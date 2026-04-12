@@ -1,0 +1,109 @@
+name: S02-p101-ir-hash-crlf-divergence
+series: pitfall-final-1
+version: 1
+specs: [CL-04, CL-05]
+description: >
+  Validates that GovernanceIR hash computation normalizes line endings to LF
+  before hashing, so the same workspace produces identical hashes on Windows
+  (CRLF) and Linux (LF). Covers git autocrlf interaction, claws drift false
+  positives, and claws diff phantom changes.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      line_ending_normalized: true
+    analysis:
+      rules_evaluated: true
+      violations: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace is developed on Windows (git core.autocrlf=true) and deployed on
+  Linux. SOUL.md has CRLF on Windows, LF on Linux. The GovernanceIR hash is
+  computed from raw file bytes. The same workspace produces hash A on Windows
+  and hash B on Linux. claws drift reports the workspace as drifted despite
+  zero semantic changes. claws diff shows phantom changes on every line.
+  Fleet-wide compliance scans report false violations across mixed-OS fleets.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The normalization layer must convert all line endings to LF before
+      hashing. This layer sits between file I/O and both the parser and
+      the hasher. CRLF -> LF, CR -> LF, mixed endings -> LF. The
+      normalization is applied uniformly to all 9 workspace files.
+    spec_impact: "CL-04 GovernanceIR — LF normalization before hash"
+    pitfall: P-101
+
+  - id: F02
+    severity: major
+    description: >
+      Git core.autocrlf=true converts LF to CRLF on checkout and CRLF to
+      LF on commit. The working-tree hash differs from the git-stored hash.
+      claws must always hash the normalized (LF) content, matching the
+      git-stored representation, not the working-tree representation.
+    spec_impact: "CL-04 hash — match git-stored not working-tree"
+    pitfall: P-101
+
+  - id: F03
+    severity: major
+    description: >
+      claws drift compares hashes across time. If a hash was stored before
+      normalization was implemented (v0 hash), it will never match a
+      normalized hash. Migration path: re-hash all stored baselines on
+      first run with normalization enabled. Store a hash-version field.
+    spec_impact: "CL-05 drift — hash version migration"
+    pitfall: P-101
+
+  - id: F04
+    severity: warning
+    description: >
+      claws diff shows per-line changes. If diff operates on raw bytes,
+      every line shows as changed (CRLF vs LF). Diff must also normalize
+      before comparison. But if the user wants to see actual line-ending
+      differences, a --raw flag should bypass normalization.
+    spec_impact: "CL-05 diff — normalized comparison with raw override"
+    pitfall: P-101
+
+  - id: F05
+    severity: major
+    description: >
+      Mixed line endings within a single file (some CRLF, some LF) are
+      valid but pathological. The normalizer must handle mixed endings
+      correctly. A naive CRLF->LF replacement followed by CR->LF
+      replacement handles this. The reverse order would corrupt CRLF
+      by converting CR first.
+    spec_impact: "CL-04 PARSE — mixed line-ending normalization order"
+    pitfall: P-101
+
+  - id: F06
+    severity: warning
+    description: >
+      Fleet scan across 50 workspaces on mixed OS produces 50 different
+      hashes for semantically identical workspaces. Without normalization,
+      fleet compliance is unmeasurable. With normalization, fleet drift
+      detection becomes meaningful for the first time.
+    spec_impact: "CL-05 fleet — cross-OS fleet hash consistency"
+    pitfall: P-101
+
+  - id: F07
+    severity: note
+    description: >
+      Binary files (images, compiled artifacts) should not be line-ending
+      normalized. The normalizer must only apply to text files. claws
+      parses only the 9 known workspace file types, all text, so this
+      is safe. But if custom workspace files are added later, the
+      normalizer needs a text-only filter.
+    spec_impact: "CL-04 PARSE — text-only normalization scope"
+    pitfall: P-101

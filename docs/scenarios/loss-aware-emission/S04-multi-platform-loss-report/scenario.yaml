@@ -1,0 +1,118 @@
+name: S04-multi-platform-loss-report
+series: loss-aware-emission
+version: 1
+specs: [CL-04, CL-07]
+description: >
+  Validates that a single compilation targeting 3 platforms produces a
+  per-platform fidelity report showing governance loss for each target.
+  The workspace has 4 G-rules. Claude Code retains full fidelity,
+  Cursor loses G-ELICIT enforcement, Aider loses G-ELICIT and G-BOUND.
+  The report quantifies per-platform loss as a percentage.
+
+expect:
+  rules_applied: [G-PERM, G-BOUND, G-DATA, G-ELICIT]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace defines 4 governance rules and compiles to 3 target
+  platforms simultaneously: Claude Code, Cursor, and Aider. The compiler
+  produces governance artifacts for each platform and a unified loss
+  report. Claude Code supports all 4 rules at high fidelity (avg 0.95).
+  Cursor supports G-PERM and G-DATA at high fidelity (0.9) but G-BOUND
+  at medium (0.6) and G-ELICIT at low (0.3), avg 0.68. Aider supports
+  only G-PERM at medium fidelity (0.5), with G-BOUND (0.2), G-DATA
+  (0.4), and G-ELICIT (0.1), avg 0.30. The loss report must show:
+  per-platform per-rule fidelity scores, per-platform aggregate scores,
+  cross-platform comparison, and a recommendation ranking platforms
+  from highest to lowest governance fidelity.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Multi-platform compilation must be a single compiler invocation,
+      not three separate compilations. The governance analysis (parsing,
+      IR lowering, rule generation) happens once. Only the emission
+      phase fans out per platform. If multi-platform requires three
+      separate invocations, the analysis phase runs three times (wasted
+      work) and may produce inconsistent results if source files change
+      between invocations.
+    spec_impact: "CL-04 Multi-Platform -- single analysis, multi-emission architecture"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The loss report comparison must account for rule importance, not
+      just average fidelity. If G-ELICIT (critical for R5 safety) scores
+      0.1 on Aider, the 0.30 average underrepresents the risk. The report
+      should include a weighted average where rule importance weights are
+      derived from the workspace's risk profile (R5 tools make G-ELICIT
+      weight higher). Unweighted averages mislead platform selection.
+    spec_impact: "CL-04 Loss Report -- risk-weighted fidelity averaging based on workspace tool risk profile"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The platform recommendation ranking must include caveats. Ranking
+      Claude Code #1 by fidelity does not account for cost, availability,
+      team familiarity, or other non-governance factors. The report should
+      present the fidelity ranking as one input to platform selection,
+      not as a definitive recommendation. The ranking title should be
+      "Governance Fidelity Ranking" not "Platform Recommendation."
+    spec_impact: "CL-04 Loss Report -- frame ranking as fidelity-specific, not holistic recommendation"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Per-platform per-rule scores produce a matrix that may be difficult
+      to read in CLI output. The report should support multiple output
+      formats: table (CLI), JSON (CI/dashboards), and markdown (reports).
+      The --format flag from CL-05 should apply to the loss report output.
+    spec_impact: "CL-04 Loss Report -- --format flag for table/JSON/markdown output"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The report shows fidelity scores but not the governance features
+      lost. An operator seeing Cursor at 0.3 for G-ELICIT needs to know
+      what specifically is lost: "no blocking elicitation, approval
+      prompt is advisory only, model may bypass." The report should
+      include a per-rule capability breakdown showing what the platform
+      supports and what is lost, not just a numeric score.
+    spec_impact: "CL-04 Loss Report -- per-rule capability breakdown with supported/lost features"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Compiling to 3 platforms simultaneously triples the emission time.
+      If single-platform emission takes 200ms, 3-platform takes 600ms,
+      exceeding the <350ms compile budget from CL-04. The budget must
+      account for multi-platform emission: either the budget scales with
+      target count (350ms per platform) or emission is parallelized across
+      platforms.
+    spec_impact: "CL-04 Performance Budget -- multi-platform emission parallelization or per-platform budget"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The loss report for a multi-platform compilation is a powerful
+      enterprise planning tool. It answers: "if we standardize on
+      platform X, what governance do we lose?" This use case supports
+      platform migration decisions. The report should include a migration
+      impact section showing what changes when switching from platform A
+      to platform B.
+    spec_impact: "CL-04 Loss Report -- platform migration impact comparison section"
+    pitfall: null

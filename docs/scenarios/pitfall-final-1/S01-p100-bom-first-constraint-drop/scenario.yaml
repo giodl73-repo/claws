@@ -1,0 +1,128 @@
+name: S01-p100-bom-first-constraint-drop
+series: pitfall-final-1
+version: 1
+specs: [CL-04]
+description: >
+  Validates that a UTF-8 BOM at the start of SOUL.md does not cause the first
+  governance constraint to be silently dropped. The keyword-anchored parser must
+  strip BOM bytes before consuming any content. Tests BOM in SOUL.md, BOM in
+  other files, and inconsistent BOM presence across workspace files.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      bom_stripped: [SOUL.md]
+      intent_types: [DenyIntent, ToolManifestEntry]
+    analysis:
+      rules_evaluated: true
+      constraints_extracted: 3
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  SOUL.md starts with a UTF-8 BOM (0xEF 0xBB 0xBF) followed by "Never access
+  production databases." The keyword-anchored parser looks for "Never" at the
+  start of a line. The BOM bytes precede "Never," so the regex match fails. The
+  first and most critical deny constraint is silently dropped. The remaining two
+  constraints ("Never delete user data," "Never expose API keys") are extracted
+  correctly because they start on clean lines. The IR contains 2 of 3 constraints,
+  with no error or warning indicating a constraint was lost.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The UTF-8 BOM (EF BB BF) is invisible in most editors but shifts byte
+      offsets. A regex anchored to ^ or line-start fails on the first line
+      because the BOM occupies bytes 0-2. The parser MUST strip the BOM
+      uniformly from ALL workspace files before any byte is consumed, not just
+      files where BOM is detected.
+    spec_impact: "CL-04 Phase 1 PARSE — blanket BOM strip requirement"
+    pitfall: P-100
+
+  - id: F02
+    severity: major
+    description: >
+      If only SOUL.md has a BOM but TOOLS.md and claws.json do not, selective
+      BOM stripping creates inconsistent parsing behavior. A file-by-file
+      detection approach means the parser behaves differently depending on
+      which files have BOMs. Blanket stripping on all 9 files eliminates this
+      inconsistency.
+    spec_impact: "CL-04 PARSE — uniform stripping across all 9 files"
+    pitfall: P-100
+
+  - id: F03
+    severity: major
+    description: >
+      The dropped constraint is the MOST critical one (production database
+      access deny). Silent dropping without even a warning is the worst failure
+      mode because the operator believes governance is active. The IR should
+      include a BOM-detection diagnostic even after stripping, so audit trails
+      record that BOM was encountered and handled.
+    spec_impact: "CL-04 PARSE — BOM detection diagnostic in IR"
+    pitfall: P-100
+
+  - id: F04
+    severity: warning
+    description: >
+      Windows Notepad (pre-2019) defaults to UTF-8 with BOM when saving files.
+      Enterprise environments with standardized editor configurations may
+      produce BOM-prefixed files consistently. The BOM strip must work on
+      re-saved files where the BOM is re-added after editing.
+    spec_impact: "CL-04 PARSE — re-save BOM resilience"
+    pitfall: P-100
+
+  - id: F05
+    severity: major
+    description: >
+      If the BOM strip changes the byte offsets of the content, any
+      source-location tracking (line:column diagnostics) must account for the
+      offset shift. A constraint at line 1, column 1 in the original file is
+      at line 1, column 1 in the stripped content, but column 4 in the
+      original bytes. Diagnostic messages should reference stripped positions
+      since those match editor display.
+    spec_impact: "CL-04 PARSE — source location adjustment after BOM strip"
+    pitfall: P-100
+
+  - id: F06
+    severity: warning
+    description: >
+      Multiple BOMs can appear in a file if content was concatenated from
+      BOM-prefixed fragments. The parser should strip only the leading BOM
+      (first 3 bytes if they match EF BB BF), not scan the entire file for
+      BOM sequences. Interior BOM bytes in content would be corrupted by
+      aggressive stripping.
+    spec_impact: "CL-04 PARSE — leading-only BOM strip"
+    pitfall: P-100
+
+  - id: F07
+    severity: major
+    description: >
+      The GovernanceIR hash must be computed on BOM-stripped content, not raw
+      file bytes. Otherwise the same logical content produces different hashes
+      depending on BOM presence, causing false positives in claws drift and
+      claws diff. The normalization layer must sit between I/O and both the
+      parser and the hasher.
+    spec_impact: "CL-04 GovernanceIR — hash computed on normalized content"
+    pitfall: P-100
+
+  - id: F08
+    severity: note
+    description: >
+      Test fixtures for BOM scenarios must include actual BOM bytes in the
+      fixture files, not simulated BOM. Git may strip or convert BOM depending
+      on .gitattributes settings. Fixtures should use binary-safe storage or
+      explicit .gitattributes rules to preserve BOM bytes.
+    spec_impact: "CL-04 testing — BOM fixture preservation"
+    pitfall: P-100

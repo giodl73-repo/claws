@@ -1,0 +1,156 @@
+name: S02-p227-tampered-chain-undetectable
+series: pitfall-thoth-2
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates that simple break detection is insufficient when an attacker
+  deletes an entry and rewrites all subsequent entries with recomputed hashes
+  (P-227). Post-break chain internal consistency analysis is required to
+  detect sophisticated tampering that appears as a valid chain.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, TRUST.md, claws.json]
+    analysis:
+      rules_evaluated: true
+      compliance_check: true
+      chain_integrity: tampered
+      rewritten_entries: 847
+  violations:
+    - code: CLAWS-E227
+      message: "Post-break chain rewrite detected — 847 entries have valid internal hashes but mismatched witness attestations"
+      severity: error
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: comply-verify
+      type: chain-tampering
+      error: "Entries 4522-5368 have valid internal hash chain but witness hashes diverge at entry 4522"
+    - component: comply-verify
+      type: signature-mismatch
+      error: "Entry 4522 signature timestamp predates witness attestation by 3 hours"
+  halt: null
+  budget: null
+
+problem: >
+  An insider with write access to the audit chain storage deletes entry 4521
+  (which recorded a denied R5 tool invocation) and rewrites entries 4522
+  through 5368 with recomputed hashes, producing a valid internal hash chain.
+  Simple break detection (walking the chain and checking prevHash values) finds
+  no break because the rewritten segment is internally consistent. The
+  tampering is only detectable by comparing the chain hashes against the
+  independent witness service attestations, which hold the original hashes.
+  Without post-break chain analysis that cross-references the witness, the
+  deletion of a critical governance denial goes undetected, and the compliance
+  evidence package certifies a clean chain.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-227 core: Break detection that only verifies internal hash chain
+      consistency is insufficient. An attacker who can rewrite entries can
+      produce a chain that passes sequential hash verification. The verify
+      command must cross-reference every entry's hash against the witness
+      service attestation. Any divergence between chain hash and witness
+      hash indicates tampering, not just data loss.
+    spec_impact: "CL-02 Audit Chain Amendment — mandatory witness cross-reference in verification"
+    pitfall: "P-227"
+
+  - id: F02
+    severity: major
+    description: >
+      The witness service attestations include RFC 3161 timestamps. A
+      rewritten entry will have a chain-recorded timestamp that differs from
+      the witness-attested timestamp. If the rewrite happened hours after the
+      original event, the temporal divergence is detectable. The verify command
+      must compare chain timestamps against witness timestamps and flag any
+      entry where the delta exceeds the configured clock skew tolerance.
+    spec_impact: "CL-02 Audit Chain Amendment — timestamp divergence detection"
+    pitfall: "P-227"
+
+  - id: F03
+    severity: major
+    description: >
+      If the witness service was not configured at the time the tampered
+      entries were written, there are no independent attestations to compare
+      against. In this case, the tampering is fundamentally undetectable.
+      The compliance evidence must report whether witness attestations exist
+      for all chain entries and flag any gaps in witness coverage as reduced
+      assurance. Chains without witness coverage cannot claim tamper-evidence.
+    spec_impact: "CL-02 Compliance Evidence — witness coverage gap reporting"
+    pitfall: "P-227"
+
+  - id: F04
+    severity: major
+    description: >
+      The rewritten entries may alter governance decisions (changing deny to
+      allow or removing entries entirely). The verify command must extract
+      the governance decision from each tampered entry and compare it against
+      the witness-attested decision. A deny-to-allow change is a critical
+      compliance finding that must be escalated immediately, not just logged.
+    spec_impact: "CL-02 Audit Chain Amendment — governance decision comparison for tampered entries"
+    pitfall: "P-227"
+
+  - id: F05
+    severity: major
+    description: >
+      The attack surface for chain rewriting includes anyone with write
+      access to the audit chain storage. The spec should mandate that the
+      audit chain file is append-only at the filesystem level (using
+      platform-specific mechanisms like chattr +a on Linux or NTFS append-only
+      ACLs on Windows). Without filesystem-level protection, any process
+      with file write access can rewrite the chain.
+    spec_impact: "CL-02 Audit Chain Amendment — append-only filesystem protection"
+    pitfall: "P-227"
+
+  - id: F06
+    severity: warning
+    description: >
+      The signing key used for entry signatures is the primary defense against
+      rewriting. If the attacker has the signing key, they can produce valid
+      signatures on rewritten entries. Key compromise detection (CB-03) must
+      be integrated into the verification procedure: if the signing key was
+      rotated, all entries signed with the old key must be reverified against
+      the witness service.
+    spec_impact: "CL-02 Verification Procedure — key rotation cross-reference"
+    pitfall: "P-227"
+
+  - id: F07
+    severity: warning
+    description: >
+      The sidecar (L5 ring) should maintain an independent running hash of
+      the audit chain. If the sidecar's hash diverges from the chain file's
+      hash, tampering occurred between the sidecar and the storage. The
+      sidecar hash serves as a second witness independent of the external
+      witness service, providing defense in depth.
+    spec_impact: "CL-03 Sidecar — independent chain hash for tampering detection"
+    pitfall: "P-227"
+
+  - id: F08
+    severity: warning
+    description: >
+      A sophisticated attacker may also compromise the witness service. The
+      verify command should support multiple independent witnesses (e.g.,
+      external timestamping authority + internal sidecar + cloud witness).
+      Detecting tampering requires at least one uncompromised attestation
+      source. The spec should recommend minimum witness diversity for
+      enterprise compliance tiers.
+    spec_impact: "CL-02 Audit Chain Amendment — witness diversity recommendation"
+    pitfall: "P-227"
+
+  - id: F09
+    severity: note
+    description: >
+      The 847 rewritten entries in this scenario represent a targeted
+      manipulation of a specific time window. The verify report should
+      identify the temporal bounds of the tampered segment and correlate
+      it with any security incidents in that period. This correlation helps
+      incident response understand the scope of potential governance bypass.
+    spec_impact: "CL-02 Compliance Evidence — temporal correlation of tampered segments"
+    pitfall: "P-227"

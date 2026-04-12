@@ -1,0 +1,108 @@
+name: S22-p131-trust-tier-per-target-override
+series: pitfall-final-1
+version: 1
+specs: [CL-01, CL-02]
+description: >
+  Validates that the trust tier ceiling check uses per-target overrides rather
+  than the core workspace trust tier. A workspace with core T2 but OpenClaw
+  target trustTier T4 should allow R5 tools for OpenClaw artifacts without
+  false errors. Error messages must explain the default when trustTier is omitted.
+
+expect:
+  rules_applied: [G-CLASS]
+  violations: []
+  pass: true
+  severity: info
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  claws.json sets core trustTier: T2. The workspace also has targets.openclaw
+  with trustTier: T4 (per-target override for the OpenClaw Gateway platform).
+  TOOLS.md declares send-payment (R5). The ceiling check uses core T2: R5
+  exceeds T2, producing a false error. The developer cannot deploy R5 tools
+  to OpenClaw despite the per-target override allowing T4. A second workspace
+  omits trustTier entirely, getting the default T2. The error message says
+  "R5 exceeds trust tier" but does not mention what the trust tier is or
+  that it defaulted to T2.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The ceiling check must resolve the effective trust tier per-target.
+      For an OpenClaw artifact, the effective tier is targets.openclaw.
+      trustTier (T4), not the core trustTier (T2). The resolution
+      order: per-target override > core trustTier > default (T2).
+      This matches standard configuration inheritance patterns.
+    spec_impact: "CL-01 claws.json — per-target trust tier resolution"
+    pitfall: P-131
+
+  - id: F02
+    severity: major
+    description: >
+      The ceiling check must be target-aware: when emitting OpenClaw
+      artifacts, use the OpenClaw target's trust tier. When emitting
+      Cursor artifacts, use the Cursor target's trust tier. Each target
+      has its own ceiling. A tool can be within ceiling for one target
+      and exceed ceiling for another.
+    spec_impact: "CL-02 G-CLASS — target-aware ceiling check"
+    pitfall: P-131
+
+  - id: F03
+    severity: major
+    description: >
+      Error messages must include the effective trust tier and its source.
+      "R5 tool send-payment exceeds trust tier T2 (default, trustTier
+      not specified in claws.json)." vs "R5 tool send-payment exceeds
+      trust tier T2 (core, from claws.json line 3)." The source helps
+      the developer understand which configuration to change.
+    spec_impact: "CL-04 diagnostics — trust tier source in error messages"
+    pitfall: P-131
+
+  - id: F04
+    severity: warning
+    description: >
+      The default trust tier (T2 when omitted) must be documented in
+      the error message. A developer who never set trustTier does not
+      know the default is T2. The error must say: "trustTier defaults
+      to T2 when not specified. To allow R5 tools, set trustTier: T4
+      or higher in claws.json." Actionable fix in the error.
+    spec_impact: "CL-04 diagnostics — default trust tier explanation"
+    pitfall: P-131
+
+  - id: F05
+    severity: major
+    description: >
+      Per-target trust tier must not exceed the core trust tier in
+      non-override mode. If core is T2 and a target tries to set T5,
+      the override should either require explicit acknowledgment
+      (escalation: true) or produce a warning. Unrestricted per-target
+      overrides would allow any target to bypass the workspace ceiling.
+    spec_impact: "CL-02 G-CLASS — target override ceiling constraint"
+    pitfall: P-131
+
+  - id: F06
+    severity: warning
+    description: >
+      Fleet deployments may set a fleet-wide trust tier ceiling that
+      individual workspaces cannot exceed. The resolution becomes:
+      fleet ceiling > workspace core > per-target override. A target
+      override of T4 in a fleet with T3 ceiling produces an error.
+      Fleet trust tier management is a CL-05 concern.
+    spec_impact: "CL-05 fleet — fleet trust tier ceiling enforcement"
+    pitfall: P-131
+
+  - id: F07
+    severity: note
+    description: >
+      The 7-platform detection (CL-01) determines which targets are
+      available. Each detected platform can have a per-target trust
+      tier. Platforms not detected in the workspace do not need trust
+      tier configuration. The ceiling check only runs for targets that
+      will produce artifacts.
+    spec_impact: "CL-01 — platform detection drives target trust tier scope"
+    pitfall: P-131

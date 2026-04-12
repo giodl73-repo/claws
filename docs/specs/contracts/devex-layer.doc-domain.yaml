@@ -1,0 +1,32 @@
+layer: "Developer Experience Layer"
+atoms:
+  three-rings:
+    visibility: public
+    docType: headline
+    narrative: P1
+    pipeline: true
+  skill-kit:
+    visibility: public
+    docType: feature
+    narrative: P1
+    pipeline: true
+  governance-badge:
+    visibility: public
+    docType: feature
+    narrative: P2
+    pipeline: false
+  claws-lsp:
+    visibility: architect
+    docType: concept
+    narrative: P2
+    pipeline: true
+  error-contract:
+    visibility: public
+    docType: concept
+    narrative: P2
+    pipeline: false
+  tier-adoption:
+    visibility: public
+    docType: headline
+    narrative: P1
+    pipeline: true

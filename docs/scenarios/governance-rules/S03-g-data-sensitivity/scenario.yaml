@@ -1,0 +1,107 @@
+name: S03-g-data-sensitivity
+series: governance-rules
+version: 1
+specs: [CL-02]
+description: >
+  Validates G-DATA rule: data sensitivity labels. MEMORY.md labels a data
+  entry as RESTRICTED. G-DATA must flag the entry and enforce that downstream
+  operations cannot downgrade the label. The high-water-mark constraint
+  applies.
+
+expect:
+  rules_applied: [G-DATA]
+  violations:
+    - rule: G-DATA
+      resource: customer-records
+      label: RESTRICTED
+      severity: warning
+      message_pattern: "RESTRICTED data requires elevated handling"
+  pass: true
+  severity: warning
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  MEMORY.md declares a memory entry "customer-records" with label RESTRICTED.
+  G-DATA must flag this entry as requiring elevated handling: no sharing with
+  PUBLIC-labeled agents, no inclusion in unencrypted audit exports, and data
+  flow ceiling enforcement. The flagging is a warning (the data can exist) but
+  downstream rules (G-A2A-FLOW) will use this label for enforcement.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The data sensitivity high-water-mark constraint means RESTRICTED data
+      can never be downgraded to PUBLIC by any operation. But at compile time,
+      the compiler can only check static label declarations. If a tool
+      transforms RESTRICTED data and outputs it without a label, the runtime
+      must propagate the label — this is a CL-03 concern that CL-02 must
+      document as a compile-time limitation.
+    spec_impact: "CL-02 G-DATA — compile-time vs runtime label propagation"
+    pitfall: null
+
+  - id: F02
+    severity: warning
+    description: >
+      MEMORY.md format for declaring labels is not specified. "Customer data
+      (confidential, 30d)" is shown in the CL-04 extraction examples, but
+      "customer-records: RESTRICTED" is a different format. The parser must
+      handle parenthetical labels, colon-separated labels, and possibly
+      YAML front matter labels.
+    spec_impact: "CL-04 EXTRACT — MEMORY.md label format flexibility"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Four sensitivity levels exist: PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED.
+      If MEMORY.md uses a non-standard label (e.g., "SENSITIVE" or "PII"), the
+      parser must either map it to the nearest standard level or reject it.
+      Unknown labels silently passing would break downstream G-A2A-FLOW checks.
+    spec_impact: "CL-02 G-DATA — unknown label handling"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      A memory entry labeled RESTRICTED combined with tools that access that
+      memory creates an implicit data flow. The compile phase should trace
+      tool->memory->label paths and ensure tools with READ capability on
+      RESTRICTED memory are classified at minimum R2.
+    spec_impact: "CL-02 G-DATA + G-CLASS — memory access risk elevation"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      G-DATA is marked "Partial" for compile-time in the governance rule table.
+      This means some G-DATA checks require runtime. The scenario only tests
+      the compile-time portion (label detection). A separate security-sim
+      scenario should test runtime label enforcement.
+    spec_impact: "CL-02 G-DATA — compile-time vs runtime scope clarity"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      If MEMORY.md has multiple entries with different labels (one PUBLIC, one
+      RESTRICTED), the overall memory sensitivity is RESTRICTED (high-water-mark).
+      But per-entry labeling should allow tools to access only PUBLIC entries
+      without RESTRICTED governance overhead. Granular vs aggregate labeling
+      strategy affects enforcement complexity.
+    spec_impact: "CL-02 G-DATA — per-entry vs aggregate sensitivity"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      HIPAA mapping (164.312(e)(1)) requires RESTRICTED labels for PHI data.
+      This scenario's RESTRICTED label on customer-records could be PHI. The
+      compliance evidence generator (CL-02 compliance section) must be able
+      to distinguish RESTRICTED-as-PHI from RESTRICTED-as-trade-secret.
+    spec_impact: "CL-02 compliance — RESTRICTED sub-classification for HIPAA"
+    pitfall: null

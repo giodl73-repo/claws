@@ -1,0 +1,172 @@
+name: S06-p167-concurrent-ring-ir-toctou
+series: pitfall-anubis
+version: 1
+specs: [CL-04, CL-05]
+description: >
+  Validates that concurrent inner/outer ring access to the GovernanceIR file
+  does not create TOCTOU races (P-167). When the inner ring writes a new IR
+  while the outer ring is reading the previous version, the outer ring may
+  read a partially-written file, producing corrupt IR that either crashes
+  the governance plugin or silently applies incomplete rules.
+
+expect:
+  governance_ir:
+    version: 1
+    write_atomic: true
+    read_consistent: true
+    toctou_detected: false
+  violations:
+    - code: CLAWS-E105
+      message: "IR file TOCTOU — outer ring read partially-written governance-ir.json"
+      severity: error
+  warnings: []
+  artifacts:
+    - name: governance-ir.json
+      status: atomic-write
+
+simulate:
+  failures:
+    - component: inner-ring
+      type: non-atomic-write
+      error: "Inner ring writes 48KB of 96KB governance-ir.json before outer ring reads"
+    - component: outer-ring
+      type: partial-read
+      error: "Outer ring reads truncated JSON — JSON.parse throws SyntaxError"
+    - component: outer-ring
+      type: silent-partial
+      error: "Outer ring reads valid but incomplete JSON — missing last 3 rules"
+  halt: null
+  budget: null
+
+problem: >
+  The inner ring detects a file change and begins recompiling the GovernanceIR.
+  It writes the new governance-ir.json by opening the file, truncating it, and
+  writing the new content. At 48KB of a 96KB file, the outer ring's fleet scan
+  reads the file for compliance checking. The outer ring sees a truncated JSON
+  file. In the best case, JSON.parse throws a SyntaxError and the fleet scan
+  fails loudly. In the worst case, the JSON is coincidentally valid at the
+  truncation point (the last complete object closes all braces), and the outer
+  ring processes an IR with only half the governance rules. Three of six R5
+  tool restrictions are missing from the truncated IR.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-167 core: The TOCTOU race exists because the inner ring writes
+      the IR file in place (truncate + write) while the outer ring reads
+      without coordination. The fix is atomic file replacement: inner
+      ring writes to governance-ir.json.tmp, then renames to governance-
+      ir.json. On POSIX systems, rename is atomic. On Windows, a
+      combination of MoveFileEx with MOVEFILE_REPLACE_EXISTING provides
+      equivalent semantics.
+    spec_impact: "CL-05 G-CONCURRENCY — atomic file replacement for IR"
+    pitfall: "P-167"
+
+  - id: F02
+    severity: major
+    description: >
+      The silent partial read is more dangerous than the crash: a valid
+      but incomplete IR applies fewer governance rules. The missing rules
+      are not detected because the IR format has no integrity check. The
+      IR file must include a trailer with: total rule count, SHA-256 hash
+      of the rule content, and file size. Readers must verify the trailer
+      before using the IR.
+    spec_impact: "CL-04 EMIT — IR file integrity trailer"
+    pitfall: "P-167"
+
+  - id: F03
+    severity: major
+    description: >
+      Reader-side validation: the outer ring (and any IR consumer) must
+      validate that the IR file is complete before processing. Validation
+      includes: (1) JSON parses without error, (2) trailer hash matches
+      content hash, (3) rule count matches actual rules in the array.
+      Any validation failure means the file is being written — retry
+      after 100ms, up to 3 times.
+    spec_impact: "CL-05 G-CONCURRENCY — reader-side IR validation"
+    pitfall: "P-167"
+
+  - id: F04
+    severity: major
+    description: >
+      The retry-on-partial-read strategy has a limit: if 3 retries all
+      see partial files, the inner ring write is either very slow or
+      stuck. The reader must not retry indefinitely — after 3 failures,
+      use the last known good IR (from memory cache) and emit CLAWS-W105
+      warning. Using stale-but-complete IR is safer than using fresh-but-
+      truncated IR.
+    spec_impact: "CL-05 G-CONCURRENCY — stale-over-corrupt fallback"
+    pitfall: "P-167"
+
+  - id: F05
+    severity: major
+    description: >
+      On Windows, file locking semantics differ from POSIX: opening a
+      file for writing on Windows locks it by default, which means the
+      reader gets an access denied error rather than reading partial
+      content. This is actually safer (fail-closed) but the reader
+      must handle EACCES/EBUSY by retrying, not by crashing. The
+      implementation must account for both POSIX (partial read) and
+      Windows (lock contention) failure modes.
+    spec_impact: "CL-05 G-CONCURRENCY — cross-platform file access handling"
+    pitfall: "P-167"
+
+  - id: F06
+    severity: warning
+    description: >
+      File system notification ordering: on some systems, the rename
+      event arrives before the file content is fully flushed to disk
+      (especially on networked file systems). The atomic rename strategy
+      must include fsync on the .tmp file before renaming. Without
+      fsync, a power failure between rename and flush could leave a
+      zero-byte IR file.
+    spec_impact: "CL-05 G-CONCURRENCY — fsync before atomic rename"
+    pitfall: "P-167"
+
+  - id: F07
+    severity: warning
+    description: >
+      The inner ring's write frequency matters: if every keystroke
+      triggers a write, the TOCTOU window is always open. Batching
+      writes (write at most once per second) reduces the window but
+      does not eliminate it. Atomic rename eliminates the window
+      regardless of write frequency — it is the correct fix, not
+      write throttling.
+    spec_impact: "CL-05 G-CONCURRENCY — atomic rename vs write throttling"
+    pitfall: "P-167"
+
+  - id: F08
+    severity: warning
+    description: >
+      Multiple outer ring consumers may read the IR simultaneously:
+      fleet scan, sidecar compliance check, and doctor --check. All
+      must handle the TOCTOU case. A shared IR reader library should
+      encapsulate the read-validate-retry logic so each consumer does
+      not implement it independently (and potentially incorrectly).
+    spec_impact: "CL-05 G-CONCURRENCY — shared IR reader library"
+    pitfall: "P-167"
+
+  - id: F09
+    severity: note
+    description: >
+      Testing the TOCTOU race requires controlled concurrency: a test
+      must write a large IR file slowly (byte by byte with delays)
+      while a reader attempts to read. The test should verify that the
+      reader either gets the complete old file or the complete new file,
+      never a mix. This requires a custom test harness with file write
+      interception.
+    spec_impact: "CL-05 G-CONCURRENCY — TOCTOU race test harness"
+    pitfall: "P-167"
+
+  - id: F10
+    severity: note
+    description: >
+      An alternative to file-based IR sharing is in-memory IPC (shared
+      memory, named pipes, or Unix domain sockets). This eliminates
+      the file system as a coordination point entirely. However, it
+      adds complexity and makes the IR invisible to debugging tools
+      that expect to read governance-ir.json from disk. File-based
+      with atomic rename is the pragmatic choice.
+    spec_impact: "CL-05 G-CONCURRENCY — file vs IPC architecture decision"
+    pitfall: "P-167"

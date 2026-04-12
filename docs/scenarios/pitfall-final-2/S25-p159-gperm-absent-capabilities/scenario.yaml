@@ -1,0 +1,124 @@
+name: S25-p159-gperm-absent-capabilities
+series: pitfall-final-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates pinch advisory when capabilities are absent from claws.json
+  but R4/R5 tools exist (P-159). No capabilities means no G-PERM constraints,
+  which means the permission layer is entirely disabled. High-risk tools
+  operate without any capability restrictions.
+
+expect:
+  rules_applied: [G-PERM]
+  violations:
+    - code: CLAWS-W040
+      rule: G-PERM
+      description: "No capabilities configured — G-PERM disabled for R4 tool 'deploy-service' and R5 tool 'send-payment'"
+  pass: true
+  severity: warning
+
+simulate:
+  failures:
+    - component: permission
+      type: no-capabilities
+      error: "claws.json has no capabilities section — all tools unconstrained"
+  halt: null
+  budget: null
+
+problem: >
+  claws.json has no capabilities section. G-PERM checks tool capabilities
+  against declared constraints. With no capabilities declared, there are
+  no constraints to check. G-PERM produces zero violations for every tool,
+  including R4 deploy-service and R5 send-payment. The developer sees "0
+  violations" and believes the workspace is compliant. In reality, the
+  permission layer is entirely disabled — every tool has unlimited
+  capabilities because no constraints exist to violate.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-159 core: The absence of capabilities in claws.json means G-PERM
+      has nothing to check. It evaluates to "pass" for every tool. This
+      is technically correct (no violations of non-existent constraints)
+      but practically dangerous: R5 tools operate with zero capability
+      restrictions. "No violations" is indistinguishable from "no checks."
+    spec_impact: "CL-02 G-PERM — permissive default on absent capabilities"
+    pitfall: "P-159"
+
+  - id: F02
+    severity: major
+    description: >
+      The pinch advisory CLAWS-W040 must fire when: (1) capabilities
+      section is absent from claws.json, AND (2) the workspace contains
+      R4 or R5 tools. For R1-R3 only workspaces, the absence of
+      capabilities is less concerning. The advisory must name the specific
+      high-risk tools that are unconstrained.
+    spec_impact: "CL-02 G-PERM — risk-conditional capability advisory"
+    pitfall: "P-159"
+
+  - id: F03
+    severity: major
+    description: >
+      The advisory message must be explicit about the consequence: "G-PERM
+      is effectively disabled. Tools deploy-service (R4) and send-payment
+      (R5) have no capability constraints. Any operation these tools can
+      perform is unrestricted." This prevents the developer from
+      misinterpreting "0 violations" as "everything is fine."
+    spec_impact: "CL-02 G-PERM — consequence-explicit advisory"
+    pitfall: "P-159"
+
+  - id: F04
+    severity: major
+    description: >
+      Suggested fix: the advisory should propose a minimal capabilities
+      section based on the tools present. For send-payment (R5/TRANSACT):
+      suggest capabilities: [{tool: "send-payment", allowed: ["TRANSACT"],
+      requireApproval: true}]. This gives the developer a starting point
+      rather than just telling them something is missing.
+    spec_impact: "CL-02 G-PERM — auto-suggested capability constraints"
+    pitfall: "P-159"
+
+  - id: F05
+    severity: major
+    description: >
+      In enterprise fleets, absent capabilities should be an error, not
+      a warning. The fleet policy can set fleet.requireCapabilities: true,
+      which elevates CLAWS-W040 to CLAWS-E040 for all fleet members. This
+      ensures no workspace joins the fleet without a capabilities section.
+    spec_impact: "CL-05 fleet — mandatory capabilities policy"
+    pitfall: "P-159"
+
+  - id: F06
+    severity: warning
+    description: >
+      The advisory must distinguish between "capabilities section absent"
+      (no section at all) and "capabilities section empty" (section exists
+      with empty array). Both result in no constraints, but the first
+      suggests the developer forgot the section while the second suggests
+      intentional permissiveness. The diagnostic should differ.
+    spec_impact: "CL-02 G-PERM — absent vs empty capabilities distinction"
+    pitfall: "P-159"
+
+  - id: F07
+    severity: warning
+    description: >
+      `claws init` should generate a capabilities section with default
+      constraints based on the detected tools. For R5 tools, TRANSACT
+      capability with requireApproval. For R4, EXECUTE with audit. For
+      R1-R3, basic READ/WRITE/OBSERVE constraints. The init output
+      gives the developer a secure-by-default starting point.
+    spec_impact: "CL-05 init — default capabilities generation"
+    pitfall: "P-159"
+
+  - id: F08
+    severity: note
+    description: >
+      The interaction between G-PERM (capabilities) and G-CLASS (risk
+      classification) is important: G-CLASS determines the risk level,
+      G-PERM constrains what the tool can do within that risk level.
+      Without G-PERM, G-CLASS still applies (the tool is classified R5
+      and goes through elicitation) but the SCOPE of what the tool can
+      do is unrestricted.
+    spec_impact: "CL-02 G-PERM/G-CLASS — classification vs permission scope"
+    pitfall: "P-159"

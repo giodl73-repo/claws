@@ -1,0 +1,157 @@
+name: S04-data-flow-label-mismatch
+series: a2a-governance
+version: 1
+specs: [CL-02]
+description: >
+  Validates data flow label enforcement across agent boundaries. An agent
+  with CONFIDENTIAL data attempts to send that data to an agent with a PUBLIC
+  data flow ceiling. G-A2A-FLOW detects the label mismatch at compile time
+  (FE6) and at runtime (handler). The data sensitivity high-water-mark rule
+  prevents CONFIDENTIAL data from flowing to a PUBLIC-ceiling agent. This is
+  the compile-time structural check — the compiler cannot verify behavioral
+  data scrubbing, only label declarations.
+
+expect:
+  attack_class: data-exfiltration
+  defense_layer: G-A2A-FLOW
+  blocked: true
+  audit_event: a2a-data-flow-label-mismatch
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  AGENTS.md declares research-agent (data ceiling: CONFIDENTIAL) and
+  public-reporter (data ceiling: PUBLIC). research-agent handles customer
+  data labeled CONFIDENTIAL in MEMORY.md. research-agent delegates a
+  summarization task to public-reporter, passing query results that include
+  CONFIDENTIAL data. G-A2A-FLOW detects the label mismatch: CONFIDENTIAL
+  data flowing to a PUBLIC-ceiling agent. At compile time, FE6 flags this
+  with the specific data flow path. At runtime, the handler blocks the
+  data transfer. The audit chain records the blocked flow with label details.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The data flow ceiling applies to data SENT to the agent, not data the
+      agent retrieves externally (Amendment CP-S07-F03). If public-reporter
+      independently fetches CONFIDENTIAL data from an external source, G-A2A-FLOW
+      cannot detect this at compile time because external data has unknown
+      labels. The compiler must document this limitation: "G-A2A-FLOW validates
+      declared data flows between agents. External data sources have unknown
+      labels at compile time."
+    spec_impact: "CL-02 G-A2A-FLOW — external data source limitation documentation"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The high-water-mark propagation (Amendment A137) must traverse the
+      full delegation chain. If research-agent sends CONFIDENTIAL data to
+      intermediate-agent (CONFIDENTIAL ceiling, valid), and intermediate-agent
+      forwards to public-reporter (PUBLIC ceiling, violation), the violation
+      is on the second edge. The transitive flow analysis must propagate
+      labels through all intermediate agents, not just check adjacent pairs.
+    spec_impact: "CL-02 G-A2A-FLOW — transitive label propagation through delegation chain"
+    pitfall: P-206
+
+  - id: F03
+    severity: major
+    description: >
+      The compile-time check is conservative: it flags ALL label mismatches
+      even when the intermediate agent may transform the data (aggregate,
+      anonymize) before forwarding (Amendment A140). A developer can suppress
+      the violation with `declassify: true` (Amendment A139) in AGENTS.md,
+      attesting that the agent strips sensitivity. This suppression must be
+      audited and visible in compliance evidence. False positives are
+      acceptable; missing a CONFIDENTIAL leak is catastrophic.
+    spec_impact: "CL-02 G-A2A-FLOW — declassify annotation audit trail"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Default data flow ceiling (Amendment CP-S07-F06): if AGENTS.md does not
+      declare a ceiling for an agent, the default is PUBLIC (least privilege
+      for incoming data). This means an agent without an explicit ceiling
+      cannot receive CONFIDENTIAL data by default. The default is conservative
+      but may surprise developers who expect "no ceiling declared = no
+      restriction." The compiler must emit a clear message: "public-reporter
+      has default PUBLIC ceiling (no explicit ceiling declared)."
+    spec_impact: "CL-02 G-A2A-FLOW — default ceiling explanation in diagnostic"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Multiple sensitivity labels may coexist (Amendment A71): CONFIDENTIAL
+      for customer data, INTERNAL for business data. A delegation chain may
+      carry both. The ceiling check must verify against the HIGHEST label in
+      the transitive flow (max(CONFIDENTIAL, INTERNAL) = CONFIDENTIAL), not
+      any single label. The label hierarchy is PUBLIC < INTERNAL <
+      CONFIDENTIAL < RESTRICTED.
+    spec_impact: "CL-02 G-A2A-FLOW — multi-label ceiling evaluation"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The violation diagnostic (Amendment A138) must identify: the breaching
+      edge (research-agent -> public-reporter), the propagated label
+      (CONFIDENTIAL), the violated ceiling (PUBLIC), and the full chain path.
+      This level of detail enables the developer to pinpoint which edge in
+      a complex topology caused the violation. Without the chain path, the
+      developer may fix the wrong edge.
+    spec_impact: "CL-02 G-A2A-FLOW — complete violation diagnostic with chain path"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      Cycle detection must run BEFORE label propagation (Amendment A141).
+      If research-agent delegates to intermediate-agent which delegates back
+      to research-agent (circular delegation), the label propagation would
+      loop infinitely. Topological sort detects cycles, reports them as
+      separate violations (G-A2A-CYCLE), and label propagation skips cyclic
+      edges. The two analyses must run in the correct order.
+    spec_impact: "CL-02 G-A2A-FLOW — cycle detection prerequisite for label propagation"
+    pitfall: P-207
+
+  - id: F08
+    severity: warning
+    description: >
+      The processing vs forwarding distinction (Amendment CP-S07-F02):
+      research-agent receives CONFIDENTIAL data and produces PUBLIC output
+      (aggregated statistics with no individual records). The compile-time
+      check still flags the label mismatch because it cannot verify the
+      transformation. The `declassify: true` annotation is the developer's
+      attestation. The runtime could potentially verify the transformation
+      (CL-03), but compile-time must be conservative.
+    spec_impact: "CL-02 G-A2A-FLOW — processing vs forwarding at compile time"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Transitive flow analysis performance (Amendment A72): with branching
+      delegation (3 agents each delegating to 3 more), transitive paths grow
+      exponentially. The analyzer must use BFS with visited set to avoid
+      exponential blowup, and cap depth at the G-A2A-ESCALATE chain depth
+      limit. All analysis must complete within the 200ms ANALYZE budget.
+    spec_impact: "CL-04 ANALYZE — transitive flow analysis performance budget"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The data flow label mismatch is analogous to type safety in programming:
+      CONFIDENTIAL data is a "type" that cannot be implicitly cast to PUBLIC.
+      The `declassify` annotation is an explicit cast. This mental model
+      (data labels as types, ceiling as type constraint, declassify as cast)
+      should be used in documentation and error messages to make the concept
+      intuitive for developers.
+    spec_impact: "CL-02 G-A2A-FLOW — type safety mental model in documentation"
+    pitfall: null

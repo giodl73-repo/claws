@@ -1,0 +1,128 @@
+name: S07-cross-workspace-cycles
+series: pitfall-coverage-1
+version: 1
+specs: [CL-05, CL-02]
+description: >
+  Validates that fleet-level cycle detection catches delegation cycles
+  spanning multiple workspaces. P-058 identifies that Agent A in workspace 1
+  can delegate to Agent B in workspace 2, and Agent B can delegate back to
+  Agent A, creating a cycle invisible to single-workspace compilation.
+  Only `claws scan` across the fleet can detect cross-workspace cycles.
+
+expect:
+  governance_ir:
+    version: 1
+    fleet:
+      workspaces: [workspace-alpha, workspace-beta]
+      cross_workspace_delegation:
+        - from: { workspace: workspace-alpha, agent: coordinator-a }
+          to: { workspace: workspace-beta, agent: executor-b }
+        - from: { workspace: workspace-beta, agent: executor-b }
+          to: { workspace: workspace-alpha, agent: coordinator-a }
+      cycles_detected:
+        - path: [coordinator-a@workspace-alpha, executor-b@workspace-beta, coordinator-a@workspace-alpha]
+          severity: error
+  violations:
+    - rule: CIRCULAR-DELEGATION
+      scope: fleet
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - phase: FLEET-SCAN
+      conflict: CIRCULAR-DELEGATION
+  halt: null
+  budget: null
+
+problem: >
+  Fleet has two workspaces: workspace-alpha and workspace-beta. In
+  workspace-alpha, AGENTS.md delegates coordinator-a to executor-b in
+  workspace-beta for data processing. In workspace-beta, AGENTS.md
+  delegates executor-b back to coordinator-a in workspace-alpha for
+  results delivery. Each workspace compiles cleanly — the delegation
+  target is an external reference, not validated intra-workspace.
+  At runtime, a request triggers an infinite delegation loop.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Single-workspace compilation treats cross-workspace delegation targets
+      as opaque external references. The compiler cannot validate them without
+      access to the target workspace. This is correct for single-workspace
+      mode but means cycle detection is impossible at compile time.
+    spec_impact: "CL-05 fleet scan — cross-workspace delegation requires fleet-level analysis"
+    pitfall: P-058
+
+  - id: F02
+    severity: major
+    description: >
+      `claws scan` must build a fleet-wide delegation graph. Each workspace
+      contributes its local delegation edges. Cross-workspace edges reference
+      `agent@workspace`. The graph is directed. Cycle detection (DFS with
+      back-edge detection) runs on the merged graph.
+    spec_impact: "CL-05 fleet scan — merged delegation graph construction"
+    pitfall: P-058
+
+  - id: F03
+    severity: major
+    description: >
+      A cycle involving 3+ workspaces is harder to diagnose. Coordinator-a
+      delegates to executor-b, which delegates to planner-c (workspace 3),
+      which delegates back to coordinator-a. The cycle path must include
+      all intermediate hops with workspace context for each agent.
+    spec_impact: "CL-05 fleet diagnostics — multi-hop cycle path reporting"
+    pitfall: P-058
+
+  - id: F04
+    severity: warning
+    description: >
+      Cross-workspace delegation may be intentional for request-response
+      patterns (A calls B, B returns result). This is not a cycle — it is
+      a callback. The cycle detector must distinguish true cycles (infinite
+      loop) from callbacks (bounded delegation with return). Depth limit
+      or call-stack model differentiates the two.
+    spec_impact: "CL-02 G-A2A — callback vs cycle distinction"
+    pitfall: P-058
+
+  - id: F05
+    severity: warning
+    description: >
+      If one workspace in the cycle is outside the fleet's management scope
+      (third-party workspace), the cycle is partially invisible. `claws scan`
+      should warn when delegation targets reference workspaces not in the
+      scanned fleet. The warning cannot confirm a cycle but flags the risk.
+    spec_impact: "CL-05 fleet scan — unresolvable external delegation warning"
+    pitfall: P-058
+
+  - id: F06
+    severity: major
+    description: >
+      At runtime, the infinite delegation loop consumes resources until a
+      timeout or recursion limit kills it. The Gateway plugin should enforce
+      a delegation depth limit (e.g., 10 hops). If the limit is reached,
+      the request is denied with a clear error: "delegation depth exceeded."
+    spec_impact: "CL-03 runtime — delegation depth limit enforcement"
+    pitfall: P-058
+
+  - id: F07
+    severity: note
+    description: >
+      Fleet scan frequency matters. If workspace-alpha adds a delegation
+      to workspace-beta between scans, the cycle exists but is undetected
+      until the next scan. Continuous scanning or event-driven triggers
+      (delegation change -> re-scan) reduce the detection window.
+    spec_impact: "CL-05 fleet — scan trigger on delegation change"
+    pitfall: P-058
+
+  - id: F08
+    severity: warning
+    description: >
+      The delegation graph may be large in enterprise fleets (100+ workspaces).
+      Cycle detection must be efficient. Tarjan's algorithm runs in O(V+E)
+      and reports all strongly connected components. Each SCC with more than
+      one node is a cycle group.
+    spec_impact: "CL-05 fleet scan — efficient cycle detection algorithm"
+    pitfall: P-058

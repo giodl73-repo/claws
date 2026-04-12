@@ -1,0 +1,125 @@
+name: S03-strict-loss-r5-advisory
+series: loss-aware-emission
+version: 1
+specs: [CL-04, CL-07]
+description: >
+  Validates that --strict-loss blocks emission when R5 governance
+  (human approval for transact-level tools) would compile to an
+  advisory-only platform that cannot enforce blocking elicitation.
+  An R5 tool targeting an advisory platform (fidelity <0.5 for G-ELICIT)
+  must be rejected outright, not downgraded to advisory.
+
+expect:
+  rules_applied: [G-ELICIT, G-CLASS]
+  violations: []
+  pass: false
+  severity: error
+
+simulate:
+  failures:
+    - component: loss-aware-emission
+      type: strict-loss-violation
+      error: "CRAFT-LOSS-001: G-ELICIT fidelity 0.3 on target platform 'aider' is below strict-loss threshold 0.5 for R5 tool 'send-payment'"
+  halt: true
+  budget: null
+
+problem: >
+  A workspace declares send-payment as an R5 tool (transact, OBO) with
+  G-ELICIT requiring human approval before execution. The target platform
+  is Aider, which has no hook support and can only express governance as
+  advisory system prompt instructions. The G-ELICIT fidelity for Aider
+  is 0.3 (advisory-only, model may ignore). Without --strict-loss, the
+  compiler emits advisory governance with a fidelity warning. With
+  --strict-loss, the compiler must refuse to emit: R5 tools with
+  advisory-only elicitation are a safety hazard because the model may
+  execute send-payment without human approval. The error CRAFT-LOSS-001
+  must clearly state: the fidelity score, the threshold, the tool name,
+  the risk level, and why advisory enforcement is insufficient for R5.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The --strict-loss threshold (0.5) is a global default. Different
+      G-rules may need different thresholds: G-ELICIT for R5 should
+      require 0.9+ (hard enforcement), while G-BOUND (audit) might
+      accept 0.5 (advisory logging is acceptable). The strict-loss
+      configuration should support per-rule thresholds, not just a
+      global cutoff. The claws.json should accept a loss_thresholds
+      map keyed by G-rule.
+    spec_impact: "CL-04 Strict Loss -- per-rule fidelity thresholds in claws.json loss_thresholds map"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The R5 fail-closed principle (from the design decisions) states
+      that R5 tools never emit with fail-open governance. --strict-loss
+      should be automatic for R5 tools, not opt-in. If an operator forgets
+      --strict-loss, R5 tools can compile to advisory platforms silently.
+      The compiler should enforce strict-loss for R5 by default, with an
+      explicit --allow-advisory-r5 flag for the rare case where advisory
+      R5 governance is intentional.
+    spec_impact: "CL-04 R5 Enforcement -- automatic strict-loss for R5, explicit opt-out required"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      CRAFT-LOSS-001 halts emission for the entire workspace. If the
+      workspace has 10 tools and only send-payment (R5) fails the strict
+      loss check, the other 9 tools also fail to emit. The compiler
+      should support partial emission: emit governance for tools that
+      pass the check, skip tools that fail, and report both in the
+      output. The --strict-loss flag controls whether partial emission
+      is allowed or if any failure halts everything.
+    spec_impact: "CL-04 Strict Loss -- partial emission mode vs all-or-nothing halt"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The fidelity threshold 0.5 implies that 50% governance fidelity
+      is acceptable for non-R5 tools. But 0.5 fidelity means half the
+      governance features are lost. The default threshold should be
+      higher (0.7) with explicit justification required for lowering it.
+      The threshold choice directly affects governance quality and should
+      be a conscious decision, not an unexamined default.
+    spec_impact: "CL-04 Strict Loss -- raise default threshold to 0.7, require justification for lowering"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The error message must be actionable. "Fidelity 0.3 below threshold
+      0.5" tells the operator what failed but not how to fix it. The error
+      should include remediation options: (a) choose a higher-fidelity
+      platform, (b) install platform extensions to increase fidelity,
+      (c) remove the R5 tool from the workspace, (d) use --allow-
+      advisory-r5 with explicit justification. Remediation guidance
+      transforms an error into a decision point.
+    spec_impact: "CL-04 Diagnostics -- remediation options in CRAFT-LOSS-001 error message"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Advisory-only governance for R5 tools is dangerous but not useless.
+      In a development environment where real payment APIs are mocked,
+      advisory R5 governance may be acceptable. The --strict-loss bypass
+      should include a context field (environment: development/staging/
+      production) so the compiler can enforce strict loss only in
+      production while allowing advisory in development.
+    spec_impact: "CL-04 Strict Loss -- environment-aware enforcement (strict in production, advisory in development)"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The scenario tests a single R5 tool against a single advisory
+      platform. A comprehensive test matrix would combine: R1-R5 tools
+      x 7 platforms x with/without --strict-loss = 70 test cases. The
+      test suite should generate this matrix programmatically from the
+      fidelity matrix (S01) rather than authoring 70 individual scenarios.
+    spec_impact: "CL-04 Test Strategy -- programmatic test matrix generation from fidelity matrix"
+    pitfall: null

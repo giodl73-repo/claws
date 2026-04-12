@@ -1,0 +1,174 @@
+name: S02-hipaa-evidence-phi-detection
+series: compliance-evidence
+version: 1
+specs: [CL-02]
+description: >
+  Validates that `claws comply hipaa` generates HIPAA Security Rule evidence
+  with proper PHI (Protected Health Information) detection. The workspace
+  handles medical data with RESTRICTED sensitivity labels. The evidence must
+  map 5 HIPAA safeguards to claws rules, verify that PHI fields are properly
+  labeled as RESTRICTED, and verify that access controls, audit mechanisms,
+  and transmission security are configured for PHI-handling tools.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, MEMORY.md, USER.md, claws.json]
+      intent_types: [DenyIntent, ToolManifestEntry, MemoryConfig, UserScope]
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+  violations: []
+  warnings:
+    - code: HIPAA-PHI-LABEL-COVERAGE
+  artifacts:
+    count: 1
+    types: [hipaa-evidence-package]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A healthcare workspace has tools that access patient records (R2, read),
+  update treatment plans (R3, write), and send referral letters (R5, OBO).
+  MEMORY.md declares sensitivity: RESTRICTED with pii_types: [ssn, mrn,
+  diagnosis, medication]. The workspace's claws.json configures G-DATA
+  labels, G-PERM capabilities, G-ELICIT policies for referral tools, and
+  audit chain signing with Ed25519. `claws comply hipaa` must generate a
+  HIPAAEvidence package mapping all 5 safeguards, flagging any gaps where
+  PHI protection is incomplete, and verifying that RESTRICTED labels are
+  consistently applied to all PHI-related data flows.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The HIPAASafeguard schema includes a "dataLabels" field that lists
+      PHI fields detected, but the spec does not define how PHI fields are
+      detected. The pii_types in MEMORY.md (ssn, mrn, diagnosis, medication)
+      are declared by the developer. The compliance generator must verify
+      that ALL declared pii_types have corresponding RESTRICTED labels,
+      not just that RESTRICTED labels exist. If pii_types lists 4 types
+      but only 2 have RESTRICTED labels, the safeguard should be
+      "partial" not "implemented."
+    spec_impact: "CL-02 HIPAA Evidence — define per-pii-type label coverage check"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      HIPAA 164.312(d) (Authentication) maps to G-A2A-IDENTITY (L2+ for
+      PHI access). But the scenario workspace has no AGENTS.md (single-agent
+      workspace). The identity safeguard mapping assumes A2A context. For
+      single-agent workspaces handling PHI, the authentication safeguard
+      should map to user authentication (who started the agent session),
+      not agent identity. The spec needs an alternative mapping for
+      single-agent HIPAA workspaces.
+    spec_impact: "CL-02 HIPAA Safeguard 164.312(d) — define mapping for single-agent workspaces"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      HIPAA 164.312(e)(1) (Transmission Security) maps to G-A2A-FLOW with
+      RESTRICTED data flow labels. But data transmitted by tools (send
+      referral letter via email) is not an A2A flow — it is a tool-to-
+      external-system flow. G-A2A-FLOW only covers agent-to-agent data
+      flows. The spec needs a separate rule or mapping for tool-to-external
+      data transmission security, or the HIPAA mapping must note that
+      transmission security for external tools is outside compile-time
+      governance scope.
+    spec_impact: "CL-02 HIPAA Safeguard 164.312(e)(1) — address tool-to-external transmission gap"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The HIPAA evidence includes safeguard status but not remediation
+      guidance. A "partial" safeguard should include specific actions:
+      "Add RESTRICTED label to mrn field in MEMORY.md" or "Configure L2+
+      identity for agents accessing patient-records tool." Without
+      remediation guidance, the evidence package identifies gaps but does
+      not help close them.
+    spec_impact: "CL-02 HIPAA Evidence — add per-safeguard remediation guidance for non-implemented status"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The pii_types field uses generic names (ssn, mrn, diagnosis). HIPAA
+      defines 18 specific PHI identifiers (names, dates, geographic data,
+      phone numbers, etc.). The compliance generator should cross-reference
+      declared pii_types against the HIPAA 18-identifier list and warn
+      about missing identifiers that are commonly present in healthcare
+      data. For example, if the workspace processes patient names but
+      pii_types does not include "name", the evidence should flag this gap.
+    spec_impact: "CL-02 HIPAA Evidence — cross-reference pii_types against HIPAA 18-identifier list"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The HIPAAEvidence schema does not include a "Breach Notification"
+      section. HIPAA requires breach notification within 60 days. The
+      compliance evidence should document the incident response path:
+      G-OUTPUT detects PHI in output -> audit event -> SIEM alert -> who
+      is the breach notification contact? claws.json should have a
+      breach notification configuration section that the evidence generator
+      verifies exists for HIPAA workspaces.
+    spec_impact: "CL-02 HIPAA Evidence — add breach notification configuration and evidence section"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The audit chain for HIPAA must demonstrate continuous monitoring per
+      164.312(b). If the audit chain has gaps (e.g., the governance plugin
+      was temporarily disabled), the evidence should flag the gap duration
+      and assess its impact. A 24-hour gap in a 6-month observation period
+      is different from a 30-day gap. The evidence should include uptime
+      percentage for governance enforcement.
+    spec_impact: "CL-02 HIPAA Evidence — include governance enforcement uptime in audit controls evidence"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The scenario workspace uses send-referral (R5, OBO) for patient
+      referral letters. The referral letter contains PHI (patient name,
+      diagnosis). G-OUTPUT-01 (data redaction) should apply to the referral
+      content, but redacting PHI from a referral letter defeats its purpose.
+      The HIPAA compliance evidence should document this tension: G-OUTPUT
+      redaction is configured but exempted for legitimate PHI transmission
+      to authorized recipients. The exemption must be documented in the
+      evidence as a policy decision.
+    spec_impact: "CL-02 HIPAA Evidence — document redaction exemptions for legitimate PHI transmission"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      HIPAA evidence may need to be shared with HHS (Department of Health
+      and Human Services) during an investigation. The evidence package
+      format (JSON + signatures) must be accessible to non-technical
+      auditors. Consider generating a human-readable summary (PDF or HTML)
+      alongside the machine-readable JSON, referenced from the evidence
+      package but not part of the signed payload.
+    spec_impact: "CL-02 Compliance Evidence — add human-readable summary generation option"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The per-channel redaction configuration (Amendment A31) shows audit
+      chain preserving full PII for "forensic integrity." For HIPAA
+      workspaces, the audit chain itself becomes a PHI data store subject
+      to the same access controls. The audit chain storage location
+      (.claws/audit/) must be documented as a PHI storage location in the
+      HIPAA evidence, subject to encryption at rest requirements.
+    spec_impact: "CL-02 HIPAA Evidence — flag audit chain as PHI storage requiring encryption at rest"
+    pitfall: P-223

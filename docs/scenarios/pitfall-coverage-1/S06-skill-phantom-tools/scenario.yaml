@@ -1,0 +1,131 @@
+name: S06-skill-phantom-tools
+series: pitfall-coverage-1
+version: 1
+specs: [CL-04, CL-05]
+description: >
+  Validates SKILL-TOOL-GHOST detection for marketplace skills that reference
+  tools not present in the current workspace. P-057 identifies that skills
+  from ClawHub contain natural language references to tools that may exist
+  in the marketplace reference workspace but not in the target workspace.
+  The compiler must parse skill instructions for tool references and
+  validate them against the local TOOLS.md.
+
+expect:
+  governance_ir:
+    version: 1
+    analysis:
+      conflicts:
+        - category: SKILL-TOOL-GHOST
+          severity: warning
+          skill: marketplace-data-pipeline
+          phantom_tools: [api-caller, cloud-storage-writer]
+          available_tools: [query-db, export-csv]
+          resolution: "add referenced tools to TOOLS.md or choose a compatible skill"
+      violations: []
+      warnings:
+        - category: SKILL-TOOL-GHOST
+  violations: []
+  warnings:
+    - category: SKILL-TOOL-GHOST
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The workspace installs a marketplace skill "marketplace-data-pipeline"
+  from ClawHub. The skill's SKILL.md instructions say: "Use the api-caller
+  tool to fetch data from external APIs, then write results using
+  cloud-storage-writer." The workspace's TOOLS.md has only query-db (R1) and
+  export-csv (R2). Neither api-caller nor cloud-storage-writer exists in the
+  workspace. The agent will either fail at runtime or hallucinate tool usage.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      SKILL.md is natural language, not structured data. Detecting tool
+      references requires fuzzy matching: "use the api-caller tool" should
+      match tool name "api-caller". The parser must handle variations like
+      "invoke api-caller", "call the api-caller", "run api-caller tool".
+      False positives on common words (e.g., "use the search tool" matching
+      a tool named "search") must be manageable.
+    spec_impact: "CL-04 PARSE — natural language tool reference extraction from SKILL.md"
+    pitfall: P-057
+
+  - id: F02
+    severity: major
+    description: >
+      Marketplace skills are authored against a reference workspace that
+      may have different tools than the target workspace. The skill README
+      should declare required tools as structured metadata, not just in
+      prose. If the skill has a `requires_tools` field, phantom detection
+      is exact. Without it, fuzzy matching is the fallback.
+    spec_impact: "CL-06 marketplace — skill metadata should declare required tools"
+    pitfall: P-057
+
+  - id: F03
+    severity: warning
+    description: >
+      A phantom tool reference in a skill that is never activated is
+      harmless. If the skill's SKILL.md references api-caller but the
+      agent never invokes that code path, no runtime failure occurs.
+      However, the compiler cannot determine code path activation at
+      compile time — all references must be validated conservatively.
+    spec_impact: "CL-04 ANALYZE — conservative phantom detection (all paths)"
+    pitfall: P-057
+
+  - id: F04
+    severity: major
+    description: >
+      Tool name aliasing complicates detection. If TOOLS.md has "database-query"
+      but the skill says "use the db-query tool", fuzzy matching might miss
+      the alias. The compiler could maintain a known-alias table, or require
+      exact tool names in skill instructions. Exact names are enforceable
+      at marketplace publish time.
+    spec_impact: "CL-06 marketplace — tool name aliasing and normalization"
+    pitfall: P-057
+
+  - id: F05
+    severity: warning
+    description: >
+      Multiple installed marketplace skills may reference the same phantom
+      tool. If three skills all reference "api-caller", adding api-caller
+      to TOOLS.md resolves all three. The diagnostic should group phantom
+      tool references by tool name, showing which skills need each tool.
+    spec_impact: "CL-04 diagnostics — grouped phantom tool reporting"
+    pitfall: P-057
+
+  - id: F06
+    severity: note
+    description: >
+      Some marketplace skills reference tools that are standard OC built-ins
+      (e.g., "file-reader", "terminal"). These tools exist on every OC
+      platform but may not be listed in TOOLS.md because they are implicit.
+      The compiler should have a built-in tool allowlist for each target
+      platform. Phantom detection skips tools in the platform allowlist.
+    spec_impact: "CL-06 platform — built-in tool allowlist per target platform"
+    pitfall: P-057
+
+  - id: F07
+    severity: major
+    description: >
+      Runtime fallback: if a phantom tool is detected at compile time and
+      the workspace is deployed anyway (advisory mode), the Gateway plugin
+      should intercept the tool call and return a clear error ("tool not
+      available in this workspace") instead of letting the agent hallucinate.
+    spec_impact: "CL-03 runtime — phantom tool interception in Gateway plugin"
+    pitfall: P-057
+
+  - id: F08
+    severity: warning
+    description: >
+      Skill updates from the marketplace may add new tool references.
+      After a skill update, `claws pinch` should re-validate tool
+      references. The three-rings watch ring should detect skill file
+      changes and trigger recompilation.
+    spec_impact: "CL-05 watch ring — skill update triggers recompilation"
+    pitfall: P-057

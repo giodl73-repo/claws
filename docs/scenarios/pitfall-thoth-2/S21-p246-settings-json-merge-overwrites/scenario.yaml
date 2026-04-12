@@ -1,0 +1,152 @@
+name: S21-p246-settings-json-merge-overwrites
+series: pitfall-thoth-2
+version: 1
+specs: [CL-04, CL-05]
+description: >
+  Validates that the EMIT phase merges governance tool restrictions into
+  existing .claude/settings.json without overwriting user-configured settings.
+  The emitter must perform a deep merge where governance entries take precedence
+  for conflict resolution, but user entries outside the governance scope are
+  preserved exactly as authored.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+    analysis:
+      rules_evaluated: true
+      emit_mode: settings-merge
+  violations: []
+  warnings:
+    - code: CLAWS-W302
+      message: "settings.json merge conflict — user 'allow' for 'Bash' overridden by governance 'deny'"
+  artifacts:
+    count: 1
+
+simulate:
+  failures:
+    - component: emit
+      type: settings-overwrite
+      error: "User settings.json overwritten — custom allowedTools and permissions lost"
+    - component: emit
+      type: merge-conflict
+      error: "User allows Bash tool but governance denies it — conflict unresolved"
+  halt: null
+  budget: null
+
+problem: >
+  A developer has a .claude/settings.json with custom tool permissions: Bash is
+  allowed, WebSearch is allowed, and a custom MCP server is configured with
+  specific environment variables. They run claws compile. The governance rules
+  deny Bash access (R4 tool restriction). The EMIT phase writes settings.json
+  with the governance-mandated tool restrictions. Instead of merging, it
+  overwrites the entire file. The developer's WebSearch permission, custom MCP
+  server configuration, and all other settings vanish. The next Claude Code
+  session starts with only governance-mandated settings, missing the MCP server
+  entirely. The developer spends 30 minutes recreating their settings.json from
+  memory, and some custom configurations are lost permanently because they were
+  not documented elsewhere.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The EMIT phase must read the existing settings.json, deep-merge
+      governance entries into it, and write the merged result. The merge
+      must preserve all user-configured keys that do not conflict with
+      governance. Keys like model preferences, MCP server configs, and
+      UI settings are completely outside governance scope and must never
+      be modified.
+    spec_impact: "CL-04 EMIT — deep merge for settings.json"
+    pitfall: P-246
+
+  - id: F02
+    severity: major
+    description: >
+      Governance-first conflict resolution means: when a user allows
+      a tool but governance denies it, governance wins. This is the
+      only safe default for security governance. The merge must log
+      every conflict resolution with the original user value and the
+      governance override so the developer can see exactly what changed
+      and why.
+    spec_impact: "CL-04 EMIT — governance-first conflict resolution with logging"
+    pitfall: P-246
+
+  - id: F03
+    severity: major
+    description: >
+      The merged settings.json must contain a metadata section or
+      comment identifying which entries are governance-managed. This
+      enables the developer to distinguish their settings from
+      governance settings. On claws eject, only governance-managed
+      entries are removed; user entries remain.
+    spec_impact: "CL-04 EMIT — governance entry tagging in settings.json"
+    pitfall: P-246
+
+  - id: F04
+    severity: major
+    description: >
+      Array-valued settings (e.g., allowedTools, deniedTools) must be
+      merged by union, not replacement. If the user allows [Bash,
+      WebSearch] and governance denies [Bash], the result should be
+      allow [WebSearch], deny [Bash]. Replacing the allow array with
+      the governance version loses WebSearch; replacing deny loses
+      the user's other deny entries.
+    spec_impact: "CL-04 EMIT — array union merge strategy"
+    pitfall: P-246
+
+  - id: F05
+    severity: major
+    description: >
+      If settings.json does not exist, the emitter creates it with
+      only governance entries. If it exists but is malformed JSON, the
+      emitter must refuse to modify it and report an error rather than
+      silently replacing it. A parse error in the user's settings.json
+      should not result in data loss.
+    spec_impact: "CL-04 EMIT — malformed settings.json protection"
+    pitfall: P-246
+
+  - id: F06
+    severity: warning
+    description: >
+      The settings.json format may evolve across Claude Code versions.
+      The merge logic must be schema-aware enough to handle unknown
+      keys gracefully — preserve them as-is. If a future Claude Code
+      version adds new settings, claws must not strip them during
+      merge because they are not in the known schema.
+    spec_impact: "CL-04 EMIT — unknown key preservation during merge"
+    pitfall: P-246
+
+  - id: F07
+    severity: warning
+    description: >
+      MCP server configurations within settings.json may contain
+      sensitive data (API keys, environment variables). The merge
+      operation must treat the entire MCP configuration block as
+      user-owned and never modify, log, or expose its contents. Even
+      the merge conflict log must redact MCP server details.
+    spec_impact: "CL-04 EMIT — MCP configuration sensitivity"
+    pitfall: P-246
+
+  - id: F08
+    severity: warning
+    description: >
+      A backup of the pre-merge settings.json should be created before
+      any modification (e.g., settings.json.claws-backup). If the merge
+      produces unexpected results, the developer can restore the backup.
+      The backup should be created only if settings.json exists and is
+      non-empty, to avoid cluttering new projects with empty backups.
+    spec_impact: "CL-04 EMIT — pre-merge settings.json backup"
+    pitfall: P-246
+
+  - id: F09
+    severity: note
+    description: >
+      The claws diff command should show the settings.json merge plan
+      before emission: which keys will be added, which will be
+      overridden, and which will be preserved. This pre-emit preview
+      gives the developer confidence that the merge will not destroy
+      their configuration.
+    spec_impact: "CL-05 diff — settings.json merge preview"
+    pitfall: P-246

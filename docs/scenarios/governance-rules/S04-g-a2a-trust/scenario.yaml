@@ -1,0 +1,108 @@
+name: S04-g-a2a-trust
+series: governance-rules
+version: 1
+specs: [CL-02]
+description: >
+  Validates G-A2A-TRUST rule: default-deny trust boundaries. A subagent
+  declared in AGENTS.md without an explicit trust declaration produces a
+  violation. Agents cannot communicate unless explicitly allowed.
+
+expect:
+  rules_applied: [G-A2A-TRUST]
+  violations:
+    - rule: G-A2A-TRUST
+      agent: data-fetcher
+      severity: error
+      message_pattern: "no trust declaration"
+  pass: false
+  severity: error
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  AGENTS.md declares a subagent "data-fetcher" with delegated tools but no
+  trust group assignment and no explicit trust declaration. Under default-deny
+  A2A policy, this agent cannot communicate with the parent or any sibling
+  agent. G-A2A-TRUST must flag this as a violation because the agent is
+  declared but unreachable — it can receive tool delegation but cannot
+  report results back.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Default-deny means NO communication without explicit trust. But tool
+      delegation implies communication (parent sends work, agent returns
+      results). If AGENTS.md declares a subagent with tools, is there an
+      implicit trust grant for the delegation channel? Or must every
+      delegation explicitly declare trust? The spec says default-deny but
+      delegation without trust is contradictory.
+    spec_impact: "CL-02 G-A2A-TRUST — delegation implies minimum trust"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The violation says "no trust declaration" but the fix is ambiguous.
+      Should the developer add a trust group? Add an explicit trust: allow?
+      Add identity configuration? The fix suggestion must be specific about
+      the minimum trust declaration needed for the agent to function.
+    spec_impact: "CL-02 G-A2A-TRUST — minimum viable trust declaration"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      If AGENTS.md uses a format that does not support trust declarations
+      (e.g., a simple markdown list of agent names), every agent will violate
+      G-A2A-TRUST. The rule must handle the case where the format cannot
+      express trust — either by providing an alternative declaration location
+      (claws.json trust groups) or by documenting the required AGENTS.md format.
+    spec_impact: "CL-02 G-A2A-TRUST — trust declaration format requirements"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      An agent that is declared but cannot communicate is effectively dead code.
+      The OPTIMIZE phase (Phase 4) should be able to eliminate unreachable
+      agents from the compiled output. But the violation in ANALYZE (Phase 3)
+      halts the pipeline before optimization. The pipeline should continue to
+      optimization with the violation flagged, not halt.
+    spec_impact: "CL-04 pipeline — violation severity and halt behavior"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      Trust declarations are workspace-scoped. In a fleet, trust policies may
+      be defined at the fleet level and inherited by workspaces. If the fleet
+      trust policy grants trust to data-fetcher, the workspace-level violation
+      should not fire. Fleet-level trust inheritance is a CL-05 concern.
+    spec_impact: "CL-05 fleet — trust policy inheritance"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      G-A2A-TRUST is one of 5 A2A rules. This scenario tests TRUST alone, but
+      in practice G-A2A-IDENTITY, G-A2A-FLOW, G-A2A-ESCALATE, and G-A2A-DELEGATE
+      all apply to the same agent. A no-trust-declaration violation should
+      suppress the other 4 A2A rules for this agent (they are all inapplicable
+      if trust is denied). Rule dependency ordering matters.
+    spec_impact: "CL-02 A2A rules — dependency ordering and suppression"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The violation severity is "error" (compile fails). For enterprise
+      adoption, a "strict mode" vs "advisory mode" flag could downgrade this
+      to warning during migration. New deployments would use strict; existing
+      deployments migrating to claws would use advisory until all agents have
+      trust declarations.
+    spec_impact: "CL-02 G-A2A-TRUST — strict vs advisory mode for migration"
+    pitfall: null

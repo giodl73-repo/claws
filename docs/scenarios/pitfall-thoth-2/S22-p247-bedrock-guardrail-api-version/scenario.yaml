@@ -1,0 +1,140 @@
+name: S22-p247-bedrock-guardrail-api-version
+series: pitfall-thoth-2
+version: 1
+specs: [CL-04, CL-05]
+description: >
+  Validates that the EMIT phase targets a specific AWS Bedrock CreateGuardrail
+  API version and warns when the targeted version may be outdated. API schema
+  evolution in Bedrock can silently reject or misinterpret guardrail JSON if the
+  emitter produces output for a different API version than the one deployed.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, RULES.md, claws.json]
+    analysis:
+      rules_evaluated: true
+      target_platform: aws-bedrock
+      api_version_targeted: "2024-06-01"
+  violations: []
+  warnings:
+    - code: CLAWS-W303
+      message: "Bedrock API version 2024-06-01 targeted — verify compatibility with deployed Bedrock version"
+  artifacts:
+    count: 1
+
+simulate:
+  failures:
+    - component: emit
+      type: api-version-mismatch
+      error: "Emitted guardrail JSON uses 2024-06-01 schema — deployed Bedrock expects 2025-01-15 format"
+    - component: deploy
+      type: silent-rejection
+      error: "CreateGuardrail API returned 200 but ignored unrecognized fields from old schema version"
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise deploys governance guardrails to AWS Bedrock using claws-compiled
+  JSON. The claws emitter targets the CreateGuardrail API schema version
+  2024-06-01. Six months later, AWS updates the Bedrock API to version
+  2025-01-15, adding new required fields and deprecating old ones. The enterprise
+  runs claws compile and deploys the output to Bedrock. The API accepts the
+  request (backward compatibility) but silently ignores the deprecated fields
+  that carried critical deny constraints. The guardrail is created but enforces
+  only a subset of the intended governance rules. The security team's compliance
+  dashboard shows the guardrail as "active" because the API returned 200. Two
+  weeks later, an audit reveals that three deny constraints were silently dropped
+  during the API version transition.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The emitter must target a specific, documented Bedrock API version
+      and include the version in the emitted JSON metadata. The
+      claws.json should specify bedrock.api_version as a required field
+      for Bedrock targets. The emitter refuses to emit without an
+      explicit version target, preventing accidental version
+      mismatches.
+    spec_impact: "CL-04 EMIT — explicit Bedrock API version targeting"
+    pitfall: P-247
+
+  - id: F02
+    severity: major
+    description: >
+      The emitter should include a version compatibility check that
+      warns when the targeted API version is older than a configurable
+      threshold (e.g., 6 months). The warning states: "Targeted Bedrock
+      API version is N months old. Verify that your deployed Bedrock
+      version is compatible. Run claws update-targets to check for
+      newer API versions."
+    spec_impact: "CL-05 DX — API version staleness warning"
+    pitfall: P-247
+
+  - id: F03
+    severity: major
+    description: >
+      API backward compatibility does not guarantee semantic
+      compatibility. An API that accepts old fields without error but
+      ignores them is more dangerous than one that rejects them. The
+      emitter should document which Bedrock API fields are used and
+      which governance constraints they carry, enabling manual
+      verification against the deployed API version.
+    spec_impact: "CL-04 EMIT — field-to-constraint mapping documentation"
+    pitfall: P-247
+
+  - id: F04
+    severity: major
+    description: >
+      The emitted guardrail JSON should include a validation section
+      that lists expected enforcement behaviors. After deployment,
+      the operator can run a validation test against the live guardrail
+      to verify that all constraints are active. This catch-net
+      compensates for silent API field drops during version transitions.
+    spec_impact: "CL-04 EMIT — post-deploy validation test in output"
+    pitfall: P-247
+
+  - id: F05
+    severity: warning
+    description: >
+      Multiple Bedrock API versions may coexist in an enterprise (dev,
+      staging, prod on different versions). The claws.json should
+      support per-environment API version targeting so that the same
+      source files can emit compatible guardrails for each environment.
+    spec_impact: "CL-04 EMIT — per-environment API version targeting"
+    pitfall: P-247
+
+  - id: F06
+    severity: warning
+    description: >
+      The emitter should support a --dry-run mode that validates the
+      emitted JSON against the target API schema without actually
+      deploying. This enables CI pipelines to catch version mismatches
+      before deployment, without requiring Bedrock API credentials in
+      the build environment.
+    spec_impact: "CL-05 DX — schema validation dry-run mode"
+    pitfall: P-247
+
+  - id: F07
+    severity: warning
+    description: >
+      AWS may deprecate the targeted API version entirely, returning
+      HTTP 400 instead of accepting the request. The emitter should
+      maintain a list of known deprecated versions and refuse to target
+      them. This list should be updatable via claws update without
+      requiring a full claws version upgrade.
+    spec_impact: "CL-04 EMIT — deprecated version rejection list"
+    pitfall: P-247
+
+  - id: F08
+    severity: note
+    description: >
+      The claws update-targets command should query the Bedrock API
+      documentation or service endpoints to determine the current
+      supported API versions. This automates the version discovery
+      process and reduces the risk of targeting an incompatible version
+      after an AWS update.
+    spec_impact: "CL-05 update-targets — Bedrock version auto-discovery"
+    pitfall: P-247

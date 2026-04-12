@@ -1,0 +1,143 @@
+name: S29-p190-baseline-invalidates-drift
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that baseline changes via snap promote automatically invalidate
+  all cached drift reports. Without invalidation, stale compliance status
+  persists and workspaces appear compliant against a baseline that no longer
+  exists.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      snapshot_name: enterprise-v3.0
+      snapshot_action: promote
+      drift_cache_invalidated: true
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings:
+        - code: W-DRIFT-CACHE-STALE
+          message: "15 cached drift reports invalidated by baseline change"
+  violations: []
+  warnings:
+    - code: W-DRIFT-CACHE-STALE
+      message: "Baseline changed — all drift reports require re-evaluation"
+  artifacts:
+    count: 1
+    types: [fleet-baseline]
+
+simulate:
+  failures:
+    - component: drift-cache
+      type: stale-after-baseline-change
+      error: "15 drift reports still reference old baseline enterprise-v2.0 after promote to enterprise-v3.0"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet of 20 workspaces has cached drift reports from the last scan (run
+  12 hours ago against baseline enterprise-v2.0). A fleet admin promotes a new
+  baseline (enterprise-v3.0) that adds stricter elicitation requirements. The
+  cached drift reports still show all 20 workspaces as "compliant" because
+  they were evaluated against v2.0. The compliance dashboard displays "100%
+  compliant" based on the cached reports. In reality, 15 workspaces lack the
+  new elicitation requirements added in v3.0 and would fail drift detection
+  against the new baseline. The stale compliance status persists until the next
+  scheduled drift scan (24 hours away), creating a 24-hour window of false
+  compliance.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must mandate that snap promote atomically invalidates all cached
+      drift reports as part of the promotion transaction. The invalidation
+      must happen in the same operation as the baseline update — not as a
+      separate command or background task. If the promote succeeds but
+      invalidation fails, the promote must be rolled back. Atomic coupling
+      prevents the stale window entirely.
+    spec_impact: "CL-05 Snapshot Promote — atomic drift cache invalidation"
+    pitfall: P-190
+
+  - id: F02
+    severity: major
+    description: >
+      After invalidation, `claws fleet drift` must report all workspaces as
+      "UNKNOWN" until they are re-evaluated against the new baseline. The
+      status should never show "COMPLIANT" based on a stale evaluation.
+      The UNKNOWN status must be distinct from COMPLIANT, NON_COMPLIANT,
+      and ERROR in the compliance dashboard. Dashboard integrations must
+      handle UNKNOWN as a fourth state.
+    spec_impact: "CL-05 Fleet Drift — UNKNOWN status after baseline change"
+    pitfall: P-190
+
+  - id: F03
+    severity: major
+    description: >
+      A notification must be sent to all workspace operators when the baseline
+      changes. The notification should include: "Fleet baseline changed from
+      enterprise-v2.0 to enterprise-v3.0. Your workspace drift status is now
+      UNKNOWN. Run `claws pinch` to re-evaluate compliance against the new
+      baseline." This pushes operators to re-evaluate promptly rather than
+      waiting for the next scheduled scan.
+    spec_impact: "CL-05 Snapshot Promote — workspace operator notification"
+    pitfall: P-190
+
+  - id: F04
+    severity: major
+    description: >
+      The compliance dashboard must show the baseline version alongside
+      compliance percentages. "95% compliant (baseline: enterprise-v3.0,
+      evaluated: 2 hours ago)" gives full context. Without the baseline
+      version, operators cannot tell if the compliance was evaluated against
+      the current baseline or a previous one. The baseline version must be
+      a mandatory field in the compliance API response.
+    spec_impact: "CL-05 Fleet Compliance — baseline version in compliance response"
+    pitfall: P-190
+
+  - id: F05
+    severity: warning
+    description: >
+      snap promote should optionally trigger an automatic re-scan: `claws snap
+      promote enterprise-v3.0 --rescan`. The re-scan evaluates all workspaces
+      against the new baseline immediately after promotion. This eliminates
+      the UNKNOWN window at the cost of a longer promote operation. For
+      large fleets, the re-scan should be parallelized across workspaces.
+    spec_impact: "CL-05 Snapshot Promote — optional automatic re-scan"
+    pitfall: P-190
+
+  - id: F06
+    severity: warning
+    description: >
+      Cached drift reports should include the baseline version they were
+      evaluated against. If a dashboard queries a cached report and the
+      baseline version does not match the current fleet baseline, the
+      dashboard must show the report as stale. This defense-in-depth
+      catches stale reports even if the invalidation mechanism fails.
+    spec_impact: "CL-05 Fleet Drift — baseline version in cached reports"
+    pitfall: P-190
+
+  - id: F07
+    severity: warning
+    description: >
+      SIEM export of compliance events must include the baseline version.
+      SOC teams correlating compliance events need to know which baseline
+      was in effect. An event showing "workspace compliant" means nothing
+      without knowing it was compliant against baseline enterprise-v3.0,
+      not the weaker v2.0.
+    spec_impact: "CL-05 Fleet Compliance — baseline version in SIEM events"
+    pitfall: P-190
+
+  - id: F08
+    severity: note
+    description: >
+      The drift cache implementation should use a generation counter. Each
+      promote bumps the generation. Cached reports include the generation
+      at evaluation time. A cache hit is only valid if the report generation
+      matches the current generation. This mechanism is simpler and more
+      reliable than individually invalidating each cached report.
+    spec_impact: "CL-05 Fleet Drift — generation-based cache invalidation"
+    pitfall: P-190

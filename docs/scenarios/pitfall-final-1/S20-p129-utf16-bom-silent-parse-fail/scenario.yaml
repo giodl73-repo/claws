@@ -1,0 +1,120 @@
+name: S20-p129-utf16-bom-silent-parse-fail
+series: pitfall-final-1
+version: 1
+specs: [CL-04]
+description: >
+  Validates that workspace files saved in UTF-16 encoding are detected and
+  either transcoded or rejected with a clear error. The UTF-8-only BOM handler
+  does not recognize UTF-16 BOM (FF FE or FE FF), causing the parser to read
+  corrupted content and produce zero governance constraints silently.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      encoding_detected: true
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings:
+        - rule: ENCODING-DETECTED
+          file: SOUL.md
+          encoding: UTF-16LE
+          action: transcoded-to-utf8
+  violations: []
+  warnings:
+    - rule: ENCODING-DETECTED
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise developer uses an internal tool that outputs UTF-16 LE encoded
+  files. SOUL.md is saved as UTF-16 LE (BOM: FF FE, content in 2-byte chars).
+  The parser reads the file as UTF-8. Every other byte is 0x00 (null). The
+  parser sees corrupted text: "N\x00e\x00v\x00e\x00r\x00" instead of "Never."
+  Keyword matching fails. Zero constraints are extracted. The IR has an empty
+  constraint set. No error is reported because the parser does not validate
+  encoding — it just finds no matching keywords. The workspace deploys with
+  zero governance.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Multi-encoding BOM detection must handle: UTF-8 (EF BB BF), UTF-16 LE
+      (FF FE), UTF-16 BE (FE FF), and UTF-32 (FF FE 00 00 / 00 00 FE FF).
+      For UTF-16, the parser must either transcode to UTF-8 and proceed, or
+      reject with a clear error: "SOUL.md is UTF-16 LE encoded. Convert to
+      UTF-8: iconv -f UTF-16LE -t UTF-8 SOUL.md > SOUL.md.utf8"
+    spec_impact: "CL-04 PARSE — multi-encoding BOM detection"
+    pitfall: P-129
+
+  - id: F02
+    severity: major
+    description: >
+      The silent zero-constraint outcome is the worst failure mode. The
+      parser must validate that at least one constraint was extracted from
+      each file that is expected to contain constraints. SOUL.md with
+      zero constraints should produce a warning: "SOUL.md: no governance
+      constraints found. Is the file encoding correct?"
+    spec_impact: "CL-04 PARSE — empty extraction validation"
+    pitfall: P-129
+
+  - id: F03
+    severity: major
+    description: >
+      Even without a BOM, the parser can detect UTF-16 by checking for
+      null bytes in the first 100 bytes. UTF-8 text almost never contains
+      null bytes; UTF-16 text of ASCII content has null bytes on every
+      other byte. This heuristic catches UTF-16 files saved without BOM.
+    spec_impact: "CL-04 PARSE — null-byte UTF-16 detection heuristic"
+    pitfall: P-129
+
+  - id: F04
+    severity: warning
+    description: >
+      Windows Notepad (current versions) defaults to UTF-8 but can save
+      as UTF-16. Some enterprise tools (PowerShell Out-File, certain
+      Java libraries) default to UTF-16 on Windows. The encoding
+      detection is especially important on Windows where UTF-16 is
+      more common in enterprise environments.
+    spec_impact: "CL-04 PARSE — Windows UTF-16 prevalence"
+    pitfall: P-129
+
+  - id: F05
+    severity: major
+    description: >
+      If the parser transcodes UTF-16 to UTF-8, the transcoded content
+      must be used for both parsing and hashing. The GovernanceIR hash
+      should be computed on the transcoded UTF-8 content, not the raw
+      UTF-16 bytes. This is consistent with BOM stripping (P-100) and
+      CRLF normalization (P-101) — all normalization before hashing.
+    spec_impact: "CL-04 GovernanceIR — hash on transcoded content"
+    pitfall: P-129
+
+  - id: F06
+    severity: warning
+    description: >
+      claws.json is JSON, which is defined as UTF-8 (RFC 8259). A
+      UTF-16 encoded claws.json should be rejected, not transcoded,
+      because JSON parsers expect UTF-8. The error message: "claws.json
+      is UTF-16 encoded. JSON must be UTF-8 per RFC 8259. Convert with:
+      iconv -f UTF-16LE -t UTF-8 claws.json > claws.json.utf8"
+    spec_impact: "CL-01 claws.json — UTF-8 enforcement per RFC 8259"
+    pitfall: P-129
+
+  - id: F07
+    severity: note
+    description: >
+      This pitfall extends P-100 (UTF-8 BOM) to the broader encoding
+      problem. P-100 handles BOM within UTF-8. P-129 handles entirely
+      wrong encodings. Together they cover the encoding normalization
+      layer that must sit between file I/O and the parser.
+    spec_impact: "CL-04 PARSE — encoding normalization layer (P-100 + P-129)"
+    pitfall: P-129

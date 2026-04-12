@@ -1,0 +1,167 @@
+name: S05-p166-broadcast-lossless-violation
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that broadcast operations use fleet overlay instead of writing
+  directly to workspace files (P-166). When fleet broadcast modifies OC
+  workspace files (AGENTS.md, TRUST.md) directly, it violates the lossless
+  guarantee — the user's original content is overwritten with fleet-normalized
+  content, losing comments, custom formatting, and inline documentation.
+
+expect:
+  governance_ir:
+    version: 1
+    lossless_check: failed
+    overlay_used: false
+    direct_write_detected: true
+  violations:
+    - code: CLAWS-E100
+      message: "Lossless violation — broadcast wrote directly to AGENTS.md"
+      severity: error
+  warnings:
+    - code: CLAWS-W100
+      message: "Fleet overlay not used — workspace files modified in place"
+  artifacts:
+    - name: fleet-overlay.json
+      status: absent
+
+simulate:
+  failures:
+    - component: broadcast
+      type: direct-file-write
+      error: "broadcast writes normalized AGENTS.md — user comments stripped"
+    - component: broadcast
+      type: lossless-violation
+      error: "Original AGENTS.md content lost — no overlay separation"
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise fleet administrator runs `claws fleet broadcast` to push a
+  new trust policy across 50 workspaces. The broadcast implementation reads
+  each workspace's AGENTS.md, merges the fleet policy, and writes the result
+  back to AGENTS.md. The merge normalizes the file: it strips markdown
+  comments that developers use for documentation, reorders agent declarations
+  alphabetically, and removes custom formatting. Developer Alice's workspace
+  had detailed inline comments explaining why certain OBO delegations exist.
+  After broadcast, the comments are gone. The file is semantically equivalent
+  but the developer's documentation is destroyed. This violates the core
+  lossless guarantee: claws must never modify original OC workspace files.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-166 core: The lossless guarantee means claws never modifies OC
+      workspace files directly. Fleet broadcast must write policy overlays
+      to a separate fleet-overlay.json file (or .claws/fleet/ directory),
+      not to the workspace files themselves. The compilation pipeline
+      merges the overlay with the workspace files at compile time, leaving
+      the originals untouched.
+    spec_impact: "CL-05 G-LOSSLESS — fleet overlay architecture"
+    pitfall: "P-166"
+
+  - id: F02
+    severity: major
+    description: >
+      The fleet overlay must be additive: it can add new policies, restrict
+      existing permissions, and require minimum trust tiers. It must not
+      remove or modify existing workspace declarations. If the fleet policy
+      conflicts with a workspace declaration, the overlay records the
+      conflict as a violation for the administrator to resolve, not an
+      automatic overwrite.
+    spec_impact: "CL-05 G-LOSSLESS — additive-only fleet overlay"
+    pitfall: "P-166"
+
+  - id: F03
+    severity: major
+    description: >
+      Pre-broadcast validation: before writing the overlay, broadcast must
+      verify that no workspace files will be directly modified. A file
+      system write hook or dry-run mode should detect any code path that
+      opens workspace files for writing. Direct writes to files in the
+      workspace's OC directory (.openclaw/, AGENTS.md, TRUST.md, etc.)
+      must be blocked during broadcast.
+    spec_impact: "CL-05 G-LOSSLESS — broadcast write guard"
+    pitfall: "P-166"
+
+  - id: F04
+    severity: major
+    description: >
+      The compilation pipeline must implement overlay precedence: workspace
+      files are the base layer, fleet overlay is a higher-precedence layer.
+      When both declare a trust tier for the same agent, the fleet overlay
+      wins (fleet policy overrides workspace-local policy). This precedence
+      must be explicit in the GovernanceIR so developers can see which
+      rules come from the fleet vs their workspace.
+    spec_impact: "CL-05 G-LOSSLESS — overlay precedence in GovernanceIR"
+    pitfall: "P-166"
+
+  - id: F05
+    severity: major
+    description: >
+      The lossless violation is invisible to the developer until they
+      check git diff or re-read their files. `claws status` must report
+      whether any workspace files were modified by external tools. A
+      post-broadcast status check should confirm "0 workspace files
+      modified, 1 overlay file written" — any workspace modification
+      is a lossless violation.
+    spec_impact: "CL-05 status — lossless violation detection"
+    pitfall: "P-166"
+
+  - id: F06
+    severity: major
+    description: >
+      Overlay removal: `claws fleet overlay remove` must cleanly remove
+      the fleet overlay without affecting workspace files. After removal,
+      recompilation uses only workspace files. If the overlay was incorrectly
+      merged into workspace files (lossless violation), removal cannot
+      restore the original content — this is precisely why overlays must
+      be separate.
+    spec_impact: "CL-05 fleet — overlay lifecycle management"
+    pitfall: "P-166"
+
+  - id: F07
+    severity: warning
+    description: >
+      Markdown comments in AGENTS.md and TRUST.md serve as operational
+      documentation (why a delegation exists, when it was approved, who
+      reviewed it). These comments are invisible to the governance
+      compiler but critical to human operators. Any process that strips
+      comments destroys institutional knowledge.
+    spec_impact: "CL-05 G-LOSSLESS — comment preservation rationale"
+    pitfall: "P-166"
+
+  - id: F08
+    severity: warning
+    description: >
+      The fleet overlay file format must support the same expressiveness
+      as workspace files. If fleet policy requires a construct that the
+      overlay format cannot express, the temptation is to write directly
+      to workspace files. The overlay schema must be a superset of
+      workspace policy constructs.
+    spec_impact: "CL-05 fleet — overlay schema expressiveness"
+    pitfall: "P-166"
+
+  - id: F09
+    severity: note
+    description: >
+      The byte-for-byte round-trip test: before and after any claws
+      operation (build, broadcast, doctor), workspace files should have
+      identical checksums. This test can be automated as a pre-commit
+      hook: hash workspace files before claws runs, hash again after,
+      assert equality.
+    spec_impact: "CL-05 G-LOSSLESS — round-trip hash verification"
+    pitfall: "P-166"
+
+  - id: F10
+    severity: note
+    description: >
+      For the fleet overlay, version control is essential: the overlay
+      file should be committed alongside the workspace files in git.
+      This enables git diff to show exactly what the fleet pushed, and
+      git revert to remove a bad fleet policy without touching workspace
+      files.
+    spec_impact: "CL-05 fleet — overlay version control"
+    pitfall: "P-166"

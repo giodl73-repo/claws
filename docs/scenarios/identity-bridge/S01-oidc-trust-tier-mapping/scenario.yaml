@@ -1,0 +1,127 @@
+name: S01-oidc-trust-tier-mapping
+series: identity-bridge
+version: 1
+specs: [CL-02, CL-07]
+description: >
+  Validates that OIDC group claims from an identity provider map to
+  workspace trust tiers at compile time. An Entra ID token with 3 group
+  claims (security-admins, workspace-editors, read-only-viewers) maps
+  to trust tiers 4, 2, and 1 respectively. The compiled governance
+  applies tier-appropriate G-PERM and G-ELICIT rules based on the
+  authenticated identity's trust tier.
+
+expect:
+  attack_class: privilege-escalation
+  defense_layer: identity-trust-tier-mapping
+  blocked: true
+  audit_event: IDENTITY-TIER-MISMATCH-BLOCKED
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise uses Entra ID (Azure AD) as the OIDC identity provider.
+  Users authenticate via SSO, and their JWT tokens contain group claims
+  indicating organizational roles. The claws.json identity section maps
+  OIDC groups to workspace trust tiers: security-admins -> tier 4 (full
+  admin, can modify governance), workspace-editors -> tier 2 (can edit
+  workspace content but not governance), read-only-viewers -> tier 1
+  (can view but not modify anything). The compiler reads the identity
+  mapping and generates tier-specific governance: tier 4 users bypass
+  G-ELICIT for administrative tools, tier 2 users require G-ELICIT for
+  R4+ tools, tier 1 users have G-PERM deny on all write tools. A user
+  in the workspace-editors group attempts to invoke a tier-4-only
+  administrative tool. The compiled governance blocks the invocation
+  and logs IDENTITY-TIER-MISMATCH-BLOCKED.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      OIDC group-to-tier mapping is configured in claws.json but verified
+      at runtime. The compiler generates static governance rules per tier,
+      but the tier assignment happens when the user authenticates (runtime).
+      The compile-time artifact must include the mapping table and the
+      runtime must resolve the user's tier from their JWT claims using
+      that table. If the table is stale (OIDC groups renamed), the tier
+      resolution fails. The mapping table must include a validation
+      mechanism (e.g., test against IDP at compile time).
+    spec_impact: "CL-02 Identity Bridge -- compile-time IDP validation for OIDC group mapping"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      A user may belong to multiple OIDC groups (security-admins AND
+      workspace-editors). The tier resolution must define a precedence
+      rule: highest tier wins (user gets tier 4) or most restrictive
+      wins (user gets tier 2). For governance, highest tier is more
+      permissive (admin can do more), so the resolution depends on
+      whether the enterprise wants multi-group users to have maximum
+      or minimum privilege. The claws.json must specify the resolution
+      strategy explicitly.
+    spec_impact: "CL-02 Identity Bridge -- multi-group tier resolution strategy (max-privilege vs min-privilege)"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The IDENTITY-TIER-MISMATCH-BLOCKED event fires when a user's tier
+      does not authorize the requested operation. But the event must
+      include sufficient context for security investigation: user identity
+      (from JWT), claimed groups, resolved tier, requested operation,
+      required tier, and the specific G-rule that blocked the request.
+      Without this context, the audit event is uninvestigable.
+    spec_impact: "CL-02 Audit Events -- 6-field context for IDENTITY-TIER-MISMATCH-BLOCKED"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Trust tier 4 users "bypass G-ELICIT for administrative tools"
+      which means admin actions are not human-approved. This is a
+      calculated risk: admins are trusted by definition. But compromised
+      admin credentials (stolen JWT) bypass all human approval gates.
+      The spec should support a "paranoid mode" where even tier 4 users
+      require G-ELICIT for R5 tools, reducing blast radius of credential
+      compromise.
+    spec_impact: "CL-02 Identity Bridge -- paranoid mode requiring G-ELICIT for all tiers on R5 tools"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      OIDC tokens have expiration times. If a user authenticates, gets
+      tier 4, and the token expires during a long session, the tier
+      assignment becomes stale. The runtime must re-validate the tier
+      on token refresh. The compiled governance should include a
+      tier_refresh_interval specifying how often the runtime must re-
+      resolve the user's tier from their current (refreshed) token.
+    spec_impact: "CL-02 Identity Bridge -- tier_refresh_interval for token expiration handling"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The OIDC group claim name (e.g., "security-admins") is IDP-
+      specific. If the enterprise migrates from Entra ID to Okta, the
+      group claim format may change. The identity mapping in claws.json
+      must be IDP-agnostic: map from a generic claim path (e.g.,
+      "$.groups[*]") to tier, with IDP-specific claim extraction defined
+      in an IDP profile rather than hardcoded in the mapping.
+    spec_impact: "CL-07 Identity Profiles -- IDP-agnostic claim extraction via IDP profiles"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The 3-tier model (admin/editor/viewer) is a common RBAC pattern.
+      Some enterprises use more granular roles (deployer, auditor,
+      security-reviewer). The trust tier model should support N tiers
+      (not just 1-4) with custom tier definitions. Each tier defines
+      which G-rules apply and which are bypassed. The 4-tier default
+      is a starting point, not a limit.
+    spec_impact: "CL-02 Trust Tiers -- configurable N-tier model with per-tier G-rule application"
+    pitfall: null

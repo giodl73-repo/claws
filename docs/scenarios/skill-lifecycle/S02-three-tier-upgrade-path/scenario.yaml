@@ -1,0 +1,143 @@
+name: S02-three-tier-upgrade-path
+series: skill-lifecycle
+version: 1
+specs: [CL-05]
+description: >
+  Validates the progressive adoption path from DECLARED (3 YAML lines) to
+  TYPED (@bic/claws-skill-kit decorators) to VERIFIED (full claws build with
+  generated tests and signed manifest). Each tier transition must preserve
+  prior governance metadata and add new capabilities without regression.
+
+expect:
+  artifacts:
+    - type: skill
+      path: my-tool/SKILL.md
+      valid: true
+  plugin_hooks: null
+  skill_content:
+    tier_progression: [DECLARED, TYPED, VERIFIED]
+    governance_preserved: true
+    no_data_loss: true
+  approvals: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An existing skill starts ungoverned (no frontmatter). The developer adds
+  3 lines of governance YAML frontmatter (risk: R3, obo: none, data: INTERNAL)
+  to reach DECLARED tier. They then run `claws import` to migrate to TYPED
+  tier by adding @bic/claws-skill-kit imports and decorators. Finally they run
+  `claws build --skill` to reach VERIFIED tier with generated tests, governance
+  wrapper, and signed manifest. Each transition must be validated as a clean
+  step that preserves all prior metadata.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The `claws import` command migrates from DECLARED to TYPED by adding
+      @bic/claws-skill-kit imports and decorators to the handler. If the skill
+      has no handler.ts (prompt-only skill), `claws import` has nothing to
+      decorate. CL-05 does not specify behavior for prompt-only skills at
+      TYPED tier. A prompt-only skill can be DECLARED (frontmatter) and
+      VERIFIED (governance tests pass) but cannot meaningfully be TYPED
+      (no code to decorate).
+    spec_impact: "CL-05 Three-Tier Adoption — prompt-only skill tier ceiling (DECLARED or VERIFIED, skip TYPED)"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      When upgrading from DECLARED to TYPED, `claws import` must read
+      existing governance frontmatter and translate it into decorator
+      arguments. If frontmatter says `risk: R3` and the decorator says
+      `@classify({ risk: 'R2' })`, the values conflict. The import command
+      must use frontmatter values as the source of truth for decorator
+      arguments, not defaults.
+    spec_impact: "CL-05 @bic/claws-skill-kit — frontmatter-to-decorator value propagation"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Enterprise install policies can require minimum tiers per risk level
+      (DECLARED for R1-R2, TYPED for R3, VERIFIED for R4-R5). If a skill
+      is R4 and only DECLARED, the fleet scan should report it as
+      non-compliant with the install policy. The tier requirement is a
+      function of risk level, not a global setting.
+    spec_impact: "CL-05 Three-Tier Adoption — enterprise tier-per-risk enforcement"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The transition from TYPED to VERIFIED requires `claws build --skill`
+      which generates tests in .claws/dist/scenarios.test.ts. These generated
+      tests validate declared vs actual behavior using @bic/claws-test's 12
+      governance checks. If the skill handler violates its own governance
+      declaration (e.g., declares obo: none but calls email APIs), the
+      generated tests must catch this. The test generation must be smart
+      enough to derive test scenarios from the governance frontmatter.
+    spec_impact: "CL-05 @bic/claws-test — governance-aware test generation from frontmatter"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Each tier transition must be reversible without data loss. A developer
+      at TYPED tier who removes @bic/claws-skill-kit imports should gracefully
+      fall back to DECLARED (frontmatter still present). If the build system
+      errors on missing imports instead of detecting tier regression, the
+      developer is stuck. `claws pinch` must detect the current tier from
+      workspace state, not from a stored tier field.
+    spec_impact: "CL-05 Three-Tier Adoption — tier detection from workspace state, not stored metadata"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The VERIFIED tier produces a signed .claws-manifest. If the developer
+      modifies handler.ts after verification, the manifest signature is
+      invalidated. The next `claws pinch` must detect the stale signature
+      and downgrade the tier display to TYPED (code changed since last
+      verified build). This tier-on-edit downgrade is not specified in CL-05.
+    spec_impact: "CL-05 Three-Tier Adoption — signature staleness detection and tier downgrade"
+    pitfall: P-227
+
+  - id: F07
+    severity: note
+    description: >
+      The time estimates in CL-05 (DECLARED: 2-5 min, TYPED: 15-30 min,
+      VERIFIED: 30-60 min) assume a developer familiar with claws. For a
+      first-time user, DECLARED may take 10 minutes (reading docs, choosing
+      risk level). The error messages at each tier must be the primary
+      teaching surface, per the error message contract in CL-05.
+    spec_impact: "CL-05 Error Message Contract — tier-transition error messages as onboarding"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      The `claws annotate` command auto-suggests governance frontmatter for
+      existing skills. If the skill handler calls file-system APIs, annotate
+      should suggest risk: R3 (TRANSFORM). If it calls email APIs, suggest
+      obo: email. The annotation heuristics must be documented and testable.
+      False-positive R5 suggestions (annotate says R5, actual risk is R2)
+      create unnecessary governance burden; false-negative R1 suggestions
+      (annotate says R1, actual risk is R4) create security gaps.
+    spec_impact: "CL-05 claws annotate — heuristic accuracy requirements and false-positive/negative bounds"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The three tiers map to ClawHub badge display. A skill at DECLARED shows
+      a basic badge (risk + OBO + data). TYPED adds a "typed" indicator.
+      VERIFIED adds the full verification seal. Badge rendering must degrade
+      gracefully — a skill published before badges existed shows no badge,
+      not a broken badge placeholder.
+    spec_impact: "CL-05 ClawHub Governance Badges — backward compatibility for pre-badge skills"
+    pitfall: null

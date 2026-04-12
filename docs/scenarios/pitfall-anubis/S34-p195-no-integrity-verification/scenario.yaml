@@ -1,0 +1,153 @@
+name: S34-p195-no-integrity-verification
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that snapshots include mandatory SHA-256 integrity hashes per
+  file and HMAC-SHA256 manifest signing. Without integrity verification, a
+  corrupted or tampered snapshot is silently restored, putting the workspace
+  in an unknown governance state.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      snapshot_name: enterprise-v2.0
+      snapshot_action: restore
+      integrity_verified: true
+      hash_algorithm: SHA-256
+      manifest_signature: HMAC-SHA256
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: snapshot-integrity
+      type: no-verification
+      error: "Snapshot restored without integrity check — TOOLS.md corrupted (3 bytes flipped), governance state unknown"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace stores snapshots on a network share. During a network hiccup,
+  the snapshot file for enterprise-v2.0 is partially corrupted: 3 bytes in
+  TOOLS.md are flipped, changing "R5" to "R2" for a destructive tool's risk
+  classification. The operator runs `claws snap restore enterprise-v2.0`.
+  Without integrity verification, the corrupted TOOLS.md is restored. The
+  destructive tool is now classified as R2 instead of R5, meaning it no
+  longer requires human elicitation. Agents can execute the destructive tool
+  without approval. The corruption is invisible — the file looks syntactically
+  valid, just with a wrong value. The governance state is silently weakened
+  by a storage corruption event.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must mandate SHA-256 integrity hashes for every file in a
+      snapshot. The snap save command must compute SHA-256 for each of the
+      9 workspace files plus the GovernanceIR and store the hashes in the
+      snapshot manifest. On restore, each file's hash is recomputed and
+      compared. Any mismatch must abort the restore with: "Integrity check
+      failed for TOOLS.md. Expected hash: abc123. Actual hash: def456.
+      Snapshot may be corrupted."
+    spec_impact: "CL-05 Snapshot Integrity — mandatory per-file SHA-256"
+    pitfall: P-195
+
+  - id: F02
+    severity: major
+    description: >
+      The snapshot manifest itself must be signed with HMAC-SHA256 using a
+      workspace-specific key. This prevents tampering with the manifest
+      (an attacker could update both the file and its hash). The HMAC key
+      should be derived from the workspace identity and stored securely.
+      On restore, the manifest signature is verified before individual file
+      hashes are checked.
+    spec_impact: "CL-05 Snapshot Integrity — HMAC-SHA256 manifest signing"
+    pitfall: P-195
+
+  - id: F03
+    severity: major
+    description: >
+      Integrity verification must be mandatory and non-bypassable for
+      security-critical operations: dead man switch restore, fleet baseline
+      operations, and any restore in a fleet context. A --skip-integrity
+      flag may exist for development convenience but must be disabled in
+      fleet mode and must log a CRITICAL audit event if used.
+    spec_impact: "CL-05 Snapshot Integrity — non-bypassable for security operations"
+    pitfall: P-195
+
+  - id: F04
+    severity: major
+    description: >
+      The integrity check must detect both accidental corruption (bit flips,
+      truncation) and deliberate tampering (modified governance values). For
+      deliberate tampering, the HMAC verification catches cases where an
+      attacker updates both the file and the per-file hash. The two-layer
+      defense (per-file SHA-256 + manifest HMAC) provides defense against
+      both attack types.
+    spec_impact: "CL-05 Snapshot Integrity — two-layer defense model"
+    pitfall: P-195
+
+  - id: F05
+    severity: major
+    description: >
+      When integrity verification fails, the error must include remediation
+      steps: (1) check network/storage health, (2) try restoring from a
+      different copy (if replicated), (3) create a new snapshot from source
+      files, (4) if fleet baseline, request a re-promote from the fleet
+      admin. The error should not just say "corrupted" — it should guide
+      the operator to resolution.
+    spec_impact: "CL-05 Snapshot Integrity — remediation steps on failure"
+    pitfall: P-195
+
+  - id: F06
+    severity: warning
+    description: >
+      Periodic integrity verification should run in the background for all
+      stored snapshots, not just on restore. `claws snap verify --all`
+      should check all snapshots and report any that have become corrupted.
+      This proactive check catches corruption early (before a restore is
+      attempted) and allows remediation before the snapshot is needed.
+    spec_impact: "CL-05 Snapshot Integrity — periodic background verification"
+    pitfall: P-195
+
+  - id: F07
+    severity: warning
+    description: >
+      The hash algorithm must be specified in the snapshot metadata. If a
+      future version of claws needs to upgrade from SHA-256 to SHA-3, the
+      restore must read the hash algorithm from the metadata and use the
+      correct one. Hard-coding SHA-256 in the restore logic would break
+      when the algorithm changes. The metadata field should be:
+      "integrity.hashAlgorithm: SHA-256".
+    spec_impact: "CL-05 Snapshot Integrity — hash algorithm in metadata"
+    pitfall: P-195
+
+  - id: F08
+    severity: note
+    description: >
+      Fleet baseline snapshots may be distributed to multiple workspaces.
+      Each copy should have its integrity verified independently on receipt.
+      A corruption in transit that affects one copy should not affect others.
+      The fleet broadcast of baselines should include the manifest hash so
+      each workspace can verify its received copy independently.
+    spec_impact: "CL-05 Fleet Baseline — independent integrity verification on receipt"
+    pitfall: P-195
+
+  - id: F09
+    severity: note
+    description: >
+      The integrity verification event (pass or fail) must be logged in the
+      audit trail. A successful verification is evidence that the snapshot
+      was intact at the time of restore. A failed verification is a security
+      event that may indicate storage infrastructure problems or an active
+      attack on the governance configuration.
+    spec_impact: "CL-05 Snapshot Integrity — verification event in audit trail"
+    pitfall: P-195

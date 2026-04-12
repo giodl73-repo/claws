@@ -1,0 +1,132 @@
+name: S15-p176-concurrent-broadcast-interleave
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that concurrent broadcast operations are prevented by a fleet-level
+  lock. Without locking, two simultaneous broadcasts interleave their policy
+  updates across workspaces, leaving the fleet in an inconsistent state where
+  some workspaces have policy A and others have policy B.
+
+expect:
+  workspaces:
+    total: 10
+    updated: 0
+    failed: 0
+  drift_count: 0
+  broadcast_result:
+    status: rejected
+    reason: fleet-lock-held
+    lock_holder: "broadcast-soc2-v3"
+    lock_acquired: "2026-04-11T14:00:00Z"
+  compliance:
+    current_policy: 10
+    stale_policy: 0
+
+simulate:
+  failures:
+    - component: broadcast
+      type: concurrent-broadcast
+      error: "Fleet lock held by broadcast-soc2-v3, cannot start broadcast-pci-v4"
+  halt: null
+  budget: null
+
+problem: >
+  Two fleet admins independently run broadcasts at the same time: Admin A
+  broadcasts soc2-v3 and Admin B broadcasts pci-v4. Without a fleet-level
+  lock, the broadcasts interleave. Workspaces 1-5 receive soc2-v3 first,
+  then pci-v4. Workspaces 6-10 receive pci-v4 first, then soc2-v3. The
+  final state depends on which broadcast reached each workspace last. Some
+  workspaces end up with soc2-v3, others with pci-v4, and the fleet has no
+  consistent governance baseline. Neither admin knows the fleet is split
+  because each sees their own broadcast as successful.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must mandate a fleet-level mutex lock for broadcast operations.
+      Before starting a broadcast, the system must acquire an exclusive lock.
+      If the lock is held, the second broadcast must fail immediately with
+      a clear error: "Fleet lock held by {operation}, started at {time}.
+      Use --force to override (requires --confirm)." The lock must include
+      the operation name and start time for diagnostics.
+    spec_impact: "CL-05 Fleet Broadcast — mandatory fleet-level mutex"
+    pitfall: P-176
+
+  - id: F02
+    severity: major
+    description: >
+      The fleet lock must have an automatic timeout to prevent deadlocks.
+      If a broadcast crashes mid-execution, the lock must not persist
+      indefinitely. Default lock timeout should be 30 minutes (configurable
+      via fleet.lockTimeoutMinutes). After timeout, the lock is released
+      with a STALE_LOCK warning in the audit trail.
+    spec_impact: "CL-05 Fleet Broadcast — lock timeout for deadlock prevention"
+    pitfall: P-176
+
+  - id: F03
+    severity: major
+    description: >
+      The lock must be workspace-level, not process-level. Using a PID-based
+      lock would fail in distributed fleet topologies where broadcasts originate
+      from different machines. The lock should be stored in the fleet
+      configuration store (shared filesystem or coordination service) with
+      a lease-based mechanism.
+    spec_impact: "CL-05 Fleet Broadcast — distributed lock implementation"
+    pitfall: P-176
+
+  - id: F04
+    severity: major
+    description: >
+      The --force flag must exist for emergency override, but it must require
+      --confirm AND log a CRITICAL audit event. Force-overriding a lock can
+      cause the interleaving problem this lock prevents. The audit event must
+      include both the overriding operation and the overridden one so the
+      fleet admin can manually reconcile the state afterward.
+    spec_impact: "CL-05 Fleet Broadcast — force override with audit trail"
+    pitfall: P-176
+
+  - id: F05
+    severity: warning
+    description: >
+      Queuing semantics should be considered: instead of failing the second
+      broadcast, queue it to run after the first completes. Queue mode
+      (fleet.broadcast.queueMode: true) would make the second broadcast
+      wait for the lock. The queue should have a maximum wait time to avoid
+      indefinite blocking, defaulting to lockTimeoutMinutes.
+    spec_impact: "CL-05 Fleet Broadcast — optional queuing semantics"
+    pitfall: P-176
+
+  - id: F06
+    severity: warning
+    description: >
+      The lock must be visible via `claws fleet status`. Operators need to
+      know why their broadcast was rejected. The status output should show
+      active locks with operation name, holder identity, start time, and
+      estimated remaining time. This prevents operators from repeatedly
+      retrying a locked broadcast and cluttering the audit trail.
+    spec_impact: "CL-05 Fleet Status — lock visibility"
+    pitfall: P-176
+
+  - id: F07
+    severity: warning
+    description: >
+      Read-only fleet operations (scan, drift, status) must not acquire or
+      be blocked by the broadcast lock. Only mutating operations (broadcast,
+      kill, promote) need the lock. Blocking reads on writes would make fleet
+      monitoring unavailable during broadcasts, which is exactly when
+      monitoring is most needed.
+    spec_impact: "CL-05 Fleet Operations — read/write lock separation"
+    pitfall: P-176
+
+  - id: F08
+    severity: note
+    description: >
+      The interleaving problem is amplified when broadcasts have different
+      policy types (e.g., soc2 vs pci). A single workspace ending up with
+      soc2 policy when the fleet expects pci is worse than having a slightly
+      older version of the correct policy type. The drift detection must
+      catch policy-type mismatches in addition to version mismatches.
+    spec_impact: "CL-05 Fleet Drift — policy type mismatch detection"
+    pitfall: P-176

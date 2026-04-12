@@ -1,0 +1,115 @@
+name: S06-hook-timeout-r5
+series: fail-mode
+version: 1
+specs: [CL-02]
+description: >
+  Validates that a governance hook exceeding 50ms timeout with an R5 tool
+  results in DENIED. The generated plugin uses AbortSignal.timeout(50ms)
+  to enforce hook latency. Timeout is treated as a crash for fail-mode
+  purposes — R5 timeout = DENIED.
+
+expect:
+  attack_class: governance-bypass-via-timeout
+  defense_layer: abort-signal-timeout
+  blocked: true
+  audit_event:
+    type: governance-timeout
+    tool: wire-transfer
+    risk_level: 5
+    outcome: DENIED
+    timeout_ms: 50
+    actual_ms: 120
+    reason: "hook timeout exceeded 50ms for R5 tool"
+
+simulate:
+  failures:
+    - component: governance-hook
+      type: timeout
+      duration_ms: 120
+      tool: wire-transfer
+  halt: null
+  budget: null
+
+problem: >
+  The governance before_tool_call handler takes 120ms to evaluate policy for
+  "wire-transfer" (R5/TRANSACT) — exceeding the 50ms timeout. The handler
+  is wrapped with AbortSignal.timeout(50ms). When the signal fires, the
+  handler is treated as a crash: R5 + crash = DENIED. The wire-transfer tool
+  must NOT execute. The timeout event is recorded in the audit chain.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The 50ms timeout for hook evaluation is tight. Normal policy evaluation
+      should take <10ms, but complex workspaces with many rules might take
+      longer. If 50ms is too aggressive, legitimate R5 tool calls will be
+      permanently blocked. The timeout must be configurable per-workspace
+      while maintaining a hard ceiling for security.
+    spec_impact: "CL-01 claws.json — configurable hook timeout with ceiling"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      AbortSignal.timeout() is a Node.js API (v18+). The generated plugin
+      must use the correct timeout mechanism for each platform target. If
+      the platform is Python-based (LangGraph, CrewAI), AbortSignal does
+      not exist. The EMIT phase must generate platform-specific timeout code.
+    spec_impact: "CL-04 EMIT — platform-specific timeout implementation"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      A hook timeout of 120ms vs 50ms limit is a 2.4x overshoot. The audit
+      event records both the limit and the actual duration, enabling diagnosis.
+      But the cause of the slowdown (complex rule evaluation? I/O in handler?
+      garbage collection?) is not captured. The audit event should include
+      a performance context.
+    spec_impact: "CL-02 audit — performance context in timeout events"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      If the handler is interrupted by AbortSignal mid-execution, any
+      partially-written state (e.g., half-updated classification cache) may
+      be corrupted. The handler must be idempotent and interruptible — no
+      partial writes survive an abort. This is a transactional integrity
+      requirement for the governance handler.
+    spec_impact: "CL-03 runtime — handler interruptibility and idempotence"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The CL-04 spec says total pipeline latency is <500ms. The hook
+      evaluation timeout of 50ms is a subset of this budget. If the hook
+      runs once per tool call and a workflow has 10 tool calls, the total
+      governance overhead is up to 500ms just from hook timeouts. The per-call
+      budget vs per-workflow budget must be distinguished.
+    spec_impact: "CL-04 latency — per-call vs per-workflow timeout budgets"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      Timeout-as-crash for fail-mode purposes is the correct conservative
+      behavior. An alternative is timeout-as-warning (allow the tool but
+      log the timeout). For R5, timeout-as-crash is mandatory. For R1-R2,
+      timeout could be treated as a warning, allowing the read while logging
+      the latency issue.
+    spec_impact: "CL-02 fail-mode — timeout severity per risk level"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      A malicious tool could intentionally cause the governance hook to
+      timeout (e.g., by passing a crafted toolName that triggers expensive
+      regex evaluation). This is a denial-of-service attack against the
+      governance layer. The hook must have O(1) or O(n) time complexity
+      guarantees, not O(n^2) or worse.
+    spec_impact: "CL-02 security — governance hook time complexity"
+    pitfall: null

@@ -1,0 +1,173 @@
+name: S09-fleet-plugin-ordering
+series: fleet-operations
+version: 1
+specs: [CL-05, CL-02]
+description: >
+  Validates that fleet-level governance enforces consistent plugin ordering
+  across all workspaces. The OC Gateway loads plugins in order and the
+  governance plugin must run BEFORE other plugins to enforce policy before
+  side effects occur. Fleet scan must detect workspaces where the governance
+  plugin is not first in the plugin chain, which would allow ungoverned
+  tool calls to execute before governance checks.
+
+expect:
+  workspaces:
+    total: 8
+    correct_ordering: 6
+    incorrect_ordering: 2
+  drift_count: 2
+  broadcast_result: null
+  compliance:
+    plugin_ordering_violations:
+      - workspace: workspace-lambda
+        governance_position: 3
+        expected_position: 1
+        plugins_before: [logging-plugin, metrics-plugin]
+      - workspace: workspace-mu
+        governance_position: 2
+        expected_position: 1
+        plugins_before: [custom-auth-plugin]
+
+simulate:
+  failures:
+    - component: plugin-ordering
+      type: governance-not-first
+      error: "workspace-lambda: governance plugin at position 3, expected 1"
+    - component: plugin-ordering
+      type: governance-not-first
+      error: "workspace-mu: governance plugin at position 2, expected 1"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet of 8 workspaces uses the OC Gateway with multiple plugins.
+  The governance plugin must be the first plugin in the chain so that
+  tool calls are checked BEFORE any other plugin can execute side effects.
+  Six workspaces have correct ordering. Workspace-lambda has logging and
+  metrics plugins before governance (benign but violates the ordering
+  requirement). Workspace-mu has a custom auth plugin before governance
+  (potentially dangerous — auth plugin may approve calls the governance
+  plugin would deny). `claws scan` must detect incorrect ordering and
+  classify the risk: non-governance plugins before governance is a
+  warning for observability plugins, an error for action plugins.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The OC Gateway's plugin loading order is determined by configuration,
+      not by claws compilation. The governance plugin can be emitted by
+      claws but its position in the plugin chain depends on how the
+      workspace owner configures the Gateway. If the spec relies on plugin
+      ordering for security (governance-first), there must be a mechanism
+      to enforce ordering at compile time or verify it at scan time.
+      Currently neither CL-03 nor CL-05 define ordering enforcement.
+    spec_impact: "CL-03 Runtime — plugin ordering enforcement or verification mechanism"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Not all pre-governance plugins are equally dangerous. A logging
+      plugin before governance is low risk (it observes but does not act).
+      An auth plugin before governance may approve tool calls that
+      governance would deny. The spec should define plugin risk categories:
+      OBSERVE (logging, metrics — low risk before governance), ACT
+      (auth, routing, transformation — high risk before governance).
+      Only ACT plugins before governance should be errors.
+    spec_impact: "CL-05 Fleet — plugin risk categorization (OBSERVE vs ACT)"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Fleet-level plugin ordering policy should be enforceable via
+      broadcast. A fleet policy that says "governance plugin must be first"
+      should cause `claws pinch --fleet` to flag workspaces where it is
+      not. But claws currently does not have visibility into Gateway plugin
+      configuration — it only controls the governance plugin it emits.
+      Reading the Gateway's plugin config requires a new integration point.
+    spec_impact: "CL-05 Fleet — Gateway plugin config visibility for ordering validation"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The governance plugin itself may need to validate its own position
+      at runtime. On first tool call, the governance plugin could check:
+      "am I the first handler registered for before_tool_call?" If not,
+      it should log a warning to the audit chain. This is a runtime
+      self-check that complements the fleet-level static check. But the
+      Gateway API may not expose handler registration order.
+    spec_impact: "CL-03 Runtime — governance plugin self-position verification"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      If a custom auth plugin runs before governance and approves an R5
+      tool call, the governance plugin receives the call with an "already
+      approved" context. The governance plugin must ignore any prior
+      approval and evaluate independently. Prior-approval bypass is a
+      real attack vector: a malicious plugin could pre-approve all calls
+      to circumvent governance. The governance plugin must treat its
+      evaluation as authoritative regardless of prior plugin decisions.
+    spec_impact: "CL-03 Runtime — governance ignores prior plugin approvals"
+    pitfall: P-184
+
+  - id: F06
+    severity: warning
+    description: >
+      Plugin ordering may change after deployment. A workspace that passes
+      the fleet ordering check today may have its plugin config modified
+      tomorrow. The sidecar (CL-03) should monitor plugin config files
+      and alert on ordering changes. This is the runtime complement to
+      the fleet scan's static ordering check.
+    spec_impact: "CL-03 Runtime — sidecar monitoring for plugin config changes"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The fleet scan must know the governance plugin's identifier to
+      check its position. If the governance plugin is emitted as
+      "claws-governance-plugin" but the workspace renames it, the scan
+      cannot find it. The emitted plugin should include a marker (e.g.,
+      a metadata field: `__claws_governance: true`) that the scan can
+      search for regardless of filename or plugin name.
+    spec_impact: "CL-04 EMIT — governance plugin marker for fleet scan identification"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      For workspaces where reordering is not possible (third-party Gateway
+      configurations), the governance plugin should support a "late
+      validation" mode: instead of blocking tool calls before execution,
+      it audits tool calls after execution and flags violations for
+      post-incident review. Late validation is weaker but better than
+      no governance when ordering cannot be enforced.
+    spec_impact: "CL-03 Runtime — late validation mode for uncontrollable plugin ordering"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The fleet plugin ordering report should show the full plugin chain
+      per workspace, not just the governance plugin position. "workspace-
+      lambda: [logging, metrics, GOVERNANCE, custom-transform]" gives the
+      operator full visibility. This is useful for debugging ordering
+      issues and understanding the overall plugin architecture per workspace.
+    spec_impact: "CL-05 Fleet — full plugin chain visibility in scan report"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Plugin ordering enforcement at the Gateway level (not just claws
+      checking) would be the strongest guarantee. An upstream enhancement
+      to the OC Gateway that allows plugins to declare ordering constraints
+      (e.g., "must be first") would make claws's ordering check redundant.
+      Until then, claws's fleet scan is the best available mechanism.
+    spec_impact: "CL-03 Runtime — upstream Gateway ordering constraint proposal"
+    pitfall: null

@@ -1,0 +1,165 @@
+name: S10-p235-non-atomic-publish
+series: pitfall-thoth-2
+version: 1
+specs: [CL-05]
+description: >
+  Validates that skill publish is atomic with rollback on remote failure
+  (P-235). When badge metadata is injected locally but the remote publish
+  fails, the local version number is incremented for an unpublished skill,
+  leaving local and remote state inconsistent. The publish operation must
+  be all-or-nothing.
+
+expect:
+  governance_ir:
+    version: 1
+    publish:
+      local_version: "1.2.0"
+      remote_version: "1.1.0"
+      state: inconsistent
+      rollback_required: true
+    analysis:
+      rules_evaluated: true
+      publish_check: true
+  violations:
+    - code: CLAWS-E235
+      message: "Publish failed after local state mutation — local version 1.2.0 but remote is 1.1.0"
+      severity: error
+  warnings:
+    - code: CLAWS-W235
+      message: "Local badge metadata injected but not committed to remote — rollback initiated"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: skill-publish
+      type: remote-failure
+      error: "ClawHub API returned HTTP 502 after local version bump and badge metadata injection"
+    - component: skill-publish
+      type: state-inconsistency
+      error: "Local manifest shows version 1.2.0 with DECLARED badge but ClawHub has version 1.1.0"
+  halt: null
+  budget: null
+
+problem: >
+  A developer runs claws skill publish for version 1.2.0 of their skill. The
+  publish command first updates the local manifest: bumps version from 1.1.0
+  to 1.2.0, injects badge metadata (tier, verification hash, timestamp), and
+  writes the updated manifest to disk. Then it attempts to upload the skill
+  package to ClawHub. The ClawHub API returns HTTP 502 (Bad Gateway) due to a
+  transient infrastructure issue. The publish command reports the failure but
+  does not roll back the local changes. The developer now has a local manifest
+  at version 1.2.0 with badge metadata for a version that was never published.
+  Subsequent claws pinch reads the local manifest and reports version 1.2.0 as
+  current. If the developer runs publish again, ClawHub may reject it as a
+  duplicate version or accept it with different metadata. The local and remote
+  states are diverged with no automated recovery path.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-235 core: The publish command must not mutate local state before
+      confirming remote success. The correct sequence is: (1) build the
+      publish package in a temporary directory, (2) upload to ClawHub,
+      (3) on success, commit the local state changes (version bump, badge
+      metadata). If step 2 fails, step 3 never executes and local state
+      remains at the pre-publish version.
+    spec_impact: "CL-05 Publish Amendment — remote-first publish sequence"
+    pitfall: "P-235"
+
+  - id: F02
+    severity: major
+    description: >
+      If local state has already been mutated when the remote publish fails,
+      the command must perform an automatic rollback: restore the manifest
+      to its pre-publish state from the backup copy. The backup must be
+      created before any mutations begin. The rollback must be atomic (no
+      partial manifest state) and must log the rollback action for
+      diagnostics.
+    spec_impact: "CL-05 Publish Amendment — automatic rollback on remote failure"
+    pitfall: "P-235"
+
+  - id: F03
+    severity: major
+    description: >
+      The publish command must implement idempotency. If the developer
+      retries after a failure, the command must detect the previous failed
+      attempt and either resume (if the remote received the package) or
+      restart cleanly (if the remote did not receive it). A publish-lock
+      file with a transaction ID enables this: the retry checks the lock,
+      queries ClawHub for the transaction ID, and decides whether to
+      resume or restart.
+    spec_impact: "CL-05 Publish Amendment — idempotent publish with transaction ID"
+    pitfall: "P-235"
+
+  - id: F04
+    severity: major
+    description: >
+      The version number is the most critical piece of local state. Once
+      bumped and written to disk, any tool that reads the manifest sees the
+      new version. If the bump happens before remote confirmation, all
+      local operations (pinch, status, compile) reference a version that
+      does not exist remotely. The version bump must be the LAST local
+      mutation, occurring only after remote confirmation.
+    spec_impact: "CL-05 Publish Amendment — version bump as final step"
+    pitfall: "P-235"
+
+  - id: F05
+    severity: major
+    description: >
+      The badge metadata injection (tier, verification hash) is tied to
+      a specific version. If the metadata is injected for version 1.2.0
+      but that version never publishes, the metadata references a phantom
+      version. The next successful publish at 1.2.0 may have different
+      content than the metadata was generated for. Badge metadata must be
+      regenerated on each publish attempt, not reused from a failed attempt.
+    spec_impact: "CL-05 Publish Amendment — fresh badge metadata per publish attempt"
+    pitfall: "P-235"
+
+  - id: F06
+    severity: warning
+    description: >
+      Network failures during publish are common (timeouts, 502s, DNS
+      failures). The publish command should implement retry with exponential
+      backoff for transient errors (5xx, timeout) but fail immediately for
+      permanent errors (4xx, authentication failure). Maximum 3 retries with
+      5s, 15s, 45s delays. Each retry must use the same transaction ID
+      for idempotency.
+    spec_impact: "CL-05 Publish Amendment — retry strategy for transient failures"
+    pitfall: "P-235"
+
+  - id: F07
+    severity: warning
+    description: >
+      The publish-lock file must be cleaned up after both success and
+      failure. A stale lock from a crashed publish process should not block
+      future publishes indefinitely. The lock should include a creation
+      timestamp and expire after 10 minutes. The publish command should
+      detect stale locks, warn the developer, and offer to break the lock
+      with --force.
+    spec_impact: "CL-05 Publish Amendment — publish lock lifecycle"
+    pitfall: "P-235"
+
+  - id: F08
+    severity: warning
+    description: >
+      The claws skill status command should detect local-remote version
+      divergence and report it clearly: "Local version 1.2.0 does not
+      match remote version 1.1.0 — possible failed publish. Run claws
+      skill publish --recover to resolve." This gives the developer a
+      recovery path even if the automatic rollback failed.
+    spec_impact: "CL-05 Status — local-remote version divergence detection"
+    pitfall: "P-235"
+
+  - id: F09
+    severity: note
+    description: >
+      Git-based workflows add another state dimension. If the developer
+      committed the version bump before publish failed, the git history
+      contains a commit for a version that does not exist remotely. The
+      publish command should not automatically git-commit local changes.
+      Commit should be a separate step that the developer performs after
+      confirming successful publish.
+    spec_impact: "CL-05 Publish Amendment — no auto-commit during publish"
+    pitfall: "P-235"

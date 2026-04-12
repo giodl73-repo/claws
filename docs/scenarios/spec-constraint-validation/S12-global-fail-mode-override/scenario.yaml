@@ -1,0 +1,127 @@
+name: S12-global-fail-mode-override
+series: spec-constraint-validation
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates the global fail-mode override: `failMode.global: fail-closed` in
+  claws.json forces ALL tools to fail-closed, including R1 and R2. This
+  overrides per-risk defaults (R1 normally fail-open) but does not conflict
+  with R5 (which is already fail-closed). The enterprise wants maximum security
+  at the cost of read availability during governance errors.
+
+expect:
+  attack_class: governance-handler-crash
+  defense_layer: L2-plugin-handler
+  blocked: true
+  audit_event:
+    type: fail-closed
+    tool: read-file
+    risk_level: 1
+    configured_fail_mode: global-override
+    effective_fail_mode: fail-closed
+    error: "governance evaluation error"
+
+simulate:
+  failures:
+    - component: evaluatePolicy
+      error: "Error: classification cache corrupted"
+      tool: read-file
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise workspace has claws.json with `failMode.global: fail-closed`.
+  The workspace has read-file (R1), search-db (R2), and send-email (R5). The
+  governance handler crashes while evaluating read-file. Normally R1 tools
+  fail-open (the read proceeds despite the crash). But the global override
+  forces fail-closed for all risk levels. The read-file call is blocked. The
+  audit records the block with `configured_fail_mode: global-override`.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The fail-mode precedence order must be clearly defined: per-tool >
+      per-risk-level > global > default. If claws.json has both a global
+      override and a per-tool override for read-file, the per-tool override
+      wins. If only the global is set, it applies to all tools. This
+      precedence must be documented and tested for all combinations.
+    spec_impact: "CL-02 security — fail-mode precedence order"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The global fail-closed override for R1 tools blocks reads on governance
+      errors. This is a significant availability impact. The compiler SHOULD
+      warn when global fail-closed is configured: "CLAWS-W025: global
+      fail-closed will block R1 read tools on governance errors." The warning
+      is informational, not blocking -- the enterprise made a deliberate
+      choice.
+    spec_impact: "CL-02 security — global fail-closed availability warning"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The secondary audit mechanism for fail-open events (S02-F01) uses
+      process.stderr as a last-resort trail. With global fail-closed, there
+      are no fail-open events. The stderr trail is not needed. But if the
+      global override is removed later, the secondary audit must reactivate.
+      The audit path must be dynamic based on the effective fail mode.
+    spec_impact: "CL-03 runtime — dynamic audit path based on fail mode"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The global override must be honored in the catch clause of the
+      generated handler. The failModeForRisk() function checks: (1) per-tool
+      override, (2) per-risk override, (3) global override, (4) default.
+      If the global override is checked at the wrong precedence level
+      (e.g., before per-tool), it would override intentional per-tool
+      fail-open configurations.
+    spec_impact: "CL-03 runtime — failModeForRisk precedence implementation"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The global override does not affect R5, which is already fail-closed
+      by the type-level constraint. Setting `failMode.global: fail-open`
+      should NOT override R5 fail-closed. The global override has a ceiling:
+      it can make things MORE restrictive (R1 fail-closed) but cannot make
+      R5 less restrictive. This asymmetry must be enforced.
+    spec_impact: "CL-02 security — global override R5 ceiling"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      If `failMode.global: fail-open` is set (enterprise prefers availability),
+      R3-R4 tools that default to fail-closed would become fail-open. This
+      weakens security. The compiler should warn: "CLAWS-W026: global
+      fail-open overrides R3-R4 fail-closed default. R3 write tools will
+      execute on governance errors." The warning names the affected tools.
+    spec_impact: "CL-02 security — global fail-open security warning"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Fleet-level fail-mode configuration may conflict with workspace-level.
+      If the fleet sets global fail-closed but the workspace overrides to
+      fail-open for R1, the resolution depends on fleet policy enforcement.
+      Strict fleet policies should prevent workspace-level weakening of
+      fail-mode configuration.
+    spec_impact: "CL-05 fleet — fail-mode policy enforcement"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      This scenario validates CL-02 constraint S02-F03 "Global fail mode
+      override." The constraint ensures enterprises can adopt a uniform
+      security posture without configuring each risk level individually.
+    spec_impact: "CL-02 — global fail-mode override constraint traceability"
+    pitfall: null

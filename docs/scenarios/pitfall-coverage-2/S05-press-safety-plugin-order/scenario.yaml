@@ -1,0 +1,152 @@
+name: S05-press-safety-plugin-order
+series: pitfall-coverage-2
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates that PRESS compression preserves safety-critical governance
+  directives (P-075) and that the governance plugin loading order is
+  first in openclaw.json (P-076). Aggressive compression may weaken
+  prohibitions, and wrong plugin order allows pre-governance tool
+  modification.
+
+expect:
+  rules_applied: [G-PRESS-SAFETY, G-PLUGIN]
+  violations:
+    - code: CLAWS-W060
+      rule: G-PLUGIN
+      description: "Governance plugin not first in openclaw.json plugins list"
+  pass: false
+  severity: warning
+
+simulate:
+  failures:
+    - component: emit-phase
+      type: press-safety-loss
+      error: "PRESS compressed 'never access production databases' to 'avoid prod db'"
+    - component: pinch-check
+      type: plugin-order
+      error: "analytics-plugin registered before claws-governance in openclaw.json"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace with strict governance policy: SOUL.md contains "never access
+  production databases under any circumstances" and "always require manager
+  approval for financial transactions." PRESS compression reduces these to
+  "avoid prod db" and "require approval for finance." The LLM interprets
+  "avoid" as advisory rather than mandatory. Separately, openclaw.json lists
+  "analytics-plugin" before "claws-governance" in the plugins array. The
+  analytics plugin's before_tool_call hook fires first and logs the tool name,
+  but a buggy version modifies the tool arguments before governance can inspect
+  them.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-075 core: "never access production databases under any circumstances"
+      compressed to "avoid prod db." The word "never" is a safety-critical
+      keyword indicating absolute prohibition. "Avoid" is a preference keyword
+      indicating effort, not mandate. The LLM may access production databases
+      when it judges the benefit outweighs the avoidance preference.
+    spec_impact: "CL-04 G-PRESS-SAFETY — safety keyword preservation"
+    pitfall: "P-075"
+
+  - id: F02
+    severity: major
+    description: >
+      The PRESS governance compression profile must maintain a safety keyword
+      allowlist: never, always, must, must not, prohibited, required, blocked,
+      mandatory, under no circumstances. These keywords must survive compression
+      verbatim. The compression ratio may be lower but safety semantics are
+      preserved.
+    spec_impact: "CL-04 EMIT — PRESS safety keyword allowlist"
+    pitfall: "P-075"
+
+  - id: F03
+    severity: major
+    description: >
+      Compression quality validation: the compressed SKILL.md must be
+      semantically equivalent to the uncompressed version for all safety-
+      critical directives. A simple diff is insufficient. The validation
+      should check that every safety keyword in the source appears in the
+      compressed output within the same directive context.
+    spec_impact: "CL-04 G-PRESS-SAFETY — semantic equivalence validation"
+    pitfall: "P-075"
+
+  - id: F04
+    severity: major
+    description: >
+      P-076 core: OC executes hooks in registration order. analytics-plugin
+      registers before_tool_call before claws-governance. The analytics plugin
+      logs tool arguments, including user credentials passed to an OAuth tool.
+      Governance would have blocked the tool call, but analytics already
+      captured the credentials.
+    spec_impact: "CL-02 G-PLUGIN — pre-governance data exposure"
+    pitfall: "P-076"
+
+  - id: F05
+    severity: warning
+    description: >
+      A buggy analytics plugin modifies tool arguments before governance sees
+      them. The tool name is changed from "send-payment" to "log-payment."
+      Governance classifies "log-payment" as R1 (read-only) and allows it.
+      The actual tool executed is still "send-payment" (R5). Governance must
+      inspect the ORIGINAL tool call, not the potentially-modified one.
+    spec_impact: "CL-02 G-PLUGIN — pre-governance argument modification"
+    pitfall: "P-076"
+
+  - id: F06
+    severity: warning
+    description: >
+      claws cannot modify openclaw.json (lossless principle). The warning
+      from `claws pinch` about plugin ordering is advisory. But the warning
+      must be prominent: a dedicated diagnostic code (CLAWS-W060), displayed
+      at the top of pinch output, with explicit fix instructions ("Move
+      claws-governance to position 0 in openclaw.json#plugins").
+    spec_impact: "CL-02 G-PLUGIN — advisory prominence"
+    pitfall: "P-076"
+
+  - id: F07
+    severity: warning
+    description: >
+      PRESS compression of multi-sentence governance directives may
+      restructure the sentence. "Always require manager approval for
+      financial transactions over $10,000" could become "manager approval
+      for finance > $10K." The threshold "$10,000" is compressed to "$10K"
+      which is numerically equivalent but textually different. Numeric
+      thresholds should be preserved exactly.
+    spec_impact: "CL-04 G-PRESS-SAFETY — numeric threshold preservation"
+    pitfall: "P-075"
+
+  - id: F08
+    severity: note
+    description: >
+      If the workspace has only one plugin (claws-governance), the loading
+      order check passes trivially. The check is only meaningful when 2+
+      plugins are configured. The diagnostic should be suppressed for
+      single-plugin workspaces to avoid noise.
+    spec_impact: "CL-02 G-PLUGIN — single-plugin suppression"
+    pitfall: "P-076"
+
+  - id: F09
+    severity: warning
+    description: >
+      The combination of P-075 and P-076 creates a layered weakness: if
+      PRESS compression weakens a directive AND another plugin modifies the
+      tool call before governance, the governance layer operates on both
+      weakened policy AND modified input. Neither pitfall alone may be
+      exploitable, but together they create a viable bypass path.
+    spec_impact: "CL-02 — compound bypass via compression + plugin order"
+    pitfall: "P-075, P-076"
+
+  - id: F10
+    severity: note
+    description: >
+      The PRESS safety keyword allowlist should be configurable via claws.json
+      to accommodate domain-specific safety language. A healthcare workspace
+      may need "contraindicated," "life-threatening," "do not administer" as
+      additional safety keywords. The default list covers general governance;
+      extensions cover domain governance.
+    spec_impact: "CL-01 schema — PRESS safety keyword extensions"
+    pitfall: "P-075"

@@ -1,0 +1,96 @@
+name: S06-plugin-abort-timeout
+series: emit-artifacts
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates that the generated plugin includes AbortSignal.timeout(50ms)
+  in the hook handler. The timeout ensures governance evaluation does not
+  block tool execution indefinitely. R5 tools that timeout are DENIED.
+
+expect:
+  artifacts:
+    - type: plugin
+      path: plugins/claws-governance/index.ts
+      valid: true
+      contains_abort_signal: true
+      timeout_ms: 50
+  plugin_hooks:
+    - name: before_tool_call
+      has_timeout: true
+  skill_content: null
+  approvals: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The generated index.ts must wrap the governance evaluation in
+  AbortSignal.timeout(50). The generated code pattern should be:
+  `const result = await Promise.race([evaluatePolicy(event, ctx),
+  timeoutPromise(50)])` or use AbortSignal directly. If the evaluation
+  exceeds 50ms, the handler must return the fail-mode-appropriate response
+  (DENIED for R5, configurable for others).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      AbortSignal.timeout() creates a new AbortSignal that triggers after
+      the specified duration. But the evaluatePolicy function must respect
+      the signal — if evaluatePolicy does not check the signal, the timeout
+      does not abort evaluation, only the wrapping promise. The generated
+      code must pass the signal to evaluatePolicy.
+    spec_impact: "CL-04 EMIT — AbortSignal propagation to evaluatePolicy"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      50ms is the default timeout. Enterprises may need longer timeouts for
+      complex policy evaluation (e.g., 100 rules against 50 tools). The
+      timeout should be configurable in claws.json: `performance.hookTimeoutMs: 50`.
+      The generated code must read this configuration at startup.
+    spec_impact: "CL-01 claws.json — configurable hook timeout"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The Promise.race pattern has a subtle bug: if evaluatePolicy resolves
+      with a response AFTER the timeout promise resolves, the response is
+      discarded but the evaluatePolicy function may still have side effects
+      (e.g., writing to audit chain). The timeout must also abort side effects.
+    spec_impact: "CL-04 EMIT — timeout side effect cleanup"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Node.js AbortSignal.timeout() is available since Node 18.x. If the OC
+      platform runs on Node 16.x, AbortSignal.timeout is undefined. The
+      generated code must include a polyfill or use setTimeout-based fallback
+      for older Node versions.
+    spec_impact: "CL-04 EMIT — Node.js version compatibility"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The 50ms timeout is per-tool-call. In a workflow with 10 tool calls,
+      the total governance overhead is up to 500ms. For real-time applications
+      (chat), this may be noticeable. For batch workflows, it is negligible.
+      The timeout budget should consider the use case.
+    spec_impact: "CL-04 latency — per-call vs per-session timeout budgets"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The generated code must handle the timeout AbortError differently from
+      other errors. An AbortError means "evaluation took too long" (timeout),
+      while a TypeError means "evaluation crashed" (bug). Both trigger
+      fail-mode, but the audit events should distinguish the two causes.
+    spec_impact: "CL-04 EMIT — error type distinction in timeout handling"
+    pitfall: null

@@ -1,0 +1,164 @@
+name: S01-openclaw-detection
+series: platform-detection
+version: 1
+specs: [CL-01]
+description: >
+  Validates that a workspace containing SOUL.md is detected as the OpenClaw
+  platform with definitive confidence. OpenClaw is the primary platform for
+  claws: it receives runtime enforcement (Gateway hooks), T2 default trust
+  tier, and full artifact emission (SKILL.md, plugin, exec-approvals, compiled
+  workflow).
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      platform_detected: openclaw
+      detection_confidence: definitive
+      detection_source: marker_file
+      marker: SOUL.md
+      default_trust_tier: 2
+      enforcement: runtime
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace contains SOUL.md, TOOLS.md, and claws.json with no explicit
+  `platform` field. The detection logic must: (1) scan for marker files, (2)
+  find SOUL.md and identify the platform as OpenClaw with definitive confidence,
+  (3) set default trust tier to T2, and (4) configure the emission pipeline for
+  runtime enforcement (Gateway hooks). No claws.json `platform` field or
+  `targets` map is present — pure auto-detection.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      SOUL.md is the definitive marker for OpenClaw, but it is also a common
+      filename. A non-OC project might have a SOUL.md as a mission statement
+      or philosophy document. The detection logic should look for structural
+      markers inside SOUL.md (frontmatter, constraint keywords like "never",
+      "always", "must") to distinguish an OC governance file from an arbitrary
+      SOUL.md. Without structural validation, false-positive detection is
+      possible.
+    spec_impact: "CL-01 Platform Detection Matrix — structural validation of marker file content"
+    pitfall: P-236
+
+  - id: F02
+    severity: major
+    description: >
+      Detection priority is: targets map > platform field > auto-detect.
+      If claws.json has `targets: { cursor: { ... } }` but no `platform`
+      field, and SOUL.md is present, which takes precedence? The targets
+      map indicates the developer wants Cursor output, but SOUL.md indicates
+      OpenClaw. The spec says targets map is highest priority, meaning
+      the workspace is treated as Cursor despite SOUL.md being present.
+      This cross-platform workspace scenario needs explicit documentation.
+    spec_impact: "CL-01 Platform Detection Matrix — cross-platform precedence when targets map and marker file disagree"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      OpenClaw workspaces have the richest artifact emission (4 artifacts)
+      because the platform supports runtime enforcement. The detection result
+      must propagate to the EMIT phase to configure the correct artifact set.
+      If detection happens in PARSE but is not available in EMIT, the emit
+      phase defaults to a generic artifact set that may miss platform-specific
+      features (e.g., exec-approvals.json is OC-specific).
+    spec_impact: "CL-04 EMIT — platform detection result must be available throughout pipeline"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The default trust tier T2 is applied when trustTier is omitted from
+      claws.json. But if the detection also sets a default trust tier
+      per platform (OpenClaw = T2, Cursor = T1), there are two T2 defaults:
+      one from the spec (CL-01) and one from platform detection. They agree
+      for OpenClaw but differ for Cursor. The default trust tier must come
+      from exactly one source: the claws.json default (T2), overridden by
+      the platform-specific default only if explicitly specified in the
+      platform detection table.
+    spec_impact: "CL-01 Platform Detection Matrix — trust tier default source hierarchy"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      A workspace with SOUL.md and no claws.json can still be detected and
+      governed (CL-01 constraint: "Auto-detection must not require config").
+      But without claws.json, there is no trust tier, no policies, no audit
+      config. The pipeline must synthesize a minimal effective configuration:
+      platform=openclaw, trustTier=T2, enabled=true, policies=[]. This
+      synthetic config must be documented as the "zero-config governance"
+      mode.
+    spec_impact: "CL-01 claws.json schema — zero-config mode with synthetic defaults"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Multiple marker files may coexist: a workspace with both SOUL.md and
+      CLAUDE.md is both OpenClaw and Claude Code. This is a valid cross-
+      platform workspace. The detection logic must detect all platforms, not
+      just the first match. The primary platform (for default trust tier and
+      enforcement) should be the one with the highest enforcement capability
+      — OpenClaw (runtime) over Claude Code (semi-enforced).
+    spec_impact: "CL-01 Platform Detection Matrix — multi-platform detection and primary selection"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The detection result should be visible to the developer: `claws`
+      (bare invocation) shows "Workspace: my-agent/ (OpenClaw detected, T2)".
+      If detection is wrong (false positive from a non-OC SOUL.md), the
+      developer can override with `platform: cursor` in claws.json. The
+      bare invocation output must show whether the platform was auto-detected
+      or explicitly set, so the developer knows which to trust.
+    spec_impact: "CL-01 Bare claws Invocation — show detection method (auto vs explicit)"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      OpenClaw runtime enforcement uses Gateway hooks. If the workspace has
+      SOUL.md but no OC Gateway (e.g., using OpenClaw in advisory-only mode),
+      the generated plugin will not load. The detection logic identifies the
+      platform, but the enforcement capability depends on the runtime, not
+      the workspace files. A warning should be emitted if the generated
+      plugin cannot be loaded by the current OC installation.
+    spec_impact: "CL-01 Platform Detection Matrix — enforcement capability vs detection are independent"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The `claws init` command in an OpenClaw workspace should detect the
+      platform and pre-configure claws.json with openclaw-specific defaults
+      (template paths, audit config, plugin output paths). If init does not
+      detect the platform, it creates a generic config that requires manual
+      platform-specific adjustments.
+    spec_impact: "CL-01 claws init — platform-aware default configuration"
+    pitfall: null
+
+  - id: F10
+    severity: major
+    description: >
+      The detection scan must handle case sensitivity across platforms.
+      On Windows and macOS (case-insensitive FS), "soul.md" and "SOUL.md"
+      are the same file. On Linux (case-sensitive FS), only "SOUL.md"
+      matches. The detection logic must use the canonical filename "SOUL.md"
+      with exact case on Linux and case-insensitive comparison on Windows/
+      macOS. A Linux workspace with "soul.md" (lowercase) should not be
+      detected as OpenClaw.
+    spec_impact: "CL-01 Platform Detection Matrix — case-sensitive marker file matching on Linux"
+    pitfall: null

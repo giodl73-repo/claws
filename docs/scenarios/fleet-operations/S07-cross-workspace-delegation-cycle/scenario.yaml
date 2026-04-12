@@ -1,0 +1,188 @@
+name: S07-cross-workspace-delegation-cycle
+series: fleet-operations
+version: 1
+specs: [CL-05, CL-02]
+description: >
+  Validates that fleet-level scan detects cross-workspace delegation
+  cycles invisible within single-workspace compilation. Agent A in
+  workspace-alpha delegates to Agent B in workspace-beta, and Agent B
+  delegates back to Agent A. Each workspace compiles cleanly because
+  cross-workspace targets are opaque external references. Only
+  `claws scan` with fleet-wide graph merging detects the cycle.
+
+expect:
+  workspaces:
+    total: 5
+    scanned: 5
+    cycles_detected: 1
+  drift_count: 0
+  broadcast_result: null
+  compliance:
+    delegation_cycles:
+      - path: "agent-a@workspace-alpha -> agent-b@workspace-beta -> agent-a@workspace-alpha"
+        type: cross-workspace
+        hops: 2
+        severity: error
+
+simulate:
+  failures:
+    - component: delegation-graph
+      type: cross-workspace-cycle
+      error: "CIRCULAR-DELEGATION: agent-a@workspace-alpha -> agent-b@workspace-beta -> agent-a@workspace-alpha"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet of 5 workspaces uses A2A delegation. Workspace-alpha's AGENTS.md
+  declares Agent A which delegates to "agent-b@workspace-beta" for data
+  processing. Workspace-beta's AGENTS.md declares Agent B which delegates
+  back to "agent-a@workspace-alpha" for result delivery. Each workspace
+  compiles independently with zero violations — the cross-workspace
+  delegation target is treated as an opaque external reference at compile
+  time. At runtime, this creates an infinite delegation loop: A calls B
+  calls A calls B... Only `claws scan` can merge all workspace delegation
+  graphs and detect the cycle via Tarjan's SCC algorithm.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Single-workspace compilation cannot detect cross-workspace cycles
+      because external delegation targets are opaque. The spec (CL-02
+      Amendment A63) defines the fleet-level merged graph requirement but
+      does not specify the cross-workspace reference format. The format
+      "agent-name@workspace-id" must be standardized so that delegation
+      edges from different workspaces can be merged into a single graph.
+      Without a standard format, graph merging fails on name mismatches.
+    spec_impact: "CL-02 G-A2A-DELEGATE — standardize cross-workspace reference format"
+    pitfall: P-181
+
+  - id: F02
+    severity: major
+    description: >
+      Amendment A65 distinguishes cycles from callbacks (A calls B, B
+      returns result to A). The cycle detector must model delegation
+      direction. A request-response pattern (A->B with response) is not
+      a cycle; it is bounded. A delegation chain (A delegates authority
+      to B, B delegates authority to A) IS a cycle. The spec must define
+      what "delegation" means in the graph: authority transfer (cycle-prone)
+      vs request-response (bounded, not a cycle). If AGENTS.md uses the
+      same syntax for both, the detector cannot distinguish them.
+    spec_impact: "CL-02 G-A2A-DELEGATE — delegation vs request-response annotation"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Amendment A68 specifies Tarjan's SCC for cycle detection with O(V+E)
+      complexity. For the fleet-wide merged graph, V = total agents across
+      all workspaces, E = total delegation edges. In enterprise fleets
+      (100 workspaces, 10 agents each = 1000 nodes), this is fast. But
+      the graph must be built first by scanning all AGENTS.md files and
+      resolving cross-workspace references. Graph construction may dominate
+      cycle detection time if workspaces are on network shares.
+    spec_impact: "CL-05 Fleet — fleet delegation graph construction latency budget"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Multi-hop cycles (A->B->C->A across 3 workspaces) are harder to
+      diagnose than 2-hop cycles. Amendment A64 requires the cycle path
+      to include all intermediate hops with workspace context. But the
+      diagnostic message format is unspecified. The cycle diagnostic must
+      follow the CL-05 error message contract: WHAT (cycle detected),
+      WHERE (full path with workspace-qualified agent names), HOW (break
+      the cycle by removing one delegation edge), DOCS (link to
+      delegation cycle documentation).
+    spec_impact: "CL-05 Fleet — cycle diagnostic message format with remediation guidance"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Amendment A66 warns about unresolvable external references (delegation
+      targets outside the fleet). If workspace-alpha delegates to
+      "agent-c@workspace-external" and workspace-external is not in the
+      fleet, the cycle detector cannot determine if a cycle exists through
+      the external workspace. The diagnostic must distinguish: "confirmed
+      cycle (all workspaces in fleet)" vs "potential cycle (1+ workspaces
+      outside fleet)." Potential cycles are warnings, not errors.
+    spec_impact: "CL-05 Fleet — confirmed vs potential cycle classification"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Runtime delegation depth limits (Amendment A67, default: 10 hops)
+      are the safety net for cycles that escape compile-time detection.
+      But the runtime limit and the compile-time detection are defined in
+      different specs (CL-03 vs CL-05). The interaction is unspecified:
+      if fleet scan detects a cycle and the workspace owner ignores the
+      warning, does the runtime plugin enforce the depth limit? The depth
+      limit plugin must be emitted regardless of whether the cycle was
+      detected at compile time.
+    spec_impact: "CL-03 Runtime — delegation depth limit emission independent of cycle detection"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The delegation graph must handle agent name collisions across
+      workspaces. If workspace-alpha and workspace-gamma both have an
+      agent named "data-processor," the graph edge
+      "agent-a@alpha -> data-processor@beta" must resolve unambiguously.
+      If workspace-beta has two agents with similar names (due to L0
+      identity), the graph edge is ambiguous. Fleet identity level (L1+)
+      resolves this, but L0 fleets have ambiguous delegation graphs.
+    spec_impact: "CL-02 G-A2A — delegation graph ambiguity with L0 identity"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Delegation permissions must be checked along with cycle detection.
+      Even if no cycle exists, a delegation chain A->B->C must verify
+      that permissions do not escalate: B cannot grant C more permissions
+      than B has, and B cannot have more than A granted. Cross-workspace
+      delegation permission checking requires resolving each workspace's
+      trust tier and tool set. This is a superset of cycle detection —
+      the merged graph must carry permission metadata on each edge.
+    spec_impact: "CL-02 G-A2A-DELEGATE — cross-workspace permission ceiling validation"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      When a cycle is detected, the remediation advice must identify the
+      minimum set of edges to remove to break all cycles (minimum feedback
+      arc set). For a 2-hop cycle, any one edge breaks it. For overlapping
+      cycles sharing edges, removing one edge may break multiple cycles.
+      Tarjan's SCC identifies cycle groups but not the optimal edges to
+      remove. A follow-up analysis step is needed for remediation.
+    spec_impact: "CL-05 Fleet — minimum edge removal for cycle remediation"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The cycle detection results should be cached in the fleet manifest
+      so that `claws drift` can detect new cycles without re-scanning the
+      entire fleet. If workspace-beta adds a new delegation edge, only
+      workspace-beta's local graph needs to be re-merged. Incremental
+      cycle detection updates the fleet delegation graph and re-runs SCC
+      on the affected subgraph.
+    spec_impact: "CL-05 Fleet — incremental cycle detection via cached delegation graph"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Visualization of the fleet delegation graph would help operators
+      understand cross-workspace delegation topology. `claws scan --graph`
+      could produce a DOT-format graph or a Mermaid diagram. For the
+      cycle diagnostic, highlighting the cycle edges in the graph makes
+      the problem immediately obvious. This is a developer experience
+      enhancement, not a functional requirement.
+    spec_impact: "CL-05 Fleet — delegation graph visualization (DOT/Mermaid output)"
+    pitfall: null

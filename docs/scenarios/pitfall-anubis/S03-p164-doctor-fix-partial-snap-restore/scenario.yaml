@@ -1,0 +1,160 @@
+name: S03-p164-doctor-fix-partial-snap-restore
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that doctor --fix handles partial success correctly without
+  reverting successful migrations (P-164). When doctor --fix applies 4 of 6
+  fixes successfully but fails on the 5th, snap restore must not undo the 4
+  successful fixes. The user needs a resume path, not a full revert.
+
+expect:
+  governance_ir:
+    version: 1
+    fixes_applied: 4
+    fixes_failed: 1
+    fixes_pending: 1
+    state: partial-success
+  violations: []
+  warnings:
+    - code: CLAWS-W091
+      message: "doctor --fix partial success — 4/6 applied, 1 failed, 1 pending"
+  artifacts:
+    - name: doctor-manifest.json
+      status: partial
+
+simulate:
+  failures:
+    - component: doctor
+      type: fix-partial-success
+      error: "Fix 5/6 failed — RULES.md migration encounters ambiguous risk level"
+    - component: doctor
+      type: snap-restore-overkill
+      error: "snap restore reverts all 4 successful fixes along with the failed fix"
+  halt: null
+  budget: null
+
+problem: >
+  A developer runs `claws doctor --fix` to remediate 6 detected issues. The
+  first 4 fixes apply successfully: updating deprecated field names, adding
+  missing required fields, normalizing trust tier values, and fixing a malformed
+  agent declaration. Fix 5 fails because RULES.md contains an ambiguous risk
+  level that cannot be automatically resolved. The dead man's switch triggers
+  snap restore, which reverts the entire workspace to the pre-fix state,
+  undoing all 4 successful fixes. The developer must now re-run doctor --fix
+  and manually resolve the same 4 issues again before reaching the problematic
+  5th fix. With no resume mechanism, complex workspaces with many issues become
+  practically unfixable through doctor --fix.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-164 core: snap restore is all-or-nothing, but doctor --fix applies
+      changes sequentially. These two semantics are incompatible. Either
+      doctor --fix must be atomic (apply all or none, like a database
+      transaction) or it must support partial progress with per-fix
+      checkpoints. The atomic approach fails for large fix sets because
+      a single ambiguous fix blocks everything.
+    spec_impact: "CL-05 G-SCHEMA — doctor fix atomicity vs resumability"
+    pitfall: "P-164"
+
+  - id: F02
+    severity: major
+    description: >
+      The doctor --fix manifest must track each fix independently: fix ID,
+      target file, change description, status (pending/applied/failed/
+      skipped). After a partial failure, `claws doctor --fix --resume`
+      reads the manifest and skips already-applied fixes, retrying only
+      the failed and pending ones.
+    spec_impact: "CL-05 G-SCHEMA — per-fix manifest tracking"
+    pitfall: "P-164"
+
+  - id: F03
+    severity: major
+    description: >
+      Fix ordering matters: some fixes depend on others (e.g., adding a
+      required field before normalizing its value). The doctor must build
+      a fix dependency graph and apply fixes in topological order. If a
+      fix fails, only its dependents should be skipped, not independent
+      fixes later in the sequence.
+    spec_impact: "CL-05 G-SCHEMA — fix dependency graph"
+    pitfall: "P-164"
+
+  - id: F04
+    severity: major
+    description: >
+      The snap restore behavior after doctor --fix failure must be
+      configurable: (1) revert all (current behavior, destructive), (2)
+      keep successful fixes and report failure (partial progress), (3)
+      prompt the user for a decision. The default should be option 2
+      (partial progress) with a clear report of what was applied and
+      what failed.
+    spec_impact: "CL-05 G-SCHEMA — configurable partial fix behavior"
+    pitfall: "P-164"
+
+  - id: F05
+    severity: major
+    description: >
+      Per-fix snapshots: instead of one snapshot before all fixes, take
+      a lightweight checkpoint before each fix. If fix N fails, restore
+      only fix N's checkpoint while preserving fixes 1 through N-1. This
+      is more expensive in I/O but preserves progress. Lightweight
+      checkpoints can use file-level copies rather than full workspace
+      snapshots.
+    spec_impact: "CL-05 G-SCHEMA — per-fix checkpoint strategy"
+    pitfall: "P-164"
+
+  - id: F06
+    severity: warning
+    description: >
+      Ambiguous fixes (where automatic resolution is impossible) should
+      be separated from deterministic fixes. doctor --fix should apply
+      all deterministic fixes first, then present ambiguous fixes as
+      interactive prompts. This maximizes automatic progress while
+      stopping cleanly at human-decision points.
+    spec_impact: "CL-05 doctor — deterministic vs ambiguous fix separation"
+    pitfall: "P-164"
+
+  - id: F07
+    severity: warning
+    description: >
+      The doctor --fix --dry-run mode must accurately predict which fixes
+      will succeed and which will fail. If dry-run says "6 fixes will be
+      applied" but the actual run fails on fix 5, the dry-run is misleading.
+      Dry-run must flag fixes with ambiguous inputs as "may fail" rather
+      than "will apply."
+    spec_impact: "CL-05 doctor — dry-run accuracy for ambiguous fixes"
+    pitfall: "P-164"
+
+  - id: F08
+    severity: warning
+    description: >
+      The resume mechanism must be idempotent: running --resume twice
+      should not double-apply successful fixes. Each fix must check
+      whether its target state already exists before applying. Idempotency
+      is critical because the user may interrupt and resume multiple
+      times during a complex fix session.
+    spec_impact: "CL-05 doctor — resume idempotency"
+    pitfall: "P-164"
+
+  - id: F09
+    severity: note
+    description: >
+      For fleets, doctor --fix partial success is amplified: a fleet-wide
+      doctor run may partially fix some workspaces while failing on others.
+      The fleet doctor manifest must track per-workspace fix status so
+      that `claws fleet doctor --resume` handles the cross-product of
+      workspace x fix combinations.
+    spec_impact: "CL-05 fleet — fleet-wide doctor resume"
+    pitfall: "P-164"
+
+  - id: F10
+    severity: note
+    description: >
+      Telemetry for doctor --fix should record: total fixes attempted,
+      succeeded, failed, and skipped. Fleet-level aggregation of these
+      metrics helps identify which fix types commonly fail across
+      workspaces, guiding improvements to the automatic resolution logic.
+    spec_impact: "CL-05 doctor — fix success rate telemetry"
+    pitfall: "P-164"

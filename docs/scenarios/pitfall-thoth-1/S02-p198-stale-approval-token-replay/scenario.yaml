@@ -1,0 +1,139 @@
+name: S02-p198-stale-approval-token-replay
+series: pitfall-thoth-1
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates that approval tokens expire after the 60-second validity window
+  defined in CL-02 G-ELICIT. An attacker captures a legitimately issued approval
+  token and replays it hours later after a network retry or session resumption.
+  The runtime must reject expired tokens regardless of signature validity.
+
+expect:
+  attack_class: token-replay
+  defense_layer: g-elicit
+  blocked: true
+  audit_event:
+    type: obo-token-expired
+    tool: "delete-repository"
+    risk_level: 5
+    outcome: DENY
+    reason: "approval token expired: issued 7200s ago, validity window is 60s"
+
+simulate:
+  failures:
+    - component: approval-flow
+      type: stale-token-replay
+      error: "token timestamp outside 60s validity window"
+  halt: null
+  budget: null
+
+problem: >
+  A user approves delete-repository (R5/DESTRUCTIVE) at 14:00. The approval token
+  is issued with a timestamp of 14:00:00. The agent's HTTP call to the repository
+  API fails due to a transient network error. The agent framework queues the
+  operation for retry. At 16:00, the retry fires and the agent presents the
+  original approval token (signed, valid signature, correct parameter hash) to the
+  runtime. The token's timestamp is now 7200 seconds old. Without an expiry check,
+  the runtime accepts the token because the signature and parameters are valid. The
+  repository is deleted two hours after the user's approval, during which time the
+  user may have changed their mind, the repository contents may have changed, or
+  the security context may have shifted (e.g., an incident response lockdown).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The 60-second validity window must be enforced using the token's embedded
+      timestamp compared against the runtime's current time. The comparison must
+      use monotonic clock (process.hrtime or equivalent) for the elapsed-time
+      check, not wall clock, to prevent clock-manipulation bypass (see P-206).
+      The wall-clock timestamp in the token is for audit purposes only; the
+      elapsed-time enforcement uses the monotonic source.
+    spec_impact: "CL-02 G-ELICIT — 60s validity window with monotonic clock enforcement"
+    pitfall: P-198
+
+  - id: F02
+    severity: major
+    description: >
+      The 60-second window must be non-configurable by the agent. If the agent
+      can request a longer validity window (e.g., "approve for 1 hour"), the
+      replay attack surface expands proportionally. The validity window is a
+      compile-time constant in the emitted handler, not a runtime parameter.
+      Enterprise fleet policy may reduce the window below 60s but never extend it.
+    spec_impact: "CL-02 G-ELICIT — non-configurable 60s ceiling on token validity"
+    pitfall: P-198
+
+  - id: F03
+    severity: major
+    description: >
+      A replayed token with a valid signature but expired timestamp must produce
+      a distinct audit event type (obo-token-expired) separate from forgery
+      detection (obo-forged-token-detected) and parameter mismatch
+      (obo-parameter-mismatch). The SIEM classification differs: replay is
+      suspicious but may be a legitimate retry gone wrong, while forgery is
+      always malicious. The audit event must include the token's original
+      timestamp and the time of the replay attempt.
+    spec_impact: "CL-02 G-ELICIT-AUDIT — distinct replay vs forgery audit classification"
+    pitfall: P-198
+
+  - id: F04
+    severity: major
+    description: >
+      The agent framework's retry mechanism may not be aware of the approval
+      token's expiry. When a tool call fails and the framework retries, it
+      resubmits the entire request including the stale token. The runtime must
+      respond to an expired-token denial with a structured error that tells the
+      framework "re-elicitation required," not just "denied." This enables the
+      framework to trigger a new approval request rather than endlessly retrying
+      with the expired token.
+    spec_impact: "CL-03 runtime — structured re-elicitation-required error on token expiry"
+    pitfall: P-198
+
+  - id: F05
+    severity: major
+    description: >
+      A single approval token must be consumed exactly once. Even within the
+      60-second window, replaying the same token for a second invocation must
+      be blocked. The runtime must track consumed token nonces in a short-lived
+      cache (TTL = validity window + grace period). Without single-use
+      enforcement, a valid token within the window can be replayed multiple times
+      to execute the same destructive action repeatedly.
+    spec_impact: "CL-03 runtime — single-use token consumption with nonce cache"
+    pitfall: P-198
+
+  - id: F06
+    severity: warning
+    description: >
+      The nonce cache for consumed tokens must be bounded in memory. An attacker
+      who floods the system with unique tokens (even invalid ones) could exhaust
+      the cache and cause eviction of legitimate nonces, reopening the replay
+      window. The cache should use an LRU policy with a hard upper bound, and
+      tokens older than the validity window should be rejected before cache
+      lookup (timestamp check first, nonce check second).
+    spec_impact: "CL-03 runtime — bounded nonce cache with timestamp-first rejection"
+    pitfall: P-198
+
+  - id: F07
+    severity: warning
+    description: >
+      In distributed deployments where multiple Gateway instances serve the same
+      workspace, the nonce cache must be shared or the token must be instance-
+      bound. If each Gateway instance has an independent nonce cache, a token
+      consumed on instance A can be replayed on instance B within the validity
+      window. Instance-binding (token includes the Gateway instance ID) is
+      simpler than distributed cache synchronization.
+    spec_impact: "CL-02 G-ELICIT — instance-bound tokens for distributed deployments"
+    pitfall: P-198
+
+  - id: F08
+    severity: major
+    description: >
+      The retry scenario reveals a UX gap: the user approved an action that
+      silently failed and was retried hours later. The approval flow should
+      include a "delivery confirmation" — the user sees that the approved action
+      executed successfully (or failed). If the action failed, the user knows
+      a retry will require re-approval. Without delivery confirmation, the user
+      assumes the action completed and is surprised by a re-approval prompt
+      hours later.
+    spec_impact: "CL-02 G-ELICIT — approval delivery confirmation in UX flow"
+    pitfall: P-198

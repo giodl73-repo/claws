@@ -1,0 +1,140 @@
+name: S18-p179-double-kill-snapshot-overwrite
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that a second kill command (double-kill) does not overwrite the
+  pre-kill snapshot with the halted state. The pre-kill snapshot is the
+  recovery point for restoring governance after the incident. Overwriting
+  it with the halted state makes recovery impossible.
+
+expect:
+  workspaces:
+    total: 5
+    killed: 5
+    active: 0
+  drift_count: 0
+  broadcast_result: null
+  compliance:
+    governance_active: 0
+    governance_halted: 5
+    pre_kill_snapshot_preserved: true
+    snapshot_name: "pre-kill-2026-04-11T16:00:00Z"
+
+simulate:
+  failures:
+    - component: kill-switch
+      type: double-kill-snapshot-overwrite
+      error: "Second kill would overwrite pre-kill snapshot with halted state"
+  halt:
+    type: fleet-kill
+    reason: "re-triggered kill during investigation"
+    timestamp: "2026-04-11T16:30:00Z"
+  budget: null
+
+problem: >
+  An incident responder runs `claws kill --fleet --confirm` at 16:00, which
+  creates a pre-kill snapshot capturing the full governance state before
+  halting all agents. During investigation at 16:30, a second responder
+  (unaware of the first kill) runs `claws kill --fleet --confirm` again.
+  The second kill creates a new "pre-kill" snapshot, but the workspace is
+  already halted — the snapshot captures the halted state, not the original
+  governance configuration. The original pre-kill snapshot is overwritten.
+  When the incident is resolved and the team runs `claws unkill`, the
+  restore uses the halted-state snapshot, which has no governance rules.
+  The fleet is now ungoverned with no way to recover the original
+  governance configuration.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must mandate a state check before kill: if the workspace is
+      already in KILLED state, the kill command must refuse to execute with
+      error "Workspace already killed at {timestamp} by {operator}. Pre-kill
+      snapshot: {name}. Use `claws fleet status` to verify." The state check
+      prevents accidental double-kill entirely rather than trying to handle
+      the double-kill gracefully.
+    spec_impact: "CL-05 Kill Switch — state check prevents double-kill"
+    pitfall: P-179
+
+  - id: F02
+    severity: major
+    description: >
+      Pre-kill snapshots must be write-protected immediately after creation.
+      The snapshot file should have a "protected" flag or read-only filesystem
+      permission that prevents any subsequent operation from overwriting it.
+      Only `claws unkill` should be able to consume (and optionally archive)
+      the pre-kill snapshot. This defense-in-depth protects the recovery
+      point even if the state check fails.
+    spec_impact: "CL-05 Kill Switch — write-protected pre-kill snapshots"
+    pitfall: P-179
+
+  - id: F03
+    severity: major
+    description: >
+      The pre-kill snapshot must include metadata: kill timestamp, operator
+      identity, kill reason, workspace governance state hash. The metadata
+      enables the unkill process to verify that the snapshot matches the
+      expected recovery point. If the metadata indicates the snapshot was
+      taken from a KILLED state (governance_active: false), the unkill
+      must refuse to restore and alert the operator.
+    spec_impact: "CL-05 Kill Switch — snapshot metadata for state verification"
+    pitfall: P-179
+
+  - id: F04
+    severity: major
+    description: >
+      Multiple pre-kill snapshots should be kept, not just the latest one.
+      If three kill events occur during an incident (initial kill, accidental
+      double-kill, intentional re-kill after partial unkill), the system
+      should keep all three snapshots with timestamps. The operator can
+      then choose which snapshot to restore from, defaulting to the first
+      one (which has the original governance state).
+    spec_impact: "CL-05 Kill Switch — multiple pre-kill snapshot retention"
+    pitfall: P-179
+
+  - id: F05
+    severity: warning
+    description: >
+      The double-kill error message must include the original kill details:
+      who ran it, when, why, and the snapshot name. This information helps
+      the second responder understand the current state without needing to
+      run additional commands. In an incident, every second counts and
+      every unnecessary command is a distraction.
+    spec_impact: "CL-05 Kill Switch — informative double-kill rejection"
+    pitfall: P-179
+
+  - id: F06
+    severity: warning
+    description: >
+      A --force flag for kill should override the double-kill prevention
+      only with explicit confirmation and audit logging. The use case is
+      re-killing after a partial unkill that failed: the workspace is in
+      an indeterminate state and the operator wants to force it back to
+      KILLED. Force-kill must NOT overwrite the original pre-kill snapshot;
+      it should create a new snapshot with a "force-kill" tag.
+    spec_impact: "CL-05 Kill Switch — force-kill preserves original snapshot"
+    pitfall: P-179
+
+  - id: F07
+    severity: warning
+    description: >
+      Pre-kill snapshot integrity must be verified on creation. The snapshot
+      should include a SHA-256 hash of all included files. On unkill, the
+      hash is verified before restoration. If the hash does not match (file
+      corruption or tampering), unkill must abort and alert. This ensures
+      the recovery point is trustworthy.
+    spec_impact: "CL-05 Kill Switch — snapshot integrity on creation"
+    pitfall: P-179
+
+  - id: F08
+    severity: note
+    description: >
+      The pre-kill snapshot should be included in the incident timeline
+      exported to SIEM. The timeline event "pre-kill snapshot created" with
+      the snapshot hash provides forensic evidence that the governance state
+      at kill time was captured. This is valuable for post-incident analysis
+      and regulatory compliance reporting.
+    spec_impact: "CL-05 Kill Switch — pre-kill snapshot in SIEM timeline"
+    pitfall: P-179

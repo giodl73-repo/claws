@@ -1,0 +1,133 @@
+name: S03-p199-approve-on-timeout-override
+series: pitfall-thoth-1
+version: 1
+specs: [CL-02, CL-03, CL-04]
+description: >
+  Validates that claws refuses to register handlers on platforms where the
+  AbortSignal override for deny-on-timeout is unsupported. The platform's default
+  approve-on-timeout behavior means R5 tools execute without user approval if the
+  timeout expires. claws must detect this at registration time and fail loudly
+  rather than silently falling back to the platform's unsafe default.
+
+expect:
+  attack_class: approval-forgery
+  defense_layer: handler-registration
+  blocked: true
+  audit_event:
+    type: obo-registration-refused
+    tool: "deploy-production"
+    risk_level: 5
+    outcome: DENY
+    reason: "platform does not support AbortSignal for deny-on-timeout; R5 handler registration refused"
+
+simulate:
+  failures:
+    - component: handler-registration
+      type: abort-signal-unsupported
+      error: "platform version does not support AbortSignal override; approve-on-timeout is unsafe default"
+  halt: null
+  budget: null
+
+problem: >
+  A claws-compiled plugin is deployed on an older version of the OC Gateway that
+  does not support AbortSignal for elicitation timeouts. The platform's default
+  behavior is approve-on-timeout: if the user does not respond within the timeout
+  window, the tool call proceeds as if approved. The compiled handler attempts to
+  register with deny-on-timeout semantics using AbortSignal, but the registration
+  call silently ignores the unsupported parameter. The handler registers
+  successfully with the platform's default approve-on-timeout. An R5 tool
+  (deploy-production) fires an elicitation prompt. The user is in a meeting and
+  does not respond within 30 seconds. The platform auto-approves. A production
+  deployment executes without human authorization, potentially deploying untested
+  code to production infrastructure.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The handler registration code emitted by claws must include an explicit
+      capability probe for AbortSignal support before registering any R5 handler.
+      The probe must be a runtime check (not compile-time assumption) because the
+      same compiled plugin may be deployed across different platform versions.
+      If the probe fails, registration must throw a hard error, not log a warning.
+    spec_impact: "CL-02 G-ELICIT — AbortSignal capability probe at handler registration"
+    pitfall: P-199
+
+  - id: F02
+    severity: major
+    description: >
+      The capability probe must test actual AbortSignal behavior, not just API
+      surface existence. A platform could expose AbortSignal in its type
+      definitions but not implement the abort callback. The probe should register
+      a test handler with a synthetic AbortSignal and verify the abort fires
+      within a controlled timeout. Surface-level API checking is insufficient.
+    spec_impact: "CL-03 runtime — behavioral AbortSignal probe, not API surface check"
+    pitfall: P-199
+
+  - id: F03
+    severity: major
+    description: >
+      When registration is refused, the error message must clearly state WHY and
+      WHAT TO DO: "R5 handler registration refused: platform version X.Y does not
+      support deny-on-timeout (AbortSignal). Upgrade to version X.Z or higher.
+      R5 tools cannot be safely deployed on this platform." Vague errors lead
+      operators to bypass the check rather than upgrade the platform.
+    spec_impact: "CL-05 DX — actionable registration refusal error with upgrade path"
+    pitfall: P-199
+
+  - id: F04
+    severity: major
+    description: >
+      The EMIT phase must generate the capability probe as part of the handler
+      registration preamble, not as a separate health check. If the probe is a
+      separate operation, an operator can deploy the handlers without running the
+      probe. The probe and the registration must be coupled: no probe success, no
+      registration. This is a compile-time guarantee, not a runtime convention.
+    spec_impact: "CL-04 EMIT — capability probe coupled to handler registration"
+    pitfall: P-199
+
+  - id: F05
+    severity: major
+    description: >
+      R1-R4 tools do not require deny-on-timeout and can register on platforms
+      without AbortSignal support. The registration refusal must be scoped to R5
+      handlers only. A plugin with mixed R1-R5 tools should register the R1-R4
+      handlers successfully while refusing the R5 handlers. The operator sees
+      partial registration with a clear inventory of which tools were refused.
+    spec_impact: "CL-02 G-ELICIT — R5-scoped registration refusal, not all-or-nothing"
+    pitfall: P-199
+
+  - id: F06
+    severity: warning
+    description: >
+      Platform version detection must account for cloud-hosted Gateways where
+      the operator does not control the version. If the Gateway is a managed
+      service (e.g., Anthropic-hosted), the version may change without the
+      operator's knowledge. The capability probe at registration time (not
+      deployment time) handles this case because it tests the actual runtime
+      environment, not a configured version string.
+    spec_impact: "CL-03 runtime — registration-time probe for managed gateway environments"
+    pitfall: P-199
+
+  - id: F07
+    severity: warning
+    description: >
+      The audit event for registration refusal must be emitted even though no
+      tool execution occurred. This is a pre-execution security event: the
+      system detected an unsafe configuration and refused to proceed. Fleet
+      dashboards need visibility into which deployments failed registration
+      so they can track platform upgrade progress across the fleet.
+    spec_impact: "CL-02 G-ELICIT-AUDIT — registration refusal audit event"
+    pitfall: P-199
+
+  - id: F08
+    severity: major
+    description: >
+      A malicious operator could patch the capability probe to always return
+      true, bypassing the safety check. The compiled handler must include a
+      secondary runtime check at invocation time: before each R5 tool execution,
+      verify that the AbortSignal was actually wired (not just probed at
+      registration). Defense in depth means the TOCTOU between probe and
+      invocation is also covered.
+    spec_impact: "CL-03 runtime — per-invocation AbortSignal verification as defense-in-depth"
+    pitfall: P-199

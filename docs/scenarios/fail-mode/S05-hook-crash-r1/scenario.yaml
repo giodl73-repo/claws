@@ -1,0 +1,102 @@
+name: S05-hook-crash-r1
+series: fail-mode
+version: 1
+specs: [CL-02]
+description: >
+  Validates fail-open behavior when the governance hook crashes during an
+  R1 tool invocation. The handler-level try/catch returns undefined (allow),
+  letting the R1 read-only tool execute. Governance errors should not block
+  observe-only operations.
+
+expect:
+  attack_class: governance-bypass
+  defense_layer: handler-level-allow
+  blocked: false
+  audit_event:
+    type: governance-error
+    tool: log-viewer
+    risk_level: 1
+    outcome: ALLOWED
+    reason: "fail-open: R1 observe tool"
+
+simulate:
+  failures:
+    - component: governance-hook
+      type: crash
+      error: "RangeError: Maximum call stack size exceeded"
+  halt: null
+  budget: null
+
+problem: >
+  The governance plugin's before_tool_call handler crashes with a RangeError
+  while processing an R1 tool (log-viewer). The claws handler catch clause
+  checks the tool's risk level (R1), determines fail-open is appropriate,
+  and returns undefined (do not block). The log-viewer tool executes normally.
+  The crash is recorded in the audit chain as a governance-error event with
+  outcome ALLOWED.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The handler's catch clause calls `riskLevel(event.toolName)` to determine
+      fail behavior. If this function ALSO crashes (e.g., toolName is malformed),
+      the catch clause itself throws, falling through to the Gateway's fail-open.
+      For R1, this accidentally gives the correct behavior. For R3-R4, it gives
+      the wrong behavior if the enterprise configured fail-closed.
+    spec_impact: "CL-02 CB-01 — catch clause defense-in-depth for riskLevel()"
+    pitfall: null
+
+  - id: F02
+    severity: warning
+    description: >
+      "RangeError: Maximum call stack size exceeded" suggests infinite recursion
+      in the governance logic. This is a serious bug that would affect ALL tools,
+      not just log-viewer. The audit event should trigger investigation, not just
+      logging. The sidecar should escalate stack overflow errors differently
+      from typical TypeErrors.
+    spec_impact: "CL-03 sidecar — error type classification for escalation"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The audit event records outcome ALLOWED for a governance-error. Fleet
+      monitoring (claws drift) should flag workspaces with governance-error
+      events as "degraded" even if the outcome was ALLOWED. A workspace with
+      frequent R1 fail-open events has a broken governance hook.
+    spec_impact: "CL-05 fleet — degraded governance detection"
+    pitfall: null
+
+  - id: F04
+    severity: note
+    description: >
+      R1 fail-open after crash is the same behavior as if governance were
+      not installed. For observe-only tools, this is acceptable. But it
+      means R1 tools provide zero security benefit from governance during
+      outages — the audit is the only value, and the audit may also be
+      broken. R1 governance overhead should be justified by the value of
+      the audit trail.
+    spec_impact: "CL-02 G-CLASS — R1 governance value proposition"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The fail-open path for R1 and the fail-closed path for R5 share the
+      same catch clause. A single branching error (e.g., `>=` instead of
+      `===` in the risk level check) could cause R1 tools to get fail-closed
+      or R5 tools to get fail-open. The branching logic must be exhaustively
+      tested with all 5 risk levels.
+    spec_impact: "CL-02 CB-01 — risk level branching exhaustive testing"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      If the workspace has configured R1 as fail-closed (enterprise override),
+      the catch clause must honor the configuration. The default fail-open for
+      R1 is only the DEFAULT — the configured value takes precedence. The
+      `failModeForRisk()` function must check claws.json configuration.
+    spec_impact: "CL-02 CB-01 — configured vs default fail mode precedence"
+    pitfall: null

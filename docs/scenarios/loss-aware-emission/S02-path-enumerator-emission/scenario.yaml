@@ -1,0 +1,123 @@
+name: S02-path-enumerator-emission
+series: loss-aware-emission
+version: 1
+specs: [CL-04, CL-07]
+description: >
+  Validates the path enumerator: given a workspace targeting Cursor,
+  the compiler finds 3 emission routes with different fidelity scores,
+  enumerates all three, and selects the lowest-loss path. The selected
+  path maximizes governance fidelity for the target platform while
+  respecting the platform's enforcement constraints.
+
+expect:
+  rules_applied: [G-PERM, G-BOUND, G-ELICIT]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace defines 3 governance rules (G-PERM, G-BOUND, G-ELICIT)
+  and targets Cursor as the emission platform. The compiler's path
+  enumerator discovers 3 possible emission routes: (1) system-prompt-
+  only: all 3 rules emitted as advisory instructions in .cursorrules,
+  fidelity 0.5/0.4/0.3 = avg 0.40. (2) rules-plus-hooks: G-PERM and
+  G-BOUND use Cursor's MCP hook support for enforcement, G-ELICIT falls
+  back to advisory, fidelity 0.9/0.8/0.3 = avg 0.67. (3) full-plugin:
+  all 3 rules use a custom Cursor extension plugin, fidelity 1.0/1.0/0.9
+  = avg 0.97 but requires extension installation. The path enumerator
+  presents all 3 routes with fidelity scores. By default, the compiler
+  selects route 2 (highest fidelity without additional installation).
+  The --max-fidelity flag selects route 3 (highest absolute fidelity).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The path enumerator must define what constitutes a "route." Is it
+      the combination of enforcement mechanisms used? The set of output
+      artifacts generated? The deployment prerequisites? Without a formal
+      route definition, the enumerator cannot systematically discover all
+      options. A route should be defined as: {enforcement_mechanisms[],
+      output_artifacts[], prerequisites[], fidelity_scores{}}.
+    spec_impact: "CL-04 Path Enumerator -- formal route definition schema"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Route selection involves tradeoffs beyond fidelity. Route 3 has
+      highest fidelity but requires extension installation (operational
+      cost). Route 2 is zero-install but lower fidelity. The selection
+      algorithm must support multi-criteria optimization: fidelity,
+      installation complexity, maintenance burden, platform version
+      requirements. A single fidelity score is insufficient for route
+      selection; a cost vector is needed.
+    spec_impact: "CL-04 Route Selection -- multi-criteria cost vector (fidelity, complexity, maintenance)"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The path enumerator discovers routes based on the platform profile's
+      enforcement mechanisms. If the profile is incomplete (missing a
+      mechanism that the platform actually supports), routes are missed.
+      The enumerator's completeness depends entirely on profile quality.
+      The spec should define a minimum set of enforcement mechanism
+      categories that every platform profile must evaluate, even if the
+      answer is "not supported."
+    spec_impact: "CL-07 Platform Profiles -- mandatory enforcement mechanism checklist per profile"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The --max-fidelity flag changes route selection but may select a
+      route with unmet prerequisites (extension not installed). The
+      compiler should validate prerequisites before selecting a route.
+      If --max-fidelity selects route 3 but the extension is not
+      installed, the emission fails. The compiler should either check
+      prerequisites or emit a clear prerequisite list with installation
+      instructions.
+    spec_impact: "CL-04 Route Selection -- prerequisite validation before emission or prerequisite report"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Three routes for a 3-rule workspace is manageable. But a 20-rule
+      workspace may have combinatorial route explosion (each rule can
+      use different mechanisms). The enumerator must prune the route space
+      efficiently. Practical pruning: group rules by mechanism compatibility
+      and enumerate at the group level, not the individual rule level.
+    spec_impact: "CL-04 Path Enumerator -- group-level route enumeration to avoid combinatorial explosion"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Route fidelity scores assume the enforcement mechanisms work as
+      documented. But platform-specific quirks (bugs, version differences,
+      undocumented behavior) may reduce actual fidelity below the scored
+      value. The compiler cannot verify runtime enforcement effectiveness
+      at compile time. The fidelity scores should be framed as "theoretical
+      maximum fidelity" with a caveat that actual enforcement depends on
+      platform implementation.
+    spec_impact: "CL-04 Fidelity Scores -- frame as theoretical maximum with platform implementation caveat"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The path enumerator output is valuable for governance architects
+      evaluating platform choices. A workspace compiled with --enumerate-
+      paths (without emission) should produce a comparison table of all
+      routes, enabling architects to make informed platform decisions
+      before committing to a target. This is a planning tool, not just
+      a compilation step.
+    spec_impact: "CL-04 Path Enumerator -- --enumerate-paths flag for planning-only route comparison"
+    pitfall: null

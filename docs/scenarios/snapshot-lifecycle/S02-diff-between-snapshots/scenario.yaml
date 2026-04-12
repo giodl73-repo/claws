@@ -1,0 +1,160 @@
+name: S02-diff-between-snapshots
+series: snapshot-lifecycle
+version: 1
+specs: [CL-05]
+description: >
+  Validates snap diff between two named snapshots with different governance
+  states. Snapshot A has trust tier T2 with 3 tools (R1, R2, R3). Snapshot B
+  has trust tier T3 with 5 tools (R1-R5). The diff must show governance-level
+  changes (trust tier delta, new tool risk classifications, new violation
+  potential) not just file-level diffs. This is the governance-aware
+  comparison that distinguishes snap diff from git diff.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      snapshot_a: pre-expansion
+      snapshot_b: post-expansion
+      diff_mode: governance
+    analysis:
+      rules_evaluated: false
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 1
+    types: [governance-diff-report]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise governance admin has two snapshots: "pre-expansion" (T2,
+  3 tools at R1-R3, zero violations) and "post-expansion" (T3, 5 tools
+  including R4 and R5, 1 violation: R5 tool exceeds T3 ceiling). Running
+  `claws snap diff pre-expansion post-expansion` must produce a structured
+  report showing: trust tier changed T2->T3, 2 tools added (R4, R5),
+  1 new violation (G-CLASS on R5 tool), and the overall governance posture
+  change (from clean to 1 violation).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      snap diff must compare GovernanceIRs, not just source files. A file
+      diff of claws.json shows "trustTier: 2 -> 3" but does not show the
+      governance implications (now R4 tools are allowed, R5 still blocked).
+      The diff must be semantic: it interprets the IR changes in governance
+      terms. This requires a dedicated diff engine that understands the
+      GovernanceIR schema, not a generic JSON diff.
+    spec_impact: "CL-05 snap diff — semantic governance diff engine, not JSON diff"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The diff report should show violation DELTAS, not absolute states.
+      "Snapshot A: 0 violations, Snapshot B: 1 violation" is less useful
+      than "+1 violation: G-CLASS on tool 'deploy-prod' (new in B)." The
+      delta format tells the admin exactly what changed, not just what
+      exists. The spec does not define whether diff shows deltas or
+      absolute states.
+    spec_impact: "CL-05 snap diff — delta-oriented output format"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      If the two snapshots were taken with different claws versions, the
+      GovernanceIR schemas may differ. A v1.2 IR has different fields than
+      a v1.5 IR. snap diff must either refuse to compare incompatible
+      schema versions or normalize both to a common schema before diffing.
+      Without version handling, diff may produce spurious changes that
+      are schema artifacts, not governance changes.
+    spec_impact: "CL-05 snap diff — cross-version IR schema normalization"
+    pitfall: P-188
+
+  - id: F04
+    severity: warning
+    description: >
+      The diff output format is not defined. Options: (a) human-readable
+      text with color-coded additions/removals, (b) JSON for programmatic
+      consumption, (c) SARIF for CI integration. snap diff should support
+      --format (text, json, sarif) consistent with pinch's format options.
+      The default should be human-readable text.
+    spec_impact: "CL-05 snap diff — output format options (text, json, sarif)"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      When diffing two snapshots, the order matters: `diff A B` shows
+      what changed FROM A TO B. `diff B A` shows the reverse. The output
+      must clearly indicate direction: "compared [base] to [target]."
+      If the user swaps the order, the additions become removals and vice
+      versa. The CLI should label the arguments (e.g., --from and --to)
+      to avoid ambiguity.
+    spec_impact: "CL-05 snap diff — directional labeling (from/to or base/target)"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The diff must handle the case where a snapshot does not exist.
+      `snap diff pre-expansion nonexistent` should produce a clear error
+      following the what/how/where contract: "snapshot 'nonexistent' not
+      found. Available snapshots: pre-expansion, post-expansion. Run
+      snap list to see all snapshots." Without this, the user gets an
+      opaque file-not-found error.
+    spec_impact: "CL-05 snap diff — error handling for missing snapshots"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      snap diff can also compare a snapshot against the CURRENT workspace
+      state (not just snapshot-vs-snapshot). This is the most common use
+      case: "what changed since I saved this snapshot?" The spec mentions
+      `snap diff <a> <b>` but not `snap diff <a>` (implicit current state).
+      A single-argument form should be supported.
+    spec_impact: "CL-05 snap diff — single-argument form: snapshot vs current workspace"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The governance diff should categorize changes by risk impact: (a)
+      risk-increasing changes (added R4/R5 tools, lowered trust tier),
+      (b) risk-neutral changes (added R1 tool to T3 workspace), (c)
+      risk-decreasing changes (removed high-risk tool, raised trust tier).
+      This categorization helps admins quickly assess the governance posture
+      change without reading every line item.
+    spec_impact: "CL-05 snap diff — risk-impact categorization of changes"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      snap diff is used by the middle ring (upgrade workflow) to verify
+      that doctor --post-upgrade produced the expected changes. After
+      upgrade, `snap diff pre-upgrade current` shows what doctor changed.
+      This is a validation use case, not just a reporting use case. The
+      diff output should include a summary verdict: "governance posture
+      improved/degraded/unchanged."
+    spec_impact: "CL-05 snap diff — summary verdict for middle-ring validation"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Large workspaces with many tools and agents produce large IRs. The
+      diff between two large IRs could be extensive. The diff command
+      should support --summary (show only aggregates: tools added/removed,
+      violations delta, trust tier change) and --verbose (show full details).
+      Default should be summary for terminal output, verbose for --format json.
+    spec_impact: "CL-05 snap diff — summary vs verbose output modes"
+    pitfall: null

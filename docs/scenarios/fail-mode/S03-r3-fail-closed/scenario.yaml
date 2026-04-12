@@ -1,0 +1,92 @@
+name: S03-r3-fail-closed
+series: fail-mode
+version: 1
+specs: [CL-02]
+description: >
+  Validates that R3 tools with fail-closed configuration pass compilation.
+  R3-R4 tools are configurable: the enterprise decides whether write/execute
+  operations should fail-open or fail-closed on governance errors. Both
+  options are valid at compile time.
+
+expect:
+  rules_applied: [G-CLASS]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  TOOLS.md declares "config-writer" (R3/WRITE) with failMode: "fail-closed"
+  in claws.json. The FailMode<3> type resolves to "fail-open" | "fail-closed",
+  so fail-closed is valid. The compiler must accept this configuration. If the
+  governance hook crashes while processing config-writer, the tool is BLOCKED
+  and the crash is logged.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      R3 fail-closed blocks write operations on governance errors. If the
+      governance hook has a bug that always crashes for a specific tool, that
+      tool is permanently blocked until the bug is fixed. The fail-closed
+      behavior must be accompanied by a recovery mechanism — either a bypass
+      for debugging or a health check that detects persistent failures.
+    spec_impact: "CL-03 runtime — persistent governance failure recovery"
+    pitfall: null
+
+  - id: F02
+    severity: warning
+    description: >
+      The default fail mode for R3-R4 is not specified in CL-02. The spec says
+      "configurable" but does not state the default. If fail-closed is default,
+      it is more secure but breaks more easily. If fail-open is default, it is
+      less secure but more resilient. The default must be documented.
+    spec_impact: "CL-02 fail-mode — R3-R4 default specification"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      An R3 tool blocked by fail-closed should produce a user-visible message
+      explaining why the write was blocked. "governance-error: hook crash" is
+      technical; "this action was blocked due to a governance system error —
+      please retry or contact your administrator" is user-friendly. The block
+      reason format affects developer experience.
+    spec_impact: "CL-03 runtime — block reason formatting for users"
+    pitfall: null
+
+  - id: F04
+    severity: note
+    description: >
+      R3 fail-closed + R1 fail-open in the same workspace means reads succeed
+      but writes fail on governance errors. This is a reasonable degradation
+      mode: the agent can still read and report but cannot modify anything.
+      The scenario should note this as an expected degradation pattern.
+    spec_impact: "CL-02 fail-mode — mixed fail-mode degradation patterns"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The generated plugin handler for fail-closed R3 must return
+      `{ block: true, blockReason: "..." }` in the catch clause. The handler
+      for fail-open R1 returns `undefined` (allow). If the code generator uses
+      a template and the fail-mode variable is wrong, R3 could accidentally
+      get fail-open behavior. Template correctness must be verified per-tool.
+    spec_impact: "CL-04 EMIT — per-tool fail-mode template correctness"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      In the CL-02 spec, the handler-level deny-on-error pattern uses
+      `riskLevel(event.toolName) >= 5` for the unconditional block and
+      `failModeForRisk()` for R3-R4. The generated code must correctly
+      branch: R5 always blocks, R3-R4 checks configured fail mode, R1-R2
+      checks configured fail mode with different defaults.
+    spec_impact: "CL-04 EMIT — risk-level branching in handler generation"
+    pitfall: null

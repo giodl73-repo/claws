@@ -1,0 +1,111 @@
+name: S03-missing-optional-files
+series: compile-pipeline
+version: 1
+specs: [CL-04]
+description: >
+  Validates graceful degradation when optional files are absent. Only SOUL.md,
+  TOOLS.md, and claws.json are required. Missing IDENTITY.md, HEARTBEAT.md,
+  USER.md, MEMORY.md, AGENTS.md, skills/, and lobster.yaml must not cause
+  parse errors. The manifest omits intent types for missing files without
+  producing violations.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      intent_types: [DenyIntent, ToolManifestEntry]
+    analysis:
+      rules_evaluated: true
+      violations: []
+  violations: []
+  warnings:
+    - pattern: "optional files not present"
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has SOUL.md, TOOLS.md, and claws.json but is missing all 6
+  optional files (IDENTITY.md, USER.md, MEMORY.md, HEARTBEAT.md, AGENTS.md,
+  skills/, lobster.yaml). The pipeline must parse successfully, produce a
+  manifest with only the intents from present files, and emit informational
+  warnings (not violations) about the absent files. No rules that depend on
+  missing files should trigger violations.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Without IDENTITY.md, the agent identity level defaults to L0 (declared
+      name only). If the workspace has A2A communication configured elsewhere
+      (e.g., in claws.json trust groups), G-A2A-IDENTITY should warn that L0
+      is insufficient for fleet communication. The absence of the file must
+      not suppress rules that apply to defaults.
+    spec_impact: "CL-02 G-A2A-IDENTITY — L0 default when IDENTITY.md absent"
+    pitfall: null
+
+  - id: F02
+    severity: warning
+    description: >
+      Without USER.md, there is no explicit OBO scope declaration. If TOOLS.md
+      contains R5/OBO tools, the absence of USER.md means no authority grants
+      exist — the tools are declared but ungoverned at the authority level.
+      This should produce a warning, not silently pass.
+    spec_impact: "CL-02 G-ELICIT — OBO tools without USER.md authority"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Without MEMORY.md, data sensitivity labels default to unset. If TOOLS.md
+      tools access data stores, G-DATA rules cannot evaluate because no labels
+      exist. The pipeline must distinguish "no labels declared" (warning) from
+      "labels declared as PUBLIC" (intentional).
+    spec_impact: "CL-02 G-DATA — absent vs explicit label handling"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Without AGENTS.md, A2A governance rules (G-A2A-TRUST, G-A2A-FLOW,
+      G-A2A-ESCALATE, G-A2A-DELEGATE) are all skipped. The skip must be
+      recorded in the analysis as "not applicable" rather than silently
+      omitted, so fleet scans can detect workspaces missing A2A configuration.
+    spec_impact: "CL-04 Phase 3 ANALYZE — rule applicability tracking"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      Without HEARTBEAT.md, no scheduled tasks exist. If a tool in TOOLS.md
+      is designed for scheduled use (e.g., a monitoring tool), the absence of
+      HEARTBEAT.md means no schedule governance. This is fine — but the lack
+      of HEARTBEAT.md combined with tool descriptions mentioning "periodic"
+      or "scheduled" could merit an advisory note.
+    spec_impact: "CL-04 EXTRACT — heuristic detection of schedule-like tools"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The warning "optional files not present" must enumerate which files are
+      missing. A single aggregate warning is less useful than per-file warnings.
+      The diagnostic should say "IDENTITY.md not found (agent identity defaults
+      to L0)" rather than a generic message.
+    spec_impact: "CL-04 diagnostics — per-file absence warnings"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Without lobster.yaml, Phase 5 EMIT skips the lobster.compiled.yaml
+      artifact entirely. The artifact count in the emit phase output must
+      reflect this — 3 artifacts maximum instead of 4. If the emit phase
+      always expects 4 outputs, it will error on this workspace.
+    spec_impact: "CL-04 Phase 5 EMIT — conditional artifact count"
+    pitfall: null

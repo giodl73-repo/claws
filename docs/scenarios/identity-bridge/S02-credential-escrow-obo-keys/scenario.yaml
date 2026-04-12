@@ -1,0 +1,128 @@
+name: S02-credential-escrow-obo-keys
+series: identity-bridge
+version: 1
+specs: [CL-02, CL-07]
+description: >
+  Validates that OBO (On Behalf Of) keys are stored in the guard secrets
+  vault and resolved at compile time without embedding secrets in
+  governance artifacts. The compiler reads the key reference from
+  claws.json, resolves it from the vault, and generates governance
+  artifacts that reference the vault location, not the key material.
+
+expect:
+  attack_class: credential-exfiltration
+  defense_layer: credential-escrow
+  blocked: true
+  audit_event: OBO-KEY-ESCROW-RESOLVED
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace uses an R5 tool (send-payment) that acts on behalf of
+  the user via an OBO key (API credential). The OBO key must never
+  appear in governance artifacts, compiled output, or context windows.
+  claws.json references the key as a vault path:
+  `obo_key: "vault://guard/secrets/payment-api-key"`. At compile time,
+  the compiler resolves the vault reference to verify the key exists
+  and has the required permissions. The compiled governance artifacts
+  contain only the vault reference (not the key). At runtime, the
+  guard secrets vault resolves the reference just-in-time when the R5
+  tool is invoked. A governance artifact inspection must never reveal
+  the key material. An attacker with access to compiled artifacts can
+  see the vault path but cannot extract the key without vault access.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The vault://guard/secrets/ URI scheme must be defined in the spec.
+      The compiler must parse this URI, extract the vault provider
+      (guard), the secret path (secrets/payment-api-key), and validate
+      the reference at compile time. If the vault is unreachable at
+      compile time, the compiler must distinguish "vault unreachable"
+      (infrastructure issue, warn) from "secret not found" (configuration
+      error, error). The vault URI scheme and resolution protocol must
+      be formally specified.
+    spec_impact: "CL-02 Credential Escrow -- vault URI scheme specification and resolution protocol"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Compile-time vault resolution verifies existence but must not
+      cache the secret. If the compiler caches the secret in memory
+      during compilation and that memory is later accessible (crash
+      dump, debug log), the secret leaks. The compiler must use a
+      verify-only vault API call that confirms existence and permissions
+      without returning the secret material. The vault API must support
+      this verify-only mode.
+    spec_impact: "CL-02 Credential Escrow -- verify-only vault API for compile-time resolution"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The vault reference in compiled artifacts is itself sensitive
+      metadata. An attacker who sees "vault://guard/secrets/payment-
+      api-key" knows: (a) a payment API key exists, (b) it is stored
+      in the guard vault, (c) the secret path. This metadata enables
+      targeted vault attacks. The compiled artifacts should use an
+      opaque reference (hash of the vault path) rather than the literal
+      path. The mapping from opaque reference to vault path is stored
+      only in the vault itself.
+    spec_impact: "CL-02 Credential Escrow -- opaque vault references in compiled artifacts"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Runtime just-in-time resolution adds latency to R5 tool invocation.
+      If the vault is slow (network latency, cold start), the G-ELICIT
+      approval flow stalls after the human approves but before the tool
+      executes. The user experience is: approve -> wait -> execute. The
+      vault resolution latency must be budgeted: if resolution exceeds
+      a threshold (e.g., 2s), the tool invocation should fail rather
+      than hang indefinitely.
+    spec_impact: "CL-02 Credential Escrow -- vault resolution timeout with fail-closed on timeout"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      OBO keys have rotation schedules. If the key is rotated in the
+      vault after compilation, the compiled vault reference still points
+      to the correct path (the vault serves the current key at that path).
+      But if the key path changes during rotation (new path for new key),
+      the compiled reference is stale. The vault must support key rotation
+      at a stable path, or the compiler must support dynamic path
+      resolution at runtime.
+    spec_impact: "CL-02 Credential Escrow -- stable vault paths across key rotation cycles"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The guard secrets vault is a dependency of the runtime governance
+      system. If the vault is unavailable, all R5 tools that use OBO
+      keys fail. This single point of failure needs a degradation
+      strategy: fail-closed (all R5 tools blocked when vault is down)
+      is the safe default. A cached-credential fallback would violate
+      the escrow principle. The spec must explicitly state that vault
+      unavailability blocks all vault-dependent tools.
+    spec_impact: "CL-02 Credential Escrow -- vault unavailability blocks all vault-dependent tools (no cache fallback)"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The credential escrow pattern applies beyond OBO keys. Any secret
+      the agent needs (API tokens, database credentials, signing keys)
+      should use the same vault reference mechanism. The vault://
+      URI scheme should be generic enough for all secret types, with
+      the secret type indicated by a field in the vault metadata, not
+      by the URI path convention.
+    spec_impact: "CL-02 Credential Escrow -- generic vault reference for all secret types"
+    pitfall: null

@@ -1,0 +1,135 @@
+name: S03-crlf-preservation
+series: lossless-roundtrip
+version: 1
+specs: [CL-04]
+description: >
+  Validates that Windows CRLF line endings in workspace files are preserved
+  byte-for-byte after compilation. The pipeline normalizes line endings
+  internally (to LF) for consistent parsing and hash computation, but NEVER
+  writes normalized content back to source files.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace on Windows has SOUL.md and TOOLS.md with CRLF line endings
+  (0x0D 0x0A). The pipeline must: (1) normalize to LF internally for
+  consistent keyword extraction (line-anchored patterns), (2) compute
+  content hashes from LF-normalized content (for cross-platform determinism),
+  (3) NEVER write LF-normalized content back to source files. After
+  compilation, files must retain CRLF. If git is configured with
+  core.autocrlf=true, the source files on disk are CRLF; the pipeline
+  must not convert them to LF.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Line-counting in error messages must account for CRLF. If the parser
+      normalizes to LF internally and reports "SOUL.md:15" as the error
+      location, but the original file has CRLF (making line 15 at a
+      different byte offset), the VS Code integration must map the line
+      number correctly. The LSP diagnostics use line numbers, not byte
+      offsets, so CRLF vs LF does not affect line numbering — but column
+      numbers may be off if CRLF is counted as two characters.
+    spec_impact: "CL-04 PARSE — line/column mapping with CRLF source files"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Hash normalization (LF before hashing) means two developers — one on
+      Windows (CRLF) and one on macOS (LF) — produce the same GovernanceIR
+      hash for semantically identical files. This is correct for cache
+      sharing. But the raw-byte lossless verification hash (used to verify
+      files are unchanged) must use raw bytes including CRLF. Two different
+      hash algorithms with different normalization rules is confusing. The
+      spec must clearly distinguish: IR hash (normalized) vs lossless hash
+      (raw bytes).
+    spec_impact: "CL-04 GovernanceIR — two hash types: normalized (IR) vs raw (lossless verification)"
+    pitfall: P-233
+
+  - id: F03
+    severity: warning
+    description: >
+      Mixed line endings within a single file (some lines CRLF, some LF)
+      are valid but unusual. The normalizer must handle mixed endings
+      consistently. A regex-based normalizer that replaces \r\n with \n
+      handles the common case, but \r alone (old Mac OS) should also be
+      normalized to \n for parsing. The source file keeps whatever mixed
+      endings it has — the normalizer is in-memory only.
+    spec_impact: "CL-04 PARSE — mixed line ending normalization (CRLF, LF, CR)"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The `claws diff` command compares two GovernanceIR snapshots. If
+      the diff is computed on normalized content (LF) but displayed with
+      original line numbers (CRLF-based), line references in the diff
+      output match the source file. If normalized content is used for
+      both diff and display, the diff is correct but line numbers may
+      not correspond to the original file. Diff display must use original
+      line-ending-aware offsets.
+    spec_impact: "CL-04 claws diff — line number mapping for CRLF source files"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The generated output artifacts (SKILL.md, index.ts, exec-approvals.json,
+      lobster.compiled.yaml) need their own line ending policy. Should
+      generated files use LF (cross-platform convention for code) or match
+      the workspace's line ending style? If generated files use LF on
+      Windows, git with core.autocrlf=true will convert them to CRLF on
+      checkout, and the hash-skip optimization (don't write if content
+      unchanged) may re-write every build because the on-disk CRLF differs
+      from the generated LF.
+    spec_impact: "CL-04 EMIT — generated file line ending policy (match workspace or force LF)"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      YAML and JSON parsers are line-ending agnostic (both CRLF and LF are
+      valid whitespace). Markdown parsing is also line-ending agnostic for
+      content blocks. The only place line endings matter is keyword-anchored
+      extraction (regex patterns with $ or line-start anchors). As long as
+      the regex uses /m flag and the content is normalized, parsing is safe.
+    spec_impact: "CL-04 PARSE — regex flag requirements for line-ending-safe keyword extraction"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The `.editorconfig` file in the workspace may specify `end_of_line = crlf`.
+      claws should respect this for generated output files (writing CRLF in
+      generated .ts and .json if the workspace convention is CRLF). However,
+      reading .editorconfig adds a dependency and complexity. The simpler
+      approach: detect the line ending style of the first source file and
+      match it in generated output.
+    spec_impact: "CL-04 EMIT — line ending detection from source files for generated output"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The trailing newline convention (file ends with newline vs no trailing
+      newline) is another form of byte-level preservation. Some editors add
+      a trailing newline on save. The pipeline must not add or remove trailing
+      newlines from source files, even if the internal representation trims
+      trailing whitespace for parsing.
+    spec_impact: "CL-04 PARSE — trailing newline preservation in lossless guarantee"
+    pitfall: null

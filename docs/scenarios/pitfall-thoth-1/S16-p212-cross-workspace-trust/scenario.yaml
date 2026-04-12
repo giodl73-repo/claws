@@ -1,0 +1,139 @@
+name: S16-p212-cross-workspace-trust
+series: pitfall-thoth-1
+version: 1
+specs: [CL-02, CL-05]
+description: >
+  Validates that cross-workspace transitive trust chains are detected by
+  fleet-wide scanning. Local workspace FE6 analysis only sees local trust;
+  cross-workspace chains require claws scan with Tarjan SCC to surface
+  hidden transitive trust relationships.
+
+expect:
+  attack_class: cross-workspace-trust
+  defense_layer: g-a2a-trust
+  blocked: true
+  audit_event:
+    type: cross-workspace-transitive-trust
+    tool: "claws scan"
+    risk_level: 5
+    outcome: DENY
+    reason: "Transitive trust chain spans workspace-A → workspace-B → workspace-C — invisible to local analysis"
+
+simulate:
+  failures:
+    - component: fleet-scan
+      type: cross-workspace-trust-invisible
+      error: "Local FE6 in workspace-A sees no issues; transitive chain through workspace-B undetected"
+    - component: tarjan-scc
+      type: not-executed
+      error: "Fleet scan skipped cross-workspace SCC analysis"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet has three workspaces: A, B, and C. Workspace-A trusts workspace-B's
+  "data-processor" agent for data transformation. Workspace-B trusts
+  workspace-C's "storage-writer" agent for persistence. Neither workspace-A
+  nor workspace-C has any direct trust relationship. However, data flows
+  A→B→C transitively. Workspace-A's local FE6 analysis only sees the A→B
+  trust and reports it as clean. Workspace-C's local analysis only sees B→C.
+  No single workspace sees the full A→B→C chain. The result: workspace-A's
+  CONFIDENTIAL data reaches workspace-C's INTERNAL-rated storage without any
+  workspace declaring that trust explicitly.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Local FE6 analysis is fundamentally unable to detect cross-workspace
+      transitive trust. Each workspace sees only its own trust declarations.
+      Fleet-wide trust analysis requires a global graph built from all
+      workspace trust declarations. claws scan must construct this global
+      graph as a prerequisite to any fleet-level trust validation. Without
+      it, fleet governance is theater.
+    spec_impact: "CL-05 claws scan — mandatory global trust graph construction"
+    pitfall: P-212
+
+  - id: F02
+    severity: major
+    description: >
+      Tarjan's SCC algorithm identifies strongly connected components in
+      the cross-workspace trust graph. Cycles (A trusts B, B trusts A)
+      are the most dangerous pattern because they create mutual trust
+      escalation. Non-cyclic transitive chains (A→B→C) are a separate
+      concern — they don't form SCCs but still need transitive closure
+      analysis. claws scan must run both SCC detection AND transitive
+      closure enumeration.
+    spec_impact: "CL-05 claws scan — SCC + transitive closure dual analysis"
+    pitfall: P-212
+
+  - id: F03
+    severity: major
+    description: >
+      The data classification labels must propagate across workspace
+      boundaries in the fleet graph. If workspace-A labels data as
+      CONFIDENTIAL and workspace-B's trust allows forwarding to
+      workspace-C at INTERNAL level, the fleet scan must flag the
+      label downgrade. Label propagation across workspaces requires
+      the same high-water-mark analysis used within a single workspace
+      but applied to the fleet-wide graph.
+    spec_impact: "CL-05 claws scan — cross-workspace label propagation"
+    pitfall: P-212
+
+  - id: F04
+    severity: major
+    description: >
+      Each workspace is independently managed and compiled. The fleet
+      scan must operate on compiled governance IRs from all workspaces,
+      not raw workspace files. This means claws scan must first compile
+      each workspace (or use cached IRs) and then merge them into a
+      fleet-level trust graph. The merge must detect version mismatches
+      between cached and current workspace states.
+    spec_impact: "CL-05 claws scan — IR merge with version validation"
+    pitfall: P-212
+
+  - id: F05
+    severity: warning
+    description: >
+      Fleet-wide scanning may be expensive for large fleets (100+
+      workspaces). The analysis complexity is O(V+E) for SCC where V
+      is total agents across all workspaces and E is total trust edges.
+      The scan should support incremental mode: only re-analyze workspaces
+      whose IRs have changed since the last scan, merging deltas into
+      the cached fleet graph.
+    spec_impact: "CL-05 claws scan — incremental fleet analysis mode"
+    pitfall: P-212
+
+  - id: F06
+    severity: major
+    description: >
+      The scan results must be actionable: for each transitive chain,
+      show the full path (workspace-A/agent-X → workspace-B/agent-Y →
+      workspace-C/agent-Z), the trust levels at each hop, and the data
+      labels that would propagate. A developer in workspace-A needs to
+      understand that their CONFIDENTIAL data reaches workspace-C even
+      though they never declared trust to workspace-C.
+    spec_impact: "CL-05 claws scan — transitive chain visualization with labels"
+    pitfall: P-212
+
+  - id: F07
+    severity: warning
+    description: >
+      Cross-workspace trust may be intentional (federated processing
+      pipeline) or accidental (inherited from template). The scan must
+      allow explicit cross-workspace trust declarations that suppress
+      the warning for known chains. Undeclared chains produce errors;
+      declared chains produce informational audit entries.
+    spec_impact: "CL-05 fleet config — explicit cross-workspace trust declarations"
+    pitfall: P-212
+
+  - id: F08
+    severity: warning
+    description: >
+      Workspace administrators may not have visibility into other
+      workspaces in the fleet. The scan output must be filterable by
+      workspace: "show me all transitive chains that touch workspace-A."
+      This allows each workspace admin to understand their exposure
+      without requiring fleet-wide administrative access.
+    spec_impact: "CL-05 claws scan — per-workspace filtered output"
+    pitfall: P-212

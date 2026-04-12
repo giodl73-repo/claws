@@ -1,0 +1,152 @@
+name: S01-scaffold-new-skill
+series: skill-lifecycle
+version: 1
+specs: [CL-05]
+description: >
+  Validates that `claws new skill my-tool` scaffolds a complete skill directory
+  with governance frontmatter, typed handler stub, package.json, and .claws/
+  build output structure. The scaffolded skill must be immediately compilable
+  via `claws build --skill` without manual edits.
+
+expect:
+  artifacts:
+    - type: scaffold
+      path: my-tool/SKILL.md
+      valid: true
+    - type: scaffold
+      path: my-tool/src/handler.ts
+      valid: true
+    - type: scaffold
+      path: my-tool/package.json
+      valid: true
+  plugin_hooks: null
+  skill_content:
+    contains_governance: true
+    frontmatter_valid: true
+    tier: TYPED
+  approvals: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer runs `claws new skill my-tool` in an existing OpenClaw workspace.
+  The command must scaffold a complete skill directory containing: SKILL.md with
+  valid governance frontmatter (risk, obo, data fields), src/handler.ts with a
+  typed handler importing @bic/claws-skill-kit and using the skill() factory,
+  package.json with @bic/claws-skill-kit and @bic/claws-test as dependencies, and a
+  .gitignore entry for .claws/dist/. The scaffolded skill must compile on first
+  `claws build --skill` without requiring manual edits.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The scaffold must detect the workspace's trust tier from claws.json and
+      set an appropriate default risk level in the governance frontmatter. If
+      the workspace is T2 (R3-max), scaffolding a skill with R5 creates an
+      immediate G-CLASS violation on first pinch. The scaffold should default
+      to the maximum risk allowed by the workspace trust tier.
+    spec_impact: "CL-05 Maker Experience — scaffold risk level derivation from workspace trust tier"
+    pitfall: P-225
+
+  - id: F02
+    severity: major
+    description: >
+      The scaffolded handler.ts imports from @bic/claws-skill-kit, which must be
+      installed. If the workspace does not have @bic/claws-skill-kit in its
+      dependencies, `claws new skill` must either auto-install it or emit a
+      clear instruction to install it. An unresolvable import on first build
+      is a first-run failure that blocks adoption.
+    spec_impact: "CL-05 Maker Experience — dependency auto-install or guided install"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The scaffold creates a SKILL.md with TYPED-tier content (decorators,
+      typed handler). But the Three-Tier Adoption model starts at DECLARED
+      (3 lines of YAML). Should `claws new skill` scaffold at TYPED or
+      DECLARED? TYPED is the better default for new skills (full type safety
+      from the start), but this means `claws new skill` produces Tier 2 output,
+      not Tier 1. The command should accept `--tier declared` for minimal scaffolds.
+    spec_impact: "CL-05 Three-Tier Adoption — scaffold default tier and --tier flag"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The scaffold must produce a valid package.json with the correct
+      @bic/claws-skill-kit version range. If the scaffold hardcodes a version
+      (e.g., "^1.0.0") and the installed claws is v2, the dependency
+      resolution fails. The scaffold should use the same major version as
+      the running claws binary.
+    spec_impact: "CL-05 Maker Experience — version alignment between claws and @bic/claws-skill-kit"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Build output goes to .claws/dist/, not the skill project root. The
+      scaffold must include a .gitignore with `.claws/` to prevent generated
+      files from being committed. If the workspace-level .gitignore already
+      covers .claws/, the skill-level .gitignore is redundant but harmless.
+      Missing .gitignore in the scaffold means generated governance wrappers
+      pollute version control.
+    spec_impact: "CL-05 Maker Experience — .gitignore in scaffold template"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The skill() factory in the scaffolded handler.ts must receive a name
+      parameter that matches the skill directory name. If the developer renames
+      the directory after scaffolding, the skill name in handler.ts and the
+      directory name diverge. The build should detect this mismatch and warn.
+    spec_impact: "CL-05 @bic/claws-skill-kit — skill name vs directory name consistency check"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The scaffold generates a src/handler.ts with a single skill() call and
+      one empty method. The generated code must include JSDoc comments
+      explaining each decorator (@obo, @audit, @classify) so the developer
+      discovers governance annotations through their editor, not just docs.
+    spec_impact: "CL-05 @bic/claws-skill-kit — inline documentation in scaffold"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The OBO field in governance frontmatter defaults to "none" in the
+      scaffold. If the skill name contains keywords like "send", "email",
+      "purchase", or "schedule", the scaffold should suggest a non-none OBO
+      type in a comment. Failing to declare OBO when the skill clearly acts
+      on behalf of the user creates a false-negative in fleet scanning.
+    spec_impact: "CL-05 Maker Experience — OBO auto-suggestion from skill name heuristics"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      `claws new skill` must refuse to overwrite an existing directory. If
+      my-tool/ already exists, the command must fail with a clear error rather
+      than silently overwriting files. This is standard CLI scaffold behavior
+      but must be explicitly tested because the governance frontmatter in an
+      existing SKILL.md would be lost.
+    spec_impact: "CL-05 Maker Experience — overwrite protection in scaffold command"
+    pitfall: null
+
+  - id: F10
+    severity: major
+    description: >
+      The scaffold must produce a skill that passes `claws pinch` at the
+      DECLARED tier immediately — the governance frontmatter must satisfy all
+      3 required fields (risk, obo, data) with valid values. If the scaffold
+      produces frontmatter with placeholder values like "TODO" or empty
+      strings, pinch fails on first run and the first-run experience is broken.
+    spec_impact: "CL-05 Three-Tier Adoption — scaffold must produce pinch-clean output"
+    pitfall: null

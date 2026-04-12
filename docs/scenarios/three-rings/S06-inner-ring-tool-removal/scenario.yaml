@@ -1,0 +1,173 @@
+name: S06-inner-ring-tool-removal
+series: three-rings
+version: 1
+specs: [CL-05]
+description: >
+  Validates the CL-05 constraint (CFC-S06-F05): when TOOLS.md removes a
+  tool, the inner ring must re-check skill dependencies to detect new
+  SKILL-TOOL-GHOST conflicts. A tool removal is not just "one fewer tool" —
+  it can break skills that reference the removed tool. The inner ring must
+  detect this at file-save time, not defer to compile time.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [TOOLS.md]
+      incremental: true
+      ring: inner
+    analysis:
+      rules_evaluated: true
+      violations:
+        - rule: SKILL-TOOL-GHOST
+          severity: high
+          file: TOOLS.md
+          removed_tool: fetch-contacts
+          affected_skills: [calendar-scheduler, email-composer]
+          message: "removed tool 'fetch-contacts' is referenced by 2 skills"
+      warnings: []
+  violations:
+    - rule: SKILL-TOOL-GHOST
+      file: TOOLS.md
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer removes the "fetch-contacts" tool from TOOLS.md because it
+  was replaced by a new "contact-search" tool. Two existing skills
+  (calendar-scheduler and email-composer) reference "fetch-contacts" in
+  their SKILL.md files. The inner ring detects the TOOLS.md change on save
+  and must cross-reference the removed tool name against all skill
+  dependencies to flag SKILL-TOOL-GHOST conflicts. This requires reading
+  skill metadata from the cached GovernanceIR, since the inner ring only
+  re-parses the changed file.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      SKILL-TOOL-GHOST detection on tool removal requires knowing which
+      skills reference which tools. This mapping is in the GovernanceIR
+      (from full compile). But the inner ring operates incrementally on
+      the changed file only. The tool-to-skill dependency graph must be
+      part of the cached IR. If the IR was compiled before the skills
+      were added, the dependency graph is stale and the ghost conflict
+      will be missed.
+    spec_impact: "CL-05 Inner Ring — tool-skill dependency graph must be in cached IR"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The constraint says "re-check skill dependencies" but skill files
+      (SKILL.md) are not one of the 9 workspace files that claws compiles.
+      Skills declare tool dependencies in their SKILL.md frontmatter or
+      handler code. If claws does not parse skill files during compilation,
+      it cannot build the dependency graph. Either skill-file parsing must
+      be added to the compilation pipeline, or dependency declarations
+      must be mirrored in one of the 9 workspace files.
+    spec_impact: "CL-04 PARSE — skill-file dependency extraction for SKILL-TOOL-GHOST"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Tool removal is a diff operation: the inner ring must know what
+      TOOLS.md contained BEFORE the save to determine which tools were
+      removed. The file watcher only sees the new content. The inner ring
+      must diff the new file against the cached version to compute the
+      removal set. Without pre-save state, it cannot distinguish "tool
+      removed" from "tool never existed."
+    spec_impact: "CL-05 Inner Ring — pre-save state needed for removal detection"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The developer removed "fetch-contacts" and added "contact-search"
+      in the same save. The inner ring sees both changes. Should it suggest
+      that affected skills update their references from "fetch-contacts"
+      to "contact-search"? This is a rename detection heuristic, not a
+      governance rule. The spec does not address whether the inner ring
+      should detect renames or just report removals.
+    spec_impact: "CL-05 Inner Ring — tool rename detection heuristic"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The error message for SKILL-TOOL-GHOST must follow the what/how/where
+      contract. The "Fix" suggestion should list the affected skills by
+      name and suggest: "update skill references from 'fetch-contacts' to
+      the replacement tool, or re-add 'fetch-contacts' to TOOLS.md." This
+      requires the inner ring to know skill names, which comes from the
+      cached IR, reinforcing the need for skill metadata in the IR.
+    spec_impact: "CL-05 Error Contract — SKILL-TOOL-GHOST fix suggestion requires skill names"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      If the workspace has 50 skills and one tool is removed, the inner
+      ring must check all 50 skill dependency entries. This is O(skills)
+      work on every TOOLS.md save. For large workspaces, this could push
+      past the <1s latency target. The dependency graph should be indexed
+      (tool -> skills) so the lookup is O(1) per removed tool, not O(n)
+      per skill.
+    spec_impact: "CL-05 Inner Ring — indexed tool-to-skill dependency lookup for performance"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      SKILL-TOOL-GHOST is currently defined as a cross-file conflict
+      (CL-04). The CL-05 constraint extends it to the inner ring, meaning
+      the same conflict is detected in two places: full compile (CL-04)
+      and inner ring file save (CL-05). The spec must ensure these produce
+      identical results — same severity, same message, same rule ID.
+      Otherwise the developer sees different diagnostics depending on
+      whether they saved a file or ran a full compile.
+    spec_impact: "CL-05 + CL-04 — SKILL-TOOL-GHOST consistency across detection surfaces"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Tool removal may be intentional (tool deprecated) or accidental
+      (developer deleted a line while editing). The inner ring cannot
+      distinguish intent. The diagnostic should be neutral: report the
+      fact (tool removed, skills affected) without assuming error. The
+      severity (high) seems too strong for an intentional removal that
+      just needs skill updates.
+    spec_impact: "CL-05 SKILL-TOOL-GHOST — severity should be warning, not high, for removals"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      If the removed tool was referenced by a skill that has governance
+      tier VERIFIED, the SKILL-TOOL-GHOST breaks the verification status.
+      A verified skill with a ghost tool reference is no longer verified.
+      The inner ring should detect this tier regression and flag it
+      separately from the base SKILL-TOOL-GHOST conflict.
+    spec_impact: "CL-05 Inner Ring — governance tier regression on SKILL-TOOL-GHOST"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The CFC-S06-F05 constraint was added from a cross-file-conflicts
+      scenario. It is the only constraint in CL-05 that specifies a
+      specific governance rule (SKILL-TOOL-GHOST) rather than a ring
+      behavior. This suggests the constraint may belong in CL-04 (where
+      the rule is defined) rather than CL-05 (developer experience). The
+      spec organization should be reviewed to avoid rule logic in the
+      DX spec.
+    spec_impact: "CL-05 vs CL-04 — SKILL-TOOL-GHOST inner-ring constraint may belong in CL-04"
+    pitfall: null

@@ -1,0 +1,151 @@
+name: S22-p183-elicitation-removal-cascade
+series: pitfall-anubis
+version: 1
+specs: [CL-02, CL-05]
+description: >
+  Validates that removing an elicitation policy from the fleet template
+  triggers an impact analysis showing affected workspaces before the change
+  is applied. Without impact analysis, removing a policy cascades
+  OBO-WITHOUT-ELICIT failures across dependent workspaces.
+
+expect:
+  workspaces:
+    total: 10
+    affected: 4
+    cascade_failures: 4
+  drift_count: 4
+  broadcast_result:
+    status: blocked
+    reason: impact-analysis-required
+    affected_workspaces: 4
+    cascade_type: obo-without-elicit
+  compliance:
+    pre_change: 10
+    post_change_predicted: 6
+    requires_confirmation: true
+
+simulate:
+  failures:
+    - component: fleet-template
+      type: cascade-elicitation-removal
+      error: "Removing 'elicit_r3_data_access' from fleet template affects 4 workspaces with OBO delegations"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet admin runs `claws fleet template edit` and removes the
+  elicit_r3_data_access policy from the fleet template. This policy required
+  human approval for R3 tools that access sensitive data. 4 workspaces in the
+  fleet have OBO (on-behalf-of) delegations where Agent A acts on behalf of
+  User B, and those delegations rely on the elicitation policy to get User B's
+  approval before data access. After the policy removal is broadcast, the 4
+  workspaces fail pinch with OBO-WITHOUT-ELICIT: the delegation requires
+  elicitation but no elicitation policy covers R3 data access anymore. All 4
+  workspaces enter a broken state where OBO delegations are blocked. The fleet
+  admin did not realize the elicitation policy was a dependency for OBO
+  workflows.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-02 must mandate impact analysis before any fleet template modification
+      that removes or weakens a policy. The impact analysis must show: which
+      workspaces depend on the policy being removed, what governance rules
+      reference it, and what failures will result. The analysis must run as
+      a dry-run before the actual modification is applied.
+    spec_impact: "CL-02 G-ELICIT — mandatory impact analysis for template changes"
+    pitfall: P-183
+
+  - id: F02
+    severity: major
+    description: >
+      The impact analysis must identify OBO-WITHOUT-ELICIT cascades specifically.
+      When an elicitation policy is removed, the analyzer must check all
+      workspaces for OBO delegations that reference tools covered by the
+      removed policy. Each affected delegation must be listed with the
+      workspace name, agent name, tool name, and the specific OBO constraint
+      that will break.
+    spec_impact: "CL-02 G-ELICIT — OBO cascade detection in impact analysis"
+    pitfall: P-183
+
+  - id: F03
+    severity: major
+    description: >
+      Fleet template modifications must require explicit confirmation after
+      impact analysis. The confirmation prompt must show the count of affected
+      workspaces and the types of failures expected. `claws fleet template edit
+      --confirm` must be re-confirmed if impact analysis reveals cascade failures.
+      The double-confirmation pattern (analysis then apply) prevents accidental
+      damage.
+    spec_impact: "CL-05 Fleet Template — double-confirmation for destructive changes"
+    pitfall: P-183
+
+  - id: F04
+    severity: major
+    description: >
+      The impact analysis must distinguish between "will cause error" and
+      "will weaken security." Removing an elicitation policy that OBO depends
+      on causes hard errors (OBO-WITHOUT-ELICIT). Removing a policy that only
+      adds a warning causes soft degradation (fewer warnings). Both must be
+      reported but the error-causing removals must be flagged as CRITICAL
+      impacts.
+    spec_impact: "CL-02 G-ELICIT — impact severity classification"
+    pitfall: P-183
+
+  - id: F05
+    severity: warning
+    description: >
+      The fleet template should support staged rollout for policy removals.
+      Instead of broadcasting the removal to all workspaces simultaneously,
+      the admin can roll out to a canary set (2 workspaces), verify no
+      cascades, then roll out to the rest. `claws fleet template edit --
+      canary 2` broadcasts to the first 2 workspaces and waits for
+      confirmation before continuing.
+    spec_impact: "CL-05 Fleet Template — staged rollout for policy changes"
+    pitfall: P-183
+
+  - id: F06
+    severity: warning
+    description: >
+      If the admin proceeds despite cascade warnings, the broadcast must
+      include a remediation plan for affected workspaces. Each affected
+      workspace should receive both the policy removal AND a notification
+      with: "Elicitation policy 'elicit_r3_data_access' removed. Your OBO
+      delegation for Agent X will fail. Add a local elicitation policy or
+      remove the OBO delegation."
+    spec_impact: "CL-05 Fleet Broadcast — remediation notification for cascades"
+    pitfall: P-183
+
+  - id: F07
+    severity: warning
+    description: >
+      Fleet template changes should be versioned and reversible. If the
+      removal causes unexpected cascades, the admin should be able to run
+      `claws fleet template rollback` to restore the previous version. The
+      template version history must include diffs showing what was added,
+      modified, or removed in each version.
+    spec_impact: "CL-05 Fleet Template — versioned rollback"
+    pitfall: P-183
+
+  - id: F08
+    severity: note
+    description: >
+      Dependency tracking between fleet policies and workspace configurations
+      should be a first-class feature. `claws fleet deps` should show a
+      dependency graph: which policies are depended upon by which workspaces,
+      and what governance rules reference each policy. This makes impact
+      analysis transparent and auditable before any change is attempted.
+    spec_impact: "CL-05 Fleet Operations — policy dependency graph"
+    pitfall: P-183
+
+  - id: F09
+    severity: note
+    description: >
+      Post-broadcast health checks must run automatically after template
+      changes. The health check re-runs pinch on all affected workspaces
+      and reports any new failures. If the cascade warnings were overridden
+      and failures occur, the health check provides immediate feedback
+      rather than waiting for the next scheduled compliance scan.
+    spec_impact: "CL-05 Fleet Broadcast — automatic post-broadcast health check"
+    pitfall: P-183

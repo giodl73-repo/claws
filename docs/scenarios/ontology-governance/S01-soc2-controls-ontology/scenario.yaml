@@ -1,0 +1,124 @@
+name: S01-soc2-controls-ontology
+series: ontology-governance
+version: 1
+specs: [CL-04, CL-06, CL-07]
+description: >
+  Validates that SOC2 trust service criteria (CC6.1 logical access, CC7.2
+  system monitoring, CC8.1 change management) expressed in a governance
+  ontology package compile through OntologyIR to enforceable governance
+  rules. The ontology maps SOC2 controls to claws G-rules: CC6.1 maps to
+  G-PERM (capability gating), CC7.2 maps to G-BOUND (audit chain), CC8.1
+  maps to G-SUPPLY (artifact signing). All three rules must appear in the
+  compiled GovernanceIR with SOC2 provenance annotations.
+
+expect:
+  rules_applied: [G-PERM, G-BOUND, G-SUPPLY]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise compliance team publishes a SOC2 ontology package
+  (soc2-governance.onto.yaml) containing 3 control families mapped to
+  claws governance rules. CC6.1 (logical access controls) requires that
+  tools classified R3+ demand explicit capability grants -- mapping to
+  G-PERM. CC7.2 (system monitoring) requires audit events for all R2+
+  tool invocations -- mapping to G-BOUND with audit-chain constraints.
+  CC8.1 (change management) requires that all governance artifacts are
+  signed and versioned -- mapping to G-SUPPLY. The compiler must parse
+  the ontology, lower each SOC2 control to the corresponding G-rule in
+  GovernanceIR, and preserve provenance annotations linking each generated
+  rule back to its SOC2 control ID. Zero runtime footprint: all rules
+  compile to static governance configuration.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      SOC2 controls are abstract (e.g., "logical access controls") while
+      G-rules are concrete (e.g., G-PERM requires tool capability grants).
+      The ontology mapping layer must make the abstraction gap explicit.
+      If the mapping is implicit or convention-based, different ontology
+      authors will map the same SOC2 control to different G-rules. The
+      ontology schema must enforce explicit control-to-rule bindings with
+      a required `maps_to` field per control entry.
+    spec_impact: "CL-06 Ontology Schema -- require explicit maps_to field for control-to-rule bindings"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      SOC2 controls have sub-criteria (CC6.1.1, CC6.1.2) that may map to
+      different parameters of the same G-rule. G-PERM may need different
+      thresholds for CC6.1.1 (user access) vs CC6.1.2 (service access).
+      The ontology must support hierarchical control decomposition where
+      parent controls set the rule target and child controls parameterize
+      it. Flat mapping loses sub-criteria granularity.
+    spec_impact: "CL-06 Ontology -- hierarchical control decomposition for parameterized rules"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Provenance annotations (linking GovernanceIR rules back to SOC2
+      control IDs) must survive the full pipeline: OntologyIR to
+      GovernanceIR to emitted artifacts. If provenance is stripped during
+      IR lowering, the compliance team cannot trace a governance violation
+      back to the specific SOC2 control it enforces. Provenance must be
+      a first-class field in GovernanceIR, not metadata.
+    spec_impact: "CL-04 GovernanceIR -- add provenance as first-class field, not metadata"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The SOC2 ontology package version may drift from the compliance
+      team's current requirements. If the workspace pins soc2-governance
+      v1.2 but the team has published v1.3 with a new control (CC9.1),
+      the compiled governance is stale. The compiler should emit a warning
+      when the ontology package version is older than the latest published
+      version, similar to npm outdated.
+    spec_impact: "CL-07 Package Registry -- ontology version staleness warning"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Multiple ontology packages may map to the same G-rule with
+      conflicting parameters. If soc2-governance maps CC6.1 to G-PERM
+      with threshold R3 and hipaa-governance maps 164.312(a)(1) to G-PERM
+      with threshold R2, the compiler must resolve the conflict. The
+      strictest-wins policy (R2, the lower threshold) is the safe default
+      but must be documented and overridable.
+    spec_impact: "CL-04 OntologyIR -- multi-ontology conflict resolution (strictest-wins default)"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      SOC2 compliance evidence requires demonstrating that controls are
+      implemented and operating effectively. The compiled GovernanceIR
+      rules prove implementation but not operation. The provenance
+      annotations should include a compliance_evidence_type field indicating
+      whether the control is enforced at compile time (static) or requires
+      runtime evidence (audit logs, periodic scans).
+    spec_impact: "CL-06 Ontology -- compliance_evidence_type field for audit readiness"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The scenario assumes a clean 1:1 mapping from SOC2 controls to
+      G-rules. In practice, some SOC2 controls require multiple G-rules
+      working together (CC7.2 monitoring needs both G-BOUND for audit
+      events and G-MEM for context memory limits). The ontology must
+      support 1:N control-to-rule mappings with a conjunction operator
+      specifying that all mapped rules must be satisfied for the control
+      to be met.
+    spec_impact: "CL-06 Ontology -- 1:N control-to-rule mapping with conjunction semantics"
+    pitfall: null

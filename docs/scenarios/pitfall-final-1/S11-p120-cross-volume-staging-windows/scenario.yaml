@@ -1,0 +1,115 @@
+name: S11-p120-cross-volume-staging-windows
+series: pitfall-final-1
+version: 1
+specs: [CL-04]
+description: >
+  Validates that the EMIT phase places the staging directory on the same
+  filesystem as the target to ensure atomic move semantics. On Windows,
+  MoveFileEx across volumes is not atomic and can leave partial governance
+  artifacts. The staging directory MUST reside in .claws/ within the workspace.
+
+expect:
+  governance_ir:
+    version: 1
+    emit:
+      staging_dir: ".claws/staging"
+      same_volume: true
+      atomic_move: true
+    analysis:
+      rules_evaluated: true
+      violations: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 4
+    staging_protocol: same-volume-atomic
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The workspace is on C:\projects\my-agent. The EMIT phase uses %TEMP%
+  (C:\Users\...\AppData\Local\Temp) as the staging directory. On Windows,
+  %TEMP% may be on a different volume (or a RAM disk). MoveFileEx with
+  MOVEFILE_REPLACE_EXISTING across volumes falls back to copy+delete,
+  which is not atomic. If the process crashes mid-copy, the workspace has
+  stale governance artifacts and the staging directory has partial new ones.
+  The agent runs with outdated advisory SKILL.md but no enforcement plugin.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The staging directory MUST be on the same filesystem as the target
+      workspace. Placing it in .claws/staging/ (within the workspace
+      directory) guarantees same-volume. os.rename() on same-volume is
+      atomic on both POSIX (rename(2)) and Windows (MoveFileEx on same
+      volume). This is the simplest and most portable solution.
+    spec_impact: "CL-04 EMIT — staging in .claws/staging/"
+    pitfall: P-120
+
+  - id: F02
+    severity: major
+    description: >
+      Cross-volume move on Windows is copy+delete: CreateFile, WriteFile,
+      CloseHandle, DeleteFile. Four non-atomic operations. Power failure
+      between WriteFile and DeleteFile leaves both copies. Power failure
+      during WriteFile leaves a partial copy. Neither outcome is
+      acceptable for governance artifacts.
+    spec_impact: "CL-04 EMIT — cross-volume move is never atomic"
+    pitfall: P-120
+
+  - id: F03
+    severity: major
+    description: >
+      The partial emit failure mode is dangerous: SKILL.md (advisory L1)
+      is present but index.ts (enforcement L2-L3) is missing. The agent
+      has governance documentation but no enforcement. The operator sees
+      the SKILL.md and believes governance is active. This is worse than
+      no governance because it creates false confidence.
+    spec_impact: "CL-03 runtime — partial emit creates false confidence"
+    pitfall: P-120
+
+  - id: F04
+    severity: warning
+    description: >
+      Symlinks and junction points can make two paths appear to be on
+      the same volume when they are not. The same-volume check should
+      verify the volume serial number (GetVolumeInformation on Windows,
+      stat.st_dev on POSIX), not just the path prefix.
+    spec_impact: "CL-04 EMIT — volume identity verification"
+    pitfall: P-120
+
+  - id: F05
+    severity: warning
+    description: >
+      Network shares (UNC paths like \\server\share) may not support
+      atomic rename. The EMIT phase should detect network paths and
+      either refuse to emit or use a two-phase commit protocol (write
+      marker file, move artifacts, verify marker, remove marker).
+    spec_impact: "CL-04 EMIT — network share handling"
+    pitfall: P-120
+
+  - id: F06
+    severity: major
+    description: >
+      The .claws/ directory must exist before staging begins. If the
+      workspace is freshly initialized, .claws/ may not exist. The EMIT
+      phase must create .claws/staging/ with mkdir -p semantics before
+      writing any artifacts. The creation itself must handle concurrent
+      builds (EEXIST is not an error).
+    spec_impact: "CL-04 EMIT — staging directory creation"
+    pitfall: P-120
+
+  - id: F07
+    severity: note
+    description: >
+      macOS APFS and Linux ext4/btrfs support atomic rename within the
+      same filesystem. The same-volume requirement is not Windows-specific
+      but is most critical on Windows where the failure mode is silent.
+      Cross-platform code should use the same .claws/staging/ approach
+      on all platforms.
+    spec_impact: "CL-04 EMIT — cross-platform same-volume approach"
+    pitfall: P-120

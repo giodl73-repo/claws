@@ -1,0 +1,117 @@
+name: S02-full-emit-workflow
+series: emit-artifacts
+version: 1
+specs: [CL-04]
+description: >
+  Validates full 4-artifact emission including lobster.compiled.yaml. When
+  lobster.yaml is present, the emit phase produces all 4 artifacts: SKILL.md,
+  plugin, exec-approvals, and the governance-injected compiled workflow.
+
+expect:
+  artifacts:
+    - type: skill
+      path: skills/claws-governance/SKILL.md
+      valid: true
+    - type: plugin
+      path: plugins/claws-governance/index.ts
+      valid: true
+    - type: exec-approvals
+      path: exec-approvals.json
+      valid: true
+    - type: workflow
+      path: lobster.compiled.yaml
+      valid: true
+      governance_steps_injected: true
+  plugin_hooks:
+    - before_tool_call
+  skill_content:
+    contains_governance: true
+  approvals:
+    matches_tools: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A full workspace with all 9 files plus lobster.yaml defining a 5-step
+  workflow (trigger -> research -> draft -> send-email -> respond). The EMIT
+  phase produces 4 artifacts. lobster.compiled.yaml must contain the rewritten
+  DAG with governance steps injected before and after the R5 send-email step.
+  The compiled workflow must reference the governance plugin handlers by name.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      lobster.compiled.yaml must be valid YAML that the OC workflow runner
+      can execute. If the governance step injection creates invalid YAML
+      (e.g., step references to handlers that do not exist in the plugin),
+      the workflow fails at runtime. The emit phase must validate the compiled
+      workflow against the lobster schema.
+    spec_impact: "CL-04 EMIT — compiled workflow schema validation"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The compiled workflow references governance handler functions from the
+      plugin (e.g., claws-elicit-send-email). These handler names must match
+      the exported functions in index.ts. If the naming convention differs
+      between workflow and plugin, the reference is broken. A contract between
+      workflow emission and plugin emission is needed.
+    spec_impact: "CL-04 EMIT — workflow-plugin handler name contract"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The original lobster.yaml is NOT modified (lossless principle). The
+      compiled workflow is a separate file. If the user edits lobster.yaml
+      after compilation, lobster.compiled.yaml becomes stale. The three-ring
+      inner ring should detect lobster.yaml edits and trigger recompilation.
+    spec_impact: "CL-05 three-ring — workflow staleness detection"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Four artifacts emitted simultaneously must not have file conflicts.
+      If skills/claws-governance/ already exists from a previous compilation,
+      the emit must overwrite, not append. But overwriting without backup
+      loses any manual edits to the governance SKILL.md. The emit should
+      compare before overwriting.
+    spec_impact: "CL-04 EMIT — overwrite vs incremental emit strategy"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The 4-artifact model means a full build produces 4 files plus compiled
+      data in .claws/compiled/. The total output size for a typical workspace
+      should be estimated: SKILL.md (~2KB), index.ts (~5KB), exec-approvals
+      (~1KB), lobster.compiled (~3KB). If output exceeds expectations, the
+      OPTIMIZE phase may need to reduce generated code size.
+    spec_impact: "CL-04 EMIT — output size budget estimation"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The governance steps injected into lobster.compiled.yaml must themselves
+      be governed. If the injected elicitation step crashes, the workflow
+      should fail-closed for R5 tools. The compiled workflow must carry the
+      fail-mode metadata for each governance step.
+    spec_impact: "CL-04 EMIT — fail-mode in compiled workflow steps"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      If the workflow has conditional branches (if/else in lobster.yaml),
+      governance injection must handle all branches. A branch that skips
+      send-email should not have the elicitation step. A branch that goes
+      through send-email must have it. The DAG rewriting must be branch-aware.
+    spec_impact: "CL-04 workflow inversion — conditional branch handling"
+    pitfall: null

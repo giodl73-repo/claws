@@ -1,0 +1,162 @@
+name: S03-promote-to-fleet
+series: snapshot-lifecycle
+version: 1
+specs: [CL-05]
+description: >
+  Validates snap promote: a local snapshot is promoted to the fleet baseline,
+  becoming the reference point for all drift detection across workspaces.
+  The promoted snapshot must be verified (pinch-clean), versioned, and
+  distributed to the fleet configuration store. Workspaces that diverge
+  from the promoted baseline will be flagged by subsequent drift scans.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      snapshot_name: enterprise-v2.3
+      snapshot_action: promote
+      fleet_target: all
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 1
+    types: [fleet-baseline]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A fleet admin runs `claws snap promote enterprise-v2.3` to push a local
+  snapshot as the new fleet baseline. The snapshot was created from a
+  reference workspace with trust tier T3, 15 tools (R1-R3 only), full
+  elicitation policies, and zero violations. After promotion, a drift
+  scan across 20 workspaces compares each against the promoted baseline.
+  3 workspaces had T2 trust tiers (now flagged as drifted), and 2
+  workspaces had R4 tools not present in the baseline (flagged as
+  policy additions).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      snap promote pushes a snapshot to "fleet baseline." But the transport
+      mechanism is undefined. Is the baseline stored in a central server,
+      a shared filesystem, a git repository, or an API? Each option has
+      different availability, authentication, and consistency guarantees.
+      The spec must define the fleet baseline storage backend or provide
+      a pluggable storage interface.
+    spec_impact: "CL-05 snap promote — define fleet baseline storage backend"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Promoting a snapshot as fleet baseline is a security-sensitive
+      operation: it defines the governance standard for ALL workspaces.
+      A malicious or mistaken promote could lower the baseline trust tier,
+      allowing all workspaces to pass drift checks with weaker governance.
+      snap promote must require authentication and authorization, not just
+      any local user running the command.
+    spec_impact: "CL-05 snap promote — authentication and authorization requirement"
+    pitfall: P-189
+
+  - id: F03
+    severity: major
+    description: >
+      The promoted baseline should be pinch-clean (zero violations). If
+      snap promote allows promoting a snapshot with violations, the fleet
+      baseline itself is non-compliant, and drift detection compares
+      workspaces against a broken standard. snap promote must validate
+      the snapshot before promotion, refusing to promote if violations
+      exist.
+    spec_impact: "CL-05 snap promote — mandatory pinch validation before promotion"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      When the baseline changes, all existing drift reports become stale.
+      Workspaces that were "compliant" against the old baseline may be
+      "drifted" against the new one. The promote operation should trigger
+      a fleet-wide re-scan notification (or at minimum, invalidate cached
+      drift results). Without invalidation, admins see stale compliance
+      status until the next scheduled scan.
+    spec_impact: "CL-05 snap promote — invalidate cached drift results on baseline change"
+    pitfall: P-190
+
+  - id: F05
+    severity: warning
+    description: >
+      The baseline is a point-in-time snapshot from ONE workspace. But
+      workspaces may have legitimate differences: dev workspaces need R4
+      tools that prod workspaces do not. A single baseline for all
+      workspaces creates false drift positives. The spec should support
+      per-environment baselines (dev-baseline, staging-baseline, prod-
+      baseline) or workspace-group targeting in promote.
+    spec_impact: "CL-05 snap promote — per-environment or grouped baselines"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Fleet baselines should be versioned: enterprise-v2.3, enterprise-v2.4.
+      If a promote goes wrong, the admin needs to roll back to the previous
+      baseline. snap promote should maintain baseline history (at least the
+      last N baselines), not just overwrite the current baseline. This is
+      analogous to configuration version history.
+    spec_impact: "CL-05 snap promote — baseline version history and rollback"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      After promotion, drift detection flags 3 workspaces with T2 trust
+      tiers. But T2 may be intentional for those workspaces (lower-risk
+      environments). The drift report should distinguish "configuration
+      differs from baseline" from "configuration violates governance rules."
+      A workspace with T2 in a T3-baseline fleet is different but not
+      necessarily non-compliant.
+    spec_impact: "CL-05 drift + promote — distinguish intentional deviation from violation"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      The promote command modifies fleet-level state that affects all
+      workspaces. This is the highest-blast-radius operation in claws.
+      The spec should require a confirmation prompt ("promoting baseline
+      affects 20 workspaces, proceed?") or a --dry-run mode that shows
+      what would change without actually promoting. This is analogous to
+      terraform plan before apply.
+    spec_impact: "CL-05 snap promote — confirmation prompt and --dry-run mode"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The promoted snapshot includes governance configuration but not the
+      full workspace content. A baseline that specifies "T3 trust tier,
+      elicitation required" but not specific tool lists is a POLICY baseline.
+      A baseline that specifies exact tools is a CONFIGURATION baseline.
+      The spec should clarify which level the baseline operates at: policy
+      constraints (flexible) vs exact configuration (rigid).
+    spec_impact: "CL-05 snap promote — policy baseline vs configuration baseline"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      snap promote is the write side of the fleet baseline. drift is the
+      read side. broadcast is the enforcement side. These three operations
+      form a fleet governance lifecycle: promote (define standard) -> drift
+      (detect deviations) -> broadcast (enforce standard). The spec
+      describes these individually but does not connect them as a lifecycle.
+      A lifecycle diagram would clarify the operational flow.
+    spec_impact: "CL-05 Fleet Operations — promote/drift/broadcast lifecycle diagram"
+    pitfall: null

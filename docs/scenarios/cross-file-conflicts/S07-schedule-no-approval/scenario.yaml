@@ -1,0 +1,117 @@
+name: S07-schedule-no-approval
+series: cross-file-conflicts
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates SCHEDULE-NO-APPROVAL conflict: HEARTBEAT.md defines a scheduled
+  task that uses an R5 tool, but no approval policy exists for scheduled
+  invocations. Scheduled R5 tool use cannot prompt the user for approval
+  because the user is not present.
+
+expect:
+  governance_ir:
+    version: 1
+    analysis:
+      conflicts:
+        - category: SCHEDULE-NO-APPROVAL
+          severity: error
+          files: [HEARTBEAT.md, TOOLS.md]
+          schedule: hourly
+          tool_name: send-report-email
+          risk_level: 5
+          resolution: "pre-authorize in USER.md or remove R5 tool from schedule"
+  violations:
+    - category: SCHEDULE-NO-APPROVAL
+      severity: error
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  HEARTBEAT.md defines an hourly schedule that triggers a workflow including
+  "send-report-email" (R5/COMMUNICATE/OBO). The R5 tool requires human
+  approval (elicitation gate), but the schedule runs without a human present.
+  The elicitation gate has no one to ask. The approval timeout (300s) would
+  fire, and deny-default would block the tool every time. The schedule is
+  configured to do something it can never do.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      This is arguably the most important cross-file conflict. A scheduled R5
+      tool with deny-default and no pre-authorization is guaranteed to fail
+      every execution. The conflict is not "might happen" — it is deterministic.
+      The severity should be error with no advisory mode exception.
+    spec_impact: "CL-04 conflict severity — deterministic failure is always error"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The resolution "pre-authorize in USER.md" means the user grants standing
+      approval for the scheduled R5 tool. This bypasses the per-use elicitation
+      gate. The standing approval should have conditions: only during scheduled
+      hours, only for the specific report, with audit logging. Unconditional
+      standing approval for R5 is dangerous.
+    spec_impact: "CL-02 G-ELICIT — conditional standing approval for schedules"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      HEARTBEAT.md may not explicitly name the tools used in the scheduled
+      task. It might say "run the daily-report workflow" which references
+      lobster.yaml which uses send-report-email. The conflict detection must
+      resolve the full chain: HEARTBEAT -> workflow -> tool -> R5 classification.
+    spec_impact: "CL-04 ANALYZE — transitive tool resolution from schedules"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      An alternative resolution is to replace the R5 tool with an R3 version:
+      instead of "send-report-email" (sends to external recipients), use
+      "save-report-draft" (writes to local file for manual send). The compiler
+      could suggest risk-level alternatives when the tool set includes lower-
+      risk equivalents.
+    spec_impact: "CL-04 conflict resolution — tool alternative suggestions"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      Some platforms support async elicitation: the scheduled task triggers,
+      sends a notification to the user, and waits for approval before executing
+      the R5 tool. This would allow scheduled R5 tools without pre-authorization.
+      But the 300s timeout means the schedule must allow for up to 5-minute
+      delays, which may break time-sensitive workflows.
+    spec_impact: "CL-02 G-ELICIT — async elicitation for scheduled tasks"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      If the schedule runs at 3 AM and no one approves, the deny-default blocks
+      the tool. The schedule retries on the next interval. If the user never
+      approves, the scheduled task is permanently blocked. The audit chain fills
+      with denied-by-timeout events. The compiler should detect this pattern
+      and flag it as a misconfiguration, not just a conflict.
+    spec_impact: "CL-04 ANALYZE — perpetual denial pattern detection"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      G-ELICIT-CHAIN says no transitive OBO delegation. If the scheduled task
+      delegates to a subagent that uses the R5 tool, the pre-authorization
+      must be on the subagent's R5 tool, not the parent's delegation. The
+      conflict detection must follow the delegation chain to find where the
+      R5 tool is actually invoked.
+    spec_impact: "CL-02 G-ELICIT-CHAIN — schedule delegation approval chain"
+    pitfall: null

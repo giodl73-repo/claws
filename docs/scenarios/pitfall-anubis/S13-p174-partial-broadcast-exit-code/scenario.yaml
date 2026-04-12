@@ -1,0 +1,142 @@
+name: S13-p174-partial-broadcast-exit-code
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that partial broadcast success produces a distinct exit code
+  (exit 2) rather than exit 0, so CI pipelines and monitoring tools detect
+  that some workspaces failed to receive the policy update. A fleet of 10
+  workspaces where 3 fail must not report success.
+
+expect:
+  workspaces:
+    total: 10
+    updated: 7
+    failed: 3
+    failed_reasons:
+      - workspace: workspace-alpha
+        reason: network-timeout
+      - workspace: workspace-delta
+        reason: disk-full
+      - workspace: workspace-kappa
+        reason: permission-denied
+  drift_count: 3
+  broadcast_result:
+    status: partial
+    exit_code: 2
+    policy: soc2-v3
+    workspaces_updated: 7
+    workspaces_failed: 3
+    retry_available: true
+  compliance:
+    current_policy: 7
+    stale_policy: 3
+
+simulate:
+  failures:
+    - component: broadcast
+      type: partial-success-exit-code
+      error: "3 of 10 workspaces failed but broadcast returned exit 0"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet admin runs `claws fleet broadcast --policy soc2-v3` across 10
+  workspaces. 7 workspaces receive the update successfully. Workspace-alpha
+  times out (network share offline), workspace-delta has no disk space for
+  the policy file, and workspace-kappa has a read-only mount. The broadcast
+  command returns exit code 0 because the majority succeeded. The CI pipeline
+  that gates on the broadcast result sees exit 0 and marks the deployment as
+  complete. The 3 failed workspaces are now running stale policy, creating a
+  silent drift that goes undetected until the next manual audit.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Exit code 0 for partial success is indistinguishable from full success
+      in CI pipelines. Any tool that checks `$?` will treat partial broadcast
+      as complete. CL-05 must mandate exit code 2 for partial success, exit 1
+      for total failure, and exit 0 only when all workspaces confirm receipt.
+      This three-level exit code scheme matches POSIX conventions for partial
+      completion.
+    spec_impact: "CL-05 Fleet Broadcast — three-level exit code scheme"
+    pitfall: P-174
+
+  - id: F02
+    severity: major
+    description: >
+      The broadcast result must include a machine-readable failure manifest
+      listing each failed workspace, the failure reason, and a retry command.
+      Without this manifest, operators must manually diff the fleet roster
+      against the success list. For a 200-workspace fleet, this manual diff
+      is impractical and error-prone.
+    spec_impact: "CL-05 Fleet Broadcast — failure manifest in output"
+    pitfall: P-174
+
+  - id: F03
+    severity: major
+    description: >
+      Partial broadcast must automatically schedule a retry for failed
+      workspaces. The retry mechanism should use exponential backoff with
+      a configurable maximum retry count (default 3). After exhausting
+      retries, the broadcast must escalate to a CRITICAL alert. Without
+      automatic retry, operators forget failed workspaces and drift becomes
+      permanent.
+    spec_impact: "CL-05 Fleet Broadcast — automatic retry scheduling"
+    pitfall: P-174
+
+  - id: F04
+    severity: major
+    description: >
+      The broadcast exit code must be documented in CL-01 CLI surface as
+      a formal contract. Exit codes are part of the API for automation
+      consumers. If the exit code semantics are undocumented, different
+      CI tools will interpret partial results differently, leading to
+      inconsistent fleet governance enforcement across organizations.
+    spec_impact: "CL-01 CLI Surface — exit code contract documentation"
+    pitfall: P-174
+
+  - id: F05
+    severity: warning
+    description: >
+      Fleet compliance dashboards must distinguish between "current policy"
+      and "stale policy" workspaces. A dashboard showing 10/10 compliant
+      when 3 workspaces have stale policy is misleading. The compliance
+      metric should show 7/10 on current policy, 3/10 on previous policy,
+      with timestamps for each workspace's last successful broadcast.
+    spec_impact: "CL-05 Fleet Compliance — stale policy visibility"
+    pitfall: P-174
+
+  - id: F06
+    severity: warning
+    description: >
+      The --strict flag should change partial success from exit 2 to exit 1,
+      treating any failure as total failure. Enterprise CI pipelines that
+      require 100% coverage should use --strict. Development fleets that
+      tolerate partial updates use the default. This gives operators control
+      over their failure tolerance without changing the default behavior.
+    spec_impact: "CL-05 Fleet Broadcast — --strict flag for zero-tolerance"
+    pitfall: P-174
+
+  - id: F07
+    severity: warning
+    description: >
+      Partial broadcast should emit a structured JSON report alongside the
+      exit code. The JSON report contains workspace-level success/failure
+      details that monitoring tools (Datadog, Splunk, SIEM) can ingest.
+      Exit codes alone are insufficient for observability at fleet scale.
+      The report path should be printed to stdout for capture.
+    spec_impact: "CL-05 Fleet Broadcast — JSON report for observability"
+    pitfall: P-174
+
+  - id: F08
+    severity: note
+    description: >
+      For idempotent broadcast retries, each workspace must store a
+      broadcast receipt (policy hash + timestamp). Retrying a broadcast
+      that already succeeded at a workspace should be a no-op. Without
+      receipts, retries may trigger unnecessary recompilation in workspaces
+      that already have the current policy.
+    spec_impact: "CL-05 Fleet Broadcast — idempotent retry via receipts"
+    pitfall: P-174

@@ -1,0 +1,123 @@
+name: S03-schedule-perpetual-denial
+series: pitfall-coverage-1
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates detection of deterministic schedule failures. P-054 identifies
+  that HEARTBEAT.md can schedule an R5 tool for unattended execution, but
+  the elicitation gate requires human approval that will never arrive.
+  The tool is permanently denied, filling the audit chain with timeout
+  events. The compiler must detect this at compile time as a hard error.
+
+expect:
+  governance_ir:
+    version: 1
+    analysis:
+      conflicts:
+        - category: SCHEDULE-NO-APPROVAL
+          severity: error
+          tool_name: deploy-production
+          risk_level: 5
+          schedule_unattended: true
+          pre_authorization: false
+          resolution: "add pre-authorization in claws.json or remove R5 tool from schedule"
+      violations:
+        - rule: SCHEDULE-NO-APPROVAL
+          tool: deploy-production
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - phase: ANALYZE
+      conflict: SCHEDULE-NO-APPROVAL
+  halt: null
+  budget: null
+
+problem: >
+  HEARTBEAT.md schedules deploy-production to run at 02:00 AM daily.
+  TOOLS.md classifies deploy-production as R5 (OBO). No pre-authorization
+  exists in claws.json. No human is available at 02:00 AM to approve the
+  elicitation prompt. The tool will be denied every invocation. The audit
+  chain accumulates denied-by-timeout events indefinitely. This is a
+  deterministic failure detectable at compile time.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The SCHEDULE-NO-APPROVAL conflict must detect the combination of
+      (R5 tool + scheduled execution + no pre-authorization). Each
+      individual piece is valid — R5 tools can exist, schedules can
+      exist, pre-authorization is optional — but together they create
+      a guaranteed failure. This is a three-way cross-file conflict.
+    spec_impact: "CL-04 ANALYZE — three-way conflict detection (HEARTBEAT + TOOLS + claws.json)"
+    pitfall: P-054
+
+  - id: F02
+    severity: major
+    description: >
+      R4 tools with elicitation gates have the same problem when
+      scheduled during unattended hours, but only if the workspace
+      has no pre-authorization. The detection must generalize beyond
+      R5 to any tool where elicitation is required and no human is
+      available. The risk threshold is configurable per workspace.
+    spec_impact: "CL-02 G-ELICIT — perpetual denial applies to R4+ without pre-auth"
+    pitfall: P-054
+
+  - id: F03
+    severity: major
+    description: >
+      Pre-authorization in claws.json resolves the conflict for
+      specific tools. But pre-authorization for an R5 tool is itself
+      a significant governance decision. The compiler should emit a
+      warning when pre-authorization is used for R5, even though it
+      resolves the schedule conflict.
+    spec_impact: "CL-02 G-ELICIT — R5 pre-authorization deserves dedicated warning"
+    pitfall: P-054
+
+  - id: F04
+    severity: warning
+    description: >
+      The "unattended hours" concept requires the schedule context
+      (time, timezone) and the workspace configuration (business hours).
+      If claws.json does not specify business hours, the compiler cannot
+      determine if a schedule runs unattended. Default: all scheduled
+      R5 tools without pre-auth are flagged regardless of time.
+    spec_impact: "CL-01 claws.json — business hours configuration for schedule validation"
+    pitfall: P-054
+
+  - id: F05
+    severity: warning
+    description: >
+      The audit chain filling with denied-by-timeout events is a
+      secondary concern but can mask real incidents. If 1000 timeout
+      events per day accumulate, audit log review becomes impractical.
+      The compiler warning should mention audit chain pollution as a
+      consequence, not just the denied execution.
+    spec_impact: "CL-02 audit chain — denied-by-timeout event volume management"
+    pitfall: P-054
+
+  - id: F06
+    severity: note
+    description: >
+      HEARTBEAT.md may schedule the same R5 tool at both attended and
+      unattended times (e.g., 10:00 AM and 02:00 AM). The 10:00 AM
+      run has a human available; the 02:00 AM run does not. The conflict
+      should be per-schedule-entry, not per-tool. One entry may be valid
+      while another is not.
+    spec_impact: "CL-04 ANALYZE — per-schedule-entry conflict granularity"
+    pitfall: P-054
+
+  - id: F07
+    severity: major
+    description: >
+      If the compiler allows perpetual denial to pass (as a warning),
+      runtime behavior is predictable but wasteful. The three-rings
+      watch ring will see repeated denials and trigger a doctor-ring
+      alert. But the doctor ring has no remediation — the schedule
+      cannot be changed at runtime. The issue must be caught at compile
+      time to prevent this dead-end alerting loop.
+    spec_impact: "CL-05 three-rings — compile-time detection prevents runtime dead loops"
+    pitfall: P-054

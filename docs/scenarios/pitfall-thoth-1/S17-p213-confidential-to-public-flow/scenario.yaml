@@ -1,0 +1,136 @@
+name: S17-p213-confidential-to-public-flow
+series: pitfall-thoth-1
+version: 1
+specs: [CL-02]
+description: >
+  Validates that CONFIDENTIAL data cannot flow to a PUBLIC-rated agent through
+  an intermediate agent. High-water-mark label propagation must trace the full
+  delegation chain, not just adjacent pairs, to detect label downgrades.
+
+expect:
+  attack_class: data-flow-label-violation
+  defense_layer: g-a2a-flow
+  blocked: true
+  audit_event:
+    type: label-downgrade-detected
+    tool: "claws compile"
+    risk_level: 5
+    outcome: DENY
+    reason: "CONFIDENTIAL data flows to PUBLIC agent 'public-reporter' via intermediate 'internal-processor'"
+
+simulate:
+  failures:
+    - component: label-propagation
+      type: adjacent-only-check
+      error: "Label check CONFIDENTIAL→INTERNAL passed; INTERNAL→PUBLIC passed; transitive CONFIDENTIAL→PUBLIC missed"
+    - component: a2a-flow
+      type: label-downgrade
+      error: "Data label downgraded from CONFIDENTIAL to PUBLIC through 2-hop chain"
+  halt: null
+  budget: null
+
+problem: >
+  Three agents form a delegation chain: "secret-analyst" (CONFIDENTIAL) delegates
+  to "internal-processor" (INTERNAL) which delegates to "public-reporter" (PUBLIC).
+  The adjacent-pair label check validates secret-analyst→internal-processor as
+  CONFIDENTIAL→INTERNAL (downgrade by 1 level, within tolerance). It validates
+  internal-processor→public-reporter as INTERNAL→PUBLIC (downgrade by 1 level,
+  within tolerance). Each hop appears acceptable. But the end-to-end flow is
+  CONFIDENTIAL→PUBLIC — a 2-level downgrade that violates the high-water-mark
+  principle. The compiler only checks adjacent pairs and never computes the
+  transitive label propagation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Adjacent-pair label checking is fundamentally insufficient for
+      delegation chains longer than 2 agents. The high-water-mark label
+      must propagate through the entire chain: if the source is CONFIDENTIAL,
+      every subsequent agent in the chain must be rated CONFIDENTIAL or
+      higher. The compiler must compute the maximum label in each chain
+      and verify that no agent in the chain has a rating below that maximum.
+    spec_impact: "CL-02 G-A2A-FLOW — transitive high-water-mark propagation"
+    pitfall: P-213
+
+  - id: F02
+    severity: major
+    description: >
+      The delegation chain may not be linear. Agent A delegates to B and C;
+      B delegates to D; C delegates to D. The label propagation must handle
+      DAGs (directed acyclic graphs), not just linear chains. For each agent,
+      the effective label is the maximum of all incoming labels from all paths.
+      Agent D's effective label is max(label(A→B→D), label(A→C→D)).
+    spec_impact: "CL-02 G-A2A-FLOW — DAG-aware label propagation"
+    pitfall: P-213
+
+  - id: F03
+    severity: major
+    description: >
+      The "within tolerance" concept for adjacent downgrades is dangerous.
+      If each hop is allowed a 1-level downgrade, then a chain of N agents
+      allows an N-1 level total downgrade. There should be no tolerance for
+      label downgrades in delegation chains. The high-water-mark is absolute:
+      data at level X can only flow to agents at level X or above, regardless
+      of the number of hops.
+    spec_impact: "CL-02 G-A2A-FLOW — zero-tolerance label downgrade in chains"
+    pitfall: P-213
+
+  - id: F04
+    severity: major
+    description: >
+      The intermediate agent (internal-processor) may not intend to forward
+      CONFIDENTIAL data. It receives a task, processes it, and delegates
+      the result. But if the result contains CONFIDENTIAL information (which
+      it does, because the input was CONFIDENTIAL), the label must be
+      inherited. Label propagation is about data provenance, not about
+      what the intermediate agent "thinks" it is forwarding.
+    spec_impact: "CL-02 G-A2A-FLOW — label inheritance from input to output"
+    pitfall: P-213
+
+  - id: F05
+    severity: warning
+    description: >
+      The diagnostic for label violation must show the full chain with
+      labels at each hop: "CONFIDENTIAL(secret-analyst) → INTERNAL
+      (internal-processor) → PUBLIC(public-reporter). High-water-mark
+      CONFIDENTIAL violated at public-reporter (PUBLIC < CONFIDENTIAL)."
+      This enables the developer to understand where to break the chain
+      or upgrade the agent's clearance level.
+    spec_impact: "CL-02 diagnostics — full chain label visualization"
+    pitfall: P-213
+
+  - id: F06
+    severity: major
+    description: >
+      Runtime enforcement must complement compile-time detection. Even if
+      the compiler flags the chain at compile time, runtime data can flow
+      through unexpected paths due to dynamic delegation. The runtime must
+      track data labels on every message and enforce the high-water-mark
+      at every hop, not just at the delegation declaration level.
+    spec_impact: "CL-03 runtime — per-message label tracking and enforcement"
+    pitfall: P-213
+
+  - id: F07
+    severity: warning
+    description: >
+      Data transformation may legitimately reduce sensitivity: a CONFIDENTIAL
+      dataset aggregated into anonymous statistics may be PUBLIC-safe. The
+      system must support explicit label declassification annotations where
+      an agent declares "output of this operation is INTERNAL despite
+      CONFIDENTIAL input." These annotations must be audited and require
+      human approval via G-ELICIT.
+    spec_impact: "CL-02 G-A2A-FLOW — explicit declassification with human approval"
+    pitfall: P-213
+
+  - id: F08
+    severity: warning
+    description: >
+      Label propagation in cycles (A→B→A) would cause infinite propagation.
+      The cycle detection in G-A2A-DELEGATE must run before label propagation
+      (per P-214). Label propagation on a DAG is well-defined; on a cyclic
+      graph it requires fixed-point iteration which may not converge if
+      labels can change. Cycle-free graph is a precondition for label
+      propagation correctness.
+    spec_impact: "CL-02 G-A2A-FLOW — cycle-free precondition for label propagation"
+    pitfall: P-213

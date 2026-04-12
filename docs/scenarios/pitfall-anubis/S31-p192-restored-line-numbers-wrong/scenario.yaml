@@ -1,0 +1,134 @@
+name: S31-p192-restored-line-numbers-wrong
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that snap restore re-runs pinch after restoration rather than
+  trusting the saved IR blindly. If files were modified between save and
+  restore, the saved IR's violation line numbers reference wrong locations,
+  producing misleading diagnostic output.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      snapshot_name: baseline-v1
+      snapshot_action: restore
+      recompile_after_restore: true
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings:
+        - code: W-SNAP-RECOMPILE
+          message: "IR recompiled after restore — saved IR line numbers may be stale"
+  violations: []
+  warnings:
+    - code: W-SNAP-RECOMPILE
+      message: "Post-restore recompilation ensures line number accuracy"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: snapshot-restore
+      type: stale-line-numbers
+      error: "Restored IR references TOOLS.md:42 but that line is now a comment — file was modified between save and restore"
+  halt: null
+  budget: null
+
+problem: >
+  A developer saves a snapshot at 14:00. The snapshot's IR records a violation
+  at TOOLS.md line 42 (an R4 tool missing an elicitation policy). At 15:00,
+  the developer adds 10 lines of comments at the top of TOOLS.md, pushing all
+  content down by 10 lines. The R4 tool is now at line 52. At 16:00, the
+  developer restores the snapshot. The restored IR still says the violation is
+  at TOOLS.md line 42. The developer opens TOOLS.md and goes to line 42 —
+  which is now a comment, not the R4 tool. They waste 20 minutes searching for
+  the violation before realizing the line numbers are stale. In a large
+  TOOLS.md with 200+ lines and multiple violations, stale line numbers make
+  the diagnostic output useless.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must mandate that snap restore always re-runs pinch (recompilation)
+      on the restored source files to produce fresh IR with correct line
+      numbers. The saved IR in the snapshot is used only for coherence
+      verification (comparing the recompiled IR against the saved IR to
+      detect tampering), not as the active IR. The active IR is always the
+      result of compilation from source files.
+    spec_impact: "CL-05 Snapshot Restore — mandatory post-restore recompilation"
+    pitfall: P-192
+
+  - id: F02
+    severity: major
+    description: >
+      The post-restore recompilation must happen automatically, not as a
+      separate step the developer must remember. The restore workflow is:
+      (1) restore source files, (2) recompile from restored source files,
+      (3) compare recompiled IR to saved IR for integrity, (4) use recompiled
+      IR as the active IR. Steps 2-4 are invisible to the developer — they
+      see "restore complete" with up-to-date diagnostics.
+    spec_impact: "CL-05 Snapshot Restore — automatic recompilation workflow"
+    pitfall: P-192
+
+  - id: F03
+    severity: major
+    description: >
+      If the recompiled IR differs from the saved IR (beyond expected
+      differences like line number shifts), the restore must warn: "Restored
+      IR differs from saved IR. This may indicate file modification between
+      save and restore, or IR schema changes between claws versions." The
+      warning should include a diff of the governance-meaningful differences
+      (not line number differences, which are expected).
+    spec_impact: "CL-05 Snapshot Restore — saved-vs-recompiled IR diff"
+    pitfall: P-192
+
+  - id: F04
+    severity: major
+    description: >
+      For the dead man switch (automated restore), recompilation is critical.
+      The dead man switch may fire hours or days after the snapshot was
+      saved. Source files may have changed significantly. Without
+      recompilation, the dead man switch restores files but leaves stale IR
+      with wrong line numbers. The developer investigating the failed
+      upgrade gets misleading diagnostics from the dead man switch recovery.
+    spec_impact: "CL-05 Dead Man Switch — post-restore recompilation"
+    pitfall: P-192
+
+  - id: F05
+    severity: warning
+    description: >
+      The recompilation should use the same claws version that will be
+      running the governance enforcement. If the restore is from a snapshot
+      created with claws 2.1 but the current version is 3.0, the
+      recompilation uses 3.0's compiler. This produces IR compatible with
+      the running enforcement engine, even though the source files were
+      from the 2.1 era.
+    spec_impact: "CL-05 Snapshot Restore — current-version recompilation"
+    pitfall: P-192
+
+  - id: F06
+    severity: warning
+    description: >
+      Performance impact of post-restore recompilation should be minimal.
+      Recompilation of 9 workspace files is fast (< 1 second for most
+      workspaces). The spec should set a performance budget: recompilation
+      must complete within 5 seconds for workspaces with up to 500 lines
+      of source files. If recompilation is slow, the restore experience
+      degrades.
+    spec_impact: "CL-05 Snapshot Restore — recompilation performance budget"
+    pitfall: P-192
+
+  - id: F07
+    severity: note
+    description: >
+      The saved IR in the snapshot serves as a tamper detection mechanism.
+      If the recompiled IR differs from the saved IR in governance-meaningful
+      ways (not just line numbers), someone may have modified the source
+      files in the snapshot. The integrity check should flag this as a
+      potential security issue, not just an informational warning.
+    spec_impact: "CL-05 Snapshot Restore — tamper detection via IR comparison"
+    pitfall: P-192

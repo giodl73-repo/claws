@@ -1,0 +1,144 @@
+name: S10-p206-clock-manipulation-bypass
+series: pitfall-thoth-1
+version: 1
+specs: [CL-03, CL-02]
+description: >
+  Validates that time-bounded standing approvals cannot be bypassed through
+  system clock manipulation. An attacker manipulates the system clock (NTP
+  poisoning, VM time drift, container time injection) to make the runtime
+  believe it is within the authorized time window when it is not. The runtime
+  must use monotonic clock plus trusted wall-clock verification.
+
+expect:
+  attack_class: standing-approval-bypass
+  defense_layer: g-elicit
+  blocked: true
+  audit_event:
+    type: obo-clock-integrity-violation
+    tool: "deploy-production"
+    risk_level: 5
+    outcome: DENY
+    reason: "wall clock drift exceeds 30s from trusted source; standing approval time window untrusted"
+
+simulate:
+  failures:
+    - component: approval-flow
+      type: clock-manipulation
+      error: "system clock advanced 6 hours via NTP override; standing approval time window falsely satisfied"
+  halt: null
+  budget: null
+
+problem: >
+  A standing approval for deploy-production is configured with a time window
+  condition: {hours: "09:00-17:00", timezone: "America/New_York"}. At 22:00 EST
+  (outside the window), an attacker with container access modifies the system
+  clock to show 14:00 EST. The runtime reads the system clock, determines that
+  14:00 is within the 09:00-17:00 window, and allows deploy-production to execute
+  without user elicitation. The deployment occurs at 22:00 when the operations
+  team is offline and cannot respond to incidents. Alternatively, an NTP poisoning
+  attack against the host's time synchronization subtly drifts the clock forward
+  by 6 hours over several days, making the manipulation harder to detect. The
+  standing approval's time window becomes meaningless if the clock source is
+  untrusted.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The runtime must use two independent time sources for standing approval
+      time window checks: (1) system wall clock for the current time-of-day,
+      and (2) a monotonic clock to measure elapsed time since last verified
+      wall-clock synchronization. If the wall clock changes by more than 30
+      seconds between monotonic checkpoints (indicating manipulation), all
+      time-bounded standing approvals are suspended until the clock is re-
+      verified against a trusted source.
+    spec_impact: "CL-03 runtime — dual-clock verification for time-bounded standing approvals"
+    pitfall: P-206
+
+  - id: F02
+    severity: major
+    description: >
+      The trusted wall-clock source must be external to the host. The runtime
+      should periodically query a trusted NTP server (or the platform's time
+      service API) and compare against the local wall clock. A drift exceeding
+      30 seconds triggers a clock integrity alert. The trusted source endpoint
+      must be configurable (for air-gapped environments) but must default to
+      a well-known NTP pool. The query interval should be 5 minutes.
+    spec_impact: "CL-03 runtime — external trusted time source verification (5-min interval)"
+    pitfall: P-206
+
+  - id: F03
+    severity: major
+    description: >
+      When a clock integrity violation is detected, the audit event must include
+      the local clock reading, the trusted source reading, the drift magnitude,
+      and the monotonic elapsed time since last verified sync. This forensic
+      data enables the operator to determine whether the drift was accidental
+      (VM suspend/resume, NTP sync delay) or malicious (deliberate clock
+      manipulation). The SIEM classification should default to "suspicious"
+      for drifts over 60 seconds.
+    spec_impact: "CL-03 audit — clock integrity forensics in drift event"
+    pitfall: P-206
+
+  - id: F04
+    severity: major
+    description: >
+      Monotonic clock (process.hrtime or performance.now) cannot be
+      manipulated by system clock changes. The runtime should use monotonic
+      time for all security-critical elapsed-time calculations (token expiry,
+      rate limiting windows, cooldown periods). Wall clock is used ONLY for
+      human-readable time-of-day conditions in standing approvals, and even
+      then it must be cross-checked against the monotonic-derived expected
+      wall time.
+    spec_impact: "CL-03 runtime — monotonic clock for all security-critical time measurements"
+    pitfall: P-206
+
+  - id: F05
+    severity: warning
+    description: >
+      Container environments (Docker, Kubernetes) inherit the host's clock
+      by default. An attacker with host access can manipulate the clock for
+      all containers simultaneously. In Kubernetes, a compromised node's
+      clock affects all pods on that node. The trusted external time check
+      must originate from within the container (outbound NTP query), not
+      rely on the host's time synchronization being correct.
+    spec_impact: "CL-03 runtime — container-originated time verification, not host-inherited"
+    pitfall: P-206
+
+  - id: F06
+    severity: major
+    description: >
+      VM suspend/resume (common in developer environments and CI/CD) causes
+      the wall clock to jump forward by the suspend duration. This is not
+      malicious but has the same effect as clock manipulation: the standing
+      approval time window may be satisfied or violated by the jump. The
+      runtime must detect suspend/resume events (monotonic gap > 5 seconds)
+      and re-verify the wall clock before honoring any time-bounded standing
+      approval.
+    spec_impact: "CL-03 runtime — suspend/resume detection with wall-clock re-verification"
+    pitfall: P-206
+
+  - id: F07
+    severity: warning
+    description: >
+      Timezone manipulation is a subtler variant: the attacker changes the
+      system timezone rather than the clock. If the standing approval says
+      "09:00-17:00 America/New_York" and the system timezone is changed to
+      "Asia/Tokyo," the local time 22:00 JST maps to 09:00 EST, satisfying
+      the window. The time window check must use the standing approval's
+      configured timezone, not the system timezone. The runtime must resolve
+      the timezone from the approval condition, not from the environment.
+    spec_impact: "CL-03 runtime — approval-configured timezone, not system timezone"
+    pitfall: P-206
+
+  - id: F08
+    severity: warning
+    description: >
+      If the trusted external time source is unavailable (network outage,
+      air-gapped environment), the runtime must decide whether to trust the
+      local clock or suspend time-bounded standing approvals. The safe default
+      is to suspend: if the clock cannot be verified, time-bounded approvals
+      revert to per-invocation elicitation. The operator can override this
+      for air-gapped environments by configuring a local time authority.
+    spec_impact: "CL-03 runtime — fail-closed time-bounded approvals when trusted source unavailable"
+    pitfall: P-206

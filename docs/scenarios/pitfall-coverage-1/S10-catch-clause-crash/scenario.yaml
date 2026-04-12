@@ -1,0 +1,143 @@
+name: S10-catch-clause-crash
+series: pitfall-coverage-1
+version: 1
+specs: [CL-04, CL-02, CL-03]
+description: >
+  Validates that the emitted fail-mode handler's catch clause is structurally
+  minimal and cannot crash. P-070 identifies that the Gateway's fail-open
+  default takes over if the catch clause itself throws, allowing R5 tools to
+  execute ungoverned. The compiler must pre-compute a risk map and verify
+  the catch clause contains no allocations, async operations, or complex
+  logic through post-emit static analysis.
+
+expect:
+  governance_ir:
+    version: 1
+    emit:
+      fail_mode_handler:
+        risk_map_precomputed: true
+        catch_clause_minimal: true
+        catch_clause_ops: ["map_get", "default_deny"]
+        static_verification: passed
+    analysis:
+      rules_evaluated: true
+      violations: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 4
+    static_verified: [index.ts]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The compiler emits a Gateway plugin (index.ts) with a before_tool_call
+  hook. The hook's try block evaluates governance rules. The catch block is
+  the last line of defense: if rule evaluation fails, catch must deny R5+
+  tools. But if catch calls `riskLevel(toolName)` and toolName is malformed
+  (null, undefined, or contains special characters), the function throws
+  inside catch. The Gateway's built-in fail-open default activates. An R5
+  tool executes with no governance. The catch clause must use only a
+  pre-computed riskMap lookup with a safe default.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The catch clause is the ONLY defense between a governance evaluation
+      failure and the Gateway's fail-open default. If catch throws, there
+      is no further fallback. The catch clause is a single point of failure
+      for the entire governance enforcement layer. It must be as simple as
+      a map lookup with a constant default.
+    spec_impact: "CL-03 runtime — catch clause is the critical fail-safe"
+    pitfall: P-070
+
+  - id: F02
+    severity: major
+    description: >
+      Pre-computing the risk map at handler registration time (not per-call)
+      means the map is built once from the GovernanceIR. At call time, the
+      catch clause does `riskMap.get(toolName) ?? 5`. Unknown tools default
+      to risk 5 (fail-closed). This eliminates all runtime computation from
+      the catch path.
+    spec_impact: "CL-04 EMIT — risk map pre-computation requirement"
+    pitfall: P-070
+
+  - id: F03
+    severity: major
+    description: >
+      The `?? 5` default (unknown = R5 = fail-closed) is critical. If an
+      unknown tool appears at runtime (tool added after compilation), the
+      catch clause treats it as maximum risk. This is the correct conservative
+      default. An alternative `?? 1` (fail-open for unknown) would be a
+      security vulnerability.
+    spec_impact: "CL-02 G-FAILMODE — unknown tool defaults to maximum risk"
+    pitfall: P-070
+
+  - id: F04
+    severity: major
+    description: >
+      Post-emit static verification must validate the catch clause AST.
+      Allowed operations: Map.get, nullish coalescing, numeric comparison,
+      return/throw. Disallowed: function calls (except Map.get), await,
+      new, property access chains (length > 1), template literals. The
+      verifier runs on the emitted TypeScript before writing to disk.
+    spec_impact: "CL-04 EMIT — catch clause static verifier specification"
+    pitfall: P-070
+
+  - id: F05
+    severity: warning
+    description: >
+      If toolName is null or undefined, `riskMap.get(null)` returns
+      undefined, and `undefined ?? 5` returns 5. This is safe by accident.
+      The catch clause should explicitly handle null/undefined toolName
+      as a hard deny (risk 5) before the map lookup, for clarity.
+    spec_impact: "CL-03 runtime — explicit null toolName handling in catch"
+    pitfall: P-070
+
+  - id: F06
+    severity: warning
+    description: >
+      The risk map is a frozen object (Object.freeze or ReadonlyMap) to
+      prevent accidental mutation during the handler's lifecycle. If the
+      map is mutated between calls (race condition, plugin interference),
+      the catch clause could produce incorrect risk levels.
+    spec_impact: "CL-04 EMIT — risk map immutability requirement"
+    pitfall: P-070
+
+  - id: F07
+    severity: major
+    description: >
+      The Gateway's fail-open default is a platform behavior that claws
+      cannot modify. The claws defense (catch clause) must be correct
+      because the platform fallback is hostile to governance. If OC ever
+      changes the default to fail-closed, the catch clause is still
+      needed as a defense-in-depth layer. The design must not depend on
+      the platform's default behavior changing.
+    spec_impact: "CL-03 runtime — defense-in-depth regardless of platform default"
+    pitfall: P-070
+
+  - id: F08
+    severity: note
+    description: >
+      Testing the catch clause requires inducing a governance evaluation
+      failure. The test fixture must cause the try block to throw (e.g.,
+      corrupted IR loaded at runtime). The test then verifies that the
+      catch clause correctly denies R5 tools and allows R1 tools, using
+      the pre-computed risk map.
+    spec_impact: "CL-04 testing — catch clause failure induction test"
+    pitfall: P-070
+
+  - id: F09
+    severity: warning
+    description: >
+      The catch clause must log the evaluation failure to the audit chain
+      before denying/allowing. The log entry must include: toolName, risk
+      level (from map), original error message, and the deny/allow decision.
+      The log operation itself must not throw — use a fire-and-forget
+      pattern or pre-allocated log buffer.
+    spec_impact: "CL-02 audit — catch clause must log without throwing"
+    pitfall: P-070

@@ -1,0 +1,166 @@
+name: S08-p169-orphaned-watcher-windows
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that orphaned watcher processes are prevented on Windows via
+  PID file enforcement (P-169). When a terminal closes without cleanup or
+  the user opens multiple terminals, orphaned watcher processes accumulate.
+  Each orphan runs its own pinch on every save, causing duplicate governance
+  compilations, file contention, and CPU exhaustion.
+
+expect:
+  governance_ir:
+    version: 1
+    watcher_instances: 1
+    pid_file_valid: true
+    orphan_detected: false
+  violations: []
+  warnings:
+    - code: CLAWS-W115
+      message: "Existing watcher detected (PID 12345) — reusing instance"
+  artifacts:
+    - name: .claws/watcher.pid
+      status: valid
+
+simulate:
+  failures:
+    - component: inner-ring
+      type: orphaned-watcher
+      error: "3 watcher processes running — each fires pinch on AGENTS.md save"
+    - component: inner-ring
+      type: pid-file-stale
+      error: "PID file references dead process — new watcher starts alongside orphan"
+    - component: system
+      type: cpu-exhaustion
+      error: "3 concurrent pinch compilations consume 100% CPU on 4-core machine"
+  halt: null
+  budget: null
+
+problem: >
+  A developer works in VS Code with an integrated terminal running `claws watch`.
+  They close the terminal tab without stopping the watcher (Ctrl+C not sent on
+  Windows terminal close). The watcher process becomes an orphan — still running,
+  still watching. The developer opens a new terminal and runs `claws watch` again.
+  Now two watchers run. Over the course of a day, 5 terminals are opened and
+  closed, leaving 5 orphaned watcher processes. Every file save triggers 5
+  concurrent pinch compilations. The GovernanceIR file is written 5 times in
+  rapid succession (race condition from P-167). CPU usage spikes to 100% on
+  every keystroke. The developer blames claws for being slow.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-169 core: The watcher must enforce single-instance via PID file.
+      On startup, `claws watch` checks .claws/watcher.pid. If the file
+      exists and the PID is alive (process.kill(pid, 0) on POSIX,
+      tasklist /FI "PID eq N" on Windows), the new watcher must refuse
+      to start with a clear message: "Watcher already running (PID N).
+      Use `claws watch --restart` to replace."
+    spec_impact: "CL-05 G-WATCH — single instance PID file enforcement"
+    pitfall: "P-169"
+
+  - id: F02
+    severity: major
+    description: >
+      Stale PID file detection: if the PID file exists but the process
+      is dead (terminated without cleanup), the new watcher must detect
+      the stale PID. On Windows, this requires calling OpenProcess with
+      the PID and checking the result. If the process is dead, the
+      watcher overwrites the PID file with its own PID and starts
+      normally.
+    spec_impact: "CL-05 G-WATCH — stale PID detection on Windows"
+    pitfall: "P-169"
+
+  - id: F03
+    severity: major
+    description: >
+      PID reuse on Windows: the OS may assign a dead process's PID to
+      a new, unrelated process. The PID file must include both the PID
+      and a startup timestamp. The liveness check verifies that the
+      process with that PID was started at approximately that timestamp.
+      On Windows, use wmic to query process creation date, or store
+      a unique nonce in both the PID file and the process's environment.
+    spec_impact: "CL-05 G-WATCH — PID reuse detection"
+    pitfall: "P-169"
+
+  - id: F04
+    severity: major
+    description: >
+      Terminal close on Windows does not send SIGTERM or SIGINT to child
+      processes. The watcher must register for the Windows console
+      control events (SetConsoleCtrlHandler) to detect terminal close.
+      If Node.js is the runtime, process.on('SIGBREAK') and
+      process.on('beforeExit') must clean up the PID file. Without
+      these handlers, every terminal close creates an orphan.
+    spec_impact: "CL-05 G-WATCH — Windows console event handler"
+    pitfall: "P-169"
+
+  - id: F05
+    severity: major
+    description: >
+      The `claws watch --restart` command must: (1) read the PID file,
+      (2) terminate the existing watcher (process.kill or taskkill on
+      Windows), (3) wait for termination (up to 5 seconds), (4) write
+      a new PID file, (5) start the new watcher. If step 2 fails
+      (access denied — different user), report the error and refuse
+      to start a duplicate.
+    spec_impact: "CL-05 G-WATCH — restart protocol"
+    pitfall: "P-169"
+
+  - id: F06
+    severity: warning
+    description: >
+      The `claws status` command should report watcher state: running
+      (PID, uptime, events processed), stopped, or orphaned (PID file
+      exists, process dead). This gives the developer visibility into
+      watcher health without requiring Task Manager inspection.
+    spec_impact: "CL-05 status — watcher health reporting"
+    pitfall: "P-169"
+
+  - id: F07
+    severity: warning
+    description: >
+      VS Code extension integration: if claws provides a VS Code
+      extension, the extension should manage the watcher lifecycle
+      (start on workspace open, stop on workspace close). This
+      eliminates the terminal-close orphan problem entirely for VS
+      Code users. The extension must still use the PID file protocol
+      for coexistence with terminal-launched watchers.
+    spec_impact: "CL-05 G-WATCH — editor extension lifecycle management"
+    pitfall: "P-169"
+
+  - id: F08
+    severity: warning
+    description: >
+      Orphan cleanup command: `claws watch --cleanup` should scan for
+      all watcher processes (by name or command line pattern) and
+      terminate orphans. On Windows, use wmic or PowerShell
+      Get-Process to find node.exe processes with "claws watch" in
+      the command line. This is the nuclear option for when PID file
+      tracking has failed.
+    spec_impact: "CL-05 G-WATCH — orphan cleanup command"
+    pitfall: "P-169"
+
+  - id: F09
+    severity: note
+    description: >
+      The CPU exhaustion from multiple watchers is a secondary symptom.
+      The primary bug is duplicate pinch compilations writing to the
+      same IR file. Even if CPU were unlimited, the concurrent writes
+      trigger P-167 (TOCTOU race). Single-instance enforcement solves
+      both the performance and the correctness problem.
+    spec_impact: "CL-05 G-WATCH — single instance solves TOCTOU cascade"
+    pitfall: "P-169"
+
+  - id: F10
+    severity: note
+    description: >
+      Fleet telemetry should track watcher instance counts per workspace.
+      A workspace reporting >1 watcher instance is a P-169 occurrence.
+      Fleet-wide, the percentage of workspaces with orphaned watchers
+      indicates the severity of the terminal-close problem and whether
+      the PID file enforcement is effective.
+    spec_impact: "CL-05 fleet — watcher orphan telemetry"
+    pitfall: "P-169"

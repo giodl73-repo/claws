@@ -1,0 +1,117 @@
+name: S12-p121-orphaned-staging-crash-recovery
+series: pitfall-final-1
+version: 1
+specs: [CL-04]
+description: >
+  Validates crash recovery for orphaned staging directories. If the process
+  crashes after staging succeeds but before the atomic move completes, the
+  next build must detect the orphaned staging directory and either complete
+  the move or clean up. The workspace must not remain stale indefinitely.
+
+expect:
+  governance_ir:
+    version: 1
+    emit:
+      staging_dir: ".claws/staging"
+      recovery_check: true
+      orphaned_staging_detected: false
+    analysis:
+      rules_evaluated: true
+      violations: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 4
+
+simulate:
+  failures:
+    - phase: emit
+      type: process-crash
+      timing: after-staging-before-move
+  halt: null
+  budget: null
+
+problem: >
+  Build 1: EMIT writes 4 artifacts to .claws/staging/. The process crashes
+  (SIGKILL, power failure, OOM kill) before the atomic move from staging to
+  the workspace. The workspace has stale old artifacts. .claws/staging/ has
+  new artifacts. Build 2: The compiler starts a fresh build. It does not
+  check for orphaned staging directories. It creates a new .claws/staging/,
+  which may fail (directory exists with contents) or silently overwrite.
+  Meanwhile, the workspace remains stale from Build 1 until Build 2 completes.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      On startup, the EMIT phase must check for .claws/staging/ existence.
+      If the directory exists and contains artifacts, it is an orphaned
+      staging directory from a crashed build. The recovery protocol is:
+      (1) validate staging artifacts (checksum), (2) if valid, complete
+      the move, (3) if invalid, delete staging and proceed with fresh build.
+    spec_impact: "CL-04 EMIT — orphaned staging recovery protocol"
+    pitfall: P-121
+
+  - id: F02
+    severity: major
+    description: >
+      A crash-marker file (.claws/staging/.in-progress) is written at the
+      start of staging and removed after the atomic move completes. If the
+      marker exists on next build, the staging is orphaned. If the marker
+      does not exist but staging has files, the move was interrupted during
+      the final rename. Both cases require recovery.
+    spec_impact: "CL-04 EMIT — crash marker protocol"
+    pitfall: P-121
+
+  - id: F03
+    severity: major
+    description: >
+      Validating orphaned staging artifacts requires checksums embedded
+      in the staging directory (e.g., .claws/staging/manifest.sha256).
+      If the manifest is missing or checksums do not match, the staging
+      was written incompletely. The safe action is to delete staging and
+      rebuild from scratch.
+    spec_impact: "CL-04 EMIT — staging manifest checksum"
+    pitfall: P-121
+
+  - id: F04
+    severity: warning
+    description: >
+      The time window between staging completion and atomic move is the
+      vulnerable window. Minimizing this window reduces crash risk. Write
+      all artifacts to staging, compute the manifest, then do a single
+      rename of the staging directory. The rename is the atomic operation;
+      everything before it is non-critical.
+    spec_impact: "CL-04 EMIT — minimize vulnerable window"
+    pitfall: P-121
+
+  - id: F05
+    severity: warning
+    description: >
+      Concurrent builds (two claws build processes on the same workspace)
+      could both detect orphaned staging and both attempt recovery. A
+      lock file (.claws/build.lock with PID) prevents concurrent builds.
+      If the lock PID is dead, the lock is stale and can be claimed.
+    spec_impact: "CL-04 EMIT — concurrent build lock"
+    pitfall: P-121
+
+  - id: F06
+    severity: major
+    description: >
+      The operator must be informed when crash recovery occurs. A
+      diagnostic message: "Detected orphaned staging from previous
+      build. Artifacts validated. Completing move." or "Detected
+      orphaned staging. Checksums invalid. Cleaning up and rebuilding."
+      Silent recovery hides operational issues.
+    spec_impact: "CL-04 diagnostics — crash recovery notification"
+    pitfall: P-121
+
+  - id: F07
+    severity: note
+    description: >
+      The crash recovery path must itself be crash-safe. If the recovery
+      (completing the move) crashes, the next build must still detect
+      the orphaned staging. This is naturally true if the marker file
+      is only removed after the final successful rename.
+    spec_impact: "CL-04 EMIT — recovery is idempotent"
+    pitfall: P-121

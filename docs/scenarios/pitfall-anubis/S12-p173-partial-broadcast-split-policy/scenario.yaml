@@ -1,0 +1,186 @@
+name: S12-p173-partial-broadcast-split-policy
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that partial broadcast creates a recoverable split-policy fleet
+  with defined retry semantics (P-173). When broadcast fails after updating
+  some workspaces, the fleet is in a split-policy state with no automatic
+  recovery. The manifest state machine must track partial failure and the
+  retry mechanism must converge the fleet to a consistent policy.
+
+expect:
+  workspaces:
+    - name: workspace-group-a
+      policy_version: "3.0"
+      broadcast_status: applied
+    - name: workspace-group-b
+      policy_version: "2.0"
+      broadcast_status: failed
+    - name: workspace-group-c
+      policy_version: "2.0"
+      broadcast_status: pending
+  drift_count: 30
+  broadcast_result:
+    status: partial-failure
+    workspaces_applied: 20
+    workspaces_failed: 5
+    workspaces_pending: 25
+    retry_available: true
+    manifest_state: partial
+  compliance:
+    all_current: false
+    split_policy: true
+    policy_versions_active: 2
+
+simulate:
+  failures:
+    - component: fleet-broadcast
+      type: partial-failure
+      error: "5 workspaces rejected policy update — schema validation failed on custom rules"
+    - component: fleet-broadcast
+      type: no-retry
+      error: "No retry mechanism — administrator must manually re-broadcast to failed workspaces"
+    - component: fleet-state
+      type: split-policy
+      error: "20 workspaces on v3.0, 30 workspaces on v2.0 — governance divergence"
+  halt: null
+  budget: null
+
+problem: >
+  The fleet administrator broadcasts policy v3.0 to a 50-workspace fleet.
+  20 workspaces accept the update successfully. 5 workspaces reject it because
+  their custom RULES.md files contain constructs that conflict with the v3.0
+  policy schema (they use an older syntax not supported by v3.0). The broadcast
+  stops at the first batch failure (fail-fast behavior). 25 workspaces never
+  receive the update at all. The fleet is now split: 20 on v3.0, 30 on v2.0.
+  The administrator has no built-in mechanism to retry failed workspaces, skip
+  incompatible ones, or converge the fleet. Re-running broadcast targets all
+  50 workspaces again, wasting time on the 20 already-updated ones. The 5
+  incompatible workspaces fail again. The split-policy state persists.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-173 core: Broadcast must not use fail-fast semantics. A single
+      workspace failure should not stop the entire broadcast. Instead,
+      broadcast should use best-effort semantics: attempt every workspace,
+      record successes and failures in the manifest, and report a summary.
+      Failed workspaces can be retried individually after diagnosis.
+    spec_impact: "CL-05 G-BROADCAST — best-effort semantics"
+    pitfall: "P-173"
+
+  - id: F02
+    severity: major
+    description: >
+      The manifest state machine must support a retry operation: `claws
+      fleet broadcast --retry` reads the manifest and retargets only
+      FAILED and PENDING workspaces. APPLIED workspaces are skipped.
+      The retry command is idempotent: running it multiple times converges
+      toward all workspaces being APPLIED or explicitly FAILED.
+    spec_impact: "CL-05 G-BROADCAST — retry from manifest"
+    pitfall: "P-173"
+
+  - id: F03
+    severity: major
+    description: >
+      Workspaces that permanently fail (incompatible schema) must be
+      classifiable as EXCLUDED. `claws fleet broadcast --exclude
+      workspace-17 workspace-23` marks them in the manifest. Excluded
+      workspaces are skipped on all future broadcasts and retries.
+      The administrator must explicitly include them again when
+      compatibility is restored.
+    spec_impact: "CL-05 G-BROADCAST — workspace exclusion mechanism"
+    pitfall: "P-173"
+
+  - id: F04
+    severity: major
+    description: >
+      The split-policy fleet must be visible in fleet status: `claws
+      fleet status` shows active policy versions across the fleet with
+      workspace counts per version. "v3.0: 20 workspaces, v2.0: 30
+      workspaces (5 failed, 25 pending)" gives the administrator a
+      complete picture of convergence state.
+    spec_impact: "CL-05 fleet — policy version distribution report"
+    pitfall: "P-173"
+
+  - id: F05
+    severity: major
+    description: >
+      The retry mechanism must include failure diagnosis: for each
+      FAILED workspace, the manifest must record the failure reason
+      (schema incompatibility, network error, permission denied, etc.).
+      `claws fleet broadcast --status` shows per-workspace failure
+      reasons to guide remediation. Generic "failed" is not actionable.
+    spec_impact: "CL-05 G-BROADCAST — per-workspace failure diagnosis"
+    pitfall: "P-173"
+
+  - id: F06
+    severity: major
+    description: >
+      Pre-broadcast compatibility check: before attempting to apply the
+      policy to a workspace, validate that the workspace's current
+      schema is compatible with the new policy. Incompatible workspaces
+      are flagged upfront with instructions for migration. This converts
+      runtime failures to build-time warnings and reduces split-fleet
+      occurrences.
+    spec_impact: "CL-05 G-BROADCAST — pre-broadcast compatibility scan"
+    pitfall: "P-173"
+
+  - id: F07
+    severity: warning
+    description: >
+      The split-policy state has security implications: workspaces on
+      v2.0 may lack security rules added in v3.0. If v3.0 added a
+      mandatory R5 approval requirement, v2.0 workspaces still auto-
+      approve R5 tools. The fleet scan must flag split-policy as a
+      drift condition with severity proportional to the security
+      impact of the policy delta.
+    spec_impact: "CL-05 G-DRIFT — split-policy security assessment"
+    pitfall: "P-173"
+
+  - id: F08
+    severity: warning
+    description: >
+      Broadcast convergence timeout: if the fleet does not converge to
+      a single policy version within a configurable window (default: 24
+      hours), emit a CRITICAL alert. Prolonged split-policy states
+      indicate systemic issues (incompatible workspaces, broken retry,
+      abandoned broadcast) that require administrator intervention.
+    spec_impact: "CL-05 G-BROADCAST — convergence timeout alert"
+    pitfall: "P-173"
+
+  - id: F09
+    severity: warning
+    description: >
+      Rollback option: if the split-policy state is untenable, the
+      administrator needs `claws fleet broadcast --rollback` to revert
+      the 20 updated workspaces back to v2.0. This requires the
+      manifest to store the previous overlay version per workspace.
+      Rollback makes the fleet consistently on v2.0 while the v3.0
+      compatibility issues are resolved.
+    spec_impact: "CL-05 G-BROADCAST — partial rollback mechanism"
+    pitfall: "P-173"
+
+  - id: F10
+    severity: note
+    description: >
+      Fleet broadcast should support staged rollout: update 10% of
+      workspaces first (canary), verify compliance, then proceed to
+      the remaining 90%. If the canary batch fails, the blast radius
+      is limited and rollback is trivial. Staged rollout prevents the
+      50-workspace split-policy scenario entirely.
+    spec_impact: "CL-05 G-BROADCAST — staged rollout strategy"
+    pitfall: "P-173"
+
+  - id: F11
+    severity: note
+    description: >
+      The manifest should support labeling workspaces by group or tag:
+      "production," "staging," "development." Broadcast can target
+      specific groups: `claws fleet broadcast --group staging` updates
+      only staging workspaces. This enables controlled rollout and
+      limits split-policy risk to non-production workspaces.
+    spec_impact: "CL-05 fleet — workspace group targeting"
+    pitfall: "P-173"

@@ -1,0 +1,124 @@
+name: S07-subagent-delegation
+series: compile-pipeline
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates that AGENTS.md is parsed into a delegation graph in the IR.
+  The graph must capture parent-child relationships, trust declarations,
+  tool delegation scope, and data flow labels. FE6 fence pass validates
+  the delegation graph for consistency.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, AGENTS.md, claws.json]
+      intent_types: [DenyIntent, ToolManifestEntry, DelegationIntent]
+    analysis:
+      rules_evaluated: true
+      delegation_graph:
+        nodes: [root, research-agent, writer-agent]
+        edges:
+          - from: root
+            to: research-agent
+            tools_delegated: [web-search, db-read]
+            trust_level: T2
+          - from: root
+            to: writer-agent
+            tools_delegated: [file-writer]
+            trust_level: T2
+        data_flow_labels:
+          - channel: root->research-agent
+            ceiling: INTERNAL
+          - channel: root->writer-agent
+            ceiling: INTERNAL
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  AGENTS.md declares two subagents: research-agent (delegated web-search and
+  db-read) and writer-agent (delegated file-writer). Both operate under T2
+  trust with INTERNAL data flow ceiling. The pipeline must build a delegation
+  graph with 3 nodes (root + 2 agents) and 2 edges, each carrying the
+  delegated tool set, trust level, and data flow labels. FE6 validates no
+  trust escalation or transitive trust violations exist.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The "root" node in the delegation graph is implicit — it represents the
+      parent workspace agent. AGENTS.md does not declare the root; it is
+      inferred. The parser must synthesize a root node from claws.json trust
+      tier and TOOLS.md tool set. If claws.json is missing trust tier, the
+      root node has no ceiling.
+    spec_impact: "CL-04 EXTRACT — implicit root node synthesis"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      FE6 fence pass validates delegation scope: a subagent cannot receive
+      tools the parent does not have. If AGENTS.md delegates "web-search" to
+      research-agent but TOOLS.md does not list web-search, this is a
+      delegation-of-phantom-tool error. FE6 must cross-reference TOOLS.md.
+    spec_impact: "CL-02 FE6 — delegation scope vs tool registry validation"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Data flow ceiling INTERNAL on the root->research-agent channel means
+      research-agent should not receive CONFIDENTIAL or RESTRICTED data. But
+      if research-agent's web-search returns external data, that data's label
+      is unknown at compile time. The ceiling applies to data SENT to the
+      agent, not data the agent RETRIEVES externally.
+    spec_impact: "CL-02 G-A2A-FLOW — direction semantics of data flow ceiling"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      AGENTS.md format may use markdown headers (## research-agent) or YAML
+      blocks or structured lists. The parser must handle all common OC AGENTS.md
+      formats. If the format does not explicitly state trust_level, the parser
+      must infer it from the parent's tier (delegation ceiling principle).
+    spec_impact: "CL-04 Phase 1 PARSE — AGENTS.md format flexibility"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      Two subagents with no communication between them produce a tree graph,
+      not a mesh. This scenario does not test peer-to-peer agent communication.
+      A follow-up scenario with research-agent -> writer-agent data flow
+      would exercise transitive trust detection.
+    spec_impact: "CL-02 G-A2A-TRUST — peer-to-peer coverage gap"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The delegation graph is part of the GovernanceIR and must be serializable
+      to JSON. Circular references in the graph (tested in cross-file-conflicts
+      S05) would break JSON serialization. Even for valid trees, the serializer
+      must handle shared references if two agents delegate to the same sub-agent.
+    spec_impact: "CL-04 GovernanceIR serialization — graph cycle handling"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Trust level T2 for both agents means the parent is at least T2. If
+      claws.json specifies T1, the delegation of T2 subagents is a trust
+      escalation. This scenario assumes consistent T2 — the escalation case
+      is covered in cross-file-conflicts S02.
+    spec_impact: "CL-02 G-A2A-ESCALATE — parent-child tier consistency"
+    pitfall: null

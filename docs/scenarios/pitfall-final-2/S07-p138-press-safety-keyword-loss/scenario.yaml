@@ -1,0 +1,123 @@
+name: S07-p138-press-safety-keyword-loss
+series: pitfall-final-2
+version: 1
+specs: [CL-04]
+description: >
+  Validates that PRESS compression preserves safety keywords verbatim (P-138).
+  When "never access production database" is compressed to "avoid production
+  database," the LLM interprets the instruction as advisory rather than
+  prohibitive. Safety semantics are lost.
+
+expect:
+  artifacts:
+    - name: SKILL.md
+      status: validated
+      assertion: "Safety keywords 'never', 'must not', 'always' preserved verbatim"
+  plugin_hooks: []
+  skill_content: "contains verbatim safety keywords"
+  approvals: null
+
+simulate:
+  failures:
+    - component: press
+      type: safety-keyword-removal
+      error: "'never access' compressed to 'avoid' — safety semantic downgraded from prohibition to advisory"
+  halt: null
+  budget: null
+
+problem: >
+  The PRESS compression pass reduces SKILL.md token count by 40%. During
+  compression, "never access production database directly" becomes "avoid
+  production database." The word "never" is a hard prohibition; "avoid" is
+  an advisory. An LLM following the compressed instruction may access the
+  production database when it judges the situation warrants it, because
+  "avoid" implies discretion. The safety intent of the original governance
+  rule is silently weakened.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-138 core: Safety keywords carry normative force that synonyms do
+      not. "never" is absolute prohibition. "must not" is RFC 2119 MUST
+      NOT. "always" is unconditional requirement. Compression that replaces
+      these with weaker synonyms ("avoid," "try to," "generally") changes
+      the governance semantics, not just the wording.
+    spec_impact: "CL-04 PRESS — safety keyword semantic preservation"
+    pitfall: "P-138"
+
+  - id: F02
+    severity: major
+    description: >
+      The PRESS pass must maintain a safety keyword allowlist: ["never",
+      "must not", "shall not", "always", "must", "shall", "required",
+      "prohibited", "forbidden", "mandatory"]. Any token on this list
+      must be preserved verbatim in the output. The allowlist must be
+      configurable for domain-specific safety terms.
+    spec_impact: "CL-04 PRESS — safety keyword allowlist"
+    pitfall: "P-138"
+
+  - id: F03
+    severity: major
+    description: >
+      The allowlist check must operate on semantic context, not just
+      token presence. "Never mind" should not be preserved as a safety
+      keyword. The check should verify the keyword appears in an
+      imperative sentence directed at the agent, not in a description
+      or example.
+    spec_impact: "CL-04 PRESS — context-aware keyword detection"
+    pitfall: "P-138"
+
+  - id: F04
+    severity: major
+    description: >
+      Post-PRESS validation: compare the original and compressed SKILL.md
+      for safety keyword count. If any safety keyword is present in the
+      original but absent in the compressed version, the PRESS pass must
+      be re-run with that keyword pinned. This is a hard build error, not
+      a warning.
+    spec_impact: "CL-04 PRESS — post-compression safety keyword audit"
+    pitfall: "P-138"
+
+  - id: F05
+    severity: major
+    description: >
+      Negation loss is the most dangerous variant: "do not delete user
+      data" compressed to "delete user data carefully." The negation is
+      entirely lost. The PRESS pass must detect negation patterns (not,
+      never, no, don't, must not) and preserve the entire negated phrase,
+      not just the keyword.
+    spec_impact: "CL-04 PRESS — negation preservation"
+    pitfall: "P-138"
+
+  - id: F06
+    severity: warning
+    description: >
+      The compression ratio target (e.g., 40% reduction) may conflict
+      with safety preservation. If preserving all safety keywords limits
+      compression to 25%, the PRESS pass must accept the lower ratio.
+      Safety preservation takes absolute precedence over compression
+      efficiency.
+    spec_impact: "CL-04 PRESS — safety precedence over compression ratio"
+    pitfall: "P-138"
+
+  - id: F07
+    severity: warning
+    description: >
+      Domain-specific safety terms (e.g., "PHI" in healthcare, "PCI"
+      in finance) are not on the default allowlist. Workspace operators
+      must be able to extend the allowlist via claws.json
+      press.safetyKeywords. The default list covers RFC 2119 terms plus
+      common prohibition language.
+    spec_impact: "CL-01 schema — press.safetyKeywords configuration"
+    pitfall: "P-138"
+
+  - id: F08
+    severity: note
+    description: >
+      PRESS compression applied to non-English SKILL.md content may
+      miss safety keywords in other languages. The allowlist must be
+      locale-aware or the PRESS pass must skip compression for content
+      in languages without a configured allowlist.
+    spec_impact: "CL-04 PRESS — locale-aware safety keywords"
+    pitfall: "P-138"

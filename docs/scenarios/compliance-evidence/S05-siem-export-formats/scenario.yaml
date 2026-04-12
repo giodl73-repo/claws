@@ -1,0 +1,169 @@
+name: S05-siem-export-formats
+series: compliance-evidence
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates that `claws audit export` produces audit trail data in multiple
+  SIEM-compatible formats: CEF (Common Event Format), NDJSON (Newline
+  Delimited JSON), syslog (RFC 5424), and SARIF (Static Analysis Results
+  Interchange Format). Each format must faithfully represent the governance
+  events while conforming to the target format's schema and field naming
+  conventions. The export must preserve the audit chain's integrity
+  (signatures and timestamps) in a format-appropriate manner.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      intent_types: [DenyIntent, ToolManifestEntry]
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 4
+    types: [cef-export, ndjson-export, syslog-export, sarif-export]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise workspace has an audit chain with 5,000 events including
+  tool classifications, elicitation approvals/denials, G-BOUND limit
+  events, and G-OUTPUT redaction events. The enterprise SIEM (Splunk) uses
+  CEF format. The security team also needs NDJSON for custom analysis
+  pipelines, syslog for legacy infrastructure, and SARIF for integration
+  with GitHub Advanced Security. `claws audit export --format <format>`
+  must produce valid output for each format, mapping claws governance
+  event fields to the target format's schema while preserving all relevant
+  context for incident investigation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CEF (Common Event Format) requires specific fields: CEF version,
+      device vendor, device product, device version, signature ID,
+      name, severity (0-10). The spec does not define the mapping from
+      claws governance events to CEF fields. For example, what is the
+      CEF severity for a G-BOUND limit exceeded event? What is the
+      signature ID for a G-ELICIT denial? These mappings must be defined
+      explicitly or the export will produce inconsistent CEF that SIEM
+      correlation rules cannot match.
+    spec_impact: "CL-02 SIEM Export — define CEF field mapping for all governance event types"
+    pitfall: P-224
+
+  - id: F02
+    severity: major
+    description: >
+      SARIF (Static Analysis Results Interchange Format) is designed for
+      static analysis findings, not runtime events. Using SARIF for audit
+      trail export is a format mismatch — SARIF has "results" with
+      "locations" (file + line number), "rules," and "invocations." The
+      spec should define how governance events map to SARIF concepts:
+      governance rules map to SARIF rules, events map to results, but
+      "location" is unclear for runtime events. This may require SARIF
+      extensions or a subset mapping.
+    spec_impact: "CL-02 SIEM Export — define SARIF mapping for runtime governance events or remove SARIF"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The audit chain signatures (Ed25519 or HMAC) should be preserved
+      in the export to allow independent verification. CEF and syslog have
+      limited extensibility for binary signature data. NDJSON can include
+      base64-encoded signatures. SARIF has properties for extensions. The
+      spec should define how signatures are preserved (or explicitly dropped
+      with a note that verification requires the original chain) for each
+      format.
+    spec_impact: "CL-02 SIEM Export — define signature preservation strategy per export format"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Syslog (RFC 5424) has a maximum message size of 2048 bytes (though
+      many implementations accept larger messages). Governance events with
+      long tool arguments, chain paths, or error messages may exceed this
+      limit. The export must define a truncation strategy: truncate the
+      message with a reference to the full event in the original chain,
+      or split into multiple syslog messages with a correlation ID.
+    spec_impact: "CL-02 SIEM Export — define syslog message size handling (truncation vs splitting)"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The NDJSON export is the most flexible format but also the most
+      schema-dependent. Without a published JSON Schema for the NDJSON
+      export, consumers cannot validate the output or build reliable
+      parsing pipelines. The spec should publish a JSON Schema for the
+      NDJSON export format and version it alongside the audit chain schema.
+    spec_impact: "CL-02 SIEM Export — publish JSON Schema for NDJSON export format"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      CEF severity mapping from claws governance events requires a risk-
+      to-severity translation. A G-ELICIT denial for an R5 tool is high
+      severity (CEF 8-10). A G-BOUND warning for approaching a limit is
+      medium (CEF 4-6). A G-CLASS classification event is informational
+      (CEF 0-2). The translation table should be configurable in
+      .claws/config/siem.yaml to match enterprise SIEM correlation rules.
+    spec_impact: "CL-02 SIEM Export — make CEF severity mapping configurable in siem.yaml"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The export must handle PII in accordance with Amendment A31 (per-
+      channel redaction). SIEM export is listed as "event-level data only
+      (no PII content)." But some governance events inherently contain PII
+      (e.g., a G-ELICIT approval for "send email to patient@hospital.com").
+      The export must redact PII fields before writing to SIEM formats.
+      This redaction must be consistent across all 4 formats — the same
+      event should have the same fields redacted regardless of format.
+    spec_impact: "CL-02 SIEM Export — define consistent PII redaction across all export formats"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Export of 5,000+ events could produce large files. The export should
+      support streaming output (write to stdout, pipe to SIEM ingestion)
+      rather than requiring the full export to be written to disk first.
+      For enterprise deployments with millions of events, the export must
+      be streamable with constant memory usage.
+    spec_impact: "CL-02 SIEM Export — support streaming export for large audit chains"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The sidecar (L5) has its own SIEM forwarding configuration per CL-03.
+      The `claws audit export` command and the sidecar SIEM forwarding
+      may produce overlapping data. The spec should clarify the relationship:
+      the sidecar provides real-time forwarding (Tier 2 async), while
+      `claws audit export` is a batch operation (Tier 4) for historical
+      data. Both should produce the same event representation for the same
+      event to avoid SIEM deduplication issues.
+    spec_impact: "CL-03 Event Fanout — ensure sidecar and batch export produce identical event representations"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The export command should support date-range filtering (--from,
+      --to) and event-type filtering (--event-type G-ELICIT) to allow
+      targeted exports for incident investigation. Exporting the full
+      chain for a single incident investigation is wasteful when only
+      a few hours of events are relevant.
+    spec_impact: "CL-02 SIEM Export — add date-range and event-type filtering to export command"
+    pitfall: null

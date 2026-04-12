@@ -1,0 +1,169 @@
+name: S10-p171-broadcast-crash-partial-update
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that broadcast crash after partial fleet update is recoverable via
+  manifest tracking (P-171). When broadcast crashes after updating 23 of 50
+  workspaces, there is no record of which workspaces received the update and
+  which did not. Re-running broadcast may double-apply to the 23 or skip the
+  remaining 27 depending on idempotency of the policy merge.
+
+expect:
+  workspaces:
+    - name: workspace-batch-1
+      policy_version: "2.0"
+      update_status: applied
+    - name: workspace-batch-2
+      policy_version: "1.0"
+      update_status: pending
+  drift_count: 27
+  broadcast_result:
+    status: crashed
+    workspaces_updated: 23
+    workspaces_pending: 27
+    manifest_state: partial
+    recovery_available: true
+  compliance:
+    all_current: false
+    split_fleet: true
+
+simulate:
+  failures:
+    - component: fleet-broadcast
+      type: crash-mid-update
+      error: "Broadcast process OOM-killed after updating 23/50 workspaces"
+    - component: fleet-broadcast
+      type: no-manifest
+      error: "No manifest tracking — unknown which workspaces were updated"
+    - component: fleet-state
+      type: split-policy
+      error: "23 workspaces on v2.0 policy, 27 workspaces on v1.0 policy"
+  halt: broadcast
+  budget: null
+
+problem: >
+  The fleet administrator runs `claws fleet broadcast` to push a new security
+  policy. After successfully updating 23 of 50 workspaces, the broadcast process
+  is killed by the OOM killer (the policy diff for each workspace is computed
+  in memory, and workspace 24 has an unusually large RULES.md). The administrator
+  re-runs broadcast. Without a manifest of completed workspaces, broadcast
+  starts from workspace 1 again. The 23 already-updated workspaces receive the
+  policy overlay a second time. If the merge is not idempotent, the double-apply
+  corrupts the overlay (duplicate rules, conflicting precedence). The 27
+  remaining workspaces are updated correctly. The fleet is now in three states:
+  23 with potentially corrupt double-applied policy, 27 with clean policy, and
+  the administrator has no way to tell which is which.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-171 core: Broadcast must maintain a persistent manifest file
+      that tracks per-workspace update status: pending, in-progress,
+      applied, failed. The manifest is written before each workspace
+      update begins and updated after completion. On crash, the manifest
+      shows exactly which workspaces were completed. `claws fleet
+      broadcast --resume` reads the manifest and skips completed
+      workspaces.
+    spec_impact: "CL-05 G-BROADCAST — persistent broadcast manifest"
+    pitfall: "P-171"
+
+  - id: F02
+    severity: major
+    description: >
+      The manifest must be written synchronously (fsync) after each
+      workspace update. If the manifest write is buffered and the
+      crash occurs before flush, the manifest understates progress.
+      Under-reporting (re-updating completed workspaces) is safer
+      than over-reporting (skipping unupdated workspaces) only if
+      the policy merge is idempotent.
+    spec_impact: "CL-05 G-BROADCAST — synchronous manifest writes"
+    pitfall: "P-171"
+
+  - id: F03
+    severity: major
+    description: >
+      Policy merge idempotency is mandatory: applying the same policy
+      overlay twice must produce identical results to applying it once.
+      The overlay merge must be declarative (desired state), not
+      imperative (actions). "Set trust tier to T2" is idempotent.
+      "Increment trust tier" is not. All fleet overlay operations must
+      be declarative.
+    spec_impact: "CL-05 G-BROADCAST — idempotent overlay merge"
+    pitfall: "P-171"
+
+  - id: F04
+    severity: major
+    description: >
+      The OOM crash on workspace 24 reveals a memory management issue:
+      broadcast must process workspaces with bounded memory. Each
+      workspace's policy diff should be computed, applied, and released
+      before the next workspace begins. Streaming processing prevents
+      memory accumulation across workspaces.
+    spec_impact: "CL-05 G-BROADCAST — bounded memory per workspace"
+    pitfall: "P-171"
+
+  - id: F05
+    severity: major
+    description: >
+      The manifest state machine for each workspace: PENDING -> IN_PROGRESS
+      -> APPLIED | FAILED. On resume, PENDING workspaces are retried,
+      IN_PROGRESS workspaces are treated as FAILED (crash during update),
+      APPLIED workspaces are skipped, FAILED workspaces are retried.
+      The IN_PROGRESS -> FAILED transition handles the crash-during-write
+      case.
+    spec_impact: "CL-05 G-BROADCAST — manifest state machine"
+    pitfall: "P-171"
+
+  - id: F06
+    severity: major
+    description: >
+      Post-broadcast verification: after broadcast (or resume) completes,
+      run `claws fleet scan` to verify all workspaces have the expected
+      policy version. This catches cases where the manifest says APPLIED
+      but the actual workspace is corrupted or reverted. Verification is
+      the final phase of broadcast, not an optional follow-up.
+    spec_impact: "CL-05 G-BROADCAST — post-broadcast verification scan"
+    pitfall: "P-171"
+
+  - id: F07
+    severity: warning
+    description: >
+      The split-fleet state (some workspaces on v2.0, others on v1.0) is
+      operationally dangerous: workspaces enforcing different policies
+      may produce different security postures. `claws fleet status` must
+      highlight policy version divergence and show which workspaces are
+      behind. A split fleet is treated as a CRITICAL drift condition.
+    spec_impact: "CL-05 fleet — split-fleet detection"
+    pitfall: "P-171"
+
+  - id: F08
+    severity: warning
+    description: >
+      Broadcast should support batched execution: update 10 workspaces,
+      checkpoint the manifest, then update the next 10. This limits the
+      blast radius of a crash: at most 10 workspaces may be in an
+      uncertain state, not the entire fleet. Batch size is configurable.
+    spec_impact: "CL-05 G-BROADCAST — batched execution with checkpoints"
+    pitfall: "P-171"
+
+  - id: F09
+    severity: note
+    description: >
+      The manifest file should be stored in the fleet control plane
+      directory (.claws/fleet/broadcast-manifest.json), not in individual
+      workspaces. This centralizes recovery state and enables the
+      administrator to inspect it without accessing each workspace.
+    spec_impact: "CL-05 fleet — manifest storage location"
+    pitfall: "P-171"
+
+  - id: F10
+    severity: note
+    description: >
+      Historical manifests should be retained (rotated after 10) to
+      enable forensic analysis: which broadcasts were partial, how
+      long did recovery take, which workspaces consistently fail.
+      This data guides fleet operational improvements.
+    spec_impact: "CL-05 fleet — manifest history retention"
+    pitfall: "P-171"

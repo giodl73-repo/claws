@@ -1,0 +1,127 @@
+name: S03-ontology-governance-generation
+series: ontology-governance
+version: 1
+specs: [CL-04, CL-06, CL-07]
+description: >
+  Validates end-to-end lowering from OntologyIR concepts to GovernanceIR
+  rules with zero runtime footprint. An ontology package defining 5
+  governance concepts (access-control, audit-trail, data-classification,
+  output-redaction, change-signing) compiles to 5 GovernanceIR rules.
+  The compiled output is pure static configuration: no runtime imports,
+  no dynamic evaluation, no conditional logic. Every generated rule
+  resolves at compile time.
+
+expect:
+  rules_applied: [G-PERM, G-BOUND, G-DATA, G-OUTPUT, G-SUPPLY]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A governance ontology package defines 5 concepts that must lower to
+  GovernanceIR rules: (1) access-control lowers to G-PERM with capability
+  grants for R3+ tools, (2) audit-trail lowers to G-BOUND with event
+  emission for all R2+ invocations, (3) data-classification lowers to
+  G-DATA with label requirements on tools processing sensitive data,
+  (4) output-redaction lowers to G-OUTPUT with pattern-based redaction
+  hooks, (5) change-signing lowers to G-SUPPLY requiring artifact
+  signatures. The compiler must lower all 5 with zero runtime footprint:
+  the emitted governance configuration contains no import statements, no
+  dynamic require/import calls, no eval-like constructs, and no
+  conditional branches that depend on runtime state. All governance
+  decisions are statically resolved during compilation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      "Zero runtime footprint" must be precisely defined. The emitted
+      governance rules configure runtime hooks (event listeners, guard
+      stubs), which are themselves runtime code. The zero-footprint
+      guarantee means the governance configuration is static data, not
+      that no code runs at runtime. The distinction is: the compiler
+      emits configuration consumed by existing runtime infrastructure,
+      it does not emit new runtime code. This boundary must be explicit
+      in the spec.
+    spec_impact: "CL-04 Emission -- define zero-footprint as static configuration, not zero runtime execution"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The lowering from OntologyIR to GovernanceIR is a compiler pass.
+      If the pass is lossy (drops ontology metadata during lowering),
+      the GovernanceIR rules lose their provenance. The lowering pass
+      must be formally defined as a mapping function with documented
+      preservation guarantees: which OntologyIR fields survive in
+      GovernanceIR and which are dropped. Provenance, version, and
+      control-ID must be in the preserved set.
+    spec_impact: "CL-04 IR Lowering -- formal preservation guarantees for ontology-to-governance pass"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Five ontology concepts generating five rules assumes 1:1 mapping.
+      But ontology concepts can overlap (access-control and audit-trail
+      both touch tool invocation). If two concepts generate conflicting
+      parameters for the same underlying mechanism, the lowering pass
+      must detect and resolve the conflict. Conflict resolution strategy
+      (strictest-wins, explicit priority, error) must be configurable
+      per ontology package.
+    spec_impact: "CL-04 IR Lowering -- concept overlap detection and configurable conflict resolution"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The "no conditional branches that depend on runtime state" constraint
+      prohibits context-dependent governance. But some governance rules
+      legitimately need runtime context (e.g., G-OUTPUT redaction depends
+      on the actual output content). The zero-footprint guarantee should
+      apply to rule selection (which rules are active), not rule execution
+      (how active rules evaluate). Rule selection is compile-time; rule
+      execution uses pre-existing runtime hooks.
+    spec_impact: "CL-04 Zero-Footprint -- scope to rule selection, not rule execution"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The lowering pass must be deterministic: the same ontology input
+      must produce the same GovernanceIR output regardless of compilation
+      order, platform, or compiler version. Non-determinism (e.g., from
+      object key ordering or set iteration) would cause governance hash
+      drift between environments, triggering false-positive drift alerts
+      in fleet operations.
+    spec_impact: "CL-04 IR Lowering -- deterministic output guarantee for governance hash stability"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The 5-rule scenario is a small ontology. Enterprise ontologies
+      may define 50+ concepts generating 100+ rules. The lowering pass
+      must scale linearly with ontology size. If the conflict detection
+      step is O(n^2) on rule count, large ontologies hit unacceptable
+      compile times. The <350ms budget from CL-04 must account for
+      ontology complexity.
+    spec_impact: "CL-04 Performance -- ontology lowering must be O(n) or O(n log n), not O(n^2)"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The zero-footprint guarantee could be verified with a static
+      analysis check on the emitted output: scan for import/require
+      statements, eval calls, dynamic property access, and conditional
+      branches. This check could be a built-in post-emission validation
+      step in the compiler, ensuring that the guarantee is enforced, not
+      just documented.
+    spec_impact: "CL-04 Post-Emission -- add static analysis check verifying zero-footprint invariant"
+    pitfall: null

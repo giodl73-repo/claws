@@ -1,0 +1,115 @@
+name: S02-trust-escalation
+series: cross-file-conflicts
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates TRUST-ESCALATION conflict: a subagent in AGENTS.md has R4 tools
+  delegated but the parent workspace operates at T2 trust tier. The subagent's
+  tool risk exceeds the parent's trust ceiling. This is an error-severity
+  cross-file conflict detected by FE6 fence pass.
+
+expect:
+  governance_ir:
+    version: 1
+    analysis:
+      conflicts:
+        - category: TRUST-ESCALATION
+          severity: error
+          files: [AGENTS.md, claws.json]
+          agent: automation-worker
+          agent_max_risk: 4
+          parent_trust_tier: 2
+          resolution: "reduce delegated tool risk or elevate parent trust tier"
+  violations:
+    - category: TRUST-ESCALATION
+      severity: error
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  AGENTS.md declares "automation-worker" subagent with delegated tools
+  including "shell-exec" (R4/EXECUTE). claws.json sets the workspace trust
+  tier to T2. T2 trust supports tools up to R3. The subagent has an R4 tool,
+  which exceeds T2 ceiling. FE6 fence pass detects that delegation scope
+  exceeds the parent's trust tier, producing a TRUST-ESCALATION conflict.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Trust tier T2 supports R1-R3 tools. The mapping between trust tiers
+      and maximum risk levels must be defined: T0=R1, T1=R2, T2=R3, T3=R4,
+      T4=R5. This mapping is in CL-01 (claws.json schema) but not explicitly
+      stated in CL-02. The mapping must be authoritative and consistent.
+    spec_impact: "CL-01/CL-02 — trust tier to risk level mapping"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The delegation ceiling principle says "a subagent never gets more
+      permissions than its delegator." If the parent is T2/R3-max, the
+      subagent cannot receive R4 tools. But what if the subagent operates
+      in a DIFFERENT workspace with T4 trust? Cross-workspace delegation
+      may have different trust ceilings. This scenario tests intra-workspace.
+    spec_impact: "CL-02 G-A2A-DELEGATE — intra vs cross-workspace delegation"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The resolution "reduce delegated tool risk or elevate parent trust tier"
+      has security implications. Elevating to T3 allows R4 tools but also
+      loosens other governance. The resolution should prefer reducing tool
+      risk (more specific) over elevating trust tier (more permissive).
+    spec_impact: "CL-04 conflict resolution — least-privilege preference"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      FE6 fence pass validates delegation graph consistency. It runs as part
+      of Phase 3 ANALYZE. If FE6 is implemented separately from the conflict
+      detection logic, it may miss conflicts that require cross-checking
+      multiple files (AGENTS.md + claws.json + TOOLS.md). FE6 must have
+      access to the full CapabilityManifest.
+    spec_impact: "CL-04 Phase 3 — FE6 access to full manifest"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The subagent "automation-worker" with R4 tools could be a legitimate
+      CI/CD agent that needs EXECUTE capability. The trust escalation is a
+      real conflict, not a misconfiguration. The developer must consciously
+      choose: elevate the workspace to T3 (accepting more risk) or remove
+      shell-exec from the delegation.
+    spec_impact: "CL-02 G-A2A-DELEGATE — conscious trust elevation"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      If AGENTS.md does not explicitly list the tools delegated to automation-
+      worker (e.g., it says "all tools"), the compiler must resolve "all tools"
+      against TOOLS.md to determine the maximum risk level. Implicit delegation
+      of "all tools" to a subagent is particularly dangerous and may deserve
+      its own warning independent of trust escalation.
+    spec_impact: "CL-04 EXTRACT — implicit 'all tools' delegation detection"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The tension model says governance > authority > execution priority.
+      TRUST-ESCALATION is a governance conflict (trust tier violated). The
+      auto-resolution is clear: the escalation is blocked. This conflict
+      category should never be downgraded to warning, even in advisory mode.
+    spec_impact: "CL-04 conflict severity — TRUST-ESCALATION always error"
+    pitfall: null

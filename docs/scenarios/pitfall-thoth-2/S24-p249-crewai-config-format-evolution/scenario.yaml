@@ -1,0 +1,156 @@
+name: S24-p249-crewai-config-format-evolution
+series: pitfall-thoth-2
+version: 1
+specs: [CL-01, CL-04]
+description: >
+  Validates that the platform detection phase handles evolving CrewAI
+  configuration file formats without hardcoding a single filename. CrewAI has
+  changed its config filename across versions (crewai.yaml, crew.yaml,
+  pyproject.toml with [tool.crewai] section). Detection must check a list of
+  known config filenames to avoid missing workspaces that use newer or older
+  format conventions.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: []
+    analysis:
+      rules_evaluated: false
+      workspace_detected: true
+      platform_detected: crewai
+      config_format: crew.yaml
+  violations: []
+  warnings:
+    - code: CLAWS-W304
+      message: "CrewAI detected via crew.yaml — verify version compatibility with claws CrewAI support"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: detect
+      type: config-format-miss
+      error: "CrewAI workspace undetected — hardcoded crewai.yaml check missed crew.yaml format"
+    - component: detect
+      type: version-assumption
+      error: "Detection assumed CrewAI v2 format but workspace uses CrewAI v3 conventions"
+  halt: null
+  budget: null
+
+problem: >
+  A team upgrades from CrewAI v2 to v3. In v2, the configuration file was
+  crewai.yaml. In v3, it was renamed to crew.yaml and the schema changed. The
+  team runs claws detect to verify their workspace is recognized. The detection
+  phase checks only for crewai.yaml (the v2 filename). The workspace contains
+  crew.yaml (v3 format) but no crewai.yaml. Detection reports "no supported
+  platform detected." The team concludes that claws does not support CrewAI and
+  abandons the integration. Meanwhile, another team still on CrewAI v2 is
+  detected correctly. The inconsistency is confusing: claws appears to support
+  CrewAI but only for the old version, with no indication that it simply needs
+  to check for the new filename.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The platform detection must maintain a list of known config
+      filenames for each framework, not a single hardcoded name.
+      For CrewAI: [crewai.yaml, crew.yaml, pyproject.toml]. For
+      pyproject.toml, the detector must parse TOML and check for
+      [tool.crewai] or [tool.crew] sections. The list must be
+      ordered by recency so the most current format is checked first.
+    spec_impact: "CL-01 DETECT — multi-filename config detection per framework"
+    pitfall: P-249
+
+  - id: F02
+    severity: major
+    description: >
+      The detected config format must be recorded in the detection
+      result so downstream phases know which schema to expect. A
+      crew.yaml file has a different structure than crewai.yaml. The
+      parser must dispatch to the correct schema reader based on which
+      filename was detected, not assume a fixed schema.
+    spec_impact: "CL-01 DETECT — config format determines parser dispatch"
+    pitfall: P-249
+
+  - id: F03
+    severity: major
+    description: >
+      The config filename list must be updatable without a full claws
+      release. The detection rules should be stored in a configuration
+      file (e.g., platform-signatures.json) that claws update can
+      refresh from a registry. This decouples detection evolution from
+      compiler releases, critical for fast-moving frameworks.
+    spec_impact: "CL-01 DETECT — updatable platform signature registry"
+    pitfall: P-249
+
+  - id: F04
+    severity: major
+    description: >
+      When multiple config files are found (e.g., both crewai.yaml
+      and crew.yaml during a migration), the detector must resolve the
+      ambiguity. The most recent format should take precedence, and a
+      warning should note: "Multiple CrewAI config formats detected.
+      Using crew.yaml (v3 format). Remove crewai.yaml if migration is
+      complete." This guides the developer through the transition.
+    spec_impact: "CL-01 DETECT — multi-config ambiguity resolution"
+    pitfall: P-249
+
+  - id: F05
+    severity: warning
+    description: >
+      pyproject.toml is a shared configuration file used by many Python
+      tools. The presence of pyproject.toml alone does not indicate
+      CrewAI. The detector must parse the TOML and verify the
+      [tool.crewai] section exists. A pyproject.toml without that
+      section must not trigger CrewAI detection.
+    spec_impact: "CL-01 DETECT — TOML section validation for pyproject.toml"
+    pitfall: P-249
+
+  - id: F06
+    severity: warning
+    description: >
+      The version of the CrewAI framework affects which governance
+      features are available. The detector should extract the CrewAI
+      version from the config file or from requirements.txt/pyproject
+      .toml dependencies. If the version is below the minimum
+      supported by claws, a warning should indicate which features
+      are unavailable.
+    spec_impact: "CL-01 DETECT — framework version extraction and minimum check"
+    pitfall: P-249
+
+  - id: F07
+    severity: major
+    description: >
+      The "no supported platform detected" error message must include
+      a list of checked filenames so the developer can diagnose the
+      mismatch. "Checked for: crewai.yaml, crew.yaml, pyproject.toml
+      with [tool.crewai]. None found in /path/to/workspace." This
+      immediately tells the developer which filenames claws expects
+      and lets them verify their own setup.
+    spec_impact: "CL-05 DX — detection failure diagnostic with checked filenames"
+    pitfall: P-249
+
+  - id: F08
+    severity: warning
+    description: >
+      The detection test suite must include fixtures for every known
+      CrewAI config format, including transition states (both files
+      present) and edge cases (empty config file, minimal config).
+      Each new format added to the detection list must come with a
+      corresponding test fixture to prevent regression.
+    spec_impact: "CL-01 testing — per-format detection test fixtures"
+    pitfall: P-249
+
+  - id: F09
+    severity: note
+    description: >
+      The platform-signatures.json registry should include a "last
+      verified" date for each config format so maintainers can
+      periodically verify that the detection rules still match the
+      current framework documentation. Stale signatures that have
+      not been verified in 6+ months should produce a build-time
+      warning in claws's own CI.
+    spec_impact: "CL-01 DETECT — signature staleness tracking"
+    pitfall: P-249

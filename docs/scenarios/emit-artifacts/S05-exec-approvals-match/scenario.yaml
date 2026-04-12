@@ -1,0 +1,99 @@
+name: S05-exec-approvals-match
+series: emit-artifacts
+version: 1
+specs: [CL-04]
+description: >
+  Validates that exec-approvals.json correctly maps tool classifications
+  to approval requirements. Every R5 tool must require approval. R3-R4 tools
+  must require confirmation. R1-R2 tools must be listed as auto-approved.
+  The approval map must match the tool set in TOOLS.md exactly.
+
+expect:
+  artifacts:
+    - type: exec-approvals
+      path: exec-approvals.json
+      valid: true
+  plugin_hooks: null
+  skill_content: null
+  approvals:
+    matches_tools: true
+    r5_tools_require_approval: true
+    r3_r4_tools_require_confirmation: true
+    r1_r2_tools_auto_approved: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  TOOLS.md declares 6 tools across risk levels. exec-approvals.json must
+  contain exactly 6 entries, one per tool. R5 tools (send-email) must have
+  approval: "required". R3-R4 tools (file-writer, shell-exec) must have
+  approval: "confirmation". R1-R2 tools (file-reader, web-search, db-read)
+  must have approval: "auto". No extra tools, no missing tools.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      exec-approvals.json is the L4 backup — it operates at the host level,
+      independent of the Gateway plugin. If the OC platform has its own exec
+      approval format that differs from claws's generated format, the backup
+      is useless. The emitted format must match the platform's expected schema
+      exactly.
+    spec_impact: "CL-04 EMIT — exec-approvals platform schema conformance"
+    pitfall: "P-008"
+
+  - id: F02
+    severity: major
+    description: >
+      "matches_tools: true" means exact set equality between TOOLS.md tool
+      names and exec-approvals.json keys. If a tool is renamed in TOOLS.md
+      but exec-approvals is not regenerated, the backup has a stale entry
+      and a missing entry. The three-ring model should detect this drift.
+    spec_impact: "CL-05 three-ring — exec-approval staleness detection"
+    pitfall: "P-008"
+
+  - id: F03
+    severity: warning
+    description: >
+      The approval levels (required, confirmation, auto) map to risk levels
+      (R5, R3-R4, R1-R2). But individual tools may have custom approval
+      overrides in claws.json. The emitted exec-approvals must honor
+      overrides: an R3 tool with explicit approval: "required" must be
+      emitted as "required," not "confirmation."
+    spec_impact: "CL-04 EMIT — custom approval override in exec-approvals"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Platform built-in tools may not appear in TOOLS.md but still need
+      exec-approval entries. If OC's bash tool (R4/EXECUTE) is available
+      by default, it should appear in exec-approvals even without a TOOLS.md
+      declaration. The emit phase must merge declared and built-in tools.
+    spec_impact: "CL-04 EMIT — built-in tool inclusion in exec-approvals"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The JSON structure of exec-approvals must be both machine-readable
+      (for the platform) and human-readable (for auditing). A flat
+      key-value mapping { "tool-name": { "approval": "required" } } is
+      simple but may need metadata (risk level, capabilities, OBO status)
+      for audit purposes.
+    spec_impact: "CL-04 EMIT — exec-approvals schema richness"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      If exec-approvals.json lists 6 tools but TOOLS.md changes to 7 tools
+      (new tool added), the exec-approvals is stale. The new tool has no
+      approval entry, meaning it executes without L4 governance. This is
+      a critical drift scenario that the inner ring must catch on TOOLS.md
+      save.
+    spec_impact: "CL-05 three-ring — TOOLS.md change triggers recompile"
+    pitfall: "P-008"

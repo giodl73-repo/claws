@@ -1,0 +1,166 @@
+name: S04-cross-ring-escalation
+series: three-rings
+version: 1
+specs: [CL-05]
+description: >
+  Validates cross-ring escalation: the inner ring detects a violation that
+  requires middle-ring intervention (doctor --fix), which in turn reveals
+  a fleet-level inconsistency requiring outer-ring action. Each ring must
+  know its own boundary and escalate cleanly to the next ring without
+  duplicating work or losing context.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [TOOLS.md]
+      ring: inner
+      escalation_target: middle
+    analysis:
+      rules_evaluated: true
+      violations:
+        - rule: SCHEMA-STALE
+          severity: warning
+          message: "claws.json schema v2 is deprecated; run doctor --post-upgrade"
+      warnings: []
+  violations:
+    - rule: SCHEMA-STALE
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer saves TOOLS.md, triggering the inner ring. pinch detects that
+  claws.json uses schema v2 while the installed claws version expects v3.
+  This is not a governance violation per se — it is a schema staleness issue
+  that inner-ring pinch cannot fix. The inner ring must escalate to the
+  middle ring: emit a diagnostic suggesting "run claws doctor --post-upgrade"
+  instead of just reporting a violation. If the developer runs doctor, it
+  discovers the schema mismatch also exists in 4 other workspaces in the
+  fleet, suggesting an outer-ring broadcast is needed.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The spec defines three rings as independent concentric layers, but
+      does not define an escalation protocol between them. When the inner
+      ring detects an issue it cannot resolve, how does it signal the middle
+      ring? Options: (a) error message with suggested command, (b) structured
+      escalation event in the audit trail, (c) automatic middle-ring trigger.
+      The spec needs to pick one.
+    spec_impact: "CL-05 Three Rings — define inter-ring escalation protocol"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The inner ring checks governance rules. Schema staleness is NOT a
+      governance rule (not one of the 29 rules in CL-02). It is an
+      infrastructure concern. The inner ring's diagnostic scope is unclear:
+      does it only check governance rules, or does it also check schema
+      health, version compatibility, and configuration validity? If the
+      inner ring checks everything, it is no longer "just pinch --staged."
+    spec_impact: "CL-05 Inner Ring — diagnostic scope: governance rules only vs infrastructure"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      If doctor discovers a fleet-wide schema mismatch, the escalation
+      from middle to outer ring requires fleet context that doctor does
+      not have. doctor operates on one workspace. It cannot know that 4
+      other workspaces have the same issue. The escalation to outer ring
+      must come from a fleet-aware component (drift or a fleet management
+      layer), not from doctor itself.
+    spec_impact: "CL-05 Middle-to-Outer Escalation — requires fleet context, doctor cannot provide"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Escalation creates a UX problem: the developer gets a pinch violation,
+      runs doctor, doctor suggests broadcast. The developer now needs fleet
+      admin permissions they may not have. The escalation path crosses
+      permission boundaries (developer -> workspace admin -> fleet admin).
+      The spec does not address RBAC in the escalation flow.
+    spec_impact: "CL-05 Escalation — permission boundaries across rings"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The inner ring produces a diagnostic. The middle ring produces a
+      diagnostic. If both are visible simultaneously (e.g., in VS Code
+      diagnostics panel), the user sees two related but different messages
+      for the same root cause. The UX must deduplicate: once doctor is
+      suggested, the original inner-ring diagnostic should reference the
+      escalation rather than standing alone as if it were independently
+      actionable.
+    spec_impact: "CL-05 Escalation UX — deduplicate cross-ring diagnostics"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The escalation from inner to middle ring is triggered by the
+      developer running a command. But the escalation from middle to
+      outer is advisory ("you should run broadcast"). There is no
+      automated escalation — every ring transition requires human action.
+      This is correct for safety, but the spec should explicitly state
+      that cross-ring escalation is ALWAYS human-initiated, never automatic.
+    spec_impact: "CL-05 Escalation — human-initiated, never automatic (safety constraint)"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      If the inner ring caches the GovernanceIR and the middle ring
+      modifies workspace files (doctor --fix), the inner ring's cache
+      is stale. The next file save triggers inner-ring pinch against
+      the old IR. Cache invalidation must propagate across rings: when
+      the middle ring modifies files, it must invalidate the inner ring's
+      cache. The spec does not define cross-ring cache coherence.
+    spec_impact: "CL-05 Three Rings — cross-ring cache invalidation protocol"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The three-ring model maps cleanly to organizational roles: inner ring
+      = individual developer, middle ring = workspace admin, outer ring =
+      fleet admin. This mapping suggests that ring boundaries should align
+      with organizational permission levels. The spec hints at this but
+      does not make the role-ring mapping explicit.
+    spec_impact: "CL-05 Three Rings — explicit role-ring permission mapping"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Escalation context must be preserved. When doctor runs after inner-ring
+      escalation, it should know it was triggered BY the inner ring (not
+      invoked standalone). This context affects diagnostics: doctor can
+      report "inner ring detected schema v2 in TOOLS.md; upgrading to v3"
+      rather than generic "found schema v2." The spec does not define
+      escalation context passing between rings.
+    spec_impact: "CL-05 Escalation — context preservation between rings"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The three-ring model uses existing commands (watch, pinch, doctor,
+      drift, broadcast). This means each command must know which ring it
+      is operating in, either from flags or from invocation context. A
+      command invoked by the inner ring watcher behaves differently from
+      the same command invoked standalone. The behavioral difference should
+      be minimal to avoid confusion, but the spec does not define what
+      changes per ring context.
+    spec_impact: "CL-05 Commands — behavioral differences based on ring context"
+    pitfall: null

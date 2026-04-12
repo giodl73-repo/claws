@@ -1,0 +1,115 @@
+name: S01-deny-vs-tool
+series: cross-file-conflicts
+version: 1
+specs: [CL-04]
+description: >
+  Validates DENY-vs-TOOL conflict: SOUL.md contains a deny constraint
+  ("never access production") while TOOLS.md declares a tool that accesses
+  production (prod-db). The conflict must be detected as an error-severity
+  cross-file violation.
+
+expect:
+  governance_ir:
+    version: 1
+    analysis:
+      conflicts:
+        - category: DENY-vs-TOOL
+          severity: error
+          files: [SOUL.md, TOOLS.md]
+          soul_constraint: "never access production"
+          tool_name: prod-db
+          resolution: "remove tool or remove deny constraint"
+  violations:
+    - category: DENY-vs-TOOL
+      severity: error
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  SOUL.md declares: "Never access production databases." TOOLS.md declares
+  a tool named "prod-db" with description "Query production database for
+  customer records" (R2/READ). The compiler must detect that the prod-db
+  tool directly contradicts the SOUL.md deny constraint. The conflict
+  category is DENY-vs-TOOL with error severity. The pipeline must not emit
+  artifacts when this conflict exists.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The deny constraint "never access production" uses natural language.
+      The tool name "prod-db" uses a slug. The conflict detection must match
+      natural language patterns to tool names/descriptions. This requires
+      semantic matching, not just string matching. "production" in the deny
+      must match "prod" in the tool name or "production" in the description.
+    spec_impact: "CL-04 ANALYZE — semantic matching for deny-tool conflicts"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      If the deny constraint says "never access production" and the tool is
+      named "prod-staging-db" (access staging, not production), the semantic
+      matcher must not false-positive. "prod-staging" is not "production."
+      The matching must be precise enough to avoid false positives while
+      catching true conflicts.
+    spec_impact: "CL-04 ANALYZE — deny-tool matching precision"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The resolution suggestion "remove tool or remove deny constraint" is
+      bidirectional. But in practice, deny constraints from SOUL.md should
+      almost always win (governance > authority > execution priority from
+      the tension model). The resolution should prefer removing the tool.
+    spec_impact: "CL-04 conflict resolution — governance-first priority"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Multiple deny constraints may conflict with the same tool. "Never
+      access production" AND "never query customer data" both apply to
+      prod-db. The conflict report should aggregate all applicable deny
+      constraints for a single tool, not report each as a separate conflict.
+    spec_impact: "CL-04 ANALYZE — multi-constraint conflict aggregation"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The confidence scoring for SOUL.md extraction (0.0-1.0, threshold 0.5)
+      affects conflict detection. If the deny constraint is extracted with
+      confidence 0.6, the conflict is detected. If confidence is 0.4, the
+      constraint is flagged for user confirmation and the conflict is not
+      auto-detected. Low-confidence constraints need special handling.
+    spec_impact: "CL-04 PARSE — low-confidence constraint conflict behavior"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The pipeline halts before EMIT when error-severity conflicts exist.
+      This is the correct behavior — conflicting governance should not
+      produce artifacts. But the user must be told explicitly that no
+      artifacts were produced and why, not just shown the conflict.
+    spec_impact: "CL-04 pipeline — clear halt-reason communication"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      If the tool is used only in a specific workflow step and the deny
+      constraint has a conditional ("never access production UNLESS approved"),
+      the conflict may be resolvable with an elicitation gate. The compiler
+      should suggest elicitation as a resolution for conditional denies, not
+      just removal.
+    spec_impact: "CL-04 conflict resolution — elicitation as resolution"
+    pitfall: null

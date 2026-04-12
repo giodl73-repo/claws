@@ -1,0 +1,135 @@
+name: S23-p184-pre-governance-plugin-r5
+series: pitfall-anubis
+version: 1
+specs: [CL-03]
+description: >
+  Validates that the governance plugin evaluates R5 tool calls authoritatively,
+  ignoring any "already approved" context from plugins that ran earlier in the
+  chain. A pre-governance plugin that pre-approves R5 calls must not influence
+  the governance decision.
+
+expect:
+  workspaces:
+    total: 1
+    governed: 1
+  drift_count: 0
+  broadcast_result: null
+  compliance:
+    r5_calls_blocked: 1
+    pre_approval_ignored: true
+    governance_authoritative: true
+
+simulate:
+  failures:
+    - component: plugin-chain
+      type: pre-approval-influence
+      error: "Pre-governance plugin marked execute_code as 'approved'; governance plugin deferred to prior approval"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has two plugins registered in order: (1) productivity-helper
+  plugin that auto-approves common tool calls to reduce user interruptions,
+  and (2) the governance plugin compiled by claws. The productivity-helper
+  plugin runs first and marks the execute_code tool (R5, destructive) as
+  "approved" in the plugin context. The governance plugin sees the "approved"
+  flag in the tool call context and, following a "don't ask twice" heuristic,
+  defers to the prior approval. The R5 tool call executes without human
+  elicitation. The governance plugin's fail-closed guarantee for R5 is
+  bypassed by a convenience plugin that has no security awareness.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-03 must mandate that the governance plugin performs authoritative
+      evaluation regardless of any prior plugin decisions. The governance
+      plugin must strip or ignore all "approved," "denied," or "deferred"
+      flags set by prior plugins in the chain. The governance evaluation is
+      the security decision; all prior decisions are advisory at best and
+      should be treated as untrusted input.
+    spec_impact: "CL-03 Runtime Enforcement — authoritative governance evaluation"
+    pitfall: P-184
+
+  - id: F02
+    severity: major
+    description: >
+      The governance plugin must not read the plugin context for prior
+      approval status. The plugin API should isolate the governance plugin's
+      input to: tool name, parameters, risk classification, and workspace
+      configuration. Any "approval" field in the context must be explicitly
+      excluded from the governance plugin's view. This isolation is
+      architectural, not behavioral — the field must not be accessible.
+    spec_impact: "CL-03 Runtime Enforcement — context isolation for governance plugin"
+    pitfall: P-184
+
+  - id: F03
+    severity: major
+    description: >
+      R5 fail-closed is non-negotiable and non-configurable. Even if the
+      governance plugin were to check prior approvals, R5 must always require
+      human elicitation. CL-03 must include an explicit test case: "Prior
+      plugin approves R5 tool call. Governance plugin must still block and
+      require human elicitation. If the tool call executes without elicitation,
+      the implementation is non-compliant."
+    spec_impact: "CL-03 Runtime Enforcement — R5 fail-closed regardless of context"
+    pitfall: P-184
+
+  - id: F04
+    severity: major
+    description: >
+      The audit trail must record when the governance plugin overrides a
+      prior approval. The audit event should include: tool name, risk level,
+      prior plugin name, prior decision (approved), governance decision
+      (blocked, pending elicitation), and reason (R5 requires human approval).
+      This audit event is evidence that the governance plugin is functioning
+      correctly and not deferring to prior plugins.
+    spec_impact: "CL-03 Runtime Enforcement — prior-approval override audit event"
+    pitfall: P-184
+
+  - id: F05
+    severity: major
+    description: >
+      The compiled governance plugin must include a static assertion that
+      it does not access prior-plugin approval state. During emit, the
+      generated plugin code should be checked for any references to the
+      approval context field. If the generated code reads the approval
+      context, the emit should fail with a compiler error. This is a
+      defense-in-depth measure at the compilation stage.
+    spec_impact: "CL-04 Compilation Pipeline — no-prior-approval static assertion"
+    pitfall: P-184
+
+  - id: F06
+    severity: warning
+    description: >
+      Plugin ordering documentation must warn that pre-governance plugins
+      can influence governance decisions if the governance plugin is not
+      properly isolated. The documentation should recommend placing the
+      governance plugin first in the chain, but the isolation guarantee
+      must hold regardless of ordering. Defense-in-depth means the system
+      is safe even in the wrong configuration.
+    spec_impact: "CL-03 Runtime Enforcement — plugin ordering documentation"
+    pitfall: P-184
+
+  - id: F07
+    severity: warning
+    description: >
+      The governance plugin should emit a warning if it detects it is not
+      the first plugin in the chain. The warning should say: "Governance
+      plugin is not first in the plugin chain. Prior plugins may attempt
+      to influence governance decisions. Governance evaluation is authoritative
+      regardless of ordering, but placing governance first is recommended."
+    spec_impact: "CL-03 Runtime Enforcement — non-first-position warning"
+    pitfall: P-184
+
+  - id: F08
+    severity: note
+    description: >
+      Post-governance plugins should have access to the governance decision
+      but must not be able to override it. The plugin API should define
+      governance decisions as immutable: once the governance plugin says
+      DENY, no subsequent plugin can change it to ALLOW. This one-way
+      immutability is the architectural guarantee that governance decisions
+      are final.
+    spec_impact: "CL-03 Runtime Enforcement — immutable governance decisions"
+    pitfall: P-184

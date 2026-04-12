@@ -1,0 +1,125 @@
+name: S23-p156-approve-on-timeout-default
+series: pitfall-final-2
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates unconditional deny-on-timeout override for the platform's
+  approve-on-timeout default (P-156). The OC platform auto-approves R5
+  tools after 30s of human inaction. claws must ALWAYS generate deny-on-
+  timeout, and approveOnTimeout: true in claws.json must be a build error.
+
+expect:
+  rules_applied: [G-ELICIT-TIMEOUT]
+  violations:
+    - code: CLAWS-E042
+      rule: G-ELICIT-TIMEOUT
+      description: "Platform default approve-on-timeout not overridden — R5 auto-executes on inaction"
+  pass: false
+  severity: error
+
+simulate:
+  failures:
+    - component: elicitation
+      type: approve-on-timeout
+      error: "OC platform approves R5 tool 'send-payment' after 30s timeout — no deny override generated"
+  halt: null
+  budget: null
+
+problem: >
+  The OC platform default is approve-on-timeout: if a human does not respond
+  to an R5 tool approval request within 30 seconds, the tool executes
+  automatically. This default exists for UX convenience in low-risk
+  scenarios. claws's governance philosophy requires deny-on-timeout for
+  all risk levels. But the generated handler does not include the timeout
+  override because denyDefault is not configured in claws.json. The platform
+  default takes effect. A user steps away from their desk, and 30 seconds
+  later, send-payment executes a $50,000 wire transfer without approval.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-156 core: The platform default approve-on-timeout contradicts
+      claws's deny-default philosophy. For R5 tools, auto-approval on
+      timeout is equivalent to no governance — the tool executes because
+      the human was not present, which is the exact scenario governance
+      should protect against.
+    spec_impact: "CL-02 G-ELICIT-TIMEOUT — platform default contradiction"
+    pitfall: "P-156"
+
+  - id: F02
+    severity: major
+    description: >
+      The emit phase must UNCONDITIONALLY generate deny-on-timeout,
+      regardless of claws.json configuration. This is a non-configurable
+      safety default. The generated handler includes: on timeout, return
+      { block: true, blockReason: "claws-timeout-deny: human did not
+      respond within configured timeout" }. No configuration can change
+      this behavior.
+    spec_impact: "CL-04 EMIT — unconditional deny-on-timeout generation"
+    pitfall: "P-156"
+
+  - id: F03
+    severity: major
+    description: >
+      If claws.json explicitly sets approveOnTimeout: true, the build
+      fails with CLAWS-E042: "approveOnTimeout: true is a prohibited
+      configuration. claws requires deny-on-timeout for all risk levels.
+      This configuration cannot be overridden because it would allow
+      ungoverned R5 tool execution on human inaction."
+    spec_impact: "CL-01 schema — approveOnTimeout: true is build error"
+    pitfall: "P-156"
+
+  - id: F04
+    severity: major
+    description: >
+      The deny-on-timeout must apply to ALL risk levels, not just R5.
+      For R1-R2 tools, the deny is less critical (read-only), but
+      consistency matters. A timeout on any tool should result in denial
+      with a clear message: "Governance timeout — tool not executed.
+      Retry if intended."
+    spec_impact: "CL-02 G-ELICIT-TIMEOUT — all risk levels deny on timeout"
+    pitfall: "P-156"
+
+  - id: F05
+    severity: major
+    description: >
+      The timeout value itself should be configurable (hookTimeoutMs,
+      per P-136), but the timeout BEHAVIOR (deny) is non-configurable.
+      The developer can say "timeout after 60s" but cannot say "approve
+      after timeout." This separation of timeout duration (configurable)
+      from timeout behavior (fixed deny) must be clearly documented.
+    spec_impact: "CL-01 schema — timeout duration vs timeout behavior"
+    pitfall: "P-156"
+
+  - id: F06
+    severity: warning
+    description: >
+      The platform may update its default behavior in future versions.
+      If OC changes from approve-on-timeout to deny-on-timeout, claws's
+      override becomes redundant but harmless. The generated handler
+      should always include the override regardless of platform version
+      to defend against version regression.
+    spec_impact: "CL-04 EMIT — platform-version-independent override"
+    pitfall: "P-156"
+
+  - id: F07
+    severity: warning
+    description: >
+      Post-emit verification must check that the generated handler
+      includes the deny-on-timeout logic. A template bug that omits
+      the timeout handler would silently revert to the platform default.
+      The post-emit AST check must verify: timeout handler exists AND
+      returns block: true.
+    spec_impact: "CL-04 EMIT — post-emit timeout handler verification"
+    pitfall: "P-156"
+
+  - id: F08
+    severity: note
+    description: >
+      The deny-on-timeout may frustrate users who expect quick tool
+      execution. The UX mitigation: the denial message should include
+      a one-click retry mechanism: "Tool timed out. Click to approve
+      and retry." This preserves security while minimizing UX friction.
+    spec_impact: "CL-05 DX — timeout denial UX mitigation"
+    pitfall: "P-156"

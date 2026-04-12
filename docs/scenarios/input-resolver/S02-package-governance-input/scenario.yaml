@@ -1,0 +1,122 @@
+name: S02-package-governance-input
+series: input-resolver
+version: 1
+specs: [CL-01, CL-04, CL-07]
+description: >
+  The InputResolver receives a workspace that declares @corp/soc2-policies as
+  a package input source in the claws.json file. The resolver fetches the
+  package from the configured registry, extracts its governance rules, and
+  merges them with local workspace rules using precedence semantics. The
+  resulting governance IR contains both local and package-sourced rules with
+  distinct provenance entries. This validates the package input path including
+  registry resolution, version pinning, and merge conflict handling.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "TOOLS.md"
+        - "claws.json"
+        - "@corp/soc2-policies/rules.yaml"
+        - "@corp/soc2-policies/policies.yaml"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  An enterprise team maintains centralized SOC2 compliance policies in
+  @corp/soc2-policies. A project workspace declares this package as an input
+  source alongside its own local SOUL.md. When the developer runs
+  claws compile, the InputResolver must fetch the package, extract governance
+  files, and merge rules. Local rules take precedence over package rules when
+  IDs conflict, but package rules that have no local counterpart must be
+  included without modification. The CGR must distinguish package-sourced
+  rules from local rules in provenance. If the merge order is wrong, local
+  overrides could be silently dropped, leaving the project bound by stale
+  corporate rules the team intentionally customized. The test confirms
+  correct fetch, extraction, merge precedence, and provenance tagging.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Package version resolution must be deterministic and auditable. If the
+      claws.json declares @corp/soc2-policies without a version pin, the
+      resolver could fetch different versions across builds. The resolver
+      must either require explicit version pins or record the resolved version
+      in a lockfile equivalent. Without version determinism, governance
+      compilation becomes non-reproducible, which directly violates SOC2
+      audit requirements that this package is meant to enforce.
+    spec_impact: "CL-04 Section 3 — package version determinism"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      Merge precedence must be documented and enforced with a single strategy.
+      If local rules override package rules by ID, this is last-writer-wins
+      with local priority. But if the package declares rules as mandatory
+      (non-overridable), the resolver needs a merge mode that respects the
+      package author's intent. Without a mandatory/advisory distinction in
+      rule metadata, enterprises cannot enforce baseline compliance while
+      allowing project-level customization.
+    spec_impact: "CL-01 Section 7 — rule merge precedence semantics"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      Package extraction must validate the internal structure of governance
+      packages. A malformed @corp/soc2-policies that contains rules.yaml
+      with invalid schema should produce INPUT-RESOLVE-SCHEMA diagnostics,
+      not a runtime crash during analysis. The resolver must schema-validate
+      extracted files before merging them into the governance IR, treating
+      package inputs with the same validation rigor as local files.
+    spec_impact: "CL-07 Section 2 — package input schema validation"
+    pitfall: null
+  - id: F04
+    severity: major
+    description: >
+      Registry authentication for private packages must be handled without
+      leaking credentials into the CGR or governance IR. If @corp/soc2-policies
+      is hosted on a private registry requiring an auth token, the resolver
+      must use credential helpers (npmrc, environment variables) without
+      recording tokens in provenance metadata. A credential leak in the CGR
+      would be an actual SOC2 violation caused by the compliance tooling.
+    spec_impact: "CL-07 Section 4 — credential isolation in provenance"
+    pitfall: null
+  - id: F05
+    severity: minor
+    description: >
+      Transitive package dependencies should be resolved but not merged. If
+      @corp/soc2-policies depends on @corp/base-rules, the resolver must
+      fetch the transitive dependency but only merge rules explicitly
+      re-exported by soc2-policies. Silent transitive inclusion would
+      surprise developers with rules they never declared.
+    spec_impact: "CL-04 Section 5 — transitive dependency boundaries"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      Cache invalidation for package inputs must respect both version changes
+      and content changes within the same version. If a package author
+      publishes a patch under the same version (bad practice but possible
+      with private registries), the resolver's content hash must detect the
+      change. Version-only cache keys would serve stale content.
+    spec_impact: "CL-04 Section 6 — package cache integrity"
+    pitfall: null
+  - id: F07
+    severity: minor
+    description: >
+      The governance IR manifest must clearly separate local and package
+      sources in its structure, not just via provenance metadata on
+      individual entries. A top-level sources array grouped by origin type
+      enables quick auditing without scanning every rule. This structural
+      separation also simplifies diff tooling that compares IR snapshots
+      across builds.
+    spec_impact: "CL-07 Section 1 — manifest source grouping"
+    pitfall: null

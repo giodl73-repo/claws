@@ -1,0 +1,130 @@
+name: S06-provenance-audit-trail
+series: input-resolver
+version: 1
+specs: [CL-01, CL-04, CL-07]
+description: >
+  The InputResolver processes a workspace with all three source types (local
+  files, npm package, URL) and produces a CGR (Compilation Governance Record)
+  that captures complete provenance for every resolved source. The CGR records
+  source type, resolution path, content hash, cache status (hit/miss/expired/
+  not-applicable), and timestamp for each entry. An external audit tool can
+  consume the CGR to reconstruct the exact inputs that produced the governance
+  IR without re-running compilation. This scenario validates end-to-end
+  provenance fidelity and CGR schema compliance.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "MEMORY.md"
+        - "claws.json"
+        - "@corp/soc2-policies/rules.yaml"
+        - "https://policies.corp.internal/soc2/v3/rules.yaml"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 1
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  An auditor needs to verify that a governance compilation used the correct
+  inputs. They receive the CGR artifact and must be able to determine: which
+  files were read locally, which packages were fetched and at what version,
+  which URLs were downloaded and whether they passed SRI validation, and
+  whether any source was served from cache vs fetched live. The CGR must
+  contain all of this information in a machine-readable schema without
+  requiring access to the original build environment. If the CGR is
+  incomplete (missing timestamps, missing cache status, missing hash for
+  a source), the auditor cannot certify the build and the governance
+  process fails its own compliance requirements. This scenario validates
+  that every source type produces a complete provenance entry and that
+  the CGR schema is self-contained for offline audit.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The CGR schema must be versioned independently from the governance IR
+      schema. If the CGR format changes (adding fields, restructuring
+      provenance entries), audit tools consuming CGRs must know which
+      schema version to validate against. A cgr_schema_version field at
+      the root of the CGR enables backward-compatible evolution. Without
+      versioning, adding a required field in a future release breaks all
+      existing audit tooling that parses CGRs from historical builds.
+    spec_impact: "CL-07 Section 11 — CGR schema versioning"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      Content hashes in the CGR must be computed over the raw fetched bytes,
+      not the parsed YAML representation. If the resolver parses YAML and
+      then serializes it for hashing, semantically equivalent but
+      syntactically different inputs produce the same hash. This defeats
+      the purpose of integrity verification because a tampered file that
+      parses to the same AST would pass hash comparison. Raw-byte hashing
+      catches any modification, including comment changes and whitespace
+      that YAML normalizes away.
+    spec_impact: "CL-07 Section 12 — raw-byte content hashing"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      Cache status must use a closed enumeration (HIT, MISS, EXPIRED,
+      REVALIDATED, NOT_APPLICABLE) rather than freeform strings. Local
+      files are NOT_APPLICABLE (no caching layer). Package sources may
+      be HIT (cached version matches) or MISS (first fetch). URL sources
+      may be any of the five values. A closed enum prevents audit tools
+      from encountering unexpected cache status values that they cannot
+      categorize, which would force manual review of every such entry.
+    spec_impact: "CL-07 Section 13 — cache status enumeration"
+    pitfall: null
+  - id: F04
+    severity: major
+    description: >
+      Timestamps in the CGR must use ISO 8601 with timezone offset, not
+      local time without timezone. Build machines in different timezones
+      produce CGRs that cannot be temporally ordered if timestamps lack
+      timezone information. UTC is preferred (Z suffix) for consistency,
+      but any timezone-aware format is acceptable. Millisecond precision
+      is needed to order events within a single compilation that processes
+      sources in parallel.
+    spec_impact: "CL-07 Section 14 — timestamp precision and timezone"
+    pitfall: null
+  - id: F05
+    severity: minor
+    description: >
+      The CGR should include a compilation_id (UUID) that links it to the
+      specific build invocation. If a developer runs claws compile twice
+      with the same inputs, the two CGRs must be distinguishable by their
+      compilation_id even though their content hashes may be identical.
+      This enables audit trails to reference specific build events
+      rather than build content.
+    spec_impact: "CL-07 Section 15 — compilation identity"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      The CGR artifact must be signable. If the organization requires
+      cryptographic attestation of build provenance (SLSA, in-toto),
+      the CGR must be structured as a valid attestation subject. This
+      means the CGR should be serializable to a canonical form (sorted
+      keys, no trailing whitespace) so that signatures are reproducible
+      across environments.
+    spec_impact: "CL-07 Section 16 — CGR canonical serialization"
+    pitfall: null
+  - id: F07
+    severity: minor
+    description: >
+      The CGR should record the resolver configuration that was active
+      during compilation, including timeout values, retry limits, cache
+      TTL, and merge precedence settings. Without configuration capture,
+      an auditor cannot determine whether the resolver was running in a
+      permissive mode (e.g., --allow-stale) that would weaken the
+      provenance guarantees. Configuration-in-CGR makes each build
+      self-documenting.
+    spec_impact: "CL-04 Section 16 — resolver configuration capture"
+    pitfall: null

@@ -1,0 +1,128 @@
+name: S02-hipaa-safeguards-ontology
+series: ontology-governance
+version: 1
+specs: [CL-04, CL-06, CL-07]
+description: >
+  Validates that HIPAA 164.312 technical safeguards expressed in a
+  governance ontology compile through OntologyIR to enforceable governance
+  rules. 164.312(a)(1) access control maps to G-PERM, 164.312(c)(1)
+  integrity maps to G-DATA with PII labels, 164.312(e)(1) transmission
+  security maps to G-OUTPUT with redaction rules. All rules must carry
+  HIPAA provenance and PHI-specific data classification labels.
+
+expect:
+  rules_applied: [G-PERM, G-DATA, G-OUTPUT]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A healthcare enterprise publishes a HIPAA ontology package
+  (hipaa-governance.onto.yaml) mapping 164.312 technical safeguards to
+  claws governance rules. 164.312(a)(1) (access control) requires
+  capability-gated tool access for any tool touching patient data --
+  mapping to G-PERM with a PHI-aware trust tier. 164.312(c)(1) (integrity)
+  requires that tools processing PHI declare data labels with PII
+  classification -- mapping to G-DATA. 164.312(e)(1) (transmission
+  security) requires that output containing PHI is redacted before
+  leaving the workspace -- mapping to G-OUTPUT with redaction hooks.
+  The compiler must generate all three rules with HIPAA provenance and
+  ensure PHI-specific data labels flow from G-DATA to G-OUTPUT so the
+  redaction rule knows which fields to redact.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      HIPAA safeguards reference PHI (Protected Health Information) which
+      is a data classification concept, not a governance rule concept.
+      The ontology must bridge data classification (PHI, PII, financial)
+      to governance rules (G-DATA, G-OUTPUT). If the bridge is missing,
+      the G-DATA rule knows to check labels but does not know which
+      labels constitute PHI. The ontology schema needs a data_classes
+      section that defines classification taxonomies consumed by rules.
+    spec_impact: "CL-06 Ontology Schema -- data_classes section for classification taxonomies"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The flow from G-DATA labels to G-OUTPUT redaction requires
+      cross-rule dependency in GovernanceIR. G-OUTPUT must reference
+      G-DATA's label definitions to know what to redact. If GovernanceIR
+      treats rules as independent, the redaction rule cannot access
+      labels defined by the data classification rule. GovernanceIR must
+      support rule dependency edges where one rule's output feeds
+      another's configuration.
+    spec_impact: "CL-04 GovernanceIR -- add rule dependency edges for cross-rule data flow"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      HIPAA 164.312(e)(1) transmission security applies to data in
+      transit. In the claws context, "transit" means tool output leaving
+      the workspace (e.g., send-email, API calls). The G-OUTPUT redaction
+      rule must distinguish between internal tool calls (file write within
+      workspace) and external transmissions (API, email, webhook). Only
+      external transmissions trigger redaction. The tool classification
+      must include a transit_boundary flag.
+    spec_impact: "CL-02 Tool Classification -- add transit_boundary flag for external data tools"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      PHI data labels include 18 HIPAA identifiers (names, dates, SSNs,
+      medical record numbers, etc.). The ontology must enumerate these
+      identifiers in the data_classes taxonomy so the G-OUTPUT redaction
+      rule can pattern-match against them. A generic "PHI" label without
+      sub-identifiers produces either over-redaction (all output) or
+      under-redaction (only obvious fields). The 18 HIPAA identifiers
+      must be explicitly listed.
+    spec_impact: "CL-06 HIPAA Ontology -- enumerate 18 HIPAA identifiers in PHI data class"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      HIPAA compliance requires a BAA (Business Associate Agreement)
+      between covered entities and business associates. The ontology
+      compiler cannot verify BAA status -- it can only generate rules
+      assuming the organizational relationship exists. The provenance
+      annotations should include a `requires_baa: true` field so
+      compliance dashboards can flag workspaces using HIPAA ontology
+      without verified BAA status.
+    spec_impact: "CL-06 Ontology Provenance -- requires_baa field for organizational prerequisite tracking"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      HIPAA defines both required and addressable safeguards. Required
+      safeguards must be implemented; addressable safeguards allow
+      alternative measures if the entity documents why the addressable
+      specification is not reasonable. The ontology must distinguish
+      required vs addressable controls so the compiler can emit errors
+      for missing required rules and warnings for missing addressable
+      rules.
+    spec_impact: "CL-06 Ontology Controls -- required vs addressable distinction for HIPAA safeguards"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The PHI redaction in G-OUTPUT fires at compile time (static rule
+      generation) but actual redaction happens at runtime. If the runtime
+      redaction engine is unavailable or the redaction patterns are stale,
+      PHI leaks despite compile-time governance being correct. The
+      compliance_evidence_type for transmission security must be "runtime"
+      not "static," and the provenance must record that compile-time
+      governance alone is insufficient for this safeguard.
+    spec_impact: "CL-06 Provenance -- compliance_evidence_type runtime for transmission security"
+    pitfall: null

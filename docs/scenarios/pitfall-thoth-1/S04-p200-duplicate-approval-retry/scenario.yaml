@@ -1,0 +1,140 @@
+name: S04-p200-duplicate-approval-retry
+series: pitfall-thoth-1
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates that duplicate approval requests caused by agent framework retries
+  are deduplicated. The agent framework's timeout is shorter than the elicitation
+  timeout, causing the framework to retry the tool call (and re-issue the approval
+  prompt) while the user is still considering the first prompt. The runtime must
+  detect and suppress duplicate elicitation requests within the timeout window.
+
+expect:
+  attack_class: approval-fatigue
+  defense_layer: g-elicit
+  blocked: true
+  audit_event:
+    type: obo-duplicate-request-suppressed
+    tool: "transfer-funds"
+    risk_level: 5
+    outcome: DEDUPLICATED
+    reason: "duplicate elicitation request suppressed: matching request pending within timeout window"
+
+simulate:
+  failures:
+    - component: approval-flow
+      type: framework-retry-duplicate
+      error: "agent framework timeout (15s) shorter than elicitation timeout (30s); retry generates duplicate approval prompt"
+  halt: null
+  budget: null
+
+problem: >
+  The agent invokes transfer-funds (R5/TRANSACT) with parameters {to: "acme-corp",
+  amount: 5000}. The elicitation prompt is displayed to the user. The elicitation
+  timeout is 30 seconds. The agent framework has a 15-second tool call timeout.
+  After 15 seconds with no response (user is reading the prompt), the framework
+  times out the tool call and retries. The retry generates a second identical
+  elicitation prompt. The user now sees two prompts for the same action. If the
+  user approves both, two transfers execute. If the user denies the first
+  (thinking it is a duplicate) but approves the second, the transfer executes once
+  but with confusing UX. If the framework retries N times, N prompts appear and
+  the user loses confidence in the approval system's reliability.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The runtime must maintain a pending-request table keyed by (agent_id,
+      tool_name, parameter_hash). When a new elicitation request arrives whose
+      key matches an existing pending request, the runtime returns a "pending"
+      response to the agent framework instead of displaying a second prompt.
+      The pending response must include the original request's correlation ID
+      so the framework can await the same outcome.
+    spec_impact: "CL-02 G-ELICIT — pending-request deduplication table"
+    pitfall: P-200
+
+  - id: F02
+    severity: major
+    description: >
+      The deduplication window must align with the elicitation timeout. A
+      pending request remains in the table for the full elicitation timeout
+      duration (30s default). After the timeout expires and the request is
+      resolved (approved, denied, or timed out), the table entry is removed.
+      A retry arriving after table cleanup is treated as a new request and
+      prompts the user again — this is correct behavior because the original
+      request has already resolved.
+    spec_impact: "CL-03 runtime — deduplication window aligned to elicitation timeout"
+    pitfall: P-200
+
+  - id: F03
+    severity: major
+    description: >
+      The deduplication must use the same canonical parameter serialization as
+      the TOCTOU check (P-197). If the retry slightly modifies parameters
+      (e.g., adds a retry_count field injected by the framework), the
+      deduplication key changes and the duplicate is not detected. Framework-
+      managed parameters must be excluded from the deduplication key just as
+      they are excluded from the approval hash.
+    spec_impact: "CL-02 G-ELICIT — consistent parameter canonicalization across dedup and TOCTOU"
+    pitfall: P-200
+
+  - id: F04
+    severity: major
+    description: >
+      The audit trail must record both the original request and each suppressed
+      duplicate, with timestamps. This creates an observable signal for
+      framework misconfiguration: if an agent consistently generates 3+
+      duplicates per approval, the framework timeout is too short relative to
+      the elicitation timeout. Fleet dashboards should surface "high duplicate
+      rate" as a configuration health warning.
+    spec_impact: "CL-02 G-ELICIT-AUDIT — suppressed duplicate count as health metric"
+    pitfall: P-200
+
+  - id: F05
+    severity: warning
+    description: >
+      The user must never see duplicate prompts. But if the UI layer is
+      separate from the runtime (e.g., VS Code extension rendering prompts
+      from the Gateway), a race condition could display the second prompt
+      before the runtime suppresses it. The runtime must suppress at the
+      Gateway level before the prompt reaches the UI transport, not at the
+      UI rendering layer.
+    spec_impact: "CL-03 runtime — gateway-level dedup before UI transport"
+    pitfall: P-200
+
+  - id: F06
+    severity: major
+    description: >
+      When the user responds to the original prompt (approve or deny), the
+      outcome must be propagated to all deduplicated retries awaiting the
+      same correlation ID. The framework receives the same outcome for all
+      retries: if the user approves once, all retries receive "approved" and
+      the tool executes exactly once. If the user denies, all retries receive
+      "denied." The runtime must not execute the tool once per approval —
+      only once total.
+    spec_impact: "CL-03 runtime — single execution for deduplicated approvals"
+    pitfall: P-200
+
+  - id: F07
+    severity: warning
+    description: >
+      The deduplication table is an in-memory state. If the runtime process
+      restarts during the elicitation window, the table is lost and a retry
+      after restart will generate a second prompt. The table should be
+      persisted to a short-lived durable store (e.g., SQLite WAL) for
+      crash-resilient deduplication. The persistence overhead is low because
+      the table is small and entries are short-lived.
+    spec_impact: "CL-03 runtime — crash-resilient deduplication via durable store"
+    pitfall: P-200
+
+  - id: F08
+    severity: warning
+    description: >
+      Agent frameworks that implement their own retry logic (LangGraph,
+      AutoGen, CrewAI) may have hardcoded retry timeouts that cannot be
+      configured to exceed the elicitation timeout. The claws documentation
+      must publish the elicitation timeout value and recommend framework
+      timeout >= 2x elicitation timeout. The health check should detect
+      and warn about known framework timeout defaults that are too short.
+    spec_impact: "CL-05 DX — framework timeout recommendation in health check"
+    pitfall: P-200

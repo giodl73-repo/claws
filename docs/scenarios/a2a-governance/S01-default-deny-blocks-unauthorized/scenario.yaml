@@ -1,0 +1,154 @@
+name: S01-default-deny-blocks-unauthorized
+series: a2a-governance
+version: 1
+specs: [CL-02]
+description: >
+  Validates the default-deny trust model for A2A communication. Agent A
+  attempts to send a message to Agent B without any trust group declaration.
+  The communication must be blocked at the handler level. No trust declaration
+  means no communication — the starting point is always DENY. This is the
+  foundational A2A security primitive, analogous to deny-default-on-timeout
+  for OBO.
+
+expect:
+  attack_class: unauthorized-communication
+  defense_layer: G-A2A-TRUST
+  blocked: true
+  audit_event: a2a-default-deny-blocked
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  AGENTS.md declares two agents: data-fetcher and report-generator. Neither
+  agent has a trust declaration in AGENTS.md or claws.json. data-fetcher
+  attempts to send query results to report-generator. The runtime handler
+  checks G-A2A-TRUST and finds no trust relationship between the two agents.
+  The communication is blocked. At compile time, FE6 detects the same
+  configuration gap: agents declared without trust declarations produce
+  CLAWS-E030 (Amendment A97). The scenario validates both compile-time and
+  runtime enforcement of default-deny.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Amendment A97 makes delegation-without-trust a hard error (CLAWS-E030).
+      But the error fires only when delegation exists (tools are delegated to
+      the agent). Two agents that merely need to communicate (not delegate)
+      need a trust declaration but may not have delegation. G-A2A-TRUST must
+      also fire when AGENTS.md declares agents that are NOT in any trust group,
+      even without delegation. Declaration implies intent to communicate.
+    spec_impact: "CL-02 G-A2A-TRUST — trust requirement for all declared agents, not just delegated"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Default-deny at compile time means FE6 flags the missing trust. But
+      what about agents that are spawned dynamically at runtime (not declared
+      in AGENTS.md)? Dynamic agents have no compile-time trust validation.
+      The runtime handler must enforce default-deny for ALL agent pairs,
+      regardless of whether they were declared at compile time. Unknown agent
+      identities default to no trust.
+    spec_impact: "CL-03 runtime — default-deny for dynamic agents"
+    pitfall: P-203
+
+  - id: F03
+    severity: major
+    description: >
+      The A2A rule dependency ordering (Amendment A17) makes G-A2A-TRUST the
+      prerequisite for all other A2A rules. If G-A2A-TRUST fails (no trust
+      declaration), all downstream rules (IDENTITY, FLOW, ESCALATE, DELEGATE)
+      are skipped. This is correct — without trust, other checks are moot.
+      But the compiler must still report the skipped rules so the developer
+      understands the full impact of adding a trust declaration (all 5 rules
+      will then fire).
+    spec_impact: "CL-02 G-A2A-TRUST — cascading skip notification"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The minimum viable trust declaration (Amendment A15) is
+      `trust: delegation-only`. But for agents that need to communicate
+      without delegation (peer-to-peer information sharing), a different
+      trust level is needed: `trust: communication`. The trust taxonomy
+      should include at minimum: none (default), delegation-only (parent
+      sends work), communication (bidirectional messages), full (unrestricted).
+    spec_impact: "CL-02 G-A2A-TRUST — trust level taxonomy"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The blocked communication attempt must produce an actionable error for
+      the developer. The runtime block reason should include: "data-fetcher
+      cannot communicate with report-generator: no trust declaration. Add a
+      trust group in claws.json or trust declaration in AGENTS.md." The fix
+      suggestion must be specific to the agents involved, not a generic
+      "add trust declarations" message.
+    spec_impact: "CL-02 G-A2A-TRUST — agent-specific fix suggestions in block reason"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Agent-less workspaces skip all G-A2A-* rules via precondition (Amendment
+      A100). But a workspace that declares agents in AGENTS.md and has no
+      trust declarations is fundamentally different from a workspace with no
+      agents. The precondition should check for DECLARED agents (AGENTS.md
+      has entries), not just ACTIVE agents (agents currently running). A
+      workspace with declared but non-running agents should still be validated.
+    spec_impact: "CL-02 G-A2A-TRUST — declared vs active agent distinction in precondition"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      If both agents are in the SAME trust group, communication is allowed.
+      But trust groups are symmetric: if A trusts B, B trusts A. Some
+      workflows require asymmetric trust: A can send to B, but B cannot
+      initiate communication with A. The trust group model may need
+      directional trust declarations for fine-grained control. Default-deny
+      is the foundation; directional trust is the refinement.
+    spec_impact: "CL-02 G-A2A-TRUST — directional trust declarations"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      The scenario tests runtime blocking, but the compile-time FE6 check
+      should prevent this workspace from building at all. If FE6 produces
+      CLAWS-E030 (hard error), the workspace cannot compile, and the runtime
+      scenario never occurs. The scenario is valuable for cases where FE6
+      is bypassed (advisory mode, dynamic agents, stale compilation). The
+      runtime handler is the last line of defense.
+    spec_impact: "CL-02 FE6 — compile-time vs runtime enforcement layering"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The audit event for a default-deny block must distinguish "blocked
+      because no trust exists" from "blocked because trust was revoked" or
+      "blocked because trust conditions were not met." These are different
+      operational situations requiring different responses. The audit event
+      type taxonomy should include: default-deny, trust-revoked,
+      trust-condition-failed, identity-mismatch.
+    spec_impact: "CL-02 G-A2A-TRUST — audit event type taxonomy for A2A blocks"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Default-deny means even the implicit delegation trust (Amendment A14)
+      requires explicit acknowledgment. A parent agent delegating tools to a
+      subagent creates implicit trust for the delegation channel. But this
+      implicit trust must still be declared or the workspace must acknowledge
+      the implicit trust creation. The developer should never be surprised
+      by trust relationships they did not explicitly create.
+    spec_impact: "CL-02 G-A2A-TRUST — implicit delegation trust visibility"
+    pitfall: null

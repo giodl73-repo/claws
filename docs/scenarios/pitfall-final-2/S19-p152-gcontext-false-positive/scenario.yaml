@@ -1,0 +1,120 @@
+name: S19-p152-gcontext-false-positive
+series: pitfall-final-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates that G-CONTEXT compile-time checks are scoped to configuration
+  only, not content (P-152). "Remember to update login instructions" in
+  SOUL.md should not be flagged as prompt injection at compile time.
+  Content scanning is deferred to runtime.
+
+expect:
+  rules_applied: [G-CONTEXT]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  SOUL.md contains the instruction "Remember to update login instructions
+  when the SSO provider changes." G-CONTEXT's compile-time injection
+  detection flags "Remember to" as a potential prompt injection pattern
+  (an attacker might use "Remember to ignore all previous instructions").
+  The false positive blocks compilation. The developer must either rewrite
+  their SOUL.md to avoid the pattern or disable G-CONTEXT entirely. Both
+  options are harmful: rewriting changes the governance intent, disabling
+  removes injection defense.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-152 core: Compile-time injection detection applied to workspace
+      content produces excessive false positives. Phrases like "remember
+      to," "ignore the previous," and "you must" are common in legitimate
+      governance instructions. The same phrases are used in injection
+      attacks, making them indistinguishable at the lexical level.
+    spec_impact: "CL-02 G-CONTEXT — compile-time false positive rate"
+    pitfall: "P-152"
+
+  - id: F02
+    severity: major
+    description: >
+      The scope fix: compile-time G-CONTEXT checks only validate
+      CONFIGURATION, not CONTENT. Configuration: claws.json schema,
+      exec-approvals.json structure, plugin registration metadata.
+      Content: SOUL.md instructions, TOOLS.md descriptions, MEMORY.md
+      data. Content scanning is deferred to runtime where context
+      (who is speaking, what was asked) disambiguates injection from
+      legitimate instruction.
+    spec_impact: "CL-02 G-CONTEXT — compile-time scope restriction"
+    pitfall: "P-152"
+
+  - id: F03
+    severity: major
+    description: >
+      The compile-time configuration check validates: no executable code
+      in JSON configuration fields, no cross-site scripting patterns in
+      display strings, no path traversal in file references. These are
+      structural checks that do not require content understanding and
+      have near-zero false positive rates.
+    spec_impact: "CL-02 G-CONTEXT — configuration-only structural checks"
+    pitfall: "P-152"
+
+  - id: F04
+    severity: major
+    description: >
+      Runtime content scanning uses context: the agent's system prompt
+      is scanned differently from user input. Agent instructions in
+      SOUL.md are trusted content (the workspace operator wrote them).
+      User input at runtime is untrusted content. The trust boundary
+      determines which scanning rules apply.
+    spec_impact: "CL-03 runtime — trust-context-aware content scanning"
+    pitfall: "P-152"
+
+  - id: F05
+    severity: major
+    description: >
+      If compile-time G-CONTEXT is too aggressive, developers disable it.
+      A disabled G-CONTEXT provides zero injection defense. The false
+      positive rate must be low enough (<1%) that developers keep it
+      enabled. Restricting to configuration checks achieves this because
+      configuration has a known schema with limited expressiveness.
+    spec_impact: "CL-02 G-CONTEXT — false positive rate target"
+    pitfall: "P-152"
+
+  - id: F06
+    severity: warning
+    description: >
+      The diagnostic for a false positive should explain why the pattern
+      was flagged and how to suppress it: "CLAWS-W050: 'Remember to'
+      pattern matched injection heuristic. This is likely a false positive
+      in SOUL.md. Suppress with: claws.json context.suppress: ['W050']."
+    spec_impact: "CL-02 G-CONTEXT — false positive suppression mechanism"
+    pitfall: "P-152"
+
+  - id: F07
+    severity: warning
+    description: >
+      The boundary between configuration and content is not always clear.
+      SKILL.md is generated content that contains instructions (content-
+      like) but is emitted by claws (configuration-like). SKILL.md should
+      be scanned at emit time (trusted content) with relaxed rules, not
+      at runtime with untrusted rules.
+    spec_impact: "CL-02 G-CONTEXT — SKILL.md trust classification"
+    pitfall: "P-152"
+
+  - id: F08
+    severity: note
+    description: >
+      The deferred runtime scanning requires the generated handler to
+      include content scanning logic. This adds to the handler's code
+      size and latency. The scanning must be lightweight: pattern matching,
+      not LLM-based analysis. Complex injection detection belongs in a
+      separate middleware, not the governance handler.
+    spec_impact: "CL-03 runtime — lightweight content scanning"
+    pitfall: "P-152"

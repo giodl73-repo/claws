@@ -1,0 +1,135 @@
+name: S01-fleet-broadcast-context-fork
+series: compiled-context
+version: 1
+specs: [CL-05, CL-07]
+description: >
+  Validates the fleet-as-context-forks model where fleet policy is the
+  governance root layer and individual workspaces are context forks
+  inheriting from the root. A fleet of 10 workspaces shares a common
+  governance root (3 G-rules). Each workspace fork adds workspace-specific
+  constraints. A fleet broadcast updates the root, and all 10 forks
+  must reflect the update while preserving their local customizations.
+
+expect:
+  workspaces:
+    total: 10
+    governed: 10
+    ungoverned: 0
+    misconfigured: 0
+  drift_count: 0
+  broadcast_result:
+    success: 10
+    failed: 0
+    skipped: 0
+  compliance:
+    governed_pass: 10
+    governed_fail: 0
+    ungoverned: 0
+    misconfigured: 0
+    vacuous_compliance: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise fleet defines a governance root context containing 3
+  G-rules: G-PERM (all R3+ tools require capability grants), G-BOUND
+  (audit events for all invocations), and G-OUTPUT (PII redaction on
+  external transmissions). This root is the fleet policy layer. Each of
+  10 workspaces forks this root and adds workspace-specific constraints:
+  workspace-alpha adds G-ELICIT for trade approvals, workspace-beta adds
+  G-DATA for PHI labels, etc. When the fleet broadcasts an update to the
+  root (adding G-SUPPLY for artifact signing), all 10 forks must inherit
+  the new rule without losing their local additions. The compiled context
+  for each workspace is the root + fork delta, and the delta must be
+  minimal (only workspace-specific additions, not a full copy of root).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The fork model requires structural sharing: each workspace stores
+      only its delta from the root, not a full copy. If the fleet broadcast
+      replaces the root, every fork must rebase onto the new root. This
+      rebase operation must be atomic per workspace: either the fork
+      successfully rebases (inherits new root + preserves delta) or it
+      fails without partial application. Partial rebase (new root applied,
+      delta lost) would silently drop workspace-specific governance.
+    spec_impact: "CL-05 Fleet Broadcast -- atomic fork rebase with delta preservation"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The delta between root and fork may conflict with the root update.
+      If workspace-alpha's delta includes a G-PERM override (lowering the
+      threshold from R3 to R2), and the root update changes G-PERM's
+      threshold to R4, the fork delta conflicts. The rebase must detect
+      such conflicts and apply the monotonic tightening rule: the stricter
+      value (R2, from the fork) wins, but a governance conflict event
+      must be emitted so fleet operators are aware of the divergence.
+    spec_impact: "CL-05 Fork Rebase -- conflict detection with monotonic tightening resolution"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The compiled context for each workspace must be reconstructable
+      from root + delta alone. If the root is updated and the fork's
+      compiled context is cached, the cache must be invalidated. The
+      cache invalidation key is the root governance hash plus the fork
+      delta hash. If either changes, the compiled context is stale.
+      Without proper cache invalidation, workspaces may run on stale
+      governance after a fleet broadcast.
+    spec_impact: "CL-05 Context Caching -- root-hash + delta-hash composite cache key"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The broadcast_result reports success/failed/skipped counts. But
+      success only means the root update was received, not that
+      recompilation succeeded. A two-phase broadcast (receive + recompile)
+      should report both phases separately. A workspace that receives the
+      update but fails recompilation is in a dangerous state: it knows
+      about the new root but runs on the old compiled context.
+    spec_impact: "CL-05 Fleet Broadcast -- two-phase status (receive + recompile) per workspace"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Fleet policy as the governance root implies a single authority
+      model. In practice, enterprises have multiple governance authorities
+      (security team, compliance team, platform team). The root could be
+      a merge of multiple authority layers, each contributing G-rules.
+      The context fork model should support multi-root composition where
+      each authority contributes a layer, ordered by precedence.
+    spec_impact: "CL-05 Fleet Policy -- multi-authority root composition with precedence ordering"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The 10-workspace fleet is small. At enterprise scale (1000+
+      workspaces), the broadcast must be batched and parallelized.
+      Serial broadcast of root updates would take O(n) time where n
+      is fleet size. The broadcast protocol should support parallel
+      fan-out with configurable batch size and rollback on batch-level
+      failure rate exceeding a threshold.
+    spec_impact: "CL-05 Fleet Broadcast -- parallel fan-out with batch-level rollback threshold"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The fleet-as-context-forks model is analogous to git branches.
+      The root is main, forks are feature branches. Fleet broadcast is
+      a merge from main into all branches. This analogy could inform the
+      UI: `claws fleet tree` showing fork hierarchy, `claws fleet rebase`
+      applying root updates, `claws fleet diff` showing fork deltas.
+      The git-like mental model reduces the learning curve for developers.
+    spec_impact: "CL-05 Fleet UX -- git-like command vocabulary for context fork operations"
+    pitfall: null

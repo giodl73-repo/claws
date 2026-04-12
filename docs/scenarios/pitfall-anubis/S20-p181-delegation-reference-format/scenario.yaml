@@ -1,0 +1,142 @@
+name: S20-p181-delegation-reference-format
+series: pitfall-anubis
+version: 1
+specs: [CL-02, CL-05]
+description: >
+  Validates that cross-workspace delegation references use a standardized
+  format so fleet-level delegation graph construction does not fail on
+  workspace name mismatches, path differences, or format inconsistencies.
+
+expect:
+  workspaces:
+    total: 6
+    delegation_refs_valid: 4
+    delegation_refs_invalid: 2
+  drift_count: 2
+  broadcast_result: null
+  compliance:
+    delegation_graph_complete: false
+    invalid_refs:
+      - workspace: workspace-beta
+        ref: "../workspace-alpha/agent-finance"
+        reason: relative-path-not-allowed
+      - workspace: workspace-gamma
+        ref: "alpha:finance"
+        reason: non-standard-format
+
+simulate:
+  failures:
+    - component: delegation-graph
+      type: reference-format-mismatch
+      error: "Cross-workspace delegation ref '../workspace-alpha/agent-finance' uses non-standard relative path format"
+    - component: delegation-graph
+      type: reference-format-mismatch
+      error: "Cross-workspace delegation ref 'alpha:finance' uses non-standard shorthand format"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet of 6 workspaces defines cross-workspace delegations in AGENTS.md.
+  Workspace-beta delegates to workspace-alpha's finance agent using a relative
+  path: "../workspace-alpha/agent-finance". Workspace-gamma delegates to the
+  same agent using a shorthand: "alpha:finance". Workspace-delta delegates
+  using the canonical format: "fleet://workspace-alpha/agents/finance". When
+  `claws fleet scan --delegation-graph` attempts to build the fleet-wide
+  delegation graph, it cannot resolve the relative path or shorthand formats.
+  The graph shows 2 broken edges, making cycle detection and trust analysis
+  unreliable. The fleet admin cannot determine if a circular delegation exists.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-02 must define a canonical cross-workspace delegation reference
+      format. The format should be: "fleet://{workspace-name}/agents/{agent-
+      name}" for fleet-level references. All other formats (relative paths,
+      shorthand, bare names) must be rejected at compile time with an error
+      that includes the canonical format. This is a schema validation rule,
+      not a runtime check.
+    spec_impact: "CL-02 G-A2A-DELEGATE — canonical reference format"
+    pitfall: P-181
+
+  - id: F02
+    severity: major
+    description: >
+      The delegation reference format must be validated during `claws pinch`,
+      not only during fleet scan. A workspace that declares a cross-workspace
+      delegation with a non-standard format should fail pinch with a clear
+      error. This catches format issues at the workspace level before they
+      propagate to fleet-level graph construction.
+    spec_impact: "CL-02 G-A2A-DELEGATE — pinch-time format validation"
+    pitfall: P-181
+
+  - id: F03
+    severity: major
+    description: >
+      Fleet graph construction must report all invalid references in a single
+      pass, not fail on the first one. The graph builder should collect all
+      invalid references and report them together: workspace, invalid ref,
+      expected format, and a suggested correction. This batch reporting
+      allows operators to fix all references in one pass rather than
+      playing whack-a-mole with one error at a time.
+    spec_impact: "CL-05 Fleet Scan — batch reporting of invalid references"
+    pitfall: P-181
+
+  - id: F04
+    severity: major
+    description: >
+      The workspace-name in the canonical format must match the workspace's
+      declared name in claws.json, not the directory name or hostname. If
+      claws.json declares `workspace.name: "alpha-prod"` but the directory
+      is named "workspace-alpha", the canonical ref is "fleet://alpha-prod/
+      agents/finance". This decouples the logical identity from the physical
+      location.
+    spec_impact: "CL-02 G-A2A-DELEGATE — logical workspace name binding"
+    pitfall: P-181
+
+  - id: F05
+    severity: warning
+    description: >
+      A migration tool should help convert legacy delegation references to
+      the canonical format. `claws fleet migrate-refs` should scan all
+      workspaces, find non-standard references, resolve them to canonical
+      form (using workspace name mapping), and update AGENTS.md files.
+      This eases the adoption burden for existing fleets that predated
+      the format standardization.
+    spec_impact: "CL-05 Fleet Operations — reference migration tool"
+    pitfall: P-181
+
+  - id: F06
+    severity: warning
+    description: >
+      Cross-workspace delegation references must include a version or hash
+      component for safety: "fleet://alpha-prod/agents/finance@v2.3" or
+      "fleet://alpha-prod/agents/finance#sha256:abc123". This ensures that
+      the delegation is bound to a specific version of the target agent,
+      not whatever the target workspace happens to have deployed. Version
+      pinning prevents silent behavior changes in delegated agents.
+    spec_impact: "CL-02 G-A2A-DELEGATE — versioned reference format"
+    pitfall: P-181
+
+  - id: F07
+    severity: warning
+    description: >
+      The delegation graph visualization (`claws fleet graph`) must
+      distinguish valid edges from broken edges. Broken edges (unresolved
+      references) should be rendered in red with the error reason. Valid
+      edges should show the trust level of the delegation. This visual
+      distinction makes it immediately obvious where the graph is incomplete.
+    spec_impact: "CL-05 Fleet Graph — broken edge visualization"
+    pitfall: P-181
+
+  - id: F08
+    severity: note
+    description: >
+      The canonical format should support wildcards for fleet templates:
+      "fleet://*/agents/finance" means "any workspace's finance agent."
+      This is useful in fleet policies that define delegation rules across
+      all workspaces. Wildcard references must be expanded to concrete
+      references during fleet scan, never during pinch (which operates
+      on a single workspace).
+    spec_impact: "CL-05 Fleet Templates — wildcard delegation references"
+    pitfall: P-181

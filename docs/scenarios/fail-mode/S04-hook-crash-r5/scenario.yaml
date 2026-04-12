@@ -1,0 +1,111 @@
+name: S04-hook-crash-r5
+series: fail-mode
+version: 1
+specs: [CL-02]
+description: >
+  Validates fail-closed behavior when the governance hook crashes during an
+  R5 tool invocation. The handler-level try/catch must return block=true,
+  denying the R5 tool execution. This is the CB-01 defense against the OC
+  Gateway's fail-open hook runner default.
+
+expect:
+  attack_class: governance-bypass
+  defense_layer: handler-level-deny
+  blocked: true
+  audit_event:
+    type: governance-error
+    tool: send-payment
+    risk_level: 5
+    outcome: DENIED
+    reason: "claws-governance-error"
+
+simulate:
+  failures:
+    - component: governance-hook
+      type: crash
+      error: "TypeError: Cannot read property 'classify' of undefined"
+  halt: null
+  budget: null
+
+problem: >
+  The governance plugin's before_tool_call handler crashes with a TypeError
+  while processing an R5 tool (send-payment). The OC Gateway hook runner
+  defaults to fail-open (catchErrors: true, continues execution). The claws
+  handler-level try/catch must intercept the crash and return
+  { block: true, blockReason: "claws-governance-error: ..." }, overriding
+  the Gateway's fail-open default. The R5 tool must NOT execute.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The handler-level try/catch is the ONLY defense until the upstream PR
+      lands the failMode field on PluginHookRegistration. If the try/catch
+      itself has a bug (e.g., the catch clause throws), the Gateway's
+      fail-open takes over and the R5 tool executes ungoverned. The catch
+      clause must be as simple as possible — no complex logic.
+    spec_impact: "CL-02 CB-01 — catch clause simplicity requirement"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The audit event must be recorded EVEN THOUGH the handler crashed. If
+      the crash corrupts the audit chain state, the denial event is lost.
+      The audit recording in the catch clause must use a separate, hardened
+      audit path that does not depend on the normal audit chain.
+    spec_impact: "CL-02 CB-01 — hardened audit in crash path"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The crash error "TypeError: Cannot read property 'classify' of undefined"
+      is a realistic bug. The blockReason must include the error message for
+      debugging but must NOT include stack traces (which could leak internal
+      code structure to the user). Error sanitization in blockReason is needed.
+    spec_impact: "CL-02 CB-01 — error sanitization in blockReason"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      If the handler crash is persistent (happens on every invocation of
+      send-payment), the tool is permanently blocked. This is correct
+      security behavior but bad user experience. The sidecar (L5) should
+      detect persistent handler failures and trigger an alert to the
+      workspace operator, not just silently block.
+    spec_impact: "CL-03 sidecar — persistent handler failure detection"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The CB-01 defense is handler-level, operating below the Gateway's hook
+      runner. If the OC Gateway changes its hook runner semantics (e.g., from
+      catchErrors: true to catching AND blocking), the handler-level defense
+      might double-block (both handler and runner block). The handler must
+      return a consistent result regardless of the runner's behavior.
+    spec_impact: "CL-02 CB-01 — runner behavior independence"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The upstream PR strategy (contributing failMode to PluginHookRegistration)
+      would make this handler-level workaround unnecessary. Until the PR lands,
+      every claws release must include the handler-level try/catch. The PR
+      status should be tracked as a dependency.
+    spec_impact: "CL-02 CB-01 — upstream PR dependency tracking"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The runtime integrity verification (CISO M1) checks that the handler
+      is still registered. If the handler crashes so badly that it gets
+      unregistered by the Gateway, the sidecar must detect the absence via
+      health endpoint. This scenario tests crash-with-handler-present; the
+      handler-unregistered case needs a separate security-sim scenario.
+    spec_impact: "CL-03 runtime — handler presence monitoring"
+    pitfall: null

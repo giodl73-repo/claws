@@ -1,0 +1,144 @@
+name: S25-p186-save-ir-not-source
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that snap save captures both the GovernanceIR and all 9 workspace
+  source files as a coherent pair. A snapshot that captures only the IR leaves
+  the restore in an inconsistent state where the IR does not match the actual
+  workspace files.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, AGENTS.md, WORKFLOWS.md, DATA.md, IDENTITY.md, PERMISSIONS.md, SCHEDULE.md, claws.json]
+      snapshot_name: full-save-v1
+      snapshot_action: save
+      snapshot_includes_source: true
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+  violations: []
+  warnings:
+    - code: W-SNAP-SOURCE
+      message: "Snapshot must include source files for coherent restore"
+  artifacts:
+    count: 1
+    types: [snapshot]
+
+simulate:
+  failures:
+    - component: snapshot-save
+      type: ir-only-save
+      error: "snap save captured GovernanceIR but not SOUL.md, TOOLS.md, and 7 other source files"
+  halt: null
+  budget: null
+
+problem: >
+  A developer runs `claws snap save baseline-v1` before modifying the
+  workspace. The snapshot captures the GovernanceIR (compiled output) but not
+  the 9 workspace source files (SOUL.md, TOOLS.md, AGENTS.md, etc.). The
+  developer then modifies TOOLS.md to add 3 new R4 tools and SOUL.md to
+  lower the trust tier. When they run `claws snap restore baseline-v1`, the
+  GovernanceIR is restored to the baseline state, but the source files remain
+  modified. The restored IR says "trust tier T3, 5 tools" but the actual
+  TOOLS.md has 8 tools and SOUL.md has trust tier T1. A subsequent pinch
+  recompiles from the modified source files, producing a new IR that differs
+  from the restored one. The snapshot restore was useless — it restored IR
+  that was immediately invalidated by the unchanged source files.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must mandate that snap save captures a coherent file+IR pair:
+      all 9 workspace source files AND the GovernanceIR. The snapshot is a
+      point-in-time capture of the entire governance state. Without source
+      files, restoring the IR is meaningless because the next pinch will
+      overwrite it from the (modified) source files. The spec must list
+      all 9 files by name as mandatory snapshot contents.
+    spec_impact: "CL-05 Snapshot Save — mandatory 9-file + IR coherent pair"
+    pitfall: P-186
+
+  - id: F02
+    severity: major
+    description: >
+      The snapshot format must include a manifest listing all included files
+      with their SHA-256 hashes. On restore, the manifest is used to verify
+      that all files were restored correctly. A snapshot without a manifest
+      cannot be validated, making silent corruption undetectable. The manifest
+      itself must be hashed and the hash stored in the snapshot metadata.
+    spec_impact: "CL-05 Snapshot Save — file manifest with integrity hashes"
+    pitfall: P-186
+
+  - id: F03
+    severity: major
+    description: >
+      If any of the 9 workspace files does not exist at save time (optional
+      files like IDENTITY.md or SCHEDULE.md), the snapshot must record their
+      absence explicitly in the manifest: "IDENTITY.md: absent". On restore,
+      if the file was absent in the snapshot but exists in the workspace, the
+      restore must either delete it or warn. This prevents files that were
+      added after the snapshot from persisting through a restore.
+    spec_impact: "CL-05 Snapshot Save — absent file tracking in manifest"
+    pitfall: P-186
+
+  - id: F04
+    severity: major
+    description: >
+      The snapshot must be atomic: either all files are saved or none are.
+      If saving TOOLS.md succeeds but saving AGENTS.md fails (disk full,
+      permission error), the partial snapshot must be discarded, not kept.
+      A partial snapshot is worse than no snapshot because it creates a
+      false recovery point. The save operation must use a temp directory
+      and atomic rename.
+    spec_impact: "CL-05 Snapshot Save — atomic save semantics"
+    pitfall: P-186
+
+  - id: F05
+    severity: major
+    description: >
+      The snap save command must verify coherence after saving: recompile
+      the saved source files and compare the resulting IR to the saved IR.
+      If they differ, the snapshot is incoherent (the IR was stale when
+      saved) and must be rejected with an error. This verification catches
+      the case where the developer modified source files between the last
+      pinch and the snap save.
+    spec_impact: "CL-05 Snapshot Save — post-save coherence verification"
+    pitfall: P-186
+
+  - id: F06
+    severity: warning
+    description: >
+      Snapshot size must be considered. Including all 9 source files plus
+      the IR will increase snapshot size. The spec should define maximum
+      snapshot size (default 10MB) and warn when a snapshot exceeds 80%
+      of the limit. Large DATA.md or WORKFLOWS.md files could push
+      snapshots over the limit, requiring compression or external storage.
+    spec_impact: "CL-05 Snapshot Storage — size limits and compression"
+    pitfall: P-186
+
+  - id: F07
+    severity: warning
+    description: >
+      The claws.json file must be included in the snapshot because it
+      contains configuration that affects compilation (trust tier, fleet
+      settings, custom rules). If claws.json is excluded, the restored
+      state will use the current claws.json, which may have different
+      settings than when the snapshot was taken. The coherent pair is:
+      9 source files + claws.json + GovernanceIR.
+    spec_impact: "CL-05 Snapshot Save — claws.json included in snapshot"
+    pitfall: P-186
+
+  - id: F08
+    severity: note
+    description: >
+      The snapshot should include the claws version that created it. If
+      the snapshot was created with claws 2.1 and restored with claws 3.0,
+      the IR schema may be incompatible. The version mismatch should produce
+      a warning: "Snapshot created with claws 2.1, current version 3.0.
+      Source files will be recompiled after restore to ensure IR compatibility."
+    spec_impact: "CL-05 Snapshot Save — version tagging for compatibility"
+    pitfall: P-186

@@ -1,0 +1,128 @@
+name: S02-bom-preservation
+series: lossless-roundtrip
+version: 1
+specs: [CL-04]
+description: >
+  Validates that workspace files with UTF-8 BOM (byte order mark, 0xEF 0xBB 0xBF)
+  are preserved byte-for-byte after compilation. The pipeline strips BOM
+  internally for correct parsing but NEVER writes the stripped content back to
+  the source file. BOM stripping is an internal pipeline operation.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has SOUL.md and TOOLS.md with UTF-8 BOM markers (common on
+  Windows when files are created with Notepad or other editors that prepend
+  BOM). The pipeline must: (1) strip BOM internally before parsing to prevent
+  the BOM bytes from being interpreted as part of the first constraint keyword,
+  (2) compute content hashes from BOM-stripped content (for cross-platform
+  determinism), (3) NEVER write the BOM-stripped content back to the source
+  file. After compilation, both files must retain their original BOM markers.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If SOUL.md has a UTF-8 BOM and the first line is "# Never access
+      production", the BOM bytes (0xEF 0xBB 0xBF) precede the '#' character.
+      A keyword-anchored parser looking for '^# ' at line start would fail
+      because the line actually starts with BOM + '#'. BOM stripping must
+      happen before keyword extraction, and the stripped content must be
+      used only in-memory, never persisted back.
+    spec_impact: "CL-04 Phase 1 PARSE — BOM stripping before keyword anchor extraction"
+    pitfall: P-232
+
+  - id: F02
+    severity: major
+    description: >
+      Hash computation for incremental recompilation and GovernanceIR hash
+      must use BOM-stripped content. If two developers work on the same
+      SOUL.md — one with BOM (Windows Notepad), one without (VS Code) —
+      the content is semantically identical but the raw bytes differ. If
+      hashes use raw bytes, the same logical workspace produces different
+      IR hashes on different machines, breaking incremental compilation
+      cache sharing.
+    spec_impact: "CL-04 GovernanceIR — hash normalization must strip BOM before hashing"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      BOM can appear not only in UTF-8 but also in UTF-16LE (0xFF 0xFE) and
+      UTF-16BE (0xFE 0xFF). If a workspace file is encoded in UTF-16 (rare
+      but possible on Windows), the BOM stripping logic must handle all three
+      BOM variants. UTF-16 files also require transcoding to UTF-8 before
+      parsing. The lossless guarantee means the file stays in its original
+      encoding — no transcoding is written back.
+    spec_impact: "CL-04 PARSE — UTF-16 BOM detection and transcoding without write-back"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The Node.js `fs.readFile` API returns a Buffer. Converting to string
+      via `buffer.toString('utf-8')` does NOT strip the BOM — the BOM
+      appears as the first character (U+FEFF, zero-width no-break space).
+      The pipeline must explicitly check for and remove U+FEFF from the
+      string start. Libraries like `strip-bom` handle this, but adding a
+      dependency for 3 lines of code may not be warranted.
+    spec_impact: "CL-04 PARSE — explicit BOM stripping in Node.js string conversion"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The lossless test for BOM preservation must compare raw bytes, not
+      string content. If the test reads the file as a string (which strips
+      BOM implicitly in some environments), the comparison passes even if
+      the BOM was removed from the file. The test must use binary reads
+      (fs.readFile without encoding) and compare Buffer instances.
+    spec_impact: "CL-04 testing strategy — binary comparison for BOM preservation tests"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      claws.json is a JSON file, not a markdown file. JSON with BOM is
+      technically invalid per RFC 8259 (which says JSON text SHALL be encoded
+      in UTF-8 without BOM). However, many Windows tools produce JSON with
+      BOM. The claws.json parser should accept and preserve BOM silently
+      rather than rejecting the file as invalid JSON. Strict RFC compliance
+      here would break Windows workflows.
+    spec_impact: "CL-01 claws.json schema — accept JSON with BOM on Windows"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The `claws doctor` command could detect BOM in workspace files and
+      offer to strip it (with user consent). This is a quality-of-life
+      improvement but must NOT auto-strip BOM without explicit `--fix`
+      flag, as that would violate the lossless guarantee. Doctor's role
+      is diagnosis and consented remediation.
+    spec_impact: "CL-05 Three-Ring Model — doctor BOM detection as diagnostic, not auto-fix"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      YAML frontmatter in SKILL.md with BOM creates a nuance: the BOM
+      precedes the first `---` delimiter. YAML parsers may not recognize
+      the frontmatter block if BOM bytes intervene. The frontmatter
+      extraction logic must strip BOM before looking for the `---` pattern,
+      same as the main SOUL.md parser.
+    spec_impact: "CL-05 DECLARED Tier — BOM handling in YAML frontmatter extraction"
+    pitfall: null

@@ -1,0 +1,147 @@
+name: S04-hook-timeout-interruptibility
+series: pitfall-coverage-2
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates that governance hook timeout is configurable without blocking
+  legitimate R5 calls (P-074) and that handler interruption via AbortSignal
+  does not corrupt classification state (P-083). Complex workspaces may exceed
+  the default 50ms timeout, and mid-execution interrupts must leave state clean.
+
+expect:
+  attack_class: denial-of-service
+  defense_layer: timeout-guard
+  blocked: false
+  audit_event:
+    type: governance-timeout-averted
+    tool: generate-report
+    risk_level: 5
+    outcome: ALLOWED
+    reason: "evaluation completed within configured 200ms limit"
+
+simulate:
+  failures:
+    - component: governance-hook
+      type: timeout-exceeded
+      error: "Policy evaluation took 75ms, exceeding default 50ms limit"
+    - component: governance-hook
+      type: abort-mid-execution
+      error: "AbortSignal fired at 50ms, classification cache half-updated"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace with 50+ tools and complex A2A delegation graph takes 75ms for
+  policy evaluation. The default 50ms timeout fires AbortSignal, interrupting
+  the handler mid-execution. The classification cache has been partially
+  updated: tools A-M have fresh classifications, tools N-Z still have stale
+  classifications from the previous evaluation. Subsequent tool calls for
+  tools N-Z use stale risk levels. The workspace operator has configured
+  hookTimeoutMs: 200 in claws.json, but the generated handler still uses 50ms
+  because the configuration was not threaded through to code generation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-074 core: The 50ms default is too aggressive for a workspace with 50+
+      tools and A2A graph traversal. Policy evaluation legitimately needs 75ms.
+      The default fires AbortSignal, and an R5 tool (generate-report) is
+      blocked despite being policy-compliant. This is a false-positive denial
+      that breaks legitimate workflows.
+    spec_impact: "CL-02 G-LATENCY — default timeout too aggressive for complex workspaces"
+    pitfall: "P-074"
+
+  - id: F02
+    severity: major
+    description: >
+      The claws.json#performance.hookTimeoutMs setting must be threaded through
+      to the generated handler code. The emit phase must read this value and
+      generate `AbortSignal.timeout(200)` instead of the default 50. If the
+      setting is not threaded, the configuration is cosmetic only.
+    spec_impact: "CL-04 EMIT — timeout configuration threading"
+    pitfall: "P-074"
+
+  - id: F03
+    severity: major
+    description: >
+      The 500ms ceiling on hookTimeoutMs prevents abuse (a 10-second timeout
+      would make every tool call sluggish). But the ceiling must be validated
+      at parse time, not emit time. If claws.json sets 600ms, the error must
+      appear during `claws build`, not at runtime when the first tool call
+      times out unexpectedly.
+    spec_impact: "CL-01 schema — hookTimeoutMs ceiling validation at parse"
+    pitfall: "P-074"
+
+  - id: F04
+    severity: major
+    description: >
+      P-083 core: AbortSignal fires at 50ms, interrupting the handler after
+      it has updated classifications for tools A-M but before N-Z. The
+      classification cache is in an inconsistent state. Tool N (risk level
+      stale: R2, actual: R5) is called next and gets the stale R2
+      classification, bypassing the R5 elicitation gate.
+    spec_impact: "CL-02 G-IDEMPOTENT — interrupted state corruption"
+    pitfall: "P-083"
+
+  - id: F05
+    severity: major
+    description: >
+      The fix for P-083: immutable snapshots for all state reads. The handler
+      clones the classification cache at the start of evaluation and works on
+      the clone. The live cache is only replaced atomically (compare-and-swap)
+      after evaluation completes. If AbortSignal fires, the clone is discarded
+      and the live cache retains its previous consistent state.
+    spec_impact: "CL-02 G-IDEMPOTENT — immutable snapshot protocol"
+    pitfall: "P-083"
+
+  - id: F06
+    severity: warning
+    description: >
+      The classification cache must be a ReadonlyMap after initialization.
+      The generated code should use `Object.freeze()` or TypeScript's
+      `ReadonlyMap<string, number>` type. Any mutation attempt after
+      initialization is a TypeScript compilation error, caught at emit time.
+    spec_impact: "CL-04 EMIT — ReadonlyMap enforcement in generated code"
+    pitfall: "P-083"
+
+  - id: F07
+    severity: warning
+    description: >
+      `claws pinch` should warn when actual evaluation time approaches the
+      configured timeout. If evaluation consistently takes 180ms out of a
+      200ms budget, the operator should be warned before the timeout starts
+      firing. A threshold of 80% (160ms/200ms) triggers advisory CLAWS-W050.
+    spec_impact: "CL-02 G-LATENCY — proactive timeout budget warning"
+    pitfall: "P-074"
+
+  - id: F08
+    severity: warning
+    description: >
+      If the handler is interrupted by AbortSignal and the immutable snapshot
+      protocol prevents state corruption, the tool call still needs a
+      governance decision. The interrupted handler must return a cached
+      classification from the previous successful evaluation, not a default.
+      This means the previous-evaluation snapshot must always be retained.
+    spec_impact: "CL-02 G-IDEMPOTENT — fallback to previous evaluation"
+    pitfall: "P-083"
+
+  - id: F09
+    severity: note
+    description: >
+      Complex workspaces that consistently hit timeout should be flagged by
+      the sidecar with a recommendation to increase hookTimeoutMs. The sidecar
+      sees the pattern before the operator does, and can proactively suggest
+      a configuration change via its diagnostic channel.
+    spec_impact: "CL-03 sidecar — timeout pattern detection"
+    pitfall: "P-074"
+
+  - id: F10
+    severity: note
+    description: >
+      The combination of P-074 and P-083 is the primary attack surface: an
+      adversary adds 100+ tools to TOOLS.md to force timeout, then relies on
+      the stale classification cache to bypass R5 governance. The immutable
+      snapshot protocol is the defense against this deliberate timeout attack.
+    spec_impact: "CL-02 G-IDEMPOTENT — adversarial timeout exploitation"
+    pitfall: "P-074, P-083"

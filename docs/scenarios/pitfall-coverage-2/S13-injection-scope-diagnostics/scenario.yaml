@@ -1,0 +1,167 @@
+name: S13-injection-scope-diagnostics
+series: pitfall-coverage-2
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates that G-CONTEXT checks configuration rather than content (P-091)
+  and that injection defense rules have individual diagnostic codes per sub-
+  rule (P-092). Scanning content at compile time produces false positives.
+  Undifferentiated violation codes prevent targeted fixes.
+
+expect:
+  rules_applied: [G-CONTEXT, G-INPUT, G-OUTPUT, G-BOUND]
+  violations:
+    - code: CLAWS-W026
+      rule: G-CONTEXT
+      description: "MEMORY.md configuration missing boundary markers"
+    - code: CLAWS-W028-01
+      rule: G-INPUT
+      description: "G-INPUT-01: input length validation not configured"
+  pass: false
+  severity: warning
+
+simulate:
+  failures:
+    - component: injection-defense
+      type: content-scan-false-positive
+      error: "G-CONTEXT flagged MEMORY.md entry 'Remember to update the login instructions' as injection"
+    - component: injection-defense
+      type: undifferentiated-code
+      error: "G-CONTEXT violation — no sub-rule code to identify which of 4 checks failed"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace's MEMORY.md contains a runtime data entry: "Remember to update
+  the login instructions for the new SSO provider." G-CONTEXT scans this
+  content and flags "update the login instructions" as an instruction-like
+  pattern (verb + noun matching "action injection" heuristic). This is a
+  false positive — the content is a user note, not an injected instruction.
+  The violation message says "memory entry treated as instructions" but does
+  not specify which of the 4 G-CONTEXT sub-rules triggered. The developer
+  cannot determine if the fix is boundary markers, content isolation,
+  configuration change, or content rewording.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-091 core: G-CONTEXT scans MEMORY.md content ("Remember to update
+      the login instructions") and flags it as instruction injection. At
+      compile time, only CONFIGURATION can be verified — does memory config
+      include boundary markers? Content scanning is a CL-03 runtime concern
+      because content changes between tool calls.
+    spec_impact: "CL-02 G-CONTEXT — compile-time scope boundary"
+    pitfall: "P-091"
+
+  - id: F02
+    severity: major
+    description: >
+      G-CONTEXT at compile time should check: (1) are memory boundary markers
+      configured in claws.json? (2) is memory isolation mode set? (3) are
+      memory sections typed (data vs instructions)? These are configuration
+      checks that are deterministic at compile time. Content scanning belongs
+      in the CL-03 runtime guard stub.
+    spec_impact: "CL-02 G-CONTEXT — configuration-only checks"
+    pitfall: "P-091"
+
+  - id: F03
+    severity: major
+    description: >
+      P-092 core: The violation "memory entry treated as instructions" does
+      not say which sub-rule fired. G-CONTEXT has 4 sub-rules: CONTEXT-01
+      (boundary markers), CONTEXT-02 (isolation mode), CONTEXT-03 (section
+      typing), CONTEXT-04 (content pattern — runtime only). The developer
+      needs to know which sub-rule to address.
+    spec_impact: "CL-02 G-CONTEXT — sub-rule diagnostic codes"
+    pitfall: "P-092"
+
+  - id: F04
+    severity: major
+    description: >
+      Each multi-sub-rule group needs individual codes: G-INPUT-01 through
+      G-INPUT-04, G-CONTEXT-01 through G-CONTEXT-04, G-OUTPUT-01 through
+      G-OUTPUT-03, G-BOUND-01 through G-BOUND-04. The code identifies the
+      specific check that failed. The fix instruction is sub-rule-specific.
+    spec_impact: "CL-02 — sub-rule code scheme for all injection defense rules"
+    pitfall: "P-092"
+
+  - id: F05
+    severity: major
+    description: >
+      The false positive rate for content scanning at compile time is high
+      because any verb-noun pattern matches. "Update the database" (actual
+      instruction to the agent) and "Remember to update the database" (user
+      note about a task) are indistinguishable at compile time without
+      runtime context. Compile-time content scanning must be disabled by
+      default; configuration scanning is sufficient.
+    spec_impact: "CL-02 G-CONTEXT — false positive rate of content scanning"
+    pitfall: "P-091"
+
+  - id: F06
+    severity: warning
+    description: >
+      If a developer explicitly enables content scanning at compile time
+      (e.g., for strict security posture), the false positive rate should
+      be documented in the diagnostic: "G-CONTEXT-04 (content pattern) has
+      a high false-positive rate at compile time. Consider using runtime
+      scanning (CL-03) for content-level injection defense."
+    spec_impact: "CL-02 G-CONTEXT — compile-time scanning advisory"
+    pitfall: "P-091"
+
+  - id: F07
+    severity: warning
+    description: >
+      The sub-rule codes must be stable across claws versions. G-INPUT-01
+      always means "input length validation." Adding a new sub-rule gets
+      the next number (G-INPUT-05), never reassigning existing codes.
+      Stability matters because downstream tools (CI, dashboards) may
+      reference specific codes.
+    spec_impact: "CL-02 — sub-rule code stability contract"
+    pitfall: "P-092"
+
+  - id: F08
+    severity: warning
+    description: >
+      `claws pinch` output must group violations by rule and show sub-rule
+      codes. Instead of:
+        "3 G-CONTEXT violations"
+      Show:
+        "G-CONTEXT-01: 1 violation (boundary markers)"
+        "G-CONTEXT-03: 2 violations (section typing)"
+      Grouped output makes the fix path clear.
+    spec_impact: "CL-02 pinch — grouped sub-rule output"
+    pitfall: "P-092"
+
+  - id: F09
+    severity: note
+    description: >
+      The CL-03 runtime guard stub for G-CONTEXT-04 (content scanning)
+      should be emitted by the compile phase but only activated at runtime.
+      The stub pattern: compile time generates the scanning function, runtime
+      calls it on actual memory reads. This separation keeps compile-time
+      checks deterministic and runtime checks context-aware.
+    spec_impact: "CL-03/CL-04 — guard stub for runtime content scanning"
+    pitfall: "P-091"
+
+  - id: F10
+    severity: note
+    description: >
+      The combination of P-091 and P-092 means a developer sees "G-CONTEXT
+      violation: content treated as instructions" with no sub-rule code,
+      triggered by a false positive from content scanning that should not
+      happen at compile time. Three problems in one diagnostic: wrong scope,
+      no specificity, false positive. Fixing any one would improve the
+      experience; fixing all three is required.
+    spec_impact: "CL-02 G-CONTEXT — compounding diagnostic failures"
+    pitfall: "P-091, P-092"
+
+  - id: F11
+    severity: warning
+    description: >
+      G-INPUT, G-OUTPUT, and G-BOUND have the same undifferentiated code
+      problem as G-CONTEXT. The sub-rule code fix must apply consistently
+      to ALL multi-sub-rule groups. A partial fix (only G-CONTEXT gets
+      sub-codes) creates inconsistency across the injection defense layer.
+    spec_impact: "CL-02 — consistent sub-rule codes across all injection rules"
+    pitfall: "P-092"

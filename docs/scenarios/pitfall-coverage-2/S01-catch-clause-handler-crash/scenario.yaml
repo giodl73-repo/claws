@@ -1,0 +1,152 @@
+name: S01-catch-clause-handler-crash
+series: pitfall-coverage-2
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates that the catch clause in the fail-mode handler cannot itself crash
+  and defeat R5 defense (P-070), and that persistent handler crashes are
+  detected and recoverable rather than permanently blocking tools (P-079).
+  The catch clause must be structurally minimal with a pre-computed risk map,
+  and the L5 sidecar must detect consecutive crash patterns.
+
+expect:
+  attack_class: governance-bypass
+  defense_layer: handler-level-deny
+  blocked: true
+  audit_event:
+    type: governance-error
+    tool: send-wire-transfer
+    risk_level: 5
+    outcome: DENIED
+    reason: "claws-governance-error: catch-clause-fallback"
+
+simulate:
+  failures:
+    - component: governance-hook
+      type: catch-clause-crash
+      error: "TypeError: riskLevel is not a function — catch clause itself throws"
+    - component: governance-hook
+      type: persistent-crash
+      error: "Repeated TypeError on classify() for tool send-wire-transfer (4 consecutive)"
+  halt: null
+  budget: null
+
+problem: >
+  The governance plugin's before_tool_call handler crashes with a TypeError
+  in the MAIN handler body. The catch clause attempts to call riskLevel(toolName)
+  to determine fail-mode, but riskLevel() itself is undefined (module import
+  failed). The catch clause throws, and the OC Gateway's fail-open default
+  takes over. An R5 tool (send-wire-transfer) executes ungoverned. Additionally,
+  the same crash repeats on every invocation of send-wire-transfer, creating a
+  persistent failure with no alerting or recovery mechanism.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-070 core: The catch clause calls riskLevel(toolName) which requires
+      a working import of the classification module. If the import fails at
+      handler registration time (e.g., missing .claws/compiled/rules.json),
+      the catch clause crashes. The fix is a pre-computed riskMap built at
+      registration time with unknown tools defaulting to R5 (fail-closed).
+    spec_impact: "CL-02 G-FAILMODE — pre-computed risk map at registration"
+    pitfall: "P-070"
+
+  - id: F02
+    severity: major
+    description: >
+      The catch clause must be structurally minimal: no allocations, no async
+      calls, no function invocations beyond Map.get(). Post-emit static
+      verification should validate that the generated catch clause contains
+      only a map lookup, block return, and stderr write. Any deviation is a
+      hard build error.
+    spec_impact: "CL-04 EMIT — catch clause structural verification"
+    pitfall: "P-070"
+
+  - id: F03
+    severity: major
+    description: >
+      If the riskMap itself fails to build at handler registration (corrupt
+      rules.json, schema mismatch), the handler must refuse to register rather
+      than register with an empty map. An empty riskMap means every tool gets
+      the default R5 treatment, which blocks all tools including R1 read
+      operations.
+    spec_impact: "CL-02 G-FAILMODE — registration-time riskMap validation"
+    pitfall: "P-070"
+
+  - id: F04
+    severity: major
+    description: >
+      P-079 core: The same TypeError on send-wire-transfer fires 4+ times in
+      60 seconds. No alert is raised. The tool is permanently blocked (correct
+      security) but the operator has no visibility. The L5 sidecar must detect
+      3+ consecutive crashes for the same tool within 60s and trigger a
+      structured alert with the crash pattern.
+    spec_impact: "CL-03 sidecar — persistent handler failure detection"
+    pitfall: "P-079"
+
+  - id: F05
+    severity: major
+    description: >
+      P-079 recovery: `claws recover --tool send-wire-transfer` must force
+      governance re-evaluation with fresh state: rebuild riskMap, reload
+      rules.json, re-register handler. The recovery command must NOT require
+      a full workspace recompile — it should be a targeted handler reset.
+    spec_impact: "CL-03 G-RESILIENCE — targeted handler recovery"
+    pitfall: "P-079"
+
+  - id: F06
+    severity: warning
+    description: >
+      The persistent failure alert must distinguish between "tool blocked due
+      to governance bug" (actionable — fix the handler) and "tool blocked due
+      to policy" (correct — tool genuinely requires R5 approval). The alert
+      must include the crash stack trace for the operator but NOT expose it to
+      the user or agent.
+    spec_impact: "CL-03 sidecar — crash vs policy distinction in alerts"
+    pitfall: "P-079"
+
+  - id: F07
+    severity: warning
+    description: >
+      If the riskMap defaults unknown tools to R5, a tool added to TOOLS.md
+      after the handler registered will be treated as R5 until recompilation.
+      This is fail-safe behavior but may over-block R1/R2 tools. The sidecar
+      should detect unknown-tool-in-riskMap events and trigger recompilation
+      advisory.
+    spec_impact: "CL-02 G-FAILMODE — unknown tool detection"
+    pitfall: "P-070"
+
+  - id: F08
+    severity: note
+    description: >
+      The combination of P-070 and P-079 creates a compounding failure: a catch
+      clause bug that persists means every invocation of the affected tool both
+      (a) bypasses governance momentarily AND (b) triggers persistent crash
+      detection. The sidecar alert must fire BEFORE the Gateway fail-open
+      window is exploitable — latency budget for catch-clause-crash detection
+      must be under 5ms.
+    spec_impact: "CL-03 sidecar — compounding failure detection latency"
+    pitfall: "P-070, P-079"
+
+  - id: F09
+    severity: warning
+    description: >
+      The stderr fallback audit trail (P-078 related) must capture catch-clause
+      crashes specifically. If process.stderr.write itself fails (pipe broken,
+      full buffer), the last-resort audit is also lost. The sidecar must have
+      an independent crash detection mechanism that does not rely on the
+      handler's own reporting.
+    spec_impact: "CL-03 G-RESILIENCE — independent crash detection"
+    pitfall: "P-070"
+
+  - id: F10
+    severity: note
+    description: >
+      Post-emit static verification of catch clause minimalism must define
+      "minimal" precisely: allowed operations are Map.get, nullish coalescing,
+      object literal return, and process.stderr.write. Any function call,
+      property access chain deeper than 2, or async keyword is a violation.
+      This AST check should be part of the emit phase, not a separate lint.
+    spec_impact: "CL-04 EMIT — catch clause AST allowlist"
+    pitfall: "P-070"

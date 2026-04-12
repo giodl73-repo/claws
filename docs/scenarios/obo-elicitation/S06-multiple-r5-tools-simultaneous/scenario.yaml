@@ -1,0 +1,149 @@
+name: S06-multiple-r5-tools-simultaneous
+series: obo-elicitation
+version: 1
+specs: [CL-02]
+description: >
+  Validates behavior when multiple R5/OBO tools require approval simultaneously
+  or in rapid succession. Tests serialization vs parallelization of approval
+  requests, user cognitive load, request ordering guarantees, and partial
+  approval (approve some, deny others). An agent orchestrating a complex
+  workflow may need 3+ R5 tools in sequence — the elicitation UX must handle
+  this without creating approval fatigue or confusion.
+
+expect:
+  attack_class: social-engineering
+  defense_layer: G-ELICIT
+  blocked: false
+  audit_event: obo-multi-tool-partial-approval
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workflow agent needs to: (1) send-email to the client (R5/OBO), (2)
+  post-slack to a public channel (R5 per context — DM-like notification),
+  (3) process-invoice for $5,000 (R5/TRANSACT). All three tool invocations
+  are identified within the same agent turn. The elicitation gate must present
+  these to the user. The user approves send-email and post-slack but denies
+  process-invoice. The agent receives partial approval — two actions proceed,
+  one is denied. The audit chain records all three decisions atomically.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The spec's elicitation flow (6 steps) describes a single-tool approval.
+      When multiple R5 tools need approval in the same turn, the spec does not
+      define whether requests are serialized (one at a time, each with its own
+      timeout) or batched (all presented together, single response window).
+      Serialized: safer (user considers each), slower (3 x 300s worst case).
+      Batched: faster, but user may not carefully review each tool. The spec
+      must define the multi-tool approval mode.
+    spec_impact: "CL-02 G-ELICIT — multi-tool approval mode (serialized vs batched)"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      If approval requests are serialized and the user approves the first tool,
+      the agent may begin executing it while the second request is pending. If
+      the first tool's execution changes state that affects the second tool
+      (e.g., sending email reveals information that makes the invoice invalid),
+      the user's approval of the second tool is based on stale context. The
+      spec should define whether approved tools execute immediately or wait
+      for all approvals to complete (transactional approval).
+    spec_impact: "CL-02 G-ELICIT — immediate vs transactional execution after approval"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Partial approval (approve some, deny others) creates a complex state
+      for the agent. The agent's workflow may depend on all three tools
+      succeeding. If process-invoice is denied, the agent must handle the
+      partial completion gracefully. The denial response should indicate which
+      tools were approved and which were denied, allowing the agent to adapt
+      its workflow.
+    spec_impact: "CL-02 G-ELICIT — partial approval response format"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Three simultaneous approval requests from the same agent in the same
+      turn could indicate a compromised agent performing a "spray and pray"
+      attack — request many dangerous actions hoping the user approves some
+      without careful review. The rate limiting (S02-F06) should apply per-turn
+      as well as per-minute. A configurable per-turn R5 tool limit (default: 5)
+      would block excessive simultaneous requests.
+    spec_impact: "CL-02 G-ELICIT — per-turn R5 request limit"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Each approval request has its own timeout. If the user approves tool 1
+      at T=10s and tool 3's timeout starts at T=0, tool 3 has already consumed
+      10s of its 300s window. The timeout must be per-request from the time
+      the request is PRESENTED to the user, not from the time the agent
+      identifies the tool. Presentation time varies based on serialization.
+    spec_impact: "CL-02 G-ELICIT-TIMEOUT — per-request timeout start from presentation"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The signed approval tokens for multiple tools must be independent — each
+      token covers exactly one tool invocation. A batch approval token covering
+      all three tools would allow a malicious agent to add a fourth tool to the
+      batch after approval. Individual tokens per tool, each binding to specific
+      parameters, prevent this.
+    spec_impact: "CL-02 G-ELICIT — per-tool individual approval tokens"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The audit chain must record the multi-tool approval as an atomic group.
+      All three decisions (approve, approve, deny) should share a correlation
+      ID so auditors can reconstruct the full decision context. Without
+      correlation, the three decisions appear as independent events and the
+      partial-approval pattern is invisible.
+    spec_impact: "CL-02 G-ELICIT-AUDIT — multi-tool approval correlation ID"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The user's cognitive load scales with the number of simultaneous
+      approvals. The approval UI should present the most dangerous tool first
+      (highest risk, highest impact) so the user's attention is freshest for
+      the most critical decision. Ordering by risk level descending is a
+      reasonable default. Custom ordering per workspace is over-engineering.
+    spec_impact: "CL-02 G-ELICIT — approval request ordering by risk level"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The scenario tests 3 simultaneous R5 tools. In practice, well-designed
+      agents should rarely need more than 1-2 OBO tools per turn. If an agent
+      consistently requests 5+ R5 tools per turn, the workspace's tool
+      configuration may be too permissive. `claws pinch` could report average
+      R5-requests-per-turn as a health metric.
+    spec_impact: "CL-05 health metrics — R5 request frequency"
+    pitfall: null
+
+  - id: F10
+    severity: major
+    description: >
+      If the user denies one tool in a batch and the agent retries the denied
+      tool with modified parameters (e.g., lower invoice amount), this is a
+      new request requiring new approval. The denial must not be cached — the
+      agent should be allowed to present a modified request. But the
+      modification should be visible to the user: "Previously denied
+      process-invoice for $5,000. Now requesting process-invoice for $500."
+    spec_impact: "CL-02 G-ELICIT — modified re-request after denial"
+    pitfall: null

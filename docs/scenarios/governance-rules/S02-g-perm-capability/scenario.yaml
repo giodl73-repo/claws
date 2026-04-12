@@ -1,0 +1,94 @@
+name: S02-g-perm-capability
+series: governance-rules
+version: 1
+specs: [CL-02]
+description: >
+  Validates G-PERM rule: capability-based permissions. A READ-only tool
+  declared in a WRITE-only workspace produces a violation. The workspace's
+  capability matrix (from claws.json) must be checked against each tool's
+  required capabilities.
+
+expect:
+  rules_applied: [G-PERM]
+  violations:
+    - rule: G-PERM
+      tool: readonly-query
+      required_capability: READ
+      workspace_capabilities: [WRITE, EXECUTE]
+      severity: error
+  pass: false
+  severity: error
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  claws.json configures the workspace with capabilities [WRITE, EXECUTE] only
+  (a CI/CD pipeline workspace that deploys but does not query). TOOLS.md
+  declares "readonly-query" which requires READ capability to function. G-PERM
+  must detect that READ is not in the workspace capability set and produce a
+  violation. The tool is unusable in this workspace context.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The workspace capability matrix is defined in claws.json, but most
+      workspaces will not explicitly list capabilities — they will rely on
+      defaults. If the default is "all capabilities allowed," G-PERM never
+      fires. The spec must define the default capability set: permissive
+      (all) or restrictive (none).
+    spec_impact: "CL-01 claws.json — default capability set definition"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      A tool requiring READ in a WRITE-only workspace is a misconfiguration.
+      The fix suggestion should be: either add READ to the workspace
+      capabilities or remove the tool from TOOLS.md. G-PERM violations need
+      bidirectional fix suggestions.
+    spec_impact: "CL-02 G-PERM — fix suggestion for capability mismatch"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The capability set {WRITE, EXECUTE} without READ is unusual. A
+      deployment workspace that executes commands but cannot read status is
+      likely a misconfiguration. G-PERM could emit an advisory warning for
+      common capability combinations that suggest misconfiguration.
+    spec_impact: "CL-02 G-PERM — common misconfiguration detection"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      If a tool has multiple capabilities (e.g., a tool that both reads and
+      writes), the workspace must have ALL required capabilities. The check
+      must be an intersection test (all required caps present), not a union
+      test (any required cap present).
+    spec_impact: "CL-02 G-PERM — multi-capability intersection semantics"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      G-PERM maps to OWASP #2 (Inadequate Access Control). This scenario
+      tests the tool-vs-workspace dimension. The agent-vs-tool dimension
+      (can this agent use this tool?) is handled by G-CLASS and trust tiers.
+      The two rules must not contradict each other.
+    spec_impact: "CL-02 G-PERM vs G-CLASS — non-contradiction invariant"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Capability names (READ/WRITE/COMMUNICATE/EXECUTE/TRANSACT) must be
+      an exact enum — no synonyms, no case variation. If TOOLS.md uses
+      "read" (lowercase) and claws.json uses "READ" (uppercase), the
+      comparison must be case-insensitive or the parser must normalize.
+    spec_impact: "CL-02 capability names — normalization requirement"
+    pitfall: null

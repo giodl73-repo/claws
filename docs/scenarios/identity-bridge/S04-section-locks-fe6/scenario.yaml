@@ -1,0 +1,127 @@
+name: S04-section-locks-fe6
+series: identity-bridge
+version: 1
+specs: [CL-02, CL-07]
+description: >
+  Validates SOUL.md section lock enforcement (FE-6 guard fence). An
+  admin locks the GOVERNANCE and SAFETY sections of SOUL.md, preventing
+  editors from modifying those sections while allowing edits to ROLE and
+  WORKFLOW sections. The compiler enforces section-level access control
+  based on section lock metadata and the authenticated user's role.
+
+expect:
+  attack_class: governance-bypass
+  defense_layer: section-lock-fe6
+  blocked: true
+  audit_event: SECTION-LOCK-VIOLATION-BLOCKED
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  SOUL.md contains multiple sections with different sensitivity levels.
+  The GOVERNANCE section defines non-negotiable constraints ("never
+  execute R5 tools without approval"). The SAFETY section defines harm
+  prevention rules. The ROLE section describes the agent's persona. The
+  WORKFLOW section describes task procedures. An admin locks GOVERNANCE
+  and SAFETY sections via FE-6 guard fences: these sections carry a
+  `<!-- @lock: admin -->` annotation meaning only admin-role users can
+  modify them. An editor attempts to modify the GOVERNANCE section
+  (removing the R5 approval requirement). The compiler's section lock
+  checker detects the modification, verifies the user's role is editor
+  (not admin), and blocks the change with SECTION-LOCK-VIOLATION-BLOCKED.
+  The editor can freely modify ROLE and WORKFLOW sections.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Section lock detection requires the compiler to parse SOUL.md
+      structure and identify section boundaries. If SOUL.md uses
+      markdown headings for sections, the compiler must parse heading
+      hierarchy. But SOUL.md is free-form markdown without a fixed
+      schema. The section lock mechanism needs either: (a) a fixed
+      section schema for SOUL.md, or (b) explicit lock annotations
+      (<!-- @lock: admin -->) that mark arbitrary content ranges.
+      Option (b) is more flexible but harder to verify at a glance.
+    spec_impact: "CL-02 Section Locks -- define lock annotation syntax and section boundary detection"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The lock annotation is an HTML comment in markdown (<!-- @lock -->).
+      An editor could delete the lock annotation itself, effectively
+      unlocking the section. The lock enforcement must be based on the
+      compiled governance state (which records locked sections at compile
+      time), not the current file content. If the file's lock annotation
+      is removed, the compiled governance still remembers the lock, and
+      the next compile detects the annotation removal as a lock violation.
+    spec_impact: "CL-02 Section Locks -- lock state in compiled governance, not just file annotations"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Section lock enforcement requires knowing which user is making the
+      modification. In a CI/CD pipeline, the "user" may be a service
+      account or a git commit author. The section lock mechanism must
+      integrate with the identity bridge (S01) to resolve the modifier's
+      identity. If identity is unavailable (local development, no SSO),
+      the lock enforcement must fail-closed (treat all modifications as
+      non-admin) or provide a local override mechanism.
+    spec_impact: "CL-02 Section Locks -- identity integration with fail-closed default"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The lock granularity is at the section level (markdown heading).
+      But governance constraints may span multiple sections or appear
+      inline within an unlocked section. A governance rule embedded in
+      the WORKFLOW section (which is unlocked) would be editable by
+      editors. The compiler should warn when governance-like content
+      appears in unlocked sections, suggesting it be moved to a locked
+      section.
+    spec_impact: "CL-02 Section Locks -- governance-content-in-unlocked-section warning"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      FE-6 guard fences are a compile-time mechanism. They prevent
+      modifications from being compiled into governance. But they do not
+      prevent the file from being modified on disk. An editor can edit
+      SOUL.md freely; the lock only triggers when the modified file is
+      recompiled. If the workspace does not enforce compile-on-save or
+      pre-commit hooks, a modified SOUL.md with violated locks may exist
+      on disk for an extended period before detection.
+    spec_impact: "CL-02 Section Locks -- recommend pre-commit hook for immediate lock violation detection"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Lock annotations are per-section but the required role is per-lock
+      (<!-- @lock: admin -->). Different sections may require different
+      roles: GOVERNANCE requires admin, SAFETY requires security-admin.
+      The lock annotation must support role specification per lock. If
+      multiple roles can unlock a section, the annotation should support
+      a role list (<!-- @lock: admin, security-admin -->).
+    spec_impact: "CL-02 Section Locks -- per-lock role specification with multi-role support"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Section locks create a two-tier editing experience: some sections
+      are editable, others are not. The editor UX must clearly indicate
+      which sections are locked. The compiler should support a `claws
+      soul locks` command that lists all locked sections, their required
+      roles, and whether the current user can modify them. This
+      visibility prevents editors from wasting time on changes that
+      will be rejected at compile time.
+    spec_impact: "CL-02 Section Locks -- claws soul locks command for lock visibility"
+    pitfall: null

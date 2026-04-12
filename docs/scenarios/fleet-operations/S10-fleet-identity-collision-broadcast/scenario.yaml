@@ -1,0 +1,173 @@
+name: S10-fleet-identity-collision-broadcast
+series: fleet-operations
+version: 1
+specs: [CL-05, CL-02]
+description: >
+  Validates that `claws broadcast` is blocked when agent name collisions
+  exist across fleet workspaces (Amendment A241). Two workspaces declare
+  agents with the same L0 name ("finance-bot"). The broadcast must detect
+  the collision during pre-broadcast validation and refuse to proceed until
+  the collision is resolved via identity migration or agent renaming.
+
+expect:
+  workspaces:
+    total: 6
+    collisions_detected: 1
+    collision_agents: ["finance-bot"]
+    collision_workspaces: ["workspace-alpha", "workspace-gamma"]
+  drift_count: 0
+  broadcast_result:
+    status: blocked
+    reason: agent-name-collision
+    collisions: 1
+    resolution_required: true
+  compliance:
+    broadcast_blocked: true
+    collision_severity: error
+
+simulate:
+  failures:
+    - component: pre-broadcast-validation
+      type: agent-name-collision
+      error: "CLAWS-W070: Agent 'finance-bot' exists in workspace-alpha and workspace-gamma"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet administrator prepares to broadcast an updated A2A communication
+  policy to 6 workspaces. Workspace-alpha has agent "finance-bot" (L0
+  identity, handles payment processing). Workspace-gamma independently
+  declared an agent "finance-bot" (L0 identity, handles expense reports).
+  The A2A policy being broadcast includes delegation rules referencing
+  "finance-bot" — but which one? The broadcast must refuse to push the
+  policy because the delegation target is ambiguous. The collision must
+  be resolved before broadcast: either rename one agent, or migrate both
+  to L1+ identity (workspace-qualified names).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Amendment A241 says "collision blocks broadcast" but does not define
+      the pre-broadcast validation pipeline. The broadcast command must:
+      (1) scan all fleet workspaces for agent names, (2) build a name
+      collision map, (3) check the policy being broadcast for references
+      to colliding names, (4) block if any broadcast policy references a
+      colliding name. Steps 1-2 may be expensive for large fleets. The
+      spec should define whether pre-broadcast validation reuses the last
+      `claws scan` results or performs a fresh scan.
+    spec_impact: "CL-05 Fleet — pre-broadcast validation pipeline definition"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The collision blocking scope is unclear. Should ALL broadcasts be
+      blocked when any collision exists? Or only broadcasts that reference
+      the colliding agent names? Blocking all broadcasts because of an
+      unrelated collision (between agents not mentioned in the policy)
+      is too aggressive. The block should be scoped to policies that
+      reference colliding names. This requires the broadcast to parse
+      the policy YAML and identify agent name references.
+    spec_impact: "CL-05 Fleet — collision block scoped to policy-referenced agents"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The collision resolution workflow is undefined. Options: (a) rename
+      one agent, (b) migrate to L1+ identity, (c) add a namespace prefix,
+      (d) add workspace-qualified names to the policy. Option (b) is the
+      spec's preferred path (Amendment A102: fleet.minIdentityLevel). But
+      migration requires key generation and distribution, which may take
+      hours in large organizations. An interim resolution (workspace-
+      qualified names in the policy) should be available for urgent
+      broadcasts.
+    spec_impact: "CL-05 Fleet — collision resolution workflow with interim option"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The CLAWS-W070 diagnostic for collision is a warning in Amendment
+      A238, but blocking broadcast requires an error. The severity should
+      escalate based on context: collision during `claws scan` is a
+      warning (advisory), collision during `claws broadcast` is an error
+      (blocking). Context-dependent severity escalation should be a
+      general pattern in the diagnostic system.
+    spec_impact: "CL-02 Diagnostics — context-dependent severity escalation"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The collision check must handle partial name matches and aliases.
+      If workspace-alpha has "finance-bot" and workspace-gamma has
+      "Finance-Bot" (case difference), are these a collision? Agent names
+      should be case-insensitive for collision detection but case-preserving
+      for display. Without case normalization, the collision is missed and
+      the A2A routing ambiguity persists.
+    spec_impact: "CL-02 G-A2A-IDENTITY — case-insensitive agent name collision detection"
+    pitfall: P-185
+
+  - id: F06
+    severity: warning
+    description: >
+      After collision resolution (e.g., workspace-gamma renames its agent
+      to "expense-bot"), the broadcast should automatically re-validate
+      before proceeding. A manual two-step workflow (resolve collision,
+      then re-run broadcast) risks the operator forgetting to re-run.
+      `claws broadcast --retry` should re-validate the last blocked
+      broadcast after resolution.
+    spec_impact: "CL-05 Fleet — automatic re-validation on broadcast retry after collision resolution"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The collision detection must handle dynamic fleet membership. If a
+      new workspace joins the fleet between the last scan and the current
+      broadcast, it may introduce a collision that the cached scan did not
+      detect. Pre-broadcast validation should use fresh scan data, not
+      cached data, for collision detection. This is an argument for
+      always-fresh scan in pre-broadcast validation, not reusing cached
+      results.
+    spec_impact: "CL-05 Fleet — fresh scan required for pre-broadcast collision detection"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The fleet.minIdentityLevel config (Amendment A102) prevents collisions
+      proactively: if all agents must be L1+ (workspace-qualified), name
+      collisions cannot occur because names include the workspace context.
+      The broadcast block is a reactive measure for fleets that have not
+      adopted minIdentityLevel. The spec should recommend minIdentityLevel
+      as the preferred preventive control and collision blocking as the
+      fallback detective control.
+    spec_impact: "CL-05 Fleet — minIdentityLevel as preventive, collision block as detective"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The collision detection should report the full collision context:
+      agent name, both workspace IDs, each agent's identity level, each
+      agent's role/purpose (if available from AGENTS.md description), and
+      the specific policy references that are ambiguous. This context helps
+      the operator decide which agent to rename or whether identity
+      migration is more appropriate.
+    spec_impact: "CL-05 Fleet — collision context report with agent metadata"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      For fleets with many collisions (poor naming hygiene across 100+
+      workspaces), the collision report should prioritize: collisions in
+      A2A-active agents first (agents that delegate or receive delegations),
+      then collisions in isolated agents (no A2A communication). Isolated
+      agent collisions are theoretically harmless — they only become
+      dangerous if A2A communication is added later.
+    spec_impact: "CL-05 Fleet — collision priority based on A2A activity"
+    pitfall: null

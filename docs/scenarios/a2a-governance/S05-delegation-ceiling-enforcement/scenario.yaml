@@ -1,0 +1,158 @@
+name: S05-delegation-ceiling-enforcement
+series: a2a-governance
+version: 1
+specs: [CL-02]
+description: >
+  Validates the delegation permission ceiling: Agent B cannot receive more
+  permissions than Agent A delegated. If coordinator delegates {read-db,
+  write-report} to executor, executor cannot invoke delete-db (not in the
+  delegated set). The delegation ceiling applies to tool access, data
+  sensitivity, and risk level. G-A2A-DELEGATE enforces this at compile time
+  (FE6) and runtime.
+
+expect:
+  attack_class: privilege-escalation
+  defense_layer: G-A2A-DELEGATE
+  blocked: true
+  audit_event: a2a-delegation-ceiling-exceeded
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  AGENTS.md declares coordinator with tools: [read-db, write-report,
+  delete-db, send-email]. coordinator delegates to executor with
+  tools: [read-db, write-report]. executor attempts to invoke delete-db
+  (R4, not in delegated set) and send-email (R5/OBO, not in delegated set).
+  G-A2A-DELEGATE blocks both: delete-db because it exceeds the delegation
+  scope, send-email because it exceeds both scope and risk level. FE6
+  detects at compile time when executor's AGENTS.md configuration references
+  tools not in the delegation set. Runtime handler blocks the invocation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The IMPLICIT-R4-DELEGATION rule (Amendment A135) fires when resolved
+      "all" delegation includes R4+ tools. If coordinator delegates
+      `tools: all` to executor, the effective delegation includes delete-db
+      (R4) and send-email (R5). The warning must list the specific R4+ tools
+      included in the "all" expansion and their risk levels. The developer
+      may not realize that "all" includes dangerous tools.
+    spec_impact: "CL-02 G-A2A-DELEGATE — specific tool listing in 'all' expansion warning"
+    pitfall: P-208
+
+  - id: F02
+    severity: major
+    description: >
+      Nested "all" delegation chains (Amendment A136) amplify the risk.
+      If coordinator delegates `tools: all` to sub-coordinator, who delegates
+      `tools: all` to executor, executor inherits the full tool set
+      transitively. The warning must show the transitive expansion:
+      "executor inherits R5 send-email via sub-coordinator's 'all' delegation
+      from coordinator." The chain path is essential for diagnosis.
+    spec_impact: "CL-02 G-A2A-DELEGATE — transitive 'all' delegation chain warning"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The delegation ceiling must include risk level constraints, not just
+      tool lists. If coordinator delegates {read-db} to executor, and
+      read-db is R2, executor cannot invoke any R3+ tool. But if coordinator
+      also delegates write-report (R3), executor can invoke R3 tools — only
+      the specific delegated ones. The ceiling is per-tool, not per-risk-level.
+      An agent cannot elevate its own risk level by discovering new tools.
+    spec_impact: "CL-02 G-A2A-DELEGATE — per-tool delegation ceiling, not per-risk-level"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The `allowImplicitDelegation` config (Amendment A60) lets developers
+      suppress the IMPLICIT-R4-DELEGATION warning for specific agents
+      (e.g., a trusted coordinator). But suppression is per-agent, not
+      per-tool. Suppressing the warning for coordinator means ALL implicit
+      R4+ delegations from coordinator are suppressed. A more granular
+      approach would be per-agent-per-risk-level suppression, but that
+      adds configuration complexity.
+    spec_impact: "CL-02 G-A2A-DELEGATE — suppression granularity trade-off"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Cross-workspace delegation (Amendment CP-S02-F06) changes the ceiling
+      semantics. If coordinator@workspace-alpha delegates to executor@workspace-beta,
+      and workspace-beta has a different trust tier (T2 vs T4), the delegation
+      ceiling must respect BOTH: the per-tool delegation list AND the target
+      workspace's trust tier ceiling. A tool delegated from T4 workspace to
+      T2 workspace may exceed T2's ceiling even though it is within the
+      delegation set.
+    spec_impact: "CL-05 fleet — cross-workspace delegation ceiling with trust tier interaction"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The delegation ceiling for data sensitivity must be consistent with
+      G-A2A-FLOW. If coordinator has CONFIDENTIAL data access and delegates
+      to executor with PUBLIC ceiling, the delegation is valid for tools but
+      the data flow is restricted. The two constraints (delegation ceiling
+      for tools, data flow ceiling for data) must be checked independently
+      and both must pass. A tool delegation that passes G-A2A-DELEGATE may
+      still fail G-A2A-FLOW.
+    spec_impact: "CL-02 G-A2A-DELEGATE + G-A2A-FLOW — independent constraint checking"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      At runtime, the delegation ceiling must be enforced per invocation.
+      The handler maintains a delegation map: for each agent, which tools
+      were delegated by which parent. When executor invokes delete-db, the
+      handler checks: "is delete-db in executor's delegation set from
+      coordinator?" If not, blocked. The delegation map is built from the
+      compiled GovernanceIR but must handle dynamic delegation (runtime
+      agent creation) gracefully.
+    spec_impact: "CL-03 runtime — delegation map maintenance and per-invocation check"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The scenario tests a direct ceiling violation (invoking an undelegated
+      tool). A subtler attack is parameter escalation: executor is delegated
+      read-db, which normally reads from a local database. Executor invokes
+      read-db but passes a parameter pointing to a production database with
+      RESTRICTED data. The tool is within delegation scope but the parameters
+      exceed the intended scope. Parameter-level delegation constraints are
+      a CL-03 runtime concern but the compiler should warn when delegated
+      tools have parameters that could affect scope.
+    spec_impact: "CL-02 G-A2A-DELEGATE — parameter-level scope escalation awareness"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The compile-time FE6 check validates static delegation declarations.
+      But if AGENTS.md uses `tools: [read-db, write-report]` and write-report
+      is later reclassified from R3 to R5, the delegation ceiling changes.
+      The compiler must re-evaluate delegation ceilings after all
+      reclassifications are applied. Reclassification ordering matters:
+      first apply all reclassifications, then evaluate delegation ceilings.
+    spec_impact: "CL-04 ANALYZE — reclassification before delegation ceiling evaluation"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The delegation ceiling is the agent-level equivalent of the trust tier
+      ceiling (workspace level). Trust tiers cap what tools the workspace can
+      use; delegation ceilings cap what tools the subagent can use. Both
+      follow the principle that permissions cannot escalate through delegation.
+      The mental model is simple: "you cannot give what you do not have."
+    spec_impact: "CL-02 G-A2A-DELEGATE — permission delegation mental model"
+    pitfall: null

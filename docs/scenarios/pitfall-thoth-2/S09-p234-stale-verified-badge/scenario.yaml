@@ -1,0 +1,169 @@
+name: S09-p234-stale-verified-badge
+series: pitfall-thoth-2
+version: 1
+specs: [CL-05, CL-06]
+description: >
+  Validates that modifying a handler after verification invalidates the
+  VERIFIED badge (P-234). The manifest signature becomes stale when handler.ts
+  changes, but the badge continues to show VERIFIED. Signature staleness
+  detection must trigger automatic tier downgrade to DECLARED.
+
+expect:
+  governance_ir:
+    version: 1
+    badge:
+      tier: VERIFIED
+      signature_valid: false
+      signature_stale: true
+      downgrade_target: DECLARED
+    analysis:
+      rules_evaluated: true
+      signature_check: true
+  violations:
+    - code: CLAWS-E234
+      message: "VERIFIED badge signature stale — handler.ts modified after verification, tier downgraded to DECLARED"
+      severity: error
+  warnings:
+    - code: CLAWS-W234
+      message: "Manifest signature hash does not match current handler.ts content hash"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: badge-verification
+      type: signature-stale
+      error: "handler.ts SHA-256 at verification: a1b2c3... — current SHA-256: d4e5f6..."
+    - component: clawhub-registry
+      type: stale-badge
+      error: "Published skill shows VERIFIED but handler modified 3 days after verification — no tier downgrade triggered"
+  halt: null
+  budget: null
+
+problem: >
+  A developer achieves VERIFIED badge for their skill through runtime analysis.
+  The manifest records the verification timestamp and a signature covering all
+  source files. Three days later, the developer modifies handler.ts to add a
+  new API call that performs OBO email sending. The manifest signature is now
+  stale (it covers the pre-modification handler). The developer runs claws skill
+  publish to update the skill on ClawHub. The publish succeeds and the registry
+  continues to show VERIFIED because the signature staleness check does not run
+  during publish. Consumers install the updated skill trusting the VERIFIED
+  badge, unaware that the badge was earned for a different version of the handler
+  and the current version has not been verified.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-234 core: The publish command must verify that the manifest
+      signature matches the current source file hashes before publishing.
+      If any source file has been modified since verification, the signature
+      is stale and the badge must be downgraded to DECLARED before publish
+      proceeds. The downgrade must be recorded in the publish metadata with
+      the reason "source-modified-after-verification."
+    spec_impact: "CL-05 ClawHub Badges Amendment — signature check at publish time"
+    pitfall: "P-234"
+
+  - id: F02
+    severity: major
+    description: >
+      The signature staleness check must be file-content-based (SHA-256 of
+      each source file), not timestamp-based. Timestamps can be manipulated
+      (touch command) or may be unreliable across file systems. The manifest
+      must record the content hash of every file covered by the verification
+      and compare against current content hashes at publish time.
+    spec_impact: "CL-05 ClawHub Badges Amendment — content-hash-based signature validation"
+    pitfall: "P-234"
+
+  - id: F03
+    severity: major
+    description: >
+      The tier downgrade must be atomic with the publish. If the signature
+      is stale, the skill must be published at DECLARED tier, not published
+      at VERIFIED and then downgraded asynchronously. A window where the
+      skill shows VERIFIED with stale signatures is a trust violation that
+      may mislead consumers during the race window.
+    spec_impact: "CL-05 ClawHub Badges Amendment — atomic tier downgrade at publish"
+    pitfall: "P-234"
+
+  - id: F04
+    severity: major
+    description: >
+      The developer must be informed of the downgrade before publish
+      completes. The publish command should output: "Badge downgraded from
+      VERIFIED to DECLARED — handler.ts modified after verification. Run
+      claws skill verify to re-verify." This gives the developer the
+      opportunity to cancel the publish and re-verify first if they want
+      to maintain VERIFIED status.
+    spec_impact: "CL-05 Maker Experience — downgrade notification at publish"
+    pitfall: "P-234"
+
+  - id: F05
+    severity: major
+    description: >
+      The inner ring (compile-time) should also detect signature staleness
+      during claws pinch. A modified handler with a stale VERIFIED badge
+      should produce a warning during local development, not just at publish
+      time. This gives the developer immediate feedback that their changes
+      have invalidated their badge.
+    spec_impact: "CL-05 Inner Ring — staleness detection during pinch"
+    pitfall: "P-234"
+
+  - id: F06
+    severity: warning
+    description: >
+      The ClawHub registry should display the verification date and the
+      last-modified date prominently. If verification_date < last_modified_date,
+      the badge should show a visual indicator (e.g., "VERIFIED on Jan 15,
+      updated Jan 18 — re-verification pending"). This temporal information
+      helps consumers assess whether the VERIFIED badge is current.
+    spec_impact: "CL-06 ClawHub — verification date vs modification date display"
+    pitfall: "P-234"
+
+  - id: F07
+    severity: warning
+    description: >
+      Non-handler file changes (README.md, docs, tests) should not
+      invalidate the VERIFIED badge if the verification scope covers only
+      runtime-relevant files. The manifest must define which files are
+      in the verification scope. Changes to out-of-scope files should
+      not trigger a downgrade. The scope definition must be explicit in
+      the manifest, not implicit.
+    spec_impact: "CL-05 ClawHub Badges Amendment — verification scope definition"
+    pitfall: "P-234"
+
+  - id: F08
+    severity: warning
+    description: >
+      A mass downgrade event (e.g., ClawHub discovers a flaw in the
+      verification process and invalidates all badges issued before a
+      certain date) must be handled gracefully. The registry should support
+      bulk tier downgrade with notifications to all affected developers
+      and a re-verification fast track.
+    spec_impact: "CL-06 ClawHub — bulk tier downgrade mechanism"
+    pitfall: "P-234"
+
+  - id: F09
+    severity: note
+    description: >
+      The signature should cover the full dependency closure, not just
+      direct source files. If handler.ts imports a local utility module
+      that is modified, the verification is also stale. The manifest must
+      include all transitive local dependencies in the signature scope.
+      npm dependencies are excluded (their versions are pinned in
+      package-lock.json, which is in the signature scope).
+    spec_impact: "CL-05 ClawHub Badges Amendment — transitive dependency coverage in signature"
+    pitfall: "P-234"
+
+  - id: F10
+    severity: note
+    description: >
+      Consumers who installed a skill at VERIFIED tier should be notified
+      when the skill is downgraded to DECLARED. The notification should
+      include the reason for the downgrade and a recommendation to review
+      the changes before continuing to use the skill. Fleet administrators
+      with a minimum-tier policy should receive an alert if a downgrade
+      violates their policy.
+    spec_impact: "CL-06 ClawHub — consumer notification on tier downgrade"
+    pitfall: "P-234"

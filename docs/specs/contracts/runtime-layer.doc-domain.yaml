@@ -1,0 +1,32 @@
+layer: "Runtime Layer"
+atoms:
+  governance-plugin:
+    visibility: public
+    docType: headline
+    narrative: P1
+    pipeline: true
+  governance-skill:
+    visibility: public
+    docType: concept
+    narrative: P2
+    pipeline: true
+  governance-host:
+    visibility: architect
+    docType: concept
+    narrative: P2
+    pipeline: true
+  defense-in-depth:
+    visibility: public
+    docType: feature
+    narrative: P1
+    pipeline: true
+  fail-mode:
+    visibility: public
+    docType: feature
+    narrative: P1
+    pipeline: true
+  claws-bypass:
+    visibility: public
+    docType: feature
+    narrative: P2
+    pipeline: false

@@ -1,0 +1,92 @@
+name: S02-r1-fail-open-allowed
+series: fail-mode
+version: 1
+specs: [CL-02]
+description: >
+  Validates that R1 tools with fail-open configuration pass compilation.
+  R1-R2 tools are configurable: fail-open is the default because blocking
+  read operations on governance errors degrades agent functionality without
+  security benefit.
+
+expect:
+  rules_applied: [G-CLASS]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  TOOLS.md declares "log-viewer" (R1/READ) with fail-open configured in
+  claws.json. The FailMode<1> type resolves to "fail-open" | "fail-closed",
+  so both are valid. The compiler must accept fail-open for R1 tools without
+  warnings. If the governance hook crashes while processing log-viewer, the
+  tool executes (fail-open) and the crash is logged to the audit chain.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      R1 fail-open means a governance hook crash lets the read tool execute.
+      The crash itself is a governance failure that must be logged. If the
+      audit chain is also broken (e.g., the crash corrupted the audit state),
+      the fail-open read happens with zero record. A secondary audit mechanism
+      (OS-level logging) should exist for fail-open events.
+    spec_impact: "CL-02 fail-mode — secondary audit for fail-open events"
+    pitfall: null
+
+  - id: F02
+    severity: warning
+    description: >
+      The default fail mode for R1-R2 is fail-open. If claws.json does not
+      specify failMode for an R1 tool, the compiler should apply the default.
+      The scenario tests explicit fail-open; the implicit default path should
+      produce the same behavior without requiring configuration.
+    spec_impact: "CL-01 claws.json — implicit fail mode defaults"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      An enterprise may want ALL tools to be fail-closed, including R1. A
+      global override `failMode.global: fail-closed` in claws.json should
+      be supported. This overrides per-risk defaults but not the R5
+      constraint (which is already fail-closed).
+    spec_impact: "CL-01 claws.json — global fail mode override"
+    pitfall: null
+
+  - id: F04
+    severity: note
+    description: >
+      R1 and R2 share the same FailMode type constraint (both configurable).
+      The behavioral distinction is: R1 (observe) has audit-only governance,
+      R2 (read) has audit + data labels. On fail-open, R1 loses audit, R2
+      loses audit AND data label checking. R2 fail-open is riskier than R1
+      fail-open — should they have different defaults?
+    spec_impact: "CL-02 fail-mode — R1 vs R2 default differentiation"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The generated plugin code for R1 fail-open must contain the fail-open
+      path in the try/catch handler: `catch(err) { return undefined; }` (allow
+      the tool to proceed). The code generation must not accidentally generate
+      fail-closed for R1 tools. A test that verifies the generated code's
+      catch behavior is needed.
+    spec_impact: "CL-04 EMIT — fail-open code generation correctness"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      If a tool is reclassified from R1 to R3 (e.g., due to a new data source
+      being added), its fail-open setting may become inappropriate. The
+      compiler should warn when fail-open is configured for R3-R4 tools by
+      default, since those risk levels expect configurable-but-defaulting-to-
+      closed behavior.
+    spec_impact: "CL-02 fail-mode — reclassification impact on fail mode"
+    pitfall: null

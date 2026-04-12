@@ -1,0 +1,140 @@
+name: S09-p205-stale-standing-approval
+series: pitfall-thoth-1
+version: 1
+specs: [CL-02, CL-05]
+description: >
+  Validates that standing approval drift is detected when a standing approval
+  is removed from claws.json but the compiled handler is not redeployed. The
+  old approval remains active in the running handler despite the operator's
+  intent to revoke it. CL-05 drift detection must identify the mismatch
+  between source configuration and deployed handler state.
+
+expect:
+  attack_class: standing-approval-bypass
+  defense_layer: g-elicit
+  blocked: true
+  audit_event:
+    type: obo-standing-approval-drift-detected
+    tool: "deploy-production"
+    risk_level: 5
+    outcome: DENY
+    reason: "standing approval for deploy-production revoked in config but active in deployed handler; drift detected"
+
+simulate:
+  failures:
+    - component: approval-flow
+      type: standing-approval-stale
+      error: "compiled handler has standing approval for deploy-production but source claws.json does not"
+  halt: null
+  budget: null
+
+problem: >
+  An operator grants a standing approval for deploy-production in claws.json
+  with a condition {env: "staging", hours: "09:00-17:00"}. The handler is compiled
+  and deployed. Two weeks later, after a production incident, the operator removes
+  the standing approval from claws.json. However, the operator forgets to
+  recompile and redeploy the handler. The running handler still has the standing
+  approval baked into its code. An agent invokes deploy-production during business
+  hours. The handler checks the standing approval, finds it valid (compiled-in
+  conditions met), and executes without user elicitation. The operator believed
+  the approval was revoked but the deployed handler was never updated. The
+  deploy-production action executes with a stale authorization that the operator
+  explicitly intended to remove.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The compiled handler must include a hash of the source configuration
+      (claws.json + USER.md standing approval sections) at compile time.
+      At runtime, the handler periodically checks the source files' current
+      hash against the compiled-in hash. Any mismatch triggers a drift alert
+      and optionally blocks standing approvals until recompilation. The check
+      interval should be configurable (default: every 60 seconds).
+    spec_impact: "CL-05 drift detection — source hash comparison for standing approval currency"
+    pitfall: P-205
+
+  - id: F02
+    severity: major
+    description: >
+      When drift is detected, the handler must fail closed: all standing
+      approvals are suspended and R5 tools revert to per-invocation elicitation.
+      The operator must recompile and redeploy to restore standing approvals.
+      Failing open on drift (continuing to honor stale standing approvals)
+      defeats the purpose of the revocation. The fail-closed behavior is
+      non-configurable for standing approvals specifically.
+    spec_impact: "CL-05 drift detection — fail-closed on standing approval drift"
+    pitfall: P-205
+
+  - id: F03
+    severity: major
+    description: >
+      The drift detection must be tamper-resistant. If an attacker can modify
+      the source claws.json to match the compiled handler's expectations
+      (re-adding the standing approval), the drift check passes and the
+      stale approval remains active. The source hash must be computed from
+      a trusted copy of the configuration, not the agent-accessible workspace
+      copy. This ties into the governance-critical path protection (P-204).
+    spec_impact: "CL-05 drift detection — trusted source copy for hash comparison"
+    pitfall: P-205
+
+  - id: F04
+    severity: major
+    description: >
+      The health check (claws doctor) must include standing approval drift
+      as a critical check item. When an operator runs the health check, it
+      must compare the compiled handler's standing approval set against the
+      current source configuration and report any mismatches. The health
+      check output must clearly state which standing approvals are stale
+      and which are current.
+    spec_impact: "CL-05 DX — standing approval drift in claws doctor output"
+    pitfall: P-205
+
+  - id: F05
+    severity: major
+    description: >
+      Standing approvals must have a mandatory expiry date in the source
+      configuration. The default expiry is 90 days from creation. When the
+      expiry date passes, the standing approval is automatically invalid
+      even if the handler is not recompiled. The compiled handler must check
+      the expiry date at runtime (not just at compile time) as a defense
+      against indefinite stale approvals.
+    spec_impact: "CL-02 G-ELICIT — mandatory 90-day expiry on standing approvals"
+    pitfall: P-205
+
+  - id: F06
+    severity: warning
+    description: >
+      Fleet deployments may have hundreds of handlers across many workspaces.
+      A fleet-level drift dashboard must aggregate standing approval drift
+      across all deployed handlers. The fleet operator must be able to see
+      which handlers have stale standing approvals and trigger batch
+      recompilation. Without fleet-level visibility, individual workspace
+      drift goes unnoticed.
+    spec_impact: "CL-06 fleet — standing approval drift dashboard across deployed handlers"
+    pitfall: P-205
+
+  - id: F07
+    severity: warning
+    description: >
+      The compilation pipeline should emit a post-compile advisory listing
+      all standing approvals in the generated handler. This advisory serves
+      as a deployment checklist: the operator reviews the list before
+      deploying and can catch standing approvals that should have been
+      removed. The advisory is a human-readable summary, not just the
+      compiled code.
+    spec_impact: "CL-04 EMIT — post-compile standing approval advisory"
+    pitfall: P-205
+
+  - id: F08
+    severity: warning
+    description: >
+      Git-based configuration management creates a subtle risk: if the
+      operator reverts a commit that removed the standing approval (e.g.,
+      git revert for an unrelated change that happened in the same commit),
+      the standing approval is silently restored in the source. The drift
+      detection catches this only if the handler is recompiled from the
+      reverted state. A git-hook integration that triggers recompilation
+      on governance file changes would close this gap.
+    spec_impact: "CL-05 DX — git-hook triggered recompilation on governance file changes"
+    pitfall: P-205

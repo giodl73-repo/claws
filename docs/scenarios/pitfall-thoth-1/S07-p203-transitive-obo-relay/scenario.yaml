@@ -1,0 +1,144 @@
+name: S07-p203-transitive-obo-relay
+series: pitfall-thoth-1
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates that the per-invocation approval model prevents transitive OBO
+  escalation through relay agent patterns. Agent A obtains legitimate approval
+  for an R5 tool, executes it, and produces output. Agent B reads Agent A's
+  output and attempts to independently invoke the same R5 tool without its own
+  approval. The runtime must enforce per-invocation approval regardless of
+  delegation path or information flow between agents.
+
+expect:
+  attack_class: transitive-obo
+  defense_layer: g-elicit
+  blocked: true
+  audit_event:
+    type: obo-transitive-delegation-blocked
+    tool: "send-payment"
+    risk_level: 5
+    outcome: DENY
+    reason: "Agent B attempted R5 invocation without its own approval; transitive delegation blocked"
+
+simulate:
+  failures:
+    - component: approval-flow
+      type: transitive-obo-relay
+      error: "Agent B invoked send-payment using information from Agent A's approved execution; no independent approval obtained"
+  halt: null
+  budget: null
+
+problem: >
+  Agent A (legitimate, user-trusted) requests approval for send-payment with
+  parameters {to: "vendor", amount: 500}. The user approves. Agent A executes
+  the payment and writes the result to a shared context: "Payment of 500 to
+  vendor completed. Transaction ID: TX-12345." Agent B (compromised or
+  prompt-injected) reads this context and decides to invoke send-payment with
+  parameters {to: "attacker", amount: 5000}. Agent B does not have its own
+  approval token. But Agent B argues (in its reasoning) that it is "continuing
+  the payment workflow initiated by Agent A" and attempts to reference Agent A's
+  approval as justification. The runtime must not accept delegation-based
+  approval: Agent B must obtain its own per-invocation approval from the user.
+  Without this enforcement, any agent that can read an approved agent's output
+  can escalate to R5 operations.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Approval tokens must be bound to the agent identity (agent_id) that
+      requested them. Agent A's approval token is non-transferable to Agent B.
+      The runtime verifies that the agent_id in the approval token matches the
+      agent_id making the current invocation. Any mismatch is a transitive
+      delegation attempt and is blocked with a security incident audit event.
+    spec_impact: "CL-02 G-ELICIT — agent-bound approval tokens (non-transferable)"
+    pitfall: P-203
+
+  - id: F02
+    severity: major
+    description: >
+      The runtime must not infer approval from information flow. Even if
+      Agent B's invocation uses parameters that are clearly derived from
+      Agent A's approved output (same vendor name, same transaction format),
+      this does not constitute approval. Approval is an explicit user action
+      on a specific invocation, not a property that flows through data.
+      The runtime has no concept of "inherited approval."
+    spec_impact: "CL-02 G-ELICIT — no inherited or inferred approval from data flow"
+    pitfall: P-203
+
+  - id: F03
+    severity: major
+    description: >
+      In A2A delegation chains (Agent A delegates to Agent B via A2A protocol),
+      the delegation itself does not carry OBO approval. The A2A trust level
+      (L0-L3) governs whether Agent B can be delegated to, but R5 tool
+      execution by Agent B still requires per-invocation user approval.
+      A2A trust and OBO approval are orthogonal dimensions: trust says
+      "this agent can participate," approval says "this specific action
+      is authorized."
+    spec_impact: "CL-02 G-ELICIT — A2A trust and OBO approval as orthogonal dimensions"
+    pitfall: P-203
+
+  - id: F04
+    severity: major
+    description: >
+      The transitive relay pattern is especially dangerous in multi-agent
+      workflows where agents share a context window or workspace. Agent B
+      may not even be malicious — it may be a well-intentioned agent that
+      reads Agent A's output and logically concludes it should take the
+      next step. The runtime must block ALL unapproved R5 invocations
+      regardless of the agent's intent. Intent is unverifiable; approval
+      tokens are verifiable.
+    spec_impact: "CL-03 runtime — intent-agnostic R5 blocking (approval tokens only)"
+    pitfall: P-203
+
+  - id: F05
+    severity: major
+    description: >
+      The OBO hop counter must be separate from the A2A delegation chain
+      depth. A2A chain depth counts how many agents delegated work before
+      reaching Agent B. OBO hop count is always 1 (user -> agent -> tool)
+      because each R5 invocation requires direct user approval. There is
+      no concept of "2-hop OBO" where User approves Agent A who delegates
+      to Agent B who invokes the tool. The OBO model is strictly single-hop.
+    spec_impact: "CL-02 G-ELICIT — single-hop OBO model (no transitive delegation)"
+    pitfall: P-203
+
+  - id: F06
+    severity: warning
+    description: >
+      Multi-agent orchestrators (e.g., a supervisor agent that coordinates
+      worker agents) may be surprised by the per-invocation requirement.
+      The supervisor cannot pre-approve R5 actions for its workers. Each
+      worker that needs R5 access must independently trigger user elicitation.
+      The health check should detect multi-agent topologies and warn about
+      per-invocation requirements for each agent in the topology.
+    spec_impact: "CL-05 DX — multi-agent OBO topology warning in health check"
+    pitfall: P-203
+
+  - id: F07
+    severity: major
+    description: >
+      The audit trail must capture the full delegation context when a
+      transitive attempt is blocked: which agent originated the chain,
+      which agent attempted the transitive invocation, what data was
+      shared between them, and the parameters of the blocked invocation.
+      This enables post-incident reconstruction of the relay pattern to
+      determine whether it was malicious (prompt injection in Agent B)
+      or accidental (legitimate workflow design error).
+    spec_impact: "CL-02 G-ELICIT-AUDIT — full delegation context in transitive block event"
+    pitfall: P-203
+
+  - id: F08
+    severity: warning
+    description: >
+      Standing approvals (from claws.json) are also per-agent. A standing
+      approval for Agent A to use send-payment does not extend to Agent B
+      even if Agent B is in the same workspace. Standing approvals must
+      include the agent_id (or agent class) in their condition clause.
+      A standing approval with no agent_id restriction applies to all
+      agents in the workspace, which may be intentional but must trigger
+      a compile-time warning about broad OBO scope.
+    spec_impact: "CL-02 G-ELICIT — per-agent standing approval scope with broad-scope warning"
+    pitfall: P-203

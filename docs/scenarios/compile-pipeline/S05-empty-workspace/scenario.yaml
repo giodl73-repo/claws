@@ -1,0 +1,99 @@
+name: S05-empty-workspace
+series: compile-pipeline
+version: 1
+specs: [CL-04]
+description: >
+  Validates that a workspace containing only claws.json (no SOUL.md, no
+  TOOLS.md) produces a minimal IR with zero violations. This is the
+  degenerate case: no governance input means no governance output. The IR
+  must still be well-formed and serializable.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [claws.json]
+      intent_types: []
+    analysis:
+      rules_evaluated: true
+      violations: []
+  violations: []
+  warnings:
+    - pattern: "no SOUL.md found"
+    - pattern: "no TOOLS.md found"
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace contains only claws.json with a default T2 trust tier and no
+  other files. The pipeline must produce a valid GovernanceIR with an empty
+  manifest (no intents extracted) and zero violations. Warnings should note
+  the absence of SOUL.md and TOOLS.md. The IR must be serializable to
+  .claws/compiled/governance-ir.json and pass hash validation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      An empty manifest means zero tools, zero constraints, zero agents. But
+      the workspace still has a trust tier from claws.json. If the platform
+      has built-in tools (e.g., OC exec = R4), the empty TOOLS.md means those
+      built-in tools are ungoverned. The compiler should warn that platform
+      default tools exist but have no governance policy.
+    spec_impact: "CL-04 EXTRACT — platform built-in tool detection"
+    pitfall: "P-008"
+
+  - id: F02
+    severity: warning
+    description: >
+      Zero violations from zero input is trivially correct but misleading.
+      A fleet scan comparing this workspace to others would show 100%
+      compliance — which is vacuously true. The fleet scan should flag
+      workspaces with zero intents as "ungoverned" rather than "compliant."
+    spec_impact: "CL-05 fleet scan — ungoverned vs compliant distinction"
+    pitfall: null
+
+  - id: F03
+    severity: note
+    description: >
+      Serializing an IR with empty arrays and null fields to JSON produces a
+      valid but sparse file. The diff tool (claws diff) comparing this to a
+      full workspace IR must handle the structural mismatch gracefully rather
+      than treating every field as a diff.
+    spec_impact: "CL-04 GovernanceIR — diff tool sparse-vs-full handling"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      claws.json itself might have invalid JSON syntax. This scenario assumes
+      valid claws.json. A separate parse error scenario for claws.json is
+      needed — the required config file being unparseable is a critical path
+      that differs from SOUL.md parse errors.
+    spec_impact: "CL-01 claws.json schema — parse error handling for config"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The hash of an IR with no intents must still be deterministic and unique.
+      If two empty workspaces on different paths produce different hashes
+      (because the path is included in the hash input), that is correct but
+      may surprise users expecting content-only hashing.
+    spec_impact: "CL-04 GovernanceIR hash — path inclusion semantics"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The Phase 3 ANALYZE step runs 29 rules against an empty manifest. Each
+      rule must handle the "no applicable input" case without throwing. This
+      is a robustness property of every rule implementation — null-safe
+      evaluation across all 29 rules.
+    spec_impact: "CL-02 governance rules — null-safe evaluation requirement"
+    pitfall: null

@@ -1,0 +1,132 @@
+name: S26-p135-exec-approvals-field-mismatch
+series: pitfall-final-1
+version: 1
+specs: [CL-04, CL-03]
+description: >
+  Validates that the emitted exec-approvals.json uses the exact field names
+  expected by the OC platform. A "deny" field instead of "blocked" silently
+  disables L4 governance because the platform ignores unknown fields. Schema
+  validation against a pinned OC platform spec version is required.
+
+expect:
+  governance_ir:
+    version: 1
+    emit:
+      exec_approvals:
+        schema_version: "2026.4"
+        field_validation: passed
+        platform_spec_pinned: true
+    analysis:
+      rules_evaluated: true
+      violations: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 4
+    exec_approvals_schema_valid: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The EMIT phase generates exec-approvals.json with field "deny: true" for
+  R5 tools. The OC platform expects "blocked: true." The platform ignores
+  unknown fields (lenient JSON parsing). exec-approvals.json is valid JSON
+  but uses the wrong field names. L4 governance is silently disabled for ALL
+  tools because none have the "blocked" field. The workspace appears to have
+  L4 governance (the file exists) but enforcement is completely absent. A
+  platform version upgrade changes "blocked" to "status: blocked" and all
+  existing exec-approvals.json files break.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The EMIT phase must validate exec-approvals.json against a pinned
+      OC platform JSON schema. The schema is versioned (e.g., "2026.4")
+      and bundled with the claws release. The validation catches field
+      name mismatches, type mismatches, and missing required fields
+      BEFORE writing to disk.
+    spec_impact: "CL-04 EMIT — schema validation for exec-approvals.json"
+    pitfall: P-135
+
+  - id: F02
+    severity: major
+    description: >
+      The "deny" vs "blocked" mismatch is a template bug: the EMIT
+      template uses the wrong field name. Schema validation catches this
+      class of bug. But the schema must be accurate and up-to-date. A
+      stale schema (from an older OC version) would validate against
+      the wrong field names. Schema versioning is critical.
+    spec_impact: "CL-04 EMIT — exec-approvals template correctness"
+    pitfall: P-135
+
+  - id: F03
+    severity: major
+    description: >
+      Platform schema changes (e.g., "blocked" -> "status: blocked") are
+      breaking changes. claws must pin to a specific platform schema
+      version and upgrade the pin when the platform upgrades. claws doctor
+      --post-upgrade should check if the pinned schema matches the
+      installed platform version and warn on mismatch.
+    spec_impact: "CL-01 claws.json — platform schema version pinning"
+    pitfall: P-135
+
+  - id: F04
+    severity: warning
+    description: >
+      The OC platform's lenient JSON parsing (ignoring unknown fields)
+      is the root cause of silent failure. If the platform rejected
+      unknown fields, the error would be visible at deployment. claws
+      cannot change platform behavior, but it can compensate with
+      strict schema validation at compile time.
+    spec_impact: "CL-04 EMIT — compensating for platform leniency"
+    pitfall: P-135
+
+  - id: F05
+    severity: major
+    description: >
+      Post-emit verification should read the generated exec-approvals.json
+      back from staging and validate it against the schema. This catches
+      serialization bugs (e.g., JSON.stringify producing unexpected
+      field names due to prototype pollution or key ordering). The
+      round-trip validation is a defense-in-depth layer.
+    spec_impact: "CL-04 EMIT — round-trip schema verification"
+    pitfall: P-135
+
+  - id: F06
+    severity: warning
+    description: >
+      The error message for schema validation failure must include the
+      expected field name and the actual field name: "exec-approvals.json:
+      field 'deny' is not recognized. Expected field: 'blocked' (per
+      OC platform spec 2026.4). Change 'deny: true' to 'blocked: true'."
+      The diff between expected and actual helps diagnose template bugs.
+    spec_impact: "CL-04 diagnostics — expected vs actual field names"
+    pitfall: P-135
+
+  - id: F07
+    severity: warning
+    description: >
+      Multiple platform versions may be in fleet use. Fleet deployments
+      need exec-approvals.json compatible with the deployed platform
+      version. claws build --target-platform-version 2026.3 should
+      generate artifacts compatible with that specific version, using
+      the corresponding schema. Version-specific artifact generation
+      supports staged fleet upgrades.
+    spec_impact: "CL-05 fleet — version-specific artifact generation"
+    pitfall: P-135
+
+  - id: F08
+    severity: note
+    description: >
+      This pitfall demonstrates why schema validation is a hard
+      requirement for generated artifacts that interface with external
+      platforms. The internal artifact (GovernanceIR) can use any schema.
+      But external artifacts (exec-approvals.json, openclaw.json snippets)
+      must match the platform's expectations exactly. One wrong field
+      name disables an entire governance layer.
+    spec_impact: "CL-04 — external artifact schema strictness"
+    pitfall: P-135

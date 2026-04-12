@@ -1,0 +1,112 @@
+name: S01-minimal-emit
+series: emit-artifacts
+version: 1
+specs: [CL-04]
+description: >
+  Validates minimal artifact emission: SKILL.md + Gateway plugin + exec-approvals.
+  A workspace without lobster.yaml produces 3 of the 4 possible artifacts.
+  Each artifact must be well-formed and independently valid.
+
+expect:
+  artifacts:
+    - type: skill
+      path: skills/claws-governance/SKILL.md
+      valid: true
+    - type: plugin
+      path: plugins/claws-governance/index.ts
+      valid: true
+    - type: exec-approvals
+      path: exec-approvals.json
+      valid: true
+  plugin_hooks:
+    - before_tool_call
+  skill_content:
+    contains_governance: true
+  approvals:
+    matches_tools: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace with SOUL.md, TOOLS.md (3 tools: R1, R3, R5), and claws.json
+  compiles and builds to the openclaw target. Phase 5 EMIT produces 3
+  artifacts: (1) SKILL.md with governance advisory prompts, (2) index.ts
+  with before_tool_call hook registration, (3) exec-approvals.json mapping
+  tools to approval requirements. No lobster.yaml means no compiled workflow.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The 3 artifacts must be emitted atomically: either all 3 succeed or none
+      are written. If SKILL.md emits successfully but index.ts fails (e.g.,
+      TypeScript generation error), the workspace has advisory governance
+      without enforcement. Partial emit is worse than no emit.
+    spec_impact: "CL-04 Phase 5 EMIT — atomic artifact emission"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      exec-approvals.json is the L4 (host-level backup) bridge. Its format
+      must be compatible with the OC platform's exec approval configuration.
+      If the format is wrong, the host-level backup is silently broken. The
+      emit phase must validate the JSON schema against the OC exec approval
+      spec.
+    spec_impact: "CL-04 EMIT — exec-approvals.json schema validation"
+    pitfall: "P-008"
+
+  - id: F03
+    severity: warning
+    description: >
+      SKILL.md is PRESS-compressed to minimize token usage. If PRESS
+      compression is too aggressive, the advisory prompt loses governance
+      context and the LLM cannot follow the instructions. Compression quality
+      must be validated: compressed SKILL.md must be semantically equivalent
+      to uncompressed version.
+    spec_impact: "CL-04 EMIT — PRESS compression semantic preservation"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The plugin index.ts registers before_tool_call. But the governance
+      handler needs access to the compiled rule tables (.claws/compiled/).
+      The emitted code must include the import/require path to the rule
+      tables. If the relative path is wrong on different platforms, the
+      plugin fails to load.
+    spec_impact: "CL-04 EMIT — generated code import path correctness"
+    pitfall: "P-003"
+
+  - id: F05
+    severity: note
+    description: >
+      Without lobster.yaml, the 4th artifact (lobster.compiled.yaml) is
+      absent. The emit phase must not create an empty or placeholder file.
+      The artifact list must be exactly 3, not 4-with-one-empty.
+    spec_impact: "CL-04 EMIT — conditional artifact count"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The generated plugin must be a valid OC plugin that passes `openclaw
+      plugins list` verification. If the plugin structure is wrong (missing
+      package.json, wrong entry point, incorrect hook registration API), the
+      platform rejects it. Emit must generate the complete plugin scaffold.
+    spec_impact: "CL-04 EMIT — OC plugin scaffold completeness"
+    pitfall: "P-013"
+
+  - id: F07
+    severity: warning
+    description: >
+      The 3 artifacts serve different layers: L1 (SKILL.md advisory), L2-L3
+      (plugin enforcement), L4 (exec-approvals backup). If only L1 is loaded
+      (platform does not support plugins), governance is advisory-only. The
+      emitted SKILL.md must be self-sufficient as advisory governance without
+      relying on the plugin.
+    spec_impact: "CL-04 EMIT — SKILL.md self-sufficiency"
+    pitfall: null

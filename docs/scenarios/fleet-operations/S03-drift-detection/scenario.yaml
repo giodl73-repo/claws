@@ -1,0 +1,185 @@
+name: S03-drift-detection
+series: fleet-operations
+version: 1
+specs: [CL-05, CL-02]
+description: >
+  Validates that `claws drift` detects divergence across fleet workspaces
+  relative to the fleet baseline. Three of 10 workspaces have drifted:
+  one has a trust tier mismatch (T3 vs fleet baseline T2), one has a
+  policy hash mismatch (local modification after broadcast), and one is
+  missing a required governance rule. Drift detection must report each
+  divergence type with actionable remediation.
+
+expect:
+  workspaces:
+    total: 10
+    in_sync: 7
+    drifted: 3
+  drift_count: 3
+  broadcast_result: null
+  compliance:
+    baseline_match: 7
+    trust_tier_drift: 1
+    policy_hash_drift: 1
+    missing_rule_drift: 1
+
+simulate:
+  failures:
+    - component: drift-detector
+      type: trust-tier-mismatch
+      error: "workspace-delta: trust tier T3, fleet baseline T2"
+    - component: drift-detector
+      type: policy-hash-mismatch
+      error: "workspace-epsilon: policy hash a1b2c3 != baseline d4e5f6"
+    - component: drift-detector
+      type: missing-rule
+      error: "workspace-zeta: G-ELICIT rule missing from compiled plugin"
+  halt: null
+  budget: null
+
+problem: >
+  After a fleet broadcast established a SOC2 baseline, three workspaces
+  diverged. Workspace-delta manually raised its trust tier from T2 to T3
+  (allowing R4 tools the fleet policy prohibits). Workspace-epsilon
+  modified its local policy YAML after receiving the broadcast (added a
+  custom exception for a tool). Workspace-zeta's compiled governance
+  plugin is missing the G-ELICIT rule due to a failed recompilation after
+  the broadcast. The remaining 7 workspaces are in sync with the fleet
+  baseline. `claws drift` must detect all three drift types and classify
+  them by severity.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The spec defines drift detection as "hash-based" but does not specify
+      what is hashed. Options: (a) hash the policy YAML files only, (b) hash
+      the compiled GovernanceIR, (c) hash both. Option (a) misses drift in
+      trust tier (which lives in claws.json, not policy YAML). Option (b)
+      misses policy file modifications that have not been recompiled yet.
+      Option (c) is comprehensive but requires defining which files
+      contribute to the drift hash. The drift hash must include: claws.json,
+      all policy YAML files, and the GovernanceIR hash.
+    spec_impact: "CL-05 Fleet — drift hash composition specification"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Trust tier drift (T3 vs baseline T2) is a security escalation: the
+      workspace now allows higher-risk tools than the fleet permits. This
+      is more severe than a policy hash mismatch (which may be a benign
+      local override). Drift severity classification is missing from the
+      spec. Trust tier escalation should be CRITICAL, policy hash mismatch
+      should be HIGH, missing rule should be HIGH, cosmetic divergence
+      should be LOW.
+    spec_impact: "CL-05 Fleet — drift severity classification (CRITICAL/HIGH/LOW)"
+    pitfall: P-172
+
+  - id: F03
+    severity: major
+    description: >
+      The fleet baseline itself is unversioned in the current spec. What
+      IS the baseline? The last broadcast? The fleet-level claws.json? A
+      golden snapshot? Without a defined baseline, "drift" is undefined.
+      The spec should define the baseline as the state recorded after the
+      most recent `claws broadcast` or `claws push`, stored in a fleet
+      manifest file with per-workspace expected hashes.
+    spec_impact: "CL-05 Fleet — fleet baseline definition and manifest storage"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Drift detection must distinguish intentional divergence from
+      accidental drift. A workspace owner who raises the trust tier
+      deliberately (with approval) should be able to register an exception.
+      Without exception registration, every deliberate override triggers
+      a drift alert on every scan. Exception entries should require a
+      reason and an approver, recorded in the fleet manifest.
+    spec_impact: "CL-05 Fleet — drift exception registration for intentional overrides"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Missing-rule drift (workspace-zeta lacks G-ELICIT) means the compiled
+      plugin does not enforce a required rule. This is a build failure, not
+      just configuration drift. The drift detector must distinguish
+      configuration drift (claws.json/policy YAML changed) from build drift
+      (compiled artifacts stale or incomplete). Build drift requires
+      recompilation; configuration drift may require policy rollback.
+    spec_impact: "CL-05 Fleet — configuration drift vs build drift distinction"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Drift detection frequency affects fleet security posture. The spec
+      says "scheduled, on-demand" for the outer ring. For the CI/CD Stage 3
+      (weekly cron), weekly drift detection may miss a trust tier escalation
+      for up to 7 days. High-security fleets may need daily or real-time
+      drift detection. The sidecar (CL-03) could monitor for configuration
+      file changes and trigger drift alerts, not just scheduled scans.
+    spec_impact: "CL-05 Fleet — drift detection frequency and real-time option"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The drift report should include a timeline: when did the drift occur?
+      If the scan runs weekly, it detects drift but not when it happened.
+      If workspace-delta raised its trust tier 5 days ago, the drift report
+      should indicate the approximate time of divergence (last known good
+      scan vs current). This requires comparing the current scan against
+      the previous scan's workspace hashes.
+    spec_impact: "CL-05 Fleet — drift timeline via scan history comparison"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Drift remediation actions differ per drift type. Trust tier drift:
+      "revert claws.json trustTier to T2 or register exception." Policy
+      hash drift: "re-run `claws broadcast` or accept local override."
+      Missing rule drift: "re-run `claws build` in workspace-zeta." The
+      drift report must include per-drift-type remediation guidance,
+      following the CL-05 error message contract (what/how/where).
+    spec_impact: "CL-05 Fleet — per-drift-type remediation in drift report"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      For SARIF output (--format sarif), each drift finding should map to
+      a SARIF result with the workspace path as the artifact location. The
+      drift type maps to a SARIF rule ID (e.g., CLAWS-DRIFT-TIER,
+      CLAWS-DRIFT-HASH, CLAWS-DRIFT-RULE). This enables fleet drift to
+      appear in GitHub code scanning dashboards alongside per-workspace
+      pinch results.
+    spec_impact: "CL-05 Fleet — drift findings as SARIF results"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Drift detection in a 100+ workspace fleet must be efficient.
+      Comparing hashes is O(n) — fast. But if hash mismatch triggers
+      recompilation to identify the specific drift, the cost grows to
+      O(n * compile_time). The two-phase approach (hash check first,
+      detailed diff only for drifted workspaces) keeps average-case
+      latency low while providing detailed diagnostics for drifted
+      workspaces only.
+    spec_impact: "CL-05 Fleet — two-phase drift detection for large fleets"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Drift metrics should be tracked over time to show fleet convergence
+      or divergence trends. "3 drifted workspaces this week, 5 last week"
+      shows improvement. "3 this week, 1 last week" shows growing drift.
+      `claws audit history` (command 26) should include drift counts per
+      scan in the compliance trend.
+    spec_impact: "CL-05 Fleet — drift trend tracking in audit history"
+    pitfall: null

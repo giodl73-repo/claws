@@ -1,0 +1,186 @@
+name: S06-compliance-evidence-reproducibility
+series: compliance-evidence
+version: 1
+specs: [CL-02]
+description: >
+  Validates that compliance evidence generation is reproducible: the same
+  audit chain, policy version, and observation period produce an identical
+  evidence package (modulo timestamp). This is critical for auditor
+  confidence — if two runs of `claws comply soc2` produce different results
+  for the same inputs, the evidence is unreliable. The scenario tests
+  reproducibility across platforms (Windows/Linux), claws versions, and
+  serialization implementations.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      intent_types: [DenyIntent, ToolManifestEntry]
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 2
+    types: [soc2-evidence-package, reproducibility-proof]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise generates a SOC2 evidence package on Monday for an auditor.
+  On Friday, the auditor asks to verify the evidence by regenerating it.
+  No workspace changes occurred between Monday and Friday. The regenerated
+  evidence must be byte-for-byte identical to the Monday evidence (excluding
+  the generatedAt timestamp and signature, which depend on the generation
+  time). The evidence hash (computed from the content excluding timestamp
+  and signature) must match. Additionally, the same evidence must be
+  reproducible on a different machine (different OS, different claws build)
+  given the same inputs.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Reproducibility requires canonical serialization. JSON serialization
+      order varies between implementations (JavaScript objects are ordered
+      by insertion, but JSON.stringify does not guarantee key order across
+      runtimes). The evidence package must use a canonical JSON format
+      (sorted keys, no trailing whitespace, consistent number formatting)
+      to ensure deterministic output. The spec should reference RFC 8785
+      (JSON Canonicalization Scheme) or define its own canonical form.
+    spec_impact: "CL-02 Compliance Evidence — require RFC 8785 canonical JSON for reproducible serialization"
+    pitfall: P-221
+
+  - id: F02
+    severity: major
+    description: >
+      The evidence hash is computed from the evidence content. But the spec
+      does not define which fields are included in the hash. If generatedAt
+      and signature are excluded (as they must be for reproducibility),
+      the hash must be computed from a "content" subset. The spec must
+      define the exact fields included in and excluded from the evidence
+      hash, and the hash algorithm (SHA-256 assumed but not stated).
+    spec_impact: "CL-02 Compliance Evidence — define evidence hash scope and algorithm explicitly"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The audit chain may contain floating-point values (e.g., budget
+      amounts, latency measurements). Floating-point serialization differs
+      across platforms (0.1 vs 0.10000000000000001). The canonical form
+      must define floating-point formatting rules. Alternative: use string
+      representations for all monetary and measurement values in the audit
+      chain, avoiding floating-point entirely.
+    spec_impact: "CL-02 Audit Chain — define numeric serialization for cross-platform reproducibility"
+    pitfall: P-222
+
+  - id: F04
+    severity: warning
+    description: >
+      Line endings in workspace files (SOUL.md, TOOLS.md) differ between
+      Windows (CRLF) and Linux (LF). The evidence package includes
+      references to workspace files. If the evidence hash includes content
+      from these files, line ending normalization is required for cross-
+      platform reproducibility. This is the same issue identified in
+      compile-pipeline S01-F04 (GovernanceIR hash normalization) and must
+      be solved consistently.
+    spec_impact: "CL-02 Compliance Evidence — apply same line-ending normalization as GovernanceIR"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The observation period (start, end) in the evidence package must be
+      deterministic. If the start is derived from the first audit event's
+      timestamp and the end from the last, slight variations in timestamp
+      parsing (timezone handling, millisecond precision) could produce
+      different period boundaries. The period should be normalized to
+      UTC with second precision, truncating milliseconds.
+    spec_impact: "CL-02 SOC2 Evidence — normalize observation period to UTC with second precision"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The evidence signature uses Ed25519 which is deterministic (unlike
+      ECDSA which uses a random nonce). This is good for reproducibility:
+      the same content + same key = same signature. However, HMAC-SHA256
+      (the non-enterprise option) is also deterministic. The spec should
+      explicitly note that both signing algorithms are deterministic and
+      that the signature IS reproducible given the same key, enabling full
+      byte-for-byte comparison including the signature when the same key
+      is used.
+    spec_impact: "CL-02 Compliance Evidence — note that Ed25519 and HMAC signatures are deterministic"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Cross-version reproducibility (generating the same evidence with
+      claws v1.1 and v1.2) requires that the evidence format is versioned
+      and backward-compatible. If a new claws version adds fields to the
+      evidence schema, the hash changes. The spec should define that
+      evidence format versions are pinned: `claws comply soc2 --format-
+      version 1.0` produces the v1.0 format regardless of the claws
+      version. This allows auditors to reproduce evidence generated by
+      an older version.
+    spec_impact: "CL-02 Compliance Evidence — add evidence format version pinning for cross-version reproducibility"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The compliance evidence includes event counts (auditEvents per
+      control). If the event counting logic changes between claws versions
+      (e.g., a bug fix in event-to-control filtering), the same audit chain
+      produces different event counts. Version-pinned evidence format helps
+      but the counting logic must also be versioned. This is a broader
+      concern: any change in the evidence generation logic breaks
+      reproducibility.
+    spec_impact: "CL-02 Compliance Evidence — version evidence generation logic alongside format"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      A "reproducibility proof" artifact (type in this scenario's expect)
+      would be a comparison report showing that two evidence generations
+      produce identical output. This artifact does not exist in the spec.
+      `claws comply --verify-reproducibility <package1> <package2>` could
+      generate a diff report showing any discrepancies, helping auditors
+      confirm evidence integrity.
+    spec_impact: "CL-02 Compliance Evidence — add verify-reproducibility command for evidence comparison"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The policy version embedded in the evidence (hash of .claws/policies/)
+      must also be reproducible. If .claws/policies/ contains files that
+      differ in metadata (file modification times, permissions) across
+      platforms, the hash may differ even though the content is identical.
+      The policy hash should be computed from file CONTENT only, ignoring
+      filesystem metadata.
+    spec_impact: "CL-02 Compliance Evidence — compute policy hash from content only, ignore fs metadata"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      The RFC 3161 timestamp authority response is obtained at generation
+      time and varies between runs. If the timestamp is included in the
+      evidence package, it breaks byte-for-byte reproducibility. The
+      timestamp must be either excluded from the reproducibility hash
+      (like generatedAt) or obtained deterministically (e.g., cached from
+      the first generation and reused). The spec should list all fields
+      excluded from the reproducibility hash: generatedAt, signature,
+      and RFC 3161 timestamp response.
+    spec_impact: "CL-02 Compliance Evidence — exclude RFC 3161 timestamp from reproducibility hash"
+    pitfall: null

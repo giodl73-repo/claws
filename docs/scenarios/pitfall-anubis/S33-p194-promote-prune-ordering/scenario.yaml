@@ -1,0 +1,128 @@
+name: S33-p194-promote-prune-ordering
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that snap promote establishes the new baseline before pruning
+  can delete the previous baseline. Without ordering, a promote that triggers
+  pruning may delete the old baseline before the new one is established,
+  creating a window with no baseline.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      snapshot_name: enterprise-v3.0
+      snapshot_action: promote
+      promote_order: establish-then-prune
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 1
+    types: [fleet-baseline]
+
+simulate:
+  failures:
+    - component: snapshot-promote
+      type: promote-prune-race
+      error: "Pruning deleted enterprise-v2.0 before enterprise-v3.0 was established as baseline"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet admin runs `claws snap promote enterprise-v3.0`. The promote
+  operation involves two steps: (1) establish enterprise-v3.0 as the new
+  baseline, (2) the previous baseline enterprise-v2.0 becomes eligible for
+  pruning (its protection is downgraded). If auto-pruning runs between step
+  1 and step 2 (or if the operation fails after step 2 but before step 1),
+  there is a window where no fleet baseline exists. During this window,
+  `claws fleet drift` fails for all workspaces. A fleet with 20 workspaces
+  running scheduled drift scans every hour will see 20 failures during the
+  window. The no-baseline window also means the dead man switch has no
+  reference point for compliance comparison.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must define promote as an atomic operation with strict ordering:
+      (1) validate the new snapshot, (2) establish the new snapshot as
+      baseline (write the baseline pointer), (3) downgrade the previous
+      baseline protection. At no point during this sequence can both
+      baselines be unprotected simultaneously. The operation must be
+      implemented as a transaction with rollback on failure.
+    spec_impact: "CL-05 Snapshot Promote — atomic establish-then-prune ordering"
+    pitfall: P-194
+
+  - id: F02
+    severity: major
+    description: >
+      Auto-pruning must be locked out during promote operations. The promote
+      operation should acquire a pruning lock that prevents auto-pruning from
+      running until promote completes. This prevents the race condition where
+      pruning runs between the baseline establishment and protection
+      downgrade steps. The lock must be bounded by a timeout to prevent
+      deadlocks.
+    spec_impact: "CL-05 Snapshot Promote — pruning lock during promote"
+    pitfall: P-194
+
+  - id: F03
+    severity: major
+    description: >
+      The previous baseline must retain its fleet-baseline protection until
+      the new baseline is fully established and verified. The verification
+      includes: (1) the baseline pointer is updated, (2) at least one
+      workspace successfully evaluates drift against the new baseline. Only
+      after verification does the previous baseline's protection downgrade.
+      This adds a safety margin to the atomic operation.
+    spec_impact: "CL-05 Snapshot Promote — verified establishment before downgrade"
+    pitfall: P-194
+
+  - id: F04
+    severity: major
+    description: >
+      If promote fails mid-operation (crash, disk error), the rollback must
+      restore the previous baseline as the active baseline. The system must
+      never be in a state where neither snapshot is the baseline. The promote
+      operation should write a transaction log that enables crash recovery:
+      "promote in progress, old baseline: v2.0, new baseline: v3.0, step:
+      establishing." On restart, the transaction log is replayed.
+    spec_impact: "CL-05 Snapshot Promote — transaction log for crash recovery"
+    pitfall: P-194
+
+  - id: F05
+    severity: warning
+    description: >
+      The promote command output should confirm the ordering: "Step 1/3:
+      Validating enterprise-v3.0... OK. Step 2/3: Establishing as fleet
+      baseline... OK. Step 3/3: Downgrading enterprise-v2.0 to previous-
+      baseline... OK." This transparency helps the operator understand the
+      atomic operation and diagnose where failures occur.
+    spec_impact: "CL-05 Snapshot Promote — step-by-step progress output"
+    pitfall: P-194
+
+  - id: F06
+    severity: warning
+    description: >
+      Fleet status should show a "promote in progress" state if queried
+      during the promote operation. This prevents operators from seeing
+      confusing intermediate states where the baseline appears to be
+      missing or changing. The promote-in-progress state should include
+      the old and new baseline names and the current step.
+    spec_impact: "CL-05 Fleet Status — promote-in-progress state"
+    pitfall: P-194
+
+  - id: F07
+    severity: note
+    description: >
+      The previous baseline retention period (default 30 days) starts when
+      the new baseline is established, not when the downgrade occurs. If the
+      downgrade is delayed (due to verification failure), the retention timer
+      does not start early. This ensures the previous baseline is always
+      available for rollback for the full retention period.
+    spec_impact: "CL-05 Snapshot Storage — retention timer starts at establishment"
+    pitfall: P-194

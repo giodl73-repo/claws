@@ -1,0 +1,132 @@
+name: S24-p157-p158-supply-chain-verification
+series: pitfall-final-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates environment-based severity for unsigned skills (P-157) and
+  three-part verification for signed skills (P-158). A warning for unsigned
+  skills in production is insufficient (37% malicious rate), and a signature
+  without verification capability is cosmetic security.
+
+expect:
+  rules_applied: [G-SUPPLY]
+  violations:
+    - code: CLAWS-E047
+      rule: G-SUPPLY
+      description: "Unsigned skill 'data-export' in production — error severity"
+    - code: CLAWS-E048
+      rule: G-SUPPLY
+      description: "Signed skill 'analytics-helper' unverifiable — .claws/keys/ missing"
+  pass: false
+  severity: error
+
+simulate:
+  failures:
+    - component: supply-chain
+      type: unsigned-production
+      error: "Marketplace skill 'data-export' has no signature — production env requires error"
+    - component: supply-chain
+      type: unverifiable-signature
+      error: "Marketplace skill 'analytics-helper' has signature but .claws/keys/ not found"
+  halt: null
+  budget: null
+
+problem: >
+  A production workspace installs two marketplace skills. "data-export" has
+  no signature at all. In development, this generates a warning that developers
+  routinely rubber-stamp. In production (where 37% of marketplace skills are
+  malicious), the warning is dangerously insufficient. "analytics-helper" has
+  a valid Ed25519 signature, but the workspace has no .claws/keys/ directory
+  with marketplace public keys. The signature is present but cannot be verified.
+  G-SUPPLY passes "analytics-helper" because it checks signature PRESENCE,
+  not verification capability. Both skills are effectively unvetted.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-157 core: A warning for unsigned skills in production relies on
+      developers reading and acting on warnings. With 37% of marketplace
+      skills malicious, a warning is the equivalent of a sign saying
+      "beware of the leopard." Production environments must treat unsigned
+      skills as errors that block installation.
+    spec_impact: "CL-02 G-SUPPLY — environment-based severity escalation"
+    pitfall: "P-157"
+
+  - id: F02
+    severity: major
+    description: >
+      Environment-based severity: claws.json#supply.unsignedSeverity
+      controls the behavior. Default depends on claws.json#environment:
+      "development" -> "warning," "staging" -> "error," "production" ->
+      "error." The developer can explicitly override, but the override
+      is itself logged as a security decision.
+    spec_impact: "CL-01 schema — unsignedSeverity with environment default"
+    pitfall: "P-157"
+
+  - id: F03
+    severity: major
+    description: >
+      P-158 core: Signature presence is not verification. analytics-helper
+      has a byte sequence in its signature field, but without the
+      marketplace's public key, the signature is unverifiable. It could
+      be random bytes. G-SUPPLY must check three things: (1) signature
+      exists, (2) .claws/keys/ exists with public keys, (3) the
+      signature verifies against a key. All three are required.
+    spec_impact: "CL-02 G-SUPPLY — three-part verification check"
+    pitfall: "P-158"
+
+  - id: F04
+    severity: major
+    description: >
+      The three verification states: unsigned (no signature), signed-
+      unverifiable (signature present, no keys), signed-verified (signature
+      validates against trusted key). Only signed-verified provides actual
+      security. The pinch output must report the state for each skill
+      and the overall supply chain health.
+    spec_impact: "CL-02 G-SUPPLY — three-state supply chain reporting"
+    pitfall: "P-157, P-158"
+
+  - id: F05
+    severity: major
+    description: >
+      `claws init` must create .claws/keys/ and offer to fetch the
+      marketplace public key bundle. Without init, workspaces built
+      directly with `claws build` have no key store. The init step is
+      where key provisioning happens. Its absence should be detectable
+      by G-SUPPLY.
+    spec_impact: "CL-05 init — key store provisioning in init"
+    pitfall: "P-158"
+
+  - id: F06
+    severity: warning
+    description: >
+      Key rotation: when the marketplace rotates its signing key, old
+      signatures become unverifiable unless the previous key is retained
+      in .claws/keys/ with its validity period. `claws fleet sync-keys`
+      should distribute updated key bundles across the fleet while
+      retaining previous keys for backward verification.
+    spec_impact: "CL-05 fleet — marketplace key rotation"
+    pitfall: "P-158"
+
+  - id: F07
+    severity: warning
+    description: >
+      The 37% malicious rate should not be hardcoded. It should come from
+      threat intelligence or claws's own scanning telemetry. But even
+      if the actual rate is 5%, unsigned skills in production should still
+      be errors. The rate informs policy communication but does not change
+      the security decision.
+    spec_impact: "CL-02 G-SUPPLY — threat rate communication"
+    pitfall: "P-157"
+
+  - id: F08
+    severity: note
+    description: >
+      The combination of P-157 and P-158 creates a false-security spectrum:
+      at one end, unsigned skills with only warnings. At the other, signed
+      skills that pass without verification. Both endpoints are insecure.
+      Only the narrow middle (signed + verified) provides actual protection.
+      The majority of marketplace skills may fall outside this middle.
+    spec_impact: "CL-02 G-SUPPLY — supply chain security spectrum"
+    pitfall: "P-157, P-158"

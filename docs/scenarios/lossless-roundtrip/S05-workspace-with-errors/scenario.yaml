@@ -1,0 +1,149 @@
+name: S05-workspace-with-errors
+series: lossless-roundtrip
+version: 1
+specs: [CL-04]
+description: >
+  Validates that the lossless guarantee holds even when the compilation
+  pipeline encounters parse errors, governance violations, or cross-file
+  conflicts. Error conditions must NEVER cause the pipeline to modify,
+  truncate, or delete source files. The pipeline produces error output
+  only — no artifacts are emitted.
+
+expect:
+  governance_ir: null
+  violations:
+    - rule: G-CLASS
+      severity: high
+    - rule: PARSE
+      severity: critical
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - phase: PARSE
+      file: SOUL.md
+      error: "malformed constraint at line 7"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has a malformed SOUL.md (unclosed markdown heading causing a
+  parse error at line 7) and a TOOLS.md with an R5 tool in a T2 workspace
+  (G-CLASS violation). The pipeline must: (1) report both errors (collect-all
+  behavior), (2) NOT produce a GovernanceIR or emit any artifacts, (3)
+  preserve all 9 source files byte-for-byte including the malformed SOUL.md.
+  The malformed file must not be "fixed" by the pipeline, even if the fix
+  is obvious. Only `claws pinch --fix` with explicit user invocation may
+  modify files, and only for auto-fixable violations, never for source files.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      A parse error in SOUL.md must not prevent parsing of TOOLS.md. The
+      collect-all-errors strategy (CL-04) means the pipeline attempts to
+      parse all files and reports all errors. If the parser fails fast on
+      SOUL.md and skips TOOLS.md, the developer fixes SOUL.md, re-runs,
+      and discovers the G-CLASS violation. Two round-trips instead of one.
+      Error collection across files must be independent.
+    spec_impact: "CL-04 Phase 1 PARSE — independent per-file error collection"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      When the pipeline fails with errors, no artifacts should be emitted.
+      But what about previously-emitted artifacts from a prior successful
+      compilation? CL-04 specifies "last-known-good artifact preservation"
+      (SCV-S01-F05) — a failed compilation must NOT delete previous
+      artifacts. The developer retains the last working governance
+      enforcement while they fix the errors. This is the opposite of
+      "clean on error" and must be tested explicitly.
+    spec_impact: "CL-04 EMIT — last-known-good preservation on compilation error"
+    pitfall: P-235
+
+  - id: F03
+    severity: warning
+    description: >
+      The `claws pinch --fix` command can auto-fix certain violations
+      (e.g., adding missing elicitation gates). But --fix MUST NOT modify
+      the 9 source files. It can only modify claws.json, .claws/ config
+      files, or generated artifacts. If --fix attempts to modify SOUL.md
+      to resolve a conflict, it violates the lossless guarantee. The fix
+      scope must be explicitly limited to non-source files.
+    spec_impact: "CL-05 claws pinch --fix — fix scope limited to non-source files"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Error messages must include file:line references for parse errors.
+      But the malformed SOUL.md may have a parse state where line counting
+      is unreliable (e.g., unclosed code block spans to EOF, making all
+      subsequent line numbers wrong). The parser must track line numbers
+      independently of content parsing so that error locations are reliable
+      even in malformed files.
+    spec_impact: "CL-04 PARSE — reliable line counting in malformed files"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      If the pipeline crashes (unhandled exception) rather than reporting
+      errors cleanly, the lossless guarantee depends on the pipeline not
+      having opened any source files for writing before the crash. Since
+      source files should only be opened for reading (F03 in S01), a crash
+      cannot corrupt source files. But if the pipeline opens exec-approvals.json
+      for writing before crashing, the existing file may be truncated.
+      The atomic staging pattern (SCV-S01) prevents this for normal flow,
+      but unhandled exceptions may bypass the staging logic.
+    spec_impact: "CL-04 EMIT — crash safety for atomic staging (unhandled exception path)"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      A workspace with ALL files malformed (every file has parse errors)
+      must still produce a structured error report, not crash. The pipeline
+      must handle the case where the CapabilityManifest has zero successfully-
+      parsed files. An empty manifest is a valid (degenerate) compile result
+      that reports N parse errors.
+    spec_impact: "CL-04 PARSE — graceful handling of zero successfully-parsed files"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The error output itself must be deterministic for the same malformed
+      input. If error ordering changes between runs (because file parse
+      order is non-deterministic), CI/CD pipelines that compare error
+      output for regression detection will see false diffs. Error output
+      should be sorted by file path, then by line number.
+    spec_impact: "CL-04 error output — deterministic error ordering"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      A subtle lossless violation: if the pipeline reads SOUL.md, encounters
+      a parse error, and the error message includes a "suggested fix" that
+      quotes the corrected content, a developer might manually apply the
+      fix. This is fine — manual edits are the developer's choice. But if
+      `claws doctor --fix` applies the suggestion automatically without
+      creating a snapshot first, the original SOUL.md content is lost.
+      Doctor --fix must always `claws snap save` before modifying any file.
+    spec_impact: "CL-05 Three-Ring Model — mandatory snapshot before doctor --fix modifies any file"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The pipeline must distinguish between "file not found" (AGENTS.md
+      missing, which is optional) and "file found but malformed" (AGENTS.md
+      present but unparseable). Missing optional files are not errors.
+      Malformed present files are errors. The error categories must be
+      distinct in both human-readable and JSON output.
+    spec_impact: "CL-04 PARSE — missing-optional vs malformed-present error distinction"
+    pitfall: null

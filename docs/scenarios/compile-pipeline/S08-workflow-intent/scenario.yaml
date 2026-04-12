@@ -1,0 +1,116 @@
+name: S08-workflow-intent
+series: compile-pipeline
+version: 1
+specs: [CL-04]
+description: >
+  Validates that lobster.yaml is parsed into a WorkflowIntent in the
+  CapabilityManifest. The workflow DAG must be captured with governance
+  injection points identified for R3+ tools and OBO actions.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, lobster.yaml, claws.json]
+      intent_types: [DenyIntent, ToolManifestEntry, WorkflowIntent]
+    analysis:
+      rules_evaluated: true
+      workflow:
+        steps: [trigger, research, draft, send-email, respond]
+        governance_points:
+          - before_step: send-email
+            type: elicit
+            reason: "R5/OBO tool requires approval gate"
+          - after_step: send-email
+            type: audit
+            reason: "R5 tool execution must be recorded"
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  lobster.yaml defines a 5-step workflow: trigger -> research -> draft ->
+  send-email -> respond. The send-email step uses an R5/OBO tool. The
+  pipeline must parse the workflow DAG, identify send-email as a governance-
+  sensitive step, and mark two governance injection points: an elicitation
+  gate before send-email and an audit step after send-email. The workflow
+  inversion logic must produce the correct rewritten DAG structure.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Workflow inversion inserts governance steps into the DAG, changing step
+      count from 5 to 7. The step IDs for injected steps (claws-elicit-send-email,
+      claws-audit-send-email) must be deterministic and unique. If two R5 tools
+      exist in the same workflow, the naming scheme must disambiguate.
+    spec_impact: "CL-04 workflow inversion — injected step naming convention"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      lobster.yaml may define parallel branches (step A and B run concurrently).
+      If both branches contain R5 tools, the governance injection must handle
+      parallel elicitation: two approval requests simultaneously, or serialized.
+      The CL-04 spec shows only linear DAG inversion.
+    spec_impact: "CL-04 workflow inversion — parallel branch handling"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The send-email step references a tool in TOOLS.md. If the step name in
+      lobster.yaml does not exactly match the tool name in TOOLS.md (e.g.,
+      "send-email" vs "sendEmail" vs "send_email"), the cross-reference fails.
+      The compiler needs a tool name normalization strategy.
+    spec_impact: "CL-04 EXTRACT — tool name normalization across files"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The audit step injected after send-email adds latency to the workflow.
+      If the audit chain append fails (disk full, key missing), the workflow
+      should not block — audit failures should be handled asynchronously.
+      But the injected step code must decide: sync or async audit.
+    spec_impact: "CL-04 Phase 5 EMIT — audit step sync/async design"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      lobster.yaml schema versioning is an open question in CL-04. If the
+      schema changes (new step types, new DAG constructs), the workflow
+      inversion logic must handle unknown step types gracefully — skip
+      governance injection for unrecognized steps rather than crash.
+    spec_impact: "CL-04 workflow inversion — forward compatibility"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The classification step (claws-classify-research shown in CL-04 spec
+      diagram) is injected before the research step, not just before R5 tools.
+      This scenario only checks R5 injection but the spec shows classification
+      injection for all tool-using steps. The expected governance_points may
+      be incomplete.
+    spec_impact: "CL-04 workflow inversion — classification step injection"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      If the trigger step itself uses an R5 tool (e.g., a webhook trigger
+      that sends a confirmation email), governance injection before the first
+      step creates a chicken-and-egg: the workflow cannot start until approval
+      is given, but the approval flow is part of the workflow. This needs a
+      pre-workflow gate pattern.
+    spec_impact: "CL-04 workflow inversion — first-step governance edge case"
+    pitfall: null

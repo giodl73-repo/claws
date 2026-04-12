@@ -1,0 +1,135 @@
+name: S01-bom-and-line-endings
+series: pitfall-coverage-1
+version: 1
+specs: [CL-04]
+description: >
+  Validates that the compilation pipeline normalizes encoding artifacts
+  before parsing and hashing. P-051 covers UTF-8 BOM markers that cause
+  the PARSE phase to skip the first constraint in SOUL.md. P-052 covers
+  GovernanceIR hash non-determinism caused by OS-specific line endings.
+  Together these test the contract that byte-level encoding differences
+  never affect governance semantics or cross-platform reproducibility.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      bom_stripped: true
+      line_endings_normalized: true
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+      hash_deterministic: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Workspace A exists on Windows. SOUL.md starts with a UTF-8 BOM (0xEF 0xBB 0xBF)
+  and the first line is "Never access production databases." TOOLS.md has one R1 tool.
+  claws.json sets trust tier T2. The same workspace is cloned on Linux. Windows uses
+  CRLF; Linux uses LF. Both workspaces compile. The GovernanceIR from both must be
+  identical: same intents extracted, same hash, same violations. The BOM must not
+  cause the first deny constraint to be missed, and the hash must be identical
+  regardless of OS.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      UTF-8 BOM (0xEF 0xBB 0xBF) at the start of SOUL.md causes the keyword-
+      anchored parser to miss the first constraint line. The BOM bytes precede
+      "Never", so a regex anchored on "Never" at line start fails. The most
+      critical deny constraint is silently dropped from the IR.
+    spec_impact: "CL-04 Phase 1 PARSE — must strip BOM before keyword extraction"
+    pitfall: P-051
+
+  - id: F02
+    severity: major
+    description: >
+      If only SOUL.md has a BOM but TOOLS.md does not, the parser strips BOM
+      inconsistently. A blanket BOM-strip on all files is safer than file-by-file
+      detection. The strip must happen before any byte is consumed by the parser.
+    spec_impact: "CL-04 PARSE — BOM stripping must apply uniformly to all 9 files"
+    pitfall: P-051
+
+  - id: F03
+    severity: warning
+    description: >
+      SOUL.md with BOM + CRLF on Windows produces a line that is
+      BOM + "Never access production databases\r\n". After BOM strip,
+      the \r remains. If the parser does BOM strip but not line-ending
+      normalization, the constraint text includes a trailing \r, which
+      may cause string comparison failures in the ANALYZE phase.
+    spec_impact: "CL-04 PARSE — BOM strip and line-ending normalization must be sequenced"
+    pitfall: P-051
+
+  - id: F04
+    severity: major
+    description: >
+      GovernanceIR hash computed from raw file bytes differs between Windows
+      (CRLF) and Linux (LF) for the same workspace. Fleet drift detection
+      (`claws drift`) reports false positives when comparing workspaces
+      compiled on different operating systems.
+    spec_impact: "CL-04 GovernanceIR — hash must be computed from LF-normalized content"
+    pitfall: P-052
+
+  - id: F05
+    severity: warning
+    description: >
+      Line ending normalization must happen before hashing but after file read.
+      If normalization is applied in the parser but the hash is computed from
+      the raw file read buffer, the hash still varies. The normalization layer
+      must sit between file I/O and both the parser and the hasher.
+    spec_impact: "CL-04 pipeline architecture — normalization layer placement"
+    pitfall: P-052
+
+  - id: F06
+    severity: major
+    description: >
+      Git's core.autocrlf setting can convert line endings on checkout.
+      A workspace checked out with autocrlf=true on Windows has CRLF in
+      the working tree but LF in the git object store. If `claws diff`
+      compares working-tree hashes against git-stored hashes, every file
+      shows as changed. The hash must be computed from normalized content,
+      not raw working-tree bytes.
+    spec_impact: "CL-04 diff — working tree vs stored hash comparison"
+    pitfall: P-052
+
+  - id: F07
+    severity: note
+    description: >
+      UTF-16 and UTF-32 encoded workspace files are possible but rare.
+      The spec should state that only UTF-8 (with or without BOM) is
+      supported. Other encodings produce a hard error at parse time
+      with a clear message: "Unsupported encoding in {file}."
+    spec_impact: "CL-01 workspace schema — encoding requirements"
+    pitfall: P-051
+
+  - id: F08
+    severity: warning
+    description: >
+      The round-trip fidelity guarantee (lossless-roundtrip series)
+      conflicts with BOM stripping. If the parser strips BOM internally
+      but the original file retains BOM, the round-trip is technically
+      not byte-for-byte. The spec must clarify that normalization is
+      internal to the pipeline and original files are never modified.
+    spec_impact: "CL-04 lossless guarantee — internal normalization vs file mutation"
+    pitfall: P-051
+
+  - id: F09
+    severity: note
+    description: >
+      Mixed line endings within a single file (some lines CRLF, some LF)
+      should be normalized to LF without error. The compiler should not
+      reject mixed-ending files — they are common in copy-paste workflows.
+    spec_impact: "CL-04 PARSE — mixed line ending tolerance"
+    pitfall: P-052

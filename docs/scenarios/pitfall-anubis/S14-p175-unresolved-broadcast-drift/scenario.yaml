@@ -1,0 +1,137 @@
+name: S14-p175-unresolved-broadcast-drift
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that unresolved broadcast failures trigger stale failure alerting
+  after a configurable threshold, preventing permanent drift when operators
+  forget to retry failed workspaces. Without alerting, failed broadcast
+  results sit indefinitely in the failure manifest.
+
+expect:
+  workspaces:
+    total: 10
+    updated: 8
+    failed: 2
+    stale_hours: 48
+  drift_count: 2
+  broadcast_result:
+    status: stale-failure
+    policy: pci-v4
+    workspaces_updated: 8
+    workspaces_failed: 2
+    retry_available: true
+    alert_fired: true
+    alert_level: CRITICAL
+  compliance:
+    current_policy: 8
+    stale_policy: 2
+    stale_alert_threshold_hours: 24
+
+simulate:
+  failures:
+    - component: broadcast
+      type: stale-unresolved-failure
+      error: "2 workspaces failed broadcast 48 hours ago, no retry attempted"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet broadcast for pci-v4 policy completes with partial success: 8 of 10
+  workspaces updated, 2 failed due to temporary network issues. The operator
+  acknowledges the partial result but gets pulled into other work. 48 hours
+  pass with no retry. The 2 failed workspaces are running pci-v3 while the
+  fleet dashboard shows 80% compliance. No alert fires because the system
+  has no stale failure detection. The compliance gap persists until the next
+  scheduled audit (30 days away). During this window, the 2 workspaces are
+  non-compliant with the latest PCI requirements.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must define a stale broadcast failure threshold (default 24 hours).
+      When a broadcast failure remains unresolved past this threshold, the
+      system must fire an escalating alert: WARNING at 24h, CRITICAL at 48h,
+      EMERGENCY at 72h. The threshold must be configurable per fleet via
+      claws.json#fleet.staleBroadcastThresholdHours.
+    spec_impact: "CL-05 Fleet Broadcast — stale failure alerting threshold"
+    pitfall: P-175
+
+  - id: F02
+    severity: major
+    description: >
+      Stale failure alerts must include actionable retry commands. The alert
+      body should contain the exact `claws fleet broadcast --retry-failed`
+      command that will retry only the failed workspaces. Without the exact
+      command, operators waste time reconstructing the retry invocation from
+      the failure manifest.
+    spec_impact: "CL-05 Fleet Broadcast — actionable retry in alerts"
+    pitfall: P-175
+
+  - id: F03
+    severity: major
+    description: >
+      Fleet compliance reports must flag stale-failure workspaces separately
+      from drifted workspaces. A workspace that failed a broadcast is not the
+      same as a workspace that was intentionally modified. The compliance
+      report should show three categories: current, drifted, and stale-failed.
+      Stale-failed workspaces have a clear remediation path (retry), while
+      drifted workspaces require investigation.
+    spec_impact: "CL-05 Fleet Compliance — three-category compliance model"
+    pitfall: P-175
+
+  - id: F04
+    severity: major
+    description: >
+      The stale failure tracking must persist across claws process restarts.
+      If the failure manifest is only in memory, a claws restart clears the
+      failure state and the stale timer resets. The failure manifest must be
+      written to disk at fleet.failureManifestPath with timestamps for each
+      failure, enabling the stale detection to survive restarts.
+    spec_impact: "CL-05 Fleet Broadcast — persistent failure manifest"
+    pitfall: P-175
+
+  - id: F05
+    severity: warning
+    description: >
+      Auto-retry should be configurable: `fleet.autoRetry.enabled: true` with
+      `fleet.autoRetry.maxAttempts: 3` and `fleet.autoRetry.backoffMinutes: 30`.
+      When enabled, the system retries failed workspaces automatically before
+      firing the stale alert. This reduces operator burden for transient
+      failures while preserving alerting for persistent ones.
+    spec_impact: "CL-05 Fleet Broadcast — configurable auto-retry"
+    pitfall: P-175
+
+  - id: F06
+    severity: warning
+    description: >
+      SIEM integration must export stale failure events with fleet context:
+      fleet ID, workspace names, original broadcast timestamp, failure reason,
+      hours since failure. SOC teams monitoring fleet governance health need
+      these fields to correlate with infrastructure incidents and prioritize
+      remediation.
+    spec_impact: "CL-05 Fleet Compliance — SIEM export for stale failures"
+    pitfall: P-175
+
+  - id: F07
+    severity: warning
+    description: >
+      The `claws fleet status` command must prominently display stale failures.
+      A fleet with 2 stale failures should show a status of DEGRADED, not
+      HEALTHY. The status output should include the stale failure count, hours
+      since failure, and next auto-retry time (if configured). Operators who
+      run fleet status should immediately see the problem.
+    spec_impact: "CL-05 Fleet Status — DEGRADED status for stale failures"
+    pitfall: P-175
+
+  - id: F08
+    severity: note
+    description: >
+      Permanent drift (failures that persist beyond max retries) must be
+      escalated to a separate workflow: manual intervention required. The
+      workspace may be decommissioned, unreachable, or have a fundamental
+      configuration problem. `claws fleet quarantine` could isolate these
+      workspaces from fleet compliance metrics while investigation proceeds.
+    spec_impact: "CL-05 Fleet Operations — quarantine for permanent failures"
+    pitfall: P-175

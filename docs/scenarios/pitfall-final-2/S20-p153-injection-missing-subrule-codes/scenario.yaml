@@ -1,0 +1,123 @@
+name: S20-p153-injection-missing-subrule-codes
+series: pitfall-final-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates that injection defense rules have per-sub-rule diagnostic codes
+  (P-153). A generic "G-CONTEXT violation" with no sub-rule code forces
+  the developer to guess which specific injection pattern triggered the
+  violation.
+
+expect:
+  rules_applied: [G-CONTEXT]
+  violations:
+    - code: CLAWS-E060-03
+      rule: G-CONTEXT-INPUT-VALIDATION
+      description: "Input field 'query' lacks sanitization constraint — injection vector"
+  pass: false
+  severity: error
+
+simulate:
+  failures:
+    - component: injection-defense
+      type: no-subrule-code
+      error: "G-CONTEXT violation on input 'query' — no sub-rule code, developer cannot target fix"
+  halt: null
+  budget: null
+
+problem: >
+  The pinch phase detects a G-CONTEXT violation on input field "query" in
+  TOOLS.md. The diagnostic says "G-CONTEXT violation" with no further
+  specificity. G-CONTEXT has 8 sub-rules: input validation, context
+  isolation, output guards, bounded reasoning, system prompt protection,
+  tool argument validation, response filtering, and memory poisoning. The
+  developer cannot determine which sub-rule is violated and therefore
+  cannot target the fix. They attempt fixes for the wrong sub-rule,
+  wasting time.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-153 core: "G-CONTEXT violation" is analogous to "syntax error"
+      without a line number. It tells the developer something is wrong
+      but not what or where. Each of G-CONTEXT's 8 sub-rules needs its
+      own diagnostic code: CLAWS-E060-01 through CLAWS-E060-08. The
+      code identifies the specific defense that is missing or misconfigured.
+    spec_impact: "CL-02 G-CONTEXT — per-sub-rule diagnostic codes"
+    pitfall: "P-153"
+
+  - id: F02
+    severity: major
+    description: >
+      The sub-rule code table: -01 input validation, -02 context isolation,
+      -03 output guards, -04 bounded reasoning, -05 system prompt
+      protection, -06 tool argument validation, -07 response filtering,
+      -08 memory poisoning. Each code is stable across claws versions.
+      New sub-rules get new codes; existing codes never change meaning.
+    spec_impact: "CL-02 G-CONTEXT — stable sub-rule code registry"
+    pitfall: "P-153"
+
+  - id: F03
+    severity: major
+    description: >
+      The diagnostic message for CLAWS-E060-03 must include: the specific
+      input field ("query"), the expected constraint (sanitization rule
+      or allowlist), and a reference to the documentation that explains
+      how to add the constraint. A bare code without context is only
+      marginally better than no code at all.
+    spec_impact: "CL-02 G-CONTEXT — rich diagnostic messages"
+    pitfall: "P-153"
+
+  - id: F04
+    severity: major
+    description: >
+      Sub-rule codes must apply to ALL injection defense rules, not just
+      G-CONTEXT. G-BOUND should have CLAWS-W032-01 through -04 (per
+      P-154). G-ELICIT should have sub-rules for timeout, approval flow,
+      and signing. The sub-rule pattern is a general diagnostic convention.
+    spec_impact: "CL-02 diagnostics — sub-rule codes as general convention"
+    pitfall: "P-153"
+
+  - id: F05
+    severity: major
+    description: >
+      When multiple sub-rules are violated simultaneously (e.g., input
+      validation AND output guards both missing), each violation gets its
+      own diagnostic with its own sub-rule code. The developer can fix
+      them independently. Grouping them under a single "G-CONTEXT
+      violation" hides the fact that two separate fixes are needed.
+    spec_impact: "CL-02 G-CONTEXT — independent sub-rule violations"
+    pitfall: "P-153"
+
+  - id: F06
+    severity: warning
+    description: >
+      The sub-rule codes should be machine-parseable for CI integration.
+      A CI pipeline can fail on CLAWS-E060-03 (input validation) but
+      warn on CLAWS-W060-07 (response filtering). Severity can differ
+      per sub-rule: input validation is error (direct injection vector),
+      response filtering is warning (defense-in-depth).
+    spec_impact: "CL-02 diagnostics — CI-parseable sub-rule codes"
+    pitfall: "P-153"
+
+  - id: F07
+    severity: warning
+    description: >
+      Documentation for each sub-rule code must include: what the sub-rule
+      checks, why it matters (threat model), how to fix it (code example),
+      and when to suppress it (if legitimate). `claws explain CLAWS-E060-03`
+      should display this documentation inline.
+    spec_impact: "CL-05 DX — inline sub-rule documentation"
+    pitfall: "P-153"
+
+  - id: F08
+    severity: note
+    description: >
+      Backward compatibility: existing diagnostics that use generic
+      "G-CONTEXT violation" must be migrated to sub-rule codes. The
+      migration must be backward-compatible: the generic code continues
+      to work in CI pipelines that filter on it, and the sub-rule code
+      is added as additional specificity.
+    spec_impact: "CL-02 diagnostics — backward-compatible code migration"
+    pitfall: "P-153"

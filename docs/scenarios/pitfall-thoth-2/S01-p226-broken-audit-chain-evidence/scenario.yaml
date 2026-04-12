@@ -1,0 +1,160 @@
+name: S01-p226-broken-audit-chain-evidence
+series: pitfall-thoth-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates that a single missing audit chain entry renders all post-break
+  compliance evidence untrustworthy (P-226). SOC2 auditors flag any broken
+  chain as a material weakness regardless of the break's cause. The compiler
+  must perform break scope assessment and attempt witness recovery before
+  marking evidence as degraded.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, TRUST.md, claws.json]
+    analysis:
+      rules_evaluated: true
+      compliance_check: true
+      chain_integrity: broken
+      break_scope: 1
+      post_break_entries: 5479
+  violations:
+    - code: CLAWS-E226
+      message: "Audit chain break at entry 4521 — all 5479 post-break entries have uncertain provenance"
+      severity: error
+  warnings:
+    - code: CLAWS-W226
+      message: "Witness recovery attempted — witness service unreachable"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: comply-verify
+      type: chain-break
+      error: "Entry 4521 missing — prevHash in entry 4522 references nonexistent entry"
+    - component: comply-verify
+      type: witness-unreachable
+      error: "Witness service at configured endpoint returned HTTP 503"
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise workspace has accumulated 10,000 audit chain entries over nine
+  months. A disk error silently corrupts sector 4521, deleting that entry. The
+  SOC2 annual audit runs claws comply --verify and discovers the break. Because
+  the hash chain is sequential, every entry after 4521 has uncertain provenance:
+  an attacker could have replaced them after the break. The witness service,
+  which could independently attest to the missing entry's hash, is unreachable
+  due to a network partition. The compliance evidence package generated from this
+  chain is worthless for SOC2 Type II because the auditor cannot verify the
+  completeness of the governance decision history. The entire nine-month evidence
+  trail is potentially compromised by a single missing entry.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-226 core: A single missing entry invalidates all subsequent entries
+      because each entry's prevHash references the prior entry. The compliance
+      evidence generator must detect the break BEFORE packaging evidence and
+      include a break scope assessment in the evidence metadata. Without
+      break scope, the auditor cannot distinguish a single disk error from
+      wholesale chain manipulation.
+    spec_impact: "CL-02 Audit Chain Amendment — break scope assessment in evidence metadata"
+    pitfall: "P-226"
+
+  - id: F02
+    severity: major
+    description: >
+      The witness service is the primary recovery mechanism for broken chains.
+      If the witness holds the missing entry's hash, the chain can be partially
+      validated: the content is lost but existence is attested. The compliance
+      evidence generator must attempt witness recovery for every detected break
+      and record the attempt outcome (recovered, unreachable, not-configured)
+      in the evidence package.
+    spec_impact: "CL-02 Audit Chain Amendment — witness recovery attempt in evidence generation"
+    pitfall: "P-226"
+
+  - id: F03
+    severity: major
+    description: >
+      SOC2 Type II auditors treat any gap in the audit trail as a material
+      weakness. The compliance evidence generator must not silently exclude
+      broken chain segments. Instead, it must include a compliance finding of
+      type AUDIT-CHAIN-INTEGRITY-BROKEN with the full break details (position,
+      scope, recovery attempts). Omitting the finding is worse than reporting
+      it because it conceals the weakness.
+    spec_impact: "CL-02 Compliance Evidence — mandatory integrity finding for broken chains"
+    pitfall: "P-226"
+
+  - id: F04
+    severity: major
+    description: >
+      The break scope assessment must count both the number of breaks and the
+      total number of affected entries. A chain with 3 breaks affecting 20
+      entries has a different compliance impact than 1 break affecting 5,479
+      entries. The scope assessment should compute a coverage percentage:
+      (verified entries / total entries) to give auditors a quantitative measure
+      of evidence reliability.
+    spec_impact: "CL-02 Audit Chain Amendment — coverage percentage in break scope"
+    pitfall: "P-226"
+
+  - id: F05
+    severity: major
+    description: >
+      When the witness service is unreachable, the evidence package must note
+      the recovery failure prominently. A transient network error should not
+      permanently degrade the evidence. The comply command should support
+      retry-with-backoff for witness recovery and allow the operator to re-run
+      verification once the witness is reachable. The evidence package must
+      record when witness recovery was last attempted.
+    spec_impact: "CL-02 Audit Chain Amendment — witness recovery retry and timestamp"
+    pitfall: "P-226"
+
+  - id: F06
+    severity: warning
+    description: >
+      The current chainIntegrity enum (verified, broken, unchecked) does not
+      express partial verification. A chain with 10,000 entries where 4,521
+      are verified and 5,479 are uncertain needs a richer status. Consider
+      adding 'partial' with a verified-up-to entry number and a post-break
+      status (internally-consistent or also-broken).
+    spec_impact: "CL-02 Audit Chain Amendment — partial verification status"
+    pitfall: "P-226"
+
+  - id: F07
+    severity: warning
+    description: >
+      The compliance evidence package should include a remediation section
+      for broken chains: (a) attempt witness recovery when service returns,
+      (b) restore from backup if available, (c) re-key the chain from the
+      break point. Without remediation guidance, the operator receives a
+      failure with no path to resolution.
+    spec_impact: "CL-02 Compliance Evidence — remediation guidance for broken chains"
+    pitfall: "P-226"
+
+  - id: F08
+    severity: warning
+    description: >
+      Pre-break entries (1 through 4520) remain fully verified and should be
+      usable as compliance evidence for the period they cover. The evidence
+      generator must not invalidate the entire chain when only the post-break
+      segment is uncertain. The evidence package should contain two sections:
+      verified (pre-break) and uncertain (post-break) with clear temporal
+      boundaries.
+    spec_impact: "CL-02 Compliance Evidence — temporal segmentation of broken chains"
+    pitfall: "P-226"
+
+  - id: F09
+    severity: note
+    description: >
+      A silent disk error that corrupts a single entry is indistinguishable
+      from deliberate deletion at the chain level. The break scope assessment
+      must not assume benign cause. For compliance purposes, all breaks are
+      treated as potential tampering until witness recovery or backup
+      restoration confirms otherwise.
+    spec_impact: "CL-02 Audit Chain Amendment — assume-tampering default for break assessment"
+    pitfall: "P-226"

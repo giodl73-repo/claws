@@ -1,0 +1,153 @@
+name: S14-gbound-tool-name-mismatch
+series: pitfall-coverage-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates that G-BOUND checks all 4 sub-rules individually and warns on
+  missing ones (P-094), and that R5 tool names in elicitation policy match
+  TOOLS.md exactly (P-095). Missing G-BOUND sub-rules allow unbounded tool
+  calls. Tool name mismatches silently disable R5 elicitation gates.
+
+expect:
+  rules_applied: [G-BOUND, G-ELICIT]
+  violations:
+    - code: CLAWS-W032
+      rule: G-BOUND
+      description: "G-BOUND-02 (maxToolCalls) not configured — unbounded tool calls despite step limits"
+    - code: CLAWS-E037
+      rule: G-ELICIT
+      description: "Elicitation policy references 'send_payment' but TOOLS.md declares 'send-payment'"
+  pass: false
+  severity: error
+
+simulate:
+  failures:
+    - component: bounded-reasoning
+      type: missing-sub-rule
+      error: "maxSteps: 100 configured, maxToolCalls: undefined — 5000 tool calls possible in 100 steps"
+    - component: elicitation
+      type: tool-name-mismatch
+      error: "Elicitation policy 'send_payment' (underscore) vs TOOLS.md 'send-payment' (hyphen)"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace configures bounded reasoning with maxSteps: 100 and
+  maxTokens: 50000 but does not configure maxToolCalls or maxDuration.
+  G-BOUND checks only configured limits. An agent makes 50 tool calls per
+  step, consuming 5000 tool calls in 100 steps — effectively unbounded tool
+  usage. Separately, the elicitation policy in claws.json references
+  "send_payment" (underscore convention) but TOOLS.md declares "send-payment"
+  (hyphen convention). The policy matches no tool. The R5 tool executes
+  without an approval gate because the elicitation rule cannot find its
+  target tool.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-094 core: maxSteps: 100 and maxTokens: 50000 are configured, but
+      maxToolCalls is absent. G-BOUND checks: step limit (pass), token limit
+      (pass), tool call limit (skip — not configured), duration limit
+      (skip — not configured). Two of four bounds are unchecked. An agent
+      can make unlimited tool calls as long as step and token limits hold.
+    spec_impact: "CL-02 G-BOUND — missing sub-rule allows unbounded resource"
+    pitfall: "P-094"
+
+  - id: F02
+    severity: major
+    description: >
+      All 4 G-BOUND sub-rules must be checked individually. Missing sub-rules
+      produce individual warnings: CLAWS-W032-01 (maxSteps missing),
+      CLAWS-W032-02 (maxToolCalls missing), CLAWS-W032-03 (maxTokens missing),
+      CLAWS-W032-04 (maxDuration missing). Each warning explains the resource
+      that is unbounded and suggests a reasonable default.
+    spec_impact: "CL-02 G-BOUND — per-sub-rule individual warnings"
+    pitfall: "P-094"
+
+  - id: F03
+    severity: major
+    description: >
+      Suggested defaults in the warning: maxToolCalls = 10 * maxSteps (if
+      maxSteps configured), maxDuration = 300s. The defaults are advisory, not
+      auto-applied. The developer must explicitly add them to claws.json. This
+      prevents silent behavior changes from auto-defaults while still guiding
+      configuration.
+    spec_impact: "CL-02 G-BOUND — advisory defaults in warnings"
+    pitfall: "P-094"
+
+  - id: F04
+    severity: major
+    description: >
+      P-095 core: Elicitation policy says "send_payment" (underscore). TOOLS.md
+      says "send-payment" (hyphen). The policy matches zero tools. G-ELICIT
+      skips the tool (no match = no policy = no gate). The R5 tool executes
+      without user approval. This is a security bypass caused by a naming
+      convention difference.
+    spec_impact: "CL-02 G-ELICIT — tool name mismatch bypass"
+    pitfall: "P-095"
+
+  - id: F05
+    severity: major
+    description: >
+      G-ELICIT must cross-validate tool names between the elicitation policy
+      (claws.json) and TOOLS.md. Unmatched policy entries should produce a
+      hard error with a fuzzy match suggestion: "Policy references
+      'send_payment' — no match in TOOLS.md. Did you mean 'send-payment'?"
+      The Levenshtein distance threshold for suggestions should be <= 3.
+    spec_impact: "CL-02 G-ELICIT — fuzzy match cross-validation"
+    pitfall: "P-095"
+
+  - id: F06
+    severity: warning
+    description: >
+      Tool name normalization strategy: should the parser normalize all tool
+      names to a canonical form (e.g., kebab-case) before comparison? Or
+      should comparison be exact and mismatches flagged? Normalization hides
+      the mismatch (risky if the platform is case/convention-sensitive).
+      Exact comparison with suggestions is safer.
+    spec_impact: "CL-02 G-ELICIT — normalization vs exact comparison"
+    pitfall: "P-095"
+
+  - id: F07
+    severity: warning
+    description: >
+      Elicitation policies may reference tools that exist in TOOLS.md at
+      build time but are removed later. `claws pinch` must detect ghost
+      policy entries — elicitation rules that reference non-existent tools.
+      Ghost entries are not security risks (they match nothing) but they
+      clutter the policy and may indicate a rename that was not propagated.
+    spec_impact: "CL-02 G-ELICIT — ghost policy entry detection"
+    pitfall: "P-095"
+
+  - id: F08
+    severity: warning
+    description: >
+      The interaction between P-094 and P-095: if G-BOUND allows unbounded
+      tool calls AND G-ELICIT has a name mismatch on an R5 tool, the agent
+      can make unlimited R5 tool calls with no approval gate. Both pitfalls
+      must be fixed independently because either alone is exploitable, but
+      together they amplify the attack surface.
+    spec_impact: "CL-02 — compounding bound + elicitation failures"
+    pitfall: "P-094, P-095"
+
+  - id: F09
+    severity: note
+    description: >
+      Enterprise templates should include all 4 G-BOUND limits with
+      conservative defaults. `claws init --template enterprise` sets
+      maxSteps: 50, maxToolCalls: 500, maxTokens: 100000, maxDuration: 300.
+      This prevents the "missing sub-rule" pattern for enterprise deployments.
+    spec_impact: "CL-05 init — enterprise bounded reasoning template"
+    pitfall: "P-094"
+
+  - id: F10
+    severity: note
+    description: >
+      Tool names may include version suffixes (e.g., "send-payment-v2").
+      The fuzzy match suggestion should handle version suffixes correctly:
+      "send_payment_v2" should suggest "send-payment-v2" (convention fix),
+      not "send-payment" (different tool). The Levenshtein calculation
+      should weight convention characters (hyphen, underscore) lower.
+    spec_impact: "CL-02 G-ELICIT — version-aware fuzzy matching"
+    pitfall: "P-095"

@@ -1,0 +1,141 @@
+name: S28-p189-promote-lowers-baseline
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that snap promote includes a mandatory pinch validation gate
+  that prevents promoting a snapshot with weaker governance than the current
+  fleet baseline. A malicious or mistaken promote that lowers the trust tier
+  makes all workspaces appear compliant with weaker governance.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      snapshot_name: enterprise-v2.0-lowered
+      snapshot_action: promote
+      promote_blocked: true
+    analysis:
+      rules_evaluated: true
+      violations:
+        - code: V-PROMOTE-FLOOR
+          message: "Promoted snapshot trust tier T1 is below current baseline T3"
+      warnings: []
+  violations:
+    - code: V-PROMOTE-FLOOR
+      message: "Snapshot lowers fleet baseline — promotion blocked"
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: snapshot-promote
+      type: baseline-floor-violation
+      error: "Promoted snapshot has trust tier T1, current fleet baseline requires T3 minimum"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet admin (or a compromised account) runs `claws snap promote
+  enterprise-v2.0-lowered` to set a new fleet baseline. The snapshot was
+  created from a workspace with trust tier T1 (lowest), no elicitation
+  policies, and R5 tools approved without human review. The current fleet
+  baseline is trust tier T3 with full elicitation. If the promote succeeds,
+  every workspace in the fleet is now compared against the T1 baseline. All
+  workspaces pass drift detection because they all exceed T1. The fleet's
+  effective governance floor drops from T3 to T1 without any workspace
+  changing. The CISO's compliance reports still show 100% compliant, but the
+  baseline against which compliance is measured has been gutted.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must mandate a pinch validation gate before any snap promote.
+      The validation must compare the promoted snapshot against the current
+      fleet baseline across all governance dimensions: trust tier, elicitation
+      scope, fail mode defaults, data sensitivity requirements. If the
+      promoted snapshot is weaker in any dimension, promote must be blocked
+      with a clear error listing each weakened dimension.
+    spec_impact: "CL-05 Snapshot Promote — mandatory pinch validation gate"
+    pitfall: P-189
+
+  - id: F02
+    severity: major
+    description: >
+      The baseline comparison must be multi-dimensional, not just trust tier.
+      A snapshot could have the same trust tier but weaker elicitation (fewer
+      R levels requiring approval), weaker fail modes (fail-open instead of
+      fail-closed for R3), or fewer data sensitivity labels. Each dimension
+      must be compared independently. The promote gate fails if ANY dimension
+      is weakened.
+    spec_impact: "CL-05 Snapshot Promote — multi-dimensional baseline comparison"
+    pitfall: P-189
+
+  - id: F03
+    severity: major
+    description: >
+      A --lower flag should exist for legitimate baseline reductions, but it
+      must require multi-factor confirmation: --lower --confirm --reason
+      "moving from T3 to T2 per board decision BD-2026-042". The --lower
+      flag must log a CRITICAL audit event with the operator identity, the
+      reason, and a before/after comparison of all governance dimensions.
+      This creates an auditable trail for deliberate baseline reductions.
+    spec_impact: "CL-05 Snapshot Promote — controlled baseline reduction"
+    pitfall: P-189
+
+  - id: F04
+    severity: major
+    description: >
+      After a baseline promotion (whether raising or lowering), all cached
+      drift reports must be invalidated immediately. Stale drift reports
+      that were computed against the old baseline would show incorrect
+      compliance status. CL-05 must mandate drift cache invalidation as an
+      atomic part of the promote operation, not a separate step.
+    spec_impact: "CL-05 Snapshot Promote — atomic drift cache invalidation"
+    pitfall: P-189
+
+  - id: F05
+    severity: warning
+    description: >
+      The promote command should show a preview before executing: "Promoting
+      enterprise-v2.0-lowered as new fleet baseline. Changes from current
+      baseline: trust_tier T3 -> T1 (LOWERED), elicitation: full -> none
+      (LOWERED), fail_mode: closed -> open (LOWERED). This is a baseline
+      REDUCTION. Use --lower --confirm --reason to proceed."
+    spec_impact: "CL-05 Snapshot Promote — pre-execution preview"
+    pitfall: P-189
+
+  - id: F06
+    severity: warning
+    description: >
+      Fleet admins should have role-based access control for promote. Only
+      users with the fleet-admin role should be able to promote. Users with
+      the fleet-operator role can save and restore snapshots but cannot
+      change the fleet baseline. This limits the blast radius of a
+      compromised operator account.
+    spec_impact: "CL-05 Snapshot Promote — RBAC for baseline changes"
+    pitfall: P-189
+
+  - id: F07
+    severity: warning
+    description: >
+      Baseline promotion should support a canary period: the new baseline
+      is tentative for 24 hours. During the canary period, drift detection
+      reports against both the old and new baselines. If the new baseline
+      causes problems, it can be reverted with `claws snap promote --rollback`.
+      After the canary period, the new baseline becomes permanent.
+    spec_impact: "CL-05 Snapshot Promote — canary period for new baselines"
+    pitfall: P-189
+
+  - id: F08
+    severity: note
+    description: >
+      Baseline change history should be maintained and auditable. `claws fleet
+      baseline-history` should show all baseline changes with timestamps,
+      operators, reasons, and governance dimension comparisons. This history
+      is essential for compliance audits that need to verify the fleet's
+      governance posture over time.
+    spec_impact: "CL-05 Fleet Baseline — change history for audit"
+    pitfall: P-189

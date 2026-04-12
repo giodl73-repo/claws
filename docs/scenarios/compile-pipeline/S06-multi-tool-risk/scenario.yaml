@@ -1,0 +1,155 @@
+name: S06-multi-tool-risk
+series: compile-pipeline
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates correct R1-R5 risk classification across 10 tools with mixed
+  risk levels. Each tool must be classified based on its capabilities
+  (READ/WRITE/COMMUNICATE/EXECUTE/TRANSACT) and OBO detection must flag
+  tools that act AS the user.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      intent_types: [ToolManifestEntry]
+      tool_count: 10
+    analysis:
+      rules_evaluated: true
+      tool_classifications:
+        - name: file-reader
+          risk: 1
+          capabilities: [READ]
+        - name: web-search
+          risk: 1
+          capabilities: [READ]
+        - name: db-read
+          risk: 2
+          capabilities: [READ]
+        - name: file-writer
+          risk: 3
+          capabilities: [WRITE]
+        - name: config-editor
+          risk: 3
+          capabilities: [WRITE]
+        - name: shell-exec
+          risk: 4
+          capabilities: [EXECUTE]
+        - name: container-run
+          risk: 4
+          capabilities: [EXECUTE]
+        - name: send-email
+          risk: 5
+          capabilities: [COMMUNICATE, TRANSACT]
+          obo: true
+        - name: post-slack
+          risk: 5
+          capabilities: [COMMUNICATE, TRANSACT]
+          obo: true
+        - name: process-payment
+          risk: 5
+          capabilities: [TRANSACT]
+          obo: true
+  violations: []
+  warnings:
+    - pattern: "OBO"
+      count: 3
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  TOOLS.md declares 10 tools spanning all 5 risk levels: 2 R1 observe tools
+  (file-reader, web-search), 1 R2 read tool (db-read), 2 R3 write tools
+  (file-writer, config-editor), 2 R4 execute tools (shell-exec, container-run),
+  and 3 R5 transact tools (send-email, post-slack, process-payment). The 3 R5
+  tools all act on behalf of the user and must be flagged as OBO. The pipeline
+  must classify each tool correctly and detect OBO status.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The distinction between R1 (observe) and R2 (read) is subtle. Both have
+      READ capability. The differentiator is data sensitivity: file-reader on
+      local files is R1, db-read on a database with potentially sensitive data
+      is R2. The classification logic must use data sensitivity context, not
+      just capability type.
+    spec_impact: "CL-02 G-CLASS — R1 vs R2 requires data context"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      OBO detection uses the "reasonable person" test. For send-email and
+      process-payment, OBO is obvious. For post-slack, it depends on context:
+      posting to a public channel might be FOR the user, but posting as the
+      user to a DM is AS the user. The classifier needs channel context, not
+      just tool name.
+    spec_impact: "CL-02 OBO boundary — context-dependent OBO classification"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      With 10 tools, the G-CLASS rule evaluates 10 times. If classification
+      is expensive (e.g., involves pattern matching on tool descriptions), the
+      ANALYZE phase could exceed its 200ms budget on workspaces with 50+ tools.
+      Need to confirm linear scaling of G-CLASS.
+    spec_impact: "CL-04 Phase 3 latency — G-CLASS scaling with tool count"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      shell-exec and container-run are both R4/EXECUTE, but container-run is
+      sandboxed while shell-exec is not. The risk level is the same but the
+      mitigation is different. The classification captures risk but not the
+      mitigation status — this may need an additional field in ToolManifestEntry.
+    spec_impact: "CL-02 G-CLASS — sandbox status as classification modifier"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      A tool with multiple capabilities (send-email has COMMUNICATE + TRANSACT)
+      should be classified at the highest risk level implied by any capability.
+      If the classification logic takes the first capability match rather than
+      the maximum, send-email could be misclassified as R3 (COMMUNICATE only)
+      instead of R5 (TRANSACT).
+    spec_impact: "CL-02 G-CLASS — multi-capability max-risk rule"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      TOOLS.md format is not specified in CL-04. If tools are declared as
+      markdown list items vs YAML front matter vs structured blocks, the
+      parser needs format detection. This scenario assumes a known format
+      but the real world will have variations.
+    spec_impact: "CL-04 Phase 1 PARSE — TOOLS.md format flexibility"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The 3 OBO warnings are expected but the warning text must indicate
+      which specific tools are OBO-flagged. A single warning saying "3 OBO
+      tools detected" is less useful than three individual warnings naming
+      each tool and its OBO trigger.
+    spec_impact: "CL-04 diagnostics — per-tool OBO warning granularity"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Without USER.md granting OBO scope, the 3 R5 tools exist in TOOLS.md
+      but have no authority to execute. This scenario focuses on classification
+      but the absence of USER.md means the tools will fail at the elicitation
+      gate — a runtime concern, but the compile phase should note it.
+    spec_impact: "CL-02 G-ELICIT — R5 tools without authority declaration"
+    pitfall: null

@@ -1,0 +1,134 @@
+name: S13-p209-fleet-identity-impersonation
+series: pitfall-thoth-1
+version: 1
+specs: [CL-02, CL-06]
+description: >
+  Validates that L0 fleet identity (name-only, no cryptographic binding) cannot
+  be used to impersonate agents across workspaces. A malicious workspace registers
+  an agent with the same name as a trusted agent in another workspace, exploiting
+  the absence of identity verification at the fleet level.
+
+expect:
+  attack_class: identity-impersonation
+  defense_layer: g-a2a-identity
+  blocked: true
+  audit_event:
+    type: fleet-identity-collision
+    tool: "claws scan"
+    risk_level: 5
+    outcome: DENY
+    reason: "L0 identity collision detected — agent 'finance-bot' registered in workspace-A and workspace-B with no cryptographic binding"
+
+simulate:
+  failures:
+    - component: fleet-identity
+      type: name-collision
+      error: "Agent 'finance-bot' exists in 2 workspaces with different trust profiles"
+    - component: a2a-trust
+      type: impersonation-undetected
+      error: "Cross-workspace delegation accepted based on name match alone"
+  halt: null
+  budget: null
+
+problem: >
+  An attacker controls workspace-B in a fleet. They create an agent named
+  "finance-bot" — the same name as a trusted agent in workspace-A that has
+  CONFIDENTIAL data access. The fleet manager sees both agents as "finance-bot"
+  with no way to distinguish them. When workspace-A's orchestrator delegates a
+  CONFIDENTIAL task to "finance-bot," the fleet routing layer may resolve it to
+  the attacker's agent in workspace-B. The L0 identity scheme uses name strings
+  with no cryptographic signatures, certificates, or workspace-scoped namespacing.
+  The attacker receives CONFIDENTIAL data without ever being granted trust.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      L0 identity relies on agent name strings that are globally ambiguous
+      across workspaces. Without workspace-scoped namespacing (e.g.,
+      workspace-A/finance-bot vs workspace-B/finance-bot), name collisions
+      are indistinguishable from legitimate agents. The fleet identity layer
+      must enforce at minimum L1 identity: workspace-qualified names that
+      prevent cross-workspace ambiguity.
+    spec_impact: "CL-02 G-A2A-IDENTITY — minimum L1 fleet identity requirement"
+    pitfall: P-209
+
+  - id: F02
+    severity: major
+    description: >
+      Fleet-level agent registration must include a collision detection
+      step. When a new agent registers with a name that already exists in
+      any workspace in the fleet, claws scan must emit a CLAWS-E-IDENTITY
+      error with both workspace paths and trust profiles. Silent collision
+      is the worst outcome because it creates an exploitable ambiguity.
+    spec_impact: "CL-02 G-A2A-IDENTITY — fleet-wide collision detection"
+    pitfall: P-209
+
+  - id: F03
+    severity: major
+    description: >
+      Cross-workspace delegation currently resolves agents by name. If
+      two agents share a name, the resolution order is undefined — it may
+      depend on scan order, file system ordering, or hash table insertion
+      order. This non-determinism means the attack succeeds intermittently,
+      making it harder to detect through testing. Resolution must fail
+      deterministically on ambiguous names.
+    spec_impact: "CL-06 fleet routing — deterministic failure on ambiguous agent names"
+    pitfall: P-209
+
+  - id: F04
+    severity: major
+    description: >
+      The threat model for L0 identity must be documented explicitly in
+      CL-02. L0 means no authentication, no authorization, no integrity.
+      The compiler should emit a diagnostic warning at compile time when
+      a workspace uses L0 identity in a fleet context, because fleet
+      context inherently requires at least L1 identity to prevent trivial
+      impersonation.
+    spec_impact: "CL-02 G-A2A-IDENTITY — L0 fleet context warning mandatory"
+    pitfall: P-209
+
+  - id: F05
+    severity: warning
+    description: >
+      Even with workspace-qualified names, an attacker who controls a
+      workspace can register agents with misleading names (e.g.,
+      "workspace-A-finance-bot" in workspace-B). Display name spoofing
+      is a separate attack from identity spoofing. The audit trail must
+      always show the fully qualified workspace/agent path, never just
+      the display name.
+    spec_impact: "CL-02 audit — fully qualified agent paths in all events"
+    pitfall: P-209
+
+  - id: F06
+    severity: major
+    description: >
+      Fleet broadcast operations (claws broadcast) that target agents by
+      name may inadvertently include impersonating agents. Broadcast must
+      resolve to workspace-qualified identities before delivery. A
+      broadcast to "finance-bot" must fail if the name is ambiguous across
+      workspaces, rather than delivering to all matches.
+    spec_impact: "CL-06 broadcast — workspace-qualified resolution before delivery"
+    pitfall: P-209
+
+  - id: F07
+    severity: warning
+    description: >
+      Migration from L0 to L1 identity in an existing fleet requires
+      re-registering all agents with workspace-qualified names. The
+      migration path must be non-breaking: existing L0 names continue
+      to work within their workspace but fail on cross-workspace
+      resolution until upgraded to L1.
+    spec_impact: "CL-06 fleet — L0-to-L1 migration path"
+    pitfall: P-209
+
+  - id: F08
+    severity: warning
+    description: >
+      The audit event for identity collision must include enough context
+      for incident response: both workspace paths, both agent configurations,
+      the trust profiles of each, and the delegation chain that triggered
+      the resolution. A bare "collision detected" event is insufficient
+      for forensic analysis.
+    spec_impact: "CL-02 audit — identity collision event enrichment"
+    pitfall: P-209

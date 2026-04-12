@@ -1,0 +1,169 @@
+name: S03-outer-ring-fleet-drift
+series: three-rings
+version: 1
+specs: [CL-05]
+description: >
+  Validates the outer ring (fleet) drift detection: a scheduled fleet scan
+  discovers 3 of 12 workspaces have diverged from the fleet baseline. The
+  drift command identifies specific divergences (trust tier mismatches,
+  missing policies, schema version skew), and broadcast pushes a policy
+  update to bring all workspaces back into compliance. The outer ring
+  operates within the <120s latency target.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      ring: outer
+      fleet_size: 12
+      workspaces_scanned: 12
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings:
+        - rule: DRIFT-DETECTED
+          count: 3
+  violations: []
+  warnings:
+    - rule: DRIFT-DETECTED
+      workspaces: [workspace-dev-03, workspace-staging-01, workspace-prod-02]
+  artifacts:
+    count: 1
+    types: [fleet-drift-report]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise runs 12 OpenClaw workspaces across dev, staging, and prod
+  environments. A weekly cron triggers `claws drift` which compares each
+  workspace's GovernanceIR against the fleet baseline snapshot. Three
+  workspaces have diverged: workspace-dev-03 lowered its trust tier from
+  T3 to T1, workspace-staging-01 is missing the updated elicitation policy,
+  and workspace-prod-02 has a schema version one generation behind. The
+  drift command produces a fleet report. The admin then runs
+  `claws broadcast --policy enterprise-v2.3` to push the corrected policy
+  to all 12 workspaces.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Drift detection compares workspace GovernanceIR against "the fleet
+      baseline." But the spec does not define what the baseline IS. Is it
+      a specific snapshot? The most common configuration across workspaces?
+      The fleet template? Without a defined baseline source, drift has no
+      reference point. The spec must define: baseline = the promoted
+      snapshot (from snap promote) stored in the fleet configuration.
+    spec_impact: "CL-05 Outer Ring — define fleet baseline source (promoted snapshot)"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Drift detection across 12 workspaces requires network access to each
+      workspace's GovernanceIR. If workspaces are on different machines or
+      in different CI environments, drift needs a transport mechanism (HTTP
+      endpoint, shared filesystem, or cloud storage). The spec does not
+      define the workspace discovery or IR retrieval protocol for fleet
+      operations.
+    spec_impact: "CL-05 Outer Ring — workspace discovery and IR retrieval protocol"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      broadcast pushes policy updates to all workspaces. But this modifies
+      workspace files — directly contradicting the lossless guarantee. If
+      broadcast writes to claws.json or policy files, it must either be
+      carved out from lossless (like doctor --fix) or operate through an
+      intermediary (fleet config overlay that workspaces inherit, rather
+      than direct file modification).
+    spec_impact: "CL-05 broadcast — lossless conflict, use fleet overlay instead of direct write"
+    pitfall: P-166
+
+  - id: F04
+    severity: major
+    description: >
+      The <120s latency target for the outer ring must cover scanning ALL
+      workspaces. At 12 workspaces with 9 files each, that is 108 file
+      parses. If each parse takes 50ms, parsing alone is 5.4s — fine. But
+      if workspaces are remote (network latency per workspace), 12
+      sequential requests at 2s each = 24s. Parallel scanning is required
+      to meet the target, but the spec does not mention parallelism.
+    spec_impact: "CL-05 Outer Ring — parallel workspace scanning requirement"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      workspace-prod-02 has a schema version one generation behind. drift
+      flags this as divergence. But the fix requires doctor --post-upgrade
+      (middle ring), not broadcast (outer ring). The outer ring detects
+      the issue but cannot fix it — the fix requires middle-ring tooling.
+      The drift report should classify divergences by ring: which ones
+      broadcast can fix (policy) vs which ones need doctor (schema).
+    spec_impact: "CL-05 drift report — classify divergences by remediation ring"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      broadcast pushes to all 12 workspaces, but workspace-prod-02 needs
+      a schema upgrade, not a policy push. If broadcast blindly pushes the
+      latest policy to a workspace with an old schema, the policy may be
+      incompatible with the old schema version. broadcast must validate
+      schema compatibility before pushing, or skip incompatible workspaces
+      with a warning.
+    spec_impact: "CL-05 broadcast — schema version compatibility check before push"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The CL-05 constraint says fleet scans must distinguish "ungoverned"
+      (zero intents) from "compliant" (zero violations). A workspace that
+      has never been compiled has no GovernanceIR. drift must distinguish:
+      (a) workspace with baseline-matching IR (compliant), (b) workspace
+      with diverged IR (drifted), (c) workspace with no IR (ungoverned).
+      Treating (c) as drifted misrepresents the situation.
+    spec_impact: "CL-05 drift — three-state classification: compliant/drifted/ungoverned"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      If broadcast fails on one workspace (network error, permission denied),
+      should it continue to the remaining workspaces or abort? The spec does
+      not define partial failure semantics for broadcast. Database-style:
+      all-or-nothing. DevOps-style: continue and report failures. Fleet
+      operations typically use continue-and-report, but this should be
+      explicit.
+    spec_impact: "CL-05 broadcast — partial failure semantics (continue vs abort)"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The weekly cron trigger for fleet scan is a CI/CD Stage 3 concept.
+      The spec says "CI/CD is not a fourth ring — it is the enforcement
+      mechanism." Stage 3 IS the outer ring. This should be made explicit
+      in both directions: CL-05 outer ring references Stage 3 as its
+      enforcement surface, and the CI/CD section references the outer ring
+      as its governance model.
+    spec_impact: "CL-05 — bidirectional reference between outer ring and CI/CD Stage 3"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Cross-workspace delegation cycle detection (CL-05 constraint from
+      CFC-S05-F07) must run during fleet drift scans. A single-workspace
+      compile cannot detect cycles that span workspaces. This means drift
+      needs access to the delegation graphs of ALL workspaces simultaneously,
+      not just individual IR comparisons against baseline. This significantly
+      increases the data requirement for drift.
+    spec_impact: "CL-05 drift — cross-workspace delegation cycle detection requires full graph"
+    pitfall: null

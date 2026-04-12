@@ -1,0 +1,132 @@
+name: S10-p109-catch-clause-crash-risk-map
+series: pitfall-final-1
+version: 1
+specs: [CL-02, CL-03, CL-04]
+description: >
+  Validates that the emitted fail-mode handler's catch clause uses a pre-computed
+  ReadonlyMap for risk lookup and cannot crash. If the catch clause throws, the
+  Gateway's fail-open default activates and R5 tools execute ungoverned. The
+  catch clause is the single point of failure for governance enforcement.
+
+expect:
+  governance_ir:
+    version: 1
+    emit:
+      fail_mode_handler:
+        risk_map_precomputed: true
+        catch_clause_minimal: true
+        catch_clause_ops: ["map_get", "nullish_coalesce", "default_deny"]
+        static_verification: passed
+    analysis:
+      rules_evaluated: true
+      violations: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 4
+    static_verified: [index.ts]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The emitted Gateway plugin (index.ts) has a before_tool_call hook. The try
+  block evaluates governance rules. The catch block must deny R5+ tools if rule
+  evaluation fails. Current catch calls riskLevel(toolName). If toolName is
+  null, undefined, or contains special characters that trigger a regex in
+  riskLevel(), the function throws inside catch. The Gateway's built-in
+  fail-open default activates. An R5 tool (send-payment) executes with zero
+  governance. The catch clause must use only riskMap.get(toolName) ?? 5.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The catch clause is the ONLY defense between a governance evaluation
+      failure and the Gateway's fail-open default. There is no further
+      fallback. If catch throws, R5 tools execute ungoverned. The catch
+      clause must contain zero function calls other than Map.get, zero
+      property access chains longer than 1, and zero allocations.
+    spec_impact: "CL-03 runtime — catch clause as single point of failure"
+    pitfall: P-109
+
+  - id: F02
+    severity: major
+    description: >
+      Pre-computing the risk map at handler registration time (not per-call)
+      means the map is built once from the GovernanceIR. The map is a
+      ReadonlyMap<string, number>. At call time: riskMap.get(toolName) ?? 5.
+      Unknown tools default to risk 5 (fail-closed). This eliminates all
+      runtime computation from the catch path.
+    spec_impact: "CL-04 EMIT — pre-computed ReadonlyMap requirement"
+    pitfall: P-109
+
+  - id: F03
+    severity: major
+    description: >
+      The ?? 5 default means unknown tools (added after compilation) are
+      treated as maximum risk. This is the correct conservative default.
+      A ?? 1 default would be a security vulnerability: any tool not in
+      the map executes with no governance. The default MUST be 5, and
+      this must be validated by the post-emit static verifier.
+    spec_impact: "CL-02 G-FAILMODE — unknown tool default risk = 5"
+    pitfall: P-109
+
+  - id: F04
+    severity: major
+    description: >
+      Post-emit static verification validates the catch clause AST.
+      Allowed operations: Map.get, nullish coalescing (??), numeric
+      comparison (<, >=), return, throw. Disallowed: function calls
+      (except Map.get), await, new, property chains (length > 1),
+      template literals, string concatenation. The verifier runs on
+      emitted TypeScript before writing to disk.
+    spec_impact: "CL-04 EMIT — catch clause AST verification whitelist"
+    pitfall: P-109
+
+  - id: F05
+    severity: major
+    description: >
+      If toolName is null or undefined, Map.get(null) returns undefined,
+      and undefined ?? 5 returns 5. This is safe. But the catch clause
+      should explicitly guard: if (!toolName) return deny(5). This makes
+      the null handling visible for code review and audit, rather than
+      relying on implicit Map.get behavior.
+    spec_impact: "CL-03 runtime — explicit null toolName guard"
+    pitfall: P-109
+
+  - id: F06
+    severity: warning
+    description: >
+      The risk map must be frozen (Object.freeze or ReadonlyMap) to
+      prevent mutation during the handler's lifecycle. If another plugin
+      or a race condition mutates the map between calls, the catch clause
+      could produce incorrect risk levels. Immutability is enforced at
+      construction time.
+    spec_impact: "CL-04 EMIT — risk map immutability"
+    pitfall: P-109
+
+  - id: F07
+    severity: warning
+    description: >
+      The catch clause must log the evaluation failure to the audit chain
+      before denying/allowing. The log operation itself must not throw.
+      Use a fire-and-forget pattern: try { log(...) } catch {} — an
+      empty catch inside the outer catch. Or use a pre-allocated log
+      buffer that cannot fail.
+    spec_impact: "CL-02 audit — non-throwing log in catch clause"
+    pitfall: P-109
+
+  - id: F08
+    severity: note
+    description: >
+      Testing requires inducing a governance evaluation failure in the
+      try block (e.g., corrupted IR loaded at runtime). The test verifies
+      that the catch clause correctly denies R5 tools (send-payment) and
+      allows R1 tools (doc-reader) using the pre-computed risk map.
+      The test must also verify that Map.get with malformed toolName
+      does not throw.
+    spec_impact: "CL-04 testing — catch clause failure induction"
+    pitfall: P-109

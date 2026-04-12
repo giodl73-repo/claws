@@ -1,0 +1,125 @@
+name: S03-url-policy-input
+series: input-resolver
+version: 1
+specs: [CL-01, CL-04, CL-07]
+description: >
+  The InputResolver fetches a governance policy document from a URL source
+  declared in claws.json. The URL points to a corporate policy server
+  hosting YAML rules with an SRI (Subresource Integrity) hash for content
+  verification. The resolver validates the downloaded content against the
+  declared SRI hash, respects the configured cache TTL, and records the
+  full fetch metadata in provenance. This scenario validates the URL input
+  path including network fetch, integrity checking, caching, and failure
+  recovery for remote governance sources.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "claws.json"
+        - "https://policies.corp.internal/soc2/v3/rules.yaml"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  A security team publishes governance policies at a stable URL with SRI
+  hashes pinned in each project's claws.json. When a developer runs
+  claws compile, the InputResolver fetches the URL, computes the content
+  hash, and compares it against the declared SRI value. If the hash matches,
+  the content is parsed and merged with local rules. If the hash mismatches,
+  the resolver must halt with an INPUT-RESOLVE-SRI-MISMATCH diagnostic
+  rather than silently accepting potentially tampered content. The cache
+  TTL determines how long a fetched copy is reused without re-fetching.
+  When the TTL expires, the resolver re-fetches and re-validates. The
+  CGR records the URL, SRI hash, cache status (hit/miss/expired), and
+  fetch timestamp for every URL source. This is critical for air-gapped
+  builds where the cache is pre-warmed and TTL must be respected offline.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      SRI hash algorithm must be explicitly declared, not inferred. The
+      claws.json should specify both the algorithm (sha256, sha384,
+      sha512) and the hash value in standard SRI format (e.g.,
+      sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC).
+      If the algorithm is omitted, the resolver must reject the source
+      rather than guessing, because algorithm downgrade attacks are a
+      real supply-chain threat.
+    spec_impact: "CL-07 Section 5 — SRI algorithm specification"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      Cache TTL must be enforced even when the network is unavailable. If
+      the TTL has expired and the URL is unreachable, the resolver must
+      not silently fall back to the expired cache entry. It must emit
+      INPUT-RESOLVE-CACHE-EXPIRED and halt, because serving stale
+      governance rules in an enterprise context could mean enforcing
+      outdated compliance requirements. A separate --allow-stale flag
+      could opt into degraded mode explicitly.
+    spec_impact: "CL-04 Section 7 — cache expiry enforcement"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      URL redirect chains must be bounded and auditable. If the policy
+      URL returns a 301/302 redirect, the resolver must follow up to a
+      configurable limit (default 3) and record the full redirect chain
+      in provenance. Unbounded redirects enable redirect-based content
+      injection. The final resolved URL must also be validated against
+      an allowlist if one is configured in the solution file.
+    spec_impact: "CL-07 Section 6 — redirect chain provenance"
+    pitfall: null
+  - id: F04
+    severity: minor
+    description: >
+      HTTPS certificate validation must be strict by default with no
+      implicit bypass. If the corporate policy server uses an internal
+      CA, the resolver should accept a configured CA bundle path rather
+      than a --insecure flag. Recording whether custom CA was used in
+      provenance ensures audit trails capture the trust boundary.
+    spec_impact: "CL-04 Section 8 — TLS certificate validation"
+    pitfall: null
+  - id: F05
+    severity: major
+    description: >
+      Content-type validation on the HTTP response prevents non-YAML
+      content from being parsed. If the URL returns HTML (e.g., a login
+      page due to expired auth), the YAML parser may produce cryptic
+      errors or silently produce an empty document. The resolver must
+      check Content-Type headers before parsing and emit
+      INPUT-RESOLVE-CONTENT-TYPE if the response is not application/yaml
+      or text/yaml.
+    spec_impact: "CL-01 Section 8 — response content-type validation"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      Rate limiting and retry behavior for URL fetches must be
+      configurable. Corporate policy servers may rate-limit requests,
+      and CI pipelines running many concurrent claws builds could
+      trigger throttling. The resolver should support configurable
+      retry count, backoff strategy, and timeout per URL source.
+      Default timeout should be 30 seconds with 2 retries.
+    spec_impact: "CL-04 Section 9 — URL fetch retry configuration"
+    pitfall: null
+  - id: F07
+    severity: minor
+    description: >
+      The cache storage location must be deterministic and configurable.
+      By default, URL caches should live in a platform-appropriate
+      cache directory (XDG_CACHE_HOME on Linux, %LOCALAPPDATA% on
+      Windows). The cache key must include the full URL and SRI hash
+      to prevent collisions between different versions of the same
+      URL source. Cache entries must be atomic writes to prevent
+      corruption from concurrent builds.
+    spec_impact: "CL-07 Section 7 — cache storage determinism"
+    pitfall: null

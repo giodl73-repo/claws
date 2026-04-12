@@ -1,0 +1,169 @@
+name: S11-p172-trust-tier-drift-escalation
+series: pitfall-anubis
+version: 1
+specs: [CL-02, CL-05]
+description: >
+  Validates that trust tier drift from T2 to T3 is classified as a CRITICAL
+  security escalation (P-172). When a workspace's local trust tier drifts
+  higher than the fleet-permitted tier, it allows higher-risk tool categories
+  than the fleet administrator intended. Drift detection must distinguish
+  escalation (CRITICAL) from de-escalation (LOW) and report accordingly.
+
+expect:
+  workspaces:
+    - name: workspace-gamma
+      fleet_tier: T2
+      local_tier: T3
+      drift_severity: CRITICAL
+      drift_direction: escalation
+    - name: workspace-delta
+      fleet_tier: T2
+      local_tier: T1
+      drift_severity: LOW
+      drift_direction: de-escalation
+  drift_count: 2
+  broadcast_result: null
+  compliance:
+    all_current: false
+    security_escalations: 1
+    de_escalations: 1
+
+simulate:
+  failures:
+    - component: fleet-drift
+      type: trust-escalation
+      error: "workspace-gamma trust tier T3 exceeds fleet maximum T2 — R5 tools accessible"
+    - component: fleet-drift
+      type: undetected-escalation
+      error: "drift scan classifies T2->T3 as HIGH instead of CRITICAL — no immediate alert"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet of 50 workspaces is configured with fleet trust tier T2 (automated
+  governance for R1-R3 tools, human approval for R4-R5). Developer Charlie
+  in workspace-gamma edits the local claws.json and changes trust.tier to T3
+  (automated governance for all tools including R5). This drift means R5 tools
+  like "deploy-production" and "delete-database" now auto-approve without human
+  review. The fleet scan runs hourly and detects the drift, but classifies it
+  as HIGH severity (same as other drift types). The CRITICAL classification
+  is missing, so the alert goes to the normal queue and is reviewed next
+  business day. During that window, workspace-gamma's agent auto-approves
+  3 R5 tool calls that should have required human approval.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-172 core: Trust tier drift must be classified by direction.
+      Escalation (local tier > fleet tier) is always CRITICAL because
+      it expands the set of auto-approved tools beyond fleet policy.
+      De-escalation (local tier < fleet tier) is LOW because it
+      restricts tools more than required (over-blocking, not a security
+      risk). Equal tiers are compliant (no drift).
+    spec_impact: "CL-05 G-DRIFT — directional drift severity classification"
+    pitfall: "P-172"
+
+  - id: F02
+    severity: major
+    description: >
+      The CRITICAL classification must trigger immediate response: the
+      fleet scan should emit an alert that bypasses normal queue and
+      goes to the security channel. For automated environments, a
+      CRITICAL drift detection should trigger automatic remediation:
+      push the fleet-mandated trust tier overlay to the drifting
+      workspace immediately, without waiting for administrator action.
+    spec_impact: "CL-05 G-DRIFT — CRITICAL drift auto-remediation"
+    pitfall: "P-172"
+
+  - id: F03
+    severity: major
+    description: >
+      Trust tier is not the only field that can escalate: allowedTools
+      lists, approval thresholds, and R5 fail-open/fail-closed settings
+      can all drift in ways that weaken security. The drift severity
+      classification must apply to all governance-relevant fields, not
+      just trust.tier. A generic "security impact" classifier should
+      categorize each drifted field as escalation, de-escalation, or
+      neutral.
+    spec_impact: "CL-05 G-DRIFT — field-level drift classification"
+    pitfall: "P-172"
+
+  - id: F04
+    severity: major
+    description: >
+      The workspace should not be able to self-escalate trust tier.
+      The fleet overlay should enforce a maximum trust tier that the
+      local configuration cannot exceed. If fleet sets maxTrustTier: T2,
+      the compilation pipeline must reject local configurations that
+      set trust.tier > T2, producing a hard build error.
+    spec_impact: "CL-05 G-DRIFT — fleet tier ceiling enforcement at build time"
+    pitfall: "P-172"
+
+  - id: F05
+    severity: major
+    description: >
+      Build-time enforcement is the first line of defense, but runtime
+      enforcement is the backstop. The governance plugin must check
+      the fleet tier ceiling on every tool call, not just at build
+      time. If the plugin's compiled tier exceeds the fleet ceiling
+      (because the plugin was built before the ceiling was imposed),
+      the plugin must fail-closed for R4/R5 tools.
+    spec_impact: "CL-02 G-ENFORCEMENT — runtime tier ceiling check"
+    pitfall: "P-172"
+
+  - id: F06
+    severity: major
+    description: >
+      The audit trail for trust tier drift must record: workspace name,
+      previous tier, new tier, drift direction, detection timestamp,
+      and remediation action. For CRITICAL escalations, the audit
+      trail should also capture any tool calls that were auto-approved
+      under the escalated tier during the drift window.
+    spec_impact: "CL-05 G-DRIFT — escalation audit trail"
+    pitfall: "P-172"
+
+  - id: F07
+    severity: warning
+    description: >
+      Drift scan frequency for CRITICAL-capable fields should be higher
+      than for non-security fields. Trust tier drift should be scanned
+      at minimum every 5 minutes, not hourly. Alternatively, the sidecar
+      can monitor claws.json for changes and trigger an immediate drift
+      check when trust.tier is modified.
+    spec_impact: "CL-05 G-DRIFT — high-frequency scan for security fields"
+    pitfall: "P-172"
+
+  - id: F08
+    severity: warning
+    description: >
+      Social engineering risk: a developer may argue that T3 is needed
+      "temporarily" for a deployment and plans to revert. The fleet
+      policy must not accommodate temporary escalations through local
+      configuration. If temporary escalation is needed, it should go
+      through `claws fleet grant-exception` with administrator approval,
+      an expiry time, and an audit record.
+    spec_impact: "CL-05 fleet — temporary escalation exception workflow"
+    pitfall: "P-172"
+
+  - id: F09
+    severity: note
+    description: >
+      The fleet dashboard should show a trust tier heat map: all
+      workspaces colored by their current tier (green for compliant,
+      red for escalated, yellow for de-escalated). This visual
+      summary enables administrators to spot drift patterns at a
+      glance across large fleets.
+    spec_impact: "CL-05 fleet — trust tier heat map visualization"
+    pitfall: "P-172"
+
+  - id: F10
+    severity: note
+    description: >
+      Historical drift data enables trend analysis: if workspace-gamma
+      drifts to T3 repeatedly, it may indicate a systemic need for T3
+      access. The fleet administrator can then make an informed decision
+      to either grant a permanent exception or restructure the workspace's
+      workflow to avoid T3 tools.
+    spec_impact: "CL-05 fleet — drift trend analysis"
+    pitfall: "P-172"

@@ -1,0 +1,131 @@
+name: S07-error-type-escalation
+series: spec-constraint-validation
+version: 1
+specs: [CL-03]
+description: >
+  Validates error type classification for escalation priority: the sidecar must
+  classify governance errors by type. Stack overflow (RangeError) indicates
+  systemic recursion affecting ALL tools and escalates immediately. TypeError
+  indicates a specific code path bug and escalates per-tool. Timeout indicates
+  performance degradation and alerts without escalation.
+
+expect:
+  attack_class: error-type-classification
+  defense_layer: L5-sidecar
+  blocked: true
+  audit_event:
+    type: error-classification
+    error_class: RangeError
+    escalation: immediate
+    scope: systemic
+    all_tools_affected: true
+
+simulate:
+  failures:
+    - component: evaluatePolicy
+      error: "RangeError: Maximum call stack size exceeded"
+      tool: any-tool
+      systemic: true
+  halt: null
+  budget: null
+
+problem: >
+  The governance handler encounters a stack overflow (RangeError) during policy
+  evaluation. This is not a per-tool bug -- infinite recursion in the rule
+  evaluation engine affects ALL tool calls. The sidecar classifies the error
+  as RangeError, recognizes it as systemic (not tool-specific), and triggers
+  an immediate escalation. This is different from a TypeError (which is
+  tool-specific) or a timeout (which is performance-related).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The error classification taxonomy must be defined and documented. At
+      minimum: RangeError (systemic, immediate escalation), TypeError (per-
+      tool, standard escalation), AbortError (timeout, alert only), SyntaxError
+      (configuration, immediate escalation), and generic Error (unknown,
+      default to standard escalation). Custom error classes from the governance
+      engine must also be classified.
+    spec_impact: "CL-03 sidecar — error classification taxonomy"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The escalation channel must be appropriate for the severity. Systemic
+      errors (RangeError, SyntaxError) go to PagerDuty/OpsGenie/equivalent.
+      Per-tool errors (TypeError) go to the engineering team channel. Timeout
+      alerts go to the performance monitoring dashboard. The SIEM receives
+      all error types. Escalation routing must be configurable in the sidecar
+      configuration.
+    spec_impact: "CL-03 sidecar — escalation channel routing"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      A stack overflow in the governance handler's catch clause is catastrophic.
+      If the catch clause itself triggers a RangeError (e.g., by calling a
+      function that recurses), the handler crashes without returning a deny
+      result. The catch clause minimalism requirement (emit-S07-F01) is the
+      defense: no function calls, no recursion, just pre-computed lookups and
+      a return statement.
+    spec_impact: "CL-03 runtime — catch clause RangeError immunity"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Timeout errors (AbortError) may be transient (one slow evaluation) or
+      persistent (all evaluations exceeding the budget). The sidecar must
+      track timeout frequency. If >50% of evaluations timeout within a
+      window, escalate from "alert" to "standard escalation." Persistent
+      timeouts indicate the hookTimeoutMs setting is too low for the
+      workspace complexity.
+    spec_impact: "CL-03 sidecar — timeout frequency escalation"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The performance context field in timeout audit events (S06-F03) must
+      include: (a) rules evaluated before timeout, (b) phase where timeout
+      occurred (classification, policy eval, A2A check), and (c) heap usage.
+      This data enables root cause diagnosis. Without it, the operator must
+      reproduce the timeout to diagnose it, which may not be possible in
+      production.
+    spec_impact: "CL-03 audit — timeout performance context completeness"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Error deduplication is essential to prevent alert storms. If every
+      tool call produces the same RangeError, the sidecar should escalate
+      once and suppress duplicates for a configurable window (e.g., 5
+      minutes). The suppression must note the count of suppressed events
+      in the next escalation: "53 additional occurrences suppressed."
+    spec_impact: "CL-03 sidecar — error deduplication and suppression"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The error type classification must survive error wrapping. If the
+      governance engine catches a TypeError and wraps it in a GovernanceError,
+      the original error type must be preserved in the wrapping. The sidecar
+      classifies based on the ROOT CAUSE error type, not the wrapper.
+      `error.cause` chain must be traversed to find the original.
+    spec_impact: "CL-03 sidecar — error cause chain traversal"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      This scenario validates CL-03 constraint S05-F02 "Error type
+      classification for escalation." The three error types (systemic,
+      per-tool, performance) map to three escalation tiers with different
+      response latency expectations.
+    spec_impact: "CL-03 — error type escalation constraint traceability"
+    pitfall: null

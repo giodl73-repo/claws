@@ -1,0 +1,126 @@
+name: S08-press-safety-keywords
+series: spec-constraint-validation
+version: 1
+specs: [CL-04]
+description: >
+  Validates that PRESS compression preserves safety-critical governance keywords
+  in SKILL.md. The compression profile must NEVER remove or weaken the keywords:
+  never, always, must, prohibited, required, blocked. These directives are the
+  core of L1 advisory governance. Aggressive compression that rewrites "NEVER
+  access production" to "avoid prod" changes a hard constraint to a suggestion.
+
+expect:
+  artifacts:
+    - type: skill
+      path: skills/claws-governance/SKILL.md
+      valid: true
+      safety_keywords_preserved: true
+      keywords_checked: [never, always, must, prohibited, required, blocked]
+  plugin_hooks: null
+  skill_content:
+    compression_level: aggressive
+    safety_keywords_present: true
+    semantic_equivalence: verified
+  approvals: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has 15 tools with detailed governance directives in SOUL.md.
+  The PRESS compression level is set to "aggressive" (for a small 4K context
+  window). Aggressive compression aggressively rewrites text to minimize tokens.
+  The governance compression profile must preserve safety-critical keywords even
+  under aggressive compression. The scenario verifies that the compressed
+  SKILL.md retains all "NEVER", "ALWAYS", "MUST", "PROHIBITED", "REQUIRED",
+  and "BLOCKED" keywords exactly as they appear in the uncompressed version.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The PRESS compression engine operates on text tokens, not semantic
+      meaning. A synonym replacement rule that changes "never" to "don't" or
+      "prohibited" to "not allowed" weakens the directive from an absolute
+      constraint to a suggestion. The governance compression profile must
+      mark safety-critical keywords as FROZEN (never subject to synonym
+      replacement or abbreviation).
+    spec_impact: "CL-04 PRESS — frozen keyword set for governance"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The keyword preservation applies to the directive context, not just the
+      word itself. "NEVER access production databases" must remain as a
+      complete directive. If compression removes "databases" and keeps "NEVER
+      access production", the directive is ambiguous. The preservation unit
+      is the full directive sentence, not individual keywords.
+    spec_impact: "CL-04 PRESS — directive-level preservation"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Compression quality validation (emit-S04-F02) must compare the
+      compressed and uncompressed SKILL.md for semantic equivalence. This is
+      a difficult problem -- automated semantic comparison is imprecise.
+      Practical validation: count safety-critical keywords in both versions.
+      If any keyword count decreases, the compression is rejected.
+    spec_impact: "CL-04 EMIT — keyword count validation"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Case sensitivity matters. "NEVER" (uppercase) is a stronger directive
+      than "never" (lowercase) in LLM prompt engineering. The compression
+      profile must preserve the original casing of safety-critical keywords.
+      A compression rule that lowercases all text would weaken every directive.
+    spec_impact: "CL-04 PRESS — case preservation for safety keywords"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The configurable compression level (emit-S04-F03) interacts with keyword
+      preservation. At "minimal" compression, the issue is unlikely. At
+      "aggressive" compression for small context windows, the pressure to
+      compress is highest and the risk of keyword loss is greatest. The
+      keyword preservation must be enforced REGARDLESS of compression level.
+    spec_impact: "CL-04 PRESS — keyword preservation across compression levels"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      If the workspace has 50+ tools and SKILL.md uses the size management
+      policy (inline R4-R5 only, reference exec-approvals.json for the rest),
+      the safety keywords apply only to the inlined R4-R5 directives. But the
+      referenced exec-approvals.json is not PRESS-compressed. The preservation
+      scope is the SKILL.md content only, not the referenced file.
+    spec_impact: "CL-04 PRESS — preservation scope boundary"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      SKILL.md provenance invisibility (emit-S08-F03) requires that the
+      compressed text not mention PRESS or Craftworks. The keyword preservation
+      mechanism must not insert metadata like "[PRESS-PRESERVED]" or
+      "{{frozen}}" markers into the SKILL.md output. Preservation is an
+      internal process; the output reads as natural governance guidance.
+    spec_impact: "CL-04 PRESS — no preservation metadata in output"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      This scenario validates CL-04 constraint "PRESS preserves safety-critical
+      keywords" from emit-S04-F02. The frozen keyword set is the minimum list;
+      governance profiles may add domain-specific frozen terms (e.g.,
+      "confidential", "restricted", "sandbox").
+    spec_impact: "CL-04 PRESS — frozen keyword constraint traceability"
+    pitfall: null

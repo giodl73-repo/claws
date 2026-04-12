@@ -1,0 +1,129 @@
+name: S04-mixed-source-compilation
+series: input-resolver
+version: 1
+specs: [CL-01, CL-04, CL-07]
+description: >
+  The InputResolver processes a workspace that declares all three input source
+  types simultaneously: local governance files, an npm package (@corp/base-rules),
+  and a URL policy source (https://policies.corp.internal/extra-rules.yaml).
+  The resolver must fetch, validate, and merge all sources into a single
+  governance IR with accurate provenance for each rule's origin. The CGR
+  records source type, resolution path, content hash, and merge order for
+  every entry. This scenario validates the full multi-source compilation
+  path and provenance fidelity across heterogeneous inputs.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "TOOLS.md"
+        - "MEMORY.md"
+        - "claws.json"
+        - "@corp/base-rules/rules.yaml"
+        - "https://policies.corp.internal/extra-rules.yaml"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  An enterprise project inherits baseline rules from @corp/base-rules, pulls
+  additional policies from a URL source, and defines local overrides in
+  workspace files. The developer runs claws compile expecting all three
+  source types to resolve, merge correctly, and produce a unified governance
+  IR. The merge precedence is: local > URL > package (most specific wins).
+  If a rule ID appears in all three sources, only the local version survives,
+  but the CGR must record that overrides occurred and from which sources.
+  The provenance section must distinguish each rule's origin type (file,
+  package, url) without ambiguity. If the resolver processes sources in
+  the wrong order or fails to record override chains, audit compliance
+  tools cannot reconstruct the decision history. This test validates
+  that heterogeneous sources compose correctly under the defined
+  precedence model.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Three-way merge precedence must be explicitly defined and enforced in
+      a single pass. The current design implies local > URL > package but
+      does not specify how this is implemented. A naive two-pass approach
+      (merge package first, then URL, then local) risks intermediate state
+      where URL rules override package rules that were already correctly
+      positioned. A single-pass priority resolver that assigns precedence
+      scores to each source type eliminates intermediate state bugs.
+    spec_impact: "CL-01 Section 9 — multi-source merge algorithm"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      Override chain recording in the CGR must capture the full shadow stack.
+      If local rule R1 overrides URL rule R1 which would have overridden
+      package rule R1, the CGR should record all three versions with their
+      source types, not just the winning version. This enables audit tools
+      to answer "what would have applied if the local override didn't exist"
+      without re-running compilation.
+    spec_impact: "CL-07 Section 8 — override chain completeness"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      Source fetch ordering affects compilation latency but must not affect
+      correctness. The resolver should fetch package and URL sources in
+      parallel for performance, but merge them in the defined precedence
+      order after all fetches complete. If merge happens as sources arrive
+      (streaming merge), a slow URL fetch could cause rules to merge in
+      package-then-local order, missing the URL layer entirely until a
+      retry adds it out of order.
+    spec_impact: "CL-04 Section 10 — parallel fetch with ordered merge"
+    pitfall: null
+  - id: F04
+    severity: minor
+    description: >
+      Cross-source rule ID namespace collisions should emit warnings even
+      when precedence resolves them cleanly. A developer may not realize
+      that their local rule R1 shadows a corporate package rule with the
+      same ID. An INFO-level diagnostic listing all shadowed rules helps
+      developers make intentional override decisions rather than accidental
+      ones.
+    spec_impact: "CL-01 Section 10 — shadow notification diagnostics"
+    pitfall: null
+  - id: F05
+    severity: major
+    description: >
+      The governance IR schema must have a stable representation for
+      heterogeneous provenance. If file sources use path strings, packages
+      use scope/name/version tuples, and URLs use URI strings, the
+      provenance type must be a discriminated union (tagged by source_type)
+      rather than an untyped string. This prevents downstream consumers
+      from parsing provenance strings with fragile heuristics.
+    spec_impact: "CL-07 Section 9 — provenance type discrimination"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      Compilation performance with mixed sources must be benchmarked and
+      bounded. If the URL source has a 10-second TTL and the package
+      registry is slow, compilation time becomes unpredictable. The
+      resolver should emit timing metadata per source (fetch_ms, parse_ms,
+      merge_ms) in the CGR so developers can identify bottlenecks without
+      external profiling.
+    spec_impact: "CL-04 Section 11 — per-source timing metadata"
+    pitfall: null
+  - id: F07
+    severity: minor
+    description: >
+      The claws.json declaration syntax for mixed sources must be
+      unambiguous. If sources are declared as a flat list, the resolver
+      must infer type from the value format (path vs scope/name vs URL).
+      A structured declaration with explicit type fields (type: file,
+      type: package, type: url) eliminates inference ambiguity and
+      prevents a local file path that looks like a URL from being
+      fetched over HTTP.
+    spec_impact: "CL-01 Section 11 — source type declaration syntax"
+    pitfall: null

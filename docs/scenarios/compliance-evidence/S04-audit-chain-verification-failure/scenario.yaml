@@ -1,0 +1,177 @@
+name: S04-audit-chain-verification-failure
+series: compliance-evidence
+version: 1
+specs: [CL-02]
+description: >
+  Validates that `claws comply --verify` detects a broken audit chain
+  (missing entries, tampered hashes, invalid signatures) and reports the
+  failures as compliance findings. A broken audit chain is the most serious
+  compliance issue: it means the governance history cannot be trusted. The
+  verification procedure must detect breaks, locate them precisely, assess
+  their scope (how many events are affected), and produce actionable
+  remediation guidance.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      intent_types: [DenyIntent, ToolManifestEntry]
+    analysis:
+      rules_evaluated: true
+      violations:
+        - code: AUDIT-CHAIN-INTEGRITY-BROKEN
+      warnings: []
+  violations:
+    - code: AUDIT-CHAIN-INTEGRITY-BROKEN
+  warnings: []
+  artifacts:
+    count: 1
+    types: [verification-report]
+
+simulate:
+  failures:
+    - type: audit-chain-break
+      location: entry-4521
+      cause: missing-entry
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise workspace has an audit chain with 10,000 entries spanning
+  9 months. Entry 4521 is missing (deleted or lost due to disk error). The
+  hash chain breaks at entry 4522 because its prevHash references the
+  missing entry. `claws comply --verify` must: (a) detect the break by
+  walking the chain and finding the hash mismatch, (b) locate the break
+  precisely (between entry 4520 and 4522), (c) determine the scope (1
+  missing entry, 5,479 subsequent entries with uncertain provenance),
+  (d) check the witness service (if configured) for independent verification
+  of the missing entry's hash, and (e) report the findings with remediation
+  guidance.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The spec defines chainIntegrity as 'verified', 'broken', or
+      'unchecked', but 'broken' is binary — it does not distinguish between
+      a single missing entry and a corrupted chain segment (100+ entries
+      with bad hashes). The severity of a break depends on its scope. The
+      verification report should include break count, affected entry range,
+      and a scope assessment (isolated incident vs systemic corruption).
+    spec_impact: "CL-02 Audit Chain Signing — add break scope assessment to chainIntegrity reporting"
+    pitfall: P-219
+
+  - id: F02
+    severity: major
+    description: >
+      When the chain is broken, all entries AFTER the break have uncertain
+      provenance. An attacker who deleted entry 4521 could have also
+      modified entries 4522+ and recomputed their hashes. The verification
+      must check whether entries after the break are internally consistent
+      (their own hash chain is valid) even though their connection to the
+      pre-break chain is lost. This distinguishes a missing entry (likely
+      disk error, post-break chain intact) from active tampering (post-break
+      chain also corrupted).
+    spec_impact: "CL-02 Audit Chain Signing — define post-break chain analysis for tampering detection"
+    pitfall: P-220
+
+  - id: F03
+    severity: major
+    description: >
+      The witness service (CB-02) receives each entry's hash in real-time.
+      If the witness has the missing entry's hash, the chain can be
+      partially reconstructed: the entry content is lost but its existence
+      and hash are independently attested. The verification procedure
+      should check the witness as a recovery source. The spec defines the
+      witness protocol but does not integrate it into the verification
+      procedure.
+    spec_impact: "CL-02 Verification Procedure — integrate witness service check for broken chain recovery"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The RFC 3161 timestamp on each entry provides independent time
+      attestation. Even if the hash chain is broken, entries with valid
+      RFC 3161 timestamps can independently prove they existed at the
+      claimed time. The verification report should note which entries have
+      valid timestamps, providing a secondary evidence source when the
+      primary hash chain is broken.
+    spec_impact: "CL-02 Verification Procedure — use RFC 3161 timestamps as secondary evidence for broken chains"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Chain verification for 10,000 entries requires reading and hashing
+      every entry sequentially. For large chains (100K+ entries), this
+      could take minutes. The spec does not define a latency budget for
+      verification. For audit purposes, the full chain must be verified,
+      but for operational use (e.g., pre-commit compliance check), a
+      partial verification (last N entries) may be acceptable with a note
+      that full verification is deferred.
+    spec_impact: "CL-02 Verification Procedure — define verification modes (full vs recent) with latency guidance"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The remediation guidance for a broken chain is not defined. Options
+      include: (a) acknowledge the break and continue (with a permanent
+      compliance finding), (b) re-key the chain from the break point
+      forward (new chain, old chain preserved for forensics), (c) restore
+      the missing entry from backup (if available). The spec should define
+      the remediation procedure and document it in the compliance evidence
+      as a corrective action.
+    spec_impact: "CL-02 Audit Chain Signing — define chain break remediation procedures"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      A missing entry at position 4521 means the verification must scan
+      all 10,000 entries to find all breaks. Multiple breaks may exist.
+      The verification should report ALL breaks in a single pass, not stop
+      at the first break. This is important because multiple breaks may
+      indicate different root causes (one disk error, one deliberate
+      deletion) that require different remediation.
+    spec_impact: "CL-02 Verification Procedure — verify full chain in single pass, report all breaks"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The audit chain entries include governance decisions (allow/deny).
+      A missing entry that recorded a deny decision means the denial is
+      unverifiable. For SOC2 and HIPAA compliance, unverifiable governance
+      decisions are material weaknesses. The verification report should
+      classify breaks by the type of governance decision in the affected
+      entries (if recoverable from surrounding context or witness service).
+    spec_impact: "CL-02 Verification Procedure — classify breaks by governance decision type for compliance impact"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The verification procedure does not address the scenario where the
+      first entry in the chain is tampered with. Entry 1 has no prevHash
+      to verify against (it is the genesis entry). The genesis entry's
+      integrity can only be verified by its signature and timestamp. If
+      the signing key was compromised, the entire chain from genesis is
+      suspect. Key compromise recovery (Amendment CB-03) should be
+      cross-referenced in the verification procedure.
+    spec_impact: "CL-02 Verification Procedure — cross-reference key compromise recovery for genesis entry"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The --verify flag operates on a previously generated compliance
+      evidence package. But the audit chain may have grown since the
+      evidence was generated. The verification should check that the audit
+      chain in the evidence package matches the current chain up to the
+      generation timestamp, and note any events that occurred after
+      generation.
+    spec_impact: "CL-02 Verification Procedure — define temporal scope of verification relative to evidence generation"
+    pitfall: null

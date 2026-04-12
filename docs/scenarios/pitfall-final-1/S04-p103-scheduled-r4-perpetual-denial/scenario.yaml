@@ -1,0 +1,108 @@
+name: S04-p103-scheduled-r4-perpetual-denial
+series: pitfall-final-1
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates that the compiler detects R4+ tools scheduled for unattended
+  execution where the elicitation gate requires human approval that will never
+  arrive. The tool is permanently denied, filling the audit chain with
+  denied-by-timeout events. SCHEDULE-NO-APPROVAL must fire for all R4+ tools
+  in scheduled contexts.
+
+expect:
+  rules_applied: [G-ELICIT, SCHEDULE-NO-APPROVAL]
+  violations:
+    - rule: SCHEDULE-NO-APPROVAL
+      severity: error
+      tool: deploy-to-staging
+      risk: 4
+      context: scheduled-unattended
+  pass: false
+  severity: error
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  HEARTBEAT.md schedules deploy-to-staging (R4) to run every 6 hours. The
+  elicitation policy requires human approval for R4+ tools. No pre-auth
+  token is configured. At 2:00 AM, the scheduled run fires. The elicitation
+  gate prompts for approval. No human responds. After 30 seconds, the
+  timeout fires: denied-by-timeout. The audit chain records the denial. This
+  repeats every 6 hours, 4 times per day, 28 times per week. The tool is
+  permanently denied and the audit chain fills with noise.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      SCHEDULE-NO-APPROVAL must be generalized from R5-only (P-054) to all
+      R4+ tools. Any tool requiring elicitation that is scheduled for
+      unattended execution is a guaranteed perpetual denial. The compiler
+      must detect this at compile time and produce an error, not a warning.
+    spec_impact: "CL-02 G-ELICIT — SCHEDULE-NO-APPROVAL generalized to R4+"
+    pitfall: P-103
+
+  - id: F02
+    severity: major
+    description: >
+      The detection must cross-reference HEARTBEAT.md schedules against
+      the elicitation policy in claws.json. A tool scheduled in HEARTBEAT.md
+      that has an elicitation requirement in claws.json is a conflict. The
+      cross-reference requires the two-pass architecture (P-102).
+    spec_impact: "CL-04 ANALYZE — HEARTBEAT x elicitation cross-reference"
+    pitfall: P-103
+
+  - id: F03
+    severity: major
+    description: >
+      Pre-auth tokens are the escape hatch: a tool can be scheduled if it
+      has a valid pre-authorization in claws.json. The compiler must check
+      for pre-auth before firing SCHEDULE-NO-APPROVAL. Missing pre-auth
+      fires the rule. Present pre-auth with valid scope suppresses it.
+      Expired pre-auth fires the rule with an "expired" diagnostic.
+    spec_impact: "CL-02 G-ELICIT — pre-auth suppression of SCHEDULE-NO-APPROVAL"
+    pitfall: P-103
+
+  - id: F04
+    severity: warning
+    description: >
+      The audit chain noise (28 denied-by-timeout per week per tool) is a
+      secondary problem. If SCHEDULE-NO-APPROVAL is not caught at compile
+      time, the runtime must rate-limit audit entries for repetitive
+      denials. Sidecar (L5) should aggregate: "deploy-to-staging denied
+      28 times this week (scheduled, no approval)" as a single entry.
+    spec_impact: "CL-03 runtime — audit chain rate limiting for scheduled denials"
+    pitfall: P-103
+
+  - id: F05
+    severity: major
+    description: >
+      R3 tools with configurable elicitation are edge cases. If R3 is
+      configured to require elicitation and is scheduled, the same
+      perpetual denial occurs. SCHEDULE-NO-APPROVAL must consider the
+      effective elicitation requirement, not just the risk level.
+    spec_impact: "CL-02 G-ELICIT — effective elicitation, not just risk level"
+    pitfall: P-103
+
+  - id: F06
+    severity: warning
+    description: >
+      The error message must include a remediation path: "Add pre-auth
+      for deploy-to-staging in claws.json, or remove it from HEARTBEAT.md
+      schedules, or lower its risk level below R4." Three distinct fix
+      options, each actionable.
+    spec_impact: "CL-04 diagnostics — three-option remediation for SCHEDULE-NO-APPROVAL"
+    pitfall: P-103
+
+  - id: F07
+    severity: note
+    description: >
+      This scenario extends P-054 (R5-only perpetual denial) discovered
+      in earlier pitfall rounds. The generalization from R5 to R4+ was
+      identified by analyzing the elicitation gate's applicability across
+      risk levels. CL-02 Amendment A55 codifies the generalized rule.
+    spec_impact: "CL-02 Amendment A55 — traceability to P-054 generalization"
+    pitfall: P-103

@@ -1,0 +1,134 @@
+name: S08-p139-pre-governance-plugin-mutation
+series: pitfall-final-2
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates that plugin loading order is checked for pre-governance mutation
+  risk (P-139). A buggy analytics plugin that fires before the governance
+  handler can modify tool arguments, causing governance to classify the
+  wrong tool.
+
+expect:
+  rules_applied: [G-PLUGIN]
+  violations:
+    - code: CLAWS-W060
+      rule: G-PLUGIN
+      description: "Plugin 'analytics-tracker' loads before governance handler — mutation risk"
+  pass: true
+  severity: warning
+
+simulate:
+  failures:
+    - component: plugin
+      type: pre-governance-mutation
+      error: "analytics-tracker modifies toolCall.name from 'send-payment' to 'track-send-payment'"
+  halt: null
+  budget: null
+
+problem: >
+  The OC workspace has two plugins: analytics-tracker (position 0) and
+  claws-governance (position 1). analytics-tracker's before_tool_call hook
+  fires first and renames tool calls for tracking purposes: "send-payment"
+  becomes "track-send-payment." The claws governance handler receives
+  "track-send-payment," finds no riskMap entry, and applies the default
+  (which may be R1 if defaults are lenient). The actual R5 tool
+  send-payment executes without elicitation because governance classified
+  the wrong tool name.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-139 core: Plugin execution order is defined by the plugins array
+      in the OC workspace configuration. Any plugin loading before the
+      governance handler can mutate the toolCall object — name, arguments,
+      or metadata. The governance handler classifies whatever it receives,
+      not the original tool call.
+    spec_impact: "CL-02 G-PLUGIN — pre-governance mutation risk"
+    pitfall: "P-139"
+
+  - id: F02
+    severity: major
+    description: >
+      The pinch phase must analyze the plugins array in the workspace
+      configuration and warn (CLAWS-W060) if any plugin loads before the
+      claws governance handler. The warning must name the plugin, its
+      position, and the risk: "analytics-tracker at position 0 can mutate
+      tool calls before governance at position 1."
+    spec_impact: "CL-04 pinch — plugin ordering analysis"
+    pitfall: "P-139"
+
+  - id: F03
+    severity: major
+    description: >
+      The governance handler should snapshot the original tool call at
+      entry and classify based on the snapshot, not the potentially-mutated
+      argument. This defense-in-depth measure protects against mutations
+      even if the plugin order cannot be changed (e.g., analytics-tracker
+      must be first for operational reasons).
+    spec_impact: "CL-02 G-PLUGIN — original tool call snapshot"
+    pitfall: "P-139"
+
+  - id: F04
+    severity: major
+    description: >
+      The original tool call snapshot must be immutable: Object.freeze()
+      on the snapshot prevents accidental modification. The classification
+      uses snapshot.name, not toolCall.name. If they differ, a diagnostic
+      is emitted: "CLAWS-W061: tool call name mutated by prior plugin."
+    spec_impact: "CL-02 G-PLUGIN — mutation detection diagnostic"
+    pitfall: "P-139"
+
+  - id: F05
+    severity: major
+    description: >
+      If the governance handler cannot determine the original tool name
+      (snapshot mechanism unavailable on the platform), the handler must
+      fall back to fail-closed for unknown tools. A tool name not in the
+      riskMap gets R5 treatment, which ensures the elicitation gate fires
+      for any mutated tool name.
+    spec_impact: "CL-02 G-FAILMODE — unknown tool name defaults to R5"
+    pitfall: "P-139"
+
+  - id: F06
+    severity: warning
+    description: >
+      The CLAWS-W060 advisory is a compile-time warning based on static
+      analysis of the workspace configuration. At runtime, plugin order
+      may differ if plugins are loaded dynamically. The sidecar should
+      verify plugin order at runtime startup and alert if it differs
+      from the compile-time expectation.
+    spec_impact: "CL-03 sidecar — runtime plugin order verification"
+    pitfall: "P-139"
+
+  - id: F07
+    severity: warning
+    description: >
+      Some OC platforms may not expose plugin ordering in their
+      configuration files. For these platforms, CLAWS-W060 cannot fire.
+      The governance handler's snapshot-and-compare defense is the only
+      protection. Platform detection must determine whether plugin order
+      analysis is possible.
+    spec_impact: "CL-01 platform — plugin order visibility"
+    pitfall: "P-139"
+
+  - id: F08
+    severity: note
+    description: >
+      The mutation is not always malicious. analytics-tracker's renaming
+      is a bug, not an attack. But the governance impact is the same:
+      wrong classification. The warning must be neutral in tone ("mutation
+      risk") rather than accusatory ("malicious plugin"). Operators need
+      information, not blame.
+    spec_impact: "CL-02 G-PLUGIN — neutral diagnostic tone"
+    pitfall: "P-139"
+
+  - id: F09
+    severity: note
+    description: >
+      If the operator explicitly acknowledges the plugin order via
+      claws.json (e.g., pluginOrder.acknowledged: ["analytics-tracker"]),
+      the CLAWS-W060 warning is suppressed. This allows intentional
+      pre-governance plugins while still warning about unacknowledged ones.
+    spec_impact: "CL-01 schema — plugin order acknowledgment"
+    pitfall: "P-139"

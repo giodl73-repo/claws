@@ -1,0 +1,126 @@
+name: S09-utf8-bom-forma-parse
+series: spec-constraint-validation
+version: 1
+specs: [CL-04]
+description: >
+  Validates UTF-8 BOM handling in Phase 1 PARSE. BOM bytes (0xEF 0xBB 0xBF)
+  preceding the first line of SOUL.md cause the keyword-anchored extraction to
+  miss the first governance constraint. The parser must strip BOM markers from
+  all 9 workspace files before extraction begins. Without BOM stripping, the
+  first constraint in SOUL.md is silently skipped.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      constraints_extracted: 3
+      first_constraint: "DenyIntent: never access production"
+    analysis:
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  SOUL.md begins with a UTF-8 BOM followed by the constraint "Never access
+  production databases." The file has 3 governance constraints total. Without
+  BOM stripping, the keyword-anchored extraction looks for "Never" at the
+  start of the line but finds BOM+"Never", which does not match the "Never"
+  pattern. The first constraint is silently skipped, and only 2 of 3
+  constraints are extracted. The BOM is invisible in most editors, making this
+  a particularly insidious bug. Windows tools (especially Notepad) add BOMs
+  by default.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      BOM stripping must apply to ALL 9 workspace file types, not just
+      SOUL.md. Any file may have a BOM if created on Windows. TOOLS.md with
+      a BOM could cause the first tool declaration to be missed. The BOM
+      stripping is a pre-processing step before any file-specific parsing.
+    spec_impact: "CL-04 PARSE — universal BOM stripping across all file types"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The BOM stripping must handle multiple BOM variants: UTF-8 (EF BB BF),
+      UTF-16 LE (FF FE), UTF-16 BE (FE FF). If a workspace file is saved in
+      UTF-16 encoding, the parser must either strip the BOM and transcode to
+      UTF-8, or reject the file with a clear encoding error. Silent
+      transcoding may alter character boundaries in non-ASCII content.
+    spec_impact: "CL-04 PARSE — multi-encoding BOM handling"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The keyword-anchored extraction uses confidence scoring (0.0-1.0).
+      If the BOM is not stripped, the first line's match score may be below
+      0.5 (because the pattern match is partial). This could cause the
+      constraint to be flagged for user confirmation instead of being
+      extracted automatically. The user sees a confirmation prompt for a
+      perfectly valid constraint, with no visible reason for the low score.
+    spec_impact: "CL-04 PARSE — BOM-induced false low-confidence"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Line number tracking must account for BOM bytes. The BOM is technically
+      part of line 1, but after stripping, the first content character is at
+      position 1. Diagnostic messages that report source locations must use
+      the post-strip positions so they match the user's editor. Editors that
+      show BOMs (hex editors) would see different positions than the compiler
+      reports.
+    spec_impact: "CL-04 PARSE — BOM-aware source position tracking"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The GovernanceIR hash (CP-S01-F04) must be computed on BOM-stripped
+      content. Two identical files, one with BOM and one without, must
+      produce the same GovernanceIR hash. This is related to line-ending
+      normalization: the hash normalization pipeline is BOM-strip then
+      LF-normalize then hash.
+    spec_impact: "CL-04 IR — BOM-agnostic hash computation"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Git on Windows with core.autocrlf=true may add or strip BOMs during
+      checkout depending on the .gitattributes configuration. A workspace
+      that compiles correctly on one developer's machine may fail on another's
+      if their git config handles BOMs differently. The compiler must be
+      BOM-tolerant regardless of git configuration.
+    spec_impact: "CL-04 PARSE — git BOM configuration independence"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The PARSE phase reads skills/ directory files (N SKILL.md files). Each
+      skill file may independently have a BOM. BOM stripping must apply to
+      each file independently, not assume all files have the same encoding.
+      A workspace with 10 skills where only 1 has a BOM must strip that one
+      and parse the others normally.
+    spec_impact: "CL-04 PARSE — per-file BOM detection"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      This scenario validates CL-04 constraint "BOM stripping in PARSE"
+      from CP-S01-F01. The constraint was added specifically for Windows
+      compatibility. Windows is the primary development platform for this
+      project, making BOM handling a first-class concern, not an edge case.
+    spec_impact: "CL-04 PARSE — BOM stripping constraint traceability"
+    pitfall: null

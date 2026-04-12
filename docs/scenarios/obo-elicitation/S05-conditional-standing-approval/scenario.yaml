@@ -1,0 +1,154 @@
+name: S05-conditional-standing-approval
+series: obo-elicitation
+version: 1
+specs: [CL-02]
+description: >
+  Validates conditional standing approvals for scheduled R5 tools. A standing
+  approval in USER.md or claws.json is scope-limited (specific tool, specific
+  context) and time-bound (business hours, specific date range). This tests
+  the boundary between unconditional pre-auth (dangerous for R5) and
+  conditional pre-auth (acceptable with constraints and audit logging).
+  Unconditional R5 standing approval must produce a compiler warning.
+
+expect:
+  attack_class: none
+  defense_layer: G-ELICIT
+  blocked: false
+  audit_event: obo-standing-approval-conditional
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace runs a daily report pipeline that invokes send-report-email
+  (R5/OBO) at 08:00 every weekday. USER.md pre-authorizes: "You may send the
+  daily sales report to leadership@company.com on weekdays between 07:00-09:00."
+  claws.json has a matching standing approval: {tool: send-report-email,
+  scope: {recipient: "leadership@company.com", timeWindow: "07:00-09:00",
+  days: ["mon","tue","wed","thu","fri"]}}. The compiler validates the standing
+  approval conditions, emits the handler with time-window checks, and warns
+  about R5 pre-authorization. At 08:00 Monday, the tool executes without
+  interactive approval. At 10:00 Monday, the same tool is denied (outside
+  time window). On Saturday, the tool is denied (outside day scope).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The compiler must validate standing approval conditions at compile time:
+      time window format (24h, valid range), day list (enum), recipient format
+      (email regex). Invalid conditions (timeWindow: "25:00-09:00") must
+      produce a parse error, not silently pass through to runtime where they
+      would either always-match or never-match depending on implementation.
+    spec_impact: "CL-01 claws.json schema — standing approval condition validation"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Unconditional R5 standing approval (no scope limits, no time bounds)
+      is extremely dangerous — it permanently disables the OBO gate for an
+      R5 tool. The compiler MUST emit CLAWS-W041: "Unconditional standing
+      approval for R5 tool send-email. Consider adding scope conditions
+      (recipient, time window) per Amendment CFC-S07-F02." In strict mode,
+      this escalates to an error.
+    spec_impact: "CL-02 G-ELICIT — unconditional R5 standing approval warning/error"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The time-window check at runtime depends on the system clock. If the
+      clock is manipulated (NTP poisoning, VM time drift), an R5 tool could
+      execute outside its authorized window. The runtime handler should use
+      a monotonic clock for timeout enforcement and verify wall-clock time
+      against a trusted source when evaluating standing approval conditions.
+    spec_impact: "CL-03 runtime — clock integrity for standing approval time windows"
+    pitfall: P-199
+
+  - id: F04
+    severity: warning
+    description: >
+      Standing approvals for scheduled tasks must cover the subagent chain
+      (Amendment CFC-S07-F07). If the scheduled pipeline delegates
+      send-report-email to a subagent, the standing approval must explicitly
+      cover the subagent's invocation, not just the parent's. Without this,
+      the subagent's R5 call is denied because standing approval is not
+      transitive (consistent with G-ELICIT-CHAIN).
+    spec_impact: "CL-02 G-ELICIT-CHAIN — standing approval scope for subagent R5 tools"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The standing approval must be revocable. If the user removes the
+      pre-authorization from USER.md or the operator removes the standing
+      approval from claws.json, the next compilation must close the gate.
+      But if the compiled handler is not redeployed after the change (stale
+      deployment), the old standing approval remains active. Recompilation
+      drift detection (`claws drift`) must check standing approval currency.
+    spec_impact: "CL-05 drift detection — standing approval staleness"
+    pitfall: P-198
+
+  - id: F06
+    severity: warning
+    description: >
+      Audit events for standing-approval executions must log the specific
+      conditions that were evaluated and met: "standing approval matched:
+      tool=send-report-email, recipient=leadership@company.com, time=08:00
+      within 07:00-09:00, day=Monday." This level of detail is necessary for
+      SOC2 CC6.2 evidence (authorization mechanisms).
+    spec_impact: "CL-02 G-ELICIT-AUDIT — standing approval condition evaluation logging"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      Multiple standing approvals for the same tool with overlapping conditions
+      create ambiguity. If one approval allows send-report-email to
+      leadership@company.com and another allows it to all@company.com, does
+      sending to leadership@company.com match both? The compiler must detect
+      overlapping standing approvals and either merge them (union of conditions)
+      or warn about ambiguity. Overlapping approvals with conflicting time
+      windows are a hard error.
+    spec_impact: "CL-02 G-ELICIT — overlapping standing approval detection"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The scenario's standing approval references a specific recipient. At
+      runtime, the handler must extract the recipient from the tool call
+      parameters and compare against the standing approval scope. This requires
+      the handler to understand the tool's parameter schema — which parameter
+      is "recipient"? The standing approval condition must reference parameter
+      names, and the tool manifest must declare parameter names for OBO-relevant
+      parameters.
+    spec_impact: "CL-02 G-ELICIT — tool parameter schema for standing approval matching"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Standing approval expiry (e.g., expires: 2026-12-31) means the approval
+      automatically stops working after the date. The compiler should warn
+      when a standing approval is within 30 days of expiry during `claws pinch`
+      health checks. Expired standing approvals should not silently revert to
+      per-use elicitation — they should produce a clear message: "Standing
+      approval for send-report-email expired on 2026-12-31."
+    spec_impact: "CL-05 health check — standing approval expiry warning"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The conditional standing approval pattern is the enterprise solution to
+      the SCHEDULE-NO-APPROVAL problem (Amendment A128). Without standing
+      approvals, scheduled R5 tools are perpetually denied. With conditional
+      standing approvals, they execute within defined boundaries. This is the
+      designed escape hatch and must be prominently documented in the
+      deployment guide.
+    spec_impact: "CL-05 deployment guide — conditional standing approval as SCHEDULE-NO-APPROVAL solution"
+    pitfall: null

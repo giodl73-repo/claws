@@ -1,0 +1,133 @@
+name: S05-input-resolver-failure-modes
+series: input-resolver
+version: 1
+specs: [CL-01, CL-04, CL-07]
+description: >
+  The InputResolver encounters three distinct failure conditions during source
+  resolution: a declared npm package (@corp/missing-pkg) does not exist in the
+  registry, a URL source (https://policies.corp.internal/down.yaml) returns a
+  network error, and a URL source with SRI hash receives content that does not
+  match the declared integrity value. Each failure must produce a specific
+  INPUT-RESOLVE-* diagnostic code with structured error metadata. The resolver
+  must halt compilation cleanly without partial state leaking into the
+  governance IR.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: []
+    analysis:
+      rules_evaluated: false
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures:
+    - type: package-not-found
+      source: "@corp/missing-pkg"
+      diagnostic: INPUT-RESOLVE-PKG-NOT-FOUND
+    - type: url-unreachable
+      source: "https://policies.corp.internal/down.yaml"
+      diagnostic: INPUT-RESOLVE-URL-UNREACHABLE
+    - type: sri-mismatch
+      source: "https://policies.corp.internal/tampered.yaml"
+      diagnostic: INPUT-RESOLVE-SRI-MISMATCH
+  halt: INPUT-RESOLVE-PKG-NOT-FOUND
+  budget: null
+problem: >
+  A developer's workspace declares three external sources, all of which fail
+  for different reasons. The missing package returns a 404 from the npm
+  registry. The unreachable URL times out after the configured timeout
+  period. The SRI mismatch URL returns valid YAML content, but its SHA-384
+  hash does not match the pinned value in claws.json. The resolver
+  must detect each failure independently, produce the correct diagnostic
+  code for each, and decide on a halt strategy. The design question is
+  whether to fail-fast on the first error or collect all errors before
+  halting. Fail-fast gives faster feedback but hides subsequent errors.
+  Collect-all gives complete diagnostics but may attempt network fetches
+  that are unnecessary if an earlier source is critical. The resolver
+  should support both modes via a --fail-fast flag, defaulting to
+  collect-all for maximum diagnostic value.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Diagnostic codes must be structured, not just string constants. Each
+      INPUT-RESOLVE-* code should carry a payload object with source_type,
+      source_ref, attempted_action, and failure_reason. Flat string
+      diagnostics force downstream tools to parse error messages, which
+      breaks when messages are localized or reworded. Structured diagnostics
+      enable programmatic error handling in CI pipelines that need to
+      distinguish "retry-able" failures (network timeout) from
+      "permanent" failures (SRI mismatch).
+    spec_impact: "CL-07 Section 10 — structured diagnostic payloads"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      SRI mismatch must be treated as a security event, not just a build
+      error. The diagnostic should include the expected hash, the actual
+      computed hash, and the content length to help security teams triage
+      whether the mismatch indicates tampering, truncation, or encoding
+      differences. The resolver should also support an optional webhook
+      notification for SRI failures to integrate with security monitoring
+      systems.
+    spec_impact: "CL-07 Section 5 — SRI mismatch security escalation"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      Partial resolution state must be discarded on failure. If the resolver
+      successfully fetches source A, then fails on source B, the governance
+      IR must not contain source A's rules. Partial IRs are worse than no
+      IR because downstream tools may proceed with incomplete governance,
+      enforcing some rules but missing others. The resolver must use a
+      transactional approach: buffer all sources, validate all, then commit
+      to the IR atomically.
+    spec_impact: "CL-01 Section 12 — atomic resolution transaction"
+    pitfall: null
+  - id: F04
+    severity: major
+    description: >
+      Network timeout configuration must be separate from SRI validation
+      timeout. A slow but valid URL source needs a longer fetch timeout,
+      while SRI computation on already-downloaded content should be nearly
+      instant. Conflating the two timeouts means either URL fetches time
+      out too quickly or SRI checks appear to hang. Two distinct timeout
+      parameters (fetch_timeout_ms, validate_timeout_ms) solve this.
+    spec_impact: "CL-04 Section 12 — timeout granularity"
+    pitfall: null
+  - id: F05
+    severity: minor
+    description: >
+      The --fail-fast vs collect-all default should be environment-aware.
+      Local development benefits from collect-all (see all errors at once).
+      CI pipelines may prefer fail-fast for faster feedback loops. The
+      resolver could auto-detect CI environments (CI=true env var) and
+      switch defaults accordingly, while always respecting explicit flags.
+    spec_impact: "CL-04 Section 13 — environment-adaptive failure mode"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      Error messages for package-not-found must distinguish between
+      "package does not exist in registry" (404) and "registry is
+      unreachable" (ECONNREFUSED). Both prevent resolution, but the
+      remediation is different: the former requires fixing the package
+      name or publishing it; the latter requires network/VPN/proxy
+      configuration. Conflating them under a single diagnostic code
+      wastes developer debugging time.
+    spec_impact: "CL-04 Section 14 — registry error discrimination"
+    pitfall: null
+  - id: F07
+    severity: minor
+    description: >
+      Retry behavior on transient failures must be idempotent. If the
+      resolver retries a URL fetch that returned a 503, the retry must
+      not create duplicate entries in diagnostic output or cache partial
+      content from the failed attempt. Each retry should start with
+      clean state for that source while preserving successfully resolved
+      sources from other entries in the collect-all buffer.
+    spec_impact: "CL-04 Section 15 — retry idempotency"
+    pitfall: null

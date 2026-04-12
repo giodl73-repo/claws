@@ -1,0 +1,120 @@
+name: S04-data-label-mismatch
+series: cross-file-conflicts
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates DATA-LABEL-MISMATCH conflict: MEMORY.md labels data as
+  CONFIDENTIAL, but AGENTS.md delegates to a subagent that forwards data
+  to a PUBLIC-labeled agent. The data sensitivity high-water-mark is violated.
+  This is an error-severity cross-file conflict.
+
+expect:
+  governance_ir:
+    version: 1
+    analysis:
+      conflicts:
+        - category: DATA-LABEL-MISMATCH
+          severity: error
+          files: [MEMORY.md, AGENTS.md]
+          data_label: CONFIDENTIAL
+          agent_name: public-reporter
+          agent_data_ceiling: PUBLIC
+          resolution: "elevate agent data ceiling or restrict data access"
+  violations:
+    - category: DATA-LABEL-MISMATCH
+      severity: error
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  MEMORY.md declares customer data with label CONFIDENTIAL. AGENTS.md
+  declares "public-reporter" subagent with data flow ceiling PUBLIC (it
+  generates public-facing reports). The delegation from root to
+  public-reporter passes customer data through the CONFIDENTIAL->PUBLIC
+  boundary, violating the high-water-mark constraint. CONFIDENTIAL data
+  cannot be downgraded to PUBLIC through delegation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The data flow from root to public-reporter must be traced through the
+      delegation graph. If root delegates to research-agent, which delegates
+      to public-reporter, the CONFIDENTIAL data traverses two hops. The
+      conflict detection must follow transitive data flows, not just direct
+      parent-child relationships.
+    spec_impact: "CL-04 ANALYZE — transitive data flow tracing"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      "Data flow ceiling PUBLIC" on an agent means it can only handle PUBLIC
+      data. If the agent receives CONFIDENTIAL data and processes it into a
+      public report (redacting sensitive fields), the output may be PUBLIC
+      even though the input was CONFIDENTIAL. The compile-time check cannot
+      verify that the agent actually redacts — it can only flag the label
+      mismatch.
+    spec_impact: "CL-02 G-A2A-FLOW — processing vs forwarding distinction"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The resolution "elevate agent data ceiling" means changing public-reporter
+      to CONFIDENTIAL ceiling. But then the public-reporter's output might
+      contain CONFIDENTIAL data in its public reports. The resolution
+      "restrict data access" is safer: do not delegate CONFIDENTIAL data to
+      public-reporter.
+    spec_impact: "CL-04 conflict resolution — safe resolution preference"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      MEMORY.md may have multiple data entries with different labels. If only
+      one entry is CONFIDENTIAL and the agent only accesses PUBLIC entries,
+      the conflict is a false positive. The conflict detection should check
+      which specific data entries are accessible to the agent, not just the
+      aggregate memory label.
+    spec_impact: "CL-04 ANALYZE — per-entry data access conflict checking"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      HIPAA compliance requires that PHI data (mapped to CONFIDENTIAL or
+      RESTRICTED) never reaches a PUBLIC endpoint. This conflict directly
+      maps to HIPAA 164.312(e)(1) (transmission security). The compliance
+      evidence generator should cite this conflict resolution as evidence
+      of HIPAA compliance.
+    spec_impact: "CL-02 compliance — data label mismatch as HIPAA evidence"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      If AGENTS.md does not declare a data flow ceiling for public-reporter,
+      the default is undefined. Should undefined default to PUBLIC (least
+      privilege for incoming data) or RESTRICTED (most privilege)? The CL-02
+      spec says default-deny for trust, but data flow labels may have a
+      different default. The default must be documented.
+    spec_impact: "CL-02 G-A2A-FLOW — default data flow ceiling"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The 4 sensitivity levels (PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED)
+      form a total order. INTERNAL->PUBLIC is also a downgrade but less
+      severe than CONFIDENTIAL->PUBLIC. The conflict severity could vary
+      by the label distance: 1-level downgrade is warning, 2+ level
+      downgrade is error. Currently all downgrades are errors.
+    spec_impact: "CL-04 conflict severity — label distance scaling"
+    pitfall: null

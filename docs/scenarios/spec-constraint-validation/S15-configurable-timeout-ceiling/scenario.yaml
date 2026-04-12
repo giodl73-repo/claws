@@ -1,0 +1,146 @@
+name: S15-configurable-timeout-ceiling
+series: spec-constraint-validation
+version: 1
+specs: [CL-03, CL-04]
+description: >
+  Validates the configurable hook timeout with hard ceiling. The default
+  policy evaluation timeout is 50ms, configurable via
+  claws.json#performance.hookTimeoutMs. Enterprises may need longer timeouts
+  for complex workspaces. Hard ceiling: 500ms. Values above 500ms are clamped.
+  On timeout, the handler applies fail-mode by risk level.
+
+expect:
+  attack_class: timeout-configuration
+  defense_layer: L2-plugin-handler
+  blocked: true
+  audit_event:
+    type: hook-timeout
+    tool: write-db
+    risk_level: 3
+    configured_timeout_ms: 200
+    actual_duration_ms: 250
+    effective_fail_mode: fail-closed
+    clamped: false
+
+simulate:
+  failures:
+    - component: evaluatePolicy
+      error: "AbortError: timeout"
+      tool: write-db
+      duration_ms: 250
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise workspace has 40+ tools with complex classification rules.
+  The default 50ms timeout is insufficient for policy evaluation. The
+  enterprise configures hookTimeoutMs: 200 in claws.json. A write-db call
+  triggers policy evaluation that takes 250ms (exceeding the 200ms configured
+  timeout). The handler aborts evaluation via AbortSignal.timeout(200) and
+  applies fail-mode by risk level: write-db is R3, default fail-closed, so
+  the tool is blocked. The audit event records both the configured timeout
+  and actual duration.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The 500ms hard ceiling exists to protect the agent request path from
+      governance-induced latency. If an enterprise configures hookTimeoutMs:
+      1000, the value must be clamped to 500 with a warning: "CLAWS-W030:
+      hookTimeoutMs 1000 exceeds ceiling of 500ms -- clamped to 500ms."
+      The clamping must happen at configuration load time, not at runtime.
+    spec_impact: "CL-03 runtime — timeout ceiling clamping"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The AbortSignal.timeout() creates a signal, but evaluatePolicy must
+      actually respect it (emit-S06-F01). The generated code passes the
+      AbortSignal to evaluatePolicy so the timeout aborts evaluation, not
+      just the wrapping Promise.race. If evaluatePolicy ignores the signal,
+      it continues running after timeout (wasting CPU), and the fail-mode
+      result races with the eventual evaluatePolicy result.
+    spec_impact: "CL-04 EMIT — AbortSignal propagation in generated code"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The per-call vs per-workflow distinction (S06-F05) is critical. In a
+      workflow with 10 tool calls, each call has a 200ms timeout budget.
+      Total governance overhead could reach 2000ms (10 * 200ms). The per-
+      workflow budget is not explicitly constrained by the hookTimeoutMs
+      setting. A separate workflow-level governance budget may be needed
+      for workflow-heavy deployments.
+    spec_impact: "CL-03 runtime — per-workflow governance budget"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The timeout audit event must include performance context (S06-F03):
+      number of rules evaluated before timeout, which phase timed out
+      (classification, policy eval, A2A check), and heap usage. Without
+      this context, the operator cannot tell whether the timeout is caused
+      by too many rules, slow classification, or memory pressure.
+    spec_impact: "CL-03 audit — timeout performance context"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Timeout side effects (emit-S06-F03) must be cleaned up. If
+      evaluatePolicy started writing to the classification cache before the
+      timeout fired, the cache entry may be partial. The AbortSignal must
+      also abort side effects (cache writes, audit appends) from the
+      abandoned evaluation. Without cleanup, partial state accumulates and
+      may corrupt future evaluations.
+    spec_impact: "CL-03 runtime — timeout side effect cleanup"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The configurable timeout interacts with the persistent handler failure
+      detection (S06 scenario). Frequent timeouts for a specific tool may
+      be misclassified as persistent failures. The sidecar must distinguish
+      timeout-caused blocks (performance issue, may resolve with higher
+      timeout) from crash-caused blocks (code bug, requires fix). The error
+      type classification (S07) handles this distinction.
+    spec_impact: "CL-03 sidecar — timeout vs crash classification"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Node.js version compatibility: AbortSignal.timeout() requires Node 18+.
+      The generated code must include a fallback for older Node versions
+      (emit-S06-F04). The fallback uses setTimeout + AbortController to
+      achieve the same effect. The fallback must be tested to ensure it
+      produces the same timeout behavior as AbortSignal.timeout().
+    spec_impact: "CL-04 EMIT — Node version fallback for timeout"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      The error type distinction (emit-S06-F06) means AbortError (timeout)
+      and TypeError (bug) must produce different audit events even though
+      both trigger fail-mode. A timeout is expected behavior (performance
+      under load); a TypeError is unexpected (code bug). Conflating the two
+      in audit events makes it impossible to distinguish planned degradation
+      from bugs.
+    spec_impact: "CL-03 audit — AbortError vs TypeError distinction"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      This scenario validates CL-03 constraint S06-F01 "Configurable hook
+      timeout with ceiling" and the related CL-04 EMIT constraints for
+      generated timeout code. The 50ms/500ms defaults balance governance
+      latency against evaluation completeness.
+    spec_impact: "CL-03/CL-04 — configurable timeout constraint traceability"
+    pitfall: null

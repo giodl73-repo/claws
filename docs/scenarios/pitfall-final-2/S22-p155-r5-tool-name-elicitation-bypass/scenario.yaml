@@ -1,0 +1,123 @@
+name: S22-p155-r5-tool-name-elicitation-bypass
+series: pitfall-final-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates fuzzy match cross-validation for R5 tool name matching in
+  elicitation policies (P-155). Policy specifies "send_payment" but TOOLS.md
+  declares "send-payment." The underscore/hyphen mismatch causes the policy
+  to match nothing, silently disabling the elicitation gate for the R5 tool.
+
+expect:
+  rules_applied: [G-ELICIT]
+  violations:
+    - code: CLAWS-E065
+      rule: G-ELICIT
+      description: "Elicitation policy 'send_payment' matches no tool — did you mean 'send-payment'?"
+  pass: false
+  severity: error
+
+simulate:
+  failures:
+    - component: elicitation
+      type: tool-name-mismatch
+      error: "Policy references 'send_payment' but TOOLS.md declares 'send-payment' — elicitation bypassed"
+  halt: null
+  budget: null
+
+problem: >
+  The elicitation policy in claws.json declares that tool "send_payment"
+  requires user approval before execution. TOOLS.md declares the tool as
+  "send-payment" (hyphen, not underscore). The policy matcher does an exact
+  string comparison. "send_payment" !== "send-payment." The policy matches
+  nothing. The R5 tool send-payment executes without elicitation because
+  no policy applies to it. The developer configured the policy believing
+  it protects send-payment, but a single character difference silently
+  disables the entire elicitation gate.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-155 core: Tool name matching in elicitation policies is exact
+      string comparison. Common naming convention differences (hyphen vs
+      underscore, camelCase vs kebab-case) cause silent mismatches. The
+      policy is correctly authored in intent but wrong in syntax. The
+      result is the same as having no policy.
+    spec_impact: "CL-02 G-ELICIT — tool name matching strictness"
+    pitfall: "P-155"
+
+  - id: F02
+    severity: major
+    description: >
+      Fuzzy match cross-validation: at compile time, every tool name in
+      elicitation policies is cross-referenced against TOOLS.md declarations.
+      If a policy name does not match any tool exactly, the compiler
+      computes similarity (normalized: remove hyphens, underscores, and
+      case). If a near-match exists, CLAWS-E065 fires with the suggestion.
+    spec_impact: "CL-02 G-ELICIT — fuzzy match cross-validation"
+    pitfall: "P-155"
+
+  - id: F03
+    severity: major
+    description: >
+      CLAWS-E065 is a hard error, not a warning. An elicitation policy
+      that matches no tool is always a bug. There is no legitimate use
+      case for a policy that references a non-existent tool. The developer
+      must fix the name or remove the policy. Hard error prevents shipping
+      a non-functional elicitation gate.
+    spec_impact: "CL-02 G-ELICIT — unmatched policy is hard error"
+    pitfall: "P-155"
+
+  - id: F04
+    severity: major
+    description: >
+      The cross-validation must also check the reverse: R5 tools in
+      TOOLS.md that have NO elicitation policy. This is CLAWS-E066:
+      "R5 tool 'send-payment' has no elicitation policy." An R5 tool
+      without a policy is a governance gap as dangerous as a mismatched
+      policy.
+    spec_impact: "CL-02 G-ELICIT — R5 tool without policy detection"
+    pitfall: "P-155"
+
+  - id: F05
+    severity: major
+    description: >
+      The normalization for fuzzy matching: lowercase, remove hyphens,
+      remove underscores, remove dots. "send_payment" -> "sendpayment".
+      "send-payment" -> "sendpayment". Match. "SendPayment" ->
+      "sendpayment". Match. The normalization must be documented so
+      developers understand which variations are caught.
+    spec_impact: "CL-02 G-ELICIT — normalization algorithm documentation"
+    pitfall: "P-155"
+
+  - id: F06
+    severity: warning
+    description: >
+      False positive risk in fuzzy matching: "send-payment" and
+      "send-payment-receipt" normalize to different strings. But
+      "send_payment" and "send-payment" normalize to the same string.
+      The fuzzy match should have a similarity threshold (>90%) to
+      avoid suggesting unrelated tools.
+    spec_impact: "CL-02 G-ELICIT — fuzzy match similarity threshold"
+    pitfall: "P-155"
+
+  - id: F07
+    severity: warning
+    description: >
+      If the elicitation policy uses glob patterns ("send-*"), the
+      exact match check does not apply. Glob patterns should be validated
+      that they match at least one R5 tool. A glob that matches zero
+      R5 tools is as dangerous as an exact mismatch.
+    spec_impact: "CL-02 G-ELICIT — glob pattern coverage validation"
+    pitfall: "P-155"
+
+  - id: F08
+    severity: note
+    description: >
+      This class of naming mismatch is extremely common because
+      elicitation policies are often authored by security teams who
+      do not have access to TOOLS.md. The cross-validation at compile
+      time bridges the gap between policy authors and tool authors.
+    spec_impact: "CL-05 DX — cross-team policy validation"
+    pitfall: "P-155"

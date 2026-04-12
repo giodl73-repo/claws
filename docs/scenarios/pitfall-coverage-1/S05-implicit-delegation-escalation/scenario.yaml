@@ -1,0 +1,118 @@
+name: S05-implicit-delegation-escalation
+series: pitfall-coverage-1
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates detection of implicit "all tools" delegation that hides trust
+  escalation. P-056 identifies that AGENTS.md can delegate "all tools" to
+  a subagent without listing them explicitly, which may include R5 tools
+  the developer did not intend to share. The compiler must resolve "all
+  tools" against TOOLS.md and warn when high-risk tools are implicitly
+  included.
+
+expect:
+  governance_ir:
+    version: 1
+    analysis:
+      delegation_graph:
+        agents:
+          - name: coordinator
+            delegated_tools: all
+            resolved_tools: [query-db, export-csv, send-email, deploy-production]
+            implicit_r4_plus: [send-email, deploy-production]
+      warnings:
+        - category: IMPLICIT-R4-DELEGATION
+          agent: coordinator
+          tools: [send-email, deploy-production]
+      violations: []
+  violations: []
+  warnings:
+    - category: IMPLICIT-R4-DELEGATION
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  AGENTS.md declares coordinator with `tools: all`. TOOLS.md has four tools:
+  query-db (R1), export-csv (R2), send-email (R4/OBO), deploy-production (R5).
+  The developer intended coordinator to query and export data. By writing
+  `tools: all`, they inadvertently delegated send-email (R4/OBO) and
+  deploy-production (R5) to the subagent. The compiler must resolve "all"
+  against the actual tool set and warn about implicit high-risk delegation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      `tools: all` in AGENTS.md is syntactically valid but semantically
+      dangerous. The compiler must resolve "all" to the concrete tool list
+      from TOOLS.md and inject the resolved list into the IR. The IR must
+      never contain the raw "all" token — only resolved tool names.
+    spec_impact: "CL-04 PARSE — 'all' token must be resolved to concrete tool list"
+    pitfall: P-056
+
+  - id: F02
+    severity: major
+    description: >
+      After resolving "all tools", the compiler must check each resolved
+      tool's risk level. Any R4+ tool included via implicit delegation
+      should produce a dedicated IMPLICIT-R4-DELEGATION warning. This is
+      distinct from TRUST-ESCALATION (which compares agent trust ceiling
+      to tool risk).
+    spec_impact: "CL-04 ANALYZE — new warning category for implicit high-risk delegation"
+    pitfall: P-056
+
+  - id: F03
+    severity: major
+    description: >
+      Adding a new R5 tool to TOOLS.md silently grants it to every agent
+      with `tools: all`. The developer adds a tool in one file and does
+      not realize a subagent now has access. Incremental compilation must
+      re-check agents with "all" delegation when TOOLS.md changes.
+    spec_impact: "CL-05 watch ring — TOOLS.md change invalidates 'all' delegation"
+    pitfall: P-056
+
+  - id: F04
+    severity: warning
+    description: >
+      Some developers may use `tools: all` intentionally for a trusted
+      coordinator. The warning must be suppressible via explicit
+      acknowledgment in claws.json: `"allowImplicitDelegation": ["coordinator"]`.
+      Suppression is per-agent, not global.
+    spec_impact: "CL-01 claws.json — implicit delegation suppression config"
+    pitfall: P-056
+
+  - id: F05
+    severity: warning
+    description: >
+      `tools: all` combined with A2A delegation creates a transitive
+      blast radius. If coordinator delegates to sub-coordinator with
+      `tools: all`, and sub-coordinator has `tools: all`, the transitive
+      tool set is the full TOOLS.md. The warning should show the
+      transitive expansion, not just the direct delegation.
+    spec_impact: "CL-02 G-A2A-DELEGATE — transitive 'all' expansion"
+    pitfall: P-056
+
+  - id: F06
+    severity: note
+    description: >
+      The AGENTS.md syntax may support `tools: all except [deploy-production]`.
+      Exclusion lists are safer than inclusion lists for broad delegation.
+      If this syntax exists, the compiler must validate that excluded tools
+      actually exist in TOOLS.md (no phantom exclusions).
+    spec_impact: "CL-01 AGENTS.md schema — exclusion list validation"
+    pitfall: P-056
+
+  - id: F07
+    severity: major
+    description: >
+      In fleet contexts, `tools: all` resolves differently per workspace
+      because each workspace has a different TOOLS.md. Fleet broadcast of
+      an agent template with `tools: all` produces different effective
+      delegations per workspace. `claws scan` must detect this divergence.
+    spec_impact: "CL-05 fleet — per-workspace resolution of 'all' delegation"
+    pitfall: P-056

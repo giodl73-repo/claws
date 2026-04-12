@@ -1,0 +1,32 @@
+layer: "Compiler Layer"
+atoms:
+  claws-compiler:
+    visibility: public
+    docType: headline
+    narrative: P1
+    pipeline: true
+  governance-ir:
+    visibility: architect
+    docType: concept
+    narrative: P2
+    pipeline: true
+  capability-manifest:
+    visibility: architect
+    docType: concept
+    narrative: null
+    pipeline: true
+  mechanical-intent:
+    visibility: architect
+    docType: concept
+    narrative: P2
+    pipeline: true
+  workflow-inversion:
+    visibility: public
+    docType: feature
+    narrative: P2
+    pipeline: true
+  three-engine-model:
+    visibility: public
+    docType: headline
+    narrative: P1
+    pipeline: true

@@ -1,0 +1,111 @@
+name: S14-p123-obo-elicit-severity-migration
+series: pitfall-final-1
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates that the OBO-WITHOUT-ELICIT severity elevation from warning to
+  error includes a migration path for existing workspaces. Workspaces with
+  R5/OBO tools and no elicitation policy will stop compiling. The error
+  message must include an actionable claws.json snippet.
+
+expect:
+  rules_applied: [G-ELICIT, OBO-WITHOUT-ELICIT]
+  violations:
+    - rule: OBO-WITHOUT-ELICIT
+      severity: error
+      tool: send-payment
+      risk: 5
+      migration_hint: true
+  pass: false
+  severity: error
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An existing workspace has been compiling successfully for months with
+  send-payment (R5, OBO) and no elicitation policy. OBO-WITHOUT-ELICIT was
+  a warning. The developer upgrades claws. OBO-WITHOUT-ELICIT is now an error.
+  The next claws build fails with no explanation of what changed or how to fix
+  it. The developer has never configured an elicitation policy and does not
+  know the syntax. The error message says "OBO-WITHOUT-ELICIT: send-payment"
+  but does not explain the fix.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The error message must include a complete claws.json snippet showing
+      the minimum configuration to resolve the error. Example: "Add to
+      claws.json: { elicitation: { send-payment: { mode: 'confirm',
+      timeout: 30000 } } }". The snippet must be copy-pasteable, not
+      pseudocode. This is a migration aid, not documentation.
+    spec_impact: "CL-04 diagnostics — actionable migration snippet"
+    pitfall: P-123
+
+  - id: F02
+    severity: major
+    description: >
+      The error must explain what changed: "OBO-WITHOUT-ELICIT was elevated
+      from warning to error in claws v2.0.0. R5 tools with OBO delegation
+      now require an explicit elicitation policy. This prevents deployable
+      artifacts with permanently denied tools (see P-104)." Context helps
+      the developer understand WHY, not just WHAT.
+    spec_impact: "CL-04 diagnostics — severity change explanation"
+    pitfall: P-123
+
+  - id: F03
+    severity: major
+    description: >
+      A migration command (claws migrate --obo-elicit) could automatically
+      add default elicitation policies to claws.json for all R5/OBO tools.
+      The default policy (mode: confirm, timeout: 30000) is safe and can
+      be customized later. Automated migration prevents workspace breakage
+      on upgrade.
+    spec_impact: "CL-05 doctor — automated OBO elicitation migration"
+    pitfall: P-123
+
+  - id: F04
+    severity: warning
+    description: >
+      Workspaces with many R5/OBO tools (e.g., 15 payment tools) would
+      see 15 separate errors, all with the same fix pattern. The error
+      output should group these: "15 R5/OBO tools lack elicitation policy:
+      [send-payment, wire-transfer, ...]. Run 'claws migrate --obo-elicit'
+      to add default policies for all."
+    spec_impact: "CL-04 diagnostics — grouped OBO migration errors"
+    pitfall: P-123
+
+  - id: F05
+    severity: major
+    description: >
+      Backward compatibility: a --compat v1 flag could temporarily
+      downgrade OBO-WITHOUT-ELICIT back to warning for a migration period.
+      This gives teams time to update their claws.json without blocking
+      builds immediately. The flag should have a deprecation timeline
+      (removed in v3.0.0).
+    spec_impact: "CL-04 build — compatibility mode for migration"
+    pitfall: P-123
+
+  - id: F06
+    severity: warning
+    description: >
+      The changelog for the claws version with this breaking change must
+      prominently list OBO-WITHOUT-ELICIT severity elevation as a BREAKING
+      CHANGE. If the changelog is overlooked, the compile error is the
+      first indication. The error message compensates for missed changelogs.
+    spec_impact: "CL-05 changelog — breaking change prominence"
+    pitfall: P-123
+
+  - id: F07
+    severity: note
+    description: >
+      This pitfall exemplifies the tension between security improvement
+      (error prevents useless deployment) and upgrade friction (existing
+      workspaces break). The migration path (snippet + command + compat
+      flag) resolves the tension by providing multiple off-ramps at
+      different urgency levels.
+    spec_impact: "CL-02/CL-04 — security vs upgrade friction balance"
+    pitfall: P-123

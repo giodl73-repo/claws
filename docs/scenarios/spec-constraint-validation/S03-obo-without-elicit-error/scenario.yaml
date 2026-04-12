@@ -1,0 +1,135 @@
+name: S03-obo-without-elicit-error
+series: spec-constraint-validation
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates that OBO-WITHOUT-ELICIT is now error severity by default, not
+  warning. The conflict table was updated per CFC-S03-F01: R5 fail-closed is
+  non-negotiable, so an R5/OBO tool without any elicitation policy contradicts
+  the fail-closed invariant. The pipeline must halt and refuse to emit artifacts
+  when an R5/OBO tool has no governance gate.
+
+expect:
+  governance_ir:
+    version: 1
+    analysis:
+      conflicts:
+        - category: OBO-WITHOUT-ELICIT
+          severity: error
+          files: [TOOLS.md, SOUL.md, USER.md]
+          tool_name: send-email
+          obo_detected: true
+          elicitation_configured: false
+          resolution: "add elicitation policy in claws.json or OBO scope in USER.md"
+  violations:
+    - code: OBO-WITHOUT-ELICIT
+      severity: error
+      tool: send-email
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: ANALYZE
+  budget: null
+
+problem: >
+  TOOLS.md declares "send-email" with capabilities [COMMUNICATE, TRANSACT],
+  classified as R5/OBO. No elicitation policy exists in claws.json, no OBO
+  scope in USER.md, no elicitation constraints in SOUL.md. Unlike the original
+  cross-file-conflicts/S03 scenario (which tested warning severity), this
+  scenario validates the ELEVATED severity: OBO-WITHOUT-ELICIT is now error
+  by default. The pipeline halts at ANALYZE and produces zero artifacts.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The severity elevation from warning to error changes the pipeline's
+      halt behavior. Previously, OBO-WITHOUT-ELICIT produced a warning and
+      the pipeline continued to EMIT (producing artifacts without the OBO
+      gate). Now it halts at ANALYZE. This is a breaking change for existing
+      workspaces that have R5/OBO tools without elicitation policies -- they
+      will stop compiling. Migration guidance is required.
+    spec_impact: "CL-04 ANALYZE — OBO-WITHOUT-ELICIT halt behavior change"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The three-source check (TOOLS.md, SOUL.md, USER.md) must be exhaustive
+      before the error fires. If USER.md grants pre-authorization ("you may
+      send emails"), the conflict resolves. If SOUL.md has an elicitation
+      constraint ("always ask before sending email"), the conflict resolves.
+      Only when ALL three sources are checked and NONE provide coverage does
+      the error fire. A false-positive error that blocks compilation despite
+      valid coverage is a critical bug.
+    spec_impact: "CL-02 G-ELICIT — exhaustive source check before error"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Fleet-level inherited configuration (CL-05) may provide the elicitation
+      policy. If the workspace inherits from a fleet template that configures
+      send-email elicitation, the conflict resolves at the fleet level. The
+      ANALYZE phase must check fleet inheritance before flagging, or fleet-
+      managed workspaces will produce false-positive errors.
+    spec_impact: "CL-05 fleet — inherited policy resolves OBO-WITHOUT-ELICIT"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Multiple R5/OBO tools without elicitation must produce one error per
+      tool (CFC-S03-F07). If send-email and process-payment are both R5/OBO
+      without policies, the output shows two errors with tool-specific
+      remediation. Aggregate "2 tools lack elicitation" hides which tools
+      need configuration.
+    spec_impact: "CL-04 ANALYZE — per-tool error granularity for OBO"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The error message must suggest specific remediation. "Add elicitation
+      policy for send-email in claws.json" is actionable. "OBO-WITHOUT-ELICIT
+      detected" is not. The diagnostic should include a claws.json snippet
+      showing the minimum configuration to resolve the conflict.
+    spec_impact: "CL-04 diagnostics — actionable remediation in OBO errors"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      If claws.json has `strict: false` (advisory mode), should OBO-WITHOUT-
+      ELICIT still be error? The finding CFC-S03-F01 says error "by default"
+      which implies the severity is not reduced by advisory mode. R5 fail-
+      closed is non-negotiable regardless of mode. This makes OBO-WITHOUT-
+      ELICIT the only conflict that cannot be downgraded to warning via
+      advisory mode.
+    spec_impact: "CL-02 security — OBO error immune to advisory mode"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The resolution suggestion "add elicitation policy in claws.json or OBO
+      scope in USER.md" presents two alternatives. But these alternatives
+      have different security implications: claws.json elicitation policy
+      requires per-use approval (stronger), while USER.md OBO scope is a
+      standing authorization (weaker). The resolution should note the
+      difference and recommend claws.json for R5 tools.
+    spec_impact: "CL-02 G-ELICIT — resolution strength ordering"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      This scenario directly validates the constraint update "Error (was
+      Warning; elevated per CFC-S03-F01)" in the CL-04 conflict table.
+      It is a regression test for the severity elevation -- if future changes
+      accidentally revert to warning, this scenario catches it.
+    spec_impact: "CL-04 conflict table — severity elevation regression test"
+    pitfall: null

@@ -1,0 +1,165 @@
+name: S01-atomic-emission
+series: spec-constraint-validation
+version: 1
+specs: [CL-04]
+description: >
+  Validates atomic artifact emission: the EMIT phase must write all 4 artifacts
+  (SKILL.md, index.ts, exec-approvals.json, lobster.compiled.yaml) atomically.
+  If any single artifact fails to emit, NONE are written. Partial emit leaves
+  advisory governance without enforcement -- worse than no governance at all.
+  The emit phase writes to a staging directory and moves atomically on success.
+
+expect:
+  artifacts:
+    - type: plugin
+      path: plugins/claws-governance/index.ts
+      valid: false
+      written: false
+    - type: skill
+      path: skills/claws-governance/SKILL.md
+      valid: false
+      written: false
+    - type: exec-approvals
+      path: exec-approvals.json
+      valid: false
+      written: false
+    - type: workflow
+      path: lobster.compiled.yaml
+      valid: false
+      written: false
+  plugin_hooks: null
+  skill_content: null
+  approvals: null
+
+simulate:
+  failures:
+    - phase: EMIT
+      artifact: plugin
+      error: "TypeScript generation error in handler template"
+  halt: EMIT
+  budget: null
+
+problem: >
+  A workspace with 3 tools (including an R5 send-email) compiles successfully
+  through phases 1-4. During EMIT, the SKILL.md and exec-approvals.json write
+  successfully to the staging directory, but index.ts generation fails due to a
+  TypeScript template error. The EMIT phase must detect the failure and rollback
+  the staging directory -- no artifacts are moved to the workspace. Without
+  atomicity, the workspace would have SKILL.md (advisory L1) and
+  exec-approvals.json (backup L4) but no enforcement plugin (L2+L3), creating
+  a false sense of security.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The staging directory pattern (write to temp, move on success) requires
+      an atomic filesystem move. On Windows, MoveFileEx with
+      MOVEFILE_REPLACE_EXISTING is not atomic across volumes. The staging
+      directory MUST be on the same filesystem as the target to guarantee
+      atomicity via rename(). Cross-volume staging silently breaks the
+      atomicity guarantee.
+    spec_impact: "CL-04 EMIT — same-filesystem staging requirement"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      If the process crashes DURING the atomic move (after staging succeeds
+      but before the move completes), the workspace has stale artifacts from
+      the previous compilation and new artifacts in the staging directory.
+      Recovery on next build must detect orphaned staging directories and
+      either complete the move or clean up.
+    spec_impact: "CL-04 EMIT — staging directory crash recovery"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The lobster.compiled.yaml artifact is optional -- it only exists if the
+      workspace has a lobster.yaml. Atomicity must handle variable artifact
+      counts. The contract is: all EXPECTED artifacts succeed or none are
+      written. A workspace without lobster.yaml expects 3 artifacts; one with
+      lobster.yaml expects 4. The expected set must be determined before EMIT
+      starts.
+    spec_impact: "CL-04 EMIT — variable artifact count in atomic set"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The error message when EMIT rolls back must enumerate which artifacts
+      succeeded and which failed. "EMIT failed: index.ts generation error.
+      Rolled back: SKILL.md, exec-approvals.json, lobster.compiled.yaml.
+      No artifacts written." This diagnostic is critical for debugging template
+      errors in the code generator.
+    spec_impact: "CL-04 EMIT — rollback diagnostic detail"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      If a previous successful build left artifacts in the workspace, a failed
+      EMIT must NOT delete the previous artifacts. The workspace retains the
+      last-known-good artifacts. The staging-and-move pattern naturally
+      preserves this: the old artifacts are only replaced on successful move.
+      A "clean before emit" strategy would violate this by destroying the
+      previous build before the new one succeeds.
+    spec_impact: "CL-04 EMIT — last-known-good artifact preservation"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Content hash comparison (emit-S02-F04) interacts with atomicity. If the
+      hash check determines that SKILL.md is unchanged but exec-approvals.json
+      needs updating, the partial-write optimization (skip unchanged files)
+      must still be atomic. Either all changed files are written atomically,
+      or the hash optimization is disabled when any file in the set changes.
+    spec_impact: "CL-04 EMIT — hash optimization vs atomicity interaction"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The exec-approvals.json artifact modifies an existing file (host-level
+      OC config), while SKILL.md and index.ts are created in claws-owned
+      directories. The atomic move must handle both create-new and
+      overwrite-existing semantics. Overwriting exec-approvals.json requires
+      the original to be backed up before the move, consistent with CL-03
+      CB-08 backup location requirements.
+    spec_impact: "CL-04 EMIT — mixed create/overwrite atomicity"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Filesystem permissions may prevent the atomic move. If the plugins/
+      directory is read-only (e.g., mounted volume in container deployment),
+      the move fails. The EMIT phase must check write permissions for ALL
+      target paths before beginning artifact generation, failing fast with
+      a clear permission error rather than generating artifacts that cannot
+      be placed.
+    spec_impact: "CL-04 EMIT — pre-emit permission check"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      This scenario validates CL-04 constraint "Atomic emit" and finding
+      emit-S01-F01. The constraint was added after scenario analysis revealed
+      that partial emit creates a dangerous half-governed state. The 4-artifact
+      atomic set is the most critical EMIT invariant.
+    spec_impact: "CL-04 EMIT — atomic emit constraint traceability"
+    pitfall: null
+
+  - id: F10
+    severity: major
+    description: >
+      If the workspace uses git and the staging directory is inside the
+      workspace root, git may index the staging files during the brief
+      window between write and move. The staging directory must be listed
+      in .gitignore or placed in .claws/ (which should already be ignored).
+      Stale staging files appearing in git status confuse developers.
+    spec_impact: "CL-04 EMIT — staging directory git visibility"
+    pitfall: null

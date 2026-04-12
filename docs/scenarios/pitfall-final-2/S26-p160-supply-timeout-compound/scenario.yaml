@@ -1,0 +1,155 @@
+name: S26-p160-supply-timeout-compound
+series: pitfall-final-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates the compound attack surface where a malicious unsigned skill
+  (warning only) modifies elicitation timeout behavior to restore approve-
+  on-timeout (P-160). Supply chain and timeout defaults are connected
+  attack surfaces that must be fixed independently.
+
+expect:
+  attack_class: compound-attack
+  defense_layer: multi-layer
+  blocked: true
+  audit_event:
+    type: compound-attack-detected
+    tool: send-payment
+    risk_level: 5
+    outcome: DENIED
+    reason: "claws-compound: supply chain + timeout default interaction blocked"
+
+simulate:
+  failures:
+    - component: supply-chain
+      type: malicious-skill-installed
+      error: "Unsigned skill 'helpers-utils' installed with warning only — modifies elicitation timeout"
+    - component: elicitation
+      type: timeout-restored
+      error: "Malicious skill restores approveOnTimeout: true — claws deny override bypassed at runtime"
+  halt: null
+  budget: null
+
+problem: >
+  A malicious marketplace skill "helpers-utils" is installed in a production
+  workspace. G-SUPPLY generates a warning (not an error, per P-157) because
+  the environment-based severity is not configured. The skill loads and
+  registers a before_tool_call hook that runs before claws's governance
+  handler. The malicious hook modifies the elicitation timeout configuration
+  at runtime, restoring the platform's approve-on-timeout default. claws's
+  deny-on-timeout override (P-156) was generated at compile time, but the
+  malicious skill overrides it at runtime. R5 tool send-payment auto-
+  approves after 30 seconds of human inaction.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-160 core: Two independent vulnerabilities (P-157 unsigned skill
+      warning + P-156 approve-on-timeout default) combine into a compound
+      attack. The malicious skill (possible because P-157 only warns)
+      disables the timeout defense (normally fixed by P-156). Each
+      pitfall must be fixed independently because either one enables
+      the compound attack.
+    spec_impact: "CL-02 — compound attack surface documentation"
+    pitfall: "P-160"
+
+  - id: F02
+    severity: major
+    description: >
+      The malicious skill modifies the timeout configuration at runtime,
+      AFTER claws's compile-time deny-on-timeout was generated. The
+      generated code sets deny-on-timeout, but the malicious skill
+      patches the configuration object to approve-on-timeout. Runtime
+      configuration must be immutable: Object.freeze() on the timeout
+      configuration after handler registration.
+    spec_impact: "CL-03 runtime — immutable timeout configuration"
+    pitfall: "P-160"
+
+  - id: F03
+    severity: major
+    description: >
+      Defense layer 1 (P-157 fix): unsigned skills in production are
+      errors, not warnings. This prevents the malicious skill from
+      installing at all. If P-157 is fixed, the compound attack is
+      blocked at the supply chain layer.
+    spec_impact: "CL-02 G-SUPPLY — prevent malicious skill installation"
+    pitfall: "P-160"
+
+  - id: F04
+    severity: major
+    description: >
+      Defense layer 2 (P-156 fix): deny-on-timeout is non-configurable
+      and immutable at runtime. Even if the malicious skill is installed,
+      it cannot modify the timeout behavior because the configuration is
+      frozen. If P-156 is fixed with immutable config, the compound
+      attack is blocked at the timeout layer.
+    spec_impact: "CL-02 G-ELICIT-TIMEOUT — immutable deny-on-timeout"
+    pitfall: "P-160"
+
+  - id: F05
+    severity: major
+    description: >
+      Defense layer 3 (P-139 related): the governance handler snapshots
+      the original tool call and ignores mutations from prior plugins.
+      Even if the malicious skill modifies the timeout config, the
+      governance handler uses its own frozen snapshot. Three independent
+      defenses must all be bypassed for the compound attack to succeed.
+    spec_impact: "CL-02 G-PLUGIN — defense-in-depth against runtime mutation"
+    pitfall: "P-160"
+
+  - id: F06
+    severity: warning
+    description: >
+      Runtime configuration integrity monitoring: the sidecar should
+      periodically verify that the timeout configuration matches the
+      compile-time value. A drift from deny-on-timeout to approve-on-
+      timeout is a critical alert: "CLAWS-ALERT: timeout configuration
+      modified at runtime — possible malicious skill."
+    spec_impact: "CL-03 sidecar — runtime configuration integrity"
+    pitfall: "P-160"
+
+  - id: F07
+    severity: warning
+    description: >
+      The compound attack surface should be documented in CL-02 as an
+      explicit interaction diagram: G-SUPPLY warning + G-ELICIT-TIMEOUT
+      default = compound vulnerability. This documentation helps security
+      reviewers understand why both must be fixed, not just one.
+    spec_impact: "CL-02 — compound attack surface documentation"
+    pitfall: "P-160"
+
+  - id: F08
+    severity: warning
+    description: >
+      `claws pinch` should detect compound attack surfaces by analyzing
+      pairwise interactions between unfixed pitfalls. If G-SUPPLY severity
+      is warning (not error) AND G-ELICIT-TIMEOUT override is not verified,
+      the compound advisory fires: "CLAWS-W080: Supply chain + timeout
+      default compound vulnerability — fix both independently."
+    spec_impact: "CL-02 pinch — compound vulnerability detection"
+    pitfall: "P-160"
+
+  - id: F09
+    severity: note
+    description: >
+      The compound attack is a class, not just this specific instance.
+      Other compound surfaces may exist: unsigned skill + plugin order
+      mutation (P-139), unsigned skill + cache corruption (P-137),
+      unsigned skill + PII redaction bypass (P-148). Each pair should
+      be analyzed for compound interactions.
+    spec_impact: "CL-02 — compound attack surface catalog"
+    pitfall: "P-160"
+
+  - id: F10
+    severity: note
+    description: >
+      The 37% malicious marketplace rate (P-157) makes the supply chain
+      vector highly probable. Combined with the platform's approve-on-
+      timeout default, the compound attack has a realistic probability:
+      ~37% chance a malicious skill is installed (if warnings are ignored)
+      x 100% chance the timeout default is exploitable (if not overridden)
+      = ~37% probability of successful compound attack in unpatched
+      workspaces.
+    spec_impact: "CL-02 — compound attack probability estimation"
+    pitfall: "P-160"

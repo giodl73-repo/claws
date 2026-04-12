@@ -1,0 +1,169 @@
+name: S06-p231-cef-severity-mapping-undefined
+series: pitfall-thoth-2
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates that governance events have explicit mappings to CEF severity
+  levels 0-10 (P-231). Without a defined mapping, SIEM correlation rules
+  cannot match claws events, rendering the SIEM export functionally useless
+  for security operations teams.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, RULES.md, claws.json]
+    analysis:
+      rules_evaluated: true
+      compliance_check: true
+      cef_mapping: incomplete
+  violations:
+    - code: CLAWS-E231
+      message: "No CEF severity mapping for 8 governance event types — SIEM correlation rules will not match"
+      severity: error
+  warnings:
+    - code: CLAWS-W231a
+      message: "CEF severity mapping table missing from compliance configuration"
+    - code: CLAWS-W231b
+      message: "3 custom governance rules have no CEF severity assignment"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: comply-export
+      type: cef-mapping-missing
+      error: "Governance event 'tool-denied-r5' has no CEF severity mapping — defaulting to 0 (Unknown)"
+    - component: comply-export
+      type: siem-correlation-fail
+      error: "SIEM rule 'high-risk-tool-block' expects CEF severity >= 7 — claws exports severity 0 for all events"
+  halt: null
+  budget: null
+
+problem: >
+  A security operations team configures their SIEM to alert on high-severity
+  governance events from claws. They create correlation rules matching CEF
+  severity >= 7. When claws exports governance events in CEF format, all events
+  have severity 0 (Unknown) because no mapping table exists between claws
+  governance event types and CEF severity levels 0-10. The SIEM receives the
+  events but none match the correlation rules. An R5 tool denial (which should
+  be severity 9 — very high) is logged at severity 0. The security team sees no
+  alerts for three weeks while critical governance events accumulate silently
+  in the SIEM. A post-incident review discovers that the CEF export was
+  functionally useless because the severity field carried no signal.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-231 core: The spec defines CEF export format but does not include
+      a mapping table from governance event types to CEF severity levels
+      (0-10). Every governance event type must have an explicit severity
+      assignment. The mapping table should be included in the CL-02 SIEM
+      Export Amendment as a normative reference.
+    spec_impact: "CL-02 SIEM Export Amendment — normative CEF severity mapping table"
+    pitfall: "P-231"
+
+  - id: F02
+    severity: major
+    description: >
+      The CEF severity mapping must reflect the governance risk model:
+      R5 deny events should map to CEF 9-10, R4 deny to CEF 7-8, R3 to
+      CEF 5-6, R2 to CEF 3-4, R1 to CEF 1-2. Informational events
+      (governance-pass, cache-hit) should map to CEF 0. This alignment
+      ensures that SIEM correlation rules written for standard severity
+      ranges work correctly with claws events.
+    spec_impact: "CL-02 SIEM Export Amendment — risk-level-to-severity alignment"
+    pitfall: "P-231"
+
+  - id: F03
+    severity: major
+    description: >
+      Custom governance rules (user-defined in RULES.md) may not have a
+      default CEF severity assignment. The compiler must require a severity
+      field in custom rule definitions or derive it from the rule's risk
+      classification. A custom rule with no severity assignment must produce
+      a compile-time warning, and the CEF export must use a conservative
+      default (CEF 5 — medium) rather than 0 (unknown).
+    spec_impact: "CL-02 SIEM Export Amendment — custom rule severity requirement"
+    pitfall: "P-231"
+
+  - id: F04
+    severity: major
+    description: >
+      CEF severity 0 (Unknown) as a default defeats the purpose of the
+      severity field. If the exporter encounters an unmapped event type,
+      it should fail loudly with CLAWS-E231 rather than silently defaulting
+      to 0. An unmapped event type is a configuration error that must be
+      fixed before the CEF export is operational.
+    spec_impact: "CL-02 SIEM Export Amendment — fail-loud on unmapped event types"
+    pitfall: "P-231"
+
+  - id: F05
+    severity: major
+    description: >
+      The CEF format includes fields beyond severity: deviceAction,
+      deviceEventClassId, name, and extension fields. The mapping table
+      must also define these fields for each governance event type.
+      deviceEventClassId should use a claws-specific namespace
+      (e.g., "claws:tool-denied-r5") to distinguish claws events from
+      other sources in the SIEM.
+    spec_impact: "CL-02 SIEM Export Amendment — full CEF field mapping beyond severity"
+    pitfall: "P-231"
+
+  - id: F06
+    severity: warning
+    description: >
+      SIEM correlation rules are typically written by security engineers
+      who may not understand claws's governance model. The CEF export
+      documentation should include sample SIEM rules for common use cases:
+      (a) alert on any R5 tool denial, (b) alert on 3+ R4 denials in 5
+      minutes, (c) alert on governance plugin crash. These samples reduce
+      the time-to-value for SIEM integration.
+    spec_impact: "CL-02 SIEM Export Amendment — sample SIEM correlation rules"
+    pitfall: "P-231"
+
+  - id: F07
+    severity: warning
+    description: >
+      The CEF severity mapping should be configurable per-workspace to
+      accommodate different risk appetites. An enterprise with strict
+      compliance requirements may want R3 events at CEF 8, while a
+      development workspace may set R3 to CEF 3. The mapping table in
+      claws.json should allow per-event-type severity overrides with a
+      floor (R5 events cannot be mapped below CEF 7).
+    spec_impact: "CL-02 SIEM Export Amendment — configurable severity mapping with floor"
+    pitfall: "P-231"
+
+  - id: F08
+    severity: warning
+    description: >
+      The sidecar (L5 ring) generates its own events (persistent crash,
+      resource exhaustion, dead-man-switch trigger). These sidecar events
+      must also have CEF severity mappings. A dead-man-switch trigger
+      (governance-offline) should be CEF 10 (emergency) because it indicates
+      complete loss of governance enforcement.
+    spec_impact: "CL-03 Sidecar — CEF severity mapping for sidecar events"
+    pitfall: "P-231"
+
+  - id: F09
+    severity: note
+    description: >
+      The claws comply --test-siem command should validate the CEF export
+      by generating a sample event for each governance event type and
+      verifying that the severity field is populated and within the expected
+      range. This allows operators to validate their SIEM integration
+      before relying on it for production alerting.
+    spec_impact: "CL-02 SIEM Export Amendment — CEF export validation command"
+    pitfall: "P-231"
+
+  - id: F10
+    severity: note
+    description: >
+      Beyond CEF, organizations may use other SIEM formats (LEEF, JSON
+      over syslog, OpenTelemetry). The severity mapping should be format-
+      agnostic: defined as an internal severity level (1-10) that each
+      export format adapter translates to its native severity scheme. This
+      prevents duplicating the mapping table for each export format.
+    spec_impact: "CL-02 SIEM Export Amendment — format-agnostic severity model"
+    pitfall: "P-231"

@@ -1,0 +1,125 @@
+name: S25-p134-cross-artifact-classification
+series: pitfall-final-1
+version: 1
+specs: [CL-04]
+description: >
+  Validates that cross-artifact classification mismatches are detected during
+  post-emit consistency validation. SKILL.md, exec-approvals.json, and the
+  Gateway plugin may disagree on a tool's risk level. Mismatch triggers staging
+  rollback to prevent inconsistent governance deployment.
+
+expect:
+  governance_ir:
+    version: 1
+    emit:
+      consistency_check:
+        skill_md_risk: { write-db: 3 }
+        exec_approvals_risk: { write-db: 5 }
+        plugin_risk: { write-db: 3 }
+        mismatch_detected: true
+        staging_rollback: true
+    analysis:
+      rules_evaluated: true
+      violations:
+        - rule: CLASSIFICATION-MISMATCH
+          tool: write-db
+          sources: [SKILL.md, exec-approvals.json, index.ts]
+          risk_levels: [3, 5, 3]
+  violations:
+    - rule: CLASSIFICATION-MISMATCH
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The EMIT phase generates 3 artifacts with risk classifications for write-db:
+  SKILL.md maps "requires confirmation" to R3 (via directive-to-risk mapping).
+  exec-approvals.json has write-db as R5 (from a stale template). The Gateway
+  plugin (index.ts) classifies write-db as R3 (from the current GovernanceIR).
+  Three layers disagree: L1 says R3, L4 says R5, L2 says R3. At runtime, the
+  effective governance depends on which layer evaluates first. L4 blocks
+  write-db (R5 = blocked), but L2 allows it (R3 = allowed with confirmation).
+  The conflict creates unpredictable behavior.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Post-emit consistency validation compares risk levels across all
+      artifacts for every tool. If any two sources disagree, the mismatch
+      is reported. The check runs in the staging directory before the
+      atomic move. Any mismatch triggers staging rollback — no artifacts
+      are deployed.
+    spec_impact: "CL-04 EMIT — cross-artifact consistency validation"
+    pitfall: P-134
+
+  - id: F02
+    severity: major
+    description: >
+      The GovernanceIR is the single source of truth for risk levels.
+      All artifacts must derive their risk classifications from the IR.
+      If exec-approvals.json has a different risk level, the generator
+      has a bug (using stale data or a different classification source).
+      The consistency check catches generator bugs.
+    spec_impact: "CL-04 EMIT — IR as single source of truth"
+    pitfall: P-134
+
+  - id: F03
+    severity: major
+    description: >
+      SKILL.md risk levels are derived from directive-to-risk mapping
+      (P-122). This mapping must use the same risk values as the IR.
+      If the mapping table is out of sync with the IR's classification,
+      SKILL.md will always disagree. The mapping table must be generated
+      from the same IR, not a separate configuration.
+    spec_impact: "CL-04 EMIT — directive mapping from IR"
+    pitfall: P-134
+
+  - id: F04
+    severity: warning
+    description: >
+      The error message must show all three risk levels side by side:
+      "write-db classification mismatch: SKILL.md=R3, exec-approvals=R5,
+      plugin=R3. All artifacts must agree. The GovernanceIR classifies
+      write-db as R3. exec-approvals.json appears to use stale data."
+      The root cause (stale data) helps the developer fix the generator.
+    spec_impact: "CL-04 diagnostics — side-by-side classification display"
+    pitfall: P-134
+
+  - id: F05
+    severity: major
+    description: >
+      Stale exec-approvals.json from a previous build is a specific
+      failure pattern. If the EMIT phase re-generates only changed
+      artifacts (incremental emit), exec-approvals.json may retain
+      old risk levels. Incremental emit must invalidate all artifacts
+      when any risk level changes in the IR.
+    spec_impact: "CL-04 EMIT — incremental emit invalidation on risk change"
+    pitfall: P-134
+
+  - id: F06
+    severity: warning
+    description: >
+      Runtime consistency: the Gateway plugin should validate its own
+      risk classifications against exec-approvals.json at startup. If
+      they disagree, the plugin logs a warning: "Risk classification
+      drift detected. Plugin: R3, exec-approvals: R5 for write-db.
+      Run 'claws build' to reconcile." This is a runtime safety net.
+    spec_impact: "CL-03 runtime — startup consistency check"
+    pitfall: P-134
+
+  - id: F07
+    severity: note
+    description: >
+      This pitfall connects to P-133 (partial emit) and P-122 (directive-
+      to-risk mapping). P-134 catches mismatches between complete
+      artifacts. P-133 catches missing artifacts. P-122 catches mapping
+      errors that cause mismatches. Together, the three pitfalls cover
+      the full emit integrity surface.
+    spec_impact: "CL-04 EMIT — pitfall triad P-122/P-133/P-134"
+    pitfall: P-134

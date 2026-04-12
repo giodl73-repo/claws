@@ -1,0 +1,127 @@
+name: S16-p148-pii-redaction-forensic-loss
+series: pitfall-final-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates per-channel redaction matrix for PII data (P-148). Global PII
+  redaction loses forensic evidence (audit gets [REDACTED]), while no
+  redaction violates privacy (SIEM gets full SSN). Each output channel
+  must have independent redaction rules.
+
+expect:
+  rules_applied: [G-OUTPUT]
+  violations:
+    - code: CLAWS-W035
+      rule: G-OUTPUT
+      description: "Global redaction configured — audit channel loses forensic evidence"
+  pass: true
+  severity: warning
+
+simulate:
+  failures:
+    - component: output
+      type: global-redaction
+      error: "Audit record shows [REDACTED] for SSN — forensic investigation impossible"
+    - component: output
+      type: no-redaction
+      error: "SIEM export contains full SSN 123-45-6789 — privacy violation"
+  halt: null
+  budget: null
+
+problem: >
+  The workspace handles SSN data. A global PII redaction policy is configured:
+  all PII fields are replaced with [REDACTED] in all output channels. The
+  audit chain records "[REDACTED]" for the SSN field — forensic investigation
+  cannot determine which SSN was processed. The SIEM export also gets
+  "[REDACTED]," making compliance evidence incomplete. If redaction is removed,
+  the SIEM export contains the full SSN, violating privacy regulations. The
+  operator needs different redaction per channel: full data in audit (encrypted),
+  tokenized in SIEM, redacted in user-facing output.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-148 core: Global redaction treats all output channels identically.
+      Audit needs full data (for forensics). SIEM needs tokenized data
+      (for correlation without exposure). User-facing output needs full
+      redaction (for privacy). A single policy cannot serve all three
+      channels' conflicting requirements.
+    spec_impact: "CL-02 G-OUTPUT — per-channel redaction matrix"
+    pitfall: "P-148"
+
+  - id: F02
+    severity: major
+    description: >
+      The per-channel redaction matrix defines redaction behavior for each
+      output channel: audit: {mode: "encrypt", key: "audit-signing.key"},
+      siem: {mode: "tokenize", prefix: "TOK-"}, user: {mode: "redact",
+      replacement: "[REDACTED]"}, log: {mode: "hash", algorithm: "sha256"}.
+      Each channel has an independent redaction strategy.
+    spec_impact: "CL-02 G-OUTPUT — redaction matrix schema"
+    pitfall: "P-148"
+
+  - id: F03
+    severity: major
+    description: >
+      Encrypted audit data must be decryptable for authorized forensic
+      investigations. The encryption key must be the same audit signing
+      key used for HMAC (P-143). Key escrow or key splitting may be
+      required for enterprise compliance. Decryption must require two-
+      party authorization.
+    spec_impact: "CL-02 G-OUTPUT — forensic decryption authorization"
+    pitfall: "P-148"
+
+  - id: F04
+    severity: major
+    description: >
+      Tokenized SIEM data: SSN "123-45-6789" becomes "TOK-A7F2B9." The
+      tokenization must be consistent (same SSN always produces same token)
+      to enable correlation across events. But the token must be non-
+      reversible without the tokenization key. The key is stored in
+      .claws/keys/ separate from the signing key.
+    spec_impact: "CL-02 G-OUTPUT — consistent non-reversible tokenization"
+    pitfall: "P-148"
+
+  - id: F05
+    severity: major
+    description: >
+      The redaction matrix must be configured at compile time and enforced
+      at runtime. The generated handler must route PII data through the
+      appropriate redaction function based on the output channel. If the
+      channel is unknown, the default is full redaction (most restrictive).
+    spec_impact: "CL-04 EMIT — redaction routing in generated handler"
+    pitfall: "P-148"
+
+  - id: F06
+    severity: warning
+    description: >
+      PII detection accuracy: the redaction function must correctly
+      identify which fields contain PII. False negatives (PII not
+      redacted) violate privacy. False positives (non-PII redacted)
+      lose useful data. The PII field list should come from data labels
+      in MEMORY.md, not from runtime content scanning.
+    spec_impact: "CL-02 G-OUTPUT — PII field identification from labels"
+    pitfall: "P-148"
+
+  - id: F07
+    severity: warning
+    description: >
+      The per-channel matrix adds complexity to the generated handler.
+      Each output path (audit write, SIEM export, user response, log
+      write) must include the channel-specific redaction call. Missing
+      a single output path creates a data leak. Post-emit verification
+      must check that every output path includes redaction.
+    spec_impact: "CL-04 EMIT — output path redaction coverage verification"
+    pitfall: "P-148"
+
+  - id: F08
+    severity: note
+    description: >
+      Regulatory requirements vary by jurisdiction: GDPR requires full
+      redaction in user-facing output but allows encrypted storage. HIPAA
+      requires minimum necessary disclosure. The redaction matrix must be
+      configurable per compliance framework, and `claws comply` must
+      validate the matrix against the declared framework.
+    spec_impact: "CL-06 comply — redaction matrix compliance validation"
+    pitfall: "P-148"

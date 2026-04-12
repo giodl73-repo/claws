@@ -1,0 +1,160 @@
+name: S01-inner-ring-file-save
+series: three-rings
+version: 1
+specs: [CL-05]
+description: >
+  Validates the inner ring (live) file-save detection: when TOOLS.md changes,
+  claws watch detects the modification and triggers pinch --staged on only the
+  changed file. The inner ring must respond in <1s, apply governance rules to
+  the diff, and report violations without re-compiling the entire workspace.
+  This is the 70% scenario — most governance issues are caught here.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [TOOLS.md]
+      incremental: true
+      ring: inner
+    analysis:
+      rules_evaluated: true
+      violations:
+        - rule: G-CLASS
+          severity: high
+          file: TOOLS.md
+          tool_name: deploy-prod
+          message: "tool risk R5 exceeds workspace trust tier T2"
+      warnings: []
+  violations:
+    - rule: G-CLASS
+      file: TOOLS.md
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer working in VS Code saves TOOLS.md after adding a new tool
+  "deploy-prod" with capabilities [EXECUTE, TRANSACT], which classifies as
+  R5. The workspace trust tier is T2 (max R3). claws watch is running in the
+  background. It must detect the TOOLS.md change via file system watcher,
+  run pinch --staged on only the changed file, evaluate the G-CLASS rule
+  against the cached GovernanceIR, and surface the violation in <1s. The
+  developer sees the violation before they even switch to the terminal.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The spec says the inner ring runs "pinch --staged" on file save, but
+      --staged is a git concept (staged files). A file save in the editor
+      is NOT a git stage. The inner ring needs a distinct mode: pinch on
+      the saved file (working tree diff), not pinch --staged (git index diff).
+      These are different sets of files. The spec conflates editor save with
+      git stage.
+    spec_impact: "CL-05 Inner Ring — distinguish file-save trigger from git-stage trigger"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Incremental pinch on a single file requires a cached GovernanceIR from
+      the last full compile. If the cache is stale (workspace was modified
+      outside the editor), the inner ring may evaluate against outdated context.
+      The spec does not define cache invalidation rules for the inner ring.
+      A stale cache means the inner ring could miss cross-file conflicts.
+    spec_impact: "CL-05 Inner Ring — cache invalidation policy for incremental checks"
+    pitfall: P-162
+
+  - id: F03
+    severity: major
+    description: >
+      The <1s latency target for the inner ring assumes incremental parsing.
+      But if the changed file is TOOLS.md and a new tool introduces an OBO
+      boundary, detecting OBO-WITHOUT-ELICIT requires checking SOUL.md and
+      USER.md — which are NOT in the changed set. The inner ring must load
+      at least the cached IR to detect cross-file conflicts, which adds
+      deserialization time to the latency budget.
+    spec_impact: "CL-05 Inner Ring — cross-file conflict detection in incremental mode"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The file system watcher must handle rapid successive saves (user types,
+      saves, types, saves). The 300ms batch window from the VS Code extension
+      spec (compilation host) should also apply to the inner ring watch mode.
+      Without batching, 5 rapid saves produce 5 pinch runs, wasting resources
+      and flooding the terminal with duplicate violations.
+    spec_impact: "CL-05 Inner Ring — batch window for rapid file saves"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The inner ring output goes to the terminal (or LSP diagnostics). But
+      pinch normally writes to stdout with formatting. In watch mode, the
+      output must be appended, not overwritten — the developer needs to see
+      the history of checks, not just the latest. The spec does not define
+      the output format for watch-mode pinch results.
+    spec_impact: "CL-05 Inner Ring — watch-mode output format (append vs overwrite)"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      When TOOLS.md adds a tool that triggers G-CLASS, the inner ring detects
+      it. But the fix requires editing claws.json (raise trust tier) or
+      removing the tool. If the developer edits claws.json, the inner ring
+      must re-check TOOLS.md against the new trust tier. This creates a
+      cascading re-check: change A triggers check, fix triggers re-check of
+      the original violation. The spec does not address cascading checks.
+    spec_impact: "CL-05 Inner Ring — cascading re-checks after fix edits"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The error message contract (what/how/where) from CL-05 must apply in
+      watch mode. But the "Fix:" suggestion for G-CLASS ("raise trust tier
+      to T3") requires knowing the current trust tier. In incremental mode,
+      the inner ring may not have loaded claws.json. Fix suggestions that
+      reference other files need the cached IR or explicit file reads.
+    spec_impact: "CL-05 Error Message Contract — fix suggestions in incremental mode"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The 70% figure ("handles 70% of scenarios") is an assertion without
+      evidence. The actual percentage depends on the violation distribution:
+      if most violations are cross-file conflicts (which require full compile),
+      the inner ring catches less than 70%. The spec should either validate
+      this number against the 29 governance rules or remove the specific claim.
+    spec_impact: "CL-05 Inner Ring — validate or qualify the 70% claim"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      On Windows, file system watchers can fire multiple events for a single
+      save (write + rename for atomic saves in VS Code). The inner ring must
+      deduplicate events for the same file within the batch window. Without
+      deduplication, a single save could trigger 2-3 pinch runs on Windows.
+    spec_impact: "CL-05 Inner Ring — Windows file watcher event deduplication"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The inner ring watches for changes to the 9 workspace files. But if
+      a non-workspace file changes (e.g., a .ts source file in the skill
+      project), the inner ring should NOT trigger. The watcher needs an
+      explicit include list matching the 9 workspace files, not a directory-
+      level watch that fires on every file change.
+    spec_impact: "CL-05 Inner Ring — watcher scope limited to 9 workspace files"
+    pitfall: null

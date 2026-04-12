@@ -1,0 +1,147 @@
+name: S11-p207-timing-side-channel
+series: pitfall-thoth-1
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates that approval token signature verification uses constant-time
+  comparison to prevent timing side-channel attacks. An attacker makes repeated
+  verification requests with incrementally guessed signatures, measuring response
+  times to determine which bytes are correct. The compiler must enforce constant-
+  time comparison (crypto.timingSafeEqual) at the compile-time level.
+
+expect:
+  attack_class: timing-side-channel
+  defense_layer: g-elicit
+  blocked: true
+  audit_event:
+    type: obo-forged-token-detected
+    tool: "execute-shell-command"
+    risk_level: 5
+    outcome: DENY
+    reason: "token signature verification failed; constant-time comparison prevented timing leak"
+
+simulate:
+  failures:
+    - component: approval-flow
+      type: timing-side-channel-attempt
+      error: "attacker attempted byte-by-byte signature guessing; constant-time comparison prevented information leakage"
+  halt: null
+  budget: null
+
+problem: >
+  An attacker controls a malicious agent and can observe the response time of
+  token verification requests. The attacker submits an approval token with a
+  guessed signature where the first byte is correct but the rest are random. If
+  the comparison uses standard equality (===), the first byte matches and the
+  comparison proceeds to the second byte before failing — taking slightly longer
+  than a token where the first byte is wrong. The attacker measures this timing
+  difference (typically nanoseconds to microseconds) across hundreds of requests.
+  By iterating byte by byte, the attacker reconstructs the valid signature in
+  O(256 * N) attempts instead of O(256^N) brute force. For a 32-byte HMAC-SHA256
+  signature, this reduces the attack from 2^256 to 8192 attempts — trivially
+  feasible. The constant-time comparison ensures every comparison takes the same
+  time regardless of which bytes match.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The EMIT phase must generate token verification code that uses
+      crypto.timingSafeEqual (Node.js) or equivalent constant-time comparison.
+      This is not a runtime convention — the compiler must emit the correct
+      comparison function. If the emitted code uses === or Buffer.equals for
+      signature comparison, it is vulnerable. The compiler should lint its own
+      output to verify that no non-constant-time comparison is used on
+      security-sensitive values.
+    spec_impact: "CL-04 EMIT — mandatory crypto.timingSafeEqual in emitted token verification"
+    pitfall: P-207
+
+  - id: F02
+    severity: major
+    description: >
+      The constant-time guarantee must extend beyond just the signature bytes.
+      If the token format includes a length field, the length check must also
+      be constant-time. An attacker could probe signature lengths (e.g., 31
+      bytes vs 32 bytes) to determine the expected length before attacking
+      the content. The comparison must first pad both inputs to the same
+      length, then compare in constant time.
+    spec_impact: "CL-02 G-ELICIT — constant-time length normalization before comparison"
+    pitfall: P-207
+
+  - id: F03
+    severity: major
+    description: >
+      The timing attack requires many requests to build statistical confidence.
+      The rate limiter (P-201) provides a secondary defense: if the attacker
+      is limited to 5 R5 requests per minute, gathering 8192 timing samples
+      takes 27 hours. However, the attacker may use different tool names to
+      avoid the per-tool rate limit while still measuring the timing of the
+      signature comparison. The timing defense must be primary (constant-time
+      comparison) with rate limiting as defense-in-depth.
+    spec_impact: "CL-02 G-ELICIT — constant-time as primary defense, rate limiting as secondary"
+    pitfall: P-207
+
+  - id: F04
+    severity: major
+    description: >
+      The compiler must emit a static analysis annotation (or AST marker) on
+      all security-sensitive comparison sites. During the VERIFY phase, the
+      compiler's own output is scanned for comparison operations on token
+      fields. Any comparison that does not use the constant-time primitive
+      is flagged as a security defect. This makes the constant-time
+      requirement a compile-time guarantee rather than a code review
+      convention.
+    spec_impact: "CL-04 VERIFY — static analysis for non-constant-time comparison in emitted code"
+    pitfall: P-207
+
+  - id: F05
+    severity: warning
+    description: >
+      JavaScript's crypto.timingSafeEqual throws if the two buffers have
+      different lengths. The emitted code must handle the length mismatch
+      case (invalid token with wrong-length signature) BEFORE calling
+      timingSafeEqual. The length check must also be constant-time — a
+      naive "if (a.length !== b.length) return false" leaks length
+      information. The recommended pattern is: pad the shorter buffer to
+      the expected length, then compare, then separately check length.
+    spec_impact: "CL-04 EMIT — safe length mismatch handling before timingSafeEqual"
+    pitfall: P-207
+
+  - id: F06
+    severity: major
+    description: >
+      The timing side-channel is not limited to network-observable timing.
+      If the attacker agent runs on the same machine (common in local
+      development), it may measure CPU cache timing, branch prediction
+      artifacts, or memory access patterns. Constant-time comparison
+      mitigates the software-level timing channel but does not address
+      hardware-level channels. For enterprise deployments, the handler
+      process should run with process isolation (separate container or VM)
+      from agent processes.
+    spec_impact: "CL-03 runtime — process isolation recommendation for handler execution"
+    pitfall: P-207
+
+  - id: F07
+    severity: warning
+    description: >
+      The error response for a failed signature verification must take the
+      same time as a successful verification (minus the tool execution time).
+      If the "denied" response returns immediately but the "approved" response
+      includes tool execution latency, the attacker can distinguish approved
+      from denied without even reading the response. The denied response
+      should include a fixed delay matching the average tool execution
+      overhead to mask the approval status from timing analysis.
+    spec_impact: "CL-03 runtime — response-time normalization for approval vs denial"
+    pitfall: P-207
+
+  - id: F08
+    severity: warning
+    description: >
+      Unit tests for constant-time behavior are inherently difficult (timing
+      measurements in tests are noisy). The compile-time static analysis
+      (F04) is the primary enforcement mechanism. However, integration tests
+      should verify that the emitted code imports and calls
+      crypto.timingSafeEqual (import presence and call-site verification)
+      rather than trying to measure timing differences directly.
+    spec_impact: "CL-04 testing — import and call-site verification for timingSafeEqual"
+    pitfall: P-207

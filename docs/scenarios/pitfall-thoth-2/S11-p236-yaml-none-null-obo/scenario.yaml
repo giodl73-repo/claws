@@ -1,0 +1,172 @@
+name: S11-p236-yaml-none-null-obo
+series: pitfall-thoth-2
+version: 1
+specs: [CL-05]
+description: >
+  Validates that YAML None (capitalized) is not parsed as null in skill
+  frontmatter (P-236). When a developer writes obo: None intending the string
+  "none", YAML parses it as null, causing validation to fail with a cryptic
+  error. The frontmatter parser must disambiguate None/null and provide a
+  clear diagnostic.
+
+expect:
+  governance_ir:
+    version: 1
+    skill_scaffold:
+      obo_raw: "None"
+      obo_parsed: null
+      obo_expected: "none"
+      disambiguation: required
+    analysis:
+      rules_evaluated: true
+      parse_check: true
+  violations:
+    - code: CLAWS-E236
+      message: "obo field parsed as null — did you mean 'none' (quoted string)? YAML treats None as null"
+      severity: error
+  warnings:
+    - code: CLAWS-W236
+      message: "YAML None/True/False disambiguation — use quoted strings for literal values"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: frontmatter-parser
+      type: yaml-null-coercion
+      error: "obo: None parsed as obo: null — validation rejects null as invalid obo value"
+    - component: compile-sim
+      type: validation-failure
+      error: "Skill manifest validation failed: obo must be string, got null"
+  halt: null
+  budget: null
+
+problem: >
+  A developer creates a skill manifest with obo: None, intending to declare
+  that the skill does not act on behalf of users. In YAML 1.1 (the default
+  for most YAML parsers including js-yaml), "None" is parsed as null along
+  with "null", "~", and empty values. The frontmatter parser produces
+  {obo: null} instead of {obo: "none"}. The skill manifest validator rejects
+  null because the obo field expects a string value ("none", "user", or a
+  specific delegation target). The error message is "Validation error: obo
+  must be of type string, received null" — which does not explain why the
+  developer's input was converted to null or how to fix it. The developer
+  tries obo: NONE (all caps), which also parses as null. They eventually
+  discover through Stack Overflow that YAML requires quoting: obo: "None".
+  This is a well-known YAML footgun that the parser should handle gracefully.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-236 core: The frontmatter parser must detect YAML null coercion
+      for known fields and produce a targeted diagnostic. When obo parses
+      as null and the raw text contains "None", "NONE", "null", or "~",
+      the error message must say: "obo: None was parsed as null by YAML.
+      Use obo: 'none' (quoted) for the string value." This specific
+      diagnostic eliminates the Stack Overflow debugging cycle.
+    spec_impact: "CL-05 Amendment — YAML null disambiguation diagnostic"
+    pitfall: "P-236"
+
+  - id: F02
+    severity: major
+    description: >
+      The parser should auto-correct common YAML null coercions for known
+      fields where the intent is unambiguous. For the obo field, if the
+      parsed value is null and the schema expects a string, the parser
+      should treat it as the string "none" with a warning. This is safe
+      because null is never a valid value for obo, so the coercion does
+      not create ambiguity.
+    spec_impact: "CL-05 Amendment — auto-correction for unambiguous null coercions"
+    pitfall: "P-236"
+
+  - id: F03
+    severity: major
+    description: >
+      YAML 1.1 has multiple null aliases: null, Null, NULL, ~, and empty
+      value. All of these must be handled for the obo field. Additionally,
+      YAML 1.1 treats True/False/TRUE/FALSE/Yes/No/On/Off as booleans.
+      If any skill manifest field expects a string that collides with a
+      YAML keyword, the parser must detect the coercion and provide a
+      targeted diagnostic.
+    spec_impact: "CL-05 Amendment — comprehensive YAML keyword collision handling"
+    pitfall: "P-236"
+
+  - id: F04
+    severity: major
+    description: >
+      The scaffold command should generate obo values with proper quoting.
+      When claws skill new generates a manifest with obo: none, it must
+      output obo: "none" (quoted) to prevent the YAML footgun from the
+      start. All string values in generated manifests that could collide
+      with YAML keywords must be quoted defensively.
+    spec_impact: "CL-05 Maker Experience Amendment — defensive quoting in generated manifests"
+    pitfall: "P-236"
+
+  - id: F05
+    severity: major
+    description: >
+      The claws lint command should detect unquoted YAML keyword values
+      in manifests and warn about potential coercion issues. This
+      compile-time check catches the problem before the developer
+      encounters a cryptic validation error. The lint rule should fire
+      for any unquoted value that matches a YAML 1.1 keyword (null, true,
+      false, yes, no, on, off, none) in a string-typed field.
+    spec_impact: "CL-05 Amendment — lint rule for unquoted YAML keywords"
+    pitfall: "P-236"
+
+  - id: F06
+    severity: warning
+    description: >
+      YAML 1.2 removed most of the boolean and null aliases (only true,
+      false, null remain as keywords). Switching to a YAML 1.2 parser
+      would eliminate most coercion issues. However, js-yaml defaults to
+      YAML 1.1 for backward compatibility. The spec should recommend
+      YAML 1.2 parsing for skill manifests and document any backward
+      compatibility concerns.
+    spec_impact: "CL-05 Amendment — YAML 1.2 recommendation for skill manifests"
+    pitfall: "P-236"
+
+  - id: F07
+    severity: warning
+    description: >
+      The validation error message must never expose the raw YAML parse
+      result without context. "received null" is meaningless to a developer
+      who wrote "None." Every validation error for frontmatter fields must
+      include both the raw text from the source file and the parsed value,
+      so the developer can see the transformation that occurred.
+    spec_impact: "CL-05 Amendment — raw text in validation error messages"
+    pitfall: "P-236"
+
+  - id: F08
+    severity: warning
+    description: >
+      The YAML footgun affects all string-typed fields, not just obo.
+      Fields like fail_mode: off (parsed as false), description: null
+      (parsed as null), and enabled: yes (parsed as true) are all
+      vulnerable. The disambiguation logic should apply generically to
+      all string-typed fields in the manifest schema, not just obo.
+    spec_impact: "CL-05 Amendment — generic YAML keyword disambiguation for all string fields"
+    pitfall: "P-236"
+
+  - id: F09
+    severity: note
+    description: >
+      Documentation and error messages should reference the YAML 1.1
+      keyword list and explain the quoting requirement. A "YAML gotchas"
+      section in the skill development guide would preemptively address
+      the most common YAML footguns. The guide should include a table of
+      values that require quoting with examples.
+    spec_impact: "CL-05 Developer Guide — YAML quoting reference"
+    pitfall: "P-236"
+
+  - id: F10
+    severity: note
+    description: >
+      Test coverage must include all YAML null aliases for every string-
+      typed manifest field. The test matrix should cover: null, Null, NULL,
+      ~, empty string, None, NONE, and the absence of the field entirely.
+      Each case must produce either a correct parse or a clear diagnostic,
+      never a silent wrong value.
+    spec_impact: "CL-05 Amendment — YAML null alias test matrix"
+    pitfall: "P-236"

@@ -1,0 +1,148 @@
+name: S17-p178-kill-unreachable-workspace
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that kill switch partial failure for unreachable workspaces
+  escalates to a CRITICAL alert with an explicit escalation path. A kill
+  that silently fails for unreachable workspaces leaves compromised agents
+  running with no operator awareness.
+
+expect:
+  workspaces:
+    total: 8
+    killed: 6
+    active: 2
+    unreachable: 2
+  drift_count: 0
+  broadcast_result: null
+  compliance:
+    governance_active: 0
+    governance_halted: 6
+    kill_failed: 2
+    alert_level: CRITICAL
+    escalation_path: "manual workspace isolation required"
+
+simulate:
+  failures:
+    - component: kill-switch
+      type: unreachable-workspace
+      error: "workspace-phi: ECONNREFUSED — kill cannot reach workspace"
+    - component: kill-switch
+      type: unreachable-workspace
+      error: "workspace-sigma: ETIMEDOUT — kill timed out after 10s"
+  halt:
+    type: fleet-kill
+    reason: "active data exfiltration incident"
+    timestamp: "2026-04-11T17:00:00Z"
+  budget: null
+
+problem: >
+  An incident responder runs `claws kill --fleet --confirm` to stop all
+  agents during an active data exfiltration event. 6 of 8 workspaces are
+  killed successfully. Workspace-phi is on a network share that went offline
+  during the incident. Workspace-sigma is behind a firewall that blocks the
+  kill signal. The kill command returns with a partial success message, but
+  the 2 unreachable workspaces continue running their agents with active
+  governance (which the compromised agent has already bypassed). The incident
+  responder assumes all agents are halted and begins forensic investigation,
+  unaware that 2 workspaces are still active and potentially still exfiltrating
+  data.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Kill partial failure is fundamentally different from broadcast partial
+      failure. A broadcast failure means a workspace misses a policy update.
+      A kill failure means a potentially compromised workspace continues
+      running. CL-05 must treat kill partial failure as a CRITICAL security
+      event, not an operational inconvenience. The exit code must be 1 (total
+      failure semantics), not 2 (partial success).
+    spec_impact: "CL-05 Kill Switch — CRITICAL severity for partial failure"
+    pitfall: P-178
+
+  - id: F02
+    severity: major
+    description: >
+      The CRITICAL alert for kill partial failure must include an explicit
+      escalation path: "MANUAL INTERVENTION REQUIRED: 2 workspaces could
+      not be killed. Workspace-phi (network-unreachable) and workspace-sigma
+      (timeout). Recommended: isolate these workspaces at the network level
+      immediately." The alert must go to the security incident channel, not
+      the operations channel.
+    spec_impact: "CL-05 Kill Switch — escalation path in CRITICAL alert"
+    pitfall: P-178
+
+  - id: F03
+    severity: major
+    description: >
+      The kill command must retry unreachable workspaces with aggressive
+      timing (3 retries, 5-second intervals) before declaring failure. A
+      transient network blip should not result in a false CRITICAL alert.
+      However, after retries are exhausted, the CRITICAL alert must fire
+      immediately. The retry loop must be bounded by a total timeout
+      (default 30 seconds for kill, much shorter than broadcast).
+    spec_impact: "CL-05 Kill Switch — bounded retry before CRITICAL"
+    pitfall: P-178
+
+  - id: F04
+    severity: major
+    description: >
+      The `claws fleet status` command must show unreachable-unkilled
+      workspaces with a distinct status: KILL_FAILED. This status must
+      persist until the workspace becomes reachable and the kill is confirmed.
+      The fleet status must not show these workspaces as "killed" — the
+      kill was requested but not confirmed. The distinction between
+      "kill confirmed" and "kill requested but unconfirmed" is critical
+      for incident response.
+    spec_impact: "CL-05 Fleet Status — KILL_FAILED distinct status"
+    pitfall: P-178
+
+  - id: F05
+    severity: major
+    description: >
+      A background kill reconciliation loop must continuously attempt to
+      reach unreachable workspaces after the initial kill fails. When a
+      workspace becomes reachable again, the reconciliation loop must
+      immediately apply the kill. This ensures that workspaces that were
+      temporarily unreachable are killed as soon as possible, without
+      requiring manual operator intervention.
+    spec_impact: "CL-05 Kill Switch — background kill reconciliation"
+    pitfall: P-178
+
+  - id: F06
+    severity: warning
+    description: >
+      The kill CRITICAL alert must integrate with external incident response
+      tools. CL-05 should define webhook and SIEM export formats for kill
+      failure events. The webhook payload must include: fleet_id, failed
+      workspaces, failure reasons, retry count, and recommended actions.
+      SOC teams need this data in their SIEM to correlate with network
+      isolation actions.
+    spec_impact: "CL-05 Kill Switch — SIEM/webhook integration for failures"
+    pitfall: P-178
+
+  - id: F07
+    severity: warning
+    description: >
+      If the fleet uses a coordination service (etcd, consul), the kill
+      command could set a fleet-wide kill flag that workspaces poll on
+      heartbeat. When the unreachable workspace reconnects and heartbeats,
+      it sees the kill flag and self-halts. This pattern handles the
+      "temporarily unreachable" case gracefully without requiring the
+      kill command to maintain a long-running connection.
+    spec_impact: "CL-05 Kill Switch — heartbeat-based kill propagation"
+    pitfall: P-178
+
+  - id: F08
+    severity: note
+    description: >
+      Kill failure for unreachable workspaces should be included in the
+      post-incident report as a finding. The incident response runbook
+      should include a step: "After kill, verify all workspaces show
+      KILLED status. If any show KILL_FAILED, escalate to network team
+      for manual isolation." This procedural documentation is as important
+      as the technical implementation.
+    spec_impact: "CL-05 Kill Switch — post-incident report integration"
+    pitfall: P-178

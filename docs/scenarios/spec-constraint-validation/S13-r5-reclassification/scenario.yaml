@@ -1,0 +1,127 @@
+name: S13-r5-reclassification
+series: spec-constraint-validation
+version: 1
+specs: [CL-02]
+description: >
+  Validates the R5 reclassification constraint: the only way to change an R5
+  tool's fail-mode behavior is to reclassify it to R4 or below. There is no
+  fail-open override for R5. Reclassification is the ONLY mechanism. The
+  compiler must accept valid reclassifications and audit the override reason.
+
+expect:
+  rules_applied: [G-CLASS]
+  violations: []
+  pass: true
+  severity: note
+  warnings:
+    - code: CLAWS-I010
+      type: classification-override
+      tool: send-email
+      original_classification: R5
+      override_classification: R4
+      reason: "generates draft only, does not send"
+      audited: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  G-CLASS classifies "send-email" as R5/OBO based on its name and capabilities.
+  But in this workspace, send-email actually generates a draft email for human
+  review -- it does not send anything. The operator overrides the classification
+  to R4/EXECUTE in claws.json with a reason field. The compiler accepts the
+  override, downgrades the tool from R5 to R4, and the tool now uses R4
+  fail-mode rules (configurable, default fail-closed) instead of R5's
+  non-negotiable fail-closed. The override is audited.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Reclassification from R5 to R4 changes three security properties:
+      (1) fail-mode becomes configurable instead of non-negotiable,
+      (2) elicitation gate may no longer be required (R4 requires
+      confirmation, not OBO approval), and (3) the tool is no longer
+      flagged as an OBO boundary. All three changes must be reflected
+      consistently in all governance layers and artifacts.
+    spec_impact: "CL-02 G-CLASS — reclassification cascading effects"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The override MUST include a reason field. A reclassification from R5
+      to R4 without a reason is a red flag -- it may indicate a developer
+      trying to avoid the elicitation gate. The compiler SHOULD warn if the
+      reason is absent: "CLAWS-W015: R5 reclassification without reason --
+      consider documenting why this tool does not require OBO governance."
+    spec_impact: "CL-02 G-CLASS — mandatory reason for R5 reclassification"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Reclassification downward (R5 to R4) is the common case. But can
+      reclassification go upward (R1 to R5)? If an operator reclassifies
+      read-file from R1 to R5, the tool gains OBO governance. Upward
+      reclassification should be allowed (more restrictive is always safe)
+      but produces an informational note: "R1 tool reclassified to R5 --
+      OBO governance will be applied."
+    spec_impact: "CL-02 G-CLASS — bidirectional reclassification"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The reclassification override appears in `claws pinch` output as
+      [OVERRIDE] per Amendment A3. The pinch report must show: original
+      classification, override classification, reason, and whether the
+      override changes the fail-mode behavior. This transparency is
+      essential for security audits.
+    spec_impact: "CL-02 G-CLASS — reclassification in pinch report"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      If the workspace is part of a fleet, the fleet administrator may
+      prohibit R5 reclassifications. A fleet policy like
+      `fleet.preventR5Reclassification: true` would block the override
+      at the fleet level, even though the workspace operator configures it.
+      Fleet policy enforcement for reclassification is a CL-05 concern.
+    spec_impact: "CL-05 fleet — R5 reclassification fleet policy"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The compliance evidence package (CL-02 SOC2) must include all
+      reclassifications with reasons. An auditor reviewing the evidence
+      needs to see every tool that was downgraded from R5 and WHY. The
+      `claws comply soc2` output includes a reclassification table with
+      tool name, original risk, override risk, reason, and date.
+    spec_impact: "CL-02 compliance — reclassification audit trail"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Multiple tools may be reclassified. If 5 of 10 R5 tools are
+      reclassified to R4, the workspace's effective R5 tool count drops from
+      10 to 5. The GovAnalysis summary must report both counts: "10 tools
+      classified R5 (5 overridden to R4, 5 effective R5)." This prevents
+      the false impression that only 5 tools have OBO characteristics.
+    spec_impact: "CL-02 G-CLASS — effective vs derived count reporting"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      This scenario validates CL-02 constraint S01-F03 "R5 reclassification
+      as fail-mode workaround." The constraint documents that reclassification
+      is intentionally the ONLY path -- no fail-open override for R5 exists,
+      and this is by design.
+    spec_impact: "CL-02 — R5 reclassification constraint traceability"
+    pitfall: null

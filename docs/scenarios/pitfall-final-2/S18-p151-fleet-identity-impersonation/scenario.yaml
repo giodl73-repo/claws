@@ -1,0 +1,141 @@
+name: S18-p151-fleet-identity-impersonation
+series: pitfall-final-2
+version: 1
+specs: [CL-02, CL-05]
+description: >
+  Validates fleet-conditional identity warnings for L0 identity (P-151).
+  When two workspaces in a fleet declare the same agent name "finance-bot,"
+  messages reach the wrong agent. Fleet scanning must detect identity
+  collisions and warn about impersonation risk.
+
+expect:
+  attack_class: identity-impersonation
+  defense_layer: fleet-identity-scan
+  blocked: false
+  audit_event:
+    type: identity-collision
+    tool: null
+    risk_level: 5
+    outcome: WARNED
+    reason: "claws-fleet-identity: 'finance-bot' declared in 2 workspaces"
+
+simulate:
+  failures:
+    - component: fleet
+      type: identity-collision
+      error: "Agent name 'finance-bot' declared in workspace-alpha and workspace-beta"
+    - component: a2a
+      type: message-misroute
+      error: "Message intended for workspace-alpha/finance-bot delivered to workspace-beta/finance-bot"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet of 5 workspaces includes workspace-alpha and workspace-beta.
+  Both declare an agent named "finance-bot" with L0 identity (name-only,
+  no cryptographic identity). Agent "ops-bot" in workspace-gamma sends a
+  delegation message to "finance-bot." The fleet router delivers it to
+  workspace-beta's finance-bot (which has a different policy configuration,
+  different data access, and different trust relationships). Workspace-
+  beta's finance-bot processes the message, potentially accessing data
+  it should not have, and returns results that ops-bot trusts as coming
+  from workspace-alpha's finance-bot.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-151 core: L0 identity (name-only) provides no uniqueness guarantee
+      across workspaces. In a single workspace, agent names are unique by
+      convention. In a fleet, different workspaces can independently declare
+      agents with the same name. The fleet has no global namespace.
+    spec_impact: "CL-02 G-A2A-IDENTITY — L0 identity collision in fleet"
+    pitfall: "P-151"
+
+  - id: F02
+    severity: major
+    description: >
+      Fleet-conditional warning: `claws fleet scan` must detect agent name
+      collisions across workspaces. For each collision, emit CLAWS-W070:
+      "Agent 'finance-bot' declared in workspace-alpha and workspace-beta.
+      Fleet-wide A2A messaging may misroute." The warning only fires in
+      fleet context, not for standalone workspaces.
+    spec_impact: "CL-05 fleet — identity collision detection"
+    pitfall: "P-151"
+
+  - id: F03
+    severity: major
+    description: >
+      The minIdentityLevel configuration: claws.json fleet.minIdentityLevel
+      can require L1 (name + workspace qualifier) or L2 (cryptographic
+      identity) for fleet participation. If set to L1, agents must be
+      addressed as "workspace-alpha/finance-bot" — eliminating name-only
+      collisions. L2 requires Ed25519 keys per agent.
+    spec_impact: "CL-01 schema — fleet.minIdentityLevel configuration"
+    pitfall: "P-151"
+
+  - id: F04
+    severity: major
+    description: >
+      Message misrouting in a fleet can cause data leakage: ops-bot sends
+      financial data to the wrong finance-bot, which operates under a
+      different trust policy and may forward the data to unauthorized
+      third-party agents. The impersonation creates a transitive trust
+      violation: ops-bot trusts workspace-alpha/finance-bot but data
+      reaches workspace-beta/finance-bot.
+    spec_impact: "CL-02 G-A2A-TRUST — impersonation-driven trust violation"
+    pitfall: "P-151"
+
+  - id: F05
+    severity: major
+    description: >
+      The fleet identity scan must run as part of `claws fleet scan` and
+      `claws fleet broadcast`. Before broadcasting configurations, verify
+      that no identity collisions exist in the target fleet. A collision
+      found during broadcast should block the broadcast with a clear error.
+    spec_impact: "CL-05 fleet — pre-broadcast identity validation"
+    pitfall: "P-151"
+
+  - id: F06
+    severity: warning
+    description: >
+      L1 identity (workspace-qualified name) solves the collision problem
+      but requires all A2A message senders to use qualified names. Existing
+      configurations that use unqualified names must be migrated. `claws
+      fleet migrate-identity` should update trust declarations to use
+      qualified names.
+    spec_impact: "CL-05 fleet — identity migration tooling"
+    pitfall: "P-151"
+
+  - id: F07
+    severity: warning
+    description: >
+      In a fleet with dynamic workspace additions, identity collisions
+      can appear after the initial scan. The sidecar should monitor for
+      new agent registrations and re-run collision detection. A collision
+      introduced by a new workspace joining the fleet must be detected
+      within 60 seconds.
+    spec_impact: "CL-03 sidecar — dynamic fleet identity monitoring"
+    pitfall: "P-151"
+
+  - id: F08
+    severity: note
+    description: >
+      L2 cryptographic identity is the gold standard but adds operational
+      complexity: key generation, distribution, rotation, and revocation.
+      For most enterprises, L1 (workspace-qualified names) provides
+      sufficient protection without the key management burden. L2 should
+      be recommended for high-security fleets only.
+    spec_impact: "CL-02 G-A2A-IDENTITY — identity level guidance"
+    pitfall: "P-151"
+
+  - id: F09
+    severity: note
+    description: >
+      The impersonation risk increases with fleet size. A 5-workspace fleet
+      may have zero collisions. A 500-workspace fleet almost certainly has
+      collisions (birthday paradox). The fleet.minIdentityLevel default
+      should scale: L0 for <10 workspaces, L1 recommended for 10-100,
+      L1 required for >100.
+    spec_impact: "CL-05 fleet — size-based identity level recommendation"
+    pitfall: "P-151"

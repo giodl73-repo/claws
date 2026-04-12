@@ -1,0 +1,151 @@
+name: S11-a2a-delegation-cascade
+series: pitfall-coverage-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates that tool delegation without trust declaration is detected (P-088)
+  and that A2A rule cascades are suppressed when the root cause is a single
+  missing trust declaration (P-089). Delegation-without-trust creates
+  unreachable agents. Unsuppressed cascades produce 5 violations for one
+  root cause, overwhelming developers.
+
+expect:
+  rules_applied: [G-A2A-TRUST, G-A2A-IDENTITY, G-A2A-FLOW, G-A2A-ESCALATE, G-A2A-DELEGATE]
+  violations:
+    - code: CLAWS-E030
+      rule: G-A2A-TRUST
+      description: "Agent 'research-bot' has delegated tools but no trust declaration"
+  pass: false
+  severity: error
+
+simulate:
+  failures:
+    - component: a2a-analysis
+      type: delegation-without-trust
+      error: "research-bot receives 3 delegated tools but has no trust entry in claws.json"
+    - component: a2a-analysis
+      type: rule-cascade
+      error: "Missing trust triggers G-A2A-TRUST, G-A2A-IDENTITY, G-A2A-FLOW, G-A2A-ESCALATE, G-A2A-DELEGATE"
+  halt: null
+  budget: null
+
+problem: >
+  AGENTS.md declares a subagent "research-bot" with 3 delegated tools
+  (search-web, read-file, summarize). claws.json has no trust declaration
+  for research-bot. Under default-deny A2A policy, the agent can receive
+  delegated work but cannot report results back (the return channel requires
+  trust). The agent is effectively unreachable — work sent to it is lost.
+  Without rule dependency ordering, G-A2A-TRUST fires, then G-A2A-IDENTITY,
+  G-A2A-FLOW, G-A2A-ESCALATE, and G-A2A-DELEGATE each fire independently.
+  Five violations appear for one root cause. The developer does not know
+  which violation to fix first.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-088 core: research-bot has 3 delegated tools but no trust declaration.
+      The agent receives work (delegation channel open) but cannot report back
+      (return channel requires trust). Work items are lost. The developer sees
+      research-bot as "configured" but it never produces results. Silent data
+      loss is the worst failure mode.
+    spec_impact: "CL-02 G-A2A-TRUST — delegation implies minimum trust"
+    pitfall: "P-088"
+
+  - id: F02
+    severity: major
+    description: >
+      Tool delegation must imply minimum trust for the delegation channel.
+      If AGENTS.md delegates tools to an agent, claws must either (a) auto-
+      generate a minimum trust entry for the delegation channel, or (b) flag
+      the missing trust as a hard error with the fix instruction. Option (b)
+      is safer because it forces the developer to make an explicit trust
+      decision.
+    spec_impact: "CL-02 G-A2A-TRUST — implicit trust vs explicit error"
+    pitfall: "P-088"
+
+  - id: F03
+    severity: major
+    description: >
+      P-089 core: Five violations fire for one root cause (missing trust).
+      G-A2A-TRUST fires first. Then G-A2A-IDENTITY fails (no trust context
+      to evaluate identity), G-A2A-FLOW fails (no trust context for data
+      flow), G-A2A-ESCALATE fails (no trust context for escalation), and
+      G-A2A-DELEGATE fails (delegation without trust is incomplete). Five
+      errors, one fix.
+    spec_impact: "CL-02 G-A2A-* — cascade noise from single root cause"
+    pitfall: "P-089"
+
+  - id: F04
+    severity: major
+    description: >
+      Rule dependency ordering: G-A2A-TRUST is prerequisite for all other
+      G-A2A-* rules. If G-A2A-TRUST fails, downstream rules are suppressed
+      with status "SKIPPED: prerequisite G-A2A-TRUST not satisfied." Only
+      the root-cause violation appears. The developer fixes trust first,
+      then re-runs to see if downstream rules produce their own violations.
+    spec_impact: "CL-02 G-A2A-* — dependency ordering and suppression"
+    pitfall: "P-089"
+
+  - id: F05
+    severity: warning
+    description: >
+      The suppressed rules should still appear in verbose output
+      (`claws pinch --verbose`) so developers can see the full rule
+      evaluation. Default output shows only the root cause. Verbose output
+      shows all rules with their skip reasons. This prevents confusion about
+      "why didn't G-A2A-IDENTITY run?"
+    spec_impact: "CL-02 pinch — verbose vs default output for suppressed rules"
+    pitfall: "P-089"
+
+  - id: F06
+    severity: warning
+    description: >
+      If multiple agents are missing trust declarations, each agent produces
+      one G-A2A-TRUST violation. The downstream suppressions are per-agent.
+      With 5 untrusted agents, the developer sees 5 G-A2A-TRUST violations
+      (clear root causes) instead of 25 violations (5 agents x 5 rules).
+    spec_impact: "CL-02 G-A2A-* — per-agent suppression scaling"
+    pitfall: "P-089"
+
+  - id: F07
+    severity: warning
+    description: >
+      The minimum trust for delegation channels must be defined: what
+      capabilities does the return channel need? At minimum, the agent
+      needs COMMUNICATE capability to return results. If the delegated
+      tools include WRITE, the return channel may also need WRITE to
+      report write results. The minimum trust is capability-dependent.
+    spec_impact: "CL-02 G-A2A-TRUST — capability-dependent minimum trust"
+    pitfall: "P-088"
+
+  - id: F08
+    severity: note
+    description: >
+      The unreachable agent pattern (P-088) should be a distinct diagnostic
+      code (CLAWS-E030) separate from "agent with no trust" (which might be
+      intentional for isolated agents). The diagnostic must specifically flag
+      delegation + no trust = unreachable, not just missing trust in general.
+    spec_impact: "CL-02 G-A2A-TRUST — unreachable agent diagnostic code"
+    pitfall: "P-088"
+
+  - id: F09
+    severity: note
+    description: >
+      The dependency ordering creates a rule evaluation DAG. G-A2A-TRUST is
+      the root. G-A2A-IDENTITY depends on TRUST. G-A2A-FLOW depends on
+      TRUST and IDENTITY. G-A2A-ESCALATE depends on TRUST. G-A2A-DELEGATE
+      depends on TRUST. The DAG must be explicit in the rule engine
+      configuration, not implicit in evaluation order.
+    spec_impact: "CL-02 — A2A rule dependency DAG"
+    pitfall: "P-089"
+
+  - id: F10
+    severity: warning
+    description: >
+      A workspace with zero A2A agents should skip all G-A2A-* rules
+      entirely (not fire-and-suppress). The rule dependency DAG should have
+      a precondition: "agents_declared: true" before entering the G-A2A-*
+      subtree. This prevents noise in single-agent workspaces.
+    spec_impact: "CL-02 G-A2A-* — precondition gate for agent-less workspaces"
+    pitfall: "P-089"

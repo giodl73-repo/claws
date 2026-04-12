@@ -1,0 +1,155 @@
+name: S01-p162-inner-ring-cache-stale
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that inner ring incremental cache invalidates correctly after
+  out-of-editor workspace modifications (P-162). When a user edits OC workspace
+  files via git merge, sed, or external tools rather than the editor, the inner
+  ring watcher may not detect the change, leaving the cache stale and missing
+  cross-file OBO (on-behalf-of) conflicts.
+
+expect:
+  governance_ir:
+    version: 1
+    cache_state: invalidated
+    recompile_triggered: true
+    obo_conflicts_detected: 1
+  violations:
+    - code: CLAWS-E080
+      message: "Stale cache detected — file timestamp mismatch on AGENTS.md"
+      severity: error
+  warnings:
+    - code: CLAWS-W080
+      message: "Inner ring cache invalidated — 3 files changed outside editor"
+  artifacts:
+    - name: governance-ir.json
+      status: recompiled
+
+simulate:
+  failures:
+    - component: inner-ring
+      type: cache-stale
+      error: "AGENTS.md modified by git merge — watcher did not fire, cache serves stale IR"
+    - component: inner-ring
+      type: obo-conflict-missed
+      error: "Cross-file OBO conflict between AGENTS.md and TRUST.md not detected"
+  halt: null
+  budget: null
+
+problem: >
+  A developer runs git merge on a branch that modifies AGENTS.md, adding a new
+  agent with OBO delegation. The inner ring watcher is configured for editor-
+  driven file system events but git merge writes files in a batch that the
+  watcher's debounce window collapses into silence. The incremental cache still
+  holds the pre-merge IR. The next pinch run reads the stale cache and reports
+  zero violations. Meanwhile, the new agent's OBO declaration conflicts with an
+  existing trust boundary in TRUST.md — a cross-file conflict that only a full
+  recompilation would catch. The user deploys the governance plugin believing
+  it is clean.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-162 core: The inner ring incremental cache indexes files by content
+      hash, but the cache lookup uses the file path as the primary key
+      without verifying the content hash matches the current file on disk.
+      Out-of-editor modifications change the file content without triggering
+      the watcher, so the cache serves stale entries. The cache must compare
+      file modification timestamps or content hashes on every read, not
+      just on watcher events.
+    spec_impact: "CL-05 G-CACHE — content hash validation on cache read"
+    pitfall: "P-162"
+
+  - id: F02
+    severity: major
+    description: >
+      Git operations (merge, rebase, checkout, cherry-pick) write multiple
+      files atomically from git's perspective but the file system events
+      arrive as individual writes. The inner ring watcher's debounce window
+      may collapse these into a single event or miss them entirely if the
+      writes complete within the debounce interval. The watcher must use
+      a post-debounce full scan to detect any files whose timestamps
+      changed during the debounce window.
+    spec_impact: "CL-05 G-CACHE — post-debounce full scan"
+    pitfall: "P-162"
+
+  - id: F03
+    severity: major
+    description: >
+      Cross-file OBO conflicts require analyzing relationships between
+      AGENTS.md, TRUST.md, and RULES.md simultaneously. Incremental
+      compilation that only recompiles the changed file misses these cross-
+      file constraints. When any file in the OBO dependency graph changes,
+      all files in the graph must be recompiled together as a unit.
+    spec_impact: "CL-05 G-CACHE — cross-file dependency graph invalidation"
+    pitfall: "P-162"
+
+  - id: F04
+    severity: major
+    description: >
+      The stale cache scenario is silent — no error, no warning, no
+      indication that the cache served outdated data. The inner ring must
+      log a cache-hit event that includes the file timestamp at cache time
+      and the current file timestamp. A mismatch must produce CLAWS-W080
+      warning and trigger a full recompilation automatically.
+    spec_impact: "CL-05 G-CACHE — stale cache detection and warning"
+    pitfall: "P-162"
+
+  - id: F05
+    severity: major
+    description: >
+      The user experience after git merge is critical: the developer expects
+      the inner ring to detect changes and recompile. If the inner ring
+      silently serves stale data, the developer's mental model diverges
+      from reality. `claws status` must report cache freshness: last
+      validated timestamp, number of files verified, and whether any
+      files have been modified since last validation.
+    spec_impact: "CL-05 status — cache freshness reporting"
+    pitfall: "P-162"
+
+  - id: F06
+    severity: warning
+    description: >
+      On Windows, git operations may trigger NTFS journal events that
+      file system watchers do not receive. Node.js fs.watch on Windows
+      uses ReadDirectoryChangesW which may miss rename-based atomic
+      writes that git uses. The inner ring should supplement the watcher
+      with periodic polling (every 5 seconds) to catch watcher blind
+      spots on Windows.
+    spec_impact: "CL-05 G-CACHE — Windows watcher supplemental polling"
+    pitfall: "P-162"
+
+  - id: F07
+    severity: warning
+    description: >
+      The incremental cache invalidation granularity matters: invalidating
+      a single file is insufficient when cross-file constraints exist.
+      The cache must maintain a dependency graph where invalidating
+      AGENTS.md also invalidates the OBO analysis that depends on both
+      AGENTS.md and TRUST.md. Fine-grained invalidation without dependency
+      tracking is worse than full invalidation.
+    spec_impact: "CL-05 G-CACHE — dependency-aware invalidation"
+    pitfall: "P-162"
+
+  - id: F08
+    severity: warning
+    description: >
+      The debounce window duration creates a tradeoff: too short and every
+      keystroke triggers recompilation; too long and batch operations like
+      git merge complete within the window and are missed. The default
+      debounce should be 300ms for editor events, but out-of-editor batch
+      detection should use a separate 2-second post-quiet scan.
+    spec_impact: "CL-05 G-CACHE — dual debounce strategy"
+    pitfall: "P-162"
+
+  - id: F09
+    severity: note
+    description: >
+      The `claws doctor --check` command should include a cache coherence
+      test: recompile from scratch and compare the result with the cached
+      IR. Any difference indicates cache staleness. This is the gold
+      standard validation but too expensive for every file change.
+    spec_impact: "CL-05 doctor — cache coherence verification"
+    pitfall: "P-162"

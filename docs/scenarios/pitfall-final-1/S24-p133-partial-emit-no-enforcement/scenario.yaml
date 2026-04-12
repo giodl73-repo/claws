@@ -1,0 +1,121 @@
+name: S24-p133-partial-emit-no-enforcement
+series: pitfall-final-1
+version: 1
+specs: [CL-04]
+description: >
+  Validates that partial emit (SKILL.md emits but index.ts fails) is prevented
+  by the atomic staging protocol. All artifacts must be written to .claws/staging/
+  first, validated, and then moved atomically. A workspace must never have
+  advisory governance (L1) without enforcement (L2-L3).
+
+expect:
+  governance_ir:
+    version: 1
+    emit:
+      staging_protocol: atomic
+      artifacts_staged: 4
+      validation_passed: true
+      atomic_move: true
+    analysis:
+      rules_evaluated: true
+      violations: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 4
+    all_or_nothing: true
+
+simulate:
+  failures:
+    - phase: emit
+      type: index-ts-generation-failure
+      cause: typescript-compilation-error
+  halt: null
+  budget: null
+
+problem: >
+  The EMIT phase generates 4 artifacts: SKILL.md (L1 advisory), index.ts
+  (L2 plugin), exec-approvals.json (L4), and workflow.ts (L3). Generation
+  proceeds in order. SKILL.md generates successfully. index.ts generation
+  fails (TypeScript compilation error in a template). The EMIT phase halts.
+  SKILL.md was already written to the workspace. The workspace now has L1
+  advisory governance (SKILL.md says "NEVER access prod") but no enforcement
+  (index.ts is missing). The operator sees SKILL.md and believes governance
+  is active. R5 tools execute because there is no plugin to block them.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The atomic staging protocol writes ALL artifacts to .claws/staging/
+      first. No artifact is written to the workspace until all have been
+      generated and validated in staging. If any artifact fails, the
+      staging directory is cleaned up and no workspace files change.
+      This is the all-or-nothing guarantee.
+    spec_impact: "CL-04 EMIT — all-or-nothing staging protocol"
+    pitfall: P-133
+
+  - id: F02
+    severity: major
+    description: >
+      The partial emit failure mode creates false governance confidence.
+      SKILL.md present + index.ts absent = advisory without enforcement.
+      This is WORSE than no governance at all because the operator
+      believes protection exists. The atomic protocol eliminates this
+      failure mode entirely.
+    spec_impact: "CL-03 runtime — partial emit creates false confidence"
+    pitfall: P-133
+
+  - id: F03
+    severity: major
+    description: >
+      Post-staging validation checks all 4 artifacts before the atomic
+      move: (1) SKILL.md is non-empty and contains frozen keywords,
+      (2) index.ts compiles without TypeScript errors, (3) exec-approvals
+      .json is valid JSON with correct schema, (4) workflow.ts compiles.
+      If any check fails, staging is rolled back.
+    spec_impact: "CL-04 EMIT — post-staging validation checklist"
+    pitfall: P-133
+
+  - id: F04
+    severity: warning
+    description: >
+      The previous build's artifacts remain in the workspace if the new
+      build fails at staging. This is correct behavior: the workspace
+      keeps the last-known-good artifacts. The diagnostic should say:
+      "Build failed. Workspace retains previous build artifacts (last
+      successful build: 2026-04-10T14:32:00Z)."
+    spec_impact: "CL-04 EMIT — last-known-good preservation"
+    pitfall: P-133
+
+  - id: F05
+    severity: major
+    description: >
+      Cross-artifact consistency validation in staging ensures all 4
+      artifacts agree on risk levels, tool names, and policies before
+      moving to the workspace. This catches P-134 (classification
+      mismatch) at staging time. The consistency check is a pre-move
+      gate, not a post-move audit.
+    spec_impact: "CL-04 EMIT — consistency validation in staging"
+    pitfall: P-133
+
+  - id: F06
+    severity: warning
+    description: >
+      The staging directory must be cleaned up on failure. Leftover
+      staging artifacts from a failed build (related to P-121 orphaned
+      staging) must not accumulate. The cleanup is best-effort: if
+      cleanup fails, the next build's orphan detection handles it.
+    spec_impact: "CL-04 EMIT — staging cleanup on failure"
+    pitfall: P-133
+
+  - id: F07
+    severity: note
+    description: >
+      This pitfall connects the EMIT phase (CL-04) to runtime safety
+      (CL-03). The compiler's job is not just to generate correct
+      artifacts but to ensure they are deployed atomically. The staging
+      protocol is the bridge between compile-time correctness and
+      runtime safety.
+    spec_impact: "CL-04/CL-03 — compile-to-runtime safety bridge"
+    pitfall: P-133

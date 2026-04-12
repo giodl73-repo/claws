@@ -1,0 +1,132 @@
+name: S09-collect-all-errors
+series: pitfall-coverage-1
+version: 1
+specs: [CL-04]
+description: >
+  Validates that the compilation pipeline collects all errors across all
+  source files before halting, rather than fail-fast on the first error.
+  P-060 identifies that a malformed SOUL.md halts the pipeline at Phase 1,
+  hiding errors in TOOLS.md and claws.json until the developer fixes
+  SOUL.md and re-runs. The pipeline must report all diagnostics in one pass,
+  matching developer expectations from tsc, rustc, and similar compilers.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, AGENTS.md, claws.json]
+      parse_errors:
+        - file: SOUL.md
+          error: "invalid constraint syntax at line 3"
+        - file: TOOLS.md
+          error: "missing risk field for tool 'deploy-prod'"
+        - file: claws.json
+          error: "unknown trust tier 'T9'"
+      all_errors_collected: true
+    analysis:
+      rules_evaluated: false
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - phase: PARSE
+      error: "3 parse errors across 3 files"
+  halt: after_parse
+  budget: null
+
+problem: >
+  Workspace has four files, three of which have errors. SOUL.md has an
+  invalid constraint syntax on line 3 (missing closing quote). TOOLS.md
+  has a tool "deploy-prod" with no risk field. claws.json has trust tier
+  set to "T9" (valid values are T1-T5). With fail-fast, only the SOUL.md
+  error is reported. The developer fixes SOUL.md, re-runs, sees the
+  TOOLS.md error. Fixes that, re-runs, sees the claws.json error. Three
+  compile cycles for three independently fixable errors.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Fail-fast halts on the first error in SOUL.md. TOOLS.md and
+      claws.json errors are hidden. The developer needs 3 compile cycles
+      to see all 3 errors. Collect-all-errors reports all 3 in one pass,
+      reducing fix cycles from N to 1.
+    spec_impact: "CL-04 PARSE — collect-all-errors mode is the default"
+    pitfall: P-060
+
+  - id: F02
+    severity: major
+    description: >
+      Error collection requires the parser to continue after encountering
+      an error in one file. If SOUL.md parsing fails, the parser must
+      still attempt TOOLS.md and claws.json. Each file's parser must be
+      independent — a failure in one must not corrupt the parser state
+      for the next file.
+    spec_impact: "CL-04 PARSE — per-file parser isolation"
+    pitfall: P-060
+
+  - id: F03
+    severity: warning
+    description: >
+      After collecting all parse errors, the ANALYZE phase cannot run
+      because the IR is incomplete. The pipeline halts after PARSE with
+      all collected errors. The error message must clearly state: "3
+      errors found — analysis skipped." The developer should not think
+      there are only 3 issues (there may be ANALYZE-phase issues too,
+      but they cannot be detected until PARSE succeeds).
+    spec_impact: "CL-04 pipeline — phase-gating with collected errors"
+    pitfall: P-060
+
+  - id: F04
+    severity: major
+    description: >
+      Within a single file, error collection must also continue past the
+      first error. If SOUL.md has errors on lines 3 and 7, both should be
+      reported. This requires a recoverable parser that can skip past
+      malformed constructs and resume at the next valid anchor point
+      (e.g., next heading, next tool block).
+    spec_impact: "CL-04 PARSE — intra-file error recovery"
+    pitfall: P-060
+
+  - id: F05
+    severity: warning
+    description: >
+      Error collection has a limit. If a file has 100 errors (e.g.,
+      completely invalid format), reporting all 100 is noise. A per-file
+      error limit (e.g., 10 errors per file, then "...and N more") keeps
+      output manageable while still showing errors from all files.
+    spec_impact: "CL-04 diagnostics — per-file error limit"
+    pitfall: P-060
+
+  - id: F06
+    severity: note
+    description: >
+      Error ordering: errors should be grouped by file, then by line
+      number within each file. This matches the developer's mental model
+      of fixing file-by-file, top-to-bottom. Interleaved errors from
+      multiple files are harder to process.
+    spec_impact: "CL-04 diagnostics — file-grouped error ordering"
+    pitfall: P-060
+
+  - id: F07
+    severity: warning
+    description: >
+      The `--fail-fast` flag should still be available for CI/CD pipelines
+      where the first error is sufficient to fail the build. The default
+      is collect-all-errors for interactive use. The mode is controlled by
+      claws.json `"errorMode": "collect" | "fast"` or CLI flag `--fail-fast`.
+    spec_impact: "CL-01 claws.json — errorMode configuration"
+    pitfall: P-060
+
+  - id: F08
+    severity: note
+    description: >
+      Warnings and notes should always be collected regardless of error
+      mode. Even in fail-fast mode, warnings from successfully parsed
+      files should be reported alongside the first error. The developer
+      gets the full picture of non-error diagnostics.
+    spec_impact: "CL-04 diagnostics — warnings always collected"
+    pitfall: P-060

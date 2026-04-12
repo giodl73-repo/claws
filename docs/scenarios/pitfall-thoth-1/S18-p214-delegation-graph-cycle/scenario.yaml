@@ -1,0 +1,134 @@
+name: S18-p214-delegation-graph-cycle
+series: pitfall-thoth-1
+version: 1
+specs: [CL-02]
+description: >
+  Validates that cycles in the delegation graph are detected before label
+  propagation runs. A circular delegation (A delegates to B, B delegates to A)
+  causes infinite loop in label propagation if cycle detection is not a
+  prerequisite step.
+
+expect:
+  attack_class: delegation-graph-cycle
+  defense_layer: g-a2a-delegate
+  blocked: true
+  audit_event:
+    type: delegation-cycle-detected
+    tool: "claws compile"
+    risk_level: 5
+    outcome: DENY
+    reason: "Cycle in delegation graph: agent-alpha → agent-beta → agent-gamma → agent-alpha"
+
+simulate:
+  failures:
+    - component: delegation-graph
+      type: cycle-detected
+      error: "3-node cycle: agent-alpha → agent-beta → agent-gamma → agent-alpha"
+    - component: label-propagation
+      type: infinite-loop
+      error: "Label propagation entered infinite loop before cycle detection ran"
+  halt: null
+  budget: null
+
+problem: >
+  AGENTS.md declares three agents with circular delegation: agent-alpha delegates
+  task-X to agent-beta, agent-beta delegates task-Y to agent-gamma, and
+  agent-gamma delegates task-Z to agent-alpha. The compiler runs label propagation
+  to compute data flow labels. Label propagation follows delegation edges:
+  alpha's CONFIDENTIAL label propagates to beta, beta propagates to gamma, gamma
+  propagates back to alpha. The algorithm enters an infinite loop because it
+  revisits alpha with an updated label, which triggers re-propagation to beta,
+  and so on. The compiler process hangs, consuming CPU until killed.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Cycle detection must be the FIRST analysis pass on the delegation
+      graph, before any label propagation, trust computation, or flow
+      analysis. This is a hard ordering constraint: if any analysis that
+      traverses edges runs before cycle detection, it risks non-termination.
+      The compiler pipeline must enforce this ordering structurally, not
+      by convention.
+    spec_impact: "CL-02 G-A2A-DELEGATE — cycle detection as first analysis pass"
+    pitfall: P-214
+
+  - id: F02
+    severity: major
+    description: >
+      The cycle detection algorithm must handle both direct cycles (A→B→A)
+      and indirect cycles (A→B→C→A). Tarjan's SCC algorithm or simple DFS
+      with back-edge detection are both O(V+E) and sufficient. The
+      implementation must mark all nodes participating in any cycle, not
+      just report the first cycle found, because multiple independent
+      cycles may exist in the same graph.
+    spec_impact: "CL-02 G-A2A-DELEGATE — complete cycle enumeration via SCC"
+    pitfall: P-214
+
+  - id: F03
+    severity: major
+    description: >
+      The diagnostic for cycle detection must show the full cycle path
+      with the delegation types at each edge. "Cycle: alpha --[task-X]--> beta
+      --[task-Y]--> gamma --[task-Z]--> alpha" is actionable because the
+      developer can see which delegation to remove. "Cycle detected in
+      delegation graph" without the path is not actionable.
+    spec_impact: "CL-02 diagnostics — cycle path with edge labels"
+    pitfall: P-214
+
+  - id: F04
+    severity: major
+    description: >
+      Self-delegation (A delegates to A) is a degenerate cycle that may
+      not be caught by algorithms looking for multi-node cycles. The
+      compiler must explicitly check for self-edges as a separate
+      validation before running SCC analysis. Self-delegation is always
+      an error — an agent cannot meaningfully delegate to itself.
+    spec_impact: "CL-02 G-A2A-DELEGATE — self-delegation rejection"
+    pitfall: P-214
+
+  - id: F05
+    severity: warning
+    description: >
+      Cycles may be introduced accidentally through group membership:
+      group-A agents delegate to group-B, group-B agents delegate to
+      group-A. The cycle is not visible in individual agent declarations
+      but emerges from group expansion. Cycle detection must run on the
+      expanded graph (after group membership resolution), not on the
+      raw declaration graph.
+    spec_impact: "CL-02 G-A2A-DELEGATE — cycle detection on expanded graph"
+    pitfall: P-214
+
+  - id: F06
+    severity: major
+    description: >
+      If cycles are detected, the compiler must not silently remove them
+      or break them by deleting edges. The cycle is a configuration error
+      that must be reported and fixed by the developer. Automatic cycle
+      breaking would change the governance semantics without the developer's
+      knowledge. Fail-closed: report the error and refuse to compile.
+    spec_impact: "CL-02 G-A2A-DELEGATE — fail-closed on cycle detection"
+    pitfall: P-214
+
+  - id: F07
+    severity: warning
+    description: >
+      The pipeline hang caused by infinite loop in label propagation is
+      a denial-of-service risk. Even if cycle detection is implemented,
+      label propagation should include a maximum iteration count as a
+      safety net. If propagation exceeds V iterations (where V is the
+      number of agents), it should abort with an internal error indicating
+      a possible undetected cycle.
+    spec_impact: "CL-02 label propagation — iteration limit safety net"
+    pitfall: P-214
+
+  - id: F08
+    severity: warning
+    description: >
+      Cross-workspace delegation can create cycles invisible to any single
+      workspace's cycle detection. Workspace-A delegates to workspace-B,
+      workspace-B delegates to workspace-A. This is the same issue as
+      P-212 but specifically for cycles. Fleet-wide cycle detection must
+      complement workspace-local detection.
+    spec_impact: "CL-05 claws scan — fleet-wide cycle detection"
+    pitfall: P-214

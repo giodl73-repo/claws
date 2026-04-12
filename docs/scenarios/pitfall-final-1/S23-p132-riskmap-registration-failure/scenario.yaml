@@ -1,0 +1,114 @@
+name: S23-p132-riskmap-registration-failure
+series: pitfall-final-1
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates that riskMap construction failure at handler registration time is
+  handled as a fatal initialization error. An empty riskMap causes all tools
+  to get R5 default (all blocked). A null/undefined riskMap causes the catch
+  clause to crash, triggering the Gateway's fail-open (all ungoverned).
+
+expect:
+  attack_class: riskmap-initialization-failure
+  defense_layer: L2-registration-validation
+  blocked: true
+  audit_event:
+    type: fatal-initialization-error
+    component: riskMap
+    handler_registered: false
+    tools_state: none-loaded
+
+simulate:
+  failures:
+    - phase: registration
+      type: riskmap-build-failure
+      cause: corrupt-rules-json
+  halt: fatal
+  budget: null
+
+problem: >
+  The Gateway plugin loads at startup. During handler registration, it attempts
+  to build the riskMap from the compiled GovernanceIR (rules.json). The JSON
+  is corrupted (truncated write during previous build). JSON.parse throws
+  SyntaxError. Path A: catch builds an empty Map. All tools default to R5
+  (all blocked). Path B: catch does not build a Map. riskMap is undefined.
+  At runtime, catch clause does riskMap.get(toolName) — TypeError on undefined.
+  Gateway fail-open activates. All tools execute ungoverned.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The handler MUST refuse to register if riskMap validation fails.
+      Registration failure is a fatal initialization error. The Gateway
+      should log: "claws governance plugin failed to initialize: corrupt
+      rules.json. Governance is NOT active. All tools are UNGOVERNED."
+      The plugin must not silently register with a broken riskMap.
+    spec_impact: "CL-03 runtime — fatal initialization on riskMap failure"
+    pitfall: P-132
+
+  - id: F02
+    severity: major
+    description: >
+      riskMap validation after construction: verify that the map has at
+      least 1 entry, that all values are integers 1-5, and that the map
+      is frozen (ReadonlyMap). If any validation fails, the handler does
+      not register. This catches both empty maps and maps with invalid
+      risk levels.
+    spec_impact: "CL-03 runtime — riskMap validation requirements"
+    pitfall: P-132
+
+  - id: F03
+    severity: major
+    description: >
+      Path B (undefined riskMap) is the catastrophic scenario. The catch
+      clause crashes, and ALL tools execute ungoverned. This is worse
+      than Path A (all blocked) because blocked tools are at least safe.
+      The handler must ensure riskMap is NEVER undefined at registration
+      completion. If construction fails, refuse to register.
+    spec_impact: "CL-03 runtime — undefined riskMap is catastrophic"
+    pitfall: P-132
+
+  - id: F04
+    severity: warning
+    description: >
+      Corrupt rules.json from a partial write during the previous build
+      is a staging protocol failure (related to P-121 orphaned staging).
+      The riskMap builder should attempt to detect truncated JSON (check
+      for matching braces, validate schema). A second-chance load from
+      .claws/staging/rules.json.bak could provide recovery.
+    spec_impact: "CL-04 EMIT — rules.json integrity protection"
+    pitfall: P-132
+
+  - id: F05
+    severity: major
+    description: >
+      When the handler refuses to register, the Gateway must not silently
+      continue. The plugin API should allow the plugin to indicate fatal
+      failure. If the Gateway does not support fatal plugin failure, the
+      plugin must at minimum emit a prominent stderr warning and log to
+      every available channel. The operator must know governance is down.
+    spec_impact: "CL-03 runtime — fatal plugin failure signaling"
+    pitfall: P-132
+
+  - id: F06
+    severity: warning
+    description: >
+      The sidecar (L5) can monitor plugin health. If the governance
+      plugin fails to register, the sidecar detects the absence of
+      governance hooks and alerts immediately. For L1-L4 (no sidecar),
+      the stderr warning is the only notification channel. The Gateway
+      logs should also record the initialization failure.
+    spec_impact: "CL-03 L5 sidecar — plugin health monitoring"
+    pitfall: P-132
+
+  - id: F07
+    severity: note
+    description: >
+      This pitfall is directly related to P-109 (catch clause crash with
+      pre-computed risk map). P-109 addresses catch clause safety at
+      runtime. P-132 addresses the riskMap's construction at registration
+      time. Together they form the two-phase defense: build a valid
+      riskMap (P-132), then use it safely in catch (P-109).
+    spec_impact: "CL-02/CL-03 — two-phase riskMap defense (P-109 + P-132)"
+    pitfall: P-132

@@ -1,0 +1,144 @@
+name: S06-persistent-handler-failure
+series: spec-constraint-validation
+version: 1
+specs: [CL-03]
+description: >
+  Validates persistent handler failure detection: when the governance handler
+  crashes on every invocation of a specific tool (3+ consecutive crashes within
+  60s), the sidecar (L5) must detect the pattern, alert the workspace operator,
+  and provide a recovery mechanism via the health dashboard and
+  `claws recover --tool <name>`.
+
+expect:
+  attack_class: persistent-governance-failure
+  defense_layer: L5-sidecar
+  blocked: true
+  audit_event:
+    type: persistent-handler-failure
+    tool: write-db
+    consecutive_crashes: 5
+    window_seconds: 60
+    sidecar_alert: true
+    recovery_available: true
+
+simulate:
+  failures:
+    - component: evaluatePolicy
+      error: "TypeError: Cannot read property 'classifications' of null"
+      tool: write-db
+      persistent: true
+      count: 5
+  halt: null
+  budget: null
+
+problem: >
+  The governance handler has a bug in its classification lookup for write-db:
+  the classification table entry for write-db references a null object. Every
+  time write-db is called, evaluatePolicy throws a TypeError. The handler's
+  catch clause correctly blocks the tool (R3 fail-closed default). But the
+  tool is now permanently blocked -- not by policy, but by a bug. The sidecar
+  detects 5 consecutive crashes for write-db within 30 seconds, triggers an
+  alert, and surfaces the recovery option.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The detection threshold (3+ crashes in 60s) must be configurable. A
+      workspace with high tool call volume may hit 3 crashes in normal error
+      conditions (e.g., transient network issues affecting classification
+      lookup). The threshold should distinguish persistent bugs (deterministic
+      crash on specific tool) from transient errors (random crashes across
+      different tools). Per-tool tracking is essential.
+    spec_impact: "CL-03 sidecar — per-tool crash tracking vs aggregate"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The recovery mechanism (`claws recover --tool write-db`) forces a
+      governance re-evaluation with fresh state. But if the bug is in the
+      compiled rule tables (not transient state), re-evaluation will crash
+      again. Recovery must include a fallback: if re-evaluation crashes,
+      the tool remains blocked and the operator is told to recompile
+      (`claws build`). Recovery is not a bypass.
+    spec_impact: "CL-03 recovery — re-evaluation vs recompilation distinction"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The health dashboard must show per-tool governance status: healthy,
+      degraded (transient errors), failed (persistent crash). The status must
+      include the last error, the crash count, and the time of first failure.
+      Without per-tool status, the operator cannot tell which tool is blocked
+      or why.
+    spec_impact: "CL-03 health — per-tool governance status"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The persistent failure alert must include the error type for triage.
+      A TypeError indicates a code bug (fix the rule tables). A RangeError
+      (stack overflow) indicates recursion (may affect all tools). A timeout
+      indicates performance (may resolve with higher hookTimeoutMs). The
+      alert severity and remediation depend on the error type.
+    spec_impact: "CL-03 sidecar — error type in persistent failure alerts"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      If the sidecar is not installed (L1-L4 only deployment), persistent
+      handler failures are silent. The tool is blocked, the audit chain
+      records each crash, but no alert fires. The governance plugin itself
+      should implement basic persistent failure detection (counter per tool)
+      and log a warning to stderr after 3+ crashes, even without the sidecar.
+    spec_impact: "CL-03 runtime — basic failure detection without sidecar"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The health endpoint must expose persistent failure data so the sidecar
+      can detect it. The endpoint response includes a `failedTools` array
+      listing tools with consecutive crash counts above the threshold. If the
+      health endpoint itself is broken (e.g., the handler crash corrupts
+      shared state), the sidecar detects the health endpoint failure as a
+      separate concern.
+    spec_impact: "CL-03 health — failedTools in health endpoint"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      Multiple tools may have persistent failures simultaneously if the root
+      cause is shared state (e.g., corrupted classification cache). The
+      sidecar must detect correlated failures (multiple tools failing with
+      the same error type) and escalate as a systemic failure, not per-tool.
+      Systemic failure triggers a higher-severity alert and may warrant
+      CLAWS_BYPASS or `claws kill`.
+    spec_impact: "CL-03 sidecar — correlated failure detection"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      After recovery, the crash counter for the tool must reset to zero.
+      If the recovery triggers a re-evaluation that succeeds, the tool
+      transitions from "failed" to "healthy" status. The health dashboard
+      should show the transition history (failed -> recovered -> healthy)
+      for audit purposes.
+    spec_impact: "CL-03 recovery — crash counter reset and status transition"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      This scenario validates CL-03 constraint S04-F04 "Persistent handler
+      failure detection" and the recovery mechanism S03-F01. The constraint
+      was added after scenario analysis revealed that fail-closed correctness
+      can become a denial-of-service if the governance code has bugs.
+    spec_impact: "CL-03 — persistent failure constraint traceability"
+    pitfall: null

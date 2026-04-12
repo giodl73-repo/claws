@@ -1,0 +1,174 @@
+name: S04-snapshot-with-violations
+series: snapshot-lifecycle
+version: 1
+specs: [CL-05]
+description: >
+  Validates snapshot behavior when the workspace has active governance
+  violations at save time. The snapshot captures the violation state.
+  Restoring the snapshot brings back the violations. This tests whether
+  snapshots are governance-neutral (capture whatever exists) or
+  governance-gated (refuse to save non-compliant state). The dead man's
+  switch depends on saving pre-upgrade state that may already have warnings.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json, AGENTS.md]
+      snapshot_name: known-state-with-warnings
+      snapshot_action: save
+    analysis:
+      rules_evaluated: true
+      violations:
+        - rule: G-CLASS
+          severity: high
+          file: TOOLS.md
+          tool_name: admin-panel
+      warnings:
+        - rule: OBO-WITHOUT-ELICIT
+          file: TOOLS.md
+          tool_name: send-email
+  violations:
+    - rule: G-CLASS
+  warnings:
+    - rule: OBO-WITHOUT-ELICIT
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has two known issues: a G-CLASS violation (admin-panel tool
+  is R4 in a T2 workspace) and an OBO-WITHOUT-ELICIT warning (send-email
+  tool has no elicitation policy). The developer needs to save this state
+  before attempting a risky upgrade. They run `claws snap save
+  known-state-with-warnings`. The question is: does snap save succeed
+  despite violations? After save, the developer makes changes that create
+  additional violations. They run snap restore and expect to return to
+  exactly the 1-violation, 1-warning state (not a clean state).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The spec does not define whether snap save is governance-gated.
+      Two valid designs: (a) save always succeeds, capturing whatever
+      state exists (governance-neutral), (b) save requires pinch-clean
+      or at least no critical/high violations (governance-gated). The
+      dead man's switch requires governance-neutral saves (pre-upgrade
+      state may have warnings). But snap promote requires governance-gated
+      saves. save and promote need different validation requirements.
+    spec_impact: "CL-05 snap save — governance-neutral; snap promote — governance-gated"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The --pinch flag on snap save (from the dead man's switch) runs
+      pinch before saving. If pinch finds violations, what happens? If
+      save is governance-neutral, --pinch is informational only (shows
+      violations but saves anyway). If save is governance-gated, --pinch
+      is a validation gate (violations abort the save). The flag's
+      semantics depend on the governance-neutral vs gated decision.
+    spec_impact: "CL-05 snap save --pinch — informational vs gating semantics"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The snapshot metadata should record the governance state at save
+      time: violation count, warning count, compliance percentage. This
+      allows snap list to show "baseline-v1 (clean)", "pre-upgrade
+      (1 violation, 1 warning)" without requiring full diff to see the
+      state. The metadata enables informed decisions about which snapshot
+      to restore.
+    spec_impact: "CL-05 snap save — include governance summary in snapshot metadata"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Restoring a snapshot with violations brings back the violations.
+      The inner ring (if active) will immediately detect these violations
+      and report them. The developer may be confused: they intentionally
+      restored an old state but are now seeing "new" violation reports.
+      The restore operation should emit a summary: "restored snapshot
+      'known-state-with-warnings' — 1 violation, 1 warning (pre-existing
+      in snapshot)."
+    spec_impact: "CL-05 snap restore — emit governance summary of restored state"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      In the dead man's switch, snap save runs with --pinch before an
+      upgrade. If the workspace already has a critical violation, should
+      the upgrade proceed? The dead man's switch is designed for safety,
+      but upgrading from a broken state means restore also restores the
+      broken state. The spec should define whether the dead man's switch
+      aborts if the pre-upgrade state has critical violations.
+    spec_impact: "CL-05 Dead Man's Switch — abort if pre-upgrade state has critical violations"
+    pitfall: P-191
+
+  - id: F06
+    severity: warning
+    description: >
+      Violations are tied to governance rule versions. If the workspace
+      is saved with claws v1.2 (29 rules) and restored under claws v1.5
+      (35 rules), the restored state may have NEW violations that did not
+      exist when the snapshot was saved. The snapshot captures file state,
+      not rule state. Post-restore pinch may produce different results
+      than pre-save pinch. This is correct but potentially confusing.
+    spec_impact: "CL-05 snap restore — document that rule evolution affects post-restore pinch"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      If snap save captures the GovernanceIR (including violations), and
+      snap restore puts the IR back, there is a question of whether
+      restore should ALSO re-run pinch to validate the restored state,
+      or just blindly restore the saved IR. Blind restore is faster but
+      may restore an IR that is inconsistent with the current claws version.
+      Re-running pinch after restore is safer but adds latency.
+    spec_impact: "CL-05 snap restore — re-run pinch after restore or trust saved IR"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      A snapshot with violations is a valid use case for debugging: the
+      developer wants to reproduce a specific violation state for testing.
+      "Save the broken state, fix it, then restore to verify the fix works
+      against the original broken state." This is a test harness pattern
+      that snap enables. The documentation should call this out as a
+      supported workflow.
+    spec_impact: "CL-05 snap — document debugging/test-harness workflow for violation snapshots"
+    pitfall: null
+
+  - id: F09
+    severity: major
+    description: >
+      The snapshot captures violations as part of the GovernanceIR. But
+      violations reference specific file:line locations. If the developer
+      modifies files between save and restore (adding lines above the
+      violation), the restored violation's line number may no longer match
+      the restored file content. The snapshot must capture files AND IR
+      as a coherent pair, or regenerate violations from files on restore.
+    spec_impact: "CL-05 snap — file content and IR must be a coherent pair in snapshot"
+    pitfall: P-192
+
+  - id: F10
+    severity: note
+    description: >
+      Enterprise compliance requires audit trails of governance state over
+      time. Snapshots with violation metadata provide a natural audit
+      history: "at time T, the workspace had N violations." snap list
+      with timestamps and violation counts becomes a compliance timeline.
+      This audit use case should be considered in the snapshot metadata
+      design.
+    spec_impact: "CL-05 snap — audit timeline use case for snapshot metadata"
+    pitfall: null

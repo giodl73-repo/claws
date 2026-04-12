@@ -1,0 +1,147 @@
+name: S01-r5-tool-elicitation-approve
+series: obo-elicitation
+version: 1
+specs: [CL-02]
+description: >
+  Validates the core OBO elicitation flow for an R5 tool: agent identifies an
+  R5/OBO tool call (send-email), presents approval request to the user, user
+  approves within the 300s timeout, signed approval token is issued, and the
+  action proceeds with full audit chain recording. This is the happy-path
+  baseline for the OBO boundary — every other scenario in the series is a
+  deviation from this flow.
+
+expect:
+  attack_class: none
+  defense_layer: G-ELICIT
+  blocked: false
+  audit_event: obo-approval-granted
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has TOOLS.md declaring send-email (R5/TRANSACT/OBO), claws.json
+  with elicitation policy configured (mode: inline, timeout: 300, approver:
+  user), and USER.md with no pre-authorization. The agent invokes send-email.
+  The elicitation gate fires, user is presented with a description of the
+  action, and approves within 10 seconds. The approval token is signed with
+  the workspace's approval key, and the send-email tool executes. The entire
+  decision chain (request, approval, execution) is recorded in the audit chain.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The approval request presented to the user must include sufficient context
+      for informed consent: tool name, risk classification, what the tool will
+      do (action summary), and who the action is performed as (the user's
+      identity). If the approval request shows only "send-email wants to
+      execute" without the recipient, subject, or body summary, the user cannot
+      make an informed decision. G-ELICIT must specify minimum context fields
+      for the approval request.
+    spec_impact: "CL-02 G-ELICIT — minimum approval request context fields"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The signed approval token must include the tool invocation parameters
+      (or a hash thereof), not just the tool name. If the token only covers
+      "send-email approved," a malicious agent could change the recipient
+      between approval and execution. The token must bind to the specific
+      invocation: tool + parameters + timestamp.
+    spec_impact: "CL-02 G-ELICIT — approval token must bind to invocation parameters"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The elicitation flow has 6 steps (identify, present, timeout, deny-default,
+      sign, audit) but does not specify what happens if the approval key is
+      missing or corrupted. If the key is unavailable, the approval token cannot
+      be signed. The flow must define behavior: deny (safe) or allow without
+      signature (dangerous). Deny is the only acceptable default, consistent
+      with fail-closed for R5.
+    spec_impact: "CL-02 G-ELICIT — missing approval key behavior"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The audit chain entry for an approved R5 action must include a reference
+      to the signed approval token (token hash or ID), creating a verifiable
+      link between the approval decision and the audit record. Without this
+      link, an auditor cannot prove that a specific execution was authorized
+      by a specific approval event.
+    spec_impact: "CL-02 G-ELICIT-AUDIT — token-to-audit-entry linkage"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The "inline" approval mode blocks the agent while waiting for user
+      response. If the user is in a multi-turn conversation and the agent
+      sends an approval request, the user's next message might be a response
+      to the conversation, not a yes/no to the approval. The approval UI must
+      be unambiguous and not confusable with normal conversation flow.
+    spec_impact: "CL-02 G-ELICIT — inline approval UX disambiguation"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Between the time the user approves and the tool executes, the tool
+      parameters could be modified by a prompt injection in the conversation
+      context. The approval token binds to specific parameters, but the
+      runtime must verify that the actual tool call parameters match the
+      approved parameters before execution. This is a TOCTOU (time-of-check-
+      time-of-use) vulnerability in the approval flow.
+    spec_impact: "CL-03 runtime — TOCTOU check between approval and execution"
+    pitfall: P-190
+
+  - id: F07
+    severity: warning
+    description: >
+      The elicitation flow assumes a single user. In a shared workspace
+      (multiple humans collaborating), the approver must be the user whose
+      identity is being used for the OBO action, not just any workspace user.
+      G-ELICIT must specify approver identity verification when multiple users
+      have workspace access.
+    spec_impact: "CL-02 G-ELICIT — multi-user approver identity"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The 300s default timeout is generous for inline approval (user is
+      present and watching). For async approval (mobile notification), 300s
+      may be too short. The timeout should be mode-dependent: inline default
+      120s (user is present), async default 3600s (user may be away). Per-tool
+      overrides (Amendment A45) handle the fine-tuning.
+    spec_impact: "CL-02 G-ELICIT-TIMEOUT — mode-dependent default timeouts"
+    pitfall: null
+
+  - id: F09
+    severity: major
+    description: >
+      The approval token has no expiry independent of the timeout. Once
+      approved, the token is valid indefinitely for that invocation. If the
+      agent retries the same tool call hours later (e.g., after a network
+      failure), it could reuse the stale token. Approval tokens must have a
+      short validity window (e.g., 60s after issuance) separate from the
+      elicitation timeout.
+    spec_impact: "CL-02 G-ELICIT — approval token expiry window"
+    pitfall: P-191
+
+  - id: F10
+    severity: warning
+    description: >
+      The scenario assumes the approval key uses HMAC-SHA256 (default). For
+      enterprise deployments using Ed25519 asymmetric signing (Amendment CB-02),
+      the approval token signing path must support both algorithms transparently.
+      The key type in .claws/config/keys.yaml determines the algorithm; the
+      elicitation flow should not need to know which algorithm is in use.
+    spec_impact: "CL-02 key management — algorithm-agnostic approval token signing"
+    pitfall: null

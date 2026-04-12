@@ -1,0 +1,124 @@
+name: S19-p215-implicit-all-delegation
+series: pitfall-thoth-1
+version: 1
+specs: [CL-02]
+description: >
+  Validates that tools: all delegation triggers explicit tool listing warning
+  when the expansion includes R5/OBO tools. Developer writes tools: all
+  unaware that it silently includes dangerous tool categories.
+
+expect:
+  attack_class: implicit-delegation-escalation
+  defense_layer: g-a2a-delegate
+  blocked: true
+  audit_event:
+    type: implicit-r5-delegation
+    tool: "claws compile"
+    risk_level: 5
+    outcome: DENY
+    reason: "tools: all delegation includes R5 tools [Bash, Write] and OBO tool [SendMessage] — explicit listing required"
+
+simulate:
+  failures:
+    - component: delegation-resolver
+      type: implicit-all-expansion
+      error: "tools: all expanded to 14 tools including 3 R5-classified and 1 OBO-classified"
+    - component: a2a-delegate
+      type: r5-implicit-grant
+      error: "R5 tool 'Bash' delegated via implicit all without explicit acknowledgment"
+  halt: null
+  budget: null
+
+problem: >
+  A developer writes AGENTS.md with a delegation entry: "data-worker can use
+  tools: all." The developer intends to grant access to Read, Grep, and Glob —
+  the tools the data-worker needs for its analysis task. However, "all" expands
+  to the full tool manifest including Bash (R5), Write (R5), SendMessage (OBO),
+  and other high-risk tools. The developer never reviews what "all" includes.
+  The data-worker agent now has R5 tool access and OBO capability — it can
+  execute arbitrary commands and send messages on behalf of other agents. The
+  compiler silently resolves "all" without warning.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The tools: all shorthand is a convenience that becomes a security
+      liability. When "all" includes R5-classified tools, the compiler
+      must refuse to accept it silently. The IMPLICIT-R4-DELEGATION
+      warning must enumerate every R4+ tool that "all" expands to, and
+      require the developer to either list tools explicitly or add an
+      acknowledgment annotation (e.g., tools: all # includes-r5: ack).
+    spec_impact: "CL-02 G-A2A-DELEGATE — IMPLICIT-R4-DELEGATION warning with tool listing"
+    pitfall: P-215
+
+  - id: F02
+    severity: major
+    description: >
+      The tool manifest changes over time. An "all" delegation that was
+      safe when written (only R1-R3 tools existed) becomes dangerous when
+      a new R5 tool is added. The compiler must re-evaluate "all" on every
+      compilation against the current tool manifest, not cache the expansion
+      from a previous run. This is a TOCTOU risk: the delegation was
+      checked at time T, but the tool manifest changed at time T+1.
+    spec_impact: "CL-02 G-A2A-DELEGATE — re-evaluate all-expansion on every compile"
+    pitfall: P-215
+
+  - id: F03
+    severity: major
+    description: >
+      OBO (on-behalf-of) tools are especially dangerous in "all" expansion
+      because they allow the delegated agent to act as another agent. If
+      data-worker receives SendMessage via "all," it can send messages as
+      the orchestrator. OBO tools must be excluded from "all" expansion
+      entirely — they must always be listed explicitly with a justification
+      comment. This is a harder constraint than R5 warning.
+    spec_impact: "CL-02 G-A2A-DELEGATE — OBO tools excluded from all-expansion"
+    pitfall: P-215
+
+  - id: F04
+    severity: major
+    description: >
+      The diagnostic must show the full expansion with risk classification:
+      "tools: all expands to: Read (R1), Grep (R1), Glob (R1), Edit (R3),
+      Write (R5), Bash (R5), SendMessage (OBO). 2 R5 tools and 1 OBO tool
+      require explicit listing." This enables the developer to immediately
+      see what they are granting and make an informed decision.
+    spec_impact: "CL-02 diagnostics — all-expansion with risk classification per tool"
+    pitfall: P-215
+
+  - id: F05
+    severity: warning
+    description: >
+      A common pattern is tools: all minus [Bash, Write] — granting
+      everything except specific dangerous tools. This exclusion pattern
+      is fragile because new R5 tools added to the manifest are automatically
+      included. The compiler should prefer tools: [Read, Grep, Glob, Edit]
+      (inclusion list) over tools: all minus [Bash] (exclusion list) and
+      warn when exclusion patterns are used.
+    spec_impact: "CL-02 G-A2A-DELEGATE — inclusion-preferred over exclusion patterns"
+    pitfall: P-215
+
+  - id: F06
+    severity: major
+    description: >
+      The escalation from "all" delegation is invisible in audit trails
+      unless the expansion is logged. The audit event for a delegation
+      must include the resolved tool list, not the raw "all" keyword.
+      Incident responders reviewing the audit trail need to know which
+      tools were actually granted, not that "all" was written in the
+      configuration.
+    spec_impact: "CL-02 audit — resolved tool list in delegation events"
+    pitfall: P-215
+
+  - id: F07
+    severity: warning
+    description: >
+      In fleet contexts, "all" may expand to different tool sets in
+      different workspaces (each workspace may have different tool
+      manifests). An agent delegated "all" in workspace-A gets a different
+      capability set than the same delegation in workspace-B. This
+      inconsistency is confusing and error-prone. Fleet-level governance
+      should require explicit tool listings in cross-workspace delegations.
+    spec_impact: "CL-06 fleet — explicit tool listing for cross-workspace delegation"
+    pitfall: P-215

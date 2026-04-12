@@ -1,0 +1,98 @@
+name: S05-g-a2a-identity
+series: governance-rules
+version: 1
+specs: [CL-02]
+description: >
+  Validates G-A2A-IDENTITY rule: agent identity verification levels. An agent
+  with L0 identity (declared name only) is insufficient for fleet-level
+  communication. Produces a warning recommending L2+ for fleet participation.
+
+expect:
+  rules_applied: [G-A2A-IDENTITY]
+  violations: []
+  pass: true
+  severity: warning
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  IDENTITY.md declares agent identity at L0 (name only, no cryptographic
+  attestation). The workspace participates in a fleet (configured in claws.json
+  with fleet.enabled: true). G-A2A-IDENTITY must warn that L0 identity is
+  advisory only — any agent can claim the name. For fleet participation, L2
+  (signed by fleet HMAC) or L3 (PKI attested) is recommended. This is a
+  warning, not an error, because L0 is technically valid.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      L0 identity means the agent name is self-declared with zero verification.
+      In a fleet, a malicious workspace could declare the same name as a
+      trusted agent, impersonating it. The warning should explain the
+      impersonation risk, not just recommend an upgrade.
+    spec_impact: "CL-02 G-A2A-IDENTITY — impersonation risk in warning text"
+    pitfall: null
+
+  - id: F02
+    severity: warning
+    description: >
+      The threshold for identity level depends on the communication channel.
+      L0 might be acceptable for local subagents (same workspace) but not for
+      fleet communication (cross-workspace). The rule should distinguish
+      local-only vs fleet-participating agents.
+    spec_impact: "CL-02 G-A2A-IDENTITY — scope-dependent identity threshold"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      IDENTITY.md format for declaring identity level is not specified. Options
+      include: YAML front matter with `identity-level: L0`, prose stating
+      "this agent uses declared name identity," or an explicit OC config
+      reference. The parser must support at least one canonical format.
+    spec_impact: "CL-04 EXTRACT — IDENTITY.md canonical format"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      If fleet.enabled is false in claws.json, L0 is acceptable for all
+      communication. The G-A2A-IDENTITY rule must check fleet configuration
+      before applying the L2+ recommendation. Without fleet context, the
+      warning is noise.
+    spec_impact: "CL-02 G-A2A-IDENTITY — fleet-conditional rule activation"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      L2 requires a shared secret (HMAC key) which means key management
+      infrastructure (CL-02 CB-03). If the warning recommends L2 but the
+      workspace has no .claws/keys/ directory, the recommendation is not
+      actionable without first setting up key management.
+    spec_impact: "CL-02 G-A2A-IDENTITY — actionable recommendation chain"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The boundary between warning (L0 in fleet) and error depends on
+      enterprise policy. Some enterprises may require L3 (PKI) for all agents.
+      G-A2A-IDENTITY should support a configurable minimum identity level
+      in claws.json: `identity.minimumLevel: L2`.
+    spec_impact: "CL-01 claws.json — configurable minimum identity level"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      HIPAA safeguard 164.312(d) requires authentication. L0 does not satisfy
+      this. If the compliance evidence generator produces a HIPAA package for
+      a workspace with L0 identity, the safeguard status should be
+      "not-implemented" rather than "partial."
+    spec_impact: "CL-02 compliance — L0 identity HIPAA mapping"
+    pitfall: null

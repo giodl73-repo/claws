@@ -1,0 +1,147 @@
+name: S19-p244-advisory-r5-silently-unenforced
+series: pitfall-thoth-2
+version: 1
+specs: [CL-01, CL-04, CL-05]
+description: >
+  Validates that R5 (highest risk) governance tools compiled for advisory-only
+  platforms (Cursor, Copilot) produce prominent enforcement warnings. On these
+  platforms, the LLM may ignore advisory instructions, meaning R5 tools that
+  require mandatory enforcement cannot be reliably governed. The compiler must
+  surface this enforcement gap clearly.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, RULES.md, claws.json]
+    analysis:
+      rules_evaluated: true
+      platform_class: advisory
+      r5_tools_detected: 2
+  violations:
+    - code: CLAWS-E301
+      message: "R5 tool 'database-delete' requires mandatory enforcement — advisory platform 'cursor' cannot guarantee compliance"
+      severity: error
+  warnings:
+    - code: CLAWS-W301
+      message: "R4 tool 'user-data-export' on advisory platform — enforcement is best-effort only"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: classify
+      type: enforcement-gap
+      error: "R5 tool database-delete classified for advisory platform — mandatory enforcement impossible"
+    - component: emit
+      type: silent-advisory
+      error: "Generated governance relies on LLM instruction-following for R5 deny — no runtime guarantee"
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise security team defines R5 tools in TOOLS.md: database-delete and
+  production-deploy. These tools must NEVER be invoked without human approval —
+  the "fail-closed" guarantee. The team compiles governance for Cursor, an
+  advisory-only platform where governance rules are injected as system prompt
+  instructions. The LLM reads the governance instructions but is not
+  mechanically prevented from calling the tools. In testing, the LLM correctly
+  refuses database-delete 99% of the time. But under adversarial prompting
+  (prompt injection, jailbreak), the LLM ignores the advisory constraint and
+  invokes database-delete. The security team believed R5 enforcement was active
+  because claws compiled successfully. No warning indicated that the platform
+  cannot enforce R5 mechanically.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The platform classification system must distinguish mandatory-
+      enforcement platforms (Claude Code with tool use control) from
+      advisory-only platforms (Cursor, Copilot) where governance is
+      instruction-based. R5 tools require mandatory enforcement. If the
+      target platform is advisory-only, the compiler must emit an error
+      for R5 tools, not a warning. Downgrading R5 enforcement to
+      advisory is a security violation.
+    spec_impact: "CL-01 CLASSIFY — platform enforcement capability matrix"
+    pitfall: P-244
+
+  - id: F02
+    severity: major
+    description: >
+      The error must be non-overridable for R5 tools. Unlike other
+      compilation errors that can be bypassed with --force, R5
+      enforcement gaps on advisory platforms must be a hard error.
+      The compiler refuses to emit R5 governance for advisory platforms
+      entirely. The developer must either remove R5 tools from the
+      advisory platform scope or switch to an enforcement-capable
+      platform.
+    spec_impact: "CL-04 EMIT — R5 advisory platform hard block"
+    pitfall: P-244
+
+  - id: F03
+    severity: major
+    description: >
+      R4 tools on advisory platforms should produce a prominent warning
+      but not a hard error. R4 tools benefit from governance but do not
+      have the same catastrophic failure mode as R5. The warning must
+      clearly state: "R4 enforcement on advisory platform is best-effort.
+      The LLM may not comply under adversarial conditions."
+    spec_impact: "CL-05 DX — R4 advisory platform enforcement warning"
+    pitfall: P-244
+
+  - id: F04
+    severity: major
+    description: >
+      The GovernanceIR must record the enforcement class for each tool
+      on each target platform: "mandatory," "advisory," or "none." This
+      enables audit trails that clearly show which tools have guaranteed
+      enforcement and which rely on LLM compliance. Security reviewers
+      can then assess residual risk per tool.
+    spec_impact: "CL-04 GovernanceIR — per-tool enforcement class field"
+    pitfall: P-244
+
+  - id: F05
+    severity: major
+    description: >
+      Multi-platform compilations (targeting both Claude Code and
+      Cursor simultaneously) must evaluate enforcement capability per
+      platform independently. A tool that is R5-enforced on Claude Code
+      may be advisory-only on Cursor. The compilation output must
+      clearly show the enforcement matrix across all target platforms.
+    spec_impact: "CL-01 CLASSIFY — per-platform enforcement evaluation"
+    pitfall: P-244
+
+  - id: F06
+    severity: warning
+    description: >
+      Advisory platforms may gain enforcement capabilities over time
+      (e.g., Cursor adds tool use control). The platform capability
+      database must be versioned and updatable. The claws.json should
+      specify a platform-capabilities-version so compilations are
+      reproducible even as platform capabilities evolve.
+    spec_impact: "CL-01 DETECT — versioned platform capability database"
+    pitfall: P-244
+
+  - id: F07
+    severity: warning
+    description: >
+      The silent unenforcement is the worst possible failure mode for
+      security governance: the operator believes protection is active
+      when it is not. The compiler's error message must use alarming
+      language: "CRITICAL: R5 tool 'X' CANNOT be enforced on advisory
+      platform 'Y'. Do NOT deploy this configuration for production
+      governance." Understatement here creates false confidence.
+    spec_impact: "CL-05 DX — alarming language for R5 enforcement gaps"
+    pitfall: P-244
+
+  - id: F08
+    severity: note
+    description: >
+      The platform classification should be tested with a matrix of
+      all supported platforms crossed with all risk levels (R1-R5).
+      This produces a 5xN test matrix that validates the enforcement
+      capability assessment for every combination, catching edge cases
+      where a platform partially supports enforcement.
+    spec_impact: "CL-01 testing — platform x risk level test matrix"
+    pitfall: P-244

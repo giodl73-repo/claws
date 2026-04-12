@@ -1,0 +1,149 @@
+name: S07-crewai-detection
+series: platform-detection
+version: 1
+specs: [CL-01]
+description: >
+  Validates that a workspace containing crewai.yaml is detected as the CrewAI
+  platform with definitive confidence. CrewAI is semi-enforced: governance
+  compiles to YAML guard configuration that CrewAI's task execution engine
+  can read. Default trust tier is T2 reflecting partial enforcement through
+  task-level guards.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      platform_detected: crewai
+      detection_confidence: definitive
+      detection_source: marker_file
+      marker: crewai.yaml
+      default_trust_tier: 2
+      enforcement: semi-enforced
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace contains crewai.yaml (the CrewAI configuration that defines
+  agents, tasks, tools, and crew composition) and claws.json with no explicit
+  `platform` field. The detection logic must: (1) find crewai.yaml and identify
+  the platform as CrewAI, (2) set default trust tier to T2, (3) configure
+  emission for YAML guard configuration that integrates with CrewAI's task
+  execution pipeline. CrewAI workspaces define multi-agent crews with task
+  delegation, making A2A governance particularly relevant.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CrewAI defines multi-agent crews with delegation between agents. This
+      maps directly to claws's AGENTS.md delegation model and A2A governance
+      rules (G-A2A-TRUST, G-A2A-IDENTITY). The compiler should parse
+      crewai.yaml's agent definitions to extract delegation intents, treating
+      crewai.yaml as a supplementary source for DelegationIntent alongside
+      AGENTS.md. If both crewai.yaml and AGENTS.md define delegation, the
+      two sources must be reconciled.
+    spec_impact: "CL-04 PARSE — crewai.yaml as supplementary delegation intent source"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      CrewAI uses a YAML-first configuration model: agents, tasks, and tools
+      are all defined in YAML. The emit phase must produce YAML guard config
+      that fits within CrewAI's existing YAML structure. If CrewAI expects
+      guards in crewai.yaml itself (not a separate file), the emit phase
+      must inject governance into crewai.yaml — same delimiter-based
+      section management as Cursor/.cursorrules. But crewai.yaml is the
+      DETECTION marker, and modifying it creates a parse-emit feedback risk.
+    spec_impact: "CL-04 EMIT — CrewAI guard config location (separate file vs injection into crewai.yaml)"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      CrewAI's tool definition format uses Python tool classes with
+      descriptions and expected_output schemas. Like LangGraph, this is
+      a Python ecosystem. The emit phase needs Python guard code or YAML
+      guard configuration that CrewAI can consume. This is the second
+      Python-adjacent platform (after LangGraph), reinforcing the need
+      for a Python claws guard package.
+    spec_impact: "CL-06 Platform Ecosystem — shared Python guard package for LangGraph and CrewAI"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      CrewAI supports hierarchical crews (manager agent delegates to worker
+      agents) and sequential/parallel task execution. The delegation graph
+      in CrewAI is more structured than OC's flat AGENTS.md. Circular
+      delegation detection (cross-file conflict category 5) must account
+      for CrewAI's hierarchical delegation model where a manager delegates
+      to workers who may delegate sub-tasks back up.
+    spec_impact: "CL-04 cross-file conflicts — hierarchical delegation cycle detection for CrewAI"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      crewai.yaml may use an alternative name: crew.yaml, crew_config.yaml,
+      or even pyproject.toml with CrewAI sections. The detection logic
+      hardcodes "crewai.yaml" as the marker. If CrewAI evolves its config
+      format (as frameworks often do), the detection breaks. The detection
+      should check a list of known CrewAI config filenames and be
+      configurable for custom names via claws.json.
+    spec_impact: "CL-01 Platform Detection Matrix — CrewAI config filename variants"
+    pitfall: P-242
+
+  - id: F06
+    severity: warning
+    description: >
+      CrewAI's "semi-enforced" model means some governance is machine-
+      checked (task-level guards that prevent tool invocation) while some
+      is advisory (agent instructions). The boundary between enforced and
+      advisory is determined by CrewAI's guard API capabilities. If CrewAI
+      adds new guard APIs (e.g., budget guards, output validators), claws's
+      emission should evolve to use them. The enforcement capability must
+      be versioned per CrewAI release.
+    spec_impact: "CL-01 Platform Detection Matrix — enforcement capability versioned per framework release"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      CrewAI crews can include both custom agents and tool-using agents.
+      Tool-using agents have explicit tool assignments in crewai.yaml.
+      These tool assignments map to TOOLS.md entries in the claws model.
+      The compiler could derive TOOLS.md-equivalent data from crewai.yaml
+      tool assignments, reducing the need for separate OC workspace files
+      when the source workspace is pure CrewAI.
+    spec_impact: "CL-04 PARSE — tool extraction from crewai.yaml as alternative to TOOLS.md"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      CrewAI is actively maintained with frequent API changes. The emit
+      phase targeting CrewAI must be tested against multiple CrewAI versions.
+      A generated guard config that works with CrewAI 0.28 may break with
+      CrewAI 0.30. The claws.json targets.crewai configuration should
+      accept a version field for targeted emission.
+    spec_impact: "CL-01 claws.json v2 schema — targets.crewai.version for version-targeted emission"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      CrewAI supports memory (short-term, long-term, entity memory) which
+      maps to claws's MEMORY.md governance (data labels, retention). The
+      governance injection for CrewAI should include memory governance
+      rules (G-CONTEXT-MEMORY) that map to CrewAI's memory configuration.
+      This is a cross-domain mapping unique to CrewAI among the 7 platforms.
+    spec_impact: "CL-04 EMIT — CrewAI memory governance mapping from MEMORY.md"
+    pitfall: null

@@ -1,0 +1,137 @@
+name: S02-full-workspace
+series: compile-pipeline
+version: 1
+specs: [CL-04]
+description: >
+  Validates that all 9 workspace file types are parsed and contribute intents
+  to the CapabilityManifest. The manifest must contain intent types from every
+  file: DenyIntent, ToolManifestEntry, DelegationIntent, IdentityIntent,
+  AuthorityIntent, MemoryIntent, ScheduleIntent, SkillIntent, and WorkflowIntent.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - SOUL.md
+        - TOOLS.md
+        - AGENTS.md
+        - IDENTITY.md
+        - USER.md
+        - MEMORY.md
+        - HEARTBEAT.md
+        - skills/
+        - lobster.yaml
+      intent_types:
+        - DenyIntent
+        - ToolManifestEntry
+        - DelegationIntent
+        - IdentityIntent
+        - AuthorityIntent
+        - MemoryIntent
+        - ScheduleIntent
+        - SkillIntent
+        - WorkflowIntent
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace contains all 9 file types with valid content. SOUL.md has deny
+  and require constraints. TOOLS.md has 3 tools at R1, R3, R5. AGENTS.md
+  declares 2 subagents. IDENTITY.md configures L2 identity. USER.md grants
+  OBO scope for email. MEMORY.md labels data as INTERNAL. HEARTBEAT.md defines
+  an hourly schedule. skills/ has one signed skill. lobster.yaml defines a
+  3-step workflow. The pipeline must produce a complete CapabilityManifest with
+  all 9 intent types populated.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The skills/ directory may contain multiple skill subdirectories. The
+      parser must enumerate all SKILL.md files within skills/, not just the
+      directory itself. If skills/ contains 5 skills, 5 SkillIntent entries
+      must appear in the manifest.
+    spec_impact: "CL-04 Phase 1 PARSE — skills/ enumeration logic"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Parse ordering matters: if AGENTS.md references tools from TOOLS.md,
+      TOOLS.md must be parsed first to build the tool registry. If files are
+      parsed in alphabetical order (AGENTS before TOOLS), forward references
+      to tools will fail. The parser needs either two-pass or declaration-
+      order independence.
+    spec_impact: "CL-04 Phase 1-2 — parse/extract ordering dependency"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      USER.md granting OBO scope for email must cross-reference TOOLS.md to
+      confirm a send-email tool exists. If the authority references a tool
+      not in TOOLS.md, this is a SKILL-TOOL GHOST variant at the user
+      authority level — currently undetected by the 7 conflict categories.
+    spec_impact: "CL-04 cross-file conflicts — potential 8th category"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      HEARTBEAT.md with an hourly schedule using an R5 tool should trigger
+      SCHEDULE-NO-APPROVAL (conflict category 7). If the schedule is
+      configured with approval pre-authorized in USER.md, the conflict
+      resolution logic must recognize the pre-authorization.
+    spec_impact: "CL-04 conflict resolution — pre-authorized schedules"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The total parse time for 9 files must stay under 100ms (CL-04 latency
+      table). With lobster.yaml requiring DAG construction and AGENTS.md
+      requiring graph analysis, the 100ms budget may be tight on large
+      workspaces. This scenario should include file sizes to calibrate.
+    spec_impact: "CL-04 latency budget — per-file timing breakdown"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      IDENTITY.md configuring L2 identity (HMAC signed by fleet) requires
+      a key reference. If the key is not in .claws/keys/, the parse succeeds
+      but the IR contains an unresolvable key reference. The pipeline should
+      warn at compile time, not fail at runtime.
+    spec_impact: "CL-02 G-A2A-IDENTITY — key reference validation at compile"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      MEMORY.md labeled INTERNAL combined with AGENTS.md delegating to a
+      subagent creates a data flow channel. If the data flow ceiling is not
+      explicitly set in AGENTS.md, the default must be derived from MEMORY.md
+      labels — this implicit derivation is not documented in CL-04.
+    spec_impact: "CL-04 EXTRACT — implicit data flow label derivation"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      A workspace with all 9 files and zero violations is the happy path.
+      The scenario does not test interaction effects between intents. Adding
+      a conflicting constraint (e.g., USER.md granting access that SOUL.md
+      denies) would exercise the conflict detection logic within this same
+      full-workspace fixture.
+    spec_impact: "CL-04 Phase 3 ANALYZE — intent interaction coverage"
+    pitfall: null

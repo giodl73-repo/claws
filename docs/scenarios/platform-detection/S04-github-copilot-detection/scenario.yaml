@@ -1,0 +1,150 @@
+name: S04-github-copilot-detection
+series: platform-detection
+version: 1
+specs: [CL-01]
+description: >
+  Validates that a workspace containing .github/copilot-instructions.md is
+  detected as the GitHub Copilot platform with definitive confidence. Copilot
+  is advisory-only: governance compiles to instructions in the copilot
+  instructions file. Default trust tier is T1 reflecting purely advisory
+  enforcement with no runtime hooks.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      platform_detected: github
+      detection_confidence: definitive
+      detection_source: marker_file
+      marker: .github/copilot-instructions.md
+      default_trust_tier: 1
+      enforcement: advisory
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace contains .github/copilot-instructions.md and claws.json. The
+  detection logic must: (1) find the copilot instructions file at the correct
+  nested path (.github/ subdirectory), (2) identify the platform as GitHub
+  Copilot, (3) set default trust tier to T1 (advisory-only, like Cursor),
+  (4) configure emission for instructions-based output. The marker file path
+  includes a directory component (.github/), unlike other markers which are
+  root-level files.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The marker file .github/copilot-instructions.md is nested in a
+      subdirectory. The detection logic must check subdirectory paths, not
+      just root-level files. If the scanner only checks the workspace root,
+      it misses the .github/ subdirectory and falls back to "no platform
+      detected." The scan must be path-aware, not just filename-aware.
+    spec_impact: "CL-01 Platform Detection Matrix — nested path support in marker file scanning"
+    pitfall: null
+
+  - id: F02
+    severity: warning
+    description: >
+      The .github/ directory exists in many repositories for GitHub Actions,
+      issue templates, and other GitHub features. The presence of .github/
+      alone does not indicate Copilot. Only
+      .github/copilot-instructions.md is the marker. The detection must
+      check for the specific file, not the directory. A workspace with
+      .github/workflows/ but no copilot-instructions.md is NOT a Copilot
+      workspace.
+    spec_impact: "CL-01 Platform Detection Matrix — specific file check, not directory presence"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      GitHub Copilot recently added support for .github/copilot-instructions/
+      (directory with multiple .md files) as an alternative to the single
+      file. The detection logic must handle both: single file
+      (.github/copilot-instructions.md) and directory
+      (.github/copilot-instructions/). If the directory form becomes the
+      standard, the single-file marker becomes a legacy detection path.
+    spec_impact: "CL-01 Platform Detection Matrix — Copilot directory-form marker detection"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The emit target for Copilot injects a governance section into
+      .github/copilot-instructions.md. Like Cursor and Claude Code, this
+      is delimiter-based section management. But Copilot instructions files
+      are typically shorter and simpler than CLAUDE.md files. The governance
+      section may dominate the file content, changing the Copilot experience
+      significantly. The injection must be proportional — a 50-line
+      governance section in a 10-line instructions file overwhelms the
+      original content.
+    spec_impact: "CL-04 EMIT — proportional governance injection for Copilot"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      GitHub Copilot has organization-level instructions that are inherited
+      by all repositories. If the organization-level instructions already
+      include governance directives, the workspace-level claws injection
+      may duplicate or conflict with them. The detection logic has no
+      visibility into organization-level Copilot settings. A warning should
+      note that claws governs workspace-level only.
+    spec_impact: "CL-01 Platform Detection Matrix — org-level instruction visibility limitation"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      GitHub Copilot's advisory model and T1 default trust tier mean R3+
+      tools produce ceiling violations. But many Copilot workspaces have
+      high-risk tools (code execution, file system access) that the
+      developer uses routinely. The T1 default creates excessive violations
+      that the developer must either acknowledge (raise trust tier) or
+      ignore. The first-run experience for Copilot workspaces with R3+
+      tools must guide the developer to set an appropriate trust tier
+      rather than flooding with violations.
+    spec_impact: "CL-05 Error Message Contract — guided trust tier selection for advisory platforms with high-risk tools"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      GitHub Copilot Workspace is a different product from GitHub Copilot
+      (chat/completion). Copilot Workspace may have its own configuration
+      format. The detection logic targets the standard Copilot instructions
+      file, not Copilot Workspace. If Copilot Workspace becomes common, a
+      new detection marker may be needed.
+    spec_impact: "CL-01 Platform Detection Matrix — Copilot vs Copilot Workspace distinction"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The .github/copilot-instructions.md file may be committed to git and
+      shared across team members. Governance injection into a committed file
+      means governance sections appear in pull requests and code review.
+      This is either a feature (governance changes are reviewable) or a
+      nuisance (governance diffs clutter PRs). The delimiter comments
+      should include a note: "Generated by claws — do not edit manually."
+    spec_impact: "CL-04 EMIT — generated section comment for version-controlled platform files"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      GitHub Copilot also supports .copilotignore for excluding files from
+      Copilot context. The detection logic should NOT treat .copilotignore
+      as a platform marker — it is a content exclusion file, not an
+      instructions file. Only .github/copilot-instructions.md signals
+      Copilot as the governance target.
+    spec_impact: "CL-01 Platform Detection Matrix — .copilotignore is not a detection marker"
+    pitfall: null

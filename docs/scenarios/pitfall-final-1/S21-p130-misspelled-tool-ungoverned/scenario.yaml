@@ -1,0 +1,124 @@
+name: S21-p130-misspelled-tool-ungoverned
+series: pitfall-final-1
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates that a misspelled tool name in claws.json's elicitation policy is
+  detected via cross-reference normalization. The policy governs a non-existent
+  tool while the real R5 tool has no elicitation gate. The diagnostic must
+  connect the misspelling cause to the ungoverned-tool effect.
+
+expect:
+  rules_applied: [G-ELICIT, OBO-WITHOUT-ELICIT]
+  violations:
+    - rule: OBO-WITHOUT-ELICIT
+      severity: error
+      tool: send-payment
+      risk: 5
+      cause: misspelled-policy-target
+      suggestion: "send_payment -> send-payment"
+  pass: false
+  severity: error
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  claws.json configures an elicitation policy for "send_payment" (underscore).
+  TOOLS.md declares "send-payment" (hyphen) as R5 with OBO. The exact string
+  match fails: the policy targets a tool that does not exist. OBO-WITHOUT-
+  ELICIT fires for send-payment (the real tool). The developer sees the error
+  and adds a policy for "send-payment," leaving the orphaned "send_payment"
+  policy in claws.json. Two policies exist: one effective, one dead. The
+  dead policy consumes configuration space and confuses future editors.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Pipeline-wide tool name normalization: all tool references across
+      all files are normalized (lowercase, hyphens, strip whitespace)
+      before cross-referencing. "send_payment" normalizes to "send-payment"
+      and matches the TOOLS.md declaration. If normalization matches,
+      the policy is applied. If normalization does not match, it's a
+      true orphan.
+    spec_impact: "CL-04 ANALYZE — tool name normalization for cross-reference"
+    pitfall: P-130
+
+  - id: F02
+    severity: major
+    description: >
+      "Did you mean?" suggestions with edit distance. If a policy targets
+      "send_paymnet" (typo) and TOOLS.md has "send-payment" (edit distance
+      2), the diagnostic says: "Elicitation policy targets 'send_paymnet'
+      which does not exist. Did you mean 'send-payment'?" The edit distance
+      threshold is configurable (default: 3).
+    spec_impact: "CL-04 diagnostics — edit distance suggestions"
+    pitfall: P-130
+
+  - id: F03
+    severity: major
+    description: >
+      Cascading diagnostic chain: the misspelling causes OBO-WITHOUT-ELICIT
+      for the real tool. The diagnostic must connect them: "send-payment
+      has no elicitation policy (OBO-WITHOUT-ELICIT). However, an
+      elicitation policy exists for 'send_payment' (edit distance 1).
+      The policy likely targets send-payment but has a misspelled name."
+      Cause and effect in one diagnostic.
+    spec_impact: "CL-04 diagnostics — cascading cause-effect chain"
+    pitfall: P-130
+
+  - id: F04
+    severity: major
+    description: >
+      Orphaned policies (targeting non-existent tools) must be detected
+      and reported. Even without a misspelling, a policy for a removed
+      tool is dead configuration. The diagnostic: "Elicitation policy for
+      'old-tool' targets a tool not declared in TOOLS.md. Remove the
+      policy or add the tool."
+    spec_impact: "CL-04 ANALYZE — orphaned policy detection"
+    pitfall: P-130
+
+  - id: F05
+    severity: major
+    description: >
+      Orphaned R5 policies escalate to error. An orphaned policy for an
+      R5 tool means the developer INTENDED to govern it but made a typo.
+      The R5 tool is ungoverned, which is a security risk. Orphaned R5
+      policies are error, not warning. Orphaned R1-R2 policies are warning.
+    spec_impact: "CL-02 G-ELICIT — orphaned R5 policy escalation"
+    pitfall: P-130
+
+  - id: F06
+    severity: warning
+    description: >
+      The normalization must handle common naming convention differences:
+      camelCase (sendPayment), snake_case (send_payment), kebab-case
+      (send-payment), PascalCase (SendPayment). All four should normalize
+      to the same canonical form. The canonical form is kebab-case
+      (consistent with OpenClaw conventions).
+    spec_impact: "CL-04 ANALYZE — naming convention normalization"
+    pitfall: P-130
+
+  - id: F07
+    severity: warning
+    description: >
+      claws fix --normalize could automatically fix misspelled tool names
+      in claws.json by applying the normalization and edit-distance
+      matching. The fix is logged in the audit chain: "Renamed policy
+      target: send_payment -> send-payment (auto-normalized)."
+    spec_impact: "CL-05 fix — automatic tool name normalization"
+    pitfall: P-130
+
+  - id: F08
+    severity: note
+    description: >
+      This pitfall demonstrates why cross-reference validation is
+      critical for governance correctness. A single character difference
+      (underscore vs hyphen) creates an ungoverned R5 tool. The
+      normalization + edit distance + cascading diagnostic approach
+      catches this class of error comprehensively.
+    spec_impact: "CL-04 — cross-reference validation importance"
+    pitfall: P-130

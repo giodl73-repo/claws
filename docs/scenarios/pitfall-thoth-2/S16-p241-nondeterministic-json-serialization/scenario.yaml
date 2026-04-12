@@ -1,0 +1,151 @@
+name: S16-p241-nondeterministic-json-serialization
+series: pitfall-thoth-2
+version: 1
+specs: [CL-04]
+description: >
+  Validates that GovernanceIR JSON serialization is fully deterministic with
+  sorted keys, ensuring that identical logical IR content always produces
+  byte-identical JSON output. Non-deterministic property ordering causes hash
+  divergence across compilations, breaking the hash-skip optimization that
+  avoids unnecessary file rewrites.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, RULES.md, claws.json]
+    analysis:
+      rules_evaluated: true
+      json_deterministic: true
+      hash_stable: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: emit
+      type: json-ordering-drift
+      error: "GovernanceIR JSON property order differs between compilations — hash mismatch"
+    - component: cache
+      type: false-invalidation
+      error: "Hash-skip optimization failed — file rewritten despite identical logical content"
+  halt: null
+  budget: null
+
+problem: >
+  A developer runs claws compile twice in succession without changing any source
+  files. The first compilation writes governance-ir.json and computes hash H1.
+  The second compilation builds the same IR in memory, but JavaScript object
+  property insertion order differs because the parser processes files in a
+  slightly different order due to async file reads. JSON.stringify produces
+  a different byte sequence. Hash H2 differs from H1. The hash-skip
+  optimization — which avoids rewriting files when the hash matches — fails.
+  The emitter rewrites governance-ir.json unnecessarily. Git shows a diff with
+  no logical changes, just reordered properties. In CI, every build produces
+  a "changed" governance-ir.json, triggering downstream rebuilds and confusing
+  change detection systems.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      All JSON serialization in the EMIT phase must use JSON.stringify
+      with a key-sorting replacer function. The replacer must recursively
+      sort object keys at every nesting level, not just the top level.
+      A shallow sort would still produce non-deterministic output for
+      nested objects whose property insertion order varies.
+    spec_impact: "CL-04 EMIT — recursive key-sorted JSON.stringify"
+    pitfall: P-241
+
+  - id: F02
+    severity: major
+    description: >
+      The hash-skip optimization compares the hash of the new output
+      against the hash of the existing file to avoid unnecessary writes.
+      If serialization is non-deterministic, this optimization never
+      triggers, degrading to full-rewrite-every-time behavior. The
+      optimization depends entirely on serialization determinism.
+    spec_impact: "CL-04 EMIT — hash-skip depends on serialization stability"
+    pitfall: P-241
+
+  - id: F03
+    severity: major
+    description: >
+      The IR construction must also be deterministic. If the parser
+      processes files concurrently and merges results into an object
+      in arrival order, the property insertion order varies per run.
+      The IR builder must sort entries after collection, before
+      serialization. Determinism must be guaranteed at the data
+      structure level, not just the serialization level.
+    spec_impact: "CL-04 IR — deterministic construction order"
+    pitfall: P-241
+
+  - id: F04
+    severity: major
+    description: >
+      Array ordering within the IR must also be deterministic. Arrays
+      of rules, constraints, or tools should be sorted by a stable
+      key (e.g., rule ID, tool name) before serialization. An unsorted
+      array whose elements arrive in different orders across compilations
+      produces different JSON even with sorted object keys.
+    spec_impact: "CL-04 IR — stable array ordering by canonical key"
+    pitfall: P-241
+
+  - id: F05
+    severity: warning
+    description: >
+      Floating-point numbers in JSON (e.g., confidence scores, risk
+      weights) can serialize differently across JavaScript engines or
+      even across V8 versions. The IR should avoid floating-point values
+      where possible, preferring integer scores (0-100) or string
+      representations with fixed precision.
+    spec_impact: "CL-04 IR — integer or fixed-precision numeric values"
+    pitfall: P-241
+
+  - id: F06
+    severity: warning
+    description: >
+      The JSON output formatting (indentation, trailing newline) must
+      be fixed. JSON.stringify(obj, replacer, 2) uses 2-space indent;
+      this must be the canonical format. A build tool that reformats
+      JSON with different indentation would change the hash. The
+      emitter should document the canonical JSON format.
+    spec_impact: "CL-04 EMIT — canonical JSON formatting specification"
+    pitfall: P-241
+
+  - id: F07
+    severity: major
+    description: >
+      Compilation timestamps embedded in the IR (compiled_at, version)
+      change on every run, defeating hash stability. Timestamps must
+      be excluded from the content hash. The hash should cover only
+      the governance-relevant content: rules, constraints, tools,
+      classifications. Metadata like compilation time is recorded but
+      not hashed.
+    spec_impact: "CL-04 GovernanceIR — exclude metadata from content hash"
+    pitfall: P-241
+
+  - id: F08
+    severity: warning
+    description: >
+      CI pipelines that check for "clean" builds (no uncommitted changes
+      after compilation) will always fail if serialization is non-
+      deterministic. The governance-ir.json file will always show as
+      modified. This erodes trust in CI and leads teams to add
+      governance-ir.json to .gitignore, bypassing version control
+      entirely.
+    spec_impact: "CL-05 DX — clean build guarantee for CI"
+    pitfall: P-241
+
+  - id: F09
+    severity: note
+    description: >
+      A test should compile the same workspace twice and assert byte-
+      equality of the output files. This idempotence test catches any
+      non-determinism in the entire pipeline — parsing, IR construction,
+      serialization, and emission. It should run as part of the standard
+      test suite, not just as a one-time verification.
+    spec_impact: "CL-04 testing — idempotence byte-equality test"
+    pitfall: P-241

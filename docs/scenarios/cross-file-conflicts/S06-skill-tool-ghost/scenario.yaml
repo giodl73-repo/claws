@@ -1,0 +1,102 @@
+name: S06-skill-tool-ghost
+series: cross-file-conflicts
+version: 1
+specs: [CL-04]
+description: >
+  Validates SKILL-TOOL-GHOST conflict: a skill in skills/ references a tool
+  that does not exist in TOOLS.md. The skill declares it uses "api-caller"
+  but TOOLS.md has no such tool. This is a warning-severity referential
+  integrity check.
+
+expect:
+  governance_ir:
+    version: 1
+    analysis:
+      conflicts:
+        - category: SKILL-TOOL-GHOST
+          severity: warning
+          files: [skills/, TOOLS.md]
+          skill_name: data-aggregator
+          ghost_tool: api-caller
+          resolution: "add tool to TOOLS.md or remove reference from skill"
+  violations: []
+  warnings:
+    - category: SKILL-TOOL-GHOST
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  skills/data-aggregator/SKILL.md references a tool "api-caller" in its
+  instructions ("use the api-caller tool to fetch external data"). TOOLS.md
+  does not declare "api-caller". The skill references a phantom tool —
+  either the tool was removed from TOOLS.md, the skill was copied from
+  another workspace, or the tool name is misspelled. The skill will fail
+  at runtime when it tries to use the non-existent tool.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Detecting tool references in SKILL.md requires parsing natural language
+      instructions for tool names. The skill may say "use api-caller" or
+      "invoke the API Caller tool" or "call api_caller()". Name normalization
+      and fuzzy matching are needed to catch all reference patterns.
+    spec_impact: "CL-04 EXTRACT — skill tool reference extraction"
+    pitfall: null
+
+  - id: F02
+    severity: warning
+    description: >
+      SKILL-TOOL-GHOST is the only conflict category classified as "better as
+      a G1 assertion" in the CL-04 spec. This means it is a referential
+      integrity check, not a governance conflict. It could be implemented as
+      a lint rule rather than a conflict category, simplifying the ANALYZE phase.
+    spec_impact: "CL-04 ANALYZE — conflict vs lint rule classification"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Skills downloaded from the marketplace (ClawHub) may reference tools
+      that exist in the marketplace's reference workspace but not in the
+      current workspace. This is the most common cause of SKILL-TOOL-GHOST.
+      The warning should suggest checking if the missing tool is a standard
+      marketplace tool that needs to be added.
+    spec_impact: "CL-04 diagnostics — marketplace skill context in warning"
+    pitfall: "P-004"
+
+  - id: F04
+    severity: note
+    description: >
+      The severity is warning, not error, because the skill may work without
+      the referenced tool if it has fallback logic. But skills are prompt-only
+      — they cannot have fallback code. If the skill instructs the agent to
+      use a tool that does not exist, the agent will fail or hallucinate a
+      different tool. The severity may need to be elevated.
+    spec_impact: "CL-04 conflict severity — ghost tool failure impact"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      If TOOLS.md adds the tool after the skill is installed, the ghost
+      resolves. But if TOOLS.md removes a tool that a skill depends on,
+      a new ghost appears. The three-ring inner ring should detect TOOLS.md
+      changes and re-check skill dependencies, not just check at compile time.
+    spec_impact: "CL-05 three-ring — tool removal skill impact detection"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Multiple skills may reference the same ghost tool. The conflict report
+      should aggregate: "api-caller referenced by skills: [data-aggregator,
+      report-builder, analytics-worker] but not in TOOLS.md." This gives
+      the developer a clear picture of the blast radius.
+    spec_impact: "CL-04 ANALYZE — ghost tool aggregation across skills"
+    pitfall: null

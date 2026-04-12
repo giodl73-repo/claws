@@ -1,0 +1,146 @@
+name: S03-exec-approvals-format-stale
+series: pitfall-coverage-2
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates that exec-approvals.json conforms to the OC platform schema (P-072)
+  and detects staleness after TOOLS.md changes (P-073). A format-incompatible
+  exec-approvals.json silently disables L4 governance. Stale entries after tool
+  additions or renames leave new tools ungoverned.
+
+expect:
+  rules_applied: [G-EXEC-APPROVALS]
+  violations:
+    - code: CLAWS-E040
+      rule: G-EXEC-APPROVALS
+      description: "exec-approvals.json schema mismatch"
+    - code: CLAWS-E041
+      rule: G-EXEC-APPROVALS
+      description: "exec-approvals.json stale — tool set does not match TOOLS.md"
+  pass: false
+  severity: error
+
+simulate:
+  failures:
+    - component: exec-approvals
+      type: schema-mismatch
+      error: "exec-approvals.json uses 'deny' field, OC platform expects 'blocked'"
+    - component: exec-approvals
+      type: stale-entry
+      error: "TOOLS.md declares 'process-payment' but exec-approvals.json has 'send-payment'"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace compiled 2 weeks ago has exec-approvals.json with 4 tool entries.
+  The developer renamed "send-payment" to "process-payment" in TOOLS.md and
+  added a new tool "audit-query." exec-approvals.json still references the old
+  name and has no entry for the new tool. Additionally, the exec-approvals.json
+  uses a "deny" boolean field instead of the OC platform's expected "blocked"
+  field name, because claws emitted using an older schema draft.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-072 core: exec-approvals.json uses {"deny": true} but the OC platform
+      expects {"blocked": true}. The field name mismatch means OC reads the
+      file, finds no "blocked" field, and treats the tool as unblocked. L4
+      governance is silently broken for all tools.
+    spec_impact: "CL-04 EMIT — exec-approvals.json field name schema"
+    pitfall: "P-072"
+
+  - id: F02
+    severity: major
+    description: >
+      The emit phase must validate the generated JSON against a pinned OC
+      exec approval schema definition. The schema version should be tracked
+      in claws.json (e.g., "execApprovalsSchema": "v2.1"). Schema mismatches
+      are hard errors that block emission.
+    spec_impact: "CL-04 G-EXEC-APPROVALS — schema version pinning"
+    pitfall: "P-072"
+
+  - id: F03
+    severity: major
+    description: >
+      P-073 core: "send-payment" renamed to "process-payment" in TOOLS.md.
+      exec-approvals.json still has "send-payment." Two problems: the old
+      name entry is a ghost (never matches), and the new name has no entry
+      (no L4 governance). The rename is undetectable without cross-reference.
+    spec_impact: "CL-02 G-EXEC-APPROVALS — tool rename detection"
+    pitfall: "P-073"
+
+  - id: F04
+    severity: major
+    description: >
+      The new tool "audit-query" has no exec-approvals.json entry. If
+      audit-query is R1 (read-only), missing L4 governance is low-risk but
+      still a gap. If audit-query is R5, missing L4 governance means no
+      host-level backup. The staleness check must flag ALL missing tools,
+      with severity proportional to risk level.
+    spec_impact: "CL-02 G-EXEC-APPROVALS — missing tool severity scaling"
+    pitfall: "P-073"
+
+  - id: F05
+    severity: warning
+    description: >
+      `claws pinch` must validate exec-approvals.json against the current
+      TOOLS.md on every run, not just during compilation. Developers running
+      `claws pinch` after editing TOOLS.md should see the staleness warning
+      immediately, without needing a full recompile.
+    spec_impact: "CL-02 pinch — live staleness detection"
+    pitfall: "P-073"
+
+  - id: F06
+    severity: warning
+    description: >
+      `claws watch` triggers recompilation on TOOLS.md save. If the developer
+      is in the middle of a multi-file edit (renaming in TOOLS.md, updating
+      SOUL.md references), the recompilation fires on the first save and may
+      produce incorrect intermediate results. A debounce window (e.g., 2s)
+      prevents spurious recompilations during multi-file edits.
+    spec_impact: "CL-05 watch — debounce for multi-file edits"
+    pitfall: "P-073"
+
+  - id: F07
+    severity: warning
+    description: >
+      If the OC platform upgrades its exec-approvals schema (e.g., from v2.1
+      to v3.0), all previously-compiled workspaces have incompatible L4
+      governance. `claws doctor` should detect this during platform upgrades
+      and recommend recompilation. The schema version mismatch is a doctor
+      finding, not just a build error.
+    spec_impact: "CL-05 doctor — platform schema version drift"
+    pitfall: "P-072"
+
+  - id: F08
+    severity: note
+    description: >
+      Tool renames that change casing only (e.g., "SendPayment" to
+      "send-payment") should be detected by the staleness check. Case-
+      insensitive comparison may produce false negatives if the platform
+      treats tool names as case-sensitive. The comparison must match the
+      platform's case sensitivity behavior.
+    spec_impact: "CL-02 G-EXEC-APPROVALS — case sensitivity in tool names"
+    pitfall: "P-073"
+
+  - id: F09
+    severity: note
+    description: >
+      exec-approvals.json may contain extra entries for tools that were removed
+      from TOOLS.md. These ghost entries are harmless (never matched) but
+      clutter the file and may confuse auditors reviewing L4 governance.
+      Staleness check should warn on ghost entries at info severity, not error.
+    spec_impact: "CL-02 G-EXEC-APPROVALS — ghost entry cleanup"
+    pitfall: "P-073"
+
+  - id: F10
+    severity: major
+    description: >
+      The combination of P-072 and P-073 creates a compounding failure:
+      exec-approvals.json has both wrong field names AND stale tool entries.
+      A developer running `claws pinch` sees two violations but may only fix
+      the staleness (easier). The format issue persists. Both violations must
+      be surfaced with equal severity and independent fix instructions.
+    spec_impact: "CL-02 G-EXEC-APPROVALS — independent violation reporting"
+    pitfall: "P-072, P-073"

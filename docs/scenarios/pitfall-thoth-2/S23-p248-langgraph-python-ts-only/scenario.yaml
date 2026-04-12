@@ -1,0 +1,157 @@
+name: S23-p248-langgraph-python-ts-only
+series: pitfall-thoth-2
+version: 1
+specs: [CL-04, CL-05]
+description: >
+  Validates that the compiler detects LangGraph (a Python framework) as a target
+  platform and correctly identifies that TypeScript-only code generation is
+  insufficient. The emitter must support multi-language output or explicitly
+  report that the target platform requires Python codegen that is not yet
+  available, rather than silently emitting unusable TypeScript.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+    analysis:
+      rules_evaluated: true
+      target_platform: langgraph
+      target_language: python
+  violations:
+    - code: CLAWS-E302
+      message: "LangGraph target requires Python code generation — TypeScript output is not usable"
+      severity: error
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: emit
+      type: language-mismatch
+      error: "Emitted TypeScript guard decorators for LangGraph Python framework — imports will fail"
+    - component: deploy
+      type: unusable-output
+      error: "Generated governance.ts cannot be imported by LangGraph Python application"
+  halt: null
+  budget: null
+
+problem: >
+  A team uses LangGraph to orchestrate their AI agent workflows in Python. They
+  adopt claws to add governance enforcement. The claws.json specifies
+  target_platform: langgraph. The compiler successfully parses the OC workspace
+  files and builds the GovernanceIR. The EMIT phase generates governance guard
+  code — but in TypeScript, the only language the emitter currently supports.
+  The output includes TypeScript decorators, import statements from @openclaw/
+  packages, and Node.js-specific runtime calls. The team cannot use any of this
+  output in their Python LangGraph application. They discover the mismatch only
+  after attempting to integrate the output, having spent time configuring their
+  OC workspace and defining governance rules. The compilation produced no error
+  or warning about the language incompatibility.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The platform detection phase must map each target platform to its
+      required output language(s). LangGraph requires Python. AutoGen
+      requires Python. CrewAI requires Python. Claude Code requires
+      TypeScript. When the target language does not match any available
+      code generator, the compiler must report an error before entering
+      the EMIT phase.
+    spec_impact: "CL-04 EMIT — platform-to-language mapping requirement"
+    pitfall: P-248
+
+  - id: F02
+    severity: major
+    description: >
+      The error must be reported at the earliest possible stage, not
+      after full compilation. The platform detection or validation
+      phase (before PARSE) should verify that the target platform has
+      a compatible code generator. Failing after IR construction wastes
+      compilation time and gives the developer a misleading sense that
+      their configuration is valid.
+    spec_impact: "CL-01 DETECT — early language compatibility check"
+    pitfall: P-248
+
+  - id: F03
+    severity: major
+    description: >
+      The multi-language code generation architecture must be designed
+      with a language-agnostic IR that can drive multiple language-
+      specific emitters. The GovernanceIR should not contain language-
+      specific constructs. It should express governance rules in a
+      universal format that TypeScript and Python emitters each
+      translate into their respective idioms.
+    spec_impact: "CL-04 IR — language-agnostic governance representation"
+    pitfall: P-248
+
+  - id: F04
+    severity: major
+    description: >
+      Python codegen for governance must produce idiomatic Python: guard
+      decorators using Python decorator syntax, imports from openclaw
+      Python packages, and Python-native type hints. A mechanical
+      TypeScript-to-Python transpilation would produce un-Pythonic code
+      that Python developers reject. The Python emitter must be a
+      first-class citizen, not a TypeScript afterthought.
+    spec_impact: "CL-04 EMIT — idiomatic Python code generation"
+    pitfall: P-248
+
+  - id: F05
+    severity: major
+    description: >
+      LangGraph uses specific patterns for tool decoration and state
+      management. The Python emitter must produce guard code that
+      integrates with LangGraph's @tool decorator pattern, state graph
+      nodes, and conditional edges. Generic Python guard code that
+      does not align with LangGraph's architecture will require manual
+      adaptation by the developer.
+    spec_impact: "CL-04 EMIT — LangGraph-specific guard integration patterns"
+    pitfall: P-248
+
+  - id: F06
+    severity: warning
+    description: >
+      The error message for unsupported languages must include a
+      migration path: "LangGraph requires Python codegen. Python
+      support is tracked in issue #XXX. Until then, use the IR output
+      (claws compile --emit-ir-only) and implement guards manually."
+      This gives the developer an actionable workaround rather than
+      a dead end.
+    spec_impact: "CL-05 DX — unsupported language workaround guidance"
+    pitfall: P-248
+
+  - id: F07
+    severity: warning
+    description: >
+      The --emit-ir-only flag provides a partial workaround: emit the
+      GovernanceIR JSON without generating code. A Python developer
+      can read the IR and implement guards manually. This flag must
+      be available for all platforms, even unsupported ones, because
+      the IR itself is language-agnostic.
+    spec_impact: "CL-04 EMIT — IR-only output for unsupported platforms"
+    pitfall: P-248
+
+  - id: F08
+    severity: warning
+    description: >
+      The platform capability matrix in documentation must clearly
+      state which platforms support which output languages. A table
+      of platform x language x status (supported/planned/unsupported)
+      prevents developers from investing time in a configuration that
+      cannot produce usable output.
+    spec_impact: "CL-05 DX — platform x language support matrix documentation"
+    pitfall: P-248
+
+  - id: F09
+    severity: note
+    description: >
+      Testing multi-language emission requires Python test fixtures
+      and a Python linter/type-checker (mypy or pyright) to validate
+      the generated Python code. The test suite must verify that
+      emitted Python code is syntactically valid, type-correct, and
+      importable in the target framework.
+    spec_impact: "CL-04 testing — Python output validation with type checker"
+    pitfall: P-248

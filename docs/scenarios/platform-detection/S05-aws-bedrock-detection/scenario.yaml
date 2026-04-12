@@ -1,0 +1,141 @@
+name: S05-aws-bedrock-detection
+series: platform-detection
+version: 1
+specs: [CL-01]
+description: >
+  Validates that AWS Bedrock requires explicit `platform: bedrock` in
+  claws.json because no reliable workspace marker file exists. Bedrock
+  workspaces are cloud-configured through AWS console/SDK, not through
+  local workspace files. Default trust tier is T3 reflecting Bedrock's
+  API-level guardrail enforcement.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      platform_detected: bedrock
+      detection_confidence: explicit
+      detection_source: claws_json
+      marker: null
+      default_trust_tier: 3
+      enforcement: runtime
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace contains claws.json with `platform: bedrock` and source files
+  describing agent governance. There are no characteristic Bedrock marker files
+  in the workspace (Bedrock configuration lives in AWS, not locally). The
+  detection logic must: (1) recognize the explicit platform field, (2) skip
+  marker file scanning (explicit overrides auto-detect), (3) set default trust
+  tier to T3 (Bedrock supports API-level guardrails, allowing R4 tools), (4)
+  configure emission for Bedrock guardrail policy JSON.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Bedrock is the only platform that requires explicit configuration.
+      This creates an asymmetry: 6 platforms auto-detect, 1 requires config.
+      If a developer forgets to set `platform: bedrock` and there are no
+      other marker files, the workspace has no detected platform. The
+      pipeline must handle the "no platform detected" case gracefully:
+      compile the IR but warn that no emission target is configured, and
+      suggest adding a platform field or creating a marker file.
+    spec_impact: "CL-01 Platform Detection Matrix — no-platform-detected warning and guidance"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Bedrock guardrail policies have a specific JSON schema defined by AWS.
+      The emit phase must produce JSON that conforms to the Bedrock
+      CreateGuardrail API format. If AWS updates the guardrail API (new
+      fields, schema version), claws's Bedrock emission breaks. The emit
+      phase should target a specific Bedrock API version and warn when
+      emitting for an unknown version.
+    spec_impact: "CL-04 EMIT — Bedrock guardrail API version targeting"
+    pitfall: P-240
+
+  - id: F03
+    severity: warning
+    description: >
+      Bedrock's T3 default trust tier (R4-max) is the highest auto-default
+      in the platform matrix. This reflects Bedrock's runtime guardrail
+      enforcement capability (API-level blocking). But the developer must
+      still configure the Bedrock guardrail separately — claws emitting a
+      guardrail policy JSON does not automatically apply it. The build
+      output must include instructions: "Apply this guardrail via
+      `aws bedrock create-guardrail --cli-input-json file://guardrail.json`."
+    spec_impact: "CL-05 Maker Experience — post-build deployment instructions for Bedrock"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Bedrock guardrails operate at the API level (content filters, denied
+      topics, word filters), which is semantically different from OC Gateway
+      hooks (tool-level governance). The governance model translation from
+      claws's tool-centric model (R1-R5 risk, per-tool OBO) to Bedrock's
+      content-centric model (topic filters, word lists) is lossy. Some
+      governance rules (G-CLASS per-tool risk) have no direct Bedrock
+      equivalent. The emit phase must document which rules are emitted and
+      which are advisory-only for Bedrock.
+    spec_impact: "CL-04 EMIT — governance model translation coverage for Bedrock"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      AWS Bedrock supports multiple model providers (Anthropic, AI21, Cohere,
+      Meta). Different model providers may have different guardrail
+      capabilities. The Bedrock emission should be model-agnostic (targeting
+      Bedrock guardrails, not provider-specific features). If the guardrail
+      JSON includes provider-specific fields, it fails for other providers.
+    spec_impact: "CL-04 EMIT — Bedrock emission must be model-provider-agnostic"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Some Bedrock workspaces use Bedrock Agents (formerly "Agents for
+      Bedrock"), which have their own action group definitions and knowledge
+      base configurations. These are potential marker files (agent YAML,
+      action group JSON). A future detection enhancement could look for
+      Bedrock Agent configuration files to enable auto-detection, removing
+      the explicit-only requirement.
+    spec_impact: "CL-01 Platform Detection Matrix — future Bedrock Agent marker file candidates"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The `platform: bedrock` explicit detection means a developer can set
+      platform: bedrock on ANY workspace, even one with SOUL.md. The
+      explicit platform field takes precedence over marker file detection
+      (per detection priority). This is intentional: a developer might want
+      to cross-compile an OpenClaw workspace to Bedrock guardrails. But the
+      source files (SOUL.md) are parsed as OpenClaw format while the output
+      targets Bedrock, creating a source-target platform mismatch. The
+      pipeline handles this via the cross-compile target system.
+    spec_impact: "CL-01 Cross-Compile Targets — source-target platform mismatch is valid for cross-compile"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Bedrock guardrail policies support versioning (guardrail versions).
+      The emitted guardrail JSON should be treated as a new version on each
+      compilation, not an overwrite. The emit phase should support both
+      "create new guardrail" and "update existing guardrail" workflows.
+      The developer should specify the guardrail ID in claws.json
+      targets.bedrock configuration for updates.
+    spec_impact: "CL-01 claws.json v2 schema — targets.bedrock.guardrailId for update workflow"
+    pitfall: null

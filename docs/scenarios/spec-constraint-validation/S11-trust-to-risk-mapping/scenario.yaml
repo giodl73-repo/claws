@@ -1,0 +1,126 @@
+name: S11-trust-to-risk-mapping
+series: spec-constraint-validation
+version: 1
+specs: [CL-01, CL-02]
+description: >
+  Validates the authoritative trust-to-risk mapping: T0=R1-max, T1=R2-max,
+  T2=R3-max, T3=R4-max, T4=R5-max. A workspace at trust tier T2 cannot have
+  tools classified above R3. If TOOLS.md declares an R5 tool but claws.json
+  sets trustTier: 2, the compiler must produce an error: the tool exceeds the
+  trust tier ceiling.
+
+expect:
+  rules_applied: [G-CLASS]
+  violations:
+    - code: TRUST-CEILING-EXCEEDED
+      severity: error
+      tool: send-email
+      risk_level: 5
+      trust_tier: 2
+      max_risk: 3
+  pass: false
+  severity: error
+
+simulate:
+  failures: []
+  halt: ANALYZE
+  budget: null
+
+problem: >
+  claws.json sets trustTier: 2 (T2). TOOLS.md declares "send-email" with
+  capabilities [COMMUNICATE, TRANSACT], which G-CLASS classifies as R5/OBO.
+  The trust-to-risk mapping says T2 workspaces can have tools up to R3-max.
+  An R5 tool in a T2 workspace exceeds the ceiling. The compiler must refuse
+  to compile this configuration -- the tool cannot exist in this workspace
+  at this trust tier. The resolution is either raise the trust tier to T4
+  or remove the R5 tool.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The trust-to-risk mapping must be consistent between CL-01 and CL-02.
+      If CL-01 defines T2=R3-max and CL-02 defines T2=R4-max, the specs
+      contradict. The constraint is duplicated in both specs with a cross-
+      reference (CFC-S02-F01). Any change to the mapping in one spec must
+      be reflected in the other.
+    spec_impact: "CL-01/CL-02 — trust-to-risk cross-spec consistency"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Per-target trust tier overrides (CL-01) allow raising the trust tier
+      for specific platforms. If the core trustTier is T2 but the OpenClaw
+      target has trustTier: T4, R5 tools are allowed for OpenClaw but not
+      for other platforms. The ceiling check must use the per-target override
+      when evaluating platform-specific artifacts.
+    spec_impact: "CL-01 — per-target trust tier in ceiling check"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Platform built-in tools (OC exec = R4) may exceed the trust tier
+      ceiling. An OC workspace at T2 has a built-in R4 exec tool that
+      exceeds R3-max. The compiler must handle built-in tools differently:
+      built-ins that exceed the ceiling should produce a warning (not error)
+      because the operator cannot remove platform built-ins. The warning
+      should recommend raising the trust tier or disabling the built-in
+      via exec-approvals.
+    spec_impact: "CL-02 G-CLASS — built-in tool ceiling exception"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Classification overrides in claws.json (Amendment A3) may bring a tool
+      below the ceiling. If send-email is overridden from R5 to R3, it fits
+      within T2's R3-max ceiling. The ceiling check must use the EFFECTIVE
+      classification (after overrides), not the DERIVED classification
+      (before overrides).
+    spec_impact: "CL-02 G-CLASS — override precedence in ceiling check"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The trustTier default is T2 (CL-01 constraint CP-S01-F02). A workspace
+      without an explicit trustTier in claws.json defaults to T2, which means
+      R3-max. If the workspace has R4 or R5 tools and no explicit trustTier,
+      the ceiling check catches this. The error message must explain the
+      default: "trustTier not set -- defaulting to T2 (R3-max)."
+    spec_impact: "CL-01 — default trustTier in ceiling error message"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The resolution for a ceiling violation should be bidirectional (like
+      G-PERM, Amendment A6): "Raise trustTier to T4 in claws.json" or
+      "Remove send-email from TOOLS.md" or "Override send-email to R3 in
+      claws.json classification overrides." Three options with different
+      trade-offs.
+    spec_impact: "CL-02 G-CLASS — bidirectional ceiling resolution"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Fleet templates may set the trust tier centrally. If a fleet template
+      sets T2 and a workspace adds R5 tools, the workspace fails compilation.
+      The fleet administrator must be notified, not just the workspace
+      developer. The diagnostic should indicate that the trust tier is
+      inherited from fleet configuration.
+    spec_impact: "CL-05 fleet — fleet-inherited trust tier in diagnostics"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      This scenario validates the CL-01 and CL-02 constraint "Trust tier to
+      risk level mapping (authoritative)" from CFC-S02-F01. The mapping is
+      the bridge between workspace-level trust (CL-01) and tool-level risk
+      (CL-02).
+    spec_impact: "CL-01/CL-02 — trust-to-risk mapping constraint traceability"
+    pitfall: null

@@ -1,0 +1,137 @@
+name: S02-cursor-detection
+series: platform-detection
+version: 1
+specs: [CL-01]
+description: >
+  Validates that a workspace containing .cursorrules is detected as the Cursor
+  platform with definitive confidence. Cursor is advisory-only: governance
+  compiles to instructions injected into .cursorrules, with no runtime hooks.
+  Default trust tier is T1 (R2-max) reflecting the advisory enforcement model.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      platform_detected: cursor
+      detection_confidence: definitive
+      detection_source: marker_file
+      marker: .cursorrules
+      default_trust_tier: 1
+      enforcement: advisory
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace contains .cursorrules and claws.json with no explicit `platform`
+  field. The detection logic must: (1) find .cursorrules and identify the
+  platform as Cursor, (2) set default trust tier to T1 (advisory platforms
+  have lower default trust because governance is unenforceable at runtime),
+  (3) configure the emission pipeline for advisory output (governance section
+  injected into .cursorrules, no plugin or exec-approvals).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Cursor is advisory-only: the compiled governance output is a text
+      section appended to .cursorrules. This means claws modifies
+      .cursorrules — which appears to violate the lossless guarantee. But
+      .cursorrules is NOT one of the 9 OC workspace files. The lossless
+      guarantee applies to the 9 OC files, not to platform-specific config
+      files. For Cursor, .cursorrules is both a source (existing rules) and
+      a target (governance section). This dual role must be documented: claws
+      appends a clearly-delimited governance section, never modifies existing
+      content above the delimiter.
+    spec_impact: "CL-04 lossless boundary — .cursorrules is outside the 9-file lossless scope"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The T1 default trust tier (R2-max) means any R3+ tools in the workspace
+      produce G-CLASS violations. But a Cursor workspace may legitimately use
+      R3 tools with advisory governance (the developer accepts the risk). The
+      error message for T1 ceiling violations must explain that advisory
+      platforms default to T1 and suggest raising the trust tier explicitly
+      in claws.json if the developer accepts unenforceable governance for
+      higher-risk tools.
+    spec_impact: "CL-01 Platform Detection Matrix — T1 ceiling violation messaging for advisory platforms"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The .cursorrules file format is not standardized — it is a plain text
+      file with no formal schema. Cursor reads it as system prompt instructions.
+      The governance section injected by claws must be clearly delimited
+      (e.g., `<!-- claws governance start -->` ... `<!-- claws governance end -->`)
+      so that re-compilation can replace the section without affecting
+      user-authored content above or below the delimiters.
+    spec_impact: "CL-04 EMIT — delimiter-based section management for .cursorrules injection"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Cursor may update its workspace file format (e.g., from .cursorrules
+      to .cursor/config.json or a YAML format). The detection logic
+      hardcodes ".cursorrules" as the marker. If Cursor changes its format,
+      claws detection breaks until updated. The detection should also check
+      for alternative Cursor markers (e.g., .cursor/ directory) as a
+      forward-compatibility measure.
+    spec_impact: "CL-01 Platform Detection Matrix — Cursor marker forward-compatibility"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Advisory enforcement means the LLM may ignore governance instructions
+      in .cursorrules. For R4-R5 tools, advisory-only governance is
+      insufficient. The compiler should emit a prominent warning: "Cursor
+      platform is advisory-only. R4+ tools (send-email, execute-code) are
+      NOT enforced at runtime. Consider cross-compiling to OpenClaw for
+      runtime enforcement." This warning helps developers understand the
+      enforcement gap.
+    spec_impact: "CL-05 Error Message Contract — advisory enforcement warning for high-risk tools"
+    pitfall: P-237
+
+  - id: F06
+    severity: note
+    description: >
+      The cross-compile target `claws build cursor` emits a .cursorrules
+      governance section. But if the workspace was auto-detected as Cursor,
+      `claws build` (no target) should also produce Cursor output. The
+      default build target should match the detected platform. Specifying
+      `claws build cursor` is redundant for a Cursor workspace but harmless.
+    spec_impact: "CL-01 Cross-Compile Targets — default build target matches detected platform"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      A workspace with both .cursorrules and CLAUDE.md is a multi-platform
+      workspace. `claws build` must either build for the primary platform
+      (by detection priority) or build for all detected platforms. CL-01
+      specifies cross-compile targets but does not specify behavior for
+      multi-platform auto-detection. The build command should warn about
+      multiple detected platforms and require explicit target selection.
+    spec_impact: "CL-01 Cross-Compile Targets — multi-platform ambiguity resolution"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Cursor workspaces typically have a .cursor/ directory in addition to
+      .cursorrules. The presence of .cursor/ alone (without .cursorrules)
+      should not trigger Cursor detection — only the rules file is the
+      marker. The .cursor/ directory may contain settings, extensions, or
+      other Cursor-specific data that is not governance-related.
+    spec_impact: "CL-01 Platform Detection Matrix — .cursor/ directory alone is not a marker"
+    pitfall: null

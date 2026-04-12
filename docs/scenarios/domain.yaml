@@ -1,0 +1,52 @@
+name: claws
+description: "claws governance compiler — scenario validation for compile, pinch, build, fleet, compliance"
+
+lineage:
+  specs: [CL-01, CL-02, CL-03, CL-04, CL-05, CL-06, CL-07]
+  atoms: [atom:claws-compiler, atom:governance-ir, atom:pinch, atom:governance-plugin, atom:obo-boundary, atom:three-rings, atom:fail-mode]
+  pipeline: ["compile", "pinch", "build", "fleet", "comply"]
+  source: "claws-sdk/src"
+
+coverage:
+  forward: true
+  simulation: true
+  contract: true
+  structural: true
+
+runners:
+  compile-sim:
+    description: "Compilation pipeline simulation — parse → extract → analyze → optimize → emit"
+    marker: "scenario.yaml"
+    expect_keys: [governance_ir, violations, warnings, artifacts]
+
+  pinch-sim:
+    description: "Governance check simulation — rule application against workspace fixtures"
+    marker: "scenario.yaml"
+    expect_keys: [rules_applied, violations, pass, severity]
+
+  emit-sim:
+    description: "Code emission simulation — verify generated plugin/skill/workflow output"
+    marker: "scenario.yaml"
+    expect_keys: [artifacts, plugin_hooks, skill_content, approvals]
+
+  fleet-sim:
+    description: "Fleet operation simulation — multi-workspace scan/broadcast/drift"
+    marker: "scenario.yaml"
+    expect_keys: [workspaces, drift_count, broadcast_result, compliance]
+
+  security-sim:
+    description: "Security scenario simulation — OBO, A2A, injection, fail-mode"
+    marker: "scenario.yaml"
+    expect_keys: [attack_class, defense_layer, blocked, audit_event]
+
+notes: |
+  Scenarios validate the 7 claws specs (CL-01 through CL-07) against
+  OC workspace fixtures. Each scenario series maps to a spec area.
+  Fixtures are minimal OC workspaces (SOUL.md + TOOLS.md + claws.json minimum).
+
+  Runner types:
+  - compile-sim: Full pipeline (parse → emit), checks IR output
+  - pinch-sim: Rule checking only (parse → analyze), checks violations
+  - emit-sim: Code generation only (IR → artifacts), checks generated TS
+  - fleet-sim: Multi-workspace operations, checks fleet state
+  - security-sim: Attack/defense scenarios, checks enforcement layers

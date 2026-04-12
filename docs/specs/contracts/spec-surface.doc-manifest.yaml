@@ -1,0 +1,31 @@
+surface: "claws-spec"
+entries:
+  claws-spec-index:
+    type: directory-index
+    path: "design/claws/SPECS.md"
+    atoms: ["claws-compiler", "governance-ir", "tool-classification", "governance-plugin", "three-rings", "three-tier-packages", "lossless-roundtrip"]
+
+  claws-command-map:
+    type: reference
+    path: "design/claws/COMMAND-MAP.md"
+    atoms: ["pinch", "snap", "claws-init", "claws-uninstall", "progressive-disclosure"]
+
+  claws-pitfalls:
+    type: reference
+    path: "design/claws/PITFALLS.md"
+    atoms: ["obo-boundary", "fail-mode", "defense-in-depth", "tool-classification", "a2a-governance"]
+
+  claws-research:
+    type: directory-index
+    path: "design/claws/focus/README.md"
+    atoms: ["claws-compiler", "governance-ir", "obo-boundary", "governance-plugin", "claws-sdk"]
+
+  claws-deck:
+    type: reference
+    path: "docs/presentations/why-claws.md"
+    atoms: ["three-engine-model", "obo-boundary", "press-pinch", "defense-in-depth", "dotnet-for-oc"]
+
+  claws-atoms:
+    type: directory-index
+    path: "docs/claws/ATOMS.md"
+    atoms: ["*"]  # all claws atoms

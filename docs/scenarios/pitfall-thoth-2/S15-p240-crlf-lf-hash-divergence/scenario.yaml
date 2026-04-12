@@ -1,0 +1,138 @@
+name: S15-p240-crlf-lf-hash-divergence
+series: pitfall-thoth-2
+version: 1
+specs: [CL-04, CL-05]
+description: >
+  Validates that CRLF vs LF line ending differences do not cause GovernanceIR
+  hash divergence across platforms. The same logical content must produce
+  identical IR hashes regardless of whether the source files use Windows (CRLF)
+  or Unix (LF) line endings, ensuring incremental compilation cache sharing
+  across developer machines and CI environments.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, RULES.md, claws.json]
+      line_endings_normalized: true
+    analysis:
+      rules_evaluated: true
+      hash_deterministic: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: ir-hash
+      type: line-ending-divergence
+      error: "SOUL.md hash differs: Windows a3f7c2 vs macOS b8e1d4 — CRLF vs LF"
+    - component: cache
+      type: cross-platform-miss
+      error: "Incremental cache miss — hash mismatch between CI (Linux LF) and dev (Windows CRLF)"
+  halt: null
+  budget: null
+
+problem: >
+  A team has developers on Windows and macOS. The Windows developer runs claws
+  compile and the GovernanceIR hash is computed on CRLF content. They commit
+  the IR cache to the repository. The macOS developer pulls the same branch and
+  runs claws compile. Their local files use LF line endings (via .gitattributes
+  auto-normalization). The IR hash computed on LF content differs from the
+  cached CRLF hash. The incremental compilation cache reports a miss and
+  triggers a full recompilation. This happens on every single compilation,
+  effectively disabling incremental compilation for cross-platform teams. In
+  CI (Linux), every build recompiles from scratch because the cache was
+  populated on Windows, wasting 30+ seconds per build.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Line ending normalization to LF must occur before any hashing
+      operation. The normalization layer must sit between file I/O and the
+      hasher, alongside BOM stripping. The order is: read bytes, strip BOM,
+      normalize line endings to LF, then pass to parser and hasher. This
+      ensures all downstream consumers see identical content regardless of
+      platform.
+    spec_impact: "CL-04 GovernanceIR — LF normalization before hashing"
+    pitfall: P-240
+
+  - id: F02
+    severity: major
+    description: >
+      The normalization must handle mixed line endings within a single
+      file. Some editors produce files with a mix of CRLF and LF (e.g.,
+      after partial edits on different platforms). The normalizer must
+      replace ALL occurrences of \r\n with \n and then strip any remaining
+      standalone \r characters (old Mac line endings).
+    spec_impact: "CL-04 PARSE — mixed line ending normalization"
+    pitfall: P-240
+
+  - id: F03
+    severity: major
+    description: >
+      The incremental compilation cache key must be computed on normalized
+      content, not raw file bytes. If the cache stores raw-byte hashes,
+      every platform switch invalidates the entire cache. The cache format
+      should document that hashes are computed on BOM-stripped, LF-
+      normalized content to prevent future implementers from changing the
+      normalization order.
+    spec_impact: "CL-04 G-IR — cache key normalization documentation"
+    pitfall: P-240
+
+  - id: F04
+    severity: major
+    description: >
+      The EMIT phase must also use normalized line endings. If the emitter
+      writes CRLF on Windows and LF on macOS, the emitted artifacts differ
+      across platforms despite identical source content. All emitted files
+      must use LF regardless of platform, matching the canonical line ending
+      used for hashing.
+    spec_impact: "CL-04 EMIT — canonical LF output on all platforms"
+    pitfall: P-240
+
+  - id: F05
+    severity: warning
+    description: >
+      Git's core.autocrlf and .gitattributes text=auto settings interact
+      with claws's normalization. If Git normalizes to LF on checkout but
+      the working tree has CRLF, claws sees CRLF. The hash must match
+      regardless of Git's normalization state because developers may have
+      different Git configurations.
+    spec_impact: "CL-04 PARSE — independence from Git line ending settings"
+    pitfall: P-240
+
+  - id: F06
+    severity: warning
+    description: >
+      Source location diagnostics (line:column) must reference positions
+      in the normalized content, not the raw file. A CRLF file has
+      different byte offsets than the same content with LF. Diagnostics
+      should note the original line ending format so developers can
+      correlate reported positions with their editor display.
+    spec_impact: "CL-05 DX — source location on normalized content"
+    pitfall: P-240
+
+  - id: F07
+    severity: warning
+    description: >
+      The claws diff command compares GovernanceIR across compilations.
+      If one compilation used CRLF and another used LF, diff should
+      report zero differences (because the normalized content is
+      identical). If diff operates on raw hashes without normalization,
+      it reports false positives on every cross-platform comparison.
+    spec_impact: "CL-05 diff — normalized comparison across platforms"
+    pitfall: P-240
+
+  - id: F08
+    severity: note
+    description: >
+      Performance: line ending normalization adds a string replacement
+      pass over every file. For the 9 OC workspace files (typically
+      small), this overhead is negligible. But the implementation should
+      use a single-pass regex replace rather than multiple sequential
+      replacements to keep the normalization cost predictable.
+    spec_impact: "CL-04 PARSE — single-pass normalization performance"
+    pitfall: P-240

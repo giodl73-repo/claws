@@ -1,0 +1,138 @@
+name: S05-hook-ordering-guarantee
+series: spec-constraint-validation
+version: 1
+specs: [CL-03, CL-04]
+description: >
+  Validates the governance hook registration ordering guarantee: the claws
+  governance plugin MUST be loaded before all other plugins. OC executes hooks
+  in registration order, not priority order. If a non-governance plugin
+  registers before_tool_call first, it may allow a tool call before the
+  governance plugin can block it.
+
+expect:
+  attack_class: hook-registration-order-bypass
+  defense_layer: L2-plugin-registration
+  blocked: true
+  audit_event:
+    type: hook-order-warning
+    governance_plugin_position: 1
+    total_plugins: 3
+    ordering_verified: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has 3 plugins: claws-governance (governance), code-quality
+  (linter), and data-connector (integration). The OC Gateway loads plugins in
+  the order specified in openclaw.json. If code-quality is listed first, its
+  before_tool_call hook runs before claws-governance. If code-quality's hook
+  modifies the event (e.g., changing toolName), the governance plugin sees
+  modified data. If it allows the call, governance never gets to block it.
+  The EMIT phase warns if governance is not first in openclaw.json.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The EMIT phase SHOULD warn if the governance plugin is not first in
+      openclaw.json, but modifying openclaw.json is outside claws's scope
+      (lossless principle). This creates a gap: the compiler can detect the
+      risk but cannot fix it. The warning must be prominent and include the
+      exact change needed: "Move claws-governance to position 1 in
+      openclaw.json plugins array."
+    spec_impact: "CL-04 EMIT — plugin ordering advisory warning"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      If another plugin's before_tool_call hook throws an exception before
+      the governance hook runs, the OC Gateway's default fail-open behavior
+      may skip the governance hook entirely. The governance plugin must not
+      depend on other plugins executing correctly. If possible, the governance
+      plugin should request "first" registration priority via the OC plugin
+      API (if such a mechanism exists).
+    spec_impact: "CL-03 runtime — governance hook independence from other plugins"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      A malicious or buggy plugin could register a before_tool_call hook that
+      clones the event, calls the tool directly (bypassing subsequent hooks),
+      and returns an allow result. This "short-circuit" pattern defeats any
+      governance hook regardless of ordering. The sidecar (L5) is the defense
+      against this class of attack because it operates outside the Gateway
+      plugin system.
+    spec_impact: "CL-03 L5 sidecar — defense against plugin short-circuit"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The `claws init` command creates the governance plugin but does not
+      modify openclaw.json's plugin load order (lossless principle). After
+      init, the user must manually ensure governance is first. The init
+      output should include an explicit instruction: "IMPORTANT: Ensure
+      claws-governance is the FIRST plugin in openclaw.json."
+    spec_impact: "CL-03 init — post-init ordering instruction"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Dynamic plugin loading (hot-reload, lazy-load) may change the effective
+      hook order at runtime. If a plugin is loaded after Gateway start, its
+      hooks are appended AFTER existing hooks. This is actually favorable for
+      governance (governance hooks registered at init time run first). But if
+      the governance plugin itself is hot-reloaded, its hooks are re-appended
+      at the end. Hot-reload of the governance plugin must re-register hooks
+      at the front, not the back.
+    spec_impact: "CL-03 runtime — hot-reload hook ordering"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The `claws pinch` command should verify hook ordering as part of its
+      runtime checks. `pinch` already validates policy configuration; it
+      should also query the Gateway's plugin registry to confirm governance
+      is first. If not, `pinch` reports: "CLAWS-W030: governance plugin is
+      at position 3 of 5 -- should be position 1."
+    spec_impact: "CL-05 pinch — hook ordering runtime check"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The OC Gateway may add internal hooks (telemetry, error tracking) that
+      register before any plugin hooks. These internal hooks should be
+      transparent to governance. The governance plugin must be first among
+      PLUGIN hooks, not necessarily first among ALL hooks (which may include
+      internal Gateway hooks).
+    spec_impact: "CL-03 runtime — plugin vs internal hook distinction"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      In a fleet deployment where openclaw.json is managed centrally, the
+      plugin ordering is a fleet-level security property. The fleet template
+      must enforce governance-first ordering. `claws fleet scan` should
+      check plugin ordering across all managed workspaces and report any
+      workspace where governance is not first.
+    spec_impact: "CL-05 fleet — plugin ordering fleet enforcement"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      This scenario validates CL-04 constraint emit-S03-F01 "Plugin loading
+      order advisory" and the broader CL-03 principle that governance hooks
+      must run before all other plugin hooks. The OC platform's registration-
+      order semantics make this a critical deployment concern.
+    spec_impact: "CL-03/CL-04 — hook ordering constraint traceability"
+    pitfall: null

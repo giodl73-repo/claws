@@ -1,0 +1,110 @@
+name: S04-skill-governance-advisory
+series: emit-artifacts
+version: 1
+specs: [CL-04]
+description: >
+  Validates that the generated SKILL.md contains governance advisory
+  instructions. The skill is L1 (prompt-based, advisory only) and must
+  include tool classifications, deny constraints, and OBO boundary guidance.
+  PRESS compression must preserve semantic content.
+
+expect:
+  artifacts:
+    - type: skill
+      path: skills/claws-governance/SKILL.md
+      valid: true
+  plugin_hooks: null
+  skill_content:
+    contains_governance: true
+    contains_tool_classifications: true
+    contains_deny_constraints: true
+    contains_obo_guidance: true
+    press_compressed: true
+  approvals: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The emit phase generates SKILL.md for the governance skill. The skill
+  must contain: (1) tool risk classifications (R1-R5 for each tool),
+  (2) deny constraints from SOUL.md ("never access production"),
+  (3) OBO boundary guidance ("ask before sending emails"), and
+  (4) general governance instructions. All content is PRESS-compressed
+  to minimize token usage in the LLM context window.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      SKILL.md is advisory only — the LLM may ignore it. The effectiveness
+      of L1 governance depends on LLM instruction-following quality. If the
+      LLM ignores "never access production" in SKILL.md, the deny constraint
+      is unenforced. This is why L2+ enforcement (plugin) exists. The SKILL.md
+      must include clear, imperative instructions, not suggestions.
+    spec_impact: "CL-04 EMIT — SKILL.md instruction quality"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      PRESS compression must not remove critical governance directives. If
+      compression reduces "never access production databases under any
+      circumstances" to "avoid prod db," the directive is weakened. The
+      compression profile for governance content must preserve safety-critical
+      keywords (never, always, must, prohibited).
+    spec_impact: "CL-04 EMIT — PRESS governance compression profile"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The SKILL.md token budget depends on the LLM's context window. For a
+      4K context, governance advisory competes with user instructions. For
+      128K context, it is negligible. The PRESS compression level should be
+      configurable: aggressive for small contexts, minimal for large contexts.
+    spec_impact: "CL-04 EMIT — PRESS compression level configuration"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Tool classifications in SKILL.md must match tool classifications in
+      exec-approvals.json and in the plugin's rule tables. If three artifacts
+      have different classifications for the same tool, the governance layers
+      contradict each other. Cross-artifact consistency validation is needed.
+    spec_impact: "CL-04 EMIT — cross-artifact consistency validation"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The "OC developer test" applies to SKILL.md: the content must look like
+      something an OC developer would write as skill instructions. No
+      @craftworks references, no internal terminology, no compilation
+      metadata. The skill must read as natural language governance guidance.
+    spec_impact: "CL-04 EMIT — SKILL.md OC developer test"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      If the workspace has 50+ tools, the SKILL.md listing all tool
+      classifications could be very long. PRESS compression helps, but at
+      some point the advisory should reference the exec-approvals.json file
+      rather than listing every tool inline. A threshold for inline vs
+      reference should be defined.
+    spec_impact: "CL-04 EMIT — SKILL.md size management strategy"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Skills in OC are prompt-only (no code). The CL-04 spec explicitly
+      corrects the misconception of "TypeScript skills." The generated
+      SKILL.md must be pure markdown with no executable code. Any enforcement
+      logic belongs in the plugin (index.ts), not the skill.
+    spec_impact: "CL-04 EMIT — skill vs plugin content separation"
+    pitfall: null

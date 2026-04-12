@@ -1,0 +1,130 @@
+name: S05-context-tree-visualization
+series: compiled-context
+version: 1
+specs: [CL-05, CL-07]
+description: >
+  Validates that `claws fleet tree` renders the fork hierarchy with
+  delta sizes, governance hashes, and drift indicators. A fleet with
+  a root, 3 department forks, and 9 workspace forks (3 per department)
+  must render as a tree showing inheritance relationships, per-node
+  delta sizes, and visual markers for drifted nodes.
+
+expect:
+  workspaces:
+    total: 9
+    governed: 9
+    ungoverned: 0
+    misconfigured: 0
+  drift_count: 1
+  broadcast_result: null
+  compliance:
+    governed_pass: 8
+    governed_fail: 1
+    ungoverned: 0
+    misconfigured: 0
+    vacuous_compliance: 0
+
+simulate:
+  failures:
+    - component: tree-rendering
+      type: drift-indicator
+      error: "workspace-eng-03: drifted from department-eng fork (G-BOUND timeout reduced)"
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise fleet has a 3-level hierarchy: fleet root -> 3 department
+  forks (eng, compliance, ops) -> 9 workspace forks (3 per department).
+  `claws fleet tree` must render this hierarchy as an ASCII tree (for
+  terminal) or structured JSON (for dashboards). Each node shows: name,
+  governance hash (truncated), delta size from parent, and drift status.
+  One workspace (eng-03) has drifted from its parent department fork.
+  The tree must visually indicate the drifted node (e.g., [DRIFT] marker)
+  and show the delta size increase that indicates unauthorized local
+  modifications. The tree output must be deterministic (same input
+  produces same output) for snapshot testing.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The tree visualization must handle arbitrary depth. The 3-level
+      hierarchy (root -> department -> workspace) is the common case,
+      but the fork model supports N levels. If a workspace forks into
+      sub-workspaces (team-level forks), the tree must render 4+ levels
+      without truncation. The rendering algorithm must be recursive,
+      not hardcoded for 3 levels.
+    spec_impact: "CL-05 Fleet Tree -- recursive N-level rendering, not hardcoded depth"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Delta size is meaningful only relative to the parent. A workspace
+      with 500B delta from its department fork might seem large, but if
+      the department fork itself is only 200B delta from root, the total
+      accumulated delta is 700B. The tree should show both per-hop delta
+      and cumulative delta from root, so operators understand the total
+      divergence at each leaf.
+    spec_impact: "CL-05 Fleet Tree -- per-hop and cumulative delta display"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The deterministic output requirement for snapshot testing conflicts
+      with dynamic data (governance hashes change on every recompile).
+      The tree output must support a --stable mode that replaces hashes
+      with stable identifiers (e.g., node names only) for testing. The
+      default mode shows full hashes for operational use. This dual-mode
+      output enables both snapshot testing and production dashboards.
+    spec_impact: "CL-05 Fleet Tree -- --stable flag for deterministic snapshot-testable output"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The ASCII tree format works for small fleets but degrades at scale.
+      A fleet with 100 workspaces across 10 departments produces a tree
+      too large for a terminal window. The tree command should support
+      --depth N to limit rendering depth and --filter to show only
+      specific subtrees (e.g., `claws fleet tree --filter department-eng`).
+    spec_impact: "CL-05 Fleet Tree -- --depth and --filter flags for large fleet navigation"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The drift indicator [DRIFT] is binary. But drift has severity
+      levels (S04 findings). The tree should use graduated indicators:
+      [OK] for no drift, [MINOR] for single-parameter changes, [MAJOR]
+      for multi-rule changes, [TAMPER] for unauthorized artifact edits.
+      Graduated indicators let operators triage by scanning the tree
+      without drilling into individual workspaces.
+    spec_impact: "CL-05 Fleet Tree -- graduated drift indicators (OK/MINOR/MAJOR/TAMPER)"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The tree must be consistent with other fleet commands. `claws fleet
+      scan` produces a flat workspace list; `claws fleet tree` produces a
+      hierarchy. If scan reports 9 workspaces but tree shows 12 nodes
+      (9 workspaces + 3 departments), the count discrepancy confuses
+      operators. The tree should clearly distinguish leaf nodes (workspaces)
+      from intermediate nodes (departments, fleet root) in both display
+      and count.
+    spec_impact: "CL-05 Fleet UX -- consistent node type distinction across fleet commands"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The JSON output format for dashboards should include the same
+      information as the ASCII tree but as a nested object. Each node
+      has: name, type (root/department/workspace), hash, delta_bytes,
+      cumulative_delta_bytes, drift_status, children[]. This format
+      enables web dashboards to render interactive trees with drill-down
+      capability.
+    spec_impact: "CL-05 Fleet Tree JSON -- nested object schema with node metadata"
+    pitfall: null

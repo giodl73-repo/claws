@@ -1,0 +1,150 @@
+name: S02-deny-default-on-timeout
+series: obo-elicitation
+version: 1
+specs: [CL-02]
+description: >
+  Validates the deny-default behavior when a user does not respond to an
+  elicitation request within the configured timeout (300s). The action must
+  be DENIED, not approved. This is the inverse of the approve-on-timeout
+  anti-pattern that many platforms implement. The denial must be recorded
+  in the audit chain with the full context of the denied action.
+
+expect:
+  attack_class: social-engineering
+  defense_layer: G-ELICIT-TIMEOUT
+  blocked: true
+  audit_event: obo-denied-by-timeout
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has send-payment (R5/TRANSACT/OBO) with inline elicitation
+  (timeout: 300s). The agent invokes send-payment. The elicitation gate fires,
+  presenting the approval request. The user does not respond (AFK, distracted,
+  or the request is lost in conversation context). After 300 seconds, the
+  timeout expires. The action is DENIED. The agent receives a clear denial
+  reason. The denial event is recorded in the audit chain. The platform's
+  approve-on-timeout default is overridden by the claws-generated handler.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The platform (OpenClaw Gateway) may default to approve-on-timeout for
+      backward compatibility. The claws-generated handler MUST override this
+      default using AbortSignal.timeout() returning block: true (Amendment A42).
+      If the override mechanism fails (e.g., AbortSignal not supported on the
+      platform version), the platform default takes over and the R5 tool
+      executes without approval. The generated handler must detect
+      AbortSignal support and refuse to register if unavailable.
+    spec_impact: "CL-02 G-ELICIT-TIMEOUT — AbortSignal support detection"
+    pitfall: P-192
+
+  - id: F02
+    severity: major
+    description: >
+      The deny-default mechanism races with the agent's own timeout handling.
+      If the agent framework has a shorter timeout (e.g., 60s tool call timeout)
+      than the elicitation timeout (300s), the agent may retry the tool call
+      before the elicitation timeout expires, creating duplicate approval
+      requests. The elicitation gate must deduplicate requests for the same
+      tool invocation within the timeout window.
+    spec_impact: "CL-02 G-ELICIT — request deduplication within timeout window"
+    pitfall: P-193
+
+  - id: F03
+    severity: major
+    description: >
+      approveOnTimeout: true in claws.json is a hard build error (Amendment
+      A117). But what about platforms that inject approve-on-timeout behavior
+      outside of claws configuration? The generated handler must explicitly
+      set deny-on-timeout regardless of any platform-level configuration, not
+      just override the claws.json setting. Defense in depth: compile-time
+      rejection of the config AND runtime enforcement in the generated code.
+    spec_impact: "CL-04 EMIT — deny-on-timeout is unconditionally generated"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The denial reason sent to the agent ("elicitation-timeout-denied") is
+      machine-readable but not user-friendly. The agent should translate this
+      into a human-readable message: "I was unable to send the payment because
+      the approval request timed out after 5 minutes. Would you like me to try
+      again?" The translation is the agent's responsibility, but claws should
+      document the expected denial reason format.
+    spec_impact: "CL-02 G-ELICIT-TIMEOUT — denial reason format documentation"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The timeout audit event must include the timeout duration and the time
+      the request was presented, so auditors can verify the timeout was enforced
+      correctly (not shortened or extended). If the audit shows the request was
+      presented at T=0 and denied at T=290, the 300s timeout may not have been
+      reached — clock drift or early trigger. The tolerance should be documented
+      (e.g., deny between 295s-305s is valid).
+    spec_impact: "CL-02 G-ELICIT-AUDIT — timeout enforcement tolerance in audit"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      A malicious agent could flood the user with approval requests to cause
+      "approval fatigue" — the user stops reading and auto-approves everything,
+      or the requests time out and the agent claims "the user was unavailable."
+      Rate limiting on elicitation requests (max N per minute per agent) would
+      mitigate this. If the rate limit is hit, subsequent R5 tools are
+      immediately denied without presenting to the user.
+    spec_impact: "CL-02 G-ELICIT — elicitation request rate limiting"
+    pitfall: P-194
+
+  - id: F07
+    severity: warning
+    description: >
+      The scenario tests the 300s default timeout. But Amendment A45 allows
+      per-tool overrides (e.g., send-email: 60s, process-payment: 600s). The
+      deny-default behavior must work identically regardless of the timeout
+      value. Zero timeout (timeout: 0) is detected at compile time as
+      degenerate (Amendment A44) and produces CLAWS-W022. The runtime
+      handler should never receive timeout: 0.
+    spec_impact: "CL-02 G-ELICIT-TIMEOUT — per-tool timeout with deny-default"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      In scheduled execution (cron, pipeline), the user is never present to
+      approve. The deny-default timeout means ALL R5 tools in scheduled
+      contexts will be perpetually denied (Amendment A128, SCHEDULE-NO-APPROVAL).
+      This is caught at compile time. The scenario validates the runtime
+      behavior that the compile-time check prevents.
+    spec_impact: "CL-02 G-ELICIT — scheduled execution and deny-default interaction"
+    pitfall: null
+
+  - id: F09
+    severity: major
+    description: >
+      If the timeout fires but the deny response fails to reach the Gateway
+      (network partition, process crash), the tool call hangs indefinitely.
+      The deny-on-timeout handler must have its own internal timeout (e.g.,
+      5s after the denial decision) to force-return the block response. If
+      even that fails, the Gateway's own tool call timeout is the last resort.
+    spec_impact: "CL-03 runtime — deny response delivery guarantee"
+    pitfall: P-195
+
+  - id: F10
+    severity: warning
+    description: >
+      After a timeout denial, the agent's conversation context still contains
+      the intent to perform the action. A prompt injection could cause the
+      agent to immediately retry the same action, burning another 300s
+      timeout cycle. The generated handler should include a cooldown period
+      after denial (e.g., same tool+params cannot be re-requested for 60s)
+      to prevent denial cycling.
+    spec_impact: "CL-02 G-ELICIT — post-denial cooldown period"
+    pitfall: null

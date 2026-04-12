@@ -1,0 +1,141 @@
+name: S06-p202-deny-delivery-failure
+series: pitfall-thoth-1
+version: 1
+specs: [CL-03]
+description: >
+  Validates that a deny response that fails to reach the Gateway does not leave
+  the tool call hanging indefinitely. The elicitation timeout fires and the
+  runtime decides to deny, but the deny response is lost due to a network
+  partition. The runtime must have an internal delivery timeout with Gateway
+  fallback to ensure the tool call resolves within a bounded time.
+
+expect:
+  attack_class: delivery-failure
+  defense_layer: g-elicit
+  blocked: true
+  audit_event:
+    type: obo-deny-delivery-failed
+    tool: "modify-acl"
+    risk_level: 5
+    outcome: DENY
+    reason: "deny response delivery failed after 5s; Gateway fallback deny applied"
+
+simulate:
+  failures:
+    - component: approval-flow
+      type: deny-delivery-network-partition
+      error: "deny response failed to reach Gateway within 5s internal timeout"
+  halt: null
+  budget: null
+
+problem: >
+  The user does not respond to the modify-acl (R5/ACCESS_CONTROL) elicitation
+  prompt within 30 seconds. The runtime's deny-on-timeout triggers and generates
+  a DENY response. The runtime attempts to deliver the DENY to the Gateway, but
+  a network partition between the runtime and Gateway prevents delivery. The DENY
+  is queued in the network buffer. The tool call remains in a "pending" state at
+  the Gateway because neither an APPROVE nor a DENY has arrived. The Gateway's own
+  timeout may be longer (or nonexistent), so the tool call hangs indefinitely. If
+  the Gateway has an approve-on-timeout fallback for unresolved calls, the tool
+  eventually executes without authorization. The runtime believes it denied the
+  call; the Gateway believes it was approved. The ACL is modified without the
+  user's knowledge.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The runtime must implement a 5-second internal delivery timeout for deny
+      responses. If the DENY is not acknowledged by the Gateway within 5 seconds,
+      the runtime must escalate to a direct Gateway abort (kill the pending tool
+      call via a separate control channel). The 5-second window is generous enough
+      for normal latency but short enough to prevent the Gateway's own timeout
+      from firing first.
+    spec_impact: "CL-03 runtime — 5s internal delivery timeout for deny responses"
+    pitfall: P-202
+
+  - id: F02
+    severity: major
+    description: >
+      The Gateway must expose a "force-abort" control endpoint that the runtime
+      can use when normal deny delivery fails. This endpoint must be on a
+      separate connection (or use a different transport like WebSocket control
+      frame) from the elicitation channel, so a network partition on the
+      elicitation channel does not affect the abort channel. Two independent
+      paths ensure at least one deny reaches the Gateway.
+    spec_impact: "CL-03 runtime — dual-channel deny delivery (elicitation + abort control)"
+    pitfall: P-202
+
+  - id: F03
+    severity: major
+    description: >
+      If both deny delivery paths fail (elicitation channel and abort control
+      channel), the runtime must assume the worst case: the tool call may
+      execute. The runtime must record a critical security event indicating
+      "deny delivery failed, tool execution status unknown." The operator
+      must be alerted immediately to verify whether the tool call executed.
+      This is a split-brain scenario that requires manual investigation.
+    spec_impact: "CL-03 audit — critical alert for undeliverable deny (split-brain)"
+    pitfall: P-202
+
+  - id: F04
+    severity: major
+    description: >
+      The Gateway must never have an approve-on-timeout for unresolved calls.
+      The Gateway's own default for an unresolved elicitation must be DENY,
+      matching the runtime's deny-on-timeout. This is defense in depth: even
+      if the runtime's deny fails to arrive, the Gateway independently denies
+      after its own timeout. The Gateway timeout must be strictly greater than
+      the runtime timeout (runtime=30s, Gateway=35s) to give the runtime's
+      deny time to arrive first.
+    spec_impact: "CL-03 runtime — Gateway independent deny-on-timeout as defense in depth"
+    pitfall: P-202
+
+  - id: F05
+    severity: major
+    description: >
+      The runtime must not assume that a deny was delivered just because the
+      network call returned successfully. The delivery acknowledgment must be
+      an explicit Gateway response containing the tool call's status
+      (now: denied). An HTTP 200 from a load balancer does not mean the Gateway
+      received the deny — intermediate proxies may buffer and acknowledge before
+      forwarding. End-to-end acknowledgment is required.
+    spec_impact: "CL-03 runtime — end-to-end deny acknowledgment, not transport-level ACK"
+    pitfall: P-202
+
+  - id: F06
+    severity: warning
+    description: >
+      Network partitions may be temporary (seconds to minutes). After the
+      partition heals, a delayed deny may arrive at the Gateway after the
+      Gateway has already resolved the call (either by its own timeout or by
+      late user approval). The Gateway must handle stale denies gracefully:
+      if the tool call has already resolved, the late deny is logged but
+      not applied. The runtime must check the resolution status after
+      partition recovery.
+    spec_impact: "CL-03 runtime — stale deny handling after partition recovery"
+    pitfall: P-202
+
+  - id: F07
+    severity: warning
+    description: >
+      The deny delivery failure scenario has implications for the audit trail
+      integrity. If the runtime recorded "DENIED" but the Gateway executed the
+      tool, the audit trails diverge. A reconciliation process must compare
+      runtime audit events with Gateway execution logs to detect divergence.
+      Any divergence triggers an integrity alert and the affected tool
+      execution is flagged for review.
+    spec_impact: "CL-03 audit — runtime-Gateway audit reconciliation for deny delivery"
+    pitfall: P-202
+
+  - id: F08
+    severity: major
+    description: >
+      The compiled handler must include the delivery timeout logic as generated
+      code, not as a runtime library call. If the delivery timeout depends on
+      a runtime library that could be patched or misconfigured, the safety
+      guarantee is weakened. The 5-second timeout and dual-channel delivery
+      must be baked into the emitted handler code by the EMIT phase, making
+      them immutable after compilation.
+    spec_impact: "CL-04 EMIT — delivery timeout baked into generated handler code"
+    pitfall: P-202

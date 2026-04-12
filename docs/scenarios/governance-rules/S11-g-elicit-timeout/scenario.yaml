@@ -1,0 +1,94 @@
+name: S11-g-elicit-timeout
+series: governance-rules
+version: 1
+specs: [CL-02]
+description: >
+  Validates G-ELICIT-TIMEOUT rule: deny-default must be set for elicitation
+  timeouts. If the workspace configures an elicitation policy but does not
+  set deny-default behavior on timeout, the action may be approved by
+  default after timeout — violating the OBO boundary.
+
+expect:
+  rules_applied: [G-ELICIT-TIMEOUT]
+  violations:
+    - rule: G-ELICIT-TIMEOUT
+      severity: error
+      message_pattern: "deny-default not set"
+      timeout_configured: false
+  pass: false
+  severity: error
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  claws.json has an elicitation policy for R5 tools but the policy section
+  is missing the `denyDefault: true` field and the `timeout` field. Without
+  deny-default, the platform may allow the action if the user does not respond
+  within the timeout period (platform-dependent behavior). G-ELICIT-TIMEOUT
+  must enforce that deny-default is explicitly set to prevent silent approval.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The CL-02 spec says timeout is 300s (configurable per policy) and
+      deny-default means no response = DENIED. If the platform's default
+      behavior is approve-on-timeout (opposite of claws's requirement),
+      failing to set deny-default is a critical security hole. The generated
+      plugin must override the platform default.
+    spec_impact: "CL-02 G-ELICIT-TIMEOUT — platform default override"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Three fields interact: timeout (duration), denyDefault (behavior on
+      timeout), and approvalMode (inline vs async). If approvalMode is async
+      and timeout is 300s, the user has 5 minutes to respond via notification.
+      If approvalMode is inline, 300s blocks the agent for 5 minutes. The
+      interaction between these fields needs validation rules.
+    spec_impact: "CL-02 G-ELICIT-TIMEOUT — field interaction validation"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      A timeout of 0 with deny-default means all R5 actions are immediately
+      denied. This is equivalent to disabling R5 tools entirely. The compiler
+      should flag timeout=0 as potentially unintended and suggest using the
+      tool deny list instead.
+    spec_impact: "CL-02 G-ELICIT-TIMEOUT — degenerate timeout detection"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Enterprise deployments may want different timeouts for different R5
+      tools: send-email gets 60s, process-payment gets 600s. The policy
+      must support per-tool timeout overrides, not just a global timeout.
+    spec_impact: "CL-01 claws.json — per-tool elicitation timeout"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The violation message "deny-default not set" should include a fix
+      suggestion: add `denyDefault: true` and `timeout: 300` to the
+      elicitation policy section. The fix should be a specific YAML/JSON
+      snippet that the developer can copy-paste.
+    spec_impact: "CL-02 G-ELICIT-TIMEOUT — fix suggestion specificity"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      If deny-default is set but the runtime handler does not enforce it
+      (e.g., the platform hook does not support timeout-based denial), the
+      compile-time check passes but runtime is unprotected. The emit phase
+      must generate a handler that implements deny-on-timeout using
+      AbortSignal.timeout() or equivalent.
+    spec_impact: "CL-04 EMIT — deny-on-timeout handler generation"
+    pitfall: null

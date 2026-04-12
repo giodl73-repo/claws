@@ -1,0 +1,126 @@
+name: S01-default-9-file-resolution
+series: input-resolver
+version: 1
+specs: [CL-01, CL-04, CL-07]
+description: >
+  The InputResolver receives a standard workspace directory containing all 9
+  default file types (SOUL.md, MEMORY.md, AGENTS.md, TOOLS.md,
+  HEARTBEAT.md, exec-approvals.json, IDENTITY.md, USER.md, claws.json).
+  Each file is discovered, parsed, and registered as a local file source with
+  provenance metadata. The resolver produces a unified governance IR that
+  reflects all 9 inputs without any external package or URL sources. This
+  validates the baseline happy path for local workspace compilation.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "MEMORY.md"
+        - "AGENTS.md"
+        - "TOOLS.md"
+        - "HEARTBEAT.md"
+        - "exec-approvals.json"
+        - "IDENTITY.md"
+        - "USER.md"
+        - "claws.json"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  A developer initializes a fresh workspace with all 9 governance file types
+  populated. They run claws compile expecting a clean governance IR. The
+  InputResolver must discover all files in deterministic order, parse each
+  without error, assign local-file provenance to every source entry, and
+  produce a manifest that accounts for all 9 files. If any file is silently
+  skipped or double-counted, the downstream analysis stage will either miss
+  rules or produce duplicates. The test confirms that the default resolution
+  path handles the full file surface without configuration overrides,
+  external sources, or caching layers. This is the zero-config baseline
+  that every other scenario builds upon.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      File discovery order must be deterministic across platforms. If the
+      InputResolver relies on filesystem readdir order, Windows NTFS and
+      Linux ext4 return entries in different sequences. The governance IR
+      manifest must sort files lexicographically or by a defined priority
+      to ensure reproducible compilation output regardless of OS. Without
+      this guarantee, snapshot tests and CGR hashes will diverge across
+      developer machines.
+    spec_impact: "CL-01 Section 3 — file discovery ordering constraint"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      The 9-file surface is a design contract, not an implementation detail.
+      If a 10th file type is added later, the InputResolver must either
+      discover it automatically via glob pattern or require explicit
+      registration. The current design should document whether file type
+      discovery is closed (hardcoded list) or open (pattern-based). An
+      open design risks picking up unrelated .claws-* files; a closed
+      design requires code changes for every new file type.
+    spec_impact: "CL-04 Section 2 — source type extensibility"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      Empty files must be handled gracefully. A workspace may contain a
+      IDENTITY.md file with zero entries. The InputResolver must still
+      register it in the manifest with files_parsed but produce an empty
+      section in the governance IR. Skipping empty files would cause the
+      manifest count to diverge from the filesystem state, breaking
+      provenance audit expectations.
+    spec_impact: "CL-07 Section 1 — provenance completeness invariant"
+    pitfall: null
+  - id: F04
+    severity: minor
+    description: >
+      BOM (byte order mark) handling on Windows-created files. If a
+      developer creates SOUL.md in Notepad, it may contain a UTF-8
+      BOM prefix. The YAML parser must strip or tolerate BOM bytes to
+      avoid parse failures that only manifest on Windows-authored files.
+      This is a cross-platform parity concern.
+    spec_impact: "CL-01 Section 5 — cross-platform parsing"
+    pitfall: null
+  - id: F05
+    severity: minor
+    description: >
+      Symlinked governance files should resolve to their real path for
+      provenance tracking. If SOUL.md is a symlink to a shared
+      template, the CGR must record both the symlink path and the resolved
+      target to maintain audit fidelity. Recording only the symlink
+      path hides the actual source; recording only the target hides the
+      workspace structure.
+    spec_impact: "CL-07 Section 3 — symlink provenance recording"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      File modification timestamps should be captured at resolution time
+      and included in the governance IR manifest. This enables incremental
+      compilation in later scenarios by comparing timestamps between runs.
+      Without timestamps at the IR level, incremental strategies must
+      re-read the filesystem, defeating the purpose of a cached IR.
+    spec_impact: "CL-04 Section 4 — incremental compilation metadata"
+    pitfall: null
+  - id: F07
+    severity: major
+    description: >
+      The InputResolver must validate that no two files define the same
+      rule ID or entity ID. Duplicate identifiers across files (e.g.,
+      a rule in SOUL.md and the same ID in TOOLS.md) would
+      cause silent override or merge conflicts downstream. The resolver
+      should detect cross-file ID collisions during the manifest-building
+      phase and emit INPUT-RESOLVE-DUPLICATE diagnostics before the
+      analysis stage begins.
+    spec_impact: "CL-01 Section 6 — cross-file identifier uniqueness"
+    pitfall: null

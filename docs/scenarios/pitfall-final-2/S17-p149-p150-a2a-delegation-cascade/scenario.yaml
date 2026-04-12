@@ -1,0 +1,144 @@
+name: S17-p149-p150-a2a-delegation-cascade
+series: pitfall-final-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates A2A delegation trust requirements (P-149) and violation cascade
+  suppression (P-150). Delegation without trust creates unreachable agents
+  with silent data loss. A single missing trust relationship triggers 5+
+  independent violations that overwhelm the developer.
+
+expect:
+  attack_class: a2a-trust-failure
+  defense_layer: trust-boundary
+  blocked: true
+  audit_event:
+    type: delegation-blocked
+    tool: delegate-to-finance-bot
+    risk_level: 5
+    outcome: DENIED
+    reason: "claws-a2a-trust: delegation requires bidirectional trust"
+
+simulate:
+  failures:
+    - component: a2a
+      type: delegation-without-trust
+      error: "Agent 'ops-bot' delegates to 'finance-bot' but trust is unidirectional"
+    - component: a2a
+      type: violation-cascade
+      error: "Missing trust triggers 5 violations: G-A2A-TRUST, G-A2A-FLOW, G-A2A-IDENTITY, G-DATA, G-PERM"
+  halt: null
+  budget: null
+
+problem: >
+  ops-bot delegates a financial report generation task to finance-bot.
+  ops-bot trusts finance-bot (declared in trust graph) but finance-bot does
+  not trust ops-bot (trust is unidirectional). finance-bot cannot return
+  results to ops-bot because it has no trust channel back. The task executes
+  but results are silently lost — finance-bot generates the report but
+  cannot deliver it. Additionally, the missing bidirectional trust triggers
+  5 independent G-A2A-* violations, each with its own diagnostic code.
+  The developer sees 5 violations for 1 root cause and cannot identify
+  the fix.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-149 core: Delegation without bidirectional trust creates a one-way
+      channel. The delegating agent can send work but the receiving agent
+      cannot return results. The work executes (consuming resources) but
+      the output is lost. This is worse than a blocked delegation because
+      it wastes compute and produces no value.
+    spec_impact: "CL-02 G-A2A-TRUST — delegation implies bidirectional trust"
+    pitfall: "P-149"
+
+  - id: F02
+    severity: major
+    description: >
+      CLAWS-E030 hard error: delegation to an agent without bidirectional
+      trust must be a compile-time error, not a runtime failure. The trust
+      graph is known at compile time. The error must name both agents and
+      the missing trust direction: "ops-bot -> finance-bot: trust declared.
+      finance-bot -> ops-bot: trust MISSING. Delegation blocked."
+    spec_impact: "CL-02 G-A2A-TRUST — compile-time delegation validation"
+    pitfall: "P-149"
+
+  - id: F03
+    severity: major
+    description: >
+      P-150 core: The missing trust triggers G-A2A-TRUST (no bidirectional
+      trust), G-A2A-FLOW (data cannot flow back), G-A2A-IDENTITY (finance-
+      bot cannot verify ops-bot's identity for return), G-DATA (data labels
+      cannot be enforced on return channel), G-PERM (finance-bot has no
+      permission to invoke ops-bot's receive handler). Five violations,
+      one root cause.
+    spec_impact: "CL-02 G-A2A-* — violation cascade from single root cause"
+    pitfall: "P-150"
+
+  - id: F04
+    severity: major
+    description: >
+      Dependency ordering with suppression: G-A2A-TRUST is the root
+      violation. G-A2A-FLOW, G-A2A-IDENTITY, G-DATA, and G-PERM are
+      dependent violations that would be resolved by fixing the root.
+      The rule evaluator must identify the dependency chain and suppress
+      dependent violations, showing only: "CLAWS-E030: Fix bidirectional
+      trust (4 additional violations will resolve)."
+    spec_impact: "CL-02 rule evaluation — dependency suppression"
+    pitfall: "P-150"
+
+  - id: F05
+    severity: major
+    description: >
+      The suppressed violations must still be accessible via verbose mode
+      or `claws pinch --verbose`. Suppression is for the default output
+      to avoid developer overwhelm. The full violation list matters for
+      compliance evidence and for cases where the root cause analysis
+      is incorrect.
+    spec_impact: "CL-02 diagnostics — verbose mode for suppressed violations"
+    pitfall: "P-150"
+
+  - id: F06
+    severity: warning
+    description: >
+      Trust graph cycles: if ops-bot trusts finance-bot and finance-bot
+      trusts ops-bot, but there is a third agent (hr-bot) that only
+      trusts ops-bot, a delegation chain ops-bot -> finance-bot -> hr-bot
+      would fail at the second hop. Transitive trust is explicitly
+      disallowed (CL-02 G-A2A-TRUST), so each hop must have direct
+      bidirectional trust.
+    spec_impact: "CL-02 G-A2A-TRUST — no transitive trust in delegation chains"
+    pitfall: "P-149"
+
+  - id: F07
+    severity: warning
+    description: >
+      The dependency ordering algorithm must be conservative: only suppress
+      a violation if it is DEFINITELY caused by the root violation. If
+      there is ambiguity (the dependent violation could have an independent
+      cause), show both violations. False suppression hides real issues.
+    spec_impact: "CL-02 rule evaluation — conservative suppression"
+    pitfall: "P-150"
+
+  - id: F08
+    severity: note
+    description: >
+      The silent data loss from P-149 is particularly dangerous because
+      the delegating agent receives no error. From its perspective, the
+      task was successfully delegated. It may proceed with subsequent
+      steps that depend on the (lost) results. The compile-time error
+      prevents this cascading failure.
+    spec_impact: "CL-02 G-A2A-TRUST — silent loss prevention"
+    pitfall: "P-149"
+
+  - id: F09
+    severity: note
+    description: >
+      Dependency suppression should track suppression statistics: "In this
+      workspace, 15 of 23 violations are suppressed dependents of 8 root
+      violations." This metric indicates the workspace has a small number
+      of foundational trust issues to fix, which is more actionable than
+      a raw count of 23 violations.
+    spec_impact: "CL-02 diagnostics — suppression statistics"
+    pitfall: "P-150"

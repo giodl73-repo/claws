@@ -1,0 +1,130 @@
+name: S06-p137-abort-signal-cache-corruption
+series: pitfall-final-2
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates the immutable snapshot protocol for classification cache (P-137).
+  An AbortSignal interruption at 50ms can leave the classification cache
+  half-updated, causing a stale R2 entry for a tool that is actually R5.
+  The cache must use clone-and-swap to prevent partial updates.
+
+expect:
+  attack_class: classification-bypass
+  defense_layer: cache-integrity
+  blocked: true
+  audit_event:
+    type: cache-corruption-prevented
+    tool: manage-payroll
+    risk_level: 5
+    outcome: DENIED
+    reason: "claws-cache-integrity: immutable snapshot prevents stale classification"
+
+simulate:
+  failures:
+    - component: classification-cache
+      type: abort-mid-update
+      error: "AbortSignal fired at 50ms — cache entry for manage-payroll half-written (R2 stale)"
+    - component: classification-cache
+      type: stale-read
+      error: "Subsequent classify(manage-payroll) reads stale R2 — elicitation gate bypassed"
+  halt: null
+  budget: null
+
+problem: >
+  The governance handler maintains a classification cache for performance.
+  During a cache update for manage-payroll (reclassifying from R2 to R5),
+  the AbortSignal fires at 50ms. The update is interrupted: the old R2
+  entry is deleted but the new R5 entry is not written. On the next tool
+  call, classify(manage-payroll) finds no cached entry and falls back to
+  the default behavior, which may return R2 from a stale secondary source.
+  The elicitation gate for R5 is never triggered. manage-payroll executes
+  as an R2 tool without approval.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-137 core: The classification cache uses a mutable Map. Delete-then-
+      insert creates a window where the entry is absent. If AbortSignal
+      fires in this window, the entry is permanently missing until the
+      next full reclassification. The cache must use an immutable snapshot:
+      build a new Map, then swap the reference atomically.
+    spec_impact: "CL-02 G-IDEMPOTENT — immutable snapshot protocol"
+    pitfall: "P-137"
+
+  - id: F02
+    severity: major
+    description: >
+      Clone-and-swap: the handler creates a deep clone of the current
+      classification Map, applies all updates to the clone, validates
+      the clone for consistency, then replaces the reference with a
+      single assignment. JavaScript's single-threaded execution model
+      makes reference assignment atomic, but async operations between
+      clone and swap must be avoided.
+    spec_impact: "CL-02 G-IDEMPOTENT — clone-and-swap implementation"
+    pitfall: "P-137"
+
+  - id: F03
+    severity: major
+    description: >
+      The fallback behavior when a cache entry is missing must be
+      fail-closed (R5), not fail-open. If classify(tool) returns null
+      from the cache, the handler must treat it as R5 and require
+      elicitation. This prevents the stale-read attack vector entirely
+      at the cost of potentially over-blocking.
+    spec_impact: "CL-02 G-FAILMODE — cache miss defaults to R5"
+    pitfall: "P-137"
+
+  - id: F04
+    severity: major
+    description: >
+      The stale secondary source (e.g., rules.json on disk) may have
+      an older classification. If the cache falls back to disk on miss,
+      it reads an R2 classification from a prior compilation. The cache
+      miss path must consult the riskMap (in-memory, built at registration),
+      not the on-disk rules.json.
+    spec_impact: "CL-02 G-FAILMODE — cache miss fallback source"
+    pitfall: "P-137"
+
+  - id: F05
+    severity: major
+    description: >
+      AbortSignal interruption during cache update must be logged as a
+      structured audit event. The event must include: tool name, old
+      classification, intended new classification, and the fact that
+      the update was aborted. This provides forensic evidence if the
+      stale classification leads to a governance bypass.
+    spec_impact: "CL-03 audit — cache interruption event logging"
+    pitfall: "P-137"
+
+  - id: F06
+    severity: warning
+    description: >
+      The classification cache should be read-only during tool call
+      handling. Updates should only happen during explicit reclassification
+      triggered by workspace changes. If the cache never updates during
+      tool calls, the AbortSignal corruption vector is eliminated for
+      the common path.
+    spec_impact: "CL-02 G-IDEMPOTENT — read-only cache during tool calls"
+    pitfall: "P-137"
+
+  - id: F07
+    severity: warning
+    description: >
+      Performance impact of clone-and-swap: for workspaces with 500+
+      tools, cloning the entire Map on every reclassification may be
+      expensive. A structural sharing approach (persistent data structure)
+      could reduce the clone cost while maintaining immutability.
+    spec_impact: "CL-02 G-LATENCY — clone performance for large workspaces"
+    pitfall: "P-137"
+
+  - id: F08
+    severity: note
+    description: >
+      The immutable snapshot protocol is a general pattern that applies
+      to other mutable state in the handler: the tool registry, the
+      policy set, and the elicitation state. P-137 is the classification
+      cache instance, but the same clone-and-swap discipline should
+      be applied consistently across all mutable handler state.
+    spec_impact: "CL-02 — immutable snapshot as general handler pattern"
+    pitfall: "P-137"

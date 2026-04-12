@@ -1,0 +1,123 @@
+name: S04-obo-elicit-severity
+series: pitfall-coverage-1
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates that OBO-WITHOUT-ELICIT is classified as an error (not a
+  warning) for R5 tools. P-055 identifies that warning severity allows
+  compilation to succeed for R5/OBO tools without elicitation policies,
+  which directly contradicts the R5 fail-closed invariant. If R5 tools
+  cannot execute without approval, they must not compile without an
+  approval mechanism.
+
+expect:
+  governance_ir:
+    version: 1
+    analysis:
+      conflicts:
+        - category: OBO-WITHOUT-ELICIT
+          severity: error
+          tool_name: send-financial-transfer
+          risk_level: 5
+          obo_detected: true
+          elicitation_configured: false
+      violations:
+        - rule: G-ELICIT
+          tool: send-financial-transfer
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - phase: ANALYZE
+      conflict: OBO-WITHOUT-ELICIT
+  halt: null
+  budget: null
+
+problem: >
+  TOOLS.md declares send-financial-transfer as R5/OBO (capabilities:
+  [TRANSACT, COMMUNICATE]). Neither SOUL.md, USER.md, nor claws.json
+  configures an elicitation policy for this tool. The tool acts on behalf
+  of the user but no governance gate exists to ask for approval. Under the
+  previous warning severity, this workspace compiles successfully and the
+  R5 tool can be invoked at runtime — where it will be denied by
+  fail-closed, making the deployment pointless.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      OBO-WITHOUT-ELICIT at warning severity allows `claws build` to emit
+      artifacts. The generated Gateway plugin includes the R5 tool in the
+      hook, but the tool can never execute because fail-closed denies it
+      without an approval path. The artifact is deployable but functionally
+      broken. Elevating to error prevents emission of dead artifacts.
+    spec_impact: "CL-04 conflict severity — OBO-WITHOUT-ELICIT must be error for R5"
+    pitfall: P-055
+
+  - id: F02
+    severity: major
+    description: >
+      The R5 fail-closed invariant (CL-02) and OBO-WITHOUT-ELICIT severity
+      (CL-04) are specified in different documents. The inconsistency was
+      not caught during spec authoring. Cross-spec invariant validation is
+      needed: if CL-02 says "R5 always fail-closed", CL-04 must not allow
+      compilation of R5 tools without a fail-closed path.
+    spec_impact: "CL-02/CL-04 cross-spec consistency — invariant propagation"
+    pitfall: P-055
+
+  - id: F03
+    severity: major
+    description: >
+      For R3/R4 tools, OBO-WITHOUT-ELICIT at warning severity may be
+      appropriate — these tools can fail-open if configured. The severity
+      split means the conflict table needs risk-level-conditional severity:
+      error for R5, warning for R3-R4. This adds complexity but correctly
+      reflects the fail-closed/fail-open distinction.
+    spec_impact: "CL-04 ANALYZE — risk-level-conditional conflict severity"
+    pitfall: P-055
+
+  - id: F04
+    severity: warning
+    description: >
+      In enterprise/strict mode, OBO-WITHOUT-ELICIT should be error for
+      ALL risk levels, not just R5. Strict mode says "no OBO tool without
+      explicit governance." The severity becomes: R5 always error,
+      R3-R4 warning (advisory) or error (strict). Two configuration
+      dimensions: risk level and mode.
+    spec_impact: "CL-01 strict mode — OBO severity matrix (risk x mode)"
+    pitfall: P-055
+
+  - id: F05
+    severity: warning
+    description: >
+      If the developer adds an empty elicitation policy (e.g.,
+      `"elicitation": {}` in claws.json), does that satisfy OBO-WITHOUT-
+      ELICIT? An empty policy is technically present but functionally
+      absent. The check must validate that the elicitation policy is
+      complete (has an approval mechanism), not just that the key exists.
+    spec_impact: "CL-02 G-ELICIT — empty policy vs missing policy distinction"
+    pitfall: P-055
+
+  - id: F06
+    severity: note
+    description: >
+      The severity change from warning to error is a breaking change for
+      existing workspaces. Workspaces that previously compiled with R5/OBO
+      tools and no elicitation policy will now fail. Migration guidance:
+      add `"preAuthorize": true` for intentionally unattended R5 tools,
+      or add elicitation policies for interactive use.
+    spec_impact: "CL-04 migration — severity elevation is a breaking change"
+    pitfall: P-055
+
+  - id: F07
+    severity: major
+    description: >
+      Multiple R5/OBO tools without elicitation policies should each
+      produce a separate error. If send-financial-transfer and
+      delete-account are both R5/OBO without policies, the compiler
+      must report two errors, not one aggregate error. Each tool
+      needs its own remediation.
+    spec_impact: "CL-04 ANALYZE — per-tool error reporting for OBO-WITHOUT-ELICIT"
+    pitfall: P-055

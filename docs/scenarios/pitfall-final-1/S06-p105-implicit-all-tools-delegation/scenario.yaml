@@ -1,0 +1,120 @@
+name: S06-p105-implicit-all-tools-delegation
+series: pitfall-final-1
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates that implicit "all tools" delegation in AGENTS.md is resolved to
+  a concrete tool list at compile time, and that adding a new R5 tool to
+  TOOLS.md triggers re-evaluation of agents with "tools: all" delegation.
+  IMPLICIT-R4-DELEGATION warning must fire when "all" includes R4+ tools.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [AGENTS.md, TOOLS.md, claws.json]
+      delegation_resolved: true
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings:
+        - rule: IMPLICIT-R4-DELEGATION
+          agent: coordinator
+          tools_delegated: [web-search, doc-reader, send-payment]
+          r4_plus_tools: [send-payment]
+  violations: []
+  warnings:
+    - rule: IMPLICIT-R4-DELEGATION
+  artifacts:
+    count: 4
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  AGENTS.md declares "coordinator" with tools: all. TOOLS.md has web-search
+  (R2), doc-reader (R1), and send-payment (R5). The developer intended
+  coordinator to handle R1-R2 work, but "all" silently includes send-payment.
+  Later, another developer adds deploy-to-prod (R5) to TOOLS.md. The
+  coordinator now has two R5 tools without anyone explicitly approving the
+  delegation. No warning is produced because "all" is treated as an opaque
+  keyword, not resolved to a concrete list.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The compiler must resolve "all" to the concrete list of tools at
+      compile time and inject the resolved list into the IR. This makes
+      the implicit delegation explicit. The IR records: coordinator
+      delegates [web-search, doc-reader, send-payment], not "all."
+      The resolved list is the source of truth for downstream rules.
+    spec_impact: "CL-04 ANALYZE — implicit delegation resolution"
+    pitfall: P-105
+
+  - id: F02
+    severity: major
+    description: >
+      IMPLICIT-R4-DELEGATION warning must fire when the resolved list
+      includes any R4+ tool. The warning includes the specific tools
+      and their risk levels. The developer can then either restrict
+      the delegation or explicitly acknowledge the R5 delegation.
+    spec_impact: "CL-02 G-A2A-DELEGATE — IMPLICIT-R4-DELEGATION rule"
+    pitfall: P-105
+
+  - id: F03
+    severity: major
+    description: >
+      Adding a new R5 tool to TOOLS.md must trigger re-compilation of
+      all agents with "tools: all." Incremental compilation must track
+      the dependency: agents with "all" depend on the full TOOLS.md
+      tool set. Any change to TOOLS.md invalidates all "all" agents.
+    spec_impact: "CL-04 incremental — TOOLS.md invalidates all agents"
+    pitfall: P-105
+
+  - id: F04
+    severity: warning
+    description: >
+      The resolved list should be included in the emitted SKILL.md and
+      the Gateway plugin's runtime configuration. At runtime, the plugin
+      can verify that the actual tool set matches the compiled tool set.
+      If a new tool appears at runtime that was not in the compiled list,
+      the plugin can flag it as an unresolved delegation.
+    spec_impact: "CL-03 runtime — compiled vs runtime tool set drift"
+    pitfall: P-105
+
+  - id: F05
+    severity: major
+    description: >
+      Nested delegation compounds the problem: coordinator delegates
+      "all" to sub-coordinator, which also has "tools: all." The
+      resolution must be recursive: sub-coordinator's "all" resolves
+      to coordinator's resolved list (which is the full TOOLS.md list),
+      not to TOOLS.md again. But the result is the same — both get
+      everything. The warning should chain: "sub-coordinator inherits
+      R5 tools via coordinator's 'all' delegation."
+    spec_impact: "CL-02 G-A2A-DELEGATE — nested 'all' delegation chain"
+    pitfall: P-105
+
+  - id: F06
+    severity: warning
+    description: >
+      The "tools: all" keyword is convenient but dangerous. The compiler
+      should suggest the alternative: "tools: [web-search, doc-reader]"
+      with explicit enumeration. The suggestion includes the resolved
+      list so the developer can copy-paste. This promotes explicit-over-
+      implicit delegation without breaking existing workspaces.
+    spec_impact: "CL-04 diagnostics — explicit delegation suggestion"
+    pitfall: P-105
+
+  - id: F07
+    severity: note
+    description: >
+      Strict mode (--strict) could escalate IMPLICIT-R4-DELEGATION from
+      warning to error, forcing explicit delegation for R4+ tools. This
+      is consistent with strict mode behavior for OBO-WITHOUT-ELICIT
+      (P-104). Enterprise deployments would require explicit delegation.
+    spec_impact: "CL-04 build — strict mode delegation escalation"
+    pitfall: P-105

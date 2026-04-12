@@ -1,0 +1,153 @@
+name: S04-user-md-pre-authorization
+series: obo-elicitation
+version: 1
+specs: [CL-02]
+description: >
+  Validates the USER.md pre-authorization mechanism for OBO tools. When a user
+  provides standing authorization in USER.md ("you may send emails on my
+  behalf"), the elicitation gate is permanently open for that tool. The action
+  still executes with full audit logging, but no per-invocation approval is
+  required. This tests the distinction between pre-authorized (acknowledged,
+  gate open, logged) and ungoverned (no policy at all).
+
+expect:
+  attack_class: none
+  defense_layer: G-ELICIT
+  blocked: false
+  audit_event: obo-pre-authorized-execution
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  USER.md contains: "You may send emails on my behalf to internal team members."
+  TOOLS.md declares send-email (R5/OBO). claws.json has elicitation policy for
+  send-email. The compiler detects USER.md pre-authorization and marks
+  send-email's elicitation gate as permanently open. At runtime, the agent
+  invokes send-email. No approval prompt appears. The action executes. The
+  audit chain records "pre-authorized by USER.md" with a reference to the
+  specific USER.md clause. The three-source check (TOOLS.md, SOUL.md,
+  USER.md) resolves without OBO-WITHOUT-ELICIT error.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      USER.md pre-authorization is weaker than per-invocation approval
+      (Amendment SCV-S03-F07). The compiler must emit a warning when R5 tools
+      are pre-authorized: "CLAWS-W040: send-email is pre-authorized via
+      USER.md. Per-invocation approval (claws.json elicitation) provides
+      stronger security." This is informational — the user made a deliberate
+      choice — but auditors and compliance tools should see it.
+    spec_impact: "CL-02 G-ELICIT — R5 pre-authorization strength warning"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The USER.md clause "send emails to internal team members" includes a
+      scope condition. Pre-authorization is not unconditional — it is limited
+      to internal recipients. The compiler must parse scope conditions from
+      USER.md and emit them as runtime constraints. If the agent invokes
+      send-email with an external recipient, the pre-authorization does not
+      apply and the elicitation gate fires. Scope parsing is a hard NLP
+      problem; the compiler should support structured pre-auth in USER.md
+      frontmatter as an alternative to free-text.
+    spec_impact: "CL-02 G-ELICIT — structured pre-authorization in USER.md"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Pre-authorization in USER.md has no expiry. A pre-authorization written
+      6 months ago for a departed team member still opens the gate. USER.md
+      pre-authorizations should support optional expiry dates, and claws
+      should warn on pre-authorizations older than 90 days (configurable)
+      during `claws pinch` health checks.
+    spec_impact: "CL-02 G-ELICIT — pre-authorization expiry and staleness detection"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The "pre-authorized vs ungoverned" distinction (Amendment CFC-S03-F03)
+      is critical for compliance. Pre-authorized: USER.md explicitly grants
+      OBO scope, gate open, audit-logged, compliance-visible. Ungoverned: no
+      policy exists, tool may execute without any governance layer. The
+      GovernanceIR must distinguish these two states, and `claws comply soc2`
+      must report pre-authorized tools separately from ungoverned tools.
+    spec_impact: "CL-02 G-ELICIT — GovernanceIR pre-authorized vs ungoverned distinction"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      If USER.md pre-authorizes send-email AND claws.json configures per-use
+      elicitation for send-email, which wins? The spec must define precedence.
+      Recommended: claws.json elicitation overrides USER.md pre-auth (stronger
+      security wins). An operator who configures per-use elicitation is making
+      a more restrictive choice than the user's pre-auth. But the reverse
+      argument (user explicitly pre-authorized, operator should not add
+      friction) is also valid. The precedence must be documented and tested.
+    spec_impact: "CL-02 G-ELICIT — claws.json vs USER.md precedence for elicitation"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Audit events for pre-authorized actions must clearly state "pre-authorized
+      by USER.md" rather than "approved." An auditor reviewing the chain should
+      not confuse a standing authorization with a per-use approval. The audit
+      event type should be distinct: "obo-pre-authorized-execution" vs
+      "obo-approval-granted" vs "obo-denied-by-timeout."
+    spec_impact: "CL-02 G-ELICIT-AUDIT — distinct audit event types for authorization modes"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      USER.md is a user-editable file. A prompt injection in the conversation
+      could cause the agent to modify USER.md, adding pre-authorization for
+      tools the user never intended to authorize. The OBO boundary must treat
+      USER.md modifications as R5 actions themselves — editing USER.md to add
+      OBO scope requires its own elicitation gate. This creates a bootstrap
+      problem: who authorizes the first USER.md edit?
+    spec_impact: "CL-02 G-ELICIT — USER.md modification as OBO action"
+    pitfall: P-197
+
+  - id: F08
+    severity: warning
+    description: >
+      The three-source exhaustive check (Amendment SCV-S03-F02) must check
+      USER.md pre-authorization, SOUL.md elicitation constraints, and claws.json
+      elicitation policy in a defined order. If USER.md pre-authorizes but
+      SOUL.md denies ("never send emails"), the denial takes precedence (SOUL.md
+      is the workspace's foundational constraint). Precedence: SOUL.md deny >
+      claws.json elicitation > USER.md pre-authorization.
+    spec_impact: "CL-02 G-ELICIT — three-source precedence ordering"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The scenario uses USER.md free-text pre-authorization. For enterprise
+      deployments, structured YAML frontmatter in USER.md is more reliable:
+      `obo_scope: [{tool: send-email, scope: internal-only, expires: 2026-12-31}]`.
+      Free-text parsing is best-effort; structured format is machine-verifiable.
+      The compiler should support both and prefer structured when available.
+    spec_impact: "CL-01 USER.md schema — structured OBO scope format"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Fleet-inherited policies (Amendment SCV-S03-F03) may provide elicitation
+      coverage that resolves OBO-WITHOUT-ELICIT. If the fleet template
+      configures send-email elicitation but USER.md also pre-authorizes it,
+      the fleet policy and USER.md may conflict. The fleet policy should take
+      precedence (organizational security > individual user preference) unless
+      the fleet explicitly allows user-level pre-auth overrides.
+    spec_impact: "CL-02 G-ELICIT — fleet policy vs USER.md pre-auth precedence"
+    pitfall: null

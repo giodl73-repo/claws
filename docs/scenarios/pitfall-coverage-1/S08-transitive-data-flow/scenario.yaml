@@ -1,0 +1,137 @@
+name: S08-transitive-data-flow
+series: pitfall-coverage-1
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates that transitive data flow analysis detects sensitivity label
+  violations across multi-hop delegation chains. P-059 identifies that
+  direct parent-child conflict detection misses CONFIDENTIAL data flowing
+  through intermediate agents to a PUBLIC-ceiling agent. The compiler must
+  trace data flows through the full delegation graph and flag transitive
+  sensitivity mismatches.
+
+expect:
+  governance_ir:
+    version: 1
+    analysis:
+      conflicts:
+        - category: DATA-LABEL-MISMATCH
+          severity: error
+          flow_path: [root, research-agent, public-reporter]
+          data_label: CONFIDENTIAL
+          ceiling_violation: { agent: public-reporter, ceiling: PUBLIC }
+          resolution: "restrict public-reporter ceiling to CONFIDENTIAL or remove delegation path"
+      violations:
+        - rule: G-A2A-FLOW
+          path: [root, research-agent, public-reporter]
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - phase: ANALYZE
+      conflict: DATA-LABEL-MISMATCH
+  halt: null
+  budget: null
+
+problem: >
+  Root agent handles CONFIDENTIAL customer data and delegates analysis to
+  research-agent (ceiling: CONFIDENTIAL). Research-agent delegates summary
+  generation to public-reporter (ceiling: PUBLIC). Direct parent-child
+  check passes: root->research-agent is CONFIDENTIAL->CONFIDENTIAL (ok).
+  Research-agent->public-reporter is not flagged because research-agent's
+  explicit data flow to public-reporter is not checked transitively. But
+  CONFIDENTIAL data from root reaches public-reporter through the chain.
+  The transitive flow violates the PUBLIC ceiling.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Direct parent-child data label checks only examine adjacent edges
+      in the delegation graph. The CONFIDENTIAL data from root reaches
+      research-agent (valid), and research-agent forwards a subset to
+      public-reporter (unchecked). The ANALYZE phase must propagate
+      sensitivity labels through the full delegation chain.
+    spec_impact: "CL-04 ANALYZE — transitive data label propagation"
+    pitfall: P-059
+
+  - id: F02
+    severity: major
+    description: >
+      Sensitivity label propagation follows the "high water mark" rule:
+      once data is labeled CONFIDENTIAL, all downstream agents must have
+      a ceiling >= CONFIDENTIAL. The label cannot be downgraded through
+      delegation. This is analogous to mandatory access control (MAC)
+      in traditional security models.
+    spec_impact: "CL-02 G-A2A-FLOW — high water mark sensitivity propagation"
+    pitfall: P-059
+
+  - id: F03
+    severity: major
+    description: >
+      An intermediate agent may transform data (e.g., aggregate, anonymize)
+      before forwarding. If research-agent produces an anonymized summary,
+      the output may genuinely be PUBLIC-safe. The compiler cannot determine
+      this statically. Conservative approach: always flag the transitive
+      violation. Suppression via explicit declassification annotation in
+      AGENTS.md allows the developer to attest that transformation strips
+      sensitivity.
+    spec_impact: "CL-01 AGENTS.md — declassification annotation syntax"
+    pitfall: P-059
+
+  - id: F04
+    severity: warning
+    description: >
+      Multiple sensitivity labels may coexist: CONFIDENTIAL for customer
+      data, INTERNAL for business data, PUBLIC for published data. A
+      delegation chain may carry both CONFIDENTIAL and INTERNAL data.
+      The ceiling check must verify against the HIGHEST label in the
+      transitive flow, not any single label.
+    spec_impact: "CL-02 G-DATA — multi-label ceiling evaluation"
+    pitfall: P-059
+
+  - id: F05
+    severity: warning
+    description: >
+      Delegation depth affects the number of transitive paths to check.
+      With 5 agents in a chain, the number of transitive flows is linear
+      (5 paths). But with branching delegation (agent delegates to 3
+      sub-agents, each delegates to 3 more), the paths grow exponentially.
+      The analyzer must cap depth or use efficient graph traversal.
+    spec_impact: "CL-04 ANALYZE — transitive flow analysis performance"
+    pitfall: P-059
+
+  - id: F06
+    severity: major
+    description: >
+      Cross-workspace transitive flows (P-058 overlap): if root is in
+      workspace-alpha and public-reporter is in workspace-beta, the
+      transitive data flow analysis requires fleet-level visibility.
+      Single-workspace compilation cannot detect cross-workspace
+      sensitivity violations. This is a fleet-scan requirement.
+    spec_impact: "CL-05 fleet — cross-workspace transitive data flow analysis"
+    pitfall: P-059
+
+  - id: F07
+    severity: note
+    description: >
+      The conflict message must show the full flow path, not just the
+      violating edge. "CONFIDENTIAL data flows root -> research-agent ->
+      public-reporter (ceiling: PUBLIC)" is actionable. "DATA-LABEL-MISMATCH
+      between research-agent and public-reporter" is not — it hides the
+      root source of the CONFIDENTIAL label.
+    spec_impact: "CL-04 diagnostics — full flow path in DATA-LABEL-MISMATCH messages"
+    pitfall: P-059
+
+  - id: F08
+    severity: warning
+    description: >
+      Sensitivity labels are defined in SOUL.md or claws.json. If neither
+      declares labels, the compiler has no sensitivity information and
+      cannot perform transitive flow analysis. The absence of labels should
+      produce a note (not a warning) suggesting label configuration for
+      workspaces with multi-agent delegation.
+    spec_impact: "CL-01 claws.json — sensitivity label configuration guidance"
+    pitfall: P-059

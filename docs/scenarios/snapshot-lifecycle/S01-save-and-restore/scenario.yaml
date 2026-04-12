@@ -1,0 +1,161 @@
+name: S01-save-and-restore
+series: snapshot-lifecycle
+version: 1
+specs: [CL-05]
+description: >
+  Validates the basic snapshot save/restore cycle: snap save captures the
+  GovernanceIR, claws.json, and all policy files. After modifying the
+  workspace (changing trust tier, adding tools), snap restore reverts
+  to the saved state. The restored GovernanceIR must match the original
+  byte-for-byte. This is the foundation for the dead man's switch and
+  all middle-ring safety workflows.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      snapshot_name: baseline-v1
+      snapshot_action: restore
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace with SOUL.md, TOOLS.md, and claws.json (trust tier T3,
+  3 tools at R1-R3) runs `claws snap save baseline-v1`. The developer
+  then modifies claws.json to lower the trust tier to T1 and adds an
+  R4 tool to TOOLS.md. pinch reports 2 violations (R3 and R4 tools
+  exceed T1 ceiling). The developer runs `claws snap restore baseline-v1`.
+  The workspace must revert to T3 trust tier with the original 3 tools.
+  A subsequent pinch must produce zero violations, and the GovernanceIR
+  hash must match the pre-save hash.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The spec says snap save captures "GovernanceIR + claws.json + policies."
+      But the GovernanceIR is a compiled artifact derived from workspace files.
+      If snap save captures the IR but NOT the source files (SOUL.md, TOOLS.md),
+      restore can put the IR back but the source files remain modified.
+      The restored IR would be inconsistent with the actual workspace files.
+      snap save must capture ALL source files that contribute to the IR.
+    spec_impact: "CL-05 snap save — must capture source files, not just compiled IR"
+    pitfall: P-186
+
+  - id: F02
+    severity: major
+    description: >
+      Restoring workspace files means overwriting SOUL.md, TOOLS.md, and
+      claws.json with older versions. This violates the lossless guarantee:
+      claws is modifying files it did not create. snap restore must be
+      explicitly carved out from lossless, or it must write to a staging
+      area and let the developer apply the revert manually (e.g., via
+      git checkout or a diff-apply workflow).
+    spec_impact: "CL-05 snap restore — lossless carve-out or staging-area workflow"
+    pitfall: P-187
+
+  - id: F03
+    severity: major
+    description: >
+      The hash comparison ("GovernanceIR hash must match the pre-save hash")
+      requires deterministic compilation. If the same source files produce
+      different IR hashes on different runs (due to timestamps, random IDs,
+      or ordering differences), restore-then-compile will not match the
+      saved hash even though the content is identical. The IR serialization
+      must be canonical and deterministic.
+    spec_impact: "CL-04 GovernanceIR — deterministic serialization for hash comparison"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The snapshot storage location is not defined. Options: (a) .claws/snapshots/
+      directory in the workspace, (b) user-level ~/.claws/snapshots/, (c)
+      fleet-level remote storage. Location affects portability: workspace-local
+      snapshots travel with the repo (if committed), user-level snapshots
+      are machine-specific, fleet-level requires network access. The spec
+      must define the default location and whether snapshots are gitignored.
+    spec_impact: "CL-05 snap — define storage location and git inclusion policy"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      snap save captures the workspace at a point in time but does not record
+      the claws version that created it. If the workspace is saved with
+      claws v1.2 and restored under claws v1.5 (which uses a different
+      schema), the restored files may not be compatible with the running
+      claws version. Snapshots must include claws version metadata.
+    spec_impact: "CL-05 snap save — include claws version in snapshot metadata"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      If the developer has uncommitted git changes when running snap restore,
+      the restore overwrites their working tree. This is destructive.
+      snap restore should check for uncommitted changes and refuse to run
+      (or require --force) if the working tree is dirty. This is analogous
+      to git checkout refusing to switch branches with uncommitted changes.
+    spec_impact: "CL-05 snap restore — dirty working tree protection"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The spec mentions "policies" as part of the snapshot, but does not
+      define what "policies" means in file terms. Is it the fleet policy
+      overlay? claws.json enforcement rules? A separate .claws/policies/
+      directory? The snapshot scope must be defined as an explicit file
+      list, not an ambiguous category name.
+    spec_impact: "CL-05 snap save — define 'policies' as explicit file list"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      snap restore with no arguments could mean "restore the most recent
+      snapshot" or "list available snapshots." The spec shows `snap restore
+      <name>` with a required name argument. But the dead man's switch
+      uses a fixed name ("pre-upgrade"). If the developer forgets the
+      snapshot name, they need `snap list` to see available snapshots.
+      The spec should define a snap list subcommand.
+    spec_impact: "CL-05 snap — add snap list subcommand for discoverability"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The snapshot captures file content but not file permissions or
+      timestamps. On Windows, this is fine (permissions are ACL-based and
+      not typically workspace-relevant). On macOS/Linux, file permissions
+      matter (executable scripts). Since claws is cross-platform, snapshots
+      should preserve platform-relevant metadata or document that only
+      content is captured.
+    spec_impact: "CL-05 snap — define whether file metadata is captured (content-only vs full)"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      If the workspace uses git, snapshots duplicate git's ability to
+      save and restore state (git stash, git checkout). The value of
+      claws snapshots is that they are governance-aware: they capture the
+      GovernanceIR alongside source files, enabling diff operations that
+      compare governance state, not just file content. This distinction
+      should be emphasized in the snap command documentation to justify
+      the feature's existence alongside git.
+    spec_impact: "CL-05 snap — document value proposition vs git stash/checkout"
+    pitfall: null

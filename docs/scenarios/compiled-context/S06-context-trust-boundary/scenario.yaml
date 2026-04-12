@@ -1,0 +1,139 @@
+name: S06-context-trust-boundary
+series: compiled-context
+version: 1
+specs: [CL-05, CL-07]
+description: >
+  Validates trust boundary enforcement in compiled context layers.
+  Governance rules compile to the systemPrompt layer (protected, admin-
+  only modification). Role-specific instructions compile to the
+  userPrompt layer (standard trust, workspace-editor modifiable). The
+  compiler must enforce that governance content never leaks into the
+  userPrompt layer and role content never escalates into systemPrompt.
+
+expect:
+  workspaces:
+    total: 1
+    governed: 1
+    ungoverned: 0
+    misconfigured: 0
+  drift_count: 0
+  broadcast_result: null
+  compliance:
+    governed_pass: 1
+    governed_fail: 0
+    ungoverned: 0
+    misconfigured: 0
+    vacuous_compliance: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has two categories of compiled context: governance
+  constraints (G-rules, elicitation gates, audit requirements) and
+  role instructions (agent personality, task guidance, workflow hints).
+  Governance compiles to the systemPrompt layer, which is protected by
+  the platform's trust boundary: only admin-level identity can modify
+  it. Role instructions compile to the userPrompt layer, modifiable by
+  workspace editors. The compiler must enforce layer placement during
+  emission: every governance artifact must target systemPrompt, every
+  role artifact must target userPrompt. If a governance rule is
+  accidentally emitted to userPrompt, an editor could modify or delete
+  it, bypassing governance. If a role instruction is emitted to
+  systemPrompt, it becomes immutable when it should be flexible.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The trust boundary between systemPrompt and userPrompt is a
+      platform-specific concept. Not all target platforms have the same
+      trust layers. Claude Code has system/user/assistant. Cursor has
+      rules files with different scopes. Windsurf has its own layering.
+      The compiler must map governance -> highest-trust-layer and role ->
+      standard-trust-layer per platform. The layer mapping must be in
+      the platform profile, not hardcoded.
+    spec_impact: "CL-04 Platform Profiles -- trust layer mapping per target platform"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Some governance artifacts contain both governance constraints and
+      role guidance. For example, a G-ELICIT rule may include the prompt
+      text shown to the human (governance: require approval) and the
+      agent's instruction on how to present the prompt (role: be concise).
+      The compiler must split such mixed artifacts: constraint portion
+      goes to systemPrompt, presentation guidance goes to userPrompt.
+      This requires semantic analysis of the artifact content.
+    spec_impact: "CL-04 Emission -- semantic splitting of mixed governance/role artifacts"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The trust boundary enforcement is a compile-time invariant but can
+      be violated at runtime if the platform allows dynamic context
+      modification. An agent could use a tool to modify its own
+      userPrompt, effectively editing role instructions. This is expected
+      behavior. But if the agent can modify systemPrompt (via platform
+      exploit or misconfiguration), governance is compromised. The
+      compiled governance should include a self-check: a runtime assertion
+      that governance content in systemPrompt has not been modified since
+      compilation.
+    spec_impact: "CL-03 Runtime Integrity -- governance self-check assertion in systemPrompt"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The editor role can modify userPrompt content. If role instructions
+      include implicit governance references ("always check with the
+      user before sending emails"), those references are governance-like
+      but placed in userPrompt. An editor could remove them. The compiler
+      should warn when role instructions contain governance-like keywords
+      (approve, block, deny, require) that might be better placed as
+      formal G-rules in systemPrompt.
+    spec_impact: "CL-04 Lint -- warn on governance-like keywords in userPrompt-targeted content"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The layer placement must be verifiable after emission. A post-
+      emission check should scan all emitted artifacts and verify:
+      (a) every governance artifact targets the protected layer,
+      (b) every role artifact targets the standard layer, (c) no
+      artifact targets both layers. This check is the trust boundary
+      invariant and should be part of the compile pipeline, not a
+      separate command.
+    spec_impact: "CL-04 Post-Emission -- trust boundary invariant check in compile pipeline"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Context layer sizes matter for LLM performance. If systemPrompt
+      is too large (governance-heavy workspace), it consumes context
+      window budget that the agent needs for task execution. The compiler
+      should report context budget allocation: what percentage of the
+      estimated context window is consumed by governance (systemPrompt)
+      vs available for agent work (remaining window). This metric helps
+      workspace designers balance governance depth with agent capability.
+    spec_impact: "CL-05 Context Budget -- report governance context consumption as % of estimated window"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The two-layer model (systemPrompt = protected, userPrompt =
+      standard) is a simplification. Some platforms support 3+ trust
+      layers (e.g., platform system, workspace system, user). The
+      compiled context model should support N trust layers with a total
+      ordering from highest to lowest trust. Governance targets the
+      highest layer; role instructions target the layer matching their
+      modification scope; data targets the lowest.
+    spec_impact: "CL-04 Context Model -- N-layer trust hierarchy with total ordering"
+    pitfall: null

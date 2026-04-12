@@ -1,0 +1,129 @@
+name: S10-p142-fail-open-no-audit
+series: pitfall-final-2
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates secondary audit via stderr for fail-open events (P-142). When
+  the R1 fail-open path triggers and the primary audit chain is corrupted
+  by the same crash, zero record of ungoverned execution exists. The
+  stderr secondary audit and sidecar independent detection must survive.
+
+expect:
+  attack_class: audit-evasion
+  defense_layer: secondary-audit
+  blocked: false
+  audit_event:
+    type: fail-open-audit
+    tool: read-config
+    risk_level: 1
+    outcome: ALLOWED-FAIL-OPEN
+    reason: "claws-failopen: R1 tool allowed, secondary audit via stderr"
+
+simulate:
+  failures:
+    - component: audit-chain
+      type: corruption
+      error: "Primary audit chain corrupted by handler crash — write fails"
+    - component: governance-hook
+      type: crash
+      error: "Handler crash on R1 tool read-config — fail-open applies"
+  halt: null
+  budget: null
+
+problem: >
+  An R1 tool (read-config) triggers a governance handler crash. Under R1
+  fail-open policy, the tool executes — this is correct behavior to avoid
+  blocking read-only operations. However, the crash that triggered fail-open
+  also corrupts the primary audit chain state. The fail-open event is not
+  recorded anywhere. Six months later, a compliance audit asks for evidence
+  of all ungoverned tool executions. None exists. The fail-open event is
+  invisible to forensics.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-142 core: The same crash that triggers fail-open corrupts the
+      audit chain. The handler catches the crash, allows the R1 tool,
+      then attempts to write an audit record — but the audit writer
+      shares state with the crashed handler. The audit write fails
+      silently. Zero record of the ungoverned execution.
+    spec_impact: "CL-02 G-AUDIT-SECONDARY — crash + audit corruption coupling"
+    pitfall: "P-142"
+
+  - id: F02
+    severity: major
+    description: >
+      The secondary audit mechanism: all fail-open events must write to
+      process.stderr as a JSON line, independent of the primary audit
+      chain. Format: {"event":"CLAWS-FAILOPEN","tool":"read-config",
+      "risk":1,"time":"<iso>","reason":"<crash-msg>"}. The sidecar
+      captures stderr independently.
+    spec_impact: "CL-03 G-AUDIT-SECONDARY — stderr JSON line audit"
+    pitfall: "P-142"
+
+  - id: F03
+    severity: major
+    description: >
+      The stderr write must be synchronous and allocation-free. If the
+      handler is in a corrupted state, async operations or allocations
+      may fail. process.stderr.write with a pre-formatted string buffer
+      is the safest option. The buffer must be pre-allocated at handler
+      registration, not constructed on the fly.
+    spec_impact: "CL-03 G-AUDIT-SECONDARY — allocation-free stderr write"
+    pitfall: "P-142"
+
+  - id: F04
+    severity: major
+    description: >
+      If process.stderr itself is broken (pipe closed, buffer full),
+      the secondary audit also fails. The sidecar must independently
+      detect fail-open events by monitoring the handler's return value
+      pattern: a series of "allow" returns after a crash event indicates
+      fail-open behavior. This detection does not rely on the handler's
+      own reporting.
+    spec_impact: "CL-03 sidecar — independent fail-open detection"
+    pitfall: "P-142"
+
+  - id: F05
+    severity: major
+    description: >
+      The compliance impact: SOC2 CC7.2 requires logging of security-
+      relevant events. An ungoverned tool execution IS a security-relevant
+      event. Missing audit records for fail-open events is a compliance
+      finding. The secondary audit mechanism is not optional — it is a
+      compliance requirement.
+    spec_impact: "CL-02 G-AUDIT-SECONDARY — SOC2 CC7.2 compliance"
+    pitfall: "P-142"
+
+  - id: F06
+    severity: warning
+    description: >
+      The sidecar's independent detection has a latency window: between
+      the fail-open event and the sidecar detecting it, the tool has
+      already executed. For R1 tools this is acceptable (read-only). For
+      R2 tools with fail-open config, the sidecar should detect and
+      alert within 5 seconds to limit the window of ungoverned writes.
+    spec_impact: "CL-03 sidecar — fail-open detection latency SLA"
+    pitfall: "P-142"
+
+  - id: F07
+    severity: warning
+    description: >
+      Multiple fail-open events in quick succession (e.g., handler crash
+      persists across 10 tool calls) should be aggregated in the stderr
+      audit to prevent log flooding. A batch record: {"event":"CLAWS-
+      FAILOPEN-BATCH","count":10,"tools":["read-config",...]} after the
+      first 3 individual records.
+    spec_impact: "CL-03 G-AUDIT-SECONDARY — log flooding prevention"
+    pitfall: "P-142"
+
+  - id: F08
+    severity: note
+    description: >
+      The stderr audit trail and the sidecar detection are complementary.
+      stderr is a synchronous, same-process record. The sidecar is an
+      asynchronous, independent-process observer. Together they provide
+      defense-in-depth for audit completeness. Neither alone is sufficient.
+    spec_impact: "CL-03 — dual audit channel defense-in-depth"
+    pitfall: "P-142"

@@ -1,0 +1,160 @@
+name: S35-p196-dead-man-switch-corrupt
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that the dead man switch has a secondary fallback mechanism when
+  the pre-upgrade snapshot is corrupt. If both the upgrade fails AND the
+  snapshot restore fails, the workspace must not be left in an indeterminate
+  state with no recovery path.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      snapshot_name: pre-upgrade-v2.8
+      snapshot_action: dead-man-restore
+      restore_failed: true
+      fallback_activated: true
+      fallback_type: git-stash
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings:
+        - code: W-DMS-FALLBACK
+          message: "Primary snapshot corrupt — secondary fallback activated"
+  violations: []
+  warnings:
+    - code: W-DMS-FALLBACK
+      message: "Dead man switch used secondary fallback — primary snapshot integrity failed"
+  artifacts:
+    count: 1
+    types: [fallback-recovery]
+
+simulate:
+  failures:
+    - component: dead-man-switch
+      type: corrupt-snapshot-no-fallback
+      error: "Upgrade failed AND pre-upgrade snapshot corrupt — no recovery path available"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace upgrades from claws 2.8 to 3.0. The dead man switch saves a
+  pre-upgrade snapshot. The upgrade fails (incompatible IR schema). The dead
+  man switch activates and attempts to restore the pre-upgrade snapshot.
+  However, the snapshot integrity check fails — the snapshot file was
+  corrupted on disk (storage hardware issue). The dead man switch cannot
+  restore the pre-upgrade state. The workspace is now in a failed state:
+  the upgrade is incomplete (IR schema partially migrated), the pre-upgrade
+  snapshot is corrupt, and the workspace has no valid governance configuration.
+  Without a secondary fallback, the workspace must be manually reconstructed
+  from scratch, requiring the operator to re-create all 9 governance files.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must mandate a secondary fallback mechanism for the dead man
+      switch. The primary fallback is the pre-upgrade snapshot. The secondary
+      fallback should be a git-based recovery: before upgrade, the dead man
+      switch also commits the current workspace state to a dedicated git
+      branch (claws/pre-upgrade/{version}). If the snapshot is corrupt,
+      the secondary fallback restores from the git branch.
+    spec_impact: "CL-05 Dead Man Switch — secondary git-based fallback"
+    pitfall: P-196
+
+  - id: F02
+    severity: major
+    description: >
+      If the workspace is not under git version control, the secondary
+      fallback should be a redundant snapshot copy stored in a different
+      location: claws.json#upgrade.fallbackPath or a system temp directory.
+      The redundant copy must be integrity-verified independently. Two
+      independent copies with independent integrity checks make simultaneous
+      corruption extremely unlikely.
+    spec_impact: "CL-05 Dead Man Switch — redundant snapshot copy fallback"
+    pitfall: P-196
+
+  - id: F03
+    severity: major
+    description: >
+      If both primary and secondary fallbacks fail, the dead man switch must
+      enter deny-all mode (same as kill switch) and emit a CRITICAL alert:
+      "DEAD MAN SWITCH TOTAL FAILURE: Upgrade failed, primary snapshot
+      corrupt, secondary fallback unavailable. Workspace is in deny-all
+      mode. Manual reconstruction required." The deny-all mode prevents
+      agents from running with no governance while the operator investigates.
+    spec_impact: "CL-05 Dead Man Switch — deny-all on total failure"
+    pitfall: P-196
+
+  - id: F04
+    severity: major
+    description: >
+      The pre-upgrade workflow must verify both primary and secondary fallbacks
+      BEFORE starting the upgrade. The upgrade should be blocked if: (1) the
+      pre-upgrade snapshot fails integrity check, (2) the secondary fallback
+      location is unavailable, or (3) the workspace has insufficient storage
+      for both copies. This proactive check prevents entering the upgrade
+      with an inadequate safety net.
+    spec_impact: "CL-05 Dead Man Switch — pre-upgrade fallback verification"
+    pitfall: P-196
+
+  - id: F05
+    severity: major
+    description: >
+      The CRITICAL alert for dead man switch total failure must include a
+      manual reconstruction guide: (1) which files need to be recreated,
+      (2) the last known governance configuration (from the fleet baseline
+      if available), (3) commands to initialize a fresh governance state
+      from the fleet template. For fleet workspaces, the fleet baseline
+      provides a reconstruction reference even when local snapshots are lost.
+    spec_impact: "CL-05 Dead Man Switch — manual reconstruction guide in alert"
+    pitfall: P-196
+
+  - id: F06
+    severity: warning
+    description: >
+      The dead man switch should test the restore path periodically, not
+      just during upgrades. `claws upgrade --dry-run` should simulate the
+      upgrade, trigger the dead man switch, verify the snapshot restore,
+      and roll back — all without actually upgrading. This dry-run catches
+      corrupt snapshots and missing fallbacks before a real upgrade needs
+      them.
+    spec_impact: "CL-05 Dead Man Switch — dry-run restore testing"
+    pitfall: P-196
+
+  - id: F07
+    severity: warning
+    description: >
+      Fleet-level dead man switch coordination should aggregate workspace
+      fallback health. `claws fleet upgrade-readiness` should check all
+      workspaces for: (1) pre-upgrade snapshot exists and passes integrity,
+      (2) secondary fallback is available, (3) sufficient storage for both.
+      The fleet admin should see a readiness report before running a fleet-
+      wide upgrade.
+    spec_impact: "CL-05 Fleet Upgrade — readiness check with fallback health"
+    pitfall: P-196
+
+  - id: F08
+    severity: warning
+    description: >
+      The secondary fallback should have the same integrity verification as
+      the primary. If the secondary is git-based, the commit hash serves as
+      the integrity check. If it is a redundant snapshot copy, it must have
+      its own SHA-256 manifest. An unverified secondary fallback is not a
+      reliable safety net — it could be corrupt too.
+    spec_impact: "CL-05 Dead Man Switch — secondary fallback integrity"
+    pitfall: P-196
+
+  - id: F09
+    severity: note
+    description: >
+      The total failure event must be exported to SIEM with maximum context:
+      upgrade version attempted, primary snapshot corruption details,
+      secondary fallback failure reason, workspace current state (deny-all),
+      and recommended remediation steps. This event is a P1 incident trigger
+      in any enterprise SOC and must have sufficient detail for immediate
+      triage.
+    spec_impact: "CL-05 Dead Man Switch — SIEM export for total failure"
+    pitfall: P-196

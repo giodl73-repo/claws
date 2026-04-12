@@ -1,0 +1,146 @@
+name: S32-p193-auto-prune-deletes-baseline
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that auto-pruning of old snapshots respects protected categories.
+  The fleet baseline snapshot, active dead man switch snapshots, and user-
+  pinned snapshots must be immune to auto-pruning regardless of age or storage
+  pressure.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      snapshot_name: fleet-baseline-v2.0
+      snapshot_action: prune-check
+      protected: true
+      protection_reason: fleet-baseline
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings:
+        - code: W-PRUNE-PROTECTED
+          message: "fleet-baseline-v2.0 is protected from auto-pruning"
+  violations: []
+  warnings:
+    - code: W-PRUNE-PROTECTED
+      message: "Auto-pruning skipped 3 protected snapshots"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: snapshot-pruning
+      type: baseline-deleted
+      error: "Auto-pruning deleted fleet-baseline-v2.0 — drift detection broken for all fleet workspaces"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has 50 snapshots accumulating over 6 months. Storage limits
+  trigger auto-pruning with a retention policy of "keep last 10 snapshots."
+  The fleet baseline snapshot (fleet-baseline-v2.0) was created 4 months ago
+  and is the 35th oldest snapshot. Auto-pruning deletes all snapshots older
+  than the 10th most recent, including fleet-baseline-v2.0. The next fleet
+  drift scan fails: "Baseline snapshot fleet-baseline-v2.0 not found." All 20
+  workspaces in the fleet cannot run drift detection. The fleet admin must
+  re-create the baseline from scratch, but the exact governance configuration
+  from 4 months ago may not be reproducible. Fleet compliance reporting is
+  broken for days.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must define protected snapshot categories that are immune to
+      auto-pruning: (1) fleet baseline snapshots, (2) active dead man switch
+      snapshots (pre-upgrade captures), (3) user-pinned snapshots (manually
+      marked as important). Auto-pruning must check the protection flag
+      before deleting any snapshot. Protected snapshots are never candidates
+      for pruning regardless of age or storage pressure.
+    spec_impact: "CL-05 Snapshot Storage — protected categories immune to pruning"
+    pitfall: P-193
+
+  - id: F02
+    severity: major
+    description: >
+      The protection flag must be set automatically for fleet baselines and
+      dead man switch snapshots. When `claws snap promote` creates a baseline,
+      the snapshot is automatically protected. When `claws upgrade` creates a
+      pre-upgrade snapshot, it is automatically protected. User pins are
+      manual: `claws snap pin baseline-v1`. Automatic protection prevents
+      human error in forgetting to pin critical snapshots.
+    spec_impact: "CL-05 Snapshot Storage — automatic protection for critical snapshots"
+    pitfall: P-193
+
+  - id: F03
+    severity: major
+    description: >
+      The auto-pruning algorithm must be: (1) identify candidates (all
+      snapshots minus protected), (2) sort by age, (3) delete oldest
+      candidates until under the retention limit. If all snapshots are
+      protected and storage is full, auto-pruning must fail with a warning
+      rather than deleting protected snapshots. The warning should suggest
+      unpinning old snapshots or increasing the storage limit.
+    spec_impact: "CL-05 Snapshot Storage — protection-respecting pruning algorithm"
+    pitfall: P-193
+
+  - id: F04
+    severity: major
+    description: >
+      Snapshot deletion must be a soft delete with a grace period. Deleted
+      snapshots move to a "trash" directory for 7 days (configurable via
+      snap.pruneGraceDays). During the grace period, `claws snap undelete`
+      can recover them. After the grace period, they are permanently removed.
+      This safety net catches accidental deletions, including bugs in the
+      auto-pruning logic.
+    spec_impact: "CL-05 Snapshot Storage — soft delete with grace period"
+    pitfall: P-193
+
+  - id: F05
+    severity: warning
+    description: >
+      `claws snap list` must show the protection status of each snapshot.
+      Protected snapshots should be clearly marked: "[PROTECTED: fleet-
+      baseline]" or "[PROTECTED: dead-man-switch]" or "[PROTECTED: user-pin]".
+      This visibility helps operators understand which snapshots are safe
+      from pruning and which are candidates for cleanup.
+    spec_impact: "CL-05 Snapshot List — protection status visibility"
+    pitfall: P-193
+
+  - id: F06
+    severity: warning
+    description: >
+      Storage usage metrics should distinguish between protected and
+      unprotected snapshot storage. `claws snap storage` should show:
+      "Total: 500MB. Protected: 350MB (3 snapshots). Prunable: 150MB
+      (47 snapshots). Retention limit: 10 snapshots." This helps fleet
+      admins understand the storage impact of protected snapshots and
+      plan accordingly.
+    spec_impact: "CL-05 Snapshot Storage — protected vs prunable metrics"
+    pitfall: P-193
+
+  - id: F07
+    severity: warning
+    description: >
+      When a new fleet baseline is promoted, the previous fleet baseline
+      should be automatically downgraded from "protected: fleet-baseline"
+      to "protected: previous-baseline" with a configurable retention period
+      (default 30 days). After the retention period, the previous baseline
+      protection is removed and it becomes a pruning candidate. This prevents
+      indefinite accumulation of protected fleet baselines.
+    spec_impact: "CL-05 Snapshot Storage — previous baseline retention policy"
+    pitfall: P-193
+
+  - id: F08
+    severity: note
+    description: >
+      The auto-pruning event must be logged in the audit trail with: number
+      of snapshots deleted, number of protected snapshots skipped, storage
+      recovered, and remaining storage usage. If the pruning fails to recover
+      sufficient storage (all candidates already pruned, only protected
+      remain), the log must include a recommendation to increase storage or
+      review protected snapshots.
+    spec_impact: "CL-05 Snapshot Storage — pruning audit trail"
+    pitfall: P-193

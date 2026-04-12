@@ -1,0 +1,175 @@
+name: S03-eu-ai-act-assessment
+series: compliance-evidence
+version: 1
+specs: [CL-02]
+description: >
+  Validates that `claws comply eu-ai-act` generates an EU AI Act risk
+  assessment for a high-risk system. The workspace is classified as high-risk
+  under Article 6/Annex III. The assessment must include system classification,
+  Article 13 transparency obligations, and Article 14 human oversight mapping
+  to claws's G-ELICIT configuration. The distinction between system-level
+  classification (Article 6) and per-tool R1-R5 classification is critical.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, AGENTS.md, USER.md, claws.json]
+      intent_types: [DenyIntent, ToolManifestEntry, AgentDeclaration, UserScope]
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 1
+    types: [eu-ai-act-assessment]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace runs an AI agent that assists with employment decisions
+  (resume screening, interview scheduling, candidate ranking). This falls
+  under Annex III, category 4(a) (employment, workers management, access
+  to self-employment). The system classification is "high" under Article 6.
+  TOOLS.md declares: candidate-search (R2), score-candidate (R3, WRITE),
+  send-offer (R5, OBO). claws.json configures G-ELICIT for send-offer,
+  G-BOUND limits, and data labels (CONFIDENTIAL for candidate PII).
+  `claws comply eu-ai-act` must produce an EUAIActAssessment with high-risk
+  classification, Annex III category, Article 13 transparency disclosures,
+  and Article 14 human oversight mapping demonstrating that G-ELICIT gates
+  provide the required human-in-the-loop for high-risk decisions.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The EUAIActAssessment schema includes systemClassification with
+      article6Category and annexIIICategory, but the spec does not define
+      how the system is classified. `claws assess` produces the
+      classification, but the classification inputs are not defined. Does
+      the developer declare the category in claws.json? Does the compiler
+      infer it from tool descriptions? For EU AI Act compliance, the
+      classification must be a deliberate human decision documented in
+      the configuration, not an automated inference.
+    spec_impact: "CL-02 EU AI Act Assessment — define classification as explicit config, not automated inference"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Article 14 human oversight maps to G-ELICIT configuration: OBO gates,
+      deny-default, kill switch. But Article 14 requires more than
+      approval gates — it requires the human to UNDERSTAND the AI system's
+      capabilities and limitations. The assessment's article14HumanOversight
+      section has a boolean "oboGatesConfigured" but does not assess whether
+      the human receiving the approval request has sufficient context to
+      make an informed decision. The assessment should check for USER.md
+      documentation that explains the system's capabilities and limitations
+      to the approver.
+    spec_impact: "CL-02 EU AI Act Article 14 — add human understanding assessment beyond gate configuration"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The distinction between system-level classification (Article 6) and
+      per-tool R1-R5 classification is noted in the spec. But the assessment
+      does not show how per-tool risk connects to system-level risk. A
+      high-risk system may have low-risk tools (R1 candidate-search) and
+      high-risk tools (R5 send-offer). The assessment should map which
+      tools contribute to the high-risk classification and which are
+      incidental, because Article 14 human oversight requirements apply
+      to the high-risk tools specifically.
+    spec_impact: "CL-02 EU AI Act Assessment — map per-tool risk to system-level risk contribution"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Article 13 transparency requires disclosing system capabilities AND
+      limitations. The assessment's article13Transparency section has
+      booleans for capabilitiesDisclosed and limitationsDisclosed, but
+      these are self-reported by the developer. The compliance generator
+      cannot verify that the disclosures are accurate or complete. The
+      assessment should note that transparency compliance is attestation-
+      based, not automatically verifiable, and recommend periodic review.
+    spec_impact: "CL-02 EU AI Act Article 13 — note attestation-based verification limitation"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The employment use case involves candidate ranking (score-candidate
+      tool). The EU AI Act specifically addresses AI systems that rank
+      candidates for employment (Annex III, 4(a)). The assessment should
+      include specific obligations for ranking systems: explanation of
+      ranking criteria, bias assessment, and regular accuracy testing.
+      These go beyond generic human oversight requirements.
+    spec_impact: "CL-02 EU AI Act Assessment — add Annex III category-specific obligation checklists"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The EUAIActAssessment schema does not include a "fundamental rights
+      impact assessment" section, which is required for high-risk systems
+      under Article 27 (for deployers) and Article 9 (for providers).
+      The assessment generator should either include a fundamental rights
+      section or clearly note it as out of scope with a reference to
+      where the assessment should be documented.
+    spec_impact: "CL-02 EU AI Act Assessment — add fundamental rights impact assessment section or reference"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The assessment is signed with Ed25519, but EU AI Act compliance
+      evidence may need to be submitted to national authorities. Different
+      EU member states may have different requirements for electronic
+      signatures. The assessment should support eIDAS-qualified electronic
+      signatures for EU submissions, not just Ed25519.
+    spec_impact: "CL-02 EU AI Act Assessment — support eIDAS-qualified signatures for EU authority submissions"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      The "oversightLevel" field in article14HumanOversight has three
+      values: full, partial, minimal. The EU AI Act does not define these
+      categories — it requires "appropriate human oversight measures"
+      proportionate to the risk. The assessment should map the claws
+      configuration to specific Article 14(4) requirements (ability to
+      fully understand capabilities, ability to correctly interpret output,
+      ability to decide not to use the system, ability to intervene or
+      stop) rather than using abstract levels.
+    spec_impact: "CL-02 EU AI Act Article 14 — map to Article 14(4) specific requirements, not abstract levels"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The EU AI Act is not yet fully in effect (phased implementation
+      through 2026-2027). The assessment generator should include the
+      applicable date for each obligation and note which obligations are
+      currently enforceable vs upcoming. This helps enterprises prioritize
+      compliance efforts.
+    spec_impact: "CL-02 EU AI Act Assessment — include obligation applicability dates"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      The "unacceptable" risk category in systemClassification should
+      trigger a hard error, not just an assessment. If the system is
+      classified as unacceptable risk (e.g., social scoring), the compiler
+      should refuse to generate compliance evidence and instead emit an
+      error: "System classified as unacceptable risk under EU AI Act
+      Article 5. Deployment prohibited." This is analogous to the R5
+      fail-closed non-negotiable.
+    spec_impact: "CL-02 EU AI Act Assessment — block evidence generation for unacceptable-risk systems"
+    pitfall: null

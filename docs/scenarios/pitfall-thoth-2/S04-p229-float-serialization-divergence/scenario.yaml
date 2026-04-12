@@ -1,0 +1,162 @@
+name: S04-p229-float-serialization-divergence
+series: pitfall-thoth-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates that floating-point values in audit chain entries produce
+  deterministic serialization across platforms (P-229). Budget amounts, risk
+  scores, and timeout values serialized as IEEE 754 doubles may differ in
+  string representation (0.1 vs 0.10000000000000001), causing evidence hash
+  divergence even when the underlying values are identical.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, BUDGET.md, claws.json]
+    analysis:
+      rules_evaluated: true
+      compliance_check: true
+      numeric_serialization: string-representation
+  violations:
+    - code: CLAWS-E229
+      message: "Floating-point serialization divergence in 14 audit chain entries — budget_remaining: 0.1 vs 0.10000000000000001"
+      severity: error
+  warnings:
+    - code: CLAWS-W229
+      message: "7 entries contain raw floating-point values — should use string representation"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: comply-export
+      type: float-divergence
+      error: "Entry 3421 budget_remaining serialized as 0.1 on arm64 but 0.10000000000000001 on x86_64"
+    - component: comply-export
+      type: float-format
+      error: "Risk score 3.5 serialized as 3.5 on Node 20 but 3.50 on Python evidence verifier"
+  halt: null
+  budget: null
+
+problem: >
+  A governance workspace tracks budget consumption in the audit chain. Each
+  tool invocation records budget_remaining as a floating-point number. On
+  Windows x86_64, the value 0.1 serializes to "0.1" via JSON.stringify. On
+  Linux arm64 (the auditor's verification environment), the same IEEE 754
+  double serializes to "0.10000000000000001" due to differences in the dtoa
+  (double-to-ASCII) algorithm between V8 builds. The evidence hashes diverge.
+  Additionally, a Python-based evidence verifier used by the compliance team
+  serializes 3.5 as "3.5" while Node.js serializes it as "3.5" — but edge
+  cases like 1e20 vs 100000000000000000000 produce different representations.
+  Every numeric value in the audit chain is a potential divergence point.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-229 core: IEEE 754 doubles have multiple valid string representations.
+      The same bit pattern can serialize as "0.1", "1e-1", or
+      "0.10000000000000001" depending on the dtoa algorithm. All monetary
+      and measurement values in audit chain entries must be stored as string
+      representations (e.g., "0.10" not 0.1) to avoid runtime-dependent
+      serialization. The schema must enforce string type for these fields.
+    spec_impact: "CL-02 Reproducibility Amendment — string representation for numeric values"
+    pitfall: "P-229"
+
+  - id: F02
+    severity: major
+    description: >
+      Budget values are inherently decimal (dollars and cents). Storing them
+      as IEEE 754 doubles introduces representation error (0.1 + 0.2 != 0.3).
+      The audit chain should store budget values as string-encoded decimals
+      with explicit precision (e.g., "0.10" for 10 cents). This eliminates
+      both serialization divergence and arithmetic precision issues in
+      compliance calculations.
+    spec_impact: "CL-02 Reproducibility Amendment — decimal string encoding for budget values"
+    pitfall: "P-229"
+
+  - id: F03
+    severity: major
+    description: >
+      Risk scores (1-5 scale) may appear safe as integers but intermediate
+      calculations (e.g., weighted average risk) produce fractional values.
+      If a weighted risk score of 3.7 is stored as a float, it may serialize
+      differently across platforms. Risk scores must follow the same string
+      representation rule as budget values, with a defined precision
+      (e.g., one decimal place for risk scores).
+    spec_impact: "CL-02 Reproducibility Amendment — defined precision for risk score serialization"
+    pitfall: "P-229"
+
+  - id: F04
+    severity: major
+    description: >
+      Timeout values in milliseconds may be stored as integers but elapsed
+      time calculations produce floats (e.g., performance.now() returns
+      a high-resolution timestamp). If elapsed_ms: 1247.3000000000002 appears
+      in an audit entry, serialization will diverge. All timing values must
+      be truncated to integer milliseconds before storage or stored as
+      string representations with defined precision.
+    spec_impact: "CL-02 Reproducibility Amendment — integer truncation for timing values"
+    pitfall: "P-229"
+
+  - id: F05
+    severity: major
+    description: >
+      The RFC 8785 canonical JSON specification defines number serialization
+      using the shortest representation that round-trips to the same IEEE 754
+      value. However, "shortest representation" may still differ between
+      implementations. For compliance evidence, the safer approach is to
+      avoid floating-point JSON numbers entirely and use string-encoded
+      values with explicit formatting rules.
+    spec_impact: "CL-02 Reproducibility Amendment — avoid JSON number type for precision-sensitive values"
+    pitfall: "P-229"
+
+  - id: F06
+    severity: warning
+    description: >
+      Existing audit chain entries that already contain raw floating-point
+      values cannot be retroactively converted to strings (that would break
+      the hash chain). The evidence generator must handle both formats:
+      entries with raw floats are canonicalized using RFC 8785 number rules,
+      and new entries use string representations. The schema must support
+      both formats during the migration period.
+    spec_impact: "CL-02 Reproducibility Amendment — dual format support during migration"
+    pitfall: "P-229"
+
+  - id: F07
+    severity: warning
+    description: >
+      Cross-language verification (Node.js generates, Python verifies) adds
+      another divergence layer. Python's json.dumps uses a different dtoa
+      implementation than V8. Even with RFC 8785, the Python implementation
+      may produce different shortest representations for the same double.
+      The compliance specification should define a reference implementation
+      in a language-neutral format (e.g., test vectors) for verifier
+      conformance.
+    spec_impact: "CL-02 Reproducibility Amendment — cross-language test vectors for number serialization"
+    pitfall: "P-229"
+
+  - id: F08
+    severity: warning
+    description: >
+      The claws schema validator should reject raw floating-point values in
+      new audit chain entries for fields designated as precision-sensitive
+      (budget, risk scores, timing). A lint rule should warn on any numeric
+      JSON value in these fields with a recommendation to use string encoding.
+      This prevents the problem at write time rather than detecting it at
+      verification time.
+    spec_impact: "CL-02 Schema Validation — reject raw floats in precision-sensitive fields"
+    pitfall: "P-229"
+
+  - id: F09
+    severity: note
+    description: >
+      Special IEEE 754 values (NaN, Infinity, -Infinity) are not valid JSON
+      but may appear in error conditions (e.g., budget_remaining after
+      division by zero). The audit chain serializer must detect these values
+      and replace them with sentinel strings ("NaN", "Infinity") before
+      serialization. JSON.stringify silently converts NaN to null, which
+      loses the error signal.
+    spec_impact: "CL-02 Schema Validation — IEEE 754 special value handling"
+    pitfall: "P-229"

@@ -1,0 +1,176 @@
+name: S01-fleet-scan-discovery
+series: fleet-operations
+version: 1
+specs: [CL-05]
+description: >
+  Validates that `claws scan` discovers all agent workspaces in a fleet
+  and correctly classifies each as governed, ungoverned, or misconfigured.
+  A fleet of 10 workspaces contains 7 with valid governance (claws.json +
+  compiled artifacts), 2 with zero governance intents (no claws.json, no
+  SOUL.md constraints), and 1 with malformed claws.json. The scan must
+  produce a fleet inventory distinguishing all three states and never
+  conflate ungoverned (zero intents) with compliant (zero violations).
+
+expect:
+  workspaces:
+    total: 10
+    governed: 7
+    ungoverned: 2
+    misconfigured: 1
+  drift_count: 0
+  broadcast_result: null
+  compliance:
+    governed_pass: 7
+    governed_fail: 0
+    ungoverned: 2
+    misconfigured: 1
+    vacuous_compliance: 0
+
+simulate:
+  failures:
+    - component: workspace-discovery
+      type: misconfigured-claws-json
+      error: "workspace-gamma: claws.json parse error at line 7 — invalid trustTier"
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise fleet contains 10 workspaces. Seven have complete governance:
+  claws.json with trust tiers, SOUL.md with constraints, TOOLS.md with
+  classified tools, and compiled governance plugins. Two workspaces are
+  agent directories with no governance files at all — they contain SOUL.md
+  for advisory instructions but no claws.json and no governance constraints.
+  One workspace has a claws.json with invalid syntax (trustTier: "high"
+  instead of a numeric 0-4 value). `claws scan` must discover all 10,
+  classify each, and report the fleet inventory without treating zero-intent
+  workspaces as 100% compliant.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The ungoverned vs compliant distinction is the core fleet intelligence
+      problem. A workspace with zero governance intents produces zero violations,
+      which naively looks like 100% compliance. If `claws scan` reports these
+      as "pass," the fleet dashboard shows 9/10 passing when only 7/10 are
+      actually governed. The scan must introduce a three-state classification:
+      GOVERNED (has intents + checked), UNGOVERNED (no intents), MISCONFIGURED
+      (has intents but broken).
+    spec_impact: "CL-05 Outer Ring — three-state workspace classification required"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Workspace discovery relies on filesystem traversal to find agent
+      directories. The spec does not define the discovery heuristic. What
+      makes a directory an "agent workspace"? Presence of SOUL.md? Presence
+      of .claws/? A claws.json? If only claws.json is required, ungoverned
+      workspaces (which lack claws.json) are invisible to the scan. Discovery
+      must use a broader heuristic (any OC workspace markers) and then classify
+      governance state as a second step.
+    spec_impact: "CL-05 Fleet — workspace discovery heuristic definition needed"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The scan latency budget is <120s for the outer ring. With 10 workspaces,
+      each workspace compile is <350ms, so serial compilation is ~3.5s. But
+      workspace discovery (filesystem traversal) may dominate. If workspaces
+      are scattered across a network share, discovery alone could exceed 120s.
+      The spec should define discovery scope (directory depth, network mounts,
+      symlink following) and provide a fleet registry file as an alternative
+      to filesystem traversal.
+    spec_impact: "CL-05 Outer Ring — discovery scope limits and registry alternative"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Misconfigured workspaces (invalid claws.json) should not halt the scan.
+      The scan must be fault-tolerant: record the error for workspace-gamma,
+      continue scanning the remaining 9. If the scan aborts on first error,
+      partial fleet state is invisible. The scan output must include per-workspace
+      status with error details for misconfigured entries.
+    spec_impact: "CL-05 Fleet — scan fault tolerance and partial results"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The scan output format is unspecified. For CI/CD fleet scan (Stage 3,
+      weekly cron), the output must be machine-readable (JSON, SARIF). For
+      human operators, a summary table is needed. The --format flag from CL-05
+      CI flags should apply to `claws scan` as well. Without structured output,
+      fleet dashboards cannot aggregate scan results.
+    spec_impact: "CL-05 Fleet — scan output format specification (--format support)"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The scan must record metadata per workspace: last compile time, last
+      pinch time, governance hash, trust tier, agent count, tool count. This
+      metadata enables drift detection (S03) without recompiling every
+      workspace. If the scan only records pass/fail, subsequent drift detection
+      must recompile everything, defeating the <120s budget for large fleets.
+    spec_impact: "CL-05 Fleet — per-workspace metadata in scan inventory"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Two ungoverned workspaces may be intentionally ungoverned (development
+      sandboxes) or accidentally ungoverned (governance setup incomplete). The
+      scan cannot distinguish intent. A fleet policy that says "all workspaces
+      must be governed" should escalate ungoverned workspaces to errors, not
+      warnings. The escalation should be configurable in fleet policy:
+      `fleet.requireGovernance: true` in the fleet-level claws.json.
+    spec_impact: "CL-05 Fleet — fleet.requireGovernance policy escalation"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The scan must be idempotent and safe to run frequently. If the scan
+      modifies workspace state (e.g., writes a .claws/scan-result.json in each
+      workspace), concurrent scans or concurrent builds could conflict. The
+      scan should write results to a fleet-level directory only, never modify
+      individual workspace state. This preserves the lossless principle at
+      fleet scope.
+    spec_impact: "CL-05 Fleet — scan idempotency and workspace immutability"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Workspace permissions matter for fleet scan. An operator running
+      `claws scan` may have read access to 8 of 10 workspaces but not the
+      other 2. Permission-denied workspaces should be reported as INACCESSIBLE
+      (fourth state) rather than silently skipped. Silent skip makes the fleet
+      look smaller than it is.
+    spec_impact: "CL-05 Fleet — INACCESSIBLE workspace state for permission errors"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The scan should report aggregate statistics: total workspaces, governed
+      count, ungoverned count, misconfigured count, total agents, total tools,
+      trust tier distribution. This aggregate is the fleet health dashboard
+      input. Individual workspace details are secondary — the operator first
+      needs the fleet posture summary.
+    spec_impact: "CL-05 Fleet — aggregate fleet health statistics in scan output"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      If a workspace has been scanned before and its governance hash has not
+      changed, the scan could skip recompilation and reuse cached results.
+      Incremental fleet scan reduces latency for large fleets. The governance
+      hash from the GovernanceIR (CL-04) serves as the cache key. Hash match
+      means no recompile needed.
+    spec_impact: "CL-05 Fleet — incremental scan via governance hash caching"
+    pitfall: null

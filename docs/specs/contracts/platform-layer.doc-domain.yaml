@@ -1,0 +1,32 @@
+layer: "Platform Layer"
+atoms:
+  claws-sdk:
+    visibility: architect
+    docType: concept
+    narrative: P2
+    pipeline: true
+  three-tier-packages:
+    visibility: public
+    docType: headline
+    narrative: P1
+    pipeline: true
+  press-pinch:
+    visibility: architect
+    docType: concept
+    narrative: P2
+    pipeline: true
+  claws-relax:
+    visibility: public
+    docType: feature
+    narrative: P2
+    pipeline: false
+  lossless-roundtrip:
+    visibility: public
+    docType: headline
+    narrative: P1
+    pipeline: false
+  dotnet-for-oc:
+    visibility: public
+    docType: headline
+    narrative: P1
+    pipeline: false

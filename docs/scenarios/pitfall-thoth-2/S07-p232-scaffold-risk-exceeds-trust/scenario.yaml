@@ -1,0 +1,147 @@
+name: S07-p232-scaffold-risk-exceeds-trust
+series: pitfall-thoth-2
+version: 1
+specs: [CL-05]
+description: >
+  Validates that skill scaffolding derives maximum risk level from the
+  workspace trust tier (P-232). Without this constraint, a scaffold defaults
+  to R5 in a T2 workspace, and the first compilation produces an immediate
+  G-CLASS violation that blocks the developer before they write any code.
+
+expect:
+  governance_ir:
+    version: 1
+    skill_scaffold:
+      requested_risk: 5
+      workspace_trust: 2
+      max_allowed_risk: 2
+      clamped: true
+    analysis:
+      rules_evaluated: true
+      risk_check: true
+  violations:
+    - code: CLAWS-E232
+      message: "Scaffold risk R5 exceeds workspace trust tier T2 — clamped to R2"
+      severity: error
+  warnings:
+    - code: CLAWS-W232
+      message: "Skill scaffold created at R2 instead of requested R5 — workspace trust tier limits maximum risk"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: skill-scaffold
+      type: risk-trust-mismatch
+      error: "claws skill new --risk 5 in T2 workspace — G-CLASS violation on first pinch"
+    - component: compile-sim
+      type: g-class-violation
+      error: "G-CLASS: skill risk level R5 exceeds workspace trust tier T2 maximum of R2"
+  halt: null
+  budget: null
+
+problem: >
+  A developer runs claws skill new my-automation --risk 5 in a workspace with
+  trust tier T2. The scaffold generates a skill manifest with risk_level: 5.
+  The developer has not written any handler code yet. They run claws pinch to
+  check the workspace and receive an immediate G-CLASS violation because R5
+  skills are only permitted in T4+ workspaces. The developer is confused: they
+  just scaffolded a skill and it already violates governance. They must manually
+  edit the manifest to lower the risk level, but they do not know what the
+  workspace trust tier is or what risk levels are permitted. The scaffolding
+  experience should prevent this by clamping the risk level to the workspace
+  maximum and explaining why.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-232 core: The skill scaffold command must read the workspace trust
+      tier before generating the manifest. If the requested risk level exceeds
+      the trust tier's maximum allowed risk, the scaffold must clamp the risk
+      level down and emit a clear message explaining the constraint. The
+      mapping of trust tiers to maximum risk levels must be defined in
+      CL-05: T1->R1, T2->R2, T3->R3, T4->R4, T5->R5.
+    spec_impact: "CL-05 Maker Experience Amendment — trust-tier-to-risk-level clamping in scaffold"
+    pitfall: "P-232"
+
+  - id: F02
+    severity: major
+    description: >
+      The scaffold should not silently clamp. When the requested risk is
+      reduced, the command must output a message like "Skill created at R2
+      (workspace trust tier T2 limits maximum to R2). Use claws workspace
+      upgrade to request a higher trust tier." Silent clamping leaves the
+      developer unaware that their intent was modified, which may lead to
+      incorrect assumptions about the skill's capabilities.
+    spec_impact: "CL-05 Maker Experience Amendment — explicit clamping notification"
+    pitfall: "P-232"
+
+  - id: F03
+    severity: major
+    description: >
+      If no --risk flag is provided, the scaffold must default to R1 (the
+      safest level), not to the workspace maximum. Defaulting to the maximum
+      encourages over-privileged skills. The developer should consciously
+      choose a higher risk level based on the skill's actual requirements.
+      The scaffold command's help text must explain risk levels and their
+      implications.
+    spec_impact: "CL-05 Maker Experience Amendment — R1 default risk level for scaffold"
+    pitfall: "P-232"
+
+  - id: F04
+    severity: major
+    description: >
+      The workspace trust tier must be discoverable. The scaffold command
+      should include the trust tier in its output or the developer should
+      be able to query it via claws workspace info. If the trust tier is
+      not set (pre-governance workspace), the scaffold should default to
+      T1 and require explicit opt-in to higher tiers.
+    spec_impact: "CL-05 Maker Experience Amendment — trust tier discoverability"
+    pitfall: "P-232"
+
+  - id: F05
+    severity: warning
+    description: >
+      A skill scaffolded at R2 in a T2 workspace may later need R4
+      capabilities (e.g., network access). The scaffold should generate
+      a comment in the manifest explaining how to request a risk level
+      increase: update the manifest and run claws pinch to check compliance.
+      This guides the developer through the upgrade path rather than leaving
+      them to discover it through trial and error.
+    spec_impact: "CL-05 Maker Experience Amendment — risk level upgrade guidance in scaffold"
+    pitfall: "P-232"
+
+  - id: F06
+    severity: warning
+    description: >
+      The G-CLASS violation message produced by pinch must include actionable
+      guidance, not just the rule code. Instead of "G-CLASS violation: risk
+      level exceeds trust tier", the message should say "Skill risk R5
+      requires workspace trust tier T4 or higher. Current workspace is T2.
+      Either lower skill risk to R2 or upgrade workspace trust tier."
+    spec_impact: "CL-05 G-CLASS — actionable violation messages"
+    pitfall: "P-232"
+
+  - id: F07
+    severity: warning
+    description: >
+      The scaffold template should vary by risk level. An R1 skill needs
+      minimal governance boilerplate. An R4 skill needs approval hooks,
+      budget tracking, and audit chain integration. Generating the same
+      template for all risk levels wastes the developer's time removing
+      unnecessary code for low-risk skills or missing required code for
+      high-risk skills.
+    spec_impact: "CL-05 Maker Experience Amendment — risk-level-specific scaffold templates"
+    pitfall: "P-232"
+
+  - id: F08
+    severity: note
+    description: >
+      The trust-tier-to-risk-level mapping should be configurable at the
+      fleet level. An enterprise fleet administrator may want to allow R3
+      skills in T2 workspaces for specific use cases. The default mapping
+      is conservative (TN -> RN), but fleet policy can override it with
+      a floor (T2 can never allow R5 regardless of fleet policy).
+    spec_impact: "CL-05 Maker Experience Amendment — fleet-configurable trust-to-risk mapping"
+    pitfall: "P-232"

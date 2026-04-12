@@ -1,0 +1,158 @@
+name: S02-partial-emit-consistency
+series: pitfall-coverage-2
+version: 1
+specs: [CL-04]
+description: >
+  Validates atomic artifact emission (P-071) and cross-artifact classification
+  consistency (P-080). When one artifact fails to emit, no artifacts should be
+  written. When all artifacts emit, tool classifications must agree across
+  SKILL.md, exec-approvals.json, and plugin rule tables.
+
+expect:
+  artifacts:
+    - type: skill
+      path: skills/claws-governance/SKILL.md
+      valid: false
+    - type: plugin
+      path: plugins/claws-governance/index.ts
+      valid: false
+    - type: exec-approvals
+      path: exec-approvals.json
+      valid: false
+  plugin_hooks: []
+  skill_content:
+    contains_governance: false
+  approvals:
+    matches_tools: false
+
+simulate:
+  failures:
+    - component: emit-phase
+      type: partial-emission
+      error: "TypeScript generation failed for index.ts — SKILL.md already written"
+    - component: emit-phase
+      type: classification-mismatch
+      error: "SKILL.md classifies send-email as R3, exec-approvals.json says R5"
+  halt: emit
+  budget: null
+
+problem: >
+  A workspace with 5 tools (R1, R2, R3, R4, R5) compiles successfully through
+  Phase 4 OPTIMIZE. During Phase 5 EMIT, SKILL.md writes successfully but
+  index.ts fails due to a TypeScript generation error (handler template
+  incompatible with the R4 tool's complex approval chain). The workspace now
+  has advisory governance (L1) without enforcement (L2-L3). Separately, when
+  all artifacts DO emit, the R3 tool "send-email" is classified as R3 in
+  SKILL.md but as R5 in exec-approvals.json due to an OBO keyword match in
+  exec-approvals generation that was not present in SKILL.md generation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-071 core: SKILL.md was written to disk before index.ts generation
+      began. The workspace has advisory governance without enforcement. A user
+      inspecting the workspace sees SKILL.md and believes governance is active,
+      but no plugin enforces it. This false sense of security is worse than
+      having no governance at all.
+    spec_impact: "CL-04 Phase 5 EMIT — sequential write creates partial state"
+    pitfall: "P-071"
+
+  - id: F02
+    severity: major
+    description: >
+      The atomic staging fix: all artifacts write to .claws/staging/ first.
+      Only after all 4 (or 3, if no lobster.yaml) succeed does an atomic
+      directory swap replace the live artifacts. On any failure, staging is
+      deleted. The swap must be as close to atomic as the OS allows (rename
+      on POSIX, MoveFileEx on Windows).
+    spec_impact: "CL-04 G-EMIT-ATOMIC — staging directory protocol"
+    pitfall: "P-071"
+
+  - id: F03
+    severity: major
+    description: >
+      If the staging directory swap is interrupted (process kill, power loss),
+      the workspace may have neither old nor new artifacts. Recovery must
+      detect an incomplete swap: if .claws/staging/ exists alongside live
+      artifacts, the live artifacts are authoritative and staging is deleted.
+    spec_impact: "CL-04 G-EMIT-ATOMIC — interrupted swap recovery"
+    pitfall: "P-071"
+
+  - id: F04
+    severity: major
+    description: >
+      P-080 core: SKILL.md says send-email is R3 (write). exec-approvals.json
+      says R5 (transact, OBO). Plugin rule tables say R3. Three governance
+      layers have two different classifications. Effective governance depends
+      on which layer processes first. In OC, exec-approvals.json is checked
+      before the plugin hook, so the R5 classification wins.
+    spec_impact: "CL-04 G-EMIT-CONSISTENT — classification source-of-truth"
+    pitfall: "P-080"
+
+  - id: F05
+    severity: major
+    description: >
+      Post-emit consistency validation must compare tool classifications
+      across all emitted artifacts. The comparison must be exact: same tool
+      name, same risk level, same capabilities. Any mismatch is a hard error
+      that triggers staging rollback. The error message must identify which
+      artifact disagrees and what the expected classification is.
+    spec_impact: "CL-04 G-EMIT-CONSISTENT — cross-artifact validation"
+    pitfall: "P-080"
+
+  - id: F06
+    severity: warning
+    description: >
+      The classification mismatch root cause: emit-phase generates each
+      artifact from different IR paths. SKILL.md generation reads the advisory
+      IR. exec-approvals generation reads the enforcement IR. If an OBO
+      keyword match in the enforcement path elevates R3 to R5 but the advisory
+      path does not, the artifacts diverge. The fix is a single authoritative
+      classification table that all emitters read.
+    spec_impact: "CL-04 EMIT — single classification source"
+    pitfall: "P-080"
+
+  - id: F07
+    severity: warning
+    description: >
+      `claws pinch` on an existing workspace must detect classification
+      inconsistency in already-emitted artifacts. This is a post-hoc check
+      for workspaces that were compiled before the consistency validation
+      existed. The pinch rule G-EMIT-CONSISTENT must cross-reference live
+      artifacts, not just staged ones.
+    spec_impact: "CL-02 G-EMIT-CONSISTENT — pinch post-hoc detection"
+    pitfall: "P-080"
+
+  - id: F08
+    severity: note
+    description: >
+      The staging directory approach requires that the build output path is
+      deterministic. If two concurrent `claws build` invocations target the
+      same workspace, both write to .claws/staging/ and one overwrites the
+      other. A per-invocation staging directory (e.g., .claws/staging-{uuid}/)
+      prevents this race condition.
+    spec_impact: "CL-04 G-EMIT-ATOMIC — concurrent build safety"
+    pitfall: "P-071"
+
+  - id: F09
+    severity: warning
+    description: >
+      If the emit phase generates a 4th artifact (lobster.compiled.yaml) but
+      only the first 3 pass consistency checks, the 4th artifact may have
+      handler names that do not match the plugin. Consistency validation must
+      include ALL emitted artifacts, including the optional workflow.
+    spec_impact: "CL-04 G-EMIT-CONSISTENT — workflow artifact inclusion"
+    pitfall: "P-080"
+
+  - id: F10
+    severity: note
+    description: >
+      The combination of P-071 and P-080 means a partial emit could leave
+      INCONSISTENT partial artifacts. If SKILL.md (R3) emits but index.ts
+      (R5) fails, rolling back SKILL.md is essential. Without rollback, the
+      workspace has an R3 advisory for a tool that exec-approvals.json (from
+      a previous build) still classifies as R5. Two different compile runs
+      create cross-generational inconsistency.
+    spec_impact: "CL-04 EMIT — cross-generational artifact consistency"
+    pitfall: "P-071, P-080"

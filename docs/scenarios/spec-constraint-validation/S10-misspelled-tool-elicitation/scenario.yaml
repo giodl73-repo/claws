@@ -1,0 +1,123 @@
+name: S10-misspelled-tool-elicitation
+series: spec-constraint-validation
+version: 1
+specs: [CL-02]
+description: >
+  Validates tool name cross-reference validation in elicitation policies.
+  G-ELICIT cross-validates tool names between TOOLS.md and claws.json.
+  A misspelled tool name in claws.json creates an elicitation policy that
+  governs a non-existent tool while leaving the real tool ungoverned. The
+  compiler produces a diagnostic with a "Did you mean?" suggestion.
+
+expect:
+  rules_applied: [G-ELICIT]
+  violations: []
+  pass: true
+  severity: warning
+  warnings:
+    - code: CLAWS-W020
+      message_pattern: 'elicitation policy references "send_payment" which does not match TOOLS.md'
+      suggestion: "send-payment"
+      tool_in_config: send_payment
+      closest_match: send-payment
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  TOOLS.md declares "send-payment" (with a hyphen) as an R5/OBO tool.
+  claws.json configures an elicitation policy for "send_payment" (with an
+  underscore). The tool name normalization (CP-S08-F03) handles hyphens,
+  underscores, and casing for matching. But the elicitation policy cross-
+  reference uses exact string matching against TOOLS.md entries. The
+  misspelled name creates a ghost policy (governs nothing) while
+  send-payment has no elicitation policy -- potentially triggering
+  OBO-WITHOUT-ELICIT.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The cross-reference validation should use the same tool name
+      normalization as the rest of the pipeline (CP-S08-F03). If normalization
+      resolves "send_payment" to "send-payment", the policy should auto-
+      resolve without a warning. The warning is only needed when normalization
+      cannot find a match (e.g., "send_pyament" with a typo).
+    spec_impact: "CL-02 G-ELICIT — normalization before cross-reference"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The "Did you mean?" suggestion uses string similarity (Levenshtein
+      distance or similar). If TOOLS.md has 50+ tools, the suggestion must
+      pick the CLOSEST match, not just any match below a distance threshold.
+      Multiple close matches should be listed: "Did you mean: send-payment,
+      send-payment-v2?" Threshold: suggest if edit distance <= 3.
+    spec_impact: "CL-02 G-ELICIT — fuzzy match suggestion quality"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      If the misspelled tool name does not resolve (no close match), the
+      elicitation policy is orphaned. An orphaned policy wastes configuration
+      and confuses developers. The warning should escalate to error if the
+      orphaned policy targets an R5 tool classification, because the real R5
+      tool is left ungoverned.
+    spec_impact: "CL-02 G-ELICIT — orphaned R5 policy escalation"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Tool names in claws.json may reference platform built-in tools that
+      are not in TOOLS.md (e.g., OC exec, bash). The cross-reference must
+      check both TOOLS.md and the platform built-in tool set. A policy for
+      "exec" should not produce a warning just because exec is not in
+      TOOLS.md -- it is a known platform built-in.
+    spec_impact: "CL-02 G-ELICIT — built-in tool cross-reference"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The interaction between tool name cross-reference and OBO-WITHOUT-ELICIT
+      is critical. If the misspelled name means the real tool has no policy,
+      OBO-WITHOUT-ELICIT should fire for the real tool. The cross-reference
+      warning and the OBO conflict should appear together, making the cause
+      (misspelling) and the effect (ungoverned R5 tool) clear.
+    spec_impact: "CL-02 G-ELICIT — cascading diagnostic chain"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Elicitation policies may reference tool names with version suffixes
+      (e.g., "send-payment-v2") that are valid in TOOLS.md. The cross-
+      reference must not flag versioned tool names as misspellings of the
+      un-versioned name. "send-payment-v2" is a different tool from
+      "send-payment", not a misspelling.
+    spec_impact: "CL-02 G-ELICIT — versioned tool name handling"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The diagnostic code CLAWS-W020 must be in the error code registry
+      (CL-04 fail-S01-F02). W0xx codes are warnings. The W020 code is
+      specifically for elicitation tool name mismatches. The registry must
+      reserve a range for G-ELICIT warnings: W020-W029.
+    spec_impact: "CL-04 diagnostics — G-ELICIT warning code range"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      This scenario validates CL-02 Amendment A37 "Tool Name Cross-Reference
+      Validation" from governance-rules S10-F02. The amendment ensures that
+      elicitation policies actually protect the tools they claim to protect.
+    spec_impact: "CL-02 G-ELICIT — cross-reference constraint traceability"
+    pitfall: null

@@ -1,0 +1,151 @@
+name: S15-p147-p161-data-label-partial-enforcement
+series: pitfall-final-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates data label validation with synonym suggestion (P-147) and
+  partial enforcement warning for mixed valid/invalid labels (P-161).
+  Unknown labels bypass G-DATA and G-A2A-FLOW silently. Partial enforcement
+  creates a false sense that all data is governed.
+
+expect:
+  rules_applied: [G-DATA, G-A2A-FLOW]
+  violations:
+    - code: CLAWS-E025
+      rule: G-DATA
+      description: "Unknown data label 'SENSITIVE' — did you mean 'PII' or 'CONFIDENTIAL'?"
+    - code: CLAWS-W028
+      rule: G-DATA
+      description: "Partial enforcement: 3/5 labels valid, 2/5 unrecognized — unrecognized data ungoverned"
+  pass: false
+  severity: error
+
+simulate:
+  failures:
+    - component: label-validator
+      type: unknown-label
+      error: "Data label 'SENSITIVE' not in enum [PII, CONFIDENTIAL, PUBLIC, INTERNAL, RESTRICTED]"
+    - component: label-validator
+      type: partial-enforcement
+      error: "MEMORY.md has 5 labels: PII, CONFIDENTIAL, PUBLIC valid; SENSITIVE, PRIVATE unrecognized"
+  halt: null
+  budget: null
+
+problem: >
+  MEMORY.md declares data labels for 5 data categories. Three use valid
+  labels (PII, CONFIDENTIAL, PUBLIC). Two use non-standard labels
+  (SENSITIVE, PRIVATE). G-DATA enforces policies for PII, CONFIDENTIAL,
+  and PUBLIC data. The SENSITIVE and PRIVATE data categories have no
+  matching policy — they bypass G-DATA and G-A2A-FLOW enforcement entirely.
+  The developer sees governance active for 3 categories and assumes all 5
+  are governed. The 2 ungoverned categories may contain actual sensitive
+  data with no protection.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-147 core: Unknown data label "SENSITIVE" is not in the label enum.
+      G-DATA checks only match against known labels. "SENSITIVE" matches
+      nothing. No data flow restrictions, no redaction rules, no A2A
+      boundary checks apply to data labeled "SENSITIVE." The data flows
+      unrestricted across all agent boundaries.
+    spec_impact: "CL-02 G-DATA — unknown label bypass"
+    pitfall: "P-147"
+
+  - id: F02
+    severity: major
+    description: >
+      Label validation with synonym suggestion: the parser must check each
+      label against the known enum and, for non-matches, compute similarity
+      (Levenshtein distance or synonym lookup). "SENSITIVE" suggests "PII"
+      or "CONFIDENTIAL." "PRIVATE" suggests "CONFIDENTIAL" or "RESTRICTED."
+      CLAWS-E025 provides actionable guidance.
+    spec_impact: "CL-02 G-DATA — synonym suggestion for unknown labels"
+    pitfall: "P-147"
+
+  - id: F03
+    severity: major
+    description: >
+      P-161 core: Mixed valid and invalid labels create partial enforcement.
+      The developer sees governance alerts for PII data and believes the
+      system is working. They do not realize that "SENSITIVE" data has
+      zero governance. This false sense of security is worse than no
+      governance at all because it suppresses investigation.
+    spec_impact: "CL-02 G-DATA — partial enforcement false sense of security"
+    pitfall: "P-161"
+
+  - id: F04
+    severity: major
+    description: >
+      CLAWS-W028 must explicitly state: "2 of 5 data labels are
+      unrecognized. Data under these labels is UNGOVERNED. If this data
+      contains sensitive information, it will flow without restriction."
+      The warning must be alarming enough to prevent rubber-stamping.
+    spec_impact: "CL-02 G-DATA — explicit ungoverned data warning"
+    pitfall: "P-161"
+
+  - id: F05
+    severity: major
+    description: >
+      G-A2A-FLOW checks use data labels to determine which data can cross
+      agent boundaries. Unknown labels bypass the flow check entirely.
+      If "SENSITIVE" data should not cross boundaries, the lack of a
+      matching flow rule means it crosses freely. The A2A boundary is
+      open for unlabeled data.
+    spec_impact: "CL-02 G-A2A-FLOW — unknown label A2A bypass"
+    pitfall: "P-147"
+
+  - id: F06
+    severity: warning
+    description: >
+      The label enum should be extensible via claws.json. Workspaces in
+      healthcare may need "PHI." Finance may need "MNPI." The default
+      enum covers common labels, and custom labels are added via
+      claws.json data.customLabels. Custom labels get full G-DATA and
+      G-A2A-FLOW enforcement.
+    spec_impact: "CL-01 schema — custom data label extension"
+    pitfall: "P-147"
+
+  - id: F07
+    severity: warning
+    description: >
+      The partial enforcement warning should include a count: "3/5 labels
+      enforced, 2/5 ungoverned." This quantification makes the governance
+      gap concrete. A workspace with 1/50 ungoverned labels may be
+      acceptable; 20/50 is clearly not. The count drives remediation
+      priority.
+    spec_impact: "CL-02 G-DATA — quantified enforcement gap"
+    pitfall: "P-161"
+
+  - id: F08
+    severity: warning
+    description: >
+      The unknown label should be treated as potentially high-risk.
+      If the developer intended "SENSITIVE" to mean "PII," the data
+      should have PII-level protection. A conservative approach: unknown
+      labels get RESTRICTED-level enforcement (the most restrictive)
+      until the developer normalizes or declares them.
+    spec_impact: "CL-02 G-DATA — unknown label conservative default"
+    pitfall: "P-147, P-161"
+
+  - id: F09
+    severity: note
+    description: >
+      Fleet scanning should aggregate label usage across all workspaces.
+      If "SENSITIVE" appears in 30% of workspaces, it should be
+      considered for addition to the default enum. Fleet telemetry
+      drives enum evolution.
+    spec_impact: "CL-05 fleet — label usage telemetry"
+    pitfall: "P-147"
+
+  - id: F10
+    severity: note
+    description: >
+      `claws comply` evidence generation must flag partial enforcement
+      as a compliance finding: "FINDING: 2 data categories ungoverned
+      due to unrecognized labels." The compliance officer needs to know
+      which specific data categories lack protection, not just that
+      some labels are unrecognized.
+    spec_impact: "CL-06 comply — partial enforcement evidence"
+    pitfall: "P-161"

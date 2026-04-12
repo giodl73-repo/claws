@@ -1,0 +1,175 @@
+name: S05-p230-hipaa-audit-chain-phi
+series: pitfall-thoth-2
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates that audit chains in HIPAA-regulated workspaces are recognized
+  as PHI storage (P-230). The audit chain preserves full PII for forensic
+  integrity, making the chain itself subject to HIPAA encryption-at-rest,
+  access controls, and breach notification requirements. Failure to classify
+  the audit chain as PHI storage exposes the organization to HIPAA violations.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, TRUST.md, DATA-LABELS.md, claws.json]
+    analysis:
+      rules_evaluated: true
+      compliance_check: true
+      hipaa_mode: true
+      chain_classification: phi-storage
+  violations:
+    - code: CLAWS-E230
+      message: "Audit chain contains PHI — chain file not flagged as PHI storage in compliance metadata"
+      severity: error
+  warnings:
+    - code: CLAWS-W230
+      message: "12 audit chain entries reference patient identifiers in tool invocation parameters"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: comply-hipaa
+      type: phi-classification-missing
+      error: "Audit chain at .claws/audit/chain.jsonl not classified as PHI despite HIPAA compliance mode"
+    - component: comply-hipaa
+      type: phi-in-chain
+      error: "Entry 2847 contains tool parameter 'patient_name: John Doe' — PHI in audit trail"
+  halt: null
+  budget: null
+
+problem: >
+  A healthcare organization uses claws to govern an AI agent that processes
+  patient records. The audit chain faithfully records every tool invocation
+  including parameters. When the agent calls query-patient-records with
+  parameter patient_name: "John Doe", the audit chain entry preserves this
+  PHI for forensic integrity. Over six months, the chain accumulates thousands
+  of entries containing patient names, MRNs, and diagnosis codes. A HIPAA
+  security audit discovers that the chain file is stored unencrypted on the
+  governance server. The chain was never classified as PHI storage because
+  the compliance metadata only tracks the application's data stores, not the
+  governance infrastructure's own storage. The organization faces a HIPAA
+  breach notification obligation for the exposed PHI in the audit chain.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-230 core: When HIPAA compliance mode is active, the audit chain
+      must be automatically classified as PHI storage in the compliance
+      metadata. The chain records tool invocation parameters which may
+      contain PHI. The classification must be applied at chain creation
+      time, not deferred to a compliance audit. The claws.json should
+      include a hipaa.chain_classification field that defaults to
+      "phi-storage" when hipaa mode is enabled.
+    spec_impact: "CL-02 HIPAA Amendment — automatic PHI classification for audit chain"
+    pitfall: "P-230"
+
+  - id: F02
+    severity: major
+    description: >
+      The audit chain file must be encrypted at rest when classified as PHI
+      storage. The encryption requirement applies to the chain file itself,
+      not just the entries within it. The spec must define the encryption
+      mechanism (e.g., AES-256-GCM with key management via the platform's
+      secure key store) and ensure that the verification procedure can
+      decrypt the chain for integrity checking.
+    spec_impact: "CL-02 HIPAA Amendment — encryption at rest for PHI-classified chains"
+    pitfall: "P-230"
+
+  - id: F03
+    severity: major
+    description: >
+      Access to the PHI-classified audit chain must be restricted to
+      authorized personnel. The chain file's filesystem permissions must
+      enforce least-privilege access. The comply --verify command must
+      check that the chain file permissions are restrictive (no world-
+      readable, no group-readable beyond the governance admin group).
+      Permission violations are compliance findings.
+    spec_impact: "CL-02 HIPAA Amendment — access control verification for PHI chains"
+    pitfall: "P-230"
+
+  - id: F04
+    severity: major
+    description: >
+      HIPAA requires breach notification within 60 days of discovering
+      unauthorized access to PHI. If the audit chain is compromised, the
+      organization must notify affected patients. The compliance evidence
+      must include a manifest of all PHI types present in the chain
+      (patient names, MRNs, diagnosis codes, etc.) so that breach scope
+      can be assessed rapidly without parsing 10,000+ entries manually.
+    spec_impact: "CL-02 HIPAA Amendment — PHI type manifest in compliance evidence"
+    pitfall: "P-230"
+
+  - id: F05
+    severity: major
+    description: >
+      Tool invocation parameters containing PHI should be redacted in
+      the standard audit chain view but preserved in a separate encrypted
+      forensic store. The chain entry should contain a reference to the
+      encrypted parameter record, not the PHI itself. This minimizes the
+      PHI exposure surface while maintaining forensic capability.
+    spec_impact: "CL-02 HIPAA Amendment — PHI parameter redaction with encrypted forensic store"
+    pitfall: "P-230"
+
+  - id: F06
+    severity: warning
+    description: >
+      The sidecar (L5 ring) that monitors the audit chain must also be
+      classified as PHI-handling if it reads chain entries containing PHI.
+      The sidecar's own logs, metrics, and alerts must not leak PHI. Alert
+      messages triggered by PHI-containing chain entries must redact the
+      PHI before transmission to monitoring systems.
+    spec_impact: "CL-03 Sidecar — PHI-safe alert generation"
+    pitfall: "P-230"
+
+  - id: F07
+    severity: warning
+    description: >
+      The witness service receives entry hashes, not entry contents, so
+      it does not handle PHI directly. However, if the witness service
+      stores metadata alongside hashes (e.g., entry timestamp, tool name),
+      the combination of tool name and timestamp may constitute indirect
+      PHI (e.g., knowing that patient-lookup was called at 3:42 PM for
+      a specific session). The witness service metadata must be evaluated
+      for indirect PHI exposure.
+    spec_impact: "CL-02 HIPAA Amendment — witness service indirect PHI assessment"
+    pitfall: "P-230"
+
+  - id: F08
+    severity: warning
+    description: >
+      HIPAA retention requirements (6 years for covered entities) conflict
+      with data minimization principles. The audit chain must retain PHI
+      for the required period but should not retain it longer than necessary.
+      The compliance configuration must include a retention policy with
+      automatic expiry and secure deletion of chain entries past the
+      retention window.
+    spec_impact: "CL-02 HIPAA Amendment — retention policy with secure deletion"
+    pitfall: "P-230"
+
+  - id: F09
+    severity: note
+    description: >
+      Not all tool invocation parameters contain PHI. A risk-based approach
+      should classify parameters by data label: parameters with data labels
+      "phi", "pii", or "sensitive" are encrypted; parameters with label
+      "public" are stored in cleartext. This selective encryption reduces
+      performance overhead while maintaining HIPAA compliance for the
+      specific PHI elements.
+    spec_impact: "CL-02 HIPAA Amendment — data-label-driven selective encryption"
+    pitfall: "P-230"
+
+  - id: F10
+    severity: note
+    description: >
+      The compliance evidence package itself may contain PHI if it includes
+      chain entry excerpts for findings. The evidence package must carry
+      the same PHI classification as the chain and be subject to the same
+      encryption, access control, and retention requirements. Distributing
+      an unencrypted evidence package to auditors constitutes PHI disclosure
+      requiring a Business Associate Agreement.
+    spec_impact: "CL-02 HIPAA Amendment — evidence package PHI classification"
+    pitfall: "P-230"

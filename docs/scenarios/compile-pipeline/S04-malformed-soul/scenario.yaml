@@ -1,0 +1,110 @@
+name: S04-malformed-soul
+series: compile-pipeline
+version: 1
+specs: [CL-04]
+description: >
+  Validates that a malformed SOUL.md produces a diagnostic with file:line
+  location and a fix suggestion. The parser must not crash on invalid input.
+  Diagnostics must reference the exact line containing the malformation and
+  suggest a corrective action.
+
+expect:
+  governance_ir: null
+  violations:
+    - code: CLAWS-P001
+      file: SOUL.md
+      line: 3
+      severity: error
+      message_pattern: "malformed constraint"
+      fix_suggestion: true
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  SOUL.md contains a constraint block with invalid syntax on line 3: an
+  unterminated deny directive ("never access" with no scope qualifier).
+  The parser must identify the exact file and line, classify the error as a
+  parse-level diagnostic (CLAWS-P001), and suggest a fix (e.g., "add a scope
+  qualifier: 'never access {resource}'"). The pipeline halts at phase 1 PARSE
+  and does not proceed to EXTRACT. TOOLS.md and claws.json are valid.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The keyword-anchored extraction uses confidence scoring (0.0-1.0) with
+      a 0.5 threshold. A malformed constraint like "never access" without a
+      scope could score 0.3-0.4 (partial match) rather than being detected
+      as a syntax error. The parser must distinguish "low confidence valid
+      input" from "structurally invalid input."
+    spec_impact: "CL-04 Phase 1 PARSE — confidence vs syntax error distinction"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Line number reporting requires the parser to track source locations
+      through extraction. If SOUL.md uses Windows-style CRLF line endings,
+      the line count must match what the user sees in their editor. Mixed
+      line endings (LF in some lines, CRLF in others) must not miscount.
+    spec_impact: "CL-04 diagnostics — line number accuracy cross-platform"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The fix suggestion "add a scope qualifier" requires the parser to
+      understand the expected grammar well enough to suggest completion.
+      This is a recovery heuristic, not just error detection. The suggestion
+      quality depends on how much context the parser retains after the error.
+    spec_impact: "CL-04 Phase 1 PARSE — error recovery and suggestion quality"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The pipeline halts at PARSE, meaning TOOLS.md and claws.json are never
+      processed even though they are valid. An alternative design could parse
+      all files and report all errors at once, giving the developer a complete
+      picture. The halt-on-first-error vs collect-all-errors design choice
+      affects developer experience.
+    spec_impact: "CL-04 pipeline error strategy — fail-fast vs collect-all"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      If SOUL.md is completely empty (0 bytes), is that "malformed" or
+      "missing"? The scenario tests a specific malformation, but the boundary
+      between empty file (S05 territory) and malformed file needs explicit
+      definition in the parser contract.
+    spec_impact: "CL-04 Phase 1 PARSE — empty vs malformed distinction"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The diagnostic code CLAWS-P001 implies a parse error taxonomy. This
+      scenario uses one code, but the full parser needs a code registry:
+      P001 (malformed constraint), P002 (unknown keyword), P003 (conflicting
+      constraints on same line), etc. The registry must be defined before
+      implementation.
+    spec_impact: "CL-04 diagnostics — error code registry"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      SOUL.md may contain markdown formatting (headers, lists, bold) around
+      constraints. A malformed constraint inside a code block (```...```)
+      should be treated differently from one in prose — code blocks may
+      contain example text that looks like constraints but should not be
+      parsed as governance directives.
+    spec_impact: "CL-04 Phase 1 PARSE — markdown-aware extraction"
+    pitfall: null

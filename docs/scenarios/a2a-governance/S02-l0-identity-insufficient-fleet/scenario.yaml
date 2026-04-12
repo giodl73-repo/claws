@@ -1,0 +1,160 @@
+name: S02-l0-identity-insufficient-fleet
+series: a2a-governance
+version: 1
+specs: [CL-02]
+description: >
+  Validates that L0 identity (declared name only) is flagged as insufficient
+  for fleet-participating agents. Any workspace in the fleet can declare an
+  agent with the same name, enabling trivial impersonation. G-A2A-IDENTITY
+  must warn with the specific impersonation risk when fleet.enabled is true
+  and agent identity is L0. For single-workspace (non-fleet) mode, L0 is
+  acceptable.
+
+expect:
+  attack_class: identity-spoofing
+  defense_layer: G-A2A-IDENTITY
+  blocked: false
+  audit_event: a2a-l0-fleet-warning
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A fleet of 5 workspaces shares agents via fleet configuration
+  (fleet.enabled: true in claws.json). Workspace Alpha declares agent
+  "data-fetcher" with L0 identity (IDENTITY.md absent, defaults to declared
+  name). Workspace Beta also declares an agent named "data-fetcher" with L0
+  identity. Both agents appear identical to fleet-level governance — same
+  name, no cryptographic differentiation. An attacker controlling Workspace
+  Beta can impersonate Alpha's data-fetcher. G-A2A-IDENTITY fires with a
+  warning (not error, unless fleet.minIdentityLevel is set). The warning
+  includes the specific impersonation scenario and recommends L2+ identity.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      L0 identity in fleet context is a name-collision vulnerability, not
+      just a security downgrade. Amendment A101 requires the warning to
+      include the specific risk: "Agent 'data-fetcher' uses L0 identity.
+      Any workspace can declare an agent with the same name, impersonating
+      this agent in fleet communication." The warning must name the risk
+      (impersonation), not just the fact (L0 identity). Generic warnings
+      are ignored; specific threat descriptions drive action.
+    spec_impact: "CL-02 G-A2A-IDENTITY — threat-specific L0 warning text"
+    pitfall: P-202
+
+  - id: F02
+    severity: major
+    description: >
+      Amendment A102 adds fleet.minIdentityLevel to claws.json. When set to
+      L2, agents below L2 produce a hard error. But during migration from
+      L0 to L2, all agents fail simultaneously. The migration tooling
+      (Amendment A106, `claws fleet migrate-identity`) must support
+      incremental migration: some agents at L2 while others remain at L0,
+      with warnings for L0 agents and errors only for agents that have
+      passed their migration deadline.
+    spec_impact: "CL-05 fleet migration — incremental identity level migration"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      When IDENTITY.md is absent, the agent defaults to L0 (Amendment
+      CP-S03-F01). But absent IDENTITY.md must not suppress applicable rules.
+      G-A2A-IDENTITY must still fire and produce the L0 warning. The
+      absence of the file is a data point (L0 by default), not a reason
+      to skip identity validation. This is the "absent file must not
+      suppress rules" principle applied to identity.
+    spec_impact: "CL-02 G-A2A-IDENTITY — absent IDENTITY.md triggers L0 warning, not rule skip"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The identity level check depends on fleet context (Amendment A105).
+      Fleet context is detected from claws.json (fleet.enabled: true).
+      But what if the workspace is part of a fleet but fleet.enabled is not
+      set (misconfiguration)? The workspace behaves as single-workspace mode,
+      L0 warning is suppressed, and fleet impersonation is possible. Fleet
+      detection should also check for fleet-inherited configuration (fleet
+      templates, fleet signing keys) as secondary indicators.
+    spec_impact: "CL-02 G-A2A-IDENTITY — fleet context detection beyond config flag"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The identity level threat model (Amendment A104) describes: L0 = name
+      spoofing, L1 = key theft, L2 = certificate revocation. Each level has
+      a different attack cost. The compiler warning for L0 should quantify
+      the risk: "L0 agents can be impersonated with zero effort (name copy).
+      L1 requires key theft. L2 requires fleet key compromise." This helps
+      operators make informed upgrade decisions based on their threat model.
+    spec_impact: "CL-02 G-A2A-IDENTITY — quantified risk per identity level"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      L1 identity (shared secret / API key) is an improvement over L0 but
+      shares the key with the fleet. If the fleet's shared secret is
+      compromised, all L1 agents in the fleet are compromised simultaneously.
+      L2 (fleet-signed HMAC) provides per-agent keys signed by the fleet
+      authority, limiting blast radius. The warning chain should be: L0
+      (impersonation), L1 (shared secret compromise), L2 (fleet key
+      compromise), L3 (PKI revocation). Each level's weakness informs the
+      upgrade recommendation.
+    spec_impact: "CL-02 G-A2A-IDENTITY — per-level weakness documentation"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Fleet identity compliance broadcasting (Amendment A103) means
+      `claws pinch --fleet` reports identity levels across all workspaces.
+      If 4 of 5 workspaces are at L2 and 1 is at L0, the fleet report must
+      highlight the L0 outlier. The weakest link determines fleet security.
+      A fleet-wide identity score (minimum across all agents) would provide
+      a single metric for fleet operators.
+    spec_impact: "CL-05 fleet health — minimum identity level metric"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      The scenario assumes IDENTITY.md is absent. But what if IDENTITY.md
+      exists but declares L0 explicitly? An explicit L0 declaration is
+      different from absent-defaults-to-L0: explicit means the developer
+      consciously chose L0 (perhaps for local development). The warning
+      should differentiate: "Agent uses L0 (absent IDENTITY.md)" vs
+      "Agent explicitly declares L0." The explicit case may be intentional
+      for non-fleet workspaces that accidentally have fleet.enabled: true.
+    spec_impact: "CL-02 G-A2A-IDENTITY — explicit vs default L0 distinction"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The L0 warning is non-blocking (warning, not error) by default. This
+      allows adoption: new workspaces start at L0 and upgrade over time.
+      fleet.minIdentityLevel elevates the warning to an error for enterprise
+      deployments. The two-tier approach (warning for adoption, error for
+      enterprise) balances security with usability.
+    spec_impact: "CL-02 G-A2A-IDENTITY — adoption-friendly default severity"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Key reference validation at compile time (Amendment CP-S02-F06)
+      requires that L2 identity references a real key. If IDENTITY.md
+      declares L2 but the key is not in .claws/keys/, the compiler warns.
+      But for L0, there is no key to validate — the warning is about the
+      absence of cryptographic identity, not about a missing key. The
+      compiler must handle the L0 case without trying to validate a
+      non-existent key reference.
+    spec_impact: "CL-02 G-A2A-IDENTITY — L0 key reference validation skip"
+    pitfall: null

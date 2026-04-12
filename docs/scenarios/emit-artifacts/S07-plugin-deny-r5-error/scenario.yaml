@@ -1,0 +1,98 @@
+name: S07-plugin-deny-r5-error
+series: emit-artifacts
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates that the generated plugin DENIES R5 tools when the governance
+  handler encounters an error. The catch clause must return
+  { block: true, blockReason: "claws-governance-error: ..." } for R5 tools.
+  This is the fail-closed behavior encoded in the emitted code.
+
+expect:
+  artifacts:
+    - type: plugin
+      path: plugins/claws-governance/index.ts
+      valid: true
+      contains_r5_deny_on_error: true
+  plugin_hooks:
+    - name: before_tool_call
+      r5_catch_behavior: block
+  skill_content: null
+  approvals: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The generated index.ts must contain a try/catch pattern in the
+  before_tool_call handler. The catch clause must check the tool's risk level.
+  For R5 tools, it returns { block: true, blockReason: "claws-governance-error:
+  <message>" }. This is the handler-level deny-on-error defense (CL-02 CB-01)
+  encoded in generated code. The emitted code must be verifiable by static
+  analysis.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The generated catch clause must be minimal to avoid introducing its
+      own bugs. The pattern should be exactly: `catch(err) { if (risk >= 5)
+      return { block: true, blockReason: ... }; }`. Any additional logic in
+      the catch clause (logging, metrics, state updates) could itself throw,
+      defeating the defense.
+    spec_impact: "CL-04 EMIT — catch clause minimalism requirement"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Static analysis of the generated code should verify: (1) every code
+      path in the handler is try/catch wrapped, (2) the catch clause checks
+      risk level, (3) R5 risk returns block:true. A linter rule or a
+      post-emit verification pass could enforce this invariant on every build.
+    spec_impact: "CL-04 EMIT — post-emit static verification"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The blockReason string includes the error message. If the error contains
+      sensitive information (e.g., file paths, configuration values), the
+      blockReason leaks it to the user. Error sanitization must strip paths
+      and config values from the blockReason while preserving the error type.
+    spec_impact: "CL-02 CB-01 — blockReason error sanitization"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The risk level check uses the tool name to look up the risk in the
+      compiled rule tables. If the rule tables are corrupted or missing, the
+      risk lookup itself fails, causing a nested error in the catch clause.
+      The catch clause must have a fallback: if risk lookup fails, default
+      to fail-closed (block all tools, not just R5).
+    spec_impact: "CL-04 EMIT — catch clause fallback on risk lookup failure"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      This scenario tests the EMITTED code, not the runtime behavior. The
+      difference is: the emit phase generates the code; the runtime executes
+      it. The emit test verifies code structure. The security-sim test (S04
+      in fail-mode) verifies runtime behavior. Both are needed.
+    spec_impact: "CL-04 EMIT vs CL-03 runtime — test scope distinction"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The generated code must handle async errors (Promise rejections) not
+      just sync errors (throws). If evaluatePolicy returns a rejected
+      Promise, the try/catch catches it. But if evaluatePolicy schedules
+      a microtask that throws later, the unhandled rejection escapes the
+      catch. The handler must use proper async/await error handling.
+    spec_impact: "CL-04 EMIT — async error handling in generated handler"
+    pitfall: null

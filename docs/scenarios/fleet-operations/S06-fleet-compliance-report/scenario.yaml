@@ -1,0 +1,195 @@
+name: S06-fleet-compliance-report
+series: fleet-operations
+version: 1
+specs: [CL-05, CL-02]
+description: >
+  Validates that `claws comply --fleet` aggregates compliance posture
+  across 10 workspaces with mixed compliance frameworks (SOC2, HIPAA,
+  EU AI Act). Each workspace may target one or more frameworks. The
+  fleet compliance report must show per-workspace, per-framework, and
+  aggregate compliance status. Ungoverned workspaces must not inflate
+  the compliance percentage.
+
+expect:
+  workspaces:
+    total: 10
+    soc2_targeted: 7
+    hipaa_targeted: 3
+    eu_ai_act_targeted: 2
+    ungoverned: 1
+  drift_count: 0
+  broadcast_result: null
+  compliance:
+    soc2:
+      pass: 6
+      fail: 1
+      not_targeted: 3
+    hipaa:
+      pass: 2
+      fail: 1
+      not_targeted: 7
+    eu_ai_act:
+      pass: 2
+      fail: 0
+      not_targeted: 8
+    fleet_overall:
+      governed: 9
+      ungoverned: 1
+      compliant: 8
+      non_compliant: 1
+
+simulate:
+  failures:
+    - component: compliance
+      type: soc2-violation
+      error: "workspace-iota: SOC2 CC6.1 — missing audit export for R4 tools"
+    - component: compliance
+      type: hipaa-violation
+      error: "workspace-kappa: HIPAA §164.312(b) — no audit trail for PHI access"
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise fleet has 10 workspaces with different compliance
+  requirements. Seven target SOC2 (cloud services), three target HIPAA
+  (healthcare agents), two target EU AI Act (European operations), and
+  one workspace is ungoverned (development sandbox). Some workspaces
+  target multiple frameworks. `claws comply --fleet` must produce a
+  unified compliance report that shows per-framework pass/fail and
+  identifies which workspaces fail which controls. Workspace-iota fails
+  SOC2 CC6.1 (access review). Workspace-kappa fails HIPAA audit trail.
+  The ungoverned workspace must not appear as "compliant" in any framework.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The fleet compliance report must handle framework multiplicity.
+      A workspace targeting both SOC2 and HIPAA has two independent
+      compliance evaluations. The fleet report must not merge them.
+      Framework-level pass/fail and workspace-level pass/fail are
+      orthogonal dimensions. The report needs a matrix: workspaces as
+      rows, frameworks as columns, each cell is pass/fail/not-targeted.
+    spec_impact: "CL-05 Fleet — compliance matrix (workspace x framework) in fleet report"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The ungoverned workspace (no claws.json, no governance) must be
+      excluded from compliance percentages. If included as "not targeted"
+      for all frameworks, the denominator shrinks and percentages inflate.
+      If excluded entirely, the fleet report hides a governance gap. The
+      report should show a separate "ungoverned" section: "1 workspace has
+      no governance. It cannot be evaluated for any compliance framework."
+    spec_impact: "CL-05 Fleet — ungoverned workspace exclusion from compliance metrics"
+    pitfall: P-180
+
+  - id: F03
+    severity: major
+    description: >
+      Compliance evidence signing (--sign flag from CL-05) at fleet level
+      is unspecified. Does `claws comply --fleet --sign` sign the aggregate
+      report? Or sign each workspace's evidence individually? For auditor
+      acceptance, each workspace's evidence must be independently signed
+      (auditors verify per-workspace). The fleet report is a summary signed
+      separately. Two-level signing: workspace evidence + fleet aggregate.
+    spec_impact: "CL-05 Fleet — two-level compliance evidence signing"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Framework-specific controls map to different governance rules. SOC2
+      CC6.6 maps to `claws drift` + `claws pinch --fleet`. HIPAA
+      §164.312(b) maps to `claws audit export`. EU AI Act transparency
+      maps to risk classification visibility. The spec lists these mappings
+      in CL-02 but does not define how `claws comply --fleet` evaluates
+      them. The fleet compliance command must resolve framework controls
+      to governance rule evaluations per workspace.
+    spec_impact: "CL-05 Fleet — framework control to governance rule resolution"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      A workspace that passes SOC2 but fails HIPAA has a split compliance
+      state. The fleet overall compliance should not report this workspace
+      as "compliant" — it is compliant for SOC2 but non-compliant for
+      HIPAA. The "fleet_overall.compliant" count must require ALL targeted
+      frameworks to pass. A workspace failing any targeted framework is
+      "non-compliant" in the overall fleet posture.
+    spec_impact: "CL-05 Fleet — overall compliance requires all targeted frameworks to pass"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Compliance reports are time-sensitive. A report generated today is
+      stale tomorrow if governance changes. The fleet compliance report
+      must include a validity window: "this report reflects fleet state
+      as of 2026-04-11T15:00:00Z. Rerun `claws comply --fleet` for
+      current state." For auditors who need point-in-time evidence, the
+      report must be paired with the fleet snapshot hash.
+    spec_impact: "CL-05 Fleet — compliance report validity window and snapshot pairing"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The compliance report format for fleet must support multiple output
+      formats: JSON (for dashboards), SARIF (for code scanning integration),
+      PDF (for auditors), CSV (for spreadsheet analysis). The --format flag
+      should support all four for `comply --fleet`. PDF generation is the
+      hardest — it may require an external renderer. The spec should define
+      minimum format support (JSON + CSV) and optional format support (PDF).
+    spec_impact: "CL-05 Fleet — comply --fleet output format support (JSON/CSV minimum)"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Cross-framework control overlap creates duplicate evaluation. SOC2
+      CC6.1 (access control) and HIPAA §164.312(a) (access control) both
+      check the same governance rules. The fleet compliance engine should
+      evaluate governance rules once and map results to multiple frameworks,
+      not evaluate the same rules N times for N frameworks. This is a
+      performance optimization for multi-framework fleets.
+    spec_impact: "CL-05 Fleet — cross-framework rule evaluation deduplication"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Workspace compliance history enables trend analysis: "workspace-iota
+      failed SOC2 in March, passed in April after remediation." The fleet
+      compliance report should reference previous reports when available.
+      `claws audit history` should show per-workspace compliance trends
+      across frameworks. This requires compliance results to be stored,
+      not just generated on demand.
+    spec_impact: "CL-05 Fleet — compliance history storage for trend analysis"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The fleet compliance report should include remediation priority: fix
+      workspace-kappa's HIPAA violation first (healthcare data exposure)
+      before workspace-iota's SOC2 violation (missing audit export).
+      Priority should consider: framework severity (HIPAA > SOC2 for
+      healthcare orgs), control criticality, and data sensitivity of the
+      affected workspace.
+    spec_impact: "CL-05 Fleet — remediation priority ordering in compliance report"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      For enterprises with multiple compliance teams (one for SOC2, one
+      for HIPAA), the fleet compliance report should support per-framework
+      extraction: `claws comply --fleet --framework soc2` produces only
+      the SOC2 section. This avoids sharing HIPAA-specific details with
+      the SOC2 audit team and vice versa. Framework filtering should be
+      a flag, not a separate command.
+    spec_impact: "CL-05 Fleet — per-framework report extraction via --framework filter"
+    pitfall: null

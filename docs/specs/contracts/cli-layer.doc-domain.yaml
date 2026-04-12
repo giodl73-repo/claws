@@ -1,0 +1,32 @@
+layer: "CLI Layer"
+atoms:
+  pinch:
+    visibility: public
+    docType: headline
+    narrative: P1
+    pipeline: false
+  snap:
+    visibility: public
+    docType: feature
+    narrative: P2
+    pipeline: false
+  claws-init:
+    visibility: public
+    docType: headline
+    narrative: P1
+    pipeline: true
+  claws-uninstall:
+    visibility: public
+    docType: feature
+    narrative: P2
+    pipeline: false
+  progressive-disclosure:
+    visibility: public
+    docType: feature
+    narrative: P1
+    pipeline: false
+  claws-json:
+    visibility: public
+    docType: feature
+    narrative: P1
+    pipeline: true

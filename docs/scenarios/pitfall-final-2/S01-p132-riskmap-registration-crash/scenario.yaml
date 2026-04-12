@@ -1,0 +1,150 @@
+name: S01-p132-riskmap-registration-crash
+series: pitfall-final-2
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates that riskMap registration failure is fatal rather than silently
+  defaulting to block-all or open-all (P-132). When rules.json is corrupt
+  or missing, the handler must refuse to register, not register with an
+  empty map that defaults every tool to R5 (block-all) or a catch clause
+  that crashes through to Gateway fail-open (open-all).
+
+expect:
+  attack_class: governance-bypass
+  defense_layer: handler-registration
+  blocked: true
+  audit_event:
+    type: registration-failure
+    tool: "*"
+    risk_level: null
+    outcome: HANDLER-REFUSED
+    reason: "claws-registration-fatal: riskMap validation failed"
+
+simulate:
+  failures:
+    - component: governance-hook
+      type: riskmap-build-failure
+      error: "rules.json schema mismatch — riskMap build returns empty Map"
+    - component: governance-hook
+      type: riskmap-absent
+      error: "rules.json not found — catch clause crashes, Gateway fail-open applies"
+  halt: registration
+  budget: null
+
+problem: >
+  The riskMap fails to build at handler registration time due to corrupt
+  rules.json. Two failure modes exist: (1) empty map — every tool receives
+  the default R5 treatment, blocking all tools including R1 read-only
+  operations; (2) no map at all — the catch clause crashes trying to look
+  up risk levels, and the OC Gateway's fail-open default applies, allowing
+  all tools including R5 transact operations without governance. Both
+  outcomes are unacceptable. The handler must detect riskMap build failure
+  and refuse to register entirely, surfacing a fatal initialization error.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-132 block-all path: empty riskMap means Map.get(toolName) returns
+      undefined for every tool. If the default for undefined is R5 (correct
+      fail-safe), then R1 tools like read-logs are over-blocked. The entire
+      workspace is non-functional. Users may disable governance entirely
+      rather than debug the registration failure.
+    spec_impact: "CL-02 G-FAILMODE — empty riskMap over-blocks all tools"
+    pitfall: "P-132"
+
+  - id: F02
+    severity: major
+    description: >
+      P-132 open-all path: if rules.json is missing and the catch clause
+      attempts riskMap.get() on a null reference, the catch clause throws.
+      The OC Gateway's default behavior is fail-open — the tool executes
+      without any governance. R5 transact tools like send-wire-transfer
+      execute silently and ungoverned.
+    spec_impact: "CL-02 G-FAILMODE — null riskMap crashes catch clause"
+    pitfall: "P-132"
+
+  - id: F03
+    severity: major
+    description: >
+      The handler must validate the riskMap at registration time, not at
+      first invocation. Registration-time validation means: (1) rules.json
+      exists, (2) schema validates, (3) riskMap is non-empty, (4) every
+      tool in TOOLS.md has a corresponding entry. Any failure is a fatal
+      registration error — the handler does not register.
+    spec_impact: "CL-02 G-FAILMODE — four-step registration validation"
+    pitfall: "P-132"
+
+  - id: F04
+    severity: major
+    description: >
+      A fatal registration error must produce a structured diagnostic that
+      includes: the corrupt field path in rules.json, the expected schema
+      version, and the recovery command (`claws build --force`). The
+      diagnostic must go to both stderr and the sidecar alert channel.
+    spec_impact: "CL-03 sidecar — registration failure diagnostic"
+    pitfall: "P-132"
+
+  - id: F05
+    severity: major
+    description: >
+      If the handler refuses to register, the OC Gateway has no governance
+      hook. All tool calls proceed without governance. This is equivalent
+      to the open-all failure mode. The sidecar must detect "handler not
+      registered" state and apply its own emergency deny policy for R4/R5
+      tools while allowing R1/R2 tools to proceed.
+    spec_impact: "CL-03 sidecar — emergency deny policy on missing handler"
+    pitfall: "P-132"
+
+  - id: F06
+    severity: warning
+    description: >
+      The distinction between "handler registered with empty map" and
+      "handler not registered" must be visible to operators. `claws status`
+      should report handler registration state with the riskMap tool count.
+      Zero tools in the map is a red flag even if registration succeeded.
+    spec_impact: "CL-05 status — riskMap health reporting"
+    pitfall: "P-132"
+
+  - id: F07
+    severity: warning
+    description: >
+      Race condition: if rules.json is being written by `claws build` while
+      the handler attempts registration, a partial file read could produce
+      a corrupt riskMap. The build process must use atomic file replacement
+      (write to .tmp, rename) and registration must retry once on schema
+      validation failure with a 100ms delay.
+    spec_impact: "CL-04 EMIT — atomic rules.json write"
+    pitfall: "P-132"
+
+  - id: F08
+    severity: warning
+    description: >
+      If the sidecar's emergency deny policy blocks R4/R5 tools when the
+      handler is absent, the sidecar itself becomes a single point of
+      failure. If both the handler and the sidecar are down, there is no
+      governance. The platform-level kill switch (CL-03) must be the
+      ultimate backstop — disable the workspace entirely if no governance
+      layer is operational.
+    spec_impact: "CL-03 kill switch — no-governance-layer detection"
+    pitfall: "P-132"
+
+  - id: F09
+    severity: note
+    description: >
+      The registration failure should trigger an automatic recompilation
+      attempt. If `claws build` succeeds, the handler can retry registration.
+      If `claws build` also fails (source files missing), the workspace
+      enters a "governance-degraded" state with sidecar-only protection.
+    spec_impact: "CL-05 — auto-recovery on registration failure"
+    pitfall: "P-132"
+
+  - id: F10
+    severity: note
+    description: >
+      Metrics: registration failures should be counted per workspace in
+      fleet telemetry. A fleet-wide spike in registration failures
+      indicates a bad build artifact propagated by `claws fleet broadcast`.
+      The fleet dashboard must surface this pattern within 60 seconds.
+    spec_impact: "CL-05 fleet — registration failure telemetry"
+    pitfall: "P-132"

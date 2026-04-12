@@ -1,0 +1,149 @@
+name: S09-p140-p141-platform-version-compat
+series: pitfall-final-2
+version: 1
+specs: [CL-04]
+description: >
+  Validates platform version compatibility for both Node.js and TypeScript
+  targets (P-140 + P-141). AbortSignal.timeout() is unavailable on Node 16,
+  and the satisfies keyword requires TS 4.9+. Both cause silent governance
+  failures on older platforms.
+
+expect:
+  artifacts:
+    - name: index.ts
+      status: validated
+      assertion: "Node 16 polyfill for AbortSignal.timeout; no 'satisfies' keyword for TS <4.9"
+  plugin_hooks:
+    - hook: before_tool_call
+      compat: "Node >=16, TS >=4.7"
+  skill_content: null
+  approvals: null
+
+simulate:
+  failures:
+    - component: runtime
+      type: node-version-incompatible
+      error: "AbortSignal.timeout is not a function — Node 16 has no static timeout()"
+    - component: build
+      type: ts-version-incompatible
+      error: "satisfies keyword requires TS 4.9+ — build fails on TS 4.7"
+  halt: null
+  budget: null
+
+problem: >
+  The generated governance handler uses AbortSignal.timeout(200) for hook
+  timeout enforcement. On Node 16 (LTS until April 2024, still in production
+  at many enterprises), AbortSignal.timeout() does not exist. The call throws
+  TypeError at runtime, crashing the entire handler. All tools are ungoverned.
+  Separately, the generated TypeScript uses the `satisfies` keyword (TS 4.9+)
+  for type narrowing. On TS 4.7 (common in locked enterprise toolchains), the
+  build fails entirely. The governance plugin never loads.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-140 core: AbortSignal.timeout() is a static method added in Node
+      17.3 (stable in Node 18). Node 16 LTS does not have it. The TypeError
+      crashes the handler at first tool call, not at registration. The
+      crash is in the governance hot path, meaning every tool call attempt
+      crashes the handler.
+    spec_impact: "CL-04 EMIT — Node version detection for AbortSignal.timeout"
+    pitfall: "P-140"
+
+  - id: F02
+    severity: major
+    description: >
+      The emit phase must detect the target Node version from claws.json
+      (nodeTarget: "16" or "18") or from the workspace's package.json
+      engines field. For Node 16, the generated code must use a setTimeout
+      polyfill: `const signal = AbortController(); setTimeout(() =>
+      controller.abort(), timeoutMs);` instead of AbortSignal.timeout().
+    spec_impact: "CL-04 EMIT — Node 16 AbortSignal polyfill"
+    pitfall: "P-140"
+
+  - id: F03
+    severity: major
+    description: >
+      P-141 core: The `satisfies` keyword in TypeScript 4.9+ provides
+      type narrowing without widening. On TS 4.7, it is a syntax error
+      that prevents compilation. The generated plugin never builds, never
+      loads, and governance is entirely absent. The build error is visible
+      but the developer may not connect it to governance failure.
+    spec_impact: "CL-04 EMIT — TS version targeting for satisfies keyword"
+    pitfall: "P-141"
+
+  - id: F04
+    severity: major
+    description: >
+      The emit phase must maintain a TS syntax compatibility matrix:
+      satisfies (4.9+), const type parameters (5.0+), using declarations
+      (5.2+). The target TS version from claws.json (tsTarget: "4.7" or
+      "5.0") determines which syntax features are available. Features
+      above the target are replaced with compatible alternatives.
+    spec_impact: "CL-04 EMIT — TS syntax compatibility matrix"
+    pitfall: "P-141"
+
+  - id: F05
+    severity: major
+    description: >
+      For TS 4.7, `satisfies` is replaced with `as const` assertions or
+      explicit type annotations. The replacement must maintain the same
+      type safety guarantees. If a compatible replacement does not exist
+      for a required feature, the build should fail with a clear error
+      naming the minimum TS version required.
+    spec_impact: "CL-04 EMIT — satisfies keyword replacement for TS 4.7"
+    pitfall: "P-141"
+
+  - id: F06
+    severity: warning
+    description: >
+      Node version auto-detection from the runtime (process.version) is
+      a runtime check. The emit phase needs a compile-time target. If
+      the developer does not specify nodeTarget, claws should detect it
+      from .nvmrc, .node-version, or package.json engines.volta fields.
+      Absent all signals, default to Node 16 (most conservative).
+    spec_impact: "CL-01 schema — Node version auto-detection cascade"
+    pitfall: "P-140"
+
+  - id: F07
+    severity: warning
+    description: >
+      The polyfill for AbortSignal.timeout adds code complexity. The
+      generated handler must include the polyfill inline (not as a
+      dependency) to avoid introducing a supply chain risk. The polyfill
+      must be minimal: controller + setTimeout + cleanup.
+    spec_impact: "CL-04 EMIT — inline polyfill, no external dependency"
+    pitfall: "P-140"
+
+  - id: F08
+    severity: warning
+    description: >
+      Fleet heterogeneity: different workspaces in a fleet may run
+      different Node/TS versions. `claws fleet scan` must report the
+      version matrix and flag workspaces where the generated code is
+      incompatible with the detected runtime. Fleet-wide compilation
+      must use the lowest common denominator or per-workspace targeting.
+    spec_impact: "CL-05 fleet — version matrix and compatibility scan"
+    pitfall: "P-140, P-141"
+
+  - id: F09
+    severity: note
+    description: >
+      As Node 16 reaches EOL, the polyfill becomes unnecessary. The
+      emit phase should deprecate Node 16 support with a CLAWS-W070
+      advisory and eventually remove the polyfill when the minimum
+      supported Node version reaches 18. The deprecation timeline
+      should be documented in CL-04.
+    spec_impact: "CL-04 EMIT — Node 16 deprecation timeline"
+    pitfall: "P-140"
+
+  - id: F10
+    severity: note
+    description: >
+      The TS compatibility matrix must be maintained as new TS versions
+      ship. Each new syntax feature used in emit templates must be added
+      to the matrix with its minimum TS version. This is a maintenance
+      burden but prevents silent build failures on older TS versions.
+    spec_impact: "CL-04 EMIT — TS compatibility matrix maintenance"
+    pitfall: "P-141"

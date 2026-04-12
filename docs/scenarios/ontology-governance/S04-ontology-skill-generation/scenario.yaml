@@ -1,0 +1,129 @@
+name: S04-ontology-skill-generation
+series: ontology-governance
+version: 1
+specs: [CL-04, CL-06, CL-07]
+description: >
+  Validates that ontology concepts generate compliance skills with
+  governance constraints embedded. A data-privacy ontology defines
+  3 compliance activities (data-inventory, access-review, breach-response)
+  that compile to executable skills. Each generated skill carries
+  governance constraints from its parent ontology concept, ensuring
+  that the skill cannot be invoked without satisfying its governance
+  prerequisites.
+
+expect:
+  rules_applied: [G-PERM, G-DATA, G-BOUND]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A data-privacy ontology package defines 3 compliance activities that
+  must compile to governance-constrained skills: (1) data-inventory
+  requires G-DATA labels on all tools that access user data, generating
+  a skill that scans workspace tools and reports label coverage,
+  (2) access-review requires G-PERM grants for admin-level operations,
+  generating a skill that audits capability grants against role
+  assignments, (3) breach-response requires G-BOUND audit chain for
+  all R4+ tool invocations, generating a skill that validates audit
+  completeness for a given time window. Each generated skill must
+  carry its governance constraints as metadata so the skill runtime
+  can verify prerequisites before execution. A skill invoked without
+  its governance prerequisites being met must fail with a clear
+  diagnostic indicating which ontology constraint is unsatisfied.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Generating executable skills from ontology concepts crosses the
+      boundary between governance configuration and code generation.
+      The zero-footprint guarantee from S03 applies to governance rules
+      but may not apply to skills, which contain logic. The spec must
+      define whether ontology-generated skills are static configuration
+      (templates filled at compile time) or dynamic code (generated
+      TypeScript). If dynamic, the zero-footprint guarantee needs an
+      exception for skill generation.
+    spec_impact: "CL-06 Skill Generation -- clarify static-template vs dynamic-code boundary"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Governance constraints embedded in skills create a circular
+      dependency risk. The skill checks governance state, but governance
+      state includes skill availability. If a compliance-check skill
+      requires G-PERM but G-PERM is configured by the same ontology
+      that generates the skill, the compiler must break the cycle by
+      ordering: ontology lowers to rules first, then rules enable skill
+      generation. The lowering pipeline must enforce this ordering.
+    spec_impact: "CL-04 Pipeline Ordering -- ontology rules must lower before skill generation"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The skill runtime must verify governance prerequisites before
+      execution. This requires the skill to query GovernanceIR state
+      at invocation time, creating a runtime dependency on compiled
+      governance artifacts. If the governance artifacts are stale or
+      missing, the prerequisite check cannot run. The skill must fail
+      closed (refuse to execute) when governance state is unavailable,
+      not fail open (execute without checking).
+    spec_impact: "CL-07 Skill Runtime -- fail-closed prerequisite check when governance state unavailable"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The 3 generated skills produce different output types: data-inventory
+      produces a coverage report, access-review produces an audit log,
+      breach-response produces a timeline. The ontology must define the
+      output schema per compliance activity so generated skills produce
+      structured, machine-readable results. Unstructured text output
+      defeats the purpose of automated compliance.
+    spec_impact: "CL-06 Ontology Activities -- output_schema field per compliance activity"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Ontology-generated skills must be distinguishable from hand-authored
+      skills. A generated skill should carry a `generated_by` provenance
+      field linking it to the ontology concept and compiler version. This
+      enables fleet-wide skill audits that distinguish managed (generated)
+      skills from custom (hand-authored) skills, which have different
+      trust levels for compliance purposes.
+    spec_impact: "CL-06 Skill Provenance -- generated_by field with ontology concept and compiler version"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      If the enterprise updates the ontology package (new version of
+      data-privacy), the generated skills must be regenerated. But
+      existing skill invocation history references the old skill version.
+      The skill versioning strategy must support version continuity:
+      the new skill version inherits the invocation history of the old
+      version for compliance continuity. Alternatively, both versions
+      coexist with the old version deprecated.
+    spec_impact: "CL-07 Package Versioning -- skill version continuity across ontology updates"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The breach-response skill validates audit completeness for a time
+      window. This requires the skill to access historical audit data,
+      which may span multiple compilation cycles. The skill's governance
+      constraint (G-BOUND audit chain) ensures audit data exists, but
+      accessing historical data requires a query interface that the
+      generated skill must call. The ontology should define data access
+      patterns per activity, not just governance constraints.
+    spec_impact: "CL-06 Ontology Activities -- data_access_pattern field for historical queries"
+    pitfall: null

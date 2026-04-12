@@ -1,0 +1,163 @@
+name: S06-snapshot-integrity-verification
+series: snapshot-lifecycle
+version: 1
+specs: [CL-05]
+description: >
+  Validates snapshot integrity: a snapshot is saved, the underlying storage
+  is corrupted (bit-flip, partial file deletion, or manual tampering), and
+  snap restore detects the corruption before applying it. Snapshots used
+  for fleet baselines and dead man's switch safety MUST be tamper-evident.
+  A corrupted snapshot silently restored could put the workspace into an
+  unknown governance state.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      snapshot_name: tampered-baseline
+      snapshot_action: restore
+      integrity_check: failed
+    analysis:
+      rules_evaluated: false
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - step: "snap restore"
+      error: "snapshot integrity check failed: SHA-256 mismatch on claws.json"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet admin saves a baseline snapshot "tampered-baseline" and promotes
+  it. A month later, an automated process or manual error corrupts one
+  file in the snapshot storage (claws.json has a truncated JSON closing
+  brace). When a developer runs `claws snap restore tampered-baseline`,
+  the restore must detect the corruption BEFORE applying the files.
+  Restoring corrupted files would put the workspace in an unparseable
+  state. The integrity check uses SHA-256 hashes computed at save time
+  and stored in the snapshot manifest.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The spec does not mention integrity verification for snapshots.
+      Every snap save should compute a SHA-256 hash of each captured file
+      and store the hashes in a snapshot manifest. snap restore should
+      verify hashes before applying. Without integrity checks, corrupted
+      snapshots are silently restored, and the developer discovers the
+      problem only when pinch or build fails on malformed input.
+    spec_impact: "CL-05 snap save — mandatory SHA-256 integrity hash per file"
+    pitfall: P-195
+
+  - id: F02
+    severity: major
+    description: >
+      The integrity manifest itself must be protected. If an attacker can
+      modify both the snapshot files AND the manifest, they can make a
+      tampered snapshot pass integrity checks. The manifest should be
+      signed (HMAC-SHA256 with a workspace key or fleet key), not just
+      hashed. This aligns with CL-05's comply --sign pattern for
+      compliance evidence.
+    spec_impact: "CL-05 snap manifest — sign manifest with HMAC-SHA256, not just hash"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The dead man's switch relies on snap restore as the safety net. If
+      snap restore fails due to corruption, the dead man's switch is
+      broken — the upgrade failed AND the restore failed. The developer
+      is stuck with a partially-upgraded workspace and no rollback path.
+      The dead man's switch must have a secondary fallback: git stash,
+      git checkout, or a redundant snapshot copy.
+    spec_impact: "CL-05 Dead Man's Switch — secondary fallback if snap restore fails"
+    pitfall: P-196
+
+  - id: F04
+    severity: warning
+    description: >
+      The error message for integrity failure must follow the what/how/where
+      contract. "SHA-256 mismatch on claws.json" is the WHAT. The HOW
+      should be: "snapshot may be corrupted. Re-save from current workspace
+      state, or restore from an older snapshot." The WHERE should link to
+      docs on snapshot integrity and troubleshooting. The error must NOT
+      silently proceed with partial restore.
+    spec_impact: "CL-05 snap restore — integrity failure error message contract"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Integrity checks add latency to snap restore. For a snapshot with
+      9 files, SHA-256 computation is negligible (<1ms). But for fleet
+      baselines distributed to 50 workspaces, each workspace verifying
+      independently adds up. The integrity check should be mandatory for
+      restore but optional for read-only operations like diff and list.
+    spec_impact: "CL-05 snap — integrity check mandatory for restore, optional for read-only"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Fleet-promoted snapshots travel across machines/environments. The
+      transport layer (whatever it is) may introduce corruption: network
+      bit-flips, partial downloads, encoding changes. Integrity verification
+      is critical for promoted snapshots. The promote operation should
+      verify integrity after upload, and the receiving workspace should
+      verify after download. End-to-end integrity, not just at-rest.
+    spec_impact: "CL-05 snap promote — end-to-end integrity verification across transport"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      If a snapshot is corrupted, the admin needs to know WHEN the
+      corruption occurred. Was the snapshot saved correctly and later
+      corrupted (storage issue)? Or was the snapshot saved incorrectly
+      (bug in snap save)? The save operation should verify its own output
+      immediately after writing (read-after-write verification). This
+      catches save-time bugs before the snapshot is trusted.
+    spec_impact: "CL-05 snap save — read-after-write verification"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The snap verify subcommand is not in the spec but is implied by
+      the integrity model. `claws snap verify <name>` should check all
+      hashes without restoring, providing a non-destructive health check.
+      This is useful for periodic auditing of snapshot storage integrity
+      without actually changing the workspace state.
+    spec_impact: "CL-05 snap — add snap verify subcommand for non-destructive integrity check"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      Corruption detection covers accidental damage. Tamper detection
+      (intentional modification) requires signing, which is a stronger
+      guarantee. For enterprise deployments, signed snapshots may be
+      required for compliance (audit evidence must be tamper-evident).
+      The spec should distinguish corruption detection (hashing) from
+      tamper detection (signing) and offer both.
+    spec_impact: "CL-05 snap — distinguish corruption detection (hash) from tamper detection (sign)"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The SHA-256 algorithm choice aligns with the comply --sign HMAC-SHA256
+      from the CI/CD pipeline spec. Using the same algorithm across
+      snapshots and compliance evidence creates a consistent security
+      model. If a future version needs to upgrade to SHA-3 or BLAKE3,
+      the hash algorithm should be recorded in the snapshot manifest to
+      allow forward migration.
+    spec_impact: "CL-05 snap manifest — record hash algorithm for forward migration"
+    pitfall: null

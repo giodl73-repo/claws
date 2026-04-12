@@ -1,0 +1,118 @@
+name: S18-p127-rangeerror-systemic-failure
+series: pitfall-final-1
+version: 1
+specs: [CL-03]
+description: >
+  Validates that RangeError (stack overflow) in the governance engine is
+  classified as a systemic failure affecting ALL tools, not a per-tool failure.
+  Per-tool crash tracking must not misclassify systemic errors. If RangeError
+  occurs in the catch clause itself, the handler crashes completely.
+
+expect:
+  attack_class: systemic-governance-failure
+  defense_layer: L5-error-classification
+  blocked: true
+  audit_event:
+    type: systemic-failure-escalation
+    error_class: RangeError
+    scope: all-tools
+    escalation: immediate
+
+simulate:
+  failures:
+    - phase: runtime
+      type: stack-overflow
+      scope: all-tools
+      error: RangeError
+  halt: null
+  budget: null
+
+problem: >
+  The governance engine has a recursive rule evaluation that does not bound
+  recursion depth. A workspace with circular policy references triggers
+  infinite recursion. RangeError (stack overflow) fires. This is not
+  tool-specific — it affects ALL tool calls. The per-tool crash tracker
+  (P-126) records: "web-search: RangeError," "doc-reader: RangeError,"
+  "write-db: RangeError." It classifies each as an independent per-tool
+  failure. The systemic nature is missed. If the RangeError occurs in
+  the catch clause (riskMap lookup during stack exhaustion), the handler
+  crashes entirely and the Gateway's fail-open takes over for ALL tools.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Error classification taxonomy is required: RangeError = systemic
+      (affects all tools), TypeError = per-tool (argument-specific),
+      AbortError = timeout (per-call), SyntaxError = configuration
+      (affects tools in the misconfigured scope). The taxonomy drives
+      different escalation paths for each error class.
+    spec_impact: "CL-03 runtime — error classification taxonomy"
+    pitfall: P-127
+
+  - id: F02
+    severity: major
+    description: >
+      Correlated failure detection: if 3+ different tools fail with the
+      same error type within a time window (e.g., 10 seconds), the
+      failure is systemic, not per-tool. The detector switches from
+      per-tool tracking to systemic alert. The alert includes all
+      affected tools and the common error type.
+    spec_impact: "CL-03 runtime — correlated failure detection"
+    pitfall: P-127
+
+  - id: F03
+    severity: major
+    description: >
+      RangeError in the catch clause defeats all governance. The catch
+      clause must be minimal (P-109): only Map.get and nullish coalesce.
+      Map.get does not recurse and cannot trigger RangeError. The catch
+      clause is the last defense; it must not be vulnerable to the same
+      error class that triggered the try-block failure.
+    spec_impact: "CL-03 runtime — catch clause immune to RangeError"
+    pitfall: P-127
+
+  - id: F04
+    severity: major
+    description: >
+      Systemic failures require immediate escalation: not the 3-strikes
+      threshold of per-tool detection (P-126), but immediate alert on
+      first RangeError. Systemic errors bypass the crash counter and
+      escalate directly. The escalation path depends on the deployment
+      tier: L2 plugin emits stderr, L5 sidecar sends external alert.
+    spec_impact: "CL-03 runtime — immediate escalation for systemic errors"
+    pitfall: P-127
+
+  - id: F05
+    severity: warning
+    description: >
+      Prevention: the governance engine must bound recursion depth for
+      rule evaluation. A maximum recursion depth (e.g., 100) with a
+      clear error message ("rule evaluation exceeded maximum depth,
+      possible circular policy reference") prevents the RangeError
+      from occurring in the first place.
+    spec_impact: "CL-03 runtime — bounded rule evaluation recursion"
+    pitfall: P-127
+
+  - id: F06
+    severity: warning
+    description: >
+      The sidecar (L5) can detect the Gateway's overall health by
+      monitoring tool call success rates. A sudden drop from 99% to 0%
+      (all tools failing) is a systemic failure signal. The sidecar
+      does not need error classification; the aggregate failure rate
+      is sufficient for systemic detection.
+    spec_impact: "CL-03 L5 sidecar — aggregate failure rate monitoring"
+    pitfall: P-127
+
+  - id: F07
+    severity: note
+    description: >
+      The Gateway's fail-open default after RangeError-in-catch is the
+      catastrophic scenario: all tools execute ungoverned. This is the
+      same failure mode as P-109 (catch clause crash) but triggered by
+      a different root cause (stack exhaustion vs malformed toolName).
+      The defense is the same: catch clause minimalism with pre-computed
+      ReadonlyMap.
+    spec_impact: "CL-03 runtime — shared defense with P-109"
+    pitfall: P-127

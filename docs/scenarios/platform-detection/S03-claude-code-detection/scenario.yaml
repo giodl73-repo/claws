@@ -1,0 +1,152 @@
+name: S03-claude-code-detection
+series: platform-detection
+version: 1
+specs: [CL-01]
+description: >
+  Validates that a workspace containing CLAUDE.md is detected as the Claude
+  Code platform with definitive confidence. Claude Code is semi-enforced:
+  governance compiles to CLAUDE.md instructions plus .claude/settings.json
+  configuration. Default trust tier is T2 reflecting partial enforcement
+  through settings.json tool restrictions.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      platform_detected: claude
+      detection_confidence: definitive
+      detection_source: marker_file
+      marker: CLAUDE.md
+      default_trust_tier: 2
+      enforcement: semi-enforced
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace contains CLAUDE.md and claws.json with no explicit `platform`
+  field. The detection logic must: (1) find CLAUDE.md and identify the
+  platform as Claude Code, (2) set default trust tier to T2, (3) configure
+  the emission pipeline for semi-enforced output (CLAUDE.md governance section
+  plus .claude/settings.json tool restrictions). The "semi-enforced" model
+  means some governance is advisory (CLAUDE.md instructions) while some is
+  enforced (settings.json blocks or allows specific tools).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Claude Code has a dual enforcement model: CLAUDE.md is advisory (LLM
+      instructions, like Cursor) while .claude/settings.json provides
+      machine-enforced tool restrictions (allow/deny lists). The compiler
+      must emit to BOTH surfaces: governance instructions in CLAUDE.md AND
+      tool restrictions in settings.json. If only CLAUDE.md is emitted,
+      enforcement degrades to advisory-only.
+    spec_impact: "CL-04 EMIT — Claude Code dual-surface emission (CLAUDE.md + settings.json)"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      CLAUDE.md is both a source file for detection AND a target for emission.
+      Unlike Cursor's .cursorrules, CLAUDE.md often contains extensive
+      project-specific instructions that MUST NOT be modified. The emission
+      must use delimiter-based section management (same as Cursor) but the
+      risk of accidentally overwriting user content is higher because
+      CLAUDE.md files tend to be larger and more structured (with headings,
+      code blocks, etc.).
+    spec_impact: "CL-04 EMIT — delimiter safety for CLAUDE.md section injection"
+    pitfall: P-238
+
+  - id: F03
+    severity: warning
+    description: >
+      .claude/settings.json already exists in many Claude Code workspaces
+      with user-configured tool restrictions. The emit phase must MERGE
+      claws-generated restrictions with existing user restrictions, not
+      overwrite the file. If the user allows "bash" in settings.json and
+      claws wants to deny "bash" (R4 tool in T2 workspace), the merge must
+      resolve the conflict with governance-first priority (deny wins).
+    spec_impact: "CL-04 EMIT — settings.json merge strategy with governance-first conflict resolution"
+    pitfall: P-239
+
+  - id: F04
+    severity: warning
+    description: >
+      Claude Code settings.json has a specific schema controlled by Anthropic.
+      claws must emit settings.json entries that conform to the current
+      schema version. If the schema changes (new fields, renamed fields),
+      claws's emission breaks. The emit phase should validate generated
+      settings.json against the known schema version and warn if the schema
+      version is unrecognized.
+    spec_impact: "CL-01 Cross-Compile Targets — Claude Code settings.json schema version tracking"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      CLAUDE.md is not one of the 9 OC workspace files — the lossless
+      guarantee for the 9 OC files does not protect CLAUDE.md. But for a
+      Claude Code workspace, CLAUDE.md IS the primary developer-facing file.
+      Modifying it without clear delimitation feels like a lossless violation
+      to the developer even though it technically is not. The UX must make
+      the modification visible: `claws build` should report "Injected
+      governance section into CLAUDE.md (lines 45-67)" so the developer
+      knows what changed.
+    spec_impact: "CL-05 Maker Experience — build output reports modifications to platform config files"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Claude Code workspaces may have CLAUDE.md at the repository root or
+      in subdirectories (.claude/CLAUDE.md). The detection logic must scan
+      for CLAUDE.md at the workspace root only, not recursively. A CLAUDE.md
+      in a subdirectory (e.g., docs/CLAUDE.md) should not trigger Claude
+      Code detection. The OC workspace concept is rooted at a specific
+      directory.
+    spec_impact: "CL-01 Platform Detection Matrix — root-only marker file scanning"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Claude Code supports MCP (Model Context Protocol) servers that extend
+      tool capabilities. MCP tools may not appear in a static TOOLS.md but
+      are available at runtime. The detection logic correctly identifies
+      Claude Code, but the governance pipeline may miss MCP-provided tools.
+      A future integration point: detect .claude/mcp.json or similar MCP
+      configuration and include MCP tools in the governance analysis.
+    spec_impact: "CL-01 Platform Detection Matrix — MCP tool discovery for Claude Code governance"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The semi-enforced model means T2 default trust tier allows R3 tools.
+      But settings.json enforcement is binary (allow/deny), not risk-graded.
+      There is no "allow with confirmation" in settings.json. For R3-R4
+      tools that should require confirmation (not denial), the enforcement
+      model degrades to advisory (CLAUDE.md says "ask before using") without
+      machine enforcement. The T2 default may be overly optimistic for the
+      actual enforcement capability.
+    spec_impact: "CL-01 Platform Detection Matrix — Claude Code enforcement capability vs trust tier alignment"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      A workspace with both CLAUDE.md and SOUL.md is both Claude Code and
+      OpenClaw. This scenario is relevant for the Craftworks monorepo
+      itself, which has CLAUDE.md for developer instructions and could
+      hypothetically have SOUL.md for agent governance. Multi-platform
+      detection must handle this without confusion: build for each platform
+      produces different artifacts.
+    spec_impact: "CL-01 Platform Detection Matrix — CLAUDE.md + SOUL.md coexistence"
+    pitfall: null

@@ -1,0 +1,143 @@
+name: S03-governance-badge-assignment
+series: skill-lifecycle
+version: 1
+specs: [CL-05]
+description: >
+  Validates that a skill with R3/OBO:none/INTERNAL governance frontmatter
+  receives the correct ClawHub badge. Badge assignment must reflect the
+  actual governance state (risk level, OBO status, supply chain verification,
+  and adoption tier), not aspirational or self-declared security claims.
+
+expect:
+  artifacts:
+    - type: badge
+      risk: R3
+      obo: none
+      data: INTERNAL
+      tier: DECLARED
+      supply_chain: unsigned
+  plugin_hooks: null
+  skill_content:
+    badge_assigned: true
+    badge_fields_accurate: true
+  approvals: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A skill has SKILL.md with governance frontmatter: risk: R3, obo: none,
+  data: INTERNAL. The skill is at DECLARED tier (frontmatter only, no
+  decorators or build). The developer runs `claws publish` to publish to
+  ClawHub. The publish step must compute the correct badge metadata: R3
+  risk level, no OBO capability, INTERNAL data sensitivity, DECLARED tier,
+  and unsigned supply chain (no .claws-manifest signature). The badge must
+  be factual — it reports governance state, not governance quality.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      ClawHub badges must distinguish between self-declared governance
+      (DECLARED tier, unverified) and compiler-verified governance (VERIFIED
+      tier, signed manifest). A DECLARED badge means "the developer claims
+      R3" while a VERIFIED badge means "claws confirmed R3 through analysis."
+      If badges do not clearly communicate this distinction, consumers may
+      trust DECLARED skills as if they were VERIFIED.
+    spec_impact: "CL-05 ClawHub Governance Badges — visual distinction between DECLARED and VERIFIED"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The badge shows "obo: none" but the skill handler might actually call
+      email APIs at runtime. At DECLARED tier, OBO is self-reported and
+      unverified. The badge should include a "self-reported" qualifier for
+      DECLARED-tier skills. At VERIFIED tier, the 12 governance checks in
+      @bic/claws-test validate OBO declarations against actual behavior, so
+      the badge can drop the qualifier.
+    spec_impact: "CL-05 ClawHub Governance Badges — self-reported qualifier for DECLARED tier"
+    pitfall: P-226
+
+  - id: F03
+    severity: warning
+    description: >
+      Supply chain status in the badge depends on whether `claws publish`
+      was used (which signs the manifest) or the skill was published via
+      raw `clawhub publish` (no signature). If a skill bypasses `claws publish`,
+      it may have governance frontmatter but no supply chain verification.
+      The badge must show "unsigned" for skills without a .claws-manifest
+      signature, regardless of their governance frontmatter completeness.
+    spec_impact: "CL-05 ClawHub Governance Badges — supply chain badge independent of governance tier"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Badge assignment happens at publish time, but governance state can
+      change after publication (developer modifies SKILL.md frontmatter,
+      new version published without re-verification). ClawHub must either
+      re-validate badges on each download or mark badges with a "verified
+      as of version X" timestamp. Stale badges showing VERIFIED for a
+      since-modified skill are misleading.
+    spec_impact: "CL-05 ClawHub Governance Badges — badge staleness and re-validation policy"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The data sensitivity field (PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED)
+      affects enterprise install policies. A skill declaring data: PUBLIC but
+      actually processing RESTRICTED data creates a policy bypass. At DECLARED
+      tier, data classification is unverified. Enterprise install policies
+      should require TYPED or VERIFIED tier for skills handling CONFIDENTIAL
+      or RESTRICTED data, since only compiler analysis can validate data
+      flow labels.
+    spec_impact: "CL-05 Three-Tier Adoption — data sensitivity requires higher tier for enterprise trust"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Badge rendering must handle edge cases: a skill with risk: R1 and
+      obo: transact is contradictory (R1 is READ, transact implies R5).
+      The badge should flag this inconsistency rather than displaying
+      contradictory metadata. The badge rendering logic needs access to
+      the risk-OBO consistency rules from CL-02.
+    spec_impact: "CL-05 ClawHub Governance Badges — inconsistent governance metadata display"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Badge colors or icons must be accessible (not just color-coded for
+      risk level). R1-green through R5-red is useful but insufficient for
+      color-blind users. Badges should include text labels (R1, R2, etc.)
+      in addition to color coding.
+    spec_impact: "CL-05 ClawHub Governance Badges — accessibility requirements for badge rendering"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The `claws publish` command wraps `clawhub publish` and injects badge
+      metadata. If `clawhub publish` adds its own metadata fields that
+      conflict with claws badge fields (e.g., both define a "security" key),
+      the publish fails or metadata is overwritten. The integration point
+      between claws and clawhub must have a defined namespace boundary for
+      metadata fields.
+    spec_impact: "CL-05 Maker Experience — claws/clawhub metadata namespace boundary"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      Multiple skills in the same workspace may have different governance
+      tiers. Skill A at VERIFIED and Skill B at DECLARED means the workspace
+      governance is mixed. Fleet scanning should report the workspace's
+      lowest-tier skill as the effective workspace tier, since a single
+      ungoverned skill compromises the overall governance posture.
+    spec_impact: "CL-05 Three-Tier Adoption — workspace-level tier as minimum of skill tiers"
+    pitfall: null

@@ -1,0 +1,122 @@
+name: S05-fleet-identity-operations
+series: identity-bridge
+version: 1
+specs: [CL-02, CL-07]
+description: >
+  Validates identity-scoped fleet operations. An admin authenticates
+  and sees all 100 workspaces in the fleet. An editor authenticates
+  and sees only the 5 workspaces where they have editor or higher role.
+  Fleet commands filter results by the authenticated user's workspace
+  role assignments, enforcing identity-aware visibility boundaries.
+
+expect:
+  attack_class: information-disclosure
+  defense_layer: identity-scoped-fleet-visibility
+  blocked: true
+  audit_event: FLEET-VISIBILITY-SCOPE-APPLIED
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise fleet has 100 workspaces. Users have workspace-specific
+  role assignments: user-alice has admin role on all 100 (fleet admin),
+  user-bob has editor role on 5 workspaces (team member). When alice
+  runs `claws fleet scan`, she sees all 100 workspaces with full details
+  (governance state, drift status, tool inventory). When bob runs the
+  same command, he sees only the 5 workspaces where he has editor or
+  higher role. Workspaces where bob has no role are invisible -- not
+  redacted, not summarized, completely absent from the output. This
+  prevents information disclosure: bob should not know that workspace-
+  secret-project exists, even as a redacted entry. The fleet command
+  must resolve the user's identity, query workspace role assignments,
+  filter the fleet inventory, and produce identity-scoped results.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Identity-scoped fleet visibility requires the fleet command to
+      authenticate the user before executing. If fleet commands run
+      without authentication (e.g., local CLI with no SSO session), the
+      default should be zero visibility (no workspaces shown), not full
+      visibility. The fail-closed principle means unauthenticated fleet
+      access shows nothing, forcing the user to authenticate first.
+    spec_impact: "CL-02 Fleet Identity -- zero visibility for unauthenticated fleet access"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The workspace role assignment lookup is a fleet-level operation.
+      If role assignments are stored per-workspace (in each workspace's
+      claws.json), the fleet command must read all 100 claws.json files
+      to determine bob's visibility. This is O(n) on fleet size and
+      requires read access to all workspaces (which bob might not have).
+      A fleet-level identity index (mapping user -> workspace -> role)
+      is needed for efficient, permission-safe visibility resolution.
+    spec_impact: "CL-05 Fleet Identity -- centralized identity index for O(1) visibility resolution"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Complete absence of invisible workspaces means the fleet command
+      output varies by user. This makes fleet command output non-
+      deterministic for testing: the same command produces different
+      results depending on who runs it. Test harnesses must support
+      identity injection (run-as-user) to produce deterministic output.
+      The CLI should support --as-identity for admin testing of another
+      user's visibility scope.
+    spec_impact: "CL-05 Fleet CLI -- --as-identity flag for admin visibility scope testing"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The count itself may be sensitive. If bob sees "5 of 100 workspaces"
+      he knows the fleet has 100 workspaces. The total count should also
+      be scoped: bob sees "5 workspaces" without knowing the fleet total.
+      Fleet aggregates (total workspaces, total tools, compliance percentage)
+      are admin-only information. Non-admin users see only aggregates
+      within their visibility scope.
+    spec_impact: "CL-05 Fleet Visibility -- scope aggregates to visible workspaces only"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Fleet drift reports for non-admin users must be scoped too. If bob
+      has editor role on 5 workspaces and 2 have drift, bob sees "2 of 5
+      workspaces drifted." Bob cannot see whether the other 95 workspaces
+      have drift. This scoped view is less useful for fleet-wide compliance
+      assessment but necessary for information boundaries. Admin-level
+      drift reports are the authoritative fleet compliance view.
+    spec_impact: "CL-05 Fleet Drift -- identity-scoped drift reports with admin-only fleet-wide view"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Identity caching affects visibility freshness. If bob's role
+      assignment is cached from a previous authentication, and his role
+      is revoked between cache and current command, he sees workspaces
+      he should no longer access. The identity cache TTL must be short
+      (minutes, not hours) and the fleet command should support --no-cache
+      to force fresh identity resolution for security-sensitive operations.
+    spec_impact: "CL-02 Identity Caching -- short TTL with --no-cache option for fresh resolution"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The FLEET-VISIBILITY-SCOPE-APPLIED event is logged when the fleet
+      command applies identity scoping. This event should be audit-logged
+      even for admin users (who see all workspaces), recording that the
+      full fleet was visible. This creates an audit trail of who accessed
+      fleet-wide information and when, which is valuable for insider
+      threat detection.
+    spec_impact: "CL-02 Fleet Audit -- log FLEET-VISIBILITY-SCOPE-APPLIED for all users including admins"
+    pitfall: null

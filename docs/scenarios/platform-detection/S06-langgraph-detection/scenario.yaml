@@ -1,0 +1,149 @@
+name: S06-langgraph-detection
+series: platform-detection
+version: 1
+specs: [CL-01]
+description: >
+  Validates that a workspace containing langgraph.json is detected as the
+  LangGraph platform with definitive confidence. LangGraph supports runtime
+  enforcement through Python guard decorators on graph nodes. Default trust
+  tier is T2 reflecting decorator-based enforcement capability.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      platform_detected: langgraph
+      detection_confidence: definitive
+      detection_source: marker_file
+      marker: langgraph.json
+      default_trust_tier: 2
+      enforcement: runtime
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace contains langgraph.json (the LangGraph configuration file that
+  defines graph structure, node definitions, and state schema) and claws.json
+  with no explicit `platform` field. The detection logic must: (1) find
+  langgraph.json and identify the platform as LangGraph, (2) set default trust
+  tier to T2, (3) configure emission for Python guard decorator output. The
+  emit phase generates Python decorators that wrap LangGraph node functions
+  with governance checks.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      LangGraph is a Python framework, but claws emits TypeScript by default
+      (for OC). The Bedrock emit phase generates JSON. The LangGraph emit
+      phase must generate Python code — decorators, guard functions, and
+      configuration YAML. This is the first Python code generation target
+      for claws. The emit phase architecture must support multiple output
+      languages, not just TypeScript and JSON.
+    spec_impact: "CL-04 EMIT — multi-language code generation architecture (TypeScript, Python, JSON, YAML)"
+    pitfall: P-241
+
+  - id: F02
+    severity: major
+    description: >
+      LangGraph guard decorators wrap node functions:
+      `@claws_guard(risk=3, obo="email")`. The decorator must be importable
+      from a claws Python package. This means claws needs a Python package
+      (@claws/guard or pip install claws-guard) in addition to the npm
+      packages. CL-06 (Platform Ecosystem) should define the Python package,
+      but CL-01 must acknowledge that Python output implies a Python
+      dependency.
+    spec_impact: "CL-06 Platform Ecosystem — Python guard package for LangGraph and CrewAI"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      langgraph.json defines graph structure (nodes, edges, state). The
+      claws compiler could parse langgraph.json to discover tool usage
+      patterns and node risk levels without requiring separate governance
+      files. This is a LangGraph-native parsing path that supplements
+      the 9 OC workspace files. But the parse logic for langgraph.json
+      is platform-specific and should not pollute the generic pipeline.
+    spec_impact: "CL-04 PARSE — platform-specific supplementary parsing for LangGraph"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      LangGraph supports human-in-the-loop (HITL) nodes natively. The
+      governance injection for R4-R5 tools (elicitation, approval) can
+      leverage LangGraph's built-in HITL mechanisms instead of generating
+      custom code. The emit phase should detect existing HITL nodes in
+      langgraph.json and wire governance elicitation through them rather
+      than creating parallel approval mechanisms.
+    spec_impact: "CL-04 EMIT — LangGraph HITL integration for governance elicitation"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Python guard decorators have runtime overhead. LangGraph graphs
+      can execute thousands of node invocations per second in streaming
+      workflows. The guard decorator must be lightweight (<5ms per
+      invocation) to avoid degrading LangGraph performance. The TypeScript
+      hook timeout (50ms default, 500ms max) may not translate to Python
+      — Python async overhead is different. Platform-specific performance
+      budgets are needed.
+    spec_impact: "CL-04 EMIT — platform-specific performance budgets for guard code"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      LangGraph uses LangChain tools, which have their own tool definition
+      format (BaseTool, StructuredTool, @tool decorator). The tool names
+      and capabilities in LangChain's tool registry may not match TOOLS.md
+      entries. The compiler must bridge between claws's tool model
+      (TOOLS.md with R1-R5 risk) and LangChain's tool model (BaseTool
+      with description and schema). Tool name normalization must handle
+      Python naming conventions (snake_case) vs claws conventions (kebab-case).
+    spec_impact: "CL-04 EXTRACT — LangChain tool model bridging for LangGraph platform"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      langgraph.json may not exist in all LangGraph projects. Some projects
+      define graphs programmatically in Python without a JSON configuration
+      file. The detection confidence is "definitive" only when langgraph.json
+      exists. A LangGraph project without langgraph.json requires explicit
+      `platform: langgraph` in claws.json, similar to Bedrock's explicit-
+      only requirement.
+    spec_impact: "CL-01 Platform Detection Matrix — LangGraph without langgraph.json requires explicit platform"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      LangGraph supports both Python and JavaScript (langgraph.js). If the
+      workspace uses langgraph.js (with a langgraph.json that references JS
+      files), the emit phase must generate JavaScript/TypeScript decorators
+      instead of Python decorators. The langgraph.json content (not just its
+      presence) determines the output language. This is a detection refinement
+      that goes beyond marker-file presence.
+    spec_impact: "CL-01 Platform Detection Matrix — LangGraph JS vs Python distinction from config content"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      LangGraph Cloud (LangSmith deployment) has its own security and
+      governance features. claws's governance overlay complements but
+      should not conflict with LangGraph Cloud's built-in governance.
+      The emit phase should detect LangGraph Cloud configuration and
+      adjust governance output to avoid duplication.
+    spec_impact: "CL-04 EMIT — LangGraph Cloud governance deduplication"
+    pitfall: null

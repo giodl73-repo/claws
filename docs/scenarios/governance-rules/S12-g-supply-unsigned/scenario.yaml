@@ -1,0 +1,101 @@
+name: S12-g-supply-unsigned
+series: governance-rules
+version: 1
+specs: [CL-02]
+description: >
+  Validates G-SUPPLY rule: skills from external sources (ClawHub marketplace)
+  must be signed. An unsigned skill produces a warning. The supply chain
+  governance rule addresses the 37% malicious skill rate in the ecosystem.
+
+expect:
+  rules_applied: [G-SUPPLY]
+  violations: []
+  pass: true
+  severity: warning
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  skills/ contains a skill downloaded from ClawHub marketplace. The skill's
+  SKILL.md has no signature metadata (no `signed-by`, no `signature` field,
+  no `.sig` sidecar file). G-SUPPLY must detect the unsigned skill and emit
+  a warning. The warning does not block compilation (the skill may be
+  legitimate) but flags the supply chain risk for the workspace operator.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      37% malicious skill rate means more than 1 in 3 marketplace skills are
+      hostile. A warning may not be sufficient — enterprise deployments may
+      need G-SUPPLY to be an error. Configurable severity (warning for dev,
+      error for production) should be supported via claws.json.
+    spec_impact: "CL-02 G-SUPPLY — configurable severity per environment"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Skill signing requires a public key infrastructure for verification.
+      If the workspace has no trusted key store (no .claws/keys/ with
+      marketplace public keys), even signed skills cannot be verified. The
+      rule should check for both: skill has signature AND workspace can
+      verify it.
+    spec_impact: "CL-02 G-SUPPLY — signature verification prerequisites"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      A skill could be signed by an unknown publisher (valid signature but
+      untrusted signer). G-SUPPLY should differentiate: unsigned (no signature
+      at all), signed-untrusted (valid signature, unknown signer), and
+      signed-trusted (valid signature, known signer). Three tiers of supply
+      chain trust.
+    spec_impact: "CL-02 G-SUPPLY — three-tier trust classification"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The 824+ known malicious skills (CL-02 threat landscape) suggests a
+      blocklist exists. G-SUPPLY should check against a known-malicious
+      skills database, not just signing status. An unsigned-but-legitimate
+      skill is less dangerous than a signed-but-malicious skill from a
+      compromised publisher.
+    spec_impact: "CL-02 G-SUPPLY — malicious skill blocklist integration"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      SKILL.md is a markdown file with governance instructions. The signing
+      must cover the entire skill directory (SKILL.md + any supporting files),
+      not just the SKILL.md text. A skill with a signed SKILL.md but unsigned
+      supporting code could be tampered with.
+    spec_impact: "CL-02 G-SUPPLY — whole-directory signing scope"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The SOC2 control CC9 (Supply Chain) maps to G-SUPPLY. The compliance
+      evidence generator must include skill signing status in the evidence
+      package. A workspace using unsigned skills cannot satisfy CC9 "Full"
+      — it would be "partially-satisfied" at best.
+    spec_impact: "CL-02 compliance — G-SUPPLY SOC2 CC9 mapping"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Skills may be updated on the marketplace after installation. A skill
+      that was signed at installation time may have been revoked since. The
+      compile-time check validates the signature at build time, but a runtime
+      or periodic check (three-ring outer ring) should verify ongoing
+      signature validity.
+    spec_impact: "CL-05 three-ring — skill signature staleness detection"
+    pitfall: "P-004"

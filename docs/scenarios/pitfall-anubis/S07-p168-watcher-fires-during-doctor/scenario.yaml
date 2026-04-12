@@ -1,0 +1,154 @@
+name: S07-p168-watcher-fires-during-doctor
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that the inner ring watcher pauses during middle ring operations
+  like doctor --fix (P-168). When doctor --fix modifies workspace files as
+  part of a migration, the inner ring watcher detects these modifications and
+  fires pinch recompilation against intermediate file states, producing false
+  violations that confuse the user and may trigger false alerts.
+
+expect:
+  governance_ir:
+    version: 1
+    watcher_paused: true
+    false_violations: 0
+    doctor_complete: true
+  violations: []
+  warnings:
+    - code: CLAWS-W110
+      message: "Inner ring paused during doctor --fix — resumed after completion"
+  artifacts:
+    - name: governance-ir.json
+      status: recompiled-post-doctor
+
+simulate:
+  failures:
+    - component: inner-ring
+      type: watcher-fires-during-fix
+      error: "Watcher detects AGENTS.md modification mid-fix — triggers pinch on partial state"
+    - component: inner-ring
+      type: false-violation
+      error: "Pinch reports R5 tool ungoverned — fix step 3/6 removed old rule before step 4 adds new one"
+  halt: null
+  budget: null
+
+problem: >
+  The developer runs `claws doctor --fix` which applies 6 sequential fixes to
+  workspace files. Fix step 3 removes a deprecated governance rule from
+  RULES.md. Fix step 4 adds the replacement rule in the new format. Between
+  steps 3 and 4, the inner ring watcher detects the RULES.md modification and
+  triggers an immediate pinch recompilation. The intermediate state (old rule
+  removed, new rule not yet added) produces a GovernanceIR where tool
+  "deploy-production" has no governance rule. The sidecar receives this IR and
+  raises a CRITICAL alert: "R5 tool ungoverned." The developer sees the alert,
+  panics, and aborts doctor --fix, leaving the workspace in a partially-fixed
+  state that is genuinely broken.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-168 core: The inner ring watcher must implement a pause/resume
+      protocol. Before any middle ring operation (doctor --fix, upgrade,
+      snap restore), the middle ring acquires a pause token. The inner
+      ring checks for an active pause token before processing file events.
+      While paused, events are queued. On resume, queued events trigger
+      a single consolidated recompilation.
+    spec_impact: "CL-05 G-CONCURRENCY — inner ring pause/resume protocol"
+    pitfall: "P-168"
+
+  - id: F02
+    severity: major
+    description: >
+      The pause token must be durable: if doctor --fix crashes mid-
+      operation, the pause token must be automatically released after
+      a timeout (30 seconds). Otherwise, a crashed doctor leaves the
+      inner ring permanently paused, and the watcher never fires again.
+      The pause token should be a file (.claws/watcher-pause.lock) with
+      a creation timestamp — the watcher ignores tokens older than 30
+      seconds.
+    spec_impact: "CL-05 G-CONCURRENCY — pause token timeout and durability"
+    pitfall: "P-168"
+
+  - id: F03
+    severity: major
+    description: >
+      The false violation from intermediate state is dangerous because
+      the sidecar cannot distinguish a real violation from a transient
+      one. The sidecar must respect the pause token too: if a pause
+      token is active, the sidecar should hold alerts for the pause
+      duration rather than firing immediately. This prevents panic
+      alerts during maintenance operations.
+    spec_impact: "CL-03 sidecar — pause-aware alert suppression"
+    pitfall: "P-168"
+
+  - id: F04
+    severity: major
+    description: >
+      The consolidated recompilation on resume must process all queued
+      events as a batch: if 6 files changed during the pause, the
+      recompilation uses the final state of all 6 files, not 6
+      sequential recompilations. This is both correct (avoids
+      intermediate states) and efficient (one compile vs six).
+    spec_impact: "CL-05 G-CONCURRENCY — batch recompilation on resume"
+    pitfall: "P-168"
+
+  - id: F05
+    severity: major
+    description: >
+      The developer's abort reaction is predictable: a CRITICAL alert
+      during a fix operation looks like the fix caused damage. The
+      UX for doctor --fix must explicitly inform the user that the
+      inner ring is paused: "Inner ring watcher paused — violations
+      suppressed during fix. Will recompile on completion." This
+      sets expectations and prevents panic.
+    spec_impact: "CL-05 doctor — pause notification in fix output"
+    pitfall: "P-168"
+
+  - id: F06
+    severity: warning
+    description: >
+      Other middle ring operations that modify workspace files must
+      also acquire the pause token: snap restore, fleet overlay apply,
+      and schema migration. Any operation that produces intermediate
+      file states visible to the watcher needs the same protection.
+      The pause protocol must be a shared utility, not duplicated per
+      command.
+    spec_impact: "CL-05 G-CONCURRENCY — shared pause protocol for all middle ring ops"
+    pitfall: "P-168"
+
+  - id: F07
+    severity: warning
+    description: >
+      Race condition on the pause token itself: if doctor --fix and
+      snap restore both try to acquire the token simultaneously, one
+      must wait. The token acquisition must be exclusive (only one
+      middle ring operation at a time). This serializes middle ring
+      operations, which is correct because concurrent middle ring
+      operations on the same workspace are undefined behavior.
+    spec_impact: "CL-05 G-CONCURRENCY — exclusive middle ring operation lock"
+    pitfall: "P-168"
+
+  - id: F08
+    severity: warning
+    description: >
+      The event queue during pause must have a bounded size: if the
+      pause lasts 30 seconds and the editor generates 1000 file events,
+      the queue should deduplicate by file path (only the latest event
+      per path matters). An unbounded queue could consume excessive
+      memory during long operations.
+    spec_impact: "CL-05 G-CONCURRENCY — bounded deduplicated event queue"
+    pitfall: "P-168"
+
+  - id: F09
+    severity: note
+    description: >
+      Telemetry for the pause/resume protocol: record pause duration,
+      number of events queued, and recompilation time on resume. If
+      pauses are consistently long (>10 seconds), the doctor --fix
+      performance may need optimization to reduce the window where
+      the inner ring is blind.
+    spec_impact: "CL-05 G-CONCURRENCY — pause protocol telemetry"
+    pitfall: "P-168"

@@ -1,0 +1,139 @@
+name: S24-p185-case-agent-name-collision
+series: pitfall-anubis
+version: 1
+specs: [CL-02, CL-05]
+description: >
+  Validates that agent name collision detection is case-insensitive. Names
+  like "finance-bot" and "Finance-Bot" must be detected as a collision,
+  preventing A2A routing ambiguity in fleet communication.
+
+expect:
+  workspaces:
+    total: 4
+    agents_total: 8
+    name_collisions: 1
+  drift_count: 0
+  broadcast_result: null
+  compliance:
+    collision_detected: true
+    collision_agents:
+      - name_a: "finance-bot"
+        workspace_a: workspace-alpha
+        name_b: "Finance-Bot"
+        workspace_b: workspace-beta
+        collision_type: case-insensitive
+
+simulate:
+  failures:
+    - component: a2a-identity
+      type: case-collision
+      error: "Agent names 'finance-bot' (workspace-alpha) and 'Finance-Bot' (workspace-beta) collide case-insensitively"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet has 4 workspaces. Workspace-alpha declares an agent "finance-bot"
+  that processes financial reports. Workspace-beta independently declares an
+  agent "Finance-Bot" (capital F and B) that handles a different financial
+  workflow. The fleet scan runs case-sensitive collision detection and finds
+  no conflicts. A2A routing receives a message for "finance-bot" from
+  workspace-gamma. The routing layer normalizes the name to lowercase for
+  lookup, matching workspace-alpha's agent. A separate message targeting
+  "Finance-Bot" is also normalized to "finance-bot" and routes to
+  workspace-alpha instead of workspace-beta. Workspace-beta's agent
+  never receives messages, and workspace-alpha's agent receives messages
+  intended for a different workflow.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-02 G-A2A-IDENTITY must mandate case-insensitive agent name collision
+      detection at both workspace and fleet level. During pinch, if two agents
+      within a workspace have names that differ only by case, it must be a
+      hard error. During fleet scan, if two agents across workspaces have
+      names that differ only by case, it must be a warning (fleet admin
+      can resolve by renaming one).
+    spec_impact: "CL-02 G-A2A-IDENTITY — case-insensitive collision detection"
+    pitfall: P-185
+
+  - id: F02
+    severity: major
+    description: >
+      Agent names should be normalized to a canonical form (lowercase) at
+      parse time. The original casing should be preserved for display, but
+      all identity operations (collision detection, routing, delegation
+      references) must use the normalized form. This ensures consistency
+      regardless of how the name was typed in AGENTS.md.
+    spec_impact: "CL-02 G-A2A-IDENTITY — canonical name normalization"
+    pitfall: P-185
+
+  - id: F03
+    severity: major
+    description: >
+      A2A routing must use the normalized name for message delivery. If a
+      message targets "Finance-Bot", the routing layer must normalize to
+      "finance-bot" and then check for collisions. If multiple agents match
+      the normalized name, routing must refuse delivery with an error:
+      "Ambiguous agent name 'finance-bot' — 2 agents match after case
+      normalization. Resolve the collision before sending messages."
+    spec_impact: "CL-02 G-A2A-IDENTITY — collision-aware routing"
+    pitfall: P-185
+
+  - id: F04
+    severity: major
+    description: >
+      The GovernanceIR must store agent names in their original casing AND
+      their normalized form. The original casing is needed for display and
+      audit trails. The normalized form is needed for collision detection
+      and routing. Having both forms prevents repeated normalization at
+      runtime and makes the collision detection explicit in the IR.
+    spec_impact: "CL-04 Compilation Pipeline — dual-form agent name in IR"
+    pitfall: P-185
+
+  - id: F05
+    severity: warning
+    description: >
+      Beyond case sensitivity, the collision detection should consider
+      Unicode normalization. Names like "finance-bot" (ASCII hyphen) and
+      "finance\u2010bot" (Unicode hyphen) should also collide. Similarly,
+      homoglyph attacks ("finance-bot" with Cyrillic 'a') should be
+      detected. The collision detection should use NFKC normalization
+      plus confusable detection per Unicode TR39.
+    spec_impact: "CL-02 G-A2A-IDENTITY — Unicode normalization and confusables"
+    pitfall: P-185
+
+  - id: F06
+    severity: warning
+    description: >
+      Fleet scan collision output must include resolution guidance. For each
+      collision, the output should suggest: "Rename one of the agents to
+      avoid ambiguity. Recommended: prefix with workspace name (alpha-finance-
+      bot, beta-finance-bot). Use `claws fleet rename-agent --workspace beta
+      --from 'Finance-Bot' --to 'beta-finance-bot'` to rename."
+    spec_impact: "CL-05 Fleet Scan — collision resolution guidance"
+    pitfall: P-185
+
+  - id: F07
+    severity: warning
+    description: >
+      The fleet template should support agent name namespacing:
+      `fleet.agentNamespace: true` would prepend workspace names to all
+      agent identities automatically. Under namespacing, "finance-bot" in
+      workspace-alpha becomes "alpha/finance-bot" and cannot collide with
+      "beta/Finance-Bot". Namespacing eliminates collisions by construction
+      rather than by detection.
+    spec_impact: "CL-05 Fleet Template — automatic agent name namespacing"
+    pitfall: P-185
+
+  - id: F08
+    severity: note
+    description: >
+      Case collision in delegation references ("fleet://alpha/agents/Finance-
+      Bot" vs "fleet://alpha/agents/finance-bot") must be detected during
+      pinch. If a delegation reference has a case mismatch with the target
+      agent's declared name, it must warn. This catches references that
+      would silently fail if the routing layer's normalization behavior
+      changes.
+    spec_impact: "CL-02 G-A2A-DELEGATE — case-sensitive reference validation"
+    pitfall: P-185

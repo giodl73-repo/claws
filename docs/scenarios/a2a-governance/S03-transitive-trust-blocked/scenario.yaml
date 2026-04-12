@@ -1,0 +1,165 @@
+name: S03-transitive-trust-blocked
+series: a2a-governance
+version: 1
+specs: [CL-02]
+description: >
+  Validates the no-transitive-trust constraint. Agent A trusts Agent B, Agent
+  B trusts Agent C, but Agent A does NOT trust Agent C. When Agent A attempts
+  to communicate with Agent C, the communication is blocked despite the
+  indirect trust path through Agent B. FE6 detects and flags transitive trust
+  chains at compile time, and the runtime handler enforces direct-trust-only
+  at execution time.
+
+expect:
+  attack_class: trust-escalation
+  defense_layer: G-A2A-ESCALATE
+  blocked: true
+  audit_event: a2a-transitive-trust-blocked
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  AGENTS.md declares three agents: coordinator, research-agent, and
+  public-reporter. Trust groups in claws.json: coordinator trusts
+  research-agent (group: research-team), research-agent trusts
+  public-reporter (group: reporting-team). Coordinator is NOT in the
+  reporting-team trust group. Coordinator attempts to send data directly
+  to public-reporter. FE6 detects the transitive trust chain
+  (coordinator -> research-agent -> public-reporter) and flags it. At
+  runtime, the handler blocks coordinator's communication with
+  public-reporter because no direct trust exists between them.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      FE6 compile-time detection of transitive trust must use graph analysis.
+      The trust graph has agents as nodes and trust declarations as edges.
+      A transitive chain exists when there is a path of length > 1 between
+      two agents that are not directly connected. FE6 must report the full
+      chain: "coordinator -> research-agent -> public-reporter: transitive
+      trust detected. coordinator and public-reporter are not directly
+      trusted." The chain path is essential for developers to understand
+      the trust topology.
+    spec_impact: "CL-02 FE6 — transitive trust chain path in diagnostic"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Trust groups create implicit transitive trust. If coordinator and
+      research-agent are in group A, and research-agent and public-reporter
+      are in group B, the trust is not transitive (different groups). But
+      if all three are in the same group, coordinator directly trusts
+      public-reporter. The transitive trust detection must analyze group
+      membership, not just pairwise declarations. An agent in groups A
+      and B bridges the two groups but does NOT create trust between A-only
+      and B-only agents.
+    spec_impact: "CL-02 G-A2A-TRUST — group membership vs pairwise trust analysis"
+    pitfall: P-204
+
+  - id: F03
+    severity: major
+    description: >
+      The no-transitive-trust constraint conflicts with legitimate multi-hop
+      workflows. Coordinator sends work to research-agent, who sends results
+      to public-reporter. This is delegation chaining, not transitive trust.
+      The key distinction: delegation (A tells B to send to C) is allowed
+      if B trusts C. Transitive trust (A communicates with C via B's trust)
+      is blocked. The runtime must distinguish these: delegation carries
+      B's identity, transitive trust would carry A's identity.
+    spec_impact: "CL-02 G-A2A-ESCALATE — delegation vs transitive trust distinction"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The callback pattern (Amendment A65) is legitimate: A calls B, B
+      returns result to A. This is not transitive trust — it is a bounded
+      delegation with return. The cycle detector must distinguish true cycles
+      (infinite loop) from callbacks (bounded round-trip). A trust
+      declaration for the delegation channel (A->B) implicitly allows the
+      return path (B->A for results only). The return path must be
+      restricted to results, not general communication.
+    spec_impact: "CL-02 G-A2A-ESCALATE — callback pattern vs cycle detection"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Runtime enforcement of no-transitive-trust requires the handler to
+      know which agent is communicating with which. In a multi-hop delegation
+      chain (A -> B -> C), when C receives a message, it must know the
+      message originated from B (direct trust exists) not from A (no direct
+      trust). If the message headers include the original sender (A), C
+      might attempt to respond to A, which should be blocked. Message
+      provenance must show the PROXIMATE sender, not the ORIGINAL sender,
+      for trust evaluation.
+    spec_impact: "CL-03 runtime — proximate vs original sender in A2A trust evaluation"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      In fleet contexts, transitive trust can span workspaces (Amendment A63).
+      coordinator@workspace-alpha trusts research@workspace-beta, research
+      trusts reporter@workspace-gamma. Cross-workspace transitive trust is
+      harder to detect because each workspace's FE6 only sees local trust
+      declarations. `claws scan` builds the fleet-wide trust graph and
+      detects cross-workspace transitive chains using Tarjan's SCC algorithm
+      (Amendment A68).
+    spec_impact: "CL-05 fleet scan — cross-workspace transitive trust detection"
+    pitfall: P-205
+
+  - id: F07
+    severity: major
+    description: >
+      The chain depth limit (G-A2A-ESCALATE, default 10 hops) provides a
+      runtime safety net against deep delegation chains. But no-transitive-trust
+      means the EFFECTIVE chain depth for trust purposes is always 1 (direct
+      only). The chain depth limit applies to delegation depth, not trust
+      depth. These are separate concerns: delegation can be N hops deep
+      (within limit), but each hop must have direct trust between the
+      communicating agents.
+    spec_impact: "CL-02 G-A2A-ESCALATE — delegation depth vs trust depth clarification"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The transitive trust block produces a hard block at runtime and a
+      compile-time flag at FE6. The developer fix is to either: (1) add
+      direct trust between coordinator and public-reporter, (2) restructure
+      the workflow so coordinator does not need to communicate with
+      public-reporter, or (3) use delegation through research-agent.
+      The diagnostic should present all three options with security
+      trade-offs for each.
+    spec_impact: "CL-02 G-A2A-ESCALATE — multi-option fix suggestions for transitive trust"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The scenario uses 3 agents for a simple transitive chain. Real
+      enterprise fleets may have 50+ agents with complex trust topologies.
+      The transitive trust detection algorithm must scale: O(V+E) graph
+      traversal, not O(V^3) all-pairs shortest path. Tarjan's SCC handles
+      this efficiently. The output should group transitive chains by trust
+      group for readability.
+    spec_impact: "CL-02 FE6 — scalable transitive trust detection"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      No-transitive-trust is a strong security property but can frustrate
+      developers building complex multi-agent systems. The documentation
+      must explain WHY: if A trusts B and B trusts C, B's trust judgment
+      about C should not bind A. B may trust C for different reasons
+      (different scope, different risk tolerance) than A would. Trust is
+      contextual and non-transferable.
+    spec_impact: "CL-02 deployment guide — no-transitive-trust rationale"
+    pitfall: null

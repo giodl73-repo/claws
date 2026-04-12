@@ -1,0 +1,126 @@
+name: S03-p134-cross-artifact-classification-mismatch
+series: pitfall-final-2
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates post-emit consistency checking across governance layers (P-134).
+  When SKILL.md says R3, exec-approvals.json says R5, and the plugin tables
+  say R3, the three layers disagree and effective governance depends on
+  evaluation order. Post-emit validation must detect and reject mismatches.
+
+expect:
+  artifacts:
+    - name: SKILL.md
+      status: staged
+    - name: index.ts
+      status: staged
+    - name: exec-approvals.json
+      status: staged
+  plugin_hooks: []
+  skill_content: null
+  approvals: null
+
+simulate:
+  failures:
+    - component: emit
+      type: classification-mismatch
+      error: "send-invoice: SKILL.md=R3, exec-approvals.json=R5, plugin riskMap=R3 — staging rollback"
+  halt: emit
+  budget: null
+
+problem: >
+  The emit phase generates all three artifacts successfully, but the post-emit
+  consistency validator detects a classification mismatch for tool send-invoice.
+  SKILL.md describes it as R3 (write), exec-approvals.json blocks it as R5
+  (transact requiring approval), and the plugin riskMap classifies it as R3.
+  If these artifacts are promoted, the effective governance depends on which
+  layer the OC Gateway evaluates first. In the worst case, the plugin allows
+  R3 treatment while exec-approvals blocks R5 — confusing and unpredictable.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-134 core: Three governance layers (SKILL.md advisory, exec-approvals.json
+      platform enforcement, plugin riskMap runtime) can each independently
+      classify a tool's risk level. If they disagree, the effective governance
+      is undefined — it depends on the OC Gateway's evaluation order, which
+      is platform-specific and may change between versions.
+    spec_impact: "CL-04 EMIT — cross-artifact consistency requirement"
+    pitfall: "P-134"
+
+  - id: F02
+    severity: major
+    description: >
+      The post-emit consistency validator must extract the risk classification
+      from each artifact for every tool and verify they are identical. The
+      extraction must be artifact-format-aware: SKILL.md uses prose markers,
+      exec-approvals.json uses JSON fields, and the plugin uses the riskMap
+      constant. All three must resolve to the same R1-R5 level.
+    spec_impact: "CL-04 EMIT — multi-format classification extraction"
+    pitfall: "P-134"
+
+  - id: F03
+    severity: major
+    description: >
+      The root cause of mismatches is typically a classification change
+      that propagates to some artifacts but not others. If the user changes
+      a tool from R3 to R5 in claws.json overrides, the recompilation must
+      update ALL artifacts. A stale artifact from a previous compilation
+      mixed with new artifacts creates the mismatch.
+    spec_impact: "CL-04 EMIT — full artifact regeneration on classification change"
+    pitfall: "P-134"
+
+  - id: F04
+    severity: major
+    description: >
+      Mismatch resolution strategy: the highest risk level wins. If any
+      artifact says R5, the tool is R5 regardless of what other artifacts
+      say. This is fail-safe. But the developer must be warned that the
+      mismatch exists so they can investigate whether the R5 classification
+      is intentional or a stale artifact.
+    spec_impact: "CL-02 G-CLASS — highest-risk-wins resolution"
+    pitfall: "P-134"
+
+  - id: F05
+    severity: major
+    description: >
+      The staging rollback on mismatch must include a diagnostic listing
+      every tool with mismatched classifications across all three layers.
+      The diagnostic format: tool name, SKILL.md level, exec-approvals
+      level, plugin level, recommended action (recompile, override, or
+      investigate).
+    spec_impact: "CL-04 EMIT — mismatch diagnostic format"
+    pitfall: "P-134"
+
+  - id: F06
+    severity: warning
+    description: >
+      If the user overrides a classification in claws.json (e.g., force
+      send-invoice to R3), the override must propagate to ALL artifacts.
+      The override is the single source of truth. Post-emit validation
+      checks the override value, not the derived classification.
+    spec_impact: "CL-01 schema — classification override propagation"
+    pitfall: "P-134"
+
+  - id: F07
+    severity: warning
+    description: >
+      Evaluation order matters even with consistency validation: if the
+      OC Gateway checks exec-approvals.json first and blocks the tool
+      before the plugin handler runs, the plugin's riskMap is never
+      consulted. Consistent classifications make this order-irrelevant,
+      which is the goal of the consistency check.
+    spec_impact: "CL-03 runtime — evaluation order independence"
+    pitfall: "P-134"
+
+  - id: F08
+    severity: note
+    description: >
+      Fleet-wide mismatch: if one workspace has consistent R3 across
+      layers and another has R5 (due to different claws.json overrides),
+      that is a legitimate policy difference, not a mismatch. The
+      consistency check is per-workspace, not cross-workspace. Fleet
+      drift detection is a separate concern.
+    spec_impact: "CL-05 fleet — per-workspace vs cross-workspace consistency"
+    pitfall: "P-134"

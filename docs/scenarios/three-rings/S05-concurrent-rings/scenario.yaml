@@ -1,0 +1,165 @@
+name: S05-concurrent-rings
+series: three-rings
+version: 1
+specs: [CL-05]
+description: >
+  Validates that all three rings can operate concurrently without
+  interference: the inner ring watches for file saves while the outer
+  ring runs a scheduled fleet scan. A middle-ring doctor operation
+  completes between them. File locks, IR cache access, and audit trail
+  writes must be safe under concurrent access. No ring should block
+  another or produce corrupt output.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      ring: inner
+      concurrent_rings: [inner, outer]
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A fleet of 8 workspaces is being scanned by the outer ring (claws drift)
+  when a developer saves TOOLS.md in one of those workspaces, triggering
+  the inner ring (claws watch -> pinch). Both operations need to read the
+  GovernanceIR. The inner ring needs to WRITE an updated IR after re-checking.
+  The outer ring is reading the IR for drift comparison. Simultaneously,
+  another developer in a different workspace runs doctor --post-upgrade,
+  which writes to workspace files and invalidates the IR cache. All three
+  rings are active on overlapping data.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The GovernanceIR is a file on disk (.claws/compiled/governance-ir.json).
+ Concurrent read/write from inner ring (write after
+      pinch) and outer ring (read for drift) creates a classic TOCTOU
+      race. The outer ring could read a partially-written IR. The spec
+      must define a concurrency model: file locking, atomic write
+      (write-to-temp + rename), or IR versioning with optimistic reads.
+    spec_impact: "CL-05 Three Rings — IR file concurrency model (atomic write or locking)"
+    pitfall: P-167
+
+  - id: F02
+    severity: major
+    description: >
+      The inner ring's batch window (300ms) and the outer ring's scan
+      duration (up to 120s) overlap by definition. The inner ring triggers
+      every few seconds; the outer ring runs for minutes. During the outer
+      ring's scan, the inner ring may update the IR multiple times. Each
+      update changes what drift detects. The outer ring must either snapshot
+      all IRs at scan start (point-in-time consistency) or accept that
+      workspaces may change during scan (eventual consistency).
+    spec_impact: "CL-05 Outer Ring — point-in-time vs eventual consistency for fleet scans"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The audit trail receives events from all three rings. If all three
+      write audit events concurrently, the trail must be append-only and
+      safe for concurrent writes. On Windows, file append is NOT atomic
+      by default. Two concurrent appends can interleave, producing
+      corrupt JSON lines. The audit writer must use a mutex or
+      write-ahead log.
+    spec_impact: "CL-05 Audit Trail — concurrent write safety across rings"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The middle ring (doctor) modifies workspace files. While doctor is
+      running, the inner ring's watcher will detect the file changes and
+      trigger pinch on the partially-modified workspace. This produces
+      false violations: doctor is mid-migration, files are inconsistent,
+      and pinch sees them in an intermediate state. The inner ring watcher
+      must be paused during middle-ring operations.
+    spec_impact: "CL-05 Ring Coordination — pause inner ring during middle-ring operations"
+    pitfall: P-168
+
+  - id: F05
+    severity: warning
+    description: >
+      If the inner ring is paused during doctor, who resumes it? The
+      middle ring must signal completion so the inner ring can restart.
+      This is a coordination protocol between rings, which contradicts
+      the spec's implication that rings are independent. The spec must
+      acknowledge that rings are NOT fully independent — they have
+      ordering constraints when operating on the same workspace.
+    spec_impact: "CL-05 Three Rings — rings are semi-independent, not fully independent"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The outer ring scans multiple workspaces. If one workspace is
+      mid-upgrade (middle ring active), the outer ring reading its IR
+      gets the pre-upgrade state. After doctor completes, the IR changes.
+      The drift report now shows stale data for that workspace. Fleet
+      scans should skip workspaces with active middle-ring operations
+      and flag them as "in-progress" rather than reporting stale drift.
+    spec_impact: "CL-05 Fleet Scan — skip workspaces with active middle-ring operations"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Process-level concurrency: the inner ring is a long-lived watcher
+      process. The outer ring is a scheduled batch job. The middle ring
+      is an interactive command. These are different process lifetimes.
+      On a developer machine, all three could be separate terminal
+      sessions. The spec does not address multi-process coordination
+      (vs multi-thread within a single process). File locks must work
+      across processes, not just within one.
+    spec_impact: "CL-05 Concurrency — cross-process coordination, not just in-process"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The inner ring may accumulate stale watcher handles if the developer
+      opens and closes multiple terminal sessions. Each session starts
+      claws watch, but closing the terminal may not clean up the watcher.
+      On Windows, orphaned node processes from watchers are a known
+      issue (noted in CLAUDE.md for npx). The watcher must use a PID
+      file and refuse to start if another watcher is already running.
+    spec_impact: "CL-05 watch — single-instance enforcement via PID file"
+    pitfall: P-169
+
+  - id: F09
+    severity: note
+    description: >
+      The three rings map to three different latency requirements:
+      inner <1s, middle <15s, outer <120s. These are not just targets
+      but concurrency constraints: the inner ring must complete before
+      the next file save triggers another run (typically 1-5s apart).
+      If the inner ring is still running when the next save arrives,
+      should it queue, cancel the previous run, or drop the new trigger?
+    spec_impact: "CL-05 Inner Ring — handling triggers while previous check is in-flight"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Performance testing for concurrent rings requires a specific
+      test harness: a simulated file watcher (inner ring), a simulated
+      fleet scanner (outer ring), and a simulated doctor operation
+      (middle ring), all running against the same workspace fixture.
+      The scenario test infrastructure must support multi-process
+      simulation, which is beyond typical unit test scope.
+    spec_impact: "CL-05 Testing — concurrent ring simulation test harness design"
+    pitfall: null

@@ -1,0 +1,115 @@
+name: S17-p126-persistent-handler-silent-block
+series: pitfall-final-1
+version: 1
+specs: [CL-03]
+description: >
+  Validates that persistent governance handler failures for a specific tool
+  are detected and surfaced, rather than silently blocking the tool indefinitely.
+  Without the sidecar, basic failure detection (per-tool crash counter with
+  stderr warning after 3+ crashes) must be implemented in the plugin itself.
+
+expect:
+  attack_class: persistent-handler-failure
+  defense_layer: L2-basic-failure-detection
+  blocked: true
+  audit_event:
+    type: persistent-failure-alert
+    tool: write-db
+    crash_count: 3
+    alert_fired: true
+
+simulate:
+  failures:
+    - phase: runtime
+      type: handler-crash
+      tool: write-db
+      repetitions: 5
+  halt: null
+  budget: null
+
+problem: >
+  The governance handler has a bug: it throws TypeError when evaluating
+  write-db because the tool's argument schema has an unexpected nested
+  structure. Fail-closed correctly blocks write-db. The error occurs
+  deterministically on every write-db invocation. After 50 invocations
+  over 3 days, write-db has been silently blocked 50 times. No alert
+  fires. No notification reaches the operator. The sidecar (L5) would
+  detect this, but the workspace is L1-L4 only. The operator discovers
+  the issue only when a user complains that write-db never works.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The plugin must implement basic failure detection: a per-tool crash
+      counter. When a tool's governance evaluation fails 3 times in a row,
+      the plugin emits a stderr warning: "CLAWS-W050: write-db governance
+      evaluation has failed 3 consecutive times. Tool is blocked by
+      fail-closed. Run 'claws recover --tool write-db' for temporary bypass."
+    spec_impact: "CL-03 runtime — per-tool crash counter"
+    pitfall: P-126
+
+  - id: F02
+    severity: major
+    description: >
+      The crash counter must distinguish between different error types.
+      The same TypeError repeating is a persistent bug. Different errors
+      (TypeError then RangeError then SyntaxError) suggest a systemic
+      issue, not a per-tool bug. The counter tracks error signatures
+      (error type + message hash) for classification.
+    spec_impact: "CL-03 runtime — error signature tracking"
+    pitfall: P-126
+
+  - id: F03
+    severity: major
+    description: >
+      Configurable thresholds: the default crash count threshold (3) and
+      time window (5 minutes) should be configurable in claws.json. Some
+      tools are called frequently (100 times/minute) and a threshold of
+      3 would alert immediately. A tool called once per day needs a lower
+      threshold (2) to catch persistent failures before a week passes.
+    spec_impact: "CL-01 claws.json — failure detection threshold configuration"
+    pitfall: P-126
+
+  - id: F04
+    severity: warning
+    description: >
+      The sidecar (L5) provides full detection: configurable thresholds,
+      external notification (Slack, email, PagerDuty), automatic recovery
+      attempts, and dashboard integration. The plugin's basic detection
+      (L2) is the minimum viable alerting for workspaces without a sidecar.
+    spec_impact: "CL-03 L5 sidecar — full failure detection capabilities"
+    pitfall: P-126
+
+  - id: F05
+    severity: major
+    description: >
+      The crash counter must reset when the tool succeeds. If write-db
+      fails 2 times then succeeds on the 3rd call, the counter resets
+      to 0. This prevents false alerts from transient failures (network
+      glitches, temporary resource exhaustion). Only persistent failures
+      (consecutive) trigger the alert.
+    spec_impact: "CL-03 runtime — crash counter reset on success"
+    pitfall: P-126
+
+  - id: F06
+    severity: warning
+    description: >
+      The audit chain must record both the individual failures and the
+      threshold crossing. Individual entries: "write-db: governance-error,
+      TypeError, blocked." Threshold entry: "write-db: persistent failure
+      detected, 3 consecutive governance errors, alert fired." The SIEM
+      integration can trigger workflows on threshold entries.
+    spec_impact: "CL-02 audit — threshold crossing audit entry"
+    pitfall: P-126
+
+  - id: F07
+    severity: note
+    description: >
+      This scenario overlaps with P-124 (R3-R4 fail-closed blocks writes)
+      and P-127 (RangeError systemic failure). P-126 focuses specifically
+      on the detection and alerting gap: the tool is blocked (correct
+      behavior) but nobody knows (incorrect behavior). Detection without
+      recovery is still valuable because it enables manual intervention.
+    spec_impact: "CL-03 — detection gap distinct from recovery gap"
+    pitfall: P-126

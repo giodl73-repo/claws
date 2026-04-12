@@ -1,0 +1,105 @@
+name: S01-minimal-workspace
+series: compile-pipeline
+version: 1
+specs: [CL-04]
+description: >
+  Validates that the minimal viable workspace (SOUL.md + TOOLS.md + claws.json)
+  produces a well-formed GovernanceIR. This is the floor case: if these three
+  files compile, the pipeline is functional. The IR must contain a manifest,
+  analysis, version, and hash even with minimal input.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      intent_types: [DenyIntent, ToolManifestEntry]
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace contains only the three required files: SOUL.md with a single
+  deny constraint ("never access production"), TOOLS.md with one R1 read-only
+  tool, and claws.json with default T2 trust tier. The pipeline must parse
+  all three, extract intents, run the 29 governance rules, and produce a
+  serializable GovernanceIR with zero violations.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If SOUL.md has a UTF-8 BOM marker, the PARSE phase may skip the first
+      constraint line because the BOM bytes precede the keyword anchor. The
+      parser must strip BOM before keyword-anchored extraction.
+    spec_impact: "CL-04 Phase 1 PARSE — needs BOM handling requirement"
+    pitfall: null
+
+  - id: F02
+    severity: warning
+    description: >
+      claws.json with no explicit trust tier defaults to T2, but the spec does
+      not mandate a default. If no default is set and the field is missing, the
+      pipeline could produce an IR without a trust ceiling, breaking downstream
+      G-CLASS evaluation.
+    spec_impact: "CL-01 claws.json schema — trust tier default must be specified"
+    pitfall: null
+
+  - id: F03
+    severity: note
+    description: >
+      With only one R1 tool and one deny constraint, zero of the 29 rules
+      produce findings. This is a valid but degenerate test — it proves the
+      pipeline runs but does not exercise rule evaluation logic.
+    spec_impact: "CL-04 Phase 3 ANALYZE — need non-trivial minimal case too"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The GovernanceIR hash field is computed from the manifest + analysis.
+      For the minimal workspace, the hash must be deterministic across
+      platforms (Windows vs Unix line endings in SOUL.md). If line endings
+      affect the hash, the same workspace produces different hashes on
+      different OS.
+    spec_impact: "CL-04 GovernanceIR — hash normalization before computation"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The pipeline latency constraint (<350ms for compile) must hold even
+      for the minimal case. If framework initialization (loading 29 rule
+      definitions) dominates, the minimal case may be slower than expected
+      relative to full workspaces.
+    spec_impact: "CL-04 latency budget — cold-start overhead measurement"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      TOOLS.md with a single R1 tool produces a ToolManifestEntry with
+      risk=1. The OBO detection logic should not fire for R1 tools. If the
+      detection regex is overly broad (matching "read" in tool descriptions),
+      it could false-positive on R1 read tools.
+    spec_impact: "CL-02 G-CLASS — OBO detection must respect risk level"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Serialization of GovernanceIR to JSON must handle empty arrays
+      consistently — some JSON serializers omit empty arrays vs writing [].
+      The diff tool (claws diff) must treat both as equivalent.
+    spec_impact: "CL-04 GovernanceIR serialization — canonical JSON format"
+    pitfall: null

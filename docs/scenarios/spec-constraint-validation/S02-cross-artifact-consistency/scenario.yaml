@@ -1,0 +1,155 @@
+name: S02-cross-artifact-consistency
+series: spec-constraint-validation
+version: 1
+specs: [CL-04]
+description: >
+  Validates cross-artifact consistency: tool classifications in SKILL.md must
+  match classifications in exec-approvals.json and the plugin's rule tables.
+  If three artifacts disagree on the same tool's risk level, governance layers
+  contradict each other. The EMIT phase includes a post-emit consistency check
+  that compares all artifact tool sets.
+
+expect:
+  artifacts:
+    - type: plugin
+      path: plugins/claws-governance/index.ts
+      valid: true
+      tool_classifications:
+        send-email: R5
+        read-file: R2
+        write-db: R3
+    - type: skill
+      path: skills/claws-governance/SKILL.md
+      valid: true
+      tool_classifications:
+        send-email: R5
+        read-file: R2
+        write-db: R3
+    - type: exec-approvals
+      path: exec-approvals.json
+      valid: true
+      tool_classifications:
+        send-email: R5
+        read-file: R2
+        write-db: R3
+  plugin_hooks: null
+  skill_content:
+    tool_count: 3
+    classifications_consistent: true
+  approvals:
+    tool_count: 3
+    classifications_consistent: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has 3 tools: send-email (R5/OBO), read-file (R2/READ), and
+  write-db (R3/WRITE). The compilation pipeline produces a GovernanceIR with
+  correct classifications. The EMIT phase generates all 4 artifacts. The
+  post-emit consistency check must verify that SKILL.md lists send-email as
+  "NEVER execute without approval" (R5 directive), exec-approvals.json lists
+  send-email as requiring approval, and the plugin's rule tables classify
+  send-email at risk level 5. Any discrepancy is a critical emit error.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      SKILL.md uses natural language directives ("NEVER access without
+      approval"), not risk level numbers. The consistency check must map
+      between the directive severity and the risk level. "NEVER" maps to
+      R5, "requires confirmation" maps to R3-R4, "audit only" maps to R1-R2.
+      If the PRESS compression changes the directive wording, the mapping
+      may break.
+    spec_impact: "CL-04 EMIT — SKILL.md directive-to-risk mapping"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      exec-approvals.json uses the OC platform's field names, not claws's
+      internal field names. The consistency check must apply the same field
+      name mapping used during emission. If the mapping translates
+      "riskLevel" to "risk_level", the check must read "risk_level" from
+      the emitted JSON, not "riskLevel".
+    spec_impact: "CL-04 EMIT — field name mapping in consistency check"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The plugin's rule tables are compiled TypeScript constants embedded in
+      index.ts. The consistency check must parse the generated TypeScript to
+      extract classification data, or the EMIT phase must generate a
+      machine-readable manifest alongside the human-readable code. Parsing
+      generated TS is fragile; a manifest is more reliable.
+    spec_impact: "CL-04 EMIT — machine-readable classification manifest"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      SKILL.md may omit R1-R2 tools for brevity when the workspace has 20+
+      tools (emit-S04-F06). The consistency check must account for intentional
+      omissions. If SKILL.md lists only R4-R5 tools but exec-approvals.json
+      lists all tools, the absence of R1-R2 from SKILL.md is not an
+      inconsistency -- it is the size management policy.
+    spec_impact: "CL-04 EMIT — intentional omission in consistency check"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Platform built-in tools (OC exec, read, write, bash) may appear in
+      exec-approvals.json and the plugin's rule tables but NOT in SKILL.md
+      (because they are not declared in TOOLS.md). The consistency check
+      must distinguish declared tools from built-in tools and apply different
+      consistency rules: built-ins must match between plugin and
+      exec-approvals but may be absent from SKILL.md.
+    spec_impact: "CL-04 EMIT — built-in tool consistency scope"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Tool name normalization (CP-S08-F03) means "send-email", "sendEmail",
+      and "send_email" are the same tool. The consistency check must normalize
+      tool names before comparison. If SKILL.md uses "send-email" but
+      exec-approvals.json uses "sendEmail" (platform convention), they are
+      consistent despite different surface forms.
+    spec_impact: "CL-04 EMIT — tool name normalization in consistency check"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      If the consistency check fails, the EMIT phase must treat it as an
+      emit error and invoke the atomic rollback (S01). Cross-artifact
+      inconsistency is never acceptable -- it means governance layers
+      contradict each other. The check is a hard gate, not a warning.
+    spec_impact: "CL-04 EMIT — consistency failure triggers atomic rollback"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Custom classification overrides in claws.json (Amendment A3) flow
+      through to all artifacts. If the override changes a tool from R5 to R3,
+      all three artifacts must reflect R3. The consistency check validates
+      that overrides are propagated uniformly, not applied to some artifacts
+      and missed by others.
+    spec_impact: "CL-04 EMIT — override propagation consistency"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      This scenario validates CL-04 constraint "Cross-artifact consistency"
+      and finding emit-S04-F04. The constraint was added after scenario
+      analysis revealed that independent artifact generation from shared IR
+      could diverge if emitters have inconsistent views of the IR.
+    spec_impact: "CL-04 EMIT — cross-artifact consistency constraint traceability"
+    pitfall: null

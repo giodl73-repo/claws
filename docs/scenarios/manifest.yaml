@@ -1,0 +1,221 @@
+series:
+  # ── Phase 1: Ptah (Foundation) ──
+
+  compile-pipeline:
+    runners: [compile-sim]
+    min: 8
+    marker: "scenario.yaml"
+    spec: CL-04
+    description: "Full compilation pipeline — parse 9 files, extract intents, analyze rules, emit artifacts"
+
+  governance-rules:
+    runners: [pinch-sim]
+    min: 12
+    marker: "scenario.yaml"
+    spec: CL-02
+    description: "All 29 governance rules — R1-R5 classification, A2A, injection, elicitation, supply chain"
+
+  fail-mode:
+    runners: [pinch-sim, security-sim]
+    min: 6
+    marker: "scenario.yaml"
+    spec: CL-02
+    description: "FailMode<R> enforcement — R5 always closed, R1-R2 configurable, crash behavior"
+
+  emit-artifacts:
+    runners: [emit-sim]
+    min: 8
+    marker: "scenario.yaml"
+    spec: CL-04
+    description: "4-artifact emission — Gateway plugin, SKILL.md, exec-approvals, compiled workflow"
+
+  cross-file-conflicts:
+    runners: [compile-sim]
+    min: 7
+    marker: "scenario.yaml"
+    spec: CL-04
+    description: "7 cross-file conflict categories — DENY-vs-TOOL, TRUST-ESCALATION, OBO-WITHOUT-ELICIT, etc."
+
+  # ── Phase 2: Anubis (Operations) ──
+
+  three-rings:
+    runners: [compile-sim, pinch-sim]
+    min: 5
+    marker: "scenario.yaml"
+    spec: CL-05
+    description: "Three-ring model — watch (inner), doctor (middle), drift (outer)"
+
+  fleet-operations:
+    runners: [fleet-sim]
+    min: 8
+    marker: "scenario.yaml"
+    spec: CL-05
+    description: "Fleet scan, broadcast, drift, partial failure, kill switch"
+
+  snapshot-lifecycle:
+    runners: [compile-sim]
+    min: 5
+    marker: "scenario.yaml"
+    spec: CL-05
+    description: "Snapshot save/restore/diff/promote lifecycle"
+
+  # ── Phase 2: Thoth (Ecosystem) ──
+
+  obo-elicitation:
+    runners: [security-sim]
+    min: 8
+    marker: "scenario.yaml"
+    spec: CL-02
+    description: "OBO boundary — send-as-user, approval flows, deny-default, transitive delegation"
+
+  compliance-evidence:
+    runners: [compile-sim]
+    min: 6
+    marker: "scenario.yaml"
+    spec: CL-02
+    description: "SOC2/HIPAA/EU AI Act evidence generation, audit chain verification, SIEM export"
+
+  a2a-governance:
+    runners: [security-sim]
+    min: 6
+    marker: "scenario.yaml"
+    spec: CL-02
+    description: "A2A trust boundaries — identity, default-deny, no transitive trust, lateral movement"
+
+  injection-defense:
+    runners: [security-sim]
+    min: 6
+    marker: "scenario.yaml"
+    spec: CL-02
+    description: "Prompt injection patterns — input validation, context isolation, output guards, bounded reasoning"
+
+  skill-lifecycle:
+    runners: [compile-sim, emit-sim]
+    min: 5
+    marker: "scenario.yaml"
+    spec: CL-05
+    description: "Skill creation — scaffold, build, test, publish, governance badge"
+
+  # ── Pitfall Coverage ──
+
+  pitfall-coverage-1:
+    runners: [compile-sim, pinch-sim, emit-sim]
+    min: 10
+    marker: "scenario.yaml"
+    spec: CL-02, CL-04
+    description: "Pitfall validation — edge cases from first scenario round (P-051 through P-070)"
+
+  pitfall-coverage-2:
+    runners: [pinch-sim, security-sim, emit-sim]
+    min: 15
+    marker: "scenario.yaml"
+    spec: CL-02, CL-03, CL-04
+    description: "Pitfall validation — fail-mode, emit, and governance rule edge cases (P-070 through P-099)"
+
+  # ── Spec Constraint Validation ──
+
+  spec-constraint-validation:
+    runners: [compile-sim, pinch-sim, emit-sim, security-sim]
+    min: 15
+    marker: "scenario.yaml"
+    spec: CL-01, CL-02, CL-03, CL-04
+    description: "Validates critical new spec constraints from scenario findings application"
+
+  # ── Pitfall Final ──
+
+  pitfall-final-1:
+    runners: [compile-sim, pinch-sim, emit-sim, security-sim]
+    min: 26
+    marker: "scenario.yaml"
+    spec: CL-01, CL-02, CL-03, CL-04
+    description: "One scenario per pitfall P-100 through P-131 — the definitive test matrix"
+
+  pitfall-final-2:
+    runners: [pinch-sim, security-sim, emit-sim]
+    min: 26
+    marker: "scenario.yaml"
+    spec: CL-02, CL-03, CL-04
+    description: "One scenario per pitfall P-132 through P-161 — the definitive test matrix"
+
+  # ── Pitfall Coverage: Anubis + Thoth ──
+
+  pitfall-anubis:
+    runners: [compile-sim, pinch-sim, fleet-sim]
+    min: 35
+    marker: "scenario.yaml"
+    spec: CL-02, CL-03, CL-05
+    description: "One scenario per pitfall P-162 through P-196 — Anubis operations pitfalls (three-rings, fleet, snapshot)"
+
+  pitfall-thoth-1:
+    runners: [security-sim, pinch-sim]
+    min: 29
+    marker: "scenario.yaml"
+    spec: CL-02, CL-03
+    description: "One scenario per pitfall P-197 through P-225 — Thoth security pitfalls (OBO, A2A, injection)"
+
+  pitfall-thoth-2:
+    runners: [compile-sim, emit-sim]
+    min: 24
+    marker: "scenario.yaml"
+    spec: CL-01, CL-02, CL-04, CL-05, CL-06
+    description: "One scenario per pitfall P-226 through P-249 — Thoth ecosystem pitfalls (compliance, skill, lossless, platform)"
+
+  # ── Praetor Integration ──
+
+  input-resolver:
+    runners: [compile-sim]
+    min: 5
+    marker: "scenario.yaml"
+    spec: CL-01, CL-04, CL-07
+    description: "InputResolver integration — 9-file default, package governance, URL policies, provenance"
+
+  package-output:
+    runners: [compile-sim, emit-sim]
+    min: 5
+    marker: "scenario.yaml"
+    spec: CL-05, CL-06, CL-07
+    description: "Package output integration — claws-publish via craft package, badge slicer, incremental, ecosystem loop"
+
+  ontology-governance:
+    runners: [compile-sim]
+    min: 5
+    marker: "scenario.yaml"
+    spec: CL-04, CL-06, CL-07
+    description: "OntologyIR integration — compliance frameworks as governance ontologies, rule generation"
+
+  compiled-context:
+    runners: [fleet-sim]
+    min: 5
+    marker: "scenario.yaml"
+    spec: CL-05, CL-07
+    description: "Compiled context integration — fleet broadcast as context forks, structural sharing, drift via diff"
+
+  loss-aware-emission:
+    runners: [compile-sim]
+    min: 5
+    marker: "scenario.yaml"
+    spec: CL-04, CL-07
+    description: "Loss-aware routing — 7-platform loss matrix, path enumerator, --strict-loss for R5"
+
+  identity-bridge:
+    runners: [security-sim]
+    min: 5
+    marker: "scenario.yaml"
+    spec: CL-02, CL-07
+    description: "Identity bridge — OIDC/SAML to trust tiers, credential escrow, section locks, fleet identity"
+
+  # ── Cross-cutting ──
+
+  lossless-roundtrip:
+    runners: [compile-sim]
+    min: 5
+    marker: "scenario.yaml"
+    spec: CL-04
+    description: "Round-trip fidelity — parse → IR → emit preserves original workspace byte-for-byte"
+
+  platform-detection:
+    runners: [compile-sim]
+    min: 7
+    marker: "scenario.yaml"
+    spec: CL-01
+    description: "7-platform detection — OC, Cursor, Claude, GitHub, Bedrock, LangGraph, CrewAI"

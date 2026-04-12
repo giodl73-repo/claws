@@ -1,0 +1,175 @@
+name: S15-timeout-default-supply-chain
+series: pitfall-coverage-2
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates that the generated plugin overrides the platform's approve-on-
+  timeout default to deny-on-timeout (P-097), that unsigned marketplace skills
+  severity is configurable per environment (P-098), and that signature
+  verification requires a trusted key store, not just signature presence
+  (P-099). These three pitfalls cover the elicitation timeout and supply
+  chain verification surface.
+
+expect:
+  rules_applied: [G-ELICIT-TIMEOUT, G-SUPPLY]
+  violations:
+    - code: CLAWS-E042
+      rule: G-ELICIT-TIMEOUT
+      description: "Platform default approve-on-timeout not overridden in generated handler"
+    - code: CLAWS-E047
+      rule: G-SUPPLY
+      description: "Unsigned skill in production environment — error severity"
+    - code: CLAWS-E048
+      rule: G-SUPPLY
+      description: "Signed skill unverifiable — no trusted key store at .claws/keys/"
+  pass: false
+  severity: error
+
+simulate:
+  failures:
+    - component: elicitation
+      type: approve-on-timeout
+      error: "Platform default approves R5 tool after 30s timeout — no deny override generated"
+    - component: supply-chain
+      type: unsigned-skill
+      error: "marketplace skill 'data-export' has no signature — production env requires error"
+    - component: supply-chain
+      type: unverifiable-signature
+      error: "marketplace skill 'analytics-helper' has signature but .claws/keys/ not found"
+  halt: null
+  budget: null
+
+problem: >
+  The OC platform default is approve-on-timeout: if a human does not respond
+  to an R5 tool approval request within 30 seconds, the tool executes. claws
+  requires deny-on-timeout but the generated handler does not override the
+  platform default because denyDefault config is missing from claws.json.
+  Separately, a marketplace skill "data-export" has no signature. In a dev
+  environment, this is a warning. In production (37% malicious marketplace
+  rate), this should be an error that blocks installation. A third skill
+  "analytics-helper" has a valid signature but the workspace has no
+  .claws/keys/ directory with marketplace public keys, making the signature
+  unverifiable.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-097 core: The platform default is approve-on-timeout. If denyDefault
+      is not set in claws.json, the generated handler does not include a
+      timeout override. After 30 seconds of human inaction, the R5 tool
+      (send-payment) executes automatically. This contradicts claws's deny-
+      default philosophy and is a critical security gap.
+    spec_impact: "CL-02 G-ELICIT-TIMEOUT — platform default contradiction"
+    pitfall: "P-097"
+
+  - id: F02
+    severity: major
+    description: >
+      The emit phase must ALWAYS generate the deny-on-timeout override,
+      regardless of claws.json configuration. This is a non-configurable
+      safety default: `AbortSignal.timeout()` handler returns
+      { block: true, blockReason: "claws-timeout-deny" }. If claws.json
+      explicitly sets approveOnTimeout: true, the build fails with a hard
+      error explaining the security implication.
+    spec_impact: "CL-04 EMIT — unconditional deny-on-timeout generation"
+    pitfall: "P-097"
+
+  - id: F03
+    severity: major
+    description: >
+      P-098 core: 37% of marketplace skills are malicious. A warning for
+      unsigned skills in production is insufficient — developers may
+      rubber-stamp warnings. Enterprise production must treat unsigned skills
+      as errors that block installation. The severity must be environment-
+      configurable: warning for dev, error for staging/production.
+    spec_impact: "CL-02 G-SUPPLY — environment-based severity configuration"
+    pitfall: "P-098"
+
+  - id: F04
+    severity: major
+    description: >
+      `claws.json#supply.unsignedSeverity` controls the severity: "warning"
+      (dev default) or "error" (production default). The default depends on
+      the environment detection: if claws.json#environment is "production" or
+      "staging," the default is "error." If "development" or unset, the
+      default is "warning." Explicit configuration always overrides.
+    spec_impact: "CL-01 schema — unsignedSeverity configuration"
+    pitfall: "P-098"
+
+  - id: F05
+    severity: major
+    description: >
+      P-099 core: analytics-helper has a valid Ed25519 signature. But
+      .claws/keys/ does not exist — no marketplace public keys are available
+      to verify the signature. G-SUPPLY currently checks: "does the skill
+      have a signature?" (yes) and passes. The signature is cosmetic. It
+      provides no security because it cannot be verified.
+    spec_impact: "CL-02 G-SUPPLY — presence vs verification"
+    pitfall: "P-099"
+
+  - id: F06
+    severity: major
+    description: >
+      G-SUPPLY must check BOTH signature presence AND verification capability.
+      Verification capability means: (1) .claws/keys/ directory exists, (2)
+      the directory contains at least one public key, (3) the skill's
+      signature can be verified against one of the keys. All three conditions
+      are required for a "verified" status.
+    spec_impact: "CL-02 G-SUPPLY — three-part verification check"
+    pitfall: "P-099"
+
+  - id: F07
+    severity: warning
+    description: >
+      `claws init` should create .claws/keys/ and optionally fetch the
+      marketplace public key bundle. Without init, workspaces created by
+      manual `claws build` have no key store. The init step is the correct
+      place for key provisioning, and its absence should be detectable.
+    spec_impact: "CL-05 init — key store provisioning"
+    pitfall: "P-099"
+
+  - id: F08
+    severity: warning
+    description: >
+      The combination of P-098 and P-099 creates a false-security spectrum:
+      unsigned skills are warned (not blocked), and signed skills pass
+      without verification. Both unsigned and signed skills are effectively
+      unvetted. Only skills with both a signature AND a verifiable key store
+      provide actual security. The pinch output must distinguish all 3
+      states: unsigned, signed-unverifiable, signed-verified.
+    spec_impact: "CL-02 G-SUPPLY — three-state supply chain assessment"
+    pitfall: "P-098, P-099"
+
+  - id: F09
+    severity: warning
+    description: >
+      P-097 interacts with P-098: if an unsigned malicious skill is installed
+      (warning only) and it modifies the elicitation timeout behavior (inject
+      approve-on-timeout), the platform's original approve-on-timeout default
+      is restored through the malicious skill. claws's deny override is
+      bypassed. Supply chain and timeout defaults are connected attack surfaces.
+    spec_impact: "CL-02 — supply chain + timeout default interaction"
+    pitfall: "P-097, P-098"
+
+  - id: F10
+    severity: note
+    description: >
+      Key rotation for marketplace public keys: when the marketplace rotates
+      keys, old signatures become unverifiable unless the previous key is
+      retained. .claws/keys/ should maintain a key history with validity
+      periods. `claws fleet sync-keys` should distribute updated key bundles
+      across the fleet.
+    spec_impact: "CL-05 fleet — marketplace key rotation"
+    pitfall: "P-099"
+
+  - id: F11
+    severity: note
+    description: >
+      The 37% malicious rate (P-098) should be sourced from claws's own
+      scanning telemetry, not hardcoded. `claws.json#supply.assumedMaliciousRate`
+      could be updated periodically from a threat intelligence feed. The rate
+      affects severity calculation: if the rate drops below 5%, warning
+      severity becomes more defensible even in production.
+    spec_impact: "CL-02 G-SUPPLY — dynamic threat rate"
+    pitfall: "P-098"

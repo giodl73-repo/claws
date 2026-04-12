@@ -1,0 +1,124 @@
+name: S03-incremental-publish-skip
+series: package-output
+version: 1
+specs: [CL-05, CL-06, CL-07]
+description: >
+  The publish pipeline detects that the compiled governance artifacts have not
+  changed since the last successful publish by comparing content hashes. When
+  hashes match, the pipeline skips the publish step entirely and reports a
+  no-op. When hashes differ, the pipeline auto-increments the patch version
+  and proceeds with publishing. This scenario validates content-hash based
+  skip detection, automatic version bumping logic, and the edge case where
+  metadata changes (badge tier upgrade) trigger a publish even when rule
+  content is unchanged.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "TOOLS.md"
+        - "claws.json"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  A CI pipeline runs claws publish on every commit. Most commits do not
+  change governance files, so publishing identical content wastes registry
+  storage and creates confusing version history. The pipeline should detect
+  content equivalence and skip. When governance files do change, the version
+  must auto-increment to avoid "version already exists" errors from the
+  registry. The content hash comparison must cover all artifacts that go
+  into the package, not just the governance IR. If the badge tier changes
+  (because a previously failing rule now passes) but the rules themselves
+  are unchanged, this is a metadata change that warrants a new publish.
+  The hash must therefore include both governance content and computed
+  metadata. Skipping a metadata-only change would leave consumers with
+  an outdated badge for rules they already have.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The content hash must be computed over the canonical serialization
+      of all publishable artifacts, not individual file hashes XORed
+      together. XOR-based composite hashes have collision risks (swapping
+      two files with the same hash produces the same composite). A
+      Merkle tree or ordered concatenation hash provides stronger
+      integrity guarantees. The hash algorithm should match what the
+      CGR uses for consistency.
+    spec_impact: "CL-06 Section 7 — publish content hash algorithm"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      Auto version bumping must respect semver semantics. A patch bump
+      is appropriate for content changes that do not alter the rule
+      schema or remove rules. If rules are removed or the governance
+      IR schema changes, a minor or major bump is needed. The pipeline
+      should analyze the diff between old and new governance IRs to
+      determine the appropriate semver increment, not blindly patch
+      bump every change.
+    spec_impact: "CL-05 Section 7 — semver-aware version bumping"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      The "last published" hash must be stored in a location that
+      survives across CI runs. Options include: a .claws/publish-state
+      file committed to the repo, a registry tag query to fetch the
+      latest published version's hash, or a CI cache artifact. Each
+      has tradeoffs. The committed file adds noise to the repo but
+      works offline. The registry query adds a network dependency but
+      is always accurate. The CI cache is fast but ephemeral. The
+      design must pick one as primary and document the tradeoffs.
+    spec_impact: "CL-06 Section 8 — publish state persistence"
+    pitfall: null
+  - id: F04
+    severity: minor
+    description: >
+      The skip notification must be explicit and visible in CI output.
+      A silent skip (exit 0 with no output) is indistinguishable from
+      a successful publish. The pipeline should emit a PUBLISH-SKIPPED
+      diagnostic with the matched hash value so CI operators can
+      confirm the skip was intentional, not a bug in hash comparison.
+    spec_impact: "CL-05 Section 8 — skip notification visibility"
+    pitfall: null
+  - id: F05
+    severity: major
+    description: >
+      Race conditions in CI when multiple pipelines attempt to publish
+      concurrently must be handled. If two commits change governance
+      files simultaneously, both pipelines detect a hash mismatch and
+      attempt to publish the same auto-incremented version. The second
+      publish will fail with a version conflict. The pipeline must
+      handle this by retrying with the next version, not by failing
+      the build.
+    spec_impact: "CL-05 Section 9 — concurrent publish conflict resolution"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      A --force-publish flag should bypass the skip check for cases
+      where the developer wants to republish identical content (e.g.,
+      after a registry purge or to update package metadata unrelated
+      to governance content). The force flag must still auto-increment
+      the version to avoid registry conflicts.
+    spec_impact: "CL-05 Section 10 — force publish override"
+    pitfall: null
+  - id: F07
+    severity: minor
+    description: >
+      The hash comparison log should be available in the CGR as a
+      publish_decision section recording: previous_hash, current_hash,
+      decision (SKIP or PUBLISH), and if PUBLISH, the version_from and
+      version_to values. This creates an auditable record of every
+      publish decision, including skips, for compliance traceability.
+    spec_impact: "CL-07 Section 19 — publish decision audit trail"
+    pitfall: null

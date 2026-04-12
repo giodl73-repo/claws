@@ -1,0 +1,135 @@
+name: S02-p133-partial-emit-no-enforcement
+series: pitfall-final-2
+version: 1
+specs: [CL-04]
+description: >
+  Validates the atomic staging protocol for emit: if SKILL.md emits but
+  index.ts generation fails, the workspace must not have advisory-only
+  governance (P-133). All artifacts go to .claws/staging/ first and are
+  promoted atomically only when the full set is validated.
+
+expect:
+  artifacts:
+    - name: SKILL.md
+      status: staged
+    - name: index.ts
+      status: failed
+    - name: exec-approvals.json
+      status: staged
+  plugin_hooks: []
+  skill_content: null
+  approvals: null
+
+simulate:
+  failures:
+    - component: emit
+      type: partial-artifact
+      error: "index.ts generation failed — TypeScript template error on handler binding"
+  halt: emit
+  budget: null
+
+problem: >
+  The emit phase generates SKILL.md successfully into .claws/staging/ but
+  fails on index.ts due to a TypeScript template error. Without the atomic
+  staging protocol, SKILL.md would already be in place (L1 advisory) while
+  index.ts (L2/L3 enforcement) is missing. The user sees governance content
+  in SKILL.md and believes the workspace is governed, but no runtime
+  enforcement exists. The OC agent follows SKILL.md advisories voluntarily
+  but has no plugin-level enforcement.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-133 core: SKILL.md without index.ts is advisory governance only.
+      The OC agent may read SKILL.md instructions but cannot be enforced.
+      A "please don't use send-payment" in SKILL.md is meaningless without
+      the before_tool_call hook in index.ts that actually blocks the tool.
+    spec_impact: "CL-04 EMIT — advisory without enforcement gap"
+    pitfall: "P-133"
+
+  - id: F02
+    severity: major
+    description: >
+      The atomic staging protocol: all artifacts emit to .claws/staging/
+      first. Only after all artifacts validate (schema check, cross-reference
+      check, structural check) are they promoted to .claws/compiled/ in a
+      single atomic move operation. If any artifact fails, the entire staging
+      directory is rolled back.
+    spec_impact: "CL-04 PC2 — staging directory protocol"
+    pitfall: "P-133"
+
+  - id: F03
+    severity: major
+    description: >
+      Rollback must not destroy the previous valid compilation. If
+      .claws/compiled/ has a valid prior set and the new emit fails,
+      the prior set remains in place. The staging directory is cleaned
+      but the compiled directory is untouched. This preserves governance
+      continuity during failed recompilations.
+    spec_impact: "CL-04 EMIT — rollback preserves prior compilation"
+    pitfall: "P-133"
+
+  - id: F04
+    severity: major
+    description: >
+      The build output must clearly distinguish "build succeeded" (all
+      artifacts promoted) from "build failed" (staging rolled back). A
+      partial success message ("SKILL.md generated, index.ts failed") may
+      mislead developers into thinking partial governance is acceptable.
+      The exit code must be non-zero on any artifact failure.
+    spec_impact: "CL-04 EMIT — binary success/failure reporting"
+    pitfall: "P-133"
+
+  - id: F05
+    severity: major
+    description: >
+      If the developer manually copies SKILL.md from .claws/staging/ to
+      the workspace root, they bypass the atomic protocol. The staging
+      directory should be cleaned on failure so that partial artifacts
+      are not available for manual extraction. Alternatively, staging
+      artifacts should be clearly marked as incomplete.
+    spec_impact: "CL-04 EMIT — staging cleanup on failure"
+    pitfall: "P-133"
+
+  - id: F06
+    severity: warning
+    description: >
+      The exec-approvals.json artifact staged successfully but index.ts
+      failed. Even if exec-approvals.json were promoted alone, it has no
+      effect without the plugin that reads it. The cross-artifact dependency
+      graph must be validated: exec-approvals.json depends on index.ts
+      which depends on SKILL.md. All or nothing.
+    spec_impact: "CL-04 EMIT — artifact dependency graph"
+    pitfall: "P-133"
+
+  - id: F07
+    severity: warning
+    description: >
+      The TypeScript template error that caused index.ts failure should
+      produce a diagnostic pointing to the specific template binding that
+      failed. Template errors are often caused by workspace-specific
+      configurations (unusual tool names, special characters in descriptions)
+      that the template engine does not escape.
+    spec_impact: "CL-04 EMIT — template error diagnostics"
+    pitfall: "P-133"
+
+  - id: F08
+    severity: note
+    description: >
+      Fleet broadcast of a partial compilation: if `claws fleet broadcast`
+      sends artifacts before the staging protocol validates them, remote
+      workspaces receive incomplete governance. Broadcast must verify
+      .claws/compiled/ integrity before sending, not .claws/staging/.
+    spec_impact: "CL-05 fleet — broadcast integrity check"
+    pitfall: "P-133"
+
+  - id: F09
+    severity: note
+    description: >
+      The staging protocol adds one extra file system operation (rename
+      directory) to the emit phase. On Windows, directory renames can fail
+      if any file in the directory is open. The staging-to-compiled promotion
+      must handle locked file errors with a retry and clear diagnostic.
+    spec_impact: "CL-04 EMIT — Windows file lock handling in staging"
+    pitfall: "P-133"

@@ -1,0 +1,115 @@
+name: S05-circular-delegation
+series: cross-file-conflicts
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates CIRCULAR-DELEGATION conflict: AGENTS.md declares Agent A
+  delegating to Agent B and Agent B delegating to Agent A, creating a
+  cycle in the delegation graph. This is an error-severity conflict
+  requiring human review (same-cluster tension, no auto-resolve).
+
+expect:
+  governance_ir:
+    version: 1
+    analysis:
+      conflicts:
+        - category: CIRCULAR-DELEGATION
+          severity: error
+          files: [AGENTS.md]
+          agents: [agent-alpha, agent-beta]
+          cycle: [agent-alpha, agent-beta, agent-alpha]
+          resolution: "requires human review — remove one delegation direction"
+  violations:
+    - category: CIRCULAR-DELEGATION
+      severity: error
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  AGENTS.md declares two subagents: "agent-alpha" delegates tools [web-search]
+  to "agent-beta", and "agent-beta" delegates tools [file-writer] to
+  "agent-alpha". This creates a delegation cycle: alpha -> beta -> alpha.
+  The cycle is detected by graph analysis in the ANALYZE phase. Unlike other
+  conflicts which auto-resolve via cross-cluster priority, circular delegation
+  is same-cluster and must escalate to human review.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Cycle detection in the delegation graph must use standard algorithms
+      (DFS-based cycle detection, topological sort failure). The graph may
+      have longer cycles: A->B->C->A. The detection must find all cycles,
+      not just 2-node cycles. The cycle path must be reported for diagnosis.
+    spec_impact: "CL-04 ANALYZE — general cycle detection algorithm"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The CL-04 spec says circular delegation "escalates to human review."
+      This means the compiler cannot auto-resolve the conflict — it halts
+      and waits for the developer to fix AGENTS.md. Unlike other error-
+      severity conflicts that have clear resolutions, this one requires
+      understanding the agents' purposes to decide which direction to keep.
+    spec_impact: "CL-04 conflict resolution — human review escalation path"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      A cycle in the delegation graph also implies a potential infinite
+      delegation loop at runtime: A asks B to do work, B delegates to A,
+      A delegates to B, etc. The G-BOUND recursion limit would eventually
+      stop this, but the compile-time detection is much better. The cycle
+      detection prevents the runtime problem entirely.
+    spec_impact: "CL-02 G-BOUND — delegation cycle vs recursion limit"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Self-delegation (Agent A delegates to itself) is a degenerate cycle
+      of length 1. It should be caught by the same cycle detection logic.
+      AGENTS.md formats might not make self-delegation obvious (e.g., an
+      agent's tools list includes itself under a different name alias).
+    spec_impact: "CL-04 ANALYZE — self-delegation detection"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The tension model classifies circular delegation as "same-cluster"
+      because both sides of the conflict come from AGENTS.md (execution
+      cluster). Cross-cluster conflicts (governance vs execution) auto-resolve
+      by priority. Same-cluster conflicts have no priority tiebreaker, hence
+      human review.
+    spec_impact: "CL-04 tension model — same-cluster escalation rationale"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      JSON serialization of the delegation graph with a cycle would create
+      an infinite structure. The GovernanceIR serializer must detect cycles
+      in the graph and represent them as references or break the cycle with
+      a marker. The cycle information in the conflict report must survive
+      serialization.
+    spec_impact: "CL-04 GovernanceIR serialization — cycle-safe graph format"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      In a fleet with shared agent pools, Agent A in workspace 1 may delegate
+      to Agent B in workspace 2, and Agent B delegates to Agent A. The cycle
+      spans workspaces and is invisible within a single workspace compilation.
+      Fleet-level cycle detection (CL-05) is needed for cross-workspace cycles.
+    spec_impact: "CL-05 fleet — cross-workspace delegation cycle detection"
+    pitfall: null

@@ -1,0 +1,137 @@
+name: S03-monotonic-tightening
+series: compiled-context
+version: 1
+specs: [CL-05, CL-07]
+description: >
+  Validates monotonic tightening enforcement: a workspace fork attempts
+  to loosen a governance constraint inherited from the root. The root
+  sets G-PERM threshold at R3 (tools R3+ require capability grants).
+  The fork tries to lower the threshold to R1 (effectively disabling
+  the constraint). The compiler must reject the loosening with error
+  CRAFT-CTX-001 and preserve the root's R3 threshold.
+
+expect:
+  workspaces:
+    total: 1
+    governed: 1
+    ungoverned: 0
+    misconfigured: 0
+  drift_count: 0
+  broadcast_result: null
+  compliance:
+    governed_pass: 0
+    governed_fail: 1
+    ungoverned: 0
+    misconfigured: 0
+    vacuous_compliance: 0
+
+simulate:
+  failures:
+    - component: context-fork-compile
+      type: monotonic-tightening-violation
+      error: "CRAFT-CTX-001: fork delta loosens G-PERM threshold from R3 (root) to R1 (fork) -- monotonic tightening violation"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet root governance context sets G-PERM with threshold R3: all
+  tools classified R3 or higher require explicit capability grants. A
+  workspace fork overrides G-PERM threshold to R1, which would mean all
+  tools (even R1 observe-only) require grants -- but in practice, this
+  configuration is used to set the "grants required" flag on all tools
+  and then grant all of them, effectively bypassing the governance intent.
+  More critically, the fork could set the threshold to R5, meaning only
+  R5 tools require grants -- loosening the root's R3 constraint. The
+  monotonic tightening rule states: forks can only tighten (lower the
+  threshold number, requiring grants for more tools) or maintain the
+  root constraint, never loosen it (raise the threshold, requiring grants
+  for fewer tools). The compiler must detect loosening and emit
+  CRAFT-CTX-001 with a clear diagnostic showing the root value, fork
+  value, and the direction of the violation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Monotonic tightening must be defined per G-rule parameter, not
+      per G-rule. G-PERM has multiple parameters: threshold, grant_scope,
+      timeout. Tightening threshold means lowering the number. Tightening
+      timeout means reducing the duration. Tightening grant_scope means
+      narrowing the scope. Each parameter needs its own monotonicity
+      direction. A generic "tighter" predicate is insufficient -- the
+      spec must define the partial order for each parameter.
+    spec_impact: "CL-05 Monotonic Tightening -- per-parameter partial order definitions for all G-rules"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The CRAFT-CTX-001 error must include enough context for the
+      operator to fix the fork. The error should show: (a) which G-rule
+      parameter was loosened, (b) the root value, (c) the fork value,
+      (d) the tightening direction, (e) the allowed range for the fork
+      value. Without all five fields, the operator cannot determine
+      the correct fix without inspecting the root context manually.
+    spec_impact: "CL-05 Diagnostics -- CRAFT-CTX-001 must include 5-field violation context"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Some G-rules have parameters where "tighter" is ambiguous. For
+      G-BOUND (audit chain), does tightening mean more events (lower
+      threshold) or longer retention (higher duration)? Both are "more
+      governance" but in different dimensions. The monotonicity spec must
+      handle multi-dimensional tightening where each dimension has its
+      own direction. A fork that tightens in one dimension but loosens
+      in another is a partial violation.
+    spec_impact: "CL-05 Monotonic Tightening -- multi-dimensional tightening with partial violation detection"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The scenario shows a fork-level violation. In a multi-level fork
+      hierarchy (root -> department fork -> team fork -> workspace fork),
+      monotonic tightening must be enforced at every level. Team fork
+      cannot loosen department fork's constraints, even if the root would
+      allow it. The enforcement must be transitive through the fork chain.
+    spec_impact: "CL-05 Fork Hierarchy -- transitive monotonic tightening across fork levels"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      An administrator may need to legitimately loosen a constraint for
+      a specific workspace (e.g., a development sandbox). The monotonic
+      tightening rule should support an explicit override mechanism with
+      audit trail: `monotonic_override: true` in claws.json with a
+      required justification field. The override is logged as a governance
+      exception, not a silent bypass.
+    spec_impact: "CL-05 Monotonic Override -- explicit loosening with required justification and audit"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The error CRAFT-CTX-001 halts compilation of the fork. This means
+      the workspace cannot compile any governance until the violation is
+      fixed. If the violation is in one G-rule but the workspace needs
+      the other G-rules compiled urgently, the all-or-nothing halt may
+      be too aggressive. Consider a mode where the compiler emits the
+      fork with the loosened parameter replaced by the root's value and
+      a warning, rather than a hard error.
+    spec_impact: "CL-05 Compilation Mode -- soft-enforcement option that replaces loosened values with root values"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      CRAFT-CTX-001 is a new error code not defined in existing specs.
+      The error code namespace (CRAFT-CTX-*) should be reserved for
+      context fork compilation errors. The spec should define the error
+      code range and include CRAFT-CTX-001 (monotonic violation),
+      CRAFT-CTX-002 (fork reference resolution failure), CRAFT-CTX-003
+      (root hash mismatch) as the initial set.
+    spec_impact: "CL-05 Error Codes -- reserve CRAFT-CTX-* namespace for context fork errors"
+    pitfall: null

@@ -1,0 +1,157 @@
+name: S08-p233-declared-obo-unverified
+series: pitfall-thoth-2
+version: 1
+specs: [CL-05, CL-06]
+description: >
+  Validates that DECLARED tier badges carry a self-reported qualifier (P-233).
+  A skill badge shows obo: none but the handler actually calls email APIs,
+  meaning the skill acts on behalf of users without declaring it. At DECLARED
+  tier, the OBO claim is unverified — the badge must make this visible to
+  consumers rather than presenting the claim as trustworthy.
+
+expect:
+  governance_ir:
+    version: 1
+    badge:
+      tier: DECLARED
+      obo_claim: none
+      obo_verified: false
+      qualifier: self-reported
+    analysis:
+      rules_evaluated: true
+      obo_check: true
+  violations: []
+  warnings:
+    - code: CLAWS-W233
+      message: "DECLARED badge obo: none is self-reported — handler may perform OBO actions undetected"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: badge-display
+      type: obo-mismatch
+      error: "Badge shows obo: none but static analysis of handler.ts found email API calls (sendMail, createDraft)"
+    - component: clawhub-registry
+      type: unverified-claim
+      error: "DECLARED tier skill published with obo: none — no runtime verification performed"
+  halt: null
+  budget: null
+
+problem: >
+  A skill developer publishes a productivity skill to ClawHub with badge tier
+  DECLARED and obo: none, claiming the skill does not act on behalf of users.
+  However, the handler.ts imports the Microsoft Graph SDK and calls sendMail()
+  to send emails on behalf of the authenticated user. The DECLARED tier does
+  not require runtime verification — it accepts the developer's self-reported
+  claims. A consumer installs the skill, trusting the obo: none badge, and
+  discovers only through network monitoring that the skill sends emails using
+  their identity. The badge display gave no indication that the OBO claim was
+  unverified. The consumer expected the badge to mean "verified to not perform
+  OBO actions" when it actually meant "developer says it does not perform OBO
+  actions, and we have not checked."
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-233 core: DECLARED tier badges must carry a visible "self-reported"
+      qualifier on all claims including OBO. The badge display must
+      distinguish between "obo: none (verified)" and "obo: none
+      (self-reported)." Without the qualifier, consumers cannot assess the
+      trustworthiness of the claim and make incorrect security assumptions
+      about the skill's behavior.
+    spec_impact: "CL-05 ClawHub Badges Amendment — self-reported qualifier on DECLARED tier claims"
+    pitfall: "P-233"
+
+  - id: F02
+    severity: major
+    description: >
+      The ClawHub registry page for a DECLARED skill must include a prominent
+      disclaimer: "This skill's claims are self-reported by the developer and
+      have not been independently verified. Upgrade to VERIFIED tier for
+      runtime-verified claims." The disclaimer must be adjacent to the badge,
+      not buried in a details section.
+    spec_impact: "CL-06 ClawHub — DECLARED tier disclaimer placement"
+    pitfall: "P-233"
+
+  - id: F03
+    severity: major
+    description: >
+      Static analysis of the handler source code can detect many OBO
+      violations without runtime verification. If the handler imports known
+      OBO-capable APIs (Graph SDK, SMTP, OAuth token exchange), the
+      compiler should produce a warning that the obo: none claim may be
+      inaccurate. This provides a middle ground between no verification
+      (DECLARED) and full runtime verification (VERIFIED).
+    spec_impact: "CL-05 ClawHub Badges Amendment — static analysis advisory for DECLARED claims"
+    pitfall: "P-233"
+
+  - id: F04
+    severity: major
+    description: >
+      The skill install command (claws skill install) must surface the
+      badge tier prominently. A DECLARED skill installation should require
+      explicit acknowledgment: "This skill is DECLARED tier. OBO claims
+      are self-reported. Install anyway? [y/N]". This friction ensures
+      consumers make an informed decision about trust.
+    spec_impact: "CL-05 Maker Experience — installation acknowledgment for DECLARED tier"
+    pitfall: "P-233"
+
+  - id: F05
+    severity: major
+    description: >
+      The three badge tiers (DECLARED, VERIFIED, CERTIFIED) must have
+      clear, documented semantics that consumers can reference. DECLARED
+      means "developer attests, no verification." VERIFIED means "runtime
+      behavior analyzed, claims match observed behavior." CERTIFIED means
+      "third-party audit confirms claims." These definitions must be in
+      the CL-05 spec and linked from every badge display.
+    spec_impact: "CL-05 ClawHub Badges Amendment — tier definition documentation"
+    pitfall: "P-233"
+
+  - id: F06
+    severity: warning
+    description: >
+      A developer who unknowingly performs OBO actions (e.g., using a
+      library that internally calls sendMail) may honestly claim obo: none.
+      The DECLARED tier's weakness is not just intentional deception but
+      also developer ignorance. The scaffold command should include an OBO
+      checklist that prompts the developer to consider common OBO patterns
+      before choosing the OBO declaration.
+    spec_impact: "CL-05 Maker Experience Amendment — OBO checklist in scaffold"
+    pitfall: "P-233"
+
+  - id: F07
+    severity: warning
+    description: >
+      The badge tier should be filterable in ClawHub search results.
+      Consumers should be able to search for "VERIFIED obo: none" skills
+      only, excluding DECLARED skills from results. If DECLARED skills
+      appear alongside VERIFIED skills without clear visual differentiation,
+      consumers may not notice the trust difference.
+    spec_impact: "CL-06 ClawHub — tier-based search filtering"
+    pitfall: "P-233"
+
+  - id: F08
+    severity: warning
+    description: >
+      Fleet administrators should be able to set a minimum badge tier for
+      skill installation across their fleet. A policy of "VERIFIED minimum"
+      would prevent any DECLARED skill from being installed in the fleet's
+      workspaces. This gives enterprises a blanket protection against
+      unverified OBO claims without relying on individual consumers to
+      check badges.
+    spec_impact: "CL-06 Fleet Policy — minimum badge tier for installation"
+    pitfall: "P-233"
+
+  - id: F09
+    severity: note
+    description: >
+      The transition from DECLARED to VERIFIED should be encouraged through
+      developer experience. The skill dashboard should show a "Verify your
+      skill" call-to-action with an estimated time and steps. Skills that
+      remain at DECLARED tier for more than 30 days should receive a
+      reminder notification encouraging upgrade.
+    spec_impact: "CL-05 ClawHub Badges Amendment — tier upgrade encouragement"
+    pitfall: "P-233"

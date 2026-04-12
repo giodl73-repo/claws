@@ -1,0 +1,151 @@
+name: S13-p238-compiled-workflow-feedback-loop
+series: pitfall-thoth-2
+version: 1
+specs: [CL-04, CL-05]
+description: >
+  Validates that the PARSE phase detects when a compiled workflow artifact is
+  accidentally fed back as source input. When a developer renames a
+  .compiled.yaml output to look like a source file, the compiler must detect
+  the compiled-output markers and refuse to process it as source, preventing
+  governance injection from compounding across compilation cycles.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      files_rejected: [workflow.yaml]
+    analysis:
+      rules_evaluated: true
+  violations:
+    - code: CLAWS-E201
+      message: "Compiled workflow detected as source input — workflow.yaml contains claws compilation markers"
+      severity: error
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: parse
+      type: feedback-loop
+      error: "workflow.yaml contains __claws_compiled header — refusing to parse as source"
+    - component: parse
+      type: governance-compounding
+      error: "Governance rules would be injected on top of previously injected rules"
+  halt: null
+  budget: null
+
+problem: >
+  A developer runs claws compile, producing workflow.compiled.yaml. They rename
+  it to workflow.yaml for deployment simplicity. On the next compilation, the
+  PARSE phase reads workflow.yaml as source input. The compiled version already
+  contains injected governance rules from the first compilation. The compiler
+  injects governance rules again, doubling the deny constraints and creating
+  conflicting tool restrictions. After three cycles, the workflow has tripled
+  governance blocks, each slightly different due to version stamps. The agent
+  runtime encounters contradictory rules and enters a fail-closed state where
+  no tools can be invoked. The developer cannot diagnose why tools stopped
+  working because the compounded governance appears legitimate.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Every claws-compiled artifact must contain an immutable header or
+      frontmatter marker (e.g., __claws_compiled: true, version: X,
+      compiled_at: timestamp) that the PARSE phase checks before processing.
+      If the marker is present, the file is rejected as source with
+      CLAWS-E201. The marker must be in a location that survives common
+      file transformations (renaming, moving, copying).
+    spec_impact: "CL-04 PARSE — compiled artifact detection marker"
+    pitfall: P-238
+
+  - id: F02
+    severity: major
+    description: >
+      The detection must not rely solely on file naming conventions
+      (.compiled.yaml suffix). Users routinely rename files. The marker
+      must be embedded in file content — a YAML comment header, a JSON
+      metadata field, or a frontmatter block. Content-based detection is
+      resilient to renaming, unlike filename-based detection.
+    spec_impact: "CL-04 PARSE — content-based detection over filename"
+    pitfall: P-238
+
+  - id: F03
+    severity: major
+    description: >
+      Governance compounding is particularly dangerous because each layer
+      of injected rules may use slightly different constraint IDs or
+      versions. The runtime must evaluate all of them, leading to
+      contradictory allow/deny decisions. A single compilation cycle must
+      be idempotent — running compile on already-compiled output must
+      produce an error, not compound the governance.
+    spec_impact: "CL-04 PARSE — idempotence guarantee against compounding"
+    pitfall: P-238
+
+  - id: F04
+    severity: major
+    description: >
+      The error message must explain the feedback loop risk clearly:
+      "This file appears to be a compiled claws output. Recompiling it
+      would inject duplicate governance rules. Use the original source
+      files instead." The message should include the detected marker
+      location and the original compilation timestamp for traceability.
+    spec_impact: "CL-05 DX — feedback loop error message clarity"
+    pitfall: P-238
+
+  - id: F05
+    severity: warning
+    description: >
+      A developer might strip the claws marker intentionally to force
+      recompilation. The compiler should detect structural patterns of
+      compiled output even without the marker — for example, the presence
+      of governance rule blocks with claws-specific formatting or IDs.
+      This defense-in-depth detection catches intentional marker removal.
+    spec_impact: "CL-04 PARSE — structural compiled-output detection"
+    pitfall: P-238
+
+  - id: F06
+    severity: major
+    description: >
+      In CI/CD pipelines, compiled artifacts may be checked into
+      repositories alongside source files. The PARSE phase must
+      distinguish source directories from output directories. The
+      claws.json configuration should define explicit source paths and
+      exclude paths, preventing compiled artifacts from being scanned
+      even if they reside in the workspace.
+    spec_impact: "CL-04 PARSE — source vs output directory distinction"
+    pitfall: P-238
+
+  - id: F07
+    severity: warning
+    description: >
+      The compiled artifact marker should include a hash of the source
+      files that produced it. When the source files change but the
+      compiled artifact is not regenerated, claws drift can detect the
+      staleness. This hash chain also enables detecting when a compiled
+      artifact has been manually edited after compilation.
+    spec_impact: "CL-04 EMIT — source hash chain in compiled artifacts"
+    pitfall: P-238
+
+  - id: F08
+    severity: warning
+    description: >
+      The feedback loop is self-reinforcing: each compilation adds more
+      governance, making the file larger, which may trigger size-based
+      warnings, which the developer might ignore because the file
+      "compiles successfully." The compiler must treat feedback detection
+      as an error, not a warning, to break the cycle decisively.
+    spec_impact: "CL-04 PARSE — error severity for feedback detection"
+    pitfall: P-238
+
+  - id: F09
+    severity: note
+    description: >
+      Documentation should explicitly warn against renaming compiled
+      output to source filenames. The claws compile output should
+      include a terminal message: "Output written to X.compiled.yaml.
+      Do not rename this file to remove the .compiled suffix."
+    spec_impact: "CL-05 DX — post-compile rename warning"
+    pitfall: P-238

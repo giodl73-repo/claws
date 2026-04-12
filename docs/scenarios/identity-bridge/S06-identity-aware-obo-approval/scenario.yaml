@@ -1,0 +1,128 @@
+name: S06-identity-aware-obo-approval
+series: identity-bridge
+version: 1
+specs: [CL-02, CL-07]
+description: >
+  Validates that OBO (On Behalf Of) tokens include the OIDC signer
+  identity, creating an auditable chain from the human approver through
+  the agent to the external action. The G-ELICIT approval event records
+  who approved, the OBO token carries their identity, and the external
+  API receives a token that traces back to a specific human.
+
+expect:
+  attack_class: non-repudiation-failure
+  defense_layer: identity-aware-obo
+  blocked: true
+  audit_event: OBO-IDENTITY-CHAIN-VERIFIED
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace uses send-payment (R5, OBO) with G-ELICIT requiring human
+  approval. User alice (sg-deployers, tier 3) triggers a workflow that
+  invokes send-payment. G-ELICIT presents the approval prompt to alice.
+  Alice approves. The OBO token used for the payment API call must
+  include alice's identity (from her OIDC JWT): her user principal name,
+  her group memberships, and the timestamp of her approval. The external
+  payment API receives a token that says "this action was authorized by
+  alice@enterprise.com at 2026-04-11T14:30:00Z via G-ELICIT approval
+  in workspace-alpha." If alice later denies approving the payment, the
+  audit chain (OIDC JWT -> G-ELICIT event -> OBO token -> API call)
+  provides non-repudiation evidence. An attempt to use an OBO token
+  without a valid OIDC signer identity is blocked.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The OBO token format must support identity embedding. Standard
+      API tokens (API keys, bearer tokens) do not carry signer identity.
+      The OBO mechanism must either: (a) use a token format that supports
+      embedded claims (JWT with custom claims), or (b) attach the signer
+      identity as a separate header alongside the API token. Option (a)
+      is more secure (tamper-evident) but requires the external API to
+      validate JWT claims. Option (b) is simpler but the header can be
+      stripped or forged.
+    spec_impact: "CL-02 OBO Token Format -- JWT with signer identity claims vs header-based approach"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The identity chain (OIDC -> G-ELICIT -> OBO -> API) has 4 links.
+      If any link is broken (e.g., G-ELICIT event is not linked to the
+      OBO token), non-repudiation fails. Each link must carry a reference
+      to the previous link: the OBO token references the G-ELICIT event
+      ID, the G-ELICIT event references the OIDC session ID, the API
+      call log references the OBO token ID. The chain must be traversable
+      in both directions for forensic investigation.
+    spec_impact: "CL-02 Identity Chain -- bidirectional traversal with link references at each step"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Non-repudiation requires that alice cannot claim someone else
+      approved on her behalf. If alice's OIDC session was hijacked
+      (session theft), the identity chain shows alice's identity but the
+      actual approver was the attacker. The identity chain provides
+      non-repudiation for alice's credentials, not for alice herself.
+      The spec must acknowledge this limitation and recommend session-
+      binding mechanisms (device binding, IP correlation) as additional
+      non-repudiation evidence.
+    spec_impact: "CL-02 Non-Repudiation -- credential-level non-repudiation with session-binding recommendations"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The external payment API may not support or inspect the signer
+      identity in the OBO token. If the API ignores the identity claims,
+      the chain exists in claws's audit trail but the external service
+      has no record of who authorized the action. For full non-repudiation,
+      the external API must validate and log the signer identity. This
+      is outside claws's control but should be documented as a deployment
+      requirement.
+    spec_impact: "CL-02 OBO Non-Repudiation -- document external API requirements for identity chain completeness"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The approval timestamp in the OBO token must be synchronized.
+      If the workspace clock and the external API clock differ, the
+      timestamp chain becomes inconsistent. The OBO token should use
+      a trusted timestamp source (e.g., the OIDC provider's token
+      issuance time) rather than the local workspace clock. Clock skew
+      between systems should not break the identity chain.
+    spec_impact: "CL-02 OBO Identity -- use OIDC provider timestamp, not local clock, for approval time"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      An OBO token without a valid OIDC signer identity is blocked. But
+      in development environments without SSO, there is no OIDC identity.
+      The OBO mechanism must support a development mode where the signer
+      identity is a local development identity (not production-grade
+      non-repudiation). The development identity must be clearly marked
+      as non-production in the OBO token to prevent accidental use in
+      production.
+    spec_impact: "CL-02 OBO Identity -- development mode with marked non-production identity"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The identity-aware OBO pattern enables compliance reporting: "all
+      payments in Q1 were authorized by humans in the sg-deployers group."
+      This compliance query traverses the identity chain across all OBO
+      invocations. The audit trail must be queryable by signer identity,
+      time range, tool name, and workspace. A dedicated audit query API
+      or CLI command (`claws audit query --signer alice --tool send-payment
+      --since 2026-01-01`) would make compliance reporting practical.
+    spec_impact: "CL-02 Audit Query -- CLI command for identity-chain-based compliance queries"
+    pitfall: null

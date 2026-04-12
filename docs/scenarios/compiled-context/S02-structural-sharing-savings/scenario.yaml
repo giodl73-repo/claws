@@ -1,0 +1,133 @@
+name: S02-structural-sharing-savings
+series: compiled-context
+version: 1
+specs: [CL-05, CL-07]
+description: >
+  Validates structural sharing savings in a 100-workspace fleet. The
+  governance root is 5KB. Each workspace fork adds ~200B of delta
+  (workspace-specific constraints). Without structural sharing, total
+  storage is 100 x 5KB = 500KB. With sharing, total is 5KB root +
+  100 x 200B deltas = 25KB. The scenario verifies that the compiled
+  context uses structural sharing and that savings are measurable.
+
+expect:
+  workspaces:
+    total: 100
+    governed: 100
+    ungoverned: 0
+    misconfigured: 0
+  drift_count: 0
+  broadcast_result: null
+  compliance:
+    governed_pass: 100
+    governed_fail: 0
+    ungoverned: 0
+    misconfigured: 0
+    vacuous_compliance: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise fleet has 100 workspaces all inheriting from a common
+  governance root (5KB compiled GovernanceIR). Each workspace adds
+  workspace-specific constraints: custom tool classifications, role-
+  specific G-PERM grants, department-specific G-DATA labels. The average
+  fork delta is ~200 bytes. Without structural sharing, each workspace
+  stores a full 5KB compiled context (500KB total fleet storage). With
+  structural sharing, the root is stored once (5KB) and each fork stores
+  only its delta (200B x 100 = 20KB), for a total of 25KB -- a 95%
+  reduction. The compiler must implement structural sharing in the
+  compiled context format and expose storage metrics so fleet operators
+  can measure the savings. The `claws fleet stats` command should report
+  root size, average delta size, total fleet storage, and savings ratio.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Structural sharing requires a reference-based context format where
+      forks point to the root by hash rather than embedding it. If the
+      compiled context is a flat JSON file per workspace, structural
+      sharing is impossible without a separate storage layer. The
+      compiled context format must support reference nodes (e.g.,
+      { "$ref": "root:abc123" }) that resolve at load time.
+    spec_impact: "CL-04 Compiled Context Format -- support reference nodes for structural sharing"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Reference resolution at load time adds latency. When a workspace
+      loads its compiled context, it must dereference the root from the
+      fleet storage. If the fleet storage is remote (network registry),
+      load latency includes a network round-trip. The reference must
+      support local caching: the workspace keeps a local copy of the
+      root, verified by hash on startup. Cache hit means no network
+      call; cache miss means one fetch per root update.
+    spec_impact: "CL-05 Context Loading -- local root cache with hash-based invalidation"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The 200B average delta assumes small workspace-specific additions.
+      But some workspaces may have large deltas (e.g., a workspace with
+      50 custom tool classifications adds 2KB of delta). The structural
+      sharing savings depend on delta size distribution. If 10% of
+      workspaces have large deltas (2KB+), total storage is 5KB + 90 x
+      200B + 10 x 2KB = 43KB, still 91% savings. The stats command must
+      report delta size distribution (min, max, p50, p90, p99) not just
+      average, so operators can identify outsized forks.
+    spec_impact: "CL-05 Fleet Stats -- delta size distribution percentiles"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Structural sharing creates a single point of failure: if the root
+      context is corrupted or deleted, all 100 workspaces lose their
+      governance base. The root must be replicated or checksummed so
+      corruption is detected before any workspace loads a broken root.
+      The fleet storage must maintain at least 2 copies of the root
+      with independent integrity verification.
+    spec_impact: "CL-05 Fleet Storage -- root context replication and integrity verification"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      When the root is updated, old root versions must be retained until
+      all forks have rebased. If root v1 is deleted after root v2 is
+      published, but 5 workspaces have not yet rebased, those 5 cannot
+      resolve their references. Root garbage collection must be
+      reference-counted: a root version is only deleted when zero forks
+      reference it.
+    spec_impact: "CL-05 Fleet Storage -- reference-counted root garbage collection"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The savings ratio (95%) is compelling for fleet dashboards but
+      misleading if storage is not the bottleneck. At 500KB total, even
+      without sharing, storage cost is negligible. The real benefit of
+      structural sharing is not storage savings but consistency guarantee:
+      all forks share the same root bytes, so root changes propagate
+      uniformly. The messaging should emphasize consistency, not savings.
+    spec_impact: "CL-05 Fleet Context -- frame structural sharing as consistency mechanism, not storage optimization"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The scenario measures storage but not bandwidth. Fleet broadcast
+      of a root update transmits the 5KB root to all 100 workspaces.
+      With structural sharing, only the root diff (delta between v1 and
+      v2) needs to be broadcast, further reducing bandwidth. The fleet
+      broadcast protocol should support incremental root updates (diffs)
+      rather than full root replacement.
+    spec_impact: "CL-05 Fleet Broadcast -- incremental root diff transmission"
+    pitfall: null

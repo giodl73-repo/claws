@@ -1,0 +1,42 @@
+layer: "Security Layer"
+atoms:
+  tool-classification:
+    visibility: public
+    docType: feature
+    narrative: P1
+    pipeline: true
+  obo-boundary:
+    visibility: public
+    docType: headline
+    narrative: P1
+    pipeline: true
+  elicitation-gate:
+    visibility: public
+    docType: feature
+    narrative: P1
+    pipeline: true
+  a2a-governance:
+    visibility: architect
+    docType: concept
+    narrative: P2
+    pipeline: true
+  injection-defense:
+    visibility: architect
+    docType: concept
+    narrative: P2
+    pipeline: false
+  compliance-artifact:
+    visibility: public
+    docType: feature
+    narrative: P1
+    pipeline: true
+  key-management:
+    visibility: architect
+    docType: concept
+    narrative: null
+    pipeline: true
+  kill-switch:
+    visibility: public
+    docType: feature
+    narrative: P2
+    pipeline: true

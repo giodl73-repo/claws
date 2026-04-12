@@ -1,0 +1,116 @@
+name: S14-p146-nonstandard-capability-bypass
+series: pitfall-final-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates parser normalization for non-standard capability names (P-146).
+  A capability declared as "READWRITE" instead of "READ" or "WRITE" never
+  matches any G-PERM constraint, leaving the tool unconstrained.
+
+expect:
+  rules_applied: [G-PERM]
+  violations:
+    - code: CLAWS-E020
+      rule: G-PERM
+      description: "Non-standard capability 'READWRITE' — normalized to ['READ', 'WRITE']"
+  pass: false
+  severity: error
+
+simulate:
+  failures:
+    - component: parser
+      type: non-standard-capability
+      error: "Capability 'READWRITE' not in enum [READ, WRITE, EXECUTE, TRANSACT, OBSERVE]"
+  halt: null
+  budget: null
+
+problem: >
+  TOOLS.md declares a tool with capability "READWRITE." The G-PERM rule
+  checks capabilities against a constraint enum: [READ, WRITE, EXECUTE,
+  TRANSACT, OBSERVE]. "READWRITE" is not in the enum. It never matches
+  any constraint. The tool has no capability restrictions applied. The
+  developer intended to declare both READ and WRITE but used a non-standard
+  compound form. The tool is effectively unconstrained.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-146 core: Non-standard capability names silently bypass G-PERM
+      because the rule only checks for exact enum matches. "READWRITE"
+      is not "READ" and not "WRITE." It matches nothing. The tool's
+      permission constraint is empty, which means "no restrictions."
+    spec_impact: "CL-02 G-PERM — non-standard capability silent bypass"
+    pitfall: "P-146"
+
+  - id: F02
+    severity: major
+    description: >
+      Parser normalization: the TOOLS.md parser must detect non-standard
+      capabilities and attempt normalization. "READWRITE" normalizes to
+      ["READ", "WRITE"]. "RW" normalizes to ["READ", "WRITE"]. "EXEC"
+      normalizes to "EXECUTE." The normalization table must be explicit
+      and documented.
+    spec_impact: "CL-02 G-PERM — capability normalization table"
+    pitfall: "P-146"
+
+  - id: F03
+    severity: major
+    description: >
+      If normalization fails (no known mapping for the declared capability),
+      the parser must emit CLAWS-E020 as a hard error. An unrecognizable
+      capability cannot be silently ignored because ignoring it means
+      no permission constraint. The developer must fix the declaration.
+    spec_impact: "CL-02 G-PERM — unrecognizable capability is hard error"
+    pitfall: "P-146"
+
+  - id: F04
+    severity: major
+    description: >
+      Case sensitivity: "read" vs "READ" vs "Read" must all normalize to
+      "READ." The parser must uppercase all capability tokens before enum
+      matching. Case-sensitive matching would cause "read" to bypass the
+      enum just like "READWRITE" does.
+    spec_impact: "CL-02 G-PERM — case-insensitive capability matching"
+    pitfall: "P-146"
+
+  - id: F05
+    severity: major
+    description: >
+      The normalization must produce a diagnostic that shows the original
+      capability and its normalized form: "CLAWS-W019: Capability
+      'READWRITE' normalized to ['READ', 'WRITE']. Verify this matches
+      the intended tool behavior." The developer must confirm the
+      normalization is correct.
+    spec_impact: "CL-02 G-PERM — normalization confirmation diagnostic"
+    pitfall: "P-146"
+
+  - id: F06
+    severity: warning
+    description: >
+      Separator conventions: "READ_WRITE", "READ-WRITE", "READ,WRITE",
+      "READ|WRITE" all intend the same thing. The parser must split on
+      common separators (underscore, hyphen, comma, pipe) and normalize
+      each token independently. This covers most developer typo patterns.
+    spec_impact: "CL-02 G-PERM — multi-separator splitting"
+    pitfall: "P-146"
+
+  - id: F07
+    severity: warning
+    description: >
+      Custom capabilities: if a workspace defines custom capability types
+      (e.g., "APPROVE" for financial workflows), they must be declared in
+      claws.json capabilities.custom enum. Custom capabilities not in
+      the custom enum are treated as non-standard and trigger CLAWS-E020.
+    spec_impact: "CL-01 schema — custom capability types"
+    pitfall: "P-146"
+
+  - id: F08
+    severity: note
+    description: >
+      The capability enum [READ, WRITE, EXECUTE, TRANSACT, OBSERVE] maps
+      to the R1-R5 risk scale. READ/OBSERVE are R1-R2. WRITE is R3.
+      EXECUTE is R4. TRANSACT is R5. Capabilities that don't map to
+      a risk level create an inconsistency between G-PERM and G-CLASS.
+    spec_impact: "CL-02 G-PERM/G-CLASS — capability-to-risk mapping"
+    pitfall: "P-146"

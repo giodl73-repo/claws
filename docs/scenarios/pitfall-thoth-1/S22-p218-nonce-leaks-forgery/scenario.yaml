@@ -1,0 +1,135 @@
+name: S22-p218-nonce-leaks-forgery
+series: pitfall-thoth-1
+version: 1
+specs: [CL-03]
+description: >
+  Validates that the session nonce used for boundary markers never appears
+  in the assembled context content. If the nonce leaks into context (via
+  error messages, debug output, or reflection), an attacker can extract it
+  and forge boundary markers.
+
+expect:
+  attack_class: nonce-leakage
+  defense_layer: g-context
+  blocked: true
+  audit_event:
+    type: nonce-leak-detected
+    tool: "claws compile"
+    risk_level: 5
+    outcome: DENY
+    reason: "Session nonce detected in assembled context content — nonce confidentiality violated"
+
+simulate:
+  failures:
+    - component: context-assembly
+      type: nonce-in-content
+      error: "Nonce 'a1b2c3d4-e5f6-7890' appeared in error message within DATA zone"
+    - component: boundary-markers
+      type: nonce-compromised
+      error: "Attacker extracted nonce from context and forged boundary marker"
+  halt: null
+  budget: null
+
+problem: >
+  The context assembler uses nonce-based boundary markers as recommended by
+  P-217. The nonce is "a1b2c3d4-e5f6-7890-abcd-ef1234567890." During context
+  assembly, a tool call fails and the error handler includes the full marker
+  string in the error message: "Failed to parse response at boundary
+  <<<CLAWS-BOUNDARY-a1b2c3d4-e5f6-7890-abcd-ef1234567890>>>." This error
+  message enters the DATA zone of the context. An attacker's injected prompt
+  in the same context reads the error message, extracts the nonce, and
+  constructs a valid boundary marker to escape the DATA zone. The nonce-based
+  defense is nullified by the leak.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The nonce is a secret. It must be treated with the same confidentiality
+      as a cryptographic key. The nonce must never appear in error messages,
+      log entries visible to agents, debug output, or any content that enters
+      the context. All error handlers must use a nonce-free representation
+      of boundary markers (e.g., "boundary at position 1247" instead of
+      the actual marker string).
+    spec_impact: "CL-03 G-CONTEXT — nonce confidentiality in error handling"
+    pitfall: P-218
+
+  - id: F02
+    severity: major
+    description: >
+      The context assembler must perform a final scan of the assembled
+      context for the nonce string before delivery. If the nonce appears
+      anywhere in the content (not as a marker), the assembly must abort.
+      This is a defense-in-depth check that catches leaks from any source,
+      not just known leak paths like error messages.
+    spec_impact: "CL-03 G-CONTEXT — post-assembly nonce-presence scan"
+    pitfall: P-218
+
+  - id: F03
+    severity: major
+    description: >
+      Model reflection is a subtle leak vector. If the model is asked
+      "what was the boundary marker in your previous turn?" and the model
+      can recall it, the nonce has leaked through the model's context
+      window. The boundary markers should be stripped from the model's
+      visible context and only used by the context assembly layer. The
+      model should never see the actual marker strings.
+    spec_impact: "CL-03 G-CONTEXT — markers invisible to model layer"
+    pitfall: P-218
+
+  - id: F04
+    severity: major
+    description: >
+      Stack traces from crashes during context assembly may include the
+      nonce if the marker string is part of the data being processed. The
+      crash handler must redact any string matching the nonce pattern before
+      writing the stack trace. This requires the crash handler to have
+      access to the current session's nonce for redaction purposes.
+    spec_impact: "CL-03 G-CONTEXT — nonce redaction in crash handlers"
+    pitfall: P-218
+
+  - id: F05
+    severity: warning
+    description: >
+      Nonce rotation limits the blast radius of a leak. If the nonce is
+      rotated every N turns (e.g., every 5 turns), a leaked nonce from
+      turn 3 is invalid by turn 8. The rotation interval is a tradeoff:
+      shorter intervals limit exposure but add overhead. Per-turn nonces
+      are the most secure but require marker regeneration on every turn.
+    spec_impact: "CL-03 G-CONTEXT — nonce rotation policy"
+    pitfall: P-218
+
+  - id: F06
+    severity: major
+    description: >
+      Debug mode (claws compile --debug) may intentionally expose nonces
+      for diagnostic purposes. Debug mode must never be enabled in
+      production sessions. The compiler must refuse to emit governance
+      plugins with debug mode enabled, or at minimum emit a critical
+      warning that nonce confidentiality is compromised in debug mode.
+    spec_impact: "CL-03 G-CONTEXT — debug mode nonce exposure warning"
+    pitfall: P-218
+
+  - id: F07
+    severity: warning
+    description: >
+      The nonce leak detection scan must be efficient. Scanning the full
+      assembled context (which may be 100K+ tokens) for a 128-bit nonce
+      string is O(n) but the constant factor matters at scale. The scan
+      should use a fast string search algorithm (Boyer-Moore or similar)
+      and run as the last step before delivery, after all content has
+      been assembled.
+    spec_impact: "CL-03 G-CONTEXT — efficient nonce leak scan algorithm"
+    pitfall: P-218
+
+  - id: F08
+    severity: warning
+    description: >
+      Third-party tool integrations may cache or log the full context
+      including markers. If a tool integration logs the context assembly
+      output (for debugging its own integration), the nonce leaks to the
+      tool provider's logs. The context assembly API must clearly document
+      that the assembled context is confidential and must not be logged
+      by consumers.
+    spec_impact: "CL-03 G-CONTEXT — assembled context confidentiality contract"
+    pitfall: P-218

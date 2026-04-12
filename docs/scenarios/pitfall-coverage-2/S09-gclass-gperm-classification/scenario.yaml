@@ -1,0 +1,165 @@
+name: S09-gclass-gperm-classification
+series: pitfall-coverage-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates that G-CLASS uses behavioral classification precedence, not just
+  keywords (P-084), that G-PERM fires when capability constraints are defined
+  (P-085), and that capability names are normalized from a closed enum (P-086).
+  These three pitfalls cover the classification and permission rule surface.
+
+expect:
+  rules_applied: [G-CLASS, G-PERM]
+  violations:
+    - code: CLAWS-E010
+      rule: G-CLASS
+      description: "send-invoice misclassified R3 by keywords, actual R5 by behavior"
+    - code: CLAWS-E020
+      rule: G-PERM
+      description: "Capability 'READWRITE' is not in closed enum"
+  pass: false
+  severity: error
+
+simulate:
+  failures:
+    - component: classification
+      type: keyword-misclassification
+      error: "send-invoice described as 'generates invoice PDF' — classified R3, actually R5 OBO"
+    - component: permission
+      type: undefined-defaults
+      error: "No capabilities in claws.json — G-PERM never fires"
+    - component: permission
+      type: non-standard-name
+      error: "TOOLS.md uses 'READWRITE', not in closed enum [READ, WRITE, COMMUNICATE, EXECUTE, TRANSACT]"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace declares 4 tools in TOOLS.md. "send-invoice" has the description
+  "generates an invoice PDF for the customer" — no OBO keywords appear. G-CLASS
+  keyword extraction classifies it as R3 (write) but the tool actually sends
+  invoices as the user (R5 transact). claws.json has no explicit capabilities
+  section, so G-PERM never fires — all capability checks are silently disabled.
+  One tool declares "READWRITE" as its capability in TOOLS.md metadata, which
+  is not in the closed enum. The non-standard name silently passes validation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-084 core: send-invoice description says "generates an invoice PDF."
+      No OBO keywords (send, act, on behalf, transact) appear. Keyword-only
+      G-CLASS scores it R3 (write). But the tool name contains "send" and the
+      tool's actual behavior is sending invoices as the user. Behavioral
+      heuristic (tool name analysis) would catch this; keywords alone do not.
+    spec_impact: "CL-02 G-CLASS — keyword-only classification miss"
+    pitfall: "P-084"
+
+  - id: F02
+    severity: major
+    description: >
+      G-CLASS must use the four-level classification precedence: (1) explicit
+      claws.json override, (2) capability analysis from TOOLS.md metadata,
+      (3) behavioral heuristic from tool name + action verbs, (4) description
+      keywords. Level 4 is advisory only, never the sole classifier. If levels
+      1-3 all return no classification, the tool is flagged for manual review
+      rather than defaulting to keyword-only R3.
+    spec_impact: "CL-02 G-CLASS — four-level precedence chain"
+    pitfall: "P-084"
+
+  - id: F03
+    severity: major
+    description: >
+      P-085 core: claws.json has no capabilities section. The default is
+      permissive (all capabilities allowed). G-PERM checks whether tools
+      exceed the allowed capability set. With all capabilities allowed,
+      no tool ever exceeds the set, so G-PERM produces zero violations.
+      The entire permission checking layer is silently disabled.
+    spec_impact: "CL-02 G-PERM — permissive default disables checking"
+    pitfall: "P-085"
+
+  - id: F04
+    severity: warning
+    description: >
+      The permissive default is intentional for individual workspaces (low
+      friction). But enterprise templates should specify restrictive
+      capability sets. `claws pinch` should note when G-PERM is effectively
+      disabled and suggest adding capability constraints if the workspace
+      handles sensitive operations (R4/R5 tools present).
+    spec_impact: "CL-02 G-PERM — advisory for unconstrained workspaces"
+    pitfall: "P-085"
+
+  - id: F05
+    severity: major
+    description: >
+      P-086 core: TOOLS.md declares "READWRITE" as a capability. The closed
+      enum is [READ, WRITE, COMMUNICATE, EXECUTE, TRANSACT]. "READWRITE" is
+      not in the enum. Without validation, the capability string passes
+      through, never matches any G-PERM constraint check (because constraints
+      use enum values), and the tool is effectively unconstrained.
+    spec_impact: "CL-02 G-PERM — non-standard capability bypass"
+    pitfall: "P-086"
+
+  - id: F06
+    severity: major
+    description: >
+      Capability name normalization: the parser must uppercase all capability
+      names and validate against the closed enum. "read" -> "READ" (valid).
+      "READWRITE" -> not in enum (parse error CLAWS-E020). "Read-Write" ->
+      not in enum (parse error). The error must suggest the closest valid
+      values: "Did you mean READ and WRITE?"
+    spec_impact: "CL-02 G-PERM — parser normalization + suggestions"
+    pitfall: "P-086"
+
+  - id: F07
+    severity: warning
+    description: >
+      Case normalization must handle edge cases: "rEaD" -> "READ" (valid
+      after uppercase). The closed enum check happens AFTER normalization.
+      Mixed-case inputs that normalize to valid enum values should pass.
+      Only post-normalization non-matches are errors.
+    spec_impact: "CL-02 G-PERM — case normalization before enum check"
+    pitfall: "P-086"
+
+  - id: F08
+    severity: warning
+    description: >
+      If claws.json has an explicit classification override for send-invoice
+      that says R3, and behavioral heuristic says R5, the override wins
+      (level 1 precedence). The developer explicitly chose R3. But the
+      override should trigger a warning if it downgrades the behavioral
+      classification: "Override R3 is lower than inferred R5 — confirm?"
+    spec_impact: "CL-02 G-CLASS — downgrade override warning"
+    pitfall: "P-084"
+
+  - id: F09
+    severity: note
+    description: >
+      The combination of P-084, P-085, and P-086 means a workspace can have:
+      (a) misclassified tools via keyword-only scoring, (b) no capability
+      checks due to permissive defaults, (c) non-standard capabilities that
+      bypass checks. All three are silent failures. A workspace with all
+      three looks "clean" in pinch output but has no effective governance.
+    spec_impact: "CL-02 — compounding silent classification failures"
+    pitfall: "P-084, P-085, P-086"
+
+  - id: F10
+    severity: note
+    description: >
+      The behavioral heuristic (level 3) should maintain a verb-to-risk
+      mapping: send/post/delete/transfer/pay -> R5 candidate, write/create/
+      update -> R3 candidate, read/get/list/query -> R1 candidate. The
+      mapping is advisory but catches misclassifications that keywords miss.
+    spec_impact: "CL-02 G-CLASS — verb-to-risk heuristic dictionary"
+    pitfall: "P-084"
+
+  - id: F11
+    severity: warning
+    description: >
+      Enterprise capability templates shipped with claws (e.g., "financial",
+      "healthcare", "general") should pre-define restrictive capability sets.
+      `claws init --template financial` sets capabilities to [READ, WRITE]
+      only, forcing explicit TRANSACT/EXECUTE enablement. This addresses
+      P-085 by providing restrictive defaults for sensitive environments.
+    spec_impact: "CL-05 init — enterprise capability templates"
+    pitfall: "P-085"

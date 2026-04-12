@@ -1,0 +1,159 @@
+name: S04-invalid-governance-frontmatter
+series: skill-lifecycle
+version: 1
+specs: [CL-05]
+description: >
+  Validates that invalid governance frontmatter (risk: R6, obo: "email-send")
+  produces specific, actionable error messages with fix suggestions and
+  documentation URLs. The error message contract requires three parts: WHAT
+  is wrong, HOW to fix it, and WHERE to learn more.
+
+expect:
+  governance_ir: null
+  violations:
+    - rule: SCHEMA
+      field: governance.risk
+      value: R6
+      severity: critical
+      fix_provided: true
+    - rule: SCHEMA
+      field: governance.obo
+      value: email-send
+      severity: critical
+      fix_provided: true
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A skill's SKILL.md contains governance frontmatter with two invalid values:
+  `risk: R6` (valid range is R1-R5) and `obo: "email-send"` (valid values are
+  none, email, message, calendar, social, purchase, transact). The pipeline
+  must produce exactly 2 errors with: (1) the specific field and invalid value,
+  (2) the list of valid values, (3) a suggested fix ("change R6 to R5" or
+  "use email, not email-send"), and (4) a documentation URL. The pipeline
+  must NOT produce a GovernanceIR or any artifacts from invalid frontmatter.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The error message for `obo: "email-send"` must suggest the closest
+      valid value: "email" (not "email-send"). This requires fuzzy matching
+      or a known-alias table. If the error only says "invalid value," the
+      developer must look up valid values in docs. The CL-05 error message
+      contract mandates a fix suggestion, and the fix must be specific:
+      'use "email" (not "email-send")'.
+    spec_impact: "CL-05 Error Message Contract — closest-value suggestion for enum validation errors"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Both errors must be reported simultaneously, not fail-fast on the first.
+      If the parser stops at `risk: R6` and never checks `obo`, the developer
+      fixes one error, re-runs, and discovers the second. CL-04 mandates
+      collect-all-errors behavior for parse phase. This applies equally to
+      frontmatter validation in skill compilation.
+    spec_impact: "CL-05 Maker Experience — collect-all-errors for frontmatter validation"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The `risk: R6` error must explain the risk level semantics, not just
+      the valid range. The fix suggestion should include: "R1=READ, R2=LIST,
+      R3=TRANSFORM, R4=EXECUTE, R5=TRANSACT." This turns every error into
+      a teaching moment per the CL-05 error message contract. Without
+      semantic context, the developer picks a number without understanding
+      what it means.
+    spec_impact: "CL-05 Error Message Contract — semantic context in enum validation errors"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      YAML frontmatter parsing must handle edge cases: quoted vs unquoted
+      values, trailing whitespace, mixed case. `risk: r3` (lowercase) should
+      be normalized to R3, not rejected. CL-05 states values are "case-
+      insensitive on input, normalized to uppercase on read." But `obo: None`
+      (capitalized) is Python's None, which YAML parsers may interpret as
+      null. The YAML parser must treat string "None" as the valid OBO value
+      "none", not as null.
+    spec_impact: "CL-05 DECLARED Tier — YAML None/null ambiguity in obo field"
+    pitfall: P-229
+
+  - id: F05
+    severity: major
+    description: >
+      The documentation URL in the error must be stable and version-specific.
+      If the URL is `https://claws.dev/tiers/declared` and the docs change
+      structure, every existing error message points to a 404. The URL
+      contract requires either versioned URLs or permanent redirects.
+      Error messages are the primary onboarding surface; broken links
+      are broken onboarding.
+    spec_impact: "CL-05 Error Message Contract — URL stability and versioning policy"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The `--json` output flag must include `what`, `fix`, and `docsUrl`
+      fields for each error, matching the human-readable output content.
+      If the JSON output omits the fix suggestion or docs URL, CI/CD
+      integrations that consume JSON lose the teaching value of the error.
+      The JSON schema for errors must be documented and versioned.
+    spec_impact: "CL-05 Error Message Contract — JSON error schema parity with human-readable output"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Extra fields in frontmatter (beyond risk, obo, data) are allowed for
+      forward-compatibility. But truly unrecognizable fields (e.g.,
+      `governance.foo: bar`) should produce a warning, not be silently
+      ignored. A typo like `governance.ris: R3` (missing 'k') would be
+      silently accepted as an extra field while the required `risk` field
+      is reported as missing. Levenshtein distance check on unrecognized
+      fields would catch common typos.
+    spec_impact: "CL-05 DECLARED Tier — typo detection via fuzzy field name matching"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      If the YAML frontmatter itself is malformed (e.g., missing closing
+      `---`, indentation errors), the error must be a YAML parse error with
+      line number, not a governance validation error. The error categories
+      must be distinct: YAML syntax error vs governance schema error. A
+      combined "invalid frontmatter" error conflates structural and semantic
+      problems.
+    spec_impact: "CL-05 Error Message Contract — YAML parse errors distinct from governance schema errors"
+    pitfall: null
+
+  - id: F09
+    severity: major
+    description: >
+      The `claws annotate` command is the recommended remediation for missing
+      or invalid frontmatter. The error message for invalid values should
+      mention annotate as an alternative: "Or run: claws annotate (auto-suggest
+      values from skill capabilities)." This connects the error path to the
+      automated fix path, reducing friction.
+    spec_impact: "CL-05 Error Message Contract — annotate command as remediation path in error messages"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      A skill with an empty governance block (`governance: {}`, all three
+      required fields missing) should produce 3 errors (one per missing
+      field), not a single "governance block incomplete" error. Each missing
+      field is independently actionable and should have its own error entry
+      with specific fix and docs URL.
+    spec_impact: "CL-05 DECLARED Tier — per-field errors for empty governance block"
+    pitfall: null

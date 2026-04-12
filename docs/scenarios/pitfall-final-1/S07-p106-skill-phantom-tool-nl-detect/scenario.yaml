@@ -1,0 +1,130 @@
+name: S07-p106-skill-phantom-tool-nl-detect
+series: pitfall-final-1
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates SKILL-TOOL-GHOST detection for marketplace skills that reference
+  tools in natural language. SKILL.md says "use the api-caller tool" but the
+  workspace has no api-caller in TOOLS.md. Detection requires fuzzy matching
+  and tool name aliasing awareness.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SKILL.md, TOOLS.md, claws.json]
+      nl_tool_references_extracted: true
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings:
+        - rule: SKILL-TOOL-GHOST
+          skill: data-summarizer
+          phantom_tools: [api-caller]
+          suggestion: null
+  violations: []
+  warnings:
+    - rule: SKILL-TOOL-GHOST
+  artifacts:
+    count: 4
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A marketplace skill "data-summarizer" has SKILL.md containing: "First, use
+  the api-caller tool to fetch data from the REST endpoint. Then use the
+  database-query tool to look up the user record." TOOLS.md declares db-query
+  (R2) and rest-fetch (R3). Neither api-caller nor database-query exists in
+  the workspace. The skill will fail at runtime or the agent will hallucinate
+  tool usage. NL detection must parse the prose, extract tool references, and
+  cross-reference against the declared tool set.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Natural language tool reference extraction must use pattern matching
+      for phrases like "use the X tool," "call X," "invoke X," "run X."
+      The extractor operates on SKILL.md prose, not structured YAML. False
+      positives are acceptable if kept low — better to warn on a non-tool
+      than miss a phantom reference.
+    spec_impact: "CL-04 PARSE — NL tool reference extraction patterns"
+    pitfall: P-106
+
+  - id: F02
+    severity: major
+    description: >
+      Tool name aliasing complicates detection. SKILL.md says "database-query"
+      but TOOLS.md declares "db-query." The NL extractor must compute edit
+      distance or token overlap to suggest matches. SKILL-TOOL-GHOST should
+      include "did you mean db-query?" when the edit distance is below a
+      threshold (e.g., 3 edits).
+    spec_impact: "CL-04 diagnostics — tool alias suggestions in SKILL-TOOL-GHOST"
+    pitfall: P-106
+
+  - id: F03
+    severity: major
+    description: >
+      Multiple skills referencing the same phantom tool should be grouped
+      in the diagnostic output. If 5 skills all reference "api-caller,"
+      the output shows one SKILL-TOOL-GHOST entry with 5 skill sources,
+      not 5 separate entries. Grouping reduces noise and highlights
+      systematic missing tools.
+    spec_impact: "CL-04 diagnostics — grouped phantom tool reporting"
+    pitfall: P-106
+
+  - id: F04
+    severity: warning
+    description: >
+      Marketplace skills SHOULD declare requires_tools metadata in their
+      package manifest. If present, the compiler uses the structured
+      metadata instead of NL extraction. NL extraction is the fallback
+      for skills without metadata. The compiler should warn if a
+      marketplace skill lacks requires_tools metadata.
+    spec_impact: "CL-06 marketplace — requires_tools metadata standard"
+    pitfall: P-106
+
+  - id: F05
+    severity: major
+    description: >
+      The NL extractor must not extract tool references from code blocks
+      in SKILL.md. A code example showing "api-caller" as sample output
+      is not a tool reference. The extractor must skip fenced code blocks
+      (triple backtick sections) and inline code spans.
+    spec_impact: "CL-04 PARSE — code block exclusion in NL extraction"
+    pitfall: P-106
+
+  - id: F06
+    severity: warning
+    description: >
+      Dynamic tool references like "use the tool configured in settings"
+      are not extractable at compile time. The NL extractor should not
+      report these as phantom tools. A heuristic: if the extracted "tool
+      name" contains determiners or prepositions (the, in, from), it's
+      likely a description, not a tool name.
+    spec_impact: "CL-04 PARSE — NL false positive filtering"
+    pitfall: P-106
+
+  - id: F07
+    severity: warning
+    description: >
+      The NL extractor runs during pass 1 (declaration collection) to
+      ensure phantom tool detection participates in the two-pass
+      resolution (P-102). If the extractor runs in pass 2 only, it
+      cannot benefit from the full declaration set.
+    spec_impact: "CL-04 PARSE — NL extraction timing in two-pass"
+    pitfall: P-106
+
+  - id: F08
+    severity: note
+    description: >
+      Performance: NL extraction on a large SKILL.md (10KB of prose) must
+      complete within the 350ms latency budget. Pattern matching on prose
+      is fast, but if many skills are present, the aggregate time must
+      be budgeted. Consider caching NL extraction results for unchanged
+      SKILL.md files.
+    spec_impact: "CL-04 latency — NL extraction performance budget"
+    pitfall: P-106

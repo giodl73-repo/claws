@@ -1,0 +1,168 @@
+name: S09-p170-broadcast-stale-governance
+series: pitfall-anubis
+version: 1
+specs: [CL-02, CL-05]
+description: >
+  Validates that fleet broadcast triggers recompilation after pushing policy
+  updates (P-170). When broadcast pushes a new governance policy to workspaces
+  but does not trigger recompilation, the governance plugin continues enforcing
+  the old rules until someone manually runs `claws build`. The stale enforcement
+  window can last hours or days.
+
+expect:
+  workspaces:
+    - name: workspace-alpha
+      policy_version: "2.0"
+      build_version: "1.0"
+      stale: true
+    - name: workspace-beta
+      policy_version: "2.0"
+      build_version: "2.0"
+      stale: false
+  drift_count: 1
+  broadcast_result:
+    status: partial-stale
+    workspaces_updated: 2
+    workspaces_rebuilt: 1
+    stale_window_detected: true
+  compliance:
+    all_current: false
+    stale_enforcement: ["workspace-alpha"]
+
+simulate:
+  failures:
+    - component: fleet-broadcast
+      type: policy-without-rebuild
+      error: "Policy v2.0 pushed to workspace-alpha but build not triggered — plugin enforces v1.0 rules"
+    - component: governance-plugin
+      type: stale-rules
+      error: "R5 tool 'deploy-production' governed by v1.0 lenient rule, v2.0 adds approval requirement"
+  halt: null
+  budget: null
+
+problem: >
+  The fleet administrator pushes a critical policy update via `claws fleet
+  broadcast`: all R5 tools now require human approval (previously auto-approved
+  for T2 workspaces). The broadcast writes the new policy overlay to all 50
+  workspaces. However, the governance plugin reads the compiled output, not
+  the policy source files. Without a recompilation, the plugin continues
+  enforcing the old v1.0 rules. In workspace-alpha, a developer uses the
+  "deploy-production" tool (R5). The old governance plugin auto-approves it
+  because v1.0 rules do not require human approval for T2. The deployment
+  proceeds without the mandated approval. The administrator believes the fleet
+  is compliant. Hours later, an audit reveals the stale enforcement window.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-170 core: Fleet broadcast must be a two-phase operation: (1) push
+      policy overlay to each workspace, (2) trigger recompilation in each
+      workspace. If either phase fails, the workspace is in an inconsistent
+      state. Broadcast must track both phases per workspace in the broadcast
+      manifest and report which workspaces completed both phases.
+    spec_impact: "CL-05 G-BROADCAST — two-phase broadcast (push + rebuild)"
+    pitfall: "P-170"
+
+  - id: F02
+    severity: major
+    description: >
+      The stale enforcement window is a security gap: between policy push
+      and recompilation, the governance plugin enforces rules that the
+      administrator has explicitly revoked. This is not a theoretical
+      concern — any R5 tool call during the window proceeds under old
+      rules. The window must be minimized to seconds, not hours.
+    spec_impact: "CL-02 G-ENFORCEMENT — stale enforcement window"
+    pitfall: "P-170"
+
+  - id: F03
+    severity: major
+    description: >
+      Remote recompilation: workspace-alpha may not have claws installed
+      locally (fleet-managed workspaces may use pre-built governance
+      plugins from a central registry). Broadcast must support two
+      recompilation modes: (1) trigger local `claws build` on the
+      workspace machine, (2) compile centrally and push the built
+      plugin artifact. Mode 2 eliminates the stale window entirely.
+    spec_impact: "CL-05 G-BROADCAST — central vs local compilation"
+    pitfall: "P-170"
+
+  - id: F04
+    severity: major
+    description: >
+      The governance plugin must detect policy staleness independently:
+      compare the policy overlay timestamp with its own build timestamp.
+      If the policy is newer than the build, the plugin should enter
+      degraded mode (deny R4/R5 tools until recompilation) rather than
+      silently enforcing old rules. This is the runtime safety net for
+      the stale window.
+    spec_impact: "CL-03 sidecar — policy staleness detection in plugin"
+    pitfall: "P-170"
+
+  - id: F05
+    severity: major
+    description: >
+      The fleet dashboard must show per-workspace policy version vs build
+      version. Any mismatch is a "stale enforcement" state, highlighted
+      in red. The dashboard should also show the stale window duration:
+      how many minutes since policy was pushed without recompilation.
+      Windows exceeding 5 minutes should trigger an automated alert.
+    spec_impact: "CL-05 fleet — stale enforcement dashboard"
+    pitfall: "P-170"
+
+  - id: F06
+    severity: major
+    description: >
+      Broadcast atomicity at the workspace level: if the policy push
+      succeeds but recompilation fails (build error in the new policy),
+      the workspace has a policy it cannot enforce. Broadcast must roll
+      back the policy overlay if recompilation fails, restoring the
+      previous policy overlay. This prevents the stale-but-unbuildable
+      state.
+    spec_impact: "CL-05 G-BROADCAST — policy rollback on build failure"
+    pitfall: "P-170"
+
+  - id: F07
+    severity: warning
+    description: >
+      Recompilation may take 5-30 seconds per workspace. For a fleet of
+      500 workspaces, sequential recompilation takes hours. Broadcast
+      must support parallel recompilation with a configurable concurrency
+      limit (default: 10 workspaces). Progress reporting should show
+      completed/total and estimated time remaining.
+    spec_impact: "CL-05 G-BROADCAST — parallel recompilation"
+    pitfall: "P-170"
+
+  - id: F08
+    severity: warning
+    description: >
+      The audit trail must record the stale enforcement window: timestamp
+      of policy push, timestamp of recompilation, and any tool calls
+      governed under old rules during the window. This enables post-hoc
+      analysis of what happened during the gap and whether any policy
+      violations occurred.
+    spec_impact: "CL-05 G-BROADCAST — stale window audit trail"
+    pitfall: "P-170"
+
+  - id: F09
+    severity: note
+    description: >
+      Pre-broadcast build verification: before pushing a policy to the
+      fleet, broadcast should compile the policy against a reference
+      workspace to verify it produces a valid governance plugin. A
+      policy that fails compilation should not be broadcast to any
+      workspace. This prevents fleet-wide build failures.
+    spec_impact: "CL-05 G-BROADCAST — pre-broadcast build verification"
+    pitfall: "P-170"
+
+  - id: F10
+    severity: note
+    description: >
+      The stale enforcement problem is analogous to DNS propagation
+      delay: the policy (like a DNS record) is updated at the source
+      but cached copies persist until they expire. The governance
+      plugin's "TTL" should be configurable: how long a compiled
+      plugin remains valid after its source policy changes. Default
+      TTL of 0 (immediate invalidation) is the safest.
+    spec_impact: "CL-05 G-BROADCAST — compiled plugin TTL"
+    pitfall: "P-170"

@@ -1,0 +1,123 @@
+name: S01-governance-fidelity-matrix
+series: loss-aware-emission
+version: 1
+specs: [CL-04, CL-07]
+description: >
+  Validates the governance fidelity matrix: 7 target platforms scored
+  across 5 governance capabilities. Each cell is a fidelity score (0.0
+  to 1.0) indicating how completely the platform can enforce the
+  capability. The matrix reveals which platforms lose governance features
+  during emission and quantifies the loss per capability.
+
+expect:
+  rules_applied: [G-PERM, G-BOUND, G-DATA, G-OUTPUT, G-ELICIT]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace defines 5 governance capabilities: G-PERM (tool capability
+  gating), G-BOUND (audit event emission), G-DATA (data label
+  enforcement), G-OUTPUT (output redaction), G-ELICIT (human approval
+  gates). The compiler must emit governance artifacts for 7 target
+  platforms: Claude Code, Cursor, Windsurf, Cline, Aider, Continue,
+  GitHub Copilot. Each platform has different enforcement mechanisms:
+  Claude Code supports system prompt + hooks (high fidelity), Cursor
+  supports rules files + limited hooks (medium fidelity), advisory-only
+  platforms support system prompt only (low fidelity). The compiler must
+  produce a 7x5 fidelity matrix where each cell scores 0.0 (no support)
+  to 1.0 (full support) for the platform/capability pair. The matrix
+  must be deterministic and machine-readable for CI integration.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Fidelity scoring must be objective and reproducible. A score of
+      0.7 for G-PERM on Cursor must mean the same thing across compiler
+      versions. The scoring rubric must be defined in the platform profile:
+      each capability has a list of enforcement mechanisms, each mechanism
+      has a weight, and the score is the weighted sum of supported
+      mechanisms. Without a formal rubric, scores are subjective and
+      incomparable across versions.
+    spec_impact: "CL-04 Platform Profiles -- formal fidelity scoring rubric per capability"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The 7x5 matrix has 35 cells. Maintaining accurate scores requires
+      re-evaluation when platforms update their enforcement capabilities.
+      If Cursor adds hook support in a new version, the G-PERM score
+      changes. The platform profile must be versioned and the fidelity
+      matrix must reference the profile version used for scoring. Stale
+      profiles produce inaccurate matrices.
+    spec_impact: "CL-07 Platform Profiles -- version-stamped profiles with matrix recalculation on update"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      A fidelity score of 0.0 means the capability cannot be enforced
+      at all on the platform. Should the compiler still emit governance
+      artifacts for 0.0 cells? Emitting unenforceable governance creates
+      false confidence. The compiler should suppress emission for 0.0
+      cells and emit a warning listing the unsupported capabilities.
+      Alternatively, emit advisory-only artifacts clearly marked as
+      non-enforced.
+    spec_impact: "CL-04 Emission -- suppress or mark-advisory for 0.0 fidelity capabilities"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The matrix aggregates to per-platform scores (average across 5
+      capabilities) and per-capability scores (average across 7 platforms).
+      These aggregates are useful for high-level comparisons but hide
+      critical gaps. A platform scoring 0.8 average may have 0.0 for
+      G-ELICIT, meaning it cannot enforce human approvals at all. The
+      matrix must highlight critical-zero cells (0.0 for governance-
+      critical capabilities) regardless of the aggregate score.
+    spec_impact: "CL-04 Fidelity Matrix -- critical-zero cell highlighting independent of aggregate"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The fidelity score measures capability coverage but not enforcement
+      strength. A platform may support G-PERM (score 0.8) but enforce
+      it via advisory-only system prompt instructions that the model can
+      ignore. True enforcement requires hooks that block tool execution.
+      The scoring rubric should distinguish advisory enforcement (model-
+      dependent) from hard enforcement (platform-level blocking).
+    spec_impact: "CL-04 Fidelity Scoring -- advisory vs hard enforcement distinction in rubric"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The matrix is static (computed at compile time). But platform
+      capabilities can be dynamic (enabled by workspace configuration).
+      A platform might support G-BOUND only if the workspace enables
+      logging. The fidelity score should reflect the workspace's actual
+      configuration, not just the platform's theoretical capability.
+      This makes the matrix workspace-specific, not just platform-specific.
+    spec_impact: "CL-04 Fidelity Matrix -- workspace-specific scoring reflecting actual configuration"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The fidelity matrix is a key differentiator for claws: no other
+      tool quantifies governance loss across platforms. The matrix output
+      should be designed for inclusion in compliance reports and executive
+      dashboards. A visual rendering (heatmap with green/yellow/red cells)
+      in the CLI and a structured JSON for API consumers would maximize
+      the matrix's utility across audiences.
+    spec_impact: "CL-05 CLI Output -- fidelity matrix heatmap rendering and JSON export"
+    pitfall: null

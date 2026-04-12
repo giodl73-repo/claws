@@ -1,0 +1,106 @@
+name: S08-g-output-pii
+series: governance-rules
+version: 1
+specs: [CL-02]
+description: >
+  Validates G-OUTPUT rule: PII detection in agent output. If agent output
+  contains personally identifiable information and the workspace handles
+  RESTRICTED or CONFIDENTIAL data, G-OUTPUT must flag the output as
+  requiring redaction before delivery.
+
+expect:
+  rules_applied: [G-OUTPUT]
+  violations:
+    - rule: G-OUTPUT
+      severity: warning
+      message_pattern: "PII in agent output"
+      redaction_required: true
+  pass: true
+  severity: warning
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The workspace handles CONFIDENTIAL customer data (declared in MEMORY.md).
+  The agent produces output that may include customer names, emails, or account
+  numbers. G-OUTPUT must detect that the workspace handles sensitive data and
+  the output channel is not configured for PII redaction. The rule flags that
+  output redaction patterns must be configured, not that specific PII was found
+  (PII detection is runtime).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      G-OUTPUT at compile time cannot detect actual PII — it can only check
+      that redaction configuration exists. The compile check is: "does the
+      workspace declare output redaction patterns for CONFIDENTIAL data?"
+      If yes, pass. If no, warn. Actual PII scanning is a runtime concern.
+    spec_impact: "CL-02 G-OUTPUT — compile-time = config check, not content scan"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Redaction patterns must be specific to data types: SSN (###-##-####),
+      email (*@*.com), credit card (####-####-####-####). If the workspace
+      declares CONFIDENTIAL data but does not specify which PII types are
+      present, the redaction patterns cannot be targeted. A catch-all
+      redaction is overly aggressive and may redact non-PII.
+    spec_impact: "CL-02 G-OUTPUT — PII type declaration in MEMORY.md"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The generated plugin (EMIT Phase 5) should include output validation
+      hooks that run redaction patterns. The hook must run AFTER the LLM
+      generates output but BEFORE delivery to the user. If the platform does
+      not support post-generation hooks, G-OUTPUT is advisory only.
+    spec_impact: "CL-04 EMIT — output validation hook in generated plugin"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      OWASP #6 (Unreliable Output) overlaps with G-OUTPUT. The distinction
+      is: G-OUTPUT checks for data that SHOULD NOT be in output (PII leakage),
+      while OWASP #6 addresses output that IS WRONG (hallucination). These
+      are different failure modes with different mitigations.
+    spec_impact: "CL-02 G-OUTPUT — PII leakage vs hallucination distinction"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      A workspace that handles only PUBLIC data should not trigger G-OUTPUT
+      PII warnings. The rule must check MEMORY.md labels and only fire if
+      CONFIDENTIAL or RESTRICTED data is declared. PUBLIC workspaces get
+      no output redaction overhead.
+    spec_impact: "CL-02 G-OUTPUT — label-conditional rule activation"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Output goes to multiple channels: user response, audit chain, SIEM
+      export, subagent delegation. PII redaction may need to be different
+      per channel — audit chain needs full PII for forensics, user response
+      needs redacted PII, SIEM needs event-level data. The redaction config
+      must be per-channel, not global.
+    spec_impact: "CL-02 G-OUTPUT — per-channel redaction configuration"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The SOC2 control CC7.1 (Incident Detection) maps to G-OUTPUT. If PII
+      is detected in output after delivery (runtime detection), it becomes
+      an incident. The audit chain must record the detection event. This
+      scenario focuses on compile-time config, but the incident response
+      path must be defined.
+    spec_impact: "CL-02 compliance — G-OUTPUT incident response path"
+    pitfall: null

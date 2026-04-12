@@ -1,0 +1,108 @@
+name: S03-plugin-hook-registration
+series: emit-artifacts
+version: 1
+specs: [CL-04]
+description: >
+  Validates that the generated plugin correctly registers the before_tool_call
+  hook. The hook must be the first registered handler to ensure governance
+  runs before any other plugin hooks. Registration order determines execution
+  order in the OC Gateway.
+
+expect:
+  artifacts:
+    - type: plugin
+      path: plugins/claws-governance/index.ts
+      valid: true
+  plugin_hooks:
+    - name: before_tool_call
+      registration_order: first
+      handler_name: evaluatePolicy
+  skill_content: null
+  approvals: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The generated index.ts must register `api.on("before_tool_call", ...)` as
+  the governance enforcement hook. The OC Gateway executes hooks in
+  registration order. If another plugin registers before_tool_call first,
+  governance may not see the original tool call (the other plugin may modify
+  or block it). The governance hook must register FIRST.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      OC executes hooks in registration order, not alphabetical or priority
+      order. The governance plugin must be loaded before all other plugins.
+      Plugin loading order is configured in openclaw.json plugins list. The
+      emit phase should warn if the governance plugin is not first in the
+      plugins list — but modifying openclaw.json is outside claws's scope
+      (lossless principle).
+    spec_impact: "CL-04 EMIT — plugin loading order advisory"
+    pitfall: "P-013"
+
+  - id: F02
+    severity: major
+    description: >
+      The generated handler must wrap the evaluatePolicy function in the
+      try/catch fail-mode handler. The code structure must be:
+      api.on("before_tool_call", async (event, ctx) => { try { return
+      evaluatePolicy(event, ctx); } catch(err) { ... } }). If the try/catch
+      is missing from the generated code, fail-closed is broken.
+    spec_impact: "CL-04 EMIT — fail-mode handler generation correctness"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The hook receives (event, ctx) from the Gateway API. The event object
+      contains toolName, arguments, and context. The generated code must
+      destructure these correctly for the target platform version. If the OC
+      API changes the event shape, the generated code breaks.
+    spec_impact: "CL-04 EMIT — OC API version compatibility"
+    pitfall: "P-007"
+
+  - id: F04
+    severity: warning
+    description: >
+      The evaluatePolicy function must be synchronous-fast (under 50ms) to
+      meet the latency budget. If it performs async operations (file reads,
+      network calls), it must use AbortSignal.timeout. The generated code
+      must include the timeout wrapper for R5 tools.
+    spec_impact: "CL-04 EMIT — timeout wrapper in generated handler"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      Additional hooks beyond before_tool_call may be needed in the future:
+      after_tool_call (for audit), on_message (for output validation),
+      gateway_start (for integrity verification). The generated plugin
+      scaffold should support registering multiple hooks, not just one.
+    spec_impact: "CL-04 EMIT — multi-hook plugin scaffold"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The generated TypeScript must compile without errors using the OC
+      platform's TypeScript version. If claws generates TS syntax from a
+      newer version (e.g., using satisfies keyword), it may fail to compile
+      on older OC installs. The emit phase must target a minimum TS version.
+    spec_impact: "CL-04 EMIT — TypeScript version targeting"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      If the plugin is registered but the governance rule tables are not yet
+      compiled (e.g., user ran `claws build` but not `claws compile` first),
+      the evaluatePolicy function has no data to work with. The handler
+      must detect missing rule tables and fall back to fail-closed for all
+      tools rather than crashing.
+    spec_impact: "CL-04 EMIT — missing rule table graceful degradation"
+    pitfall: null

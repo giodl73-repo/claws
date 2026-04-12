@@ -1,0 +1,151 @@
+name: S08-workflow-handler-mismatch
+series: pitfall-coverage-2
+version: 1
+specs: [CL-04]
+description: >
+  Validates that compiled workflow step references match plugin handler exports
+  exactly (P-081). A naming convention mismatch between lobster.compiled.yaml
+  and index.ts causes "handler not found" at runtime, silently breaking the
+  compiled workflow while the plugin loads normally.
+
+expect:
+  artifacts:
+    - type: workflow
+      path: lobster.compiled.yaml
+      valid: true
+    - type: plugin
+      path: plugins/claws-governance/index.ts
+      valid: true
+  plugin_hooks:
+    - before_tool_call
+    - workflow_step
+  skill_content:
+    contains_governance: true
+  approvals:
+    matches_tools: true
+
+simulate:
+  failures:
+    - component: emit-phase
+      type: handler-name-mismatch
+      error: "lobster.compiled.yaml references 'claws-elicit-send-email' but index.ts exports 'evaluateElicitSendEmail'"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace with lobster.yaml defining 3 workflow steps compiles to
+  lobster.compiled.yaml + index.ts. The workflow file references handlers
+  using kebab-case names (claws-elicit-send-email) following OC workflow
+  conventions. The plugin exports handlers using camelCase names
+  (evaluateElicitSendEmail) following TypeScript conventions. At runtime,
+  the OC workflow engine calls the kebab-case handler name, finds no match
+  in the plugin exports, and the workflow step fails with "handler not found."
+  The plugin itself loads fine and governance hooks work; only workflow
+  steps are broken.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-081 core: Two different naming conventions produce two different names
+      for the same handler. The workflow file uses kebab-case (OC convention).
+      The plugin uses camelCase (TS convention). Neither is wrong in isolation,
+      but together they create a runtime mismatch that is invisible at compile
+      time.
+    spec_impact: "CL-04 G-EMIT-CONTRACT — naming convention divergence"
+    pitfall: "P-081"
+
+  - id: F02
+    severity: major
+    description: >
+      The fix: a shared handler name registry generates both the workflow step
+      reference and the plugin export from the same canonical name. The registry
+      produces both forms: kebab-case for workflow, camelCase for plugin. The
+      mapping is deterministic and reversible.
+    spec_impact: "CL-04 EMIT — shared handler name registry"
+    pitfall: "P-081"
+
+  - id: F03
+    severity: major
+    description: >
+      Post-emit cross-reference check: after both lobster.compiled.yaml and
+      index.ts are generated, every handler name referenced in the workflow
+      must have a corresponding export in the plugin. The check must account
+      for the naming convention translation (kebab to camelCase).
+    spec_impact: "CL-04 G-EMIT-CONTRACT — post-emit cross-reference"
+    pitfall: "P-081"
+
+  - id: F04
+    severity: major
+    description: >
+      The naming convention translation is not trivial for edge cases:
+      "a2a-trust-verify" could translate to "a2aTrustVerify" or
+      "A2ATrustVerify" or "a2aTrustVerify." Numeric prefixes, consecutive
+      hyphens, and acronyms create ambiguity. The translation function must
+      be deterministic and tested against a comprehensive edge-case suite.
+    spec_impact: "CL-04 EMIT — name translation edge cases"
+    pitfall: "P-081"
+
+  - id: F05
+    severity: warning
+    description: >
+      The mismatch is invisible during `claws build` because the builder
+      generates both files independently. Only `claws pinch` on an existing
+      workspace (with both files present) can detect the mismatch. The pinch
+      rule G-EMIT-CONTRACT must load both files and cross-reference names.
+    spec_impact: "CL-02 pinch — post-hoc handler name validation"
+    pitfall: "P-081"
+
+  - id: F06
+    severity: warning
+    description: >
+      If the OC platform changes its workflow handler resolution strategy
+      (e.g., from exact match to fuzzy match), the mismatch may start
+      working by accident. The cross-reference check must still enforce
+      exact matching to prevent reliance on platform-specific resolution
+      behavior.
+    spec_impact: "CL-04 G-EMIT-CONTRACT — exact match enforcement"
+    pitfall: "P-081"
+
+  - id: F07
+    severity: warning
+    description: >
+      Custom workflow steps (user-defined in lobster.yaml) may reference
+      non-governance handlers that are not in the claws plugin. The cross-
+      reference check must distinguish between claws-generated handlers
+      (must match) and user-defined handlers (not in claws's scope).
+    spec_impact: "CL-04 G-EMIT-CONTRACT — scope boundary for user handlers"
+    pitfall: "P-081"
+
+  - id: F08
+    severity: note
+    description: >
+      The error message "handler not found" at runtime gives no hint about
+      the naming convention mismatch. If the cross-reference check is skipped
+      (e.g., claws version without the check), the runtime error should at
+      least suggest checking naming conventions. This requires the OC platform
+      to include attempted handler name in the error.
+    spec_impact: "CL-06 — platform error message improvement suggestion"
+    pitfall: "P-081"
+
+  - id: F09
+    severity: note
+    description: >
+      The shared handler name registry should be serialized to
+      .claws/compiled/handler-registry.json for diagnostic purposes.
+      `claws pinch` reads this file for validation. `claws info --handlers`
+      displays the registry for debugging. The registry is a compile artifact,
+      not a runtime dependency.
+    spec_impact: "CL-04 EMIT — handler registry as diagnostic artifact"
+    pitfall: "P-081"
+
+  - id: F10
+    severity: warning
+    description: >
+      When lobster.yaml is absent, the workflow artifact is not emitted and
+      this pitfall is irrelevant. But if lobster.yaml is added to an existing
+      workspace (after initial compilation), the workflow artifact is new but
+      the plugin may not be regenerated. The incremental build must detect
+      lobster.yaml addition and regenerate both plugin and workflow.
+    spec_impact: "CL-04 EMIT — incremental build on lobster.yaml addition"
+    pitfall: "P-081"

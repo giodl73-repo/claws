@@ -1,0 +1,123 @@
+name: S03-sso-groups-workspace-roles
+series: identity-bridge
+version: 1
+specs: [CL-02, CL-07]
+description: >
+  Validates that Entra ID SSO group membership maps to 4 workspace roles
+  (admin, deployer, editor, viewer) with role-specific governance. An
+  editor can modify workspace content but cannot deploy. A deployer can
+  deploy but cannot modify governance. The compiler generates role-gated
+  governance rules that enforce these boundaries.
+
+expect:
+  attack_class: privilege-escalation
+  defense_layer: role-based-governance
+  blocked: true
+  audit_event: ROLE-BOUNDARY-VIOLATION-BLOCKED
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise maps 4 Entra ID groups to workspace roles: sg-admins
+  -> admin (tier 4, full governance control), sg-deployers -> deployer
+  (tier 3, can deploy compiled artifacts but not modify governance),
+  sg-editors -> editor (tier 2, can modify workspace content: SOUL.md,
+  TOOLS.md, skills, but not claws.json or compiled governance), sg-
+  viewers -> viewer (tier 1, read-only access to workspace state). The
+  compiler generates role-gated governance: (1) claws.json modifications
+  require admin role, (2) `claws deploy` requires deployer or admin,
+  (3) SOUL.md edits require editor or above, (4) `claws status` is
+  available to all roles. An editor attempts to run `claws deploy`,
+  which is blocked because the editor role lacks deployment permission.
+  The audit event records the role boundary violation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The 4-role model assumes a linear trust hierarchy (admin > deployer
+      > editor > viewer). But deployer and editor may not have a linear
+      relationship: editors can modify content (which deployers cannot),
+      deployers can deploy (which editors cannot). This is a partial
+      order, not a total order. The governance must model role permissions
+      as a set of capabilities, not a linear tier. Two roles may be
+      incomparable (neither is "higher" than the other).
+    spec_impact: "CL-02 Role Model -- capability-set permissions, not linear tier hierarchy"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Role-to-operation mapping must be maintained as governance changes.
+      If a new command is added to claws (e.g., `claws audit`), which
+      roles can invoke it? The default should be the most restrictive
+      (admin-only) until explicitly granted to other roles. New operations
+      must not default to all-roles-permitted; that violates least
+      privilege. The spec must define the default role assignment for
+      new operations.
+    spec_impact: "CL-02 Role Model -- admin-only default for new operations (least privilege)"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The ROLE-BOUNDARY-VIOLATION-BLOCKED event must include the attempted
+      operation, the user's role, the required role, and the specific
+      capability that was denied. Without the capability detail, the
+      audit event is ambiguous: "editor tried to deploy" does not explain
+      whether the block was because editors lack deploy-to-production
+      (correct) or deploy-to-staging (possibly incorrect if staging is
+      editor-accessible).
+    spec_impact: "CL-02 Audit Events -- capability-level detail in ROLE-BOUNDARY-VIOLATION events"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Entra ID groups may have nested membership (sg-admins contains
+      sg-deployers as a member group). If the identity bridge resolves
+      only direct group membership, a user in sg-deployers who is also
+      transitively in sg-admins (via nesting) would be assigned deployer
+      role when they should get admin. The identity bridge must support
+      transitive group membership resolution or require flattened groups.
+    spec_impact: "CL-07 Identity Bridge -- transitive group membership resolution for nested Entra ID groups"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The deployer role can deploy but not modify governance. But deploying
+      a new compiled governance artifact is itself a governance modification.
+      The distinction must be: deployer can deploy artifacts compiled by
+      an admin, not artifacts they compiled themselves. This requires
+      artifact provenance: the deployer must verify that the artifact
+      was compiled under an admin identity before deploying it.
+    spec_impact: "CL-02 Deployment Authorization -- artifact provenance check (admin-compiled) before deploy"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Role assignment is per-workspace. A user may have admin role in
+      workspace-alpha and viewer role in workspace-beta. The identity
+      bridge must resolve roles per workspace, not globally. The claws.json
+      identity mapping is workspace-scoped, so each workspace has its own
+      group-to-role mapping. Fleet-level role management must aggregate
+      per-workspace mappings for fleet-wide user permission views.
+    spec_impact: "CL-05 Fleet Identity -- per-workspace role resolution with fleet-wide aggregation view"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The 4-role model covers common enterprise personas. But some
+      organizations need custom roles (security-auditor, compliance-
+      reviewer, incident-responder). The role model should be extensible:
+      custom roles defined in claws.json with explicit capability grants.
+      The 4 built-in roles serve as templates; enterprises customize
+      from there.
+    spec_impact: "CL-02 Role Model -- extensible custom roles with explicit capability grants"
+    pitfall: null

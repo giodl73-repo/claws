@@ -1,0 +1,137 @@
+name: S04-context-diff-fleet-drift
+series: compiled-context
+version: 1
+specs: [CL-05, CL-07]
+description: >
+  Validates drift detection via context diff. A fleet of 10 workspaces
+  should all share the same root governance hash. After a configuration
+  change in 2 workspaces, context diff shows the exact layer changes
+  that caused drift. The drift report includes per-workspace diff output
+  showing which governance layers diverged and by how much.
+
+expect:
+  workspaces:
+    total: 10
+    governed: 10
+    ungoverned: 0
+    misconfigured: 0
+  drift_count: 2
+  broadcast_result: null
+  compliance:
+    governed_pass: 8
+    governed_fail: 2
+    ungoverned: 0
+    misconfigured: 0
+    vacuous_compliance: 0
+
+simulate:
+  failures:
+    - component: drift-detection
+      type: governance-hash-mismatch
+      error: "workspace-delta: governance hash abc123 != fleet root hash def456 (G-PERM threshold changed)"
+    - component: drift-detection
+      type: governance-hash-mismatch
+      error: "workspace-epsilon: governance hash 789fed != fleet root hash def456 (G-DATA labels added outside ontology)"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet of 10 workspaces standardizes on a common governance root.
+  A weekly drift scan (`claws fleet scan --drift`) compares each
+  workspace's compiled governance hash against the expected hash derived
+  from root + authorized fork delta. Two workspaces show drift:
+  workspace-delta has a modified G-PERM threshold (someone edited
+  claws.json directly instead of going through the fork mechanism),
+  workspace-epsilon has extra G-DATA labels added outside the ontology
+  pipeline (manual governance artifact edits). The drift report must
+  show the exact diff: which governance layer changed, what the expected
+  value was, what the actual value is, and when the change was last
+  compiled. The diff format should be human-readable for operators and
+  machine-parseable for dashboards.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Drift detection by governance hash comparison is binary: match or
+      mismatch. But operators need to understand the magnitude and nature
+      of drift. A single-parameter change (G-PERM threshold) is minor
+      drift; a completely rewritten governance context is major drift.
+      The drift report must include a diff granularity metric: number of
+      changed rules, number of changed parameters, and a severity
+      classification (minor/moderate/major) based on change magnitude.
+    spec_impact: "CL-05 Drift Detection -- diff granularity metric with severity classification"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Drift caused by direct claws.json edits (workspace-delta) bypasses
+      the fork mechanism. The compiler must detect whether drift originated
+      from an authorized fork update or an unauthorized direct edit. If
+      the fork delta hash matches but the compiled governance hash does
+      not, someone modified the compiled artifacts directly (tampering).
+      This is a security event, not just drift.
+    spec_impact: "CL-05 Drift Classification -- distinguish authorized fork drift from unauthorized artifact tampering"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The context diff must identify the specific governance layer that
+      diverged. The compiled context has layers: root governance, fork
+      delta, ontology-derived rules, workspace-specific rules. If drift
+      is in the ontology-derived layer, the fix is recompile from the
+      ontology. If drift is in the fork delta, the fix is a fork rebase.
+      If drift is in compiled artifacts, the fix is a clean rebuild. The
+      remediation path depends on the drifted layer.
+    spec_impact: "CL-05 Context Diff -- per-layer drift attribution with layer-specific remediation"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The drift scan interval (weekly) means drift can exist for up to
+      7 days before detection. For high-security workspaces, this window
+      is too long. The drift detection should support configurable scan
+      intervals per workspace trust tier: daily for R5-hosting workspaces,
+      weekly for R3, monthly for R1. Trust tier from the governance root
+      determines the scan cadence.
+    spec_impact: "CL-05 Drift Scan -- configurable scan interval per trust tier"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The diff output must show "when the change was last compiled" which
+      requires compilation timestamps in the governance artifacts. If
+      timestamps are not embedded in the compiled context, the drift
+      report can only show what changed, not when. Compilation metadata
+      (timestamp, compiler version, source hashes) must be embedded in
+      every compiled governance artifact.
+    spec_impact: "CL-04 Compiled Artifacts -- embed compilation metadata (timestamp, version, source hashes)"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Workspace-epsilon added G-DATA labels outside the ontology pipeline.
+      This is a legitimate use case (workspace-specific labels not covered
+      by the ontology) but should be distinguished from unauthorized edits.
+      The fork mechanism should support explicit "local additions" that are
+      authorized but not part of the ontology. Local additions change the
+      governance hash but are not drift -- they are sanctioned divergence.
+    spec_impact: "CL-05 Fork Mechanism -- sanctioned local additions vs unauthorized drift distinction"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The context diff format should follow an established convention
+      (unified diff, JSON patch, or custom). JSON patch (RFC 6902) is
+      well-suited for structured governance artifacts: each operation
+      (add, remove, replace) maps to a specific governance change. This
+      makes the diff machine-parseable and integrates with existing
+      JSON patch tooling for automated remediation.
+    spec_impact: "CL-05 Context Diff Format -- adopt JSON Patch (RFC 6902) for structured governance diffs"
+    pitfall: null

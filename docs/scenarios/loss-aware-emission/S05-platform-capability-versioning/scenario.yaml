@@ -1,0 +1,120 @@
+name: S05-platform-capability-versioning
+series: loss-aware-emission
+version: 1
+specs: [CL-04, CL-07]
+description: >
+  Validates that platform capability version changes update fidelity
+  scores. A Cursor update adds MCP hook support, increasing G-ELICIT
+  fidelity from 0.3 to 0.8. The compiler must detect the platform
+  version, load the corresponding profile, and recompute fidelity
+  scores. Governance artifacts emitted for the new version use the
+  higher-fidelity enforcement mechanisms.
+
+expect:
+  rules_applied: [G-PERM, G-ELICIT]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace targets Cursor and defines G-PERM and G-ELICIT. On
+  Cursor v0.43, G-ELICIT fidelity is 0.3 (advisory-only, no hook
+  support). Cursor v0.44 adds MCP tool-calling hooks, enabling
+  blocking elicitation. The G-ELICIT fidelity for v0.44 is 0.8. The
+  compiler must: (1) detect the target platform version (from claws.json
+  targetPlatform field or auto-detection), (2) load the version-specific
+  platform profile, (3) recompute fidelity scores using the v0.44
+  profile, (4) emit governance artifacts using the higher-fidelity
+  enforcement mechanisms available in v0.44. If the workspace pins
+  Cursor v0.43 but v0.44 is available, the compiler should emit a
+  note suggesting the upgrade for improved governance fidelity.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Platform version detection must be reliable. Auto-detection
+      (reading the installed platform version) requires platform-specific
+      logic for each of 7 targets. Some platforms do not expose their
+      version programmatically. The compiler must support both explicit
+      version pinning (in claws.json) and auto-detection, with explicit
+      pinning taking precedence. If neither is available, the compiler
+      should default to the latest known profile with a warning.
+    spec_impact: "CL-07 Platform Profiles -- version detection strategy: explicit > auto > latest-with-warning"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Platform profiles must be maintained as versioned data, not
+      hardcoded in the compiler. Each platform profile version is a
+      separate file or registry entry (cursor-v0.43.json, cursor-v0.44.
+      json). The compiler loads the profile matching the detected version.
+      Hardcoding profiles in the compiler source requires a compiler
+      release for every platform update, which is unsustainable.
+    spec_impact: "CL-07 Platform Profiles -- external versioned profile data, not hardcoded in compiler"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      When a platform version adds new enforcement mechanisms, the
+      emission route changes. Route selection (S02) must be re-evaluated
+      for the new version. A route that was optimal for v0.43 may be
+      suboptimal for v0.44. The path enumerator must incorporate platform
+      version into route discovery, not just platform identity.
+    spec_impact: "CL-04 Path Enumerator -- version-aware route discovery"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The fidelity score jump from 0.3 to 0.8 for a single version
+      update is dramatic. This means governance quality is highly
+      sensitive to platform version. Fleet operators need visibility into
+      version-specific fidelity across the fleet: how many workspaces
+      are on v0.43 (low fidelity) vs v0.44 (high fidelity). Fleet scan
+      should include platform version distribution and fidelity impact.
+    spec_impact: "CL-05 Fleet Scan -- platform version distribution with fidelity impact analysis"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The upgrade suggestion ("v0.44 available, fidelity improves from
+      0.3 to 0.8") requires the compiler to know about platform versions
+      it does not have profiles for yet. If the compiler only knows
+      about v0.43 and v0.44, it cannot suggest v0.45 when released.
+      The profile registry should support a "latest" marker that the
+      compiler checks for newer profiles on compilation.
+    spec_impact: "CL-07 Profile Registry -- latest-version check for upgrade suggestions"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Platform beta/preview versions may have experimental enforcement
+      mechanisms that are unstable. The compiler should distinguish
+      stable and preview profiles. A preview profile's fidelity scores
+      should carry a confidence modifier (e.g., 0.8 * 0.7 confidence =
+      effective 0.56) until the enforcement mechanisms are confirmed
+      stable in a GA release.
+    spec_impact: "CL-07 Platform Profiles -- stability confidence modifier for preview/beta versions"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The scenario tests a single platform version change. Over time,
+      the compiler accumulates version-specific profiles for all 7
+      platforms across multiple versions. This profile corpus is a
+      valuable dataset for tracking governance capability trends across
+      the OC ecosystem. The compiler should support `claws platforms
+      history` showing fidelity score trends over time per platform.
+    spec_impact: "CL-05 CLI -- platforms history command for fidelity trend visualization"
+    pitfall: null

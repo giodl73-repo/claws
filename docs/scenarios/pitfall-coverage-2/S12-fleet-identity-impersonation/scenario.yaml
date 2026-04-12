@@ -1,0 +1,148 @@
+name: S12-fleet-identity-impersonation
+series: pitfall-coverage-2
+version: 1
+specs: [CL-02, CL-05]
+description: >
+  Validates that L0 identity (declared name only) in fleet context triggers
+  an impersonation risk warning (P-090). Any workspace in a fleet can declare
+  an agent with the same name, impersonating the original. Fleet communication
+  is compromised when identity is name-only.
+
+expect:
+  attack_class: identity-spoofing
+  defense_layer: identity-verification
+  blocked: false
+  audit_event:
+    type: impersonation-risk
+    tool: fleet-communicate
+    risk_level: 4
+    outcome: WARNED
+    reason: "L0 identity in fleet context — impersonation risk"
+
+simulate:
+  failures:
+    - component: a2a-identity
+      type: l0-in-fleet
+      error: "Agent 'finance-bot' uses L0 identity (name only) in fleet with 12 workspaces"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet of 12 workspaces uses A2A communication. Workspace A declares an
+  agent "finance-bot" with L0 identity (declared name only, no cryptographic
+  verification). Workspace B also declares an agent "finance-bot" — same
+  name, different behavior. Workspace C sends a sensitive financial report
+  to "finance-bot" expecting to reach Workspace A's agent. Due to fleet
+  routing, the message reaches Workspace B's impersonator instead. The
+  impersonator processes the financial data with unauthorized logic.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-090 core: L0 identity is just a declared name in AGENTS.md. In a
+      single workspace, this is sufficient (only one agent per name). In a
+      fleet, multiple workspaces can declare the same name. No verification
+      mechanism distinguishes the original from the impersonator. Fleet
+      routing delivers messages to whichever agent responds first.
+    spec_impact: "CL-02 G-A2A-IDENTITY — L0 insufficient for fleet"
+    pitfall: "P-090"
+
+  - id: F02
+    severity: major
+    description: >
+      G-A2A-IDENTITY must warn when L0 identity is used in fleet context.
+      The warning must explain the impersonation risk specifically: "Agent
+      'finance-bot' uses name-only identity. Any workspace in this fleet can
+      declare an agent with the same name. Consider upgrading to L1 (key-
+      based) or L2 (certificate) identity."
+    spec_impact: "CL-02 G-A2A-IDENTITY — fleet-conditional warning"
+    pitfall: "P-090"
+
+  - id: F03
+    severity: major
+    description: >
+      Configurable minimum identity level via claws.json: enterprise fleets
+      should require L2 (certificate-based) identity minimum. Development
+      fleets may accept L1 (key-based). `claws.json#fleet.minIdentityLevel`
+      sets the threshold. Agents below the threshold produce hard errors in
+      fleet context.
+    spec_impact: "CL-01 schema — fleet.minIdentityLevel configuration"
+    pitfall: "P-090"
+
+  - id: F04
+    severity: major
+    description: >
+      The impersonation attack is not hypothetical: in a 12-workspace fleet,
+      workspace operators may independently choose agent names. "finance-bot"
+      is a common naming pattern. Name collision probability increases with
+      fleet size. The warning should include collision probability estimate
+      based on fleet size and agent count.
+    spec_impact: "CL-02 G-A2A-IDENTITY — name collision probability"
+    pitfall: "P-090"
+
+  - id: F05
+    severity: major
+    description: >
+      Fleet broadcast of governance policies (`claws pinch --fleet`) must
+      include identity level requirements. If the fleet policy says "minimum
+      L1," workspaces with L0 agents are flagged as non-compliant. Fleet
+      compliance dashboards must show identity level distribution across
+      all agents in all workspaces.
+    spec_impact: "CL-05 fleet — identity compliance broadcasting"
+    pitfall: "P-090"
+
+  - id: F06
+    severity: warning
+    description: >
+      L1 (key-based) identity prevents simple name spoofing but does not
+      prevent key theft. If Workspace B steals Workspace A's agent key, it
+      can impersonate with valid cryptographic identity. L2 (certificate)
+      with revocation lists is needed for high-security fleets. The identity
+      level ladder should be documented with threat model per level.
+    spec_impact: "CL-02 G-A2A-IDENTITY — identity level threat models"
+    pitfall: "P-090"
+
+  - id: F07
+    severity: warning
+    description: >
+      For single-workspace mode (no fleet), L0 is acceptable and the
+      impersonation warning should be suppressed. `claws pinch` must detect
+      fleet context (presence of claws.json#fleet configuration or --fleet
+      flag) before applying the L0 warning. False positives on single
+      workspaces would create unnecessary noise.
+    spec_impact: "CL-02 G-A2A-IDENTITY — fleet-context detection"
+    pitfall: "P-090"
+
+  - id: F08
+    severity: warning
+    description: >
+      Agent identity migration from L0 to L1 requires key generation and
+      distribution. `claws fleet migrate-identity --from L0 --to L1` should
+      generate keys for all L0 agents, distribute public keys to all fleet
+      workspaces, and update AGENTS.md in each workspace. This is a fleet-
+      wide operation requiring the --confirm flag.
+    spec_impact: "CL-05 fleet — identity migration tooling"
+    pitfall: "P-090"
+
+  - id: F09
+    severity: note
+    description: >
+      The impersonation risk is amplified when the impersonating agent has
+      different data sensitivity labels than the original. Workspace C sends
+      CONFIDENTIAL data to "finance-bot" expecting Workspace A's RESTRICTED
+      handling. Workspace B's impersonator has PUBLIC handling. The data
+      sensitivity downgrade is invisible to the sender.
+    spec_impact: "CL-02 G-A2A-FLOW — identity + data sensitivity interaction"
+    pitfall: "P-090"
+
+  - id: F10
+    severity: note
+    description: >
+      Fleet discovery (`claws fleet scan`) should detect name collisions
+      across workspaces and report them as potential impersonation vectors.
+      The scan should compare agent names, capabilities, and identity levels
+      across all fleet workspaces. Collisions with different identity levels
+      are especially suspicious.
+    spec_impact: "CL-05 fleet — name collision detection in scan"
+    pitfall: "P-090"

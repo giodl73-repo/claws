@@ -1,0 +1,165 @@
+name: S05-storage-limits-autopruning
+series: snapshot-lifecycle
+version: 1
+specs: [CL-05]
+description: >
+  Validates snapshot storage management: a workspace accumulates 50+
+  snapshots over weeks of development. The oldest snapshots are auto-pruned
+  when a configurable limit is reached. The pruning policy must be
+  predictable, must never delete the current fleet baseline, and must
+  warn before deleting snapshots referenced by other operations (e.g.,
+  the dead man's switch pre-upgrade snapshot).
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      snapshot_count_before: 52
+      snapshot_count_after: 20
+      pruned: 32
+      preserved: [fleet-baseline-v2.3, pre-upgrade]
+    analysis:
+      rules_evaluated: false
+      violations: []
+      warnings:
+        - rule: SNAP-PRUNED
+          count: 32
+          message: "32 snapshots pruned to meet 20-snapshot limit"
+  violations: []
+  warnings:
+    - rule: SNAP-PRUNED
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer has been using claws for 3 months, saving snapshots before
+  every upgrade and at regular intervals. The workspace now has 52
+  snapshots. The default storage limit is 20 snapshots per workspace
+  (configurable in claws.json). On the next `claws snap save weekly-53`,
+  the storage limit is exceeded. claws must prune the 32 oldest snapshots
+  but preserve: (a) the current fleet baseline "fleet-baseline-v2.3",
+  (b) the most recent pre-upgrade snapshot "pre-upgrade", and (c) any
+  snapshot created in the last 7 days. After pruning, exactly 20 snapshots
+  remain.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The spec does not define snapshot storage limits, pruning policy,
+      or maximum snapshot count. Without limits, a workspace can accumulate
+      unlimited snapshots, consuming disk space indefinitely. The spec
+      must define: default limit (e.g., 20), configurable via claws.json,
+      and automatic pruning behavior when the limit is exceeded.
+    spec_impact: "CL-05 snap — define storage limits and auto-pruning policy"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The pruning policy must define which snapshots are protected. At
+      minimum: the current fleet baseline, any snapshot referenced by an
+      active dead man's switch, and user-pinned snapshots. Without
+      protected categories, auto-pruning could delete the fleet baseline,
+      breaking drift detection for all workspaces.
+    spec_impact: "CL-05 snap pruning — define protected snapshot categories"
+    pitfall: P-193
+
+  - id: F03
+    severity: major
+    description: >
+      Auto-pruning is destructive: it permanently deletes governance state.
+      Should pruning be automatic (on save when limit exceeded) or prompted
+      ("52 snapshots, limit 20. Prune 32 oldest? [y/N]")? Automatic is
+      convenient but risky. Prompted is safe but breaks scripts. The spec
+      should default to automatic with a --no-prune flag to prevent it,
+      and a pre-prune warning in the output.
+    spec_impact: "CL-05 snap save — auto-prune semantics and --no-prune override"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The pruning order ("oldest first") is the simplest policy but may
+      not be optimal. Alternative policies: LRU (least recently USED, not
+      created), keep-one-per-week (time-bucketed retention), or priority-
+      based (named snapshots last longer than auto-generated ones). The
+      spec should define the default policy and whether it is configurable.
+    spec_impact: "CL-05 snap pruning — define pruning order policy (FIFO vs LRU vs time-bucketed)"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Each snapshot stores copies of all workspace files plus the
+      GovernanceIR. For a workspace with 9 files averaging 10KB each,
+      one snapshot is ~100KB. 20 snapshots = ~2MB. This is negligible.
+      But if files include large TOOLS.md (500+ tool definitions) or
+      embedded binary content, snapshot storage could be significant.
+      The spec should estimate storage per snapshot and document the
+      trade-off.
+    spec_impact: "CL-05 snap — storage size estimate per snapshot"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The configurable limit in claws.json means each workspace can set
+      its own limit. But fleet-level policy may want to enforce a minimum
+      retention period (e.g., "keep at least 30 days of snapshots for
+      audit purposes"). The fleet baseline should be able to override
+      workspace-level limits with a minimum retention policy.
+    spec_impact: "CL-05 snap limits — fleet-level minimum retention override"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      snap save triggers pruning, but snap promote also creates a fleet
+      baseline snapshot. If promote creates a snapshot and the limit is
+      already at capacity, pruning runs during promote. Pruning during
+      promote could delete the PREVIOUS fleet baseline before the new one
+      is established, creating a window with no baseline. Promote must
+      establish the new baseline before pruning the old one.
+    spec_impact: "CL-05 snap promote + pruning — ordering: establish new baseline before pruning old"
+    pitfall: P-194
+
+  - id: F08
+    severity: note
+    description: >
+      Snapshots created by the dead man's switch use a fixed name
+      ("pre-upgrade"). If the developer runs multiple upgrades, each
+      snap save pre-upgrade overwrites the previous one. This is a
+      single-slot pattern, not accumulation. But if the developer uses
+      different names (pre-upgrade-v1, pre-upgrade-v2), they accumulate.
+      The naming convention affects pruning: fixed names self-manage,
+      unique names accumulate.
+    spec_impact: "CL-05 snap naming — fixed vs unique name conventions and pruning impact"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The snap list command (needed for discoverability) should show
+      pruning-relevant metadata: creation date, size, protected status,
+      and "will be pruned next" indicator. Without this, users cannot
+      predict which snapshots will be deleted on the next save. Pruning
+      should not be surprising.
+    spec_impact: "CL-05 snap list — show pruning-relevant metadata and next-prune indicator"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Snapshot deduplication could reduce storage: if two consecutive
+      snapshots have identical SOUL.md, only store it once and reference
+      the same content. This is a content-addressable storage optimization
+      (like git pack files). The spec need not mandate deduplication for
+      v1 but should note it as a future optimization for large fleets.
+    spec_impact: "CL-05 snap — future optimization: content-addressable deduplication"
+    pitfall: null

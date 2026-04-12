@@ -1,0 +1,115 @@
+name: S03-obo-without-elicit
+series: cross-file-conflicts
+version: 1
+specs: [CL-04, CL-02]
+description: >
+  Validates OBO-WITHOUT-ELICIT conflict: TOOLS.md has a send-email tool
+  classified as R5/OBO but neither SOUL.md nor USER.md configures an
+  elicitation policy. The OBO tool exists without a governance gate.
+  Default severity is warning; strict mode elevates to error.
+
+expect:
+  governance_ir:
+    version: 1
+    analysis:
+      conflicts:
+        - category: OBO-WITHOUT-ELICIT
+          severity: warning
+          files: [TOOLS.md, SOUL.md, USER.md]
+          tool_name: send-email
+          obo_detected: true
+          elicitation_configured: false
+          resolution: "add elicitation policy in claws.json or OBO scope in USER.md"
+  violations: []
+  warnings:
+    - category: OBO-WITHOUT-ELICIT
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  TOOLS.md declares "send-email" with capabilities [COMMUNICATE, TRANSACT],
+  classified as R5/OBO. The workspace has no elicitation policy in claws.json,
+  no OBO scope declaration in USER.md, and no elicitation-related constraints
+  in SOUL.md. The send-email tool acts AS the user but no governance gate
+  exists to ask for approval. This is an OBO boundary violation at the
+  compile level.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      OBO-WITHOUT-ELICIT is a warning by default, not an error. This means
+      the workspace can compile and deploy an R5 tool without any OBO gate.
+      This directly contradicts CL-02's statement that "R5 fail-closed is
+      non-negotiable." If R5 tools require fail-closed, they should also
+      require elicitation policies. The severity should be error.
+    spec_impact: "CL-04 conflict severity — OBO-WITHOUT-ELICIT should be error"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The conflict requires checking 3 files: TOOLS.md (OBO detection),
+      SOUL.md (elicitation constraints), USER.md (OBO scope). This is the
+      most complex cross-file check — it spans 3 sources. If any one of
+      the 3 provides coverage, the conflict is resolved. The check must
+      try all 3 before flagging.
+    spec_impact: "CL-04 ANALYZE — multi-source conflict resolution"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      USER.md might grant OBO scope ("you may send emails on my behalf")
+      which pre-authorizes the tool. This is different from an elicitation
+      policy (which asks per-use). Pre-authorization means the OBO boundary
+      is acknowledged but the gate is permanently open. G-ELICIT should
+      distinguish pre-authorized from ungoverned.
+    spec_impact: "CL-02 G-ELICIT — pre-authorized vs ungoverned distinction"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      In strict mode (enterprise), this conflict becomes an error. The
+      strict/advisory mode flag should be in claws.json, not a CLI flag.
+      This ensures the strictness is part of the workspace configuration,
+      not a per-invocation choice.
+    spec_impact: "CL-01 claws.json — strict mode configuration"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The CL-04 conflict table shows OBO-WITHOUT-ELICIT as "Warning (strict:
+      Error)." This dual severity is the only conflict category with
+      conditional severity. All other conflicts are fixed at error or warning.
+      The conditional logic adds complexity to the ANALYZE phase.
+    spec_impact: "CL-04 ANALYZE — conditional severity implementation"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      If the workspace has no USER.md and no SOUL.md OBO constraints, the
+      only way to configure elicitation is via claws.json. But claws.json
+      may be inherited from a fleet template. The conflict detection must
+      check fleet-level configuration as well as workspace-level files.
+    spec_impact: "CL-05 fleet — inherited elicitation policy resolution"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Multiple R5/OBO tools without elicitation should produce one conflict
+      per tool, not one aggregate conflict. If send-email and post-slack are
+      both R5/OBO without policies, the user needs to configure policies
+      for each independently. Aggregate reporting hides the tool-specific
+      remediation needed.
+    spec_impact: "CL-04 ANALYZE — per-tool conflict reporting"
+    pitfall: null

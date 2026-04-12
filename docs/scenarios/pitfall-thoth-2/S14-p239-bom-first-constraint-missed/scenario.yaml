@@ -1,0 +1,137 @@
+name: S14-p239-bom-first-constraint-missed
+series: pitfall-thoth-2
+version: 1
+specs: [CL-04]
+description: >
+  Validates that a UTF-8 BOM at the start of any OC workspace file does not
+  cause the first constraint to be silently missed. The PARSE phase must strip
+  BOM bytes before keyword-anchored extraction begins, ensuring the first line
+  of every file is parsed identically regardless of BOM presence.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, RULES.md, TOOLS.md, claws.json]
+      bom_stripped: [SOUL.md]
+    analysis:
+      rules_evaluated: true
+      constraints_extracted: 4
+  violations: []
+  warnings:
+    - code: CLAWS-W200
+      message: "UTF-8 BOM detected and stripped from SOUL.md"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: parse
+      type: bom-anchor-failure
+      error: "Line-start anchor ^Never failed on first line — BOM bytes precede keyword"
+    - component: parse
+      type: silent-constraint-drop
+      error: "First deny constraint silently dropped — IR contains 3 of 4 constraints"
+  halt: null
+  budget: null
+
+problem: >
+  A security team creates SOUL.md in Windows Notepad, which saves UTF-8 with
+  BOM by default. The first line reads "Never access customer PII without
+  explicit consent." The BOM bytes (0xEF 0xBB 0xBF) precede the keyword
+  "Never." The keyword-anchored parser uses a regex with ^ line-start anchor
+  to detect deny constraints. On the first line, the anchor matches the BOM
+  bytes, not "Never," so the regex fails. The most critical constraint — PII
+  access governance — is silently dropped. Lines 2-4 contain additional deny
+  constraints that parse correctly. The GovernanceIR reports 3 constraints
+  instead of 4 with no error or warning. The security team deploys believing
+  PII governance is active.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The BOM strip must occur as the very first operation in the file
+      reading pipeline, before any content is passed to the parser. If BOM
+      stripping is a parser concern rather than an I/O concern, files read
+      through non-parser paths (e.g., hash computation, drift detection)
+      may still see BOM bytes. The normalization layer must sit between
+      file I/O and all consumers.
+    spec_impact: "CL-04 PARSE — BOM strip at I/O boundary, not parser"
+    pitfall: P-239
+
+  - id: F02
+    severity: major
+    description: >
+      The silent drop is the critical failure: no error, no warning, no
+      indication that a constraint was lost. The parser must count expected
+      constraints (from structural cues like section headers) against
+      extracted constraints. A mismatch must produce at minimum a warning,
+      ideally an error that halts compilation.
+    spec_impact: "CL-04 PARSE — constraint count reconciliation"
+    pitfall: P-239
+
+  - id: F03
+    severity: major
+    description: >
+      The BOM strip must handle all three common BOM variants: UTF-8
+      (EF BB BF), UTF-16 LE (FF FE), and UTF-16 BE (FE FF). While UTF-8
+      BOM is most common, enterprise environments with legacy tooling may
+      produce UTF-16 encoded files. The parser should normalize to UTF-8
+      after stripping any BOM variant.
+    spec_impact: "CL-04 PARSE — multi-encoding BOM support"
+    pitfall: P-239
+
+  - id: F04
+    severity: major
+    description: >
+      When a BOM is stripped, the GovernanceIR should record a diagnostic
+      entry noting which file had a BOM, which variant, and that it was
+      successfully stripped. This audit trail enables security reviewers
+      to verify that BOM handling did not affect constraint extraction
+      during compliance reviews.
+    spec_impact: "CL-04 GovernanceIR — BOM diagnostic audit trail"
+    pitfall: P-239
+
+  - id: F05
+    severity: warning
+    description: >
+      The BOM detection must only strip the leading BOM (first 2-3 bytes
+      of the file). Interior BOM-like byte sequences within file content
+      are valid UTF-8 data and must not be altered. An aggressive
+      find-and-replace approach would corrupt legitimate content containing
+      these byte patterns.
+    spec_impact: "CL-04 PARSE — leading-only BOM strip, no interior modification"
+    pitfall: P-239
+
+  - id: F06
+    severity: warning
+    description: >
+      The GovernanceIR content hash must be computed on BOM-stripped,
+      normalized content. If the hash includes BOM bytes, the same logical
+      content produces different hashes depending on editor BOM behavior.
+      This breaks incremental compilation cache lookups and causes false
+      drift detection in claws diff.
+    spec_impact: "CL-04 GovernanceIR — hash on normalized content"
+    pitfall: P-239
+
+  - id: F07
+    severity: major
+    description: >
+      Test fixtures must include actual BOM bytes, not simulated ones.
+      A test that sets content to "\uFEFFNever..." may not produce the
+      same byte sequence as a file saved with BOM by Windows Notepad.
+      Fixtures should be committed as binary blobs with explicit
+      .gitattributes rules to prevent Git from stripping BOM bytes.
+    spec_impact: "CL-04 testing — BOM fixture byte fidelity"
+    pitfall: P-239
+
+  - id: F08
+    severity: note
+    description: >
+      The claws doctor command should include a BOM check that scans all
+      workspace files for BOM presence and reports findings. This helps
+      developers identify BOM issues before compilation, especially in
+      teams that mix Windows and macOS editors.
+    spec_impact: "CL-04 doctor — proactive BOM detection"
+    pitfall: P-239

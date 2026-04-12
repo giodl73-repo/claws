@@ -1,0 +1,159 @@
+name: S17-p242-error-deletes-working-artifacts
+series: pitfall-thoth-2
+version: 1
+specs: [CL-04, CL-05]
+description: >
+  Validates that a failed compilation preserves the last-known-good emitted
+  artifacts rather than deleting them. When the compiler encounters an error
+  mid-compilation, the previous working governance enforcement must remain
+  intact so the developer retains protection while fixing the error.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+    analysis:
+      rules_evaluated: false
+      compilation_failed: true
+      last_known_good_preserved: true
+  violations:
+    - code: CLAWS-E100
+      message: "Compilation failed — syntax error in RULES.md line 15"
+      severity: error
+  warnings:
+    - code: CLAWS-W201
+      message: "Preserving last-known-good artifacts from previous successful compilation"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: compile
+      type: syntax-error
+      error: "RULES.md line 15: malformed deny rule — missing tool reference"
+    - component: emit
+      type: artifact-destruction
+      error: "Previous governance-ir.json and skill files deleted before new compilation completed"
+  halt: null
+  budget: null
+
+problem: >
+  A developer has a working claws compilation with governance-ir.json and the
+  generated governance skill deployed in .claude/skills/. They edit RULES.md to
+  add a new deny constraint but introduce a syntax error. They run claws compile.
+  The compiler begins by cleaning the output directory (deleting the previous
+  artifacts) before starting the new compilation. The PARSE phase hits the syntax
+  error and aborts. Now the output directory is empty — the previous working
+  governance artifacts are gone and the new compilation produced nothing. The
+  agent runtime loads and finds no governance skill, running completely ungoverned.
+  The developer must fix the syntax error and recompile before governance is
+  restored, leaving a window of zero enforcement.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The EMIT phase must never delete previous artifacts before a new
+      compilation succeeds. The correct pattern is compile-to-staging:
+      write new artifacts to a temporary staging directory, verify
+      compilation success, then atomically swap the staging directory
+      with the output directory. On failure, the staging directory is
+      discarded and the output directory remains untouched.
+    spec_impact: "CL-04 EMIT — compile-to-staging with atomic swap"
+    pitfall: P-242
+
+  - id: F02
+    severity: major
+    description: >
+      The "clean before compile" anti-pattern is common in build tools
+      but catastrophic for governance enforcement. Unlike application
+      code where a failed build means you use the old binary, governance
+      enforcement depends on the artifacts being present at runtime.
+      Deleting them creates a governance gap that an attacker could
+      exploit by intentionally introducing compilation errors.
+    spec_impact: "CL-04 EMIT — no pre-compilation clean of output directory"
+    pitfall: P-242
+
+  - id: F03
+    severity: major
+    description: >
+      The last-known-good preservation must be documented in the
+      GovernanceIR metadata. When the developer runs claws status after
+      a failed compilation, the output should clearly state: "Last
+      successful compilation: <timestamp>. Current compilation: FAILED.
+      Using last-known-good artifacts." This prevents confusion about
+      which version of governance is active.
+    spec_impact: "CL-05 status — last-known-good reporting"
+    pitfall: P-242
+
+  - id: F04
+    severity: major
+    description: >
+      The staging directory approach must handle disk space constraints.
+      If the staging directory cannot be created (disk full), the
+      compilation should fail gracefully without touching the existing
+      output. The error message should indicate that the failure was
+      due to staging, not the compilation itself, so the developer
+      knows to free disk space rather than fix their source files.
+    spec_impact: "CL-04 EMIT — staging directory space validation"
+    pitfall: P-242
+
+  - id: F05
+    severity: major
+    description: >
+      On Windows, the atomic swap of staging to output requires careful
+      handling. NTFS does not support atomic directory rename when the
+      target exists. The implementation must: (1) rename output to
+      output.backup, (2) rename staging to output, (3) delete
+      output.backup. If step 2 fails, rename output.backup back to
+      output. This three-step swap provides crash safety.
+    spec_impact: "CL-04 EMIT — Windows-safe directory swap"
+    pitfall: P-242
+
+  - id: F06
+    severity: warning
+    description: >
+      Partial compilation failures (e.g., PARSE succeeds but EMIT fails
+      for one file) are trickier than full failures. The staging
+      approach handles this naturally: if any stage fails, the entire
+      staging directory is discarded. There must be no "partial emit"
+      where some new artifacts are written alongside old ones.
+    spec_impact: "CL-04 EMIT — all-or-nothing staging policy"
+    pitfall: P-242
+
+  - id: F07
+    severity: warning
+    description: >
+      The last-known-good artifacts should include a manifest file
+      listing the source file hashes that produced them. When governance
+      is served from last-known-good, the runtime can verify that the
+      current workspace files differ from the manifest, indicating
+      that the governance is potentially stale. This enables a "stale
+      governance" warning in the agent runtime.
+    spec_impact: "CL-04 EMIT — last-known-good source manifest"
+    pitfall: P-242
+
+  - id: F08
+    severity: warning
+    description: >
+      The backup directory (output.backup) must be cleaned up on the
+      next successful compilation. If the developer fixes the error
+      and recompiles successfully, the backup from the previous
+      successful build is no longer needed. Accumulating backup
+      directories wastes disk space and confuses developers who
+      discover them.
+    spec_impact: "CL-04 EMIT — backup cleanup on successful compilation"
+    pitfall: P-242
+
+  - id: F09
+    severity: note
+    description: >
+      The claws clean command should explicitly document that it
+      removes both the output directory and any staging/backup
+      directories. It should warn the developer that running claws
+      clean removes the last-known-good artifacts, meaning no
+      governance enforcement will be active until the next successful
+      compilation.
+    spec_impact: "CL-05 clean — last-known-good removal warning"
+    pitfall: P-242

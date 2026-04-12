@@ -1,0 +1,192 @@
+name: S05-kill-switch-fleet-wide
+series: fleet-operations
+version: 1
+specs: [CL-05, CL-02]
+description: >
+  Validates that `claws kill --fleet --confirm --reason "active incident
+  IR-2026-0411"` immediately halts all governance enforcement across all
+  fleet workspaces, records the kill event in every audit chain, and
+  provides a restoration path. The kill switch is the emergency stop:
+  it disables all governance plugins so agents are halted, not running
+  ungoverned.
+
+expect:
+  workspaces:
+    total: 10
+    killed: 10
+    active: 0
+  drift_count: 0
+  broadcast_result: null
+  compliance:
+    governance_active: 0
+    governance_halted: 10
+    audit_recorded: 10
+
+simulate:
+  failures: []
+  halt:
+    type: fleet-kill
+    reason: "active incident IR-2026-0411"
+    timestamp: "2026-04-11T15:30:00Z"
+  budget: null
+
+problem: >
+  A security incident (data exfiltration via a compromised agent) triggers
+  the fleet kill switch. The incident responder runs `claws kill --fleet
+  --confirm --reason "active incident IR-2026-0411"`. All 10 workspaces
+  must immediately halt their governance plugins. The kill must be
+  synchronous — after the command returns, no governance plugins are
+  running. The audit trail must record the kill event, the reason, and the
+  operator identity in every workspace. After the incident is resolved,
+  `claws snap restore pre-kill --fleet` restores governance to the pre-kill
+  state.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The kill switch semantics are ambiguous. Does "kill" mean: (a) stop
+      the governance plugin (agents run ungoverned), (b) stop the agents
+      themselves (agents halted), or (c) activate a deny-all governance
+      policy (agents cannot use any tools)? Option (a) is dangerous — the
+      kill switch intended to stop a compromised agent instead lets it run
+      without governance. Option (b) requires Gateway integration beyond
+      governance. Option (c) is achievable within claws's scope. The spec
+      must clarify: fleet kill activates deny-all, not disable governance.
+    spec_impact: "CL-05 Fleet — kill switch semantics: deny-all vs disable governance"
+    pitfall: P-177
+
+  - id: F02
+    severity: major
+    description: >
+      Fleet kill must be synchronous. The operator must know that ALL
+      workspaces are halted before the command returns. If kill is
+      asynchronous (fire-and-forget like broadcast), the operator has no
+      confirmation that the compromised agent is actually stopped. Network
+      latency to remote workspaces means synchronous kill across 10
+      workspaces may take seconds. The command must wait for acknowledgment
+      from each workspace and report per-workspace status.
+    spec_impact: "CL-05 Fleet — synchronous kill with per-workspace acknowledgment"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      If kill fails for some workspaces (network unreachable, like S04),
+      the compromised agent may still be running in those workspaces. Fleet
+      kill partial failure is more dangerous than broadcast partial failure.
+      The spec must define escalation: if fleet kill fails for any workspace,
+      the command must return a CRITICAL alert with the unreachable workspace
+      list so the operator can take manual action (network isolation, etc.).
+    spec_impact: "CL-05 Fleet — kill partial failure escalation (CRITICAL alert)"
+    pitfall: P-178
+
+  - id: F04
+    severity: major
+    description: >
+      The kill switch requires both --fleet and --confirm flags. But in an
+      active incident, the operator may forget --confirm or --reason. The
+      command should fail with an explicit error: "Fleet kill requires
+      --confirm and --reason. This is a destructive operation affecting
+      10 workspaces." The error must include the workspace count to
+      communicate blast radius. For single-workspace kill (no --fleet),
+      --confirm should not be required since the blast radius is contained.
+    spec_impact: "CL-05 Fleet — kill flag requirements and blast radius communication"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Pre-kill snapshot is critical for recovery. `claws kill --fleet`
+      should automatically run `claws snap save pre-kill --fleet` before
+      halting governance. If the kill command fails to save the snapshot
+      (disk full, permission error), the kill should still proceed — the
+      incident response priority is stopping the threat, not preserving
+      state. But the kill output must warn: "Pre-kill snapshot failed.
+      Manual state recovery will be needed."
+    spec_impact: "CL-05 Fleet — automatic pre-kill snapshot with failure tolerance"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      After kill, the fleet is in a halted state. The spec does not define
+      how to restore. Options: (a) `claws snap restore pre-kill --fleet`,
+      (b) `claws broadcast` to re-push policies, (c) a dedicated
+      `claws revive --fleet` command. Option (a) requires the pre-kill
+      snapshot to exist. Option (b) requires the operator to know which
+      policies were active. Option (c) is the safest — it reads the pre-kill
+      snapshot metadata and restores automatically. A dedicated revive
+      command with fleet kill as its only use case keeps the command surface
+      intentional.
+    spec_impact: "CL-05 Fleet — post-kill restoration command (revive or snap restore)"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The audit trail for fleet kill must be tamper-evident. If the
+      compromised agent has access to the audit chain, it could erase the
+      kill event. The kill audit entry should be written to both the normal
+      audit chain and an out-of-band audit log (OS syslog, stderr, external
+      SIEM) simultaneously. This matches the secondary audit mechanism in
+      CL-02 Amendment S02-F01.
+    spec_impact: "CL-02 Audit — tamper-evident kill audit via out-of-band logging"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The --reason text for fleet kill should be structured for incident
+      response. A free-text reason is flexible but hard to query. The spec
+      should recommend a format: "IR-{year}-{number}: {description}" so
+      that audit queries can filter by incident reference. The reason must
+      be immutable after recording — no editing the reason post-kill.
+    spec_impact: "CL-05 Fleet — structured kill reason format for incident correlation"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Double-kill protection: if the operator runs `claws kill --fleet`
+      when the fleet is already killed, the command should report "fleet
+      already halted" rather than attempting to kill again. Re-killing
+      could overwrite the pre-kill snapshot with a snapshot of the halted
+      state, destroying the recovery point. The kill command must check
+      fleet state before acting.
+    spec_impact: "CL-05 Fleet — double-kill prevention and state check"
+    pitfall: P-179
+
+  - id: F10
+    severity: warning
+    description: >
+      Kill-to-restore latency is a critical SLA for incident response.
+      The spec does not define how fast restoration must complete. For
+      enterprise IR, the target is typically "governance restored within
+      15 minutes of incident resolution." The spec should define a
+      restoration latency target that accounts for fleet size.
+    spec_impact: "CL-05 Fleet — kill-to-restore latency SLA definition"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The fleet kill event should trigger external integrations: PagerDuty
+      alert, Slack notification, SIEM event. The spec should define a
+      webhook/notification mechanism for critical fleet events. Kill is
+      the highest-severity fleet event and should be the first event to
+      support external notification.
+    spec_impact: "CL-05 Fleet — external notification webhook for kill events"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      In a partial kill scenario (3 of 10 workspaces unreachable), the
+      fleet dashboard should show a mixed state: 7 HALTED, 3 UNKNOWN.
+      The UNKNOWN state is distinct from ACTIVE — the operator knows the
+      kill was attempted but cannot confirm the result. This three-state
+      kill status (HALTED, ACTIVE, UNKNOWN) parallels the three-state
+      scan classification from S01.
+    spec_impact: "CL-05 Fleet — three-state kill status (HALTED/ACTIVE/UNKNOWN)"
+    pitfall: null

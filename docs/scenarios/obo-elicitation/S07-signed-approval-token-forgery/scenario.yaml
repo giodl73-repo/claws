@@ -1,0 +1,155 @@
+name: S07-signed-approval-token-forgery
+series: obo-elicitation
+version: 1
+specs: [CL-02]
+description: >
+  Validates that a forged or tampered approval token is detected and the
+  associated R5 action is blocked. An attacker (malicious agent, prompt
+  injection, or compromised subagent) crafts a fake approval token to bypass
+  the elicitation gate. The runtime must verify token integrity before
+  allowing any R5 tool execution. This is a direct attack on the OBO
+  boundary's cryptographic foundation.
+
+expect:
+  attack_class: token-forgery
+  defense_layer: G-ELICIT
+  blocked: true
+  audit_event: obo-forged-token-detected
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A malicious agent (or a prompt injection controlling the agent) constructs
+  a fake approval token for send-payment (R5/TRANSACT). The forged token has
+  the correct structure (tool name, parameters, timestamp) but an invalid
+  signature (computed with a guessed key or a different key). The agent
+  presents this token to the runtime handler as if the user approved the
+  action. The handler verifies the signature against the workspace's approval
+  key, detects the mismatch, blocks the action, and records a security
+  incident in the audit chain. The SIEM alert classifies this as a token
+  forgery attempt.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The token verification must be constant-time comparison to prevent
+      timing side-channel attacks. If the signature comparison short-circuits
+      on first byte mismatch, an attacker can incrementally guess the correct
+      signature byte by byte. HMAC-SHA256 comparison must use crypto.timingSafeEqual
+      or equivalent. This is a well-known cryptographic implementation
+      requirement but easy to miss.
+    spec_impact: "CL-02 G-ELICIT — constant-time token signature verification"
+    pitfall: P-200
+
+  - id: F02
+    severity: major
+    description: >
+      The forged token scenario assumes the attacker does not have the
+      approval key. But what if the key is leaked (hardcoded in config,
+      checked into git, readable by the agent via file system tools)? The
+      approval key must be protected: not in TOOLS.md-accessible paths, not
+      in environment variables readable by agent tools, not derivable from
+      other keys the agent can access. Key isolation is the foundation.
+    spec_impact: "CL-02 key management — approval key isolation from agent tools"
+    pitfall: P-201
+
+  - id: F03
+    severity: major
+    description: >
+      A forged token detection MUST trigger a security incident, not just a
+      blocked action. The difference between "user did not approve" (timeout
+      denial, normal) and "someone forged an approval" (security incident,
+      abnormal) is critical. The audit event type must be distinct:
+      "obo-forged-token-detected" vs "obo-denied-by-timeout." The SIEM
+      export must classify forgery attempts as security incidents requiring
+      investigation.
+    spec_impact: "CL-02 G-ELICIT-AUDIT — forgery detection as security incident"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The token includes a timestamp to prevent replay attacks. But the
+      tolerance window matters: if the window is 60s and the attacker obtains
+      a legitimate token (e.g., by observing the approval flow), they have
+      60s to replay it for a different invocation with the same parameters.
+      The token must bind to both parameters AND a nonce (random value per
+      invocation) to prevent replay even within the tolerance window.
+    spec_impact: "CL-02 G-ELICIT — approval token nonce for replay prevention"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      If the approval key is rotated (key rotation schedule: 30 days per
+      CL-02), tokens signed with the old key during the grace period must
+      still verify. The handler must check against both the current and
+      previous key during the grace period. After grace expires, old-key
+      tokens are rejected. Key rotation must not create a window where
+      all tokens are rejected (both keys invalid simultaneously).
+    spec_impact: "CL-02 key management — dual-key verification during rotation grace period"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The forgery detection response to the agent should not reveal WHY the
+      token was rejected (invalid signature vs expired vs wrong parameters).
+      Detailed rejection reasons help an attacker iterate toward a valid
+      forgery. The response should be generic: "approval verification failed"
+      with no distinguishing information. Detailed reasons go to the audit
+      chain only (operator-visible, not agent-visible).
+    spec_impact: "CL-02 G-ELICIT — opaque forgery rejection response"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Repeated forgery attempts from the same agent should escalate the
+      response: first attempt = block + audit, second attempt within 60s =
+      block + SIEM alert, third attempt = quarantine the agent (block ALL
+      tool calls, not just R5). Progressive escalation prevents brute-force
+      forgery attempts. The escalation threshold should be configurable.
+    spec_impact: "CL-02 G-ELICIT — progressive escalation for repeated forgery attempts"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      In A2A scenarios, Agent A's approval token could be intercepted by
+      Agent B during transit. If the token is not encrypted (only signed),
+      Agent B can observe the token structure even though it cannot forge a
+      valid signature. For defense in depth, approval tokens should be
+      encrypted as well as signed when crossing A2A boundaries. Within a
+      single agent, signing alone is sufficient.
+    spec_impact: "CL-02 G-ELICIT — token encryption for A2A transit"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The scenario tests a single forged token. A sophisticated attack might
+      involve a valid token reused with modified parameters (parameter
+      substitution). The token's parameter binding must be the hash of the
+      complete parameter set, not individual parameter values. Changing any
+      parameter invalidates the hash even if the token structure is otherwise
+      valid.
+    spec_impact: "CL-02 G-ELICIT — complete parameter set hashing in approval token"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      For enterprise deployments using PKI-attested identity (L3), the
+      approval token could be signed by the user's personal certificate
+      rather than a workspace key. This provides non-repudiation: the user
+      cannot deny they approved the action. HMAC-based tokens provide
+      authentication but not non-repudiation (both the user and the system
+      share the key). Ed25519 approval tokens with user-held private key
+      provide the strongest guarantee.
+    spec_impact: "CL-02 G-ELICIT — PKI-based non-repudiation for approval tokens"
+    pitfall: null

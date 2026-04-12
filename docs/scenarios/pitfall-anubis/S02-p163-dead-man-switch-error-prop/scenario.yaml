@@ -1,0 +1,159 @@
+name: S02-p163-dead-man-switch-error-prop
+series: pitfall-anubis
+version: 1
+specs: [CL-04, CL-05]
+description: >
+  Validates that the dead man's switch uses explicit per-step error handling
+  rather than bash && chaining (P-163). When snap save fails silently, bash
+  chaining propagates incorrectly and snap restore executes without a valid
+  snapshot, leaving the workspace in an irrecoverable state.
+
+expect:
+  governance_ir:
+    version: 1
+    upgrade_state: rolled-back
+    snap_valid: false
+    error_detected: true
+  violations:
+    - code: CLAWS-E090
+      message: "Dead man switch abort — snap save failed, upgrade halted"
+      severity: error
+  warnings: []
+  artifacts:
+    - name: snap-manifest.json
+      status: absent
+
+simulate:
+  failures:
+    - component: dead-man-switch
+      type: snap-save-failure
+      error: "snap save returns exit 0 but writes empty snapshot — disk full"
+    - component: dead-man-switch
+      type: bash-chaining
+      error: "&& chain continues after snap save exit 0 despite empty snapshot"
+  halt: upgrade
+  budget: null
+
+problem: >
+  The user runs `claws upgrade` which invokes the dead man's switch sequence:
+  snap save && upgrade && snap restore-on-failure. The snap save command returns
+  exit code 0 but writes an empty snapshot file because the disk is nearly full
+  and the write was silently truncated. The bash && chain sees exit 0 and proceeds
+  with the upgrade. The upgrade modifies workspace files to a new schema version.
+  The upgrade fails midway through. The dead man's switch invokes snap restore,
+  which reads the empty snapshot file and either restores nothing (leaving half-
+  upgraded files) or crashes on the empty input. The workspace is now in an
+  inconsistent state with no valid snapshot to restore from.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-163 core: Bash && chaining treats exit code 0 as success regardless
+      of output validity. snap save can return exit 0 while writing zero
+      bytes (disk full, permission error on data but not metadata, pipe
+      broken after header). The dead man's switch must validate each step's
+      output independently: snap save must verify the snapshot file exists,
+      is non-empty, and passes integrity check (hash) before proceeding.
+    spec_impact: "CL-05 G-UPGRADE — per-step output validation"
+    pitfall: "P-163"
+
+  - id: F02
+    severity: major
+    description: >
+      The dead man's switch implementation must not use bash chaining (&&,
+      ||, ;) at all. Each step must be a discrete function call with
+      explicit error checking between steps. The TypeScript implementation
+      should use a state machine: IDLE -> SNAP_SAVING -> SNAP_VERIFIED ->
+      UPGRADING -> UPGRADE_VERIFIED -> DONE, with each transition guarded
+      by validation.
+    spec_impact: "CL-05 G-UPGRADE — state machine implementation"
+    pitfall: "P-163"
+
+  - id: F03
+    severity: major
+    description: >
+      snap save verification must include: (1) file exists at expected
+      path, (2) file size > 0, (3) SHA-256 hash computed and recorded
+      in the snap manifest, (4) file can be opened and the header parsed
+      (not truncated). All four checks must pass before the upgrade step
+      begins. Any failure aborts the entire upgrade with a clear message.
+    spec_impact: "CL-05 G-UPGRADE — snap save four-point verification"
+    pitfall: "P-163"
+
+  - id: F04
+    severity: major
+    description: >
+      The snap restore path has the same vulnerability: if restore reads
+      a corrupt or empty snapshot, it may silently produce an empty
+      workspace. Restore must verify the snapshot integrity (hash match)
+      before applying. If the snapshot is corrupt, restore must abort
+      and report "snapshot corrupt — manual recovery required" rather
+      than applying garbage.
+    spec_impact: "CL-05 G-SNAP — restore integrity verification"
+    pitfall: "P-163"
+
+  - id: F05
+    severity: major
+    description: >
+      The disk-full scenario is the most common trigger: snap save writes
+      a partial file, the OS reports success because the file descriptor
+      was closed without error (write buffered, fsync not called). The
+      implementation must call fsync after writing the snapshot and check
+      the return value. On Windows, FlushFileBuffers is the equivalent.
+    spec_impact: "CL-05 G-SNAP — fsync after snapshot write"
+    pitfall: "P-163"
+
+  - id: F06
+    severity: major
+    description: >
+      Error propagation through || (or-chaining) for the restore path is
+      equally dangerous: `upgrade || snap restore` means restore runs on
+      ANY upgrade failure, but if upgrade segfaults or is killed by OOM,
+      the || may not execute at all. The dead man's switch must use a
+      try/finally pattern in TypeScript, not shell constructs.
+    spec_impact: "CL-05 G-UPGRADE — try/finally not shell chaining"
+    pitfall: "P-163"
+
+  - id: F07
+    severity: warning
+    description: >
+      The snap manifest should record: snapshot path, creation timestamp,
+      SHA-256 hash, workspace schema version at time of snapshot, and
+      the upgrade target version. This manifest enables `claws doctor`
+      to verify snapshot validity independently of the dead man's switch.
+    spec_impact: "CL-05 G-SNAP — manifest schema"
+    pitfall: "P-163"
+
+  - id: F08
+    severity: warning
+    description: >
+      If the dead man's switch aborts during the upgrade step, the workspace
+      is in an intermediate state. The switch must record which files were
+      modified before the abort so that snap restore can verify it restored
+      all modified files. A diff between the restored workspace and the
+      snapshot should produce zero differences.
+    spec_impact: "CL-05 G-UPGRADE — post-restore diff verification"
+    pitfall: "P-163"
+
+  - id: F09
+    severity: warning
+    description: >
+      The dead man's switch should be tested with fault injection: simulate
+      disk full during snap save, process kill during upgrade, corrupt
+      snapshot during restore. Each fault must be handled gracefully with
+      clear error messages. The test suite for the dead man's switch
+      requires at least 5 fault injection scenarios.
+    spec_impact: "CL-05 G-UPGRADE — fault injection test requirements"
+    pitfall: "P-163"
+
+  - id: F10
+    severity: note
+    description: >
+      Existing bash-based dead man's switch implementations in the wild
+      (Homebrew, apt) all have this class of bug. The TypeScript state
+      machine approach is deliberately more verbose to be more correct.
+      Document the design rationale so future maintainers do not
+      "simplify" it back to shell chaining.
+    spec_impact: "CL-05 G-UPGRADE — design rationale documentation"
+    pitfall: "P-163"

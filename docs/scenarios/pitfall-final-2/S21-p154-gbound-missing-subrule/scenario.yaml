@@ -1,0 +1,123 @@
+name: S21-p154-gbound-missing-subrule
+series: pitfall-final-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates per-sub-rule warnings for G-BOUND (P-154). maxSteps is
+  configured but maxToolCalls is undefined, allowing 5000 tool calls
+  in 100 steps. Each bounding sub-rule must be independently checked.
+
+expect:
+  rules_applied: [G-BOUND]
+  violations:
+    - code: CLAWS-W032-02
+      rule: G-BOUND
+      description: "maxToolCalls not configured — unbounded tool calls per step"
+    - code: CLAWS-W032-03
+      rule: G-BOUND
+      description: "maxTokens not configured — unbounded token consumption"
+  pass: true
+  severity: warning
+
+simulate:
+  failures:
+    - component: bounding
+      type: missing-subrule
+      error: "maxSteps=100 configured, but maxToolCalls and maxTokens undefined — partial bounding"
+  halt: null
+  budget: null
+
+problem: >
+  claws.json configures maxSteps: 100 for bounded reasoning. The developer
+  believes agent execution is bounded. But maxToolCalls is not configured —
+  each of the 100 steps can invoke unlimited tool calls. maxTokens is also
+  not configured — each step can consume unlimited tokens. In 100 steps with
+  50 tool calls each at 4000 tokens per call, the agent consumes 20M tokens
+  and makes 5000 tool calls. The bounding is illusory.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-154 core: G-BOUND has 4 sub-rules: maxSteps, maxToolCalls,
+      maxTokens, and maxDuration. Configuring one without the others
+      creates a false sense of bounded execution. The agent is bounded
+      in one dimension but unbounded in three others.
+    spec_impact: "CL-02 G-BOUND — individual sub-rule enforcement"
+    pitfall: "P-154"
+
+  - id: F02
+    severity: major
+    description: >
+      Per-sub-rule warnings: CLAWS-W032-01 (maxSteps missing), -02
+      (maxToolCalls missing), -03 (maxTokens missing), -04 (maxDuration
+      missing). Each fires independently. If maxSteps is configured but
+      maxToolCalls is not, only CLAWS-W032-02 fires. The developer sees
+      exactly which bounds are missing.
+    spec_impact: "CL-02 G-BOUND — per-sub-rule warning codes"
+    pitfall: "P-154"
+
+  - id: F03
+    severity: major
+    description: >
+      The effective bound is the minimum across all dimensions. 100 steps
+      with unlimited tool calls is not "bounded to 100 steps" — it is
+      "bounded to 100 steps but unbounded in compute." The pinch output
+      must calculate and display the effective bound including worst-case
+      values for unconfigured dimensions.
+    spec_impact: "CL-02 G-BOUND — effective bound calculation"
+    pitfall: "P-154"
+
+  - id: F04
+    severity: major
+    description: >
+      The worst-case calculation for missing bounds: if maxToolCalls is
+      undefined, assume the platform maximum (e.g., 1000 per step). If
+      maxTokens is undefined, assume the model context window. Display:
+      "Effective bound: 100 steps x 1000 tools/step x 128K tokens/step =
+      potential 100K tool calls, 12.8B tokens." This makes the gap visceral.
+    spec_impact: "CL-02 G-BOUND — worst-case bound visualization"
+    pitfall: "P-154"
+
+  - id: F05
+    severity: major
+    description: >
+      For R5 workspaces (any tool classified R5), all 4 sub-rules should
+      be required, not just warned. Missing bounds on a workspace that
+      handles financial transactions is a security concern, not just an
+      operational one. The severity should escalate from warning to error
+      based on the workspace's maximum risk level.
+    spec_impact: "CL-02 G-BOUND — risk-scaled severity for missing bounds"
+    pitfall: "P-154"
+
+  - id: F06
+    severity: warning
+    description: >
+      Default values: if the developer does not configure a bound, claws
+      should suggest a default based on the workspace profile. A simple
+      read-only agent: maxSteps=50, maxToolCalls=10, maxTokens=100K,
+      maxDuration=60s. A complex workflow agent: maxSteps=500,
+      maxToolCalls=100, maxTokens=1M, maxDuration=300s.
+    spec_impact: "CL-01 schema — profile-based default bounds"
+    pitfall: "P-154"
+
+  - id: F07
+    severity: warning
+    description: >
+      maxDuration (wall-clock time) interacts with maxSteps: a slow tool
+      that takes 30s per call can exhaust maxDuration before maxSteps is
+      reached. The bounding dimensions are not independent. The effective
+      bound analysis must account for interactions.
+    spec_impact: "CL-02 G-BOUND — cross-dimension bound interaction"
+    pitfall: "P-154"
+
+  - id: F08
+    severity: note
+    description: >
+      Fleet-wide bound analysis: `claws fleet scan` should report the
+      effective bounds across all workspaces. A workspace with all 4
+      bounds configured is "fully bounded." A workspace with 1-3 is
+      "partially bounded." A workspace with 0 is "unbounded." The fleet
+      dashboard should categorize workspaces by bound completeness.
+    spec_impact: "CL-05 fleet — bound completeness categorization"
+    pitfall: "P-154"

@@ -1,0 +1,114 @@
+name: S05-p104-obo-elicit-warning-vs-r5-closed
+series: pitfall-final-1
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates the cross-spec inconsistency where OBO-WITHOUT-ELICIT at warning
+  severity allows claws build to emit artifacts containing R5/OBO tools that
+  can never execute due to the R5 fail-closed invariant. The severity must be
+  risk-level-conditional: error for R5, warning for R3-R4.
+
+expect:
+  rules_applied: [G-ELICIT, OBO-WITHOUT-ELICIT]
+  violations:
+    - rule: OBO-WITHOUT-ELICIT
+      severity: error
+      tool: send-payment
+      risk: 5
+      reason: R5-fail-closed-makes-deployment-useless
+    - rule: OBO-WITHOUT-ELICIT
+      severity: warning
+      tool: update-record
+      risk: 3
+      reason: R3-degraded-but-functional
+  pass: false
+  severity: error
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has two OBO tools: send-payment (R5) and update-record (R3).
+  Neither has an elicitation policy. OBO-WITHOUT-ELICIT fires for both at
+  warning severity (CL-04 spec). claws build proceeds (warnings don't halt
+  build). The emitted Gateway plugin has R5 fail-closed for send-payment.
+  At runtime, send-payment is permanently denied. The artifact is deployable
+  but functionally broken for send-payment. The R5 fail-closed invariant
+  (CL-02) contradicts the warning severity (CL-04) for R5 tools.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      OBO-WITHOUT-ELICIT at warning severity for R5 tools creates a
+      deployable artifact that is functionally dead for R5 operations.
+      The operator deploys, believes governance is active, and discovers
+      at runtime that send-payment always fails. This is worse than a
+      compile error because it wastes deployment time and debugging effort.
+    spec_impact: "CL-02 x CL-04 — cross-spec severity inconsistency"
+    pitfall: P-104
+
+  - id: F02
+    severity: major
+    description: >
+      Risk-level-conditional severity resolves the inconsistency: error for
+      R5 (blocks build, prevents useless deployment), warning for R3-R4
+      (allows build, degraded but functional). This matches the invariant
+      hierarchy: R5 fail-closed is non-negotiable, R3-R4 fail behavior
+      is configurable.
+    spec_impact: "CL-02 Amendment A58 — risk-conditional OBO severity"
+    pitfall: P-104
+
+  - id: F03
+    severity: major
+    description: >
+      Strict mode (--strict) escalates ALL OBO-WITHOUT-ELICIT to error
+      regardless of risk level. Enterprise deployments use strict mode
+      to prevent any OBO tool from deploying without explicit elicitation
+      policy. This is a deployment configuration, not a spec change.
+    spec_impact: "CL-04 build — strict mode escalation"
+    pitfall: P-104
+
+  - id: F04
+    severity: warning
+    description: >
+      The error message for R5 OBO-WITHOUT-ELICIT must explain WHY it's
+      an error (not just a warning): "send-payment is R5 with OBO
+      delegation but no elicitation policy. R5 fail-closed will
+      permanently deny this tool at runtime. Add an elicitation policy
+      or remove the OBO delegation."
+    spec_impact: "CL-04 diagnostics — R5-specific error explanation"
+    pitfall: P-104
+
+  - id: F05
+    severity: major
+    description: >
+      The CL-02 and CL-04 specs were written independently. This cross-spec
+      inconsistency was discovered during scenario validation. Both specs
+      must be amended: CL-02 Amendment A58 (risk-conditional severity) and
+      CL-04 Pitfall-Coverage-1 constraints (severity alignment table).
+    spec_impact: "CL-02/CL-04 — dual spec amendment required"
+    pitfall: P-104
+
+  - id: F06
+    severity: warning
+    description: >
+      R4 tools with OBO but no elicitation are a gray zone. R4 fail-closed
+      is the default but configurable. If the workspace overrides R4 to
+      fail-open, OBO-WITHOUT-ELICIT at warning is appropriate. If R4 is
+      fail-closed, it should be error. The severity must consider the
+      effective fail mode, not just the risk level.
+    spec_impact: "CL-02 G-ELICIT — effective fail-mode in severity calculation"
+    pitfall: P-104
+
+  - id: F07
+    severity: note
+    description: >
+      Testing requires two OBO tools at different risk levels. The test
+      fixture must verify that the R5 tool produces an error and the R3
+      tool produces a warning from the same compilation. Build halts on
+      the R5 error even though the R3 warning alone would allow build.
+    spec_impact: "CL-04 testing — mixed-severity OBO fixture"
+    pitfall: P-104

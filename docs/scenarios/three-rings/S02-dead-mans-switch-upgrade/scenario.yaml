@@ -1,0 +1,180 @@
+name: S02-dead-mans-switch-upgrade
+series: three-rings
+version: 1
+specs: [CL-05]
+description: >
+  Validates the middle ring dead man's switch upgrade workflow: snap save
+  pre-upgrade, npm install platform upgrade, doctor --post-upgrade --fix,
+  pinch, and snap restore on any failure. The entire chain must be atomic —
+  if any step fails, the workspace reverts to the pre-upgrade snapshot.
+  This is the primary safety mechanism for platform migrations.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json, AGENTS.md, RULES.md]
+      ring: middle
+      snapshot_name: pre-upgrade
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings:
+        - rule: SCHEMA-MIGRATE
+          message: "claws.json schema version upgraded from v2 to v3"
+  violations: []
+  warnings:
+    - rule: SCHEMA-MIGRATE
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - step: "doctor --post-upgrade"
+      error: "AGENTS.md references deprecated delegation syntax"
+  halt: null
+  budget: null
+
+problem: >
+  A developer runs the dead man's switch upgrade command chain:
+  `claws snap save pre-upgrade --pinch && npm install -g openclaw@latest &&
+  claws doctor --post-upgrade --fix && claws pinch || claws snap restore pre-upgrade`.
+  The platform upgrade changes the claws.json schema from v2 to v3 and
+  deprecates the old delegation syntax in AGENTS.md. doctor --post-upgrade
+  detects both issues and --fix auto-migrates claws.json successfully but
+  fails on AGENTS.md because the delegation syntax is ambiguous (two
+  possible migration paths). The chain fails at doctor, so snap restore
+  runs and reverts the workspace to pre-upgrade state.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The dead man's switch uses bash && and || chaining. But || in bash
+      only triggers on the LAST command's exit code. If "npm install" succeeds
+      but "doctor --post-upgrade" fails, || catches it. But if "snap save"
+      fails, "npm install" still runs (because && short-circuits on save
+      failure, skipping to ||, which runs restore — but there is no snapshot
+      to restore). The spec must define explicit error handling for each step,
+      not rely on bash operator precedence.
+    spec_impact: "CL-05 Dead Man's Switch — explicit per-step error handling, not bash chaining"
+    pitfall: P-163
+
+  - id: F02
+    severity: major
+    description: >
+      The --pinch flag on snap save means "run pinch before saving." If
+      pinch finds violations, should the save abort? The spec says the
+      upgrade chain proceeds regardless, but saving a snapshot with known
+      violations means restore brings back a broken state. The pre-upgrade
+      snapshot should be a known-good state, which means pinch violations
+      should abort the save.
+    spec_impact: "CL-05 snap save --pinch — abort on violations or save-anyway semantics"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      doctor --post-upgrade --fix performs auto-migration. But if --fix
+      partially succeeds (claws.json migrated, AGENTS.md failed), the
+      workspace is in an inconsistent state. snap restore reverts everything,
+      including the successful claws.json migration. The user loses the
+      partial progress. doctor should either be fully atomic (all-or-nothing)
+      or report partial progress so the user can resume after fixing the
+      ambiguous case manually.
+    spec_impact: "CL-05 doctor --fix — atomicity: all-or-nothing vs partial progress"
+    pitfall: P-164
+
+  - id: F04
+    severity: major
+    description: >
+      The snap save captures GovernanceIR + claws.json + policies. But the
+      platform upgrade may also change TOOLS.md format, SOUL.md constraint
+      syntax, or AGENTS.md delegation format. The snapshot must capture ALL
+      9 workspace files, not just the governance-related subset. Otherwise
+      restore brings back old governance state but leaves workspace files
+      in the new format.
+    spec_impact: "CL-05 snap save — must capture all 9 workspace files, not just IR + config"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The dead man's switch assumes npm install is the upgrade mechanism.
+      But platform upgrades could also come via VS Code extension update,
+      fleet broadcast, or manual file replacement. doctor --post-upgrade
+      should detect WHAT changed (schema version, syntax deprecations)
+      regardless of HOW the upgrade arrived. The trigger should be version
+      mismatch detection, not coupling to npm install.
+    spec_impact: "CL-05 doctor --post-upgrade — trigger on version mismatch, not npm event"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The --post-upgrade flag on doctor is one of only 2 new flags. But
+      doctor without --post-upgrade already runs diagnostics. The distinction
+      is that --post-upgrade enables schema migration checks. This means
+      doctor has two modes: routine diagnostics vs upgrade migration. The
+      spec should clarify that these are different diagnostic rule sets,
+      not just a flag that enables additional checks.
+    spec_impact: "CL-05 doctor — routine vs upgrade diagnostic rule sets"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      snap restore after a failed upgrade must also handle the case where
+      npm install succeeded but doctor failed. The OpenClaw platform is now
+      at the new version but the workspace files are restored to old format.
+      This creates a version mismatch: new platform reading old-format files.
+      The restore should either also downgrade the platform or warn that
+      manual platform rollback is needed.
+    spec_impact: "CL-05 snap restore — platform version vs workspace version mismatch"
+    pitfall: P-165
+
+  - id: F08
+    severity: warning
+    description: >
+      The <15s latency target for the middle ring must include both doctor
+      diagnostics and snap operations. doctor --post-upgrade on a large
+      workspace (50+ tool definitions, multiple agent files) could exceed
+      15s for schema migration alone. The latency budget should be broken
+      down: snap save (<2s) + doctor (<10s) + pinch (<3s) = 15s.
+    spec_impact: "CL-05 Middle Ring — latency sub-budget per operation"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The dead man's switch pattern is common in database migrations (save
+      point + rollback). But database systems have ACID guarantees. File
+      system snapshots are NOT atomic — if the process crashes between
+      partial file writes during restore, the workspace could be left in
+      a corrupted state. The spec should define crash-recovery behavior
+      for snap restore.
+    spec_impact: "CL-05 snap restore — crash-recovery and partial write handling"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      If the developer runs the dead man's switch twice without clearing
+      the "pre-upgrade" snapshot, the second save overwrites the first.
+      This means a failed first upgrade (restored) followed by a second
+      attempt saves over the original known-good snapshot. snap save should
+      refuse to overwrite an existing snapshot without --force, or use
+      timestamped names by default.
+    spec_impact: "CL-05 snap save — overwrite protection for named snapshots"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The --fix flag on doctor makes automated changes to workspace files.
+      The lossless constraint (CL-04 / claws never modifies original files)
+      appears to conflict with doctor --fix, which explicitly modifies files.
+      doctor --fix must be explicitly carved out from the lossless guarantee,
+      or it must write migrated files to a staging area for user approval.
+    spec_impact: "CL-05 doctor --fix vs CL-04 lossless — explicit carve-out needed"
+    pitfall: null

@@ -1,0 +1,182 @@
+name: S08-fleet-inherited-elicitation
+series: fleet-operations
+version: 1
+specs: [CL-05, CL-02]
+description: >
+  Validates that fleet-level inherited elicitation policy resolves
+  OBO-WITHOUT-ELICIT violations in member workspaces. A workspace has
+  an R5 tool (send-email) without a local elicitation policy, which
+  normally produces a violation. The fleet template provides the
+  elicitation policy. The ANALYZE phase must check fleet inheritance
+  before flagging the workspace.
+
+expect:
+  workspaces:
+    total: 5
+    fleet_template_applied: 4
+    local_override: 1
+  drift_count: 0
+  broadcast_result: null
+  compliance:
+    obo_violations: 0
+    fleet_inherited_resolutions: 3
+    local_policy_resolutions: 1
+    ungoverned: 1
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A fleet of 5 workspaces uses a fleet template that provides elicitation
+  policies for common OBO tools (send-email, post-slack, schedule-meeting).
+  Three workspaces have R5 tools (send-email) with no local elicitation
+  policy in USER.md. One workspace has a local elicitation override that
+  is stricter than the fleet template. One workspace is ungoverned. The
+  three workspaces without local policy should inherit the fleet template
+  and pass OBO-WITHOUT-ELICIT. The workspace with a local override should
+  use its stricter local policy (local overrides fleet for strictness).
+  The ungoverned workspace is excluded from fleet inheritance.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The ANALYZE phase currently runs per-workspace. When it encounters
+      an R5 tool with no local elicitation policy, it immediately flags
+      OBO-WITHOUT-ELICIT. The fleet template resolution requires a second
+      pass: first check local policy, then check fleet inheritance if local
+      is absent. The compile pipeline must be extended to accept fleet
+      context as input, not just workspace-level files. This changes the
+      9-file compilation model to a 9+fleet compilation model.
+    spec_impact: "CL-04 ANALYZE — fleet context input for inherited policy resolution"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Fleet template inheritance semantics are unspecified. Which policies
+      can be inherited? Only elicitation? Or also trust tier, data labels,
+      injection defense rules? If all policies are inheritable, the fleet
+      template becomes a de facto workspace claws.json, and local claws.json
+      becomes an override layer. The inheritance model must define exactly
+      which fields are inheritable and which are workspace-only.
+    spec_impact: "CL-05 Fleet — inheritable policy field enumeration"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Local override strictness resolution: the workspace with a stricter
+      local policy should use the local policy (local wins when stricter).
+      But what if the local policy is LESS strict than the fleet template?
+      A workspace that sets "elicitation: none" for send-email while the
+      fleet template requires approval creates a security downgrade. The
+      spec must define precedence: fleet template sets the FLOOR, local
+      policy can only be stricter (raise the floor), never more permissive
+      (lower the floor).
+    spec_impact: "CL-05 Fleet — floor-only inheritance: local can raise, not lower"
+    pitfall: P-182
+
+  - id: F04
+    severity: major
+    description: >
+      The fleet template must be versioned and signed. If the fleet template
+      is a plain YAML file, any workspace owner could modify their copy to
+      weaken the elicitation policy. The fleet template should be signed
+      (HMAC-SHA256) by the fleet administrator, and the workspace compiler
+      must verify the signature before applying inheritance. Unsigned or
+      tampered fleet templates should be rejected.
+    spec_impact: "CL-05 Fleet — fleet template signing and verification"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      CL-02 constraint (CFC-S03-F06) says "ANALYZE must check fleet-level
+      inherited configuration in addition to workspace-level files." But
+      the ANALYZE phase runs within a workspace context. Where does the
+      fleet template physically reside? Options: (a) .claws/fleet-template.yaml
+      in each workspace (pushed by broadcast), (b) a fleet-level directory
+      outside any workspace, (c) embedded in claws.json. Option (a) means
+      broadcast distributes the template. Option (b) requires `claws build`
+      to accept a --fleet-template flag. The storage location determines
+      the resolution mechanism.
+    spec_impact: "CL-05 Fleet — fleet template storage location and resolution mechanism"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Inheritance resolution order matters when multiple fleet templates
+      exist. An organization may have a global template (all workspaces)
+      and a department template (healthcare workspaces). If both provide
+      elicitation policies for send-email, which wins? The spec should
+      define a template hierarchy: global < department < workspace. The
+      most specific template wins, with strictness-only override semantics
+      at each level.
+    spec_impact: "CL-05 Fleet — fleet template hierarchy (global < department < workspace)"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The ungoverned workspace in the fleet should NOT inherit fleet
+      policies. Inheritance implies the workspace is part of the governed
+      fleet. An ungoverned workspace (no claws.json) has not opted into
+      governance. Applying fleet policies to it without consent violates
+      the opt-in principle. The fleet template should only apply to
+      workspaces that have claws.json with fleet membership configured.
+    spec_impact: "CL-05 Fleet — opt-in requirement for fleet template inheritance"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      When an inherited fleet policy resolves an OBO-WITHOUT-ELICIT
+      violation, the diagnostic should show the resolution source:
+      "send-email elicitation policy inherited from fleet template v2
+      (broadcast 2026-04-10). No local override present." This
+      transparency helps workspace owners understand why their workspace
+      passes without a local policy and prevents confusion when the fleet
+      template changes.
+    spec_impact: "CL-05 Fleet — diagnostic transparency for inherited policy resolution"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      If the fleet template is removed (broadcast a template with the
+      elicitation policy deleted), all three dependent workspaces
+      immediately fail OBO-WITHOUT-ELICIT. This is a cascade failure
+      triggered by fleet template modification. The broadcast should
+      warn: "Removing elicitation policy from fleet template will cause
+      3 workspaces to fail OBO-WITHOUT-ELICIT. Proceed with --confirm?"
+      Impact analysis before fleet template changes prevents cascade.
+    spec_impact: "CL-05 Fleet — impact analysis for fleet template modifications"
+    pitfall: P-183
+
+  - id: F10
+    severity: note
+    description: >
+      Fleet-inherited policies should appear in the GovernanceIR metadata
+      so that `claws diff` can show the difference between "workspace
+      policy" and "fleet-inherited policy." If a workspace adds a local
+      policy later, diff should show the transition from inherited to local.
+      This supports the workspace owner's journey from fleet-managed to
+      self-managed governance.
+    spec_impact: "CL-04 GovernanceIR — fleet inheritance metadata in IR"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Pre-authorized OBO scope in USER.md (Amendment CFC-S03-F03) interacts
+      with fleet inheritance. If USER.md pre-authorizes send-email and the
+      fleet template also provides an elicitation policy for send-email,
+      the local pre-authorization takes precedence (it is stricter — the
+      user explicitly consented). The fleet template is a fallback for
+      workspaces that have neither pre-authorization nor local policy.
+    spec_impact: "CL-02 G-ELICIT — pre-authorization vs fleet inheritance precedence"
+    pitfall: null

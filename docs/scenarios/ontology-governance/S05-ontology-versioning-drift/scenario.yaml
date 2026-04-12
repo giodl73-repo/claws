@@ -1,0 +1,131 @@
+name: S05-ontology-versioning-drift
+series: ontology-governance
+version: 1
+specs: [CL-04, CL-06, CL-07]
+description: >
+  Validates fleet drift detection when an ontology package is updated
+  but not all workspaces have recompiled. A fleet of 20 workspaces uses
+  soc2-governance v1.2. The package is updated to v1.3 adding a new
+  control. After broadcast, 15 workspaces recompile successfully, 3 fail
+  to recompile (incompatible claws.json), and 2 are offline. The fleet
+  drift report must show version distribution and compliance gaps.
+
+expect:
+  rules_applied: [G-PERM, G-BOUND, G-SUPPLY]
+  violations: []
+  pass: false
+  severity: warning
+
+simulate:
+  failures:
+    - component: ontology-recompile
+      type: incompatible-config
+      error: "3 workspaces failed recompile: claws.json missing required field trust_tier_map for soc2-governance v1.3"
+    - component: workspace-connectivity
+      type: offline
+      error: "2 workspaces unreachable during broadcast window"
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise fleet standardizes on soc2-governance v1.2 across 20
+  workspaces. The compliance team publishes v1.3, adding CC9.1 (risk
+  assessment) mapped to G-CLASS with a new trust_tier_map parameter.
+  A fleet broadcast triggers recompilation across all workspaces. 15
+  recompile successfully and now enforce CC9.1. 3 workspaces have
+  claws.json configurations that lack the trust_tier_map field required
+  by the new control, causing recompilation to fail. 2 workspaces are
+  offline and never receive the broadcast. The fleet drift report must
+  show: 15 on v1.3, 3 failed (with error details), 2 unreachable. The
+  compliance dashboard must flag the fleet as non-compliant because not
+  all workspaces enforce the complete SOC2 control set.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Ontology version drift creates a compliance gap that is invisible
+      without fleet-level version tracking. If the fleet dashboard only
+      shows pass/fail per workspace, the 15 passing workspaces on v1.3
+      and 3 failing workspaces look like individual issues, not a fleet-
+      wide version migration problem. The drift report must aggregate by
+      ontology version, showing version distribution as the primary view.
+    spec_impact: "CL-05 Fleet Dashboard -- aggregate drift by ontology package version"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The 3 workspaces that failed recompilation are in a worse state
+      than the 2 offline ones. Failed workspaces attempted to update but
+      could not, leaving them on v1.2 with awareness that v1.3 exists.
+      Offline workspaces do not know v1.3 exists. The drift report must
+      distinguish STALE (knows about update, failed to apply) from
+      UNREACHABLE (never received broadcast). STALE requires immediate
+      remediation; UNREACHABLE requires connectivity investigation first.
+    spec_impact: "CL-05 Fleet Drift -- STALE vs UNREACHABLE state distinction"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The recompilation failure for 3 workspaces is caused by a missing
+      field in claws.json. The ontology v1.3 introduced a new required
+      parameter (trust_tier_map) that v1.2 did not need. This is a
+      breaking change in the ontology package. The ontology versioning
+      scheme must distinguish breaking (major) from non-breaking (minor)
+      changes. A broadcast of a breaking ontology version should warn
+      the fleet operator that workspaces may need configuration updates
+      before recompilation succeeds.
+    spec_impact: "CL-07 Package Versioning -- breaking vs non-breaking ontology version classification"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The 2 offline workspaces will eventually come online and receive
+      the broadcast. But the broadcast is ephemeral -- if the broadcast
+      mechanism is fire-and-forget, offline workspaces miss it permanently.
+      The fleet broadcast must be durable: workspaces coming online should
+      check for pending broadcasts and apply them. This requires a
+      broadcast ledger at the fleet level that workspaces poll on startup.
+    spec_impact: "CL-05 Fleet Broadcast -- durable broadcast ledger for offline workspace catch-up"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The compliance dashboard flags the fleet as non-compliant, but the
+      remediation path differs by failure mode. For STALE workspaces,
+      the fix is claws.json update + recompile. For UNREACHABLE, the fix
+      is connectivity restoration + broadcast replay. The drift report
+      should include per-workspace remediation guidance, not just status
+      labels, so operators can act without investigating each workspace
+      individually.
+    spec_impact: "CL-05 Fleet Drift Report -- per-workspace remediation guidance"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      During the drift window (between broadcast and full fleet convergence),
+      the fleet enforces mixed governance versions. Inter-workspace
+      delegation (workspace A delegates to workspace B) may cross version
+      boundaries. If workspace A (v1.3) delegates to workspace B (v1.2),
+      the delegation crosses a governance gap where CC9.1 is enforced on
+      one side but not the other. Cross-version delegation should emit a
+      governance version mismatch warning.
+    spec_impact: "CL-07 Delegation -- governance version mismatch warning for cross-version delegation"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The scenario tests drift from a single ontology version update.
+      In practice, multiple ontology packages update independently (soc2
+      v1.3, hipaa v2.1, custom-policy v3.0). The drift matrix becomes
+      multi-dimensional: each workspace has a vector of ontology versions.
+      Fleet drift detection must handle multi-ontology version vectors,
+      not just single-package drift.
+    spec_impact: "CL-05 Fleet Drift -- multi-ontology version vector drift detection"
+    pitfall: null

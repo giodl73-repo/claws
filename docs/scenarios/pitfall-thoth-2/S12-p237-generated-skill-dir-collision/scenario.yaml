@@ -1,0 +1,145 @@
+name: S12-p237-generated-skill-dir-collision
+series: pitfall-thoth-2
+version: 1
+specs: [CL-04]
+description: >
+  Validates that the EMIT phase detects and prevents directory name collisions
+  between generated governance skill directories and user-authored skill
+  directories. When the emit path resolves to a name already occupied by user
+  content, the compiler must refuse to overwrite and report a collision error
+  rather than silently destroying user work.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, SKILLS.md, claws.json]
+    analysis:
+      rules_evaluated: true
+  violations:
+    - code: CLAWS-E200
+      message: "Emit path collision — generated skill directory 'governance' already exists as user-authored skill"
+      severity: error
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: emit
+      type: directory-collision
+      error: "Target directory .claude/skills/governance/ already contains user-authored files"
+    - component: emit
+      type: content-loss
+      error: "User skill SKILL.md would be overwritten by generated governance skill"
+  halt: null
+  budget: null
+
+problem: >
+  A developer has an existing .claude/skills/governance/ directory containing a
+  hand-written SKILL.md that provides custom governance review prompts for their
+  team. They run claws compile for the first time. The EMIT phase resolves the
+  generated governance skill output path to .claude/skills/governance/ — the same
+  directory. Without collision detection, the emitter writes the generated
+  SKILL.md over the user's file. The developer's custom review prompts are
+  permanently lost. Because the emit succeeded without error, the developer does
+  not realize the loss until a teammate reports that the governance review skill
+  now produces generic output instead of their customized prompts. The git diff
+  shows the replacement but the developer has already committed and pushed.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The EMIT phase must scan the target directory for existing files before
+      writing any output. If the directory exists and contains files not
+      previously emitted by claws (determined by absence of a .claws-generated
+      marker or metadata), the emit must fail with CLAWS-E200. This is the
+      core lossless guarantee: claws never destroys user content.
+    spec_impact: "CL-04 EMIT — pre-write collision scan requirement"
+    pitfall: P-237
+
+  - id: F02
+    severity: major
+    description: >
+      The reserved directory name must be configurable in claws.json to allow
+      enterprises to choose a governance skill directory name that does not
+      conflict with their existing conventions. The default should be
+      .claws-governance/ rather than governance/ to minimize collision
+      probability with common user-chosen names.
+    spec_impact: "CL-04 EMIT — configurable reserved directory name"
+    pitfall: P-237
+
+  - id: F03
+    severity: major
+    description: >
+      A .claws-generated marker file (or frontmatter tag in SKILL.md) must
+      distinguish claws-emitted files from user-authored files. On subsequent
+      compilations, the emitter checks for this marker before overwriting. If
+      the marker is absent, the file is user-authored and must not be touched.
+      This marker must survive file edits that do not remove the marker line.
+    spec_impact: "CL-04 EMIT — generated file marker protocol"
+    pitfall: P-237
+
+  - id: F04
+    severity: major
+    description: >
+      The collision check must be recursive. A user might have subdirectories
+      within the skill directory (e.g., governance/templates/). The emitter
+      must check not just the top-level directory but all paths it intends to
+      write to, ensuring no user content exists at any target path.
+    spec_impact: "CL-04 EMIT — recursive collision detection"
+    pitfall: P-237
+
+  - id: F05
+    severity: warning
+    description: >
+      Case-insensitive file systems (Windows NTFS, macOS HFS+) create an
+      additional collision vector. A user directory named Governance/ collides
+      with a generated governance/ directory on these platforms. The collision
+      check must normalize case before comparison on case-insensitive
+      platforms using process.platform detection.
+    spec_impact: "CL-04 EMIT — case-insensitive collision detection"
+    pitfall: P-237
+
+  - id: F06
+    severity: major
+    description: >
+      The error message must clearly identify both the intended emit path and
+      the existing user content. A generic "directory exists" error is
+      insufficient. The message should list the conflicting files and suggest
+      the --emit-dir flag to redirect output to a different directory name.
+    spec_impact: "CL-04 EMIT — actionable collision error message"
+    pitfall: P-237
+
+  - id: F07
+    severity: warning
+    description: >
+      If a previous claws compilation created the directory (marker present)
+      but the user subsequently added their own files alongside the generated
+      ones, the emitter faces a mixed-ownership scenario. The emitter must
+      only overwrite files that carry the .claws-generated marker and refuse
+      to delete user-added files, even within a claws-managed directory.
+    spec_impact: "CL-04 EMIT — mixed-ownership directory handling"
+    pitfall: P-237
+
+  - id: F08
+    severity: warning
+    description: >
+      The collision detection must run before any file writes, not as a
+      per-file check during emission. A partial write that fails mid-way
+      leaves the directory in an inconsistent state — some files overwritten,
+      others preserved. The entire emit must be atomic: either all files
+      are written or none are.
+    spec_impact: "CL-04 EMIT — atomic emission with pre-flight collision check"
+    pitfall: P-237
+
+  - id: F09
+    severity: note
+    description: >
+      The claws init command should proactively check for common skill
+      directory names that would collide with the default governance skill
+      output path and warn the user during setup rather than at first
+      compilation time. Early detection improves the onboarding experience.
+    spec_impact: "CL-04 init — proactive collision warning during setup"
+    pitfall: P-237

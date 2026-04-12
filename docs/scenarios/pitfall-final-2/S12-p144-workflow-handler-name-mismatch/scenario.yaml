@@ -1,0 +1,127 @@
+name: S12-p144-workflow-handler-name-mismatch
+series: pitfall-final-2
+version: 1
+specs: [CL-04]
+description: >
+  Validates the shared handler name registry for workflow-plugin cross-
+  references (P-144). When the workflow references a kebab-case handler
+  name but the plugin exports camelCase, the handler is not found at runtime.
+
+expect:
+  artifacts:
+    - name: workflow.yaml
+      status: validated
+    - name: index.ts
+      status: validated
+      assertion: "All workflow handler references resolve to plugin exports"
+  plugin_hooks:
+    - hook: before_tool_call
+      handler_name: "governanceBeforeToolCall"
+  skill_content: null
+  approvals: null
+
+simulate:
+  failures:
+    - component: emit
+      type: handler-name-mismatch
+      error: "workflow.yaml references 'governance-before-tool-call' but index.ts exports 'governanceBeforeToolCall'"
+  halt: null
+  budget: null
+
+problem: >
+  The emit phase generates both workflow.yaml and index.ts. The workflow
+  references handler "governance-before-tool-call" (kebab-case, matching
+  OC naming conventions). The plugin exports "governanceBeforeToolCall"
+  (camelCase, matching TypeScript conventions). At runtime, the OC Gateway
+  attempts to resolve the workflow handler reference and gets "handler not
+  found." The workflow step that invokes governance is silently skipped,
+  and the subsequent tool call proceeds without governance.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-144 core: Two naming conventions collide across artifact boundaries.
+      workflow.yaml uses kebab-case (OC convention). index.ts uses camelCase
+      (TypeScript convention). The emit phase generates both artifacts
+      independently, each following its own convention. No cross-reference
+      validation catches the mismatch.
+    spec_impact: "CL-04 EMIT — cross-artifact handler name consistency"
+    pitfall: "P-144"
+
+  - id: F02
+    severity: major
+    description: >
+      The shared handler name registry: a Map<string, string> built during
+      the emit phase that maps every handler name to its canonical form.
+      Both workflow references and plugin exports must resolve to the same
+      canonical entry. A mismatch is a hard build error with the specific
+      handler names and their artifact locations.
+    spec_impact: "CL-04 EMIT — handler name registry implementation"
+    pitfall: "P-144"
+
+  - id: F03
+    severity: major
+    description: >
+      The canonical form must be defined: kebab-case (matching the
+      platform convention) or camelCase (matching TypeScript). The emit
+      phase must normalize all handler references to the canonical form.
+      If the canonical form is kebab-case, the plugin's TypeScript export
+      must use a string alias: export { governanceBeforeToolCall as
+      "governance-before-tool-call" }.
+    spec_impact: "CL-04 EMIT — canonical handler name convention"
+    pitfall: "P-144"
+
+  - id: F04
+    severity: major
+    description: >
+      Post-emit cross-reference validation: for every handler reference
+      in workflow.yaml, verify that a corresponding export exists in
+      index.ts (after normalization). For every export in index.ts that
+      is referenced by workflow.yaml, verify the reference exists. Both
+      directions must be checked.
+    spec_impact: "CL-04 EMIT — bidirectional handler resolution"
+    pitfall: "P-144"
+
+  - id: F05
+    severity: major
+    description: >
+      Runtime handler resolution on the OC Gateway may be case-sensitive
+      or case-insensitive depending on the platform. If the platform is
+      case-sensitive, "Governance-Before-Tool-Call" is different from
+      "governance-before-tool-call." The emit phase must assume
+      case-sensitive resolution (the stricter behavior).
+    spec_impact: "CL-04 EMIT — case-sensitive handler resolution assumption"
+    pitfall: "P-144"
+
+  - id: F06
+    severity: warning
+    description: >
+      Handler name collisions: if two different plugins export handlers
+      with the same normalized name, the registry must detect the collision
+      and fail the build. A workspace cannot have two handlers named
+      "governance-before-tool-call" even if they come from different
+      plugins.
+    spec_impact: "CL-04 EMIT — handler name collision detection"
+    pitfall: "P-144"
+
+  - id: F07
+    severity: warning
+    description: >
+      The workflow.yaml may reference handlers from non-claws plugins.
+      The registry must include ALL handler exports from ALL plugins in
+      the workspace, not just claws-generated ones. This requires parsing
+      all plugin index.ts files during the cross-reference phase.
+    spec_impact: "CL-04 EMIT — multi-plugin handler registry"
+    pitfall: "P-144"
+
+  - id: F08
+    severity: note
+    description: >
+      This naming mismatch is the most common cause of "governance not
+      working" bug reports from users. The error message from the OC
+      Gateway ("handler not found") does not mention the naming convention
+      mismatch. claws's build-time validation prevents this class of
+      runtime debugging entirely.
+    spec_impact: "CL-05 DX — build-time prevention of runtime naming errors"
+    pitfall: "P-144"

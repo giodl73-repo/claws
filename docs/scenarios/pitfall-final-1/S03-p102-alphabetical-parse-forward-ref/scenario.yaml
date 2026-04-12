@@ -1,0 +1,114 @@
+name: S03-p102-alphabetical-parse-forward-ref
+series: pitfall-final-1
+version: 1
+specs: [CL-04]
+description: >
+  Validates that file parse order does not affect compilation results. AGENTS.md
+  references tools declared in TOOLS.md, but alphabetical ordering parses
+  AGENTS.md first. Single-pass resolution would report phantom tools. The
+  compiler must use two-pass parsing with order-independent resolution.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [AGENTS.md, SOUL.md, TOOLS.md, claws.json]
+      parse_order_independent: true
+      intent_types: [AgentDeclaration, DenyIntent, ToolManifestEntry]
+    analysis:
+      rules_evaluated: true
+      violations: []
+      forward_references_resolved: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 4
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  AGENTS.md declares "research-agent" with tools: [web-search, doc-reader].
+  TOOLS.md declares web-search (R2) and doc-reader (R1). Alphabetical parse
+  order: AGENTS.md first, then TOOLS.md. During AGENTS.md parsing, web-search
+  and doc-reader are unresolved. A single-pass eager resolver reports both as
+  phantom tools (SKILL-TOOL-GHOST). The developer adds a new file "ALERTS.md"
+  which shifts parse order and breaks previously working compilations.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Two-pass parsing is the fundamental fix: pass 1 collects all
+      declarations across all files (agents, tools, skills, constraints),
+      pass 2 resolves all cross-references. This guarantees that parse
+      order is irrelevant. The IR must record "resolved in pass 2" for
+      traceability.
+    spec_impact: "CL-04 PARSE — two-pass architecture requirement"
+    pitfall: P-102
+
+  - id: F02
+    severity: major
+    description: >
+      Adding a new file (ALERTS.md) changes alphabetical order. If any
+      resolution behavior depends on order, the compilation is fragile.
+      Adding a file should only ADD constraints, never break existing
+      ones. This is a hard invariant: compilation is monotonic with
+      respect to file addition.
+    spec_impact: "CL-04 PARSE — monotonic file addition invariant"
+    pitfall: P-102
+
+  - id: F03
+    severity: major
+    description: >
+      Circular cross-references (AGENTS.md references a tool declared
+      in TOOLS.md, which has a note referencing an agent in AGENTS.md)
+      are valid in a two-pass system. The compiler must not stack-
+      overflow on circular references. Pass 1 collects, pass 2 resolves
+      from the collected set -- no recursion.
+    spec_impact: "CL-04 PARSE — circular reference safety"
+    pitfall: P-102
+
+  - id: F04
+    severity: warning
+    description: >
+      Incremental compilation re-parses only changed files. If TOOLS.md
+      changes, AGENTS.md references must be re-resolved against the new
+      tool set. Incremental compilation must invalidate dependent files
+      when a declaration file changes. The dependency graph is: any file
+      with references depends on any file with declarations.
+    spec_impact: "CL-04 incremental — dependency invalidation"
+    pitfall: P-102
+
+  - id: F05
+    severity: major
+    description: >
+      Error messages for unresolved references must distinguish between
+      "tool not declared anywhere" and "tool declared but in a file not
+      yet parsed." The two-pass system eliminates the second case, but
+      the error message for the first case should list available tools
+      with edit-distance suggestions.
+    spec_impact: "CL-04 diagnostics — unresolved reference messages"
+    pitfall: P-102
+
+  - id: F06
+    severity: warning
+    description: >
+      SKILL.md files use natural language tool references, not formal
+      declarations. Pass 1 must extract NL tool references from SKILL.md
+      using pattern matching, not just formal declarations. The two-pass
+      guarantee must extend to NL references.
+    spec_impact: "CL-04 PARSE — NL reference extraction in pass 1"
+    pitfall: P-102
+
+  - id: F07
+    severity: note
+    description: >
+      Performance: two-pass parsing reads every file twice. For the 9
+      workspace files (small, typically <50KB total), this is negligible.
+      But the architecture should allow pass 1 to cache parsed ASTs for
+      pass 2 to reuse, avoiding redundant parsing.
+    spec_impact: "CL-04 latency — AST caching between passes"
+    pitfall: P-102

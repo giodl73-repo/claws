@@ -1,0 +1,168 @@
+name: S01-soc2-evidence-generation
+series: compliance-evidence
+version: 1
+specs: [CL-02]
+description: >
+  Validates that `claws comply soc2` generates a complete SOC2 Type II
+  evidence package for a fully governed workspace. The workspace has all
+  9 files, full governance configuration, an active audit chain spanning
+  6 months, and all 9 SOC2 controls mapped to claws rules. The evidence
+  package must be signed, timestamped, and contain per-control evidence
+  with governance rule mappings, event counts, and compliance findings.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, AGENTS.md, MEMORY.md, USER.md, IDENTITY.md, claws.json, RULES.md, SKILLS.md]
+      intent_types: [DenyIntent, ToolManifestEntry, AgentDeclaration, MemoryConfig, UserScope, IdentityConfig]
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 1
+    types: [soc2-evidence-package]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise workspace has been running with full claws governance for
+  8 months. The audit chain contains 15,000 events across the observation
+  period. TOOLS.md declares 12 tools (R1-R5). AGENTS.md declares 4 agents
+  with L2 identity. claws.json has complete governance configuration
+  including elicitation policies, bounds, fail-mode, and data labels.
+  `claws comply soc2` must generate a SOC2Evidence object with all 9
+  controls mapped, chain integrity verified, and a signature using the
+  workspace's Ed25519 audit signing key. The evidence must be reproducible:
+  running the command again with the same audit chain and policy version
+  produces an identical package.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The SOC2Evidence schema includes an observation period (start, end)
+      but the spec does not define how the period is determined. Is it
+      derived from the audit chain's first and last events? Configured
+      explicitly in claws.json? Passed as CLI arguments? SOC2 Type II
+      requires a minimum 6-month observation period. If the audit chain is
+      only 3 months old, the command should refuse to generate evidence
+      (or generate it with a critical finding).
+    spec_impact: "CL-02 SOC2 Evidence — define observation period determination and minimum period validation"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The SOC2 control mapping (CC6.1 through CC8.1) maps each control to
+      claws rules but the evidence includes "auditEvents: number" — a
+      count of relevant events. The spec does not define how events are
+      filtered by control. A G-CLASS event is relevant to CC6.1 and CC6.3.
+      A G-ELICIT event is relevant to CC6.2. The filtering rules must be
+      defined as part of the SOC2Evidence schema, not left to implementation
+      discretion, because different filtering rules produce different event
+      counts and different compliance assessments.
+    spec_impact: "CL-02 SOC2 Control Mapping — define event-to-control filtering rules"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The evidence package includes a chainIntegrity field with three states:
+      verified, broken, unchecked. A "broken" chain (one or more breaks in
+      the hash chain) should be a critical compliance finding, not just a
+      metadata field. SOC2 auditors will flag a broken chain as a material
+      weakness. The evidence package should include the break locations and
+      the number of events between breaks, so auditors can assess the
+      impact of the breaks.
+    spec_impact: "CL-02 SOC2 Evidence — elevate broken chain to critical finding with break analysis"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The SOC2Control status has four states: satisfied, partially-satisfied,
+      not-satisfied, not-applicable. The spec maps controls to rules but
+      does not define the threshold for each status. How many G-CLASS events
+      constitute "satisfied" for CC6.1? Is it presence-based (at least one
+      event) or coverage-based (all tools classified)? Without defined
+      thresholds, the status determination is subjective and non-reproducible.
+    spec_impact: "CL-02 SOC2 Control Mapping — define status thresholds per control"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The evidence package is signed with Ed25519 but the public key for
+      verification is not included in the package. An auditor receiving the
+      package needs the public key separately. The package should include
+      a key fingerprint (not the key itself) and a reference to the key's
+      location (e.g., "verify with claws keys export audit-signing --public").
+      This follows the standard practice of signed artifacts including key
+      references.
+    spec_impact: "CL-02 Verification Procedure — include key fingerprint and retrieval instructions in evidence"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The compliance evidence includes a "reclassification table" per
+      Amendment SCV-S13-F06. But reclassifications change over time — a
+      tool may be reclassified from R5 to R4, then back to R5. The evidence
+      must include the FULL reclassification history within the observation
+      period, not just the current state. Without history, an auditor
+      cannot verify that R5 governance was consistently applied.
+    spec_impact: "CL-02 SOC2 Evidence — include reclassification history, not just current state"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The SOC2 control CC6.6 (Access Reviews) maps to `claws drift` and
+      `claws pinch --fleet`. If drift detection has never been run during
+      the observation period, the control status is "not-satisfied" even if
+      the governance is otherwise complete. The evidence generator should
+      check for drift detection events in the audit chain and report the
+      frequency. SOC2 typically requires quarterly access reviews.
+    spec_impact: "CL-02 SOC2 Control CC6.6 — define minimum drift detection frequency for satisfied status"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The evidence package's "generatedBy" field includes the claws version
+      and workspace hash. If the workspace is modified between evidence
+      generation and auditor review, the workspace hash will not match.
+      The evidence package should embed a snapshot of the policy state at
+      generation time (or reference a specific claws snap snapshot) so the
+      auditor can verify against the exact policy that was in effect.
+    spec_impact: "CL-02 SOC2 Evidence — embed or reference policy snapshot for auditor verification"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The SOC2 control CC7.3 (Change Management) maps to `claws snap` and
+      `claws diff`. The evidence should include a count of governance
+      changes during the observation period and a summary of what changed.
+      This gives auditors visibility into governance evolution, not just the
+      final state.
+    spec_impact: "CL-02 SOC2 Control CC7.3 — include governance change count and summary in evidence"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Reproducibility requires that the same audit chain + policy version
+      produces identical evidence. But the "generatedAt" timestamp changes
+      on each run. The reproducibility guarantee should exclude the
+      timestamp from the comparison, or the command should accept a
+      --timestamp override for reproducibility testing.
+    spec_impact: "CL-02 Verification Procedure — define reproducibility scope (exclude generatedAt)"
+    pitfall: null

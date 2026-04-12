@@ -1,0 +1,105 @@
+name: S10-g-elicit-approval
+series: governance-rules
+version: 1
+specs: [CL-02]
+description: >
+  Validates G-ELICIT rule: R5 tools require human approval (elicitation gate).
+  A workspace with an R5 tool and no approval policy produces a violation.
+  The elicitation gate is the OBO boundary enforcement mechanism.
+
+expect:
+  rules_applied: [G-ELICIT]
+  violations:
+    - rule: G-ELICIT
+      tool: send-payment
+      severity: error
+      message_pattern: "R5 tool without approval policy"
+  pass: false
+  severity: error
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  TOOLS.md declares "send-payment" (R5/TRANSACT/OBO). claws.json has no
+  elicitation policy configured (no `elicitation.policies` section). G-ELICIT
+  must flag send-payment as requiring an approval policy because it acts AS
+  the user. Without a policy, the tool would execute without human approval,
+  violating the OBO boundary.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The elicitation policy must specify: who can approve (the user, a
+      manager, a policy engine), how (inline prompt, async notification,
+      pre-authorized), and timeout (default 300s). If the policy section
+      exists but is incomplete (e.g., timeout missing), should G-ELICIT
+      pass or flag the incomplete policy?
+    spec_impact: "CL-02 G-ELICIT — policy completeness validation"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      An R5 tool with a misspelled name in the elicitation policy (e.g.,
+      "send_payment" vs "send-payment") would silently pass pinch because
+      the policy references a non-existent tool and the actual R5 tool has
+      no policy. Name matching between TOOLS.md and claws.json must be
+      exact or normalized.
+    spec_impact: "CL-02 G-ELICIT — tool name cross-reference validation"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Pre-authorized approval (USER.md grants permanent approval for certain
+      R5 tools) bypasses the runtime elicitation gate. This is valid for
+      tools the user has explicitly pre-approved. G-ELICIT must check USER.md
+      OBO scope grants before flagging missing policies.
+    spec_impact: "CL-02 G-ELICIT + USER.md — pre-authorization interaction"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      G-ELICIT-CHAIN (no transitive OBO, max 1 hop) is a separate rule but
+      interacts with G-ELICIT. If a subagent has an R5 tool and the parent
+      has an approval policy, does the parent's policy cover the subagent?
+      No — G-ELICIT-CHAIN says OBO cannot be delegated. The subagent's R5
+      tool needs its own approval path.
+    spec_impact: "CL-02 G-ELICIT-CHAIN — subagent approval independence"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The violation severity is "error" — the most severe. This means a
+      workspace with ANY R5 tool and no policy cannot compile. For onboarding,
+      this is a hard adoption barrier. A migration path should exist: claws
+      init generates a default deny-all policy, then users selectively enable.
+    spec_impact: "CL-05 claws init — default elicitation policy generation"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      G-ELICIT maps to OWASP #4 (Tool Misuse). The audit requirement
+      (G-ELICIT-AUDIT) mandates all approval decisions are recorded. If the
+      audit chain is not configured (CL-02 CB-02), the approval decision
+      is not recorded even if approval is granted. G-ELICIT should warn
+      if audit chain signing is not configured alongside elicitation.
+    spec_impact: "CL-02 G-ELICIT + G-ELICIT-AUDIT — audit dependency"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Signed approval tokens prevent A2A forgery (CL-02 constraint). If the
+      approval policy exists but token signing is not configured, the approval
+      can be forged by a malicious subagent. G-ELICIT should cross-check
+      that approval token signing is enabled.
+    spec_impact: "CL-02 G-ELICIT — approval token signing cross-check"
+    pitfall: null

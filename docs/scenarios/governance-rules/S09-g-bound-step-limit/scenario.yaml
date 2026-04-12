@@ -1,0 +1,91 @@
+name: S09-g-bound-step-limit
+series: governance-rules
+version: 1
+specs: [CL-02]
+description: >
+  Validates G-BOUND rule: bounded reasoning limits. A workspace with no
+  step limit produces a warning. A workspace with a 100-step limit passes.
+  G-BOUND prevents unbounded agent execution that could lead to resource
+  exhaustion or cascading hallucination.
+
+expect:
+  rules_applied: [G-BOUND]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Two workspace configurations tested: (1) claws.json with no step limit —
+  G-BOUND emits a warning "no step limit configured, agent may run unbounded."
+  (2) claws.json with bounds.maxSteps: 100 — G-BOUND passes with no warnings.
+  The step limit prevents runaway agent execution, mapping to OWASP #10
+  (Cascading Hallucination) and OWASP #3 (Injection via infinite loops).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      G-BOUND has 4 sub-rules: step limits, tool call limits, budget limits,
+      and recursion limits. This scenario tests only step limits. All 4 must
+      be configurable in claws.json and all 4 must have individual violations.
+      A workspace with step limit but no tool call limit should still get a
+      warning for the missing tool call limit.
+    spec_impact: "CL-02 G-BOUND — per-sub-rule individual checking"
+    pitfall: null
+
+  - id: F02
+    severity: warning
+    description: >
+      The "no step limit" case produces a warning, not an error. This means
+      workspaces can compile and deploy without bounds. For enterprise
+      deployments, G-BOUND should support strict mode where missing bounds
+      are errors. The severity should be configurable via claws.json.
+    spec_impact: "CL-02 G-BOUND — configurable severity for missing bounds"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      100 steps as a limit — is that reasonable? The scenario uses 100 but
+      the spec does not define recommended ranges. A tool that runs 1000
+      sequential API calls in 100 steps is still dangerous. Step limits alone
+      are insufficient without tool call limits. The scenario should test
+      the interaction between step and tool call limits.
+    spec_impact: "CL-02 G-BOUND — recommended limit ranges"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Budget limits (G-BOUND sub-rule 3) map to token consumption. If the
+      workspace has no token budget and tools are cheap per-call but the
+      agent makes 100 calls, the total cost could be high. Budget limits
+      should express cost in dollars or tokens, not just call counts.
+    spec_impact: "CL-02 G-BOUND — budget denomination (tokens vs dollars)"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      Recursion limits (G-BOUND sub-rule 4) prevent agents from calling
+      themselves. This is relevant for subagent chains (A calls B calls A).
+      The recursion limit is related to G-A2A-ESCALATE chain depth limits.
+      The two rules should share configuration to avoid contradictions.
+    spec_impact: "CL-02 G-BOUND + G-A2A-ESCALATE — shared chain depth config"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The generated plugin must enforce bounds at runtime. The compile-time
+      check verifies configuration exists. The runtime handler must count
+      steps and enforce the limit. If the handler is missing or bypassed,
+      compile-time checking is worthless. The emit phase must generate the
+      enforcement handler, not just validate the config.
+    spec_impact: "CL-04 EMIT — G-BOUND enforcement handler generation"
+    pitfall: null

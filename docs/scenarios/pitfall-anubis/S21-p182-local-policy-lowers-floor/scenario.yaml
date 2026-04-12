@@ -1,0 +1,145 @@
+name: S21-p182-local-policy-lowers-floor
+series: pitfall-anubis
+version: 1
+specs: [CL-02, CL-05]
+description: >
+  Validates floor-only inheritance semantics: local policy can raise the
+  security floor above the fleet template but can never lower it below.
+  A workspace that sets a less strict elicitation policy than the fleet
+  template must be rejected at compile time.
+
+expect:
+  workspaces:
+    total: 8
+    compliant: 6
+    floor_violation: 2
+  drift_count: 2
+  broadcast_result: null
+  compliance:
+    floor_violations:
+      - workspace: workspace-dev
+        fleet_floor: "elicit_all_r3_plus"
+        local_policy: "elicit_r5_only"
+        violation: "local policy less strict than fleet floor"
+      - workspace: workspace-test
+        fleet_floor: "trust_tier_t3_min"
+        local_policy: "trust_tier_t1"
+        violation: "local trust tier below fleet minimum"
+
+simulate:
+  failures:
+    - component: elicitation-policy
+      type: floor-violation
+      error: "workspace-dev elicitation policy 'elicit_r5_only' is less strict than fleet floor 'elicit_all_r3_plus'"
+    - component: trust-tier
+      type: floor-violation
+      error: "workspace-test trust tier T1 is below fleet minimum T3"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet template defines two security floors: all R3+ tool calls require
+  elicitation (elicit_all_r3_plus), and minimum trust tier is T3. A developer
+  in workspace-dev overrides the elicitation policy to only require elicitation
+  for R5 calls (elicit_r5_only), effectively lowering the security floor. A
+  QA engineer in workspace-test sets trust tier to T1 to test low-trust
+  scenarios. Both workspaces compile successfully because the fleet inheritance
+  check is missing. R3 and R4 tool calls in workspace-dev now execute without
+  human approval. Workspace-test allows tools that should be restricted at T1
+  trust. The fleet's security guarantees are silently violated by local
+  overrides.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-02 must define floor-only inheritance as a first-class concept in
+      G-ELICIT. The rule is: local policy >= fleet floor, always. Local
+      policy can add stricter elicitation requirements (elicit ALL tools,
+      not just R3+) but can never remove requirements that the fleet template
+      mandates. The comparison must be semantic (understanding that
+      elicit_all_r3_plus is stricter than elicit_r5_only), not lexical.
+    spec_impact: "CL-02 G-ELICIT — floor-only inheritance definition"
+    pitfall: P-182
+
+  - id: F02
+    severity: major
+    description: >
+      The floor enforcement must happen at compile time (during pinch), not
+      at runtime. A workspace that lowers the floor must fail to compile with
+      a clear error. The error must show the fleet floor, the local policy,
+      and explain why the local policy is less strict. Compile-time enforcement
+      prevents the workspace from ever running with a lowered floor.
+    spec_impact: "CL-02 G-ELICIT — compile-time floor enforcement"
+    pitfall: P-182
+
+  - id: F03
+    severity: major
+    description: >
+      The strictness comparison must cover all governance dimensions: trust
+      tier, elicitation scope, fail mode, data sensitivity labels, and tool
+      risk classifications. Lowering any dimension below the fleet floor is
+      a violation. CL-02 must define a partial ordering over governance
+      configurations where the fleet floor is the minimum element. Local
+      configurations must be above this minimum in all dimensions.
+    spec_impact: "CL-02 G-ELICIT — multi-dimensional strictness ordering"
+    pitfall: P-182
+
+  - id: F04
+    severity: major
+    description: >
+      Fleet scan must detect floor violations across all workspaces in a
+      single pass and report them as CRITICAL compliance failures. A fleet
+      with any workspace below the floor is non-compliant regardless of
+      other metrics. The scan must run the same strictness comparison as
+      pinch, catching workspaces that were compiled before the floor
+      enforcement was added.
+    spec_impact: "CL-05 Fleet Scan — floor violation detection"
+    pitfall: P-182
+
+  - id: F05
+    severity: warning
+    description: >
+      The fleet template must be able to mark specific floor dimensions as
+      "locked" (cannot be overridden at all) vs "floor" (can be raised but
+      not lowered). For example, R5 fail-closed might be locked (no workspace
+      can change it), while elicitation scope might be a floor (workspaces
+      can add but not remove requirements). This gives fleet admins granular
+      control over what local workspaces can customize.
+    spec_impact: "CL-05 Fleet Template — locked vs floor dimensions"
+    pitfall: P-182
+
+  - id: F06
+    severity: warning
+    description: >
+      When a local policy attempts to lower the floor, the error message
+      must suggest the correct approach: "To elicit only R5 in this workspace,
+      request a fleet template exception from your fleet admin. Use `claws
+      fleet request-exception --workspace dev --dimension elicitation --
+      requested elicit_r5_only --reason 'development testing'`." This guides
+      operators toward the governance process instead of workarounds.
+    spec_impact: "CL-02 G-ELICIT — exception request workflow"
+    pitfall: P-182
+
+  - id: F07
+    severity: warning
+    description: >
+      Development fleets may legitimately need lower floors for testing.
+      Fleet templates should support a `fleet.environment: development`
+      flag that lowers the floor for the entire fleet. Individual workspace
+      overrides are still prohibited — the entire fleet environment must be
+      consistent. This prevents the "one dev workspace lowered the floor"
+      problem while allowing development fleets to have different floors.
+    spec_impact: "CL-05 Fleet Template — environment-based floor tiers"
+    pitfall: P-182
+
+  - id: F08
+    severity: note
+    description: >
+      Floor violation audit events must capture the attempted override for
+      forensic analysis. If a workspace repeatedly attempts to lower the
+      floor, this pattern may indicate a compromised developer or a tool
+      that modifies claws configuration. The audit trail should include:
+      workspace, operator, attempted policy, fleet floor, and timestamp.
+    spec_impact: "CL-05 Fleet Audit — floor violation attempt logging"
+    pitfall: P-182

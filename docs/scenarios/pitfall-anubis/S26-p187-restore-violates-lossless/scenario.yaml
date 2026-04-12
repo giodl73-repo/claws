@@ -1,0 +1,155 @@
+name: S26-p187-restore-violates-lossless
+series: pitfall-anubis
+version: 1
+specs: [CL-04, CL-05]
+description: >
+  Validates that snap restore does not violate claws's lossless add-only
+  architecture. Restoring a snapshot that overwrites workspace files modified
+  after the snapshot was taken destroys user content. A staging-area workflow
+  must be used instead of direct overwrite.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      snapshot_name: baseline-v1
+      snapshot_action: restore
+      restore_mode: staging
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings:
+        - code: W-LOSSLESS-CONFLICT
+          message: "3 files modified since snapshot — staging area created"
+  violations: []
+  warnings:
+    - code: W-LOSSLESS-CONFLICT
+      message: "snap restore requires staging area — files modified since snapshot"
+  artifacts:
+    count: 1
+    types: [staging-area]
+
+simulate:
+  failures:
+    - component: snapshot-restore
+      type: lossless-violation
+      error: "Direct restore would overwrite TOOLS.md modified 2 hours after snapshot"
+  halt: null
+  budget: null
+
+problem: >
+  A developer takes a snapshot (baseline-v1) at 14:00. At 15:00, they add
+  3 new tool definitions to TOOLS.md and update SOUL.md with a new mission
+  statement. At 16:00, they decide to restore the snapshot. A direct restore
+  would overwrite TOOLS.md and SOUL.md, destroying the 3 new tool definitions
+  and the mission statement update. The claws architecture is lossless and
+  add-only — it never modifies or deletes user content. Direct snapshot
+  restore violates this fundamental principle. The user loses work that they
+  may not have committed to version control, with no undo path.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must define a staging-area workflow for snap restore instead of
+      direct file overwrite. The restore writes snapshot files to a staging
+      directory (.claws/staging/{snapshot-name}/), shows a diff between
+      staged files and current workspace files, and requires explicit
+      confirmation before applying. The developer sees exactly what will
+      change and can selectively apply or reject each file.
+    spec_impact: "CL-05 Snapshot Restore — staging-area workflow"
+    pitfall: P-187
+
+  - id: F02
+    severity: major
+    description: >
+      The lossless carve-out for snap restore must be documented as a design
+      principle in CL-04. claws never destroys user content. Snapshot restore
+      is not an exception — it is a governance configuration change, not a
+      file system operation. The carve-out must define: (1) staging area for
+      review, (2) selective application, (3) backup of current state before
+      any overwrite.
+    spec_impact: "CL-04 Compilation Pipeline — lossless restore principle"
+    pitfall: P-187
+
+  - id: F03
+    severity: major
+    description: >
+      Before any file overwrite, snap restore must create an automatic
+      backup of the current workspace state. The backup is a snapshot of
+      the pre-restore state, named "pre-restore-{timestamp}". This ensures
+      that if the restore produces unexpected results, the developer can
+      restore the pre-restore state. The lossless guarantee means no state
+      transition is irreversible.
+    spec_impact: "CL-05 Snapshot Restore — automatic pre-restore backup"
+    pitfall: P-187
+
+  - id: F04
+    severity: major
+    description: >
+      The staging-area diff must be file-level and content-level. For each
+      file in the snapshot, show: (1) whether the file was modified since
+      the snapshot, (2) a unified diff of changes, (3) whether the file
+      would be overwritten, added, or unchanged. Files that have not changed
+      since the snapshot can be skipped (no overwrite needed). Only modified
+      files require review.
+    spec_impact: "CL-05 Snapshot Restore — file-level diff in staging"
+    pitfall: P-187
+
+  - id: F05
+    severity: major
+    description: >
+      The --force flag for snap restore must bypass the staging area and
+      apply directly, but it must still create the pre-restore backup. The
+      --force flag is for automated workflows (dead man switch recovery)
+      where human review is not possible. The backup ensures that even
+      forced restores are reversible. The --force flag must require --confirm.
+    spec_impact: "CL-05 Snapshot Restore — force mode with mandatory backup"
+    pitfall: P-187
+
+  - id: F06
+    severity: warning
+    description: >
+      The staging area should support selective file application: `claws snap
+      apply --file SOUL.md` applies only SOUL.md from the staged snapshot.
+      This allows developers to cherry-pick which governance files to restore
+      while keeping their other modifications. Selective application is the
+      most common use case — developers rarely want to restore everything.
+    spec_impact: "CL-05 Snapshot Restore — selective file application"
+    pitfall: P-187
+
+  - id: F07
+    severity: warning
+    description: >
+      If the workspace is under version control (git), snap restore should
+      recommend committing current changes before restoring. The warning
+      message should say: "Workspace has uncommitted changes. Consider
+      `git commit` before restoring to preserve current state in version
+      history." This leverages existing version control as an additional
+      safety net beyond the pre-restore backup.
+    spec_impact: "CL-05 Snapshot Restore — version control integration"
+    pitfall: P-187
+
+  - id: F08
+    severity: note
+    description: >
+      The dead man switch (automatic restore on upgrade failure) uses snap
+      restore internally. The dead man switch must use --force mode because
+      there is no human to review the staging area. However, the pre-restore
+      backup must still be created. After the dead man switch fires, the
+      developer can review the backup to understand what was lost and
+      manually merge any changes.
+    spec_impact: "CL-05 Dead Man Switch — force restore with backup"
+    pitfall: P-187
+
+  - id: F09
+    severity: note
+    description: >
+      The staging area should have a configurable TTL (default 24 hours).
+      Staged snapshots that are not applied within the TTL are automatically
+      cleaned up. This prevents staging areas from accumulating indefinitely
+      and consuming disk space. The cleanup should warn before deleting:
+      "Staged snapshot baseline-v1 will be cleaned up in 2 hours."
+    spec_impact: "CL-05 Snapshot Restore — staging area TTL cleanup"
+    pitfall: P-187

@@ -1,0 +1,146 @@
+name: S03-p228-evidence-non-reproducible
+series: pitfall-thoth-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates that compliance evidence must be reproducible across platforms
+  (P-228). JSON key ordering differs between runtimes, causing the same audit
+  chain to produce different evidence hashes on Windows vs Linux vs macOS.
+  RFC 8785 canonical JSON serialization is required for deterministic output.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+    analysis:
+      rules_evaluated: true
+      compliance_check: true
+      serialization: canonical-json
+  violations:
+    - code: CLAWS-E228
+      message: "Evidence hash divergence — Windows SHA-256 does not match Linux SHA-256 for identical chain"
+      severity: error
+  warnings:
+    - code: CLAWS-W228
+      message: "Non-canonical JSON detected in 3 audit chain entries — key ordering not RFC 8785 compliant"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: comply-export
+      type: hash-divergence
+      error: "Evidence hash a3f7b1... (Windows) != c9e2d4... (Linux) for chain entries 1-10000"
+    - component: comply-export
+      type: non-canonical-json
+      error: "Entry 1247 serialized with insertion-order keys — differs from sorted-key canonical form"
+  halt: null
+  budget: null
+
+problem: >
+  A compliance team generates evidence on Windows using claws comply --export
+  and sends it to an external auditor. The auditor regenerates the evidence
+  on Linux for independent verification. The SHA-256 hashes do not match.
+  Investigation reveals that JSON.stringify on Node.js v20 (Windows) produces
+  insertion-order keys for audit chain entries, while the auditor's Node.js
+  v22 (Linux) produces a different insertion order due to V8 engine differences
+  in object property enumeration. Neither is wrong per the JSON specification,
+  but the evidence is non-reproducible. The auditor flags the evidence as
+  unverifiable because they cannot independently confirm the hash. Three months
+  of compliance evidence must be regenerated with canonical serialization.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-228 core: JSON key ordering is not guaranteed by the JSON spec.
+      Different runtimes, runtime versions, and even different V8 builds
+      may enumerate object properties in different orders. All audit chain
+      entries must be serialized using RFC 8785 (JSON Canonicalization Scheme)
+      which defines a deterministic key ordering (sorted lexicographically
+      by Unicode code point) and value serialization.
+    spec_impact: "CL-02 Reproducibility Amendment — RFC 8785 canonical JSON for all chain entries"
+    pitfall: "P-228"
+
+  - id: F02
+    severity: major
+    description: >
+      The evidence hash must be computed over the canonical form, not the
+      stored form. If existing chain entries were serialized non-canonically,
+      the evidence generator must re-canonicalize them before hashing. This
+      means the stored chain and the evidence hash may differ — the evidence
+      hash is always over the canonical representation, and the evidence
+      package must include the canonicalization version used.
+    spec_impact: "CL-02 Reproducibility Amendment — evidence hash over canonical form"
+    pitfall: "P-228"
+
+  - id: F03
+    severity: major
+    description: >
+      Existing non-canonical entries cannot be retroactively re-serialized
+      in the chain file (that would break the hash chain). The evidence
+      generator must maintain a mapping: stored-hash to canonical-hash for
+      entries that differ. This mapping is part of the evidence package and
+      allows auditors to verify both the chain integrity (stored hashes) and
+      evidence reproducibility (canonical hashes) independently.
+    spec_impact: "CL-02 Reproducibility Amendment — stored-to-canonical hash mapping"
+    pitfall: "P-228"
+
+  - id: F04
+    severity: major
+    description: >
+      The RFC 8785 implementation must be tested across all supported
+      platforms (Windows, macOS, Linux) and Node.js versions (18, 20, 22).
+      A single platform-specific edge case (e.g., locale-dependent number
+      formatting, Unicode normalization differences) breaks cross-platform
+      reproducibility. The build pipeline must include a cross-platform
+      canonicalization test that verifies identical output on all targets.
+    spec_impact: "CL-02 Reproducibility Amendment — cross-platform canonicalization test"
+    pitfall: "P-228"
+
+  - id: F05
+    severity: warning
+    description: >
+      RFC 8785 defines canonical serialization for JSON values including
+      numbers. However, JavaScript's number-to-string conversion may produce
+      different representations for edge cases (e.g., very large integers,
+      subnormal floats). The canonical serialization must use RFC 8785's
+      number serialization rules explicitly, not rely on the runtime's
+      default JSON.stringify number formatting.
+    spec_impact: "CL-02 Reproducibility Amendment — explicit number serialization per RFC 8785"
+    pitfall: "P-228"
+
+  - id: F06
+    severity: warning
+    description: >
+      Unicode string normalization affects key sorting in RFC 8785. The same
+      character can be represented as precomposed (NFC) or decomposed (NFD).
+      On macOS, HFS+ stores filenames in NFD, which may leak into JSON keys
+      derived from filenames. All string keys must be normalized to NFC before
+      canonical sorting to ensure cross-platform consistency.
+    spec_impact: "CL-02 Reproducibility Amendment — NFC normalization before canonical sorting"
+    pitfall: "P-228"
+
+  - id: F07
+    severity: warning
+    description: >
+      The evidence package format itself (not just individual entries) must
+      be canonical. The top-level evidence JSON, the metadata section, and
+      the index of entries must all use RFC 8785 serialization. A non-canonical
+      top-level wrapper around canonical entries still produces a non-
+      reproducible evidence hash.
+    spec_impact: "CL-02 Reproducibility Amendment — canonical serialization at all evidence levels"
+    pitfall: "P-228"
+
+  - id: F08
+    severity: note
+    description: >
+      Migration from non-canonical to canonical serialization requires a
+      version bump in the evidence format. Evidence packages must include
+      a serialization-version field so auditors know which canonicalization
+      rules were applied. Older evidence packages with serialization-version 0
+      (pre-canonical) cannot be cross-platform verified but remain valid
+      when verified on the same platform that generated them.
+    spec_impact: "CL-02 Compliance Evidence — serialization version field"
+    pitfall: "P-228"

@@ -1,0 +1,177 @@
+name: S02-broadcast-policy-update
+series: fleet-operations
+version: 1
+specs: [CL-05, CL-02]
+description: >
+  Validates that `claws broadcast --confirm` pushes a new SOC2 compliance
+  template to all fleet workspaces, each workspace receives the updated
+  policy YAML, and a post-broadcast `claws pinch --fleet` confirms adoption.
+  Broadcast is declarative (pushes policy files), not imperative (does not
+  compile). Each workspace must recompile after receiving broadcast policies.
+
+expect:
+  workspaces:
+    total: 10
+    received: 10
+    adopted: 10
+    rejected: 0
+  drift_count: 0
+  broadcast_result:
+    status: success
+    policy: soc2-v2
+    workspaces_updated: 10
+    recompile_required: 10
+  compliance:
+    soc2_pass: 10
+    soc2_fail: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A security team updates the SOC2 compliance template (new controls for
+  agent-to-agent communication auditing). The updated template must reach
+  all 10 fleet workspaces. The operator runs `claws broadcast --confirm
+  --reason "SOC2-2026 update: A2A audit controls"`. Each workspace receives
+  the policy YAML in its .claws/policies/ directory. The broadcast does NOT
+  auto-compile — each workspace must run `claws build` to apply the new
+  policy. After broadcast, `claws pinch --fleet` verifies that all 10
+  workspaces comply with the new SOC2 template.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Broadcast pushes policy files but does not trigger recompilation.
+      The spec says "broadcast is declarative" but does not define what
+      happens between broadcast and the next build. During this window,
+      the workspace's compiled governance plugin enforces the OLD policy
+      while the policy YAML contains the NEW policy. The fleet is in a
+      split-brain state. The spec must define whether `claws pinch` checks
+      the compiled plugin or the policy YAML. If it checks compiled, pinch
+      passes with stale enforcement. If it checks YAML, pinch catches the
+      gap but the runtime still enforces old rules.
+    spec_impact: "CL-05 Fleet — broadcast-to-build window and stale enforcement gap"
+    pitfall: P-170
+
+  - id: F02
+    severity: major
+    description: >
+      The --confirm flag is required for broadcast (destructive fleet op).
+      But --confirm alone is insufficient for audit. The --reason flag should
+      also be required for broadcast, not optional. Without a reason, the
+      audit trail shows "policy pushed" but not "why policy pushed." For SOC2
+      CC7.2 (change management), the reason is mandatory evidence.
+    spec_impact: "CL-05 Fleet — --reason required (not optional) for broadcast"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Pre-broadcast validation is missing from the spec. Before pushing a
+      new policy to 10 workspaces, the broadcast command should validate the
+      policy template against the schema. If the SOC2 template has a typo in
+      a rule reference, broadcasting it to 10 workspaces creates 10 broken
+      workspaces. `claws broadcast` must compile the template in a sandbox
+      against a synthetic workspace first.
+    spec_impact: "CL-05 Fleet — pre-broadcast policy validation gate"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Amendment A241 requires pre-broadcast identity validation (collision
+      blocks broadcast). The broadcast should also check that the policy
+      being pushed is compatible with each workspace's trust tier. A SOC2
+      template requiring T3 capabilities pushed to a T2 workspace creates
+      an unresolvable violation. Pre-broadcast compatibility check per
+      workspace prevents this.
+    spec_impact: "CL-05 Fleet — per-workspace compatibility check before broadcast"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Broadcast atomicity is unspecified. If the operator broadcasts to 10
+      workspaces and the process crashes after updating 6, the fleet has
+      inconsistent policies. Should broadcast be atomic (all-or-nothing)?
+      Or should it be best-effort with a manifest tracking which workspaces
+      received the update? Atomic is safer but requires two-phase commit
+      across filesystems, which is complex. Best-effort with manifest is
+      pragmatic but requires a follow-up reconciliation command.
+    spec_impact: "CL-05 Fleet — broadcast atomicity semantics (all-or-nothing vs manifest)"
+    pitfall: P-171
+
+  - id: F06
+    severity: warning
+    description: >
+      After broadcast, each workspace must run `claws build` to apply the
+      new policy. The spec does not define who triggers the build. Options:
+      (a) the workspace owner manually builds, (b) the fleet operator runs
+      `claws push` after broadcast to deploy pre-compiled artifacts, (c)
+      the inner ring (watch) detects the policy file change and auto-builds.
+      Option (c) is seamless but requires the inner ring to be running in
+      all workspaces. The spec should recommend a post-broadcast workflow.
+    spec_impact: "CL-05 Fleet — post-broadcast build trigger workflow"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Broadcast versioning is needed. If two broadcasts happen in quick
+      succession (SOC2-v2 then SOC2-v2.1), the fleet must know which version
+      each workspace has. A broadcast manifest with version, timestamp, and
+      hash enables `claws drift` to detect version skew. Without versioning,
+      drift detection can only compare hashes, not semantic versions.
+    spec_impact: "CL-05 Fleet — broadcast version tracking in fleet manifest"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The SOC2 template may conflict with workspace-local policy overrides.
+      If workspace-alpha has a custom elicitation policy that contradicts
+      the fleet SOC2 template, the broadcast overwrites the local policy.
+      The spec should define merge semantics: fleet policy overrides local?
+      Local overrides fleet? Merge with conflict detection? The choice has
+      significant security implications — fleet override is safer but less
+      flexible.
+    spec_impact: "CL-05 Fleet — broadcast merge semantics (override vs merge)"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Rollback after a bad broadcast is not addressed. If the SOC2-v2
+      template breaks all workspaces, the operator needs to revert. Options:
+      (a) `claws snap restore pre-broadcast --fleet`, (b) re-broadcast the
+      previous version. Option (a) requires pre-broadcast snap save (which
+      should be automatic). Option (b) requires version history. The spec
+      should mandate automatic pre-broadcast snapshot.
+    spec_impact: "CL-05 Fleet — automatic pre-broadcast snapshot for rollback"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Broadcast audit trail must record: who broadcast, what policy, which
+      version, to how many workspaces, at what time, with what reason. This
+      audit entry should appear in the fleet-level audit chain and in each
+      workspace's local audit chain (as "policy received from fleet broadcast
+      at <timestamp>").
+    spec_impact: "CL-05 Fleet — dual audit trail (fleet + workspace) for broadcast"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      For large fleets (100+ workspaces), broadcast should support workspace
+      targeting: `claws broadcast --group production` to push only to
+      production workspaces. Without targeting, a policy intended for
+      production gets pushed to development sandboxes, where it may be
+      unnecessarily restrictive. Workspace groups/tags enable selective
+      broadcast.
+    spec_impact: "CL-05 Fleet — workspace group targeting for selective broadcast"
+    pitfall: null

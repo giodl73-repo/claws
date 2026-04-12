@@ -1,0 +1,129 @@
+name: S13-p122-skill-directive-risk-press
+series: pitfall-final-1
+version: 1
+specs: [CL-04]
+description: >
+  Validates that the cross-artifact consistency check correctly maps SKILL.md
+  natural language directives to risk levels, and that PRESS compression does
+  not alter safety-critical directives. Frozen keyword set prevents PRESS from
+  changing "NEVER access" to "don't access," which would break the R5 mapping.
+
+expect:
+  governance_ir:
+    version: 1
+    emit:
+      consistency_check:
+        skill_to_risk_mapping: true
+        frozen_keywords_preserved: true
+        press_compression: safe
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 4
+    skill_md_keywords_intact: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  SKILL.md contains: "NEVER access production databases without explicit
+  approval. This tool MUST be confirmed before execution." The cross-artifact
+  consistency check maps "NEVER" to R5 and "MUST be confirmed" to elicitation-
+  required. PRESS compression for a 4K context window rewrites this to "Don't
+  access prod dbs. Confirm before use." The consistency check maps "Don't" to
+  R2 (advisory) and "Confirm" to R3 (soft gate). The risk levels no longer
+  match the TOOLS.md R5 classification and the exec-approvals.json blocked
+  status. The compression broke governance.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The frozen keyword set (NEVER, ALWAYS, MUST, PROHIBITED, REQUIRED,
+      BLOCKED, FORBIDDEN) must be protected from synonym replacement during
+      PRESS compression. These keywords have governance semantics: NEVER
+      maps to R5, MUST maps to elicitation-required. Synonym replacement
+      ("NEVER" -> "don't") destroys the mapping.
+    spec_impact: "CL-04 EMIT — frozen keyword set for PRESS"
+    pitfall: P-122
+
+  - id: F02
+    severity: major
+    description: >
+      Directive-level preservation is stronger than keyword-level: the
+      full sentence containing a frozen keyword must be preserved verbatim.
+      "NEVER access production databases without explicit approval" cannot
+      be shortened. Compressing surrounding non-critical text is allowed,
+      but the directive sentence is untouchable.
+    spec_impact: "CL-04 EMIT — directive-level PRESS preservation"
+    pitfall: P-122
+
+  - id: F03
+    severity: major
+    description: >
+      Keyword count validation post-compression verifies that the compressed
+      output has the same count of frozen keywords as the input. If the input
+      has 3 instances of "NEVER" and the output has 2, compression dropped a
+      directive. The build must fail with an error identifying the lost keyword.
+    spec_impact: "CL-04 EMIT — keyword count validation post-PRESS"
+    pitfall: P-122
+
+  - id: F04
+    severity: warning
+    description: >
+      The directive-to-risk mapping is a lookup table: NEVER -> R5,
+      PROHIBITED -> R5, BLOCKED -> R5, MUST -> R4 (elicitation), REQUIRED
+      -> R4, ALWAYS -> R3 (policy). This table must be defined in the spec,
+      not inferred. Different LLMs interpret "MUST" differently; the
+      mapping is a governance design decision.
+    spec_impact: "CL-04 ANALYZE — directive-to-risk mapping table"
+    pitfall: P-122
+
+  - id: F05
+    severity: major
+    description: >
+      Cross-artifact consistency means SKILL.md directives, TOOLS.md risk
+      levels, and exec-approvals.json blocked/allowed status must all agree.
+      If SKILL.md says "NEVER" (R5) but TOOLS.md says R3, the consistency
+      check produces a CLASSIFICATION-MISMATCH warning. The developer must
+      reconcile the three sources.
+    spec_impact: "CL-04 ANALYZE — three-source consistency check"
+    pitfall: P-122
+
+  - id: F06
+    severity: warning
+    description: >
+      Aggressive PRESS compression (target < 8K tokens) is the high-risk
+      mode. Conservative compression (target >= 32K) may not trigger keyword
+      replacement at all. The consistency check should be more strict for
+      aggressive compression levels. A compression-level-aware validation
+      tier would catch issues earlier.
+    spec_impact: "CL-04 EMIT — compression-level-aware validation"
+    pitfall: P-122
+
+  - id: F07
+    severity: warning
+    description: >
+      Multiple frozen keywords in a single sentence ("NEVER EVER access"
+      or "MUST ALWAYS confirm") must both be preserved. The deduplication
+      logic in PRESS must not merge duplicate-adjacent keywords. "NEVER
+      EVER" carries stronger intent than "NEVER" alone — semantic nuance
+      that must survive compression.
+    spec_impact: "CL-04 EMIT — multi-keyword sentence preservation"
+    pitfall: P-122
+
+  - id: F08
+    severity: note
+    description: >
+      The frozen keyword set must be extensible via claws.json configuration.
+      Enterprise deployments may have domain-specific safety keywords
+      ("CLASSIFIED," "RESTRICTED," "HIPAA-PROTECTED") that must survive
+      PRESS compression. The base set is fixed; extensions are additive.
+    spec_impact: "CL-01 claws.json — extensible frozen keyword set"
+    pitfall: P-122

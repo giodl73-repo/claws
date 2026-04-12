@@ -1,0 +1,155 @@
+name: S10-data-labels-pii-redaction
+series: pitfall-coverage-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates that unknown data sensitivity labels are caught at compile time
+  (P-087) and that PII redaction is per-channel instead of global (P-093).
+  Non-standard labels silently bypass G-DATA and G-A2A-FLOW. Global redaction
+  either loses forensic evidence or leaks PII depending on the redaction
+  choice.
+
+expect:
+  rules_applied: [G-DATA, G-OUTPUT]
+  violations:
+    - code: CLAWS-W010
+      rule: G-DATA
+      description: "Unknown sensitivity label 'SENSITIVE' in MEMORY.md"
+    - code: CLAWS-W031
+      rule: G-OUTPUT
+      description: "PII redaction configured globally, not per-channel"
+  pass: false
+  severity: warning
+
+simulate:
+  failures:
+    - component: classification
+      type: unknown-label
+      error: "MEMORY.md uses 'SENSITIVE' — not in closed enum [PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED]"
+    - component: output-guard
+      type: global-redaction
+      error: "SSN redacted in audit chain, losing forensic evidence"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has MEMORY.md with data entries labeled "SENSITIVE" and "PII"
+  instead of the standard enum (PUBLIC/INTERNAL/CONFIDENTIAL/RESTRICTED).
+  G-DATA finds no matching labels, so G-A2A-FLOW cannot enforce data
+  sensitivity boundaries between agents. An R5 tool processes a customer
+  SSN. Output redaction is configured globally: SSN is redacted everywhere.
+  The audit chain receives "[REDACTED]" instead of the SSN hash, losing
+  forensic ability to trace which specific record was accessed. The SIEM
+  export receives the full SSN, violating privacy policy.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-087 core: MEMORY.md uses "SENSITIVE" as a label. The closed enum
+      is [PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED]. "SENSITIVE" is not
+      in the enum. Without validation, the unknown label passes through
+      the parser and is stored in the IR. G-A2A-FLOW checks label
+      compatibility but "SENSITIVE" matches nothing, so the check is
+      a no-op. Data flows unrestricted between agents.
+    spec_impact: "CL-02 G-DATA — unknown label silently passes"
+    pitfall: "P-087"
+
+  - id: F02
+    severity: major
+    description: >
+      The parser must validate sensitivity labels against the closed enum.
+      Non-standard labels produce diagnostic CLAWS-W010 with the suggestion:
+      "'SENSITIVE' is not a recognized label. Did you mean CONFIDENTIAL or
+      RESTRICTED?" The mapping from common synonyms to standard labels
+      should be built into the diagnostic message.
+    spec_impact: "CL-02 G-DATA — synonym suggestion in diagnostics"
+    pitfall: "P-087"
+
+  - id: F03
+    severity: major
+    description: >
+      P-093 core: PII redaction applies globally. The customer SSN is
+      redacted in ALL channels. The audit chain gets "[REDACTED]" — no
+      forensic trace of which specific customer record was processed. If
+      the agent accessed the wrong customer's SSN, there is no way to
+      determine this from the audit trail.
+    spec_impact: "CL-02 G-OUTPUT — global redaction loses forensic evidence"
+    pitfall: "P-093"
+
+  - id: F04
+    severity: major
+    description: >
+      Per-channel redaction policy: (1) user response: redact PII (show
+      "[REDACTED]"), (2) audit chain: preserve PII hash (show
+      "SHA256:abc...") for forensic tracing without exposing raw PII,
+      (3) SIEM: event metadata only (tool name, timestamp, no PII fields),
+      (4) subagent: inherit sensitivity labels from parent data.
+    spec_impact: "CL-02 G-OUTPUT — four-channel redaction matrix"
+    pitfall: "P-093"
+
+  - id: F05
+    severity: major
+    description: >
+      The SIEM export currently receives the full SSN because global
+      redaction is "on for user, off for system channels." Per-channel
+      configuration ensures SIEM receives event metadata without PII
+      fields. The SIEM channel should receive: tool_name, timestamp,
+      data_sensitivity_label, action — never PII field values.
+    spec_impact: "CL-02 G-OUTPUT — SIEM PII exclusion"
+    pitfall: "P-093"
+
+  - id: F06
+    severity: warning
+    description: >
+      If MEMORY.md uses both standard and non-standard labels (e.g.,
+      some entries labeled "CONFIDENTIAL", others "SENSITIVE"), the
+      standard entries get proper G-A2A-FLOW enforcement but the non-
+      standard entries bypass it. Partial enforcement is worse than
+      no enforcement because it creates a false sense of security.
+    spec_impact: "CL-02 G-DATA — partial enforcement on mixed labels"
+    pitfall: "P-087"
+
+  - id: F07
+    severity: warning
+    description: >
+      The per-channel redaction configuration must be explicit in claws.json.
+      If only some channels are configured, unconfigured channels should
+      default to maximum redaction (redact PII), not minimum (pass through).
+      The safe default prevents accidental PII exposure on new channels.
+    spec_impact: "CL-02 G-OUTPUT — safe default for unconfigured channels"
+    pitfall: "P-093"
+
+  - id: F08
+    severity: warning
+    description: >
+      The audit chain PII hash (SHA256:abc...) must use a workspace-specific
+      salt to prevent rainbow table attacks. If two workspaces hash the same
+      SSN without salting, the hashes match and can be correlated across
+      workspaces. Each workspace's .claws/keys/ should include a redaction
+      salt generated by `claws init`.
+    spec_impact: "CL-02 G-OUTPUT — salted PII hashing for audit chain"
+    pitfall: "P-093"
+
+  - id: F09
+    severity: note
+    description: >
+      The combination of P-087 and P-093 creates a scenario where PII-
+      labeled data with non-standard labels flows freely between agents
+      (P-087) AND PII redaction is misconfigured globally (P-093). The
+      data sensitivity enforcement (G-A2A-FLOW) and output redaction
+      (G-OUTPUT) are independent rules but share the same underlying
+      data classification. Both must work correctly for PII protection.
+    spec_impact: "CL-02 — PII protection requires both G-DATA and G-OUTPUT"
+    pitfall: "P-087, P-093"
+
+  - id: F10
+    severity: note
+    description: >
+      Enterprise compliance frameworks (HIPAA, GDPR) require specific PII
+      handling rules. `claws comply --framework hipaa` should validate that
+      per-channel redaction is configured and that all data sensitivity
+      labels are from the closed enum. Compliance evidence must include
+      the per-channel redaction policy as part of the evidence bundle.
+    spec_impact: "CL-06 comply — PII redaction compliance evidence"
+    pitfall: "P-087, P-093"

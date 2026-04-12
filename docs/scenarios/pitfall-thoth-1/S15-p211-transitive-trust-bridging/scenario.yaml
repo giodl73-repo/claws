@@ -1,0 +1,135 @@
+name: S15-p211-transitive-trust-bridging
+series: pitfall-thoth-1
+version: 1
+specs: [CL-02]
+description: >
+  Validates that an agent belonging to two trust groups cannot bridge those
+  groups to create transitive trust between agents that should be isolated.
+  FE6 group membership graph analysis must detect and block bridging paths.
+
+expect:
+  attack_class: transitive-trust-bridging
+  defense_layer: g-a2a-trust
+  blocked: true
+  audit_event:
+    type: trust-bridge-detected
+    tool: "claws compile"
+    risk_level: 5
+    outcome: DENY
+    reason: "Agent 'bridge-bot' creates transitive trust path between group-A and group-B"
+
+simulate:
+  failures:
+    - component: trust-graph
+      type: transitive-bridge
+      error: "Agent 'bridge-bot' member of group-A and group-B creates trust path A→bridge→B"
+    - component: fe6-analysis
+      type: bridge-undetected
+      error: "FE6 group analysis did not flag cross-group membership bridging"
+  halt: null
+  budget: null
+
+problem: >
+  Workspace defines three agents: "data-reader" in group-A (read-only database
+  access), "email-sender" in group-B (outbound email), and "bridge-bot" in both
+  group-A and group-B. Data-reader and email-sender have no direct trust
+  relationship — they are in separate groups. However, bridge-bot can read data
+  via its group-A membership and send emails via its group-B membership. A
+  compromised bridge-bot can exfiltrate database contents via email without
+  any direct data-reader-to-email-sender trust being declared. The FE6 analysis
+  only checks within-group trust, not cross-group bridging through shared members.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Multi-group membership creates implicit transitive trust that is not
+      visible in the per-group trust analysis. An agent in groups A and B
+      has the union of both groups' capabilities. If A grants read-database
+      and B grants send-email, the bridging agent has read-database AND
+      send-email. The FE6 analysis must compute the capability union for
+      multi-group agents and flag when the union exceeds any single group's
+      intended capability set.
+    spec_impact: "CL-02 FE6 — capability union analysis for multi-group agents"
+    pitfall: P-211
+
+  - id: F02
+    severity: major
+    description: >
+      The trust graph must model groups as nodes and shared members as
+      edges. If agent X is in group A and group B, there is an edge A-B
+      through X. The compiler should compute connected components: if groups
+      that should be isolated share a connected component through bridging
+      agents, emit CLAWS-E-BRIDGE. Graph connectivity analysis (BFS/DFS
+      on the group membership bipartite graph) is the correct algorithm.
+    spec_impact: "CL-02 FE6 — bipartite group membership graph analysis"
+    pitfall: P-211
+
+  - id: F03
+    severity: major
+    description: >
+      Not all multi-group membership is malicious. An admin agent legitimately
+      belongs to multiple groups. The compiler must distinguish between
+      intended bridges (explicitly declared with bridge: true in AGENTS.md)
+      and accidental bridges (side effect of group assignment). Accidental
+      bridges produce an error; declared bridges produce a warning with an
+      audit record of the capability union.
+    spec_impact: "CL-02 AGENTS.md — explicit bridge declaration syntax"
+    pitfall: P-211
+
+  - id: F04
+    severity: major
+    description: >
+      The bridging attack is especially dangerous because each individual
+      group's trust profile looks correct. Group-A correctly grants
+      read-database to its members. Group-B correctly grants send-email
+      to its members. The vulnerability only appears when the two groups
+      are analyzed together. This means per-group validation is insufficient;
+      the compiler must perform a global cross-group analysis pass.
+    spec_impact: "CL-02 FE6 — mandatory cross-group analysis pass"
+    pitfall: P-211
+
+  - id: F05
+    severity: warning
+    description: >
+      The number of potential bridging paths grows quadratically with the
+      number of groups. For N groups, an agent in K groups creates K*(K-1)/2
+      potential bridges. The analysis must be efficient — compute the group
+      membership matrix once and use it for all bridge detection, rather
+      than checking each agent against each pair of groups.
+    spec_impact: "CL-02 FE6 — efficient bridge detection algorithm"
+    pitfall: P-211
+
+  - id: F06
+    severity: major
+    description: >
+      The diagnostic for bridge detection must show the full trust path:
+      which agent bridges which groups, what capabilities each group grants,
+      and what the combined capability set enables. "Bridge detected" alone
+      is not actionable. The developer needs to understand WHY the bridge
+      is dangerous to decide whether to remove the agent from one group
+      or declare it as an intentional bridge.
+    spec_impact: "CL-02 diagnostics — bridge path with capability union in error message"
+    pitfall: P-211
+
+  - id: F07
+    severity: warning
+    description: >
+      Chain bridges are also possible: agent X in groups A and B, agent Y
+      in groups B and C, creating path A→B→C without any single agent
+      being in both A and C. The bridge detection must check for transitive
+      paths through the group graph, not just direct multi-membership.
+      This requires computing the transitive closure of the group
+      connectivity graph.
+    spec_impact: "CL-02 FE6 — transitive bridge detection via graph closure"
+    pitfall: P-211
+
+  - id: F08
+    severity: warning
+    description: >
+      Runtime enforcement must complement compile-time detection. Even if
+      the compiler flags a bridge, a runtime configuration change (dynamic
+      group assignment) could create a new bridge. The runtime must re-check
+      group membership on every delegation that crosses a group boundary.
+    spec_impact: "CL-03 runtime — cross-group delegation verification"
+    pitfall: P-211

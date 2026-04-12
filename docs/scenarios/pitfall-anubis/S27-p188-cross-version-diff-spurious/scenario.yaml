@@ -1,0 +1,140 @@
+name: S27-p188-cross-version-diff-spurious
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that snap diff between snapshots created with different claws
+  versions normalizes the IR schema before comparison, preventing spurious
+  changes from schema evolution. Without normalization, every field renamed
+  or restructured between versions shows as a change.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      snapshot_a: "baseline-v2.1"
+      snapshot_b: "baseline-v3.0"
+      diff_action: normalized-diff
+    analysis:
+      rules_evaluated: true
+      violations: []
+      warnings:
+        - code: W-SNAP-VERSION-MISMATCH
+          message: "Snapshots created with different claws versions (2.1 vs 3.0) — IR normalized for comparison"
+  violations: []
+  warnings:
+    - code: W-SNAP-VERSION-MISMATCH
+      message: "Cross-version diff required IR schema normalization"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: snapshot-diff
+      type: cross-version-spurious
+      error: "47 spurious changes detected from IR schema v2 to v3 evolution, not governance changes"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet admin compares two snapshots to detect governance drift. Snapshot A
+  was created 6 months ago with claws 2.1 and snapshot B was created yesterday
+  with claws 3.0. The IR schema changed between versions: "trust_level" was
+  renamed to "trust_tier", "tool_permissions" was restructured into nested
+  "tool.permissions", and 5 new fields were added with defaults. The raw diff
+  shows 47 changes. The fleet admin investigates each change, spending 2 hours
+  before realizing that all 47 changes are schema evolution, not governance
+  drift. No actual governance configuration changed between the snapshots.
+  The diff tool wasted the admin's time and eroded trust in the tooling.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must mandate IR schema normalization before cross-version diff.
+      The diff engine must detect the schema version of each snapshot and
+      normalize both to a common representation before comparing. The common
+      representation should be the latest schema version. Old-schema fields
+      must be mapped to their new-schema equivalents using a version migration
+      table maintained in the codebase.
+    spec_impact: "CL-05 Snapshot Diff — cross-version schema normalization"
+    pitfall: P-188
+
+  - id: F02
+    severity: major
+    description: >
+      The version migration table must be exhaustive and tested. Each schema
+      version bump must include a migration entry: old field name -> new field
+      name, old structure -> new structure, new fields with their default
+      values. The migration table is the source of truth for normalization.
+      Missing entries cause spurious diffs, so the table must be a required
+      part of the IR schema change process.
+    spec_impact: "CL-05 Snapshot Diff — mandatory version migration table"
+    pitfall: P-188
+
+  - id: F03
+    severity: major
+    description: >
+      The diff output must distinguish between "governance changes" and
+      "schema changes." Even after normalization, some changes may be
+      ambiguous. The diff should use labels: [governance] for actual
+      governance configuration changes and [schema] for changes caused by
+      version migration. This transparency lets the admin focus on governance
+      changes while understanding the schema context.
+    spec_impact: "CL-05 Snapshot Diff — change classification labels"
+    pitfall: P-188
+
+  - id: F04
+    severity: major
+    description: >
+      If normalization fails (missing migration entry for a field), the diff
+      must warn rather than silently produce spurious results. The warning
+      should say: "Field 'old_field_name' in snapshot A (claws 2.1) has no
+      migration entry for schema v3. This field will appear as removed in
+      the diff. Update the migration table or ignore this change."
+    spec_impact: "CL-05 Snapshot Diff — migration gap warning"
+    pitfall: P-188
+
+  - id: F05
+    severity: warning
+    description: >
+      Source file diffs should be available alongside IR diffs. When the admin
+      suspects a spurious IR change, they can check the source file diff to
+      confirm: if SOUL.md and TOOLS.md are identical between snapshots, any
+      IR diff must be schema evolution. Source file diffs are the ground truth
+      because they are version-independent.
+    spec_impact: "CL-05 Snapshot Diff — source file diff alongside IR diff"
+    pitfall: P-188
+
+  - id: F06
+    severity: warning
+    description: >
+      The diff should support a --governance-only flag that filters out all
+      schema changes and shows only governance configuration differences.
+      For fleet drift detection, the admin only cares about governance drift,
+      not schema evolution. The --governance-only flag should be the default
+      for `claws fleet drift` and optional for `claws snap diff`.
+    spec_impact: "CL-05 Snapshot Diff — governance-only filter flag"
+    pitfall: P-188
+
+  - id: F07
+    severity: warning
+    description: >
+      Cross-version snapshot comparison should trigger an automatic re-compile
+      suggestion: "Snapshot A was created with claws 2.1. For accurate
+      comparison, consider re-compiling snapshot A's source files with claws
+      3.0: `claws snap recompile baseline-v2.1`. This produces a new IR
+      using the current schema, enabling a direct comparison."
+    spec_impact: "CL-05 Snapshot Diff — re-compile suggestion for cross-version"
+    pitfall: P-188
+
+  - id: F08
+    severity: note
+    description: >
+      Schema version should be a prominent field in the snapshot metadata.
+      The diff tool must check schema versions before any comparison and
+      warn upfront if they differ. Early warning prevents the admin from
+      wading through 47 spurious changes before realizing the versions
+      are different.
+    spec_impact: "CL-05 Snapshot Metadata — schema version prominence"
+    pitfall: P-188

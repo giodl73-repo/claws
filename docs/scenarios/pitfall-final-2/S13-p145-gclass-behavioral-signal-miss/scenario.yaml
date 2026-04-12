@@ -1,0 +1,127 @@
+name: S13-p145-gclass-behavioral-signal-miss
+series: pitfall-final-2
+version: 1
+specs: [CL-02]
+description: >
+  Validates the four-level G-CLASS precedence including tool name behavioral
+  analysis (P-145). Keyword-only classification misses when a tool named
+  "send-invoice" has a description saying "generates PDF" — keywords say
+  R3, but the tool name "send" implies R5.
+
+expect:
+  rules_applied: [G-CLASS]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  TOOLS.md declares tool "send-invoice" with description "Generates an
+  invoice PDF for the customer." The keyword-only classifier scans the
+  description and finds "generate" (R3/WRITE). It classifies the tool as
+  R3. But the tool NAME contains "send" — a transact verb that implies
+  R5 (acting on behalf of the user). The keyword classifier ignores the
+  tool name because it only analyzes description text. The tool is
+  classified R3 instead of R5, bypassing the elicitation gate.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-145 core: Tool names carry strong behavioral signals. "send-*"
+      implies transact/OBO. "read-*" implies observe. "delete-*" implies
+      destructive write. A classifier that only analyzes description
+      text misses the signal embedded in the tool name itself.
+    spec_impact: "CL-02 G-CLASS — tool name as classification signal"
+    pitfall: "P-145"
+
+  - id: F02
+    severity: major
+    description: >
+      The four-level classification precedence (CL-02 Amendment A88):
+      Level 1: claws.json explicit override (highest priority).
+      Level 2: Tool name verb analysis (send=R5, read=R1, delete=R4).
+      Level 3: Description keyword extraction.
+      Level 4: Default classification (configurable, recommended R3).
+      Each level can only raise the classification, never lower it.
+    spec_impact: "CL-02 G-CLASS — four-level precedence hierarchy"
+    pitfall: "P-145"
+
+  - id: F03
+    severity: major
+    description: >
+      Tool name verb analysis must use a curated verb-to-risk mapping:
+      {send: R5, transfer: R5, pay: R5, submit: R5, delete: R4, remove: R4,
+      write: R3, update: R3, create: R3, read: R1, get: R1, list: R1,
+      view: R1}. The verb is extracted from the tool name prefix
+      (everything before the first hyphen or underscore).
+    spec_impact: "CL-02 G-CLASS — verb-to-risk mapping"
+    pitfall: "P-145"
+
+  - id: F04
+    severity: major
+    description: >
+      When the tool name verb analysis and the description keyword analysis
+      disagree (send-invoice: name=R5, desc=R3), the higher classification
+      wins. The diagnostic must explain the disagreement: "CLAWS-W023:
+      send-invoice classified R5 (tool name 'send' overrides description
+      keyword 'generate' at R3)."
+    spec_impact: "CL-02 G-CLASS — disagreement resolution diagnostic"
+    pitfall: "P-145"
+
+  - id: F05
+    severity: major
+    description: >
+      False positive risk: "send-email-notification" may be an R2 observe
+      tool (sends a notification the user already configured) rather than
+      an R5 transact tool. The tool name verb analysis provides a floor,
+      not a ceiling. The operator can override with claws.json Level 1
+      to lower the classification if the verb is misleading.
+    spec_impact: "CL-02 G-CLASS — explicit override for misleading names"
+    pitfall: "P-145"
+
+  - id: F06
+    severity: warning
+    description: >
+      Compound tool names: "read-and-send-report" contains both "read"
+      (R1) and "send" (R5). The verb extraction must find the highest-
+      risk verb in the entire name, not just the prefix. Split on
+      hyphens and underscores, check each token against the verb map,
+      take the maximum.
+    spec_impact: "CL-02 G-CLASS — compound name verb extraction"
+    pitfall: "P-145"
+
+  - id: F07
+    severity: warning
+    description: >
+      Non-English tool names: if a tool is named "envoyer-facture"
+      (French for "send-invoice"), the English verb map does not apply.
+      The classifier should fall through to description keyword analysis
+      and default classification. Locale-specific verb maps are a future
+      extension.
+    spec_impact: "CL-02 G-CLASS — non-English tool names"
+    pitfall: "P-145"
+
+  - id: F08
+    severity: note
+    description: >
+      The verb-to-risk mapping must be extensible via claws.json. Operators
+      may have domain-specific verbs: "approve" (R5 in finance), "archive"
+      (R3 in document management). The custom verb map merges with the
+      default, and custom entries take precedence.
+    spec_impact: "CL-01 schema — custom verb-to-risk mapping"
+    pitfall: "P-145"
+
+  - id: F09
+    severity: note
+    description: >
+      The four-level precedence should be visible in the pinch output.
+      For each tool, show which level determined the final classification
+      and whether any levels disagreed. This transparency helps operators
+      understand and debug classification decisions.
+    spec_impact: "CL-02 pinch — classification level visibility"
+    pitfall: "P-145"

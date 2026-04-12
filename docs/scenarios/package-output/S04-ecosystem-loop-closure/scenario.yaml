@@ -1,0 +1,130 @@
+name: S04-ecosystem-loop-closure
+series: package-output
+version: 1
+specs: [CL-05, CL-06, CL-07]
+description: >
+  A governance package is published to npm via claws publish, then consumed
+  by a different workspace as an InputResolver package source. This end-to-end
+  loop validates that the output of the publish pipeline is a valid input for
+  the resolution pipeline. The published package must contain the governance
+  IR, provenance metadata, and badge in a structure that InputResolver can
+  discover and parse. This scenario validates the ecosystem loop closure:
+  compile -> publish -> install -> resolve -> compile, ensuring that the
+  package format is symmetric across the producer and consumer sides.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "claws.json"
+        - "@team/shared-governance/rules.yaml"
+        - "@team/shared-governance/policies.yaml"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  Team A publishes @team/shared-governance containing SOC2 rules and data
+  classification policies. Team B declares @team/shared-governance as an
+  input source in their claws.json. When Team B runs claws compile,
+  the InputResolver must find the governance files inside the installed
+  npm package, not just the package.json. The package must use a
+  conventional directory layout (e.g., governance/ or a main field
+  pointing to the IR) that InputResolver knows how to discover. If the
+  publish pipeline packages files in a structure that InputResolver
+  cannot find, the ecosystem loop is broken. The scenario also validates
+  that provenance chains: Team B's CGR records that rules came from
+  @team/shared-governance@1.2.3, and that package's own CGR (bundled
+  inside) records the original compilation inputs. Two CGRs form a
+  provenance chain that an auditor can follow from consumer back to
+  original source.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The package internal layout must follow a documented convention that
+      both the publish pipeline and InputResolver agree on. If publish
+      writes governance files to dist/governance/ but InputResolver looks
+      in governance/, the loop breaks. A package.json "claws" field
+      pointing to the governance root (similar to "main" for JS modules)
+      provides a contract that both sides can follow without hardcoded
+      path assumptions.
+    spec_impact: "CL-06 Section 9 — package governance entry point"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      The bundled CGR inside the published package must be read-only and
+      immutable. If the InputResolver or any consumer tool modifies the
+      bundled CGR, the provenance chain breaks because the hash no longer
+      matches the original. The CGR file should be marked as non-writable
+      in the tarball and the InputResolver should never write to the
+      node_modules directory when resolving package sources.
+    spec_impact: "CL-07 Section 20 — bundled CGR immutability"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      Circular dependencies in governance packages must be detected and
+      rejected. If @team/shared-governance declares @team/base-rules as
+      an input, and @team/base-rules declares @team/shared-governance as
+      an input, the InputResolver enters an infinite resolution loop. The
+      resolver must track the resolution stack and emit
+      INPUT-RESOLVE-CIRCULAR when a cycle is detected, including the
+      full cycle path in the diagnostic.
+    spec_impact: "CL-04 Section 17 — circular dependency detection"
+    pitfall: null
+  - id: F04
+    severity: minor
+    description: >
+      Version compatibility between producer and consumer claws versions
+      must be validated. If Team A published with claws 2.0 using
+      governance IR schema v2, but Team B runs claws 1.0 which only
+      understands schema v1, the InputResolver must detect the version
+      mismatch and emit a clear diagnostic rather than silently
+      misinterpreting the IR. A claws.engine field in package.json
+      (similar to Node.js engines) enables this check.
+    spec_impact: "CL-05 Section 11 — engine version compatibility"
+    pitfall: null
+  - id: F05
+    severity: major
+    description: >
+      The provenance chain across packages must be traversable without
+      network access. Team B's CGR links to @team/shared-governance@1.2.3.
+      That package's bundled CGR links to the original file sources. An
+      auditor with only the installed packages (no network) must be able
+      to traverse this chain. This means each published package must
+      bundle its CGR, not reference it by URL. The chain terminates at
+      local file sources which are not bundled but are described by hash.
+    spec_impact: "CL-07 Section 21 — offline provenance chain traversal"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      Published packages should include a human-readable summary of their
+      governance content alongside the machine-readable IR. A README.md
+      or GOVERNANCE.md in the package root helps developers evaluate
+      packages before installation. This file should be auto-generated
+      during publish from the governance IR, not manually maintained,
+      to ensure it stays synchronized with the actual rules.
+    spec_impact: "CL-06 Section 10 — auto-generated governance summary"
+    pitfall: null
+  - id: F07
+    severity: minor
+    description: >
+      The npm install step between publish and resolve may modify the
+      package structure (node_modules flattening, hoisting). The
+      InputResolver must not assume that the package is at the expected
+      node_modules/@team/shared-governance path. It should use the
+      Node.js module resolution algorithm (require.resolve or equivalent)
+      to locate the package, handling hoisting and pnpm virtual stores
+      correctly.
+    spec_impact: "CL-04 Section 18 — package manager resolution compatibility"
+    pitfall: null

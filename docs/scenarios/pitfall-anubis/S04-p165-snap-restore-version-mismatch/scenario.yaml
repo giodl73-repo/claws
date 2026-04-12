@@ -1,0 +1,151 @@
+name: S04-p165-snap-restore-version-mismatch
+series: pitfall-anubis
+version: 1
+specs: [CL-04, CL-05]
+description: >
+  Validates that snap restore detects platform vs workspace version mismatch
+  (P-165). After a failed upgrade, snap restore puts back old-format files but
+  the new platform binary is already installed. The new runtime reads old-format
+  files and either crashes or misinterprets fields silently.
+
+expect:
+  governance_ir:
+    version: 1
+    platform_version: "2.0.0"
+    workspace_version: "1.0.0"
+    mismatch_detected: true
+  violations:
+    - code: CLAWS-E095
+      message: "Version mismatch — platform 2.0.0 reading workspace 1.0.0 files"
+      severity: error
+  warnings:
+    - code: CLAWS-W095
+      message: "snap restore completed but workspace version does not match platform"
+  artifacts:
+    - name: snap-manifest.json
+      status: restored-with-warning
+
+simulate:
+  failures:
+    - component: snap-restore
+      type: version-mismatch
+      error: "Platform 2.0.0 installed but workspace files restored to 1.0.0 format"
+    - component: runtime
+      type: silent-misinterpret
+      error: "v2.0 runtime reads v1.0 trust.tier as string, expects enum — defaults to T1"
+  halt: null
+  budget: null
+
+problem: >
+  The developer upgrades claws from 1.0 to 2.0. The upgrade begins: the new
+  binary is installed first, then workspace files are migrated. The migration
+  fails midway through RULES.md (complex risk-level restructuring). The dead
+  man's switch triggers snap restore, which restores the workspace files to
+  their 1.0 format. However, the platform binary is already version 2.0 —
+  snap restore does not downgrade the binary. The 2.0 runtime reads 1.0
+  workspace files. The trust.tier field was a free-form string in 1.0 but
+  an enum in 2.0. The runtime reads the old string value and silently defaults
+  to T1 (most permissive), weakening the security posture. No error is reported.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-165 core: snap restore restores workspace files but cannot restore
+      the platform binary. After restore, the platform version and workspace
+      schema version diverge. The runtime must detect this divergence at
+      startup by comparing its own version with the workspace's schema
+      version field. A mismatch must be a hard error, not a silent default.
+    spec_impact: "CL-05 G-SNAP — version mismatch detection at startup"
+    pitfall: "P-165"
+
+  - id: F02
+    severity: major
+    description: >
+      Silent field reinterpretation is the worst outcome: the runtime reads
+      an old-format field and applies new-format semantics without error.
+      The trust.tier string "elevated" in v1.0 has no mapping in v2.0's
+      enum {T1, T2, T3}. Defaulting to T1 is a security escalation.
+      All field parsers must reject unknown values rather than defaulting.
+    spec_impact: "CL-04 PARSE — reject unknown values, never default"
+    pitfall: "P-165"
+
+  - id: F03
+    severity: major
+    description: >
+      The upgrade sequence must be atomic: either both binary and workspace
+      migrate successfully, or both revert. This means snap save must
+      include the binary version in the snapshot manifest, and snap restore
+      must verify the current binary version matches the snapshot's
+      recorded binary version. If they diverge, restore must refuse and
+      report the mismatch.
+    spec_impact: "CL-05 G-SNAP — binary version in snapshot manifest"
+    pitfall: "P-165"
+
+  - id: F04
+    severity: major
+    description: >
+      The upgrade must install the new binary LAST, after workspace
+      migration succeeds. If workspace migration fails, the old binary
+      is still in place and snap restore produces a consistent state.
+      The current sequence (binary first, then workspace) creates the
+      mismatch window. Binary installation must be the final commit
+      point of the upgrade.
+    spec_impact: "CL-05 G-UPGRADE — binary-last installation order"
+    pitfall: "P-165"
+
+  - id: F05
+    severity: major
+    description: >
+      A compatibility layer: the v2.0 runtime must be able to read v1.0
+      workspace files in degraded mode (read-only, with explicit warnings).
+      This is not the same as silent reinterpretation — degraded mode
+      locks the workspace to read-only and requires explicit migration
+      before any writes. The user sees "workspace needs migration" not
+      "everything is fine."
+    spec_impact: "CL-05 G-UPGRADE — degraded read-only mode"
+    pitfall: "P-165"
+
+  - id: F06
+    severity: warning
+    description: >
+      The snap manifest must include a schema version field that records
+      the workspace schema version at snapshot time. snap restore should
+      compare this with the current platform's expected schema version.
+      If they differ, restore must succeed (files are valid) but emit
+      CLAWS-W095 with instructions to run `claws upgrade` or downgrade
+      the platform binary.
+    spec_impact: "CL-05 G-SNAP — schema version in manifest"
+    pitfall: "P-165"
+
+  - id: F07
+    severity: warning
+    description: >
+      Platform binary downgrade is operationally complex: npm install
+      of an older version, or restoring from a cached binary. The snap
+      manifest could include the binary download URL or npm version
+      string to enable automated downgrade via `claws snap restore
+      --include-binary`.
+    spec_impact: "CL-05 G-SNAP — binary downgrade path"
+    pitfall: "P-165"
+
+  - id: F08
+    severity: warning
+    description: >
+      In fleet scenarios, an upgrade that fails on one workspace but
+      succeeds on others creates fleet-wide version divergence. The
+      fleet dashboard must show per-workspace platform and schema
+      versions side by side, flagging mismatches as CRITICAL drift.
+    spec_impact: "CL-05 fleet — version mismatch drift detection"
+    pitfall: "P-165"
+
+  - id: F09
+    severity: note
+    description: >
+      The schema version should follow semver: major bumps indicate
+      breaking workspace file format changes that require migration.
+      Minor bumps are backward-compatible additions. The compatibility
+      check only triggers on major version mismatches, allowing minor
+      version differences to proceed normally.
+    spec_impact: "CL-05 G-SNAP — semver-based compatibility check"
+    pitfall: "P-165"

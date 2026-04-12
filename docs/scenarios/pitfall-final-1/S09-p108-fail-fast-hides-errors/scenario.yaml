@@ -1,0 +1,133 @@
+name: S09-p108-fail-fast-hides-errors
+series: pitfall-final-1
+version: 1
+specs: [CL-04]
+description: >
+  Validates that the default compilation mode collects errors from all files
+  rather than halting on the first error. Per-file parser isolation ensures
+  one file's errors do not prevent parsing of subsequent files. Intra-file
+  error recovery continues after individual parse errors within a file.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+      errors_collected: true
+    analysis:
+      rules_evaluated: false
+      errors:
+        - file: SOUL.md
+          count: 1
+          errors: ["invalid deny syntax line 3"]
+        - file: TOOLS.md
+          count: 1
+          errors: ["unknown risk level R9"]
+        - file: claws.json
+          count: 1
+          errors: ["invalid JSON at line 12"]
+      violations: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has errors in 3 files: SOUL.md has an invalid deny syntax,
+  TOOLS.md has an unknown risk level (R9), claws.json has a JSON parse error.
+  With fail-fast, the compiler reports only the SOUL.md error and halts. The
+  developer fixes SOUL.md, re-runs, sees the TOOLS.md error. Fixes TOOLS.md,
+  re-runs, sees the claws.json error. Three compile cycles for three
+  independently fixable errors. Within SOUL.md, a second error on line 7
+  is hidden by the first error on line 3.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Collect-all-errors must be the default mode. Each file is parsed
+      independently. A parse failure in SOUL.md does not prevent parsing
+      of TOOLS.md. The error collection aggregates all errors from all
+      files and presents them in a single diagnostic report. The developer
+      fixes all three in one editing session.
+    spec_impact: "CL-04 PARSE — collect-all-errors default"
+    pitfall: P-108
+
+  - id: F02
+    severity: major
+    description: >
+      Per-file parser isolation means each file gets its own parser
+      instance. A fatal parse error (stack overflow, OOM) in one parser
+      does not crash the other parsers. The orchestrator catches per-file
+      fatal errors and records them, then continues with remaining files.
+    spec_impact: "CL-04 PARSE — per-file parser isolation"
+    pitfall: P-108
+
+  - id: F03
+    severity: major
+    description: >
+      Intra-file error recovery: after a parse error at line 3, the
+      parser attempts to resynchronize at the next constraint boundary
+      (next "Never," "Always," or section header). This reveals the
+      error at line 7 in the same compilation run. Error recovery is
+      best-effort; some errors may prevent resynchronization.
+    spec_impact: "CL-04 PARSE — intra-file error recovery"
+    pitfall: P-108
+
+  - id: F04
+    severity: warning
+    description: >
+      Per-file error limits (10 errors per file) prevent error cascades
+      where a single structural error (missing closing bracket) produces
+      hundreds of downstream errors. After 10 errors in one file, the
+      parser stops that file and reports "10+ errors in SOUL.md, showing
+      first 10."
+    spec_impact: "CL-04 PARSE — per-file error limit"
+    pitfall: P-108
+
+  - id: F05
+    severity: major
+    description: >
+      The --fail-fast flag provides CI/CD mode: halt on first error for
+      faster feedback in automated pipelines. This is an explicit opt-in,
+      not the default. CI environments value speed over completeness.
+      Interactive development values completeness over speed.
+    spec_impact: "CL-04 build — --fail-fast flag for CI/CD"
+    pitfall: P-108
+
+  - id: F06
+    severity: warning
+    description: >
+      Error messages must include file path, line number, column, and
+      the error text. For JSON parse errors (claws.json), the line and
+      column must point to the exact JSON syntax error, not just "invalid
+      JSON." Many JSON parsers provide position information; the compiler
+      must surface it.
+    spec_impact: "CL-04 diagnostics — JSON error position reporting"
+    pitfall: P-108
+
+  - id: F07
+    severity: warning
+    description: >
+      If all 9 files have errors, the diagnostic output could be
+      overwhelming. The compiler should group errors by severity (errors
+      first, then warnings), then by file. A summary line at the end:
+      "27 errors in 9 files. Fix errors before warnings."
+    spec_impact: "CL-04 diagnostics — grouped error output"
+    pitfall: P-108
+
+  - id: F08
+    severity: note
+    description: >
+      After error collection, the ANALYZE phase may still be partially
+      runnable. If TOOLS.md parsed successfully but SOUL.md did not, the
+      analyzer can still evaluate tool-related rules. Partial analysis
+      provides additional value beyond just parse errors. The compiler
+      should run ANALYZE on the successfully parsed subset.
+    spec_impact: "CL-04 ANALYZE — partial analysis on partial parse"
+    pitfall: P-108

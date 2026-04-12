@@ -1,0 +1,111 @@
+name: S15-p124-r3r4-fail-closed-blocks-writes
+series: pitfall-final-1
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates that the R3-R4 fail-closed default does not permanently block
+  write tools due to governance errors. A developer's write-db tool (R3) is
+  blocked by a governance bug with no recovery path. Recovery mechanisms and
+  fail-mode override via claws.json must be available.
+
+expect:
+  rules_applied: [G-FAILMODE]
+  violations: []
+  pass: true
+  severity: info
+
+simulate:
+  failures:
+    - phase: runtime
+      type: governance-error
+      tool: write-db
+      risk: 3
+      fail_mode: closed
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has write-db (R3, write access to application database). The
+  default fail mode for R3 changed from unspecified to fail-closed. A
+  governance rule has a bug: it throws TypeError on write-db's tool arguments.
+  Fail-closed correctly blocks write-db. But the bug is in the governance
+  engine, not the tool. The developer cannot use write-db until the governance
+  bug is fixed. No recovery command exists. The developer cannot override
+  fail-closed for a single tool. The write-db tool is permanently blocked.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      claws.json must support per-risk-level fail-mode override:
+      failMode.r3r4: "fail-open" allows R3-R4 tools to proceed when
+      governance errors occur. This is a conscious security trade-off
+      documented in the audit chain. The override does not affect R5
+      (always fail-closed) or R1-R2 (always fail-open).
+    spec_impact: "CL-02 G-FAILMODE — per-risk-level override"
+    pitfall: P-124
+
+  - id: F02
+    severity: major
+    description: >
+      claws recover --tool write-db provides temporary bypass for a
+      specific tool. The bypass is time-limited (default 1 hour),
+      logged in the audit chain, and requires explicit operator
+      confirmation. This is the emergency escape hatch for governance
+      bugs blocking critical tools.
+    spec_impact: "CL-03 runtime — per-tool recovery bypass"
+    pitfall: P-124
+
+  - id: F03
+    severity: major
+    description: >
+      The error message when write-db is blocked must distinguish
+      between "blocked by policy" (intended) and "blocked by governance
+      error" (unintended). The latter must include: "Governance error
+      in rule G-WRITE-AUDIT: TypeError at line 42. Use 'claws recover
+      --tool write-db' for temporary bypass."
+    spec_impact: "CL-03 runtime — governance error vs policy block distinction"
+    pitfall: P-124
+
+  - id: F04
+    severity: warning
+    description: >
+      The fail-closed default for R3-R4 is a breaking behavioral change
+      from unspecified. Existing workspaces that relied on the implicit
+      fail-open behavior are affected. The migration path mirrors P-123:
+      error message with claws.json snippet, migrate command, compat flag.
+    spec_impact: "CL-02 G-FAILMODE — fail-closed migration path"
+    pitfall: P-124
+
+  - id: F05
+    severity: major
+    description: >
+      The sidecar (L5) can detect persistent governance errors affecting
+      a specific tool and automatically escalate. Without the sidecar
+      (L1-L4 only), the plugin must implement basic failure detection:
+      if write-db is blocked 3+ times by governance errors (not policy),
+      emit a stderr warning with recovery instructions.
+    spec_impact: "CL-03 runtime — basic failure detection without sidecar"
+    pitfall: P-124
+
+  - id: F06
+    severity: warning
+    description: >
+      Audit chain entries for governance-error blocks must be distinct
+      from policy blocks. The SIEM integration must filter on
+      block_reason: "governance-error" vs block_reason: "policy-deny."
+      An operator dashboard showing "50 blocks today" must distinguish
+      intentional denials from unintentional ones.
+    spec_impact: "CL-02 audit — governance-error vs policy-deny classification"
+    pitfall: P-124
+
+  - id: F07
+    severity: note
+    description: >
+      This scenario overlaps with P-126 (persistent handler failure)
+      and P-127 (systemic RangeError). P-124 focuses on the R3-R4
+      fail-closed default specifically. P-126 focuses on detection and
+      alerting. P-127 focuses on error classification. Together they
+      cover the full governance-error-blocking-tools failure class.
+    spec_impact: "CL-02/CL-03 — pitfall cross-reference P-124/P-126/P-127"
+    pitfall: P-124

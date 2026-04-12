@@ -1,0 +1,146 @@
+name: S06-node-ts-version-compat
+series: pitfall-coverage-2
+version: 1
+specs: [CL-04]
+description: >
+  Validates that generated code is compatible with the target Node.js version
+  (P-077) and TypeScript version (P-082). AbortSignal.timeout() requires
+  Node 18+, and newer TS syntax like 'satisfies' requires TS 4.9+. Emit
+  must target the correct platform versions or include polyfills.
+
+expect:
+  artifacts:
+    - type: plugin
+      path: plugins/claws-governance/index.ts
+      valid: true
+  plugin_hooks:
+    - before_tool_call
+  skill_content:
+    contains_governance: true
+  approvals:
+    matches_tools: true
+
+simulate:
+  failures:
+    - component: emit-phase
+      type: node-version-incompatible
+      error: "AbortSignal.timeout() called on Node 16.x — function does not exist"
+    - component: emit-phase
+      type: ts-syntax-incompatible
+      error: "TS2353: 'satisfies' keyword not supported in TypeScript 4.7"
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise workspace runs Node 16.20.x and TypeScript 4.7. claws emits
+  index.ts using AbortSignal.timeout(50) for hook timeout enforcement and
+  the 'satisfies' keyword for type narrowing. Both features are unavailable.
+  AbortSignal.timeout() crashes at runtime with "is not a function," silently
+  removing the timeout defense. The TypeScript error prevents compilation
+  entirely, blocking the governance plugin from loading. The workspace has
+  zero enforcement.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-077 core: AbortSignal.timeout() requires Node 18+. On Node 16.x,
+      the function does not exist. The generated handler calls
+      AbortSignal.timeout(50) which throws TypeError at runtime. The entire
+      governance handler crashes on first tool call. With no handler, the
+      Gateway's fail-open default applies to all tools including R5.
+    spec_impact: "CL-04 G-PLATFORM-COMPAT — Node 18 API dependency"
+    pitfall: "P-077"
+
+  - id: F02
+    severity: major
+    description: >
+      The emit phase must detect the target Node version. Sources: (1)
+      .node-version file, (2) package.json engines.node, (3) claws.json
+      emit.nodeTarget, (4) runtime detection via process.version. For
+      Node <18, a setTimeout-based polyfill replaces AbortSignal.timeout().
+    spec_impact: "CL-04 EMIT — Node version detection and polyfill"
+    pitfall: "P-077"
+
+  - id: F03
+    severity: major
+    description: >
+      P-082 core: The 'satisfies' keyword (TS 4.9+) in generated code
+      prevents compilation on TS 4.7. Unlike the Node runtime crash (P-077),
+      this is a build-time failure. The governance plugin never loads. This
+      is caught earlier but equally fatal.
+    spec_impact: "CL-04 G-PLATFORM-COMPAT — TS syntax version targeting"
+    pitfall: "P-082"
+
+  - id: F04
+    severity: major
+    description: >
+      The emit phase must target a configurable minimum TS version via
+      claws.json#emit.tsTarget (default: ES2020, which maps to TS 4.1+).
+      The code generator must avoid syntax newer than the target. A TS syntax
+      compatibility matrix should map features to minimum versions.
+    spec_impact: "CL-04 EMIT — TS target configuration"
+    pitfall: "P-082"
+
+  - id: F05
+    severity: warning
+    description: >
+      The setTimeout-based polyfill for AbortSignal.timeout() must be
+      functionally equivalent: same timeout behavior, same abort reason,
+      same cleanup semantics. A naive setTimeout that never clears creates
+      a memory leak if the handler completes before timeout. The polyfill
+      must clear the timeout on successful completion.
+    spec_impact: "CL-04 EMIT — polyfill functional equivalence"
+    pitfall: "P-077"
+
+  - id: F06
+    severity: warning
+    description: >
+      `claws init` should warn if the detected Node version is below 18.
+      The warning should explain which features require polyfills and what
+      the performance/behavior implications are. Node 16 reached EOL in
+      September 2023; the warning should include an upgrade recommendation.
+    spec_impact: "CL-05 init — Node version advisory"
+    pitfall: "P-077"
+
+  - id: F07
+    severity: warning
+    description: >
+      Generated code should be pre-validated by running a TS syntax check
+      (not full compilation) against the target TS version. The emit phase
+      can include a lightweight AST parse with the target compiler options
+      to catch syntax errors before writing to disk. This adds build time
+      but prevents silent breakage.
+    spec_impact: "CL-04 EMIT — pre-write TS syntax validation"
+    pitfall: "P-082"
+
+  - id: F08
+    severity: note
+    description: >
+      Enterprise environments often pin Node and TS versions for stability.
+      The version pinning may be 2-3 major versions behind. claws's default
+      targets should be conservative (Node 16+, TS 4.5+) with opt-in for
+      newer features. This trades code elegance for compatibility reach.
+    spec_impact: "CL-04 EMIT — conservative default version targets"
+    pitfall: "P-077, P-082"
+
+  - id: F09
+    severity: note
+    description: >
+      The Node version detection chain (4 sources) may produce conflicts:
+      .node-version says 18, package.json says >=16, claws.json says 16.
+      The precedence should be: claws.json (explicit override) > .node-version
+      (project-level) > package.json (approximate) > runtime (actual). The
+      most restrictive explicit value wins.
+    spec_impact: "CL-04 EMIT — version detection precedence"
+    pitfall: "P-077"
+
+  - id: F10
+    severity: warning
+    description: >
+      If the OC platform itself requires Node 18+ (future version), the
+      polyfill becomes dead code. The emit phase should detect platform
+      minimum requirements and skip polyfills when the platform guarantees
+      the API. This prevents polyfill overhead on modern platforms.
+    spec_impact: "CL-04 EMIT — platform-conditional polyfill"
+    pitfall: "P-077"

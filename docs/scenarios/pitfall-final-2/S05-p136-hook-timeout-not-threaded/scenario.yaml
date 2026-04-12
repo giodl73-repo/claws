@@ -1,0 +1,122 @@
+name: S05-p136-hook-timeout-not-threaded
+series: pitfall-final-2
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates that hookTimeoutMs from claws.json is threaded to the generated
+  handler's AbortSignal.timeout() call (P-136). A configured 200ms timeout
+  that generates code using a hardcoded 50ms is cosmetic configuration.
+
+expect:
+  artifacts:
+    - name: index.ts
+      status: validated
+      assertion: "AbortSignal.timeout(200) matches claws.json hookTimeoutMs"
+  plugin_hooks:
+    - hook: before_tool_call
+      timeout_ms: 200
+  skill_content: null
+  approvals: null
+
+simulate:
+  failures:
+    - component: emit
+      type: timeout-not-threaded
+      error: "claws.json hookTimeoutMs=200 but generated handler uses AbortSignal.timeout(50)"
+  halt: null
+  budget: null
+
+problem: >
+  The operator configures hookTimeoutMs: 200 in claws.json to give the
+  governance handler 200ms to classify and decide on tool calls. The emit
+  phase generates index.ts with a hardcoded AbortSignal.timeout(50) from
+  the template default. The handler times out on legitimate R5 classification
+  that takes 120ms, and the abort path fires — which either blocks the
+  tool (correct but premature) or crashes (opening the fail-open path).
+  The 200ms configuration is cosmetic; it has no effect on runtime behavior.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-136 core: The emit template uses a hardcoded timeout value instead
+      of injecting the configured hookTimeoutMs. The generated code is
+      `AbortSignal.timeout(50)` regardless of the claws.json configuration.
+      The operator's intent (200ms) is silently overridden by the template
+      default (50ms).
+    spec_impact: "CL-04 EMIT — hookTimeoutMs must be injected, not hardcoded"
+    pitfall: "P-136"
+
+  - id: F02
+    severity: major
+    description: >
+      Post-emit verification must extract the timeout value from the
+      generated AbortSignal.timeout(N) call and compare it against
+      claws.json hookTimeoutMs. A mismatch is a hard build error. This
+      check ensures the configuration actually reaches the generated code.
+    spec_impact: "CL-04 EMIT — timeout value post-emit verification"
+    pitfall: "P-136"
+
+  - id: F03
+    severity: major
+    description: >
+      If hookTimeoutMs is not configured in claws.json, the emit phase
+      must use a documented default (e.g., 100ms) and emit that default
+      explicitly. The generated code should never contain a magic number
+      that differs from the effective configuration.
+    spec_impact: "CL-01 schema — hookTimeoutMs default value documentation"
+    pitfall: "P-136"
+
+  - id: F04
+    severity: major
+    description: >
+      The abort path when the timeout fires must be well-defined: for
+      R4/R5 tools, timeout means deny (fail-closed). For R1/R2 tools,
+      timeout means allow with audit (fail-open with record). The
+      generated code must branch on the pre-computed riskMap, not
+      re-classify the tool in the abort handler.
+    spec_impact: "CL-02 G-FAILMODE — timeout abort path by risk level"
+    pitfall: "P-136"
+
+  - id: F05
+    severity: major
+    description: >
+      A 50ms timeout is too aggressive for R5 tools that require
+      elicitation gate lookup (reading approval state from storage).
+      The classification itself may complete in 5ms but the approval
+      check adds latency. hookTimeoutMs must account for the full
+      governance decision path, not just classification.
+    spec_impact: "CL-02 G-LATENCY — timeout must cover full decision path"
+    pitfall: "P-136"
+
+  - id: F06
+    severity: warning
+    description: >
+      The hookTimeoutMs value should have bounds: minimum 50ms (to avoid
+      trivial timeouts), maximum 5000ms (to avoid blocking user experience).
+      Values outside this range should trigger a CLAWS-W045 warning at
+      compile time with an explanation of the tradeoff.
+    spec_impact: "CL-01 schema — hookTimeoutMs bounds validation"
+    pitfall: "P-136"
+
+  - id: F07
+    severity: warning
+    description: >
+      Multiple timeout values may interact: hookTimeoutMs (claws),
+      handlerTimeout (OC Gateway platform), and the user's patience
+      threshold. If hookTimeoutMs > handlerTimeout, the OC Gateway
+      kills the handler before the claws timeout fires. claws must
+      warn if hookTimeoutMs exceeds the platform's handler timeout.
+    spec_impact: "CL-04 EMIT — platform timeout interaction warning"
+    pitfall: "P-136"
+
+  - id: F08
+    severity: note
+    description: >
+      Fleet consistency: different workspaces may have different
+      hookTimeoutMs values. This is legitimate (latency varies by
+      infrastructure). Fleet drift detection should track timeout
+      variance but not flag it as drift unless the range exceeds
+      a configurable threshold.
+    spec_impact: "CL-05 fleet — timeout variance tracking"
+    pitfall: "P-136"

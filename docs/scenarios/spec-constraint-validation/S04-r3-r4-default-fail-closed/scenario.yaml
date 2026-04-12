@@ -1,0 +1,140 @@
+name: S04-r3-r4-default-fail-closed
+series: spec-constraint-validation
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates the R3-R4 default fail mode change from unspecified to fail-closed.
+  Per S03-F02, the spec now explicitly states that R3-R4 tools default to
+  fail-closed. When the governance hook crashes while evaluating an R3 write
+  tool, the tool is blocked. Enterprises can override to fail-open if they
+  prefer resilience over security.
+
+expect:
+  attack_class: governance-handler-crash
+  defense_layer: L2-plugin-handler
+  blocked: true
+  audit_event:
+    type: fail-closed
+    tool: write-db
+    risk_level: 3
+    configured_fail_mode: default
+    effective_fail_mode: fail-closed
+    error: "governance evaluation error"
+
+simulate:
+  failures:
+    - component: evaluatePolicy
+      error: "TypeError: Cannot read property 'riskLevel' of undefined"
+      tool: write-db
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has a write-db tool classified as R3/WRITE. The governance
+  handler crashes with a TypeError during policy evaluation for write-db.
+  The claws.json does NOT explicitly configure a fail mode for R3-R4 -- it
+  uses the default. Per the updated CL-02 spec, the default is fail-closed.
+  The handler's catch clause checks the risk level (3), looks up the
+  configured fail mode (none configured), applies the default (fail-closed),
+  and returns block:true. The write operation is prevented.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The default fail-closed for R3-R4 is a significant change from the
+      earlier unspecified state. Existing workspaces that relied on the
+      previous implicit behavior (which may have been fail-open in some
+      interpretations) will see write tools blocked on governance errors.
+      This is a breaking behavioral change that needs documentation and
+      migration guidance.
+    spec_impact: "CL-02 fail-mode — R3-R4 default change documentation"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The failModeForRisk() function must check claws.json configuration
+      first, then fall back to the default. If the function reads the config
+      incorrectly (e.g., wrong field path), it may always return the default
+      even when the enterprise has configured fail-open. The config lookup
+      path must be tested with and without explicit configuration.
+    spec_impact: "CL-03 runtime — failModeForRisk config precedence"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The catch clause evaluates `config.failModeR3R4 === "open"` to decide
+      whether to allow. If config.failModeR3R4 is undefined (not configured),
+      the comparison returns false, which means fail-closed. This is correct.
+      But if config.failModeR3R4 is null, the comparison also returns false.
+      The code relies on JavaScript's strict equality semantics. Any
+      coercion-based comparison (`==` instead of `===`) would break this.
+    spec_impact: "CL-03 runtime — strict equality in fail-mode check"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      R3 fail-closed blocks write operations on governance errors. If the
+      governance hook has a persistent bug that always crashes for write-db,
+      that tool is permanently blocked. The sidecar (L5) provides recovery
+      via the health dashboard and `claws recover --tool write-db`. Without
+      the sidecar, the only recovery is fixing the governance code or
+      bypassing with CLAWS_BYPASS=1.
+    spec_impact: "CL-03 runtime — R3 persistent failure recovery path"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The enterprise override mechanism must be documented in claws.json
+      schema (CL-01). The field path `failMode.r3r4: "fail-open" |
+      "fail-closed"` must be in the schema with the default value documented.
+      If the schema does not define this field, enterprises cannot discover
+      how to override the default.
+    spec_impact: "CL-01 schema — failMode.r3r4 field definition"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The global fail-mode override (`failMode.global: fail-closed`) takes
+      precedence over per-risk defaults. If the enterprise sets global
+      fail-closed AND r3r4 fail-open, the global wins. The precedence order
+      must be: per-tool > per-risk-level > global > default. Without clear
+      precedence, conflicting configurations produce unpredictable behavior.
+    spec_impact: "CL-02 security — fail-mode configuration precedence order"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The user-visible block reason for R3 fail-closed must explain why
+      the write was blocked. Per S03-F03: "governance-error: this action was
+      blocked due to a governance system error -- please retry or contact
+      your administrator (tool: write-db, risk: R3)". Technical error details
+      go to the audit chain, not the user message.
+    spec_impact: "CL-03 runtime — user-facing block reason for R3"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      A reclassification from R1 to R3 (S02-F06) changes the tool's default
+      fail mode from fail-open to fail-closed. The compiler MUST warn when
+      fail-open is explicitly configured for R3-R4 tools, because the default
+      change implies the enterprise should review their fail-mode config.
+    spec_impact: "CL-02 G-CLASS — reclassification fail-mode warning"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      This scenario validates CL-02 constraint "R3-R4 default specification"
+      from S03-F02 and CL-03 fail-mode policy "R3-R4 configurable (default:
+      closed)". It is a regression test for the explicit default -- if the
+      spec is reverted to unspecified, this scenario catches the omission.
+    spec_impact: "CL-02 fail-mode — R3-R4 default regression test"
+    pitfall: null

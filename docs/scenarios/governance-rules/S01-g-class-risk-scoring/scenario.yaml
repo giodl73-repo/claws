@@ -1,0 +1,102 @@
+name: S01-g-class-risk-scoring
+series: governance-rules
+version: 1
+specs: [CL-02]
+description: >
+  Validates G-CLASS rule: per-tool R1-R5 risk scoring. An R1 observe tool
+  passes with audit-only governance. An R5 transact tool is flagged as OBO
+  requiring elicitation gate. Risk classification must match capability
+  analysis from TOOLS.md declarations.
+
+expect:
+  rules_applied: [G-CLASS]
+  violations: []
+  pass: true
+  severity: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  TOOLS.md declares two tools: "log-viewer" (R1/READ, observe-only) and
+  "send-invoice" (R5/TRANSACT, acts as user). G-CLASS must classify log-viewer
+  as R1 with audit-only governance and send-invoice as R5 with full elicitation
+  gate. Both classifications must be recorded in the analysis output. The R5
+  tool must be flagged as OBO ("would a reasonable person expect to be asked?").
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      G-CLASS scoring relies on capability keywords in TOOLS.md descriptions.
+      If "send-invoice" description says "generates an invoice PDF" without
+      mentioning "send" or "on behalf of," the classifier may score it as R3
+      (write) rather than R5 (transact). Keyword extraction must look at the
+      tool's actual behavior, not just its description text.
+    spec_impact: "CL-02 G-CLASS — behavioral vs textual classification"
+    pitfall: null
+
+  - id: F02
+    severity: warning
+    description: >
+      R1 "audit-only" governance means the tool executes without blocking but
+      the execution is logged. If the audit chain is unavailable (key missing,
+      disk full), does audit-only degrade to no-audit? R1 should have a fail-
+      open audit policy to avoid blocking read operations on audit failures.
+    spec_impact: "CL-02 G-CLASS — R1 audit failure behavior"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The OBO flag ("acts as user") is binary in the classification but the
+      reality is contextual. send-invoice might send-as-user in one workspace
+      and generate-for-review in another. The classification should support
+      OBO overrides in claws.json for tools where the default classification
+      is wrong.
+    spec_impact: "CL-02 G-CLASS — OBO override mechanism"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      If claws.json includes a custom classification table (CL-02 open question
+      #1), it overrides the default R1-R5 scoring. The precedence between
+      TOOLS.md-derived classification and claws.json override must be defined:
+      does the override replace or cap the derived score?
+    spec_impact: "CL-01 claws.json — classification override precedence"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      This scenario has zero violations because both tools are correctly
+      classified. A more interesting G-CLASS test would have a tool whose
+      declared risk (in TOOLS.md metadata) contradicts the inferred risk
+      (from capability analysis). The resolution strategy for that conflict
+      is not specified.
+    spec_impact: "CL-02 G-CLASS — declared vs inferred risk conflict"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Platform built-in tools (OC exec, read, write, bash) have implicit
+      risk levels. If TOOLS.md does not declare them but the platform makes
+      them available, G-CLASS must still classify them. The open question in
+      CL-02 about default classification tables directly affects this scenario.
+    spec_impact: "CL-02 open question #1 — default classification tables"
+    pitfall: "P-008"
+
+  - id: F07
+    severity: note
+    description: >
+      The G-CLASS rule maps to OWASP #1 (Excessive Agency). The scenario
+      validates classification but does not test enforcement. The link from
+      classification (compile-time) to enforcement (runtime) is in CL-03,
+      but the scenario should verify the classification is encoded in a
+      format that the runtime can consume.
+    spec_impact: "CL-02/CL-03 boundary — classification encoding for runtime"
+    pitfall: null

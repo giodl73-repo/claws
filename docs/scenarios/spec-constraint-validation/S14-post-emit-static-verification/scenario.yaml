@@ -1,0 +1,151 @@
+name: S14-post-emit-static-verification
+series: spec-constraint-validation
+version: 1
+specs: [CL-04]
+description: >
+  Validates post-emit static verification: after code generation, a static
+  analysis pass verifies three invariants on the generated plugin code:
+  (1) every handler code path is try/catch wrapped, (2) the catch clause
+  checks risk level, (3) R5 code paths return block:true. Additionally,
+  the verification checks for zero @craftworks/ imports in TypeScript source.
+
+expect:
+  artifacts:
+    - type: plugin
+      path: plugins/claws-governance/index.ts
+      valid: true
+      static_verification:
+        try_catch_coverage: 100
+        risk_level_check: present
+        r5_block_true: present
+        craftworks_imports: 0
+  plugin_hooks: null
+  skill_content: null
+  approvals: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The EMIT phase generates index.ts for the governance plugin. After
+  generation, the post-emit verifier performs 4 static checks on the
+  generated TypeScript source: (1) every api.on("before_tool_call", ...)
+  handler body is wrapped in try/catch, (2) every catch clause contains
+  a risk level comparison, (3) any code path where risk >= 5 returns
+  { block: true }, (4) no import or require statement references
+  @craftworks/. If any check fails, the EMIT phase rolls back all
+  artifacts (atomic emit).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The static verification operates on TypeScript AST, not text patterns.
+      A regex-based check for "try" and "catch" would miss nested try/catch,
+      arrow function handlers, and other syntactic variations. The verifier
+      must parse the generated code into an AST and walk the tree to verify
+      structural properties.
+    spec_impact: "CL-04 EMIT — AST-based static verification"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The generated code may have multiple handler registrations (one for
+      before_tool_call, one for subagent_spawning, etc.). The try/catch
+      requirement applies to ALL handler registrations, not just
+      before_tool_call. Any handler that makes governance decisions must be
+      fault-tolerant. The verifier must identify all handler registration
+      patterns and check each.
+    spec_impact: "CL-04 EMIT — multi-handler verification scope"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The risk level check in the catch clause must be a comparison, not
+      just a reference. `if (risk >= 5)` is a check. `console.log(risk)` is
+      a reference but not a check. The verifier must confirm that the risk
+      variable is used in a conditional expression that gates the
+      block:true return.
+    spec_impact: "CL-04 EMIT — risk check is conditional, not just reference"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The @craftworks/ import check must scan TypeScript source, not compiled
+      JavaScript (emit-S08-F01). Type-only imports (`import type { Foo } from
+      '@craftworks/...'`) disappear in compiled JS but are still violations
+      in the TS source. The verifier operates on the .ts files before any
+      compilation step.
+    spec_impact: "CL-04 EMIT — TS source import scanning"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The catch clause minimalism check (emit-S07-F01) is difficult to
+      verify statically. "The catch clause must be minimal" is a qualitative
+      requirement. The verifier can check quantitative proxies: catch clause
+      statement count (max 5), no function calls except pre-approved ones
+      (riskMap.get, sanitizeError), no await expressions, no new object
+      allocation.
+    spec_impact: "CL-04 EMIT — catch clause complexity metrics"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The verification result must be included in the build output. `claws
+      build` should report: "Post-emit verification: 4/4 checks passed."
+      If any check fails, the specific failure must be reported with the
+      line number in the generated code where the violation was found.
+    spec_impact: "CL-04 EMIT — verification result reporting"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      If the code generator has a bug that produces non-verifiable code, the
+      post-emit check catches it and rolls back. This creates a circular
+      problem: the generator must produce code that passes verification, and
+      verification must be correct. The verification rules must be tested
+      independently against both valid and invalid generated code samples.
+    spec_impact: "CL-04 EMIT — verification rule testing"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The error string audit (emit-S08-F02) checks blockReason and log
+      message strings for internal references. This is a text search, not
+      an AST check. String templates may construct references dynamically
+      (e.g., `"${sdk.name} error"`). The verifier must check both static
+      strings and template literal expressions for internal reference
+      patterns.
+    spec_impact: "CL-04 EMIT — dynamic string reference detection"
+    pitfall: null
+
+  - id: F09
+    severity: major
+    description: >
+      The verification must run on every `claws build`, not just on first
+      build. If the code generator is updated (new version of claws-sdk),
+      the generated code may change. Post-emit verification is a per-build
+      gate, not a one-time validation. The build is only successful if
+      both generation and verification pass.
+    spec_impact: "CL-04 EMIT — per-build verification gate"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      This scenario validates CL-04 constraint emit-S07-F02 "Post-emit
+      static verification" and the zero-import check emit-S08-F01. These
+      constraints ensure that the code generator produces structurally
+      correct, secure, and namespace-clean governance code.
+    spec_impact: "CL-04 EMIT — post-emit verification constraint traceability"
+    pitfall: null

@@ -1,0 +1,145 @@
+name: S30-p191-dead-man-switch-critical
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that the dead man switch aborts if the pre-upgrade snapshot
+  contains critical violations. Restoring a snapshot with critical violations
+  brings back a broken governance state, defeating the purpose of the safety
+  mechanism.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      snapshot_name: pre-upgrade-v2.8
+      snapshot_action: dead-man-restore
+      restore_blocked: true
+    analysis:
+      rules_evaluated: true
+      violations:
+        - code: V-R5-FAIL-OPEN
+          message: "Pre-upgrade snapshot has R5 fail-open — critical violation"
+        - code: V-TRUST-TIER-MISMATCH
+          message: "Pre-upgrade snapshot trust tier T1 with R4 tools — critical violation"
+      warnings: []
+  violations:
+    - code: V-R5-FAIL-OPEN
+      message: "Dead man switch abort — pre-upgrade state has critical violations"
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: dead-man-switch
+      type: critical-violation-in-snapshot
+      error: "Pre-upgrade snapshot has 2 critical violations — dead man switch cannot restore to known-bad state"
+  halt: null
+  budget: null
+
+problem: >
+  A workspace upgrades from claws 2.8 to claws 3.0. The dead man switch
+  captures a pre-upgrade snapshot of the current state. The upgrade fails
+  (schema migration error). The dead man switch activates and attempts to
+  restore the pre-upgrade snapshot. However, the pre-upgrade state had 2
+  critical violations that were being ignored: R5 fail-open (legacy
+  configuration from before fail-closed was mandated) and trust tier T1
+  with R4 tools (grandfathered in before the trust tier enforcement was
+  strict). The dead man switch restores these critical violations. The
+  workspace is now running with R5 fail-open and mismatched trust tiers —
+  a worse governance state than having no governance at all.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must mandate pre-restore validation for the dead man switch.
+      Before restoring a pre-upgrade snapshot, the dead man switch must run
+      pinch on the snapshot and check for critical violations. If critical
+      violations exist, the dead man switch must abort with a CRITICAL alert:
+      "Dead man switch abort: pre-upgrade state has critical violations.
+      Manual intervention required." The abort must halt the workspace
+      (deny-all) rather than proceeding with broken governance.
+    spec_impact: "CL-05 Dead Man Switch — pre-restore violation check"
+    pitfall: P-191
+
+  - id: F02
+    severity: major
+    description: >
+      The abort path must leave the workspace in a safe state. If both the
+      upgrade fails AND the dead man switch aborts, the workspace must enter
+      deny-all mode (same as kill switch). The operator must manually resolve
+      the situation: either fix the upgrade, fix the pre-upgrade violations,
+      or provide a clean snapshot. Deny-all is safer than running with
+      critical violations.
+    spec_impact: "CL-05 Dead Man Switch — deny-all on abort"
+    pitfall: P-191
+
+  - id: F03
+    severity: major
+    description: >
+      The pre-upgrade snapshot should be validated BEFORE the upgrade begins.
+      If the snapshot has critical violations, the upgrade should be blocked
+      with: "Cannot upgrade: current state has critical violations that would
+      be unsafe to restore to. Fix violations first, then upgrade." This
+      proactive check prevents the dead man switch dilemma entirely.
+    spec_impact: "CL-05 Dead Man Switch — pre-upgrade validation gate"
+    pitfall: P-191
+
+  - id: F04
+    severity: major
+    description: >
+      Critical violations must be classified separately from warnings in the
+      snapshot metadata. The dead man switch checks the violation severity,
+      not just the count. A snapshot with 10 warnings is acceptable for
+      restore. A snapshot with 1 critical violation is not. The severity
+      classification must distinguish: critical (blocks restore), major
+      (warns on restore), warning (informational).
+    spec_impact: "CL-05 Dead Man Switch — violation severity classification"
+    pitfall: P-191
+
+  - id: F05
+    severity: warning
+    description: >
+      The dead man switch should support a configurable violation threshold.
+      The default should block on critical violations. Enterprise deployments
+      may want to block on major violations as well. The threshold is set
+      in claws.json: `upgrade.deadManSwitch.maxViolationSeverity: "warning"`
+      (allows warnings, blocks major and critical).
+    spec_impact: "CL-05 Dead Man Switch — configurable violation threshold"
+    pitfall: P-191
+
+  - id: F06
+    severity: warning
+    description: >
+      The CRITICAL alert from dead man switch abort must include remediation
+      steps: (1) Review critical violations in pre-upgrade state, (2) Fix
+      violations in workspace files, (3) Re-run `claws snap save` to create
+      a clean pre-upgrade snapshot, (4) Re-attempt upgrade. The alert should
+      include the exact commands for each step.
+    spec_impact: "CL-05 Dead Man Switch — remediation steps in abort alert"
+    pitfall: P-191
+
+  - id: F07
+    severity: warning
+    description: >
+      Legacy workspaces with grandfathered violations are the primary trigger
+      for this pitfall. CL-05 should define a migration path for grandfathered
+      violations: `claws migrate --fix-critical` that automatically resolves
+      critical violations by applying the minimum-viable fix (e.g., switching
+      R5 from fail-open to fail-closed). This migration must be run before
+      upgrades.
+    spec_impact: "CL-05 Upgrade — critical violation migration tool"
+    pitfall: P-191
+
+  - id: F08
+    severity: note
+    description: >
+      The dead man switch abort event must be exported to SIEM with full
+      context: upgrade version attempted, pre-upgrade snapshot name, critical
+      violations found, workspace current state (deny-all). SOC teams need
+      this data to understand why a workspace is in deny-all mode and to
+      track the remediation timeline.
+    spec_impact: "CL-05 Dead Man Switch — SIEM export for abort events"
+    pitfall: P-191

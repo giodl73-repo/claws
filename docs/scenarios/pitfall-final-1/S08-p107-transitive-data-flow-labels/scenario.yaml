@@ -1,0 +1,136 @@
+name: S08-p107-transitive-data-flow-labels
+series: pitfall-final-1
+version: 1
+specs: [CL-02, CL-04]
+description: >
+  Validates that transitive data flow through intermediate agents is detected
+  when sensitivity labels would be violated. Direct parent-child checks pass
+  for each edge, but the full chain violates the leaf agent's sensitivity
+  ceiling. The ANALYZE phase must propagate labels through the delegation chain.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [AGENTS.md, TOOLS.md, SOUL.md, claws.json]
+      delegation_chain_analyzed: true
+    analysis:
+      rules_evaluated: true
+      violations:
+        - rule: G-A2A-FLOW
+          chain: [root-agent, research-agent, public-reporter]
+          label_violation: CONFIDENTIAL-to-PUBLIC
+          edge: research-agent -> public-reporter
+      warnings: []
+  violations:
+    - rule: G-A2A-FLOW
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Root-agent handles CONFIDENTIAL data (customer records). It delegates to
+  research-agent (CONFIDENTIAL ceiling). Research-agent delegates to
+  public-reporter (PUBLIC ceiling). Direct check: root -> research passes
+  (CONFIDENTIAL -> CONFIDENTIAL). Direct check: research -> public-reporter
+  passes if research-agent claims to only forward PUBLIC data. But the
+  transitive flow carries CONFIDENTIAL data from root through research to
+  public-reporter. The PUBLIC ceiling is violated. The adjacent-edge check
+  misses the transitive violation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The ANALYZE phase must propagate sensitivity labels through the full
+      delegation chain using the high-water-mark rule: the effective
+      sensitivity of an agent is the maximum of its own ceiling and the
+      labels of data it receives from upstream. If upstream sends
+      CONFIDENTIAL, the agent's effective label is CONFIDENTIAL regardless
+      of its own ceiling.
+    spec_impact: "CL-02 G-A2A-FLOW — high-water-mark label propagation"
+    pitfall: P-107
+
+  - id: F02
+    severity: major
+    description: >
+      The violation must identify the specific edge where the ceiling is
+      breached (research-agent -> public-reporter), the propagated label
+      (CONFIDENTIAL from root-agent), and the ceiling that was violated
+      (PUBLIC). The diagnostic chain shows the full path: root-agent
+      [CONFIDENTIAL] -> research-agent [CONFIDENTIAL] -> public-reporter
+      [PUBLIC: VIOLATION].
+    spec_impact: "CL-04 diagnostics — transitive chain violation path"
+    pitfall: P-107
+
+  - id: F03
+    severity: major
+    description: >
+      Suppression via explicit declassify: true annotation in AGENTS.md
+      allows research-agent to intentionally strip sensitivity before
+      forwarding to public-reporter. This is an explicit acknowledgment
+      that the developer understands the transitive risk and has
+      implemented data scrubbing. The compiler records the declassification
+      in the IR for audit purposes.
+    spec_impact: "CL-02 Amendment A69 — declassify annotation"
+    pitfall: P-107
+
+  - id: F04
+    severity: major
+    description: >
+      Conservative default: always flag transitive violations. The
+      compiler cannot verify that research-agent actually scrubs data
+      before forwarding. The compile-time check is structural (labels
+      on declarations), not behavioral (what data actually flows). False
+      positives are acceptable because the alternative (missing a
+      CONFIDENTIAL leak) is catastrophic.
+    spec_impact: "CL-02 G-A2A-FLOW — conservative structural analysis"
+    pitfall: P-107
+
+  - id: F05
+    severity: warning
+    description: >
+      Delegation chains longer than 3 agents create O(n) label propagation.
+      For typical workspaces (2-5 agents), this is fast. For complex
+      enterprise workspaces with 20+ agents, the propagation must be
+      efficient. A topological sort of the delegation graph followed by
+      a single forward pass is O(V+E), not O(V^2).
+    spec_impact: "CL-04 ANALYZE — delegation graph traversal efficiency"
+    pitfall: P-107
+
+  - id: F06
+    severity: major
+    description: >
+      Circular delegation (A delegates to B, B delegates to A) must not
+      cause infinite label propagation. The topological sort detects
+      cycles. Cycles are a separate violation (G-A2A-CYCLE). Label
+      propagation skips cyclic edges and reports the cycle.
+    spec_impact: "CL-02 G-A2A — cycle detection before label propagation"
+    pitfall: P-107
+
+  - id: F07
+    severity: warning
+    description: >
+      Labels defined in SOUL.md (data classification) must be cross-
+      referenced with labels in AGENTS.md (ceiling declarations). If
+      SOUL.md says "all customer data is CONFIDENTIAL" but AGENTS.md
+      does not declare a ceiling for public-reporter, the default
+      ceiling must be specified. Missing ceiling defaults to the
+      workspace-wide trust tier's implied ceiling.
+    spec_impact: "CL-02 G-A2A-FLOW — default ceiling from trust tier"
+    pitfall: P-107
+
+  - id: F08
+    severity: note
+    description: >
+      CL-02 Amendments A69 and A70 codify this requirement. A69 defines
+      the declassify annotation syntax. A70 defines the high-water-mark
+      propagation algorithm. Both were added in response to scenario
+      findings from pitfall-coverage-1/S08.
+    spec_impact: "CL-02 Amendments A69/A70 — traceability"
+    pitfall: P-107

@@ -1,0 +1,145 @@
+name: S04-multi-compile-idempotence
+series: lossless-roundtrip
+version: 1
+specs: [CL-04]
+description: >
+  Validates that compiling the same workspace twice produces identical
+  GovernanceIR hashes and identical output artifacts. The compilation pipeline
+  must be deterministic: same input always produces same output, regardless of
+  ambient state (timestamps, random seeds, process IDs).
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [SOUL.md, TOOLS.md, claws.json]
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 3
+    idempotent: true
+    hash_match: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace with SOUL.md, TOOLS.md, and claws.json is compiled twice via
+  `claws build`. After each compilation, the GovernanceIR hash is recorded
+  and all output artifacts are SHA-256 hashed. The two sets of hashes must
+  be identical. Additionally, the second compilation should detect that
+  artifacts are unchanged (via content hash comparison) and skip the write,
+  preserving file timestamps from the first compilation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The GovernanceIR must not include any non-deterministic fields:
+      timestamps, compilation IDs, process PIDs, random values. If the IR
+      includes a `compiledAt: Date.now()` field, two compilations one second
+      apart produce different hashes. All time-varying fields must be excluded
+      from the IR hash computation or placed in a metadata section outside
+      the hashed content.
+    spec_impact: "CL-04 GovernanceIR — deterministic hash excludes timestamps and ambient state"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Object property ordering in JavaScript is insertion-ordered for string
+      keys. If the IR is serialized to JSON and property insertion order
+      varies between compilations (e.g., due to Map iteration order or
+      async file reading order), the JSON output differs even though the
+      logical content is identical. JSON serialization must use sorted keys
+      (JSON.stringify with replacer that sorts) for deterministic output.
+    spec_impact: "CL-04 GovernanceIR serialization — sorted-key JSON for deterministic output"
+    pitfall: P-234
+
+  - id: F03
+    severity: warning
+    description: >
+      The hash-skip optimization (CL-04 emit-S02-F04) compares content
+      hashes before writing. If the second compilation produces the same
+      content, the write is skipped and the file timestamp is preserved.
+      But if the comparison uses the serialized JSON and JSON serialization
+      is non-deterministic (F02), the hash differs and the file is
+      unnecessarily rewritten. Deterministic serialization is a prerequisite
+      for the hash-skip optimization to work.
+    spec_impact: "CL-04 EMIT — hash-skip depends on deterministic serialization"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      PRESS compression must be deterministic. If the compression algorithm
+      uses heuristics that produce different output for the same input
+      (e.g., random sampling of candidate compressions, time-limited search),
+      the generated SKILL.md differs between compilations. PRESS must use
+      deterministic algorithms for governance content compression.
+    spec_impact: "CL-04 EMIT — PRESS compression determinism requirement"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      File system enumeration order varies across platforms and file systems.
+      If skills/ contains multiple skill directories, the order in which
+      they are enumerated affects the IR manifest entry order, which affects
+      the hash. The pipeline must sort file paths lexicographically before
+      processing to guarantee deterministic ordering regardless of FS
+      enumeration order.
+    spec_impact: "CL-04 PARSE — lexicographic sort of file paths for deterministic processing order"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The generated TypeScript plugin (index.ts) must be deterministic. If
+      the code generator emits tool handlers in the order tools are
+      encountered during parsing, and parsing order varies (F05), the
+      generated code varies. Code generation must use a stable ordering
+      (alphabetical by tool name, or by risk level then alphabetical).
+    spec_impact: "CL-04 EMIT — stable code generation ordering for deterministic index.ts"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The incremental compilation cache in .claws/cache/compile/ stores
+      the GovernanceIR from the previous compilation. If the cache is
+      populated from the first compilation and the second compilation
+      detects no source file changes (via file hash comparison), the
+      second compilation can skip entirely. This fast-path must still
+      validate that the cached IR is not corrupted (hash verification
+      on cache read).
+    spec_impact: "CL-04 incremental compilation — cache integrity verification on read"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Idempotence must hold across claws versions if the source files are
+      unchanged. If a claws upgrade changes code generation templates
+      (formatting, comments), the output changes even though the source
+      is unchanged. The GovernanceIR version field should capture the
+      compiler version so that cache invalidation happens on upgrade.
+      But the IR hash itself should remain deterministic within a version.
+    spec_impact: "CL-04 GovernanceIR — compiler version in IR metadata for cache invalidation on upgrade"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The atomic staging directory (.claws/staging/) from the first
+      compilation must be cleaned up before the second compilation. If
+      the first compilation completes successfully, the staging directory
+      should be empty. If it is not empty (crash during first compilation),
+      the second compilation's crash recovery logic (SCV-S01-F02) must
+      handle the orphaned staging directory before proceeding.
+    spec_impact: "CL-04 EMIT — staging directory cleanup between compilations"
+    pitfall: null

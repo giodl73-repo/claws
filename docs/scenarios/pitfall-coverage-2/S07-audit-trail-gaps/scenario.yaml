@@ -1,0 +1,152 @@
+name: S07-audit-trail-gaps
+series: pitfall-coverage-2
+version: 1
+specs: [CL-02, CL-03]
+description: >
+  Validates secondary audit trail for fail-open events (P-078) and the
+  dependency between elicitation policy and audit chain signing (P-096).
+  Fail-open events with no audit record are invisible to forensics.
+  Elicitation approvals without signed audit chains are unverifiable in
+  legal discovery.
+
+expect:
+  attack_class: audit-evasion
+  defense_layer: secondary-audit
+  blocked: false
+  audit_event:
+    type: fail-open-audit
+    tool: read-logs
+    risk_level: 1
+    outcome: ALLOWED-FAIL-OPEN
+    reason: "governance hook crash, R1 fail-open, stderr audit captured"
+
+simulate:
+  failures:
+    - component: audit-chain
+      type: corruption
+      error: "Audit chain state corrupted by handler crash — primary audit lost"
+    - component: audit-chain
+      type: unsigned
+      error: "Elicitation approval for send-payment recorded without HMAC signature"
+  halt: null
+  budget: null
+
+problem: >
+  An R1 tool (read-logs) triggers a governance hook crash. Under R1 fail-open
+  policy, the tool executes. But the crash corrupts the audit chain state,
+  so the primary audit record for this fail-open event is lost. No forensic
+  evidence exists that an ungoverned tool execution occurred. Separately, an
+  R5 tool (send-payment) goes through elicitation, the user approves, but
+  the audit chain has no signing configured. Six months later, legal discovery
+  requests proof of user approval. The unsigned audit entry is unverifiable
+  and inadmissible.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      P-078 core: R1 fail-open means the tool executes despite the governance
+      crash. The primary audit chain is corrupted by the same crash. Zero
+      record of the ungoverned execution exists. This is the worst-case
+      audit gap: a governance failure with no evidence it happened.
+    spec_impact: "CL-02 G-AUDIT-SECONDARY — fail-open with no audit trail"
+    pitfall: "P-078"
+
+  - id: F02
+    severity: major
+    description: >
+      The secondary audit mechanism: all fail-open events write to
+      process.stderr as a last-resort record. Format:
+      `[CLAWS-FAILOPEN] tool=read-logs risk=1 time=<iso> reason=<crash-msg>`.
+      The sidecar (L5) captures stderr independently of the handler. Even if
+      the handler's audit chain is corrupted, stderr survives.
+    spec_impact: "CL-03 G-AUDIT-SECONDARY — stderr as last-resort audit"
+    pitfall: "P-078"
+
+  - id: F03
+    severity: major
+    description: >
+      If process.stderr itself is broken (pipe closed, buffer full, redirected
+      to /dev/null), the secondary audit also fails. A tertiary mechanism is
+      needed: the sidecar should independently detect fail-open events by
+      monitoring handler crash patterns (P-079 sidecar) rather than relying
+      on the handler's own reporting.
+    spec_impact: "CL-03 sidecar — independent fail-open detection"
+    pitfall: "P-078"
+
+  - id: F04
+    severity: major
+    description: >
+      P-096 core: Elicitation gate for send-payment fires. User approves via
+      inline chat. The approval is recorded in the audit chain but without
+      HMAC signing. Six months later, anyone with audit chain write access
+      could have forged the entry. Legal counsel cannot prove the approval
+      is authentic. The audit entry is inadmissible.
+    spec_impact: "CL-02 G-ELICIT-AUDIT — unsigned approval is unverifiable"
+    pitfall: "P-096"
+
+  - id: F05
+    severity: major
+    description: >
+      G-ELICIT must warn if audit chain signing is not configured alongside
+      elicitation policies. The warning is not just advisory — for R5 tools,
+      unsigned approvals defeat the purpose of the elicitation gate. The
+      warning severity should scale: info for R1-R3, warning for R4, error
+      for R5.
+    spec_impact: "CL-02 G-ELICIT + G-ELICIT-AUDIT dependency"
+    pitfall: "P-096"
+
+  - id: F06
+    severity: warning
+    description: >
+      Audit chain signing requires a key. Key management (generation,
+      rotation, storage) is outside claws's core scope but within the
+      .claws/keys/ directory. `claws init` should generate a default signing
+      key and configure audit chain signing. Without `claws init`, workspaces
+      compiled directly with `claws build` miss signing setup.
+    spec_impact: "CL-05 init — default signing key generation"
+    pitfall: "P-096"
+
+  - id: F07
+    severity: warning
+    description: >
+      The stderr audit format must be machine-parseable for SIEM ingestion.
+      The format `[CLAWS-FAILOPEN] key=value` is parseable but may conflict
+      with other stderr output. A structured JSON line format is safer:
+      `{"event":"CLAWS-FAILOPEN","tool":"read-logs","risk":1,...}`.
+    spec_impact: "CL-03 G-AUDIT-SECONDARY — SIEM-compatible format"
+    pitfall: "P-078"
+
+  - id: F08
+    severity: warning
+    description: >
+      The combination of P-078 and P-096 creates an audit gap spectrum:
+      at one end, fail-open events with no record at all (P-078); at the
+      other, approved events with unverifiable records (P-096). Both are
+      compliance failures but for different reasons. SOC2 requires event
+      logging (P-078). HIPAA requires verifiable authorization (P-096).
+    spec_impact: "CL-02 — compliance framework mapping for audit gaps"
+    pitfall: "P-078, P-096"
+
+  - id: F09
+    severity: note
+    description: >
+      `claws comply` should flag both audit gap types in its evidence
+      generation. Fail-open events without secondary audit trail should
+      appear as "FINDING: unaudited governance bypass." Unsigned approvals
+      should appear as "FINDING: unverifiable authorization." Both are
+      flagged for the compliance officer's review.
+    spec_impact: "CL-06 comply — audit gap evidence generation"
+    pitfall: "P-078, P-096"
+
+  - id: F10
+    severity: note
+    description: >
+      The sidecar's independent fail-open detection (F03) and the audit
+      chain signing (F04) are complementary but independent. A workspace
+      with signing but no sidecar has verifiable records but may miss
+      fail-open events. A workspace with sidecar but no signing has
+      complete event coverage but unverifiable approvals. Both must be
+      configured for full compliance.
+    spec_impact: "CL-03 — sidecar + signing complementarity"
+    pitfall: "P-078, P-096"

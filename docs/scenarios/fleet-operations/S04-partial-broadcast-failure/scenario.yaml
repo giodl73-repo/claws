@@ -1,0 +1,188 @@
+name: S04-partial-broadcast-failure
+series: fleet-operations
+version: 1
+specs: [CL-05]
+description: >
+  Validates fleet broadcast resilience when 2 of 10 workspaces fail to
+  receive the policy update. One workspace is unreachable (network share
+  offline), one has a filesystem permission error (read-only mount). The
+  remaining 8 workspaces receive the update successfully. The broadcast
+  must report partial success, record failures, and provide a retry
+  mechanism for the failed workspaces.
+
+expect:
+  workspaces:
+    total: 10
+    updated: 8
+    failed: 2
+    failed_reasons:
+      - workspace: workspace-eta
+        reason: network-unreachable
+      - workspace: workspace-theta
+        reason: permission-denied
+  drift_count: 2
+  broadcast_result:
+    status: partial
+    policy: soc2-v2
+    workspaces_updated: 8
+    workspaces_failed: 2
+    retry_available: true
+  compliance:
+    current_policy: 8
+    stale_policy: 2
+
+simulate:
+  failures:
+    - component: broadcast
+      type: network-unreachable
+      error: "workspace-eta: ENOENT — network share \\\\server\\agents not available"
+    - component: broadcast
+      type: permission-denied
+      error: "workspace-theta: EACCES — .claws/policies/ is read-only"
+  halt: null
+  budget: null
+
+problem: >
+  The security team broadcasts a critical SOC2 policy update via
+  `claws broadcast --confirm --reason "SOC2-2026 A2A controls"`. Eight
+  of ten workspaces receive the update. Workspace-eta is on a network
+  share that is temporarily offline. Workspace-theta is mounted read-only
+  (CI build environment). The broadcast must not abort on the first failure.
+  It must continue to all reachable workspaces, report a manifest of
+  successes and failures, and provide `claws broadcast --retry` to reattempt
+  failed workspaces once they become available.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The spec does not define partial failure semantics for broadcast. If
+      broadcast is all-or-nothing, 2 failed workspaces block the entire
+      fleet update. If broadcast is best-effort, the fleet enters a
+      split-policy state (8 on new policy, 2 on old). Neither is ideal.
+      The spec must define broadcast as best-effort with mandatory manifest
+      tracking, plus a --retry subcommand that reattempts only failed
+      workspaces from the manifest.
+    spec_impact: "CL-05 Fleet — broadcast partial failure semantics and retry mechanism"
+    pitfall: P-173
+
+  - id: F02
+    severity: major
+    description: >
+      A partial broadcast creates a split-policy fleet. `claws drift`
+      after partial broadcast will flag the 2 failed workspaces as
+      "drifted." But this drift is infrastructure-caused, not policy-caused.
+      The drift detector should distinguish "never received broadcast"
+      (infrastructure drift) from "received but modified" (policy drift).
+      The broadcast manifest provides this distinction — workspaces in the
+      manifest's failed list are infrastructure drift.
+    spec_impact: "CL-05 Fleet — infrastructure drift vs policy drift classification"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The broadcast exit code affects CI/CD pipelines. If partial success
+      returns exit 0, CI treats it as success and the failed workspaces
+      are silently ungoverned. If it returns exit 1, CI fails the pipeline
+      even though 80% of the fleet updated. The spec should define a
+      dedicated exit code for partial success (e.g., exit 2) so CI can
+      distinguish full success, partial success, and full failure.
+    spec_impact: "CL-05 Fleet — broadcast exit code for partial success (exit 2)"
+    pitfall: P-174
+
+  - id: F04
+    severity: major
+    description: >
+      The broadcast manifest must be persisted so that `claws broadcast
+      --retry` knows which workspaces to reattempt. Where is the manifest
+      stored? Options: (a) fleet-level .claws/broadcast-manifest.json,
+      (b) filesystem alongside the fleet config. If the manifest is lost,
+      retry does not know what failed. The manifest should include:
+      broadcast ID, timestamp, policy version, per-workspace status, and
+      error details.
+    spec_impact: "CL-05 Fleet — broadcast manifest schema and storage location"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Network-unreachable workspaces may come back online with stale
+      governance. If the operator forgets to retry, the fleet has permanent
+      drift. The spec should define an alerting mechanism: if a broadcast
+      manifest has unresolved failures older than a configurable threshold
+      (default: 24 hours), `claws scan` should flag the unresolved broadcast
+      failures as warnings.
+    spec_impact: "CL-05 Fleet — stale broadcast failure alerting threshold"
+    pitfall: P-175
+
+  - id: F06
+    severity: warning
+    description: >
+      Permission-denied failures (workspace-theta) indicate a structural
+      problem: the CI build environment mounts workspaces read-only.
+      Broadcast cannot push policy to read-only mounts. The spec should
+      document that broadcast requires write access to each workspace's
+      .claws/policies/ directory. Workspaces in read-only environments
+      must receive policies through a different channel (e.g., CI pipeline
+      copies policies during build).
+    spec_impact: "CL-05 Fleet — write access requirement and read-only environment workaround"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The retry mechanism must be idempotent. If workspace-eta comes
+      online and the operator runs `--retry` twice, the workspace should
+      receive the policy once, not twice. The manifest's per-workspace
+      status should transition: FAILED -> RETRYING -> SUCCESS (or
+      FAILED again). Only workspaces in FAILED state are eligible for retry.
+    spec_impact: "CL-05 Fleet — retry idempotency via manifest state machine"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Timeout handling for slow workspaces is unspecified. If workspace-eta
+      is on a slow network share (not offline, just slow), how long does
+      broadcast wait before declaring failure? A per-workspace timeout
+      (default: 30s) prevents one slow workspace from blocking the entire
+      broadcast. Timeout should be configurable: `claws broadcast
+      --timeout 60`.
+    spec_impact: "CL-05 Fleet — per-workspace broadcast timeout configuration"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Concurrent broadcasts must be prevented. If two operators run
+      `claws broadcast` simultaneously, workspaces could receive
+      interleaved policies. A fleet-level lock file (.claws/broadcast.lock)
+      with a PID and timestamp prevents concurrent broadcasts. The lock
+      should auto-expire after a configurable timeout (default: 600s) to
+      prevent permanent locks from crashed broadcasts.
+    spec_impact: "CL-05 Fleet — concurrent broadcast prevention via fleet lock"
+    pitfall: P-176
+
+  - id: F10
+    severity: note
+    description: >
+      The audit trail for partial broadcast must include both the successful
+      and failed workspaces. The fleet audit entry should show: "broadcast
+      SOC2-v2 to 10 workspaces: 8 succeeded, 2 failed (workspace-eta:
+      network unreachable, workspace-theta: permission denied)." Each
+      successful workspace should also get a local audit entry recording
+      the received policy and version.
+    spec_impact: "CL-05 Fleet — partial broadcast audit trail (fleet + workspace)"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      For the --reason flag (required per S02-F02), partial failure should
+      append the failure context to the audit reason: "SOC2-2026 A2A
+      controls [PARTIAL: 2 workspaces failed]." This ensures that audit
+      trail queries for the reason text surface the partial failure
+      without requiring a separate manifest lookup.
+    spec_impact: "CL-05 Fleet — audit reason enrichment for partial failures"
+    pitfall: null

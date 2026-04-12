@@ -1,0 +1,133 @@
+name: S14-p210-dynamic-agent-default-deny
+series: pitfall-thoth-1
+version: 1
+specs: [CL-03]
+description: >
+  Validates that dynamically spawned agents not declared in AGENTS.md are
+  subject to runtime default-deny enforcement. A dynamically created agent
+  attempts to invoke tools without compile-time trust validation, testing
+  whether the runtime independently enforces default-deny.
+
+expect:
+  attack_class: default-deny-bypass
+  defense_layer: g-a2a-trust
+  blocked: true
+  audit_event:
+    type: dynamic-agent-denied
+    tool: "Bash"
+    risk_level: 4
+    outcome: DENY
+    reason: "Dynamic agent 'temp-worker-7' not in AGENTS.md — runtime default-deny applied"
+
+simulate:
+  failures:
+    - component: runtime-trust
+      type: default-deny-bypass
+      error: "Dynamic agent invoked Bash without compile-time trust entry"
+    - component: agents-md
+      type: missing-declaration
+      error: "Agent 'temp-worker-7' not found in AGENTS.md manifest"
+  halt: null
+  budget: null
+
+problem: >
+  An orchestrator agent dynamically spawns "temp-worker-7" at runtime to handle
+  an overflow task. This agent is not declared in AGENTS.md and therefore has no
+  compile-time trust profile. The governance IR contains no entry for this agent.
+  At runtime, temp-worker-7 attempts to invoke the Bash tool. If the runtime only
+  checks the governance IR (which has no entry), it may interpret the absence as
+  "no restrictions" rather than "no trust." The tool call succeeds because the
+  runtime treats missing entries as permissive. The dynamic agent executes
+  arbitrary commands with no governance constraints.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The runtime must treat absence from the governance IR as DENY, not
+      as ALLOW. This is the fundamental default-deny principle. When the
+      runtime receives a tool call from an agent ID not present in the IR,
+      the response must be DENY with a diagnostic explaining that the agent
+      has no governance profile. The burden of proof is on the agent to be
+      declared, not on the runtime to find a prohibition.
+    spec_impact: "CL-03 runtime — absent-means-deny for governance IR lookups"
+    pitfall: P-210
+
+  - id: F02
+    severity: major
+    description: >
+      Dynamic agent spawning is a legitimate pattern (orchestrator creates
+      workers on demand). The runtime must support a "dynamic agent
+      registration" API that creates a minimal trust profile at spawn time.
+      This profile inherits the spawner's trust level minus one tier — a
+      CONFIDENTIAL orchestrator spawns INTERNAL workers, never CONFIDENTIAL
+      workers. Without explicit registration, the agent remains untrusted.
+    spec_impact: "CL-03 runtime — dynamic agent registration with trust inheritance"
+    pitfall: P-210
+
+  - id: F03
+    severity: major
+    description: >
+      The compile-time/runtime boundary is a security seam. Compile-time
+      validates AGENTS.md declarations; runtime enforces the governance IR.
+      Dynamic agents exist only at runtime. If the runtime delegates all
+      trust decisions to the compile-time IR, dynamic agents fall through
+      the gap. The runtime must have its own independent trust enforcement
+      that does not depend on compile-time artifacts for completeness.
+    spec_impact: "CL-03 runtime — independent trust enforcement layer"
+    pitfall: P-210
+
+  - id: F04
+    severity: major
+    description: >
+      The audit trail must distinguish between "agent denied because rule
+      says DENY" and "agent denied because agent is unknown." The first
+      is a policy decision; the second is a security posture. Unknown-agent
+      denials must be flagged separately because they may indicate spawning
+      errors, configuration drift, or active exploitation.
+    spec_impact: "CL-03 audit — unknown-agent vs policy-deny distinction"
+    pitfall: P-210
+
+  - id: F05
+    severity: warning
+    description: >
+      A dynamic agent that is denied should receive a structured error
+      explaining how to become trusted: "Register via claws agent register
+      or add to AGENTS.md and recompile." The error must not leak governance
+      details (which tools are available, what trust levels exist) but must
+      provide an actionable remediation path.
+    spec_impact: "CL-03 runtime — structured remediation in deny responses"
+    pitfall: P-210
+
+  - id: F06
+    severity: major
+    description: >
+      If the orchestrator itself is compromised, it may spawn dynamic agents
+      specifically to bypass its own governance constraints. The runtime
+      must enforce that dynamic agents cannot exceed their spawner's trust
+      level. A spawner with R3 tool access cannot create a worker with R5
+      tool access, regardless of what the registration API is asked to do.
+    spec_impact: "CL-03 runtime — spawner trust ceiling for dynamic agents"
+    pitfall: P-210
+
+  - id: F07
+    severity: warning
+    description: >
+      Rate limiting on dynamic agent creation prevents a compromised
+      orchestrator from spawning thousands of agents to probe the runtime's
+      enforcement boundary. Each spawned agent consumes runtime resources
+      (memory, audit entries, trust lookups). G-BOUND must include a
+      max-dynamic-agents-per-session limit.
+    spec_impact: "CL-03 G-BOUND — dynamic agent spawning rate limit"
+    pitfall: P-210
+
+  - id: F08
+    severity: warning
+    description: >
+      Dynamic agents that are denied must still appear in the governance
+      audit trail. The audit event must include the spawner identity, the
+      requested tool, the denial reason, and the dynamic agent's intended
+      purpose (if provided at spawn time). Silent denial without audit
+      creates a blind spot in incident response.
+    spec_impact: "CL-03 audit — dynamic agent denial event completeness"
+    pitfall: P-210

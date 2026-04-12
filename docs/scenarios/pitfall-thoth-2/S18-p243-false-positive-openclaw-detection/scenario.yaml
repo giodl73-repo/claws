@@ -1,0 +1,145 @@
+name: S18-p243-false-positive-openclaw-detection
+series: pitfall-thoth-2
+version: 1
+specs: [CL-01, CL-04]
+description: >
+  Validates that the platform detection phase does not produce false-positive
+  OpenClaw workspace identification from projects that happen to contain a
+  SOUL.md file used for non-governance purposes. Detection must validate the
+  structural content of marker files, not just their filenames, to distinguish
+  genuine OC workspaces from coincidental filename matches.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: []
+    analysis:
+      rules_evaluated: false
+      workspace_detected: false
+  violations: []
+  warnings:
+    - code: CLAWS-W300
+      message: "SOUL.md found but does not contain OpenClaw structural markers — skipping workspace"
+  artifacts:
+    count: 0
+
+simulate:
+  failures:
+    - component: detect
+      type: false-positive
+      error: "Non-OC SOUL.md detected as OpenClaw workspace — governance pipeline activated on non-governance file"
+    - component: compile
+      type: parse-failure
+      error: "SOUL.md contains project mission statement, not governance constraints — parser produces empty IR"
+  halt: null
+  budget: null
+
+problem: >
+  A startup uses SOUL.md as their project mission statement document — a common
+  convention in some development communities for describing a project's purpose
+  and values. The file contains prose like "Our mission is to democratize AI
+  access" with no governance keywords, no deny constraints, and no OC structural
+  markers. A developer installs claws and runs claws detect to inventory their
+  workspace. The detection phase sees SOUL.md and flags the project as an
+  OpenClaw workspace. The developer runs claws compile, which attempts to parse
+  SOUL.md as a governance file. The parser finds no constraints and produces an
+  empty GovernanceIR. The emitter writes an empty governance skill that
+  intercepts tool calls but enforces nothing, adding runtime overhead without
+  benefit. The developer is confused by claws reporting their project as
+  OC-governed when they have never heard of OpenClaw.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Filename-only detection is fundamentally flawed for OpenClaw
+      workspace identification. SOUL.md, RULES.md, and TOOLS.md are
+      all common filenames used outside the OC ecosystem. Detection
+      must require structural content validation: the presence of
+      OC-specific keywords (e.g., "deny:", "allow:", "tool:", OC
+      frontmatter markers) within the file, not just the filename.
+    spec_impact: "CL-01 DETECT — structural content validation, not filename-only"
+    pitfall: P-243
+
+  - id: F02
+    severity: major
+    description: >
+      The detection algorithm should require a quorum of marker files
+      rather than triggering on a single file. A genuine OC workspace
+      has SOUL.md AND at least one of TOOLS.md, RULES.md, or
+      claws.json. Requiring 2+ files from the OC file set dramatically
+      reduces false-positive probability from coincidental single-file
+      matches.
+    spec_impact: "CL-01 DETECT — quorum-based workspace detection"
+    pitfall: P-243
+
+  - id: F03
+    severity: major
+    description: >
+      The claws.json configuration file is the strongest signal for an
+      intentional OC workspace. Its presence should be weighted heavily
+      in the detection algorithm. A project with SOUL.md but no
+      claws.json should be classified as "uncertain" and require
+      explicit confirmation via claws init before any compilation is
+      attempted.
+    spec_impact: "CL-01 DETECT — claws.json as primary detection signal"
+    pitfall: P-243
+
+  - id: F04
+    severity: major
+    description: >
+      The detection phase must produce a confidence score, not a binary
+      yes/no. A workspace with claws.json + SOUL.md + TOOLS.md is
+      high confidence. A workspace with only SOUL.md containing no OC
+      keywords is low confidence. The compiler should refuse to compile
+      low-confidence workspaces without --force, preventing accidental
+      governance injection into non-OC projects.
+    spec_impact: "CL-01 DETECT — confidence-scored detection with threshold"
+    pitfall: P-243
+
+  - id: F05
+    severity: warning
+    description: >
+      The false-positive path leads to an empty governance skill that
+      adds runtime overhead without enforcement. While not harmful from
+      a security perspective, it degrades developer experience and
+      erodes trust in the tool. Developers who encounter false positives
+      may disable claws entirely, removing governance from projects
+      that actually need it.
+    spec_impact: "CL-05 DX — false positive impact on tool trust"
+    pitfall: P-243
+
+  - id: F06
+    severity: warning
+    description: >
+      The structural validation must be fast. It should read only the
+      first 50 lines of each marker file to check for OC keywords,
+      not parse the entire file. Workspace detection runs frequently
+      (on every compile, on editor open via inner ring) and must not
+      add noticeable latency.
+    spec_impact: "CL-01 DETECT — fast structural validation with line limit"
+    pitfall: P-243
+
+  - id: F07
+    severity: major
+    description: >
+      The warning message for a non-OC SOUL.md must be clear and
+      actionable: "Found SOUL.md but it does not appear to be an
+      OpenClaw governance file. If this is an OC workspace, run
+      claws init to create claws.json. If not, no action is needed —
+      claws will not modify your project." This prevents developer
+      alarm at unexpected tool output.
+    spec_impact: "CL-05 DX — clear non-OC detection message"
+    pitfall: P-243
+
+  - id: F08
+    severity: note
+    description: >
+      The detection logic should be versioned in claws.json so that
+      future OC workspace format changes (new marker files, renamed
+      files) can be handled by updating the detection rules without
+      requiring a claws version update. This future-proofs the
+      detection against OC specification evolution.
+    spec_impact: "CL-01 DETECT — versioned detection rules"
+    pitfall: P-243

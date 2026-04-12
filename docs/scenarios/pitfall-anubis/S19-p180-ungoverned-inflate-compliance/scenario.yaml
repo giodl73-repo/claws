@@ -1,0 +1,135 @@
+name: S19-p180-ungoverned-inflate-compliance
+series: pitfall-anubis
+version: 1
+specs: [CL-05]
+description: >
+  Validates that ungoverned workspaces are excluded from fleet compliance
+  percentage calculations. A fleet where 3 of 10 workspaces have no
+  governance installed must not report 100% compliance based on the 7
+  governed workspaces all passing.
+
+expect:
+  workspaces:
+    total: 10
+    governed: 7
+    ungoverned: 3
+    passing: 7
+    failing: 0
+  drift_count: 0
+  broadcast_result: null
+  compliance:
+    governed_passing: 7
+    governed_failing: 0
+    ungoverned: 3
+    reported_percentage: 70
+    naive_percentage: 100
+    compliance_mode: strict
+
+simulate:
+  failures:
+    - component: compliance
+      type: ungoverned-inflation
+      error: "3 ungoverned workspaces excluded from compliance denominator inflates 70% to 100%"
+  halt: null
+  budget: null
+
+problem: >
+  A fleet of 10 workspaces runs `claws fleet compliance`. 7 workspaces have
+  claws governance installed and all 7 pass their pinch checks. 3 workspaces
+  have no governance installed (legacy workspaces not yet onboarded). The
+  compliance report calculates 7/7 = 100% compliance, excluding the 3
+  ungoverned workspaces from the denominator. The fleet admin presents this
+  to the CISO as "100% governance compliance." The CISO approves the fleet
+  for production. The 3 ungoverned workspaces, which have no governance at
+  all, are now running in production under a false compliance certification.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CL-05 must define strict compliance mode as the default: ungoverned
+      workspaces count as non-compliant in the denominator. The compliance
+      percentage formula must be: passing / total (not passing / governed).
+      In this scenario, strict compliance is 7/10 = 70%, not 7/7 = 100%.
+      A `fleet.compliance.mode` setting can allow "governed-only" mode
+      for development fleets, but strict must be the default.
+    spec_impact: "CL-05 Fleet Compliance — strict mode default"
+    pitfall: P-180
+
+  - id: F02
+    severity: major
+    description: >
+      The compliance report must show ungoverned workspaces as a separate
+      category with a prominent warning: "3 workspaces have no governance
+      installed. These workspaces are NOT compliant and are excluded from
+      governed metrics." The warning must appear before the compliance
+      percentage to prevent administrators from reading only the number
+      and missing the caveat.
+    spec_impact: "CL-05 Fleet Compliance — ungoverned workspace warning"
+    pitfall: P-180
+
+  - id: F03
+    severity: major
+    description: >
+      Fleet compliance must report three numbers: total compliance (7/10 =
+      70%), governed compliance (7/7 = 100%), and governance coverage (7/10
+      = 70%). The three numbers together tell the full story. Enterprise
+      compliance requirements should gate on total compliance and governance
+      coverage, not just governed compliance.
+    spec_impact: "CL-05 Fleet Compliance — three-metric reporting"
+    pitfall: P-180
+
+  - id: F04
+    severity: major
+    description: >
+      The JSON export for SIEM must include all three metrics plus the list
+      of ungoverned workspaces. SOC teams that receive only the governed
+      compliance number will have a false sense of security. The JSON
+      schema must include: total_workspaces, governed_workspaces,
+      ungoverned_workspaces (array of names), and all three percentages.
+    spec_impact: "CL-05 Fleet Compliance — SIEM export with full context"
+    pitfall: P-180
+
+  - id: F05
+    severity: warning
+    description: >
+      A governance coverage threshold should be configurable: `fleet.compliance.
+      minCoveragePercent: 100`. When coverage falls below the threshold, the
+      compliance report status changes from COMPLIANT to NON_COMPLIANT even
+      if all governed workspaces pass. This prevents the "100% of governed
+      workspaces pass but only 30% are governed" loophole.
+    spec_impact: "CL-05 Fleet Compliance — minimum coverage threshold"
+    pitfall: P-180
+
+  - id: F06
+    severity: warning
+    description: >
+      The fleet scan (`claws fleet scan`) must detect ungoverned workspaces
+      and report them as "governance not installed." The scan should
+      distinguish between three states: governed-compliant, governed-non-
+      compliant, and ungoverned. This classification feeds into the
+      compliance report and drift detection.
+    spec_impact: "CL-05 Fleet Scan — ungoverned workspace detection"
+    pitfall: P-180
+
+  - id: F07
+    severity: warning
+    description: >
+      Compliance trend reporting must track governance coverage over time.
+      A fleet that drops from 100% coverage to 70% coverage (3 workspaces
+      removed governance) is regressing even if the governed percentage stays
+      at 100%. The trend report should alert on coverage decreases just as
+      it alerts on compliance decreases.
+    spec_impact: "CL-05 Fleet Compliance — coverage trend alerting"
+    pitfall: P-180
+
+  - id: F08
+    severity: note
+    description: >
+      Ungoverned workspaces should be flagged for onboarding. The compliance
+      report should include an "onboarding plan" section: estimated effort
+      per workspace, recommended governance template, and a `claws init`
+      command for each ungoverned workspace. This turns the compliance
+      report from a status document into an actionable remediation plan.
+    spec_impact: "CL-05 Fleet Compliance — onboarding recommendations"
+    pitfall: P-180

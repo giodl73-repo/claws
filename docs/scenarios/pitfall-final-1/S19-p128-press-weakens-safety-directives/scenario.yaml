@@ -1,0 +1,131 @@
+name: S19-p128-press-weakens-safety-directives
+series: pitfall-final-1
+version: 1
+specs: [CL-04]
+description: >
+  Validates that aggressive PRESS compression for small context windows does
+  not weaken safety directives. "NEVER access production databases" must not
+  become "avoid prod." Frozen keyword set, directive-level preservation, and
+  keyword count validation post-compression are all required.
+
+expect:
+  governance_ir:
+    version: 1
+    emit:
+      press_compression:
+        mode: aggressive
+        target_tokens: 4096
+        frozen_keywords_preserved: true
+        keyword_count_pre: 5
+        keyword_count_post: 5
+    analysis:
+      rules_evaluated: true
+      violations: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 4
+    skill_md_safety_intact: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has a large SKILL.md (15KB) that must be compressed to fit a
+  4K context window. Aggressive PRESS compression applies synonym replacement:
+  "NEVER access production databases" becomes "avoid prod." "PROHIBITED from
+  deleting user records" becomes "not allowed to delete records." "MUST obtain
+  confirmation" becomes "should confirm." Each replacement weakens the
+  directive strength. The LLM interprets compressed directives as advisory
+  guidance, not mandatory constraints. R5 tools execute because the LLM
+  believes "avoid" is a preference, not a prohibition.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The frozen keyword set (NEVER, ALWAYS, MUST, PROHIBITED, REQUIRED,
+      BLOCKED, FORBIDDEN) must be immune to synonym replacement. These
+      keywords carry governance semantics that map to risk levels. Synonym
+      replacement destroys the mapping. The frozen set is a compile-time
+      constant, not configurable (base set is non-negotiable).
+    spec_impact: "CL-04 EMIT — frozen keyword set definition"
+    pitfall: P-128
+
+  - id: F02
+    severity: major
+    description: >
+      Directive-level preservation: the full sentence containing a frozen
+      keyword is preserved verbatim. PRESS cannot shorten, paraphrase,
+      or restructure a directive sentence. Surrounding non-critical text
+      (explanations, examples, context) can be compressed aggressively.
+      The boundary between directive and context must be detectable.
+    spec_impact: "CL-04 EMIT — sentence-level directive preservation"
+    pitfall: P-128
+
+  - id: F03
+    severity: major
+    description: >
+      Keyword count validation: before and after compression, count the
+      occurrences of each frozen keyword. If any count decreases, PRESS
+      dropped a directive. The build fails: "PRESS compression lost 1
+      instance of NEVER (pre: 3, post: 2). Directive dropped at line 47."
+      This is a hard gate, not a warning.
+    spec_impact: "CL-04 EMIT — keyword count validation gate"
+    pitfall: P-128
+
+  - id: F04
+    severity: major
+    description: >
+      Case sensitivity: "NEVER" (all caps) is a stronger signal than
+      "never" (lowercase). PRESS must preserve case. "NEVER" should not
+      become "Never" or "never." Case changes may seem minor but LLMs
+      are sensitive to capitalization patterns in instruction text.
+    spec_impact: "CL-04 EMIT — frozen keyword case preservation"
+    pitfall: P-128
+
+  - id: F05
+    severity: warning
+    description: >
+      Negation context: "This tool is NOT PROHIBITED" should not have
+      "PROHIBITED" frozen in isolation. The frozen keyword set applies
+      to keywords in directive position, not in negation context. A
+      heuristic: if the keyword is preceded by "not," "no," or "isn't,"
+      it is a negation and should not be frozen.
+    spec_impact: "CL-04 EMIT — negation-aware frozen keyword application"
+    pitfall: P-128
+
+  - id: F06
+    severity: warning
+    description: >
+      Compression ratio reporting: PRESS should report how much non-
+      directive text was compressed vs how much directive text was
+      preserved. If directives are 80% of the text, aggressive
+      compression can only remove 20%. The effective compression ratio
+      must be reported so the operator understands the limit.
+    spec_impact: "CL-04 EMIT — PRESS compression ratio reporting"
+    pitfall: P-128
+
+  - id: F07
+    severity: major
+    description: >
+      Multi-language support: frozen keywords must include equivalents
+      in supported languages if SKILL.md is multilingual. "JAMAIS"
+      (French NEVER), "NIE" (German NEVER), "NUNCA" (Spanish NEVER)
+      should be in the frozen set for multilingual workspaces. The base
+      English set is always included; language extensions are additive.
+    spec_impact: "CL-04 EMIT — multilingual frozen keyword set"
+    pitfall: P-128
+
+  - id: F08
+    severity: note
+    description: >
+      This pitfall overlaps with P-122 (SKILL.md directive-to-risk
+      mapping under PRESS) and P-138 (PRESS removes safety keywords
+      from pitfall-coverage-2). P-128 is the definitive statement:
+      aggressive mode is the dangerous case, frozen keywords are the
+      defense, keyword count is the validation.
+    spec_impact: "CL-04 — definitive PRESS safety spec combining P-122/P-128/P-138"
+    pitfall: P-128

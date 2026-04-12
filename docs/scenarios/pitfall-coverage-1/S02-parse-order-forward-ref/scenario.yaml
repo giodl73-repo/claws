@@ -1,0 +1,129 @@
+name: S02-parse-order-forward-ref
+series: pitfall-coverage-1
+version: 1
+specs: [CL-04]
+description: >
+  Validates that the compilation pipeline is order-independent. P-053 identifies
+  that alphabetical parsing causes AGENTS.md to be parsed before TOOLS.md,
+  creating forward-reference failures when agents reference tools not yet
+  declared. The pipeline must use two-pass parsing or deferred resolution
+  to guarantee correct compilation regardless of file order.
+
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed: [AGENTS.md, TOOLS.md, SOUL.md, claws.json]
+      parse_order_independent: true
+    analysis:
+      rules_evaluated: true
+      delegation_graph:
+        agents: [data-analyst, research-agent]
+        tools_resolved: true
+        phantom_tools: []
+      violations: []
+      warnings: []
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Workspace has AGENTS.md declaring two agents: data-analyst (tools: [query-db,
+  export-csv]) and research-agent (tools: [web-search, summarize]). TOOLS.md
+  declares all four tools with risk levels. SOUL.md has deny constraints. If files
+  are parsed alphabetically, AGENTS.md is parsed first and references tools that
+  have not been declared yet. The pipeline must resolve all cross-references
+  correctly regardless of parse order.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Alphabetical parse order places AGENTS.md before TOOLS.md. Agent
+      declarations reference tools by name. If tool resolution happens
+      during parse (eager), all four tool references fail as "phantom
+      tools." The delegation graph is empty despite a valid workspace.
+    spec_impact: "CL-04 Phase 1 PARSE — must support deferred tool resolution"
+    pitfall: P-053
+
+  - id: F02
+    severity: major
+    description: >
+      If the parser uses a single pass with eager resolution, adding a
+      new file (e.g., HEARTBEAT.md) can change the alphabetical order
+      and break previously working compilations. File addition should
+      never break existing cross-references.
+    spec_impact: "CL-04 PARSE — order independence must be a hard guarantee"
+    pitfall: P-053
+
+  - id: F03
+    severity: warning
+    description: >
+      Two-pass parsing (collect declarations, then resolve references)
+      requires all declaration types to be known before resolution begins.
+      If a future workspace file type introduces a new declaration kind,
+      the two-pass architecture must be extensible without modifying
+      existing declaration collectors.
+    spec_impact: "CL-04 PARSE — extensible two-pass architecture"
+    pitfall: P-053
+
+  - id: F04
+    severity: major
+    description: >
+      SOUL.md deny constraints reference tools by name ("never use
+      delete-production-db"). If SOUL.md is parsed before TOOLS.md,
+      the deny constraint references a tool not yet declared. The
+      ANALYZE phase must still correctly associate the deny constraint
+      with the tool when it is eventually resolved.
+    spec_impact: "CL-04 ANALYZE — deny-tool association across parse passes"
+    pitfall: P-053
+
+  - id: F05
+    severity: warning
+    description: >
+      HEARTBEAT.md schedules tools by name. If HEARTBEAT.md is parsed
+      before TOOLS.md, schedule entries reference undeclared tools.
+      The forward-reference problem affects all files that reference
+      tools, not just AGENTS.md. The deferred resolution must cover
+      the full reference graph.
+    spec_impact: "CL-04 PARSE — tool references exist in AGENTS.md, SOUL.md, HEARTBEAT.md"
+    pitfall: P-053
+
+  - id: F06
+    severity: note
+    description: >
+      Error messages for truly phantom tools (tools referenced but never
+      declared in any file) must be distinguishable from forward-reference
+      errors (tools referenced before declaration). In two-pass parsing,
+      phantom tools are only detectable after both passes complete.
+    spec_impact: "CL-04 diagnostics — phantom vs forward-reference distinction"
+    pitfall: P-053
+
+  - id: F07
+    severity: major
+    description: >
+      Circular cross-file references are possible: AGENTS.md references
+      tools in TOOLS.md, and TOOLS.md has descriptions referencing
+      agents in AGENTS.md (e.g., "used by data-analyst"). Two-pass
+      parsing handles this naturally (both are declared in pass 1,
+      both resolved in pass 2), but single-pass fails on whichever
+      file is second.
+    spec_impact: "CL-04 PARSE — circular cross-file references"
+    pitfall: P-053
+
+  - id: F08
+    severity: warning
+    description: >
+      Performance of two-pass parsing: pass 1 reads all files and builds
+      a symbol table; pass 2 resolves references. For large workspaces
+      (50+ tools, 20+ agents), the symbol table must be indexed by name
+      for O(1) lookup, not O(n) scan. The 350ms latency budget applies
+      to both passes combined.
+    spec_impact: "CL-04 latency — two-pass budget allocation"
+    pitfall: P-053
