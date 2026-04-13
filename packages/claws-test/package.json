@@ -1,0 +1,75 @@
+{
+  "name": "@bic/claws-test",
+  "version": "0.36.0",
+  "description": "Testing framework for claws-governed OC skills — scenario replay and governance validation",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./scenario": {
+      "import": "./dist/scenario/index.js",
+      "types": "./dist/scenario/index.d.ts"
+    },
+    "./governance": {
+      "import": "./dist/governance/index.js",
+      "types": "./dist/governance/index.d.ts"
+    },
+    "./matchers": {
+      "import": "./dist/matchers/index.js",
+      "types": "./dist/matchers/index.d.ts"
+    },
+    "./security": {
+      "import": "./dist/security/scanner.js",
+      "types": "./dist/security/scanner.d.ts"
+    }
+  },
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "@bic/claws-skill-kit": ">=0.36.0",
+    "vitest": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@bic/claws-skill-kit": {
+      "optional": true
+    },
+    "vitest": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@bic/claws-skill-kit": "file:../claws-skill-kit",
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "tsup": "^8.0.0",
+    "vitest": "^4.0.0"
+  },
+  "overrides": {
+    "esbuild": ">=0.25.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:unit": "vitest run --project unit --passWithNoTests",
+    "test:integration": "vitest run --project integration --passWithNoTests",
+    "test:e2e": "vitest run --project e2e --passWithNoTests",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit"
+  }
+}

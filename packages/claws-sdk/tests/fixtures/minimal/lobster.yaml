@@ -1,0 +1,10 @@
+name: basic-check
+description: Basic validation workflow
+
+steps:
+  - name: read-config
+    command: read config.json
+  - name: send-email
+    command: send-email --to user@example.com
+  - name: log-result
+    command: log audit trail

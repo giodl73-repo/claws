@@ -1,0 +1,10 @@
+name: security-check
+description: Run security validation pipeline
+
+steps:
+  - name: scan
+    command: npm audit
+  - name: lint
+    command: npm run lint
+  - name: test
+    command: npm test

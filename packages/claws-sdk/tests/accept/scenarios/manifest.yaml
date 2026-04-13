@@ -1,0 +1,82 @@
+# Ptah-scoped acceptance manifest — filtered from design/claws/scenarios/manifest.yaml
+# Only Phase 1 (Ptah) + cross-cutting series with materialized fixtures (74 total)
+# Anubis/Thoth series excluded — fleet-sim stubs, advanced security-sim not materialized
+
+series:
+  # ── Phase 1: Ptah (Foundation) ──
+
+  compile-pipeline:
+    runners: [compile-sim]
+    min: 8
+    marker: "scenario.yaml"
+    spec: CL-04
+    description: "Full compilation pipeline — parse 9 files, extract intents, analyze rules, emit artifacts"
+
+  governance-rules:
+    runners: [pinch-sim]
+    min: 12
+    marker: "scenario.yaml"
+    spec: CL-02
+    description: "All 29 governance rules — R1-R5 classification, A2A, injection, elicitation, supply chain"
+
+  fail-mode:
+    runners: [pinch-sim, security-sim]
+    min: 6
+    marker: "scenario.yaml"
+    spec: CL-02
+    description: "FailMode<R> enforcement — R5 always closed, R1-R2 configurable, crash behavior"
+
+  emit-artifacts:
+    runners: [emit-sim]
+    min: 8
+    marker: "scenario.yaml"
+    spec: CL-04
+    description: "4-artifact emission — Gateway plugin, SKILL.md, exec-approvals, compiled workflow"
+
+  cross-file-conflicts:
+    runners: [compile-sim]
+    min: 7
+    marker: "scenario.yaml"
+    spec: CL-04
+    description: "7 cross-file conflict categories — DENY-vs-TOOL, TRUST-ESCALATION, OBO-WITHOUT-ELICIT, etc."
+
+  # ── Praetor Integration (Ptah-scoped) ──
+
+  input-resolver:
+    runners: [compile-sim]
+    min: 6
+    marker: "scenario.yaml"
+    spec: CL-01, CL-04, CL-07
+    description: "InputResolver integration — 9-file default, package governance, URL policies, provenance"
+
+  loss-aware-emission:
+    runners: [compile-sim]
+    min: 5
+    marker: "scenario.yaml"
+    spec: CL-04, CL-07
+    description: "Loss-aware routing — 7-platform loss matrix, path enumerator, --strict-loss for R5"
+
+  # ── Pitfall Coverage (Ptah-scoped) ──
+
+  pitfall-coverage-1:
+    runners: [compile-sim, pinch-sim, emit-sim]
+    min: 10
+    marker: "scenario.yaml"
+    spec: CL-02, CL-04
+    description: "Pitfall validation — edge cases from first scenario round (P-051 through P-070)"
+
+  # ── Cross-cutting ──
+
+  lossless-roundtrip:
+    runners: [compile-sim]
+    min: 5
+    marker: "scenario.yaml"
+    spec: CL-04
+    description: "Round-trip fidelity — parse → IR → emit preserves original workspace byte-for-byte"
+
+  platform-detection:
+    runners: [compile-sim]
+    min: 7
+    marker: "scenario.yaml"
+    spec: CL-01
+    description: "7-platform detection — OC, Cursor, Claude, GitHub, Bedrock, LangGraph, CrewAI"

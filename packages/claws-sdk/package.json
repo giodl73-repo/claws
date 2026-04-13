@@ -1,0 +1,78 @@
+{
+  "name": "@bic/claws-sdk",
+  "version": "0.36.0",
+  "description": "claws SDK — enterprise governance compiler for agent workspaces",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./ir": {
+      "import": "./dist/ir/index.js",
+      "types": "./dist/ir/index.d.ts"
+    },
+    "./compile": {
+      "import": "./dist/compile/index.js",
+      "types": "./dist/compile/index.d.ts"
+    },
+    "./governance": {
+      "import": "./dist/governance/index.js",
+      "types": "./dist/governance/index.d.ts"
+    },
+    "./emit": {
+      "import": "./dist/emit/index.js",
+      "types": "./dist/emit/index.d.ts"
+    },
+    "./adapter": {
+      "import": "./dist/adapter/index.js",
+      "types": "./dist/adapter/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./detect": {
+      "import": "./dist/detect/index.js",
+      "types": "./dist/detect/index.d.ts"
+    },
+    "./compliance/*": {
+      "import": "./dist/compliance/*.js",
+      "types": "./dist/compliance/*.d.ts"
+    }
+  },
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@craftworks/compiler-sdk": "file:../compiler-sdk",
+    "@craftworks/agent-sdk": "file:../agent-sdk",
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "eslint": "^9.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.0"
+  },
+  "overrides": {
+    "esbuild": ">=0.25.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:unit": "vitest run --project unit --passWithNoTests",
+    "test:integration": "vitest run --project integration --passWithNoTests",
+    "test:e2e": "vitest run --project e2e --passWithNoTests",
+    "test:accept": "vitest run --project accept --passWithNoTests",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit"
+  }
+}

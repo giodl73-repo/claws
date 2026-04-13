@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "no-restricted-imports": ["error", {
+      "patterns": [
+        {
+          "group": ["@craftworks/compiler-sdk", "@craftworks/compiler-sdk/*"],
+          "message": "@bic/claws-test must not depend on compiler-sdk"
+        },
+        {
+          "group": ["@craftworks/craftworks-sdk", "@craftworks/craftworks-sdk/*"],
+          "message": "@bic/claws-test must not depend on craftworks-sdk"
+        },
+        {
+          "group": ["@bic/claws-cli", "@bic/claws-cli/*"],
+          "message": "@bic/claws-test must not depend on claws-cli"
+        },
+        {
+          "group": ["@craftworks/shared-cli", "@craftworks/shared-cli/*"],
+          "message": "@bic/claws-test must not depend on shared-cli"
+        }
+      ]
+    }]
+  }
+}
