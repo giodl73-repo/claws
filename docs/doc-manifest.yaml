@@ -1,0 +1,17 @@
+surface: root
+entries:
+  claws-root:
+    type: section
+    path: docs/claws/README.md
+    atoms:
+    - check
+    - claws-init
+    - claws-compiler
+    - three-engine-model
+    - three-rings
+    - tier-adoption
+    - three-tier-packages
+    - lossless-roundtrip
+    - dotnet-for-oc
+    - governance-plugin
+    - obo-boundary

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "trustTier": "T2",
+  "platform": "openclaw",
+  "fleet": {
+    "workspaces": ["workspace-alpha", "workspace-beta"]
+  }
+}

@@ -62,12 +62,12 @@ findings:
   - id: F02
     severity: major
     description: >
-      The delegation reference format must be validated during `claws pinch`,
+      The delegation reference format must be validated during `claws check`,
       not only during fleet scan. A workspace that declares a cross-workspace
-      delegation with a non-standard format should fail pinch with a clear
+      delegation with a non-standard format should fail check with a clear
       error. This catches format issues at the workspace level before they
       propagate to fleet-level graph construction.
-    spec_impact: "CL-02 G-A2A-DELEGATE — pinch-time format validation"
+    spec_impact: "CL-02 G-A2A-DELEGATE — check-time format validation"
     pitfall: P-181
 
   - id: F03
@@ -136,7 +136,7 @@ findings:
       "fleet://*/agents/finance" means "any workspace's finance agent."
       This is useful in fleet policies that define delegation rules across
       all workspaces. Wildcard references must be expanded to concrete
-      references during fleet scan, never during pinch (which operates
+      references during fleet scan, never during check (which operates
       on a single workspace).
     spec_impact: "CL-05 Fleet Templates — wildcard delegation references"
     pitfall: P-181

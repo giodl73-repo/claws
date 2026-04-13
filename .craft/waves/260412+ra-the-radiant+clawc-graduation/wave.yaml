@@ -1,0 +1,63 @@
+name: "Ra the Radiant"
+number: XCIII
+deity: ra
+epithet: the-radiant
+branch: feature/ra-the-radiant
+description: "claws graduation — standalone @claws/compiler (MIT) + @bic/claws-sdk enterprise extension"
+status: planned
+dependsOn: [ptah, anubis, thoth]
+
+plans:
+  - claws-sdk-graduation
+  - craftworks-package-extraction
+
+stageOrder:
+  - kickoff
+  - setup
+  - scenarios
+  - planning
+  - implementation
+  - review
+  - close
+
+stages:
+  kickoff:
+    status: completed
+    completedAt: "2026-04-12T00:00:00Z"
+    notes: "Graduation plan created, R1 review applied (5 roles, 46 findings, 6 consensus fixes)"
+  setup:
+    status: completed
+    completedAt: "2026-04-12T00:00:00Z"
+    notes: "20 pulses, 4 checkpoints, freemium boundary defined"
+  scenarios:
+    status: pending
+    notes: "Graduation-specific scenarios TBD during implementation"
+  planning:
+    status: completed
+    completedAt: "2026-04-12T00:00:00Z"
+    notes: "20 pulses across 4 checkpoints, dependency-ordered, roles assigned"
+  implementation:
+    status: pending
+    notes: "20 pulses across 4 checkpoints (CP-1 through CP-4), ~10 weeks"
+  review:
+    status: pending
+  close:
+    status: pending
+
+checkpoints:
+  cp-1:
+    name: "Infrastructure — Readers, Crypto, Audit, R5"
+    pulses: [1, 2, 3, 4, 5, 6]
+    status: pending
+  cp-2:
+    name: "Emit + Compile — Emitters, Validator, Cache, Host"
+    pulses: [7, 8, 9, 10, 11, 12]
+    status: pending
+  cp-3:
+    name: "Package Split — Remove Deps, Create Packages, API Contract"
+    pulses: [13, 14, 15, 16, 17, 18]
+    status: pending
+  cp-4:
+    name: "Publish — Docs, Migration, npm"
+    pulses: [19, 20]
+    status: pending

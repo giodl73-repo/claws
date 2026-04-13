@@ -6,7 +6,7 @@ description: >
   Validates that orphaned watcher processes are prevented on Windows via
   PID file enforcement (P-169). When a terminal closes without cleanup or
   the user opens multiple terminals, orphaned watcher processes accumulate.
-  Each orphan runs its own pinch on every save, causing duplicate governance
+  Each orphan runs its own check on every save, causing duplicate governance
   compilations, file contention, and CPU exhaustion.
 
 expect:
@@ -27,13 +27,13 @@ simulate:
   failures:
     - component: inner-ring
       type: orphaned-watcher
-      error: "3 watcher processes running — each fires pinch on AGENTS.md save"
+      error: "3 watcher processes running — each fires check on AGENTS.md save"
     - component: inner-ring
       type: pid-file-stale
       error: "PID file references dead process — new watcher starts alongside orphan"
     - component: system
       type: cpu-exhaustion
-      error: "3 concurrent pinch compilations consume 100% CPU on 4-core machine"
+      error: "3 concurrent check compilations consume 100% CPU on 4-core machine"
   halt: null
   budget: null
 
@@ -44,7 +44,7 @@ problem: >
   still watching. The developer opens a new terminal and runs `claws watch` again.
   Now two watchers run. Over the course of a day, 5 terminals are opened and
   closed, leaving 5 orphaned watcher processes. Every file save triggers 5
-  concurrent pinch compilations. The GovernanceIR file is written 5 times in
+  concurrent check compilations. The GovernanceIR file is written 5 times in
   rapid succession (race condition from P-167). CPU usage spikes to 100% on
   every keystroke. The developer blames claws for being slow.
 
@@ -147,7 +147,7 @@ findings:
     severity: note
     description: >
       The CPU exhaustion from multiple watchers is a secondary symptom.
-      The primary bug is duplicate pinch compilations writing to the
+      The primary bug is duplicate check compilations writing to the
       same IR file. Even if CPU were unlimited, the concurrent writes
       trigger P-167 (TOCTOU race). Single-instance enforcement solves
       both the performance and the correctness problem.

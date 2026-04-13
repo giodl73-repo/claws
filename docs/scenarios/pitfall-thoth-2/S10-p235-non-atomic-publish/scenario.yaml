@@ -50,7 +50,7 @@ problem: >
   transient infrastructure issue. The publish command reports the failure but
   does not roll back the local changes. The developer now has a local manifest
   at version 1.2.0 with badge metadata for a version that was never published.
-  Subsequent claws pinch reads the local manifest and reports version 1.2.0 as
+  Subsequent claws check reads the local manifest and reports version 1.2.0 as
   current. If the developer runs publish again, ClawHub may reject it as a
   duplicate version or accept it with different metadata. The local and remote
   states are diverged with no automated recovery path.
@@ -99,7 +99,7 @@ findings:
       The version number is the most critical piece of local state. Once
       bumped and written to disk, any tool that reads the manifest sees the
       new version. If the bump happens before remote confirmation, all
-      local operations (pinch, status, compile) reference a version that
+      local operations (check, status, compile) reference a version that
       does not exist remotely. The version bump must be the LAST local
       mutation, occurring only after remote confirmation.
     spec_impact: "CL-05 Publish Amendment — version bump as final step"

@@ -5,7 +5,7 @@ specs: [CL-05]
 description: >
   Validates the middle ring dead man's switch upgrade workflow: snap save
   pre-upgrade, npm install platform upgrade, doctor --post-upgrade --fix,
-  pinch, and snap restore on any failure. The entire chain must be atomic —
+  check, and snap restore on any failure. The entire chain must be atomic —
   if any step fails, the workspace reverts to the pre-upgrade snapshot.
   This is the primary safety mechanism for platform migrations.
 
@@ -37,8 +37,8 @@ simulate:
 
 problem: >
   A developer runs the dead man's switch upgrade command chain:
-  `claws snap save pre-upgrade --pinch && npm install -g openclaw@latest &&
-  claws doctor --post-upgrade --fix && claws pinch || claws snap restore pre-upgrade`.
+  `claws snap save pre-upgrade --check && npm install -g openclaw@latest &&
+  claws doctor --post-upgrade --fix && claws check || claws snap restore pre-upgrade`.
   The platform upgrade changes the claws.json schema from v2 to v3 and
   deprecates the old delegation syntax in AGENTS.md. doctor --post-upgrade
   detects both issues and --fix auto-migrates claws.json successfully but
@@ -63,13 +63,13 @@ findings:
   - id: F02
     severity: major
     description: >
-      The --pinch flag on snap save means "run pinch before saving." If
-      pinch finds violations, should the save abort? The spec says the
+      The --check flag on snap save means "run check before saving." If
+      check finds violations, should the save abort? The spec says the
       upgrade chain proceeds regardless, but saving a snapshot with known
       violations means restore brings back a broken state. The pre-upgrade
-      snapshot should be a known-good state, which means pinch violations
+      snapshot should be a known-good state, which means check violations
       should abort the save.
-    spec_impact: "CL-05 snap save --pinch — abort on violations or save-anyway semantics"
+    spec_impact: "CL-05 snap save --check — abort on violations or save-anyway semantics"
     pitfall: null
 
   - id: F03
@@ -140,7 +140,7 @@ findings:
       diagnostics and snap operations. doctor --post-upgrade on a large
       workspace (50+ tool definitions, multiple agent files) could exceed
       15s for schema migration alone. The latency budget should be broken
-      down: snap save (<2s) + doctor (<10s) + pinch (<3s) = 15s.
+      down: snap save (<2s) + doctor (<10s) + check (<3s) = 15s.
     spec_impact: "CL-05 Middle Ring — latency sub-budget per operation"
     pitfall: null
 

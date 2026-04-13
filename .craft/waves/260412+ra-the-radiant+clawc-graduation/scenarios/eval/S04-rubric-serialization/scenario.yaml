@@ -1,0 +1,126 @@
+name: S04-rubric-serialization
+series: eval
+version: 1
+specs: [CL-08]
+description: >
+  Validates that a rubric definition survives JSON serialization and
+  deserialization with zero field loss — the deserialized rubric produces
+  identical evaluation results to the original.
+
+expect:
+  round_trip_fidelity: exact
+  field_loss: none
+  evaluation_equivalence: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer creates a rubric with 5 criteria including weighted scores,
+  custom assertion compositions (AND/OR/NOT trees), threshold overrides, and
+  metadata annotations. The rubric is serialized to JSON via rubric.toJSON(),
+  stored to disk, and later loaded via Rubric.fromJSON(). The round-tripped
+  rubric must produce byte-identical evaluation results when applied to the
+  same sample response. No fields may be silently dropped, default-filled,
+  or reordered in a way that changes evaluation semantics. The test must
+  verify both structural equality (same JSON output) and behavioral
+  equality (same scores on identical input).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Custom assertion functions (closures, lambdas) cannot survive JSON
+      serialization. If rubrics allow inline function assertions, toJSON()
+      must either reject them with a clear error or serialize them via a
+      registered assertion registry keyed by name. Silently dropping
+      function assertions produces a rubric that appears valid but
+      evaluates differently.
+    spec_impact: "CL-08 eval-api — assertion serialization strategy (registry vs rejection)"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Floating-point criterion weights may lose precision through JSON
+      round-trip (e.g., 0.1 + 0.2 != 0.3 in IEEE 754). If weight
+      validation checks sum-to-1.0 with strict equality, a deserialized
+      rubric may fail validation that the original passed. Weights must
+      use tolerance-based comparison or be stored as integer basis points.
+    spec_impact: "CL-08 eval-api — weight serialization precision strategy"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      If the JSON schema lacks a version field, consumers cannot distinguish
+      between rubric formats from different @craftworks/eval versions.
+      Loading a v2 rubric with a v1 deserializer may silently ignore new
+      fields, producing a degraded rubric that evaluates incorrectly
+      without any error.
+    spec_impact: "CL-08 eval-api — mandatory schema version in serialized rubric format"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Metadata annotations (description, author, created_at) must survive
+      round-trip even though they do not affect evaluation. Consumers use
+      metadata for rubric management (search, audit trail, deduplication).
+      Stripping metadata to "optimize" serialization size breaks these
+      workflows.
+    spec_impact: "CL-08 eval-api — metadata preservation requirement in serialization"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      JSON field ordering is not guaranteed by the spec. If structural
+      equality is tested via string comparison of JSON output, reordered
+      but semantically identical objects will falsely fail. Structural
+      equality must use deep object comparison, not string comparison.
+    spec_impact: "CL-08 eval-api — structural equality comparison method"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Rubric definitions containing Unicode characters in criterion names
+      or descriptions must survive JSON round-trip without mojibake.
+      JSON.stringify handles Unicode correctly, but consumers may
+      pipe through tools that assume ASCII, so the spec should mandate
+      UTF-8 encoding explicitly.
+    spec_impact: "CL-08 eval-api — UTF-8 encoding requirement for serialized rubrics"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Large rubrics with many criteria and deep assertion trees may produce
+      JSON payloads exceeding typical clipboard or URL-parameter size limits.
+      A compressed serialization option (e.g., gzip + base64) would help
+      consumers share rubrics via constrained channels.
+    spec_impact: "CL-08 eval-api — optional compressed serialization format"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The fromJSON() factory should validate the input against the expected
+      schema and produce specific error messages identifying which field
+      failed validation, rather than throwing a generic parse error. This
+      helps consumers debug corrupted or hand-edited rubric files.
+    spec_impact: "CL-08 eval-api — validation error quality for fromJSON"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      Behavioral equality testing (same scores on same input) requires
+      deterministic evaluation. If any assertion uses randomness (e.g.,
+      sampling-based fuzzy match), the rubric must support seeded evaluation
+      for reproducible round-trip testing.
+    spec_impact: "CL-08 eval-api — deterministic evaluation mode for testing"
+    pitfall: null

@@ -1,0 +1,99 @@
+name: S01-standalone-install
+series: emit-copilot
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/emit-copilot installs with only @craftworks/codegen
+  as a dependency and produces GitHub Copilot governance output
+  (.github/copilot-instructions.md + workspace settings).
+
+expect:
+  craftworks_deps: ["@craftworks/codegen"]
+  output_files: [".github/copilot-instructions.md"]
+  output_valid: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer installs @craftworks/emit-copilot alongside @craftworks/codegen
+  in a fresh project. The emitter is invoked with a compiled governance IR.
+  It must produce .github/copilot-instructions.md containing governance
+  instructions in the format GitHub Copilot reads for workspace-level
+  customization. The emitter may also produce VS Code workspace settings
+  for Copilot-specific configuration. Both outputs must conform to
+  GitHub's documented Copilot customization formats.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      GitHub Copilot's copilot-instructions.md has a size limit (currently
+      undocumented but observed around 8KB effective context). If the governance
+      IR produces instructions exceeding this limit, Copilot silently truncates
+      them. The emitter must prioritize high-severity governance rules and
+      warn when output exceeds the effective size limit.
+    spec_impact: "CL-08 emit-copilot — size-aware instruction generation with priority ranking"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The .github/ directory is version-controlled and visible in PRs. If the
+      emitter writes sensitive governance details (e.g., security policy
+      specifics that should not be public), they become visible in the repo.
+      The emitter must filter governance rules by visibility classification
+      before emitting to .github/.
+    spec_impact: "CL-08 emit-copilot — visibility filtering for public-repo governance"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      copilot-instructions.md may already exist with user-written instructions.
+      The emitter must use section delimiters to merge claws governance
+      without overwriting user content. GitHub Copilot reads the entire file,
+      so section ordering affects instruction priority.
+    spec_impact: "CL-08 emit-copilot — section-delimited merge with existing instructions"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      GitHub Copilot workspace settings live in .vscode/settings.json under
+      the "github.copilot" key. If the emitter creates a new settings file
+      without merging, it destroys other VS Code settings. The emitter must
+      deep-merge into existing settings.
+    spec_impact: "CL-08 emit-copilot — deep merge for VS Code settings"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The .github/ directory path must not be configurable to an arbitrary
+      location. GitHub only reads copilot-instructions.md from .github/ at
+      the repo root. An emitter that allows custom paths produces output
+      that Copilot never reads, with no error.
+    spec_impact: "CL-08 emit-copilot — enforce canonical .github/ output path"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      Copilot instructions work best as short, imperative sentences. The
+      emitter should optimize governance rule wording for Copilot's
+      instruction-following capabilities rather than emitting verbose
+      explanatory text.
+    spec_impact: "CL-08 emit-copilot — instruction style optimization for Copilot"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The emitter should include a markdown comment at the top of
+      copilot-instructions.md indicating the claws version and generation
+      timestamp so consumers can determine if the file is stale.
+    spec_impact: "CL-08 emit-copilot — generation metadata in instructions file"
+    pitfall: null

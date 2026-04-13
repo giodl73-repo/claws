@@ -1,0 +1,116 @@
+name: S01-file-resolution
+series: input
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/input resolves a local file path to its content
+  with correct provenance metadata including origin type, absolute path,
+  content hash, and trust level.
+
+expect:
+  resolution: success
+  provenance_origin: file
+  trust_level: local
+  content_hash: sha256
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer calls resolve("./governance/policy.md") from a workspace root.
+  The input resolver must normalize the relative path to an absolute path,
+  read the file content, compute a SHA-256 content hash, and return a
+  ResolvedInput object containing the content, absolute path, origin type
+  ("file"), trust level ("local"), and the content hash. If the file does not
+  exist, the resolver must return a structured error with the attempted path
+  and a suggestion to check the workspace root. The resolver must handle
+  both forward-slash and backslash path separators on Windows without
+  requiring the consumer to normalize paths first.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Path normalization must handle Windows backslash separators and mixed
+      separators (e.g., "./governance\\policy.md"). If the resolver only
+      handles POSIX paths, it will fail on Windows where path.resolve()
+      returns backslash-separated paths. The resolver must normalize to
+      platform-native separators internally but store POSIX paths in
+      provenance for cross-platform reproducibility.
+    spec_impact: "CL-08 input-api — cross-platform path normalization requirement"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The trust level for local files must be "local" (highest trust), but
+      the resolver must verify the file is within the workspace boundary.
+      A path like "../../etc/passwd" resolves to a local file but should
+      be flagged with trust level "external-local" or rejected, preventing
+      path traversal attacks that escape the workspace sandbox.
+    spec_impact: "CL-08 input-api — workspace boundary enforcement for file resolution"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      If the file is a symlink pointing outside the workspace, the resolver
+      must follow the symlink for content but record the real target path
+      in provenance. Without this, provenance metadata lies about where
+      the content actually came from, undermining audit trails.
+    spec_impact: "CL-08 input-api — symlink resolution and provenance recording"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Content hash computation must happen after reading but before any
+      encoding transformation. If the resolver normalizes line endings
+      (CRLF to LF) before hashing, the same file on Windows and Linux
+      produces different hashes, breaking content-addressed caching
+      across platforms.
+    spec_impact: "CL-08 input-api — hash computation timing relative to transformations"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Binary files (images, PDFs) must be resolvable with provenance but
+      the resolver should not attempt UTF-8 decoding on them. The content
+      field should support Buffer/Uint8Array alongside string, or the
+      resolver should provide a separate readBinary() path.
+    spec_impact: "CL-08 input-api — binary file handling in resolution"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The structured error for missing files must include the attempted
+      absolute path (after normalization), not the raw input path. If the
+      error reports "./governance/policy.md" instead of
+      "/home/user/project/governance/policy.md", the consumer cannot
+      determine whether the path normalization was the problem.
+    spec_impact: "CL-08 input-api — error reporting must show normalized path"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      File resolution should record the file's mtime in provenance metadata
+      so consumers can detect stale cached resolutions without re-reading
+      the file content. This enables incremental compilation workflows
+      where only changed inputs trigger reprocessing.
+    spec_impact: "CL-08 input-api — mtime in provenance for incremental workflows"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Very large files (>10MB) should trigger a warning in the resolution
+      result rather than silently loading into memory. Governance policy
+      files are typically small, but URL or package resolutions may
+      reference large assets that should be streamed, not buffered.
+    spec_impact: "CL-08 input-api — large file handling policy"
+    pitfall: null

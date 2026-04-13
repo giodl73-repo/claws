@@ -1,0 +1,195 @@
+name: S03-full-pipeline-equivalence
+series: cross-package
+version: 1
+specs: [CL-08]
+description: >
+  Validates that the same OC workspace compiled through the pre-extraction
+  monolith path (compiler-sdk) and the post-extraction building-blocks path
+  (@craftworks/* + @claws/compiler) produces byte-identical GovernanceIR and
+  emit artifacts. This is the extraction correctness proof: if outputs diverge,
+  the extraction introduced a behavioral change that breaks existing consumers.
+
+expect:
+  governance_ir:
+    byte_identical: true
+    diff_count: 0
+  emit_artifacts:
+    oc_gateway_plugin:
+      byte_identical: true
+    claude_code_output:
+      byte_identical: true
+  audit_chain:
+    pre_extraction_hash: "${hash_a}"
+    post_extraction_hash: "${hash_a}"
+    match: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Take a reference OC workspace containing all 9 files (SOUL.md with 5 deny
+  constraints, AGENTS.md with 3 agents and delegation graph, TOOLS.md with
+  12 R1-R5 tools across 4 categories, IDENTITY.md, USER.md, BOOTSTRAP.md,
+  HEARTBEAT.md, openclaw.json with custom trust tiers, canvas/ with 2 policy
+  files). Compile it through the existing compiler-sdk pipeline using
+  readOCWorkspaceViaFORMA() -> FORMA -> EXTRACT -> ANALYZE -> OPTIMIZE -> EMIT.
+  Save all intermediate and final artifacts. Then compile the same workspace
+  through the extracted building-blocks pipeline: @craftworks/forma
+  WorkspaceReader.read() -> @claws/compiler compile(). Compare GovernanceIR
+  serialization, OC Gateway plugin output (plugins/claws-governance/index.ts),
+  Claude Code output (CLAUDE.md + .claude/settings.json), and audit chain
+  hashes. All must be byte-identical after normalizing non-deterministic fields
+  (timestamps, build IDs).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The pre-extraction path uses readOCWorkspaceViaFORMA() which routes
+      through FORMA's format registry and multi-format detection. The
+      post-extraction path uses @craftworks/forma's WorkspaceReader.read()
+      which detects OC format directly (CL-08 line 676). If FORMA's registry
+      applies normalization passes (e.g., stripping BOM, CRLF conversion)
+      that WorkspaceReader does not replicate exactly, the ASTs diverge at
+      the root. The equivalence test must compare ASTs before GovernanceIR
+      generation to isolate the divergence point.
+    spec_impact: "CL-08 extraction map — document every normalization pass FORMA applies that WorkspaceReader must replicate"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      GovernanceIR serialization includes hash fields computed by
+      @craftworks/crypto. The pre-extraction path uses crypto functions from
+      compiler-sdk's bundled crypto module. The post-extraction path uses
+      @craftworks/crypto as a standalone package. If the crypto module's
+      SHA-256 implementation handles input encoding differently (e.g.,
+      UTF-8 BOM prefix included vs stripped before hashing), all hashes
+      diverge. The equivalence test must verify hash computation on identical
+      input bytes produces identical output before comparing full GovernanceIR.
+    spec_impact: "CL-08 @craftworks/crypto — hash equivalence test against compiler-sdk crypto module"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The OC Gateway plugin emit (plugins/claws-governance/index.ts) includes
+      generated TypeScript code with import paths. The pre-extraction emitter
+      may generate imports referencing compiler-sdk internal paths. The
+      post-extraction emitter must generate imports referencing @craftworks/*
+      and @claws/* paths. These outputs are NOT byte-identical by design —
+      the import paths intentionally change. The equivalence test must
+      normalize import paths before byte comparison, or the test will always
+      fail. CL-08 must define which parts of emit output are expected to
+      change (import paths) vs which must be identical (business logic).
+    spec_impact: "CL-08 equivalence testing — define expected-change zones (import paths) vs invariant zones (logic) in emit output"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The compile orchestrator sequences phases: PARSE -> EXTRACT -> ANALYZE ->
+      OPTIMIZE -> EMIT. The pre-extraction orchestrator is a monolith function
+      in compiler-sdk. The post-extraction orchestrator in @claws/compiler
+      calls across package boundaries (forma for PARSE, its own modules for
+      EXTRACT/ANALYZE/OPTIMIZE, codegen+emitters for EMIT). If any phase
+      returns a result type that was structurally identical in the monolith
+      but uses a different class identity in the extracted packages (e.g.,
+      FormaIR type from @craftworks/forma vs from compiler-sdk), intermediate
+      results may fail type guards that downstream phases rely on.
+    spec_impact: "CL-08 compile orchestrator — document inter-phase type contracts, not just final output equivalence"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The pre-extraction FORMA path includes heuristic shadow comparison
+      (CL-08 line 679) which the building-blocks path eliminates as acceptable
+      loss. If any GovernanceIR field was influenced by shadow comparison
+      results (e.g., confidence scores, fallback classifications), the final
+      IR will differ not because of a bug but because the post-extraction
+      path lacks this capability. The equivalence test must document and
+      exclude fields known to depend on removed capabilities.
+    spec_impact: "CL-08 extraction map — enumerate GovernanceIR fields that depend on removed FORMA capabilities"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      RELAX expressions in the OC workspace are evaluated during ANALYZE.
+      If the pre-extraction path uses compiler-sdk's relax module and the
+      post-extraction path uses @craftworks/relax (which @claws/compiler
+      does NOT depend on — relax is in the enterprise tier per CL-08 line
+      365-369), then @claws/compiler cannot evaluate RELAX expressions at
+      all. This means the post-extraction output for workspaces containing
+      RELAX expressions will differ by design. The equivalence test must
+      either restrict to RELAX-free workspaces or document this as an
+      enterprise-only feature gap.
+    spec_impact: "CL-08 Layer 2 scope — clarify whether @claws/compiler evaluates RELAX or defers to enterprise tier"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Audit chain entries include a prev_hash field linking each entry to
+      the prior one (CL-08 line 158-168). If the pre-extraction path appends
+      entries in a different order than the post-extraction path (e.g.,
+      because the monolith interleaves PARSE and EXTRACT events while the
+      extracted path completes PARSE before starting EXTRACT), the chain
+      hashes diverge even though the individual events are identical. The
+      equivalence test must compare events as a set (order-independent) or
+      enforce identical event ordering across both paths.
+    spec_impact: "CL-08 audit chain — define canonical event ordering for equivalence testing"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The Claude Code emit output includes .claude/settings.json with
+      platform-specific paths. If the pre-extraction emitter resolves paths
+      relative to compiler-sdk's installation location and the post-extraction
+      emitter resolves relative to @craftworks/codegen's location, the
+      settings.json content diverges. All path computation must use the
+      workspace root as anchor, not the package installation path.
+    spec_impact: "CL-08 emit targets — all path computation must be workspace-root-relative, not package-relative"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      Non-deterministic fields (timestamps, UUIDs, build IDs) must be
+      normalized before comparison. If the equivalence test strips these
+      fields but misses one (e.g., a timestamp embedded in a code comment
+      in the OC Gateway plugin), the test flakes intermittently. The
+      normalization function must be derived from the GovernanceIR schema,
+      not hand-maintained, so new fields with non-deterministic values are
+      automatically caught.
+    spec_impact: "CL-08 equivalence testing — normalization function must be schema-derived, not hand-maintained"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The equivalence test should be a permanent CI fixture, not a one-time
+      extraction validation. As both the monolith (compiler-sdk) and the
+      extracted packages evolve independently, drift will occur. A dual-path
+      CI job that compiles the reference workspace through both paths and
+      compares output catches drift before it reaches consumers. This job
+      becomes unnecessary only when the monolith path is officially
+      deprecated and removed.
+    spec_impact: "CL-08 testing strategy — dual-path equivalence CI job until monolith deprecation"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The reference OC workspace used for equivalence testing must cover all
+      9 file types including canvas/ directory content. If the test workspace
+      omits HEARTBEAT.md or canvas/ (which are optional), the equivalence
+      check misses code paths that handle optional files differently between
+      the monolith and extracted implementations. The fixture should be the
+      maximally complete workspace, not a minimal one.
+    spec_impact: "CL-08 equivalence testing — reference workspace must include all 9 file types plus canvas/"
+    pitfall: null

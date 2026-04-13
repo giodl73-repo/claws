@@ -1,10 +1,10 @@
 name: claws
-description: "claws governance compiler — scenario validation for compile, pinch, build, fleet, compliance"
+description: "claws governance compiler — scenario validation for compile, check, build, fleet, compliance"
 
 lineage:
   specs: [CL-01, CL-02, CL-03, CL-04, CL-05, CL-06, CL-07]
-  atoms: [atom:claws-compiler, atom:governance-ir, atom:pinch, atom:governance-plugin, atom:obo-boundary, atom:three-rings, atom:fail-mode]
-  pipeline: ["compile", "pinch", "build", "fleet", "comply"]
+  atoms: [atom:claws-compiler, atom:governance-ir, atom:check, atom:governance-plugin, atom:obo-boundary, atom:three-rings, atom:fail-mode]
+  pipeline: ["compile", "check", "build", "fleet", "comply"]
   source: "claws-sdk/src"
 
 coverage:

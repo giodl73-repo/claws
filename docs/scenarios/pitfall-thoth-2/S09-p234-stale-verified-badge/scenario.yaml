@@ -103,11 +103,11 @@ findings:
     severity: major
     description: >
       The inner ring (compile-time) should also detect signature staleness
-      during claws pinch. A modified handler with a stale VERIFIED badge
+      during claws check. A modified handler with a stale VERIFIED badge
       should produce a warning during local development, not just at publish
       time. This gives the developer immediate feedback that their changes
       have invalidated their badge.
-    spec_impact: "CL-05 Inner Ring — staleness detection during pinch"
+    spec_impact: "CL-05 Inner Ring — staleness detection during check"
     pitfall: "P-234"
 
   - id: F06

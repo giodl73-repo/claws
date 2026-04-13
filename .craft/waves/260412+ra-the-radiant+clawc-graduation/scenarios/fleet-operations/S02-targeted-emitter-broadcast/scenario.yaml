@@ -1,0 +1,174 @@
+name: S02-targeted-emitter-broadcast
+series: fleet-operations
+version: 1
+specs: [CL-08]
+description: >
+  Validates that fleet broadcast can upgrade a single emitter plugin
+  (@craftworks/emit-cursor) across only the Cursor workspaces in the fleet
+  without touching other emitters, core packages, or non-Cursor workspaces.
+  This tests the 7-emitter plugin architecture's key value proposition:
+  platform-specific updates are isolated and targetable.
+
+expect:
+  broadcast:
+    target_package: "@craftworks/emit-cursor"
+    target_workspaces: "cursor-only"
+    packages_modified: ["@craftworks/emit-cursor"]
+    packages_untouched: ["@craftworks/emit-oc", "@craftworks/emit-cc",
+      "@craftworks/emit-copilot", "@craftworks/emit-bedrock",
+      "@craftworks/emit-langgraph", "@craftworks/emit-crewai",
+      "@craftworks/forma", "@craftworks/crypto"]
+  non_cursor_workspaces:
+    modified: false
+  post_broadcast:
+    drift_report: "all cursor workspaces in spec"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A fleet of 47 workspaces includes 12 Cursor workspaces, 20 Claude Code
+  workspaces, 8 OpenClaw workspaces, and 7 multi-platform workspaces.
+  A critical fix lands in @craftworks/emit-cursor@1.1.1 that patches a
+  Cursor-specific code generation bug. The fleet operator runs
+  claws broadcast --package @craftworks/emit-cursor@1.1.1 --platform cursor.
+  The system must: (1) identify the 12 Cursor-only workspaces plus the 7
+  multi-platform workspaces that include Cursor, (2) upgrade only
+  @craftworks/emit-cursor in those 19 workspaces, (3) leave all other
+  packages at their current versions, (4) leave the 28 non-Cursor workspaces
+  completely untouched, (5) verify that each upgraded workspace compiles
+  successfully after the upgrade.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Platform detection relies on @craftworks/workspace to identify which
+      workspaces target Cursor. If a workspace targets multiple platforms
+      (e.g., Cursor + Claude Code), the broadcast must still upgrade
+      emit-cursor in that workspace. But the platform detection must
+      correctly identify multi-platform workspaces — if it only checks for
+      a primary platform marker, it misses workspaces that have Cursor as
+      a secondary target. @craftworks/workspace.detectPlatforms() must
+      return an array of all detected platforms, not just the primary one.
+    spec_impact: "CL-08 @craftworks/workspace — detectPlatforms() must return all platforms, not just primary"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Upgrading @craftworks/emit-cursor from 1.1.0 to 1.1.1 may trigger
+      npm to resolve a new version of @craftworks/codegen (emit-cursor's
+      dependency) if emit-cursor's package.json declares codegen as a
+      caret range (^1.0.0). The broadcast intends to upgrade only emit-cursor
+      but npm's dependency resolution may cascade the upgrade to codegen,
+      which then affects ALL emitters in the workspace (since they all
+      share codegen). The broadcast tool must use --save-exact or
+      --no-save to prevent cascade upgrades of shared dependencies.
+    spec_impact: "CL-08 fleet operations — broadcast must pin exact versions to prevent dependency cascade"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      After upgrading emit-cursor in 19 workspaces, the broadcast tool must
+      verify compilation success. If the upgrade introduces a TypeScript
+      type incompatibility (e.g., emit-cursor@1.1.1 exports a changed
+      type that @claws/compiler's EmitRegistry expects differently), the
+      workspace compiles fail. The broadcast tool must include a rollback
+      mechanism: restore the previous package-lock.json and node_modules
+      for any workspace where post-upgrade compilation fails.
+    spec_impact: "CL-08 fleet operations — broadcast must include per-workspace rollback on compilation failure"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The 7 multi-platform workspaces may have CI pipelines that test all
+      platform targets. Upgrading emit-cursor in these workspaces may
+      cause CI pipeline reruns that test all platforms, not just Cursor.
+      If the CI pipeline's non-Cursor tests flake or fail for unrelated
+      reasons, the broadcast appears to have caused regressions. The
+      broadcast report should indicate which workspaces triggered CI
+      and what the CI outcome was, separating broadcast-caused failures
+      from pre-existing flakes.
+    spec_impact: "CL-08 fleet operations — broadcast report should track CI outcomes and distinguish broadcast-caused vs pre-existing failures"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Fleet broadcast modifies package.json and package-lock.json in each
+      target workspace. If workspaces use git for version control, the
+      broadcast creates uncommitted changes in 19 repositories. The
+      broadcast tool should either (a) commit the changes with a
+      standardized message, (b) create a branch with the upgrade, or
+      (c) create a PR per workspace. Leaving uncommitted changes risks
+      the upgrade being reverted by the next developer who runs git
+      checkout or git stash.
+    spec_impact: "CL-08 fleet operations — broadcast must include commit/PR strategy, not leave uncommitted changes"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The --platform cursor filter assumes that platform metadata is
+      discoverable from the workspace. If a workspace has @craftworks/emit-cursor
+      installed but no Cursor-specific marker files (e.g., .cursor/ directory),
+      platform detection fails to identify it as a Cursor workspace. The
+      broadcast misses it. The tool should offer both platform-based filtering
+      (by marker files) and package-based filtering (by installed packages)
+      and warn if the two methods produce different workspace lists.
+    spec_impact: "CL-08 fleet operations — support both platform-marker and installed-package filtering for broadcast"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      If two broadcast operations run concurrently (e.g., upgrading emit-cursor
+      for Cursor workspaces while simultaneously upgrading emit-cc for Claude
+      Code workspaces), multi-platform workspaces may experience concurrent
+      npm install operations. npm does not support concurrent installs to the
+      same node_modules directory — this causes ENOENT, EPERM, and corrupted
+      lock files. The broadcast tool must acquire a per-workspace lock before
+      modifying dependencies.
+    spec_impact: "CL-08 fleet operations — broadcast must acquire per-workspace lock to prevent concurrent modification"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The broadcast operation across 19 workspaces may take significant
+      time (npm install per workspace). The tool should support parallel
+      execution with a configurable concurrency limit (--parallel N) and
+      provide progress feedback (workspace 5/19 upgraded). Without progress
+      feedback, operators cannot distinguish a slow broadcast from a hung one.
+    spec_impact: "CL-08 CLI surface — broadcast should support --parallel flag and progress reporting"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      Enterprise workspaces may use private npm registries with
+      authentication. The broadcast tool runs npm install in each workspace
+      context, inheriting that workspace's .npmrc. If a workspace's
+      .npmrc has expired credentials, the broadcast fails for that
+      workspace. The tool should pre-check registry authentication before
+      starting the upgrade cycle, failing fast rather than failing midway
+      through the fleet.
+    spec_impact: "CL-08 fleet operations — pre-check registry auth before starting broadcast cycle"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      After the broadcast completes, the fleet drift report should show
+      all 19 Cursor workspaces on @craftworks/emit-cursor@1.1.1 and the
+      28 non-Cursor workspaces unchanged. If the drift report still shows
+      some Cursor workspaces on the old version, the broadcast had silent
+      failures. The broadcast exit code should be non-zero if any target
+      workspace was not upgraded, even if no error was logged.
+    spec_impact: "CL-08 fleet operations — broadcast exit code must reflect actual upgrade success, not just absence of errors"
+    pitfall: null

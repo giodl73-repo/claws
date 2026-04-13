@@ -113,7 +113,7 @@ findings:
     severity: warning
     description: >
       Elicitation policies may reference tools that exist in TOOLS.md at
-      build time but are removed later. `claws pinch` must detect ghost
+      build time but are removed later. `claws check` must detect ghost
       policy entries — elicitation rules that reference non-existent tools.
       Ghost entries are not security risks (they match nothing) but they
       clutter the policy and may indicate a rename that was not propagated.

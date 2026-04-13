@@ -84,11 +84,11 @@ findings:
   - id: F05
     severity: warning
     description: >
-      `claws pinch` must validate exec-approvals.json against the current
+      `claws check` must validate exec-approvals.json against the current
       TOOLS.md on every run, not just during compilation. Developers running
-      `claws pinch` after editing TOOLS.md should see the staleness warning
+      `claws check` after editing TOOLS.md should see the staleness warning
       immediately, without needing a full recompile.
-    spec_impact: "CL-02 pinch — live staleness detection"
+    spec_impact: "CL-02 check — live staleness detection"
     pitfall: "P-073"
 
   - id: F06
@@ -139,7 +139,7 @@ findings:
     description: >
       The combination of P-072 and P-073 creates a compounding failure:
       exec-approvals.json has both wrong field names AND stale tool entries.
-      A developer running `claws pinch` sees two violations but may only fix
+      A developer running `claws check` sees two violations but may only fix
       the staleness (easier). The format issue persists. Both violations must
       be surfaced with equal severity and independent fix instructions.
     spec_impact: "CL-02 G-EXEC-APPROVALS — independent violation reporting"

@@ -97,12 +97,12 @@ findings:
   - id: F06
     severity: warning
     description: >
-      The `claws pinch` command should verify hook ordering as part of its
-      runtime checks. `pinch` already validates policy configuration; it
+      The `claws check` command should verify hook ordering as part of its
+      runtime checks. `claws check` already validates policy configuration; it
       should also query the Gateway's plugin registry to confirm governance
-      is first. If not, `pinch` reports: "CLAWS-W030: governance plugin is
+      is first. If not, `claws check` reports: "CLAWS-W030: governance plugin is
       at position 3 of 5 -- should be position 1."
-    spec_impact: "CL-05 pinch — hook ordering runtime check"
+    spec_impact: "CL-05 check — hook ordering runtime check"
     pitfall: null
 
   - id: F07

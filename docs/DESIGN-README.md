@@ -39,7 +39,7 @@ Related:
 
 | Phase | Questions | What they resolved |
 |-------|-----------|-------------------|
-| Surface | Q12a-d | One CLI, `claws`, 39 commands, pinch + snap |
+| Surface | Q12a-d | One CLI, `claws`, 39 commands, check + snap |
 | Experience | Q12e-f | Three rings, upgrade flow, CI/CD pipeline |
 | Schema | Q12g | GlintConfig v2 (three-layer, 7 platforms) |
 | Security | Q12h-i | 4 security layers, 5 runtime insertion points |

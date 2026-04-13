@@ -91,7 +91,7 @@ findings:
       at TYPED tier who removes @bic/claws-skill-kit imports should gracefully
       fall back to DECLARED (frontmatter still present). If the build system
       errors on missing imports instead of detecting tier regression, the
-      developer is stuck. `claws pinch` must detect the current tier from
+      developer is stuck. `claws check` must detect the current tier from
       workspace state, not from a stored tier field.
     spec_impact: "CL-05 Three-Tier Adoption — tier detection from workspace state, not stored metadata"
     pitfall: null
@@ -101,7 +101,7 @@ findings:
     description: >
       The VERIFIED tier produces a signed .claws-manifest. If the developer
       modifies handler.ts after verification, the manifest signature is
-      invalidated. The next `claws pinch` must detect the stale signature
+      invalidated. The next `claws check` must detect the stale signature
       and downgrade the tier display to TYPED (code changed since last
       verified build). This tier-on-edit downgrade is not specified in CL-05.
     spec_impact: "CL-05 Three-Tier Adoption — signature staleness detection and tier downgrade"

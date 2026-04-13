@@ -1,0 +1,184 @@
+name: S03-monolith-downgrade
+series: backward-compat
+version: 1
+specs: [CL-08]
+description: >
+  Validates CL-08 constraint C12: removing all extracted @craftworks/* packages
+  and @claws/* packages and reverting to the pre-extraction compiler-sdk version
+  produces identical behavior. This is the escape hatch — if the extraction has
+  unforeseen problems, consumers can downgrade to the monolith without data loss,
+  behavior changes, or broken builds. The downgrade must be clean.
+
+expect:
+  downgrade:
+    npm_uninstall: ["@craftworks/forma", "@craftworks/crypto", "@craftworks/workspace",
+      "@craftworks/governance", "@craftworks/codegen", "@craftworks/relax",
+      "@craftworks/context", "@craftworks/execution", "@craftworks/eval",
+      "@craftworks/input", "@craftworks/emit-oc", "@craftworks/emit-cc",
+      "@craftworks/emit-cursor", "@craftworks/emit-copilot", "@craftworks/emit-bedrock",
+      "@craftworks/emit-langgraph", "@craftworks/emit-crewai", "@claws/compiler",
+      "@bic/claws-skill-kit", "@bic/claws-test"]
+    npm_install: "@craftworks/compiler-sdk@pre-extraction-version"
+    behavior: "identical"
+  compilation:
+    output_identical: true
+    no_import_errors: true
+  audit_chain:
+    continuity: true
+    no_broken_links: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer project currently uses the extracted architecture: @claws/compiler
+  for governance compilation, @craftworks/forma for workspace reading, and
+  @bic/claws-sdk for enterprise features. Due to a critical bug in one
+  of the extracted packages, the team decides to downgrade entirely to the
+  pre-extraction compiler-sdk monolith. They run npm uninstall on all 20+
+  extracted packages and npm install the last pre-extraction compiler-sdk
+  version. All import statements must be updated from @craftworks/* and
+  @claws/* paths to compiler-sdk paths. The existing audit chain (JSONL file
+  with hash-linked entries created by @craftworks/crypto) must be readable
+  and verifiable by compiler-sdk's built-in crypto module. No data loss, no
+  behavior change, no broken hash chains.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The audit chain format may have changed during extraction. If
+      @craftworks/crypto adds a schema version field, chain metadata, or
+      changes the hash algorithm default, audit chain files created by the
+      extracted crypto package cannot be verified by the pre-extraction
+      compiler-sdk crypto module. The chain format must be frozen before
+      extraction: any format changes require a version bump and a
+      migration tool, not a silent change.
+    spec_impact: "CL-08 @craftworks/crypto — freeze audit chain JSONL format before extraction; version any changes"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Consumer import statements must change from @craftworks/* paths back
+      to compiler-sdk paths. If the consumer has 50+ import statements
+      spread across 30 files, this is a non-trivial migration. CL-08 should
+      require a codemod tool (e.g., jscodeshift transform) that automates
+      both the upgrade (compiler-sdk -> @craftworks/*) and the downgrade
+      (@craftworks/* -> compiler-sdk). Without a codemod, manual downgrade
+      is error-prone and may miss imports in dynamically constructed paths.
+    spec_impact: "CL-08 migration — provide bidirectional codemod for import path migration"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      @claws/compiler adds 29 G-rules and GovernanceIR that do not exist in
+      the pre-extraction compiler-sdk. Downgrading to compiler-sdk means
+      losing claws-specific governance capabilities. The downgrade is NOT
+      truly "identical behavior" — it is identical for the building-block
+      functionality but not for claws composition. CL-08 constraint C12
+      must clarify scope: downgrade produces identical Layer 1 behavior,
+      but Layer 2/3 features are lost. This is acceptable but must be
+      documented so consumers know what they lose.
+    spec_impact: "CL-08 constraint C12 — clarify that downgrade covers Layer 1 equivalence only, not Layer 2/3 features"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      If the extracted packages have shipped minor or patch versions since
+      the initial extraction (e.g., @craftworks/forma@1.1.0 fixing a parsing
+      bug), the pre-extraction compiler-sdk does not include those fixes.
+      Downgrading reintroduces bugs that were fixed in the extracted packages.
+      CL-08 must define a policy: fixes to extracted packages must be
+      backported to compiler-sdk's pre-extraction maintenance branch until
+      the compat window closes, or the downgrade path accepts known
+      regressions.
+    spec_impact: "CL-08 migration — define backport policy for fixes during compat window"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      @craftworks/workspace added normalize() functionality (BOM stripping,
+      CRLF normalization) that was new code built from scenario findings
+      (CL-08 line 146). This code never existed in compiler-sdk. If a
+      consumer's OC workspace files have BOMs that were transparently
+      handled by @craftworks/workspace, downgrading to compiler-sdk means
+      those BOMs are no longer stripped, potentially causing parse failures.
+      The downgrade scenario must test with BOM-containing files.
+    spec_impact: "CL-08 constraint C12 — document new capabilities in extracted packages that have no monolith equivalent"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      npm's dependency tree after uninstalling 20 packages and installing
+      compiler-sdk may leave orphaned packages in node_modules. For example,
+      @craftworks/crypto may have installed a sub-dependency that compiler-sdk
+      does not need. npm prune should be run after downgrade, but consumers
+      may forget. The downgrade documentation should include npm prune as
+      a required step, or provide a one-command downgrade script.
+    spec_impact: "CL-08 migration — downgrade script must include npm prune step"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      TypeScript project references and paths in tsconfig.json may reference
+      extracted package names. After downgrade, these references must be
+      updated. If the consumer uses incremental compilation (tsBuildInfo),
+      stale build cache from the extracted packages may cause phantom type
+      errors. The downgrade script should delete tsBuildInfo files and
+      node_modules/.cache to ensure a clean slate.
+    spec_impact: "CL-08 migration — downgrade script must clear TS build cache and node_modules/.cache"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Lock files (package-lock.json, yarn.lock, pnpm-lock.yaml) will have
+      entries for all 20 extracted packages. After downgrade and npm install,
+      the lock file is regenerated. If the consumer commits the lock file,
+      the diff is massive (removing 20+ package entries, adding compiler-sdk).
+      PR reviewers may not catch subtle issues hidden in the lock file diff.
+      The downgrade process should note that lock file review is critical.
+    spec_impact: "CL-08 migration — downgrade documentation must highlight lock file review"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      Enterprise consumers using @bic/claws-sdk have no downgrade
+      path to the monolith because claws-sdk features (fleet, compliance,
+      SIEM) never existed in compiler-sdk. The downgrade path applies only
+      to consumers using Layer 1 building blocks and Layer 2 compiler
+      independently. CL-08 should explicitly state that enterprise tier
+      has no monolith downgrade path.
+    spec_impact: "CL-08 constraint C12 — explicitly exclude Layer 3 from downgrade guarantee"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The downgrade scenario should be tested as a CI job that runs
+      periodically (not just once). As the extracted packages evolve,
+      new features may create implicit dependencies that break the
+      downgrade path silently. A weekly CI job that exercises the full
+      downgrade flow catches these breaks before the compat window closes.
+    spec_impact: "CL-08 testing strategy — periodic CI job for downgrade validation during compat window"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      If the consumer has written tests that import from @craftworks/*
+      packages (e.g., test utilities from @craftworks/eval), those test
+      files also need migration during downgrade. Test code is easy to
+      overlook because it is not in the main source tree. The downgrade
+      codemod must scan test directories, not just src/.
+    spec_impact: "CL-08 migration — downgrade codemod must cover test files and config files, not just src/"
+    pitfall: null

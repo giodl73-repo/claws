@@ -1,0 +1,307 @@
+surface: guide
+entries:
+  a2a-boundary:
+    type: guide
+    path: docs/claws/concepts/a2a-boundary.md
+    atoms:
+    - a2a-boundary
+  architecture-three-rings:
+    type: guide
+    path: docs/claws/concepts/architecture-three-rings.md
+    atoms:
+    - three-rings
+  audit-chain:
+    type: guide
+    path: docs/claws/concepts/audit-chain.md
+    atoms:
+    - audit-chain
+  bedrock:
+    type: guide
+    path: docs/claws/concepts/bedrock.md
+    atoms:
+    - bedrock
+  check:
+    type: guide
+    path: docs/claws/concepts/check.md
+    atoms:
+    - check
+  claude-code:
+    type: guide
+    path: docs/claws/concepts/claude-code.md
+    atoms:
+    - claude-code
+  claws-build:
+    type: guide
+    path: docs/claws/concepts/claws-build.md
+    atoms:
+    - claws-build
+  claws-init:
+    type: guide
+    path: docs/claws/concepts/claws-init.md
+    atoms:
+    - claws-init
+  claws-json:
+    type: guide
+    path: docs/claws/concepts/claws-json.md
+    atoms:
+    - claws-json
+  claws-publish:
+    type: guide
+    path: docs/claws/concepts/claws-publish.md
+    atoms:
+    - claws-publish
+  claws-test:
+    type: guide
+    path: docs/claws/concepts/claws-test.md
+    atoms:
+    - claws-test
+  claws-watch:
+    type: guide
+    path: docs/claws/concepts/claws-watch.md
+    atoms:
+    - claws-watch
+  compiler:
+    type: guide
+    path: docs/claws/concepts/compiler.md
+    atoms:
+    - claws-compiler
+  compliance-eu-ai-act:
+    type: guide
+    path: docs/claws/concepts/compliance-eu-ai-act.md
+    atoms:
+    - compliance-eu-ai-act
+  compliance-hipaa:
+    type: guide
+    path: docs/claws/concepts/compliance-hipaa.md
+    atoms:
+    - compliance-hipaa
+  compliance-soc2:
+    type: guide
+    path: docs/claws/concepts/compliance-soc2.md
+    atoms:
+    - compliance-soc2
+  crewai:
+    type: guide
+    path: docs/claws/concepts/crewai.md
+    atoms:
+    - crewai
+  cursor:
+    type: guide
+    path: docs/claws/concepts/cursor.md
+    atoms:
+    - cursor
+  defense-in-depth:
+    type: guide
+    path: docs/claws/concepts/defense-in-depth.md
+    atoms:
+    - defense-in-depth
+  dotnet-for-oc:
+    type: guide
+    path: docs/claws/concepts/dotnet-for-oc.md
+    atoms:
+    - dotnet-for-oc
+  elicitation-gate:
+    type: guide
+    path: docs/claws/concepts/elicitation-gate.md
+    atoms:
+    - elicitation-gate
+  error-messages:
+    type: guide
+    path: docs/claws/concepts/error-messages.md
+    atoms:
+    - error-messages
+  fail-mode:
+    type: guide
+    path: docs/claws/concepts/fail-mode.md
+    atoms:
+    - fail-mode
+  fleet-broadcast:
+    type: guide
+    path: docs/claws/concepts/fleet-broadcast.md
+    atoms:
+    - fleet-broadcast
+  fleet-compliance:
+    type: guide
+    path: docs/claws/concepts/fleet-compliance.md
+    atoms:
+    - fleet-compliance
+  fleet-delegation:
+    type: guide
+    path: docs/claws/concepts/fleet-delegation.md
+    atoms:
+    - fleet-delegation
+  fleet-drift:
+    type: guide
+    path: docs/claws/concepts/fleet-drift.md
+    atoms:
+    - fleet-drift
+  fleet-inheritance:
+    type: guide
+    path: docs/claws/concepts/fleet-inheritance.md
+    atoms:
+    - fleet-inheritance
+  fleet-scan:
+    type: guide
+    path: docs/claws/concepts/fleet-scan.md
+    atoms:
+    - fleet-scan
+  fleet-security:
+    type: guide
+    path: docs/claws/concepts/fleet-security.md
+    atoms:
+    - fleet-security
+  getting-started:
+    type: guide
+    path: docs/claws/concepts/getting-started.md
+    atoms:
+    - getting-started
+  governance-plugin:
+    type: guide
+    path: docs/claws/concepts/governance-plugin.md
+    atoms:
+    - governance-plugin
+  incident-response:
+    type: guide
+    path: docs/claws/concepts/incident-response.md
+    atoms:
+    - incident-response
+  injection-defense:
+    type: guide
+    path: docs/claws/concepts/injection-defense.md
+    atoms:
+    - injection-defense
+  inner-ring:
+    type: guide
+    path: docs/claws/concepts/inner-ring.md
+    atoms:
+    - inner-ring
+  kill-switch:
+    type: guide
+    path: docs/claws/concepts/kill-switch.md
+    atoms:
+    - kill-switch
+  langgraph:
+    type: guide
+    path: docs/claws/concepts/langgraph.md
+    atoms:
+    - langgraph
+  lossless-guarantee:
+    type: guide
+    path: docs/claws/concepts/lossless-guarantee.md
+    atoms:
+    - lossless-guarantee
+  lossless-roundtrip:
+    type: guide
+    path: docs/claws/concepts/lossless-roundtrip.md
+    atoms:
+    - lossless-roundtrip
+  middle-ring:
+    type: guide
+    path: docs/claws/concepts/middle-ring.md
+    atoms:
+    - middle-ring
+  obo-boundary:
+    type: guide
+    path: docs/claws/concepts/obo-boundary.md
+    atoms:
+    - obo-boundary
+  openclaw:
+    type: guide
+    path: docs/claws/concepts/openclaw.md
+    atoms:
+    - openclaw
+  operations-three-rings:
+    type: guide
+    path: docs/claws/concepts/operations-three-rings.md
+    atoms:
+    - three-rings
+  outer-ring:
+    type: guide
+    path: docs/claws/concepts/outer-ring.md
+    atoms:
+    - outer-ring
+  plugin-ordering:
+    type: guide
+    path: docs/claws/concepts/plugin-ordering.md
+    atoms:
+    - plugin-ordering
+  progressive-disclosure:
+    type: guide
+    path: docs/claws/concepts/progressive-disclosure.md
+    atoms:
+    - progressive-disclosure
+  siem-export:
+    type: guide
+    path: docs/claws/concepts/siem-export.md
+    atoms:
+    - siem-export
+  skill-kit:
+    type: guide
+    path: docs/claws/concepts/skill-kit.md
+    atoms:
+    - skill-kit
+  skill-scaffold:
+    type: guide
+    path: docs/claws/concepts/skill-scaffold.md
+    atoms:
+    - skill-scaffold
+  snapshot-diff:
+    type: guide
+    path: docs/claws/concepts/snapshot-diff.md
+    atoms:
+    - snap
+  snapshot-integrity:
+    type: guide
+    path: docs/claws/concepts/snapshot-integrity.md
+    atoms:
+    - snap
+  snapshot-promote:
+    type: guide
+    path: docs/claws/concepts/snapshot-promote.md
+    atoms:
+    - snap
+  snapshot-restore:
+    type: guide
+    path: docs/claws/concepts/snapshot-restore.md
+    atoms:
+    - snap
+  snapshot-save:
+    type: guide
+    path: docs/claws/concepts/snapshot-save.md
+    atoms:
+    - snap
+  snapshot-storage:
+    type: guide
+    path: docs/claws/concepts/snapshot-storage.md
+    atoms:
+    - snap
+  three-engine-model:
+    type: guide
+    path: docs/claws/concepts/three-engine-model.md
+    atoms:
+    - three-engine-model
+  three-tier-adoption:
+    type: guide
+    path: docs/claws/concepts/three-tier-adoption.md
+    atoms:
+    - tier-adoption
+  three-tier-packages:
+    type: guide
+    path: docs/claws/concepts/three-tier-packages.md
+    atoms:
+    - three-tier-packages
+  tier-adoption:
+    type: guide
+    path: docs/claws/concepts/tier-adoption.md
+    atoms:
+    - tier-adoption
+  tool-classification:
+    type: guide
+    path: docs/claws/concepts/tool-classification.md
+    atoms:
+    - tool-classification
+  upgrade-lifecycle:
+    type: guide
+    path: docs/claws/concepts/upgrade-lifecycle.md
+    atoms:
+    - upgrade-lifecycle

@@ -1,0 +1,151 @@
+name: S01-standalone-install
+series: relax
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/relax installs with zero @craftworks/
+  dependencies, parses a RELAX expression from source text, and evaluates
+  it to a typed result. This is the leaf-package contract: relax is fully
+  self-contained, usable outside of claws, and installable without pulling
+  any other Craftworks package.
+
+expect:
+  install:
+    success: true
+    craftworks_dependencies: 0
+    total_dependencies: 0
+    is_leaf: true
+  parse:
+    input: "if risk >= 3 then 'block' else 'allow'"
+    ast_valid: true
+    ast_type: "ConditionalExpression"
+  evaluate:
+    bindings: { risk: 4 }
+    result: "block"
+    result_type: "string"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer installs @craftworks/relax as a standalone dependency with
+  no other @craftworks packages. They import the parser and evaluator,
+  parse a RELAX expression "if risk >= 3 then 'block' else 'allow'",
+  bind { risk: 4 }, and evaluate. The result must be the string "block".
+  The AST produced by the parser must be inspectable (typed nodes, not
+  opaque). The evaluator must accept bindings as a plain object, not
+  requiring Craftworks-specific types. This proves relax is a genuine
+  standalone building block, not a module that happens to be split out
+  but still needs governance or forma to function.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      "Zero @craftworks/ dependencies" must be enforced at the package.json
+      level, not just at runtime. If relax lists @craftworks/crypto as a
+      devDependency that leaks into the build output (e.g., via tsup
+      bundling), the published package may contain crypto code even though
+      it is not in dependencies. The build process must tree-shake
+      devDependencies and the CI must verify the published tarball contains
+      no @craftworks/ imports.
+    spec_impact: "CL-08 relax — tarball import scanner CI check"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The RELAX grammar must be self-documenting: if a developer reads
+      the relax package README, they must be able to write expressions
+      without reading claws docs. If the grammar references claws-specific
+      concepts (GovernanceIR fields, G-rule names, risk level enums), it
+      is not standalone. The grammar must operate on abstract bindings
+      (name -> value), not governance-typed bindings.
+    spec_impact: "CL-08 relax — grammar independence from governance types"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The parser must handle Unicode identifiers in binding names. If a
+      RELAX expression uses a Japanese variable name (e.g., "リスク >= 3"),
+      the parser must accept it or reject it with a clear error. JavaScript
+      allows Unicode identifiers; RELAX should too unless the grammar
+      explicitly restricts to ASCII. The spec must state the identifier
+      character set.
+    spec_impact: "CL-08 relax — identifier character set definition"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The evaluator receives bindings as a plain object, but type safety
+      is lost. If the expression references "risk" and the bindings object
+      has "Risk" (cased differently), evaluation silently returns undefined
+      for the binding. The evaluator should either normalize binding keys
+      or report unresolved bindings as errors before evaluation proceeds.
+    spec_impact: "CL-08 relax — unresolved binding detection"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The evaluate() function must handle type mismatches gracefully. If
+      the expression compares risk >= 3 but the binding provides risk as
+      a string "4", the comparison may coerce or fail depending on the
+      evaluator's strictness. The spec must define whether RELAX evaluation
+      is strict (type mismatch is an error) or coercing (string "4"
+      becomes number 4). Coercing matches JavaScript semantics but
+      introduces subtle bugs.
+    spec_impact: "CL-08 relax — evaluation type strictness policy"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The AST type "ConditionalExpression" must be exported as a TypeScript
+      type. If the parser returns a generic Node type and consumers must
+      use type guards to narrow, the DX is poor. The parser should return
+      discriminated union types with a "type" field so switch statements
+      exhaustively handle all node types.
+    spec_impact: "CL-08 relax — discriminated union AST types"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The R2 review flagged relax as a merge candidate into eval if
+      standalone adoption is zero after 6 months (N12). This scenario
+      proves standalone viability by using relax without eval. If the
+      scenario cannot be implemented because relax actually imports eval
+      internally (e.g., for expression optimization), the merge should
+      happen now, not in 6 months. Verify at extraction time that
+      relax has zero runtime imports from eval.
+    spec_impact: "CL-08 relax — verify zero eval imports at extraction time"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Install size for a leaf package should be minimal. relax is estimated
+      at ~2000 lines, which compiles to roughly 50-80KB of JavaScript.
+      With TypeScript declarations, the package should stay under 150KB
+      total. If the RELAX grammar is implemented via a parser generator
+      (PEG.js, nearley), the generated parser may add significant bulk.
+      A hand-written recursive descent parser would be smaller and
+      dependency-free.
+    spec_impact: "CL-08 relax — parser implementation strategy and size budget"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The "standalone" claim means relax must work in Node.js, Deno, and
+      browser environments. If relax uses Node.js-specific APIs (fs for
+      loading grammar files, path for module resolution), it fails in
+      browser contexts. The parser and evaluator must be pure computation
+      with no I/O or platform-specific imports.
+    spec_impact: "CL-08 relax — runtime environment portability requirement"
+    pitfall: null

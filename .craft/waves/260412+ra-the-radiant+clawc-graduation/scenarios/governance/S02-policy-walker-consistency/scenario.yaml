@@ -1,0 +1,143 @@
+name: S02-policy-walker-consistency
+series: governance
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/governance PolicyWalker produces identical gate
+  decisions as the pre-extraction compiler-sdk governance path. This is the
+  behavioral equivalence test: any divergence means the extracted package
+  makes different security decisions than the monolith.
+
+expect:
+  equivalence:
+    policy_trees_tested: 5
+    gate_decisions_compared: 145
+    divergences: 0
+  policy_trees:
+    - name: minimal_deny_only
+    - name: full_29_rules
+    - name: mixed_risk_levels
+    - name: nested_delegation
+    - name: budget_constrained
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Five policy trees of increasing complexity are evaluated by both the pre-
+  extraction compiler-sdk governance walker and the @craftworks/governance
+  PolicyWalker: (1) a minimal tree with one deny rule, (2) a full tree
+  exercising all 29 G-rules, (3) a tree with tools at risk levels R1-R5
+  with different fail modes, (4) a tree with nested subagent delegation and
+  transitive trust evaluation, (5) a tree with budget constraints that
+  trigger gate rejections. For each tree, every gate decision (allow/deny/
+  warn + reason) is compared. Zero divergences are acceptable.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The 29 G-rules are evaluated in a specific order in compiler-sdk. If
+      @craftworks/governance evaluates them in a different order, short-circuit
+      rules may produce different results. For example, if G01 (deny) fires
+      before G15 (budget) in one implementation but after in the other, and
+      G01 triggers a halt, G15 is never evaluated in one path but is in the
+      other. Rule evaluation order must be identical and documented.
+    spec_impact: "CL-08 @craftworks/governance — G-rule evaluation order: G01 through G29 sequential"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The PolicyWalker traverses a tree structure. If compiler-sdk uses
+      depth-first traversal and @craftworks/governance uses breadth-first,
+      the order of gate evaluations differs. For trees with short-circuit
+      semantics (a deny at depth 2 skips subtrees below), traversal order
+      affects which gates fire. Traversal must be depth-first pre-order
+      in both implementations.
+    spec_impact: "CL-08 @craftworks/governance — PolicyWalker traversal: depth-first pre-order"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The GateEvaluator produces a decision enum: allow, deny, warn. The
+      warn decision includes an advisory message. If the message text
+      differs between implementations (e.g., "Tool exceeds risk threshold"
+      vs "Risk level too high"), the equivalence test must compare decision
+      type and gate ID, not message text. Message text is presentation,
+      not logic.
+    spec_impact: "CL-08 @craftworks/governance — equivalence comparison: decision + gate ID, not message text"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The R5 fail-closed rule is non-negotiable per CL-02. If the pre-
+      extraction compiler-sdk has a code path that allows R5 fail-open
+      (a bug), the equivalence test would flag @craftworks/governance's
+      correct R5-deny as a divergence. The test must not treat a compiler-sdk
+      bug as the expected behavior. Known compiler-sdk bugs must be listed
+      as exceptions in the equivalence test.
+    spec_impact: "CL-08 @craftworks/governance — equivalence test exception list for known compiler-sdk bugs"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The full 29-rule policy tree produces 29 gate evaluations. Each
+      evaluation has inputs (tool manifest, trust tier, data labels) and
+      outputs (decision, reason, rule ID). The equivalence test should
+      snapshot all 145 gate decisions (29 rules x 5 trees) as a baseline
+      file. Future changes to governance logic must update the snapshot,
+      making behavioral changes explicit in code review.
+    spec_impact: "CL-08 testing strategy — snapshot-based gate decision regression tests"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Nested delegation (policy tree 4) requires transitive trust evaluation:
+      if agent A trusts agent B and agent B trusts agent C, does A trust C?
+      The trust transitivity rule may differ between implementations. If
+      compiler-sdk allows 2-hop transitive trust and governance only allows
+      1-hop, delegation scenarios will diverge. The maximum trust hop count
+      must be specified in CL-08.
+    spec_impact: "CL-08 @craftworks/governance — maximum trust transitivity hops: 1 (no transitive)"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      Budget constraints (policy tree 5) involve numeric comparisons:
+      currentTokens >= budgetLimit triggers a deny gate. Floating-point
+      precision differences (e.g., JavaScript Number vs BigInt for token
+      counts) could cause one implementation to deny and the other to allow
+      when the token count is exactly at the limit. Token counts must be
+      integer arithmetic — no floating point for budget comparisons.
+    spec_impact: "CL-08 @craftworks/governance — budget comparisons: integer arithmetic only"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The equivalence test is a migration tool that should be deprecated
+      after extraction is complete. Once @craftworks/governance is the
+      authoritative implementation, compiler-sdk should import from governance,
+      not maintain its own copy. The equivalence test transitions to a
+      regression test against governance's own snapshot baseline.
+    spec_impact: "CL-08 @craftworks/governance — equivalence test lifecycle: migration -> regression"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      Side effects in gate evaluation (logging, metrics emission) must not
+      affect gate decisions. If compiler-sdk's walker emits telemetry as a
+      side effect and governance's walker does not, the gate decisions should
+      still be identical. The equivalence comparison must be pure: inputs
+      and outputs only, no side-effect comparison.
+    spec_impact: "CL-08 @craftworks/governance — equivalence test compares pure inputs/outputs only"
+    pitfall: null

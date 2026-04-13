@@ -1,0 +1,96 @@
+name: S03-p252
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-252
+description: >
+  Validates that `claws check --package --transitive` detects compiler-sdk
+  appearing as a transitive dependency in a standalone package's dependency
+  tree. A package may pass npm install and tsc but still pull in compiler-sdk
+  through a shared utility, defeating extraction's install-size and isolation
+  goals.
+
+expect:
+  detection: true
+  prevention: "`claws check --package --transitive` runs `npm ls --all` on packed tarballs and fails if compiler-sdk appears anywhere in the transitive dependency tree."
+
+simulate:
+  failures: ["Transitive dependency through shared utility package pulls compiler-sdk into standalone package's dependency tree"]
+  halt: null
+  budget: null
+
+problem: >
+  @craftworks/forma declares a dependency on @craftworks/shared-types. The
+  shared-types package, in turn, depends on compiler-sdk for some internal
+  type utilities. After installing forma in a standalone project, run
+  `npm ls --all` — compiler-sdk appears deep in the tree via shared-types.
+  The standalone install succeeds and tsc compiles, but the consumer has
+  inherited compiler-sdk as a phantom dependency: 47 MB of unnecessary code,
+  potential version conflicts, and a broken isolation guarantee. Verify that
+  `claws check --package --transitive` catches this before the tarball is
+  published.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The transitive scan must run against the packed tarball, not the
+      monorepo workspace. In the monorepo, npm ls shows workspace symlinks
+      that mask the real dependency tree. `npm pack` then `npm install` in
+      an isolated temp directory is the only reliable way to reproduce the
+      consumer's dependency tree.
+    spec_impact: "CL-08 G-EXTRACT — transitive audit on packed tarball, not workspace"
+    pitfall: P-252
+
+  - id: F02
+    severity: major
+    description: >
+      Optional dependencies and peerDependencies with `optional: true` may
+      pull in compiler-sdk without failing npm install. The transitive scan
+      must check all dependency categories (dependencies, optionalDependencies,
+      and resolved peerDependencies) to catch all vectors.
+    spec_impact: "CL-08 G-EXTRACT — scan all dependency categories including optional"
+    pitfall: P-252
+
+  - id: F03
+    severity: warning
+    description: >
+      The 47 MB install-size impact is a secondary concern to the isolation
+      break. Even if compiler-sdk is tree-shaken at bundle time, its presence
+      in the dependency tree means consumers inherit its peerDependency
+      requirements, potentially conflicting with their own dependency versions.
+    spec_impact: "CL-08 Layer 1 independence — transitive compiler-sdk breaks isolation"
+    pitfall: P-252
+
+  - id: F04
+    severity: warning
+    description: >
+      If the shared utility package (@craftworks/shared-types) is refactored
+      to remove the compiler-sdk dependency, but the refactored version is not
+      published yet, the transitive scan will still fail. The publish gate must
+      coordinate: all transitive dependencies must be published with their
+      compiler-sdk references removed before the Layer 1 package can be published.
+    spec_impact: "CL-08 G-EXTRACT — coordinated publish ordering for dependency chain"
+    pitfall: P-252
+
+  - id: F05
+    severity: warning
+    description: >
+      `npm ls --all` output format varies between npm versions. npm 7 uses a
+      tree format, npm 9 uses --json for structured output. The scanner must
+      use `npm ls --all --json` for reliable parsing and handle the case where
+      npm ls itself returns exit code 1 (peer dep warnings) without treating
+      it as a scan failure.
+    spec_impact: "CL-08 G-EXTRACT — handle npm ls exit codes and output format variations"
+    pitfall: P-252
+
+  - id: F06
+    severity: note
+    description: >
+      Detection at the publish gate (middle ring) is correct but late. A
+      compile-time (inner ring) check that scans package.json dependency
+      chains before `npm pack` would catch this earlier. The two-stage
+      approach (compile-time chain scan + publish-time npm ls) provides
+      defense in depth.
+    spec_impact: "CL-08 G-EXTRACT — two-stage transitive detection (compile + publish)"
+    pitfall: P-252

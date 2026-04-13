@@ -101,7 +101,7 @@ findings:
     severity: major
     description: >
       Framework-specific controls map to different governance rules. SOC2
-      CC6.6 maps to `claws drift` + `claws pinch --fleet`. HIPAA
+      CC6.6 maps to `claws drift` + `claws check --fleet`. HIPAA
       §164.312(b) maps to `claws audit export`. EU AI Act transparency
       maps to risk classification visibility. The spec lists these mappings
       in CL-02 but does not define how `claws comply --fleet` evaluates

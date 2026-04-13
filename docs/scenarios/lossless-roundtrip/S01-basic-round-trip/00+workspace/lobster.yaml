@@ -1,0 +1,16 @@
+name: review-pipeline
+description: Code review workflow
+
+steps:
+  - name: read-source
+    command: file-reader to read code
+  - name: analyze
+    command: run analysis
+  - name: send-email
+    command: send review results
+
+dependencies:
+  analyze:
+    - read-source
+  send-email:
+    - analyze

@@ -1,0 +1,164 @@
+name: S04-missing-malformed-files
+series: forma
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/forma degrades gracefully when workspace files are
+  absent, empty, or have invalid frontmatter. The reader must distinguish between
+  optional files (absent is normal) and required files (absent is an error), and
+  must never throw unhandled exceptions on malformed content.
+
+expect:
+  missing_optional:
+    behavior: "parsed as empty/default IR node"
+    error: false
+  missing_required:
+    behavior: "structured error with file name and reason"
+    error: true
+  malformed_frontmatter:
+    behavior: "structured error with line number and parse context"
+    error: true
+  empty_file:
+    behavior: "parsed as empty IR node, warning emitted"
+    error: false
+
+simulate:
+  failures:
+    - type: missing_file
+      files: [HEARTBEAT.md, IDENTITY.md, canvas/]
+    - type: malformed_frontmatter
+      files: [SOUL.md]
+    - type: empty_file
+      files: [AGENTS.md]
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has several degraded conditions: HEARTBEAT.md is missing entirely,
+  IDENTITY.md is missing, canvas/ directory does not exist, SOUL.md has malformed
+  YAML frontmatter (unclosed quote in the deny constraint field), and AGENTS.md
+  exists but is 0 bytes. The forma WorkspaceReader must (1) parse available files
+  without crashing, (2) return structured errors for truly broken files (malformed
+  SOUL.md), (3) treat missing optional files (HEARTBEAT.md, IDENTITY.md, canvas/)
+  as empty/default IR nodes without error, (4) treat empty AGENTS.md as an empty
+  agents list with a warning, and (5) never produce a partial IR that downstream
+  consumers could mistake for a complete parse.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If WorkspaceReader.read() throws on the first missing file, it never
+      reaches subsequent files. The reader must attempt all 9 files and collect
+      errors, not fail-fast on the first error. A fail-fast design means the
+      developer sees one error per invocation and must fix files one at a time.
+      CL-08 should mandate collect-all-errors behavior.
+    spec_impact: "CL-08 @craftworks/forma — WorkspaceReader collects all errors, no fail-fast"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The distinction between required and optional files is not defined in CL-08.
+      Currently all 9 files are listed as "the 9 OC workspace files" without
+      indicating which are required. In practice, SOUL.md + TOOLS.md + openclaw.json
+      are the minimal set (per S01 of compile-pipeline). CL-08 must enumerate
+      required vs optional files for forma's reader, and the OCWorkspaceAST type
+      must reflect optionality (e.g., heartbeat: HeartbeatAST | null).
+    spec_impact: "CL-08 @craftworks/forma — required vs optional file classification"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Malformed YAML frontmatter in SOUL.md (unclosed quote) will cause the
+      YAML parser to throw. The error message from js-yaml is a raw stack
+      trace with internal parser state. Forma must catch YAML parse errors
+      and wrap them in a structured error that includes: file name, line
+      number of the error, the problematic line content, and a human-readable
+      message. Raw parser errors leak implementation details.
+    spec_impact: "CL-08 @craftworks/forma — structured error wrapping for YAML/JSON parse failures"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      A 0-byte AGENTS.md could be interpreted as "no agents" (valid) or
+      "file is corrupted" (error). The correct interpretation depends on
+      whether the file has valid frontmatter. A 0-byte file has no frontmatter,
+      which is ambiguous. CL-08 should define: a file that exists but is empty
+      is treated as an empty-content file with no constraints/entries, and a
+      warning is emitted. This differs from a missing file (no warning).
+    spec_impact: "CL-08 @craftworks/forma — empty file semantics: treated as empty content + warning"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The canvas/ directory is special because it contains multiple files.
+      If canvas/ exists but is empty (no files inside), forma should return
+      an empty canvas collection, not an error. If canvas/ contains non-
+      markdown files (e.g., .DS_Store), forma should skip them silently.
+      The canvas reader must filter by supported extensions.
+    spec_impact: "CL-08 @craftworks/forma — canvas/ empty directory and unsupported file handling"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The OCWorkspaceAST return type must clearly indicate parse status per
+      file. A boolean isComplete flag on the AST is insufficient — the
+      consumer needs to know which files failed and why. The AST should
+      include a diagnostics array with per-file parse results (success,
+      missing, malformed, empty) so downstream code can decide whether to
+      proceed or abort.
+    spec_impact: "CL-08 @craftworks/forma — OCWorkspaceAST.diagnostics array with per-file status"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      If openclaw.json is malformed JSON (e.g., trailing comma), JSON.parse()
+      throws a SyntaxError. The error message includes "Unexpected token"
+      but not the file name. Forma must catch this and include the file
+      path in the error. On Windows, the file path will use backslashes;
+      the error message should normalize to forward slashes for
+      cross-platform consistency in error output.
+    spec_impact: "CL-08 @craftworks/forma — file path in JSON parse errors, forward-slash normalized"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      SOUL.md with malformed frontmatter but valid markdown body is
+      ambiguous. The frontmatter block is delimited by --- fences. If
+      the opening --- is present but closing --- is missing, the entire
+      file is interpreted as frontmatter by most parsers. Forma should
+      detect unclosed frontmatter and report it specifically, not just
+      pass the entire file content to the YAML parser which will produce
+      a confusing error.
+    spec_impact: "CL-08 @craftworks/forma — unclosed frontmatter detection as distinct error type"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      When multiple files have errors, the error ordering must be deterministic
+      (sorted by file name, not filesystem enumeration order). If errors are
+      reported in filesystem order, the same workspace produces different error
+      messages on Windows vs Linux, making it harder to compare diagnostic
+      output across platforms.
+    spec_impact: "CL-08 @craftworks/forma — deterministic error ordering by file name"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The graceful degradation must be tested with every combination of
+      missing files, not just the specific combination in this scenario.
+      With 9 files and each being present/missing/malformed/empty, there
+      are 4^9 combinations. The test suite should cover at minimum: all
+      present, all missing, each required file missing individually, and
+      each file malformed individually.
+    spec_impact: "CL-08 testing strategy — combinatorial coverage for file presence/absence"
+    pitfall: null

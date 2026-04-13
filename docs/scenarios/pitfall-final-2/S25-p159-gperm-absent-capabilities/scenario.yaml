@@ -3,7 +3,7 @@ series: pitfall-final-2
 version: 1
 specs: [CL-02]
 description: >
-  Validates pinch advisory when capabilities are absent from claws.json
+  Validates check advisory when capabilities are absent from claws.json
   but R4/R5 tools exist (P-159). No capabilities means no G-PERM constraints,
   which means the permission layer is entirely disabled. High-risk tools
   operate without any capability restrictions.
@@ -49,7 +49,7 @@ findings:
   - id: F02
     severity: major
     description: >
-      The pinch advisory CLAWS-W040 must fire when: (1) capabilities
+      The check advisory CLAWS-W040 must fire when: (1) capabilities
       section is absent from claws.json, AND (2) the workspace contains
       R4 or R5 tools. For R1-R3 only workspaces, the absence of
       capabilities is less concerning. The advisory must name the specific

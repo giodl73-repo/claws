@@ -1,0 +1,4 @@
+{
+  "file-reader": { "approval": "auto" },
+  "send-email": { "approval": "required" }
+}

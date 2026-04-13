@@ -1,0 +1,137 @@
+surface: howto
+entries:
+  check-howto:
+    type: guide
+    path: docs/claws/how-to/governance-runtime.md
+    atoms:
+    - check
+  snap-howto:
+    type: guide
+    path: docs/claws/how-to/snapshots-and-compliance.md
+    atoms:
+    - snap
+  claws-init-howto:
+    type: guide
+    path: docs/claws/how-to/initialize-workspace.md
+    atoms:
+    - claws-init
+  claws-uninstall-howto:
+    type: guide
+    path: docs/claws/how-to/initialize-workspace.md
+    atoms:
+    - claws-uninstall
+  progressive-disclosure-howto:
+    type: guide
+    path: docs/claws/how-to/configuration-and-schema.md
+    atoms:
+    - progressive-disclosure
+  claws-json-howto:
+    type: guide
+    path: docs/claws/how-to/configuration-and-schema.md
+    atoms:
+    - claws-json
+  workflow-inversion-howto:
+    type: guide
+    path: docs/claws/how-to/compiler-and-engines.md
+    atoms:
+    - workflow-inversion
+  three-engine-model-howto:
+    type: guide
+    path: docs/claws/how-to/compiler-and-engines.md
+    atoms:
+    - three-engine-model
+  three-rings-howto:
+    type: guide
+    path: docs/claws/how-to/three-ring-setup.md
+    atoms:
+    - three-rings
+  skill-kit-howto:
+    type: guide
+    path: docs/claws/how-to/publish-skill.md
+    atoms:
+    - skill-kit
+  governance-badge-howto:
+    type: guide
+    path: docs/claws/how-to/publish-skill.md
+    atoms:
+    - governance-badge
+  tier-adoption-howto:
+    type: guide
+    path: docs/claws/how-to/packages-and-ecosystem.md
+    atoms:
+    - tier-adoption
+  three-tier-packages-howto:
+    type: guide
+    path: docs/claws/how-to/packages-and-ecosystem.md
+    atoms:
+    - three-tier-packages
+  pinch-howto:
+    type: guide
+    path: docs/claws/how-to/platform-ecosystem.md
+    atoms:
+    - pinch
+  lossless-roundtrip-howto:
+    type: guide
+    path: docs/claws/how-to/first-build.md
+    atoms:
+    - lossless-roundtrip
+  dotnet-for-oc-howto:
+    type: guide
+    path: docs/claws/how-to/packages-and-ecosystem.md
+    atoms:
+    - dotnet-for-oc
+  governance-plugin-howto:
+    type: guide
+    path: docs/claws/how-to/governance-runtime.md
+    atoms:
+    - governance-plugin
+  defense-in-depth-howto:
+    type: guide
+    path: docs/claws/how-to/security-model.md
+    atoms:
+    - defense-in-depth
+  fail-mode-howto:
+    type: guide
+    path: docs/claws/how-to/security-model.md
+    atoms:
+    - fail-mode
+  claws-bypass-howto:
+    type: guide
+    path: docs/claws/how-to/security-model.md
+    atoms:
+    - claws-bypass
+  tool-classification-howto:
+    type: guide
+    path: docs/claws/how-to/security-classification.md
+    atoms:
+    - tool-classification
+  obo-boundary-howto:
+    type: guide
+    path: docs/claws/how-to/security-model.md
+    atoms:
+    - obo-boundary
+  elicitation-gate-howto:
+    type: guide
+    path: docs/claws/how-to/security-model.md
+    atoms:
+    - elicitation-gate
+  compliance-artifact-howto:
+    type: guide
+    path: docs/claws/how-to/compliance-auditing.md
+    atoms:
+    - compliance-artifact
+  kill-switch-howto:
+    type: guide
+    path: docs/claws/how-to/security-model.md
+    atoms:
+    - kill-switch
+  snap-example-howto:
+    type: guide
+    path: docs/claws/how-to/snapshots-and-compliance.md
+    atoms:
+    - snap
+  claws-howto-catchall:
+    type: section
+    path: docs/claws/README.md
+    atoms:
+    - claws-compiler

@@ -92,7 +92,7 @@ findings:
     severity: major
     description: >
       The suppressed violations must still be accessible via verbose mode
-      or `claws pinch --verbose`. Suppression is for the default output
+      or `claws check --verbose`. Suppression is for the default output
       to avoid developer overwhelm. The full violation list matters for
       compliance evidence and for cases where the root cause analysis
       is incorrect.

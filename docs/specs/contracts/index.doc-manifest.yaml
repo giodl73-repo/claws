@@ -1,0 +1,107 @@
+surface: index
+entries:
+  claws-uninstall-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - claws-uninstall
+  claws-compiler-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - claws-compiler
+  governance-badge-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - governance-badge
+  error-contract-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - error-contract
+  upstream-contrib-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - upstream-contrib
+  cicd-pipeline-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - cicd-pipeline
+  pinch-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - pinch
+  claws-assess-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - claws-assess
+  claws-doctor-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - claws-doctor
+  fleet-broadcast-index:
+    type: directory-index
+    path: docs/claws/concepts/fleet-broadcast.md
+    atoms:
+    - fleet-broadcast
+  fleet-drift-index:
+    type: directory-index
+    path: docs/claws/concepts/fleet-drift.md
+    atoms:
+    - fleet-drift
+  fleet-scan-index:
+    type: directory-index
+    path: docs/claws/concepts/fleet-scan.md
+    atoms:
+    - fleet-scan
+  fleet-doctor-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - fleet-doctor
+  fleet-comply-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - fleet-comply
+  governance-skill-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - governance-skill
+  claws-bypass-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - claws-bypass
+  snap-restore-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - snap-restore
+  latency-budget-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - latency-budget
+  compliance-artifact-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - compliance-artifact
+  audit-verify-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - audit-verify
+  workflow-inversion-index:
+    type: directory-index
+    path: docs/claws/concepts/README.md
+    atoms:
+    - workflow-inversion

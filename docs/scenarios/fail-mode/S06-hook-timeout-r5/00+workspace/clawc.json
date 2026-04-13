@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "trustTier": "T2",
+  "platform": "openclaw",
+  "elicitation": {
+    "policies": {
+      "wire-transfer": {
+        "approval": "required",
+        "timeout": 300,
+        "denyDefault": true
+      }
+    }
+  },
+  "hookTimeout": 50
+}

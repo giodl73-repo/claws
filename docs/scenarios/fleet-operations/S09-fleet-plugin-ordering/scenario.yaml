@@ -83,7 +83,7 @@ findings:
     description: >
       Fleet-level plugin ordering policy should be enforceable via
       broadcast. A fleet policy that says "governance plugin must be first"
-      should cause `claws pinch --fleet` to flag workspaces where it is
+      should cause `claws check --fleet` to flag workspaces where it is
       not. But claws currently does not have visibility into Gateway plugin
       configuration — it only controls the governance plugin it emits.
       Reading the Gateway's plugin config requires a new integration point.

@@ -1,0 +1,140 @@
+name: S03-identical-pinch-output
+series: graduation
+version: 1
+specs: [CL-04, CL-07]
+description: >
+  The claws pinch command produces byte-identical GovernanceIR and violation
+  reports regardless of whether @claws/compiler or @bic/claws-sdk is
+  the installed package. The same workspace input is compiled through both
+  packages, and the JSON-serialized IR output is diff'd. Any divergence in
+  rule evaluation order, violation severity classification, or IR field
+  values indicates a graduation regression. This is the behavioral
+  equivalence gate that protects users upgrading between tiers.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "MEMORY.md"
+        - "AGENTS.md"
+        - "TOOLS.md"
+        - "HEARTBEAT.md"
+        - "exec-approvals.json"
+        - "IDENTITY.md"
+        - "USER.md"
+        - "claws.json"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  A team uses @bic/claws-sdk in their enterprise CI pipeline. A new
+  developer joins and installs only @claws/compiler for local development.
+  They run claws pinch and get a different violation count or different rule
+  ordering than the CI pipeline. The discrepancy causes confusion: is the
+  local result wrong, or the CI result? If the core compilation logic
+  diverges between packages, the free tier becomes a second-class experience
+  rather than the same engine with fewer features. Behavioral equivalence
+  for shared operations is non-negotiable for trust.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      JSON serialization order must be deterministic. If the GovernanceIR
+      serializer uses Object.keys() or similar, property order may differ
+      between Node.js versions or V8 optimization states. The serializer
+      must sort keys lexicographically or use a stable serialization
+      format to guarantee byte-identical output. Without this, JSON.stringify
+      comparisons will fail intermittently even when the logical content
+      is identical.
+    spec_impact: "CL-04 Section 7 — deterministic IR serialization"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      Rule evaluation order must be specified and enforced. If the free
+      tier evaluates rules in registration order and the paid tier
+      evaluates in priority order (due to enterprise rule weighting),
+      the violation list will differ in ordering. Even if the same
+      violations are found, different ordering breaks snapshot tests
+      and confuses diff-based audit tools. The pinch command must
+      document and enforce a canonical violation ordering.
+    spec_impact: "CL-04 Section 2 — canonical rule evaluation order"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      Timestamp fields in the GovernanceIR must be excluded from the
+      equivalence comparison. Compilation timestamps, audit chain
+      start times, and version metadata will naturally differ between
+      runs. The equivalence check must define which IR fields are
+      content-equivalent (rules, violations, manifest) versus
+      run-metadata (timestamps, duration, host info) and compare
+      only the content fields.
+    spec_impact: "CL-07 Section 1 — content-vs-metadata equivalence"
+    pitfall: null
+  - id: F04
+    severity: major
+    description: >
+      The paid tier may inject enterprise-only metadata into the
+      GovernanceIR (e.g., fleet context, compliance annotations). If
+      these fields are present when @bic/claws-sdk is installed,
+      the IR is structurally different from the free tier output. The
+      equivalence contract must specify that enterprise-injected fields
+      are additive and that the free-tier-equivalent subset is extractable
+      for comparison. A dedicated comparison function, not raw JSON diff,
+      is required.
+    spec_impact: "CL-07 Section 2 — additive-only enterprise metadata"
+    pitfall: null
+  - id: F05
+    severity: minor
+    description: >
+      Floating-point values in the IR (confidence scores, severity
+      weights) may produce different rounding across the two packages
+      if they use different intermediate precision. All numeric fields
+      in the GovernanceIR should use integer representations or fixed-
+      decimal strings to avoid IEEE 754 comparison issues across
+      different build pipelines.
+    spec_impact: "CL-04 Section 7 — numeric representation stability"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      The equivalence test must cover edge cases: empty workspace
+      (no rules), workspace with only warnings (no violations),
+      workspace with R5 fail-closed triggered, and workspace with
+      cross-file conflicts. A single happy-path comparison is
+      insufficient to validate behavioral equivalence across the
+      full problem space.
+    spec_impact: "CL-04 Section 8 — edge case equivalence coverage"
+    pitfall: null
+  - id: F07
+    severity: major
+    description: >
+      Version negotiation between the two packages must be tested.
+      If @claws/compiler v1.2.0 produces IR version 1 and
+      @bic/claws-sdk pins v1.1.0, the paid tier produces
+      an older IR version. The equivalence test must pin both packages
+      to the same @claws/compiler version to isolate the comparison.
+      Without version alignment, equivalence failures may be version
+      skew rather than behavioral divergence.
+    spec_impact: "CL-07 Section 3 — version-aligned equivalence testing"
+    pitfall: null
+  - id: F08
+    severity: minor
+    description: >
+      Error messages and diagnostic strings should also be compared.
+      If the free tier reports "Rule R3 violated: tool not classified"
+      and the paid tier reports "Rule R3 violated: tool not classified
+      (fleet context: workspace-A)", the user-facing message differs.
+      Diagnostic string equivalence ensures the developer experience
+      is consistent regardless of installed tier.
+    spec_impact: "CL-04 Section 9 — diagnostic string consistency"
+    pitfall: null

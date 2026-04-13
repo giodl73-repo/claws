@@ -1,0 +1,131 @@
+name: S04-mixed-source-compilation
+series: input
+version: 1
+specs: [CL-08]
+description: >
+  Validates that a workspace containing file, package, and URL inputs resolves
+  all three source types with correct trust levels and a unified provenance
+  chain that tracks cross-source dependencies.
+
+expect:
+  file_trust: local
+  package_trust: registry
+  url_trust: remote
+  provenance_chain: unified
+  all_resolved: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace configuration references three governance sources: a local file
+  (./policies/internal.md), an npm package (pkg:@acme/compliance-rules@2.1.0),
+  and a remote URL (https://governance.example.com/v2/industry-standard.yaml).
+  The resolver must process all three, assigning trust levels local > registry >
+  remote. The compilation pipeline then merges the resolved inputs by trust
+  precedence — local policies override package policies which override URL
+  policies when they conflict on the same governance key. The provenance chain
+  must record all three sources with their individual metadata and the merge
+  order, enabling consumers to audit which source contributed each governance
+  rule in the final compiled output.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Trust-level precedence during merge must be deterministic and documented.
+      If two sources at the same trust level (e.g., two local files) conflict
+      on the same governance key, the resolver must either reject the ambiguity
+      or use a documented tie-breaking rule (e.g., last-specified wins). Silent
+      arbitrary resolution means compilation output depends on HashMap ordering.
+    spec_impact: "CL-08 input-api — conflict resolution rules for same-trust-level sources"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      If the URL source fails to resolve (network error, 404), the mixed
+      compilation must not silently proceed with only two sources. The consumer
+      must be notified that a source is missing so they can decide whether to
+      proceed with degraded governance or abort. A partial resolution that
+      silently drops the industry-standard source could weaken governance
+      without the consumer realizing it.
+    spec_impact: "CL-08 input-api — partial resolution failure handling policy"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The provenance chain must be a first-class output artifact, not just
+      metadata attached to individual resolved inputs. Consumers need to query
+      "which source contributed this governance rule?" from the merged output.
+      If provenance is per-input only, tracing a rule to its source requires
+      the consumer to re-implement the merge logic.
+    spec_impact: "CL-08 input-api — provenance chain as queryable output artifact"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Resolution order (parallel vs sequential) affects error reporting. If all
+      three sources are resolved in parallel and two fail, the error must report
+      both failures, not just the first one. Sequential resolution with
+      fail-fast would miss the second error, requiring the consumer to fix
+      and re-run repeatedly.
+    spec_impact: "CL-08 input-api — parallel resolution with aggregate error reporting"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Package version constraints (e.g., @2.1.0) in mixed sources must be
+      validated before merge, not after. If the package resolves to version
+      2.2.0 (installed but not matching the constraint), the merge should
+      not proceed with mismatched governance rules that the consumer did
+      not intend.
+    spec_impact: "CL-08 input-api — pre-merge version constraint validation"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The merged output must indicate which governance keys came from which
+      sources, not just the final merged values. Without source attribution
+      per key, consumers cannot determine whether a governance rule is
+      locally customized, package-standard, or industry-mandated from
+      the URL source.
+    spec_impact: "CL-08 input-api — per-key source attribution in merged output"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Mixed-source compilation should support a dry-run mode that resolves
+      and reports provenance without actually merging. This allows consumers
+      to preview which sources will contribute which keys before committing
+      to a compilation.
+    spec_impact: "CL-08 input-api — dry-run mode for mixed-source preview"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The trust-level hierarchy (local > registry > remote) should be
+      configurable per workspace, not hardcoded. Some enterprises may trust
+      their private registry packages more than local files edited by
+      individual developers. The default hierarchy should be documented
+      but overridable.
+    spec_impact: "CL-08 input-api — configurable trust-level hierarchy"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      Content hashes from all three sources should be combined into a
+      composite hash for the merged output. This composite hash enables
+      build caching — if no input hash changed, the merge can be skipped
+      entirely, returning the cached compiled output.
+    spec_impact: "CL-08 input-api — composite content hash for build caching"
+    pitfall: null

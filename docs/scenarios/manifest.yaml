@@ -204,6 +204,15 @@ series:
     spec: CL-02, CL-07
     description: "Identity bridge — OIDC/SAML to trust tiers, credential escrow, section locks, fleet identity"
 
+  # -- Ra (Graduation) --
+
+  graduation:
+    runners: [compile-sim]
+    min: 10
+    marker: "scenario.yaml"
+    spec: CL-04, CL-07, CL-08
+    description: "Freemium graduation — standalone compiler, paid extension, tier detection, security minimum"
+
   # ── Cross-cutting ──
 
   lossless-roundtrip:

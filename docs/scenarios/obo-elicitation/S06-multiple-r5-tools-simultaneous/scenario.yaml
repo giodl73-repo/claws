@@ -131,7 +131,7 @@ findings:
       The scenario tests 3 simultaneous R5 tools. In practice, well-designed
       agents should rarely need more than 1-2 OBO tools per turn. If an agent
       consistently requests 5+ R5 tools per turn, the workspace's tool
-      configuration may be too permissive. `claws pinch` could report average
+      configuration may be too permissive. `claws check` could report average
       R5-requests-per-turn as a health metric.
     spec_impact: "CL-05 health metrics — R5 request frequency"
     pitfall: null

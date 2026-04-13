@@ -1,0 +1,133 @@
+name: S03-bom-crlf-handling
+series: forma
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/forma normalizes encoding variants (UTF-8 BOM,
+  CRLF line endings, mixed LF/CRLF) consistently across Windows, macOS, and
+  Linux. The lossless guarantee requires that original files are never modified,
+  but the IR must use normalized content for deterministic parsing and hashing.
+
+expect:
+  normalization:
+    bom_stripped_in_ir: true
+    crlf_normalized_to_lf_in_ir: true
+    original_files_unmodified: true
+    hash_platform_independent: true
+  variants_tested:
+    - utf8_with_bom
+    - utf8_no_bom
+    - crlf_only
+    - lf_only
+    - mixed_crlf_lf
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace contains 9 OC files with mixed encoding: SOUL.md has a UTF-8 BOM
+  and CRLF line endings (Windows-authored), TOOLS.md has LF-only (macOS-authored),
+  AGENTS.md has mixed CRLF/LF (edited on both platforms), and the remaining files
+  use UTF-8 without BOM with LF. The forma WorkspaceReader must (1) parse all
+  files correctly regardless of encoding variant, (2) normalize to LF-only UTF-8-
+  no-BOM in the IR for deterministic hashing, (3) never write normalized content
+  back to the original files, and (4) produce identical OCWorkspaceIR hashes on
+  Windows, macOS, and Linux when given the same byte-identical input files.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The UTF-8 BOM (0xEF 0xBB 0xBF) at the start of SOUL.md shifts all byte
+      offsets by 3. If forma's keyword-anchored parser (looking for "deny" at
+      line start) uses byte offsets without BOM adjustment, the first constraint
+      in a BOM file will be missed. The parser must strip BOM before any content
+      processing, and source location offsets must be BOM-exclusive.
+    spec_impact: "CL-08 @craftworks/forma — BOM stripping before parse, BOM-exclusive source locations"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      CRLF normalization in the IR means the SHA-256 hash is computed over
+      LF-only content, but the file on disk has CRLF. If a downstream tool
+      (e.g., claws diff) hashes the raw file for comparison, it will get a
+      different hash than the IR records. The IR must document whether the
+      hash field represents raw-file-bytes or normalized-content. CL-08 must
+      mandate a single answer and both forma and downstream tools must agree.
+    spec_impact: "CL-08 @craftworks/forma — IR hash semantics: raw-bytes vs normalized-content"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Mixed CRLF/LF in AGENTS.md means some lines end with \r\n and others
+      with \n. If the frontmatter parser splits on \n only, lines ending in
+      \r\n will have trailing \r in the parsed values. A subagent name parsed
+      as "reviewer\r" instead of "reviewer" will fail identity matching
+      downstream. The parser must normalize line endings before frontmatter
+      extraction.
+    spec_impact: "CL-08 @craftworks/forma — line ending normalization before frontmatter parse"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The lossless guarantee means forma must never call fs.writeFile() on
+      source files, even to normalize encoding. But if forma reads files with
+      fs.readFile() using 'utf-8' encoding, Node.js silently strips BOM on
+      read. The original BOM bytes are lost in memory. If a round-trip test
+      re-reads the file and compares, the comparison will show no change even
+      though forma never "preserved" the BOM — Node.js did the stripping.
+      The lossless test must compare raw Buffer bytes, not decoded strings.
+    spec_impact: "CL-08 lossless verification — raw Buffer comparison, not string comparison"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      On Windows, git can be configured to auto-convert LF to CRLF on
+      checkout (core.autocrlf=true). A workspace checked out on Windows
+      may have CRLF even if the repository stores LF. Forma must handle
+      this transparently. The IR hash should be stable regardless of git's
+      autocrlf setting — which means hashing normalized content, not raw
+      bytes.
+    spec_impact: "CL-08 @craftworks/forma — git autocrlf compatibility note"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      JSON files (openclaw.json) with BOM are technically invalid JSON per
+      RFC 8259 (which requires UTF-8 without BOM). If forma uses JSON.parse()
+      on BOM-prefixed content, it may throw a SyntaxError on the first
+      character. The BOM must be stripped before JSON.parse(), and a warning
+      should be emitted (BOM in JSON is non-standard).
+    spec_impact: "CL-08 @craftworks/forma — BOM stripping for JSON files with diagnostic warning"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The normalization logic was previously in compiler-sdk's normalize
+      module. CL-08 assigns BOM/CRLF handling to forma (internalized from
+      normalize). But @craftworks/workspace also has normalization
+      responsibility (BOM stripping, CRLF normalization). If both packages
+      normalize independently, there is a risk of double-normalization or
+      conflicting normalization rules. CL-08 must define a single source of
+      truth: forma normalizes OC file content, workspace normalizes during
+      discovery/detection.
+    spec_impact: "CL-08 normalization boundary — forma for file content, workspace for discovery metadata"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Canvas files may include binary content (images) alongside markdown.
+      BOM/CRLF normalization must not corrupt binary files. The reader must
+      detect binary vs text content (e.g., by file extension or BOM absence
+      + high-byte content) and skip normalization for binary files.
+    spec_impact: "CL-08 @craftworks/forma — binary file detection in canvas/ to skip normalization"
+    pitfall: null

@@ -49,7 +49,7 @@ findings:
     severity: major
     description: >
       CL-02 G-A2A-IDENTITY must mandate case-insensitive agent name collision
-      detection at both workspace and fleet level. During pinch, if two agents
+      detection at both workspace and fleet level. During check, if two agents
       within a workspace have names that differ only by case, it must be a
       hard error. During fleet scan, if two agents across workspaces have
       names that differ only by case, it must be a warning (fleet admin
@@ -131,7 +131,7 @@ findings:
     description: >
       Case collision in delegation references ("fleet://alpha/agents/Finance-
       Bot" vs "fleet://alpha/agents/finance-bot") must be detected during
-      pinch. If a delegation reference has a case mismatch with the target
+      check. If a delegation reference has a case mismatch with the target
       agent's declared name, it must warn. This catches references that
       would silently fail if the routing layer's normalization behavior
       changes.

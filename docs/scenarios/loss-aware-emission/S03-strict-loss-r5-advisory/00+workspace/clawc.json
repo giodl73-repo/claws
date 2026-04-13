@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "trustTier": "T1",
+  "targets": ["aider"],
+  "strictLoss": true,
+  "elicitation": {
+    "policies": {
+      "send-payment": {
+        "approval": "required",
+        "timeout": 300,
+        "denyDefault": true
+      }
+    }
+  }
+}

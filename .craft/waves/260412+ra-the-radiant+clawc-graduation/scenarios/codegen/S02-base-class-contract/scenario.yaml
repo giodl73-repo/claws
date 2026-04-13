@@ -1,0 +1,155 @@
+name: S02-base-class-contract
+series: codegen
+version: 1
+specs: [CL-08]
+description: >
+  Validates that an EmitTarget subclass implementing the required abstract
+  methods produces valid TypeScript output through the codegen framework.
+  This tests the contract between the base class (provided by @craftworks/codegen)
+  and per-platform emitters (provided by @craftworks/emit-* plugins). The
+  base class defines the lifecycle; the subclass provides platform-specific
+  code generation.
+
+expect:
+  emitter:
+    extends: EmitTarget
+    methods_implemented: [emit, validate, platformId]
+  output:
+    language: typescript
+    valid_syntax: true
+    imports_only: ["@claws/*", "@openclaw/*"]
+    no_craftworks_refs: true
+  lifecycle:
+    validate_called_before_emit: true
+    emit_returns_artifact: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer creates a custom EmitTarget subclass called TestEmitter that
+  targets a fictional platform "test-platform". TestEmitter implements three
+  abstract methods: platformId() returns "test-platform", validate(ir)
+  checks that the GovernanceIR has at least one rule, and emit(ir) produces
+  a TypeScript module with a single exported function. The codegen framework
+  orchestrates the lifecycle: call validate() first, then if it passes call
+  emit(), then return the CodeArtifact. The generated TypeScript must be
+  syntactically valid and contain zero @craftworks/ imports. This tests the
+  base class contract independent of any real platform.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The EmitTarget base class must enforce the validate-then-emit lifecycle.
+      If a consumer calls emit() directly without calling validate(), the
+      emitter may produce invalid output from malformed IR. The base class
+      should either enforce the order (validate() sets an internal flag that
+      emit() checks) or combine them into a single emitChecked() method
+      that always validates first. Leaving lifecycle enforcement to the
+      caller means every caller must remember the order.
+    spec_impact: "CL-08 codegen — EmitTarget lifecycle enforcement (validate before emit)"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The validate() method returns validation results, but the contract for
+      what constitutes a blocking vs non-blocking validation failure is
+      undefined. If validate() returns warnings, should the framework still
+      call emit()? If validate() throws, is that a framework error or a
+      validation rejection? The base class must distinguish between
+      ValidationResult.pass (proceed), ValidationResult.warn (proceed with
+      advisory), and ValidationResult.fail (block emit).
+    spec_impact: "CL-08 codegen — ValidationResult severity levels (pass/warn/fail)"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The emit() method returns a CodeArtifact, but the artifact type must
+      include metadata beyond raw code: platform, target version, codegen
+      version, source IR hash, and generation timestamp. Without metadata,
+      the artifact cannot be traced back to its source IR for audit. If the
+      base class does not populate metadata automatically, every subclass
+      must do it manually, leading to inconsistent or missing metadata.
+    spec_impact: "CL-08 codegen — CodeArtifact metadata auto-population by base class"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      EmitTarget subclasses must not import @craftworks/* packages directly.
+      emit-oc and emit-cc live in the @craftworks/ scope but they consume
+      codegen's base classes and forma's IR types. If a subclass imports
+      @craftworks/governance (to check risk levels during emit), it creates
+      a horizontal dependency that the three-layer model does not account for.
+      The base class should provide all necessary data through the emit(ir)
+      parameter, not force subclasses to reach into other packages.
+    spec_impact: "CL-08 codegen — emitter subclass dependency isolation rule"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The generated TypeScript must be syntactically valid, but codegen does
+      not include a TS parser. Validity checking during emit requires either
+      an external dependency (typescript package) or a post-emit verification
+      step. If codegen bundles the TS compiler as a dependency, its install
+      size balloons. If it skips validation, invalid output reaches the
+      consumer silently. The framework should define a pluggable syntax
+      checker interface with a no-op default.
+    spec_impact: "CL-08 codegen — pluggable syntax verification interface"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The TestEmitter in this scenario is a minimal implementation. Real
+      emitters (emit-oc, emit-cc) generate hundreds of lines of code
+      across multiple files. The base class must support multi-file output:
+      emit() returns CodeArtifact[] rather than a single CodeArtifact. If
+      the return type is a single artifact, emitters must pack multiple
+      files into one artifact and consumers must unpack, violating
+      separation of concerns.
+    spec_impact: "CL-08 codegen — multi-file CodeArtifact support"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      If the subclass's emit() method throws an unhandled exception, the
+      framework must catch it and wrap it in a typed EmitError with the
+      platform ID, IR hash, and stack trace. If the exception propagates
+      raw, the caller sees a generic Error with no context about which
+      emitter failed or what IR triggered the failure. This is critical
+      when running multiple emitters in sequence (emit-oc then emit-cc):
+      the framework must identify which one failed.
+    spec_impact: "CL-08 codegen — EmitError wrapping with platform context"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The base class contract is the primary extension point for the
+      community. The founder review (R2 W08) flagged the need for an
+      emitter contribution guide. The base class API surface area directly
+      determines the difficulty of writing a new emitter. Fewer abstract
+      methods (3 is good) with clear types reduces the contribution barrier.
+      If the contract grows beyond 5 abstract methods, contribution drops.
+    spec_impact: "CL-08 codegen — emitter contribution guide as deliverable"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The validate() method receives the full GovernanceIR but may only
+      need a subset for platform-specific validation. Passing the full IR
+      couples the emitter to the IR's complete structure. If the IR adds a
+      field in a minor version, validate() must handle the new field even
+      if the emitter does not use it. Consider passing a platform-specific
+      view or projection of the IR to reduce coupling.
+    spec_impact: "CL-08 codegen — IR projection for platform-specific validation"
+    pitfall: null

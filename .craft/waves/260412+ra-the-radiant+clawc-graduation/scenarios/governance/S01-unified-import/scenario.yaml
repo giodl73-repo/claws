@@ -1,0 +1,136 @@
+name: S01-unified-import
+series: governance
+version: 1
+specs: [CL-08]
+description: >
+  Validates that a single @craftworks/governance import provides access to
+  primitives, runtime enforcement, and budget tracking. The merge of three
+  formerly separate packages (governance-primitives, governance-runtime,
+  budget-tracker) into one must expose all public APIs through a single
+  entry point without requiring consumers to know the internal package structure.
+
+expect:
+  single_import:
+    package: "@craftworks/governance"
+    apis_available:
+      - PolicyWalker
+      - GateEvaluator
+      - RuntimeEnforcer
+      - BudgetTracker
+      - RiskLevel
+      - GateType
+      - FailModePolicy
+    separate_imports_not_required: true
+  bundle_size:
+    tree_shakeable: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer project imports from @craftworks/governance using a single import
+  statement: `import { PolicyWalker, GateEvaluator, RuntimeEnforcer, BudgetTracker,
+  RiskLevel, GateType, FailModePolicy } from '@craftworks/governance'`. All 7
+  symbols must resolve. The consumer then creates instances of each class and
+  calls their primary methods. Previously, this required three separate imports
+  from governance-primitives (types), governance-runtime (enforcement), and
+  budget-tracker (budget). The merged package must work as a drop-in replacement
+  with no consumer-side code changes beyond updating the import path.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If @craftworks/governance re-exports all symbols from the package root
+      index.ts, TypeScript's declaration files (.d.ts) must include all
+      re-exported types. If governance-runtime depends on types from
+      governance-primitives and the re-export order is wrong (runtime before
+      primitives), the .d.ts may reference types that are declared later in
+      the file, causing "used before declaration" errors in some TypeScript
+      versions.
+    spec_impact: "CL-08 @craftworks/governance — re-export ordering: primitives before runtime before budget"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The three formerly separate packages may have had overlapping type
+      names. For example, both governance-primitives and governance-runtime
+      might export a `GateResult` type. In separate packages, there is no
+      conflict. In a merged package, the re-export produces a name collision.
+      The merge must audit all exported names for collisions and resolve
+      them before publishing.
+    spec_impact: "CL-08 @craftworks/governance — exported name collision audit during merge"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Tree-shaking requires that the package entry point uses only named
+      exports (no default export that bundles everything). If index.ts
+      exports a namespace object (`export default { PolicyWalker, ... }`),
+      bundlers cannot tree-shake unused members. The entry point must use
+      named re-exports: `export { PolicyWalker } from './policy-walker'`.
+    spec_impact: "CL-08 @craftworks/governance — named re-exports only for tree-shaking"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The BudgetTracker was previously in budget-tracker, which had no
+      dependency on governance-primitives. Now that it is in the same
+      package, it could start importing governance-internal types that were
+      not available when it was standalone. This creates implicit coupling
+      that makes future re-extraction harder. Internal module boundaries
+      should be maintained even within the merged package.
+    spec_impact: "CL-08 @craftworks/governance — internal module boundaries preserved after merge"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      Consumers who only need budget tracking should not pay the bundle size
+      cost of loading the policy walker and runtime enforcer. Subpath exports
+      (e.g., @craftworks/governance/budget) would allow selective import.
+      But the unified-import scenario specifically tests that a single import
+      works. CL-08 should define both: single import for convenience,
+      subpath imports for size-sensitive consumers.
+    spec_impact: "CL-08 @craftworks/governance — subpath exports alongside root re-exports"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The governance package depends on @craftworks/crypto. If a consumer
+      only imports BudgetTracker (which does not need crypto), the crypto
+      dependency is still installed because it is listed in package.json
+      dependencies. This wastes install size for budget-only consumers.
+      Crypto should be a peerDependency that is only required when using
+      PolicyWalker or RuntimeEnforcer, not BudgetTracker.
+    spec_impact: "CL-08 @craftworks/governance — crypto as optional peer for budget-only consumers"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The migration from three packages to one requires every consumer to
+      update imports. The claws compiler and craftworks-sdk both import from
+      governance packages. If any consumer is missed, it will continue
+      importing from the old (now-nonexistent) packages and fail at runtime.
+      CL-08 must include a migration checklist of all consumers that import
+      from governance-primitives, governance-runtime, or budget-tracker.
+    spec_impact: "CL-08 @craftworks/governance — migration checklist: all consumers of the 3 old packages"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The unified import test should verify that TypeScript IntelliSense
+      (auto-complete) works for all re-exported symbols. If the .d.ts
+      generation is incorrect (e.g., using `export * from` which can
+      lose JSDoc comments), consumers lose documentation in their IDE.
+      The .d.ts must preserve JSDoc for all public APIs.
+    spec_impact: "CL-08 @craftworks/governance — .d.ts must preserve JSDoc comments on re-export"
+    pitfall: null

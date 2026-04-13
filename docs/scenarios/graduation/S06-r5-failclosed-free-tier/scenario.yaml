@@ -1,0 +1,135 @@
+name: S06-r5-failclosed-free-tier
+series: graduation
+version: 1
+specs: [CL-04, CL-08]
+description: >
+  R5 fail-closed enforcement works in the free tier with no enterprise
+  dependency. The most critical security invariant — that R5-classified
+  rules can never be configured to fail-open — is enforced by the free
+  tier compiler without importing any @craftworks/ modules. This validates
+  that the security minimum is genuinely free, not gated behind a paid
+  tier. The compiler must refuse to emit any artifact when R5 fail-closed
+  is violated, regardless of --force flags or configuration overrides.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "TOOLS.md"
+        - "claws.json"
+    analysis:
+      rules_evaluated: true
+  violations:
+    - rule: R5
+      severity: critical
+      fail_mode: closed
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures:
+    - stage: emit
+      reason: "R5 fail-closed: compilation halted, no artifacts emitted"
+  halt: "R5 violation detected — emit stage blocked"
+  budget: null
+problem: >
+  An organization evaluates the free tier for their security workflow.
+  They configure a workspace where TOOLS.md grants broad filesystem
+  access to an agent. The R5 rule (critical capability escalation)
+  should flag this as a violation and halt compilation. If R5 enforcement
+  is only available in the paid tier, the free tier becomes a governance
+  theater tool that reports violations but does not enforce them. The
+  R1 review was explicit: R5 fail-closed is baseline responsible
+  engineering, not a premium feature. This scenario verifies that the
+  free tier enforces, not just reports.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The --force flag must not bypass R5 fail-closed. Other fail modes
+      (R1-R4) may be overridable with --force for development workflows,
+      but R5 is architecturally non-configurable. If the CLI accepts
+      --force and applies it to R5, the entire fail-closed guarantee
+      is undermined. The compiler must reject --force for R5 with a
+      clear error explaining that R5 fail-closed is not configurable.
+    spec_impact: "CL-04 Section 14 — R5 non-overridable enforcement"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      The fail-closed check must run before the emit stage, not during
+      it. If the compiler begins emitting artifacts and then discovers
+      an R5 violation, partial artifacts may be left on disk. The
+      analysis stage must complete all rule evaluation before the emit
+      stage begins. A pre-emit gate checks all R5 results and blocks
+      the entire emit stage if any R5 violation exists.
+    spec_impact: "CL-04 Section 15 — pre-emit R5 gate ordering"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      R5 classification must be immutable in the compiled rule set.
+      If a workspace's claws.json can reclassify an R5 rule as R4
+      (to make it fail-open), the entire R5 guarantee collapses. The
+      compiler must hardcode which rules are R5 and reject any
+      configuration that attempts to downgrade their classification.
+      This is a governance invariant, not a configuration option.
+    spec_impact: "CL-04 Section 16 — immutable R5 classification"
+    pitfall: null
+  - id: F04
+    severity: major
+    description: >
+      The error message for R5 fail-closed must be actionable. A
+      generic "compilation failed" message does not help the developer
+      understand what triggered R5. The error must identify the specific
+      rule, the file and line that triggered it, and the remediation
+      action (e.g., "Remove filesystem:write from TOOLS.md line 14,
+      or add an explicit approval in exec-approvals.json"). Error
+      quality directly impacts developer experience in the free tier.
+    spec_impact: "CL-08 Section 11 — actionable R5 error messages"
+    pitfall: null
+  - id: F05
+    severity: major
+    description: >
+      The audit chain must record R5 enforcement events even when
+      compilation is halted. If the audit chain is only written on
+      successful compilation, R5 violations leave no forensic trail.
+      Every R5 enforcement event must be signed and appended to the
+      audit chain, creating evidence that the compiler blocked unsafe
+      output. This is the compliance value of fail-closed.
+    spec_impact: "CL-04 Section 17 — R5 enforcement audit trail"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      Exit code semantics must distinguish R5 failures from other
+      compilation errors. If the CLI returns exit code 1 for both
+      parse errors and R5 violations, automation scripts cannot
+      differentiate between "code is broken" and "governance blocked
+      compilation." A dedicated exit code (e.g., 78 for R5 fail-closed)
+      enables precise CI/CD pipeline handling.
+    spec_impact: "CL-08 Section 12 — exit code semantics"
+    pitfall: null
+  - id: F07
+    severity: minor
+    description: >
+      R5 fail-closed must work when the workspace has no claws.json
+      (zero-config mode). Default R5 rules apply even without explicit
+      configuration. If the compiler skips R5 evaluation when claws.json
+      is absent, a workspace without configuration gets weaker security
+      than one with default configuration, which violates the "secure
+      by default" principle.
+    spec_impact: "CL-04 Section 18 — zero-config R5 enforcement"
+    pitfall: null
+  - id: F08
+    severity: major
+    description: >
+      Concurrent compilations must not share R5 enforcement state. If
+      two claws compile processes run simultaneously, one with R5
+      violations and one without, the clean compilation must not be
+      blocked by the other's state. R5 evaluation must be stateless
+      per compilation invocation, with no shared mutex or lock file
+      that could cause cross-process interference.
+    spec_impact: "CL-04 Section 19 — stateless R5 evaluation"
+    pitfall: null

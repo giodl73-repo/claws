@@ -1,0 +1,156 @@
+name: S03-tiered-binding-resolution
+series: relax
+version: 1
+specs: [CL-08]
+description: >
+  Validates that the RELAX evaluator correctly resolves variable bindings
+  at multiple tier levels (workspace, fleet, global) with proper shadowing
+  semantics. Inner tiers override outer tiers. This is the core mechanism
+  by which fleet-level defaults can be overridden at the workspace level
+  without modifying the fleet expression.
+
+expect:
+  tiers:
+    global: { max_risk: 5, env: "production" }
+    fleet: { max_risk: 3 }
+    workspace: { max_risk: 2 }
+  expression: "if risk > max_risk then 'block' else 'allow'"
+  resolution:
+    max_risk_resolved_to: 2
+    resolution_tier: "workspace"
+    shadowed_values:
+      fleet: 3
+      global: 5
+  evaluation:
+    bindings: { risk: 2.5 }
+    result: "block"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Three binding tiers are configured: global (max_risk=5, env="production"),
+  fleet (max_risk=3), and workspace (max_risk=2). The expression
+  "if risk > max_risk then 'block' else 'allow'" is evaluated with
+  runtime binding { risk: 2.5 }. The evaluator must resolve max_risk by
+  searching tiers from innermost to outermost: workspace has max_risk=2,
+  so it wins. The result is "block" (2.5 > 2). If the evaluator incorrectly
+  used the fleet value (3), the result would be "allow" (2.5 < 3). If it
+  used global (5), "allow" (2.5 < 5). Only workspace (2) produces "block."
+  The evaluator must also report which tier provided each binding for
+  audit purposes.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Tier ordering must be explicit, not implicit. If tiers are passed as
+      an object { global, fleet, workspace }, JavaScript object key order
+      is insertion-based, not semantic. The evaluator must accept tiers as
+      an ordered array [workspace, fleet, global] (innermost first) or
+      define a fixed precedence enum. Relying on object key order is
+      fragile and has caused real bugs in claws's governance evaluation.
+    spec_impact: "CL-08 relax — tier precedence as explicit ordered array"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The evaluator must report which tier resolved each variable. Without
+      provenance tracking, a governance audit cannot determine whether
+      max_risk=2 came from workspace policy or was hardcoded. The evaluation
+      result must include a resolution map: { max_risk: { value: 2, tier:
+      "workspace" }, risk: { value: 2.5, tier: "runtime" } }. This
+      provenance is required for compliance evidence (CL-08 + CL-02).
+    spec_impact: "CL-08 relax — binding resolution provenance in evaluation result"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Shadowing must be total, not partial. If global defines max_risk=5
+      and workspace defines max_risk=2, the workspace value completely
+      replaces the global value. But if global defines a structured binding
+      { limits: { max_risk: 5, max_tokens: 1000 } } and workspace defines
+      { limits: { max_risk: 2 } }, does workspace shadow the entire limits
+      object (losing max_tokens) or merge at the field level (preserving
+      max_tokens)? The spec must define shallow vs deep shadowing semantics.
+    spec_impact: "CL-08 relax — shallow vs deep shadowing for structured bindings"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      An unresolved binding (variable not found in any tier) must produce
+      a clear error, not undefined/null coercion. If the expression
+      references "threshold" but no tier provides it, evaluating
+      "risk > threshold" should fail with "Unresolved binding: threshold.
+      Available tiers: workspace, fleet, global." Returning undefined
+      and letting JS coerce (undefined > 2 is false) silently produces
+      wrong results.
+    spec_impact: "CL-08 relax — unresolved binding error with tier context"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The "env" binding from the global tier is not shadowed by fleet or
+      workspace. The evaluator must still resolve it correctly even though
+      the expression in this scenario does not reference it. If the
+      evaluator eagerly resolves all bindings (not just those referenced
+      in the expression), it must handle unused bindings without error.
+      If it lazily resolves on reference, unused bindings are ignored.
+      The spec must define eager vs lazy resolution.
+    spec_impact: "CL-08 relax — eager vs lazy binding resolution"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Type consistency across tiers is not guaranteed. Global defines
+      max_risk as a number (5), fleet as a number (3), workspace as a
+      number (2). But what if workspace defined max_risk as a string "2"?
+      The evaluator must either require consistent types across tiers
+      (reject string "2" when global has number 5) or coerce. Type
+      inconsistency across tiers is a common misconfiguration in fleet
+      environments.
+    spec_impact: "CL-08 relax — cross-tier type consistency validation"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The three tiers (global, fleet, workspace) map to claws's governance
+      hierarchy, but relax as a standalone package should not hardcode
+      these tier names. The evaluator should accept any tier names —
+      consumers define the hierarchy. claws happens to use global/fleet/
+      workspace, but a different consumer might use org/team/project. The
+      tier names must be caller-defined strings, not an enum.
+    spec_impact: "CL-08 relax — tier names as caller-defined strings"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Performance of tiered resolution matters for fleet-scale evaluation.
+      With 3 tiers and 10 variables, the worst case is 30 lookups. At
+      fleet scale (47 workspaces, each evaluating 29 G-rules with ~5
+      RELAX expressions each), that is 47 * 29 * 5 * 30 = 204,450 lookups.
+      If each lookup is a Map.get() (O(1)), this is fast. If tiers are
+      scanned linearly per variable, the overhead accumulates.
+    spec_impact: "CL-08 relax — tier resolution performance at fleet scale"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Runtime bindings (the { risk: 2.5 } passed at evaluation time) must
+      take highest precedence, shadowing even workspace-level bindings.
+      If runtime is treated as a separate tier, the tier order becomes
+      [runtime, workspace, fleet, global]. If runtime is treated as part
+      of the workspace tier (merged in), the precedence depends on merge
+      order. The spec must define runtime binding precedence explicitly.
+    spec_impact: "CL-08 relax — runtime binding tier precedence"
+    pitfall: null

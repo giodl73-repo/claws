@@ -1,0 +1,112 @@
+name: S03-url-resolution
+series: input
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/input resolves an HTTPS URL with caching,
+  content hash verification, and a full provenance chain tracking the
+  remote origin, fetch timestamp, and cache status.
+
+expect:
+  resolution: success
+  provenance_origin: url
+  trust_level: remote
+  cache_hit: second_call
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer calls resolve("https://governance.example.com/v2/policy.yaml")
+  twice. The first call fetches the remote resource over HTTPS, computes a
+  SHA-256 hash of the response body, stores the result in a local cache
+  keyed by URL + content hash, and returns a ResolvedInput with origin "url",
+  trust level "remote", the content hash, and fetch timestamp. The second
+  call must hit the cache (no network request) and return identical content
+  with provenance indicating cache_hit=true. If the remote server returns
+  a non-200 status, the resolver must return a structured error with the
+  HTTP status code and response headers, not a generic "fetch failed" message.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      URL resolution introduces network dependency, making builds
+      non-deterministic. If the remote resource changes between two builds,
+      compiled output silently changes. The resolver must support a
+      "locked" mode that refuses to fetch if a cached version exists,
+      forcing consumers to explicitly update via a refresh command.
+    spec_impact: "CL-08 input-api — locked mode for URL resolution determinism"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      HTTPS certificate validation must not be skippable via API options.
+      If the resolver accepts a skipTlsVerification option, consumers in
+      CI environments may disable it for convenience, creating a MITM
+      vector where governance policies are silently replaced with
+      malicious content.
+    spec_impact: "CL-08 input-api — TLS verification must be mandatory, not optional"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The cache key must include the full URL including query parameters
+      and fragment. If query params are stripped, two different resources
+      at the same base URL (e.g., ?version=1 vs ?version=2) collide in
+      the cache and return wrong content.
+    spec_impact: "CL-08 input-api — cache key must include full URL with query string"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Cache eviction policy must be defined. Without a max-age or max-size
+      policy, the cache grows unbounded across many compilation runs.
+      The resolver should respect Cache-Control headers from the server
+      and support a manual cache purge API.
+    spec_impact: "CL-08 input-api — cache eviction policy and manual purge"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Redirect chains (301/302) must be followed but the final resolved URL
+      must be recorded in provenance, not the original. If the original URL
+      redirects to a completely different domain, the trust level should
+      be re-evaluated against the final domain, not the initial one.
+    spec_impact: "CL-08 input-api — redirect following and final URL provenance"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Timeout for network requests must be configurable but have a sensible
+      default (e.g., 30 seconds). Without a timeout, a slow or unresponsive
+      server hangs the entire compilation pipeline indefinitely, with no
+      way for the consumer to recover short of killing the process.
+    spec_impact: "CL-08 input-api — network timeout configuration"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The fetch timestamp in provenance should use ISO 8601 UTC format
+      for consistency across time zones. Local timestamps make provenance
+      comparison across machines unreliable and complicate audit logging.
+    spec_impact: "CL-08 input-api — UTC timestamp format in URL provenance"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      When the remote server returns content with a Content-Type header,
+      the resolver should include this in provenance. Consumers may need
+      to distinguish between YAML, JSON, and Markdown governance files
+      fetched from the same server without inspecting content.
+    spec_impact: "CL-08 input-api — Content-Type recording in URL provenance"
+    pitfall: null

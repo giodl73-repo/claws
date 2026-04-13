@@ -3,7 +3,7 @@ slug: claws-cli-foundation
 preset: "claws"
 plan: "3 headlines: claws pinch runs from terminal with colored pass/fail, claws build openclaw emits a plugin, claws compile produces serialized GovernanceIR"
 area: claws
-status: Draft
+status: Implemented
 phase: ptah
 atoms: [atom:pinch, atom:claws-init, atom:progressive-disclosure, atom:claws-json, atom:error-contract]
 specs: [CL-01, CL-04, CL-03]

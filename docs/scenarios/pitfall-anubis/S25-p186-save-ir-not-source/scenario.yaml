@@ -44,7 +44,7 @@ problem: >
   lower the trust tier. When they run `claws snap restore baseline-v1`, the
   GovernanceIR is restored to the baseline state, but the source files remain
   modified. The restored IR says "trust tier T3, 5 tools" but the actual
-  TOOLS.md has 8 tools and SOUL.md has trust tier T1. A subsequent pinch
+  TOOLS.md has 8 tools and SOUL.md has trust tier T1. A subsequent check
   recompiles from the modified source files, producing a new IR that differs
   from the restored one. The snapshot restore was useless — it restored IR
   that was immediately invalidated by the unchanged source files.
@@ -56,7 +56,7 @@ findings:
       CL-05 must mandate that snap save captures a coherent file+IR pair:
       all 9 workspace source files AND the GovernanceIR. The snapshot is a
       point-in-time capture of the entire governance state. Without source
-      files, restoring the IR is meaningless because the next pinch will
+      files, restoring the IR is meaningless because the next check will
       overwrite it from the (modified) source files. The spec must list
       all 9 files by name as mandatory snapshot contents.
     spec_impact: "CL-05 Snapshot Save — mandatory 9-file + IR coherent pair"
@@ -105,7 +105,7 @@ findings:
       If they differ, the snapshot is incoherent (the IR was stale when
       saved) and must be rejected with an error. This verification catches
       the case where the developer modified source files between the last
-      pinch and the snap save.
+      check and the snap save.
     spec_impact: "CL-05 Snapshot Save — post-save coherence verification"
     pitfall: P-186
 

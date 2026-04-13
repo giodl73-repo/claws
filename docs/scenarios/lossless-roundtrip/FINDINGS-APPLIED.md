@@ -22,7 +22,7 @@
 - **5 new constraints**: independent per-file error collection, last-known-good artifact preservation on compilation error, reliable line counting in malformed files, crash safety for atomic staging (unhandled exception path), graceful handling of zero successfully-parsed files
 
 #### CL-05 Developer Experience
-- **2 new constraints**: claws pinch --fix scope limited to non-source files, mandatory snapshot before doctor --fix modifies any file
+- **2 new constraints**: claws check --fix scope limited to non-source files, mandatory snapshot before doctor --fix modifies any file
 
 #### CL-01 CLI Surface & Schema
 - **1 new constraint**: accept JSON with BOM on Windows for claws.json

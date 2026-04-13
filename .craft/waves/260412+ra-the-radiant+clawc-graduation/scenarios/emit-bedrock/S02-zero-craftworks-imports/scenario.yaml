@@ -1,0 +1,87 @@
+name: S02-zero-craftworks-imports
+series: emit-bedrock
+version: 1
+specs: [CL-08]
+description: >
+  Validates that emit-bedrock output (guardrail JSON) contains zero references
+  to @craftworks/ internal packages — the output is AWS Bedrock native.
+
+expect:
+  craftworks_import_count: 0
+  platform_native: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  After emit-bedrock produces the guardrail configuration JSON, the file is
+  scanned for any string matching "@craftworks/", "craftworks-", or internal
+  package names. The JSON must contain only standard AWS Bedrock API fields
+  and values. Any @craftworks/ reference causes confusion for AWS operators
+  who do not know about the craftworks toolchain and may cause API
+  validation errors if references appear in unexpected fields.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The guardrail description field is free text and a likely leak point.
+      If the emitter populates it with "Generated from @craftworks/governance
+      policy v2.1", the internal package name appears in the AWS console
+      for every operator who views the guardrail. The description must
+      use the product name "claws" or a generic "auto-generated governance."
+    spec_impact: "CL-08 emitter-isolation — description field must use product name"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Topic policy names derived from governance IR may contain internal
+      identifiers (e.g., "craftworks-security-policy-001"). These names
+      appear in Bedrock API responses, CloudWatch logs, and billing
+      dashboards. They must be human-readable domain names (e.g.,
+      "security-input-validation").
+    spec_impact: "CL-08 emitter-isolation — human-readable topic policy names"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Word filter entries pulled from governance rules may include internal
+      technical terms (e.g., "FormaIR", "OBO boundary") that are meaningful
+      only within the claws compilation context. These terms should not
+      appear as filtered words in the Bedrock guardrail.
+    spec_impact: "CL-08 emitter-isolation — filter internal terminology from word lists"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      JSON field values that reference file paths from the build environment
+      (e.g., source governance file paths) must be stripped. AWS operators
+      should not see the build machine's filesystem structure in their
+      guardrail configuration.
+    spec_impact: "CL-08 emitter-isolation — strip build environment paths from JSON output"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The scan should validate that no @craftworks/ references appear in
+      any nested JSON value at any depth. AWS Bedrock's API may pass
+      through unexpected string fields to CloudTrail logs, making even
+      deeply nested references visible.
+    spec_impact: "CL-08 emitter-isolation — deep JSON scan for all string values"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      Tags attached to the guardrail resource (if emitted) must not
+      include @craftworks/ values. AWS resource tags are searchable and
+      appear in cost allocation reports, making leaked internal names
+      visible across the organization.
+    spec_impact: "CL-08 emitter-isolation — resource tag sanitization"
+    pitfall: null

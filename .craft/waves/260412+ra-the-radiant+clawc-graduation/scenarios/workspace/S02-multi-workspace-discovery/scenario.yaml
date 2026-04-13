@@ -1,0 +1,135 @@
+name: S02-multi-workspace-discovery
+series: workspace
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/workspace enumerates nested workspaces in a directory
+  tree with correct paths and no false positives. The discovery must handle
+  monorepo structures, symlinked directories, and deeply nested workspaces without
+  performance degradation.
+
+expect:
+  discovery:
+    workspaces_found: 4
+    paths:
+      - "/root/project-a"
+      - "/root/project-b"
+      - "/root/services/api"
+      - "/root/services/web"
+    false_positives: 0
+    max_depth: 3
+  excluded:
+    - "/root/node_modules/some-pkg"
+    - "/root/.git"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A monorepo root contains 4 legitimate OC workspaces at varying depths:
+  project-a/ and project-b/ at depth 1, services/api/ and services/web/ at
+  depth 2. The root also contains node_modules/ with a package that has
+  CLAUDE.md (false positive candidate), .git/ with internal files, and a
+  symlinked directory vendor/ that points to an external workspace. The
+  discover() function must find all 4 legitimate workspaces, exclude
+  node_modules/ and .git/ paths, handle the symlink correctly, and return
+  results within 500ms for a tree with 10,000 files.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      node_modules/ can contain packages with CLAUDE.md, .cursorrules, or
+      other marker files. If the discovery walker does not exclude
+      node_modules/ by default, a large Node.js project will produce
+      hundreds of false positive workspaces. The default exclusion list
+      must include node_modules, .git, .hg, .svn, __pycache__, .venv,
+      and vendor/ (configurable). CL-08 does not specify default exclusions.
+    spec_impact: "CL-08 @craftworks/workspace — default directory exclusion list for discovery"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The discovery function must handle circular symlinks without infinite
+      recursion. If vendor/ symlinks to a directory that symlinks back, the
+      walker will loop forever. The implementation must track visited inodes
+      (on Unix) or canonicalized paths (cross-platform) and skip already-
+      visited directories. On Windows, GetFinalPathNameByHandle is needed
+      for canonical path resolution.
+    spec_impact: "CL-08 @craftworks/workspace — circular symlink detection via canonical path tracking"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Discovery depth should be configurable with a sane default (e.g.,
+      maxDepth: 5). A monorepo with deeply nested workspaces (depth > 5)
+      is unusual and scanning the full tree is expensive. If maxDepth is
+      not configurable, enterprise users with large directory trees will
+      experience slow discovery. If maxDepth defaults to Infinity, a
+      10,000-directory tree will be slow. CL-08 does not specify a default.
+    spec_impact: "CL-08 @craftworks/workspace — configurable maxDepth with default of 5"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      On Windows, path separators are backslashes. The discover() return
+      values should use forward slashes (POSIX-style) regardless of platform
+      for consistent comparison and display. If the implementation uses
+      path.join() (which uses platform separators), test assertions will fail
+      on Windows unless the tests also use platform separators. Forward-slash
+      normalization should happen at the API boundary.
+    spec_impact: "CL-08 @craftworks/workspace — forward-slash normalized paths in discovery results"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The discovery function should return results as they are found
+      (async iterable/stream) rather than collecting all results before
+      returning. For large directory trees, the caller may want to process
+      the first workspace while discovery continues. If the API returns
+      Promise<WorkspaceInfo[]>, the caller blocks until the full tree is
+      scanned.
+    spec_impact: "CL-08 @craftworks/workspace — AsyncIterable return type for discover()"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      If two workspaces are nested (e.g., project-a/ contains a sub-workspace
+      at project-a/packages/sub/), both should be returned. But if the parent
+      workspace's platform detection markers encompass the child's directory,
+      the child may be reported as part of the parent rather than as a separate
+      workspace. The boundary detection logic must use the nearest marker set,
+      not the root-level markers.
+    spec_impact: "CL-08 @craftworks/workspace — nested workspace boundary detection"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The 500ms performance budget for 10,000 files requires efficient directory
+      traversal. If the implementation uses synchronous fs.readdirSync or
+      serial async fs.readdir for each directory, traversal will be slow due
+      to I/O serialization. The implementation should use parallel readdir
+      with concurrency control (e.g., p-limit with concurrency 16) or
+      fs.opendir() for streaming.
+    spec_impact: "CL-08 @craftworks/workspace — performance budget and parallel traversal strategy"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The discovery results must include platform detection results for each
+      found workspace (which platforms were detected, confidence scores).
+      If discovery and detection are separate calls, the consumer must call
+      detect() on each discovered workspace separately, resulting in
+      redundant filesystem reads. Discovery should optionally include
+      detection results.
+    spec_impact: "CL-08 @craftworks/workspace — combined discover+detect mode to avoid redundant reads"
+    pitfall: null

@@ -1,0 +1,135 @@
+name: S08-bom-crlf-standalone-reader
+series: graduation
+version: 1
+specs: [CL-04, CL-07]
+description: >
+  BOM (byte order mark) stripping and CRLF normalization in the standalone
+  free tier reader matches the compiler-sdk reader behavior exactly. Files
+  created on Windows with UTF-8 BOM, UTF-16LE BOM, and mixed CRLF/LF line
+  endings within the same workspace are parsed identically by both readers.
+  The GovernanceIR output is byte-identical after both readers process the
+  same BOM-and-CRLF-laden workspace. This validates cross-platform
+  determinism — the core graduation requirement for Windows compatibility.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "MEMORY.md"
+        - "TOOLS.md"
+        - "claws.json"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  A team develops on mixed Windows and macOS machines. A developer on Windows
+  creates SOUL.md in Notepad, which adds a UTF-8 BOM (EF BB BF) and uses
+  CRLF line endings. Another developer on macOS creates TOOLS.md with LF
+  endings and no BOM. Both files are committed and the CI runs claws compile
+  on Linux. The compilation must produce identical GovernanceIR regardless
+  of which line endings or BOM markers are present. If the standalone reader
+  treats BOM bytes as content, rule extraction will fail on the first line
+  of BOM-prefixed files. If CRLF is not normalized, content hashing produces
+  different values across platforms, breaking snapshot tests and audit chain
+  verification.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      BOM detection must handle all three common BOM types: UTF-8
+      (EF BB BF), UTF-16LE (FF FE), and UTF-16BE (FE FF). The free
+      tier reader must detect the BOM by inspecting the first 3 bytes
+      of each file and strip it before parsing. If only UTF-8 BOM is
+      handled, UTF-16 encoded files (rare but legal in Windows
+      environments) will be parsed as garbled content instead of
+      producing a clear encoding error.
+    spec_impact: "CL-04 Section 25 — multi-BOM detection"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      CRLF normalization must happen before content hashing. If the
+      reader hashes raw bytes then normalizes for parsing, the content
+      hash will differ from a reader that normalizes then hashes. The
+      normalization-before-hashing order must be specified in the
+      WorkspaceReader interface contract and enforced in both the free
+      and compiler-sdk readers. Hash divergence breaks the identical
+      pinch output guarantee from scenario S03.
+    spec_impact: "CL-07 Section 5 — normalization ordering for hashing"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      Mixed line endings within a single file must be normalized
+      consistently. A SOUL.md file may have CRLF in its YAML front
+      matter (edited on Windows) and LF in its markdown body (edited
+      on macOS). The reader must not assume uniform line endings per
+      file. Line-by-line normalization ensures every \r\n is converted
+      to \n regardless of position within the file.
+    spec_impact: "CL-04 Section 26 — intra-file mixed line ending handling"
+    pitfall: null
+  - id: F04
+    severity: major
+    description: >
+      The standalone reader must produce the same parse result for
+      BOM-prefixed YAML as for non-BOM YAML. If the YAML parser
+      receives EF BB BF as the first characters, it may interpret them
+      as content rather than metadata, causing the first key to be
+      corrupted. BOM stripping must happen before the buffer is passed
+      to the YAML parser, not as a post-parse fixup. The parser never
+      sees BOM bytes.
+    spec_impact: "CL-04 Section 27 — pre-parser BOM stripping"
+    pitfall: null
+  - id: F05
+    severity: minor
+    description: >
+      JSON files (exec-approvals.json, claws.json) must also be
+      BOM-stripped. JSON.parse in Node.js does not tolerate UTF-8 BOM
+      and will throw a "Unexpected token" error. While JSON files from
+      Windows are less commonly BOM-prefixed than text files, PowerShell's
+      Out-File cmdlet adds BOM by default. The reader must strip BOM
+      from all file types, not just markdown and YAML.
+    spec_impact: "CL-04 Section 28 — JSON BOM tolerance"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      The reader should emit a diagnostic warning when BOM or CRLF
+      normalization is applied. While the normalization is invisible to
+      the compilation output, developers debugging cross-platform issues
+      benefit from knowing which files were normalized. The warning
+      should not be an error — it is informational and does not affect
+      compilation success.
+    spec_impact: "CL-04 Section 29 — normalization diagnostic reporting"
+    pitfall: null
+  - id: F07
+    severity: major
+    description: >
+      Lossless round-trip must preserve original line endings in the
+      source files. The reader normalizes for compilation but must never
+      write back normalized content to the original files. Claws's
+      add-only architecture means the original SOUL.md with CRLF must
+      remain CRLF after compilation. If the reader or any downstream
+      stage writes back to the source file, the lossless guarantee
+      is violated.
+    spec_impact: "CL-07 Section 6 — lossless source preservation"
+    pitfall: null
+  - id: F08
+    severity: minor
+    description: >
+      A conformance test fixture set must include files with every
+      combination of BOM and line ending: UTF-8 BOM + CRLF, UTF-8 BOM +
+      LF, no BOM + CRLF, no BOM + LF, UTF-16LE BOM, and mixed endings.
+      Both the free reader and compiler-sdk reader must produce identical
+      GovernanceIR for all fixtures. This fixture set is the canonical
+      cross-platform regression test.
+    spec_impact: "CL-04 Section 30 — normalization fixture coverage"
+    pitfall: null

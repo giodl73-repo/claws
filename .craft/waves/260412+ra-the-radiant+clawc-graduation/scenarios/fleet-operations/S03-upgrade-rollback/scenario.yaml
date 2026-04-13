@@ -1,0 +1,218 @@
+name: S03-upgrade-rollback
+series: fleet-operations
+version: 1
+specs: [CL-08]
+description: >
+  Validates that a partial fleet upgrade failure triggers automatic rollback
+  of only the failed workspaces using @craftworks/platform manifest version
+  pinning. When 3 of 47 workspaces fail to update @craftworks/governance,
+  those 3 revert to their pre-upgrade state while the remaining 44 keep the
+  new version. This tests the fleet's partial failure resilience — an all-or-nothing
+  upgrade strategy is unacceptable at enterprise scale.
+
+expect:
+  upgrade:
+    target_package: "@craftworks/governance"
+    target_version: "2.0.0"
+    workspaces_attempted: 47
+    workspaces_succeeded: 44
+    workspaces_failed: 3
+  rollback:
+    scope: "failed-only"
+    rolled_back_workspaces: 3
+    rolled_back_version: "1.0.0"
+    successful_workspaces_untouched: true
+  fleet_state:
+    governance_2_0_0: 44
+    governance_1_0_0: 3
+    split_version_documented: true
+
+simulate:
+  failures:
+    - workspace: "workspace-17"
+      error: "ERESOLVE: peer dependency conflict with @craftworks/execution@1.0.0"
+    - workspace: "workspace-31"
+      error: "EACCES: permission denied, unlink node_modules/@craftworks/governance"
+    - workspace: "workspace-42"
+      error: "ETARGET: no matching version found for @craftworks/governance@2.0.0 (private registry stale)"
+  halt: null
+  budget: null
+
+problem: >
+  The fleet operator initiates a major version upgrade of @craftworks/governance
+  from 1.0.0 to 2.0.0 across all 47 workspaces. The upgrade proceeds workspace
+  by workspace. 44 workspaces upgrade successfully. 3 fail for different reasons:
+  workspace-17 has a peer dependency conflict (execution@1.0.0 requires
+  governance@^1.0.0), workspace-31 has a filesystem permission error, and
+  workspace-42 cannot resolve the new version from its private registry. The
+  fleet tool must: (1) detect each failure, (2) rollback the failed workspaces
+  to their pre-upgrade state (restore package.json, package-lock.json, and
+  node_modules), (3) leave the 44 successfully upgraded workspaces untouched,
+  (4) produce a split-version fleet state report, (5) update the platform
+  manifest awareness so drift detection understands that 3 workspaces are
+  intentionally on the old version pending remediation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Rollback requires restoring the pre-upgrade package-lock.json and
+      node_modules directory. If the upgrade tool modifies package-lock.json
+      in-place before running npm install, a failed npm install leaves
+      the lock file in an inconsistent state (partially resolved new
+      versions). The tool must snapshot the lock file BEFORE modifying it
+      and restore the snapshot on failure. Without pre-upgrade snapshots,
+      rollback produces a corrupted lock file that is worse than either
+      the old or new version.
+    spec_impact: "CL-08 fleet operations — snapshot package-lock.json before upgrade, restore on failure"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The peer dependency conflict in workspace-17 (execution@1.0.0 requires
+      governance@^1.0.0) is a predictable failure that could be detected
+      before attempting the upgrade. The fleet tool should run a dry-run
+      phase (npm install --dry-run or equivalent) across all 47 workspaces
+      before any actual upgrades. This surfaces all predictable failures
+      upfront, allowing the operator to decide whether to proceed with
+      partial upgrades or resolve all conflicts first.
+    spec_impact: "CL-08 fleet operations — dry-run phase before upgrade to surface predictable failures"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      After partial rollback, the fleet has a split version state:
+      44 workspaces on governance@2.0.0 and 3 on governance@1.0.0. If
+      governance@2.0.0 introduced a breaking change to GovernanceIR
+      serialization format, the 3 old workspaces produce GovernanceIR
+      v1 while the 44 new workspaces produce GovernanceIR v2. If a
+      fleet-wide audit aggregation job processes GovernanceIR from all
+      47 workspaces, it must handle both schema versions. CL-08 must
+      define a GovernanceIR versioning scheme that supports mixed-version
+      fleet states.
+    spec_impact: "CL-08 GovernanceIR — define schema versioning for mixed-version fleet states"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The filesystem permission error in workspace-31 (EACCES) indicates
+      that the fleet tool runs with insufficient privileges for that
+      workspace. Rollback for workspace-31 also requires filesystem access
+      to restore the snapshot. If rollback also fails with EACCES, the
+      workspace is left in a partially upgraded state — neither old nor
+      new version. The tool must detect rollback failures and escalate
+      them as critical: manual intervention required, workspace marked
+      as "corrupted" in the fleet state.
+    spec_impact: "CL-08 fleet operations — detect and escalate rollback failures separately from upgrade failures"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The stale private registry in workspace-42 is an infrastructure
+      issue, not a package issue. If the fleet tool retries the upgrade
+      after the registry syncs, it may succeed. The tool should distinguish
+      between transient failures (registry stale, network timeout) and
+      permanent failures (peer dep conflict, missing package) and offer
+      automatic retry for transient failures. Without retry classification,
+      the operator must manually categorize 3 failures and decide which
+      to retry.
+    spec_impact: "CL-08 fleet operations — classify failures as transient vs permanent; auto-retry transient"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The @craftworks/platform manifest v1.0.0 declared governance@1.0.0
+      as the tested version. After 44 workspaces upgrade to governance@2.0.0,
+      the manifest should be updated to v1.1.0 declaring governance@2.0.0.
+      But the 3 workspaces still on governance@1.0.0 would then show as
+      out-of-spec against manifest v1.1.0. The fleet tool should support
+      per-workspace manifest version pinning: the 3 failed workspaces
+      stay pinned to manifest v1.0.0 while the 44 upgraded workspaces
+      move to v1.1.0. This requires the manifest to be a per-workspace
+      configuration, not a fleet-wide singleton.
+    spec_impact: "CL-08 @craftworks/platform — support per-workspace manifest version pinning for split-version states"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The rollback restores node_modules to the pre-upgrade state. But
+      node_modules is typically .gitignored and regenerated from lock files.
+      Restoring a node_modules snapshot may contain stale compiled
+      dependencies or platform-specific binaries. A safer rollback
+      strategy is: restore package.json + lock file, then run npm ci
+      (clean install from lock). This is slower but produces a known-good
+      state. The tool should offer both strategies: fast rollback (restore
+      snapshot) and safe rollback (restore files + clean install).
+    spec_impact: "CL-08 fleet operations — offer fast (snapshot) and safe (clean install) rollback strategies"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      If the fleet upgrade is orchestrated by a CI pipeline (e.g., GitHub
+      Actions workflow), the pipeline must handle partial failure correctly.
+      Most CI systems treat any non-zero exit as a full failure and halt
+      the pipeline. The fleet tool must exit 0 on partial success (with
+      a structured report) so the pipeline can continue to the reporting
+      step. A separate --strict flag can be provided for pipelines that
+      require all-or-nothing semantics.
+    spec_impact: "CL-08 CLI surface — fleet upgrade exits 0 on partial success by default; --strict for all-or-nothing"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The split-version fleet state creates a remediation backlog: 3
+      workspaces need manual intervention. The fleet tool should create
+      a remediation report that includes: workspace identifier, failure
+      reason, recommended fix (e.g., "upgrade @craftworks/execution to
+      ^2.0.0 first, then retry governance upgrade"), and a one-command
+      retry invocation. Without actionable recommendations, the operator
+      must investigate each failure from scratch.
+    spec_impact: "CL-08 fleet operations — remediation report with per-workspace failure analysis and retry commands"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Audit chain continuity must be maintained through the rollback.
+      If the upgrade appended entries to the audit chain before the
+      rollback (e.g., "upgrade started" event), the rollback must not
+      truncate the chain. Instead, it should append a "rollback completed"
+      event. The chain is append-only by design (CL-08 line 158-168);
+      rollback must honor this invariant even when reverting other state.
+    spec_impact: "CL-08 @craftworks/crypto — audit chain must be append-only through upgrade and rollback cycles"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The 44 successfully upgraded workspaces must be validated after
+      all rollbacks complete, not just immediately after their individual
+      upgrades. A concurrent modification (e.g., a developer running
+      npm install in workspace-5 during the fleet upgrade) could have
+      corrupted workspace-5's state. A post-upgrade verification pass
+      across all 44 workspaces confirms the fleet is in a known-good
+      state, not just an assumed-good state.
+    spec_impact: "CL-08 fleet operations — post-upgrade verification pass across all successful workspaces"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The upgrade-rollback cycle should be idempotent: running the same
+      upgrade command again after partial failure should skip the 44
+      already-upgraded workspaces and retry only the 3 failed ones. If
+      the tool does not track upgrade state, it re-upgrades all 47
+      workspaces, wasting time and risking regressions in the already-
+      upgraded workspaces. Upgrade state should be persisted in a fleet
+      state file (e.g., .claws/fleet-state.json) that tracks per-workspace
+      upgrade history.
+    spec_impact: "CL-08 fleet operations — persist per-workspace upgrade state for idempotent retry"
+    pitfall: null

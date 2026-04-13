@@ -1,0 +1,147 @@
+name: S01-emitter-plugin-registration
+series: codegen
+version: 1
+specs: [CL-08]
+description: >
+  Validates that EmitRegistry.register() accepts a new emitter plugin and
+  makes it discoverable by platform name. This is the core extensibility
+  contract for @craftworks/codegen: third-party and first-party emitters
+  register through the same interface, and the registry returns them by
+  platform identifier without ambiguity.
+
+expect:
+  registry:
+    registered_count: 1
+    discoverable_by_name: true
+    platform: "openclaw"
+    emitter_class: "OCEmitter"
+  plugin_metadata:
+    name: "emit-oc"
+    version: "1.0.0"
+    platforms: ["openclaw"]
+  discovery:
+    by_name_works: true
+    by_unknown_returns_null: true
+    list_all_returns_registered: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer imports @craftworks/codegen and calls EmitRegistry.register()
+  with a valid emitter plugin descriptor: name "emit-oc", platform
+  "openclaw", and a class that extends EmitTarget. After registration, the
+  consumer calls EmitRegistry.get("openclaw") and expects the registered
+  emitter. The consumer also calls EmitRegistry.get("unknown-platform") to
+  verify it returns null rather than throwing, and EmitRegistry.list() to
+  verify the registered emitter appears in the catalog. This scenario tests
+  the plugin boundary: codegen owns the registry and base classes, but the
+  actual emitter logic lives in a separate @craftworks/emit-oc package.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The register() method must validate the plugin descriptor before
+      accepting it. If a plugin omits the platform field or provides an
+      empty string, the registry silently stores a plugin that can never
+      be discovered by name. Validation must reject descriptors missing
+      required fields (name, platform, emitter class) with a typed error
+      rather than storing a broken entry.
+    spec_impact: "CL-08 codegen — EmitRegistry.register() input validation contract"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Platform names must be normalized before storage (lowercase, trimmed).
+      If "OpenClaw" and "openclaw" are treated as different platforms, a
+      consumer could register under one casing and look up under another,
+      getting null. The registry must define a canonical form and normalize
+      on both register() and get() to prevent casing mismatches.
+    spec_impact: "CL-08 codegen — platform name normalization rule"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      EmitRegistry.list() returns all registered emitters. If the return
+      type leaks the internal Map structure (returning the live map instead
+      of a snapshot), a consumer could mutate the registry by modifying the
+      returned collection. list() must return a defensive copy or an
+      immutable view to prevent accidental registry corruption.
+    spec_impact: "CL-08 codegen — EmitRegistry.list() defensive return type"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The plugin descriptor should include a version field. Without it,
+      the compatibility manifest (@craftworks/platform) cannot track which
+      emitter version is tested-together with which codegen version. If
+      version is optional, the manifest has gaps. If version is required,
+      every emitter plugin must declare it at registration time.
+    spec_impact: "CL-08 codegen — emitter plugin version field requirement"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Registration order may affect discovery if multiple plugins are
+      registered for the same platform (handled in S04). But even for
+      single registration, the order in which list() returns plugins must
+      be deterministic. If backed by a Map (insertion-ordered in JS), this
+      is guaranteed. If backed by an Object or Set, order may vary across
+      engines. The spec should mandate insertion-order iteration.
+    spec_impact: "CL-08 codegen — EmitRegistry iteration order guarantee"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The scenario registers a single emitter. In production, claws
+      registers emit-oc and emit-cc at startup. Enterprise extends with
+      up to 5 more emitters. The registry must handle at least 7 plugins
+      without degradation, but this is a trivial scaling requirement.
+      The real risk is startup latency if each register() call triggers
+      validation or initialization in the emitter class.
+    spec_impact: "CL-08 codegen — registration latency budget per plugin"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      EmitRegistry should be importable without side effects. If importing
+      @craftworks/codegen triggers global state initialization (populating
+      a default registry with built-in emitters), the package is no longer
+      a framework — it becomes opinionated. The registry must be empty on
+      import; callers populate it. This ensures @craftworks/codegen has no
+      hidden dependency on emit-oc or emit-cc at the package level.
+    spec_impact: "CL-08 codegen — zero-side-effect import contract"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      If EmitRegistry is a singleton (module-level instance), two
+      independent consumers importing @craftworks/codegen in the same
+      process share the same registry. One consumer's registration affects
+      the other. For library use this is correct (shared plugin catalog),
+      but for testing it creates coupling. The registry must support
+      creating isolated instances for test contexts.
+    spec_impact: "CL-08 codegen — EmitRegistry factory vs singleton pattern"
+    pitfall: null
+
+  - id: F09
+    severity: major
+    description: >
+      The emitter class provided at registration must extend EmitTarget.
+      If register() does not validate the prototype chain, a consumer
+      could register a plain object that lacks the required emit() method.
+      The first call to compile-and-emit would then fail deep in the
+      pipeline with a confusing TypeError rather than a clear registration
+      error. Validate at registration time, not at emit time.
+    spec_impact: "CL-08 codegen — EmitTarget subclass validation at registration"
+    pitfall: null

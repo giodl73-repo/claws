@@ -1,0 +1,96 @@
+name: S01-standalone-install
+series: emit-oc
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/emit-oc installs with only @craftworks/codegen
+  as a dependency and produces OC Gateway plugin output at the expected path.
+
+expect:
+  craftworks_deps: ["@craftworks/codegen"]
+  output_path: "plugins/claws-governance/index.ts"
+  output_valid_ts: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer runs npm install @craftworks/emit-oc in a project that already
+  has @craftworks/codegen installed. No other @craftworks packages should be
+  pulled. The consumer then invokes the emitter with a compiled governance
+  IR and target directory. The emitter must produce plugins/claws-governance/index.ts
+  containing a valid TypeScript module that exports an OC Gateway plugin
+  conforming to the OC plugin interface. The emitted file must be parseable
+  by TypeScript without type errors when the OC type definitions are available.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If emit-oc depends on @craftworks/governance or @craftworks/context for
+      type definitions, the standalone install guarantee is broken. All types
+      needed for code generation must come from @craftworks/codegen or be
+      inlined in the emitter package itself.
+    spec_impact: "CL-08 emitter-deps — emit-oc dependency must be codegen-only"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The emitted index.ts must import from the OC platform SDK (e.g.,
+      "@oracle-cloud/gateway"), not from @craftworks/ packages. If the emitted
+      code contains @craftworks/ imports, it cannot run in a standalone OC
+      deployment without the claws repo installed.
+    spec_impact: "CL-08 emitter-output — emitted code must use platform-native imports only"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The output directory plugins/claws-governance/ must be created if it
+      does not exist. If the emitter assumes the directory structure exists,
+      first-time runs in fresh workspaces will fail with ENOENT. The emitter
+      must mkdir -p the output path.
+    spec_impact: "CL-08 emitter-output — emitters must create output directories"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      If the target directory already contains a previous index.ts, the emitter
+      must overwrite it cleanly, not merge or append. Partial updates to
+      governance code produce corrupt plugins that fail at runtime with
+      confusing errors.
+    spec_impact: "CL-08 emitter-output — overwrite semantics for existing output"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The emitter must validate that the input governance IR is complete
+      before generating code. If required IR fields are missing, the emitter
+      should fail with an error naming the missing fields rather than
+      generating partial code that compiles but enforces incomplete governance.
+    spec_impact: "CL-08 emitter-input — IR completeness validation before emission"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The emitted TypeScript should include a generation header comment with
+      the claws version, generation timestamp, and source IR hash. This
+      metadata helps consumers determine whether re-generation is needed
+      after governance changes.
+    spec_impact: "CL-08 emitter-output — generation metadata header in emitted files"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The package should declare its @craftworks/codegen dependency as a
+      peer dependency, not a direct dependency, to avoid version duplication
+      when multiple emitters are installed in the same workspace.
+    spec_impact: "CL-08 emitter-deps — codegen as peer dependency for dedup"
+    pitfall: null

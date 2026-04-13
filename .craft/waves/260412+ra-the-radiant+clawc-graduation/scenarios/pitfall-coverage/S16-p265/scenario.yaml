@@ -1,0 +1,102 @@
+name: S16-p265
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-265
+description: >
+  Validates that `claws compile` wraps emitter exceptions in typed EmitError
+  with platform context. When an emitter plugin's emit() method throws an
+  unhandled exception, operators must be able to identify which emitter failed
+  and what IR triggered the failure. Ambiguous validate() results must be
+  resolved before emit() is called.
+
+expect:
+  detection: true
+  prevention: "`claws compile` wraps emitter exceptions in typed EmitError with platform ID, IR hash, and stack trace. ValidationResult uses explicit severity levels (pass/warn/fail). Gate evaluation errors fail closed per R5 principle."
+
+simulate:
+  failures: ["Emitter plugin throws unhandled exception during emit with no platform context in the error"]
+  halt: null
+  budget: null
+
+problem: >
+  A workspace targets two platforms: emit-oc then emit-cc. emit-oc's emit()
+  method succeeds. emit-cc's emit() method throws `TypeError: Cannot read
+  properties of undefined (reading 'rules')` because the GovernanceIR has
+  a null governance section (bug in the IR builder). The error propagates as a
+  raw TypeError with a stack trace pointing to emit-cc's internal code but no
+  indication of which emitter failed, what platform was being targeted, or what
+  IR input caused the failure. The operator sees a generic error and cannot
+  determine whether emit-oc or emit-cc failed. Separately, emit-cc's validate()
+  returns `{ valid: true, warnings: ['missing field'] }` — an ambiguous result
+  (valid with warnings). The framework proceeds to emit() on this ambiguous
+  validation. Verify that errors are wrapped with context and validation is
+  strict.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The EmitError wrapper must include: platform ID (e.g., 'claude-code'),
+      emitter package name and version, the IR hash that was being processed,
+      the original error message and stack trace, and a correlation ID linking
+      to the compile session. Without the platform ID, operators in a
+      multi-target compile cannot identify which emitter failed.
+    spec_impact: "CL-08 G-EMIT — EmitError must include platform ID, package, IR hash, correlation ID"
+    pitfall: P-265
+
+  - id: F02
+    severity: major
+    description: >
+      The validate-before-emit lifecycle must be enforced by the framework,
+      not by convention. If emit() can be called without a preceding
+      validate() call, or if validate()'s result is ignored, the lifecycle
+      contract is broken. The framework should call validate() -> check result
+      -> emit() as an atomic sequence, not leave it to the emitter plugin.
+    spec_impact: "CL-08 G-EMIT — framework-enforced validate-then-emit lifecycle"
+    pitfall: P-265
+
+  - id: F03
+    severity: major
+    description: >
+      Ambiguous validation results (valid: true with warnings) must have
+      defined semantics. If warnings are informational (emit proceeds), they
+      must be logged. If any warning is actually a blocking issue, it should
+      be a fail, not a warning. The ValidationResult type must use explicit
+      severity levels: pass (no issues), warn (proceed with caveats), fail
+      (block emit). The framework's decision threshold must be configurable.
+    spec_impact: "CL-08 G-EMIT — ValidationResult with explicit pass/warn/fail semantics"
+    pitfall: P-265
+
+  - id: F04
+    severity: warning
+    description: >
+      Gate evaluation errors (exceptions thrown during validate() itself)
+      must fail closed per R5 principle. If validate() throws, the framework
+      must treat it as a validation failure, not skip validation. A try/catch
+      that silently proceeds to emit() on validate() exception is a security
+      violation (fail-open).
+    spec_impact: "CL-08 G-EMIT — validate() exceptions treated as validation failure (fail closed)"
+    pitfall: P-265
+
+  - id: F05
+    severity: warning
+    description: >
+      When running multiple emitters in sequence, a failure in emitter N
+      should not prevent reporting results from emitters 1 through N-1.
+      The compile orchestrator should collect results per-emitter and report
+      all of them, including which succeeded before the failure. This enables
+      partial output recovery.
+    spec_impact: "CL-08 G-EMIT — per-emitter result collection even on partial failure"
+    pitfall: P-265
+
+  - id: F06
+    severity: note
+    description: >
+      Community emitter plugins may have lower code quality than official
+      emitters. The error wrapping and validation enforcement must be equally
+      strict for all emitters — official and community. The framework cannot
+      trust emitter code to handle its own errors correctly; the wrapping must
+      happen at the framework level.
+    spec_impact: "CL-08 G-EMIT — framework-level error wrapping applies to all emitters equally"
+    pitfall: P-265

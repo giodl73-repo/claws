@@ -75,12 +75,12 @@ findings:
   - id: F04
     severity: warning
     description: >
-      The reclassification override appears in `claws pinch` output as
-      [OVERRIDE] per Amendment A3. The pinch report must show: original
+      The reclassification override appears in `claws check` output as
+      [OVERRIDE] per Amendment A3. The check report must show: original
       classification, override classification, reason, and whether the
       override changes the fail-mode behavior. This transparency is
       essential for security audits.
-    spec_impact: "CL-02 G-CLASS — reclassification in pinch report"
+    spec_impact: "CL-02 G-CLASS — reclassification in check report"
     pitfall: null
 
   - id: F05

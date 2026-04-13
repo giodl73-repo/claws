@@ -1,0 +1,97 @@
+name: S10-p259
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-259
+description: >
+  Validates that `claws drift` reads resolved versions from lock files rather
+  than declared ranges from package.json. A workspace declaring ^1.0.0 but
+  resolving to 1.2.3 (which is out-of-spec) passes drift checks when comparing
+  declared ranges. Additionally, drift detection must work across npm, pnpm,
+  and yarn PnP — not just node_modules traversal.
+
+expect:
+  detection: true
+  prevention: "`claws drift` reads resolved versions via package manager CLI (`npm ls --json`, `pnpm list --json`, `yarn info --json`) rather than traversing node_modules."
+
+simulate:
+  failures: ["Drift detection compares declared semver ranges instead of resolved lock file versions"]
+  halt: null
+  budget: null
+
+problem: >
+  A workspace declares @craftworks/governance@^1.0.0 in package.json. The
+  platform manifest pins governance to 1.0.2. npm resolves and installs
+  governance@1.2.3 (which satisfies ^1.0.0 but exceeds the manifest pin).
+  `claws drift` compares the declared range ^1.0.0 against the manifest pin
+  1.0.2 and reports "no drift" because ^1.0.0 includes 1.0.2. But the actual
+  installed version is 1.2.3, which is NOT the manifest pin. Separately, a
+  pnpm workspace has no node_modules directory (uses .pnpm store). `claws
+  drift` tries to traverse node_modules, finds nothing, and crashes with
+  ENOENT. Verify that `claws drift` uses `npm ls --json` (or equivalent)
+  to read resolved versions and handles all three package managers.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The fundamental error is comparing ranges to pins. A declared range
+      ^1.0.0 tells npm "anything >=1.0.0 <2.0.0 is acceptable." The manifest
+      pin 1.0.2 says "this specific version is required." Only the resolved
+      version (from the lock file) reveals what is actually installed. The
+      drift check must always compare resolved versions, never declared
+      ranges.
+    spec_impact: "CL-08 G-DRIFT — compare resolved versions from lock file against manifest pins"
+    pitfall: P-259
+
+  - id: F02
+    severity: major
+    description: >
+      pnpm uses a content-addressable store with .pnpm directory and hard
+      links. There is no flat node_modules. The drift scanner must use
+      `pnpm list --json` to get resolved versions. If the scanner falls back
+      to node_modules traversal, it gets incomplete or empty results for
+      pnpm workspaces.
+    spec_impact: "CL-08 G-DRIFT — pnpm support via pnpm list --json, not node_modules"
+    pitfall: P-259
+
+  - id: F03
+    severity: major
+    description: >
+      yarn PnP (Plug'n'Play) has no node_modules at all. Packages are loaded
+      from .pnp.cjs and a .yarn/cache/ zip archive. The drift scanner must
+      use `yarn info --json` or parse .pnp.cjs to resolve versions. A
+      hardcoded node_modules path causes a crash.
+    spec_impact: "CL-08 G-DRIFT — yarn PnP support via yarn info, not node_modules"
+    pitfall: P-259
+
+  - id: F04
+    severity: warning
+    description: >
+      Package manager detection itself is a failure point. If the scanner
+      defaults to npm when pnpm or yarn is the actual package manager, it
+      may report incorrect resolved versions. The scanner should detect the
+      package manager from lock file presence (package-lock.json vs pnpm-lock.yaml
+      vs yarn.lock) before querying.
+    spec_impact: "CL-08 G-DRIFT — auto-detect package manager from lock file presence"
+    pitfall: P-259
+
+  - id: F05
+    severity: warning
+    description: >
+      `npm ls --json` returns exit code 1 when there are peer dependency
+      warnings, even when the output is valid JSON with all resolved versions.
+      The scanner must not treat exit code 1 as a fatal error — it should
+      parse the JSON output regardless and only fail on parse errors.
+    spec_impact: "CL-08 G-DRIFT — handle npm ls exit code 1 gracefully"
+    pitfall: P-259
+
+  - id: F06
+    severity: note
+    description: >
+      The fleet-wide implication is that drift scans across 47 workspaces
+      may use different package managers. The scanner must be polymorphic:
+      detect the package manager per workspace, not assume fleet uniformity.
+      A fleet using mixed npm + pnpm must have both code paths exercised.
+    spec_impact: "CL-08 G-DRIFT — per-workspace package manager detection in fleet scans"
+    pitfall: P-259

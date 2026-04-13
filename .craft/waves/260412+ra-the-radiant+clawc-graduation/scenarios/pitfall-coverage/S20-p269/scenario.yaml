@@ -1,0 +1,104 @@
+name: S20-p269
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-269
+description: >
+  Validates that `claws check --types` detects cross-layer type incompatibility
+  caused by duplicate .d.ts resolution paths. When npm installs two copies of
+  @craftworks/crypto, TypeScript sees structurally identical but nominally
+  different types from different paths, producing TS2345 errors in consumer
+  projects that never appear in the packages' own test suites.
+
+expect:
+  detection: true
+  prevention: "`claws check --types` runs cross-layer type compatibility tests. Platform manifest declares minimum npm version for deduplication guarantee. No type aliasing of shared package exports allowed across layers."
+
+simulate:
+  failures: ["Duplicate .d.ts resolution paths cause nominally different types that fail TypeScript assignment checks in consumers"]
+  halt: null
+  budget: null
+
+problem: >
+  npm installs two copies of @craftworks/crypto: one at
+  node_modules/@craftworks/crypto (direct dep, version 1.0.0) and one at
+  node_modules/@bic/claws-sdk/node_modules/@craftworks/crypto (nested
+  dep, version 1.0.0 — same version but different path). TypeScript resolves
+  AuditChain from two different .d.ts paths. A function in claws-sdk accepts
+  AuditChain as a parameter. The consumer creates an AuditChain from the
+  top-level crypto and passes it to the claws-sdk function. TypeScript reports
+  TS2345: "Argument of type 'AuditChain' is not assignable to parameter of
+  type 'AuditChain'" — two structurally identical types that are nominally
+  different because they come from different declaration files. The packages'
+  own test suites never see this because they resolve to a single .d.ts path
+  in the monorepo. Verify that `claws check --types` catches this cross-layer
+  incompatibility.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The TS2345 error message is deeply confusing: both types are called
+      AuditChain, both have identical fields, but TypeScript treats them as
+      different because they resolve to different .d.ts files. The check
+      must explain the root cause (duplicate npm copies) in its output,
+      not just report the type error. Operators who see "AuditChain is not
+      assignable to AuditChain" need to understand it is a deduplication
+      issue.
+    spec_impact: "CL-08 G-DEDUP — type check explains duplicate .d.ts root cause"
+    pitfall: P-269
+
+  - id: F02
+    severity: major
+    description: >
+      The cross-layer type compatibility test must simulate consumer project
+      structure, not run within the monorepo. In the monorepo, TypeScript
+      resolves all @craftworks/ packages to workspace symlinks (single .d.ts
+      path). The test must create an isolated project that installs packages
+      from npm to reproduce the duplicate .d.ts scenario.
+    spec_impact: "CL-08 G-DEDUP — cross-layer type tests in isolated consumer project"
+    pitfall: P-269
+
+  - id: F03
+    severity: major
+    description: >
+      Even when both copies are the same version (1.0.0), TypeScript treats
+      them as different types if they resolve to different file paths. Version
+      deduplication alone is insufficient — path deduplication is required.
+      The platform manifest must declare a minimum npm version (>= 7) that
+      supports the `overrides` field for forcing deduplication.
+    spec_impact: "CL-08 G-DEDUP — path deduplication required, not just version deduplication"
+    pitfall: P-269
+
+  - id: F04
+    severity: warning
+    description: >
+      Type aliasing across layers (Layer 1 re-exporting a type from Layer 0
+      under a different name) makes the problem worse: even if deduplication
+      resolves the physical .d.ts path issue, the type alias creates a new
+      nominal type that is incompatible with the original. The ban on
+      cross-layer type aliasing prevents this compounding failure.
+    spec_impact: "CL-08 G-DEDUP — ban cross-layer type aliasing for shared packages"
+    pitfall: P-269
+
+  - id: F05
+    severity: warning
+    description: >
+      The failure only surfaces in consumer projects, creating a blind spot
+      in CI: the packages' own test suites always pass. The cross-layer type
+      test must be part of the publish gate (middle ring), not the package's
+      own CI. This means the publish gate must include a consumer-simulation
+      step that is more expensive than typical package CI.
+    spec_impact: "CL-08 G-DEDUP — consumer-simulation in publish gate for cross-layer types"
+    pitfall: P-269
+
+  - id: F06
+    severity: note
+    description: >
+      TypeScript's `paths` configuration in the consumer's tsconfig could
+      work around this by mapping all @craftworks/ types to a single path.
+      But requiring consumers to configure tsconfig for governance packages
+      is poor DX. The fix must be in the package architecture (dedup at npm
+      level), not in consumer configuration.
+    spec_impact: "CL-08 G-DEDUP — fix at package level, not consumer tsconfig workaround"
+    pitfall: P-269

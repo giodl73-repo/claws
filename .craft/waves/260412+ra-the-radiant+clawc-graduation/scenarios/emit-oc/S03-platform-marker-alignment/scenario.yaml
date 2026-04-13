@@ -1,0 +1,96 @@
+name: S03-platform-marker-alignment
+series: emit-oc
+version: 1
+specs: [CL-08]
+description: >
+  Validates that emit-oc output matches the marker file format that
+  @craftworks/workspace uses to detect OC Gateway governance installations.
+
+expect:
+  marker_detected: true
+  platform_id: "oc-gateway"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The @craftworks/workspace package detects which platform emitters have been
+  applied by scanning for platform-specific marker files. For OC Gateway, the
+  marker is the presence of plugins/claws-governance/index.ts with a specific
+  header comment pattern (e.g., "// claws-governance:oc-gateway:v{version}").
+  After emit-oc runs, workspace.detect() must identify the OC Gateway platform.
+  If the marker format drifts between emit-oc and workspace, platform detection
+  silently fails and the workspace reports no governance installed.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The marker comment format is a contract between emitters and workspace.
+      If emit-oc changes the header pattern (e.g., adding a timestamp field)
+      without coordinating with @craftworks/workspace, detection breaks.
+      The marker format must be defined in a shared constant or schema
+      owned by @craftworks/codegen, not duplicated in each emitter.
+    spec_impact: "CL-08 workspace-markers — marker format must be centralized in codegen"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The marker must survive code formatting tools (Prettier, ESLint).
+      If the marker is a multi-line comment, formatters may reflow it,
+      breaking the regex pattern that workspace uses for detection. The
+      marker should be a single-line comment that formatters preserve.
+    spec_impact: "CL-08 workspace-markers — marker format must be formatter-resistant"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The version embedded in the marker must match the @craftworks/emit-oc
+      package version, not the claws compiler version. If the marker version
+      tracks the compiler version, workspace cannot determine which emitter
+      version produced the output, complicating upgrade detection.
+    spec_impact: "CL-08 workspace-markers — marker version must track emitter package version"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      If the consumer manually edits the emitted file and removes the marker
+      comment, workspace should degrade gracefully by scanning for structural
+      indicators (e.g., exported function names matching governance plugin
+      convention) rather than reporting "no governance installed."
+    spec_impact: "CL-08 workspace-markers — fallback detection for missing markers"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Multiple emitters may run in the same workspace (e.g., emit-oc and
+      emit-cc for a project targeting both platforms). Each emitter's marker
+      must be distinguishable. Workspace must detect all installed platforms,
+      not just the first one found.
+    spec_impact: "CL-08 workspace-markers — multi-platform detection support"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The marker should include the governance IR hash so workspace can
+      determine whether the emitted code is stale relative to the current
+      governance configuration without re-running the emitter.
+    spec_impact: "CL-08 workspace-markers — staleness detection via IR hash in marker"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Marker detection performance matters for large workspaces. Workspace
+      should check the marker file at a known path first (O(1)) rather than
+      scanning all files in the project tree (O(n)). The emit-oc output
+      path must be deterministic and documented.
+    spec_impact: "CL-08 workspace-markers — O(1) detection via known output path"
+    pitfall: null

@@ -9,7 +9,7 @@ claws is the governance compiler for OpenClaw agents. It reads 9 workspace files
 **DCRs**: `DCR.md` — 0 filed
 **Research**: `design/claws/focus/Q01-Q18` — 18 questions, all Proposed
 **Roles**: `.craft/roles/claws/` — 8 roles across 3 stakeholder layers
-**Deck**: `docs/presentations/why-claws.md` — product pitch
+**Deck**: `docs/claws/presentations/why-claws.md` — product pitch
 **Pitfalls**: `design/claws/PITFALLS.md` — 50 pitfalls + HITL map
 **Command Map**: `design/claws/COMMAND-MAP.md` — 40 commands
 
@@ -78,5 +78,5 @@ claws is the governance compiler for OpenClaw agents. It reads 9 workspace files
 | `design/claws/PITFALLS.md` | 50 pitfalls + HITL map |
 | `design/claws/focus/Q01-Q18` | 18 research questions |
 | `.craft/roles/claws/` | 8 stakeholder roles |
-| `docs/presentations/why-claws.md` | Product pitch deck |
+| `docs/claws/presentations/why-claws.md` | Product pitch deck |
 | `design/agent/focus/Q12m/data/atoms-audit.md` | 163 atoms classified |

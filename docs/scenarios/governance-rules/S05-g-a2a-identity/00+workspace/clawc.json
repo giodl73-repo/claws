@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "trustTier": "T2",
+  "platform": "openclaw",
+  "fleet": {
+    "enabled": true,
+    "name": "acme-fleet"
+  }
+}

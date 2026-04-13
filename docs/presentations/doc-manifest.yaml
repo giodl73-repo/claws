@@ -1,0 +1,53 @@
+surface: deck
+entries:
+  R5-typesetter-diagram-craft-deck:
+    type: guide
+    path: docs/claws/presentations/guidance/R5-typesetter-diagram-craft.md
+    atoms:
+    - R5-typesetter-diagram-craft
+  R5-typesetter-info-arch-deck:
+    type: guide
+    path: docs/claws/presentations/guidance/R5-typesetter-info-arch.md
+    atoms:
+    - R5-typesetter-info-arch
+  R5-typesetter-narrative-pacing-deck:
+    type: guide
+    path: docs/claws/presentations/guidance/R5-typesetter-narrative-pacing.md
+    atoms:
+    - R5-typesetter-narrative-pacing
+  R5-typesetter-slide-design-deck:
+    type: guide
+    path: docs/claws/presentations/guidance/R5-typesetter-slide-design.md
+    atoms:
+    - R5-typesetter-slide-design
+  R5-typesetter-table-design-deck:
+    type: guide
+    path: docs/claws/presentations/guidance/R5-typesetter-table-design.md
+    atoms:
+    - R5-typesetter-table-design
+  presentation-expert-review-deck:
+    type: guide
+    path: docs/claws/presentations/guidance/presentation-expert-review.md
+    atoms:
+    - presentation-expert-review
+  typesetter-ship-test-deck:
+    type: guide
+    path: docs/claws/presentations/guidance/typesetter-ship-test.md
+    atoms:
+    - typesetter-ship-test
+  why-claws-deck:
+    type: guide
+    path: docs/claws/presentations/why-claws.md
+    atoms:
+    - why-claws
+    - check
+    - claws-init
+    - claws-compiler
+    - three-engine-model
+    - three-rings
+    - tier-adoption
+    - three-tier-packages
+    - lossless-roundtrip
+    - dotnet-for-oc
+    - governance-plugin
+    - obo-boundary

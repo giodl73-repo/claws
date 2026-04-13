@@ -1,0 +1,170 @@
+name: S01-circular-dependency-free
+series: cross-package
+version: 1
+specs: [CL-08]
+description: >
+  Validates that the 17-package dependency graph (10 core + 7 emitters) plus
+  3 claws packages and @bic/claws-sdk forms a strict DAG with zero
+  circular dependencies. CL-08 constraint C10 requires the inter-package graph
+  to be acyclic and verifiable in CI via madge --circular. A single cycle
+  anywhere in the 21-package graph would break topological build ordering,
+  cause infinite resolution loops in npm, and undermine the layered architecture.
+
+expect:
+  madge:
+    circular_count: 0
+    packages_scanned: 21
+    layers_verified: [layer-1-blocks, layer-2-compiler, layer-3-enterprise]
+  npm_install:
+    resolution: "success"
+    warnings: []
+  tsc_build:
+    topological_order: true
+    all_packages_compile: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Run madge --circular across all 21 packages (10 core @craftworks/*, 7
+  @craftworks/emit-*, @craftworks/platform, @claws/compiler, @bic/claws-skill-kit,
+  @bic/claws-test, @bic/claws-sdk). The tool must resolve all TypeScript
+  import paths including subpath exports, barrel re-exports, and type-only
+  imports. Each package is built in topological order — leaf packages first
+  (crypto, workspace, relax, eval, input), then mid-tier (forma, governance,
+  context), then framework (codegen, execution), then emitters, then Layer 2,
+  then Layer 3. Any cycle detected at any granularity (file-level, package-level,
+  or layer-level) is a build-breaking failure.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Type re-exports from @claws/compiler back into @craftworks/* create a
+      hidden Layer 2 -> Layer 1 cycle. CL-08 line 406-431 shows @claws/compiler
+      re-exporting types from @craftworks/forma, @craftworks/workspace, and
+      @craftworks/crypto. If any @craftworks/* package imports a type that
+      @claws/compiler defines (e.g., GovernanceIR) — even as a type-only import
+      — madge may not detect it since TypeScript type-only imports are erased at
+      compile time but still create a logical dependency. CI must run madge on
+      .ts sources, not compiled .js output.
+    spec_impact: "CL-08 dependency rules — madge must scan .ts source, not .js output"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      @craftworks/execution depends on @craftworks/governance (CL-08 line 249-252),
+      and @craftworks/governance depends on @craftworks/crypto (line 189). If
+      execution also imports utility functions from crypto directly (bypassing
+      governance), the dependency graph gains a diamond but remains acyclic.
+      However, if a future contributor adds a convenience import from execution
+      back into governance (e.g., for gate evaluation in budget tracking), a
+      cycle forms between two mid-tier packages. The CI check must flag new edges
+      added between packages at the same tier level.
+    spec_impact: "CL-08 dependency rules — CI must detect new inter-package edges, not just cycles"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      @bic/claws-sdk imports from @claws/compiler (Rule 1, CL-08 line
+      521-524) and also imports additional Layer 1 blocks directly (relax,
+      context, governance, execution, eval — line 365-369). If @claws/compiler
+      internally re-exports a symbol from one of those same Layer 1 blocks,
+      both claws-sdk and @claws/compiler pull in the same block through different
+      paths. This is not a cycle but it creates a version-coherence risk: claws-sdk
+      might pin @craftworks/governance@2.0.0 while @claws/compiler pins
+      @craftworks/governance@1.0.0, causing two copies of governance in the
+      dependency tree. madge --circular will not detect this — a separate
+      version-coherence check is needed.
+    spec_impact: "CL-08 dependency rules — add version-coherence check alongside cycle detection"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Barrel files (index.ts) in each package re-export from submodules. If
+      two packages have barrel files that transitively import each other's
+      submodules, the cycle exists at the barrel level but not at the individual
+      module level. madge --circular with default settings may report the cycle
+      or miss it depending on import resolution depth. The CI job must configure
+      madge with --ts-config pointing to each package's tsconfig.json for correct
+      path resolution.
+    spec_impact: "CL-08 CI validation — madge config must include per-package tsconfig paths"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Dynamic imports (import()) are not followed by madge's default static
+      analysis. If @craftworks/codegen uses dynamic import to lazily load
+      @craftworks/forma features at emit time, madge misses this edge. The
+      cycle check passes but the runtime dependency exists. CL-08 should
+      mandate that dynamic imports between packages are banned or explicitly
+      declared in a sidecar dependency manifest.
+    spec_impact: "CL-08 dependency rules — ban or declare dynamic cross-package imports"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Test files may import from packages that create cycles not present in
+      production code. For example, @craftworks/forma tests importing test
+      utilities from @bic/claws-test (which depends on @claws/compiler, which
+      depends on @craftworks/forma) creates a test-time cycle. madge should
+      scan src/ directories only, not test/ directories. But if test utilities
+      are exported from the package root, they contaminate the production
+      dependency graph.
+    spec_impact: "CL-08 package structure — test utilities must be in separate exports condition or devDependencies only"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The 7 emitter plugins all depend on @craftworks/codegen. If a new emitter
+      is added that also depends on a second core package (e.g., emit-bedrock
+      importing @craftworks/governance for compliance metadata in headers), the
+      dependency graph gains complexity. Each new edge must be validated against
+      the DAG constraint. Without automated CI enforcement, manual review misses
+      new edges introduced in routine PRs.
+    spec_impact: "CL-08 emitter plugins — emitters must depend only on codegen; additional deps require spec amendment"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      npm workspaces resolve local packages via symlinks. madge following
+      symlinks may resolve to the workspace root's node_modules rather than
+      the package's own source, producing false negatives (missed imports)
+      or false positives (phantom cycles). The CI job should run madge against
+      published package tarballs (npm pack) rather than the workspace symlinks
+      to ensure the cycle check matches what consumers actually install.
+    spec_impact: "CL-08 CI validation — run cycle check on packed tarballs, not workspace symlinks"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The topological build order must be documented alongside the dependency
+      graph. If packages are built in parallel (e.g., all leaf packages at once),
+      a race condition exists where a mid-tier package's build starts before its
+      leaf dependency finishes. The build system (turborepo, nx, or npm scripts)
+      must respect the declared dependency edges for build ordering, not just
+      install ordering.
+    spec_impact: "CL-08 build system — document topological build order, enforce in build pipeline"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      @bic/claws-skill-kit is declared as having zero dependencies (CL-08 line 461).
+      If skill-kit adds a dependency on any @craftworks/* block in the future,
+      it gains a Layer 2 -> Layer 1 edge. This is valid (Layer 2 can depend on
+      Layer 1) but changes the build order and may surprise consumers who
+      assumed skill-kit was fully standalone. The zero-dependency guarantee
+      should be enforced in CI, not just documented.
+    spec_impact: "CL-08 @bic/claws-skill-kit — enforce zero-dependency invariant in CI"
+    pitfall: null

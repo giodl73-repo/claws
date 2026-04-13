@@ -1,0 +1,89 @@
+name: S04-p253
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-253
+description: >
+  Validates that `claws check --dedup` detects diamond dependency situations
+  where npm installs duplicate instances of a shared package. When
+  @claws/compiler and @bic/claws-sdk pin different versions of
+  @craftworks/crypto, npm cannot deduplicate, breaking instanceof checks
+  and singleton registries like EmitRegistry.
+
+expect:
+  detection: true
+  prevention: "`claws check --dedup` verifies zero duplication via `npm ls --all` at manifest-declared versions. Platform manifest is the single source of truth for version pins. Publish gate rejects manifest versions that produce duplicates."
+
+simulate:
+  failures: ["Diamond dependency between @claws/compiler and @bic/claws-sdk installs duplicate @craftworks/crypto instances"]
+  halt: null
+  budget: null
+
+problem: >
+  @claws/compiler pins @craftworks/crypto@1.0.0 while @bic/claws-sdk
+  pins @craftworks/crypto@1.1.0. A consumer installs both packages. npm cannot
+  deduplicate crypto — two copies exist at different tree levels. Code creates
+  an AuditChain using crypto@1.0.0's constructor, then passes it to a function
+  in claws-sdk that uses crypto@1.1.0's instanceof check. The check fails: the
+  AuditChain is not an instance of the other copy's class. Additionally,
+  EmitRegistry.register() called from crypto@1.0.0's context writes to one
+  singleton, while the compile orchestrator reads from the other copy's
+  singleton. Registered emitters are invisible. Verify that `claws check
+  --dedup` catches the duplication before publish and that the platform
+  manifest prevents the version mismatch.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The instanceof failure is the most severe symptom: it appears as a
+      type mismatch at runtime with no clear error message. The Error says
+      "Expected AuditChain but received Object" even though the object IS
+      an AuditChain — just from a different copy. Detection must not only
+      find duplicates but explain which packages caused the diamond.
+    spec_impact: "CL-08 G-PLATFORM — dedup report must identify both sides of the diamond"
+    pitfall: P-253
+
+  - id: F02
+    severity: major
+    description: >
+      Singleton registries (EmitRegistry, GovernanceRegistry) split across
+      duplicate copies. Emitters registered through one copy are invisible to
+      the orchestrator holding the other copy. The failure mode is silent:
+      no error is thrown, the registry simply appears empty. The dedup check
+      must specifically validate that singleton-bearing packages have zero
+      duplicates.
+    spec_impact: "CL-08 G-PLATFORM — singleton packages must have zero npm duplicates"
+    pitfall: P-253
+
+  - id: F03
+    severity: major
+    description: >
+      The platform manifest is the prevention mechanism, but if the manifest
+      itself has inconsistent version pins (e.g., crypto declared as ^1.0.0
+      in one entry and ^1.1.0 in another), the manifest is the source of the
+      diamond. `claws check --dedup` must validate manifest internal
+      consistency before checking consumer installs.
+    spec_impact: "CL-08 G-PLATFORM — manifest self-consistency validation"
+    pitfall: P-253
+
+  - id: F04
+    severity: warning
+    description: >
+      pnpm and yarn handle deduplication differently than npm. pnpm uses a
+      content-addressable store that naturally deduplicates, but its strict
+      peer dependency resolution may install two copies when npm would
+      deduplicate. The check must be package-manager aware, not npm-only.
+    spec_impact: "CL-08 G-PLATFORM — package-manager-aware dedup validation"
+    pitfall: P-253
+
+  - id: F05
+    severity: warning
+    description: >
+      If dedup detection fails and both copies are installed, the blast
+      radius is every cross-package boundary that passes objects. Any class
+      instance, any Error subclass, any branded type that crosses the
+      duplicate boundary fails. The failure appears at arbitrary points in
+      the application, making root-cause analysis extremely difficult.
+    spec_impact: "CL-08 G-PLATFORM — document blast radius of undetected duplication"
+    pitfall: P-253

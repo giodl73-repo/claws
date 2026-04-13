@@ -1,0 +1,86 @@
+name: S03-platform-marker-alignment
+series: emit-langgraph
+version: 1
+specs: [CL-08]
+description: >
+  Validates that emit-langgraph output matches the marker format that
+  @craftworks/workspace uses to detect LangGraph governance installations.
+
+expect:
+  marker_detected: true
+  platform_id: "langgraph"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  @craftworks/workspace detects LangGraph governance by scanning for
+  governance.py at a known path containing a Python module-level constant
+  or docstring marker (e.g., __claws_platform__ = "langgraph"). After
+  emit-langgraph runs, workspace.detect() must return platform_id "langgraph"
+  with the emitter version. The marker must be valid Python that does not
+  interfere with LangGraph's runtime behavior.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Workspace is a TypeScript/Node.js package scanning Python files. The
+      marker extraction must not require executing the Python file (no
+      "python -c" subprocess). It must be extractable via regex or AST-free
+      text scanning from Node.js. A module-level string constant is
+      regex-friendly; a computed value is not.
+    spec_impact: "CL-08 workspace-markers — marker must be statically extractable from Node.js"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The marker constant name (__claws_platform__) uses dunder convention,
+      which Python reserves for system-defined names. While Python does not
+      enforce this reservation for user code, linters (pylint, mypy) may
+      warn about it. Using a single-underscore prefix (_claws_platform)
+      or a plain name (CLAWS_PLATFORM) avoids lint warnings in consumer
+      projects.
+    spec_impact: "CL-08 workspace-markers — lint-friendly marker constant naming"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      If the consumer renames governance.py (e.g., to match their project
+      naming convention), workspace detection fails because it looks for
+      a fixed filename. Workspace should support a configurable filename
+      or scan all .py files in the governance directory for the marker.
+    spec_impact: "CL-08 workspace-markers — configurable Python filename for detection"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The marker must include the governance IR hash alongside the emitter
+      version so workspace can detect when the Python file is stale relative
+      to the current governance configuration without re-running the emitter.
+    spec_impact: "CL-08 workspace-markers — IR hash in Python marker for staleness detection"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      Python files may be distributed as .pyc bytecode. Workspace detection
+      must work on .py source files only and should not attempt to scan
+      .pyc files. The detection docs should note this limitation.
+    spec_impact: "CL-08 workspace-markers — source-only detection, not bytecode"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      If the governance.py file is inside a Python package (with __init__.py),
+      workspace should also detect the package structure and report the
+      full import path (e.g., "myapp.governance") for the consumer's
+      convenience.
+    spec_impact: "CL-08 workspace-markers — Python package context in detection report"
+    pitfall: null

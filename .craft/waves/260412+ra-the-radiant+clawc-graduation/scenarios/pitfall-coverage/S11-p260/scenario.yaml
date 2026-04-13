@@ -1,0 +1,102 @@
+name: S11-p260
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-260
+description: >
+  Validates that `claws broadcast` uses --save-exact to prevent targeted emitter
+  upgrades from cascading shared dependency upgrades across the fleet. A targeted
+  fix for emit-cursor should not trigger a fleet-wide @craftworks/codegen upgrade.
+  Concurrent broadcasts to multi-platform workspaces must acquire per-workspace
+  locks to prevent lock file corruption.
+
+expect:
+  detection: true
+  prevention: "`claws broadcast` uses `--save-exact` to prevent cascade upgrades of shared dependencies. Per-workspace lock acquired before modification. Parallel flag with configurable concurrency."
+
+simulate:
+  failures: ["Targeted emitter upgrade cascades shared dependency upgrades to all emitters in workspace"]
+  halt: null
+  budget: null
+
+problem: >
+  Operator runs `claws broadcast --package @craftworks/emit-cursor@1.1.1` to
+  push a targeted fix to 47 workspaces. emit-cursor declares
+  `@craftworks/codegen: "^2.0.0"` as a dependency. npm resolves codegen@2.3.0
+  (latest satisfying ^2.0.0) during install, upgrading from the previously
+  pinned codegen@2.1.0. All other emitters in the workspace (emit-cc, emit-oc,
+  emit-copilot) now use codegen@2.3.0 instead of 2.1.0. A breaking change in
+  codegen@2.3.0's normalization pass causes emit-cc to produce different
+  CLAUDE.md output — the targeted cursor fix has broken Claude Code governance.
+  Additionally, two concurrent broadcasts to workspace-17 corrupt
+  package-lock.json because both npm install processes write simultaneously.
+  Verify that `claws broadcast` pins exact versions and acquires locks.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The cascade happens because npm's caret range resolution is
+      non-deterministic over time: ^2.0.0 resolves to different versions
+      depending on what is available in the registry. --save-exact pins the
+      exact version being installed, but the broadcast command must also
+      verify that the target package's own dependencies do not declare caret
+      ranges that trigger cascades in their transitive deps.
+    spec_impact: "CL-08 G-FLEET — --save-exact for direct install; audit transitive ranges"
+    pitfall: P-260
+
+  - id: F02
+    severity: major
+    description: >
+      Concurrent broadcasts to the same workspace corrupt the lock file
+      because npm install is not safe for parallel execution in the same
+      directory. The per-workspace lock must be acquired before any npm
+      operation and held until the install completes and the lock file is
+      committed. The lock mechanism itself must handle stale locks (process
+      crash leaving a lock file).
+    spec_impact: "CL-08 G-FLEET — per-workspace advisory lock with stale lock detection"
+    pitfall: P-260
+
+  - id: F03
+    severity: warning
+    description: >
+      The configurable concurrency flag (--parallel N) must default to a
+      safe value (1 = sequential) with explicit opt-in for parallelism. If
+      the default is parallel, operators unaware of the lock file corruption
+      risk will trigger it on the first fleet-wide broadcast.
+    spec_impact: "CL-08 G-FLEET — parallel broadcast defaults to sequential"
+    pitfall: P-260
+
+  - id: F04
+    severity: warning
+    description: >
+      If the broadcast partially succeeds (35 of 47 workspaces upgraded),
+      the fleet is in a mixed state. The broadcast must report which
+      workspaces succeeded and which failed, and provide a retry command
+      that targets only the failed workspaces. A blanket retry re-upgrades
+      already-upgraded workspaces, potentially causing a double cascade.
+    spec_impact: "CL-08 G-FLEET — broadcast reports per-workspace status; retry targets failures only"
+    pitfall: P-260
+
+  - id: F05
+    severity: warning
+    description: >
+      The blast radius of an undetected cascade is that a targeted fix for
+      one platform breaks another platform's governance output. This is
+      especially dangerous because the operator tested the fix on a single
+      workspace and had no reason to expect cross-platform impact. Detection
+      must include a dry-run mode that shows all dependency changes before
+      applying.
+    spec_impact: "CL-08 G-FLEET — broadcast --dry-run shows full dependency change set"
+    pitfall: P-260
+
+  - id: F06
+    severity: note
+    description: >
+      The lock mechanism must work across different operating systems and
+      network file systems. Advisory locks (flock) do not work on NFS.
+      The lock should use a lock file with PID and timestamp, with a stale
+      detection threshold (e.g., 5 minutes), and a --force-unlock escape
+      hatch for stuck locks.
+    spec_impact: "CL-08 G-FLEET — cross-platform lock mechanism with stale detection"
+    pitfall: P-260

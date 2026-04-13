@@ -1,0 +1,128 @@
+name: S01-ed25519-cross-verification
+series: crypto
+version: 1
+specs: [CL-08]
+description: >
+  Validates that Ed25519 signatures created by @craftworks/crypto verify against
+  compiler-sdk's crypto module (and vice versa). This is the extraction equivalence
+  test for the cryptographic layer: if cross-verification fails, the audit chain
+  continuity guarantee between old and new packages is broken.
+
+expect:
+  cross_verify:
+    crypto_signs_compilersdk_verifies: true
+    compilersdk_signs_crypto_verifies: true
+    same_message_same_signature: true
+  key_format:
+    public_key_encoding: "base64"
+    private_key_encoding: "base64"
+    key_length_bytes: 32
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A test generates an Ed25519 keypair using @craftworks/crypto's generate()
+  function. The same keypair is imported into compiler-sdk's crypto module. A
+  message ("governance-ir-hash:abc123") is signed by @craftworks/crypto, and
+  the signature is verified by compiler-sdk's verify(). Then the reverse: the
+  same message is signed by compiler-sdk, and verified by @craftworks/crypto.
+  Both cross-verification paths must succeed. Additionally, both implementations
+  must produce identical signatures for the same keypair + message combination
+  (Ed25519 is deterministic — same key + same message = same signature).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Ed25519 signatures are deterministic (RFC 8032): the same private key
+      and message always produce the same signature. If @craftworks/crypto
+      and compiler-sdk produce different signatures for the same input, one
+      of them is using a non-standard Ed25519 variant (e.g., Ed25519ctx or
+      Ed25519ph). The test must assert signature equality, not just
+      cross-verification success, to catch variant mismatch.
+    spec_impact: "CL-08 @craftworks/crypto — must use standard Ed25519 (RFC 8032), not ctx/ph variants"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Node.js crypto.sign('ed25519') uses the OpenSSL implementation. If
+      compiler-sdk uses a different Ed25519 library (e.g., tweetnacl or
+      noble-ed25519), key format differences may prevent cross-import.
+      Node.js expects PKCS#8 DER for private keys and SPKI for public
+      keys, while tweetnacl uses raw 32-byte seeds. The key export/import
+      format must be standardized to raw 32-byte seed + 32-byte public key.
+    spec_impact: "CL-08 @craftworks/crypto — key format: raw 32-byte seed (private) + 32-byte public"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The message encoding matters: signing Buffer.from("hello") and
+      signing Buffer.from("hello", "utf-8") produce the same result, but
+      signing the string "hello" directly (if the API accepts strings) may
+      use a different encoding on different Node.js versions. The sign()
+      API must require Buffer input, not accept strings with implicit
+      encoding.
+    spec_impact: "CL-08 @craftworks/crypto — sign() and verify() accept Buffer only, not strings"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      If either implementation normalizes the message before signing (e.g.,
+      stripping trailing newline, trimming whitespace), the cross-verification
+      will fail because the other implementation signs the raw message.
+      Neither implementation should normalize — sign the exact bytes provided.
+      If the caller wants normalization, it must do it before calling sign().
+    spec_impact: "CL-08 @craftworks/crypto — no message normalization in sign/verify, caller responsibility"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The existing compiler-sdk crypto module may use Node.js crypto APIs
+      that were introduced in a specific Node.js version (e.g., Ed25519
+      support was added in Node.js 12.0.0 via crypto.generateKeyPairSync).
+      @craftworks/crypto must document its minimum Node.js version
+      requirement. If compiler-sdk targets Node.js 18+ but crypto targets
+      Node.js 16, the Ed25519 API surface may differ.
+    spec_impact: "CL-08 @craftworks/crypto — minimum Node.js version in engines field"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The test must cover edge cases: empty message (0 bytes), maximum
+      message (Ed25519 has no message length limit), and messages containing
+      null bytes. An empty message is a valid Ed25519 input and must produce
+      a valid 64-byte signature. If either implementation rejects empty
+      messages, it deviates from RFC 8032.
+    spec_impact: "CL-08 @craftworks/crypto — empty message signing must work per RFC 8032"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The cross-verification test is a point-in-time equivalence check. After
+      extraction, if @craftworks/crypto changes its implementation (e.g.,
+      switches from OpenSSL to noble-ed25519 for pure-JS portability),
+      cross-verification against compiler-sdk's pinned version must still
+      pass. The test should be a permanent regression test, not a one-time
+      migration check.
+    spec_impact: "CL-08 @craftworks/crypto — permanent cross-verification regression test"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Ed25519 verification is computationally cheap (~4000 verifies/sec on
+      modern hardware). The cross-verification test should run 1000
+      sign+verify cycles to catch intermittent failures (e.g., from
+      uninitialized memory in key buffers). A single-cycle test may pass
+      by luck if there is a buffer reuse bug.
+    spec_impact: "CL-08 testing strategy — bulk sign/verify cycle for crypto regression"
+    pitfall: null

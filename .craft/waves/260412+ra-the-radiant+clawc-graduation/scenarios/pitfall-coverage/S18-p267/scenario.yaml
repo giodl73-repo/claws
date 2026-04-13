@@ -1,0 +1,104 @@
+name: S18-p267
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-267
+description: >
+  Validates that `claws check --compat` enforces named re-exports only (no
+  wildcards) in compiler-sdk's backward-compat layer. Wildcard re-exports
+  (`export * from`) cause silent symbol collisions when downstream packages
+  add new exports. Wildcard subpath patterns silently narrow when files are
+  removed during extraction.
+
+expect:
+  detection: true
+  prevention: "`claws check --compat` enforces Extension Contract Rule 4 (named re-exports only, no wildcards) for the compiler-sdk compat layer. Explicit subpath entries required for all compat shims."
+
+simulate:
+  failures: ["Wildcard re-exports in compat layer cause silent symbol collision; wildcard subpath patterns narrow silently"]
+  halt: null
+  budget: null
+
+problem: >
+  compiler-sdk's backward-compat layer uses `export * from '@craftworks/forma'`
+  to re-export all forma symbols. In forma@1.1.0, a new export `normalize` is
+  added. compiler-sdk already exports its own `normalize` function. TypeScript
+  reports TS2308 (ambiguous re-export) for consumers using normalize — they
+  must now specify which normalize they want. The compat layer broke a consumer
+  who never asked for the forma upgrade. Separately, compiler-sdk's subpath
+  exports include `./astro/*` (wildcard pattern). During extraction, 3 of 7
+  astro modules are moved to @craftworks/workspace. The wildcard pattern now
+  matches only 4 files instead of 7. A consumer importing
+  `@craftworks/compiler-sdk/astro/detector` gets MODULE_NOT_FOUND because
+  detector was moved — but the wildcard pattern does not error, it just
+  silently excludes the missing file. Verify that `claws check --compat`
+  rejects wildcards in both re-exports and subpath patterns.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      `export * from` is inherently fragile for backward-compat layers
+      because it creates an implicit contract: "every symbol the downstream
+      package exports is also part of our API." When the downstream package
+      adds a symbol that collides with an existing export, the compat layer
+      breaks. Named re-exports (`export { specific } from`) are explicit
+      and do not break on downstream additions.
+    spec_impact: "CL-08 G-COMPAT — Rule 4: named re-exports only, no export *"
+    pitfall: P-267
+
+  - id: F02
+    severity: major
+    description: >
+      The wildcard subpath narrowing is harder to detect than the re-export
+      collision. Node.js does not error when a wildcard pattern matches fewer
+      files than before — it simply resolves to whatever files remain. The
+      check must compare the set of files matched by each wildcard pattern
+      against a pre-extraction baseline to detect narrowing.
+    spec_impact: "CL-08 G-COMPAT — wildcard subpath baseline comparison for narrowing detection"
+    pitfall: P-267
+
+  - id: F03
+    severity: warning
+    description: >
+      Converting from wildcard to named re-exports requires enumerating all
+      symbols currently exported by each downstream package. If the enumeration
+      is incomplete, the conversion itself drops symbols. The conversion tool
+      must use tsc's --declaration output to get the complete export list,
+      not manual inspection.
+    spec_impact: "CL-08 G-COMPAT — automated enumeration via tsc --declaration for wildcard conversion"
+    pitfall: P-267
+
+  - id: F04
+    severity: warning
+    description: >
+      The TS2308 error from ambiguous re-exports is a compile-time error for
+      the consumer, not for compiler-sdk itself. compiler-sdk's own test suite
+      passes because it does not import the ambiguous symbol. The compat check
+      must simulate consumer usage patterns, not just compile the compat
+      layer in isolation.
+    spec_impact: "CL-08 G-COMPAT — compat validation must simulate consumer imports"
+    pitfall: P-267
+
+  - id: F05
+    severity: warning
+    description: >
+      Explicit subpath entries for compat shims must include the `types`
+      condition pointing to .d.ts files. If the explicit entry only has a
+      `default` condition (JS runtime), TypeScript consumers using
+      moduleResolution: bundler or node16 will not find type information
+      for the subpath. Each explicit entry needs all three conditions:
+      types, import, require.
+    spec_impact: "CL-08 G-COMPAT — explicit subpath entries must include types/import/require conditions"
+    pitfall: P-267
+
+  - id: F06
+    severity: note
+    description: >
+      The Extension Contract Rule 4 should be documented as a governance
+      rule with an automated check. If a developer adds `export * from` to
+      the compat layer, the CI gate should catch it before merge. The rule
+      should be enforced in claws check --compat, not just documented in a
+      spec.
+    spec_impact: "CL-08 G-COMPAT — CI-enforced ban on wildcard re-exports in compat layer"
+    pitfall: P-267

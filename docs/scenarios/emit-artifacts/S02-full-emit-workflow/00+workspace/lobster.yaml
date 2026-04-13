@@ -1,0 +1,24 @@
+name: review-and-notify
+description: Review code and notify team
+
+steps:
+  - name: trigger
+    command: receive review request
+  - name: research
+    command: file-reader to read source
+  - name: draft
+    command: compose review summary
+  - name: send-email
+    command: send-email --to team@acme.com
+  - name: respond
+    command: log completion
+
+dependencies:
+  research:
+    - trigger
+  draft:
+    - research
+  send-email:
+    - draft
+  respond:
+    - send-email

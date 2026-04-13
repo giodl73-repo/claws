@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "trustTier": "T2",
+  "platform": "openclaw",
+  "inputs": {
+    "packages": [
+      {
+        "name": "@corp/soc2-policies",
+        "version": "^2.0.0"
+      }
+    ],
+    "urls": [
+      {
+        "url": "https://policies.corp.internal/soc2/v3/rules.yaml",
+        "integrity": "sha256-valid-hash",
+        "cacheTTL": 3600
+      }
+    ]
+  },
+  "provenance": {
+    "emitCGR": true
+  }
+}

@@ -6,7 +6,7 @@ description: >
   Validates that the inner ring watcher pauses during middle ring operations
   like doctor --fix (P-168). When doctor --fix modifies workspace files as
   part of a migration, the inner ring watcher detects these modifications and
-  fires pinch recompilation against intermediate file states, producing false
+  fires check recompilation against intermediate file states, producing false
   violations that confuse the user and may trigger false alerts.
 
 expect:
@@ -27,7 +27,7 @@ simulate:
   failures:
     - component: inner-ring
       type: watcher-fires-during-fix
-      error: "Watcher detects AGENTS.md modification mid-fix — triggers pinch on partial state"
+      error: "Watcher detects AGENTS.md modification mid-fix — triggers check on partial state"
     - component: inner-ring
       type: false-violation
       error: "Pinch reports R5 tool ungoverned — fix step 3/6 removed old rule before step 4 adds new one"
@@ -39,7 +39,7 @@ problem: >
   workspace files. Fix step 3 removes a deprecated governance rule from
   RULES.md. Fix step 4 adds the replacement rule in the new format. Between
   steps 3 and 4, the inner ring watcher detects the RULES.md modification and
-  triggers an immediate pinch recompilation. The intermediate state (old rule
+  triggers an immediate check recompilation. The intermediate state (old rule
   removed, new rule not yet added) produces a GovernanceIR where tool
   "deploy-production" has no governance rule. The sidecar receives this IR and
   raises a CRITICAL alert: "R5 tool ungoverned." The developer sees the alert,

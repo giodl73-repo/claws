@@ -1,0 +1,113 @@
+name: S02-package-resolution
+series: input
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/input resolves an npm package reference to the
+  correct local node_modules path with provenance tracking including package
+  version, registry origin, and integrity hash.
+
+expect:
+  resolution: success
+  provenance_origin: package
+  trust_level: registry
+  version_recorded: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer calls resolve("pkg:@acme/governance-rules") where @acme/governance-rules
+  is installed in the workspace's node_modules. The resolver must locate the package
+  via Node's module resolution algorithm, read the package.json to extract version
+  and integrity metadata, and return a ResolvedInput with origin "package", the
+  resolved filesystem path, the package version, and trust level "registry". If the
+  package is not installed, the error must distinguish between "not installed" and
+  "installed but version mismatch" when a version constraint is provided. The resolver
+  must handle hoisted packages in monorepo node_modules structures.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Monorepo hoisting means the package may not be in the immediate
+      workspace's node_modules but in a parent directory's node_modules.
+      If the resolver only checks ./node_modules/@acme/governance-rules,
+      it will fail in npm workspaces, pnpm, and yarn PnP layouts. The
+      resolver must use require.resolve() or equivalent to handle all
+      package manager layouts.
+    spec_impact: "CL-08 input-api — package resolution must handle monorepo hoisting"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The "pkg:" URI scheme must be parsed correctly, distinguishing scope
+      from package name. A naive split on "/" would break scoped packages
+      like @acme/governance-rules. The parser must handle @scope/name as
+      an atomic package identifier.
+    spec_impact: "CL-08 input-api — pkg: URI parsing for scoped packages"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Trust level for registry packages must be lower than local files
+      because package contents may change between versions. If a consumer
+      compiles governance rules from a package, the provenance chain must
+      record the exact version so that a different version installed later
+      does not silently change compiled output without re-compilation.
+    spec_impact: "CL-08 input-api — version pinning in package provenance"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      pnpm uses a content-addressable store with symlinks, meaning the
+      resolved path points into .pnpm/ rather than node_modules/ directly.
+      The resolver must record the logical package path (for display) and
+      the physical path (for reading), not conflate them.
+    spec_impact: "CL-08 input-api — logical vs physical path distinction for pnpm"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      If the package exports map restricts access to specific subpaths,
+      resolving a deep import like "pkg:@acme/governance-rules/policies"
+      must respect the exports field. Bypassing exports to read internal
+      files would break on Node 16+ and violate package encapsulation.
+    spec_impact: "CL-08 input-api — package exports map compliance"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The error for "installed but wrong version" must report both the
+      installed version and the requested constraint. Simply saying
+      "version mismatch" without showing the actual vs expected values
+      forces the consumer to manually inspect node_modules.
+    spec_impact: "CL-08 input-api — version mismatch error detail"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Package integrity hashes (from package-lock.json or npm-shrinkwrap)
+      should be included in provenance when available. This allows downstream
+      consumers to verify the package content has not been tampered with
+      between resolution and compilation.
+    spec_impact: "CL-08 input-api — integrity hash in package provenance"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Resolution of packages not yet installed should suggest the install
+      command (npm install @acme/governance-rules) in the error message.
+      This small UX improvement saves consumers a step when bootstrapping
+      new workspaces.
+    spec_impact: "CL-08 input-api — actionable error messages for missing packages"
+    pitfall: null

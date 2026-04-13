@@ -70,12 +70,12 @@ findings:
   - id: F04
     severity: warning
     description: >
-      claws pinch should verify hook ordering at runtime by querying the
+      claws check should verify hook ordering at runtime by querying the
       Gateway's plugin registry. If governance is not first among plugin
-      hooks, pinch reports: "CLAWS-W030: governance plugin at position 2
+      hooks, check reports: "CLAWS-W030: governance plugin at position 2
       of 3 — should be position 1." This catches ordering issues that
       persist after deployment.
-    spec_impact: "CL-05 pinch — runtime hook ordering check"
+    spec_impact: "CL-05 check — runtime hook ordering check"
     pitfall: P-125
 
   - id: F05

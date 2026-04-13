@@ -114,7 +114,7 @@ findings:
     severity: warning
     description: >
       Fleet identity compliance broadcasting (Amendment A103) means
-      `claws pinch --fleet` reports identity levels across all workspaces.
+      `claws check --fleet` reports identity levels across all workspaces.
       If 4 of 5 workspaces are at L2 and 1 is at L0, the fleet report must
       highlight the L0 outlier. The weakest link determines fleet security.
       A fleet-wide identity score (minimum across all agents) would provide

@@ -4,7 +4,7 @@ version: 1
 specs: [CL-05]
 description: >
   Validates the inner ring (live) file-save detection: when TOOLS.md changes,
-  claws watch detects the modification and triggers pinch --staged on only the
+  claws watch detects the modification and triggers check --staged on only the
   changed file. The inner ring must respond in <1s, apply governance rules to
   the diff, and report violations without re-compiling the entire workspace.
   This is the 70% scenario — most governance issues are caught here.
@@ -42,7 +42,7 @@ problem: >
   "deploy-prod" with capabilities [EXECUTE, TRANSACT], which classifies as
   R5. The workspace trust tier is T2 (max R3). claws watch is running in the
   background. It must detect the TOOLS.md change via file system watcher,
-  run pinch --staged on only the changed file, evaluate the G-CLASS rule
+  run check --staged on only the changed file, evaluate the G-CLASS rule
   against the cached GovernanceIR, and surface the violation in <1s. The
   developer sees the violation before they even switch to the terminal.
 
@@ -50,10 +50,10 @@ findings:
   - id: F01
     severity: major
     description: >
-      The spec says the inner ring runs "pinch --staged" on file save, but
+      The spec says the inner ring runs "check --staged" on file save, but
       --staged is a git concept (staged files). A file save in the editor
-      is NOT a git stage. The inner ring needs a distinct mode: pinch on
-      the saved file (working tree diff), not pinch --staged (git index diff).
+      is NOT a git stage. The inner ring needs a distinct mode: check on
+      the saved file (working tree diff), not check --staged (git index diff).
       These are different sets of files. The spec conflates editor save with
       git stage.
     spec_impact: "CL-05 Inner Ring — distinguish file-save trigger from git-stage trigger"
@@ -62,7 +62,7 @@ findings:
   - id: F02
     severity: major
     description: >
-      Incremental pinch on a single file requires a cached GovernanceIR from
+      Incremental check on a single file requires a cached GovernanceIR from
       the last full compile. If the cache is stale (workspace was modified
       outside the editor), the inner ring may evaluate against outdated context.
       The spec does not define cache invalidation rules for the inner ring.
@@ -88,7 +88,7 @@ findings:
       The file system watcher must handle rapid successive saves (user types,
       saves, types, saves). The 300ms batch window from the VS Code extension
       spec (compilation host) should also apply to the inner ring watch mode.
-      Without batching, 5 rapid saves produce 5 pinch runs, wasting resources
+      Without batching, 5 rapid saves produce 5 check runs, wasting resources
       and flooding the terminal with duplicate violations.
     spec_impact: "CL-05 Inner Ring — batch window for rapid file saves"
     pitfall: null
@@ -97,10 +97,10 @@ findings:
     severity: warning
     description: >
       The inner ring output goes to the terminal (or LSP diagnostics). But
-      pinch normally writes to stdout with formatting. In watch mode, the
+      check normally writes to stdout with formatting. In watch mode, the
       output must be appended, not overwritten — the developer needs to see
       the history of checks, not just the latest. The spec does not define
-      the output format for watch-mode pinch results.
+      the output format for watch-mode check results.
     spec_impact: "CL-05 Inner Ring — watch-mode output format (append vs overwrite)"
     pitfall: null
 
@@ -144,7 +144,7 @@ findings:
       On Windows, file system watchers can fire multiple events for a single
       save (write + rename for atomic saves in VS Code). The inner ring must
       deduplicate events for the same file within the batch window. Without
-      deduplication, a single save could trigger 2-3 pinch runs on Windows.
+      deduplication, a single save could trigger 2-3 check runs on Windows.
     spec_impact: "CL-05 Inner Ring — Windows file watcher event deduplication"
     pitfall: null
 

@@ -1,0 +1,156 @@
+name: S03-skill-resolver-integration
+series: execution
+version: 1
+specs: [CL-08]
+description: >
+  Validates that skill discovery within @craftworks/execution does not
+  require a separate @craftworks/execution dependency — the skill resolver
+  is merged into the execution package. A consumer importing execution
+  gets both task graph scheduling and skill resolution from a single
+  package, with no diamond dependency or version mismatch risk.
+
+expect:
+  import:
+    package: "@craftworks/execution"
+    exports_available: ["TaskGraph", "QualityGate", "SkillResolver", "resolveSkills"]
+    separate_skill_package_needed: false
+  resolution:
+    input_asp: "analyze.governance"
+    resolved_skills: ["G-PERM", "G-BOUND", "G-OUTPUT"]
+    resolution_source: "workspace"
+  integration:
+    task_with_skills: true
+    skill_resolved_before_task_start: true
+    missing_skill_blocks_task: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer imports @craftworks/execution and uses both TaskGraph (for
+  scheduling) and SkillResolver (for skill discovery). They create a task
+  "apply-governance" that requires skills ["G-PERM", "G-BOUND", "G-OUTPUT"]
+  resolved from the workspace's ASP (Agent Skill Protocol) manifest. The
+  skill resolver finds all three skills in the workspace. The task starts
+  only after all required skills are resolved. If a skill is missing, the
+  task is blocked (not failed — the skill might be installable). This tests
+  the merge of execution-engine + skill-resolver: both are available from
+  a single import with no circular or diamond dependency issues.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The merge of execution-engine and skill-resolver must not create a
+      bloated API surface. Consumers who need only task scheduling should
+      not be forced to understand skill resolution types. The package
+      should use subpath exports: "@craftworks/execution" for task graph,
+      "@craftworks/execution/skills" for skill resolution. This keeps
+      the top-level import clean while maintaining a single package for
+      dependency management.
+    spec_impact: "CL-08 execution — subpath exports for task graph vs skill resolution"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The R2 review (N13) flagged that claws skills needs skill resolution
+      but not the full execution engine. If importing SkillResolver from
+      @craftworks/execution pulls the entire TaskGraph implementation into
+      the bundle, claws skills has an unnecessarily large dependency. Tree-
+      shaking should eliminate unused code, but only if the package uses
+      ES module exports (not CommonJS barrel exports). The build must
+      produce ESM with individual entry points.
+    spec_impact: "CL-08 execution — ESM build with tree-shakeable entry points"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Skill resolution is an async operation (may involve filesystem
+      scanning, registry lookup, or network calls). Task graph scheduling
+      is synchronous (topological sort, parallel group identification).
+      The merge must not make scheduling async just because skill
+      resolution is. The two subsystems should operate independently:
+      skills are resolved before task graph construction, and the resolved
+      skills are passed as task metadata, not resolved during execution.
+    spec_impact: "CL-08 execution — skill resolution decoupled from scheduling execution"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The ASP resolution protocol references workspace files (AGENTS.md,
+      TOOLS.md). If skill-resolver imports @craftworks/forma to read these
+      files, the execution package gains a transitive dependency on forma.
+      The spec states execution depends on @craftworks/governance (not
+      forma). If skill resolution needs file reading, it should accept
+      pre-parsed data (provided by the caller via forma), not import
+      forma directly.
+    spec_impact: "CL-08 execution — skill resolver accepts pre-parsed input, does not import forma"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      A missing skill must block the task, not fail it. The distinction
+      matters: a blocked task can become unblocked when the skill is
+      installed (e.g., "npm install @craftworks/emit-oc" provides the
+      missing OC emit skill). A failed task requires code changes. The
+      execution result for a task blocked by missing skills must report:
+      task name, required skills, missing skills, and a suggested remediation
+      ("install @craftworks/emit-oc to resolve skill 'emit.oc'").
+    spec_impact: "CL-08 execution — missing skill blocks with remediation suggestion"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Skill resolution caching must be per-execution, not global. If the
+      skill resolver caches results in a module-level Map, two concurrent
+      executions (e.g., compiling two workspaces in parallel) share the
+      cache. If workspace A has skill G-PERM at version 2 and workspace B
+      has G-PERM at version 3, the cached result from A may be returned
+      for B. The resolver cache must be scoped to the execution context.
+    spec_impact: "CL-08 execution — per-execution skill resolution cache"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The skill resolution output must be typed: each resolved skill has
+      a name, version, source (workspace, fleet, registry), and capability
+      set. If the resolver returns untyped objects, consumers must validate
+      at every use site. The SkillDescriptor type should be exported from
+      @craftworks/execution/skills and used consistently across the
+      execution and governance packages.
+    spec_impact: "CL-08 execution — SkillDescriptor type shared across execution and governance"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The merge means version bumps to execution affect skill resolution
+      consumers and vice versa. If a bug fix in TaskGraph requires a
+      minor version bump, skill resolution consumers receive the update
+      even though their code path is unaffected. This is the tradeoff
+      of merging: simpler dependency management at the cost of broader
+      update scope. The package changelog must clearly separate TaskGraph
+      and SkillResolver changes.
+    spec_impact: "CL-08 execution — changelog separation for merged subsystems"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      If the execution package is the only consumer of governance types
+      (risk levels, gate policies), the dependency on @craftworks/governance
+      is justified. But if skill resolution does not need governance types,
+      the dependency pulls unnecessary code for skill-only consumers. The
+      governance dependency should be required only by the TaskGraph +
+      QualityGate subsystem, not by SkillResolver. This may require
+      the governance import to be dynamic (lazy) in the skills subpath.
+    spec_impact: "CL-08 execution — lazy governance import for skill-only consumers"
+    pitfall: null

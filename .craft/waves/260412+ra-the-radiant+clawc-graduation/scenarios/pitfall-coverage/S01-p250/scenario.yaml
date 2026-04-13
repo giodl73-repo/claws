@@ -1,0 +1,99 @@
+name: S01-p250
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-250
+description: >
+  Validates that `claws check --package` detects re-exported types whose .d.ts
+  files reference compiler-sdk paths. After extraction, standalone consumers
+  installing only @craftworks/forma must not encounter unresolvable .d.ts
+  references to compiler-sdk/src/compile/forma-ir.ts or any other compiler-sdk
+  path. Every downstream package inheriting these types also breaks if this
+  pitfall is not caught.
+
+expect:
+  detection: true
+  prevention: "`claws check --package` validates each extracted package's .d.ts files contain zero references to compiler-sdk paths. CI runs standalone install fixture per Layer 1 package."
+
+simulate:
+  failures: ["Re-exported types in @craftworks/forma .d.ts files contain references to compiler-sdk/src/compile/forma-ir.ts paths"]
+  halt: null
+  budget: null
+
+problem: >
+  Build @craftworks/forma from compiler-sdk extraction. The forma package
+  re-exports FormaIR, FormaNode, and FormaParseContext types that originate in
+  compiler-sdk/src/compile/forma-ir.ts. After tsc emits .d.ts files, inspect
+  the dist/ output: the generated declarations contain `import("../../compiler-sdk/src/compile/forma-ir").FormaIR` path references. Install forma in a fresh
+  project with no compiler-sdk present. Run tsc --noEmit. TypeScript reports
+  TS2307 (cannot find module) for every compiler-sdk path in the .d.ts files.
+  Verify that `claws check --package @craftworks/forma` catches all offending
+  .d.ts references before the standalone install fails.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The .d.ts scanner in `claws check --package` must resolve all `import()`
+      type references in declaration files, not just top-level import statements.
+      TypeScript emits inline `import("path").Type` references in .d.ts files
+      that are invisible to a naive grep for `import` statements. The scanner
+      must parse .d.ts AST nodes to catch these.
+    spec_impact: "CL-08 G-EXTRACT — .d.ts scanner must handle inline import() type references"
+    pitfall: P-250
+
+  - id: F02
+    severity: major
+    description: >
+      Types re-exported through barrel files (index.ts) may chain through
+      multiple re-export layers before reaching the compiler-sdk origin. A
+      single-level scan of direct re-exports misses chains like
+      forma/index.ts -> forma/ast/index.ts -> forma/ast/nodes.ts ->
+      compiler-sdk/src/compile/forma-ir.ts. The check must follow the full
+      re-export chain.
+    spec_impact: "CL-08 G-EXTRACT — transitive re-export chain resolution"
+    pitfall: P-250
+
+  - id: F03
+    severity: major
+    description: >
+      If the detection scan runs against source .ts files instead of emitted
+      .d.ts files, it will miss cases where tsc resolves type aliases to their
+      origin paths. A type alias `type MyIR = FormaIR` in source may expand
+      to the full compiler-sdk path in the .d.ts output. Detection must scan
+      post-build .d.ts, not pre-build .ts.
+    spec_impact: "CL-08 G-EXTRACT — scan emitted .d.ts, not source .ts"
+    pitfall: P-250
+
+  - id: F04
+    severity: warning
+    description: >
+      The blast radius extends beyond forma: every Layer 1 package that
+      re-exports types from compiler-sdk has the same vulnerability. If
+      @craftworks/governance re-exports GateType from compiler-sdk, downstream
+      consumers break identically. The check must run per-package across all
+      Layer 1 extractions, not just forma.
+    spec_impact: "CL-08 G-EXTRACT — per-package .d.ts validation across all Layer 1"
+    pitfall: P-250
+
+  - id: F05
+    severity: warning
+    description: >
+      Recovery requires rewriting the type definitions to be owned by the
+      extracted package. If the original types are complex (generic constraints,
+      conditional types, mapped types), the rewrite may subtly change the public
+      API surface. The detection tool should also compare the rewritten type's
+      structural shape against the original to prevent API drift.
+    spec_impact: "CL-08 G-EXTRACT — structural type comparison after ownership transfer"
+    pitfall: P-250
+
+  - id: F06
+    severity: warning
+    description: >
+      TypeScript's `paths` and `baseUrl` in tsconfig.json can mask compiler-sdk
+      references during development. A path mapping like `@compiler/*` ->
+      `../compiler-sdk/src/*` resolves during local development but the .d.ts
+      files still emit the resolved path. The check must ignore tsconfig path
+      mappings and scan the raw .d.ts output.
+    spec_impact: "CL-08 G-EXTRACT — ignore tsconfig path mappings in .d.ts scan"
+    pitfall: P-250

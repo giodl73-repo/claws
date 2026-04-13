@@ -122,12 +122,12 @@ findings:
   - id: F08
     severity: warning
     description: >
-      `claws pinch` should detect compound attack surfaces by analyzing
+      `claws check` should detect compound attack surfaces by analyzing
       pairwise interactions between unfixed pitfalls. If G-SUPPLY severity
       is warning (not error) AND G-ELICIT-TIMEOUT override is not verified,
       the compound advisory fires: "CLAWS-W080: Supply chain + timeout
       default compound vulnerability — fix both independently."
-    spec_impact: "CL-02 pinch — compound vulnerability detection"
+    spec_impact: "CL-02 check — compound vulnerability detection"
     pitfall: "P-160"
 
   - id: F09

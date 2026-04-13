@@ -1,0 +1,161 @@
+name: S02-quality-gate-evaluation
+series: execution
+version: 1
+specs: [CL-08]
+description: >
+  Validates that a quality gate failure halts dependent tasks in the
+  execution graph but does not affect independent task branches. Quality
+  gates are checkpoint evaluations between stages that enforce governance
+  invariants (e.g., "analyze must produce zero major violations before
+  optimize starts"). This tests the gate-as-edge-predicate model.
+
+expect:
+  graph:
+    tasks: ["parse", "extract", "analyze", "lint", "optimize", "emit"]
+    edges:
+      - ["parse", "extract"]
+      - ["extract", "analyze"]
+      - ["extract", "lint"]
+      - ["analyze", "optimize"]
+      - ["optimize", "emit"]
+    gates:
+      - edge: ["analyze", "optimize"]
+        condition: "analyze.violations.major == 0"
+  gate_evaluation:
+    analyze_violations: { major: 1, warning: 3 }
+    gate_passed: false
+  execution_result:
+    completed: ["parse", "extract", "analyze", "lint"]
+    blocked: ["optimize", "emit"]
+    failed: []
+    skipped_reason: "quality gate 'analyze -> optimize' failed: 1 major violation"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A 6-task pipeline has a quality gate on the edge from analyze to
+  optimize: "analyze must produce zero major violations." The analyze
+  task completes with 1 major and 3 warning violations. The gate
+  evaluates to false, blocking optimize and its dependent emit. However,
+  lint (which depends only on extract, not on analyze) is an independent
+  branch and must complete normally. The execution result must distinguish
+  between completed tasks (ran and succeeded), blocked tasks (not started
+  due to gate failure), and failed tasks (started and threw an error).
+  The gate failure diagnostic must identify which gate failed and why.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Gate conditions must be expressed as predicates on task output, not
+      as inline JavaScript. If the gate condition is a string
+      "analyze.violations.major == 0" that is eval'd at runtime, it is
+      a code injection vector. The gate condition should be a typed
+      predicate function (task output) => boolean, or a RELAX expression
+      evaluated by @craftworks/relax. Using RELAX keeps gates declarative
+      and auditable; using eval is a security violation.
+    spec_impact: "CL-08 execution — gate conditions as RELAX expressions, not eval'd strings"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The distinction between "blocked" and "failed" is critical for
+      reporting. Blocked tasks were never started (gate prevented them).
+      Failed tasks were started and threw. The execution result must use
+      these exact states, not a generic "did not complete." Fleet operators
+      reviewing pipeline results need to know whether optimize was blocked
+      by policy (fixable by addressing violations) or failed due to a
+      bug in the optimizer (escalate to engineering).
+    spec_impact: "CL-08 execution — task state enum: completed, blocked, failed, pending"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Gate failure must propagate transitively. If the analyze -> optimize
+      gate fails, optimize is blocked. Emit depends on optimize, so emit
+      is also blocked. But the reason differs: optimize is "blocked by
+      gate failure," emit is "blocked by dependency on blocked task."
+      The execution result should trace the block chain so the developer
+      sees the root cause (gate failure on analyze), not just "emit was
+      blocked" without context.
+    spec_impact: "CL-08 execution — transitive block propagation with root cause tracing"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Gate evaluation timing matters. If the gate evaluates immediately
+      after analyze completes (synchronous), it uses analyze's output.
+      If the gate evaluates lazily (when optimize is about to start),
+      another task could have modified shared state between analyze's
+      completion and optimize's start. Gates must evaluate atomically
+      with the producing task's completion, not lazily on consumer start.
+    spec_impact: "CL-08 execution — gate evaluation at producer completion, not consumer start"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Warning violations (3 in this scenario) do not block the gate, but
+      they should be surfaced in the execution result. If the gate only
+      reports pass/fail with no detail, the developer must re-read the
+      analyze output to understand what happened. The gate evaluation
+      result should include: pass/fail, the condition evaluated, the
+      actual values, and a list of warnings that did not trigger the gate
+      but are worth noting.
+    spec_impact: "CL-08 execution — gate evaluation result includes warning violations"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The lint task completes independently of the gate failure. But if
+      the overall pipeline status is "failed" (because emit did not run),
+      the lint result is buried. The execution summary must distinguish
+      between "pipeline incomplete due to gate failure" (partial success)
+      and "pipeline failed due to task error" (actual failure). A pipeline
+      with a gate block and a successful lint is not the same as a
+      pipeline where lint crashed.
+    spec_impact: "CL-08 execution — pipeline status: complete, partial (gate-blocked), failed"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Multiple gates on different edges are possible. If there is a
+      second gate on extract -> lint (e.g., "extract produced valid AST"),
+      and that gate also fails, both analyze -> optimize and extract ->
+      lint branches are blocked. The execution result must list all gate
+      failures, not just the first one encountered. Gates are independent
+      predicates, not a sequential check.
+    spec_impact: "CL-08 execution — multi-gate failure aggregation in execution result"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The R5 fail-closed principle (from CL-02) should apply to gate
+      evaluation itself. If the gate predicate throws (e.g., the RELAX
+      expression references an undefined variable), the gate must fail
+      closed (block the dependent task), not fail open (allow it through).
+      This is consistent with the governance compiler's non-negotiable
+      safety stance: uncertain gates are treated as failures.
+    spec_impact: "CL-08 execution — gate evaluation errors fail closed (R5 principle)"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Gate conditions must be configurable per deployment, not hardcoded.
+      A development environment might set the threshold to "major <= 3"
+      while production uses "major == 0." If gates are hardcoded in the
+      task graph definition, developers cannot relax them for local
+      iteration. The gate condition should be parameterizable, with the
+      default being the strictest setting (production values).
+    spec_impact: "CL-08 execution — parameterizable gate conditions with strict defaults"
+    pitfall: null

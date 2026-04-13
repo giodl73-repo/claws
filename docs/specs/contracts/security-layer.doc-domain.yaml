@@ -3,7 +3,7 @@ atoms:
   tool-classification:
     visibility: public
     docType: feature
-    narrative: P1
+    narrative: null
     pipeline: true
   obo-boundary:
     visibility: public
@@ -13,22 +13,22 @@ atoms:
   elicitation-gate:
     visibility: public
     docType: feature
-    narrative: P1
+    narrative: null
     pipeline: true
   a2a-governance:
     visibility: architect
     docType: concept
-    narrative: P2
+    narrative: null
     pipeline: true
   injection-defense:
     visibility: architect
     docType: concept
-    narrative: P2
+    narrative: null
     pipeline: false
   compliance-artifact:
     visibility: public
     docType: feature
-    narrative: P1
+    narrative: null
     pipeline: true
   key-management:
     visibility: architect
@@ -38,5 +38,35 @@ atoms:
   kill-switch:
     visibility: public
     docType: feature
-    narrative: P2
+    narrative: null
     pipeline: true
+  compliance-soc2:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  compliance-hipaa:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  compliance-eu-ai-act:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  audit-chain:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  audit-verify:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  siem-export:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false

@@ -1,0 +1,16 @@
+name: review-and-notify
+description: Code review with email notification workflow
+
+steps:
+  - name: checkout
+    command: read source files
+  - name: review
+    command: run code-review skill
+  - name: send-email
+    command: send-email --to team@acme.com --subject "Review complete"
+
+dependencies:
+  review:
+    - checkout
+  send-email:
+    - review

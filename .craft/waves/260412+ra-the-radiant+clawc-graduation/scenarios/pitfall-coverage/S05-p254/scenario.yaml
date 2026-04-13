@@ -1,0 +1,98 @@
+name: S05-p254
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-254
+description: >
+  Validates that `claws check --compat` detects when the compiler-sdk
+  backward-compat re-export layer drops symbols that were previously public.
+  If the re-export shim omits readOCWorkspaceViaFORMA or any other symbol
+  that consumers depend on, they get TS2305 errors. Transitively exposed
+  internal types in .d.ts also break when their source path no longer exists.
+
+expect:
+  detection: true
+  prevention: "`claws check --compat` compares compiler-sdk's pre-extraction export list against the re-export list and fails if any symbol is missing. Automated CI completeness check."
+
+simulate:
+  failures: ["Re-export shim in compiler-sdk omits previously public symbols after extraction"]
+  halt: null
+  budget: null
+
+problem: >
+  Before extraction, compiler-sdk exports 147 public symbols. After extraction,
+  the backward-compat re-export layer is added to compiler-sdk that re-exports
+  from @craftworks/* packages. The re-export layer contains 143 entries — 4
+  symbols were accidentally omitted: readOCWorkspaceViaFORMA, FormaParseContext,
+  GateTypeEnum, and AuditChainVerifier. An existing consumer that imports
+  readOCWorkspaceViaFORMA from compiler-sdk gets TS2305. FormaParseContext
+  was transitively exposed through .d.ts files — it was never in the explicit
+  public API but consumers reference it in their type annotations. Verify that
+  `claws check --compat` detects all 4 missing symbols including the
+  transitively exposed FormaParseContext.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The explicit public API (named exports in index.ts) is straightforward
+      to compare. But transitively exposed types — types that appear in .d.ts
+      files because they are used in function signatures or return types — are
+      part of the de facto public API even if they were never explicitly
+      exported. The compat check must compare .d.ts surface area, not just
+      named exports.
+    spec_impact: "CL-08 G-COMPAT — compare .d.ts surface area including transitive types"
+    pitfall: P-254
+
+  - id: F02
+    severity: major
+    description: >
+      Type-only exports (`export type { FormaIR }`) may be dropped if the
+      re-export layer only handles value exports. TypeScript's --isolatedModules
+      flag requires explicit `export type` for type-only re-exports. If the
+      shim uses `export { FormaIR }` for a type-only symbol, tsc in
+      isolatedModules mode will error in the shim itself.
+    spec_impact: "CL-08 G-COMPAT — handle export type vs export value distinction"
+    pitfall: P-254
+
+  - id: F03
+    severity: major
+    description: >
+      The pre-extraction export list must be snapshotted before extraction
+      begins and stored as a baseline artifact. If the snapshot is taken after
+      some extraction work has started, it may already be incomplete. The
+      baseline snapshot must be a CI artifact, not a manual step.
+    spec_impact: "CL-08 G-COMPAT — pre-extraction export baseline must be CI artifact"
+    pitfall: P-254
+
+  - id: F04
+    severity: warning
+    description: >
+      Overloaded function signatures present a variant: if readOCWorkspace
+      has 3 overloads in compiler-sdk but the re-export layer only exposes 2
+      (because one overload references an internal type), the compat check
+      passes on symbol count but consumers using the missing overload get a
+      type error. The check must compare signatures, not just names.
+    spec_impact: "CL-08 G-COMPAT — signature-level comparison for overloaded functions"
+    pitfall: P-254
+
+  - id: F05
+    severity: warning
+    description: >
+      Recovery requires adding the missing re-export, but if the symbol's
+      implementation moved to a different package than expected, the re-export
+      path must be updated. An automated fix that adds `export { missing }
+      from '@craftworks/forma'` only works if forma actually exports that
+      symbol. The fix must resolve the actual new location.
+    spec_impact: "CL-08 G-COMPAT — automated fix must resolve actual package location"
+    pitfall: P-254
+
+  - id: F06
+    severity: note
+    description: >
+      The compat window has a defined duration (per CL-08). After the window
+      closes, the re-export layer is removed and consumers must migrate. The
+      compat check should also flag re-exports that are scheduled for removal
+      so consumers get early warnings via deprecation notices.
+    spec_impact: "CL-08 G-COMPAT — deprecation notices for symbols approaching compat window end"
+    pitfall: P-254

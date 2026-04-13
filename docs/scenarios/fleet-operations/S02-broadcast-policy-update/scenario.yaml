@@ -5,7 +5,7 @@ specs: [CL-05, CL-02]
 description: >
   Validates that `claws broadcast --confirm` pushes a new SOC2 compliance
   template to all fleet workspaces, each workspace receives the updated
-  policy YAML, and a post-broadcast `claws pinch --fleet` confirms adoption.
+  policy YAML, and a post-broadcast `claws check --fleet` confirms adoption.
   Broadcast is declarative (pushes policy files), not imperative (does not
   compile). Each workspace must recompile after receiving broadcast policies.
 
@@ -37,7 +37,7 @@ problem: >
   --reason "SOC2-2026 update: A2A audit controls"`. Each workspace receives
   the policy YAML in its .claws/policies/ directory. The broadcast does NOT
   auto-compile — each workspace must run `claws build` to apply the new
-  policy. After broadcast, `claws pinch --fleet` verifies that all 10
+  policy. After broadcast, `claws check --fleet` verifies that all 10
   workspaces comply with the new SOC2 template.
 
 findings:
@@ -49,9 +49,9 @@ findings:
       happens between broadcast and the next build. During this window,
       the workspace's compiled governance plugin enforces the OLD policy
       while the policy YAML contains the NEW policy. The fleet is in a
-      split-brain state. The spec must define whether `claws pinch` checks
-      the compiled plugin or the policy YAML. If it checks compiled, pinch
-      passes with stale enforcement. If it checks YAML, pinch catches the
+      split-brain state. The spec must define whether `claws check` checks
+      the compiled plugin or the policy YAML. If it checks compiled, check
+      passes with stale enforcement. If it checks YAML, check catches the
       gap but the runtime still enforces old rules.
     spec_impact: "CL-05 Fleet — broadcast-to-build window and stale enforcement gap"
     pitfall: P-170

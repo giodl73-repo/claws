@@ -1,0 +1,103 @@
+name: S01-standalone-install
+series: emit-crewai
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/emit-crewai installs with only @craftworks/codegen
+  as a dependency and produces Python crew_governance.py with CrewAI task
+  constraints.
+
+expect:
+  craftworks_deps: ["@craftworks/codegen"]
+  output_file: "crew_governance.py"
+  output_language: python
+  output_valid_python: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer installs @craftworks/emit-crewai (npm package) alongside
+  @craftworks/codegen. The emitter is invoked with a compiled governance IR.
+  It must produce crew_governance.py containing CrewAI-compatible task
+  constraints — callback functions that CrewAI invokes before and after
+  task execution to enforce governance rules. The emitted Python must be
+  syntactically valid, import only from crewai and standard library, and
+  be directly usable in a CrewAI Crew definition via task callbacks.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      CrewAI's task callback API expects specific function signatures
+      (task_callback(output: TaskOutput) for post-task, or tool constraints
+      via allow_delegation and tool lists). If the emitter produces functions
+      with incorrect signatures, they fail silently or raise TypeError at
+      crew kickoff time, not at import time. The emitter must match the
+      exact CrewAI callback contract.
+    spec_impact: "CL-08 emit-crewai — CrewAI callback function signature compliance"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      CrewAI's API changes significantly between versions (0.x breaking
+      changes, 1.x rewrite). The emitter must target a specific crewai
+      version range and validate that the generated callbacks use the
+      correct API surface. A version mismatch produces imports that
+      fail with AttributeError.
+    spec_impact: "CL-08 emit-crewai — crewai version targeting with explicit range"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Like emit-langgraph, this is cross-language code generation (npm to
+      Python). The emitter must produce valid Python syntax for the target
+      version (3.9+). Common errors include using walrus operator (:=)
+      syntax on Python 3.7, or match/case on Python < 3.10.
+    spec_impact: "CL-08 emit-crewai — Python version compatibility validation"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      CrewAI task constraints that block execution (raising exceptions)
+      stop the entire crew pipeline. The emitter should generate constraints
+      that add governance violations to the task output for downstream
+      review rather than hard-failing, unless the governance rule explicitly
+      requires hard-stop enforcement.
+    spec_impact: "CL-08 emit-crewai — soft vs hard governance enforcement mode"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      CrewAI supports tool restrictions per agent (tools parameter in Agent
+      constructor). If the governance IR includes tool-access rules, the
+      emitter should generate agent configuration alongside task constraints.
+      Emitting only task callbacks misses the agent-level enforcement
+      surface that CrewAI provides natively.
+    spec_impact: "CL-08 emit-crewai — agent-level tool restriction support"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The emitter should generate a companion requirements.txt or
+      pyproject.toml snippet listing the required crewai version, so
+      consumers can install the correct dependencies without guessing.
+    spec_impact: "CL-08 emit-crewai — dependency declaration for Python consumers"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      CrewAI uses Pydantic models extensively. If the governance constraints
+      need to validate task output structure, the emitter should generate
+      Pydantic models rather than manual dict checking, matching CrewAI's
+      native validation pattern.
+    spec_impact: "CL-08 emit-crewai — Pydantic-based validation for output constraints"
+    pitfall: null

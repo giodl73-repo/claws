@@ -3,7 +3,7 @@ slug: claws-emit
 preset: "claws"
 plan: "2 headlines: claws build produces a working OC Gateway plugin, generated code passes OC developer test"
 area: claws
-status: Draft
+status: Implemented
 phase: ptah
 atoms: [atom:governance-plugin, atom:governance-skill, atom:three-engine-model, atom:workflow-inversion]
 specs: [CL-04, CL-03, CL-02]

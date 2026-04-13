@@ -23,7 +23,7 @@ simulate:
     - component: emit-phase
       type: press-safety-loss
       error: "PRESS compressed 'never access production databases' to 'avoid prod db'"
-    - component: pinch-check
+    - component: check-validation
       type: plugin-order
       error: "analytics-plugin registered before claws-governance in openclaw.json"
   halt: null
@@ -100,9 +100,9 @@ findings:
     severity: warning
     description: >
       claws cannot modify openclaw.json (lossless principle). The warning
-      from `claws pinch` about plugin ordering is advisory. But the warning
+      from `claws check` about plugin ordering is advisory. But the warning
       must be prominent: a dedicated diagnostic code (CLAWS-W060), displayed
-      at the top of pinch output, with explicit fix instructions ("Move
+      at the top of check output, with explicit fix instructions ("Move
       claws-governance to position 0 in openclaw.json#plugins").
     spec_impact: "CL-02 G-PLUGIN — advisory prominence"
     pitfall: "P-076"

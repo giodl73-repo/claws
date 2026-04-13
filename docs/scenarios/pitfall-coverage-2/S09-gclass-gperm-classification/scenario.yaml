@@ -83,7 +83,7 @@ findings:
     description: >
       The permissive default is intentional for individual workspaces (low
       friction). But enterprise templates should specify restrictive
-      capability sets. `claws pinch` should note when G-PERM is effectively
+      capability sets. `claws check` should note when G-PERM is effectively
       disabled and suggest adding capability constraints if the workspace
       handles sensitive operations (R4/R5 tools present).
     spec_impact: "CL-02 G-PERM — advisory for unconstrained workspaces"
@@ -139,7 +139,7 @@ findings:
       (a) misclassified tools via keyword-only scoring, (b) no capability
       checks due to permissive defaults, (c) non-standard capabilities that
       bypass checks. All three are silent failures. A workspace with all
-      three looks "clean" in pinch output but has no effective governance.
+      three looks "clean" in check output but has no effective governance.
     spec_impact: "CL-02 — compounding silent classification failures"
     pitfall: "P-084, P-085, P-086"
 

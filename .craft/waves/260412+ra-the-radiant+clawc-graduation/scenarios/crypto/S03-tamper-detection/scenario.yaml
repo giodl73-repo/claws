@@ -1,0 +1,136 @@
+name: S03-tamper-detection
+series: crypto
+version: 1
+specs: [CL-08]
+description: >
+  Validates that a modified audit chain entry is detected by both @craftworks/crypto
+  and agent-sdk's verify() function. This is the security guarantee: if tampering
+  goes undetected, the audit trail is worthless for compliance evidence.
+
+expect:
+  tamper_detection:
+    modified_content_detected: true
+    modified_hash_detected: true
+    modified_signature_detected: true
+    deleted_entry_detected: true
+    reordered_entries_detected: true
+  both_implementations:
+    crypto_detects: true
+    agent_sdk_detects: true
+
+simulate:
+  failures:
+    - type: tampered_entry
+      entry_index: 5
+      modification: "changed action field from 'compile' to 'deploy'"
+  halt: null
+  budget: null
+
+problem: >
+  A valid 10-entry audit chain is created and verified as intact. Then 5 tamper
+  scenarios are tested independently: (1) modify the content of entry 5 (change
+  the action field), (2) modify the hash field of entry 5 to match the new
+  content but leave the signature unchanged, (3) re-sign entry 5 with a different
+  keypair, (4) delete entry 5 and renumber entries 6-9, (5) swap entries 4 and 5.
+  For each scenario, verify() must return a failure result that identifies the
+  tampered entry index, the type of tampering detected, and the expected vs actual
+  values for the failed check.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Scenario 2 is the most subtle: the attacker modifies the content and
+      recomputes the hash, but cannot re-sign because they lack the private
+      key. Verify must check the signature BEFORE checking the hash link.
+      If verify checks hash links first, a recomputed-hash tamper will pass
+      the hash check and only fail on signature — but the error message will
+      say "invalid signature" instead of "content modified", which is less
+      informative for audit forensics.
+    spec_impact: "CL-08 @craftworks/crypto — verify checks signature first, then hash link"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Scenario 4 (entry deletion) breaks the hash chain because entry 6's
+      prev_hash points to the deleted entry 5's hash, which is now entry 5
+      (formerly entry 6). But if verify only checks sequential hash links
+      and the entries are renumbered consistently, and the attacker also
+      recomputes hash links for entries 6-9, deletion is undetectable by
+      hash chain alone. The chain must include an entry index in the signed
+      content so that renumbering invalidates signatures.
+    spec_impact: "CL-08 @craftworks/crypto — chain entry index included in signed content"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The verify() return type must provide detailed forensics, not just
+      pass/fail. For compliance auditors, "chain invalid at entry 5:
+      signature mismatch, expected signer=abc123, got=def456" is actionable.
+      "Chain invalid" is not. The VerificationResult type must include:
+      entry index, check type (signature/hash/sequence), expected value,
+      actual value.
+    spec_impact: "CL-08 @craftworks/crypto — VerificationResult with forensic detail per failure"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Scenario 5 (entry swap) should be detected because each entry's hash
+      link points to its predecessor. Swapping entries 4 and 5 means entry 4
+      (now at position 5) has a prev_hash pointing to entry 3, but the entry
+      at position 4 (formerly entry 5) has a prev_hash pointing to entry 4's
+      original hash. The hash chain breaks at position 4. But if entries do
+      not include their own index in the hash, a swap where both entries
+      happen to have the same prev_hash (impossible in practice but worth
+      testing) would go undetected.
+    spec_impact: "CL-08 @craftworks/crypto — entry position included in hash computation"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      Verify should stop at the first tampered entry and report it, not
+      continue verifying the rest of the chain. Entries after a tamper point
+      are all suspect (they may have been re-signed by the attacker). If
+      verify continues past the first failure, it wastes computation and
+      may report misleading "failures" for entries that are actually valid
+      relative to the tampered chain.
+    spec_impact: "CL-08 @craftworks/crypto — verify stops at first failure, reports entry index"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The tamper detection must work identically in @craftworks/crypto and
+      agent-sdk. If crypto detects a tamper but agent-sdk does not (or vice
+      versa), one of them has a security bug. The cross-verification test
+      must run all 5 tamper scenarios through both implementations and assert
+      identical failure results. Any discrepancy is a P0 security issue.
+    spec_impact: "CL-08 @craftworks/crypto — cross-implementation tamper detection equivalence test"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The JSONL format allows an attacker to append entries to the end of
+      the file without modifying existing entries. This "append-only attack"
+      adds fake entries that have valid hash links to the real chain's last
+      entry but are signed by the attacker's key. Verify must check that
+      all entries are signed by authorized signers (from a known signer
+      set), not just that signatures are mathematically valid.
+    spec_impact: "CL-08 @craftworks/crypto — verify requires authorized signer set, not just valid signatures"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Performance: verify() on a tampered chain should fail fast. If the
+      tampered entry is at index 5 in a 10,000-entry chain, verify should
+      complete in ~5 entry checks, not 10,000. This requires sequential
+      verification from the genesis entry, not random-access verification
+      of individual entries.
+    spec_impact: "CL-08 @craftworks/crypto — sequential verify from genesis for fail-fast behavior"
+    pitfall: null

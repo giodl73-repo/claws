@@ -8,7 +8,7 @@ entries:
   claws-command-map:
     type: reference
     path: "design/claws/COMMAND-MAP.md"
-    atoms: ["pinch", "snap", "claws-init", "claws-uninstall", "progressive-disclosure"]
+    atoms: ["check", "snap", "claws-init", "claws-uninstall", "progressive-disclosure"]
 
   claws-pitfalls:
     type: reference
@@ -22,10 +22,35 @@ entries:
 
   claws-deck:
     type: reference
-    path: "docs/presentations/why-claws.md"
-    atoms: ["three-engine-model", "obo-boundary", "press-pinch", "defense-in-depth", "dotnet-for-oc"]
+    path: "docs/claws/presentations/why-claws.md"
+    atoms: ["three-engine-model", "obo-boundary", "pinch", "sift", "defense-in-depth", "check"]
 
   claws-atoms:
     type: directory-index
     path: "docs/claws/ATOMS.md"
     atoms: ["*"]  # all claws atoms
+
+  claws-deck-technical:
+    type: reference
+    path: "docs/claws/presentations/claws-technical-deep.md"
+    atoms: ["claws-compiler", "governance-ir", "capability-manifest", "sift", "pinch", "governance-plugin"]
+
+  claws-deck-security:
+    type: reference
+    path: "docs/claws/presentations/claws-security.md"
+    atoms: ["tool-classification", "obo-boundary", "a2a-governance", "injection-defense", "elicitation-gate", "defense-in-depth", "fail-mode"]
+
+  claws-deck-compliance:
+    type: reference
+    path: "docs/claws/presentations/claws-compliance.md"
+    atoms: ["audit-chain", "soc2-compliance", "hipaa-compliance", "eu-ai-act", "siem-export", "fleet-comply"]
+
+  claws-deck-maker:
+    type: reference
+    path: "docs/claws/presentations/claws-maker.md"
+    atoms: ["skill-kit", "claws-test", "governance-badge", "tier-adoption", "claws-publish"]
+
+  claws-deck-fleet:
+    type: reference
+    path: "docs/claws/presentations/claws-fleet.md"
+    atoms: ["fleet-broadcast", "fleet-drift", "fleet-scan", "fleet-comply", "snap-promote"]

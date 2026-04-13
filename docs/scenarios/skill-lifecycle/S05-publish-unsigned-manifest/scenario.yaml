@@ -113,9 +113,9 @@ findings:
       `claws publish` must validate that the governance frontmatter is still
       valid before publishing. A developer might have valid frontmatter,
       break it with an edit, and then publish. The publish step should run
-      the equivalent of `claws pinch` validation before proceeding. This
+      the equivalent of `claws check` validation before proceeding. This
       prevents publishing skills with governance errors.
-    spec_impact: "CL-05 Maker Experience — implicit pinch validation before publish"
+    spec_impact: "CL-05 Maker Experience — implicit check validation before publish"
     pitfall: null
 
   - id: F08

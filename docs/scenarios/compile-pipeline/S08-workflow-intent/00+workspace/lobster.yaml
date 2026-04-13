@@ -1,0 +1,24 @@
+name: research-and-notify
+description: Research topic, draft summary, and email results
+
+steps:
+  - name: trigger
+    command: receive research request
+  - name: research
+    command: web-search for topic data
+  - name: draft
+    command: file-writer to compose summary
+  - name: send-email
+    command: send-email --to requester@acme.com
+  - name: respond
+    command: log completion status
+
+dependencies:
+  research:
+    - trigger
+  draft:
+    - research
+  send-email:
+    - draft
+  respond:
+    - send-email

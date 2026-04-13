@@ -65,7 +65,7 @@ findings:
   - id: F02
     severity: major
     description: >
-      The floor enforcement must happen at compile time (during pinch), not
+      The floor enforcement must happen at compile time (during check), not
       at runtime. A workspace that lowers the floor must fail to compile with
       a clear error. The error must show the fleet floor, the local policy,
       and explain why the local policy is less strict. Compile-time enforcement
@@ -92,7 +92,7 @@ findings:
       single pass and report them as CRITICAL compliance failures. A fleet
       with any workspace below the floor is non-compliant regardless of
       other metrics. The scan must run the same strictness comparison as
-      pinch, catching workspaces that were compiled before the floor
+      check, catching workspaces that were compiled before the floor
       enforcement was added.
     spec_impact: "CL-05 Fleet Scan — floor violation detection"
     pitfall: P-182

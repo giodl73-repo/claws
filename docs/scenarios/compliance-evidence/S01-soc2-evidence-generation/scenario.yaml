@@ -125,7 +125,7 @@ findings:
     severity: warning
     description: >
       The SOC2 control CC6.6 (Access Reviews) maps to `claws drift` and
-      `claws pinch --fleet`. If drift detection has never been run during
+      `claws check --fleet`. If drift detection has never been run during
       the observation period, the control status is "not-satisfied" even if
       the governance is otherwise complete. The evidence generator should
       check for drift detection events in the audit chain and report the

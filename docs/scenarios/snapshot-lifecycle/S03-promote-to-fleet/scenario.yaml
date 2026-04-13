@@ -5,7 +5,7 @@ specs: [CL-05]
 description: >
   Validates snap promote: a local snapshot is promoted to the fleet baseline,
   becoming the reference point for all drift detection across workspaces.
-  The promoted snapshot must be verified (pinch-clean), versioned, and
+  The promoted snapshot must be verified (check-clean), versioned, and
   distributed to the fleet configuration store. Workspaces that diverge
   from the promoted baseline will be flagged by subsequent drift scans.
 
@@ -69,13 +69,13 @@ findings:
   - id: F03
     severity: major
     description: >
-      The promoted baseline should be pinch-clean (zero violations). If
+      The promoted baseline should be check-clean (zero violations). If
       snap promote allows promoting a snapshot with violations, the fleet
       baseline itself is non-compliant, and drift detection compares
       workspaces against a broken standard. snap promote must validate
       the snapshot before promotion, refusing to promote if violations
       exist.
-    spec_impact: "CL-05 snap promote — mandatory pinch validation before promotion"
+    spec_impact: "CL-05 snap promote — mandatory check validation before promotion"
     pitfall: null
 
   - id: F04

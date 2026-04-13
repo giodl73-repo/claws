@@ -3,7 +3,7 @@ slug: claws-rules
 preset: "claws"
 plan: "2 headlines: claws pinch reports all violations with severity, R5 tools flagged as OBO"
 area: claws
-status: Draft
+status: Implemented
 phase: ptah
 atoms: [atom:tool-classification, atom:obo-boundary, atom:a2a-governance, atom:elicitation-gate, atom:injection-defense]
 specs: [CL-02, CL-04, CL-03]

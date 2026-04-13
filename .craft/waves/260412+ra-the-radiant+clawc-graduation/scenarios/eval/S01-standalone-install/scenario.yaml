@@ -1,0 +1,109 @@
+name: S01-standalone-install
+series: eval
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/eval installs as a standalone package with zero
+  @craftworks dependencies, can construct a rubric from a plain object, and
+  execute it against a sample response to produce a scored result.
+
+expect:
+  install_deps: 0
+  rubric_construct: true
+  evaluation_result: scored
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer runs npm install @craftworks/eval in an empty project. The package
+  must install without pulling any other @craftworks/ packages. The consumer then
+  imports createRubric, defines a 3-criterion rubric (accuracy, completeness,
+  format), and evaluates a sample LLM response. The evaluation must return a
+  result object containing per-criterion scores, an aggregate score, and
+  diagnostic messages for any criterion that scored below threshold. The rubric
+  factory must validate criterion weights sum to 1.0 and reject malformed
+  definitions with actionable error messages.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If @craftworks/eval transitively depends on @craftworks/governance or
+      @craftworks/context for assertion primitives, standalone install fails.
+      The eval package must vendor or reimplement any shared assertion logic
+      rather than importing from sibling packages.
+    spec_impact: "CL-08 dependency-matrix — eval row must show zero @craftworks/ deps"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Rubric criterion weights that do not sum to 1.0 must be rejected at
+      construction time, not silently normalized. Silent normalization changes
+      the consumer's intended scoring proportions and produces misleading
+      aggregate scores without any warning.
+    spec_impact: "CL-08 eval-api — add weight validation invariant to createRubric contract"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The package.json exports map must expose both ESM and CJS entry points.
+      If only ESM is exported, consumers using CommonJS (older Node projects,
+      Jest with default config) cannot import the package without additional
+      bundler configuration.
+    spec_impact: "CL-08 packaging — dual-format export requirement for all core packages"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Error messages from malformed rubric definitions must include the specific
+      field that failed validation and the expected format. A generic
+      "invalid rubric" error forces consumers to inspect source code to
+      understand what went wrong.
+    spec_impact: "CL-08 eval-api — error message quality requirements for factory functions"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The scored result object must include a stable schema version field so
+      that downstream tools (dashboards, CI reporters) can handle format
+      evolution. Without versioning, any result schema change is a silent
+      breaking change.
+    spec_impact: "CL-08 eval-api — add schema version to EvaluationResult type"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      Diagnostic messages for below-threshold criteria should include both the
+      actual score and the threshold value, not just a pass/fail indicator.
+      This allows consumers to distinguish near-misses from total failures
+      in CI reporting.
+    spec_impact: "CL-08 eval-api — diagnostic detail level for criterion results"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The package should export TypeScript types for Rubric, Criterion, and
+      EvaluationResult as top-level exports so consumers get IDE completion
+      without deep imports. Buried types reduce developer experience for
+      the primary use case.
+    spec_impact: "CL-08 packaging — type export surface requirements"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      If the eval package bundles any large dependencies (e.g., schema
+      validation libraries), the install size may exceed reasonable limits
+      for a utility package. A size budget should be established and
+      enforced in CI.
+    spec_impact: "CL-08 packaging — install size budget per package tier"
+    pitfall: null

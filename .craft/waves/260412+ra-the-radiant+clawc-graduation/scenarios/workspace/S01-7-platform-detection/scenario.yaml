@@ -1,0 +1,140 @@
+name: S01-7-platform-detection
+series: workspace
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/workspace detects all 7 AI platforms from their
+  marker files with correct confidence scores. The detection must be standalone
+  (no compiler-sdk dependency) and produce identical results to the pre-extraction
+  platform-detect module.
+
+expect:
+  platforms_detected: 7
+  platforms:
+    - name: OpenClaw
+      markers: [SOUL.md, TOOLS.md, openclaw.json]
+      confidence: high
+    - name: Claude Code
+      markers: [CLAUDE.md, .claude/]
+      confidence: high
+    - name: Cursor
+      markers: [.cursor/, .cursorrules]
+      confidence: high
+    - name: Windsurf
+      markers: [.windsurfrules]
+      confidence: medium
+    - name: Cline
+      markers: [.clinerules]
+      confidence: medium
+    - name: Roo
+      markers: [.roorules, .roo/]
+      confidence: medium
+    - name: Aider
+      markers: [.aider.conf.yml, CONVENTIONS.md]
+      confidence: low
+  false_positives: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Seven separate test directories are prepared, each containing marker files for
+  exactly one AI platform. The workspace detect() function is called on each
+  directory. For each platform, it must return the correct platform name, the
+  marker files it found, and a confidence score (high/medium/low) based on marker
+  specificity. A directory with only a generic file (e.g., README.md) must return
+  an empty platform list. An eighth test directory contains marker files from
+  multiple platforms (OpenClaw + Claude Code) and must return both with correct
+  confidence scores.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Aider's marker file CONVENTIONS.md is a generic filename that many non-Aider
+      projects use. If the detector treats CONVENTIONS.md alone as sufficient for
+      Aider detection, false positives will be high. The confidence should be "low"
+      for CONVENTIONS.md alone and elevated to "medium" only when .aider.conf.yml
+      is also present. CL-08 must define confidence rules per marker combination.
+    spec_impact: "CL-08 @craftworks/workspace — per-marker confidence rules, not just presence/absence"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      On case-insensitive filesystems (Windows, macOS default), "CLAUDE.md" and
+      "claude.md" are the same file. On case-sensitive filesystems (Linux),
+      they are different. If the detector uses case-sensitive string matching on
+      all platforms, it will miss "claude.md" on Linux. The detector must use
+      case-insensitive matching for marker filenames or document the canonical
+      casing requirement.
+    spec_impact: "CL-08 @craftworks/workspace — case-insensitive marker matching or canonical casing spec"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The .cursor/ and .claude/ directories are marker directories, not files.
+      If the detector uses fs.stat() and checks for isFile(), it will miss
+      directory markers. It must check for both isFile() and isDirectory()
+      depending on the marker type. CL-08 lists markers but does not
+      distinguish file vs directory markers.
+    spec_impact: "CL-08 @craftworks/workspace — marker type annotation (file vs directory) in platform registry"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The 7-platform list is hardcoded in CL-08. New AI platforms emerge
+      frequently. The detector should use a platform registry (data, not code)
+      that can be extended without modifying the detection algorithm. If the
+      registry is a TypeScript enum, adding a platform requires a code change
+      and package release. A JSON/YAML registry file allows faster updates.
+    spec_impact: "CL-08 @craftworks/workspace — data-driven platform registry, not hardcoded enum"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      When multiple platforms are detected in the same directory, the return
+      order must be deterministic (e.g., sorted by platform name or confidence
+      descending). If the order depends on filesystem enumeration or Map
+      insertion order, test assertions will be flaky across platforms.
+    spec_impact: "CL-08 @craftworks/workspace — deterministic platform ordering in results"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Symlinked marker files (e.g., CLAUDE.md symlinked to a shared template)
+      must be resolved before detection. If the detector uses fs.lstat()
+      instead of fs.stat(), it will see the symlink itself, not the target.
+      On Windows, symlinks require elevated privileges or developer mode.
+      The detector should use fs.stat() which follows symlinks, and handle
+      EPERM errors gracefully on Windows.
+    spec_impact: "CL-08 @craftworks/workspace — symlink resolution with Windows EPERM fallback"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The OpenClaw platform requires 3 marker files (SOUL.md, TOOLS.md,
+      openclaw.json). If only SOUL.md is present, should OpenClaw be detected
+      at low confidence or not detected at all? The CL-08 spec says "marker
+      files" plural but does not define the minimum set for each platform.
+      Partial marker presence must have defined behavior.
+    spec_impact: "CL-08 @craftworks/workspace — minimum marker set and partial detection rules per platform"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The extraction from compiler-sdk means the platform-detect module's tests
+      must be migrated to @craftworks/workspace's test suite. If the tests
+      remain in compiler-sdk, they test the old code path. The migration must
+      include all existing test fixtures (marker file directories) and add
+      Windows-specific fixtures (case-insensitive FS, symlink behavior).
+    spec_impact: "CL-08 testing strategy — test fixture migration from compiler-sdk to workspace"
+    pitfall: null

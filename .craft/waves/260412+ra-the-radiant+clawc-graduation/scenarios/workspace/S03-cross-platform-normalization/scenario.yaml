@@ -1,0 +1,120 @@
+name: S03-cross-platform-normalization
+series: workspace
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/workspace BOM stripping and CRLF normalization is
+  idempotent and platform-independent. Normalizing already-normalized content must
+  produce identical output. The normalize function must be a pure function with no
+  side effects and no filesystem access.
+
+expect:
+  idempotence:
+    normalize(normalize(x)): "equals normalize(x) for all x"
+    byte_for_byte: true
+  platform_independence:
+    windows_output: "equals linux_output"
+    macos_output: "equals linux_output"
+  pure_function:
+    filesystem_access: false
+    side_effects: false
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The workspace normalize() function receives a Buffer (raw file bytes) and
+  returns a normalized string. Test inputs include: (1) UTF-8 BOM + CRLF content,
+  (2) UTF-8 no-BOM + LF content, (3) UTF-8 BOM + mixed CRLF/LF, (4) empty
+  buffer, (5) single-byte buffer (just a BOM prefix byte 0xEF), (6) content that
+  is already normalized. For each input, normalize() is called twice. The output
+  of the second call must be byte-identical to the first. All tests must produce
+  the same output on Windows, macOS, and Linux.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If normalize() detects BOM by checking the first 3 bytes (0xEF 0xBB 0xBF),
+      a file that starts with the byte 0xEF followed by different bytes (e.g.,
+      a Latin-1 encoded file with 0xEF as a regular character) will have its
+      first byte incorrectly stripped. The BOM check must verify all 3 bytes
+      together, not just the first byte. Additionally, UTF-16 BOM (0xFF 0xFE
+      or 0xFE 0xFF) should be detected and rejected with a clear error since
+      workspace files must be UTF-8.
+    spec_impact: "CL-08 @craftworks/workspace — full 3-byte BOM check, reject UTF-16 BOM"
+    pitfall: null
+
+  - id: F02
+    severity: warning
+    description: >
+      CRLF normalization replaces \r\n with \n. But a lone \r (carriage return
+      without newline, used by Classic Mac OS) should not be replaced — it is
+      a different line ending convention. If the regex replaces all \r with
+      empty string, lone \r characters in file content (e.g., in a table
+      column) will be stripped. The replacement must target \r\n specifically,
+      not \r globally.
+    spec_impact: "CL-08 @craftworks/workspace — normalize replaces \\r\\n only, preserves lone \\r"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      An empty buffer (0 bytes) is a valid input. If normalize() converts
+      the buffer to a string and checks string.length === 0 to return early,
+      but the empty buffer decodes to an empty string on some Node.js versions
+      and to undefined on others, the function may throw. The empty buffer
+      case must be explicitly handled and return an empty string.
+    spec_impact: "CL-08 @craftworks/workspace — empty buffer returns empty string, no throw"
+    pitfall: null
+
+  - id: F04
+    severity: note
+    description: >
+      Idempotence failure would mean normalize(normalize(x)) !== normalize(x).
+      This can happen if the normalization introduces content that the next
+      pass modifies. For example, if BOM stripping inserts a replacement
+      character (U+FFFD) where the BOM was, and a second pass treats U+FFFD
+      as significant content. BOM stripping must remove the BOM bytes entirely,
+      not replace them.
+    spec_impact: "CL-08 @craftworks/workspace — BOM removal, not replacement with U+FFFD"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      CL-08 assigns normalization to both @craftworks/forma (internalized
+      from normalize) and @craftworks/workspace (BOM stripping, CRLF
+      normalization). If these are two different implementations, they could
+      diverge. The workspace normalize() must be the single implementation,
+      and forma must import it from workspace rather than duplicating the
+      logic. If forma bundles its own copy, a bug fix in workspace's
+      normalize does not propagate to forma.
+    spec_impact: "CL-08 normalization — single implementation in workspace, imported by forma"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      Performance: normalize() will be called on every workspace file read.
+      For a 9-file workspace with 1MB files, that is 9MB of buffer processing.
+      The implementation should avoid creating intermediate strings where
+      possible — Buffer.toString('utf-8') + regex replace creates at least
+      2 string copies. For large files, a streaming approach or single-pass
+      buffer scan would be more efficient.
+    spec_impact: "CL-08 @craftworks/workspace — normalize performance for large files"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The normalize function is a pure function that operates on Buffers.
+      If it is accidentally given a string instead of a Buffer (common in
+      JavaScript where types are loose), it should either accept strings
+      transparently or throw a clear TypeError. Silent mishandling (e.g.,
+      calling buf[0] on a string, which returns a character not a byte)
+      would produce incorrect BOM detection.
+    spec_impact: "CL-08 @craftworks/workspace — normalize() input type validation: Buffer required"
+    pitfall: null

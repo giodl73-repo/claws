@@ -3,7 +3,7 @@ slug: claws-sdk-bootstrap
 preset: "claws"
 plan: "2 headlines: monorepo scaffolding succeeds with zero source, forbidden import lint catches craftworks-sdk"
 area: claws
-status: Draft
+status: Implemented
 phase: ptah
 atoms: [atom:claws-sdk]
 specs: [CL-04]

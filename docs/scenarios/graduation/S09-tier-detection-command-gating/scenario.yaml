@@ -1,0 +1,129 @@
+name: S09-tier-detection-command-gating
+series: graduation
+version: 1
+specs: [CL-04, CL-07, CL-08]
+description: >
+  The CLI detects the installed tier at startup by checking which packages
+  are resolvable in the current node_modules. Enterprise commands (fleet,
+  comply, drift) display a clear upgrade message when invoked by free tier
+  users. Free tier commands (compile, pinch, build, init, new, annotate)
+  work regardless of installed tier. The detection is fast (< 50ms),
+  cacheable, and does not require network access. No crash, no silent
+  failure, no stack trace — enterprise commands in the free tier produce
+  a user-friendly message and exit cleanly.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "claws.json"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  A developer installs @claws/compiler and runs claws fleet scan. The CLI
+  must detect that @bic/claws-sdk is not installed and display an
+  upgrade message instead of crashing with MODULE_NOT_FOUND. If detection
+  is slow (e.g., requires loading enterprise modules to check their
+  existence), CLI startup latency increases for all users, including free
+  tier users who never use enterprise commands. The detection must be
+  lightweight: check require.resolve() for a sentinel module, cache the
+  result, and gate command registration. The wrong approach is lazy-loading
+  enterprise commands — that still crashes if the module is missing.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Tier detection must use require.resolve() with try/catch, not
+      dynamic import(). Dynamic import is async and returns a promise,
+      which complicates synchronous CLI startup. require.resolve()
+      checks module existence without loading the module, making it
+      the fastest possible detection method. The sentinel module
+      should be @bic/claws-sdk/package.json — a file that
+      always exists if the package is installed.
+    spec_impact: "CL-08 Section 16 — synchronous tier detection"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      The tier detection result must be cached for the process lifetime.
+      Multiple commands in a single CLI session should not re-check
+      module resolution. A module-level variable set once at startup
+      prevents repeated filesystem probing. The cache must also handle
+      the case where the package is installed mid-session (unlikely
+      but possible in watch mode).
+    spec_impact: "CL-08 Section 17 — detection result caching"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      The upgrade message must not resemble an error. Users who see
+      red text or "Error:" prefix will think the CLI is broken. The
+      message should use a neutral color (or no color), a clear header
+      like "Enterprise Feature", and the npm install command. Exit code
+      should be 0 (not an error condition — the CLI worked correctly by
+      informing the user), not 1 (which CI pipelines treat as failure).
+    spec_impact: "CL-08 Section 18 — upgrade message UX"
+    pitfall: null
+  - id: F04
+    severity: major
+    description: >
+      Tab completion and --help must show enterprise commands with an
+      [enterprise] tag. Hiding enterprise commands entirely from help
+      output means free tier users never discover the upgrade path.
+      Showing them with a tag creates awareness without cluttering the
+      help with unusable options. The tag should be consistent across
+      --help, man pages, and tab completion.
+    spec_impact: "CL-07 Section 7 — enterprise command discoverability"
+    pitfall: null
+  - id: F05
+    severity: minor
+    description: >
+      Version checking between the free and paid packages should warn
+      on mismatch. If @claws/compiler is v1.3.0 but @bic/claws-sdk
+      pins v1.2.0, the user has a version conflict. The CLI should detect
+      this at startup and emit a warning (not an error) suggesting the
+      user update @bic/claws-sdk. This prevents subtle behavioral
+      differences from version skew.
+    spec_impact: "CL-07 Section 8 — cross-package version compatibility"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      CI environments must not be penalized by tier detection overhead.
+      In CI, the installed tier never changes mid-run. An environment
+      variable (CLAWS_TIER=free or CLAWS_TIER=enterprise) should bypass
+      the require.resolve() check for environments where the tier is
+      known. This removes filesystem access from the hot path in
+      constrained CI runners.
+    spec_impact: "CL-08 Section 19 — CI tier override"
+    pitfall: null
+  - id: F07
+    severity: major
+    description: >
+      The detection must handle monorepo hoisting correctly. In a pnpm
+      or Yarn workspace, @bic/claws-sdk may be hoisted to a
+      parent node_modules. require.resolve() follows Node's resolution
+      algorithm and will find hoisted packages, which is correct. But
+      if the workspace uses strict mode (pnpm's default), the package
+      will not be hoisted and must be in the workspace's own dependencies.
+      The detection must work correctly under all major package managers.
+    spec_impact: "CL-08 Section 20 — package manager compatibility"
+    pitfall: null
+  - id: F08
+    severity: minor
+    description: >
+      A claws tier command should output the detected tier, version,
+      and available command groups for debugging. This helps support
+      teams diagnose "why can't I run fleet scan?" issues without
+      asking the user to inspect their node_modules. The output should
+      be machine-parseable (JSON with --json flag) for automation.
+    spec_impact: "CL-07 Section 9 — tier introspection command"
+    pitfall: null

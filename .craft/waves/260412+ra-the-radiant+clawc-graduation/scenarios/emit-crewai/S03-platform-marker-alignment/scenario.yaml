@@ -1,0 +1,88 @@
+name: S03-platform-marker-alignment
+series: emit-crewai
+version: 1
+specs: [CL-08]
+description: >
+  Validates that emit-crewai output matches the marker format that
+  @craftworks/workspace uses to detect CrewAI governance installations.
+
+expect:
+  marker_detected: true
+  platform_id: "crewai"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  @craftworks/workspace detects CrewAI governance by scanning for
+  crew_governance.py at a known path containing a Python module-level constant
+  (e.g., CLAWS_PLATFORM = "crewai") that workspace can extract via regex.
+  After emit-crewai runs, workspace.detect() must return platform_id "crewai"
+  with the emitter version. The marker must be valid Python that does not
+  affect CrewAI runtime behavior.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Like emit-langgraph, workspace must extract the marker from Python
+      source via regex from Node.js — no Python subprocess. The marker
+      constant must be a simple string assignment on its own line
+      (CLAWS_PLATFORM = "crewai") that a single regex can match without
+      parsing Python AST.
+    spec_impact: "CL-08 workspace-markers — regex-extractable marker for Python files"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The crew_governance.py filename is specific to CrewAI (vs governance.py
+      for LangGraph). If both emitters run in the same workspace, workspace
+      must detect both platforms without filename collision. The naming
+      convention must be consistent and documented per emitter.
+    spec_impact: "CL-08 workspace-markers — emitter-specific filename conventions"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      If the consumer imports crew_governance into their CrewAI project as
+      a module, the marker constant becomes part of the public API
+      (importable via from crew_governance import CLAWS_PLATFORM). While
+      harmless, it may appear in IDE autocomplete. Using a single-underscore
+      prefix (_CLAWS_PLATFORM) signals it is internal.
+    spec_impact: "CL-08 workspace-markers — underscore prefix for internal marker constants"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The marker must include both the emitter version and the governance
+      IR hash as separate constants so workspace can report both staleness
+      (IR hash changed) and upgrade availability (emitter version changed)
+      independently.
+    spec_impact: "CL-08 workspace-markers — separate version and IR hash markers"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      CrewAI projects typically have a crew.py or main.py as the entry point.
+      Workspace documentation should note that crew_governance.py is a
+      companion file, not the crew definition, to avoid confusion when
+      consumers see it alongside their crew configuration.
+    spec_impact: "CL-08 workspace-markers — documentation for companion file role"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      If the consumer moves crew_governance.py into a subdirectory or
+      renames it, workspace detection fails. A fallback scan that checks
+      all .py files in the project root for the CLAWS_PLATFORM marker
+      would handle this case, at the cost of slower detection in large
+      projects.
+    spec_impact: "CL-08 workspace-markers — fallback scan for relocated Python files"
+    pitfall: null

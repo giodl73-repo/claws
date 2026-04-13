@@ -1,0 +1,97 @@
+name: S06-p255
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-255
+description: >
+  Validates that `claws check --exports` detects subpath export entries in
+  compiler-sdk's package.json that point to files moved or removed during
+  extraction. Consumers using deep subpath imports like
+  `@craftworks/compiler-sdk/astro/workspace` get ERR_PACKAGE_PATH_NOT_EXPORTED
+  or MODULE_NOT_FOUND when the exports map is not updated or shimmed.
+
+expect:
+  detection: true
+  prevention: "`claws check --exports` validates every exports map entry against actual dist/ files post-build. CI fails if any entry resolves to a missing file."
+
+simulate:
+  failures: ["Subpath exports in compiler-sdk package.json point to dist/ files that were moved to extracted packages"]
+  halt: null
+  budget: null
+
+problem: >
+  compiler-sdk's package.json has 23 subpath exports entries including
+  `./astro/workspace`, `./astro/parser`, `./compile/forma-ir`, and
+  `./governance/gate`. After extraction, the source files for these entries
+  moved to @craftworks/workspace, @craftworks/forma, and @craftworks/governance
+  respectively. The dist/ files no longer exist at the original paths. A
+  consumer importing `@craftworks/compiler-sdk/astro/workspace` gets
+  ERR_PACKAGE_PATH_NOT_EXPORTED. The exports map entries were not updated
+  to point at shim files or re-export wrappers. Verify that `claws check
+  --exports` catches all 23 dangling entries after the build step completes.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The exports map may have conditional entries (import vs require, types
+      vs default) where some conditions resolve and others do not. A partial
+      failure — `import` works but `require` does not — is harder to detect
+      because the check may only test one condition. All conditions in each
+      exports map entry must be validated.
+    spec_impact: "CL-08 G-COMPAT — validate all conditional export conditions (import/require/types)"
+    pitfall: P-255
+
+  - id: F02
+    severity: major
+    description: >
+      Wildcard subpath patterns (e.g., `./astro/*`) silently narrow their
+      matches when source files are removed. A consumer importing a
+      previously-valid subpath gets no error from Node.js resolution — the
+      pattern simply does not match, and the import fails with a generic
+      MODULE_NOT_FOUND. The check must expand wildcard patterns and verify
+      each expanded path resolves.
+    spec_impact: "CL-08 G-COMPAT — expand and validate wildcard subpath patterns"
+    pitfall: P-255
+
+  - id: F03
+    severity: major
+    description: >
+      Shim files that re-export from @craftworks/* packages are the correct
+      fix, but if a shim's re-export target has a different public API than
+      the original module (fewer exports, renamed functions), the shim
+      silently drops symbols. The check must verify shim completeness: every
+      symbol previously available at the subpath is available through the shim.
+    spec_impact: "CL-08 G-COMPAT — shim completeness validation against pre-extraction exports"
+    pitfall: P-255
+
+  - id: F04
+    severity: warning
+    description: >
+      The `types` condition in the exports map is critical for TypeScript
+      consumers. If the types entry points to a .d.ts file that was moved
+      but the runtime entry still works (via a JS shim), TypeScript consumers
+      get red squiggles while runtime works. This is a particularly confusing
+      failure mode — "it works but TypeScript says it doesn't."
+    spec_impact: "CL-08 G-COMPAT — types condition in exports map must match runtime condition"
+    pitfall: P-255
+
+  - id: F05
+    severity: warning
+    description: >
+      The check must run post-build because the exports map references dist/
+      paths. If the build step fails or is skipped, all dist/ files are
+      missing and the check reports false positives for every entry. The
+      check should verify build completion before scanning exports.
+    spec_impact: "CL-08 G-COMPAT — exports check requires successful build as precondition"
+    pitfall: P-255
+
+  - id: F06
+    severity: note
+    description: >
+      Node.js versions before 12.7.0 do not support the exports map at all.
+      Consumers on older Node.js versions use main/module fields and resolve
+      subpaths directly from node_modules. The check should validate both
+      exports map entries and the fallback main field for backward compat.
+    spec_impact: "CL-08 G-COMPAT — validate main field fallback alongside exports map"
+    pitfall: P-255

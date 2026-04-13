@@ -123,14 +123,14 @@ findings:
   - id: F08
     severity: warning
     description: >
-      `claws pinch` output must group violations by rule and show sub-rule
+      `claws check` output must group violations by rule and show sub-rule
       codes. Instead of:
         "3 G-CONTEXT violations"
       Show:
         "G-CONTEXT-01: 1 violation (boundary markers)"
         "G-CONTEXT-03: 2 violations (section typing)"
       Grouped output makes the fix path clear.
-    spec_impact: "CL-02 pinch — grouped sub-rule output"
+    spec_impact: "CL-02 check — grouped sub-rule output"
     pitfall: "P-092"
 
   - id: F09

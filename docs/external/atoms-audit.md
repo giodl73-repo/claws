@@ -69,11 +69,11 @@ RELAX powers policy expressions in claws — the `where:` keyword for governance
 
 | Atom | Slug | What it is | claws component it powers |
 |------|------|-----------|--------------------------|
-| A248 | `atom:relax` | RELAX expression language (PEG grammar, 14 AST nodes, sandbox-enforced) | `@claws/relax` — powers all policy expressions in OC governance rules. Direct reuse from compiler-sdk. |
-| A249 | `atom:relax-ast` | RELAX AST (14 node kinds) | `@claws/relax` — the AST that claws compiles policy expressions into. |
-| A250 | `atom:relax-sandbox` | RELAX sandbox (function allowlist, deep-frozen DataFrames, prototype denylist) | `@claws/relax` — security sandbox for OC policy expression evaluation. Critical for gateway safety. |
-| A260 | `atom:relax-type-guard` | Shared RELAX type guard (validates return types for gates, rubrics, policies) | `@claws/relax` — compile-time type checking for OC governance expressions. |
-| A271 | `atom:relax-safety-guard` | RELAX safety guards (memory/CPU limits, complexity ceiling, timeout) | `@claws/relax` — runtime safety for policy evaluation in OC Gateway. |
+| A248 | `atom:relax` | RELAX expression language (PEG grammar, 14 AST nodes, sandbox-enforced) | `@claws/sift` — powers all policy expressions in OC governance rules. Direct reuse from compiler-sdk. |
+| A249 | `atom:relax-ast` | RELAX AST (14 node kinds) | `@claws/sift` — the AST that claws compiles policy expressions into. |
+| A250 | `atom:relax-sandbox` | RELAX sandbox (function allowlist, deep-frozen DataFrames, prototype denylist) | `@claws/sift` — security sandbox for OC policy expression evaluation. Critical for gateway safety. |
+| A260 | `atom:relax-type-guard` | Shared RELAX type guard (validates return types for gates, rubrics, policies) | `@claws/sift` — compile-time type checking for OC governance expressions. |
+| A271 | `atom:relax-safety-guard` | RELAX safety guards (memory/CPU limits, complexity ceiling, timeout) | `@claws/sift` — runtime safety for policy evaluation in OC Gateway. |
 
 ### PRESS Optimization
 
@@ -375,7 +375,7 @@ Layer 4: Audit & compliance         → A153 (Audit trail), A43 (CGR)
 ```
 @claws/compiler    → A133, A134, A135, A71, A72, A74, A79, A142, A73, A76, A77, A78, A169, A170, A176, A191, A197, A198, A82, A83, A84
 @claws/governance  → A148, A43, A45, A141, A47, A275, A153, A179, A180, A68
-@claws/relax       → A248, A249, A250, A260, A271
+@claws/sift       → A248, A249, A250, A260, A271
 @claws/pinch       → A274
 @claws/report      → A254 (inspired by)
 ```

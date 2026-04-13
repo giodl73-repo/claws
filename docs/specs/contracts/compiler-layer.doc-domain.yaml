@@ -8,7 +8,7 @@ atoms:
   governance-ir:
     visibility: architect
     docType: concept
-    narrative: P2
+    narrative: null
     pipeline: true
   capability-manifest:
     visibility: architect
@@ -18,12 +18,12 @@ atoms:
   mechanical-intent:
     visibility: architect
     docType: concept
-    narrative: P2
+    narrative: null
     pipeline: true
   workflow-inversion:
     visibility: public
     docType: feature
-    narrative: P2
+    narrative: null
     pipeline: true
   three-engine-model:
     visibility: public

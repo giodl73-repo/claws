@@ -8,25 +8,35 @@ atoms:
   skill-kit:
     visibility: public
     docType: feature
-    narrative: P1
+    narrative: null
     pipeline: true
   governance-badge:
     visibility: public
     docType: feature
-    narrative: P2
+    narrative: null
     pipeline: false
   claws-lsp:
     visibility: architect
     docType: concept
-    narrative: P2
+    narrative: null
     pipeline: true
   error-contract:
     visibility: public
     docType: concept
-    narrative: P2
+    narrative: null
     pipeline: false
   tier-adoption:
     visibility: public
     docType: headline
     narrative: P1
     pipeline: true
+  upstream-contrib:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  cicd-pipeline:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false

@@ -58,7 +58,7 @@ Workspace files      claws compile (phases 1-3)         claws build (phases 4-5)
 |-------|-------|--------|---------|---------|
 | 1. PARSE | 9 workspace files | GovernanceAST (~200 node types) | <100ms | `claws compile` |
 | 2. EXTRACT | GovernanceAST | CapabilityManifest (flat, queryable) | <50ms | `claws compile` |
-| 3. ANALYZE | Manifest + claws.json | GovAnalysis (violations, warnings, plan) | <200ms | `claws compile`, `claws pinch` |
+| 3. ANALYZE | Manifest + claws.json | GovAnalysis (violations, warnings, plan) | <200ms | `claws compile`, `claws check` |
 | 4. OPTIMIZE | GovAnalysis | OptimizedPlan (dead rules removed, merged) | <50ms | `claws build` |
 | 5. EMIT | OptimizedPlan | 4 artifacts (see below) | <100ms | `claws build <target>` |
 
@@ -229,7 +229,7 @@ Workspace files      claws compile (phases 1-3)         claws build (phases 4-5)
 
 **Dynamic string reference detection** (SCV-S14-F08): Error string audit must check both static strings and template literal expressions for internal reference patterns. String templates may construct references dynamically (e.g., `"${sdk.name} error"`).
 
-Total pipeline: <500ms for `claws build`, <350ms for `claws pinch`.
+Total pipeline: <500ms for `claws build`, <350ms for `claws check`.
 
 ### GovernanceIR
 
@@ -351,7 +351,7 @@ craftworks  claws-sdk       -- SIBLINGS, never cross-import
 **claws-sdk does NOT import from craftworks-sdk. Ever.**
 
 **What about the 6 command groups in COMMAND-MAP that referenced craftworks-sdk?** Those references were incorrect. The resolution:
-- `claws compile`, `claws build`, `claws pinch` -> `claws-sdk` (which uses `compiler-sdk` internally)
+- `claws compile`, `claws build`, `claws check` -> `claws-sdk` (which uses `compiler-sdk` internally)
 - `claws init`, `claws kill`, `claws watch` -> `claws-sdk` (which uses `agent-sdk` internally)
 - `claws comply`, `claws assess` -> `claws-sdk` (new compliance module, no craftworks-sdk dependency)
 - `claws fleet` -> `claws-sdk` (fleet management module, no craftworks-sdk dependency)
@@ -569,7 +569,7 @@ The key insight: L2-L4 enforcement consumes ZERO tokens. The governance plugin i
 - **Tool name aliasing**: Fuzzy matching may miss aliases ("database-query" vs "db-query"). Exact tool names should be enforced at marketplace publish time. *(Source: PC1-S06-F04)*
 - **Grouped phantom tool reporting across skills**: Multiple skills referencing the same phantom tool must be grouped in diagnostics by tool name, showing which skills need each tool. *(Source: PC1-S06-F05)*
 - **Runtime phantom tool interception**: If a phantom tool is detected at compile time but deployed in advisory mode, the Gateway plugin should intercept the tool call and return a clear error instead of letting the agent hallucinate. *(Source: PC1-S06-F07)*
-- **Skill update triggers recompilation**: After a marketplace skill update, `claws pinch` must re-validate tool references. The three-rings watch ring detects skill file changes and triggers recompilation. *(Source: PC1-S06-F08)*
+- **Skill update triggers recompilation**: After a marketplace skill update, `claws check` must re-validate tool references. The three-rings watch ring detects skill file changes and triggers recompilation. *(Source: PC1-S06-F08)*
 
 **Catch Clause and Risk Map in EMIT (S10)**:
 - **Catch clause is single point of failure**: The catch clause is the ONLY defense between governance evaluation failure and the Gateway's fail-open default. It must be as simple as a map lookup with a constant default. *(Source: PC1-S10-F01, P-109)*
@@ -595,7 +595,7 @@ The key insight: L2-L4 enforcement consumes ZERO tokens. The governance plugin i
 
 **Single authoritative classification source** (PC2-S02-F06 warning): Each artifact's classification is generated from the same authoritative classification table in the GovernanceIR. No artifact reads from a different IR path.
 
-**Pinch post-hoc consistency detection** (PC2-S02-F07 warning): `claws pinch` on existing workspaces detects classification inconsistency in already-emitted artifacts (G-EMIT-CONSISTENT), not just staged ones.
+**Check post-hoc consistency detection** (PC2-S02-F07 warning): `claws check` on existing workspaces detects classification inconsistency in already-emitted artifacts (G-EMIT-CONSISTENT), not just staged ones.
 
 **Workflow artifact inclusion in consistency checks** (PC2-S02-F09 warning): If a 4th artifact (lobster.compiled.yaml) is emitted, consistency validation includes ALL emitted artifacts including workflow handler names.
 
@@ -605,7 +605,7 @@ The key insight: L2-L4 enforcement consumes ZERO tokens. The governance plugin i
 
 **PRESS numeric threshold preservation** (PC2-S05-F07 warning): Numeric thresholds in governance directives (e.g., "$10,000") are preserved exactly during PRESS compression.
 
-**Plugin loading order advisory** (PC2-S05-F04 major, PC2-S05-F06 warning): OC executes hooks in registration order. If another plugin registers before claws-governance, it can modify tool arguments before governance inspection. `claws pinch` produces CLAWS-W060 with explicit fix instructions. The warning notes pre-governance data exposure risk.
+**Plugin loading order advisory** (PC2-S05-F04 major, PC2-S05-F06 warning): OC executes hooks in registration order. If another plugin registers before claws-governance, it can modify tool arguments before governance inspection. `claws check` produces CLAWS-W060 with explicit fix instructions. The warning notes pre-governance data exposure risk.
 
 **Compound bypass via compression + plugin order** (PC2-S05-F09 warning): PRESS weakening a directive AND another plugin modifying the tool call before governance creates a compound bypass path.
 
@@ -623,7 +623,7 @@ The key insight: L2-L4 enforcement consumes ZERO tokens. The governance plugin i
 
 **Handler name translation edge cases** (PC2-S08-F04 major): Numeric prefixes, consecutive hyphens, and acronyms (e.g., "a2a-trust-verify") have deterministic, tested translation. Edge-case suite covers all known patterns.
 
-**Pinch post-hoc handler name validation** (PC2-S08-F05 warning): `claws pinch` loads both lobster.compiled.yaml and index.ts and cross-references handler names, accounting for naming convention translation.
+**Check post-hoc handler name validation** (PC2-S08-F05 warning): `claws check` loads both lobster.compiled.yaml and index.ts and cross-references handler names, accounting for naming convention translation.
 
 **Exact match enforcement for handlers** (PC2-S08-F06 warning): Cross-reference check enforces exact matching regardless of platform resolution strategy.
 
@@ -961,7 +961,7 @@ The key insight: L2-L4 enforcement consumes ZERO tokens. The governance plugin i
 
 **Domain-specific safety terms** (PF2-S07-F07 warning): Workspace operators extend allowlist via claws.json press.safetyKeywords. Default: RFC 2119 + common prohibition language.
 
-**Plugin ordering pinch analysis** (PF2-S08-F02 major): Pinch analyzes plugins array and warns CLAWS-W060 if any plugin before claws governance handler. Names plugin, position, risk.
+**Plugin ordering check analysis** (PF2-S08-F02 major): Check analyzes plugins array and warns CLAWS-W060 if any plugin before claws governance handler. Names plugin, position, risk.
 
 **Node 16 AbortSignal.timeout polyfill** (PF2-S09-F01 major, PF2-S09-F02 major): AbortSignal.timeout() requires Node 18+. Emit detects target from claws.json nodeTarget, .nvmrc, package.json engines, or process.version. For Node <18: setTimeout polyfill, inline, no external dependency.
 

@@ -1,0 +1,3 @@
+Use TypeScript for all new files.
+Prefer functional patterns over class-based patterns.
+Always add JSDoc comments to exported functions.

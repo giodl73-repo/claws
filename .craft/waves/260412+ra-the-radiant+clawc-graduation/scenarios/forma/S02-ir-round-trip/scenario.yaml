@@ -1,0 +1,139 @@
+name: S02-ir-round-trip
+series: forma
+version: 1
+specs: [CL-08]
+description: >
+  Validates that OCWorkspaceIR serialized and deserialized through @craftworks/forma
+  produces identical output to the pre-extraction compiler-sdk FormaIR path. This
+  is the equivalence guarantee: the extracted package must behave identically to the
+  monolith code it replaces for all IR operations.
+
+expect:
+  round_trip:
+    input: full_9_file_workspace
+    serialize_format: json
+    deserialize_matches_original: true
+    hash_match: true
+  compiler_sdk_equivalence:
+    ir_diff: []
+    field_count_match: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A full 9-file OC workspace is parsed by both the pre-extraction compiler-sdk
+  FormaIR path (readOCWorkspaceViaFORMA) and the standalone @craftworks/forma
+  WorkspaceReader. Both produce an OCWorkspaceIR. Each IR is serialized to JSON
+  via forma's serialize(), then deserialized via forma's deserialize(). The test
+  asserts: (1) serialize(ir_forma) === serialize(ir_compiler_sdk) byte-for-byte,
+  (2) deserialize(serialize(ir)) deep-equals ir for both paths, and (3) the
+  SHA-256 hash of the serialized IR is identical across both paths.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The compiler-sdk FormaIR includes fields that are compiler-internal
+      (e.g., _compilerPhase, _sourceMap references). If forma's OCWorkspaceIR
+      omits these internal fields but the serializer includes them in
+      compiler-sdk's version, byte-for-byte comparison will fail. The
+      equivalence test must compare the public API surface of the IR, not
+      internal implementation fields. CL-08 must define which fields are
+      part of the public IR contract.
+    spec_impact: "CL-08 @craftworks/forma — define public IR field contract, exclude compiler internals"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      JSON serialization order matters for byte-for-byte comparison. If
+      compiler-sdk serializes fields in insertion order (default JS behavior)
+      and forma sorts them alphabetically (canonical JSON), the hashes will
+      differ even though the IR is semantically identical. Both must use the
+      same canonical serialization — sorted keys, no extra whitespace.
+    spec_impact: "CL-08 @craftworks/forma serialize() — must use deterministic key ordering"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The SoulIR contains parsed deny constraints with source location
+      metadata (line number, column, byte offset). If forma calculates
+      source locations differently from compiler-sdk (e.g., BOM bytes
+      count toward offset in one but not the other), the IRs will differ
+      in location fields even though the semantic content matches. Source
+      locations must be normalized (BOM-exclusive byte offsets) in both.
+    spec_impact: "CL-08 @craftworks/forma IR — source location normalization rules"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The deserialize() path must reconstruct Zod-validated types, not raw
+      JSON objects. If deserialize() returns plain objects that happen to
+      match the shape but lack runtime validation, downstream code that
+      calls .parse() on the IR will succeed with the original but fail
+      with the deserialized version (or vice versa). Round-trip must
+      preserve validation state.
+    spec_impact: "CL-08 @craftworks/forma deserialize() — must return Zod-validated instances"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The canvas/ directory can contain an arbitrary number of files. The
+      IR must serialize canvas entries in a deterministic order (sorted by
+      filename) to ensure round-trip hash stability. If canvas entries are
+      stored in Map insertion order and the filesystem returns them in
+      different order on different platforms, the hash will be platform-
+      dependent.
+    spec_impact: "CL-08 @craftworks/forma — canvas entries sorted by filename in IR"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      If forma's IR schema evolves independently from compiler-sdk (which
+      it will after extraction), the equivalence test becomes a snapshot
+      assertion against a specific compiler-sdk version. The equivalence
+      test must pin a compiler-sdk version and document that equivalence
+      is validated against that version. Post-extraction, forma's IR is
+      authoritative and compiler-sdk will need to import from forma.
+    spec_impact: "CL-08 equivalence testing — pin version, document breakpoint for authority transfer"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      ToolsIR includes parsed R-level (R1-R5) classifications. If the
+      R-level enum values differ between forma and compiler-sdk (e.g.,
+      string "R5" vs numeric 5 vs enum member), serialization produces
+      different JSON and round-trip fails. The R-level representation
+      must be identical in both packages' type definitions.
+    spec_impact: "CL-08 @craftworks/forma types — R-level representation must match compiler-sdk exactly"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The round-trip test should cover edge cases: empty AGENTS.md (no
+      subagents), HEARTBEAT.md with no schedules, USER.md with no OBO
+      grants. These produce empty collections in the IR. Serialization
+      of empty collections ([] vs null vs omitted) must be consistent
+      between serialize and deserialize.
+    spec_impact: "CL-08 @craftworks/forma — empty collection serialization: always [] never null"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      If forma adds new fields to OCWorkspaceIR that compiler-sdk does
+      not have, deserialization of the new format by an old compiler-sdk
+      consumer will drop those fields. The forward-compatibility strategy
+      (ignore unknown fields vs reject) must be defined in the IR schema
+      contract. CL-08 should mandate ignore-unknown for forward compat.
+    spec_impact: "CL-08 @craftworks/forma IR versioning — unknown fields ignored, not rejected"
+    pitfall: null

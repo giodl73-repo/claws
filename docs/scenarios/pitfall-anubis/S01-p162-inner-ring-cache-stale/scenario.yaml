@@ -42,7 +42,7 @@ problem: >
   agent with OBO delegation. The inner ring watcher is configured for editor-
   driven file system events but git merge writes files in a batch that the
   watcher's debounce window collapses into silence. The incremental cache still
-  holds the pre-merge IR. The next pinch run reads the stale cache and reports
+  holds the pre-merge IR. The next check run reads the stale cache and reports
   zero violations. Meanwhile, the new agent's OBO declaration conflicts with an
   existing trust boundary in TRUST.md — a cross-file conflict that only a full
   recompilation would catch. The user deploys the governance plugin believing

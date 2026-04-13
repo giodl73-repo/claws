@@ -3,7 +3,7 @@ slug: claws-detect
 preset: "claws"
 plan: "2 headlines: platform detection identifies 7 target platforms from marker files with structural validation, multi-platform resolution selects highest-enforcement primary"
 area: claws
-status: Draft
+status: Implemented
 phase: ptah
 atoms: [atom:claws-compiler, atom:platform-detection, atom:marker-files, atom:multi-platform]
 specs: [CL-01, CL-04, CL-05, CL-06]

@@ -1,0 +1,163 @@
+name: S04-circular-task-dependency
+series: execution
+version: 1
+specs: [CL-08]
+description: >
+  Validates that a cycle in the task graph is detected at construction
+  time with a diagnostic that lists the exact cycle path. Unlike runtime
+  cycle detection (which discovers a cycle during execution and must halt
+  a running pipeline), construction-time detection prevents the graph
+  from being built in an invalid state. This is the execution package's
+  equivalent of the context DAG cycle detection (context S02) but at the
+  task abstraction level.
+
+expect:
+  graph_construction:
+    tasks: ["parse", "extract", "analyze", "optimize"]
+    edges:
+      - ["parse", "extract"]
+      - ["extract", "analyze"]
+      - ["analyze", "optimize"]
+      - ["optimize", "extract"]
+    accepted: false
+    error:
+      type: "TaskCycleError"
+      cycle_path: ["extract", "analyze", "optimize", "extract"]
+  graph_state:
+    constructed: false
+    no_partial_graph: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer constructs a task graph with 4 tasks: parse -> extract ->
+  analyze -> optimize, plus a backward edge from optimize -> extract
+  (creating a cycle: extract -> analyze -> optimize -> extract). The
+  graph construction must detect the cycle and reject the graph entirely.
+  No partial graph should exist after rejection — the construction either
+  produces a valid acyclic graph or fails with a TaskCycleError listing
+  the cycle path. The error must be specific to the execution domain
+  (TaskCycleError, not a raw CycleDetectedError from the context package's
+  DAG implementation).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The cycle must be detected at construction time, not at scheduling
+      time. If the graph is constructed lazily (edges are added one by
+      one) and cycle detection only runs when schedule() is called, the
+      graph exists in an invalid state between the last addEdge and the
+      schedule call. During this window, other operations on the graph
+      (topological sort, parallel group identification) may infinite-loop
+      or produce incorrect results. Detection must be eager — either per-
+      addEdge (O(V+E) each) or at finalize/build time (once, before any
+      query is allowed).
+    spec_impact: "CL-08 execution — cycle detection at graph construction, not scheduling"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The TaskCycleError must include the cycle path as a typed array
+      of task identifiers, not a formatted string. Consumers need to
+      programmatically identify which tasks are in the cycle to suggest
+      which edge to remove. "The cycle is [extract, analyze, optimize,
+      extract]" tells the developer that one of the three edges (extract->
+      analyze, analyze->optimize, or optimize->extract) must be removed.
+      The error should suggest the most recently added edge as the likely
+      culprit.
+    spec_impact: "CL-08 execution — TaskCycleError with typed cycle path and edge suggestion"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      "No partial graph should exist" means the construction must be
+      transactional. If the builder pattern is used (addTask, addTask,
+      addEdge, addEdge, build), the build() method validates the complete
+      graph. If validation fails, build() returns an error and no
+      TaskGraph instance is created. If the construction is non-builder
+      (new TaskGraph() then mutate), the graph must be marked invalid
+      and refuse all operations until the cycle is resolved.
+    spec_impact: "CL-08 execution — builder pattern with transactional validation at build()"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The cycle path listing should report the shortest cycle, not an
+      arbitrary cycle. If the graph has multiple cycles (A->B->A and
+      C->D->E->C), reporting only one may miss the other. If the graph
+      has overlapping cycles, reporting all cycles is exponential in the
+      worst case. A practical approach: report the first cycle found
+      (deterministic via canonical node ordering) and add a note "graph
+      may contain additional cycles."
+    spec_impact: "CL-08 execution — report first cycle with note about additional cycles"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The error domain must be execution-specific. If the execution
+      package internally uses @craftworks/context for DAG operations,
+      the context package throws CycleDetectedError. The execution
+      package must catch it and wrap it in TaskCycleError with execution-
+      domain context (task names, not node IDs). Leaking context-package
+      error types through the execution API violates the package boundary.
+    spec_impact: "CL-08 execution — error wrapping at package boundary (context -> execution)"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The "optimize -> extract" backward edge in this scenario is an
+      obvious mistake. But subtler cycles arise from skill resolution:
+      if task A resolves a skill that internally schedules task B, and
+      task B depends on A's output, the cycle is not visible in the
+      explicit task graph. The execution package should detect both
+      explicit cycles (in the declared graph) and implicit cycles
+      (through skill resolution dependencies).
+    spec_impact: "CL-08 execution — implicit cycle detection through skill resolution chains"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The 4-task graph in this scenario has a cycle of length 3 (extract ->
+      analyze -> optimize -> extract). The minimum cycle length is 2
+      (A -> B -> A). Self-loops (A -> A) are length 1. The cycle detection
+      algorithm must handle all three cases. Self-loops and length-2 cycles
+      can be special-cased for better error messages: "Task 'extract'
+      depends on itself" vs "Cycle: extract -> analyze -> optimize ->
+      extract."
+    spec_impact: "CL-08 execution — cycle length-specific error messages"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Construction-time validation adds latency to graph building. For
+      a 6-task graph, cycle detection (DFS, O(V+E)) is negligible. For
+      a hypothetical 100-task graph with 500 edges, it is still under
+      1ms. The validation cost is acceptable for all realistic pipeline
+      sizes. The spec should state that no performance exemption exists
+      for skipping validation; the graph is always validated.
+    spec_impact: "CL-08 execution — mandatory validation, no skip flag"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      If the execution package supports graph modification after
+      construction (adding tasks or edges to an existing graph), every
+      modification must re-validate. If only build() validates and post-
+      build addEdge() skips validation, a cycle can be introduced after
+      construction. Either the graph is immutable after build (safer) or
+      every mutation triggers incremental cycle detection (more flexible
+      but more complex). The spec should choose immutable-after-build.
+    spec_impact: "CL-08 execution — immutable-after-build or incremental validation on mutation"
+    pitfall: null

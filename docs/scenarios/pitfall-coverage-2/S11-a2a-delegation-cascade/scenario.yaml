@@ -91,11 +91,11 @@ findings:
     severity: warning
     description: >
       The suppressed rules should still appear in verbose output
-      (`claws pinch --verbose`) so developers can see the full rule
+      (`claws check --verbose`) so developers can see the full rule
       evaluation. Default output shows only the root cause. Verbose output
       shows all rules with their skip reasons. This prevents confusion about
       "why didn't G-A2A-IDENTITY run?"
-    spec_impact: "CL-02 pinch — verbose vs default output for suppressed rules"
+    spec_impact: "CL-02 check — verbose vs default output for suppressed rules"
     pitfall: "P-089"
 
   - id: F06

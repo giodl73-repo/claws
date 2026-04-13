@@ -50,12 +50,12 @@ findings:
   - id: F02
     severity: major
     description: >
-      The pinch phase must analyze the plugins array in the workspace
+      The check phase must analyze the plugins array in the workspace
       configuration and warn (CLAWS-W060) if any plugin loads before the
       claws governance handler. The warning must name the plugin, its
       position, and the risk: "analytics-tracker at position 0 can mutate
       tool calls before governance at position 1."
-    spec_impact: "CL-04 pinch — plugin ordering analysis"
+    spec_impact: "CL-04 check — plugin ordering analysis"
     pitfall: "P-139"
 
   - id: F03

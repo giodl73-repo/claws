@@ -1,0 +1,57 @@
+surface: story
+entries:
+  check-story:
+    type: guide
+    path: docs/claws/stories/01-why-code-generation-is-the-moat.md
+    atoms:
+    - check
+  claws-init-story:
+    type: guide
+    path: docs/claws/stories/01-why-code-generation-is-the-moat.md
+    atoms:
+    - claws-init
+  claws-compiler-story:
+    type: guide
+    path: docs/claws/stories/01-why-code-generation-is-the-moat.md
+    atoms:
+    - claws-compiler
+  three-engine-model-story:
+    type: guide
+    path: docs/claws/stories/01-why-code-generation-is-the-moat.md
+    atoms:
+    - three-engine-model
+  three-rings-story:
+    type: guide
+    path: docs/claws/stories/02-the-three-rings.md
+    atoms:
+    - three-rings
+  tier-adoption-story:
+    type: guide
+    path: docs/claws/stories/03-the-dotnet-for-openclaw.md
+    atoms:
+    - tier-adoption
+  three-tier-packages-story:
+    type: guide
+    path: docs/claws/stories/03-the-dotnet-for-openclaw.md
+    atoms:
+    - three-tier-packages
+  lossless-roundtrip-story:
+    type: guide
+    path: docs/claws/stories/01-why-code-generation-is-the-moat.md
+    atoms:
+    - lossless-roundtrip
+  obo-boundary-story:
+    type: guide
+    path: docs/claws/stories/02-the-three-rings.md
+    atoms:
+    - obo-boundary
+  governance-plugin-story:
+    type: guide
+    path: docs/claws/stories/02-the-three-rings.md
+    atoms:
+    - governance-plugin
+  dotnet-for-oc-story:
+    type: guide
+    path: docs/claws/stories/03-the-dotnet-for-openclaw.md
+    atoms:
+    - dotnet-for-oc

@@ -37,7 +37,7 @@ F01 major CL-04+parse+ir+P-123+elicit-guide: breaking change | F02 major CL-02+p
 F01 major CL-02+P-124+fail-mode-guide: change documentation | F02 major CL-03: config precedence | F03 major CL-02: strict equality | F04 warning CL-03+P-124: recovery path | F05 major CL-01: schema field | F06 warning CL-02: precedence order | F07 warning CL-03: block reason | F08 warning CL-02: reclassification warning
 
 ### S05: Hook Ordering Guarantee (8 findings)
-F01 major CL-04+emit+P-125: ordering advisory | F02 major CL-03: hook independence | F03 major CL-04: short-circuit defense | F04 warning CL-04+emit: post-init instruction | F05 major CL-03: hot-reload ordering | F06 warning CL-03: pinch check | F07 warning CL-03: plugin vs internal | F08 major CL-04: fleet enforcement
+F01 major CL-04+emit+P-125: ordering advisory | F02 major CL-03: hook independence | F03 major CL-04: short-circuit defense | F04 warning CL-04+emit: post-init instruction | F05 major CL-03: hot-reload ordering | F06 warning CL-03: check validation | F07 warning CL-03: plugin vs internal | F08 major CL-04: fleet enforcement
 
 ### S06: Persistent Handler Failure (8 findings)
 F01 major CL-03+P-126: per-tool tracking | F02 major CL-03: recovery distinction | F03 major CL-03: health status | F04 warning CL-03: error type in alerts | F05 major CL-03+P-126: detection without sidecar | F06 warning CL-03: failedTools endpoint | F07 major CL-03: correlated failures | F08 warning CL-03: counter reset
@@ -61,7 +61,7 @@ F01 major (validated existing): cross-spec consistency | F02 major CL-01+ir+P-13
 F01 major CL-02+ir+fail-mode-guide: precedence | F02 major CL-02+fail-mode-guide: availability warning | F03 major CL-03: dynamic audit | F04 warning CL-03: implementation | F05 warning CL-02+fail-mode-guide: R5 ceiling | F06 major CL-02+fail-mode-guide: security warning | F07 warning (CL-05 scope): not applied
 
 ### S13: R5 Reclassification (7 findings)
-F01 major CL-02+class-guide: cascading effects | F02 major CL-02+class-guide: mandatory reason | F03 major CL-02+class-guide: bidirectional | F04 warning CL-02: pinch report | F05 warning (CL-05 scope): not applied | F06 major CL-02+ir+class-guide: compliance trail | F07 warning CL-02+ir+class-guide: counts
+F01 major CL-02+class-guide: cascading effects | F02 major CL-02+class-guide: mandatory reason | F03 major CL-02+class-guide: bidirectional | F04 warning CL-02: check report | F05 warning (CL-05 scope): not applied | F06 major CL-02+ir+class-guide: compliance trail | F07 warning CL-02+ir+class-guide: counts
 
 ### S14: Post-Emit Static Verification (8 findings)
 F01 major CL-04+emit: AST-based | F02 major CL-04+emit: multi-handler | F03 major CL-04+emit: conditional check | F04 major CL-04: TS source scanning | F05 warning CL-04+emit: complexity metrics | F06 warning CL-04+emit: result reporting | F07 major CL-04+emit: rule testing | F08 warning CL-04: dynamic strings
@@ -71,4 +71,4 @@ F01 major CL-01+CL-03: ceiling clamping | F02 major CL-04: AbortSignal propagati
 
 ## Not Applied (Out of Scope)
 
-S05-F06 (CL-05 pinch check), S05-F08 (CL-05 fleet ordering), S12-F07 (CL-05 fleet fail-mode), S13-F05 (CL-05 fleet reclassification): CL-05 spec not in target list. All note-severity findings: traceability records only.
+S05-F06 (CL-05 check check), S05-F08 (CL-05 fleet ordering), S12-F07 (CL-05 fleet fail-mode), S13-F05 (CL-05 fleet reclassification): CL-05 spec not in target list. All note-severity findings: traceability records only.

@@ -1,0 +1,27 @@
+surface: howto
+entries:
+  first-build-howto:
+    type: guide
+    path: docs/claws/how-to/first-build.md
+    atoms:
+    - first-build
+  initialize-workspace-howto:
+    type: guide
+    path: docs/claws/how-to/initialize-workspace.md
+    atoms:
+    - initialize-workspace
+  publish-skill-howto:
+    type: guide
+    path: docs/claws/how-to/publish-skill.md
+    atoms:
+    - publish-skill
+  three-ring-setup-howto:
+    type: guide
+    path: docs/claws/how-to/three-ring-setup.md
+    atoms:
+    - three-ring-setup
+  write-governance-rule-howto:
+    type: guide
+    path: docs/claws/how-to/write-governance-rule.md
+    atoms:
+    - write-governance-rule

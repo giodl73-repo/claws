@@ -1,0 +1,86 @@
+name: S03-platform-marker-alignment
+series: emit-cc
+version: 1
+specs: [CL-08]
+description: >
+  Validates that emit-cc output matches the marker format that
+  @craftworks/workspace uses to detect Claude Code governance installations.
+
+expect:
+  marker_detected: true
+  platform_id: "claude-code"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  @craftworks/workspace detects Claude Code governance by scanning for CLAUDE.md
+  containing a specific marker comment (e.g., "<!-- claws:claude-code:v{version} -->")
+  and .claude/settings.json containing a "claws" metadata key. After emit-cc
+  runs, workspace.detect() must return platform_id "claude-code" with the
+  emitter version. If the marker is absent or malformed, workspace reports
+  no governance installed even though the files exist.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The HTML comment marker in CLAUDE.md must be placed where Claude Code
+      will not interpret it as an instruction. If placed inline with
+      governance text, some markdown parsers may render it or Claude Code
+      may attempt to follow it. The marker should be at the very end of
+      the generated section, after a blank line.
+    spec_impact: "CL-08 workspace-markers — marker placement must not interfere with CC parsing"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      If the user strips HTML comments from CLAUDE.md (some teams enforce
+      this via linters), the marker is lost. Workspace must have a fallback
+      detection method — e.g., checking for the presence of the claws
+      metadata key in .claude/settings.json as a secondary marker.
+    spec_impact: "CL-08 workspace-markers — dual-marker strategy for CC (markdown + JSON)"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The .claude/settings.json metadata key used as a marker must not
+      conflict with any current or future Claude Code configuration key.
+      Using a namespaced key like "_claws" (underscore prefix) reduces
+      collision risk with Claude Code's own schema evolution.
+    spec_impact: "CL-08 workspace-markers — collision-safe metadata key in settings.json"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      When emit-cc merges with existing CLAUDE.md content, the marker must
+      remain within the claws-managed section delimiters. If the merge
+      logic places the marker outside the delimiters, subsequent emitter
+      runs may duplicate it or workspace detection may find a stale marker
+      from a previous version.
+    spec_impact: "CL-08 workspace-markers — marker must stay within managed section"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The version in the marker should follow semver format so workspace
+      can compare versions and warn about outdated governance installations
+      without parsing the full emitter package.json.
+    spec_impact: "CL-08 workspace-markers — semver format for marker version string"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      Marker detection for Claude Code should be fast since CLAUDE.md files
+      can be large (user content + generated content). Workspace should read
+      only the first N bytes or last N bytes (where the marker is placed)
+      rather than parsing the entire file.
+    spec_impact: "CL-08 workspace-markers — efficient marker detection for large files"
+    pitfall: null

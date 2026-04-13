@@ -136,7 +136,7 @@ $ claws init --template soc2
   + Synced exec-approvals bridge  -> exec-approvals.json (L4 backup)
   ⚠ Sidecar (L5) not installed   -> run 'claws init --enterprise' for full defense
 
-  4 enforcement layers active. Run 'claws pinch' to validate.
+  4 enforcement layers active. Run 'claws check' to validate.
 ```
 
 ```
@@ -147,7 +147,7 @@ $ claws init --template soc2 --enterprise
   + Configured health endpoint    -> :9091/health
   + Configured SIEM forwarding    -> .claws/config/siem.yaml
 
-  5 enforcement layers active (enterprise). Run 'claws pinch' to validate.
+  5 enforcement layers active (enterprise). Run 'claws check' to validate.
 ```
 
 Files created: 16 new files (18 with `--enterprise`). Files modified: 3 existing files (openclaw.json, exec-approvals.json, .gitignore). Originals backed up to `~/.claws-backups/<timestamp>/` (OUTSIDE `.claws/` -- see CB-08).
@@ -162,7 +162,7 @@ R4 (execute)  --- configurable -- enterprise decides (default: closed)
 R5 (OBO)      --- FAIL-CLOSED -- NON-NEGOTIABLE
                    |
                    +-- Compiler refuses to emit R5 fail-open
-                       claws pinch blocks it
+                       claws check blocks it
                        Runtime enforces it
                        No override exists
 ```
@@ -354,7 +354,7 @@ When `CLAWS_BYPASS=1` is set in the environment:
 - Audit chain still records every tool call with `bypassed: true` flag
 - A prominent warning is emitted at Gateway startup: `⚠ CLAWS GOVERNANCE BYPASSED — all tool calls ungoverned`
 - The bypass is logged to SIEM as a critical event
-- `claws pinch` reports BYPASS_ACTIVE as a critical finding
+- `claws check` reports BYPASS_ACTIVE as a critical finding
 
 This is the "break glass" escape hatch. It does NOT disable audit -- every action is still recorded for post-incident review.
 
@@ -450,7 +450,7 @@ Key design decisions:
 
 **Short-circuit pattern defense** (S16-F03 major): Malicious plugin can clone event, call tool directly, bypass hooks. Sidecar (L5) is the defense -- operates outside Gateway plugin system.
 
-**Runtime hook ordering check** (S16-F04 warning): `claws pinch` verifies governance position at runtime by querying Gateway plugin registry. "CLAWS-W030: governance plugin at position 2 of 3."
+**Runtime hook ordering check** (S16-F04 warning): `claws check` verifies governance position at runtime by querying Gateway plugin registry. "CLAWS-W030: governance plugin at position 2 of 3."
 
 **Post-init ordering instruction** (S16-F05 major): `claws init` output: "IMPORTANT: Ensure claws-governance is FIRST plugin in openclaw.json." Extra prominent if existing plugins detected.
 

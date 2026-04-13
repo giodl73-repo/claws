@@ -3,7 +3,7 @@ series: pitfall-anubis
 version: 1
 specs: [CL-05]
 description: >
-  Validates that snap restore re-runs pinch after restoration rather than
+  Validates that snap restore re-runs check after restoration rather than
   trusting the saved IR blindly. If files were modified between save and
   restore, the saved IR's violation line numbers reference wrong locations,
   producing misleading diagnostic output.
@@ -53,7 +53,7 @@ findings:
   - id: F01
     severity: major
     description: >
-      CL-05 must mandate that snap restore always re-runs pinch (recompilation)
+      CL-05 must mandate that snap restore always re-runs check (recompilation)
       on the restored source files to produce fresh IR with correct line
       numbers. The saved IR in the snapshot is used only for coherence
       verification (comparing the recompiled IR against the saved IR to

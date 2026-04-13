@@ -1,0 +1,99 @@
+name: S02-zero-craftworks-imports
+series: emit-oc
+version: 1
+specs: [CL-08]
+description: >
+  Validates that emit-oc output contains zero references to @craftworks/
+  internal packages — the emitted OC Gateway plugin is fully OC-native.
+
+expect:
+  craftworks_import_count: 0
+  platform_native: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  After emit-oc produces plugins/claws-governance/index.ts, a static analysis
+  pass scans the emitted file for any string matching "@craftworks/" in import
+  statements, require() calls, dynamic imports, type references, or comments
+  referencing internal package names. The count must be exactly zero. The
+  emitted code must only reference OC Gateway platform APIs and standard
+  Node.js built-ins. Any @craftworks/ reference in emitted code means the
+  output is not deployable to a standalone OC environment.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Type-only imports (import type { X } from "@craftworks/...") are stripped
+      at runtime but indicate the emitter is leaking internal types into the
+      output template. Even type-only references break the "zero craftworks"
+      contract because they appear in source code that consumers read and
+      that TypeScript tooling resolves.
+    spec_impact: "CL-08 emitter-isolation — type-only imports also violate zero-import rule"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Code generation templates may contain @craftworks/ references in
+      JSDoc comments or inline documentation that are not import statements.
+      These references confuse consumers who may try to install the
+      referenced packages. The zero-import scan must cover all string
+      occurrences, not just import/require statements.
+    spec_impact: "CL-08 emitter-isolation — zero-import scan must cover comments and strings"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      If the governance IR contains @craftworks/ package names as metadata
+      (e.g., source package attribution), the emitter must strip or remap
+      these before embedding them in output. Provenance metadata that
+      references internal packages leaks implementation details into
+      deployed artifacts.
+    spec_impact: "CL-08 emitter-isolation — provenance stripping in emitted output"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Error messages thrown by the emitted governance plugin at runtime must
+      not reference @craftworks/ internals. If the emitter templates include
+      error messages like "failed to load @craftworks/governance rule", the
+      OC operator sees references to packages that are not installed in
+      their environment.
+    spec_impact: "CL-08 emitter-isolation — runtime error messages must be platform-native"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Source maps, if generated alongside the emitted code, must not contain
+      references to @craftworks/ source paths. Source maps pointing to
+      non-existent paths in the deployment environment produce confusing
+      debugger experiences.
+    spec_impact: "CL-08 emitter-isolation — source map path sanitization"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The zero-import verification should be automatable as a CI check that
+      runs after every emitter code generation. A regex-based scanner is
+      sufficient but must handle multiline template literals where an
+      import might span multiple lines.
+    spec_impact: "CL-08 emitter-testing — CI automation for zero-import verification"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Package.json files emitted for the OC plugin (if any) must not list
+      @craftworks/ packages in dependencies. The emitter should generate a
+      minimal package.json with only OC platform dependencies.
+    spec_impact: "CL-08 emitter-isolation — emitted package.json must be craftworks-free"
+    pitfall: null

@@ -56,7 +56,7 @@ findings:
     description: >
       CL-05 must mandate pre-restore validation for the dead man switch.
       Before restoring a pre-upgrade snapshot, the dead man switch must run
-      pinch on the snapshot and check for critical violations. If critical
+      check on the snapshot and check for critical violations. If critical
       violations exist, the dead man switch must abort with a CRITICAL alert:
       "Dead man switch abort: pre-upgrade state has critical violations.
       Manual intervention required." The abort must halt the workspace

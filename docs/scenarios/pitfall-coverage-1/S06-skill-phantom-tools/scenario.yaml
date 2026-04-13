@@ -124,7 +124,7 @@ findings:
     severity: warning
     description: >
       Skill updates from the marketplace may add new tool references.
-      After a skill update, `claws pinch` should re-validate tool
+      After a skill update, `claws check` should re-validate tool
       references. The three-rings watch ring should detect skill file
       changes and trigger recompilation.
     spec_impact: "CL-05 watch ring — skill update triggers recompilation"

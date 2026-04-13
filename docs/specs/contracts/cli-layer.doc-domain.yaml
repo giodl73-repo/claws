@@ -1,6 +1,6 @@
 layer: "CLI Layer"
 atoms:
-  pinch:
+  check:
     visibility: public
     docType: headline
     narrative: P1
@@ -8,7 +8,7 @@ atoms:
   snap:
     visibility: public
     docType: feature
-    narrative: P2
+    narrative: null
     pipeline: false
   claws-init:
     visibility: public
@@ -18,15 +18,45 @@ atoms:
   claws-uninstall:
     visibility: public
     docType: feature
-    narrative: P2
+    narrative: null
     pipeline: false
   progressive-disclosure:
     visibility: public
     docType: feature
-    narrative: P1
+    narrative: null
     pipeline: false
   claws-json:
     visibility: public
     docType: feature
-    narrative: P1
+    narrative: null
     pipeline: true
+  claws-build:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  claws-test:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  claws-publish:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  claws-assess:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  claws-watch:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  claws-doctor:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false

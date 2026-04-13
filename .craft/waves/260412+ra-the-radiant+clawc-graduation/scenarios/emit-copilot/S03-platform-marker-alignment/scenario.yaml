@@ -1,0 +1,76 @@
+name: S03-platform-marker-alignment
+series: emit-copilot
+version: 1
+specs: [CL-08]
+description: >
+  Validates that emit-copilot output matches the marker format that
+  @craftworks/workspace uses to detect GitHub Copilot governance installations.
+
+expect:
+  marker_detected: true
+  platform_id: "github-copilot"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  @craftworks/workspace detects GitHub Copilot governance by scanning for
+  .github/copilot-instructions.md containing a claws marker comment (e.g.,
+  "<!-- claws:github-copilot:v{version} -->"). After emit-copilot runs,
+  workspace.detect() must return platform_id "github-copilot" with the emitter
+  version. The marker must be present and well-formed for detection to succeed.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The .github/ directory is used by GitHub Actions, Dependabot, and other
+      GitHub features. The marker in copilot-instructions.md must not
+      interfere with GitHub's own processing of the directory. An HTML
+      comment marker is safe as GitHub's markdown renderer ignores it.
+    spec_impact: "CL-08 workspace-markers — GitHub-safe marker format for .github/ files"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      If the repository is public, the marker reveals that claws governance
+      is in use, including the version number. For some organizations this
+      is sensitive toolchain information. The marker should use a generic
+      format (e.g., "managed-governance:v1") without the claws brand name
+      in public-repo mode.
+    spec_impact: "CL-08 workspace-markers — brand-neutral marker option for public repos"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      When copilot-instructions.md uses section delimiters for merge, the
+      marker must be within the managed section. If the user moves the
+      marker outside the delimiters during editing, workspace still detects
+      governance but the next emitter run may duplicate the marker
+      (one inside new delimiters, one orphaned outside).
+    spec_impact: "CL-08 workspace-markers — marker deduplication on re-emission"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      GitHub renders copilot-instructions.md in the repo's file browser.
+      Visible marker artifacts (malformed HTML comments, metadata blocks)
+      look unprofessional. The marker must be invisible in GitHub's
+      rendered view.
+    spec_impact: "CL-08 workspace-markers — invisible marker in GitHub rendered view"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      Workspace detection should report the last-modified time of
+      copilot-instructions.md alongside the marker, allowing consumers
+      to see when governance was last regenerated without inspecting
+      git history.
+    spec_impact: "CL-08 workspace-markers — last-modified reporting for Copilot governance"
+    pitfall: null

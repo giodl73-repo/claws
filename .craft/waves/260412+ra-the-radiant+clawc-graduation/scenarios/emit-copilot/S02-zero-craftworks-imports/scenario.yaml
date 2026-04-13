@@ -1,0 +1,86 @@
+name: S02-zero-craftworks-imports
+series: emit-copilot
+version: 1
+specs: [CL-08]
+description: >
+  Validates that emit-copilot output contains zero references to @craftworks/
+  internal packages — the output is GitHub Copilot native.
+
+expect:
+  craftworks_import_count: 0
+  platform_native: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  After emit-copilot produces .github/copilot-instructions.md and any
+  workspace settings, all output files are scanned for @craftworks/ references.
+  Since copilot-instructions.md is plain markdown read by Copilot as natural
+  language instructions, any @craftworks/ reference is a leaked internal
+  detail that Copilot may attempt to use in code suggestions, leading to
+  import statements for packages the consumer has not installed.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If governance rules reference @craftworks/ APIs in their examples
+      (e.g., "always use @craftworks/governance.validate()"), Copilot learns
+      to suggest these imports in autocompletion. This actively harms the
+      consumer's codebase by generating broken import statements in every
+      file where Copilot assists.
+    spec_impact: "CL-08 emitter-isolation — code examples in instructions must be craftworks-free"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      VS Code settings under "github.copilot" must not contain @craftworks/
+      values. Copilot settings use standard VS Code configuration format —
+      any craftworks-specific values are ignored by Copilot and clutter the
+      user's settings file.
+    spec_impact: "CL-08 emitter-isolation — settings values must use standard Copilot schema"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Governance rule descriptions copied verbatim from the IR may contain
+      internal terminology like "FormaIR validation" or "OBO boundary check."
+      These terms are meaningless to Copilot and to the consumer. The emitter
+      must translate internal terminology to domain-standard language.
+    spec_impact: "CL-08 emitter-isolation — translate internal terminology for Copilot"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Markdown links in copilot-instructions.md pointing to internal
+      documentation (e.g., docs.craftworks.dev) are inaccessible to Copilot
+      and to consumers who do not have access to the internal docs. Links
+      must be stripped or replaced with inline content.
+    spec_impact: "CL-08 emitter-isolation — strip internal documentation links"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The scan should also check for craftworks-specific governance rule IDs
+      (e.g., "GOV-042") that are meaningless outside the claws compilation
+      context. Rule IDs should be either stripped or replaced with
+      descriptive names.
+    spec_impact: "CL-08 emitter-isolation — strip or replace internal rule IDs"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      File path references to craftworks monorepo structure (e.g.,
+      "compiler-sdk/src/") may leak through template interpolation. These
+      paths do not exist in the consumer's workspace and confuse both
+      Copilot and the user.
+    spec_impact: "CL-08 emitter-isolation — build-path leak detection in Copilot output"
+    pitfall: null

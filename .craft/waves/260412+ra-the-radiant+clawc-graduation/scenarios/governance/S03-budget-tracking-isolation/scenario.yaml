@@ -1,0 +1,133 @@
+name: S03-budget-tracking-isolation
+series: governance
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/governance BudgetTracker operates standalone without
+  requiring the full governance runtime (PolicyWalker, GateEvaluator). A consumer
+  that only needs token counting and budget enforcement should not be forced to
+  initialize the policy engine.
+
+expect:
+  standalone:
+    budget_tracker_works: true
+    policy_walker_not_loaded: true
+    gate_evaluator_not_loaded: true
+  functionality:
+    token_counting: true
+    budget_limit_enforcement: true
+    fleet_aggregation: true
+    charter_enforcement: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer project imports only BudgetTracker from @craftworks/governance. It
+  creates a BudgetTracker instance with a 100,000 token budget, records 15 tool
+  calls with varying token costs, checks the remaining budget, and verifies that
+  the 16th call (which would exceed the budget) is rejected. The consumer never
+  imports PolicyWalker or GateEvaluator. The test verifies: (1) BudgetTracker
+  operates correctly without other governance components, (2) no runtime errors
+  from uninitialized policy engine dependencies, (3) the crypto dependency (used
+  for signing budget records) is properly resolved without initializing the full
+  governance stack.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If BudgetTracker's constructor internally initializes a PolicyWalker
+      (e.g., for budget-as-gate enforcement), importing BudgetTracker alone
+      will fail because PolicyWalker's dependencies (rule definitions, policy
+      tree) are not provided. BudgetTracker must be independently constructable
+      with only a budget limit and optional crypto keypair. The gate integration
+      must be a separate method (e.g., attachToRuntime()) not a constructor
+      requirement.
+    spec_impact: "CL-08 @craftworks/governance — BudgetTracker constructor: limit + optional crypto only"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Module-level side effects can break isolation. If governance/index.ts
+      has top-level code that initializes the rule registry or policy cache
+      when the module is first imported, importing BudgetTracker (which
+      triggers module load) will execute that initialization code. The merged
+      package must have no module-level side effects — all initialization
+      must be deferred to constructors or factory functions.
+    spec_impact: "CL-08 @craftworks/governance — no module-level side effects in index.ts"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      BudgetTracker records (token count, timestamp, tool ID) may need to
+      be signed for audit compliance. If BudgetTracker imports from the
+      crypto submodule of governance (which in turn depends on
+      @craftworks/crypto), the crypto package is required even for standalone
+      budget tracking. If the consumer does not install @craftworks/crypto,
+      BudgetTracker should work without signing — signing should be optional.
+    spec_impact: "CL-08 @craftworks/governance — BudgetTracker signing is optional, not required"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Fleet budget aggregation requires summing budgets across multiple
+      agents/workspaces. If the aggregation logic imports fleet-specific
+      types from @bic/claws-sdk (Layer 3), the standalone BudgetTracker
+      would have an upward dependency on the enterprise tier. Fleet
+      aggregation in the Layer 1 package must use generic interfaces
+      (BudgetSource[]) that claws-sdk's fleet module implements.
+    spec_impact: "CL-08 @craftworks/governance — fleet aggregation uses generic BudgetSource interface"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The budget enforcement decision (allow/reject) is a binary gate. But
+      in practice, consumers may want a "warn at 80%, reject at 100%"
+      policy. If BudgetTracker only supports hard limits, the consumer must
+      implement warning thresholds externally. BudgetTracker should support
+      configurable thresholds: warn at N%, reject at M%.
+    spec_impact: "CL-08 @craftworks/governance — BudgetTracker configurable warn/reject thresholds"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The token counting must handle different cost models: input tokens,
+      output tokens, total tokens, and weighted tokens (where output tokens
+      cost 4x input tokens in some pricing models). If BudgetTracker only
+      tracks total tokens, it cannot enforce input-specific or output-specific
+      budgets. The tracker should accept a cost function that maps a tool
+      call to a token cost, not assume a flat cost model.
+    spec_impact: "CL-08 @craftworks/governance — BudgetTracker accepts pluggable cost function"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      Charter enforcement (organizational spending limits) requires reading
+      a charter document. If the charter parser is part of PolicyWalker
+      (not BudgetTracker), standalone budget tracking cannot enforce charters.
+      But CL-08 lists charter enforcement as a BudgetTracker responsibility.
+      The charter parser must be implemented in BudgetTracker, not delegated
+      to PolicyWalker.
+    spec_impact: "CL-08 @craftworks/governance — charter parsing in BudgetTracker, not PolicyWalker"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The isolation test should measure import time: importing BudgetTracker
+      alone should be significantly faster than importing the full governance
+      package. If tree-shaking does not work (e.g., because of circular
+      dependencies between governance modules), importing BudgetTracker
+      loads the entire package. A bundle size test should verify that a
+      BudgetTracker-only consumer's bundle is < 50KB.
+    spec_impact: "CL-08 @craftworks/governance — BudgetTracker standalone bundle size < 50KB"
+    pitfall: null

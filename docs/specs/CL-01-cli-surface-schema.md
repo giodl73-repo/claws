@@ -10,7 +10,7 @@
 
 This spec defines the complete external-facing surface of `claws` -- the cross-platform agent governance compiler. It consolidates four research questions that determined: one CLI (not two), 40 commands across 8 groups, the name `claws`, and the three-layer `claws.json` v2 schema.
 
-The CLI surface is the product's first impression. Every command, flag, and config field reflects the design principle that governance should feel like a developer tool first and an enterprise platform second. Progressive disclosure (4/18/40) ensures a new user sees `claws init` and `claws pinch`, not `claws kill --fleet --confirm`.
+The CLI surface is the product's first impression. Every command, flag, and config field reflects the design principle that governance should feel like a developer tool first and an enterprise platform second. Progressive disclosure (4/18/40) ensures a new user sees `claws init` and `claws check`, not `claws kill --fleet --confirm`.
 
 The `claws.json` schema is the workspace-level configuration contract. Its three-layer design (core/targets/detection) scales from a 4-line minimal config to a 33-line fleet-managed enterprise setup without requiring platform-specific knowledge for the common case.
 
@@ -42,7 +42,7 @@ The `claws.json` schema is the workspace-level configuration contract. Its three
 | Group | Commands | Count | Scope |
 |-------|----------|-------|-------|
 | **Build** | init, build, build \<target\>, compile, optimize, test, diff, import, inspect, doctor, amend | 11 | Always workspace |
-| **Pinch** | pinch, pinch --fix/--watch/--strict/--staged/--fleet | 2 + flags | Scope-sensitive |
+| **Check** | check, check --fix/--watch/--strict/--staged/--fleet | 2 + flags | Scope-sensitive |
 | **Comply** | comply, comply \<framework\>, assess | 3 | Scope-sensitive |
 | **Audit** | audit, audit verify, audit export, audit history | 4 | Workspace + 1 fleet |
 | **Snap** | snap save/restore/diff/promote | 4 | Scope-sensitive |
@@ -58,12 +58,12 @@ The `claws.json` schema is the workspace-level configuration contract. Its three
 Maker (4 commands -- "5 minutes to governed"):
   claws init            Set up governance for your workspace
   claws build           Compile and emit your agent
-  claws pinch           Check against your org's policies
+  claws check           Check against your org's policies
   claws build cursor    Cross-compile to another platform
 
 Developer (18 commands -- full build + governance):
   Build:  init build compile optimize test diff import inspect watch amend doctor
-  Govern: pinch comply assess audit
+  Govern: check comply assess audit
 
 Advanced (40 commands -- fleet + snapshots + protect + maker + meta):
   + snap [save|restore|diff|promote]
@@ -79,7 +79,7 @@ Advanced (40 commands -- fleet + snapshots + protect + maker + meta):
 
 | Command | Default | --fleet | --confirm |
 |---------|---------|---------|-----------|
-| pinch | workspace | Yes | No |
+| check | workspace | Yes | No |
 | comply | workspace | Yes | No |
 | snap save/restore/diff | workspace | Yes | No |
 | budget | workspace | Yes | No |
@@ -219,18 +219,18 @@ $ claws                                    # claws.json exists, never built
 
   Next steps:
     claws build                  Compile and emit your agent
-    claws pinch                  Check against your org's policies
+    claws check                  Check against your org's policies
 
 $ claws                                    # claws.json exists, built, 2 violations
   claws — governance for every agent
 
   Workspace: my-agent/ (OpenClaw, T2)
   Last build: 2026-04-11 09:15 (847 tokens)
-  Last pinch: 2 violations (1 high, 1 medium)
+  Last check: 2 violations (1 high, 1 medium)
 
   Next steps:
-    claws pinch --fix            Auto-fix 1 of 2 violations
-    claws pinch                  Re-check after manual fix
+    claws check --fix            Auto-fix 1 of 2 violations
+    claws check                  Re-check after manual fix
 ```
 
 ### `claws init` Defaults
@@ -245,12 +245,12 @@ claws init --template hipaa    # HIPAA-specific governance defaults
 
 The `minimal` template creates a `claws.json` with `enabled: true`, `trustTier: 2`, and zero policy files. It is the simplest valid governance configuration.
 
-### `claws pinch` Output Format
+### `claws check` Output Format
 
-`claws pinch` is the primary terminal interface. Its output format is designed for human readability:
+`claws check` is the primary terminal interface. Its output format is designed for human readability:
 
 ```
-$ claws pinch
+$ claws check
   ✓ G-CLASS    Tool risk classification          PASS
   ✓ G-ELICIT   OBO elicitation gates             PASS
   ✗ G-A2A-TRUST  Inter-agent trust boundaries    FAIL  [HIGH]
@@ -259,11 +259,11 @@ $ claws pinch
         Docs: https://claws.dev/rules/G-A2A-TRUST
   ✗ G-INPUT    Input sanitization                FAIL  [MEDIUM]
       → TOOLS.md:47 — tool "web-fetch" has no input sanitizer
-        Fix: run `claws pinch --fix` to add @claws/security sanitizer stub
+        Fix: run `claws check --fix` to add @claws/security sanitizer stub
         Docs: https://claws.dev/rules/G-INPUT
 
   2 violations (1 high, 1 medium) in 0.3s
-  1 auto-fixable — run `claws pinch --fix`
+  1 auto-fixable — run `claws check --fix`
 ```
 
 **Output contract**:
@@ -304,7 +304,7 @@ Setting `CLAWS_BYPASS=1` in the environment disables all claws governance enforc
 
 ```bash
 CLAWS_BYPASS=1 claws build      # Build without governance checks
-CLAWS_BYPASS=1 claws pinch      # Pinch exits 0 with warning: "BYPASS active"
+CLAWS_BYPASS=1 claws check      # Check exits 0 with warning: "BYPASS active"
 ```
 
 **Behavior**:
@@ -459,6 +459,6 @@ CLAWS_BYPASS=1 claws pinch      # Pinch exits 0 with warning: "BYPASS active"
 | Source | What it contributed |
 |--------|-------------------|
 | Q12a | One CLI decision, product-native naming (.claws/), workspace layout, config schema v1 |
-| Q12c | 35-command verb surface, progressive disclosure (4/18/35), crustacean naming rule (pinch + snap only) |
+| Q12c | 35-command verb surface, progressive disclosure (4/18/35), crustacean naming rule (check + snap) |
 | Q12d | Name change from `claws` to `claws`, cross-platform positioning, collision analysis |
 | Q12g | Three-layer schema (core/targets/detection), platform detection matrix, v1-to-v2 migration |

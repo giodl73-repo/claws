@@ -1,0 +1,102 @@
+name: S09-p258
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-258
+description: >
+  Validates that `claws check --audit-chain` detects format incompatibility in
+  audit chain JSONL files across the extraction boundary. When @craftworks/crypto
+  changes key ordering, timestamp format, or hash computation method, audit
+  chains started by agent-sdk cannot be continued by @craftworks/crypto and
+  enterprise audit trails become unverifiable.
+
+expect:
+  detection: true
+  prevention: "`claws check --audit-chain` verifies cross-implementation chain continuity. Canonical format frozen before extraction: sorted keys, LF line endings, buffer-based hash concatenation, ISO 8601 UTC timestamps with ms precision."
+
+simulate:
+  failures: ["Audit chain JSONL format changes during extraction break cross-implementation chain continuity"]
+  halt: null
+  budget: null
+
+problem: >
+  Before extraction, agent-sdk creates audit chains using compiler-sdk's
+  built-in hash-chain module. The JSONL format uses unsorted keys and Date.now()
+  timestamps. After extraction, @craftworks/crypto implements the same audit
+  chain with sorted keys and ISO 8601 timestamps. A chain started by agent-sdk
+  (pre-extraction format) has its last entry hashed with unsorted-key JSON
+  serialization. @craftworks/crypto attempts to continue the chain by hashing
+  the previous entry with sorted-key serialization. The computed previous-hash
+  does not match, and the chain link breaks. The audit trail is now unverifiable
+  — the chain has a gap at the extraction boundary. Verify that `claws check
+  --audit-chain` detects the format divergence and that the canonical format
+  was frozen before extraction.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      JSON key ordering is the primary divergence vector. JSON.stringify()
+      with no replacer preserves insertion order, which varies between
+      implementations. The canonical format must mandate sorted keys (e.g.,
+      JSON.stringify(obj, Object.keys(obj).sort())) and the check must verify
+      that both pre- and post-extraction implementations produce identical
+      serialization for the same logical entry.
+    spec_impact: "CL-08 G-AUDIT — canonical sorted-key JSON serialization mandatory"
+    pitfall: P-258
+
+  - id: F02
+    severity: major
+    description: >
+      Timestamp format differences (epoch ms vs ISO 8601) change the hash
+      input bytes. Even if both formats represent the same instant in time,
+      the hash differs. The canonical format must specify a single timestamp
+      representation. Conversion between formats must happen before hashing,
+      not after.
+    spec_impact: "CL-08 G-AUDIT — single canonical timestamp format in hash computation"
+    pitfall: P-258
+
+  - id: F03
+    severity: major
+    description: >
+      Hash algorithm changes (SHA-256 vs SHA-512, or different input encoding)
+      break the chain irreversibly. Unlike format changes that can be
+      normalized, a hash algorithm change means old entries cannot be verified
+      with the new algorithm. The canonical format must specify the exact
+      hash algorithm, input encoding, and concatenation method.
+    spec_impact: "CL-08 G-AUDIT — hash algorithm, encoding, and concatenation frozen"
+    pitfall: P-258
+
+  - id: F04
+    severity: warning
+    description: >
+      Line endings (LF vs CRLF) in the JSONL file change hash computation
+      on Windows. If agent-sdk writes CRLF line endings and @craftworks/crypto
+      reads LF, the hash input includes different bytes. The canonical format
+      must mandate LF line endings and both implementations must normalize
+      before hashing.
+    spec_impact: "CL-08 G-AUDIT — LF line endings mandatory in JSONL audit chains"
+    pitfall: P-258
+
+  - id: F05
+    severity: warning
+    description: >
+      The "frozen before extraction" requirement means the canonical format
+      must be documented and published as a specification before any
+      extraction work begins. If the format is frozen after some chains
+      have been created with the old format, a migration tool is needed for
+      existing chains. The check should verify both format compliance and
+      migration completeness.
+    spec_impact: "CL-08 G-AUDIT — format specification frozen before extraction; migration tool for existing chains"
+    pitfall: P-258
+
+  - id: F06
+    severity: note
+    description: >
+      Enterprise consumers depend on audit chain verifiability for compliance
+      (SOC2, ISO 27001). An unverifiable chain gap at the extraction boundary
+      is not just a technical issue — it is a compliance finding. The check
+      report should include chain continuity status suitable for compliance
+      auditors.
+    spec_impact: "CL-08 G-AUDIT — chain continuity report formatted for compliance audit"
+    pitfall: P-258

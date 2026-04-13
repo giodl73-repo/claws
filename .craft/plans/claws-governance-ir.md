@@ -3,7 +3,7 @@ slug: claws-governance-ir
 preset: "claws"
 plan: "2 headlines: GovernanceIR as stable pivot, FailMode<R> type-level safety"
 area: claws
-status: Draft
+status: Implemented
 phase: ptah
 atoms: [atom:governance-ir, atom:capability-manifest, atom:mechanical-intent, atom:fail-mode]
 specs: [CL-04, CL-02]

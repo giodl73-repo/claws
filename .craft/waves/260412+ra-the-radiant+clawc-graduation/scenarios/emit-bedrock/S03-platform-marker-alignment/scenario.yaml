@@ -1,0 +1,86 @@
+name: S03-platform-marker-alignment
+series: emit-bedrock
+version: 1
+specs: [CL-08]
+description: >
+  Validates that emit-bedrock output matches the marker format that
+  @craftworks/workspace uses to detect AWS Bedrock governance installations.
+
+expect:
+  marker_detected: true
+  platform_id: "aws-bedrock"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  @craftworks/workspace detects AWS Bedrock governance by scanning for a
+  guardrail configuration JSON file at a known path (e.g.,
+  .claws/bedrock-guardrail.json) containing a metadata field with the claws
+  marker. After emit-bedrock runs, workspace.detect() must return platform_id
+  "aws-bedrock" with the emitter version and guardrail name. The marker must
+  coexist with valid AWS Bedrock API schema.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      AWS Bedrock's CreateGuardrail API rejects unknown top-level fields.
+      The marker cannot be a top-level JSON field — it must be embedded in
+      an allowed field (e.g., the description or tags) or stored in a
+      separate companion file (.claws/bedrock-marker.json) alongside
+      the guardrail JSON.
+    spec_impact: "CL-08 workspace-markers — marker must not violate Bedrock API schema"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      If the marker is embedded in the guardrail description field, it
+      consumes part of the 200-character description limit. The marker
+      must be compact enough to leave room for a meaningful description.
+      If the full description is needed for the guardrail name, the marker
+      must use the companion file approach instead.
+    spec_impact: "CL-08 workspace-markers — marker size constraint for description embedding"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The known output path (.claws/bedrock-guardrail.json) must be
+      configurable for workspaces that need Bedrock configurations in
+      a different directory (e.g., infrastructure/aws/). Workspace
+      detection must check both the default and configured paths.
+    spec_impact: "CL-08 workspace-markers — configurable output path for Bedrock emitter"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      If tags are used as the marker location, the tag key must follow AWS
+      tag naming conventions (max 128 chars, no aws: prefix). A tag key
+      like "claws:managed" is valid, but "aws:claws-managed" is reserved
+      and rejected by AWS.
+    spec_impact: "CL-08 workspace-markers — AWS tag naming compliance for marker tags"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      Workspace detection for Bedrock should report whether the guardrail
+      JSON is deployable (all required fields present) or draft (partial
+      configuration). This helps consumers distinguish between generated
+      and in-progress configurations.
+    spec_impact: "CL-08 workspace-markers — deployment readiness indicator"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      Multiple guardrail configurations (e.g., for different environments)
+      may exist in the same workspace. Workspace must detect all of them
+      and report each with its own marker metadata.
+    spec_impact: "CL-08 workspace-markers — multi-guardrail detection"
+    pitfall: null

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "trustTier": "T1",
+  "targets": ["cursor"],
+  "elicitation": {
+    "policies": {
+      "send-email": {
+        "approval": "required",
+        "timeout": 300,
+        "denyDefault": true
+      }
+    }
+  }
+}

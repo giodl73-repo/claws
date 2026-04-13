@@ -1,0 +1,130 @@
+name: S04-unknown-platform-markers
+series: workspace
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/workspace handles unrecognized marker files without
+  crashing and returns an empty platform list when no known platform is detected.
+  This tests forward-compatibility with new AI platforms that emerge after the
+  package is published.
+
+expect:
+  unknown_markers:
+    platforms_detected: 0
+    errors: 0
+    warnings: 0
+  mixed_known_unknown:
+    platforms_detected: 1
+    unknown_ignored: true
+  result:
+    stable: true
+    no_crash: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Three test directories are prepared: (1) a directory containing only unknown
+  marker files (.devinrules, .tabninerules, .codiumrules) with no known platform
+  markers, (2) a directory with known OpenClaw markers (SOUL.md, TOOLS.md,
+  openclaw.json) plus unknown markers (.devinrules), and (3) a directory with
+  files that resemble markers but are not (rules.md, .rules, platform.json).
+  The detect() function must return an empty list for directory 1, detect only
+  OpenClaw for directory 2, and return an empty list for directory 3. No errors,
+  no warnings, no crashes.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If the detector iterates through known markers and checks filesystem
+      existence, unknown files are naturally ignored. But if the detector
+      scans all files in the directory and tries to match them against a
+      pattern (e.g., files matching /\.\w+rules$/), unknown rule files
+      like .devinrules could match the pattern and trigger undefined
+      platform lookup. The detector must match against a closed set of
+      known markers, not an open pattern.
+    spec_impact: "CL-08 @craftworks/workspace — closed-set marker matching, not pattern-based"
+    pitfall: null
+
+  - id: F02
+    severity: warning
+    description: >
+      The detect() function should not log warnings for unknown files.
+      In a directory with 100 files and 3 marker files, logging a
+      "skipping unknown file" warning for 97 files produces noisy output.
+      The function should be silent about files it does not recognize.
+      Warnings should be reserved for anomalous conditions (e.g., marker
+      file exists but is unreadable due to permissions).
+    spec_impact: "CL-08 @craftworks/workspace — no warnings for unknown files, only for access errors"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      A file named "rules.md" could be confused with platform rule files
+      by a fuzzy matching algorithm. The detector must use exact marker
+      names (e.g., ".cursorrules" not "*rules*"). If the matching is
+      substring-based, generic filenames produce false positives. This is
+      particularly dangerous for Aider's CONVENTIONS.md which is already
+      a generic name.
+    spec_impact: "CL-08 @craftworks/workspace — exact marker name matching, no substring or fuzzy"
+    pitfall: null
+
+  - id: F04
+    severity: note
+    description: >
+      Future versions of @craftworks/workspace will add new platform markers.
+      The platform registry design should allow consumers to extend the
+      marker set via an options parameter (e.g., detect(dir, { extraPlatforms:
+      [...] })). This lets enterprise users detect internal platforms without
+      waiting for a workspace package update.
+    spec_impact: "CL-08 @craftworks/workspace — extensible platform registry via options parameter"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      If the directory does not exist or is not readable, detect() must
+      return a structured error, not throw an unhandled exception. The
+      caller may be scanning multiple directories and should not have
+      the entire scan aborted by one permission error. The function
+      signature should return a Result type or include an error field
+      alongside the platforms array.
+    spec_impact: "CL-08 @craftworks/workspace — detect() returns structured error for inaccessible directories"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      On Windows, directory enumeration via fs.readdir() may fail with
+      EPERM for system-protected directories. If the discovery walker
+      enters such a directory and detect() throws, the walker crashes.
+      The detect() function must handle EPERM, EACCES, and ENOENT
+      errors and return empty results with an error annotation.
+    spec_impact: "CL-08 @craftworks/workspace — graceful handling of EPERM/EACCES/ENOENT"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The return type when no platforms are detected should be an empty
+      array [], not null or undefined. Consumers should be able to check
+      results.length === 0 without null guards. If the return type allows
+      null, every caller needs a null check, increasing error surface.
+    spec_impact: "CL-08 @craftworks/workspace — empty array return, never null"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      As new AI platforms launch, their marker file conventions may not
+      be public or stable. The workspace package should document its
+      marker discovery methodology (how marker files are identified for
+      new platforms) so that contributors can submit platform additions
+      with confidence. A CONTRIBUTING.md section on platform markers
+      would reduce review friction.
+    spec_impact: "CL-08 @craftworks/workspace — document marker discovery methodology for contributors"
+    pitfall: null

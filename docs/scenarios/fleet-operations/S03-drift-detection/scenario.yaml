@@ -156,7 +156,7 @@ findings:
       drift type maps to a SARIF rule ID (e.g., CLAWS-DRIFT-TIER,
       CLAWS-DRIFT-HASH, CLAWS-DRIFT-RULE). This enables fleet drift to
       appear in GitHub code scanning dashboards alongside per-workspace
-      pinch results.
+      check results.
     spec_impact: "CL-05 Fleet — drift findings as SARIF results"
     pitfall: null
 

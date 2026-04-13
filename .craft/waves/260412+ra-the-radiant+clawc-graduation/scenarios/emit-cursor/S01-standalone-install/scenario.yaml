@@ -1,0 +1,96 @@
+name: S01-standalone-install
+series: emit-cursor
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/emit-cursor installs with only @craftworks/codegen
+  as a dependency and produces Cursor rules files at .cursor/rules/*.mdc.
+
+expect:
+  craftworks_deps: ["@craftworks/codegen"]
+  output_pattern: ".cursor/rules/*.mdc"
+  output_valid_mdc: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer installs @craftworks/emit-cursor alongside @craftworks/codegen
+  in a fresh project. The emitter is invoked with a compiled governance IR
+  containing 5 governance rules. It must produce one .mdc file per governance
+  domain under .cursor/rules/ (e.g., security.mdc, testing.mdc, style.mdc).
+  Each .mdc file must use Cursor's MDC format with frontmatter specifying
+  rule metadata (description, globs, alwaysApply) and markdown body containing
+  the governance instructions. The files must be loadable by Cursor IDE without
+  errors.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The MDC format requires specific frontmatter fields (description, globs,
+      alwaysApply) that Cursor uses for rule activation. If the emitter omits
+      required frontmatter fields, Cursor silently ignores the rule file. The
+      emitter must populate all required MDC fields from the governance IR.
+    spec_impact: "CL-08 emit-cursor — mandatory MDC frontmatter field mapping from IR"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The globs field in MDC frontmatter determines which files the rule
+      applies to. If the governance IR does not contain file-scope information,
+      the emitter must default to alwaysApply:true rather than generating
+      empty globs that cause the rule to never activate.
+    spec_impact: "CL-08 emit-cursor — default activation strategy when IR lacks file scope"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Cursor limits MDC file names to specific patterns. If the emitter
+      generates file names with characters not supported by Cursor (e.g.,
+      spaces, special characters), the rules fail to load. File names must
+      be slugified from governance domain names.
+    spec_impact: "CL-08 emit-cursor — MDC file naming conventions"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The .cursor/rules/ directory may already contain user-created .mdc files.
+      The emitter must only manage files it created (identifiable by a
+      header comment or naming convention) and leave user files untouched.
+      A clean-and-regenerate approach would destroy user customizations.
+    spec_impact: "CL-08 emit-cursor — managed vs user file separation in .cursor/rules/"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      If the governance IR maps to more rules than Cursor can practically
+      handle (e.g., 50+ .mdc files), the emitter should consolidate related
+      rules into fewer files. Too many rule files degrades Cursor IDE
+      performance and makes manual review difficult.
+    spec_impact: "CL-08 emit-cursor — rule consolidation threshold for large governance sets"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      MDC files support markdown formatting including code blocks, lists,
+      and headers. The emitter should use structured formatting for complex
+      governance rules rather than dumping everything as a single paragraph.
+    spec_impact: "CL-08 emit-cursor — markdown formatting quality in MDC body"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The emitter should log which .mdc files it created and which governance
+      rules mapped to each file, enabling consumers to verify the mapping
+      without reading every generated file.
+    spec_impact: "CL-08 emit-cursor — generation report for rule-to-file mapping"
+    pitfall: null

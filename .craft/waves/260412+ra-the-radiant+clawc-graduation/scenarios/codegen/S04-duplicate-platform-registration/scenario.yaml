@@ -1,0 +1,151 @@
+name: S04-duplicate-platform-registration
+series: codegen
+version: 1
+specs: [CL-08]
+description: >
+  Validates deterministic conflict resolution when two emitter plugins
+  register for the same platform name. The registry must not silently
+  overwrite, crash, or return an unpredictable emitter. This scenario
+  tests the boundary between the emit framework and the plugin ecosystem:
+  as community emitters grow, collisions become likely.
+
+expect:
+  registration:
+    first: { name: "emit-oc-official", platform: "openclaw" }
+    second: { name: "emit-oc-community", platform: "openclaw" }
+  conflict:
+    detected: true
+    resolution: "last-wins-with-warning"
+    warning_emitted: true
+  get_result:
+    platform: "openclaw"
+    returns: "emit-oc-community"
+  list_result:
+    count: 1
+    no_duplicates: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Two emitter plugins both register for platform "openclaw". The first
+  is @craftworks/emit-oc (official), registered during application
+  startup. The second is a hypothetical community emitter emit-oc-alt
+  that also claims "openclaw" as its platform. After both registrations,
+  EmitRegistry.get("openclaw") must return exactly one emitter. The
+  scenario tests three possible policies: (1) first-wins (reject second),
+  (2) last-wins (overwrite, with warning), (3) error (throw on conflict).
+  The chosen policy must be documented, deterministic, and produce a
+  diagnostic so the developer knows a conflict occurred.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Silent overwrite is the worst outcome. If register() replaces the
+      existing emitter without warning, a developer who installs both
+      emit-oc and emit-oc-alt gets whichever registers last, which depends
+      on import order — a notoriously unstable ordering in bundlers and
+      test runners. The registry must detect the duplicate and either reject
+      it, warn, or throw. Silent mutation of the registry is a bug.
+    spec_impact: "CL-08 codegen — EmitRegistry duplicate detection is required"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The conflict resolution policy must be documented in the emitter
+      contribution guide (R2 W08). Community emitter authors need to know
+      upfront whether their emitter will collide with official emitters.
+      If the policy is "last-wins," the guide must explain that consumers
+      control order via their registration code. If the policy is "first-
+      wins," the guide must explain that npm install order does not matter,
+      only explicit register() order.
+    spec_impact: "CL-08 codegen — conflict resolution policy in contribution guide"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The warning diagnostic for a duplicate registration must include both
+      the existing and the new emitter's name, version, and platform.
+      "Emitter conflict for platform 'openclaw': 'emit-oc@1.0.0' replaced
+      by 'emit-oc-alt@0.2.0'" is actionable. "Duplicate platform" is not.
+      The diagnostic must be structured (not just console.warn) so fleet
+      operators can detect conflicts programmatically.
+    spec_impact: "CL-08 codegen — structured conflict diagnostic with both parties"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      If the policy is "error on conflict," the second register() call
+      throws. This is safe but breaks dynamic plugin loading: an application
+      that conditionally registers emitters based on config cannot catch the
+      error cleanly without try/catch around every register(). A better API
+      is register() returning a RegistrationResult { success, conflict? }
+      so callers can handle duplicates without exception control flow.
+    spec_impact: "CL-08 codegen — RegistrationResult return type for conflict handling"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Platform name normalization (from S01 F02) interacts with duplicate
+      detection. If "OpenClaw" and "openclaw" are normalized to the same
+      key, two plugins using different casings collide. If normalization
+      is not applied, they register as separate platforms and get() with
+      one casing misses the other. Both normalization and duplicate
+      detection must use the same canonical form.
+    spec_impact: "CL-08 codegen — normalization consistency between register and detect"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      EmitRegistry.list() after a duplicate must not return both entries.
+      If the internal storage is a Map (platform -> emitter), last-wins
+      naturally deduplicates. But if the storage is an array (appended on
+      register), list() could return both, and get() returns the last match,
+      creating an inconsistency between list() and get(). The internal
+      data structure must ensure list() and get() agree.
+    spec_impact: "CL-08 codegen — list/get consistency after duplicate registration"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The 7 first-party emitters have unique platform names by construction
+      (openclaw, claudecode, cursor, copilot, bedrock, langgraph, crewai).
+      Duplicates will come from community emitters targeting the same
+      platform. The most likely collision is two community emitters for
+      "cursor" — a platform with high demand and no official Craftworks
+      emitter yet beyond the first-party one.
+    spec_impact: "CL-08 codegen — community emitter collision scenarios in test suite"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      An unregister() method would allow runtime replacement (unregister
+      old, register new) without conflict. This is useful for hot-reloading
+      during development. However, unregister() in production is risky: a
+      compiled pipeline referencing the old emitter would break mid-run.
+      If unregister() is added, it must fail if any active pipeline holds
+      a reference to the emitter being removed.
+    spec_impact: "CL-08 codegen — unregister() method feasibility and safety"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The compatibility manifest (@craftworks/platform) must account for
+      duplicate conflicts across versions. If emit-oc@1.0 and emit-oc@2.0
+      both register for "openclaw" but with different API contracts, the
+      manifest must flag this as incompatible. The manifest's version
+      matrix (17 packages x N versions) must include conflict detection
+      as a first-class property, not just "tested-together" combinations.
+    spec_impact: "CL-08 platform manifest — conflict detection across versions"
+    pitfall: null

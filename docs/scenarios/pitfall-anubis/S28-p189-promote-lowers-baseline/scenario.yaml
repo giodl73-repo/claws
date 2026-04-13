@@ -3,7 +3,7 @@ series: pitfall-anubis
 version: 1
 specs: [CL-05]
 description: >
-  Validates that snap promote includes a mandatory pinch validation gate
+  Validates that snap promote includes a mandatory check validation gate
   that prevents promoting a snapshot with weaker governance than the current
   fleet baseline. A malicious or mistaken promote that lowers the trust tier
   makes all workspaces appear compliant with weaker governance.
@@ -52,13 +52,13 @@ findings:
   - id: F01
     severity: major
     description: >
-      CL-05 must mandate a pinch validation gate before any snap promote.
+      CL-05 must mandate a check validation gate before any snap promote.
       The validation must compare the promoted snapshot against the current
       fleet baseline across all governance dimensions: trust tier, elicitation
       scope, fail mode defaults, data sensitivity requirements. If the
       promoted snapshot is weaker in any dimension, promote must be blocked
       with a clear error listing each weakened dimension.
-    spec_impact: "CL-05 Snapshot Promote — mandatory pinch validation gate"
+    spec_impact: "CL-05 Snapshot Promote — mandatory check validation gate"
     pitfall: P-189
 
   - id: F02

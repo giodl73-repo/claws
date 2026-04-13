@@ -1,0 +1,99 @@
+name: S01-standalone-install
+series: emit-bedrock
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/emit-bedrock installs with only @craftworks/codegen
+  as a dependency and produces AWS Bedrock guardrail configuration JSON.
+
+expect:
+  craftworks_deps: ["@craftworks/codegen"]
+  output_format: json
+  output_schema: bedrock-guardrail
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer installs @craftworks/emit-bedrock alongside @craftworks/codegen.
+  The emitter is invoked with a compiled governance IR. It must produce a
+  JSON file conforming to the AWS Bedrock CreateGuardrail API request schema,
+  including content policy filters, topic policies, and word filters derived
+  from the governance rules. The JSON must be directly usable with the AWS
+  CLI (aws bedrock create-guardrail --cli-input-json) or the AWS SDK without
+  modification.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The AWS Bedrock guardrail API schema evolves across AWS SDK versions.
+      If the emitter targets a specific API version, consumers on older or
+      newer SDK versions may get validation errors. The emitter must declare
+      which Bedrock API version it targets and validate output against that
+      version's schema.
+    spec_impact: "CL-08 emit-bedrock — target API version declaration and schema validation"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Bedrock guardrails have service limits (e.g., maximum number of topic
+      policies, maximum word filter entries). If the governance IR exceeds
+      these limits, the emitter must either prioritize rules to fit within
+      limits or fail with a clear error listing which rules were dropped
+      and why. Silent truncation produces incomplete governance.
+    spec_impact: "CL-08 emit-bedrock — service limit awareness and overflow handling"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Governance rules that express logic (e.g., "allow X unless Y") may not
+      map cleanly to Bedrock's filter-based model. The emitter must identify
+      unmappable rules and report them as warnings rather than silently
+      skipping them, which would produce guardrails that enforce less than
+      the governance policy requires.
+    spec_impact: "CL-08 emit-bedrock — unmappable rule detection and reporting"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The output JSON must not include AWS account-specific identifiers
+      (account ID, region, ARN) from the build environment. These values
+      are deployment-specific and must be parameterized (e.g., using
+      placeholder tokens that the consumer replaces during deployment).
+    spec_impact: "CL-08 emit-bedrock — environment-specific value parameterization"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Bedrock guardrails support versioning. The emitter should include
+      a description field in the guardrail config indicating the governance
+      IR version and claws generation timestamp so operators can trace
+      which governance version is active in production.
+    spec_impact: "CL-08 emit-bedrock — governance traceability in guardrail description"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The emitter should produce a companion README or usage comment
+      explaining the aws CLI command to deploy the guardrail, since the
+      JSON alone does not indicate how to apply it.
+    spec_impact: "CL-08 emit-bedrock — deployment instructions alongside output"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Content policy filter strengths in Bedrock (NONE, LOW, MEDIUM, HIGH)
+      must be mapped from governance severity levels. The mapping should
+      be documented and configurable, as different organizations have
+      different risk appetites for the same governance rules.
+    spec_impact: "CL-08 emit-bedrock — configurable severity-to-filter-strength mapping"
+    pitfall: null

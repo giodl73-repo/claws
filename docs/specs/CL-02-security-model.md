@@ -388,7 +388,7 @@ type ComplianceFinding = {
 | CC6.1 Logical access | G-CLASS, G-PERM, G-A2A-TRUST | Tool classification + A2A trust groups |
 | CC6.2 Auth mechanisms | G-A2A-IDENTITY, G-ELICIT | Agent identity levels + approval records |
 | CC6.3 Access control | G-CLASS (R1-R5), FE6 | Per-tool risk scoring + fence pass results |
-| CC6.6 Access reviews | `claws drift`, `claws pinch --fleet` | Drift detection reports + fleet scan results |
+| CC6.6 Access reviews | `claws drift`, `claws check --fleet` | Drift detection reports + fleet scan results |
 | CC6.8 Encryption | G-SECRETS, key management | Vault encryption + key rotation records |
 | CC7.1 Incident detection | G-OUTPUT, G-INPUT, audit chain | Output guards + input validation + events |
 | CC7.2 Incident response | `claws kill`, audit export | Kill switch records + SIEM export |
@@ -558,7 +558,7 @@ R1 "audit-only" governance degrades to no-audit if the audit chain is unavailabl
 
 **Source**: S01-F04 (warning)
 
-When claws.json includes a custom classification table, the override REPLACES the derived score (not caps it). An operator who explicitly sets a tool to R3 knows their context better than the heuristic. The override is audited and appears in `claws pinch` output as `[OVERRIDE]`.
+When claws.json includes a custom classification table, the override REPLACES the derived score (not caps it). An operator who explicitly sets a tool to R3 knows their context better than the heuristic. The override is audited and appears in `claws check` output as `[OVERRIDE]`.
 
 ### Amendment A4: Platform Built-in Tool Classification (G-CLASS)
 
@@ -1152,7 +1152,7 @@ Tool renames create ghost and missing entries. Staleness severity scales by risk
 
 **Source**: PC2-S03-F10 (major), PC2-S03-F05 (warning)
 
-Schema format issues and staleness issues surfaced with equal severity and independent fix instructions. `claws pinch` validates against current TOOLS.md on every run.
+Schema format issues and staleness issues surfaced with equal severity and independent fix instructions. `claws check` validates against current TOOLS.md on every run.
 
 ### Amendment A81: exec-approvals.json Debounce for Watch (CL-05 watch)
 
@@ -1188,7 +1188,7 @@ Handler clones classification cache at evaluation start. Live cache replaced ato
 
 **Source**: PC2-S04-F07 (warning)
 
-`claws pinch` warns at 80% timeout utilization (CLAWS-W050).
+`claws check` warns at 80% timeout utilization (CLAWS-W050).
 
 ### Amendment A87: Fallback to Previous Evaluation on Interrupt (G-IDEMPOTENT)
 
@@ -1206,7 +1206,7 @@ G-CLASS includes tool name analysis in behavioral heuristic. Verb-to-risk mappin
 
 **Source**: PC2-S09-F03 (major), PC2-S09-F04 (warning)
 
-`claws pinch` notes when G-PERM is effectively disabled and suggests constraints if R4/R5 tools are present.
+`claws check` notes when G-PERM is effectively disabled and suggests constraints if R4/R5 tools are present.
 
 ### Amendment A90: Capability Name Parser with Suggestions (G-PERM)
 
@@ -1290,7 +1290,7 @@ L0 in fleet context enables impersonation. G-A2A-IDENTITY warns with specific ri
 
 **Source**: PC2-S12-F05 (major)
 
-`claws pinch --fleet` includes identity level requirements. Non-compliant workspaces flagged.
+`claws check --fleet` includes identity level requirements. Non-compliant workspaces flagged.
 
 ### Amendment A104: Identity Level Threat Model (G-A2A-IDENTITY)
 
@@ -1338,7 +1338,7 @@ Codes never reassigned. New sub-rules get next number.
 
 **Source**: PC2-S13-F08 (warning)
 
-Per-sub-rule violation counts in pinch output.
+Per-sub-rule violation counts in check output.
 
 ### Amendment A112: G-BOUND Per-Sub-Rule Individual Warnings (G-BOUND)
 
@@ -1714,7 +1714,7 @@ Consistent classifications make evaluation order irrelevant. This is the explici
 
 **Source**: PF2-S04-F06 (warning)
 
-`claws pinch` validates hand-authored exec-approvals.json files. Workspaces predating claws may have incorrect field names. Pinch advisory CLAWS-W025 warns.
+`claws check` validates hand-authored exec-approvals.json files. Workspaces predating claws may have incorrect field names. Pinch advisory CLAWS-W025 warns.
 
 ### Amendment A174: Timeout Abort Path by Risk Level (G-FAILMODE)
 
@@ -2080,7 +2080,7 @@ Missing trust triggers 5 violations from 1 root cause. Evaluator suppresses depe
 
 **Source**: PF2-S17-F05 (major)
 
-Suppressed violations accessible via `claws pinch --verbose`. Full list for compliance evidence.
+Suppressed violations accessible via `claws check --verbose`. Full list for compliance evidence.
 
 ### Amendment A235: No Transitive Trust in Delegation Chains (G-A2A-TRUST)
 
@@ -2416,7 +2416,7 @@ Three independent defenses (supply chain error, immutable timeout, plugin snapsh
 
 **Source**: PF2-S26-F07 (warning), PF2-S26-F08 (warning)
 
-`claws pinch` detects pairwise interactions. "CLAWS-W080: Supply chain + timeout default compound vulnerability."
+`claws check` detects pairwise interactions. "CLAWS-W080: Supply chain + timeout default compound vulnerability."
 
 ### Amendment A291: Runtime Configuration Integrity Monitoring (G-SUPPLY)
 
@@ -2610,7 +2610,7 @@ The compiler supports structured pre-authorization in USER.md frontmatter as an 
 
 **Source**: OE-S04-F03 (major)
 
-USER.md pre-authorizations support optional expiry dates. Pre-authorizations older than 90 days (configurable) produce a staleness warning during `claws pinch` health checks. Expired pre-authorizations are treated as absent -- the elicitation gate fires normally for the affected tools.
+USER.md pre-authorizations support optional expiry dates. Pre-authorizations older than 90 days (configurable) produce a staleness warning during `claws check` health checks. Expired pre-authorizations are treated as absent -- the elicitation gate fires normally for the affected tools.
 
 ### Amendment A322: GovernanceIR Pre-Authorized vs Ungoverned Distinction (G-ELICIT)
 
@@ -3456,13 +3456,13 @@ Build-time enforcement of fleet trust tier ceilings is the first line of defense
 
 ### Amendment A461: Canonical Cross-Workspace Delegation Reference Format (G-A2A-DELEGATE)
 
-CL-02 must define a canonical cross-workspace delegation reference format: `fleet://{workspace-name}/agents/{agent-name}`. All other formats (relative paths, shorthand, bare names) must be rejected at compile time with a diagnostic that includes the canonical format. The workspace-name in the reference must match the workspace's declared name in claws.json (logical identity), not the directory name or hostname. References must be validated during pinch, not only during fleet scan. Cross-workspace delegation references should include a version or hash component for safety (e.g., `fleet://alpha-prod/agents/finance@v2.3`) to prevent silent behavior changes in delegated agents.
+CL-02 must define a canonical cross-workspace delegation reference format: `fleet://{workspace-name}/agents/{agent-name}`. All other formats (relative paths, shorthand, bare names) must be rejected at compile time with a diagnostic that includes the canonical format. The workspace-name in the reference must match the workspace's declared name in claws.json (logical identity), not the directory name or hostname. References must be validated during check, not only during fleet scan. Cross-workspace delegation references should include a version or hash component for safety (e.g., `fleet://alpha-prod/agents/finance@v2.3`) to prevent silent behavior changes in delegated agents.
 
 *(Sources: PA-S20-F01, PA-S20-F02, PA-S20-F04, PA-S20-F06)*
 
 ### Amendment A462: Floor-Only Inheritance for Elicitation Policy (G-ELICIT)
 
-Local workspace policy can raise the security floor above the fleet template but can never lower it below. CL-02 must define floor-only inheritance as a first-class concept: local policy >= fleet floor in all governance dimensions. The strictness comparison must be semantic (understanding that elicit_all_r3_plus is stricter than elicit_r5_only), covering trust tier, elicitation scope, fail mode, data sensitivity labels, and tool risk classifications. Floor enforcement must happen at compile time during pinch, producing a hard error with the fleet floor, local policy, and an explanation of why the local policy is less strict. The error message must suggest the exception request workflow rather than local workarounds.
+Local workspace policy can raise the security floor above the fleet template but can never lower it below. CL-02 must define floor-only inheritance as a first-class concept: local policy >= fleet floor in all governance dimensions. The strictness comparison must be semantic (understanding that elicit_all_r3_plus is stricter than elicit_r5_only), covering trust tier, elicitation scope, fail mode, data sensitivity labels, and tool risk classifications. Floor enforcement must happen at compile time during check, producing a hard error with the fleet floor, local policy, and an explanation of why the local policy is less strict. The error message must suggest the exception request workflow rather than local workarounds.
 
 *(Sources: PA-S21-F01, PA-S21-F02, PA-S21-F03, PA-S21-F06)*
 
@@ -3664,7 +3664,7 @@ Every governance event type must have an explicit mapping to CEF severity levels
 2. How should agent identity certificates (L3) be issued and managed? Is L2 (signed by fleet) sufficient for most enterprises?
 3. Should claws contribute the A2A governance spec to OWASP as a standard?
 4. How should injection defense rules interact with the three-ring model (Q12e)? Inner ring checks G-INPUT on save; middle ring checks after upgrade?
-5. Should `claws pinch --security` be a dedicated mode that runs only security-specific rules?
+5. Should `claws check --security` be a dedicated mode that runs only security-specific rules?
 6. Should G-A2A-FLOW support a "processing exemption" annotation that allows an agent with PUBLIC ceiling to receive CONFIDENTIAL data if it provably redacts before output? *(Source: CFC-S04-F02)*
 7. Should the verb-to-risk heuristic dictionary (send/post/delete -> R5, write/create -> R3, read/get -> R1) be configurable per workspace? *(Source: PC2-S09)*
 8. Should per-channel redaction configurations be required for R5 workspaces or advisory for all? *(Source: PC2-S10)*

@@ -1,0 +1,57 @@
+surface: tutorial
+entries:
+  check-tutorial:
+    type: guide
+    path: docs/claws/tutorials/governance-compiler/01-init-and-first-check.md
+    atoms:
+    - check
+  claws-init-tutorial:
+    type: guide
+    path: docs/claws/tutorials/governance-compiler/01-init-and-first-check.md
+    atoms:
+    - claws-init
+  claws-compiler-tutorial:
+    type: guide
+    path: docs/claws/tutorials/governance-compiler/04-governance-plugins.md
+    atoms:
+    - claws-compiler
+  three-engine-model-tutorial:
+    type: guide
+    path: docs/claws/tutorials/governance-compiler/04-governance-plugins.md
+    atoms:
+    - three-engine-model
+  three-rings-tutorial:
+    type: guide
+    path: docs/claws/tutorials/governance-compiler/02-three-rings-security.md
+    atoms:
+    - three-rings
+  tier-adoption-tutorial:
+    type: guide
+    path: docs/claws/tutorials/governance-compiler/03-three-tier-packages.md
+    atoms:
+    - tier-adoption
+  three-tier-packages-tutorial:
+    type: guide
+    path: docs/claws/tutorials/governance-compiler/03-three-tier-packages.md
+    atoms:
+    - three-tier-packages
+  lossless-roundtrip-tutorial:
+    type: guide
+    path: docs/claws/tutorials/governance-compiler/05-lossless-roundtrip.md
+    atoms:
+    - lossless-roundtrip
+  obo-boundary-tutorial:
+    type: guide
+    path: docs/claws/tutorials/governance-compiler/02-three-rings-security.md
+    atoms:
+    - obo-boundary
+  governance-plugin-tutorial:
+    type: guide
+    path: docs/claws/tutorials/governance-compiler/04-governance-plugins.md
+    atoms:
+    - governance-plugin
+  dotnet-for-oc-tutorial:
+    type: guide
+    path: docs/claws/tutorials/governance-compiler/03-three-tier-packages.md
+    atoms:
+    - dotnet-for-oc

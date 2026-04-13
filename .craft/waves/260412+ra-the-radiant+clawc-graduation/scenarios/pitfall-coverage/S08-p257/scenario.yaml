@@ -1,0 +1,97 @@
+name: S08-p257
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-257
+description: >
+  Validates that `claws check --markers` detects misalignment between emitter
+  output markers and workspace detector expectations. emit-cc places a marker
+  comment in CLAUDE.md but workspace.detect() looks for it in a different
+  location or format. Platform detection reports "no governance installed"
+  despite correct emission.
+
+expect:
+  detection: true
+  prevention: "`claws check --markers` validates that emitter output matches the workspace detector's expected marker format. Dual-marker strategy (markdown + JSON for CC; frontmatter + manifest for Cursor)."
+
+simulate:
+  failures: ["Emitter output marker format does not match workspace detector expectations"]
+  halt: null
+  budget: null
+
+problem: >
+  emit-cc writes a marker comment `<!-- claws:governance v2.1 -->` in CLAUDE.md.
+  workspace.detect() scans for `<!-- claws-governance:` (hyphenated, different
+  prefix). The workspace reports "no governance installed" for a workspace that
+  was just compiled. The user runs `claws doctor` which reports the workspace
+  as ungoverned. For Cursor, emit-cursor writes a frontmatter field
+  `claws_version: 2.1` but workspace.detect() reads `x-claws-version` (different
+  key). Again, detection fails. Both platforms have correct governance output but
+  broken detection. Verify that `claws check --markers` validates marker format
+  consistency between emitter and detector for all supported platforms.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The marker format must be defined in a shared contract (constant or
+      schema), not duplicated between emitter and detector code. If the
+      marker is a string literal in both the emitter and the detector, any
+      typo in either location breaks detection silently. The check validates
+      consistency, but the root cause is missing a single source of truth.
+    spec_impact: "CL-08 G-DETECT — marker format defined in shared contract, not duplicated"
+    pitfall: P-257
+
+  - id: F02
+    severity: major
+    description: >
+      Version information embedded in markers must be parseable. If the
+      marker is `<!-- claws:governance v2.1 -->` but the detector expects
+      semver format `2.1.0`, the version extraction fails. The marker check
+      must validate version format compatibility, not just marker presence.
+    spec_impact: "CL-08 G-DETECT — marker version format must be parseable by detector"
+    pitfall: P-257
+
+  - id: F03
+    severity: warning
+    description: >
+      The dual-marker strategy (markdown + JSON for CC) creates two points
+      of failure. If only the markdown marker is present (JSON marker
+      generation failed), the detector may fail even though partial governance
+      output exists. The check must validate both markers are present and
+      consistent with each other.
+    spec_impact: "CL-08 G-DETECT — validate both markers in dual-marker strategy"
+    pitfall: P-257
+
+  - id: F04
+    severity: warning
+    description: >
+      User edits to CLAUDE.md may accidentally corrupt the marker comment.
+      The lossless principle (CL-08) says claws never modifies user content,
+      but the marker is claws-owned content embedded in a user-editable file.
+      The detector must handle partial marker corruption gracefully (marker
+      present but malformed vs marker absent).
+    spec_impact: "CL-08 G-DETECT — graceful handling of corrupted markers in user-editable files"
+    pitfall: P-257
+
+  - id: F05
+    severity: warning
+    description: >
+      When a new platform is added (e.g., emit-windsurf), the marker check
+      must be extended for the new platform's conventions. If the check only
+      validates known platforms, a new emitter can ship with misaligned
+      markers undetected. The check framework should require marker format
+      registration for each emitter.
+    spec_impact: "CL-08 G-DETECT — marker format registration required for new emitters"
+    pitfall: P-257
+
+  - id: F06
+    severity: note
+    description: >
+      The blast radius of marker misalignment is that all three-ring
+      governance features fail: inner ring (claws watch) cannot find
+      governance state, middle ring (claws doctor) reports ungoverned, and
+      outer ring (claws drift) shows the workspace as non-compliant. A
+      single marker mismatch disables the entire governance loop.
+    spec_impact: "CL-08 G-DETECT — marker alignment is prerequisite for all three rings"
+    pitfall: P-257

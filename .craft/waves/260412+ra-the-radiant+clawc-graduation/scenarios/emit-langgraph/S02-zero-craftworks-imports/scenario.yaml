@@ -1,0 +1,89 @@
+name: S02-zero-craftworks-imports
+series: emit-langgraph
+version: 1
+specs: [CL-08]
+description: >
+  Validates that emit-langgraph output (governance.py) contains zero references
+  to @craftworks/ internal packages — the output is LangGraph-native Python.
+
+expect:
+  craftworks_import_count: 0
+  platform_native: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  After emit-langgraph produces governance.py, the Python file is scanned for
+  any string matching "@craftworks/", "craftworks", or "craftworks_" in import
+  statements, string literals, comments, and docstrings. The file must only
+  import from langgraph, typing, and Python standard library. Any reference
+  to craftworks internals means the Python file depends on packages that
+  do not exist in the Python ecosystem.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Python import statements cannot reference npm packages. If the emitter
+      template contains "from craftworks.governance import validate" as
+      a placeholder that was not properly replaced during code generation,
+      the output immediately fails with ModuleNotFoundError at import time.
+      Template substitution must be verified end-to-end.
+    spec_impact: "CL-08 emitter-isolation — complete template substitution verification"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      String literals in governance wrapper functions may contain rule
+      descriptions copied from the IR. If these descriptions reference
+      "@craftworks/governance" (e.g., "Enforces @craftworks/governance
+      policy GOV-042"), the string appears in Python runtime error messages
+      and log output, confusing Python developers who have no context on
+      the npm ecosystem.
+    spec_impact: "CL-08 emitter-isolation — sanitize IR descriptions in Python strings"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Python docstrings in the generated governance.py may reference
+      the npm emitter package name for attribution. The docstring should
+      reference "claws governance compiler" (the product) rather than
+      "@craftworks/emit-langgraph" (the npm package).
+    spec_impact: "CL-08 emitter-isolation — product name in Python docstrings"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      If the governance IR contains JSON examples with @craftworks/
+      references, and the emitter embeds these examples in Python
+      docstrings or comments for developer guidance, the references
+      leak into the output. Example JSON must be sanitized before
+      embedding.
+    spec_impact: "CL-08 emitter-isolation — sanitize embedded JSON examples"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The scan pattern for Python files must check both "@craftworks/"
+      (npm-style) and "craftworks." or "craftworks_" (Python module naming
+      conventions) since the emitter might accidentally translate npm
+      scope syntax to Python package syntax.
+    spec_impact: "CL-08 emitter-isolation — multi-convention scan for cross-language emitters"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      Comments in the generated Python file (e.g., "# Source: compiler-sdk/
+      src/governance/rule-042.ts") leak the claws repo structure.
+      Source attribution comments must reference governance rule IDs, not
+      file paths from the TypeScript build.
+    spec_impact: "CL-08 emitter-isolation — source attribution via rule ID, not file path"
+    pitfall: null

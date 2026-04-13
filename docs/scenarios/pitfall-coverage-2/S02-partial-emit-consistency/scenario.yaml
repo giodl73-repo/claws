@@ -116,12 +116,12 @@ findings:
   - id: F07
     severity: warning
     description: >
-      `claws pinch` on an existing workspace must detect classification
+      `claws check` on an existing workspace must detect classification
       inconsistency in already-emitted artifacts. This is a post-hoc check
       for workspaces that were compiled before the consistency validation
-      existed. The pinch rule G-EMIT-CONSISTENT must cross-reference live
+      existed. The check rule G-EMIT-CONSISTENT must cross-reference live
       artifacts, not just staged ones.
-    spec_impact: "CL-02 G-EMIT-CONSISTENT — pinch post-hoc detection"
+    spec_impact: "CL-02 G-EMIT-CONSISTENT — check post-hoc detection"
     pitfall: "P-080"
 
   - id: F08

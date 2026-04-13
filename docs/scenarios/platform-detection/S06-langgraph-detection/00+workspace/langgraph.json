@@ -1,0 +1,10 @@
+{
+  "graph": {
+    "name": "research-pipeline",
+    "nodes": ["fetch", "analyze", "report"],
+    "edges": [
+      {"from": "fetch", "to": "analyze"},
+      {"from": "analyze", "to": "report"}
+    ]
+  }
+}

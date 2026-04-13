@@ -111,7 +111,7 @@ findings:
     severity: warning
     description: >
       The scan must record metadata per workspace: last compile time, last
-      pinch time, governance hash, trust tier, agent count, tool count. This
+      check time, governance hash, trust tier, agent count, tool count. This
       metadata enables drift detection (S03) without recompiling every
       workspace. If the scan only records pass/fail, subsequent drift detection
       must recompile everything, defeating the <120s budget for large fleets.

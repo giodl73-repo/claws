@@ -1,0 +1,14 @@
+crew:
+  name: research-crew
+  agents:
+    - name: researcher
+      role: Research Analyst
+      tools: [web-search, file-reader]
+    - name: writer
+      role: Content Writer
+      tools: [file-writer]
+  tasks:
+    - description: Research the assigned topic
+      agent: researcher
+    - description: Write summary report
+      agent: writer

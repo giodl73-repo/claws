@@ -62,7 +62,7 @@ findings:
     description: >
       The effective bound is the minimum across all dimensions. 100 steps
       with unlimited tool calls is not "bounded to 100 steps" — it is
-      "bounded to 100 steps but unbounded in compute." The pinch output
+      "bounded to 100 steps but unbounded in compute." The check output
       must calculate and display the effective bound including worst-case
       values for unconfigured dimensions.
     spec_impact: "CL-02 G-BOUND — effective bound calculation"

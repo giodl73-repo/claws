@@ -136,7 +136,7 @@ findings:
       unsigned skills are warned (not blocked), and signed skills pass
       without verification. Both unsigned and signed skills are effectively
       unvetted. Only skills with both a signature AND a verifiable key store
-      provide actual security. The pinch output must distinguish all 3
+      provide actual security. The check output must distinguish all 3
       states: unsigned, signed-unverifiable, signed-verified.
     spec_impact: "CL-02 G-SUPPLY — three-state supply chain assessment"
     pitfall: "P-098, P-099"

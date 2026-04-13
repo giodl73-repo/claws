@@ -45,7 +45,7 @@ findings:
     severity: major
     description: >
       An R5 tool with a misspelled name in the elicitation policy (e.g.,
-      "send_payment" vs "send-payment") would silently pass pinch because
+      "send_payment" vs "send-payment") would silently pass check because
       the policy references a non-existent tool and the actual R5 tool has
       no policy. Name matching between TOOLS.md and claws.json must be
       exact or normalized.

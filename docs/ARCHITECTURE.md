@@ -217,7 +217,7 @@ claws-cli/
 │   ├── commands/                   ← One file per COMMAND-MAP group (10 files = 10 groups)
 │   │   ├── build.ts                   init, build, compile, optimize, test, diff,
 │   │   │                              import, inspect, doctor
-│   │   ├── pinch.ts                   pinch (+ --fix, --watch, --staged, --fleet)
+│   │   ├── check.ts                   check (+ --fix, --watch, --staged, --fleet)
 │   │   ├── comply.ts                  comply, assess
 │   │   ├── audit.ts                   audit, audit verify, audit export, audit history
 │   │   ├── snap.ts                    snap save, restore, diff, promote
@@ -492,7 +492,7 @@ Run all claws: `vitest run --project claws-sdk claws-base-cli claws-cli`
 
 | Phase | Packages | What ships |
 |-------|----------|-----------|
-| **1** | claws-sdk (compile + governance + emit) + claws-cli (minimal inline output) | `claws compile`, `claws pinch`, `claws build` |
+| **1** | claws-sdk (compile + governance + emit) + claws-cli (minimal inline output) | `claws compile`, `claws check`, `claws build` |
 | **2** | claws-base-cli (extracted from Phase 1 inline output) + claws-skill-kit + claws-test | Full 40-command CLI, skill author SDK |
 | **3** | claws-sdk (compliance + context) | `claws comply`, `claws audit`, fleet commands |
 | **4** | claws-lsp | VS Code extension |
@@ -500,7 +500,7 @@ Run all claws: `vitest run --project claws-sdk claws-base-cli claws-cli`
 
 Phase 1 is the MVP: compile OC workspace files, run governance checks, emit a Gateway plugin. Everything else builds on that foundation.
 
-> **M-01 Note**: claws-base-cli is a Phase 2 package. Phase 1 inlines the minimal output formatting needed for `claws compile` and `claws pinch` directly into claws-cli (format-json.ts, format-sarif.ts, color.ts). This reduces the Phase 1 package count from 5 to 2 (claws-sdk + claws-cli). claws-base-cli is extracted in Phase 2 when the full CLI ships, at which point the inlined modules are deleted from claws-cli and replaced with imports from claws-base-cli.
+> **M-01 Note**: claws-base-cli is a Phase 2 package. Phase 1 inlines the minimal output formatting needed for `claws compile` and `claws check` directly into claws-cli (format-json.ts, format-sarif.ts, color.ts). This reduces the Phase 1 package count from 5 to 2 (claws-sdk + claws-cli). claws-base-cli is extracted in Phase 2 when the full CLI ships, at which point the inlined modules are deleted from claws-cli and replaced with imports from claws-base-cli.
 
 ---
 

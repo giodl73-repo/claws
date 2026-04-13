@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "trustTier": "T2",
+  "platform": "openclaw",
+  "inputs": {
+    "urls": [
+      {
+        "url": "https://policies.corp.internal/soc2/v3/rules.yaml",
+        "integrity": "sha256-abc123def456",
+        "cacheTTL": 3600
+      }
+    ]
+  }
+}

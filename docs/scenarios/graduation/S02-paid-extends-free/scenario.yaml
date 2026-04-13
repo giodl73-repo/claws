@@ -1,0 +1,128 @@
+name: S02-paid-extends-free
+series: graduation
+version: 1
+specs: [CL-04, CL-07, CL-08]
+description: >
+  The paid tier @bic/claws-sdk imports from @claws/compiler and adds
+  enterprise modules (fleet, compliance, SIEM, PRESS, RELAX, identity, budget,
+  LSP). No source file is duplicated between the two packages. The paid tier
+  uses curated re-exports only — never export * — to maintain a stable API
+  surface. Enterprise features are additive extensions, never forks of free
+  tier code. A bug fix in @claws/compiler automatically flows to paid tier
+  consumers without any paid-side code changes.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "TOOLS.md"
+        - "claws.json"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  A developer upgrades from @claws/compiler to @bic/claws-sdk to
+  access fleet management. They expect all free-tier functionality to continue
+  working unchanged. If the paid package duplicates core modules instead of
+  importing them, a bug fix to the free tier will not propagate to the paid
+  tier, creating behavioral divergence between the same logical operation.
+  If export * is used, internal symbols leak into the public API surface,
+  creating implicit contracts that prevent the free tier from refactoring
+  internals. The extends-not-forks contract must be structurally enforced,
+  not just documented.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The curated re-export list must be tested by diffing the paid
+      package's public API surface against a known-good baseline. If a
+      new symbol is added to @claws/compiler and not explicitly re-exported
+      by the paid package, it is intentionally hidden. If it is accidentally
+      re-exported via a barrel file, it becomes part of the paid API
+      contract. An API surface snapshot test prevents both under-export
+      and over-export drift.
+    spec_impact: "CL-07 Section 2 — curated re-export contract"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      Source file duplication detection must be structural, not filename-based.
+      Two files with different names but identical AST structures constitute
+      duplication. The CI pipeline should hash-compare every .ts source file
+      in both packages, flagging any file where > 80% of statements match.
+      Filename-only checks miss copy-paste-rename duplication.
+    spec_impact: "CL-08 Section 5 — zero duplication enforcement"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      The paid package's dependency on @claws/compiler must use an exact
+      version pin, not a range. A caret or tilde range could pull in a
+      minor version that adds or changes public API symbols, breaking the
+      curated re-export contract. The exact version plus integrity hash
+      ensures the paid build is fully reproducible against a known free
+      tier release.
+    spec_impact: "CL-08 Section 6 — version pinning contract"
+    pitfall: null
+  - id: F04
+    severity: major
+    description: >
+      Enterprise modules must not monkey-patch or extend free tier classes
+      at runtime. If fleet management adds methods to GovernanceIR via
+      prototype extension, the free tier's type contract is violated for
+      any consumer that loads both packages. Enterprise features must
+      compose via wrapper or adapter patterns, never via mutation of
+      imported objects.
+    spec_impact: "CL-07 Section 4 — no runtime mutation of free tier"
+    pitfall: null
+  - id: F05
+    severity: minor
+    description: >
+      Documentation generation must clearly separate free and paid API
+      surfaces. If TypeDoc or similar tools are run on the paid package,
+      re-exported free symbols should link to the @claws/compiler docs
+      rather than generating duplicate pages. Duplicate documentation
+      causes SEO confusion and version drift between the two doc sites.
+    spec_impact: "CL-07 Section 5 — documentation separation"
+    pitfall: null
+  - id: F06
+    severity: major
+    description: >
+      The paid tier must not import from @claws/compiler/internal/* or
+      any non-public subpath. If the paid tier reaches into free tier
+      internals, it creates a coupling that prevents the free tier from
+      refactoring without coordinating with the paid tier. Import paths
+      must be restricted to the public exports map only, enforced via
+      ESLint no-restricted-imports or equivalent.
+    spec_impact: "CL-08 Section 3 — import path restriction"
+    pitfall: null
+  - id: F07
+    severity: minor
+    description: >
+      The free tier's changelog must be consumable by paid tier release
+      automation. When @claws/compiler publishes a new version, the
+      paid tier's CI should automatically detect the version bump,
+      run compatibility tests, and draft a corresponding release if
+      all tests pass. Manual coordination between the two packages
+      will cause release lag and version skew.
+    spec_impact: "CL-07 Section 6 — coordinated release automation"
+    pitfall: null
+  - id: F08
+    severity: minor
+    description: >
+      Tree-shaking effectiveness must be verified for the paid package.
+      If a consumer imports only fleet features, bundlers should be able
+      to eliminate all free tier code that fleet does not transitively
+      use. The curated re-export pattern supports this, but barrel files
+      or circular imports between enterprise modules can defeat tree
+      shaking, bloating consumer bundles.
+    spec_impact: "CL-04 Section 6 — tree-shaking effectiveness"
+    pitfall: null

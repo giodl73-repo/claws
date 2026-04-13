@@ -1,0 +1,100 @@
+name: S13-p262
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-262
+description: >
+  Validates that `claws drift` reports split-version states and that
+  GovernanceIR includes a schema version field. After partial fleet upgrade,
+  workspaces running different governance versions produce incompatible
+  GovernanceIR schemas that crash or silently drop fields during fleet-wide
+  audit aggregation.
+
+expect:
+  detection: true
+  prevention: "`claws drift` reports split-version state with per-workspace manifest version pinning. GovernanceIR includes a schema version field. Fleet aggregation handles both versions or fails explicitly."
+
+simulate:
+  failures: ["Mixed-version fleet produces GovernanceIR v1 and v2 schemas that cannot be aggregated"]
+  halt: null
+  budget: null
+
+problem: >
+  After a partial fleet upgrade (P-261 rollback scenario), 44 workspaces run
+  @craftworks/governance@2.0.0 (GovernanceIR v2 with new fields: schemaVersion,
+  complianceEvidence, riskScore) while 3 workspaces remain on
+  @craftworks/governance@1.0.0 (GovernanceIR v1 without those fields). The
+  fleet audit aggregation job collects GovernanceIR from all 47 workspaces.
+  When it encounters v1 output, it either crashes with "missing required field
+  schemaVersion" or silently assigns default values (riskScore: 0), producing
+  misleading compliance reports. The aggregation does not distinguish between
+  "workspace has risk score 0" and "workspace is on an old version that does
+  not report risk scores." Verify that `claws drift` detects the split and
+  that GovernanceIR includes version metadata.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      GovernanceIR must include a schemaVersion field as a mandatory top-level
+      property. If v1 does not have this field, the aggregator must treat the
+      absence as "v1" (default), not as an error. This retroactive
+      compatibility means the schema version check must handle both present
+      and absent schemaVersion fields.
+    spec_impact: "CL-08 G-SCHEMA — mandatory schemaVersion field; absent = v1"
+    pitfall: P-262
+
+  - id: F02
+    severity: major
+    description: >
+      The aggregation job must either support both schema versions (multi-version
+      parser) or fail explicitly when it encounters an unsupported version.
+      Silently assigning defaults to missing fields is the worst option — it
+      produces data that looks valid but is fabricated. The aggregator should
+      emit a "version mismatch" warning per workspace, not fabricate data.
+    spec_impact: "CL-08 G-SCHEMA — aggregation must fail or warn on version mismatch, never fabricate"
+    pitfall: P-262
+
+  - id: F03
+    severity: warning
+    description: >
+      `claws drift` must report the split-version state as a fleet health
+      issue, not just a version mismatch. The report should show: N workspaces
+      on v2.0.0, M workspaces on v1.0.0, with a list of the lagging workspaces
+      and the specific upgrade failure that caused the split (linking to
+      the P-261 rollback failure).
+    spec_impact: "CL-08 G-DRIFT — split-version report with lagging workspace identification"
+    pitfall: P-262
+
+  - id: F04
+    severity: warning
+    description: >
+      Schema evolution strategy must be documented: additive-only changes
+      (new optional fields) vs breaking changes (new required fields, type
+      changes). Breaking changes require a major version bump and a migration
+      window where both versions are supported. The governance package's
+      semver must align with GovernanceIR schema version.
+    spec_impact: "CL-08 G-SCHEMA — schema evolution policy: additive vs breaking"
+    pitfall: P-262
+
+  - id: F05
+    severity: warning
+    description: >
+      Compliance reports generated from mixed-version fleets must clearly
+      indicate which workspaces contributed v1 vs v2 data. An aggregate
+      compliance score that mixes complete v2 data with incomplete v1 data
+      is misleading. The compliance report must note data completeness per
+      workspace.
+    spec_impact: "CL-08 G-SCHEMA — compliance reports must note per-workspace data completeness"
+    pitfall: P-262
+
+  - id: F06
+    severity: note
+    description: >
+      The recovery path is to complete the fleet upgrade (fix the 3 failed
+      workspaces from P-261). But until the upgrade completes, the fleet
+      is in a degraded state. The drift report should provide an estimated
+      remediation plan: "3 workspaces need upgrade; estimated cause: peer
+      dep conflict with package X."
+    spec_impact: "CL-08 G-DRIFT — include remediation guidance in split-version report"
+    pitfall: P-262

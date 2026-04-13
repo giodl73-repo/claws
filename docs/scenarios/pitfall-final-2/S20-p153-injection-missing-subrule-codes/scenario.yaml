@@ -26,7 +26,7 @@ simulate:
   budget: null
 
 problem: >
-  The pinch phase detects a G-CONTEXT violation on input field "query" in
+  The check phase detects a G-CONTEXT violation on input field "query" in
   TOOLS.md. The diagnostic says "G-CONTEXT violation" with no further
   specificity. G-CONTEXT has 8 sub-rules: input validation, context
   isolation, output guards, bounded reasoning, system prompt protection,

@@ -1,0 +1,152 @@
+name: S02-dag-cycle-detection
+series: context
+version: 1
+specs: [CL-08]
+description: >
+  Validates that adding an edge to the context DAG that would create a
+  cycle is rejected with a diagnostic identifying the cycle path. The DAG
+  property is a structural invariant: context inheritance (fleet -> workspace)
+  must be acyclic. A cycle would cause infinite loops in context resolution,
+  policy evaluation, and compiled context generation.
+
+expect:
+  initial_dag:
+    nodes: ["fleet", "team-a", "workspace-1"]
+    edges: [["fleet", "team-a"], ["team-a", "workspace-1"]]
+    valid: true
+  cycle_attempt:
+    edge: ["workspace-1", "fleet"]
+    accepted: false
+    error:
+      type: "CycleDetectedError"
+      cycle_path: ["workspace-1", "fleet", "team-a", "workspace-1"]
+  dag_after_attempt:
+    unchanged: true
+    edges_count: 2
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A context DAG has three nodes: "fleet" -> "team-a" -> "workspace-1"
+  (fleet is the root, workspace-1 is a leaf). A consumer attempts to add
+  an edge from "workspace-1" back to "fleet", which would create a cycle:
+  fleet -> team-a -> workspace-1 -> fleet. The addEdge() operation must
+  detect the cycle before modifying the DAG, reject the operation, and
+  return a CycleDetectedError that lists the full cycle path. The DAG
+  must remain in its pre-attempt state (no partial modification). This
+  tests the graph invariant enforcement at the context package level.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Cycle detection must happen before the edge is added, not after. If
+      the implementation adds the edge first and then checks for cycles
+      (optimistic approach), a concurrent reader could observe the cyclic
+      graph in the window between add and check. The correct implementation
+      is: check reachability from target to source; if reachable, reject
+      without modifying the graph. This is O(V+E) per addEdge call using
+      DFS/BFS from the target node.
+    spec_impact: "CL-08 context — pre-add cycle detection (check-before-mutate)"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The cycle path in the error must be the actual cycle, not just the
+      two nodes of the rejected edge. "Cannot add edge workspace-1 -> fleet:
+      would create cycle [workspace-1 -> fleet -> team-a -> workspace-1]"
+      is actionable. "Cannot add edge: cycle detected" is not. The developer
+      needs the full path to understand the governance hierarchy that would
+      be violated and decide which edge to remove instead.
+    spec_impact: "CL-08 context — full cycle path in CycleDetectedError"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Self-loops (node -> same node) are a degenerate cycle case. The
+      addEdge("fleet", "fleet") attempt must be rejected with the cycle
+      path ["fleet", "fleet"]. If the cycle detection algorithm starts
+      by checking source != target, it catches self-loops cheaply before
+      running the full DFS. This is an optimization, but also a distinct
+      error case that should have its own diagnostic message.
+    spec_impact: "CL-08 context — self-loop detection as distinct error case"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The DAG may support edge labels (e.g., "inherits", "overrides",
+      "extends"). Cycle detection must consider all edge types: a cycle
+      through mixed edge types is still a cycle. If the implementation
+      only checks "inherits" edges, a cycle through an "overrides" edge
+      goes undetected. The cycle check must be edge-type-agnostic.
+    spec_impact: "CL-08 context — edge-type-agnostic cycle detection"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The "DAG must remain unchanged after rejection" property is critical.
+      If addEdge() partially modifies the adjacency list before detecting
+      the cycle and then fails to roll back cleanly, the DAG is corrupted.
+      The implementation must use either a transactional approach (copy
+      graph, modify copy, check copy, swap if valid) or ensure the check
+      happens on the current graph without mutation. The copy approach is
+      safer but costs O(V+E) memory per addEdge call.
+    spec_impact: "CL-08 context — atomic addEdge with rollback on cycle detection"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      At fleet scale (47 workspaces, multiple team nodes, one fleet root),
+      the DAG may have 50+ nodes and 100+ edges. Cycle detection per
+      addEdge is O(V+E), which for 50 nodes and 100 edges is trivial.
+      But if the DAG is rebuilt frequently (e.g., during fleet broadcast
+      with 47 edge additions), the cumulative cost is 47 * O(V+E). A
+      batched addEdges() method that checks all additions at once would
+      reduce to a single O(V+E) traversal.
+    spec_impact: "CL-08 context — batched addEdges() for fleet-scale operations"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The CycleDetectedError must be a typed error exported from the
+      context package, not a generic Error. Consumers catching context
+      errors must distinguish between CycleDetectedError (fix the graph
+      structure), NodeNotFoundError (fix the node reference), and
+      DuplicateEdgeError (idempotency question). Each error type needs
+      structured fields for programmatic handling.
+    spec_impact: "CL-08 context — typed error hierarchy for graph operations"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The context DAG is a directed graph, but the context package should
+      also expose a topological sort. If the DAG is valid, topological
+      sort produces the evaluation order for context resolution (fleet
+      evaluated first, then team, then workspace). The topological sort
+      is the "read" complement to cycle detection's "write" check. Both
+      depend on the acyclic invariant being maintained.
+    spec_impact: "CL-08 context — topological sort for context evaluation order"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Removing a node from the DAG must also remove all edges to and from
+      that node. If removeNode("team-a") is called, both edges
+      (fleet -> team-a and team-a -> workspace-1) must be removed.
+      Orphaning workspace-1 (no incoming edges from a non-root node) is
+      valid but should produce a warning: "workspace-1 is now disconnected
+      from the fleet hierarchy." If removal is not carefully implemented,
+      dangling edges referencing a removed node break subsequent operations.
+    spec_impact: "CL-08 context — cascading edge removal on node deletion"
+    pitfall: null

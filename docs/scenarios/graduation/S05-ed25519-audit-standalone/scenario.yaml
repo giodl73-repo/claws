@@ -1,0 +1,132 @@
+name: S05-ed25519-audit-standalone
+series: graduation
+version: 1
+specs: [CL-04, CL-08]
+description: >
+  The Ed25519-signed audit chain works as a standalone feature in the free
+  tier without any enterprise dependencies. Key generation, event signing,
+  chain construction, tamper detection, key rotation, and chain verification
+  all function using only Node.js crypto primitives. No agent-sdk audit
+  modules are imported. The free tier provides local signing with Ed25519
+  keypairs. Enterprise features (RFC3161 timestamps, fleet audit aggregation,
+  SIEM export) are absent but the chain format is forward-compatible with
+  their later addition.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "TOOLS.md"
+        - "claws.json"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  A security-conscious developer uses the free tier for local governance
+  compilation. They need tamper-evident audit records for their compliance
+  workflow. The audit chain must prove that compilation results have not
+  been modified after the fact. Without Ed25519 signing, the free tier
+  can only produce HMAC-SHA256 chains, which the R1 review determined
+  to be cryptographically insufficient for independent verification.
+  Ed25519 provides asymmetric signing: the public key can be shared for
+  third-party verification without exposing the signing key. The free
+  tier audit chain must be verifiable by any consumer without access to
+  the signing key, which is impossible with symmetric HMAC.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Key storage in the free tier must have a defined location and
+      protection model. Ed25519 private keys stored in plaintext in
+      the workspace directory are vulnerable to accidental commit to
+      version control. The free tier should store keys in the user's
+      home directory (~/.claws/keys/) with 0600 permissions and
+      generate a .gitignore entry. Key location must be documented
+      in the claws init output.
+    spec_impact: "CL-08 Section 7 — key storage and protection"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      Key rotation must not break chain verification. When a developer
+      rotates their Ed25519 keypair, the new key signs subsequent events
+      while the old key's public half remains in the chain metadata for
+      verifying prior events. The chain format must include a key-rotation
+      event that links old and new public keys. Without this, a verifier
+      cannot traverse a chain that spans multiple key generations.
+    spec_impact: "CL-04 Section 10 — key rotation chain continuity"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      Tamper detection must identify the exact tampered event, not just
+      report "chain invalid." Each event's signature covers the event
+      content plus the previous event's hash. Verification walks the
+      chain and reports the first event where the hash linkage breaks.
+      A binary "valid/invalid" response is insufficient for forensic
+      analysis.
+    spec_impact: "CL-04 Section 11 — granular tamper localization"
+    pitfall: null
+  - id: F04
+    severity: major
+    description: >
+      The chain format must reserve fields for enterprise extensions
+      (RFC3161 timestamp, fleet aggregation ID) without requiring their
+      presence. If the free tier chain omits these fields entirely, the
+      paid tier must migrate existing chains on upgrade, risking data
+      loss. Optional fields with null defaults ensure forward compatibility
+      and seamless tier transition.
+    spec_impact: "CL-08 Section 8 — forward-compatible chain format"
+    pitfall: null
+  - id: F05
+    severity: major
+    description: >
+      Node.js crypto Ed25519 support varies by version. Node 16+ has
+      native Ed25519 via crypto.sign/verify, but earlier versions
+      require a polyfill. The free tier must declare a minimum Node.js
+      version in engines and fail fast with a clear error if the runtime
+      does not support Ed25519, rather than falling back to HMAC
+      silently.
+    spec_impact: "CL-04 Section 12 — runtime capability detection"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      Chain export format must be JSON Lines (NDJSON), not a single JSON
+      array. Large audit chains (thousands of events) must be streamable
+      without loading the entire chain into memory. NDJSON allows line-
+      by-line reading, append-only writing, and efficient tail operations.
+      A JSON array format requires re-serializing the entire file for
+      every append.
+    spec_impact: "CL-04 Section 13 — chain serialization format"
+    pitfall: null
+  - id: F07
+    severity: minor
+    description: >
+      The public key export format should follow SSH conventions
+      (ssh-ed25519 base64 encoding) for maximum interoperability. If
+      the free tier invents a custom key format, third-party verifiers
+      must implement custom parsing. Standard formats enable verification
+      with existing SSH tooling (ssh-keygen -Y verify), reducing the
+      trust boundary.
+    spec_impact: "CL-08 Section 9 — key format interoperability"
+    pitfall: null
+  - id: F08
+    severity: major
+    description: >
+      Chain verification must be an offline operation. The verifier
+      should not need network access, an npm install, or the claws CLI
+      installed. A standalone verification script (single .mjs file)
+      shipped with the chain enables anyone to verify without trusting
+      the claws toolchain. This is the strongest form of tamper evidence:
+      the verification tool is self-contained.
+    spec_impact: "CL-08 Section 10 — offline standalone verification"
+    pitfall: null

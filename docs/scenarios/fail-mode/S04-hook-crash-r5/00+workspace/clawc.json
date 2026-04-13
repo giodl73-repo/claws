@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "trustTier": "T2",
+  "platform": "openclaw",
+  "elicitation": {
+    "policies": {
+      "send-payment": {
+        "approval": "required",
+        "timeout": 300,
+        "denyDefault": true
+      }
+    }
+  }
+}

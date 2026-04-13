@@ -84,7 +84,7 @@ findings:
       The diff output format is not defined. Options: (a) human-readable
       text with color-coded additions/removals, (b) JSON for programmatic
       consumption, (c) SARIF for CI integration. snap diff should support
-      --format (text, json, sarif) consistent with pinch's format options.
+      --format (text, json, sarif) consistent with check's format options.
       The default should be human-readable text.
     spec_impact: "CL-05 snap diff — output format options (text, json, sarif)"
     pitfall: null

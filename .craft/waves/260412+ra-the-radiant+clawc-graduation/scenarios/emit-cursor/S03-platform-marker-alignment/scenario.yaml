@@ -1,0 +1,87 @@
+name: S03-platform-marker-alignment
+series: emit-cursor
+version: 1
+specs: [CL-08]
+description: >
+  Validates that emit-cursor output matches the marker format that
+  @craftworks/workspace uses to detect Cursor governance installations.
+
+expect:
+  marker_detected: true
+  platform_id: "cursor"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  @craftworks/workspace detects Cursor governance by scanning for
+  .cursor/rules/ directory containing .mdc files with a claws marker in
+  frontmatter (e.g., "claws_managed: true" or a specific description prefix).
+  After emit-cursor runs, workspace.detect() must return platform_id "cursor"
+  with the emitter version and the count of managed rule files. If the marker
+  convention is missing, workspace cannot distinguish claws-generated rules
+  from user-created rules.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      MDC frontmatter is user-visible in Cursor's rules panel. A marker
+      field like "claws_managed: true" appears as metadata the user did
+      not create, which may be confusing. The marker must be either a
+      recognized Cursor frontmatter field repurposed for detection or
+      placed in a comment that Cursor ignores.
+    spec_impact: "CL-08 workspace-markers — non-intrusive marker strategy for MDC files"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      If the marker is a custom frontmatter field that Cursor does not
+      recognize, future Cursor versions may reject .mdc files with unknown
+      fields. The marker strategy must be robust against Cursor schema
+      changes. Using the description field with a known prefix pattern
+      is safer than custom fields.
+    spec_impact: "CL-08 workspace-markers — forward-compatible marker for Cursor MDC"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Workspace must count only claws-managed .mdc files, not all .mdc files
+      in .cursor/rules/. If the count includes user files, the governance
+      installation report inflates the number of managed rules and
+      confuses consumers about what claws is actually enforcing.
+    spec_impact: "CL-08 workspace-markers — managed file counting must exclude user files"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      When the user deletes a claws-managed .mdc file, workspace should
+      detect the reduced count on next scan. If workspace caches the
+      detection result, stale cache reports governance that no longer
+      exists in the filesystem.
+    spec_impact: "CL-08 workspace-markers — cache invalidation for deleted rule files"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      A manifest file (.cursor/rules/.claws-manifest.json) listing all
+      managed files would make detection O(1) instead of scanning all
+      .mdc files. This also provides a single point to check for
+      staleness and version information.
+    spec_impact: "CL-08 workspace-markers — manifest file for Cursor rule management"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The marker detection should report the governance domain each
+      .mdc file covers (security, testing, etc.) so workspace status
+      can show a breakdown of coverage, not just "Cursor: installed."
+    spec_impact: "CL-08 workspace-markers — domain-level governance coverage reporting"
+    pitfall: null

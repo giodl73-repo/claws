@@ -8,25 +8,45 @@ atoms:
   governance-skill:
     visibility: public
     docType: concept
-    narrative: P2
+    narrative: null
     pipeline: true
   governance-host:
     visibility: architect
     docType: concept
-    narrative: P2
+    narrative: null
     pipeline: true
   defense-in-depth:
     visibility: public
     docType: feature
-    narrative: P1
+    narrative: null
     pipeline: true
   fail-mode:
     visibility: public
     docType: feature
-    narrative: P1
+    narrative: null
     pipeline: true
   claws-bypass:
     visibility: public
     docType: feature
-    narrative: P2
+    narrative: null
+    pipeline: false
+  snap-restore:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  upgrade-lifecycle:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  incident-response:
+    visibility: architect
+    docType: feature
+    narrative: null
+    pipeline: false
+  latency-budget:
+    visibility: architect
+    docType: feature
+    narrative: null
     pipeline: false

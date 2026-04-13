@@ -3,22 +3,22 @@ atoms:
   claws-sdk:
     visibility: architect
     docType: concept
-    narrative: P2
+    narrative: null
     pipeline: true
   three-tier-packages:
     visibility: public
     docType: headline
     narrative: P1
     pipeline: true
-  press-pinch:
-    visibility: architect
-    docType: concept
-    narrative: P2
-    pipeline: true
-  claws-relax:
+  pinch:
     visibility: public
     docType: feature
-    narrative: P2
+    narrative: null
+    pipeline: false
+  claws-sift:
+    visibility: architect
+    docType: concept
+    narrative: null
     pipeline: false
   lossless-roundtrip:
     visibility: public

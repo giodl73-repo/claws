@@ -35,10 +35,10 @@ simulate:
   budget: null
 
 problem: >
-  A developer saves TOOLS.md, triggering the inner ring. pinch detects that
+  A developer saves TOOLS.md, triggering the inner ring. check detects that
   claws.json uses schema v2 while the installed claws version expects v3.
   This is not a governance violation per se — it is a schema staleness issue
-  that inner-ring pinch cannot fix. The inner ring must escalate to the
+  that inner-ring check cannot fix. The inner ring must escalate to the
   middle ring: emit a diagnostic suggesting "run claws doctor --post-upgrade"
   instead of just reporting a violation. If the developer runs doctor, it
   discovers the schema mismatch also exists in 4 other workspaces in the
@@ -65,7 +65,7 @@ findings:
       infrastructure concern. The inner ring's diagnostic scope is unclear:
       does it only check governance rules, or does it also check schema
       health, version compatibility, and configuration validity? If the
-      inner ring checks everything, it is no longer "just pinch --staged."
+      inner ring checks everything, it is no longer "just check --staged."
     spec_impact: "CL-05 Inner Ring — diagnostic scope: governance rules only vs infrastructure"
     pitfall: null
 
@@ -84,7 +84,7 @@ findings:
   - id: F04
     severity: major
     description: >
-      Escalation creates a UX problem: the developer gets a pinch violation,
+      Escalation creates a UX problem: the developer gets a check violation,
       runs doctor, doctor suggests broadcast. The developer now needs fleet
       admin permissions they may not have. The escalation path crosses
       permission boundaries (developer -> workspace admin -> fleet admin).
@@ -122,7 +122,7 @@ findings:
     description: >
       If the inner ring caches the GovernanceIR and the middle ring
       modifies workspace files (doctor --fix), the inner ring's cache
-      is stale. The next file save triggers inner-ring pinch against
+      is stale. The next file save triggers inner-ring check against
       the old IR. Cache invalidation must propagate across rings: when
       the middle ring modifies files, it must invalidate the inner ring's
       cache. The spec does not define cross-ring cache coherence.
@@ -155,7 +155,7 @@ findings:
   - id: F10
     severity: note
     description: >
-      The three-ring model uses existing commands (watch, pinch, doctor,
+      The three-ring model uses existing commands (watch, check, doctor,
       drift, broadcast). This means each command must know which ring it
       is operating in, either from flags or from invocation context. A
       command invoked by the inner ring watcher behaves differently from

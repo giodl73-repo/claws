@@ -3,7 +3,7 @@ slug: claws-test-framework
 preset: "claws"
 plan: "2 headlines: claws test runs governance scenarios with pass/fail in <5s, SecurityScanner detects prompt injection patterns"
 area: claws
-status: Draft
+status: Implemented
 phase: ptah
 atoms: [atom:claws-test, atom:cicd-pipeline]
 specs: [CL-05, CL-06]

@@ -56,7 +56,7 @@ findings:
     description: >
       The spec does not define whether snap save is governance-gated.
       Two valid designs: (a) save always succeeds, capturing whatever
-      state exists (governance-neutral), (b) save requires pinch-clean
+      state exists (governance-neutral), (b) save requires check-clean
       or at least no critical/high violations (governance-gated). The
       dead man's switch requires governance-neutral saves (pre-upgrade
       state may have warnings). But snap promote requires governance-gated
@@ -67,13 +67,13 @@ findings:
   - id: F02
     severity: major
     description: >
-      The --pinch flag on snap save (from the dead man's switch) runs
-      pinch before saving. If pinch finds violations, what happens? If
-      save is governance-neutral, --pinch is informational only (shows
-      violations but saves anyway). If save is governance-gated, --pinch
+      The --check flag on snap save (from the dead man's switch) runs
+      check before saving. If check finds violations, what happens? If
+      save is governance-neutral, --check is informational only (shows
+      violations but saves anyway). If save is governance-gated, --check
       is a validation gate (violations abort the save). The flag's
       semantics depend on the governance-neutral vs gated decision.
-    spec_impact: "CL-05 snap save --pinch — informational vs gating semantics"
+    spec_impact: "CL-05 snap save --check — informational vs gating semantics"
     pitfall: null
 
   - id: F03
@@ -104,7 +104,7 @@ findings:
   - id: F05
     severity: major
     description: >
-      In the dead man's switch, snap save runs with --pinch before an
+      In the dead man's switch, snap save runs with --check before an
       upgrade. If the workspace already has a critical violation, should
       the upgrade proceed? The dead man's switch is designed for safety,
       but upgrading from a broken state means restore also restores the
@@ -120,9 +120,9 @@ findings:
       is saved with claws v1.2 (29 rules) and restored under claws v1.5
       (35 rules), the restored state may have NEW violations that did not
       exist when the snapshot was saved. The snapshot captures file state,
-      not rule state. Post-restore pinch may produce different results
-      than pre-save pinch. This is correct but potentially confusing.
-    spec_impact: "CL-05 snap restore — document that rule evolution affects post-restore pinch"
+      not rule state. Post-restore check may produce different results
+      than pre-save check. This is correct but potentially confusing.
+    spec_impact: "CL-05 snap restore — document that rule evolution affects post-restore check"
     pitfall: null
 
   - id: F07
@@ -130,11 +130,11 @@ findings:
     description: >
       If snap save captures the GovernanceIR (including violations), and
       snap restore puts the IR back, there is a question of whether
-      restore should ALSO re-run pinch to validate the restored state,
+      restore should ALSO re-run check to validate the restored state,
       or just blindly restore the saved IR. Blind restore is faster but
       may restore an IR that is inconsistent with the current claws version.
-      Re-running pinch after restore is safer but adds latency.
-    spec_impact: "CL-05 snap restore — re-run pinch after restore or trust saved IR"
+      Re-running check after restore is safer but adds latency.
+    spec_impact: "CL-05 snap restore — re-run check after restore or trust saved IR"
     pitfall: null
 
   - id: F08

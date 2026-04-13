@@ -108,7 +108,7 @@ findings:
   - id: F07
     severity: warning
     description: >
-      `claws pinch` should warn when actual evaluation time approaches the
+      `claws check` should warn when actual evaluation time approaches the
       configured timeout. If evaluation consistently takes 180ms out of a
       200ms budget, the operator should be warned before the timeout starts
       firing. A threshold of 80% (160ms/200ms) triggers advisory CLAWS-W050.

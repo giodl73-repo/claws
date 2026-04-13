@@ -65,7 +65,7 @@ Every concept in the claws governance compiler, where it is authoritatively defi
 
 | ID | Slug | Name | Authority | Mirrors | Reuses | Spec |
 |----|------|------|-----------|---------|--------|------|
-| C30 | `atom:pinch` | pinch (governance enforcement verb) | `design/claws/COMMAND-MAP.md` | CL-01, CL-02, CL-05 | A148 `atom:policy` | CL-01 |
+| C30 | `atom:check` | check (governance enforcement verb) | `design/claws/COMMAND-MAP.md` | CL-01, CL-02, CL-05 | A148 `atom:policy` | CL-01 |
 | C31 | `atom:snap` | snap (snapshot verb) | `design/claws/COMMAND-MAP.md` | CL-01, CL-05 | A186 `atom:compilation-snapshot` | CL-01 |
 | C32 | `atom:claws-init` | claws init (installer) | `design/claws/specs/CL-03-runtime-enforcement.md` | CL-01, COMMAND-MAP | -- | CL-01, CL-03 |
 | C33 | `atom:claws-uninstall` | claws uninstall (clean removal) | `design/claws/specs/CL-03-runtime-enforcement.md` | CL-01, COMMAND-MAP | -- | CL-01, CL-03 |
@@ -89,8 +89,8 @@ Every concept in the claws governance compiler, where it is authoritatively defi
 |----|------|------|-----------|---------|--------|------|
 | C50 | `atom:claws-sdk` | claws-sdk (sibling to craftworks-sdk) | `design/claws/specs/CL-04-compilation-pipeline.md` | CL-06, CL-07 | -- | CL-04 |
 | C51 | `atom:three-tier-packages` | Three-Tier Packages (@openclaw → @claws → @craftworks) | `design/claws/specs/CL-06-platform-ecosystem.md` | CL-04, CL-07 | -- | CL-06 |
-| C52 | `atom:press-pinch` | PRESS→pinch (governance budget optimization) | `design/claws/specs/CL-06-platform-ecosystem.md` | CL-04 | A148 `atom:policy`, PRESS atoms | CL-06 |
-| C53 | `atom:claws-relax` | @claws/relax (typed expression engine) | `design/claws/specs/CL-06-platform-ecosystem.md` | CL-07 | A248 `atom:relax` | CL-06 |
+| C52 | `atom:pinch` | pinch (governance budget optimization, PRESS generalization) | `design/claws/specs/CL-06-platform-ecosystem.md` | CL-04 | A148 `atom:policy`, PRESS atoms | CL-06 |
+| C53 | `atom:claws-sift` | @claws/sift (typed expression engine) | `design/claws/specs/CL-06-platform-ecosystem.md` | CL-07 | A248 `atom:relax` | CL-06 |
 | C54 | `atom:lossless-roundtrip` | Lossless Round-Trip (byte-for-byte fidelity) | `design/claws/specs/CL-04-compilation-pipeline.md` | CL-03, CLAUDE.md | A133 `atom:forma` | CL-04 |
 | C55 | `atom:dotnet-for-oc` | .NET for OpenClaw (platform vision) | `design/claws/specs/CL-06-platform-ecosystem.md` | why-claws.md, CLAUDE.md | -- | CL-06 |
 

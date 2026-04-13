@@ -86,7 +86,7 @@ CIRCULAR-DELEGATION   -->  E(exp) vs E(exp)   --> Escalate (human)
 SKILL-TOOL-GHOST      -->  ref integrity       --> G1 assertion
 ```
 
-5 of 7 conflict categories auto-resolve via cross-cluster priority ordering (A > C > B > D > F > E > G). The priority ordering is configurable via `claws.json` for enterprises that want different governance hierarchies. The tension model is dual-use: compile-time lint (`claws pinch`) and runtime agent-agent conflict resolution.
+5 of 7 conflict categories auto-resolve via cross-cluster priority ordering (A > C > B > D > F > E > G). The priority ordering is configurable via `claws.json` for enterprises that want different governance hierarchies. The tension model is dual-use: compile-time lint (`claws check`) and runtime agent-agent conflict resolution.
 
 Existing infrastructure reused: synonym detection (10 curated pairs), duplicate rejection, schema validation from `role-md-reader.ts`, and `negotiateTension()` with custom `priorityOverride`.
 

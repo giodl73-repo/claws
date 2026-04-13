@@ -119,9 +119,9 @@ findings:
   - id: F09
     severity: note
     description: >
-      The four-level precedence should be visible in the pinch output.
+      The four-level precedence should be visible in the check output.
       For each tool, show which level determined the final classification
       and whether any levels disagreed. This transparency helps operators
       understand and debug classification decisions.
-    spec_impact: "CL-02 pinch — classification level visibility"
+    spec_impact: "CL-02 check — classification level visibility"
     pitfall: "P-145"

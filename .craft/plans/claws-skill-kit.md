@@ -3,7 +3,7 @@ slug: claws-skill-kit
 preset: "claws"
 plan: "2 headlines: npm install @bic/claws-skill-kit works with zero claws CLI dependency, Tier 2 TYPED adoption takes <15 minutes"
 area: claws
-status: Draft
+status: Implemented
 phase: ptah
 atoms: [atom:skill-kit, atom:tier-adoption]
 specs: [CL-05, CL-06]

@@ -90,10 +90,10 @@ findings:
     severity: warning
     description: >
       The mismatch is invisible during `claws build` because the builder
-      generates both files independently. Only `claws pinch` on an existing
-      workspace (with both files present) can detect the mismatch. The pinch
+      generates both files independently. Only `claws check` on an existing
+      workspace (with both files present) can detect the mismatch. The check
       rule G-EMIT-CONTRACT must load both files and cross-reference names.
-    spec_impact: "CL-02 pinch — post-hoc handler name validation"
+    spec_impact: "CL-02 check — post-hoc handler name validation"
     pitfall: "P-081"
 
   - id: F06
@@ -133,7 +133,7 @@ findings:
     description: >
       The shared handler name registry should be serialized to
       .claws/compiled/handler-registry.json for diagnostic purposes.
-      `claws pinch` reads this file for validation. `claws info --handlers`
+      `claws check` reads this file for validation. `claws info --handlers`
       displays the registry for debugging. The registry is a compile artifact,
       not a runtime dependency.
     spec_impact: "CL-04 EMIT — handler registry as diagnostic artifact"

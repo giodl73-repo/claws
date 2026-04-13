@@ -1,0 +1,167 @@
+name: S01-sdk-reexport-stability
+series: backward-compat
+version: 1
+specs: [CL-08]
+description: >
+  Validates that all existing import paths from compiler-sdk continue resolving
+  after the 10+7 extraction. compiler-sdk must re-export every public symbol
+  from the extracted @craftworks/* packages so that existing consumers who
+  import from '@craftworks/compiler-sdk' experience zero breakage. This is the
+  backward compatibility floor for the entire extraction.
+
+expect:
+  import_resolution:
+    all_existing_paths_resolve: true
+    new_paths_available: true
+    deprecated_paths_warned: false
+  typescript:
+    no_ts2305_errors: true
+    no_ts2307_errors: true
+    strict_mode: true
+  runtime:
+    all_reexports_callable: true
+    no_module_not_found: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Enumerate every public export from compiler-sdk's current index.ts and every
+  documented subpath export. Create a test file that imports every named export
+  using the existing import path (e.g., import { readOCWorkspaceViaFORMA } from
+  '@craftworks/compiler-sdk'). After extraction, compiler-sdk's index.ts must
+  re-export these symbols from their new homes in @craftworks/* packages.
+  TypeScript compilation with strict mode must succeed. Each re-exported function
+  must be callable at runtime (not just a type re-export). No import path that
+  worked before extraction may fail after extraction.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      compiler-sdk currently exports functions like readOCWorkspaceViaFORMA()
+      from its own source. After extraction, this function lives in
+      @craftworks/forma as WorkspaceReader.read(). The re-export must maintain
+      the OLD name (readOCWorkspaceViaFORMA) pointing to the NEW implementation
+      (WorkspaceReader.read()). If the re-export uses the new name only,
+      existing consumers break. A compatibility shim function that wraps
+      WorkspaceReader.read() with the old signature is needed if the API
+      surface changed during extraction.
+    spec_impact: "CL-08 migration architecture — re-exports must preserve old function names, not just new names"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      TypeScript re-exports of types require the source package's .d.ts files
+      to be resolvable from compiler-sdk's perspective. If compiler-sdk
+      re-exports OCWorkspaceAST from @craftworks/forma but forma is not in
+      compiler-sdk's dependencies (only in devDependencies), the re-export
+      resolves during development but fails for consumers who install
+      compiler-sdk from the registry. All re-exported packages must be in
+      compiler-sdk's regular dependencies.
+    spec_impact: "CL-08 migration — re-exported packages must be regular dependencies of compiler-sdk, not devDeps"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      compiler-sdk may export internal types that were never intended to be
+      public but leaked through TypeScript's structural type system. For
+      example, a function that returns FormaParseContext where FormaParseContext
+      was an internal type — TypeScript inlines the type in .d.ts output.
+      After extraction, if that internal type now lives in @craftworks/forma
+      and is not re-exported, the inlined .d.ts breaks because it references
+      a path that no longer exists. An API audit must identify all transitively
+      exposed types, not just explicitly exported ones.
+    spec_impact: "CL-08 migration — audit transitively exposed types in .d.ts, not just explicit exports"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The re-export shim in compiler-sdk adds a runtime cost: every call to
+      readOCWorkspaceViaFORMA() now hops through compiler-sdk's index.ts to
+      @craftworks/forma. For hot paths (PARSE phase called per-file), this
+      adds function call overhead. While negligible for most use cases,
+      benchmarks should confirm that the shim does not degrade compile
+      throughput by more than 5% on a 1000-workspace fleet scan.
+    spec_impact: "CL-08 performance — benchmark re-export shim overhead on fleet-scale workloads"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      If compiler-sdk uses export * from '@craftworks/forma' for convenience,
+      a future forma minor version that adds a new export with a name that
+      collides with an existing compiler-sdk export creates an ambiguous
+      export. TypeScript reports TS2308 (Module has already exported member).
+      CL-08 Extension Contract Rule 4 (line 536-539) bans wildcard re-exports
+      for @bic/claws-sdk. The same rule must apply to compiler-sdk's
+      backward-compat re-exports.
+    spec_impact: "CL-08 Extension Contract — Rule 4 (no wildcard re-exports) must apply to compiler-sdk compat layer too"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Some compiler-sdk exports may be classes with prototype methods. A
+      re-export of a class preserves the constructor but not necessarily
+      the module identity. If consumer code uses instanceof to check a
+      re-exported class (e.g., error instanceof FormaParseError), the check
+      may fail if the class was re-instantiated during the shim layer rather
+      than directly re-exported. All class exports must be pass-through
+      re-exports, not wrappers.
+    spec_impact: "CL-08 migration — class re-exports must be pass-through, not wrapper constructors"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Deprecation warnings should be emitted for re-exported paths so
+      consumers migrate to direct @craftworks/* imports over time. But if
+      deprecation warnings are emitted at import time (module evaluation),
+      they fire on every process startup, flooding logs for consumers who
+      import compiler-sdk in a hot loop (e.g., parallel workspace compilation).
+      Deprecation should be signaled via JSDoc @deprecated and TypeScript
+      type-level markers, not runtime console.warn().
+    spec_impact: "CL-08 deprecation strategy — use JSDoc @deprecated, not runtime warnings, for re-export paths"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The number of symbols to re-export may be large (50+). Manually
+      maintaining the re-export list is error-prone. A CI job should
+      compare compiler-sdk's current export list against the re-export
+      list and fail if any symbol is missing. This catch-all prevents
+      accidental drops during maintenance of the compatibility layer.
+    spec_impact: "CL-08 CI — automated re-export completeness check comparing old vs new export lists"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      compiler-sdk's re-export layer should have a planned removal date
+      (e.g., compiler-sdk 3.0.0 drops compat re-exports). Without a
+      removal timeline, the shim accumulates indefinitely, adding
+      maintenance burden and confusing new consumers who cannot tell
+      which import path is canonical. CL-08 should define the compat
+      layer's lifecycle: introduction, deprecation warning, removal.
+    spec_impact: "CL-08 migration — define compat re-export lifecycle with removal milestone"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Some consumers may use TypeScript path aliases that map
+      '@craftworks/compiler-sdk' to a local workspace directory. After
+      extraction, these aliases still resolve but point to compiler-sdk's
+      re-export layer rather than the original source. TypeScript's
+      --declaration flag may emit .d.ts files with path alias references
+      that are not portable. The scenario must test with and without
+      TypeScript path aliases to confirm both configurations work.
+    spec_impact: "CL-08 testing strategy — test re-export resolution with and without TS path aliases"
+    pitfall: null

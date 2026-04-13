@@ -1,0 +1,167 @@
+name: S01-task-graph-ordering
+series: execution
+version: 1
+specs: [CL-08]
+description: >
+  Validates that tasks in the execution graph run in dependency order
+  and that parallel-eligible tasks (no dependency between them) are
+  identified by the scheduler. This is the core scheduling contract:
+  the execution package must produce a correct topological ordering
+  and identify independent tasks for concurrent execution.
+
+expect:
+  graph:
+    tasks: ["parse", "extract", "analyze-gov", "analyze-risk", "optimize", "emit"]
+    edges:
+      - ["parse", "extract"]
+      - ["extract", "analyze-gov"]
+      - ["extract", "analyze-risk"]
+      - ["analyze-gov", "optimize"]
+      - ["analyze-risk", "optimize"]
+      - ["optimize", "emit"]
+  ordering:
+    valid_topological: true
+    parallel_groups:
+      - ["parse"]
+      - ["extract"]
+      - ["analyze-gov", "analyze-risk"]
+      - ["optimize"]
+      - ["emit"]
+  execution:
+    total_tasks: 6
+    sequential_depth: 5
+    max_parallelism: 2
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A compilation pipeline is modeled as a task graph with 6 tasks: parse,
+  extract, analyze-gov, analyze-risk, optimize, and emit. Parse feeds
+  extract; extract feeds both analyze-gov and analyze-risk (independent);
+  both analyses feed optimize; optimize feeds emit. The execution package
+  must produce a topological sort that respects all edges. It must also
+  identify that analyze-gov and analyze-risk are parallel-eligible: they
+  share no dependency edge and can execute concurrently. The scheduler
+  must report the parallel groups (stages where multiple tasks can run)
+  and the critical path depth (5 sequential stages when parallelism is
+  exploited, vs 6 if run sequentially).
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The topological sort must produce a stable ordering for tasks at
+      the same depth level. If analyze-gov and analyze-risk are both at
+      depth 2, the sort must always list them in the same order (e.g.,
+      alphabetical by task name). If the sort is non-deterministic,
+      execution logs differ between runs, making debugging harder and
+      breaking snapshot-based test assertions.
+    spec_impact: "CL-08 execution — stable topological sort with alphabetical tie-breaking"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Parallel-eligible identification must be transitive. Tasks A and B
+      are parallel-eligible only if there is no directed path from A to B
+      or from B to A in the entire graph (not just direct edges). If the
+      scheduler only checks direct edges, it might mark two tasks as
+      parallel when they are connected through a longer path. For the
+      6-task graph in this scenario, direct-edge checking suffices, but
+      for larger graphs with indirect dependencies, reachability analysis
+      is required.
+    spec_impact: "CL-08 execution — parallel eligibility via reachability, not just direct edges"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The parallel groups representation assumes synchronous barriers
+      between groups: all tasks in group N must complete before any task
+      in group N+1 starts. This is the simplest scheduling model but is
+      suboptimal. A task that only depends on a subset of group N can
+      start as soon as its specific dependencies complete, not when the
+      entire group completes. The execution package should support both
+      barrier-based and dependency-based scheduling.
+    spec_impact: "CL-08 execution — barrier vs dependency scheduling modes"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The task graph construction API must validate edges at insertion
+      time. Adding an edge from "emit" to "parse" (backward in the
+      expected pipeline) should trigger cycle detection (context package
+      S02 handles the graph invariant, but execution must also enforce
+      it at the task level). If execution delegates to context for DAG
+      operations, the error must be wrapped in an execution-domain error
+      type (TaskCycleError, not CycleDetectedError from context).
+    spec_impact: "CL-08 execution — domain-specific error wrapping for graph violations"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The critical path depth (5 stages with parallelism) determines the
+      minimum wall-clock time for the pipeline. If the execution package
+      does not compute critical path, the consumer cannot estimate
+      completion time. The scheduler should expose criticalPathDepth()
+      and criticalPathTasks() methods. The critical path for this graph
+      is parse -> extract -> analyze-gov -> optimize -> emit (or the
+      analyze-risk variant — both have the same length).
+    spec_impact: "CL-08 execution — critical path computation API"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Task execution must handle task failure without corrupting the graph
+      state. If analyze-gov fails, the scheduler must not start optimize
+      (which depends on analyze-gov). But analyze-risk, which is independent,
+      may still be running or may have already completed. The scheduler
+      must support partial failure: failed tasks block their dependents
+      but do not cancel independent branches unless a global halt is
+      requested.
+    spec_impact: "CL-08 execution — partial failure isolation (block dependents, not siblings)"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The 6-task graph is small. At enterprise scale, a compilation
+      pipeline with extensions (custom rules, multi-platform emit,
+      compliance checks) may have 20+ tasks. The topological sort and
+      parallel group computation must scale linearly with graph size.
+      Kahn's algorithm (O(V+E)) is the standard choice. If the
+      implementation uses a recursive DFS sort, stack depth may be a
+      concern for very deep graphs (unlikely but worth noting).
+    spec_impact: "CL-08 execution — O(V+E) scheduling algorithm"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The execution package merges execution-engine and skill-resolver.
+      Task graph ordering is purely execution-engine logic. If the merge
+      introduces skill-resolver types into the task graph API (e.g., tasks
+      must implement a SkillDescriptor interface), the API is polluted
+      with skill concepts. The task graph should accept generic tasks;
+      skill resolution is an operation that produces tasks, not a
+      requirement on all tasks.
+    spec_impact: "CL-08 execution — task graph API free of skill-resolver types"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The execution package must support dry-run mode: compute the
+      ordering and parallel groups without actually executing tasks. This
+      is essential for `claws pinch` (which analyzes the pipeline without
+      running it) and for the scheduling visualization in `claws compile
+      --verbose`. Dry-run must have zero side effects and return the same
+      ordering that actual execution would use.
+    spec_impact: "CL-08 execution — dry-run mode for ordering analysis without execution"
+    pitfall: null

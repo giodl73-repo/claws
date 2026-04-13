@@ -1,0 +1,158 @@
+name: S01-structural-sharing
+series: context
+version: 1
+specs: [CL-08]
+description: >
+  Validates that two context collections with overlapping entries share
+  storage rather than maintaining full copies. This is the memory efficiency
+  foundation for fleet-scale context management: 47 workspaces sharing a
+  common fleet policy layer must store the shared governance rules once,
+  not 47 times.
+
+expect:
+  collections:
+    a:
+      entries: ["G-PERM", "G-BOUND", "G-OUTPUT", "G-ELICIT"]
+      total: 4
+    b:
+      entries: ["G-PERM", "G-BOUND", "G-OUTPUT", "G-DATA"]
+      total: 4
+  sharing:
+    shared_entries: ["G-PERM", "G-BOUND", "G-OUTPUT"]
+    shared_count: 3
+    unique_to_a: ["G-ELICIT"]
+    unique_to_b: ["G-DATA"]
+  memory:
+    total_entries_stored: 5
+    without_sharing_would_be: 8
+    savings_percent: 37.5
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Two context collections are created: collection A contains governance
+  entries [G-PERM, G-BOUND, G-OUTPUT, G-ELICIT] and collection B contains
+  [G-PERM, G-BOUND, G-OUTPUT, G-DATA]. Three entries are identical between
+  the two collections. The context package must detect the overlap and
+  store only 5 unique entries, not 8. Collection A and B each hold
+  references (not copies) to the 3 shared entries. Modifying a shared
+  entry in one collection must not affect the other (copy-on-write
+  semantics). The scenario verifies both storage efficiency and isolation.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Structural sharing requires immutable entries. If entries are mutable
+      objects, two collections sharing a reference to the same entry would
+      see each other's mutations. The context package must either enforce
+      entry immutability (Object.freeze or readonly types) or implement
+      copy-on-write: the shared reference is replaced with a copy only
+      when a collection attempts to modify the entry. Without one of these
+      mechanisms, sharing introduces aliasing bugs.
+    spec_impact: "CL-08 context — entry immutability or copy-on-write for shared entries"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Entry identity must be defined for sharing to work. Two entries are
+      "the same" if they have the same content hash (crypto-based),
+      the same ID field, or referential identity. If identity is by content
+      hash, modifying any field changes the hash and breaks sharing. If
+      identity is by ID, two entries with the same ID but different content
+      create a conflict. The context package must define identity semantics
+      and use @craftworks/crypto for content hashing (its only dependency).
+    spec_impact: "CL-08 context — entry identity definition for structural sharing"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The savings percentage (37.5% for this small example) compounds at
+      fleet scale. With 47 workspaces sharing a fleet layer of 20 rules,
+      without sharing: 47 * 20 = 940 entries. With sharing: 20 + 47 *
+      (workspace-specific entries). If each workspace adds 5 unique rules,
+      total is 20 + 235 = 255 entries, a 73% savings. The sharing mechanism
+      must scale linearly with the number of collections, not quadratically
+      (pairwise comparison of all collections is O(n^2)).
+    spec_impact: "CL-08 context — sharing algorithm complexity must be O(n) per collection"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The sharing storage (the "pool" of unique entries) is itself a data
+      structure that needs lifecycle management. If collection A is garbage
+      collected but collection B still references the shared entries, the
+      pool must retain them. If both collections are GC'd, the pool entries
+      become orphans. The context package must either use WeakRef-based
+      pooling or explicit dispose() methods. Without lifecycle management,
+      the pool grows monotonically and leaks memory.
+    spec_impact: "CL-08 context — shared entry pool lifecycle (WeakRef or dispose)"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Serialization of a collection with structural sharing must produce
+      a self-contained result. If collection A is serialized, the output
+      must include the full content of all 4 entries (including the 3
+      shared ones), not references to a shared pool. Deserialization must
+      be able to reconstruct the collection from the serialized form alone.
+      Sharing is a runtime optimization, not a serialization format.
+    spec_impact: "CL-08 context — serialization materializes shared entries"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The context package depends on @craftworks/crypto for hashing. If
+      crypto's hash function changes (SHA-256 to SHA-3), all content
+      hashes change, breaking existing sharing relationships. The context
+      package must pin to a specific hash algorithm version and include
+      the algorithm identifier in the hash output. Migration between hash
+      algorithms requires rehashing all entries, which is expensive at
+      fleet scale.
+    spec_impact: "CL-08 context — hash algorithm versioning for sharing stability"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Structural sharing is analogous to git's content-addressable storage:
+      git stores blobs once and trees reference them. The context package's
+      sharing model is simpler (flat pool, not a tree), but the same
+      principles apply: content-addressed, immutable, reference-counted or
+      GC'd. This analogy should inform the API naming: pool, ref, dedup
+      are recognizable to developers with git internals knowledge.
+    spec_impact: "CL-08 context — API naming aligned with content-addressable storage conventions"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The savings percentage must be measurable at runtime. A
+      context.stats() method should return total entries, unique entries,
+      shared count, and savings percentage. Fleet operators monitoring
+      memory usage need this metric. Without it, they cannot tell if
+      sharing is working or if a misconfigured collection is storing
+      full copies.
+    spec_impact: "CL-08 context — runtime sharing statistics API"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Concurrent access to the shared pool from multiple async operations
+      (e.g., two collections being built simultaneously from fleet
+      broadcast) must be safe. If both operations compute the same content
+      hash and attempt to store the entry simultaneously, the pool must
+      handle the race: either both store (idempotent, since content is
+      identical) or one waits. In single-threaded Node.js, this is only
+      a concern if entry creation is async (e.g., involves crypto hashing).
+    spec_impact: "CL-08 context — concurrent pool access safety for async hashing"
+    pitfall: null

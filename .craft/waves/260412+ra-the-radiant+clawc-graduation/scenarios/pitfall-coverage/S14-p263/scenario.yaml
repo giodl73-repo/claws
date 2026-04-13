@@ -1,0 +1,102 @@
+name: S14-p263
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-263
+description: >
+  Validates that `claws check --equivalence` detects divergence between
+  pre-extraction monolith compilation and post-extraction multi-package
+  compilation. Normalization passes (BOM stripping, CRLF conversion) and hash
+  computations may differ between the two paths, producing different GovernanceIR
+  for the same input workspace.
+
+expect:
+  detection: true
+  prevention: "`claws check --equivalence` runs dual-path compilation on a reference workspace and compares outputs. Every normalization pass is documented in the extraction map. Hash equivalence tested on identical input bytes before full GovernanceIR comparison."
+
+simulate:
+  failures: ["Pre-extraction and post-extraction compilation paths produce different GovernanceIR for the same input"]
+  halt: null
+  budget: null
+
+problem: >
+  A reference workspace contains SOUL.md (with BOM), TOOLS.md (with CRLF
+  line endings), and openclaw.json. The pre-extraction monolith path
+  (compiler-sdk) applies BOM stripping in FormaParser before normalization.
+  The post-extraction path (@craftworks/forma + @craftworks/workspace) applies
+  BOM stripping in WorkspaceReader, but WorkspaceReader strips BOM AFTER
+  hashing the raw file, while FormaParser stripped BOM BEFORE hashing. The
+  resulting FormaIR has different source hashes for SOUL.md. The GovernanceIR
+  diverges at the hash level even though the governance decisions are identical.
+  CRLF handling also differs: the monolith normalizes CRLF to LF before
+  FORMA parsing, while the extracted path normalizes after parsing. Verify
+  that `claws check --equivalence` catches both divergences.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The ordering of normalization passes (BOM strip, CRLF normalize,
+      whitespace trim) relative to hashing is the primary divergence source.
+      If the monolith hashes raw bytes then normalizes, but extracted packages
+      normalize then hash, every file with BOM or CRLF produces different
+      hashes. The extraction map must document the exact normalization order
+      for each path.
+    spec_impact: "CL-08 G-EQUIV — normalization ordering documented in extraction map"
+    pitfall: P-263
+
+  - id: F02
+    severity: major
+    description: >
+      Hash divergence at the source level propagates through the entire IR.
+      FormaIR nodes include source hashes. GovernanceIR includes FormaIR
+      hashes. AuditChain includes GovernanceIR hashes. A single BOM byte
+      difference in the source hash cascades through 3 layers of hash
+      computation. The equivalence check must start at the source hash
+      level to identify the root cause, not just compare final GovernanceIR.
+    spec_impact: "CL-08 G-EQUIV — layered hash comparison: source -> FormaIR -> GovernanceIR"
+    pitfall: P-263
+
+  - id: F03
+    severity: warning
+    description: >
+      The reference workspace used for equivalence testing must cover edge
+      cases: files with BOM, CRLF, mixed line endings, UTF-8 multibyte
+      characters, trailing newlines, and empty files. A minimal reference
+      workspace (ASCII-only, LF-only) will pass equivalence even when the
+      normalization order differs, because there is nothing to normalize.
+    spec_impact: "CL-08 G-EQUIV — reference workspace must include normalization edge cases"
+    pitfall: P-263
+
+  - id: F04
+    severity: warning
+    description: >
+      The "expected-change zones" in byte-identical comparison need careful
+      definition. Timestamps, compilation metadata, and tool version strings
+      are expected to differ. But these must be explicitly listed — any
+      unlisted difference is a bug. The ignore list must be as narrow as
+      possible to prevent real divergences from being masked.
+    spec_impact: "CL-08 G-EQUIV — narrow expected-change zone definition"
+    pitfall: P-263
+
+  - id: F05
+    severity: warning
+    description: >
+      If the equivalence check discovers divergence, the fix requires
+      aligning normalization order between monolith and extracted paths.
+      But changing the monolith's normalization order breaks backward
+      compatibility for existing consumers. The fix must go in the extracted
+      path (match the monolith), not the other direction.
+    spec_impact: "CL-08 G-EQUIV — extracted path must match monolith normalization, not vice versa"
+    pitfall: P-263
+
+  - id: F06
+    severity: note
+    description: >
+      The equivalence check is a CI gate. If it runs on every PR, it adds
+      compilation time (dual-path compile). The reference workspace should be
+      as small as possible while still covering normalization edge cases, to
+      keep CI time reasonable. A workspace with 3 files and deliberate edge
+      cases is better than a large production workspace.
+    spec_impact: "CL-08 G-EQUIV — minimal reference workspace for CI performance"
+    pitfall: P-263

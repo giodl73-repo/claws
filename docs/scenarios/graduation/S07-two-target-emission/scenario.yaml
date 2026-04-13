@@ -1,0 +1,132 @@
+name: S07-two-target-emission
+series: graduation
+version: 1
+specs: [CL-04, CL-08]
+description: >
+  The free tier emits to two targets: OC (Gateway plugin as TypeScript) and
+  Claude Code (CLAUDE.md + settings.json). Both outputs are correct and
+  complete for the input workspace. Enterprise emit targets (Cursor, GitHub
+  Copilot, Bedrock, LangGraph, CrewAI) are gated and produce a clear upgrade
+  message when requested in the free tier. This validates that the free tier
+  delivers tangible value on the two most common platforms while enterprise
+  targets provide the upsell incentive.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "TOOLS.md"
+        - "exec-approvals.json"
+        - "claws.json"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 2
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  A developer runs claws build expecting generated artifacts for their OC
+  workspace and their Claude Code configuration. The OC Gateway plugin must
+  be executable TypeScript that passes the "would an OC developer understand
+  this?" test. The Claude Code output must be a valid CLAUDE.md file and
+  settings.json that Claude Code can consume. If either target produces
+  invalid output, the free tier's value proposition collapses. Additionally,
+  when the developer requests emission to Cursor (an enterprise target), the
+  CLI must produce a helpful upgrade message, not a crash or silent empty
+  output.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The OC Gateway plugin output must be valid TypeScript that compiles
+      without errors. The emitter must not generate code that references
+      types from @craftworks/ or @claws/ internals. All types used in the
+      generated code must be either inline type literals or imported from
+      the OC Gateway SDK (@openclaw/gateway). If the generated code has
+      import errors, the developer's first experience with claws output
+      is a broken build.
+    spec_impact: "CL-04 Section 20 — generated code compilability"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      The Claude Code output must produce valid CLAUDE.md markdown that
+      follows Claude Code's documentation format. Generated settings.json
+      must be valid JSON that Claude Code accepts without parse errors.
+      The emitter must handle workspace rules that have no Claude Code
+      equivalent (e.g., OC-specific Gateway hooks) by emitting a comment
+      explaining the gap, not by silently dropping the rule.
+    spec_impact: "CL-04 Section 21 — Claude Code output validity"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      Enterprise target gating must happen at the CLI argument validation
+      stage, not during emission. If the compiler begins processing for
+      a Cursor target and fails deep in the emit pipeline, the error
+      message is confusing. The CLI should validate the target against
+      the installed tier immediately and produce the upgrade message
+      before any compilation work begins. This saves time and provides
+      a clear call to action.
+    spec_impact: "CL-08 Section 13 — early target validation"
+    pitfall: null
+  - id: F04
+    severity: major
+    description: >
+      The upgrade message for enterprise targets must include the exact
+      npm install command and a one-line value proposition. "Enterprise
+      features available in @bic/claws-sdk" is too vague. The
+      message should say "npm install @bic/claws-sdk to emit to
+      Cursor, GitHub Copilot, and 3 more platforms." Specific, actionable,
+      with the install command ready to copy-paste.
+    spec_impact: "CL-08 Section 14 — upgrade message specificity"
+    pitfall: null
+  - id: F05
+    severity: major
+    description: >
+      Both emit targets must be tested in the same compilation pass.
+      If the developer specifies --target oc --target claude-code, both
+      artifacts are emitted in one run. If the emitter can only handle
+      one target per invocation, the developer must run twice, doubling
+      compilation time. Multi-target emission in a single pass is
+      required for developer workflow efficiency.
+    spec_impact: "CL-04 Section 22 — multi-target single pass"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      The emitter must handle workspaces where some rules are not
+      expressible on a given target. An OC Gateway hook for real-time
+      tool interception has no equivalent in Claude Code's static
+      CLAUDE.md format. The emitter should produce a warnings list
+      indicating which rules were not emitted and why, so the developer
+      understands the coverage gap between targets.
+    spec_impact: "CL-04 Section 23 — cross-target coverage reporting"
+    pitfall: null
+  - id: F07
+    severity: minor
+    description: >
+      Emitted artifacts must include a generation header comment with
+      the claws version, source workspace hash, and timestamp. This
+      enables reproducibility verification: re-running claws build
+      with the same input should produce the same output (excluding
+      the timestamp). Without the header, generated files are
+      indistinguishable from hand-authored files, making governance
+      drift detection impossible.
+    spec_impact: "CL-04 Section 24 — artifact provenance headers"
+    pitfall: null
+  - id: F08
+    severity: minor
+    description: >
+      The --dry-run flag should output what would be emitted without
+      writing files. This lets developers preview generated artifacts
+      before overwriting existing configurations. If --dry-run is not
+      supported, developers cannot safely integrate claws build into
+      existing projects without risking configuration overwrite.
+    spec_impact: "CL-08 Section 15 — dry-run preview support"
+    pitfall: null

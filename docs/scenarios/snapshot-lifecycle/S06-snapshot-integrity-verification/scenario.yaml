@@ -52,7 +52,7 @@ findings:
       and store the hashes in a snapshot manifest. snap restore should
       verify hashes before applying. Without integrity checks, corrupted
       snapshots are silently restored, and the developer discovers the
-      problem only when pinch or build fails on malformed input.
+      problem only when check or build fails on malformed input.
     spec_impact: "CL-05 snap save — mandatory SHA-256 integrity hash per file"
     pitfall: P-195
 

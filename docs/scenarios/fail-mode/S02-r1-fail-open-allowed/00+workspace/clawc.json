@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "trustTier": "T2",
+  "platform": "openclaw",
+  "failModes": {
+    "log-viewer": "fail-open"
+  }
+}

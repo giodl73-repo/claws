@@ -1,0 +1,156 @@
+name: S03-serialization-stability
+series: context
+version: 1
+specs: [CL-08]
+description: >
+  Validates that serializing a context DAG is deterministic: the same
+  logical graph produces byte-identical output regardless of insertion
+  order, platform (Windows/macOS/Linux), or Node.js version. This property
+  is required for content-addressed caching, audit chain verification,
+  and fleet-wide drift detection where hash comparison determines whether
+  two workspaces have equivalent context.
+
+expect:
+  dag:
+    nodes: ["fleet", "team-alpha", "team-beta", "ws-1", "ws-2"]
+    edges: [["fleet", "team-alpha"], ["fleet", "team-beta"], ["team-alpha", "ws-1"], ["team-beta", "ws-2"]]
+  serialization:
+    format: "json"
+    deterministic: true
+    order_a_hash: "sha256:abc..."
+    order_b_hash: "sha256:abc..."
+    hashes_match: true
+  cross_platform:
+    line_endings: "lf"
+    encoding: "utf-8"
+    no_bom: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A context DAG with 5 nodes and 4 edges is constructed in two different
+  insertion orders. Order A adds nodes alphabetically (fleet, team-alpha,
+  team-beta, ws-1, ws-2) then edges. Order B adds nodes in reverse order
+  (ws-2, ws-1, team-beta, team-alpha, fleet) then edges in reverse.
+  Both represent the same logical graph. Both are serialized to JSON.
+  The two JSON outputs must be byte-identical: same key ordering, same
+  array ordering, same whitespace, same encoding. The SHA-256 hash of
+  both outputs must match. This is tested on Windows (CRLF native) to
+  verify that the serializer forces LF line endings.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      JSON key ordering is not guaranteed by JSON.stringify. If the DAG
+      is serialized as a plain object, different insertion orders produce
+      different key orderings in the output. The serializer must sort
+      object keys alphabetically (or by a defined canonical order) before
+      emission. Using a replacer function with sorted keys in
+      JSON.stringify is the standard approach, but it must be applied
+      recursively to nested objects.
+    spec_impact: "CL-08 context — canonical JSON key ordering (sorted, recursive)"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Array ordering in the serialized output must be deterministic. If
+      nodes are stored in a Set (unordered), converting to an array for
+      serialization produces platform-dependent ordering. The serializer
+      must sort node arrays by a canonical key (node ID, alphabetically).
+      Edge arrays must be sorted by [source, target] pair. Without
+      explicit sorting, the same graph serializes differently across
+      Node.js versions (V8's Set iteration order is insertion-based but
+      not guaranteed across versions).
+    spec_impact: "CL-08 context — deterministic array sorting in serialization"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Line endings in the serialized output must be normalized to LF,
+      even on Windows where the default text mode produces CRLF. If the
+      serializer writes via fs.writeFile without explicit encoding options,
+      Windows may insert CRLF. The hash of a CRLF file differs from the
+      hash of an LF file with the same content. Either the serializer
+      forces binary mode (no line ending conversion) or it post-processes
+      to strip CR bytes.
+    spec_impact: "CL-08 context — LF-only line endings in serialized output"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Floating-point numbers in the DAG (e.g., edge weights, confidence
+      scores) may serialize differently across platforms. JavaScript's
+      Number.toString() is deterministic per the ECMAScript spec, but
+      only for finite values. NaN, Infinity, and -0 serialize as "null",
+      "null", and "0" in JSON, which loses information. The serializer
+      must reject non-finite values or encode them as strings.
+    spec_impact: "CL-08 context — non-finite number handling in serialization"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The serialized format must include a version field so that future
+      format changes do not silently break hash comparison. If version 1
+      serializes nodes before edges and version 2 serializes edges before
+      nodes, the hash changes even though the graph is identical. The
+      version field must be the first key in the output, and hash
+      comparison must reject version mismatches rather than comparing
+      structurally different formats.
+    spec_impact: "CL-08 context — serialization format versioning"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The hash used for comparison must be computed from the serialized
+      bytes, not from the in-memory graph structure. If the hash is
+      computed from the graph's adjacency matrix (which is order-independent),
+      it may match even when the serialized bytes differ. Conversely, if
+      the hash is computed from the serialized JSON (which must be
+      deterministic), it serves as both a content hash and a serialization
+      stability check. Use the serialized bytes as the hash input.
+    spec_impact: "CL-08 context — hash computed from serialized bytes, not in-memory structure"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      BOM (Byte Order Mark) must not appear in the serialized output.
+      Some Windows text editors add a UTF-8 BOM (EF BB BF) when saving
+      files. If the serializer outputs a BOM, the hash includes it, and
+      a Linux-serialized file (no BOM) has a different hash for the same
+      content. The serializer must explicitly omit the BOM.
+    spec_impact: "CL-08 context — no BOM in serialized output"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Deserialization must also be stable: serialized bytes produce the
+      same in-memory graph regardless of platform. If deserialization
+      relies on JSON.parse (which preserves key order in modern engines
+      but does not guarantee it per spec), the resulting graph may have
+      different iteration order. The deserializer must rebuild the graph
+      from sorted arrays, not from parsed JSON key order.
+    spec_impact: "CL-08 context — deserialization rebuilds from sorted data, not key order"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The determinism property must be CI-tested on all three target
+      platforms (Windows, macOS, Linux). A serialization stability test
+      that only runs on Linux proves nothing about Windows CRLF behavior.
+      The CI matrix must include a Windows runner that serializes a DAG,
+      hashes it, and compares against a golden hash. If the golden hash
+      is platform-dependent, the test is broken by design.
+    spec_impact: "CL-08 context — cross-platform serialization stability CI test"
+    pitfall: null

@@ -1,0 +1,114 @@
+name: S03-assertion-composability
+series: eval
+version: 1
+specs: [CL-08]
+description: >
+  Validates that eval assertions compose using AND, OR, and NOT combinators
+  without losing diagnostic detail — each leaf assertion's pass/fail reason
+  must propagate through the composition tree to the final result.
+
+expect:
+  and_propagation: true
+  or_propagation: true
+  not_inversion: true
+  diagnostic_depth: leaf_level
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer builds a composite assertion: AND(containsKeyword("security"),
+  OR(scoredAbove(0.8), NOT(containsPattern("TODO")))). The assertion is
+  evaluated against a response that contains "security", scores 0.6, and
+  contains "TODO". The AND's first operand passes. The OR's first operand
+  fails (0.6 < 0.8). The OR's second operand evaluates NOT(true) = false
+  (response does contain TODO). So OR fails, and AND fails. The diagnostic
+  output must trace failure through the full tree: AND failed because OR
+  failed because both scoredAbove(0.8) returned 0.6 and NOT(containsPattern)
+  found "TODO" at position 42.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If AND short-circuits on first failure, the diagnostic only reports the
+      first failing operand. For composite assertions used in rubrics, all
+      operands must be evaluated so the consumer sees every failing condition,
+      not just the first one encountered. This is evaluation, not control flow.
+    spec_impact: "CL-08 eval-api — AND combinator must evaluate all operands for diagnostics"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      NOT inversion must negate the pass/fail boolean but preserve the inner
+      assertion's diagnostic message unchanged. If NOT rewrites the message
+      to "NOT: passed" without the original detail, the consumer loses the
+      information needed to understand why the original assertion passed
+      (which caused the NOT to fail).
+    spec_impact: "CL-08 eval-api — NOT must preserve inner diagnostic verbatim"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Deeply nested compositions (e.g., AND(OR(NOT(AND(...))))) can produce
+      diagnostic trees that exceed reasonable depth. If the diagnostic
+      structure is recursive with no depth limit, serialization to JSON for
+      CI reporting may hit stack overflow or produce multi-megabyte output
+      for pathological cases.
+    spec_impact: "CL-08 eval-api — maximum composition depth limit and diagnostic truncation"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      OR combinator diagnostics must report all operand results even when one
+      passes, because the consumer may want to know which alternatives were
+      attempted. However, the overall result message should clearly indicate
+      which operand caused the OR to pass, not just list all results
+      without highlighting the decisive one.
+    spec_impact: "CL-08 eval-api — OR diagnostic must highlight decisive operand"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Custom assertion functions provided by consumers must conform to the
+      Assertion interface to be composable. If the interface requires only
+      a boolean return, diagnostic detail is lost. The interface must require
+      returning an AssertionResult with both pass/fail and a diagnostic
+      message.
+    spec_impact: "CL-08 eval-api — Assertion interface must return AssertionResult, not boolean"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The containsPattern assertion uses regex matching. If the consumer
+      passes an invalid regex, the assertion should fail with a clear
+      "invalid pattern" diagnostic rather than throwing an uncaught
+      RegExp syntax error that crashes the entire evaluation.
+    spec_impact: "CL-08 eval-api — assertion-level error containment for regex patterns"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Assertion composition should support labeling (e.g., AND("security-check",
+      [...])) so that diagnostic output uses human-readable names instead of
+      auto-generated tree position identifiers like "AND[0].OR[1].NOT[0]".
+    spec_impact: "CL-08 eval-api — optional labels for composite assertion nodes"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The diagnostic tree structure should be serializable to both a flat
+      list (for CI log output) and a nested tree (for interactive debugging
+      UIs). A single serialization format forces consumers to transform
+      the output for their context.
+    spec_impact: "CL-08 eval-api — dual serialization for diagnostic trees"
+    pitfall: null

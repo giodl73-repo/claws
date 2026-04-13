@@ -33,7 +33,7 @@ simulate:
   failures:
     - component: skill-scaffold
       type: risk-trust-mismatch
-      error: "claws skill new --risk 5 in T2 workspace — G-CLASS violation on first pinch"
+      error: "claws skill new --risk 5 in T2 workspace — G-CLASS violation on first check"
     - component: compile-sim
       type: g-class-violation
       error: "G-CLASS: skill risk level R5 exceeds workspace trust tier T2 maximum of R2"
@@ -43,7 +43,7 @@ simulate:
 problem: >
   A developer runs claws skill new my-automation --risk 5 in a workspace with
   trust tier T2. The scaffold generates a skill manifest with risk_level: 5.
-  The developer has not written any handler code yet. They run claws pinch to
+  The developer has not written any handler code yet. They run claws check to
   check the workspace and receive an immediate G-CLASS violation because R5
   skills are only permitted in T4+ workspaces. The developer is confused: they
   just scaffolded a skill and it already violates governance. They must manually
@@ -106,7 +106,7 @@ findings:
       A skill scaffolded at R2 in a T2 workspace may later need R4
       capabilities (e.g., network access). The scaffold should generate
       a comment in the manifest explaining how to request a risk level
-      increase: update the manifest and run claws pinch to check compliance.
+      increase: update the manifest and run claws check to check compliance.
       This guides the developer through the upgrade path rather than leaving
       them to discover it through trial and error.
     spec_impact: "CL-05 Maker Experience Amendment — risk level upgrade guidance in scaffold"
@@ -115,7 +115,7 @@ findings:
   - id: F06
     severity: warning
     description: >
-      The G-CLASS violation message produced by pinch must include actionable
+      The G-CLASS violation message produced by check must include actionable
       guidance, not just the rule code. Instead of "G-CLASS violation: risk
       level exceeds trust tier", the message should say "Skill risk R5
       requires workspace trust tier T4 or higher. Current workspace is T2.

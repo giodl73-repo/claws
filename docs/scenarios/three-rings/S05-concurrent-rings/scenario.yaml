@@ -34,7 +34,7 @@ simulate:
 problem: >
   A fleet of 8 workspaces is being scanned by the outer ring (claws drift)
   when a developer saves TOOLS.md in one of those workspaces, triggering
-  the inner ring (claws watch -> pinch). Both operations need to read the
+  the inner ring (claws watch -> check). Both operations need to read the
   GovernanceIR. The inner ring needs to WRITE an updated IR after re-checking.
   The outer ring is reading the IR for drift comparison. Simultaneously,
   another developer in a different workspace runs doctor --post-upgrade,
@@ -47,7 +47,7 @@ findings:
     description: >
       The GovernanceIR is a file on disk (.claws/compiled/governance-ir.json).
  Concurrent read/write from inner ring (write after
-      pinch) and outer ring (read for drift) creates a classic TOCTOU
+      check) and outer ring (read for drift) creates a classic TOCTOU
       race. The outer ring could read a partially-written IR. The spec
       must define a concurrency model: file locking, atomic write
       (write-to-temp + rename), or IR versioning with optimistic reads.
@@ -84,9 +84,9 @@ findings:
     description: >
       The middle ring (doctor) modifies workspace files. While doctor is
       running, the inner ring's watcher will detect the file changes and
-      trigger pinch on the partially-modified workspace. This produces
+      trigger check on the partially-modified workspace. This produces
       false violations: doctor is mid-migration, files are inconsistent,
-      and pinch sees them in an intermediate state. The inner ring watcher
+      and check sees them in an intermediate state. The inner ring watcher
       must be paused during middle-ring operations.
     spec_impact: "CL-05 Ring Coordination — pause inner ring during middle-ring operations"
     pitfall: P-168

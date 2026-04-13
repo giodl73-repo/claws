@@ -1,0 +1,134 @@
+name: S01-standalone-compile-zero-imports
+series: graduation
+version: 1
+specs: [CL-04, CL-08]
+description: >
+  The @claws/compiler package compiles a standard OC workspace with zero
+  @craftworks/ imports at runtime. The package tarball is inspected to confirm
+  that no @craftworks/* dependency appears in package.json, no require() or
+  import statement references @craftworks/ modules, and the compiled
+  GovernanceIR output matches the reference output from the pre-graduation
+  compiler-sdk pipeline. This validates the foundational graduation
+  invariant: the free-tier compiler is fully self-contained.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "MEMORY.md"
+        - "AGENTS.md"
+        - "TOOLS.md"
+        - "HEARTBEAT.md"
+        - "exec-approvals.json"
+        - "IDENTITY.md"
+        - "USER.md"
+        - "claws.json"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  A developer installs @claws/compiler in a fresh project via npm install
+  @claws/compiler. They run claws compile against their OC workspace
+  expecting a clean GovernanceIR. The package must have zero @craftworks/
+  entries in its dependency tree. If a transitive dependency pulls in
+  compiler-sdk or agent-sdk, the free-tier promise is broken and the
+  package cannot ship as MIT standalone. The tarball is unpacked and
+  every .js and .d.ts file is scanned for @craftworks/ string literals.
+  Node module resolution is verified to never reach outside the @claws
+  scope. This is the single most critical graduation gate: if this
+  scenario fails, no other graduation scenario matters.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Deep dependency scanning must go beyond package.json. A compiled
+      bundle could inline code from @craftworks/ packages during build,
+      embedding the dependency invisibly. The verification must scan the
+      actual JavaScript output for string literals like @craftworks/,
+      require('@craftworks'), and import('@craftworks'). Static analysis
+      of package.json alone is insufficient for supply-chain verification.
+    spec_impact: "CL-08 Section 1 — zero-dependency verification method"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      Type declarations (.d.ts) may reference @craftworks/ types even
+      when runtime code does not import them. If GovernanceIR is typed
+      as extending a compiler-sdk interface, TypeScript consumers will
+      need @craftworks/compiler-sdk installed for type checking. All
+      public type declarations must be self-contained or the standalone
+      promise is violated at the type level.
+    spec_impact: "CL-04 Section 3 — type declaration independence"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      The npm pack verification must run in CI, not just locally. A
+      developer's node_modules may mask missing dependencies through
+      hoisting. The tarball must be tested in a clean environment
+      (empty node_modules, fresh npm install from tarball) to catch
+      phantom dependencies that resolve via monorepo hoisting but fail
+      in isolation.
+    spec_impact: "CL-08 Section 2 — isolated install verification"
+    pitfall: null
+  - id: F04
+    severity: major
+    description: >
+      Optional peer dependencies on @craftworks/ packages must not
+      exist. Even optional dependencies signal a coupling. The free
+      tier must function identically whether or not enterprise packages
+      are installed nearby. If conditional require() blocks check for
+      @craftworks/ at runtime, the code path divergence creates untested
+      behavior in the free-tier-only install scenario.
+    spec_impact: "CL-08 Section 1 — no optional enterprise coupling"
+    pitfall: null
+  - id: F05
+    severity: minor
+    description: >
+      The tarball size should be tracked as a graduation metric. If
+      internalization bloats the package beyond 500KB unpacked, it
+      suggests unnecessary code was copied rather than rewritten. Size
+      regression tracking prevents the free tier from becoming a kitchen
+      sink that carries dead enterprise code paths.
+    spec_impact: "CL-04 Section 5 — package size budget"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      The package.json exports map must be audited post-graduation.
+      If subpath exports like @claws/compiler/internal/* are exposed,
+      consumers may depend on internals, making future refactoring
+      impossible. Only the documented public API subpaths should appear
+      in the exports map.
+    spec_impact: "CL-08 Section 3 — exports map hygiene"
+    pitfall: null
+  - id: F07
+    severity: major
+    description: >
+      Source maps bundled with the package must not contain paths
+      referencing the claws repo or @craftworks/ packages.
+      Source map paths leak internal directory structure and can confuse
+      debugging tools into looking for non-existent files. Either strip
+      source maps from the published package or rewrite source roots to
+      be self-relative.
+    spec_impact: "CL-08 Section 1 — source map path sanitization"
+    pitfall: null
+  - id: F08
+    severity: minor
+    description: >
+      The LICENSE file must be MIT and must not contain dual-license
+      language referencing @bic/claws-sdk. A developer evaluating
+      the free tier will read the license first. Any ambiguity about
+      enterprise licensing terms in the free package erodes trust and
+      adoption. The license must be a clean, standard MIT with no
+      addenda.
+    spec_impact: "CL-08 Section 4 — license clarity"
+    pitfall: null

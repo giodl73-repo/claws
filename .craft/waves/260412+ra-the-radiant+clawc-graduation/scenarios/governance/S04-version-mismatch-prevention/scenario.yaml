@@ -1,0 +1,152 @@
+name: S04-version-mismatch-prevention
+series: governance
+version: 1
+specs: [CL-08]
+description: >
+  Validates that merging governance-primitives, governance-runtime, and
+  budget-tracker into a single @craftworks/governance package eliminates the
+  class of version mismatch bugs that occurred when these were separate packages.
+  This scenario tests the specific failure modes that motivated the merge.
+
+expect:
+  version_mismatch_class:
+    eliminated: true
+    failure_modes_tested: 4
+  single_version:
+    primitives_version: "matches governance version"
+    runtime_version: "matches governance version"
+    budget_version: "matches governance version"
+
+simulate:
+  failures:
+    - type: version_mismatch_simulation
+      description: "Simulate what would happen if primitives and runtime had different type definitions"
+  halt: null
+  budget: null
+
+problem: >
+  Before the merge, a consumer could install governance-primitives@2.0 and
+  governance-runtime@1.9. If primitives@2.0 added a new GateType enum member
+  that runtime@1.9 did not handle, the runtime would silently skip the new gate
+  type. This produced a security gap: a governance rule was defined but never
+  enforced. Four historical failure modes are tested: (1) GateType enum drift
+  (new member in primitives, unhandled in runtime), (2) RiskLevel numeric value
+  change (R3 was 3 in primitives@1.x but 4 in primitives@2.x, runtime still
+  expects 3), (3) FailModePolicy shape change (added field in primitives,
+  runtime ignores it), (4) BudgetTracker token cost type change (number in
+  budget-tracker, BigInt in governance-primitives). The merged package must
+  make all 4 failures structurally impossible.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The GateType enum drift failure is the most dangerous: a new gate type
+      is added to the enum but the runtime's switch statement has no case
+      for it. In TypeScript, an exhaustive switch with `never` in the default
+      case catches this at compile time — but only if primitives and runtime
+      are in the same compilation unit. Separate packages compile separately,
+      so the exhaustiveness check does not work across package boundaries.
+      The merge makes them one compilation unit, enabling exhaustive checks.
+    spec_impact: "CL-08 @craftworks/governance — exhaustive switch on GateType with never default"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      RiskLevel numeric values (R1=1 through R5=5) are used in comparison
+      operators (risk >= threshold). If a separate primitives package changes
+      R3 from 3 to a different value, all comparisons in runtime break silently
+      (no runtime error, just wrong security decisions). In the merged package,
+      changing the enum value triggers recompilation of runtime code, so tests
+      catch the breakage. But only if tests exist for the comparison logic.
+      The merge is necessary but not sufficient — comparison tests are also
+      required.
+    spec_impact: "CL-08 @craftworks/governance — numeric comparison tests for all RiskLevel boundaries"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      FailModePolicy shape changes (added optional field) are the subtlest
+      version mismatch. If primitives adds `retryCount?: number` and runtime
+      does not read it, the policy silently loses a configuration option.
+      In the merged package, the type is defined once and used everywhere.
+      But if a consumer passes a FailModePolicy from an older governance
+      version (e.g., deserialized from a config file), the missing field
+      is still possible. Runtime must use defaults for missing optional fields.
+    spec_impact: "CL-08 @craftworks/governance — FailModePolicy optional fields have explicit defaults"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The BudgetTracker token cost type mismatch (number vs BigInt) is a
+      JavaScript-specific issue. number has 53-bit integer precision; BigInt
+      has arbitrary precision. If budget limits exceed 2^53 tokens (unlikely
+      now but possible for fleet aggregation), number arithmetic loses
+      precision. The merged package should standardize on number for single-
+      agent budgets and BigInt for fleet aggregation, with explicit conversion
+      at the boundary.
+    spec_impact: "CL-08 @craftworks/governance — number for agent budgets, BigInt for fleet aggregation"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Even in a merged package, internal modules can drift if they are
+      maintained by different developers. The test must verify that the
+      type used in runtime's gate evaluator is reference-identical to the
+      type defined in the primitives module — not a copy with the same shape.
+      `typeof GateType === typeof runtime_gate_type` should be validated in
+      a structural test. If someone accidentally copies the enum definition
+      into runtime (instead of importing), the merge benefit is lost.
+    spec_impact: "CL-08 @craftworks/governance — structural test: single type source, no copies"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The version mismatch prevention assumes npm deduplication. If a consumer's
+      dependency tree has @craftworks/governance at two different versions (e.g.,
+      direct dep @2.0 and transitive dep @1.9 through another package), npm
+      may install both versions. The runtime will use one version's types and
+      the other version's logic, recreating the version mismatch within a
+      single package. The package must include a singleton check or use
+      peerDependencies to prevent multiple versions.
+    spec_impact: "CL-08 @craftworks/governance — singleton version check or peerDependency enforcement"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The 4 historical failure modes should be documented in the package's
+      CHANGELOG or architecture decision record. Future maintainers need
+      to understand why these packages were merged (not just that they were).
+      Without the rationale, a future refactor might re-split them and
+      reintroduce the version mismatch class.
+    spec_impact: "CL-08 @craftworks/governance — ADR documenting merge rationale and failure modes"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The merge eliminates version mismatch between the three governance
+      packages but introduces coupling: a bug fix in BudgetTracker requires
+      a new release of the entire governance package, even if PolicyWalker
+      and GateEvaluator are unchanged. This is acceptable for version safety
+      but increases release frequency. The release notes must clearly
+      indicate which component changed.
+    spec_impact: "CL-08 @craftworks/governance — release notes indicate component scope of changes"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      TypeScript's declaration maps (.d.ts.map) enable consumers to navigate
+      to source types. If the merged package generates a single monolithic
+      .d.ts without declaration maps, consumers cannot trace a GateType
+      usage back to its definition. Declaration maps must be enabled in
+      the package's tsconfig to preserve developer experience.
+    spec_impact: "CL-08 @craftworks/governance — declaration maps enabled in tsconfig"
+    pitfall: null

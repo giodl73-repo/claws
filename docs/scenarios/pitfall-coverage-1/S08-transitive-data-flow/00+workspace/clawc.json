@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "trustTier": "T3",
+  "platform": "openclaw",
+  "dataLabels": ["CONFIDENTIAL", "INTERNAL", "PUBLIC"]
+}

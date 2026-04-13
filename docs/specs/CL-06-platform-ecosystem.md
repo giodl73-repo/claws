@@ -57,7 +57,7 @@ Any OC developer               Skill developers                claws compiler
 | `@openclaw/audit-chain` | suite/audit hash chain, WAL, verify, export | ~20KB | Hash-chained audit trails for any OC agent |
 | `@openclaw/budget-meter` | govern/GovernanceManager, 80/95/100% thresholds | ~8KB | Token/cost controls with threshold alerts |
 | `@openclaw/identity-bridge` | suite/permission, suite/entity-id | ~3KB | Enterprise SSO (OIDC/SAML) for OC agents |
-| `@openclaw/siem-emitter` | suite/audit/export (SARIF, CEF, JSON, syslog) | ~5KB | SOC integration in 4 standard formats |
+| `@openclaw/siem-emitter` | suite/audit/export (SARIF, CEF, NDJSON, syslog) | ~5KB | SOC integration in 4 standard formats |
 | `@openclaw/secret-scanner` | hashing/computeHash, pattern detection | ~4KB | Credential leak detection for agent workspaces |
 
 Each @openclaw/* package solves a real problem independently. They are genuine contributions to the OC ecosystem, powered by Craftworks infrastructure but useful without the claws compiler.
@@ -66,7 +66,7 @@ Each @openclaw/* package solves a real problem independently. They are genuine c
 
 | Package | Purpose | Standalone? | Size |
 |---------|---------|-------------|------|
-| `@claws/relax` | Typed expression engine for policy rules | Yes | ~25KB |
+| `@claws/sift` | Typed expression engine for policy rules | Yes | ~25KB |
 | `@claws/audit` | Audit trail with hash chain | Yes | ~15KB |
 | `@claws/security` | Input sanitization, injection defense patterns | Yes | ~12KB |
 | `@claws/budget` | Token/spending controls for skills | Yes | ~8KB |
@@ -78,12 +78,12 @@ Each @openclaw/* package solves a real problem independently. They are genuine c
 | `@bic/claws-test` | Scenario runner + governance validator + security scanner | Yes | ~45KB |
 | `@claws/runtime` | 7 thin governance helpers (classify, elicit, audit, etc.) | No (needs @openclaw/*) | ~15KB |
 
-All libraries work without the claws compiler. Any OC developer can `npm install @claws/relax` and use typed expressions in their skill. The libraries are standalone value; the compiler is the integration layer.
+All libraries work without the claws compiler. Any OC developer can `npm install @claws/sift` and use typed expressions in their skill. The libraries are standalone value; the compiler is the integration layer.
 
-#### Standalone Usage: @claws/relax (without compiler)
+#### Standalone Usage: @claws/sift (without compiler)
 
 ```typescript
-import { RelaxEngine, parseExpression } from '@claws/relax';
+import { RelaxEngine, parseExpression } from '@claws/sift';
 
 // Parse a RELAX policy expression
 const expr = parseExpression('tool.risk >= R3 AND tool.obo != "none"');
@@ -189,7 +189,7 @@ Distribution channels: ClawHub marketplace, private npm registries, `claws broad
 
 | Framework | Scope | Granularity | Command |
 |-----------|-------|-------------|---------|
-| **Tool Risk (R1-R5)** | Per-tool capability classification | Individual tool | `claws pinch` (G-CLASS) |
+| **Tool Risk (R1-R5)** | Per-tool capability classification | Individual tool | `claws check` (G-CLASS) |
 | **Regulatory Risk (EU AI Act)** | System-level Article 6 / Annex III classification | Entire agent system | `claws assess` |
 
 `claws assess` maps the agent system to EU AI Act Article 6 risk categories (Unacceptable, High-risk, Limited, Minimal). This is a system-level determination based on the agent's domain, deployment context, and aggregate capabilities -- NOT a rollup of per-tool R1-R5 scores. A system with all R2 tools can still be High-risk under Article 6 if it operates in a regulated domain (healthcare, credit scoring, law enforcement).
@@ -199,7 +199,7 @@ Distribution channels: ClawHub marketplace, private npm registries, `claws broad
 Each stage provides standalone value. Developers adopt the next stage when their needs grow, not because of lock-in:
 
 ```
-npm install @claws/relax        Free, standalone, MIT — typed policy expressions
+npm install @claws/sift        Free, standalone, MIT — typed policy expressions
        |
 npm install @claws/audit        "We need audit trails" — hash-chained event log
        |
@@ -209,7 +209,7 @@ claws init                      "We want compiled governance" — policy compila
        |
 claws build                     "Compiled governance plugins" — full enforcement
        |
-claws pinch --fleet             "Enforce across the org" — fleet consistency
+claws check --fleet             "Enforce across the org" — fleet consistency
        |
 ClawHub + Enterprise license    "Managed governance" — SaaS + support
 ```
@@ -325,7 +325,7 @@ Badges are additive metadata in the publish API payload. No ClawHub schema chang
 2. What is the minimum viable governance badge for ClawHub? R-level + OBO declaration + signed manifest?
 3. Should claws provide default policies for the top 100 most-installed OC skills (adoption bootstrapping)?
 4. How should the 30% skill miscategorization rate be handled? Capability extraction from SKILL.md handler code?
-5. When should @claws/relax and @claws/audit ship (highest adoption potential)?
+5. When should @claws/sift and @claws/audit ship (highest adoption potential)?
 
 ## Research References
 

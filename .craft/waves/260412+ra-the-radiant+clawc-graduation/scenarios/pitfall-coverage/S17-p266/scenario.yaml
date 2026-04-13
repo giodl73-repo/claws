@@ -1,0 +1,103 @@
+name: S17-p266
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-266
+description: >
+  Validates that `claws check --singleton` detects multiple instances of the
+  governance package in a consumer's dependency tree. Even after merging
+  governance-primitives, governance-runtime, and budget-tracker into
+  @craftworks/governance, npm may install two versions of the merged package,
+  recreating the version mismatch the merge was supposed to eliminate.
+
+expect:
+  detection: true
+  prevention: "`claws check --singleton` detects multiple instances of governance in the dependency tree. Package includes singleton version check at import time that warns when multiple copies are detected."
+
+simulate:
+  failures: ["npm installs two versions of merged @craftworks/governance package through direct and transitive dependency paths"]
+  halt: null
+  budget: null
+
+problem: >
+  A consumer project declares @craftworks/governance@2.0.0 as a direct
+  dependency. It also depends on @bic/claws-sdk which transitively
+  depends on @craftworks/governance@1.9.0 (the pre-merge version still
+  pinned in claws-sdk's package.json). npm installs both governance@2.0.0
+  and governance@1.9.0 in the dependency tree. The runtime loads governance@2.0.0
+  for direct imports and governance@1.9.0 for claws-sdk's internal imports.
+  GateType enum values from @2.0 do not match the switch statement in @1.9's
+  evaluator. A governance gate that should block an R5 action passes because
+  the enum comparison fails (different object identity). The exhaustive
+  switch check that was supposed to catch this does not cross npm module
+  boundaries. Verify that `claws check --singleton` catches the duplication
+  and that the import-time version check warns at runtime.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The singleton check at import time must compare version strings, not
+      just detect multiple loads. If governance@2.0.0 loads first and sets
+      a global marker, governance@1.9.0 loading second must detect the
+      existing marker AND compare versions. A simple "already loaded" check
+      without version comparison misses the mixed-version case.
+    spec_impact: "CL-08 G-DEDUP — singleton check must compare version strings, not just presence"
+    pitfall: P-266
+
+  - id: F02
+    severity: major
+    description: >
+      The GateType enum comparison failure is a security issue: a governance
+      gate that should block R5 actions (OBO/transact) passes because enum
+      values from different versions are !== despite being semantically
+      equivalent. This is the exact failure mode the package merge was
+      designed to prevent. Detection must happen before gate evaluation,
+      not after a false pass.
+    spec_impact: "CL-08 G-DEDUP — singleton check must run before gate evaluation"
+    pitfall: P-266
+
+  - id: F03
+    severity: warning
+    description: >
+      peerDependencies can prevent duplication by forcing the consumer to
+      resolve a single version. If @bic/claws-sdk declares governance
+      as a peerDependency (not a regular dependency), npm will use the
+      consumer's version for both. But peerDependency violations are warnings
+      in npm 7+, not errors — the consumer may ignore the warning and still
+      get two copies.
+    spec_impact: "CL-08 G-DEDUP — peerDependency prevents duplication but warnings may be ignored"
+    pitfall: P-266
+
+  - id: F04
+    severity: warning
+    description: >
+      The import-time warning must be actionable: it should log which
+      packages brought in which versions (e.g., "governance@2.0.0 from
+      direct dependency, governance@1.9.0 from @bic/claws-sdk").
+      A generic "multiple governance instances detected" warning does not
+      help the operator resolve the conflict.
+    spec_impact: "CL-08 G-DEDUP — import-time warning includes dependency chain for each version"
+    pitfall: P-266
+
+  - id: F05
+    severity: warning
+    description: >
+      The `claws check --singleton` command must run against the consumer's
+      dependency tree, not the package's own dev dependencies. Testing in
+      the monorepo (where governance is always a single workspace symlink)
+      will never detect this. The check must simulate or inspect a real
+      consumer install.
+    spec_impact: "CL-08 G-DEDUP — singleton check must test consumer install, not monorepo"
+    pitfall: P-266
+
+  - id: F06
+    severity: note
+    description: >
+      The runtime version check has a performance consideration: it runs
+      on every import of the governance module. Using a global symbol
+      (Symbol.for('governance.version')) is lightweight but pollutes the
+      global namespace. The check should use a well-namespaced global and
+      only warn once per process, not on every import.
+    spec_impact: "CL-08 G-DEDUP — singleton check uses namespaced global, warns once"
+    pitfall: P-266

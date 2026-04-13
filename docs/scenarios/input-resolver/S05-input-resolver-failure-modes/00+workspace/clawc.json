@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "trustTier": "T2",
+  "platform": "openclaw",
+  "inputs": {
+    "packages": [
+      {
+        "name": "@corp/missing-pkg",
+        "version": "^1.0.0"
+      }
+    ],
+    "urls": [
+      {
+        "url": "https://policies.corp.internal/down.yaml",
+        "integrity": "sha256-abc123",
+        "cacheTTL": 3600
+      },
+      {
+        "url": "https://policies.corp.internal/tampered.yaml",
+        "integrity": "sha256-expected-hash",
+        "cacheTTL": 3600
+      }
+    ]
+  }
+}

@@ -1,0 +1,224 @@
+/* @theme claws-dark */
+
+@import 'default';
+
+:root {
+  --bg: #0d0d0d;
+  --fg: #e8e8e8;
+  --fg-muted: #999999;
+  --accent: #ff6b35;
+  --accent-dim: rgba(255, 107, 53, 0.15);
+  --accent-border: rgba(255, 107, 53, 0.4);
+  --accent-green: #4caf50;
+  --accent-red: #ef5350;
+  --accent-amber: #ffb74d;
+  --surface: #1a1a1a;
+  --surface-border: #333333;
+}
+
+section {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 19px;
+  padding: 30px 50px;
+  line-height: 1.4;
+}
+
+h1 {
+  color: var(--accent);
+  font-size: 38px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+h2 {
+  color: var(--fg);
+  font-size: 26px;
+  font-weight: 600;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+}
+
+h3 {
+  color: var(--accent);
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  margin-top: 10px;
+}
+
+code {
+  font-family: 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
+  background: var(--accent-dim);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+pre {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  padding: 16px;
+  font-size: 18px;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  color: var(--fg);
+  padding: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 17px;
+  background: var(--surface);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+th {
+  background: #222222;
+  color: var(--fg);
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: 700;
+  border-bottom: 2px solid var(--accent);
+}
+
+td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--surface-border);
+  color: #cccccc;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+td strong, th strong {
+  color: var(--fg);
+}
+
+td em, th em {
+  color: var(--accent-amber);
+}
+
+td code, th code {
+  background: #222222;
+  color: var(--accent);
+}
+
+strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+em {
+  color: var(--accent-amber);
+  font-style: normal;
+}
+
+blockquote {
+  border-left: 4px solid var(--accent);
+  padding-left: 16px;
+  color: var(--fg-muted);
+  margin: 16px 0;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+ul, ol {
+  line-height: 1.3;
+  margin: 4px 0;
+}
+
+li {
+  margin-bottom: 2px;
+}
+
+/* Dense slide for stacked code examples */
+section.small {
+  font-size: 15px;
+  padding: 20px 40px;
+}
+
+section.small pre {
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.35;
+  margin: 4px 0;
+}
+
+section.small table {
+  font-size: 14px;
+}
+
+section.small p {
+  margin: 2px 0;
+}
+
+/* Slide-specific classes */
+section.title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+section.title h1 {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+section.title p {
+  color: var(--fg-muted);
+  font-size: 24px;
+}
+
+section.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+section.split > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Footer / page number */
+section::after {
+  color: #444444;
+  font-size: 14px;
+}
+
+/* Small text for skill lists */
+small {
+  font-size: 13px;
+  color: var(--fg-muted);
+  line-height: 1.3;
+  display: block;
+  margin-bottom: 8px;
+  font-family: 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
+}
+
+/* Highlight boxes */
+section .highlight {
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  padding: 16px;
+}

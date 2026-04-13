@@ -1,0 +1,111 @@
+name: S02-pass-k-evaluation
+series: eval
+version: 1
+specs: [CL-08]
+description: >
+  Validates that the eval package correctly implements pass^k threshold logic
+  for multi-sample evaluation, where k samples are drawn and the evaluation
+  passes if at least one sample meets all rubric criteria.
+
+expect:
+  pass_at_1: false
+  pass_at_5: true
+  sample_scores: independent
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer evaluates an LLM on a task using pass^k with k=5. Five response
+  samples are collected. Four samples fail the accuracy criterion (scoring 0.3
+  against a 0.7 threshold), but the fifth sample passes all criteria. The
+  pass^1 result must be false (random single draw has 80% chance of failure),
+  while pass^5 must be true (at least one passing sample exists). Each sample
+  must be scored independently — the score of sample 3 must not influence the
+  evaluation of sample 4. The evaluator must also report the pass rate (1/5 =
+  0.2) and confidence interval for the true pass probability.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If the pass^k evaluator short-circuits after finding the first passing
+      sample, it cannot compute the pass rate (proportion of passing samples).
+      The evaluator must score all k samples regardless of early successes
+      to provide accurate statistics. Short-circuiting optimizes latency at
+      the cost of statistical validity.
+    spec_impact: "CL-08 eval-api — pass^k must evaluate all samples, not short-circuit"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Sample independence is violated if the evaluator maintains mutable state
+      between sample evaluations (e.g., a running average that biases
+      threshold comparison). Each sample must be evaluated against a fresh
+      rubric instance or the rubric must be provably stateless.
+    spec_impact: "CL-08 eval-api — statelessness requirement for multi-sample evaluation"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The pass^k result type must distinguish between "at least one sample
+      passed" (the pass^k boolean) and "the expected pass rate under
+      repeated sampling" (the statistical estimate). Conflating these leads
+      consumers to over-interpret a single pass^5=true result as evidence
+      of reliable model performance.
+    spec_impact: "CL-08 eval-api — separate PassAtKResult fields for boolean vs statistical"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      When k=1, pass^k degenerates to standard single-sample evaluation. The
+      API should not require consumers to wrap single evaluations in a
+      multi-sample call. A k=1 path should produce identical results to
+      the non-pass^k evaluate() function.
+    spec_impact: "CL-08 eval-api — k=1 equivalence with single-sample evaluation"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Confidence interval calculation requires a minimum sample size to be
+      meaningful. For k<3, the confidence interval is unreliable and should
+      be marked as such or omitted. Reporting a confidence interval with
+      k=2 implies statistical rigor that does not exist.
+    spec_impact: "CL-08 eval-api — minimum k threshold for confidence interval reporting"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      If sample evaluation throws an error (e.g., malformed response), the
+      evaluator must count it as a failing sample rather than aborting the
+      entire pass^k run. One bad sample out of five should not prevent
+      the other four from being scored.
+    spec_impact: "CL-08 eval-api — error handling policy for individual sample failures"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The pass rate (passing/total) should be reported as a fraction with
+      both numerator and denominator, not just a decimal. This allows
+      downstream tools to aggregate across multiple pass^k runs without
+      loss of precision from floating-point rounding.
+    spec_impact: "CL-08 eval-api — pass rate representation as rational number"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Large k values (k>100) are legitimate for statistical evaluation but
+      may cause memory pressure if all sample results are retained. The
+      evaluator should support streaming mode where per-sample details
+      are discarded after aggregation when a flag is set.
+    spec_impact: "CL-08 eval-api — streaming mode for large-k evaluation"
+    pitfall: null

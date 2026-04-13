@@ -1,0 +1,102 @@
+name: S19-p268
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-268
+description: >
+  Validates that `claws migrate --downgrade` provides a bidirectional codemod
+  for import path migration when downgrading from extracted @craftworks/*
+  packages to the pre-extraction compiler-sdk monolith. Audit chain format
+  divergence, missing bug fixes, and 30+ file import rewrites make manual
+  downgrade error-prone.
+
+expect:
+  detection: true
+  prevention: "`claws migrate --downgrade` provides bidirectional codemod for import path migration. Audit chain format frozen before extraction. Backport policy defined for fixes during compat window."
+
+simulate:
+  failures: ["Consumer downgrades from extracted packages to monolith and encounters audit chain format incompatibility and missing bug fixes"]
+  halt: null
+  budget: null
+
+problem: >
+  A consumer running @craftworks/forma@1.1.0 + @craftworks/governance@2.0.0
+  needs to downgrade to compiler-sdk@4.0.0 (the pre-extraction monolith)
+  because a dependency conflict prevents running extracted packages. The
+  downgrade requires rewriting import statements across 30+ files:
+  `import { WorkspaceReader } from '@craftworks/forma'` becomes
+  `import { readOCWorkspaceViaFORMA } from '@craftworks/compiler-sdk'`. The
+  consumer's audit chain files were created by @craftworks/crypto@1.0.0 which
+  added a schemaVersion field and changed the default hash algorithm from
+  SHA-256 to SHA-512. compiler-sdk's built-in crypto module uses SHA-256
+  and does not recognize schemaVersion. Chain verification fails on every
+  entry created by the extracted crypto module. Additionally, 3 bug fixes
+  shipped in forma@1.1.0 are not present in compiler-sdk@4.0.0. Verify
+  that `claws migrate --downgrade` handles all three issues.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The bidirectional codemod must handle not just package name changes
+      but symbol renames. If extracted packages renamed functions (e.g.,
+      WorkspaceReader.read() in forma vs readOCWorkspaceViaFORMA() in
+      compiler-sdk), the codemod must map old symbols to new symbols, not
+      just old paths to new paths. A symbol mapping table is required.
+    spec_impact: "CL-08 G-COMPAT — codemod includes symbol rename mapping"
+    pitfall: P-268
+
+  - id: F02
+    severity: major
+    description: >
+      Audit chain format divergence makes downgrade data-destructive: chains
+      created by extracted crypto cannot be verified by the monolith's crypto.
+      If the format was frozen before extraction (as required by P-258), this
+      should not happen. But if the freeze was incomplete (schema version field
+      added after freeze), the downgrade codemod must include a chain format
+      migration tool that strips post-freeze fields.
+    spec_impact: "CL-08 G-COMPAT — downgrade codemod includes audit chain format migration"
+    pitfall: P-268
+
+  - id: F03
+    severity: warning
+    description: >
+      Bug fixes present in extracted packages but absent from the monolith
+      represent a regression. The backport policy must define which fixes
+      are backported to the monolith during the compat window. The downgrade
+      tool should warn the consumer about known regressions in the target
+      monolith version with CVE-style severity ratings.
+    spec_impact: "CL-08 G-COMPAT — backport policy with regression warnings on downgrade"
+    pitfall: P-268
+
+  - id: F04
+    severity: warning
+    description: >
+      30+ file rewrites are error-prone even with a codemod. The codemod must
+      produce a diff that the consumer can review before applying. A --dry-run
+      mode showing all proposed changes is essential. Silent application of 30+
+      file changes without review invites errors.
+    spec_impact: "CL-08 G-COMPAT — downgrade codemod must support --dry-run with diff preview"
+    pitfall: P-268
+
+  - id: F05
+    severity: warning
+    description: >
+      The codemod must handle TypeScript files, JavaScript files, and
+      potentially configuration files (jest.config.ts, vitest.config.ts)
+      that reference @craftworks/ package names in module mappers or
+      aliases. Missing a config file import rewrite causes test suites
+      to fail after downgrade.
+    spec_impact: "CL-08 G-COMPAT — codemod covers config files, not just source files"
+    pitfall: P-268
+
+  - id: F06
+    severity: note
+    description: >
+      The compat window duration determines how long the downgrade path must
+      be maintained. After the window closes, the monolith is EOL and
+      downgrade is no longer supported. The downgrade tool should check the
+      compat window status and warn consumers who downgrade after the window
+      closes that they will receive no further support.
+    spec_impact: "CL-08 G-COMPAT — compat window expiry check in downgrade tool"
+    pitfall: P-268

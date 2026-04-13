@@ -82,7 +82,7 @@ findings:
       The three verification states: unsigned (no signature), signed-
       unverifiable (signature present, no keys), signed-verified (signature
       validates against trusted key). Only signed-verified provides actual
-      security. The pinch output must report the state for each skill
+      security. The check output must report the state for each skill
       and the overall supply chain health.
     spec_impact: "CL-02 G-SUPPLY — three-state supply chain reporting"
     pitfall: "P-157, P-158"

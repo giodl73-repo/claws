@@ -1,0 +1,153 @@
+name: S02-expression-round-trip
+series: relax
+version: 1
+specs: [CL-08]
+description: >
+  Validates that parsing a RELAX expression to an AST, serializing the AST
+  back to source text, and re-parsing produces an equivalent AST. This
+  round-trip property is critical for tooling: claws annotate and claws
+  pinch read RELAX expressions, transform them, and write them back. If
+  round-tripping is lossy, transforms silently corrupt expressions.
+
+expect:
+  original: "if risk >= 3 and scope == 'production' then 'block' else 'allow'"
+  round_trip:
+    parse_success: true
+    serialize_success: true
+    reparse_success: true
+    ast_equivalent: true
+  whitespace:
+    preserved: false
+    semantically_equivalent: true
+  comments:
+    preserved_in_ast: true
+    preserved_in_serialization: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A RELAX expression with logical operators (and), comparisons (>=, ==),
+  string literals ('production'), and conditional structure (if/then/else)
+  is parsed to an AST. The AST is serialized back to source text using
+  a built-in serializer. The serialized text is re-parsed to a second AST.
+  The two ASTs must be structurally equivalent (same node types, same
+  values, same tree shape). Whitespace may differ (the serializer may
+  normalize spacing), but semantic content must be identical. If the
+  expression contains comments, they must survive the round-trip.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Operator precedence must be preserved through the round-trip. The
+      expression "risk >= 3 and scope == 'production'" parses with "and"
+      binding looser than ">=" and "==". If the serializer omits parentheses
+      that the parser relied on for precedence, re-parsing may produce a
+      different tree. The serializer must emit explicit parentheses for any
+      sub-expression where the parser required them, or prove that the
+      default precedence rules make them unnecessary.
+    spec_impact: "CL-08 relax — serializer precedence-preserving parenthesization"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      String literal escaping must round-trip correctly. If the original
+      expression contains 'it\\'s allowed' (escaped quote inside string),
+      the AST stores the unescaped value "it's allowed". The serializer
+      must re-escape to produce valid source. If the serializer outputs
+      'it's allowed' (unescaped), re-parsing fails at the unexpected quote.
+      This is the most common round-trip bug in expression languages.
+    spec_impact: "CL-08 relax — string literal escape round-trip"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      AST equivalence must be defined precisely. Two ASTs are equivalent
+      if they produce the same evaluation result for all possible bindings.
+      Structural equivalence (same tree) is stronger than semantic
+      equivalence (same results). The spec should define which level of
+      equivalence the round-trip guarantees. Structural is simpler to test
+      but rules out normalizations that are semantically valid (e.g.,
+      reordering commutative operands).
+    spec_impact: "CL-08 relax — AST equivalence definition (structural vs semantic)"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      RELAX expressions may contain inline comments (// line comment) or
+      block comments (/* ... */). The parser must attach comments to AST
+      nodes (as metadata, not as child nodes). The serializer must emit
+      comments in the correct position relative to the node they annotate.
+      If comments are stripped during parsing, round-tripping loses
+      developer intent embedded in comments.
+    spec_impact: "CL-08 relax — comment preservation in AST and serialization"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Numeric literal representation may change through round-trip. The
+      original "3" is an integer, but the serializer might emit "3.0" if
+      it treats all numbers as floats. While 3 == 3.0 semantically, the
+      source text differs. For governance expressions where exact
+      representation matters for auditing (was the threshold 3 or 3.0?),
+      the serializer must preserve the original numeric format.
+    spec_impact: "CL-08 relax — numeric literal format preservation"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The round-trip test should be generative: given a grammar, generate
+      random valid expressions, parse, serialize, reparse, and compare.
+      A property-based test (using fast-check or similar) would cover far
+      more cases than hand-written examples. If relax ships with a grammar
+      spec, the property test can be derived from it automatically.
+    spec_impact: "CL-08 relax — property-based round-trip test strategy"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The RELAX fill operation (variable substitution in templates) must
+      also round-trip. If a template expression "Hello {name}" is parsed,
+      filled with name="World", and serialized, the result "Hello World"
+      must re-parse as a plain string literal, not as a template with an
+      unresolved variable. The serializer must distinguish between filled
+      templates (output as literals) and unfilled templates (output with
+      placeholders).
+    spec_impact: "CL-08 relax — template fill round-trip semantics"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Whitespace normalization during serialization is acceptable (the
+      serializer may add spaces around operators for readability). But
+      if the lossless OC principle applies to RELAX expressions embedded
+      in OC workspace files, the serializer must preserve original
+      whitespace from the source. This requires the parser to store
+      whitespace tokens in the AST, which complicates the tree structure.
+      The spec should clarify whether RELAX embedded in OC files follows
+      lossless rules.
+    spec_impact: "CL-08 relax — whitespace preservation policy for embedded expressions"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The serializer output encoding must match the parser input encoding.
+      If the parser accepts UTF-8 and the serializer emits UTF-16 (common
+      in some JS string operations), a file-level round-trip (write
+      serialized to file, re-read and parse) may introduce encoding
+      artifacts. Both parser and serializer must operate on the same
+      string encoding, and the serialize() return type should be a plain
+      JS string (UTF-16 internally, but the caller writes it as UTF-8).
+    spec_impact: "CL-08 relax — encoding consistency between parser and serializer"
+    pitfall: null

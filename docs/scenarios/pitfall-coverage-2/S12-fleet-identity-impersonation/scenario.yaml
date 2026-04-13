@@ -84,7 +84,7 @@ findings:
   - id: F05
     severity: major
     description: >
-      Fleet broadcast of governance policies (`claws pinch --fleet`) must
+      Fleet broadcast of governance policies (`claws check --fleet`) must
       include identity level requirements. If the fleet policy says "minimum
       L1," workspaces with L0 agents are flagged as non-compliant. Fleet
       compliance dashboards must show identity level distribution across
@@ -107,7 +107,7 @@ findings:
     severity: warning
     description: >
       For single-workspace mode (no fleet), L0 is acceptable and the
-      impersonation warning should be suppressed. `claws pinch` must detect
+      impersonation warning should be suppressed. `claws check` must detect
       fleet context (presence of claws.json#fleet configuration or --fleet
       flag) before applying the L0 warning. False positives on single
       workspaces would create unnecessary noise.

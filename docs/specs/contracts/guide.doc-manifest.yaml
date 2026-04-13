@@ -1,0 +1,132 @@
+surface: guide
+entries:
+  claws-uninstall-guide:
+    type: guide
+    path: docs/claws/concepts/claws-uninstall.md
+    atoms:
+    - claws-uninstall
+  claws-assess-guide:
+    type: guide
+    path: docs/claws/concepts/claws-assess.md
+    atoms:
+    - claws-assess
+  claws-doctor-guide:
+    type: guide
+    path: docs/claws/concepts/claws-doctor.md
+    atoms:
+    - claws-doctor
+  governance-ir-guide:
+    type: guide
+    path: docs/claws/concepts/governance-ir.md
+    atoms:
+    - governance-ir
+  capability-manifest-guide:
+    type: guide
+    path: docs/claws/concepts/capability-manifest.md
+    atoms:
+    - capability-manifest
+  mechanical-intent-guide:
+    type: guide
+    path: docs/claws/concepts/mechanical-intent.md
+    atoms:
+    - mechanical-intent
+  workflow-inversion-guide:
+    type: guide
+    path: docs/claws/concepts/workflow-inversion.md
+    atoms:
+    - workflow-inversion
+  governance-badge-guide:
+    type: guide
+    path: docs/claws/concepts/governance-badge.md
+    atoms:
+    - governance-badge
+  claws-lsp-guide:
+    type: guide
+    path: docs/claws/concepts/claws-lsp.md
+    atoms:
+    - claws-lsp
+  error-contract-guide:
+    type: guide
+    path: docs/claws/concepts/error-contract.md
+    atoms:
+    - error-contract
+  upstream-contrib-guide:
+    type: guide
+    path: docs/claws/concepts/upstream-contrib.md
+    atoms:
+    - upstream-contrib
+  cicd-pipeline-guide:
+    type: guide
+    path: docs/claws/concepts/cicd-pipeline.md
+    atoms:
+    - cicd-pipeline
+  claws-sdk-guide:
+    type: guide
+    path: docs/claws/concepts/claws-sdk.md
+    atoms:
+    - claws-sdk
+  pinch-guide:
+    type: guide
+    path: docs/claws/concepts/pinch.md
+    atoms:
+    - pinch
+  claws-sift-guide:
+    type: guide
+    path: docs/claws/concepts/claws-sift.md
+    atoms:
+    - claws-sift
+  governance-skill-guide:
+    type: guide
+    path: docs/claws/concepts/governance-skill.md
+    atoms:
+    - governance-skill
+  governance-host-guide:
+    type: guide
+    path: docs/claws/concepts/governance-host.md
+    atoms:
+    - governance-host
+  claws-bypass-guide:
+    type: guide
+    path: docs/claws/concepts/claws-bypass.md
+    atoms:
+    - claws-bypass
+  snap-restore-guide:
+    type: guide
+    path: docs/claws/concepts/snap-restore.md
+    atoms:
+    - snap-restore
+  latency-budget-guide:
+    type: guide
+    path: docs/claws/concepts/latency-budget.md
+    atoms:
+    - latency-budget
+  a2a-governance-guide:
+    type: guide
+    path: docs/claws/concepts/a2a-governance.md
+    atoms:
+    - a2a-governance
+  compliance-artifact-guide:
+    type: guide
+    path: docs/claws/concepts/compliance-artifact.md
+    atoms:
+    - compliance-artifact
+  key-management-guide:
+    type: guide
+    path: docs/claws/concepts/key-management.md
+    atoms:
+    - key-management
+  audit-verify-guide:
+    type: guide
+    path: docs/claws/concepts/audit-verify.md
+    atoms:
+    - audit-verify
+  fleet-doctor-guide:
+    type: guide
+    path: docs/claws/concepts/fleet-doctor.md
+    atoms:
+    - fleet-doctor
+  fleet-comply-guide:
+    type: guide
+    path: docs/claws/concepts/fleet-comply.md
+    atoms:
+    - fleet-comply

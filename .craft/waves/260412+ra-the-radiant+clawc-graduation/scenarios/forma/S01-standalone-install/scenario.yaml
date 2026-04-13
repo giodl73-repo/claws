@@ -1,0 +1,138 @@
+name: S01-standalone-install
+series: forma
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/forma installs as a standalone package with zero
+  dependency on compiler-sdk. A fresh project with only forma as a dependency
+  must be able to read a minimal OC workspace (SOUL.md + TOOLS.md + openclaw.json)
+  and produce a typed OCWorkspaceAST. This is the extraction correctness floor:
+  if standalone install fails, every downstream consumer is broken.
+
+expect:
+  install:
+    package: "@craftworks/forma"
+    peer_dependencies: ["@craftworks/crypto"]
+    compiler_sdk_required: false
+  workspace_ast:
+    files_parsed: [SOUL.md, TOOLS.md, openclaw.json]
+    node_count: 3
+    type_safe: true
+  errors: []
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A fresh Node.js project declares only @craftworks/forma and @craftworks/crypto
+  as dependencies (crypto is a peer dep of forma per CL-08). No compiler-sdk,
+  no agent-sdk, no claws packages. The project calls WorkspaceReader.read() on
+  a directory containing three files: SOUL.md with a single deny constraint,
+  TOOLS.md with one R1 tool, and openclaw.json with default trust tier. The
+  reader must parse all three files into a typed OCWorkspaceAST without importing
+  any symbol from compiler-sdk at runtime. TypeScript compilation must succeed
+  with strict mode and no @ts-ignore directives.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If forma re-exports types that originate in compiler-sdk (e.g., FormaIR
+      interfaces defined in compiler-sdk/src/compile/forma-ir.ts), the standalone
+      install will fail TypeScript compilation because the .d.ts files reference
+      compiler-sdk paths. Forma must own its own type definitions -- types must be
+      defined in forma's source, not re-exported from compiler-sdk.
+    spec_impact: "CL-08 @craftworks/forma — type ownership, no re-exports from compiler-sdk"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The WorkspaceReader.read() method currently lives in compiler-sdk as
+      readOCWorkspaceViaFORMA(). During extraction, internal imports like
+      `import { normalize } from '../normalize'` must be replaced with
+      `import { normalize } from '@craftworks/workspace'` or inlined. If any
+      internal import path survives extraction, the standalone package has a
+      hidden compiler-sdk dependency that npm install does not resolve.
+    spec_impact: "CL-08 extraction strategy — audit all internal imports before publish"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      forma depends on @craftworks/crypto for IR hashing. If crypto is listed
+      as a devDependency instead of a peerDependency, standalone install will
+      succeed but WorkspaceReader.read() will throw at runtime when it tries
+      to hash the AST. The package.json must declare crypto as a peerDependency
+      with a peerDependenciesMeta entry allowing optional: false.
+    spec_impact: "CL-08 @craftworks/forma dependencies — crypto must be peer, not dev"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The 9-file reader currently handles canvas/ as a directory glob. In a
+      minimal workspace without canvas/, the reader must not throw a directory-
+      not-found error. If the reader uses fs.readdir() unconditionally on
+      canvas/, standalone install tests with minimal workspaces will fail
+      even though the package installed correctly.
+    spec_impact: "CL-08 @craftworks/forma — canvas/ directory must be optional in WorkspaceReader"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      TypeScript strict mode (strictNullChecks, noImplicitAny) must be enabled
+      in forma's own tsconfig.json. If forma was extracted from compiler-sdk
+      which uses a shared tsconfig, forma may inherit relaxed settings that
+      hide type errors visible only to downstream consumers with stricter
+      configs.
+    spec_impact: "CL-08 per-package build — each package must have strict tsconfig"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The standalone install test must verify that `node_modules/@craftworks/forma`
+      contains no transitive dependency on compiler-sdk. npm ls --all should not
+      show compiler-sdk anywhere in the dependency tree. A transitive dep through
+      a shared utility package (e.g., a common types package that imports
+      compiler-sdk) would break the standalone guarantee silently.
+    spec_impact: "CL-08 Layer 1 independence — transitive dependency audit in CI"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      If forma uses dynamic imports (import()) to lazily load optional features
+      from compiler-sdk, the standalone install will succeed but runtime calls
+      to those features will fail with MODULE_NOT_FOUND. All dynamic imports
+      from compiler-sdk must be eliminated during extraction, not just static
+      imports.
+    spec_impact: "CL-08 extraction checklist — audit dynamic imports, not just static"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The package entry point (main/exports in package.json) must resolve
+      correctly when forma is installed as a dependency. If forma uses subpath
+      exports (e.g., @craftworks/forma/ast, @craftworks/forma/ir), each subpath
+      must be tested for resolution in standalone install. Missing exports map
+      entries cause "Package subpath not defined" errors that only surface in
+      consumers, not in the package's own test suite.
+    spec_impact: "CL-08 @craftworks/forma — subpath exports tested in standalone install CI"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The standalone install scenario should be reproducible as a CI job.
+      A minimal fixture project (package.json + index.ts that reads a workspace)
+      serves as a living integration test. If this fixture is maintained inside
+      compiler-sdk's test directory, it defeats the purpose — it must live in
+      forma's own test suite or a dedicated integration-test package.
+    spec_impact: "CL-08 testing strategy — standalone install fixture per Layer 1 package"
+    pitfall: null

@@ -65,7 +65,7 @@ findings:
       6 months ago for a departed team member still opens the gate. USER.md
       pre-authorizations should support optional expiry dates, and claws
       should warn on pre-authorizations older than 90 days (configurable)
-      during `claws pinch` health checks.
+      during `claws check` health checks.
     spec_impact: "CL-02 G-ELICIT — pre-authorization expiry and staleness detection"
     pitfall: null
 

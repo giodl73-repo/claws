@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "trustTier": "T2",
+  "targets": ["claude", "cursor", "windsurf", "cline", "aider", "continue", "github"],
+  "elicitation": {
+    "policies": {
+      "send-email": {
+        "approval": "required",
+        "timeout": 300,
+        "denyDefault": true
+      }
+    }
+  }
+}

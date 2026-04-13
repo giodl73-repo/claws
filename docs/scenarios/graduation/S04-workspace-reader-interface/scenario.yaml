@@ -1,0 +1,140 @@
+name: S04-workspace-reader-interface
+series: graduation
+version: 1
+specs: [CL-04, CL-07]
+description: >
+  The WorkspaceReader interface is the graduation boundary between the free
+  and paid tiers. The free tier implements its own reader that parses the 9
+  default OC files without depending on compiler-sdk's FORMA abstraction.
+  The free reader produces the same GovernanceIR as the current compiler-sdk
+  reader for all standard workspaces. The interface contract defines input
+  (workspace path + options), output (GovernanceIR), and error semantics
+  (typed parse errors, not thrown exceptions). Both readers must satisfy
+  the same behavioral contract.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "SOUL.md"
+        - "MEMORY.md"
+        - "AGENTS.md"
+        - "TOOLS.md"
+        - "HEARTBEAT.md"
+        - "exec-approvals.json"
+        - "IDENTITY.md"
+        - "USER.md"
+        - "claws.json"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  The graduation plan calls for internalizing compiler-sdk's OC workspace
+  readers into @claws/compiler. The simplest approach is to copy the reader
+  code, but this creates hidden coupling: any behavioral difference between
+  the original and internalized reader is a latent bug. The WorkspaceReader
+  interface formalizes the contract so that both implementations can be
+  verified against the same behavioral specification. A property-based test
+  suite generates random valid workspaces and asserts identical output from
+  both readers. The interface also enables future reader implementations
+  (e.g., a streaming reader for large workspaces) without breaking the
+  compilation pipeline.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The WorkspaceReader interface must define error semantics precisely.
+      If the compiler-sdk reader throws on malformed YAML but the free
+      reader returns a Result<IR, ParseError>, callers must handle both
+      patterns during the migration period. The interface should mandate
+      Result-based error returns, and both readers must be wrapped to
+      conform. Unspecified error semantics cause try/catch inconsistency
+      throughout the compilation pipeline.
+    spec_impact: "CL-04 Section 2 — reader error contract"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      The interface must specify encoding handling. The compiler-sdk
+      reader may silently handle UTF-16LE files while the free reader
+      only handles UTF-8. If the interface does not mandate supported
+      encodings, one reader will parse files the other rejects. The
+      minimum contract should be UTF-8 with BOM tolerance, matching
+      the graduation scenario S08 requirements.
+    spec_impact: "CL-04 Section 3 — encoding contract"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      The interface must define behavior for unknown file types. If a
+      workspace contains a CUSTOM.md file not in the 9-file list, the
+      compiler-sdk reader may include it (open discovery) while the free
+      reader ignores it (closed list). The interface contract must specify
+      whether extra files are included, ignored, or produce a warning.
+      Without this, the two readers silently diverge on non-standard
+      workspaces.
+    spec_impact: "CL-07 Section 1 — unknown file handling contract"
+    pitfall: null
+  - id: F04
+    severity: major
+    description: >
+      The free reader must not depend on FORMA's format registry for
+      sidecar detection. The .claws sidecar file uses a format defined
+      in the FORMA abstraction layer. The free reader must implement its
+      own sidecar parser that produces the same configuration state
+      without importing the FORMA module. This is the deepest coupling
+      point in the graduation boundary.
+    spec_impact: "CL-04 Section 4 — sidecar independence from FORMA"
+    pitfall: null
+  - id: F05
+    severity: minor
+    description: >
+      Performance characteristics should be part of the interface
+      contract. If the compiler-sdk reader caches parsed results across
+      calls and the free reader re-parses every time, repeated
+      compilations will show a performance regression. The interface
+      should define whether caching is internal to the reader or
+      managed by the caller, so both implementations have the same
+      performance envelope.
+    spec_impact: "CL-04 Section 5 — reader performance contract"
+    pitfall: null
+  - id: F06
+    severity: minor
+    description: >
+      The interface should be versioned independently of the packages.
+      If WorkspaceReader v1 is the graduation contract, a v2 that adds
+      streaming support can be introduced without breaking existing
+      readers. Interface versioning prevents the common trap where
+      interface changes cascade through all implementations
+      simultaneously.
+    spec_impact: "CL-07 Section 4 — interface versioning strategy"
+    pitfall: null
+  - id: F07
+    severity: major
+    description: >
+      Property-based testing must generate adversarial workspaces: files
+      with maximum YAML nesting depth, files with 10MB content, files
+      with circular YAML references, files with mixed line endings within
+      a single file. These edge cases are where reader implementations
+      diverge most. A conformance suite with only happy-path fixtures
+      will miss the boundary conditions where internalization bugs hide.
+    spec_impact: "CL-04 Section 6 — adversarial conformance testing"
+    pitfall: null
+  - id: F08
+    severity: minor
+    description: >
+      The WorkspaceReader interface should support dependency injection
+      for the filesystem layer. The free reader and compiler-sdk reader
+      use different I/O patterns. If the interface takes an abstract
+      filesystem (read, stat, readdir), both readers can be tested
+      against in-memory fixtures without touching the real filesystem,
+      making conformance tests fast and deterministic.
+    spec_impact: "CL-04 Section 7 — filesystem abstraction for testing"
+    pitfall: null

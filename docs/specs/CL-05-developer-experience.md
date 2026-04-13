@@ -41,7 +41,7 @@ The maker experience ensures claws is a power tool, not just a security guard. `
 ```
 +-----------------------------------------------------------+
 |                OUTER -- FLEET (periodic)                    |
-|  drift . pinch --fleet . broadcast . comply --fleet        |
+|  drift . check --fleet . broadcast . comply --fleet        |
 |                                                            |
 |  +-----------------------------------------------------+  |
 |  |          MIDDLE -- UPGRADE (per-event)               |  |
@@ -49,7 +49,7 @@ The maker experience ensures claws is a power tool, not just a security guard. `
 |  |                                                      |  |
 |  |  +-----------------------------------------------+  |  |
 |  |  |       INNER -- LIVE (continuous)               |  |  |
-|  |  |  watch . pinch --staged . build (auto-pinch)   |  |  |
+|  |  |  watch . check --staged . build (auto-check)   |  |  |
 |  |  |  <1s latency . handles 70% of scenarios        |  |  |
 |  |  +-----------------------------------------------+  |  |
 |  +-----------------------------------------------------+  |
@@ -58,17 +58,17 @@ The maker experience ensures claws is a power tool, not just a security guard. `
 
 | Ring | Trigger | Latency | Scope | Commands |
 |------|---------|---------|-------|----------|
-| Inner (live) | File save, git commit | <1s | Changed files | watch, pinch --staged, build |
+| Inner (live) | File save, git commit | <1s | Changed files | watch, check --staged, build |
 | Middle (upgrade) | Platform/claws upgrade | <15s | One workspace | doctor --post-upgrade, snap save/restore, diff |
-| Outer (fleet) | Scheduled, on-demand | <120s | All workspaces | drift, pinch --fleet, broadcast |
+| Outer (fleet) | Scheduled, on-demand | <120s | All workspaces | drift, check --fleet, broadcast |
 
 **The dead man's switch** (upgrade workflow):
 
 ```bash
-claws snap save pre-upgrade --pinch && \
+claws snap save pre-upgrade --check && \
   npm install -g openclaw@latest && \
   claws doctor --post-upgrade --fix && \
-  claws pinch || \
+  claws check || \
   claws snap restore pre-upgrade
 ```
 
@@ -78,10 +78,10 @@ If any step fails, auto-restore. Two new flags (not new commands): `--post-upgra
 
 | Stage | Trigger | Command | Latency | Output |
 |-------|---------|---------|---------|--------|
-| 0: Pre-commit | git commit | `claws pinch --staged --quiet` | <1s | Pass/fail + audit event |
-| 1: PR check | Push to PR | `claws pinch --diff $BASE --format sarif` | <30s | SARIF + PR annotations |
+| 0: Pre-commit | git commit | `claws check --staged --quiet` | <1s | Pass/fail + audit event |
+| 1: PR check | Push to PR | `claws check --diff $BASE --format sarif` | <30s | SARIF + PR annotations |
 | 2: CD gate | Push to main/tag | `claws comply <fw> --sign` | <30s | Signed compliance evidence |
-| 3: Fleet scan | Weekly cron | `claws pinch` (matrix) + `claws drift` | <300s | Fleet report + drift alerts |
+| 3: Fleet scan | Weekly cron | `claws check` (matrix) + `claws drift` | <300s | Fleet report + drift alerts |
 
 CI/CD is not a fourth ring -- it is the enforcement mechanism for the existing three rings. Stage 0 IS the inner ring. Stage 1 is its backstop. Stage 2 is the middle ring's enforcement. Stage 3 IS the outer ring.
 
@@ -89,13 +89,13 @@ CI/CD is not a fourth ring -- it is the enforcement mechanism for the existing t
 
 | Flag | Command | Purpose |
 |------|---------|---------|
-| `--format sarif` | pinch, comply | SARIF 2.1.0 for code scanning |
-| `--format github` | pinch | Native `::error`/`::warning` annotations |
-| `--diff <ref>` | pinch | Scan only files changed since ref |
-| `--fail-on <sev>` | pinch | Severity gating (critical, high, medium, low, all) |
-| `--warn-only` | pinch | Soft-fail: all findings are warnings, exit 0 |
+| `--format sarif` | check, comply | SARIF 2.1.0 for code scanning |
+| `--format github` | check | Native `::error`/`::warning` annotations |
+| `--diff <ref>` | check | Scan only files changed since ref |
+| `--fail-on <sev>` | check | Severity gating (critical, high, medium, low, all) |
+| `--warn-only` | check | Soft-fail: all findings are warnings, exit 0 |
 | `--sign` | comply | Sign evidence with HMAC-SHA256 |
-| `--ci` | pinch | Auto-detect CI environment, set defaults |
+| `--ci` | check | Auto-detect CI environment, set defaults |
 
 **Gradual adoption path**:
 
@@ -193,7 +193,7 @@ A skill that does things.
 **What happens after adding frontmatter**:
 
 ```bash
-$ claws pinch
+$ claws check
   ✓ Governance frontmatter found in SKILL.md
   ✓ Risk: R3 (TRANSFORM)
   ✓ OBO: none
@@ -206,7 +206,7 @@ $ claws pinch
 **What happens with WRONG frontmatter**:
 
 ```bash
-$ claws pinch
+$ claws check
   ✗ SKILL.md:3 — governance.risk "R6" is not a valid risk level
     Valid values: R1, R2, R3, R4, R5
     Fix: change to a valid risk level (R1=READ, R2=LIST, R3=TRANSFORM, R4=EXECUTE, R5=TRANSACT)
@@ -223,7 +223,7 @@ $ claws pinch
 **What happens with MISSING frontmatter**:
 
 ```bash
-$ claws pinch
+$ claws check
   ⚠ SKILL.md — no governance frontmatter found
     This skill is ungoverned. Add 3 lines to get started:
 
@@ -254,7 +254,7 @@ $ claws pinch
 
 1. **claws-lsp** (Language Server Protocol server): Wraps the compilation pipeline (PARSE/EXTRACT/ANALYZE). Provides diagnostics (10 categories, <200ms), completions (RELAX expressions, tool names, policy templates), hover (risk classification, OBO status), code actions (fix violations), cross-file tension detection, semantic tokens (risk-level color coding R1=green through R5=red).
 
-2. **claws-vscode** (VS Code extension): Thin client that starts claws-lsp. Contributes tree view (governance summary), status bar (health indicator), command palette (pinch, build, test).
+2. **claws-vscode** (VS Code extension): Thin client that starts claws-lsp. Contributes tree view (governance summary), status bar (health indicator), command palette (check, build, test).
 
 3. **Compilation host**: Long-lived daemon with cached GovernanceIR, incremental recompilation on file change. Embedded in LSP server for v0.1; extractable to `claws serve` daemon for v0.3+.
 
@@ -338,23 +338,23 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 ### Three-Ring Governance (38 constraints)
 
-**Inner ring file-save vs git-stage trigger distinction** *(Source: TR-S01-F01)*: The inner ring runs on file save, but `--staged` is a git concept (staged files in the index). A file save in the editor is NOT a git stage. The inner ring needs a distinct mode: pinch on the saved file (working tree diff), not `pinch --staged` (git index diff). These are different file sets and the spec must not conflate them.
+**Inner ring file-save vs git-stage trigger distinction** *(Source: TR-S01-F01)*: The inner ring runs on file save, but `--staged` is a git concept (staged files in the index). A file save in the editor is NOT a git stage. The inner ring needs a distinct mode: check on the saved file (working tree diff), not `check --staged` (git index diff). These are different file sets and the spec must not conflate them.
 
-**Incremental IR cache invalidation policy** *(Source: TR-S01-F02)*: Incremental pinch on a single file requires a cached GovernanceIR from the last full compile. If the cache is stale (workspace modified outside the editor), the inner ring evaluates against outdated context and may miss cross-file conflicts. The spec must define cache invalidation rules including invalidation on any out-of-band workspace modification.
+**Incremental IR cache invalidation policy** *(Source: TR-S01-F02)*: Incremental check on a single file requires a cached GovernanceIR from the last full compile. If the cache is stale (workspace modified outside the editor), the inner ring evaluates against outdated context and may miss cross-file conflicts. The spec must define cache invalidation rules including invalidation on any out-of-band workspace modification.
 
 **Cross-file conflict detection in incremental mode** *(Source: TR-S01-F03)*: If TOOLS.md changes and a new tool introduces an OBO boundary, detecting OBO-WITHOUT-ELICIT requires checking SOUL.md and USER.md, which are not in the changed set. The inner ring must load the cached IR for cross-file conflict detection, and the deserialization cost must fit within the <1s latency budget.
 
-**Rapid file-save batch window (300ms)** *(Source: TR-S01-F04)*: The file system watcher must handle rapid successive saves. The 300ms batch window from the compilation host spec should also apply to inner ring watch mode. Without batching, 5 rapid saves produce 5 redundant pinch runs, wasting resources and flooding output with duplicates.
+**Rapid file-save batch window (300ms)** *(Source: TR-S01-F04)*: The file system watcher must handle rapid successive saves. The 300ms batch window from the compilation host spec should also apply to inner ring watch mode. Without batching, 5 rapid saves produce 5 redundant check runs, wasting resources and flooding output with duplicates.
 
-**Watch-mode output format (append vs overwrite)** *(Source: TR-S01-F05)*: In watch mode, pinch output must be appended, not overwritten. The developer needs the history of checks, not just the latest result. The spec must define the output format for watch-mode results.
+**Watch-mode output format (append vs overwrite)** *(Source: TR-S01-F05)*: In watch mode, check output must be appended, not overwritten. The developer needs the history of checks, not just the latest result. The spec must define the output format for watch-mode results.
 
 **Cascading re-checks after fix edits** *(Source: TR-S01-F06)*: When a G-CLASS violation requires editing claws.json to raise the trust tier, the inner ring must re-check TOOLS.md against the new trust tier. This creates a cascading re-check: change A triggers check, fix triggers re-check of the original violation. The spec must address cascading check semantics.
 
-**Windows file watcher event deduplication** *(Source: TR-S01-F09)*: On Windows, file system watchers fire multiple events for a single save (write + rename for atomic saves in VS Code). The inner ring must deduplicate events for the same file within the batch window to prevent a single save triggering 2-3 pinch runs.
+**Windows file watcher event deduplication** *(Source: TR-S01-F09)*: On Windows, file system watchers fire multiple events for a single save (write + rename for atomic saves in VS Code). The inner ring must deduplicate events for the same file within the batch window to prevent a single save triggering 2-3 check runs.
 
 **Dead man's switch explicit per-step error handling** *(Source: TR-S02-F01)*: The dead man's switch uses bash `&&` and `||` chaining, but `||` only triggers on the last command's exit code. If `snap save` fails, the chain may attempt restore with no snapshot. The spec must define explicit error handling for each step with a proper error propagation model, not rely on bash operator precedence.
 
-**snap save --pinch abort-on-violation semantics** *(Source: TR-S02-F02)*: The `--pinch` flag on snap save runs pinch before saving. If pinch finds violations, saving a snapshot with known violations means restore brings back a broken state. The semantics must be defined: `--pinch` is informational (shows violations but saves anyway) for the dead man's switch use case.
+**snap save --check abort-on-violation semantics** *(Source: TR-S02-F02)*: The `--check` flag on snap save runs check before saving. If check finds violations, saving a snapshot with known violations means restore brings back a broken state. The semantics must be defined: `--check` is informational (shows violations but saves anyway) for the dead man's switch use case.
 
 **doctor --fix atomicity (all-or-nothing vs partial progress)** *(Source: TR-S02-F03)*: If `doctor --fix` partially succeeds (claws.json migrated but AGENTS.md failed), the workspace is inconsistent. Snap restore reverts everything including successful migrations. Doctor must either be fully atomic (all-or-nothing) or report partial progress with a resume path.
 
@@ -366,7 +366,7 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 **snap restore platform vs workspace version mismatch** *(Source: TR-S02-F07)*: After a failed upgrade where npm install succeeded but doctor failed, snap restore reverts workspace files to old format while the platform remains at the new version. This creates a version mismatch: new platform reading old-format files. The restore must warn about manual platform rollback or handle the mismatch.
 
-**Middle ring latency sub-budget per operation** *(Source: TR-S02-F08)*: The <15s latency target for the middle ring must include both doctor diagnostics and snap operations. The budget should be broken down: snap save (<2s) + doctor (<10s) + pinch (<3s) = 15s. Large workspaces with 50+ tool definitions could exceed the doctor sub-budget alone.
+**Middle ring latency sub-budget per operation** *(Source: TR-S02-F08)*: The <15s latency target for the middle ring must include both doctor diagnostics and snap operations. The budget should be broken down: snap save (<2s) + doctor (<10s) + check (<3s) = 15s. Large workspaces with 50+ tool definitions could exceed the doctor sub-budget alone.
 
 **snap save overwrite protection for named snapshots** *(Source: TR-S02-F10)*: Running the dead man's switch twice without clearing the "pre-upgrade" snapshot overwrites the original known-good snapshot. `snap save` should refuse to overwrite an existing named snapshot without `--force`, or use timestamped names by default.
 
@@ -398,13 +398,13 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 **Cross-ring cache invalidation protocol** *(Source: TR-S04-F07)*: When the middle ring modifies workspace files via `doctor --fix`, the inner ring's cached GovernanceIR becomes stale. Cache invalidation must propagate across rings: middle-ring file modifications must invalidate the inner ring's cache.
 
-**IR file concurrency model (atomic write or locking)** *(Source: TR-S05-F01)*: Concurrent read/write from inner ring (write after pinch) and outer ring (read for drift) creates a TOCTOU race on the GovernanceIR file. The spec must define a concurrency model: atomic write via write-to-temp-then-rename, file locking, or IR versioning.
+**IR file concurrency model (atomic write or locking)** *(Source: TR-S05-F01)*: Concurrent read/write from inner ring (write after check) and outer ring (read for drift) creates a TOCTOU race on the GovernanceIR file. The spec must define a concurrency model: atomic write via write-to-temp-then-rename, file locking, or IR versioning.
 
 **Point-in-time vs eventual consistency for fleet scans** *(Source: TR-S05-F02)*: During the outer ring's scan (up to 120s), the inner ring may update the IR multiple times. The outer ring must either snapshot all IRs at scan start (point-in-time consistency) or accept eventual consistency with documented trade-offs.
 
 **Audit trail concurrent write safety** *(Source: TR-S05-F03)*: All three rings write audit events concurrently. On Windows, file append is NOT atomic by default. The audit writer must use a mutex or write-ahead log to prevent interleaved, corrupt JSON lines.
 
-**Pause inner ring during middle-ring operations** *(Source: TR-S05-F04)*: While `doctor --fix` runs, the inner ring's watcher detects file changes and triggers pinch on partially-modified workspace, producing false violations. The inner ring watcher must be paused during middle-ring operations to avoid evaluating intermediate states.
+**Pause inner ring during middle-ring operations** *(Source: TR-S05-F04)*: While `doctor --fix` runs, the inner ring's watcher detects file changes and triggers check on partially-modified workspace, producing false violations. The inner ring watcher must be paused during middle-ring operations to avoid evaluating intermediate states.
 
 **Rings semi-independent with ordering constraints** *(Source: TR-S05-F05)*: Rings are NOT fully independent -- they have ordering constraints when operating on the same workspace. The middle ring must signal completion so the inner ring can restart, establishing a coordination protocol between rings.
 
@@ -426,7 +426,7 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 **Scan output format specification** *(Source: FO-S01-F05)*: The scan output format must support the `--format` flag (JSON, SARIF) for CI/CD integration and machine-readable fleet dashboards. Without structured output, fleet dashboards cannot aggregate scan results.
 
-**Per-workspace metadata in scan inventory** *(Source: FO-S01-F06)*: The scan must record metadata per workspace: last compile time, last pinch time, governance hash, trust tier, agent count, and tool count. This metadata enables drift detection without recompiling every workspace on each scan.
+**Per-workspace metadata in scan inventory** *(Source: FO-S01-F06)*: The scan must record metadata per workspace: last compile time, last check time, governance hash, trust tier, agent count, and tool count. This metadata enables drift detection without recompiling every workspace on each scan.
 
 **fleet.requireGovernance policy escalation** *(Source: FO-S01-F07)*: Ungoverned workspaces may be intentional (sandboxes) or accidental (incomplete setup). A fleet policy `fleet.requireGovernance: true` should escalate ungoverned workspaces from warnings to errors, making the policy configurable.
 
@@ -434,7 +434,7 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 **INACCESSIBLE workspace state for permission errors** *(Source: FO-S01-F09)*: Workspaces where the operator lacks read access should be reported as INACCESSIBLE (fourth state), not silently skipped. Silent skip makes the fleet appear smaller than it is.
 
-**Broadcast-to-build stale enforcement window** *(Source: FO-S02-F01)*: Between broadcast and the next build, the workspace's compiled governance plugin enforces the OLD policy while the policy YAML contains the NEW policy. The spec must define whether `claws pinch` checks the compiled plugin or the policy YAML during this window.
+**Broadcast-to-build stale enforcement window** *(Source: FO-S02-F01)*: Between broadcast and the next build, the workspace's compiled governance plugin enforces the OLD policy while the policy YAML contains the NEW policy. The spec must define whether `claws check` checks the compiled plugin or the policy YAML during this window.
 
 **--reason required for broadcast** *(Source: FO-S02-F02)*: The `--reason` flag must be required (not optional) for broadcast. Without a reason, the audit trail shows "policy pushed" but not "why." For SOC2 CC7.2 change management evidence, the reason is mandatory.
 
@@ -542,7 +542,7 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 **snap diff cross-version IR schema normalization** *(Source: SL-S02-F03)*: If two snapshots were taken with different claws versions, the GovernanceIR schemas may differ. snap diff must normalize both to a common schema before diffing to prevent spurious changes from schema evolution.
 
-**snap diff output format options (text/json/sarif)** *(Source: SL-S02-F04)*: snap diff must support `--format` (text, json, sarif) consistent with pinch format options. The default is human-readable text.
+**snap diff output format options (text/json/sarif)** *(Source: SL-S02-F04)*: snap diff must support `--format` (text, json, sarif) consistent with check format options. The default is human-readable text.
 
 **snap diff directional labeling (from/to)** *(Source: SL-S02-F05)*: The diff output must clearly indicate direction: "compared [base] to [target]." Swapping order reverses additions and removals. The CLI should label arguments as `--from` and `--to` to avoid ambiguity.
 
@@ -556,7 +556,7 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 **snap promote authentication and authorization requirement** *(Source: SL-S03-F02)*: Promoting a snapshot as fleet baseline defines the governance standard for all workspaces. A mistaken promote could lower baseline trust tier. snap promote must require authentication and authorization, not just local command execution.
 
-**snap promote mandatory pinch validation before promotion** *(Source: SL-S03-F03)*: The promoted baseline must be pinch-clean (zero violations). Promoting a snapshot with violations makes the fleet baseline itself non-compliant. snap promote must validate and refuse to promote if violations exist.
+**snap promote mandatory check validation before promotion** *(Source: SL-S03-F03)*: The promoted baseline must be check-clean (zero violations). Promoting a snapshot with violations makes the fleet baseline itself non-compliant. snap promote must validate and refuse to promote if violations exist.
 
 **snap promote invalidate cached drift results on baseline change** *(Source: SL-S03-F04)*: When the baseline changes, all existing drift reports become stale. Promote must trigger fleet-wide re-scan notification or at minimum invalidate cached drift results. Without invalidation, admins see stale compliance status.
 
@@ -566,9 +566,9 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 **snap promote confirmation prompt and --dry-run mode** *(Source: SL-S03-F08)*: Promote is the highest-blast-radius operation. The spec must require a confirmation prompt ("promoting baseline affects N workspaces, proceed?") and a `--dry-run` mode that shows impact without promoting.
 
-**snap save governance-neutral vs snap promote governance-gated** *(Source: SL-S04-F01)*: snap save must be governance-neutral (save always succeeds, capturing whatever state exists) because the dead man's switch needs to save pre-upgrade state with warnings. snap promote must be governance-gated (requires pinch-clean) because the fleet baseline must be compliant.
+**snap save governance-neutral vs snap promote governance-gated** *(Source: SL-S04-F01)*: snap save must be governance-neutral (save always succeeds, capturing whatever state exists) because the dead man's switch needs to save pre-upgrade state with warnings. snap promote must be governance-gated (requires check-clean) because the fleet baseline must be compliant.
 
-**snap save --pinch informational semantics** *(Source: SL-S04-F02)*: The `--pinch` flag on snap save shows violations but saves anyway (informational only). This supports the dead man's switch use case where pre-upgrade state may have warnings but must still be saved.
+**snap save --check informational semantics** *(Source: SL-S04-F02)*: The `--check` flag on snap save shows violations but saves anyway (informational only). This supports the dead man's switch use case where pre-upgrade state may have warnings but must still be saved.
 
 **Governance summary in snapshot metadata** *(Source: SL-S04-F03)*: Snapshot metadata must record the governance state at save time: violation count, warning count, compliance percentage. This enables `snap list` to show state without requiring full diff.
 
@@ -576,9 +576,9 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 **Dead man switch abort if pre-upgrade state has critical violations** *(Source: SL-S04-F05)*: If the workspace has critical violations before the upgrade, the dead man's switch should abort. Restoring a critically broken state is not meaningful safety. The spec must define abort semantics for pre-upgrade critical violations.
 
-**Document that rule evolution affects post-restore pinch results** *(Source: SL-S04-F06)*: If saved with claws v1.2 (29 rules) and restored under v1.5 (35 rules), post-restore pinch may produce different results than pre-save pinch. This is correct but must be documented to prevent confusion.
+**Document that rule evolution affects post-restore check results** *(Source: SL-S04-F06)*: If saved with claws v1.2 (29 rules) and restored under v1.5 (35 rules), post-restore check may produce different results than pre-save check. This is correct but must be documented to prevent confusion.
 
-**snap restore re-run pinch after restore vs trust saved IR** *(Source: SL-S04-F07)*: Blind restore is faster but may restore an IR inconsistent with the current claws version. Re-running pinch after restore is safer but adds latency. The spec must define the recommended behavior.
+**snap restore re-run check after restore vs trust saved IR** *(Source: SL-S04-F07)*: Blind restore is faster but may restore an IR inconsistent with the current claws version. Re-running check after restore is safer but adds latency. The spec must define the recommended behavior.
 
 **File content and IR must be coherent pair in snapshot** *(Source: SL-S04-F09)*: Violations reference specific file:line locations. If files are modified between save and restore, the restored violation line numbers may not match restored file content. The snapshot must capture files AND IR as a coherent pair.
 
@@ -614,7 +614,7 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 ### OBO Elicitation (3 constraints)
 
-**Standing approval expiry warning in health check** *(Source: OE-S05-F09)*: Standing approval expiry (e.g., `expires: 2026-12-31`) should trigger a warning during `claws pinch` health checks when within 30 days of expiry. Expired standing approvals must produce a clear message rather than silently reverting to per-use elicitation.
+**Standing approval expiry warning in health check** *(Source: OE-S05-F09)*: Standing approval expiry (e.g., `expires: 2026-12-31`) should trigger a warning during `claws check` health checks when within 30 days of expiry. Expired standing approvals must produce a clear message rather than silently reverting to per-use elicitation.
 
 **Recompilation drift detection for standing approval currency** *(Source: OE-S05-F05)*: If a standing approval is removed from USER.md or claws.json but the compiled handler is not redeployed, the old approval remains active at runtime. `claws drift` must detect standing approval staleness by comparing compiled handlers against current configuration.
 
@@ -624,7 +624,7 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 **Incremental identity level migration tooling** *(Source: A2A-S02-F02)*: Fleet identity migration from L0 to L2 must support incremental migration: some agents at L2 while others remain at L0, with warnings for L0 agents and errors only for agents past their migration deadline. Simultaneous enforcement of `fleet.minIdentityLevel` fails all agents at once.
 
-**Fleet-wide minimum identity level metric** *(Source: A2A-S02-F07)*: Fleet identity compliance reporting (`claws pinch --fleet`) must highlight L0 outliers. A fleet-wide identity score (minimum across all agents) provides a single metric for fleet operators. The weakest link determines fleet security posture.
+**Fleet-wide minimum identity level metric** *(Source: A2A-S02-F07)*: Fleet identity compliance reporting (`claws check --fleet`) must highlight L0 outliers. A fleet-wide identity score (minimum across all agents) provides a single metric for fleet operators. The weakest link determines fleet security posture.
 
 **Cross-workspace lateral movement correlation** *(Source: A2A-S06-F04)*: Cross-workspace lateral movement (alpha -> beta -> gamma) is undetectable by individual workspace handlers. Fleet-level monitoring must aggregate blocked events across workspaces to detect cross-workspace lateral movement patterns via sidecar correlation and `claws scan` post-hoc analysis.
 
@@ -640,7 +640,7 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 #### Maker Experience (20 constraints)
 
-**Scaffold risk level derivation from workspace trust tier** *(Source: SK-S01-F01)*: The scaffold must detect the workspace's trust tier from claws.json and set an appropriate default risk level. Scaffolding a skill with R5 in a T2 workspace creates an immediate G-CLASS violation on first pinch.
+**Scaffold risk level derivation from workspace trust tier** *(Source: SK-S01-F01)*: The scaffold must detect the workspace's trust tier from claws.json and set an appropriate default risk level. Scaffolding a skill with R5 in a T2 workspace creates an immediate G-CLASS violation on first check.
 
 **Dependency auto-install or guided install for @bic/claws-skill-kit** *(Source: SK-S01-F02)*: The scaffolded handler imports @bic/claws-skill-kit, which must be installed. `claws new skill` must either auto-install the dependency or emit a clear installation instruction. An unresolvable import on first build blocks adoption.
 
@@ -654,7 +654,7 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 **OBO auto-suggestion from skill name heuristics** *(Source: SK-S01-F08)*: If the skill name contains keywords like "send", "email", "purchase", or "schedule", the scaffold should suggest a non-none OBO type. Failing to declare OBO when the skill clearly acts on behalf of the user creates false negatives in fleet scanning.
 
-**Scaffold must produce pinch-clean output** *(Source: SK-S01-F10)*: The scaffolded skill must pass `claws pinch` at DECLARED tier immediately. Governance frontmatter must have valid values for all 3 required fields, not placeholder "TODO" values.
+**Scaffold must produce check-clean output** *(Source: SK-S01-F10)*: The scaffolded skill must pass `claws check` at DECLARED tier immediately. Governance frontmatter must have valid values for all 3 required fields, not placeholder "TODO" values.
 
 **Prompt-only skill tier ceiling (DECLARED or VERIFIED, skip TYPED)** *(Source: SK-S02-F01)*: A prompt-only skill (no handler.ts) can be DECLARED (frontmatter) and VERIFIED (governance tests pass) but cannot be TYPED (no code to decorate). The spec must define this tier ceiling for prompt-only skills.
 
@@ -664,9 +664,9 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 **Governance-aware test generation from frontmatter** *(Source: SK-S02-F04)*: The transition from TYPED to VERIFIED generates tests that validate declared vs actual behavior. Test generation must derive scenarios from governance frontmatter: an `obo: none` declaration generates tests that check for email API calls.
 
-**Tier detection from workspace state, not stored metadata** *(Source: SK-S02-F05)*: Each tier transition must be reversible without data loss. Removing @bic/claws-skill-kit imports should gracefully fall back to DECLARED. `claws pinch` must detect the current tier from workspace state, not from a stored tier field.
+**Tier detection from workspace state, not stored metadata** *(Source: SK-S02-F05)*: Each tier transition must be reversible without data loss. Removing @bic/claws-skill-kit imports should gracefully fall back to DECLARED. `claws check` must detect the current tier from workspace state, not from a stored tier field.
 
-**Signature staleness detection and tier downgrade** *(Source: SK-S02-F06)*: If the developer modifies handler.ts after VERIFIED build, the manifest signature is invalidated. The next `claws pinch` must detect stale signature and downgrade the tier display from VERIFIED to TYPED.
+**Signature staleness detection and tier downgrade** *(Source: SK-S02-F06)*: If the developer modifies handler.ts after VERIFIED build, the manifest signature is invalidated. The next `claws check` must detect stale signature and downgrade the tier display from VERIFIED to TYPED.
 
 **claws annotate heuristic accuracy requirements** *(Source: SK-S02-F08)*: The `claws annotate` command auto-suggests governance frontmatter based on handler analysis. Heuristic accuracy must be documented with false-positive and false-negative bounds. False-positive R5 suggestions create unnecessary burden; false-negative R1 suggestions create security gaps.
 
@@ -712,7 +712,7 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 ### Lossless Round-Trip (2 constraints)
 
-**claws pinch --fix scope limited to non-source files** *(Source: LR-S05-F07)*: `claws pinch --fix` may auto-fix violations but must NEVER modify the 9 source workspace files. Auto-fix is limited to generated artifacts and configuration in .claws/. Source file modifications require explicit user action via `doctor --fix`.
+**claws check --fix scope limited to non-source files** *(Source: LR-S05-F07)*: `claws check --fix` may auto-fix violations but must NEVER modify the 9 source workspace files. Auto-fix is limited to generated artifacts and configuration in .claws/. Source file modifications require explicit user action via `doctor --fix`.
 
 **Mandatory snapshot before doctor --fix modifies any file** *(Source: LR-S05-F08)*: Before `doctor --fix` modifies workspace files, a snapshot must be automatically saved as a safety net. This ensures the developer can always revert if the fix produces unexpected results.
 
@@ -788,13 +788,13 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 **P-188: Cross-version diff spurious** *(Sources: PA-S27-F01, PA-S27-F02, PA-S27-F03, PA-S27-F04, PA-S27-F05, PA-S27-F06, PA-S27-F07)*: Snap diff between snapshots from different claws versions must normalize IR schemas via a version migration table before comparison, preventing spurious changes from schema evolution. The diff output must label changes as [governance] or [schema] for transparency. Missing migration entries must produce warnings rather than silently creating spurious results. A `--governance-only` flag must filter out schema changes, and source file diffs must be available alongside IR diffs as ground truth. Cross-version comparison should suggest re-compiling old snapshots with the current compiler.
 
-**P-189: Promote lowers baseline** *(Sources: PA-S28-F01, PA-S28-F02, PA-S28-F03, PA-S28-F04, PA-S28-F05, PA-S28-F06, PA-S28-F07)*: Snap promote must include a mandatory pinch validation gate comparing the promoted snapshot against the current fleet baseline across all governance dimensions. If any dimension is weakened, promote must be blocked. A `--lower` flag for legitimate reductions requires multi-factor confirmation (--confirm --reason) with a CRITICAL audit event. All cached drift reports must be invalidated atomically as part of the promote operation. Role-based access control should restrict promote to fleet-admin role only. A canary period (tentative for 24 hours, reporting against both old and new baselines) enables safe rollback.
+**P-189: Promote lowers baseline** *(Sources: PA-S28-F01, PA-S28-F02, PA-S28-F03, PA-S28-F04, PA-S28-F05, PA-S28-F06, PA-S28-F07)*: Snap promote must include a mandatory check validation gate comparing the promoted snapshot against the current fleet baseline across all governance dimensions. If any dimension is weakened, promote must be blocked. A `--lower` flag for legitimate reductions requires multi-factor confirmation (--confirm --reason) with a CRITICAL audit event. All cached drift reports must be invalidated atomically as part of the promote operation. Role-based access control should restrict promote to fleet-admin role only. A canary period (tentative for 24 hours, reporting against both old and new baselines) enables safe rollback.
 
 **P-190: Baseline invalidates drift** *(Sources: PA-S29-F01, PA-S29-F02, PA-S29-F03, PA-S29-F04, PA-S29-F05, PA-S29-F06, PA-S29-F07)*: Snap promote must atomically invalidate all cached drift reports as part of the promotion transaction, with rollback if invalidation fails. After invalidation, all workspaces must report UNKNOWN status until re-evaluated against the new baseline. UNKNOWN must be a fourth distinct status in dashboard integrations. Workspace operators must be notified of baseline changes with instructions to re-evaluate. Compliance responses must always include the baseline version they were evaluated against. Optional automatic re-scan after promote (`--rescan`) eliminates the UNKNOWN window.
 
-**P-191: Dead man switch critical violations** *(Sources: PA-S30-F01, PA-S30-F02, PA-S30-F03, PA-S30-F04, PA-S30-F05, PA-S30-F06, PA-S30-F07)*: The dead man switch must run pre-restore validation (pinch) on the snapshot and block restore if critical violations exist, entering deny-all mode instead. The pre-upgrade snapshot should be validated BEFORE the upgrade begins, blocking upgrades when the current state has critical violations. Violation severity classification must distinguish critical (blocks restore), major (warns), and warning (informational). The threshold is configurable. The CRITICAL alert must include remediation steps with exact commands. A migration tool (`claws migrate --fix-critical`) must resolve grandfathered critical violations before upgrades.
+**P-191: Dead man switch critical violations** *(Sources: PA-S30-F01, PA-S30-F02, PA-S30-F03, PA-S30-F04, PA-S30-F05, PA-S30-F06, PA-S30-F07)*: The dead man switch must run pre-restore validation (check) on the snapshot and block restore if critical violations exist, entering deny-all mode instead. The pre-upgrade snapshot should be validated BEFORE the upgrade begins, blocking upgrades when the current state has critical violations. Violation severity classification must distinguish critical (blocks restore), major (warns), and warning (informational). The threshold is configurable. The CRITICAL alert must include remediation steps with exact commands. A migration tool (`claws migrate --fix-critical`) must resolve grandfathered critical violations before upgrades.
 
-**P-192: Restored line numbers wrong** *(Sources: PA-S31-F01, PA-S31-F02, PA-S31-F03, PA-S31-F04, PA-S31-F05, PA-S31-F06)*: Snap restore must always re-run pinch (recompilation) on restored source files to produce fresh IR with correct line numbers. The saved IR serves only for coherence verification (comparing against recompiled IR to detect tampering). Recompilation must happen automatically as an invisible step in the restore workflow. Governance-meaningful differences between saved and recompiled IR must produce warnings. Recompilation uses the current claws version for compatibility with the running enforcement engine.
+**P-192: Restored line numbers wrong** *(Sources: PA-S31-F01, PA-S31-F02, PA-S31-F03, PA-S31-F04, PA-S31-F05, PA-S31-F06)*: Snap restore must always re-run check (recompilation) on restored source files to produce fresh IR with correct line numbers. The saved IR serves only for coherence verification (comparing against recompiled IR to detect tampering). Recompilation must happen automatically as an invisible step in the restore workflow. Governance-meaningful differences between saved and recompiled IR must produce warnings. Recompilation uses the current claws version for compatibility with the running enforcement engine.
 
 **P-193: Auto-prune deletes baseline** *(Sources: PA-S32-F01, PA-S32-F02, PA-S32-F03, PA-S32-F04, PA-S32-F05, PA-S32-F06, PA-S32-F07)*: Protected snapshot categories (fleet baseline, active dead man switch, user-pinned) must be immune to auto-pruning regardless of age or storage pressure. Protection must be set automatically for fleet baselines and dead man switch snapshots. When all snapshots are protected and storage is full, pruning must fail with a warning rather than deleting protected snapshots. Soft delete with a 7-day grace period (configurable) enables `claws snap undelete`. `claws snap list` must show protection status. When a new baseline is promoted, the previous baseline's protection downgrades to "previous-baseline" with a configurable retention period.
 
@@ -826,7 +826,7 @@ Throughout this spec and all claws documentation: enforcement = "Gateway plugin,
 
 **P-233: Declared OBO unverified** *(Sources: PT2-S08-F01, PT2-S08-F03, PT2-S08-F04, PT2-S08-F05, PT2-S08-F06)*: DECLARED tier badges must carry a visible "self-reported" qualifier on all claims. Static analysis of handler source code must detect known OBO-capable API imports (Graph SDK, SMTP, OAuth) and produce a warning that the obo: none claim may be inaccurate. The `claws skill install` command must require explicit acknowledgment for DECLARED tier skills. The three badge tiers (DECLARED, VERIFIED, CERTIFIED) must have documented semantics linked from every badge display. The scaffold must include an OBO checklist prompting the developer to consider common OBO patterns.
 
-**P-234: Stale verified badge** *(Sources: PT2-S09-F01, PT2-S09-F02, PT2-S09-F03, PT2-S09-F04, PT2-S09-F05, PT2-S09-F07)*: The publish command must verify that the manifest signature matches current source file content hashes (SHA-256, not timestamp-based) before publishing. If any source file was modified since verification, the badge must be atomically downgraded to DECLARED at publish time. The developer must be informed of the downgrade before publish completes. The inner ring (pinch) must also detect signature staleness during local development. The manifest must define an explicit verification scope so non-handler file changes (README, docs, tests) do not invalidate the badge.
+**P-234: Stale verified badge** *(Sources: PT2-S09-F01, PT2-S09-F02, PT2-S09-F03, PT2-S09-F04, PT2-S09-F05, PT2-S09-F07)*: The publish command must verify that the manifest signature matches current source file content hashes (SHA-256, not timestamp-based) before publishing. If any source file was modified since verification, the badge must be atomically downgraded to DECLARED at publish time. The developer must be informed of the downgrade before publish completes. The inner ring (check) must also detect signature staleness during local development. The manifest must define an explicit verification scope so non-handler file changes (README, docs, tests) do not invalidate the badge.
 
 **P-235: Non-atomic publish** *(Sources: PT2-S10-F01, PT2-S10-F02, PT2-S10-F03, PT2-S10-F04, PT2-S10-F05, PT2-S10-F06, PT2-S10-F07, PT2-S10-F08)*: The publish command must not mutate local state before confirming remote success: build the package in a temp directory, upload to ClawHub, then commit local changes (version bump, badge metadata) only on success. If local state was already mutated, automatic rollback must restore the manifest from a backup copy. Publish must be idempotent via a transaction ID enabling retry detection. The version bump must be the last local mutation. Badge metadata must be regenerated on each publish attempt. Retry with exponential backoff for transient errors (5xx, timeout) and `claws skill status` must detect local-remote version divergence.
 

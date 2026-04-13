@@ -3,7 +3,7 @@ slug: claws-parse
 preset: "claws"
 plan: "2 headlines: workspace parsing produces typed AST, cross-file conflict detection catches 7 categories"
 area: claws
-status: Draft
+status: Implemented
 phase: ptah
 atoms: [atom:claws-compiler, atom:mechanical-intent, atom:capability-manifest, atom:lossless-roundtrip]
 specs: [CL-04, CL-02]

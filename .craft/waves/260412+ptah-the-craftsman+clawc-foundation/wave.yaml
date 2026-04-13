@@ -1,0 +1,95 @@
+name: "Ptah the Craftsman"
+number: XC
+deity: ptah
+epithet: the-craftsman
+branch: feature/ptah-the-craftsman
+description: "claws foundation — packages, GovernanceIR, parse, rules, emit, CLI, skill-kit, test framework"
+status: completed
+completedAt: "2026-04-13T00:00:00Z"
+startedAt: "2026-04-11T00:00:00Z"
+
+plans:
+  - claws-sdk-bootstrap
+  - claws-governance-ir
+  - claws-detect
+  - claws-parse
+  - claws-rules
+  - claws-emit
+  - claws-cli-foundation
+  - claws-skill-kit
+  - claws-test-framework
+  - claws-public-naming
+  - claws-acceptance-harness
+
+stageOrder:
+  - kickoff
+  - setup
+  - scenarios
+  - planning
+  - implementation
+  - review
+  - close
+
+stages:
+  kickoff:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-11T00:00:00Z"
+    notes: "claws product design complete — 7 specs, 321 scenarios, 249 pitfalls, 27 plans"
+  setup:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-11T00:00:00Z"
+    notes: "9 Ptah plans with headlines, scope, coverage contracts, deliverables"
+  scenarios:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-11T00:00:00Z"
+    notes: "321 scenarios across 34 series, ~2710 findings applied to all 7 specs"
+  planning:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-12T00:00:00Z"
+    notes: "28 pulses across 4 checkpoints, dependency-ordered, roles assigned"
+  implementation:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-13T00:00:00Z"
+    notes: "31 pulses across 5 checkpoints — all 5 checkpoints reviewed and pushed"
+  review:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-13T00:00:00Z"
+    notes: "Per-checkpoint reviews (CP-2: 17M fixed, CP-3: 12M fixed, CP-5: 8M fixed). 53 Copilot threads resolved."
+  close:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-13T00:00:00Z"
+    notes: "Wave closed — 115 commits, 453 tests, 87.8% acceptance coverage"
+
+checkpoints:
+  cp-1:
+    name: "Foundation — Packages + IR"
+    pulses: [1, 2, 3, 4, 5]
+    status: completed
+    tag: ptah-cp-1
+  cp-2:
+    name: "Detection + Parse + Skill-Kit"
+    pulses: [6, 7, 8, 9, 10, 11, 12, 23, 24, 25]
+    status: completed
+    tag: ptah-cp-2
+  cp-3:
+    name: "Rules + Emit"
+    pulses: [13, 14, 15, 16, 17, 18, 19]
+    status: completed
+    tag: ptah-cp-3
+  cp-4:
+    name: "CLI + Test Framework"
+    pulses: [20, 21, 22, 26, 27, 28]
+    status: completed
+    tag: ptah-cp-4
+  cp-5:
+    name: "Acceptance Harness + Scenario Coverage"
+    pulses: [29, 30, 31]
+    status: completed
+    tag: ptah-cp-5

@@ -1,0 +1,169 @@
+name: S01-drift-detection
+series: fleet-operations
+version: 1
+specs: [CL-08]
+description: >
+  Validates that claws drift detects version mismatches across 47 workspaces
+  using the @craftworks/platform compatibility manifest. When any workspace
+  uses a package version outside the manifest-declared tested-together range,
+  drift reports which packages are out of spec, which workspaces are affected,
+  and what the manifest-recommended versions are. This is the fleet health
+  check that prevents silent incompatibility across enterprise deployments.
+
+expect:
+  drift_scan:
+    workspaces_scanned: 47
+    packages_checked: 17
+    manifest_version: "1.0.0"
+  report:
+    format: "structured_json"
+    fields: ["workspace", "package", "installed_version", "manifest_version", "severity"]
+    out_of_spec_count: ">0"
+  exit_code:
+    all_in_spec: 0
+    any_out_of_spec: 1
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise deployment has 47 workspaces across 4 teams. Each workspace
+  has its own package.json with @craftworks/* and @claws/* dependencies. Over
+  6 months, teams have upgraded packages independently: Team A is on
+  @craftworks/forma@1.2.0, Team B on @craftworks/forma@1.0.0, Team C on
+  @craftworks/forma@1.1.0. The @craftworks/platform manifest v1.0.0 declares
+  that forma@1.2.0, crypto@1.0.0, and workspace@1.3.0 are the tested-together
+  combination. Running claws drift must scan all 47 workspaces, compare each
+  installed package version against the manifest, and produce a structured
+  report showing: which workspaces are out of spec, which packages diverge,
+  the severity of each mismatch (major version = critical, minor = warning,
+  patch = info), and the recommended upgrade path.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The @craftworks/platform manifest (CL-08 line 302-304) is described as
+      a "no-code manifest" but its format is not specified. If the manifest
+      is a JSON file, claws drift must parse it. If it is a package.json with
+      peerDependencies declaring compatible ranges, npm handles range matching.
+      If it is a custom YAML format, drift needs a dedicated parser. CL-08
+      must define the exact manifest format before drift detection can be
+      implemented. Without a format, every consumer guesses at compatibility.
+    spec_impact: "CL-08 @craftworks/platform — define manifest format (JSON schema) with version range syntax"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      claws drift must resolve installed package versions from each
+      workspace's node_modules, not from package.json declared versions.
+      package.json may declare ^1.0.0 (range) while node_modules has 1.2.3
+      (resolved). If drift compares declared ranges against manifest ranges
+      instead of resolved versions against manifest versions, it misses
+      workspaces that declare a compatible range but resolved an incompatible
+      version due to lock file drift. The tool must read node_modules or
+      lock files for actual resolved versions.
+    spec_impact: "CL-08 drift detection — compare resolved versions (from lock file), not declared ranges"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Workspaces that use pnpm have node_modules/.pnpm/ with a different
+      directory structure than npm's flat node_modules. Workspaces using
+      yarn PnP have no node_modules at all — dependencies are in .yarn/cache/.
+      claws drift must support all three package manager layouts or delegate
+      version resolution to the package manager itself (npm ls --json, pnpm
+      list --json, yarn info --json). Hardcoding node_modules traversal
+      breaks for 2 of 3 package managers.
+    spec_impact: "CL-08 drift detection — use package manager CLI for version resolution, not node_modules traversal"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The manifest declares tested-together versions for 17 packages. But
+      not all 17 packages are installed in every workspace. A workspace
+      targeting only Claude Code installs @craftworks/emit-cc but not
+      @craftworks/emit-cursor. claws drift should report missing packages
+      as "not applicable" rather than "out of spec". Conflating missing
+      with mismatched produces noisy reports that teams ignore.
+    spec_impact: "CL-08 drift detection — distinguish missing (not installed) from mismatched (wrong version)"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      If the manifest itself has multiple versions (platform@1.0.0 declares
+      one set, platform@1.1.0 declares another), workspaces pinned to
+      different manifest versions are compared against different baselines.
+      claws drift must detect which manifest version each workspace targets
+      (from its @craftworks/platform dependency) and compare against the
+      correct baseline. A workspace on manifest 1.0.0 may be in-spec for
+      that version but out-of-spec for 1.1.0.
+    spec_impact: "CL-08 drift detection — detect per-workspace manifest version, compare against correct baseline"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Fleet scanning 47 workspaces requires network access (to read package
+      versions from lock files or package manager output) or filesystem
+      access (to traverse each workspace directory). In enterprise
+      environments, workspaces may be on different machines, behind VPNs,
+      or in CI-only environments. claws drift must support both local
+      scanning (directory tree) and remote scanning (reading version
+      manifests submitted by each workspace to a central registry).
+    spec_impact: "CL-08 drift detection — support local (directory scan) and remote (registry query) modes"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The drift report severity classification (major version = critical,
+      minor = warning, patch = info) assumes semver compliance. If a package
+      ships a breaking change in a minor version (violating semver), drift
+      classifies it as a warning when it should be critical. The manifest
+      should include explicit "known breaking" annotations for specific
+      version transitions, overriding the semver-based severity heuristic.
+    spec_impact: "CL-08 @craftworks/platform — manifest should support known-breaking annotations for version pairs"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      claws drift output should be machine-parseable (JSON) for CI integration
+      and human-readable (table) for terminal use. If the default output is
+      a formatted table, CI pipelines must parse it with regex. If the default
+      is JSON, terminal users see raw JSON. CL-08 should specify both output
+      formats with a --format flag (json|table|csv) and define the JSON
+      schema for programmatic consumption.
+    spec_impact: "CL-08 CLI surface — claws drift --format flag with json|table|csv options"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      Enterprise customers may run drift detection on a schedule (daily
+      cron). If a workspace is temporarily out of spec due to an in-progress
+      upgrade (package.json updated but npm install not yet run), drift
+      reports a false positive. The tool should support a --ignore-wip flag
+      or detect workspaces with pending installs (package.json mtime >
+      lock file mtime) and mark them as "upgrade in progress".
+    spec_impact: "CL-08 drift detection — detect and annotate workspaces with pending installs"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The 47-workspace scan generates a report that may contain sensitive
+      information (workspace paths, internal team names, deployment
+      locations). The drift report should support redaction of workspace
+      paths when shared externally (e.g., for a support ticket to
+      Craftworks). A --redact flag that replaces paths with workspace IDs
+      would allow sharing without exposing internal structure.
+    spec_impact: "CL-08 CLI surface — claws drift --redact flag for external report sharing"
+    pitfall: null

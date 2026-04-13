@@ -1,0 +1,99 @@
+name: S12-p261
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-261
+description: >
+  Validates that `claws upgrade --fleet` snapshots package-lock.json before
+  modification and handles rollback failures as critical escalations. When npm
+  install fails mid-upgrade, the lock file is in an inconsistent state. Without
+  a pre-upgrade snapshot, rollback is impossible. Double failures (upgrade
+  fails + rollback fails) must be escalated as "manual intervention required."
+
+expect:
+  detection: true
+  prevention: "`claws upgrade --fleet` snapshots package-lock.json before modification, classifies failures as transient vs permanent, and escalates rollback failures as critical with 'manual intervention required' status."
+
+simulate:
+  failures: ["Fleet upgrade modifies package-lock.json before npm install, leaving corrupted state when install fails"]
+  halt: null
+  budget: null
+
+problem: >
+  Operator runs `claws upgrade --fleet --to 2.0.0` across 47 workspaces. For
+  workspace-23, the upgrade modifies package-lock.json to declare the new
+  version ranges, then runs npm install. npm install fails with ERESOLVE (peer
+  dep conflict with an existing package). The lock file now contains partially
+  resolved new versions and partially old versions — an inconsistent state.
+  `claws upgrade` attempts rollback but discovers no snapshot was taken before
+  the modification. It tries `git checkout package-lock.json` but the workspace
+  has uncommitted changes to the lock file from a prior manual edit. Rollback
+  also fails. Workspace-23 is stuck in a corrupted state: npm install produces
+  different results each run because the lock file is inconsistent. Verify that
+  `claws upgrade --fleet` takes snapshots and handles the double-failure case.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The snapshot must be taken BEFORE any modification to package-lock.json
+      or package.json. If the upgrade tool modifies package.json first (to
+      update version ranges), then discovers npm install fails, both files
+      need rollback. The snapshot must cover both package.json and
+      package-lock.json as a pair.
+    spec_impact: "CL-08 G-FLEET — snapshot both package.json and package-lock.json before upgrade"
+    pitfall: P-261
+
+  - id: F02
+    severity: major
+    description: >
+      Failure classification (transient vs permanent) determines the retry
+      strategy. ERESOLVE (peer dep conflict) is permanent — retrying will
+      fail identically. ETARGET (version not published yet) is transient —
+      retrying after registry propagation may succeed. EACCES is environmental.
+      The upgrade tool must classify and report, not blindly retry.
+    spec_impact: "CL-08 G-FLEET — classify upgrade failures as transient/permanent/environmental"
+    pitfall: P-261
+
+  - id: F03
+    severity: major
+    description: >
+      The double-failure scenario (upgrade fails + rollback fails) is the
+      worst case. The workspace is in an unrecoverable state without manual
+      intervention. The upgrade tool must escalate this as CRITICAL with
+      specific instructions: which files are corrupted, what the snapshot
+      contained, and how to manually restore. Silently leaving the workspace
+      in a corrupted state is unacceptable.
+    spec_impact: "CL-08 G-FLEET — double-failure escalation with manual recovery instructions"
+    pitfall: P-261
+
+  - id: F04
+    severity: warning
+    description: >
+      The snapshot storage location matters. If snapshots are stored in the
+      workspace directory (.claws/snapshots/), they may be committed or
+      gitignored inconsistently. If stored in a temp directory, they are
+      lost on reboot. The snapshot should use a well-defined location with
+      a retention policy and be excluded from git.
+    spec_impact: "CL-08 G-FLEET — snapshot storage location with retention policy"
+    pitfall: P-261
+
+  - id: F05
+    severity: warning
+    description: >
+      Fleet-wide upgrade status reporting must show per-workspace state:
+      upgraded, failed (with classification), rolled-back, and corrupted
+      (double failure). A fleet summary that shows "45/47 succeeded" without
+      identifying the 2 corrupted workspaces is insufficient for operations.
+    spec_impact: "CL-08 G-FLEET — per-workspace upgrade status with failure classification"
+    pitfall: P-261
+
+  - id: F06
+    severity: note
+    description: >
+      The snapshot mechanism should be reusable for `claws snap` (the
+      general snapshot command per CL-05). Duplicating snapshot logic in
+      both upgrade and snap commands risks divergence. The snapshot should
+      use the same underlying mechanism.
+    spec_impact: "CL-08 G-FLEET — reuse claws snap infrastructure for upgrade snapshots"
+    pitfall: P-261

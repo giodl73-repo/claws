@@ -1,0 +1,162 @@
+name: S04-empty-context
+series: context
+version: 1
+specs: [CL-08]
+description: >
+  Validates that an empty context collection (zero entries, zero edges)
+  is a valid, first-class object that can be serialized, deserialized,
+  hashed, and used as input to the compilation pipeline. Empty context
+  is the degenerate case that must not crash, return null, or require
+  special-casing by consumers. It is the floor case for the context
+  package, analogous to the empty workspace in the compile pipeline.
+
+expect:
+  collection:
+    entries: 0
+    edges: 0
+    valid: true
+    is_empty: true
+  serialization:
+    success: true
+    output_size_gt_zero: true
+    format_valid_json: true
+  deserialization:
+    round_trip: true
+    entries_after: 0
+  hash:
+    deterministic: true
+    non_null: true
+  compile:
+    input_accepted: true
+    output: "empty compiled context"
+    warnings: ["No governance rules in context"]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer creates a new empty ContextCollection with no entries and
+  no edges. They serialize it to JSON, deserialize it back, and verify
+  the round-trip. They compute its hash and verify it is non-null and
+  deterministic. They pass it to the compilation pipeline as input and
+  expect the pipeline to accept it (producing an empty compiled output
+  with a warning, not an error). This tests every operation in the
+  context package against the empty case: if any operation assumes
+  non-empty (e.g., accessing entries[0] without checking length), it
+  crashes on the floor case.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The empty collection must serialize to valid JSON, not an empty
+      string or "null". The expected output is something like
+      {"version":1,"nodes":[],"edges":[],"metadata":{}}. If the
+      serializer returns "" for empty collections, downstream consumers
+      (fs.writeFile, hash computation, fleet broadcast) receive invalid
+      input. The serialized form must always be parseable JSON.
+    spec_impact: "CL-08 context — empty collection serializes to valid JSON, never empty string"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The hash of an empty collection must be a valid, non-null hash
+      value. SHA-256 of the serialized empty JSON is well-defined and
+      stable. If the hash function short-circuits on empty input and
+      returns null or "", cache lookups for empty contexts fail. The hash
+      of empty context is a constant that can be documented and used for
+      fast equality checks (if hash equals EMPTY_HASH, skip diffing).
+    spec_impact: "CL-08 context — empty context hash is a documented constant"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The compilation pipeline must not reject empty context as an error.
+      An empty context means "no governance rules apply" — this is a valid
+      (if unusual) configuration. The pipeline should produce an empty
+      compiled output with an advisory warning: "No governance rules in
+      context. All operations are permitted." This warning must be
+      structured (not just console.warn) for fleet-level aggregation.
+    spec_impact: "CL-08 context — empty context produces advisory warning, not error"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Structural sharing (from S01) with an empty collection must be
+      valid. If collection A has 4 entries and collection B is empty,
+      the sharing pool should not create any shared references (there is
+      nothing to share). If the sharing algorithm assumes at least one
+      entry in each collection, it may index out of bounds or produce
+      a degenerate sharing ratio (0/0 = NaN%).
+    spec_impact: "CL-08 context — structural sharing handles empty collections without division by zero"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The DAG operations (addEdge, topological sort, cycle detection)
+      must handle a DAG with zero nodes. addEdge on an empty DAG should
+      either auto-create nodes or reject with NodeNotFoundError. Topological
+      sort of an empty DAG should return an empty array, not throw. These
+      are boundary conditions that are easy to miss in implementations
+      that start with "for each node in nodes..." (empty loop is fine,
+      but "nodes[0]" crashes).
+    spec_impact: "CL-08 context — empty DAG behavior for all graph operations"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The empty context is the default starting state for new workspaces.
+      When a developer runs "claws init" in a fresh project, the initial
+      context is empty. If the context package requires explicit
+      construction (new ContextCollection()), the init command must call
+      it. If the package provides a static EMPTY constant, init can
+      reference it directly. A well-known EMPTY singleton avoids repeated
+      construction and makes empty-checks cheap (collection === EMPTY).
+    spec_impact: "CL-08 context — static EMPTY singleton for default state"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The empty compiled output must be distinguishable from "compilation
+      failed." Both produce no governance rules, but the semantics are
+      different: empty context means no rules were defined (valid),
+      compilation failure means rules existed but could not be processed
+      (error). The compiled output must include a status field
+      (empty | success | error) so consumers can differentiate.
+    spec_impact: "CL-08 context — compiled output status distinguishes empty from error"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      Fleet drift detection compares context hashes across workspaces. If
+      all 47 workspaces have empty contexts, they all hash to EMPTY_HASH,
+      and drift detection reports zero drift. This is correct. But if one
+      workspace has empty context and another has a context with zero rules
+      but one metadata entry (e.g., last-compile timestamp), their hashes
+      differ. The drift detector must normalize away metadata-only
+      differences, or the definition of "empty" must include contexts
+      with only metadata.
+    spec_impact: "CL-08 context — empty context definition includes metadata-only contexts"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The empty context's serialized size is a lower bound for all context
+      payloads. If the empty serialization is 200 bytes (version, empty
+      arrays, metadata), then a fleet broadcast of 47 empty workspaces
+      sends 47 * 200 = 9.4KB. This is trivial. But if the serialization
+      includes verbose defaults (all 29 G-rule slots with null values),
+      the empty payload balloons to thousands of bytes per workspace. The
+      serializer must omit absent rules, not include null placeholders.
+    spec_impact: "CL-08 context — sparse serialization (omit absent rules, not null placeholders)"
+    pitfall: null

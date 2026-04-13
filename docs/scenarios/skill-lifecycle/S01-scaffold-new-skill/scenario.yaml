@@ -47,7 +47,7 @@ findings:
       The scaffold must detect the workspace's trust tier from claws.json and
       set an appropriate default risk level in the governance frontmatter. If
       the workspace is T2 (R3-max), scaffolding a skill with R5 creates an
-      immediate G-CLASS violation on first pinch. The scaffold should default
+      immediate G-CLASS violation on first check. The scaffold should default
       to the maximum risk allowed by the workspace trust tier.
     spec_impact: "CL-05 Maker Experience — scaffold risk level derivation from workspace trust tier"
     pitfall: P-225
@@ -143,10 +143,10 @@ findings:
   - id: F10
     severity: major
     description: >
-      The scaffold must produce a skill that passes `claws pinch` at the
+      The scaffold must produce a skill that passes `claws check` at the
       DECLARED tier immediately — the governance frontmatter must satisfy all
       3 required fields (risk, obo, data) with valid values. If the scaffold
       produces frontmatter with placeholder values like "TODO" or empty
-      strings, pinch fails on first run and the first-run experience is broken.
-    spec_impact: "CL-05 Three-Tier Adoption — scaffold must produce pinch-clean output"
+      strings, check fails on first run and the first-run experience is broken.
+    spec_impact: "CL-05 Three-Tier Adoption — scaffold must produce check-clean output"
     pitfall: null

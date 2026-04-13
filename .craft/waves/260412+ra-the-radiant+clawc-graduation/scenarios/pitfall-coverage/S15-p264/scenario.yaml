@@ -1,0 +1,98 @@
+name: S15-p264
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-264
+description: >
+  Validates that `claws check --registry` detects duplicate emitter plugin
+  registrations in EmitRegistry. Two emitter plugins registering with the same
+  platform name silently overwrite each other. The compile orchestrator uses
+  whichever registered last with no error surfaced.
+
+expect:
+  detection: true
+  prevention: "`claws check --registry` validates EmitRegistry for duplicate registrations. register() returns a RegistrationResult with conflict diagnostic showing both parties. Duplicate detection is mandatory, not optional."
+
+simulate:
+  failures: ["Two emitter plugins register with the same platform name, silently overwriting the first registration"]
+  halt: null
+  budget: null
+
+problem: >
+  A workspace installs both @craftworks/emit-cursor (official Cursor emitter)
+  and @community/emit-cursor (community Cursor emitter). Both call
+  EmitRegistry.register('cursor', factory). The official emitter registers
+  first during module initialization. The community emitter registers second
+  and silently overwrites the official factory. `claws compile --target cursor`
+  runs the community emitter instead of the official one — producing output
+  that may not pass governance validation. No error or warning is logged.
+  Separately, npm duplication (P-253) causes two copies of the same official
+  emitter to register — the second copy overwrites the first with a different
+  instance. Verify that EmitRegistry.register() detects and rejects duplicates,
+  and that `claws check --registry` validates the registry state before compile.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The silent overwrite is the core defect. Map.set() in a registration
+      pattern naturally overwrites existing entries. register() must check
+      for existing registrations and return a RegistrationResult that includes
+      conflict information: the existing registrant's package name, version,
+      and file location alongside the new registrant's details.
+    spec_impact: "CL-08 G-EMIT — register() must fail on duplicate with conflict diagnostic"
+    pitfall: P-264
+
+  - id: F02
+    severity: major
+    description: >
+      The npm duplication variant is more insidious: both registrations come
+      from the "same" package but different npm copies. The conflict diagnostic
+      must include the resolved file path (not just package name) to distinguish
+      between same-name-different-instance duplicates. Package name alone is
+      insufficient for conflict identification.
+    spec_impact: "CL-08 G-EMIT — conflict diagnostic includes resolved file path"
+    pitfall: P-264
+
+  - id: F03
+    severity: warning
+    description: >
+      Module initialization order determines which registration wins in the
+      silent-overwrite scenario. This order is non-deterministic across
+      Node.js versions and module resolution strategies. Even if duplicate
+      detection is not implemented, the "wrong emitter runs" failure appears
+      intermittently, making it extremely hard to reproduce.
+    spec_impact: "CL-08 G-EMIT — non-deterministic registration order makes silent overwrite unreproducible"
+    pitfall: P-264
+
+  - id: F04
+    severity: warning
+    description: >
+      The pre-compile check (`claws check --registry`) catches duplicates
+      before compilation, but only if it runs before compile. If the check
+      is optional or not integrated into the compile pipeline, operators skip
+      it. The compile orchestrator itself should validate registry state as
+      a precondition before emitting.
+    spec_impact: "CL-08 G-EMIT — registry validation as compile precondition, not optional check"
+    pitfall: P-264
+
+  - id: F05
+    severity: warning
+    description: >
+      Community emitters that collide with official platform names need a
+      namespace strategy. If official emitters use bare platform names
+      ('cursor', 'claude-code') and community emitters must use scoped names
+      ('@community/cursor'), the registry can detect namespace violations.
+      Without a namespace convention, conflicts are inevitable.
+    spec_impact: "CL-08 G-EMIT — emitter platform name namespace convention"
+    pitfall: P-264
+
+  - id: F06
+    severity: note
+    description: >
+      The RegistrationResult pattern enables programmatic conflict resolution:
+      a plugin loader could choose "prefer official" or "prefer latest version"
+      policies. But the default must be fail-fast — silent resolution policies
+      hide configuration errors. Explicit conflict resolution should be opt-in.
+    spec_impact: "CL-08 G-EMIT — fail-fast default; conflict resolution policy opt-in"
+    pitfall: P-264

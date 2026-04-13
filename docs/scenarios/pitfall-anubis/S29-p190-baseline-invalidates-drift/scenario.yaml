@@ -80,7 +80,7 @@ findings:
       A notification must be sent to all workspace operators when the baseline
       changes. The notification should include: "Fleet baseline changed from
       enterprise-v2.0 to enterprise-v3.0. Your workspace drift status is now
-      UNKNOWN. Run `claws pinch` to re-evaluate compliance against the new
+      UNKNOWN. Run `claws check` to re-evaluate compliance against the new
       baseline." This pushes operators to re-evaluate promptly rather than
       waiting for the next scheduled scan.
     spec_impact: "CL-05 Snapshot Promote — workspace operator notification"

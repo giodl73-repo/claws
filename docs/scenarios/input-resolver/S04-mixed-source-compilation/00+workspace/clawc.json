@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "trustTier": "T2",
+  "platform": "openclaw",
+  "inputs": {
+    "packages": [
+      {
+        "name": "@corp/base-rules",
+        "version": "^1.0.0"
+      }
+    ],
+    "urls": [
+      {
+        "url": "https://policies.corp.internal/extra-rules.yaml",
+        "integrity": "sha256-xyz789",
+        "cacheTTL": 3600
+      }
+    ]
+  },
+  "elicitation": {
+    "policies": {
+      "send-email": {
+        "approval": "required",
+        "timeout": 300,
+        "denyDefault": true
+      }
+    }
+  }
+}

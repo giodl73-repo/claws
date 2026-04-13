@@ -35,7 +35,7 @@ simulate:
 
 problem: >
   A fleet of 10 workspaces runs `claws fleet compliance`. 7 workspaces have
-  claws governance installed and all 7 pass their pinch checks. 3 workspaces
+  claws governance installed and all 7 pass their check validates. 3 workspaces
   have no governance installed (legacy workspaces not yet onboarded). The
   compliance report calculates 7/7 = 100% compliance, excluding the 3
   ungoverned workspaces from the denominator. The fleet admin presents this

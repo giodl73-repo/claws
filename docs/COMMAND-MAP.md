@@ -13,7 +13,7 @@
 `claws` is a cross-platform governance compiler for AI agents. It compiles governance policies into enforceable artifacts for any agent runtime — OpenClaw, Claude, Cursor, GitHub Copilot, AWS Bedrock, LangGraph, CrewAI, or custom.
 
 - **40 commands** across 8 groups + maker + meta
-- **2 crustacean verbs**: `pinch` (governance enforcement), `snap` (snapshot)
+- **2 crustacean verbs**: `check` (governance enforcement), `snap` (snapshot)
 - **Progressive disclosure**: Maker (4) → Developer (18) → Advanced (40)
 - **Scope model**: workspace-default, `--fleet` for fleet escalation, `--confirm` for destructive ops
 - **Config**: `claws.json` (per-workspace), `.claws/` (artifacts)
@@ -50,7 +50,7 @@ $ claws
   Quick start:
     claws init                   Set up governance for your workspace
     claws build                  Compile and emit your agent
-    claws pinch                  Check against your org's policies
+    claws check                  Check against your org's policies
     claws build cursor           Cross-compile to another platform
 
   Run 'claws --help' for all commands.
@@ -60,14 +60,14 @@ $ claws
 
 ## Command Surface (40 commands)
 
-> **Note**: The tables below number items sequentially (1-53) for reference, but many numbered items are flag variants of the same command (e.g., `pinch`, `pinch --fix`, `pinch --watch` are 1 command with flags). The canonical count is **40 distinct commands** as shown in the [Command Count Summary](#command-count-summary).
+> **Note**: The tables below number items sequentially (1-53) for reference, but many numbered items are flag variants of the same command (e.g., `check`, `check --fix`, `check --watch` are 1 command with flags). The canonical count is **40 distinct commands** as shown in the [Command Count Summary](#command-count-summary).
 
 ### 1. BUILD — Compile and emit (always workspace-scoped)
 
 | # | Command | Synopsis | Maps to (SDK) | Persona | Notes |
 |---|---------|----------|---------------|---------|-------|
 | 1 | `claws init` | Set up governance in agent workspace | guard init + platform quickstart | Maker | Creates claws.json + .claws/ |
-| 2 | `claws build` | Compile + emit to platform output | craft build | Maker | Auto-triggers pinch via H1 handshake |
+| 2 | `claws build` | Compile + emit to platform output | craft build | Maker | Auto-triggers check via H1 handshake |
 | 3 | `claws build <target>` | Cross-compile to target platform | craft build \<target\> | Maker | Targets: `openclaw`, `cursor`, `claude`, `github`, `bedrock`, `langgraph`, `crewai` |
 | 4 | `claws compile` | Compile to IR only (no emit) | craft compile | Developer | Inspect-oriented |
 | 5 | `claws optimize` | Run boost passes (quality/cost) | craft optimize | Developer | --crush, --guard, --probe flags |
@@ -83,21 +83,21 @@ $ claws
 
 ---
 
-### 2. PINCH — Governance enforcement (scope-sensitive)
+### 2. CHECK — Governance enforcement (scope-sensitive)
 
 | # | Command | Synopsis | Maps to (SDK) | Persona | Scope |
 |---|---------|----------|---------------|---------|-------|
-| 11 | `claws pinch` | Validate workspace against policies | guard check | Maker | workspace |
-| 12 | `claws pinch --fix` | Auto-fix violations | guard check --fix | Developer | workspace |
-| 13 | `claws pinch --watch` | Re-check on file changes | guard check --watch | Developer | workspace |
-| 14 | `claws pinch --strict` | Warnings become errors | guard check --strict | Developer | workspace |
-| 15 | `claws pinch --staged` | Check only git-staged files | guard check --staged | Developer | workspace |
-| 16 | `claws pinch --fleet` | Enforce governance across all workspaces | fleet guard --scan + guard check | Advanced | fleet |
-| 17 | `claws pinch --fleet --fix` | Auto-fix fleet-wide | fleet guard --scan + guard check --fix | Advanced | fleet |
+| 11 | `claws check` | Validate workspace against policies | guard check | Maker | workspace |
+| 12 | `claws check --fix` | Auto-fix violations | guard check --fix | Developer | workspace |
+| 13 | `claws check --watch` | Re-check on file changes | guard check --watch | Developer | workspace |
+| 14 | `claws check --strict` | Warnings become errors | guard check --strict | Developer | workspace |
+| 15 | `claws check --staged` | Check only git-staged files | guard check --staged | Developer | workspace |
+| 16 | `claws check --fleet` | Enforce governance across all workspaces | fleet guard --scan + guard check | Advanced | fleet |
+| 17 | `claws check --fleet --fix` | Auto-fix fleet-wide | fleet guard --scan + guard check --fix | Advanced | fleet |
 
-**Why `pinch`**: The signature verb. "Pinch your workspace through the governance fences." Short, memorable, unmistakable. Every governance check goes through `pinch`. The `--fleet` flag scales it to fleet scope.
+**Why `check`**: The signature verb. Clear, universal, instantly understood. Every governance check goes through `check`. The `--fleet` flag scales it to fleet scope.
 
-**Pre-commit hook**: `claws pinch --staged --quiet`
+**Pre-commit hook**: `claws check --staged --quiet`
 
 ---
 
@@ -111,7 +111,7 @@ $ claws
 | 21 | `claws assess` | Risk classification (EU AI Act tiers) | guard assess | Developer | workspace |
 | 22 | `claws comply --fleet` | Fleet-wide compliance report | fleet guard --report | Advanced | fleet |
 
-**Why separate from `pinch`**: `pinch` is fast enforcement (pass/fail, 0.3s). `comply` produces signed artifacts for auditors. Different audience, different cadence.
+**Why separate from `check`**: `check` is fast enforcement (pass/fail, 0.3s). `comply` produces signed artifacts for auditors. Different audience, different cadence.
 
 ---
 
@@ -174,15 +174,20 @@ $ claws
 | 43 | `claws secrets set <key>` | Add/rotate secret | guard secrets set | Advanced | workspace |
 | 44 | `claws identity` | Configure SSO/RBAC | identity-bridge | Advanced | workspace |
 
+| 54 | `claws keys init` | Initialize signing keypair | guard keys init | Advanced | workspace |
+| 55 | `claws keys rotate` | Rotate signing key (30-day grace) | guard keys rotate | Advanced | workspace |
+| 56 | `claws keys revoke` | Revoke compromised key | guard keys revoke | Advanced | workspace |
+| 57 | `claws keys rekey` | Re-sign audit chain after compromise | guard keys rekey | Advanced | workspace |
+
 ---
 
 ### 8. LIVE — Live compilation (always workspace-scoped)
 
 | # | Command | Synopsis | Maps to (SDK) | Persona |
 |---|---------|----------|---------------|---------|
-| 45 | `claws watch` | Auto-recompile + pinch on file change | craft build --session (watch) | Developer |
+| 45 | `claws watch` | Auto-recompile + check on file change | craft build --session (watch) | Developer |
 | 46 | `claws session` | Interactive compilation session (stdin) | craft build --session | Advanced |
-| 47 | `claws amend` | Add/remove/modify workspace concept | FORMA amendment pipeline | Developer |
+| 47 | `claws amend` | Add/remove/modify workspace concept | parser amendment pipeline | Developer |
 
 ---
 
@@ -225,7 +230,7 @@ $ claws
   Quick start:
     claws init                   Set up governance for your workspace
     claws build                  Compile and emit your agent
-    claws pinch                  Check against your org's policies
+    claws check                  Check against your org's policies
     claws build cursor           Cross-compile to another platform
 ```
 
@@ -243,7 +248,7 @@ $ claws --help
     doctor        Diagnostics
 
   Govern:
-    pinch         Policy enforcement             comply        Compliance evidence
+    check         Policy enforcement             comply        Compliance evidence
     assess        Risk classification            audit         Audit trail
 
   Run 'claws --help-all' for fleet and advanced commands.
@@ -255,7 +260,7 @@ $ claws --help
 $ claws --help-all
 
   Build:        init build compile optimize test diff import inspect watch amend doctor session
-  Govern:       pinch comply assess audit [verify|export|history]
+  Govern:       check comply assess audit [verify|export|history]
   Snapshot:     snap [save|restore|diff|promote]
   Fleet:        scan broadcast drift report push kill
   Protect:      budget secrets [init|set] identity
@@ -270,7 +275,7 @@ $ claws --help-all
 | Command | Default scope | --fleet? | --confirm? |
 |---------|--------------|----------|-----------|
 | build, compile, optimize, test, diff, import, inspect, watch, session, amend, doctor | workspace | No | No |
-| **pinch** | **workspace** | **Yes** | No |
+| **check** | **workspace** | **Yes** | No |
 | **comply** | **workspace** | **Yes** | No |
 | assess | workspace | No | No |
 | audit, audit verify, audit export | workspace | No | No |
@@ -285,7 +290,7 @@ $ claws --help-all
 | new skill, publish, annotate, import | workspace | No | No |
 | uninstall | workspace | No | No |
 
-**Scope-sensitive commands (6)**: pinch, comply, snap save/restore/diff, budget, kill
+**Scope-sensitive commands (6)**: check, comply, snap save/restore/diff, budget, kill
 
 ---
 
@@ -293,38 +298,38 @@ $ claws --help-all
 
 | Flag | Commands | Description |
 |------|----------|-------------|
-| `--fleet` | pinch, comply, snap, budget, kill | Scope escalation to fleet-wide |
+| `--fleet` | check, comply, snap, budget, kill | Scope escalation to fleet-wide |
 | `--confirm` | kill --fleet, broadcast, push | Double gate for destructive fleet ops |
-| `--template <name>` | init, pinch | Policy template (soc2, hipaa, eu-ai-act, minimal) |
+| `--template <name>` | init, check | Policy template (soc2, hipaa, eu-ai-act, minimal) |
 | `--target <platform>` | build | Cross-compile target |
-| `--format <fmt>` | pinch, audit export, comply, report | Output format (sarif, github, cef, json, syslog, csv) — sarif/github added for CI (Q12f) |
-| `--dry-run` | build, amend, pinch | Validate without writing output |
+| `--format <fmt>` | check, audit export, comply, report | Output format (sarif, github, cef, json, syslog, csv) — sarif/github added for CI (Q12f) |
+| `--dry-run` | build, amend, check | Validate without writing output |
 | `--debug` | all | Debug IR dump |
 | `--json` | all | JSON output mode |
 | `--no-cache` | compile, build | Bypass all cache tiers |
-| `--skip-pinch` | build | Suppress auto governance check after build |
+| `--skip-check` | build | Suppress auto governance check after build |
 | `--optimize` | build | Run boost passes during build |
-| `--pinch` | build, snap | Run governance check as part of operation |
+| `--check` | build, snap | Run governance check as part of operation |
 | `--reason <text>` | kill, broadcast | Required for destructive operations |
-| `--only <rules>` | pinch | Run only specified rules (e.g., `--only G2,G4`) |
-| `--skip <rules>` | pinch | Skip specified rules (e.g., `--skip G1`) |
+| `--only <rules>` | check | Run only specified rules (e.g., `--only G2,G4`) |
+| `--skip <rules>` | check | Skip specified rules (e.g., `--skip G1`) |
 | `--post-upgrade` | doctor | Run upgrade-specific checks: version gap, config migration, skill compat (Q12e) |
 | `--pre-upgrade` | snap save | Tag snapshot for easy restore reference after platform upgrade (Q12e) |
-| `--diff <ref>` | pinch | Scan only files changed since ref — for PR diff scanning in CI (Q12f) |
-| `--fail-on <sev>` | pinch | Severity gating: fail only on specified levels (critical, high, medium, low, all) (Q12f) |
-| `--warn-only` | pinch | Soft-fail mode: all findings are warnings, exit 0 — for gradual CI adoption (Q12f) |
+| `--diff <ref>` | check | Scan only files changed since ref — for PR diff scanning in CI (Q12f) |
+| `--fail-on <sev>` | check | Severity gating: fail only on specified levels (critical, high, medium, low, all) (Q12f) |
+| `--warn-only` | check | Soft-fail mode: all findings are warnings, exit 0 — for gradual CI adoption (Q12f) |
 | `--sign` | comply | Sign compliance evidence with HMAC-SHA256 for CD gates (Q12f) |
-| `--ci` | pinch | Auto-detect CI environment (GitHub Actions, GitLab CI), set format/diff defaults (Q12f) |
+| `--ci` | check | Auto-detect CI environment (GitHub Actions, GitLab CI), set format/diff defaults (Q12f) |
 
-### The `--pinch` / `--skip-pinch` model
+### The `--check` / `--skip-check` model
 
-Governance is the default. `claws build` auto-triggers a pinch check via H1 handshake.
+Governance is the default. `claws build` auto-triggers a check via H1 handshake.
 
 ```bash
-claws build                              # build + auto-pinch (default)
-claws build --skip-pinch                 # build without governance
-claws build cursor --optimize --pinch    # explicit: build + optimize + pinch
-claws snap save v2 --pinch              # snapshot with governance validation
+claws build                              # build + auto-check (default)
+claws build --skip-check                 # build without governance
+claws build cursor --optimize --check    # explicit: build + optimize + check
+claws snap save v2 --check              # snapshot with governance validation
 ```
 
 ---
@@ -382,16 +387,16 @@ my-agent/
 
 ```bash
 # Morning: start working
-claws watch                           # auto-recompile + auto-pinch on save
+claws watch                           # auto-recompile + auto-check on save
 
 # Edit SOUL.md, AGENTS.md, TOOLS.md, .cursorrules...
-# Terminal: ✓ Built (847 tokens) ✓ Pinched (0 violations)
+# Terminal: ✓ Built (847 tokens) ✓ Checked (0 violations)
 
 # Add a new capability
 claws amend add skill "web-search" --tier T2
 
 # Check before committing
-claws pinch --staged
+claws check --staged
   All 15 policy checks passed in 0.3s
 
 # Cross-compile for a teammate using Cursor
@@ -407,9 +412,9 @@ claws scan
   Found 47 agent workspaces (23 OpenClaw, 15 Claude, 9 Cursor)
 
 # Check governance across the fleet
-claws pinch --fleet
+claws check --fleet
   47 workspaces checked. 3 violations in 2 workspaces.
-  Run 'claws pinch --fleet --fix' to auto-fix 2 of 3 findings.
+  Run 'claws check --fleet --fix' to auto-fix 2 of 3 findings.
 
 # Push updated policies
 claws broadcast --confirm
@@ -458,16 +463,16 @@ claws kill --fleet --confirm --reason "active incident IR-2026-0411"
 | Group | Count | Scope |
 |-------|-------|-------|
 | Build | 11 | Always workspace |
-| Pinch | 2 + flags | Scope-sensitive |
+| Check | 2 + flags | Scope-sensitive |
 | Comply | 3 | Scope-sensitive |
 | Audit | 4 | Workspace + 1 fleet-inherent |
 | Snap | 4 | Scope-sensitive |
 | Fleet | 6 | Always fleet |
-| Protect | 4 | Scope-sensitive |
+| Protect | 8 | Scope-sensitive (includes keys) |
 | Live | 3 | Always workspace |
 | Maker | 4 | Always workspace |
 | Meta | 1 | Workspace / global |
-| **Total** | **40** | |
+| **Total** | **44** | |
 
 ---
 
@@ -478,7 +483,7 @@ All commands route through `claws-sdk`, which is a sibling to `craftworks-sdk` b
 | claws group | SDK package | Module | Underlying SDK |
 |-------------|-----------|--------|----------------|
 | Build | claws-sdk | build/* | compiler-sdk (astro/*) |
-| Pinch | claws-sdk | guard/* | agent-sdk (GovernanceManager) |
+| Check | claws-sdk | guard/* | agent-sdk (GovernanceManager) |
 | Comply | claws-sdk | guard/comply | agent-sdk (compliance) |
 | Audit | claws-sdk | audit/* | agent-sdk (audit chain) |
 | Snap | claws-sdk | cache/snapshot | compiler-sdk (cache) |

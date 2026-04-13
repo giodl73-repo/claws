@@ -134,7 +134,7 @@ findings:
     description: >
       Standing approval expiry (e.g., expires: 2026-12-31) means the approval
       automatically stops working after the date. The compiler should warn
-      when a standing approval is within 30 days of expiry during `claws pinch`
+      when a standing approval is within 30 days of expiry during `claws check`
       health checks. Expired standing approvals should not silently revert to
       per-use elicitation — they should produce a clear message: "Standing
       approval for send-report-email expired on 2026-12-31."

@@ -1,0 +1,103 @@
+name: S01-standalone-install
+series: emit-langgraph
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/emit-langgraph installs with only @craftworks/codegen
+  as a dependency and produces Python governance.py with LangGraph node wrappers.
+
+expect:
+  craftworks_deps: ["@craftworks/codegen"]
+  output_file: "governance.py"
+  output_language: python
+  output_valid_python: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A consumer installs @craftworks/emit-langgraph (npm package) alongside
+  @craftworks/codegen. The emitter is invoked with a compiled governance IR.
+  It must produce a Python file governance.py containing LangGraph-compatible
+  node wrapper functions that enforce governance rules as pre/post-conditions
+  on graph node execution. The emitted Python must be syntactically valid,
+  import only from langgraph and standard library, and be directly usable
+  in a LangGraph StateGraph definition.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The emitter is an npm package producing Python output — a cross-language
+      code generation boundary. If the emitter uses Python-specific syntax
+      constructs incorrectly (e.g., wrong indentation, f-string escaping,
+      type annotation syntax for older Python versions), the output is
+      broken. The emitter must validate generated Python against a target
+      Python version (3.9+).
+    spec_impact: "CL-08 emit-langgraph — Python syntax validation with target version"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      LangGraph node wrappers must match the StateGraph node function
+      signature (state: TypedDict -> TypedDict). If the emitter produces
+      functions with a different signature, they cannot be registered as
+      graph nodes. The emitter must understand the LangGraph API contract
+      and generate conforming wrappers.
+    spec_impact: "CL-08 emit-langgraph — LangGraph node function signature compliance"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      LangGraph's API surface changes across versions (v0.1 vs v0.2 have
+      different StateGraph signatures). The emitter must target a specific
+      langgraph version range and declare it in the output file's docstring
+      or a companion requirements.txt so consumers know which version to
+      install.
+    spec_impact: "CL-08 emit-langgraph — langgraph version targeting and declaration"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Python governance wrappers that raise exceptions to enforce governance
+      halt LangGraph execution abruptly. The emitter should generate
+      wrappers that return governance violation results in the state dict
+      (e.g., state["governance_violations"]) so the graph can route to
+      error-handling nodes rather than crashing.
+    spec_impact: "CL-08 emit-langgraph — non-exception governance enforcement pattern"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The emitted Python file's import section must handle optional
+      dependencies gracefully. If langgraph is not installed in the
+      consumer's Python environment, the import should fail with a clear
+      message ("pip install langgraph") rather than a generic ImportError
+      traceback.
+    spec_impact: "CL-08 emit-langgraph — graceful import error with install guidance"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The emitter should include a __version__ variable in the generated
+      governance.py tracking the claws emitter version and governance IR
+      hash. This enables consumers to check governance staleness
+      programmatically.
+    spec_impact: "CL-08 emit-langgraph — version metadata in emitted Python"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Type annotations in the emitted Python should use typing module
+      constructs compatible with Python 3.9+ (e.g., Optional[X] not X | None)
+      to maximize compatibility across consumer environments.
+    spec_impact: "CL-08 emit-langgraph — Python 3.9+ compatible type annotations"
+    pitfall: null

@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "trustTier": "T2",
+  "platform": "openclaw",
+  "inputs": {
+    "packages": [
+      {
+        "name": "@corp/soc2-policies",
+        "version": "^2.0.0"
+      }
+    ]
+  }
+}

@@ -1,0 +1,172 @@
+name: S02-subpath-import-stability
+series: backward-compat
+version: 1
+specs: [CL-08]
+description: >
+  Validates that all documented subpath imports from compiler-sdk (e.g.,
+  @craftworks/compiler-sdk/astro/workspace, @craftworks/compiler-sdk/astro/types)
+  continue resolving after the 10+7 extraction. Subpath imports are used by
+  the craft-cli and other internal consumers for tree-shaking and targeted
+  imports. Any subpath that resolves today must resolve identically after
+  extraction.
+
+expect:
+  subpath_resolution:
+    all_documented_subpaths_resolve: true
+    node_conditions: ["import", "require", "types"]
+    no_package_subpath_not_defined: true
+  tree_shaking:
+    unused_code_eliminated: true
+    bundle_size_delta: "<5%"
+  type_declarations:
+    all_subpath_dts_resolve: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Enumerate all subpath exports from compiler-sdk's package.json "exports" map.
+  This includes paths like @craftworks/compiler-sdk/astro/workspace,
+  @craftworks/compiler-sdk/astro/types, and deep internal subpaths used by
+  craft-cli. For each subpath, create both an ESM import and a CJS require,
+  verify that the module resolves, and check that the exported types match
+  the pre-extraction signatures. After extraction, each subpath must either
+  continue pointing to compiler-sdk code or redirect to the appropriate
+  @craftworks/* package via the exports map. No consumer should see
+  ERR_PACKAGE_PATH_NOT_EXPORTED.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The "exports" field in package.json uses conditional exports to handle
+      ESM vs CJS and types. A typical entry looks like:
+      "./astro/workspace": { "types": "./dist/astro/workspace.d.ts",
+      "import": "./dist/astro/workspace.js" }. After extraction, if the
+      source file moves to @craftworks/workspace but the subpath entry still
+      points to a local dist/ file, the subpath resolves to an empty or
+      missing module. Each subpath entry must be updated to either (a) point
+      to a new local shim that re-exports from @craftworks/*, or (b) be
+      documented as deprecated with the new canonical path.
+    spec_impact: "CL-08 migration — each subpath export entry must be updated or shimmed, not left pointing at removed code"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Node.js resolves subpath exports strictly — if the exports map is
+      defined, ONLY entries listed in the map can be imported. Unlisted paths
+      produce ERR_PACKAGE_PATH_NOT_EXPORTED even if the file exists on disk.
+      If the extraction removes source files that subpath entries pointed to
+      but does not update the exports map, the listed subpath resolves to
+      a missing file (different error: MODULE_NOT_FOUND). Both cases are
+      consumer-breaking. The exports map must be validated against the actual
+      dist/ directory structure in CI.
+    spec_impact: "CL-08 CI — validate exports map entries against actual dist/ files post-build"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      craft-cli uses deep subpath imports (per CLAUDE.md: "craft-cli imports
+      astro via deep subpath imports (@craftworks/compiler-sdk/astro/*)").
+      These are internal consumers with source access, not external. After
+      extraction, craft-cli should migrate to direct @craftworks/* imports
+      rather than relying on compiler-sdk subpath shims. But if craft-cli
+      is updated before the compat shims are in place, or after they are
+      removed, craft-cli's build breaks. The migration must be coordinated:
+      shims deployed first, craft-cli migrated, shims deprecated.
+    spec_impact: "CL-08 migration — coordinate craft-cli migration with shim deployment and deprecation"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      TypeScript's moduleResolution settings affect subpath export resolution.
+      Under "node16" or "nodenext", TypeScript follows the exports map. Under
+      "bundler", it may also check the "types" condition. Under "node" (legacy),
+      it ignores the exports map entirely and uses directory-based resolution.
+      If any consumer uses legacy module resolution, subpath re-exports that
+      work under node16 are invisible. The compat layer must include both
+      exports map entries AND physical dist/ directory shim files.
+    spec_impact: "CL-08 migration — compat layer needs both exports map and physical dist/ shims for legacy TS resolution"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Subpath wildcard patterns (e.g., "./astro/*": "./dist/astro/*.js")
+      are supported by Node.js but have inconsistent TypeScript support.
+      If compiler-sdk uses wildcards in its exports map and consumers
+      rely on the wildcard expanding to a specific set of files, removing
+      source files during extraction narrows the wildcard matches without
+      any error. A consumer importing @craftworks/compiler-sdk/astro/codegen
+      would previously resolve to a local file but silently fails when
+      that file is extracted to @craftworks/codegen. The exports map must
+      use explicit entries, not wildcards, for shimmed paths.
+    spec_impact: "CL-08 migration — explicit subpath entries for compat shims, no wildcards"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The "types" condition in subpath exports must point to .d.ts files that
+      exist and export the correct shapes. If a subpath shim re-exports from
+      @craftworks/forma but the .d.ts file was generated before the shim
+      was written, the types are stale. The build pipeline must regenerate
+      declarations after all shims are in place, in the correct order:
+      (1) write shim .ts files, (2) compile to .js + .d.ts, (3) validate
+      exports map, (4) publish.
+    spec_impact: "CL-08 build pipeline — shim compilation must precede exports map validation"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Tree-shaking relies on subpath imports to load only the needed module.
+      If a subpath shim re-exports from a @craftworks/* package that has its
+      own barrel export, the consumer ends up pulling in the entire package
+      rather than the specific submodule. The shim must import from a specific
+      @craftworks/* subpath export (if available), not from the package root.
+      Otherwise, bundle sizes increase after extraction despite the shim
+      working correctly for resolution.
+    spec_impact: "CL-08 migration — shims must use targeted subpath imports from @craftworks/*, not barrel imports"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Some subpath imports may be used only by internal tooling (craft-cli,
+      guard-cli) and never by external consumers. These can be migrated
+      immediately to direct @craftworks/* imports without a compat shim,
+      reducing the shim surface. An import audit should classify each
+      subpath as internal-only or externally-used to determine which
+      need compat shims.
+    spec_impact: "CL-08 migration — classify subpath usage as internal vs external to minimize compat shim surface"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The exports map "." entry (root import) handles the default import
+      path. This entry must continue re-exporting all previously available
+      symbols. If the root entry is accidentally restricted during the
+      exports map update (e.g., changing from a barrel to a selective
+      list), consumers using the root import lose access to symbols that
+      were previously available.
+    spec_impact: "CL-08 migration — root exports entry must be audited alongside subpath entries"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Subpath import tests should run against multiple Node.js versions
+      (18, 20, 22) since the exports map resolution algorithm has had
+      bug fixes between versions. A subpath that resolves on Node 20
+      may fail on Node 18 due to a resolved exports map bug. The
+      @craftworks/platform manifest should declare minimum Node version
+      for correct subpath resolution.
+    spec_impact: "CL-08 @craftworks/platform — declare minimum Node.js version for subpath export correctness"
+    pitfall: null

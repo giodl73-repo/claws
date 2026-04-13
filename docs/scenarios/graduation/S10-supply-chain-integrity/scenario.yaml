@@ -1,0 +1,132 @@
+name: S10-supply-chain-integrity
+series: graduation
+version: 1
+specs: [CL-07, CL-08]
+description: >
+  The paid tier pins @claws/compiler with an exact version and integrity
+  hash in package.json. publint passes for both packages. No wildcard
+  re-exports (export *) exist in the paid tier's public API surface.
+  An API diff check compares the current release against the previous
+  release and flags breaking changes before publish. This validates the
+  supply-chain trust model: consumers of the paid tier can verify exactly
+  which free tier version they depend on, and the public API contract is
+  explicitly managed.
+expect:
+  governance_ir:
+    version: 1
+    manifest:
+      files_parsed:
+        - "claws.json"
+    analysis:
+      rules_evaluated: true
+  violations: []
+  warnings: []
+  artifacts:
+    count: 0
+simulate:
+  failures: []
+  halt: null
+  budget: null
+problem: >
+  An enterprise customer's security team audits the @bic/claws-sdk
+  package for supply chain risks. They check the dependency on @claws/compiler
+  and find a caret range (^1.2.0) — this means a minor version bump could
+  introduce new code into their production environment without explicit
+  approval. They also find export * from '@claws/compiler' in the paid
+  tier's index.ts — this means any symbol added to the free tier
+  automatically becomes part of the paid tier's API surface, even if
+  it was intended as internal. Both patterns are supply chain risks that
+  erode trust in the enterprise offering. Exact pinning plus curated
+  re-exports are the mitigation.
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The integrity hash in package.json must be verified at install time.
+      An exact version pin alone does not prevent registry tampering. The
+      npm overrides or resolutions field should include an integrity hash
+      (sha512) that npm verifies against the downloaded tarball. If the
+      hash does not match, npm install fails. This is defense-in-depth
+      against registry compromise.
+    spec_impact: "CL-08 Section 21 — integrity hash verification"
+    pitfall: null
+  - id: F02
+    severity: major
+    description: >
+      publint must be run as a CI gate for both packages before every
+      publish. publint catches common packaging mistakes: missing exports
+      map entries, incorrect module/main fields, broken subpath imports,
+      and type declaration mismatches. A package that fails publint may
+      install but break at runtime for consumers using ESM, CJS, or
+      TypeScript in specific configurations. publint is the packaging
+      equivalent of tsc --noEmit.
+    spec_impact: "CL-08 Section 22 — publint CI gate"
+    pitfall: null
+  - id: F03
+    severity: major
+    description: >
+      The export * prohibition must be enforced by a lint rule, not just
+      documentation. A developer adding a new enterprise module may use
+      export * for convenience. An ESLint rule (no-restricted-syntax for
+      ExportAllDeclaration from @claws/compiler paths) prevents this at
+      the PR level. Documentation-only prohibitions decay over time as
+      team members change.
+    spec_impact: "CL-07 Section 10 — export * lint enforcement"
+    pitfall: null
+  - id: F04
+    severity: major
+    description: >
+      API diff checking must run against the published npm version, not
+      the local build. The diff tool (api-extractor, attw, or custom)
+      downloads the previous published version and compares its .d.ts
+      against the current build's .d.ts. Local-to-local comparisons
+      can miss changes that occur during the build step (e.g., rollup
+      bundling that flattens types differently).
+    spec_impact: "CL-08 Section 23 — API diff against published version"
+    pitfall: null
+  - id: F05
+    severity: major
+    description: >
+      Breaking change detection must cover runtime behavior, not just
+      type signatures. A function that changes its return value semantics
+      without changing its type signature (e.g., returning empty array
+      instead of null) is a behavioral breaking change invisible to
+      type-level API diff. Scenario-based regression tests (the
+      graduation scenarios themselves) catch behavioral breaks that
+      type diffs miss.
+    spec_impact: "CL-07 Section 11 — behavioral break detection"
+    pitfall: null
+  - id: F06
+    severity: major
+    description: >
+      The paid tier's curated re-export list must be tracked as a
+      versioned artifact. A file like api-surface.txt listing every
+      re-exported symbol, checked into version control and diffed in
+      PRs, makes API surface changes reviewable. Without this, reviewers
+      must manually inspect index.ts to understand what symbols are
+      public. The file should be auto-generated from the actual exports
+      to prevent documentation drift.
+    spec_impact: "CL-08 Section 24 — API surface tracking artifact"
+    pitfall: null
+  - id: F07
+    severity: minor
+    description: >
+      The free tier's package provenance should be published via npm
+      provenance (--provenance flag during npm publish). This links the
+      published tarball to the specific CI build and git commit that
+      produced it, providing a verifiable chain from source to package.
+      Provenance is a trust signal for enterprise customers evaluating
+      supply chain risk.
+    spec_impact: "CL-08 Section 25 — npm provenance for free tier"
+    pitfall: null
+  - id: F08
+    severity: minor
+    description: >
+      Dependency tree auditing should be automated in CI. npm audit or
+      a stricter tool (socket.dev, snyk) should scan both packages for
+      known vulnerabilities in transitive dependencies. Since the free
+      tier internalizes code that was previously in compiler-sdk, the
+      transitive dependency tree changes. Any new vulnerability introduced
+      by internalization must be caught before publish.
+    spec_impact: "CL-08 Section 26 — transitive dependency auditing"
+    pitfall: null

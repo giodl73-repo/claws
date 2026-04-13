@@ -1,0 +1,76 @@
+name: S02-zero-craftworks-imports
+series: emit-cursor
+version: 1
+specs: [CL-08]
+description: >
+  Validates that emit-cursor output (.cursor/rules/*.mdc) contains zero
+  references to @craftworks/ internal packages — the rules are Cursor-native.
+
+expect:
+  craftworks_import_count: 0
+  platform_native: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  After emit-cursor produces .cursor/rules/ files, every .mdc file is scanned
+  for any string matching "@craftworks/" or "craftworks-" in the frontmatter,
+  markdown body, or code blocks within the rules. Cursor rules are natural
+  language instructions processed by the Cursor AI assistant — any @craftworks/
+  reference is meaningless to Cursor and may confuse the AI into attempting to
+  import or reference non-existent packages.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Governance rules that reference @craftworks/ types (e.g., "enforce
+      GovernancePolicy from @craftworks/governance") are meaningless in Cursor
+      context. The emitter must translate type references into descriptive
+      natural language that Cursor's AI can follow (e.g., "ensure all API
+      handlers validate input against the governance policy schema").
+    spec_impact: "CL-08 emitter-isolation — type references must become natural language"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Code examples in .mdc rule bodies that show import statements from
+      @craftworks/ packages teach Cursor's AI to generate those imports
+      in user code. The emitter must either omit code examples or use
+      platform-appropriate examples that reference standard libraries.
+    spec_impact: "CL-08 emitter-isolation — code examples must use platform-native imports"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Frontmatter description fields pulled directly from the governance IR
+      may contain internal terminology like "claws governance rule GOV-042."
+      These must be rewritten to user-friendly descriptions that Cursor
+      displays in its rules panel.
+    spec_impact: "CL-08 emitter-isolation — user-friendly descriptions in MDC frontmatter"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      If the MDC body contains markdown links to @craftworks/ documentation
+      URLs (e.g., docs.craftworks.dev/governance/...), these are internal
+      links that consumers cannot access. External documentation references
+      must be stripped or replaced with inline explanations.
+    spec_impact: "CL-08 emitter-isolation — strip internal documentation links"
+    pitfall: null
+
+  - id: F05
+    severity: note
+    description: >
+      The zero-import scan for .mdc files must handle the MDC frontmatter
+      format (YAML-like) separately from the markdown body, as the
+      escaping rules differ. A naive regex scan may miss references in
+      YAML string values.
+    spec_impact: "CL-08 emitter-isolation — format-aware scanning for MDC files"
+    pitfall: null

@@ -1,0 +1,99 @@
+name: S02-p251
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-251
+description: >
+  Validates that `claws check --package` detects hidden compiler-sdk dependencies
+  through internal import paths that survive extraction. Ghost references like
+  `import { normalize } from '../normalize'` that resolve to compiler-sdk modules
+  pass npm install but throw MODULE_NOT_FOUND at runtime. Both static and dynamic
+  import() expressions must be audited.
+
+expect:
+  detection: true
+  prevention: "`claws check --package` audits all import paths (static and dynamic) against the package's declared dependencies. `import()` expressions are scanned alongside static imports."
+
+simulate:
+  failures: ["Internal import paths referencing compiler-sdk modules survive extraction and cause MODULE_NOT_FOUND at runtime"]
+  halt: null
+  budget: null
+
+problem: >
+  Extract @craftworks/forma from compiler-sdk. During extraction, some internal
+  relative imports survive as ghost references: `import { normalize } from
+  '../normalize'` still points to compiler-sdk/src/normalize.ts which does not
+  exist in the forma package. npm install succeeds because the import is
+  relative, not a declared dependency. At runtime, when WorkspaceReader.read()
+  calls normalize(), Node.js throws MODULE_NOT_FOUND. The failure is invisible
+  until the specific code path executes. Additionally, a dynamic `import()`
+  expression loads a compiler-sdk module lazily — it only fails when the lazy
+  branch is taken. Verify that `claws check --package` catches both static and
+  dynamic ghost imports before publish.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Static import analysis alone misses dynamic `import()` expressions. A
+      module using `const mod = await import('../compile/pipeline')` has a
+      ghost reference that only triggers at runtime. The scanner must handle
+      both `import ... from` and `import()` call expressions in the AST.
+    spec_impact: "CL-08 G-EXTRACT — scan dynamic import() alongside static imports"
+    pitfall: P-251
+
+  - id: F02
+    severity: major
+    description: >
+      Relative imports (../ paths) are not validated by npm's dependency
+      resolution — they are treated as local file references. A relative
+      import that escapes the package boundary (e.g., `../../compiler-sdk/`)
+      silently resolves during monorepo development but fails in standalone
+      install. The check must verify that all relative imports resolve within
+      the package's own directory tree.
+    spec_impact: "CL-08 G-EXTRACT — relative imports must resolve within package boundary"
+    pitfall: P-251
+
+  - id: F03
+    severity: major
+    description: >
+      require() calls are a third import vector. If any module uses CommonJS
+      `require('../some-module')`, the TypeScript AST scanner for ESM imports
+      misses it. The scanner must handle ESM imports, dynamic import(), and
+      CommonJS require() to achieve complete coverage.
+    spec_impact: "CL-08 G-EXTRACT — CJS require() scanning in addition to ESM imports"
+    pitfall: P-251
+
+  - id: F04
+    severity: warning
+    description: >
+      Template literal imports (`import(\`../${name}\`)`) with variable
+      interpolation cannot be statically resolved. The check should flag these
+      as unresolvable and require manual audit, rather than silently skipping
+      them. A conservative default (flag as potential ghost) prevents false
+      negatives.
+    spec_impact: "CL-08 G-EXTRACT — flag unresolvable dynamic imports for manual audit"
+    pitfall: P-251
+
+  - id: F05
+    severity: warning
+    description: >
+      If the detection fails (scanner has a bug or is not run), the blast
+      radius is a runtime crash in production. Unlike a compile-time error,
+      MODULE_NOT_FOUND only surfaces when the specific code path executes.
+      Rare code paths (error handlers, fallback logic) may go untested for
+      weeks before the ghost reference triggers.
+    spec_impact: "CL-08 G-EXTRACT — CI must exercise all code paths, not just happy path"
+    pitfall: P-251
+
+  - id: F06
+    severity: note
+    description: >
+      The recovery mechanism is straightforward: replace ghost imports with
+      the correct @craftworks/ package import or inline the code. But automated
+      rewriting (codemod) must verify that the replacement module exports the
+      same symbols with the same signatures. A mechanical find-and-replace
+      that maps `../normalize` to `@craftworks/workspace` only works if
+      workspace actually exports normalize().
+    spec_impact: "CL-08 G-EXTRACT — codemod must verify replacement symbol availability"
+    pitfall: P-251

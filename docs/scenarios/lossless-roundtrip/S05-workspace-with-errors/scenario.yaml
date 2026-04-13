@@ -35,7 +35,7 @@ problem: >
   behavior), (2) NOT produce a GovernanceIR or emit any artifacts, (3)
   preserve all 9 source files byte-for-byte including the malformed SOUL.md.
   The malformed file must not be "fixed" by the pipeline, even if the fix
-  is obvious. Only `claws pinch --fix` with explicit user invocation may
+  is obvious. Only `claws check --fix` with explicit user invocation may
   modify files, and only for auto-fixable violations, never for source files.
 
 findings:
@@ -67,13 +67,13 @@ findings:
   - id: F03
     severity: warning
     description: >
-      The `claws pinch --fix` command can auto-fix certain violations
+      The `claws check --fix` command can auto-fix certain violations
       (e.g., adding missing elicitation gates). But --fix MUST NOT modify
       the 9 source files. It can only modify claws.json, .claws/ config
       files, or generated artifacts. If --fix attempts to modify SOUL.md
       to resolve a conflict, it violates the lossless guarantee. The fix
       scope must be explicitly limited to non-source files.
-    spec_impact: "CL-05 claws pinch --fix — fix scope limited to non-source files"
+    spec_impact: "CL-05 claws check --fix — fix scope limited to non-source files"
     pitfall: null
 
   - id: F04

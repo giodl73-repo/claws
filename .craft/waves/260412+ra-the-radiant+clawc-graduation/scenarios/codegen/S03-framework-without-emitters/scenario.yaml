@@ -1,0 +1,141 @@
+name: S03-framework-without-emitters
+series: codegen
+version: 1
+specs: [CL-08]
+description: >
+  Validates that @craftworks/codegen installs and functions as a standalone
+  framework with zero emitter plugins registered. The registry is empty but
+  operational: list() returns an empty array, get() returns null for any
+  platform, and register() is ready to accept plugins. This proves codegen
+  has no hidden dependency on emit-oc, emit-cc, or any other emitter.
+
+expect:
+  install:
+    success: true
+    craftworks_dependencies: ["@craftworks/forma"]
+    emitter_dependencies: 0
+  registry:
+    registered_count: 0
+    list_returns_empty: true
+    get_returns_null: true
+  import:
+    side_effects: false
+    throws_on_import: false
+  compile_without_emit:
+    parse_works: true
+    analyze_works: true
+    emit_skipped: true
+    error_message: "No emitter registered for platform 'openclaw'"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer installs @craftworks/codegen as a standalone dependency
+  (npm install @craftworks/codegen) without installing any emit-* plugin
+  packages. They import EmitRegistry and EmitTarget. EmitRegistry.list()
+  returns []. EmitRegistry.get("openclaw") returns null. The developer
+  can still use the TS codegen utilities (template helpers, AST builders)
+  without any emitter. They then attempt a full compile pipeline: parse
+  succeeds, analyze succeeds, but emit fails gracefully with a diagnostic
+  message identifying the missing emitter, not a null-pointer crash. This
+  validates the framework-vs-plugin separation: codegen provides the
+  scaffolding, emitters provide the platform-specific logic.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If codegen's package.json lists any emit-* package as a dependency
+      (even a peerDependency), npm install @craftworks/codegen pulls emitter
+      code. peerDependencies with default=true in npm 7+ auto-install. The
+      framework must use peerDependenciesMeta with optional: true for all
+      emit-* packages, or better yet, not list them at all. The plugin
+      discovery mechanism should be import-based (dynamic import after
+      registration), not dependency-based.
+    spec_impact: "CL-08 codegen — zero emitter dependencies in package.json"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The compile pipeline (parse -> extract -> analyze -> emit) must handle
+      the "no emitter" case as a diagnostic, not an exception. If the emit
+      stage is hardcoded to call EmitRegistry.get(platform) and throw on
+      null, the error is unstructured. The pipeline should check emitter
+      availability before starting emit and return a CompileResult with
+      status "emit-skipped" and a human-readable reason.
+    spec_impact: "CL-08 codegen — CompileResult.emit-skipped status for missing emitter"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The TS codegen utilities (template rendering, AST node builders, import
+      generators) are used by emitter plugins but also useful standalone. If
+      these utilities are only accessible through EmitTarget (as protected
+      methods), a consumer without an emitter cannot use them. Codegen
+      utilities should be exported as top-level functions, not locked behind
+      the base class.
+    spec_impact: "CL-08 codegen — top-level export of TS codegen utilities"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Install size matters for the building-block tier. @craftworks/codegen
+      without emitters should be under 200KB (source + types). If codegen
+      bundles TS template strings for all 7 platforms "just in case," the
+      framework bloats even without emitters. Template strings belong in
+      the emit-* plugins, not the framework.
+    spec_impact: "CL-08 codegen — install size budget without emitters"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      When no emitters are registered, EmitRegistry should log or warn
+      on first get() call to aid debugging. A silent null return is correct
+      programmatically, but a developer who forgot to install emit-oc will
+      spend time debugging why compile produces no output. A one-time
+      console.warn("No emitters registered — did you install an emit-*
+      plugin?") on first get() failure improves DX without being noisy.
+    spec_impact: "CL-08 codegen — first-miss diagnostic hint"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      This scenario is the "competitor test" from the spec overview: a
+      hypothetical competitor imports @craftworks/codegen, ignores emit-oc,
+      and builds their own emitter for a custom platform. The framework
+      must be truly neutral — no platform-specific code, no OC assumptions,
+      no claws-specific types in the public API. If GovernanceIR is in the
+      codegen type surface, it couples codegen to claws concepts.
+    spec_impact: "CL-08 codegen — platform-neutral public API surface"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      TypeScript type exports must work without emitter packages installed.
+      If codegen re-exports types from emit-oc (e.g., OCEmitOptions), and
+      emit-oc is not installed, TypeScript compilation fails with missing
+      module errors. Codegen's type surface must be self-contained; emitter-
+      specific types belong in the emitter package.
+    spec_impact: "CL-08 codegen — self-contained type exports"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      The @craftworks/forma dependency means codegen is not a leaf package.
+      If forma has its own dependencies (like @craftworks/crypto), the
+      transitive closure of installing codegen alone pulls forma + crypto.
+      This may be acceptable (forma is ~2000 lines), but the install size
+      and dependency depth must be documented. A consumer expecting a
+      lightweight framework may be surprised by transitive deps.
+    spec_impact: "CL-08 codegen — transitive dependency documentation"
+    pitfall: null

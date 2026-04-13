@@ -39,7 +39,7 @@ problem: >
   fleet have OBO (on-behalf-of) delegations where Agent A acts on behalf of
   User B, and those delegations rely on the elicitation policy to get User B's
   approval before data access. After the policy removal is broadcast, the 4
-  workspaces fail pinch with OBO-WITHOUT-ELICIT: the delegation requires
+  workspaces fail check with OBO-WITHOUT-ELICIT: the delegation requires
   elicitation but no elicitation policy covers R3 data access anymore. All 4
   workspaces enter a broken state where OBO delegations are blocked. The fleet
   admin did not realize the elicitation policy was a dependency for OBO
@@ -143,7 +143,7 @@ findings:
     severity: note
     description: >
       Post-broadcast health checks must run automatically after template
-      changes. The health check re-runs pinch on all affected workspaces
+      changes. The health check re-runs check on all affected workspaces
       and reports any new failures. If the cascade warnings were overridden
       and failures occur, the health check provides immediate feedback
       rather than waiting for the next scheduled compliance scan.

@@ -1,0 +1,97 @@
+name: S07-p256
+series: pitfall-coverage
+version: 1
+specs: [CL-08]
+pitfall: P-256
+description: >
+  Validates that `claws check --emit` detects @craftworks/ references leaking
+  into emitter output. CLAUDE.md, .claude/settings.json, and .cursor/rules/*.mdc
+  files must contain zero @craftworks/ package names, internal rule IDs, or code
+  examples with @craftworks/ imports. These references are meaningless to the
+  target platform and teach AI assistants to generate non-existent imports.
+
+expect:
+  detection: true
+  prevention: "`claws check --emit` scans all emitter output for @craftworks/ and craftworks- patterns. Rule IDs are expanded to natural language. Code examples use platform-native imports only."
+
+simulate:
+  failures: ["Emitter output files contain @craftworks/ package references and internal rule IDs"]
+  halt: null
+  budget: null
+
+problem: >
+  Run `claws compile` targeting Claude Code and Cursor platforms. The emit-cc
+  emitter produces CLAUDE.md containing a governance section that references
+  `@craftworks/governance` package, includes a code example with
+  `import { GateType } from '@craftworks/governance'`, and uses internal rule
+  IDs like `G-ELICIT-001`. The emit-cursor emitter produces an MDC file with
+  `@craftworks/codegen` in a code fence and `craftworks-sdk` in the description.
+  Claude Code ignores the @craftworks/ references (meaningless). Cursor's AI
+  learns to suggest `import { emit } from '@craftworks/codegen'` to the user —
+  a non-existent package in the consumer's project. Verify that `claws check
+  --emit` catches all leaking references across both platform outputs.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The pattern scan must cover multiple reference formats: npm package
+      names (@craftworks/forma), import statements, require() calls, code
+      fence contents, inline code snippets, and prose mentions. A scan that
+      only checks import statements misses `@craftworks/` in markdown prose
+      or YAML configuration values.
+    spec_impact: "CL-08 G-EMIT — full-spectrum @craftworks/ pattern matching"
+    pitfall: P-256
+
+  - id: F02
+    severity: major
+    description: >
+      Internal rule IDs (G-ELICIT-001, G-EMIT-003) are meaningless to
+      platform consumers. But they are useful for governance traceability
+      internally. The emitter must map rule IDs to human-readable descriptions
+      in the output. If the mapping table is incomplete or outdated, unmapped
+      rule IDs leak through as cryptic identifiers.
+    spec_impact: "CL-08 G-EMIT — complete rule ID to natural language mapping"
+    pitfall: P-256
+
+  - id: F03
+    severity: warning
+    description: >
+      settings.json for Claude Code may contain custom configuration keys
+      like `craftworks.governance.level`. Claude Code silently ignores
+      unknown keys — no error, no warning. The configuration has zero effect.
+      The check must scan JSON values and keys, not just markdown content.
+    spec_impact: "CL-08 G-EMIT — scan JSON keys and values for @craftworks/ patterns"
+    pitfall: P-256
+
+  - id: F04
+    severity: warning
+    description: >
+      Cursor MDC files with @craftworks/ code examples actively harm the
+      user experience: Cursor's AI treats code fences as training context
+      and will suggest @craftworks/ imports in the user's code completions.
+      The blast radius is not just "ignored output" — it generates bad
+      suggestions. Priority should be highest for code fences in MDC files.
+    spec_impact: "CL-08 G-EMIT — code fences in MDC are highest priority for scan"
+    pitfall: P-256
+
+  - id: F05
+    severity: warning
+    description: >
+      URL references to internal documentation (e.g., links to craftworks
+      GitHub repo, internal docs sites) are a variant of the same leak. The
+      scan should also flag craftworks-specific URLs that are not accessible
+      to platform consumers.
+    spec_impact: "CL-08 G-EMIT — scan for internal URLs alongside package references"
+    pitfall: P-256
+
+  - id: F06
+    severity: note
+    description: >
+      The replacement for @craftworks/ references depends on context. In
+      prose, the reference should become a plain-language description. In
+      code fences, the example should use the platform's native patterns.
+      The emitter's template system must handle context-sensitive replacement,
+      not a blanket find-and-replace.
+    spec_impact: "CL-08 G-EMIT — context-sensitive reference replacement in templates"
+    pitfall: P-256
