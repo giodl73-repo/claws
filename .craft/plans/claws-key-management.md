@@ -3,7 +3,7 @@ slug: claws-key-management
 preset: "claws"
 plan: "2 headlines: claws keys generate creates Ed25519/HMAC signing keys with managed lifecycle, M-of-N ceremony for enterprise key quorum"
 area: claws
-status: Draft
+status: Closed
 phase: anubis
 atoms: [atom:key-management]
 specs: [CL-02]

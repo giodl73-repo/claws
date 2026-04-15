@@ -1,85 +1,59 @@
 /**
  * ANSI color utilities for terminal output.
  *
- * Respects NO_COLOR env var (https://no-color.org/) and --no-color flag.
- * Maps governance severity levels to colors:
- *   green = PASS, red = high/critical, yellow = medium, dim = low/info.
+ * Consolidated: delegates to the canonical color/ module. This file
+ * re-exports with the Palette interface expected by output/ consumers.
  *
  * @module claws-cli/output/color
  */
 
-type ColorFn = (text: string) => string;
+import { isColorEnabled, createColorPalette } from '../color/index.js';
+export type { ColorPalette } from '../color/index.js';
 
-const ESC = '\x1b[';
-
-const CODES = {
-  reset: `${ESC}0m`,
-  bold: `${ESC}1m`,
-  dim: `${ESC}2m`,
-  red: `${ESC}31m`,
-  green: `${ESC}32m`,
-  yellow: `${ESC}33m`,
-  cyan: `${ESC}36m`,
-  gray: `${ESC}90m`,
-} as const;
-
-function wrap(code: string): ColorFn {
-  return (text: string) => `${code}${text}${CODES.reset}`;
+/**
+ * Color palette for terminal output.
+ *
+ * Aliases ColorPalette fields to the semantic names used by output/ modules.
+ */
+export interface Palette {
+  pass: (text: string) => string;
+  fail: (text: string) => string;
+  warn: (text: string) => string;
+  info: (text: string) => string;
+  dim: (text: string) => string;
+  bold: (text: string) => string;
+  cyan: (text: string) => string;
 }
-
-const identity: ColorFn = (text: string) => text;
 
 /**
  * Whether color output is disabled.
  *
- * Color is disabled when:
- * - NO_COLOR env var is set (any value, per no-color.org)
- * - colorEnabled is explicitly set to false (--no-color flag)
+ * Delegates to `isColorEnabled()`, which checks (in order):
+ *   1. `NO_COLOR` env var → disabled
+ *   2. `FORCE_COLOR` env var → enabled
+ *   3. Explicit `colorEnabled` parameter
+ *   4. Default: disabled when stdout is not a TTY
  */
 export function isColorDisabled(colorEnabled?: boolean): boolean {
-  if (colorEnabled === false) return true;
-  if (process.env['NO_COLOR'] !== undefined) return true;
-  return false;
+  return !isColorEnabled(colorEnabled);
 }
 
 /**
  * Create a color palette that respects NO_COLOR / --no-color.
+ *
+ * Maps ColorPalette fields to the semantic Palette interface.
  */
 export function createPalette(colorEnabled?: boolean): Palette {
-  const disabled = isColorDisabled(colorEnabled);
-  if (disabled) {
-    return {
-      pass: identity,
-      fail: identity,
-      warn: identity,
-      info: identity,
-      dim: identity,
-      bold: identity,
-      cyan: identity,
-    };
-  }
+  const cp = createColorPalette(colorEnabled);
   return {
-    pass: wrap(CODES.green),
-    fail: wrap(CODES.red),
-    warn: wrap(CODES.yellow),
-    info: wrap(CODES.gray),
-    dim: wrap(CODES.dim),
-    bold: wrap(CODES.bold),
-    cyan: wrap(CODES.cyan),
+    pass: cp.green,
+    fail: cp.red,
+    warn: cp.yellow,
+    info: cp.gray,
+    dim: cp.dim,
+    bold: cp.bold,
+    cyan: cp.cyan,
   };
-}
-
-/**
- * Color palette for terminal output.
- */
-export interface Palette {
-  pass: ColorFn;
-  fail: ColorFn;
-  warn: ColorFn;
-  info: ColorFn;
-  dim: ColorFn;
-  bold: ColorFn;
-  cyan: ColorFn;
 }
 
 /**
@@ -91,7 +65,7 @@ export interface Palette {
  * - 2 (low): dim
  * - 1 (info): dim
  */
-export function severityColor(level: number, palette: Palette): ColorFn {
+export function severityColor(level: number, palette: Palette): (text: string) => string {
   if (level >= 4) return palette.fail;
   if (level === 3) return palette.warn;
   return palette.dim;

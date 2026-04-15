@@ -13,11 +13,7 @@ import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { DEFAULT_FILE_SOURCES } from './types.js';
 
-/**
- * SDK version embedded in every cache key. Bumping this version
- * automatically invalidates all caches.
- */
-const SDK_VERSION = '0.36.0';
+import { CLAWS_SDK_VERSION } from '../version.js';
 
 /**
  * Cache file location within the .claws sidecar.
@@ -114,7 +110,7 @@ async function buildCompositeHash(
 
   // Build composite input
   const parts = [
-    `sdk:${SDK_VERSION}`,
+    `sdk:${CLAWS_SDK_VERSION}`,
     ...fileHashes,
   ];
 
@@ -162,12 +158,12 @@ export async function check(
     };
   }
 
-  if (storedEntry.sdkVersion !== SDK_VERSION) {
+  if (storedEntry.sdkVersion !== CLAWS_SDK_VERSION) {
     return {
       hit: false,
       currentHash,
       storedHash: storedEntry.compositeHash,
-      missReason: `SDK version changed (${storedEntry.sdkVersion} -> ${SDK_VERSION})`,
+      missReason: `SDK version changed (${storedEntry.sdkVersion} -> ${CLAWS_SDK_VERSION})`,
     };
   }
 
@@ -205,7 +201,7 @@ export async function store(
   const entry: CacheEntry = {
     compositeHash,
     storedAt: new Date().toISOString(),
-    sdkVersion: SDK_VERSION,
+    sdkVersion: CLAWS_SDK_VERSION,
   };
 
   const cacheDir = join(workspaceRoot, CACHE_DIR);

@@ -1,0 +1,17 @@
+{
+  "trustTier": 3,
+  "suppressions": [],
+  "format": "terminal",
+  "policySet": "default",
+  "auditLevel": "full",
+  "failMode": {
+    "R1": "open",
+    "R2": "open",
+    "R3": "gated",
+    "R4": "gated",
+    "R5": "closed"
+  },
+  "fleet": {
+    "allowBypass": false
+  }
+}

@@ -201,6 +201,32 @@ describe('validateFailModes', () => {
     expect(() => validateFailModes(ir)).not.toThrow();
   });
 
+  it('passes when non-R5 suppression exists alongside R5 intent', () => {
+    const deny: DenyIntent = {
+      id: 'i-1', kind: 'deny', ruleId: 'SEC-010', level: 5,
+      description: 'Block', target: 'tool', reason: 'R5',
+    };
+    const ir = minimalIR({
+      intents: [deny],
+      analysis: {
+        violations: [],
+        warnings: [],
+        enforcementPlan: {
+          blockedTools: [],
+          requiredApprovals: [],
+          auditOnlyRules: ['NON-R5-RULE'],
+          channelRedactions: [],
+          ruleSuppressions: [
+            { ruleId: 'NON-R5-RULE', reason: 'testing', expiresAt: '', authorizedBy: 'admin' },
+          ],
+        },
+        reclassificationTable: [],
+        effectiveR5Count: { derived: 0, overridden: 0, total: 0 },
+      },
+    });
+    expect(() => validateFailModes(ir)).not.toThrow();
+  });
+
   it('ignores non-R5 violations without deny intents', () => {
     const label: LabelIntent = {
       id: 'i-1', kind: 'label', ruleId: 'AUD-01', level: 2,

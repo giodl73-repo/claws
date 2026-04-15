@@ -1,0 +1,96 @@
+name: "Anubis the Judge"
+number: XCIV
+deity: anubis
+epithet: the-judge
+branch: feature/anubis-the-judge
+description: "claws ops — CLI surface, three-ring governance, fleet operations, snapshot system, key management, skill publishing"
+status: completed
+completedAt: "2026-04-14T15:30:00Z"
+startedAt: "2026-04-13T00:00:00Z"
+dependsOn: [ptah]
+
+plans:
+  - claws-base-cli
+  - claws-init-uninstall
+  - claws-three-rings
+  - claws-snap-restore
+  - claws-fleet-ops
+  - claws-key-management
+  - claws-scaffold
+  - claws-annotate
+  - claws-publish
+  - claws-llm-extraction
+  - claws-oc-format-alignment
+
+stageOrder:
+  - kickoff
+  - setup
+  - scenarios
+  - planning
+  - implementation
+  - review
+  - close
+
+stages:
+  kickoff:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-13T00:00:00Z"
+    notes: "9 plans read, dependency graph mapped, pulse decomposition complete"
+  setup:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-13T00:00:00Z"
+    notes: "35 pulses, 4 checkpoints, reference workspace + gateway simulator foundation"
+  scenarios:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-13T00:00:00Z"
+    notes: "158 scenario findings from Ptah scenarios applied to plans"
+  planning:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-13T00:00:00Z"
+    notes: "35 pulses across 4 checkpoints, dependency-ordered, roles assigned"
+  implementation:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-14T15:00:00Z"
+    notes: "43 pulses across 5 checkpoints, all review gates passed, 13 review majors fixed"
+  review:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-14T15:15:00Z"
+    notes: "6-role panel per checkpoint, all majors resolved"
+  close:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-14T15:30:00Z"
+    notes: "PR #632, 89 commits, 1136 files changed, 2716 tests passing"
+
+checkpoints:
+  cp-1:
+    name: "Foundation — Base CLI + Test Infrastructure"
+    pulses: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    status: completed
+    tag: anubis-cp-1
+  cp-2:
+    name: "Init + Three Rings — Watch, Doctor, Amend"
+    pulses: [10, 11, 12, 13, 14, 15, 16, 17, 18]
+    status: completed
+    tag: anubis-cp-2
+  cp-3:
+    name: "Snapshot + Fleet — Save, Restore, Scan, Broadcast, Kill"
+    pulses: [19, 20, 21, 22, 23, 24, 25, 26, 27]
+    status: completed
+    tag: anubis-cp-3
+  cp-4:
+    name: "Keys + Makers + Publish"
+    pulses: [28, 29, 30, 31, 32, 33, 34, 35]
+    status: completed
+    tag: anubis-cp-4
+  cp-5:
+    name: "LLM Extraction + OC Format Alignment"
+    pulses: [36, 37, 38, 39, 40, 41, 42, 43]
+    status: completed
+    tag: anubis-cp-5

@@ -203,6 +203,127 @@ describe('Per-file parser isolation (P-108)', () => {
   });
 });
 
+describe('validateFileContent — YAML validation', () => {
+  it('warns on empty YAML file', async () => {
+    const { writeFile, mkdir } = await import('node:fs/promises');
+    const { join } = await import('node:path');
+    const { tmpdir } = await import('node:os');
+
+    const tmpDir = join(tmpdir(), `claws-test-yaml-empty-${Date.now()}`);
+    await mkdir(tmpDir, { recursive: true });
+    await writeFile(join(tmpDir, 'SOUL.md'), '# Soul\nValid.\n');
+    await writeFile(join(tmpDir, 'lobster.yaml'), '   \n  \n');
+
+    try {
+      const result = await parse(tmpDir);
+
+      const yamlDiags = result.diagnostics.filter(d => d.file === 'lobster.yaml');
+      expect(yamlDiags.length).toBeGreaterThanOrEqual(1);
+      const emptyDiag = yamlDiags.find(d => d.code === 'CLAWS-P001');
+      expect(emptyDiag).toBeDefined();
+      expect(emptyDiag!.message).toContain('empty');
+    } finally {
+      const { rm } = await import('node:fs/promises');
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('errors on YAML file with tab indentation', async () => {
+    const { writeFile, mkdir } = await import('node:fs/promises');
+    const { join } = await import('node:path');
+    const { tmpdir } = await import('node:os');
+
+    const tmpDir = join(tmpdir(), `claws-test-yaml-tab-${Date.now()}`);
+    await mkdir(tmpDir, { recursive: true });
+    await writeFile(join(tmpDir, 'SOUL.md'), '# Soul\nValid.\n');
+    await writeFile(join(tmpDir, 'lobster.yaml'), 'name: test\n\tindented: bad\n');
+
+    try {
+      const result = await parse(tmpDir);
+
+      const yamlDiags = result.diagnostics.filter(d => d.file === 'lobster.yaml');
+      const tabDiag = yamlDiags.find(d => d.code === 'CLAWS-P004');
+      expect(tabDiag).toBeDefined();
+      expect(tabDiag!.severity).toBe('error');
+      expect(tabDiag!.message).toContain('tab indentation');
+      expect(tabDiag!.line).toBe(2);
+    } finally {
+      const { rm } = await import('node:fs/promises');
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('validateFileContent — frontmatter with content after fence', () => {
+  it('does not warn about missing heading when content after frontmatter starts with heading', async () => {
+    const { writeFile, mkdir } = await import('node:fs/promises');
+    const { join } = await import('node:path');
+    const { tmpdir } = await import('node:os');
+
+    const tmpDir = join(tmpdir(), `claws-test-fm-heading-${Date.now()}`);
+    await mkdir(tmpDir, { recursive: true });
+    await writeFile(join(tmpDir, 'SOUL.md'), '---\ntitle: test\n---\n# Agent Soul\nContent here.\n');
+
+    try {
+      const result = await parse(tmpDir);
+
+      const soulDiags = result.diagnostics.filter(d => d.file === 'SOUL.md');
+      const headingDiag = soulDiags.find(d => d.code === 'CLAWS-P002');
+      expect(headingDiag).toBeUndefined();
+    } finally {
+      const { rm } = await import('node:fs/promises');
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('warns about missing heading when content after frontmatter does not start with heading', async () => {
+    const { writeFile, mkdir } = await import('node:fs/promises');
+    const { join } = await import('node:path');
+    const { tmpdir } = await import('node:os');
+
+    const tmpDir = join(tmpdir(), `claws-test-fm-noheading-${Date.now()}`);
+    await mkdir(tmpDir, { recursive: true });
+    await writeFile(join(tmpDir, 'SOUL.md'), '---\ntitle: test\n---\nNot a heading.\n');
+
+    try {
+      const result = await parse(tmpDir);
+
+      const soulDiags = result.diagnostics.filter(d => d.file === 'SOUL.md');
+      const headingDiag = soulDiags.find(d => d.code === 'CLAWS-P002');
+      expect(headingDiag).toBeDefined();
+      expect(headingDiag!.message).toContain('does not start with a markdown heading');
+    } finally {
+      const { rm } = await import('node:fs/promises');
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('InputResolver — skills/ as file (not directory)', () => {
+  it('skills/ path that is a file returns absent entry', async () => {
+    const { writeFile, mkdir } = await import('node:fs/promises');
+    const { join } = await import('node:path');
+    const { tmpdir } = await import('node:os');
+
+    const tmpDir = join(tmpdir(), `claws-test-skills-file-${Date.now()}`);
+    await mkdir(tmpDir, { recursive: true });
+    await writeFile(join(tmpDir, 'SOUL.md'), '# Soul\nValid.\n');
+    // Create skills/ as a FILE instead of a directory
+    await writeFile(join(tmpDir, 'skills'), 'not a directory');
+
+    try {
+      const result = await parse(tmpDir);
+
+      const skills = result.entries.find(e => e.source === 'skills/');
+      expect(skills).toBeDefined();
+      expect(skills!.status).toBe('absent');
+    } finally {
+      const { rm } = await import('node:fs/promises');
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe('R1 Amendment: Compiler-SDK Reader Canary', () => {
   it('readOCWorkspaceViaFORMA is importable from compiler-sdk', () => {
     // Canary: if compiler-sdk renames or moves this function, this test breaks

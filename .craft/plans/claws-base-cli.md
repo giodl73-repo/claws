@@ -3,7 +3,7 @@ slug: claws-base-cli
 preset: "claws"
 plan: "3 headlines: SARIF output accepted by GitHub Code Scanning, error messages include fix instructions, risk-level color palette"
 area: claws
-status: Draft
+status: Closed
 phase: anubis
 atoms: [atom:error-contract]
 specs: [CL-01, CL-05]

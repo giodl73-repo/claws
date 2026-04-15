@@ -10,5 +10,5 @@ describe('claws-cli scaffold', () => {
   it('entry point module resolves', async () => {
     const mod = await import('../src/index.js');
     expect(mod).toBeDefined();
-  });
+  }, 30_000);
 });

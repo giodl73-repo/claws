@@ -50,17 +50,15 @@ export const noUnredactedPii: SecurityRule = {
       }
       if (ts.isTemplateExpression(expr)) {
         for (const span of expr.templateSpans) {
-          if (ts.isStringLiteral(span.literal) || ts.isNoSubstitutionTemplateLiteral(span.literal)) {
-            if (piiPatterns.some(p => p.test(span.literal.text))) {
-              findings.push({
-                rule: 'no-unredacted-pii',
-                severity: 'high',
-                file: filePath,
-                line: getLineNumber(sourceFile, contextNode),
-                code: getCodeSnippet(sourceFile, contextNode),
-                remediation: 'Redact PII before including in template literal output.',
-              });
-            }
+          if (piiPatterns.some(p => p.test(span.literal.text))) {
+            findings.push({
+              rule: 'no-unredacted-pii',
+              severity: 'high',
+              file: filePath,
+              line: getLineNumber(sourceFile, contextNode),
+              code: getCodeSnippet(sourceFile, contextNode),
+              remediation: 'Redact PII before including in template literal output.',
+            });
           }
         }
       }

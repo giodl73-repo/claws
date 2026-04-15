@@ -1,15 +1,14 @@
 /**
- * .claws FORMA sidecar layout definition.
+ * .claws FORMA sidecar layout definition — pure types and constants.
  *
  * The .claws sidecar is the governance-focused counterpart to .craft.
  * It stores compiled governance artifacts, policies, audit trails,
  * compliance records, and fleet management data.
  *
  * Config file: claws.json (NOT craft.json).
+ *
+ * **No I/O in this module.** Scaffolding lives in init/sidecar-scaffold.ts.
  */
-
-import { mkdir, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
 
 /**
  * All 13 subdirectories in the .claws sidecar layout.
@@ -73,26 +72,3 @@ export const CLAWS_GITIGNORE_DIRS: readonly string[] = [
   '.claws/runtime',
 ];
 
-/**
- * Initialize the .claws sidecar directory structure.
- *
- * Creates all 13 subdirectories under `${root}/.claws/` using
- * recursive mkdir. Safe to call multiple times (idempotent).
- *
- * @param root - Workspace root directory (absolute path).
- */
-export async function initSidecar(root: string): Promise<void> {
-  const dirs = Object.values(CLAWS_SIDECAR_LAYOUT);
-  await Promise.all(
-    dirs.map((dir) => mkdir(join(root, dir), { recursive: true })),
-  );
-
-  // Write .gitignore for sensitive/cache directories
-  const gitignoreLines = CLAWS_GITIGNORE_DIRS.map((d) => {
-    // Strip the .claws/ prefix since .gitignore lives inside .claws/
-    const relative = d.replace(/^\.claws\//, '');
-    return `${relative}/`;
-  });
-  const gitignorePath = join(root, '.claws', '.gitignore');
-  await writeFile(gitignorePath, gitignoreLines.join('\n') + '\n', 'utf-8');
-}

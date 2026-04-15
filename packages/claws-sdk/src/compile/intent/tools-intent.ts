@@ -86,13 +86,120 @@ function extractCapabilities(description: string): string[] {
 }
 
 /**
+ * Parse a markdown table row into cells, stripping leading/trailing pipes and whitespace.
+ * Returns undefined if the line is not a valid table row.
+ */
+function parseTableRow(line: string): string[] | undefined {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith('|') || !trimmed.endsWith('|')) return undefined;
+  // Split on unescaped pipes, drop first and last (empty from leading/trailing |)
+  const cells = trimmed.slice(1, -1).split('|').map(c => c.trim());
+  return cells;
+}
+
+/**
+ * Check if a line is a markdown table separator row (e.g. `| --- | --- |`).
+ */
+function isSeparatorRow(line: string): boolean {
+  const cells = parseTableRow(line);
+  if (!cells) return false;
+  return cells.every(c => /^:?-+:?$/.test(c));
+}
+
+/**
+ * Strip backtick wrapping from a tool name cell (e.g. `` `my-tool` `` → `my-tool`).
+ */
+function stripBackticks(name: string): string {
+  const match = /^`(.+)`$/.exec(name.trim());
+  return match ? match[1]! : name.trim();
+}
+
+/**
+ * Detect whether the content contains a markdown table with tool entries.
+ *
+ * Looks for a header row containing "Tool" and "Guidance" (case-insensitive)
+ * columns, followed by a separator row and data rows.
+ */
+function tryParseTable(lines: readonly string[]): ToolManifestEntry[] | undefined {
+  // Find the header row: must contain a "Tool" column and a "Guidance" column
+  let headerIdx = -1;
+  let toolCol = -1;
+  let guidanceCol = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const cells = parseTableRow(lines[i]!);
+    if (!cells) continue;
+    const lowerCells = cells.map(c => c.toLowerCase());
+    const ti = lowerCells.findIndex(c => c === 'tool' || c === 'tool name');
+    const gi = lowerCells.findIndex(c => c === 'guidance' || c === 'description' || c === 'notes');
+    if (ti !== -1 && gi !== -1) {
+      headerIdx = i;
+      toolCol = ti;
+      guidanceCol = gi;
+      break;
+    }
+  }
+
+  if (headerIdx === -1) return undefined;
+
+  // Next line must be separator
+  if (headerIdx + 1 >= lines.length || !isSeparatorRow(lines[headerIdx + 1]!)) {
+    return undefined;
+  }
+
+  // Parse data rows
+  const entries: ToolManifestEntry[] = [];
+  for (let i = headerIdx + 2; i < lines.length; i++) {
+    const row = lines[i]!.trim();
+    if (row.length === 0) continue;
+    const cells = parseTableRow(row);
+    if (!cells) break; // Non-table line ends the table
+
+    const rawName = cells[toolCol];
+    const rawGuidance = cells[guidanceCol];
+    if (!rawName || rawName.trim().length === 0) continue;
+
+    const name = stripBackticks(rawName);
+    const description = rawGuidance?.replace(/\\[|]/g, '|').trim() ?? '';
+
+    entries.push({
+      name,
+      riskClass: classifyRisk(description),
+      oboFlag: detectOBO(description),
+      capabilities: extractCapabilities(description),
+      description,
+      line: i + 1,
+    });
+  }
+
+  return entries.length > 0 ? entries : undefined;
+}
+
+/**
  * Extract tool manifest entries from a TOOLS.md file entry.
  *
- * Parses ## headings as tool names, body text as descriptions.
+ * Supports two formats:
+ * 1. Section format: ## headings as tool names, body text as descriptions
+ * 2. Table format: `| Tool | Guidance |` markdown tables
+ *
+ * Table format is tried first. If no valid table is found, falls back to
+ * section format. This handles real OC workspace format diversity per CL-09.
  */
 export function extractToolsIntents(entry: FileEntryPresent): IntentResult<ToolManifestEntry> {
-  const intents: ToolManifestEntry[] = [];
   const lines = entry.content.split('\n');
+
+  // Try table format first
+  const tableEntries = tryParseTable(lines);
+  if (tableEntries) {
+    return {
+      source: entry.source,
+      intents: tableEntries,
+      diagnostics: [],
+    };
+  }
+
+  // Fall back to section format
+  const intents: ToolManifestEntry[] = [];
 
   let currentTool: string | undefined;
   let currentDescription: string[] = [];

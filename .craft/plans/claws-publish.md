@@ -3,7 +3,7 @@ slug: claws-publish
 preset: "claws"
 plan: "2 headlines: claws publish distinguishes unsigned from invalid-signed manifests, publish is atomic with rollback on remote failure"
 area: claws
-status: Draft
+status: Closed
 phase: anubis
 atoms: [atom:claws-publish, atom:governance-badge, atom:tier-adoption, atom:claws-compiler]
 specs: [CL-05, CL-06]

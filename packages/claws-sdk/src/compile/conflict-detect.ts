@@ -47,8 +47,8 @@ function sortConflicts(conflicts: ConflictEntry[]): ConflictEntry[] {
     const severityOrder = a.severity === b.severity ? 0 : a.severity === 'Error' ? -1 : 1;
     if (severityOrder !== 0) return severityOrder;
 
-    // Category order
-    return (CATEGORY_ORDER[a.category] ?? 0) - (CATEGORY_ORDER[b.category] ?? 0);
+    // Category order — CATEGORY_ORDER covers all ConflictCategory values
+    return CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category];
   });
 }
 

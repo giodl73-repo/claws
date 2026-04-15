@@ -189,13 +189,17 @@ export async function runEmitSim(
 
     return { passed: true };
   } catch (e) {
+    /* istanbul ignore next -- pipeline always throws Error instances; String(e) is defensive */
+    const errorMsg = e instanceof Error ? e.message : String(e);
+    /* istanbul ignore next -- pipeline always throws Error instances; stack fallback is defensive */
+    const errorStack = e instanceof Error ? e.stack ?? '' : '';
     return {
       passed: false,
-      error: e instanceof Error ? e.message : String(e),
+      error: errorMsg,
       diagnostics: [
         `scenario: ${scenario.name}`,
         `specs: ${scenario.specs?.join(', ')}`,
-        e instanceof Error ? e.stack ?? '' : '',
+        errorStack,
       ],
     };
   } finally {

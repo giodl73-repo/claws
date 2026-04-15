@@ -8,7 +8,7 @@
  * @module claws-cli/commands/compile
  */
 
-import { writeFile, mkdir, readFile } from 'node:fs/promises';
+import { writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import {
@@ -22,6 +22,8 @@ import {
   COMPILER_VERSION,
   SCHEMA_VERSION,
   analyze,
+  ExtractorLLM,
+  buildRegexIntentMap,
 } from '@bic/claws-sdk/compile';
 import { createDefaultRegistry } from '@bic/claws-sdk/governance';
 import { serialize } from '@bic/claws-sdk/ir';
@@ -30,11 +32,13 @@ import type { GovernanceIR } from '@bic/claws-sdk/ir';
 import type { PlatformContext } from '../hooks/pre-command.js';
 import { createTimer } from '../hooks/post-command.js';
 import { writeBypassAuditEvent } from '../core/audit.js';
+import { checkBuildCache, storeBuildCache } from '../core/cache.js';
+import type { LLMFlags } from '../core/llm.js';
+import { createLLMProvider } from '../core/llm.js';
 import {
   formatError,
   formatErrorJson,
   noWorkspaceError,
-  compileFailedError,
   noSourceFilesError,
 } from '../output/errors.js';
 
@@ -45,37 +49,17 @@ const IR_OUTPUT_DIR = '.claws/compiled';
 const IR_OUTPUT_FILE = 'governance-ir.json';
 
 /**
- * Check if a cached IR exists and is still valid.
- * Returns the cached IR JSON string if valid, null otherwise.
- */
-async function checkCache(
-  workspaceRoot: string,
-  force: boolean,
-): Promise<string | null> {
-  if (force) return null;
-  const irPath = join(workspaceRoot, IR_OUTPUT_DIR, IR_OUTPUT_FILE);
-  try {
-    const content = await readFile(irPath, 'utf-8');
-    const ir = JSON.parse(content) as GovernanceIR;
-    if (ir.compiler?.compilerVersion === COMPILER_VERSION) {
-      return content;
-    }
-  } catch {
-    // No cache or invalid
-  }
-  return null;
-}
-
-/**
- * Run the compile pipeline: parse → extract → analyze → write IR.
+ * Run the compile pipeline: parse → extract → [llm-extract] → analyze → write IR.
  *
  * @param ctx - Platform context from pre-command hook
  * @param opts - Command options (force, json, verbose)
+ * @param llmFlags - Optional LLM flags (--llm, --llm-model)
  * @returns Exit code (0=clean, 1=violations, 2=bypass, 3=error)
  */
 export async function runCompile(
   ctx: PlatformContext,
   opts: { force: boolean; json: boolean; verbose: boolean },
+  llmFlags: LLMFlags = { llm: false },
 ): Promise<number> {
   const timer = createTimer();
 
@@ -99,8 +83,8 @@ export async function runCompile(
   }
 
   // Check cache (skip if --force)
-  const cached = await checkCache(ctx.workspaceRoot, opts.force);
-  if (cached !== null) {
+  const cacheResult = await checkBuildCache(ctx.workspaceRoot, opts.force);
+  if (cacheResult.skip) {
     if (opts.json) {
       console.log(JSON.stringify({ status: 'cached', path: join(IR_OUTPUT_DIR, IR_OUTPUT_FILE) }));
     } else {
@@ -108,6 +92,11 @@ export async function runCompile(
     }
     return 0;
   }
+
+  // ── Validate LLM provider (if --llm) ─────────────────────────────────
+  const llmResult = await createLLMProvider(llmFlags, opts.json);
+  if (llmResult !== null && !llmResult.ok) return llmResult.exitCode;
+  const llmExtractor = new ExtractorLLM(llmResult?.provider ?? null);
 
   // ── Parse phase ──────────────────────────────────────────────────────
   const parseResult = await parse(ctx.workspaceRoot);
@@ -126,6 +115,36 @@ export async function runCompile(
   const intentResults = extractAllIntents(parseResult);
   const ast = buildGovernanceAST(intentResults);
 
+  // ── LLM extraction → verify → merge (when --llm) ────────────────────
+  let llmExtractionCount = 0;
+  if (llmExtractor.available) {
+    // Build regex intents map by source for merging
+    const regexIntentsBySource = buildRegexIntentMap(ast);
+    const pipeline = await llmExtractor.extractVerifyMerge(
+      parseResult.entries,
+      regexIntentsBySource,
+    );
+    if (pipeline) {
+      llmExtractionCount = pipeline.extractionResults.reduce(
+        (sum, r) => sum + r.intents.length, 0,
+      );
+      if (opts.verbose) {
+        const verified = pipeline.verificationResults.reduce(
+          (sum, v) => sum + v.exactCount + v.fuzzyCount, 0,
+        );
+        const dropped = pipeline.verificationResults.reduce(
+          (sum, v) => sum + v.mismatchCount, 0,
+        );
+        const merged = pipeline.mergeResults.reduce(
+          (sum, m) => sum + m.intents.length, 0,
+        );
+        console.log(`LLM extracted ${llmExtractionCount} intent(s) via ${llmExtractor.modelId}`);
+        console.log(`  Verified: ${verified} passed, ${dropped} dropped`);
+        console.log(`  Merged: ${merged} total intent(s)`);
+      }
+    }
+  }
+
   // ── Manifest extraction ──────────────────────────────────────────────
   const manifest = extract(ast);
   const capabilityManifest = buildCapabilityManifest(manifest);
@@ -135,18 +154,9 @@ export async function runCompile(
 
   // ── Governance analysis ──────────────────────────────────────────────
   const registry = createDefaultRegistry(capabilityManifest);
-  const rawAnalysis = analyze(capabilityManifest, registry);
-
-  // ── Suppress rules from claws.json ──────────────────────────────────
-  const suppressSet = new Set(ctx.suppressedRules);
-  const suppressed = rawAnalysis.violations.filter((v) => suppressSet.has(v.ruleId));
-  const activeViolations = suppressSet.size > 0
-    ? rawAnalysis.violations.filter((v) => !suppressSet.has(v.ruleId))
-    : rawAnalysis.violations;
-  if (suppressed.length > 0) {
-    console.warn(`${suppressed.length} violation(s) suppressed by claws.json`);
-  }
-  const analysis = { ...rawAnalysis, violations: activeViolations };
+  const analysis = analyze(capabilityManifest, registry, {
+    suppressedRules: ctx.suppressedRules,
+  });
 
   // ── Build GovernanceIR ───────────────────────────────────────────────
   const ir: GovernanceIR = {
@@ -168,18 +178,28 @@ export async function runCompile(
   const outPath = join(outDir, IR_OUTPUT_FILE);
   await writeFile(outPath, serialize(ir), 'utf-8');
 
+  // Store cache after successful compile
+  await storeBuildCache(ctx.workspaceRoot);
+
   const elapsed = timer.elapsed();
   const violationCount = analysis.violations.length;
   const conflictCount = compileConflicts.conflicts.length;
 
   if (opts.json) {
-    console.log(JSON.stringify({
+    const jsonOut: Record<string, unknown> = {
       status: violationCount > 0 ? 'violations' : 'ok',
       path: join(IR_OUTPUT_DIR, IR_OUTPUT_FILE),
       violations: violationCount,
       conflicts: conflictCount,
       durationMs: elapsed,
-    }));
+    };
+    if (llmExtractor.available) {
+      jsonOut['llm'] = {
+        model: llmExtractor.modelId,
+        extractedIntents: llmExtractionCount,
+      };
+    }
+    console.log(JSON.stringify(jsonOut));
   } else {
     console.log(`Compiled governance IR → ${join(IR_OUTPUT_DIR, IR_OUTPUT_FILE)}`);
     if (violationCount > 0) {
@@ -187,6 +207,9 @@ export async function runCompile(
     }
     if (conflictCount > 0) {
       console.log(`  ${conflictCount} conflict(s) detected`);
+    }
+    if (llmExtractor.available) {
+      console.log(`  LLM: ${llmExtractionCount} intent(s) extracted via ${llmExtractor.modelId}`);
     }
     if (opts.verbose) {
       console.log(`  Duration: ${elapsed}ms`);

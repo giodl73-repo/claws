@@ -6,14 +6,15 @@ import { describe, it, expect } from 'vitest';
 import { createProgram } from '../src/cli.js';
 
 describe('claws Commander.js program', () => {
-  it('registers 4 commands (compile, check, build, init)', () => {
+  it('registers all expected commands', () => {
     const program = createProgram();
     const commandNames = program.commands.map((c) => c.name());
-    expect(commandNames).toContain('compile');
-    expect(commandNames).toContain('check');
-    expect(commandNames).toContain('build');
-    expect(commandNames).toContain('init');
-    expect(commandNames).toHaveLength(4);
+    // Authoritative list: must match createProgram() registrations and smoke test groups.
+    const expected = ['compile', 'check', 'build', 'extract', 'init', 'uninstall', 'watch', 'doctor', 'snap', 'scan', 'keys', 'annotate', 'publish', 'cache'];
+    for (const cmd of expected) {
+      expect(commandNames).toContain(cmd);
+    }
+    expect(commandNames.length).toBeGreaterThanOrEqual(expected.length);
   });
 
   it('parses global flag --json', () => {

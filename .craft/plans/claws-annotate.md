@@ -3,7 +3,7 @@ slug: claws-annotate
 preset: "claws"
 plan: "2 headlines: claws annotate infers governance metadata with documented accuracy bounds, false-positive/negative targets drive adoption trust"
 area: claws
-status: Draft
+status: Closed
 phase: anubis
 atoms: [atom:tier-adoption, atom:claws-compiler, atom:skill-kit]
 specs: [CL-05]

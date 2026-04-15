@@ -14,18 +14,30 @@ import type { RuleRegistry } from '../governance/rule-registry.js';
 import type { RuleResult } from '../governance/types.js';
 
 /**
+ * Options for analyze().
+ */
+export interface AnalyzeOptions {
+  /** Rule IDs to suppress — matching violations are excluded from results. */
+  readonly suppressedRules?: readonly string[];
+}
+
+/**
  * Run governance analysis: evaluate all registered rules against the manifest.
  *
  * Returns a GovAnalysis with violations mapped from rule results, plus
  * an empty enforcement plan (populated by downstream passes).
+ *
+ * If `suppressedRules` is provided, matching violations are filtered out
+ * and the count is returned in `suppressedCount`.
  */
 export function analyze(
   manifest: CapabilityManifest,
   registry: RuleRegistry,
+  options?: AnalyzeOptions,
 ): GovAnalysis {
   const results: readonly RuleResult[] = registry.evaluate(manifest);
 
-  const violations = results.flatMap((r) =>
+  const allViolations = results.flatMap((r) =>
     r.violations.map((v) => ({
       ruleId: v.ruleId,
       level: severityToLevel(v.severity),
@@ -36,6 +48,14 @@ export function analyze(
       toolFuzzyMatches: [],
     })),
   );
+
+  const suppressSet = options?.suppressedRules?.length
+    ? new Set(options.suppressedRules)
+    : undefined;
+
+  const violations = suppressSet
+    ? allViolations.filter((v) => !suppressSet.has(v.ruleId))
+    : allViolations;
 
   return {
     violations,

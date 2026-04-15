@@ -161,6 +161,95 @@ describe('claws check', () => {
     }
   });
 
+  it('returns exit code 3 when no workspace detected with --json', async () => {
+    const ctx = makeCtx({ hasConfig: false });
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const exitCode = await runCheck(ctx, { json: true, verbose: false, color: false });
+      expect(exitCode).toBe(3);
+
+      const output = consoleSpy.mock.calls.flat().join('');
+      const parsed = JSON.parse(output);
+      expect(parsed.error.code).toBe('CLAWS-E010');
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
+  it('returns exit code 3 when parse halts (no source files)', async () => {
+    tmpRoot = await mkdtemp(join(tmpdir(), 'claws-check-empty-'));
+    await writeFile(join(tmpRoot, 'claws.json'), JSON.stringify({ trustTier: 2 }));
+
+    const ctx = makeCtx({ workspaceRoot: tmpRoot });
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const exitCode = await runCheck(ctx, { json: false, verbose: false, color: false });
+      expect(exitCode).toBe(3);
+
+      const output = consoleSpy.mock.calls.flat().join(' ');
+      expect(output).toContain('CLAWS-E021');
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
+  it('returns exit code 3 when parse halts with --json', async () => {
+    tmpRoot = await mkdtemp(join(tmpdir(), 'claws-check-empty-'));
+    await writeFile(join(tmpRoot, 'claws.json'), JSON.stringify({ trustTier: 2 }));
+
+    const ctx = makeCtx({ workspaceRoot: tmpRoot });
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const exitCode = await runCheck(ctx, { json: true, verbose: false, color: false });
+      expect(exitCode).toBe(3);
+
+      const output = consoleSpy.mock.calls.flat().join('');
+      const parsed = JSON.parse(output);
+      expect(parsed.error.code).toBe('CLAWS-E021');
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
+  it('--format sarif routes through format registry', async () => {
+    tmpRoot = await createCleanWorkspace();
+    const ctx = makeCtx({ workspaceRoot: tmpRoot });
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      const exitCode = await runCheck(ctx, { json: false, verbose: false, color: false, format: 'sarif' });
+      expect(exitCode).toBeLessThanOrEqual(1);
+
+      const output = consoleSpy.mock.calls.flat().join('');
+      const parsed = JSON.parse(output);
+      // SARIF output has $schema and runs array
+      expect(parsed.$schema).toContain('sarif');
+      expect(Array.isArray(parsed.runs)).toBe(true);
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
+  it('--format csv outputs CSV', async () => {
+    tmpRoot = await createCleanWorkspace();
+    const ctx = makeCtx({ workspaceRoot: tmpRoot });
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      const exitCode = await runCheck(ctx, { json: false, verbose: false, color: false, format: 'csv' });
+      expect(exitCode).toBeLessThanOrEqual(1);
+
+      const output = consoleSpy.mock.calls.flat().join('');
+      // CSV always has a header line
+      expect(output).toMatch(/rule|severity|message/i);
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
   it('CLAWS_BYPASS=1 with --json outputs JSON bypass status', async () => {
     tmpRoot = await createCleanWorkspace();
     const ctx = makeCtx({ workspaceRoot: tmpRoot, bypass: true });

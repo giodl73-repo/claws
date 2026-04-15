@@ -1,0 +1,60 @@
+# R1 Compliance Review — CP-3 Snapshot & Fleet Operations
+
+**Reviewer**: claws:compliance
+**Scope**: Snapshot system (claws-sdk/src/snapshot/), Fleet operations (claws-sdk/src/fleet/), CLI commands (claws-cli/src/commands/)
+**Date**: 2026-04-13
+**Round**: R1
+
+---
+
+## Summary
+
+CP-3 delivers a substantial fleet governance surface: snapshot save/restore with SHA-256 integrity verification, governance-aware semantic diffing, fleet-level promotion with pinch gates, drift detection with severity classification, policy broadcast with atomic writes and trust monotonicity, kill switch with double-kill prevention, audit trail integration, compliance matrix, and multi-format reporting. The architecture is compliance-aware by design. However, several findings need attention before this can generate artifacts an external auditor would accept without follow-up questions.
+
+---
+
+## Findings
+
+| # | Sev | Area | File | Finding |
+|---|-----|------|------|---------|
+| C1 | **M** | Kill / Report | `fleet/report.ts:150` vs `fleet/kill.ts:59` | **Kill sentinel path mismatch breaks report kill status.** `kill.ts` writes the sentinel to `.claws/KILL` (constant `KILL_SENTINEL_FILE = 'KILL'`), but `report.ts:150` reads `.claws/kill.json` to detect kill status. The report will never detect a killed workspace because it reads the wrong file. An auditor running `claws report` after a fleet kill would see all workspaces as "active" when they are actually killed. This is a data integrity defect in the compliance evidence chain. |
+| C2 | **M** | Exception Registry | `fleet/exception.ts` / `fleet/drift-types.ts:86` | **No approver validation on exception creation.** `FleetException.approver` is a freeform string with no validation. `addException()` accepts any value including empty string. For SOC2 CC6.1 and CC6.3 (logical access controls), exception approvals must be traceable to an authorized individual. An auditor would ask: "How do you know this exception was approved by someone with authority?" Currently the answer is: "We don't — anyone can type anything." At minimum, validate non-empty and log the approver to the audit chain. |
+| C3 | **M** | Exception Registry | `fleet/exception.ts:39-55` | **Expired exceptions are silently skipped but never purged or reported.** `matchException()` correctly skips expired exceptions during drift checks, but there is no mechanism to: (a) report which exceptions have expired, (b) purge expired exceptions from the registry, or (c) alert that an exception is approaching expiry. For compliance, expired exceptions that remain in the registry create confusion during audits — "Is this still active? When did it expire? Who was notified?" |
+| C4 | **M** | Broadcast Audit | `fleet/broadcast.ts:384-401` | **Broadcast manifest is written per-workspace, not centrally.** Each successfully updated workspace gets a copy of the broadcast manifest at `.claws/fleet/broadcast-manifest.json`. If a workspace is later deleted or corrupted, the broadcast evidence is lost. There is no central broadcast log at the fleet level. For SOC2 CC8.1 (change management), the auditor needs a single authoritative record of all broadcasts, not scattered copies that can individually disappear. |
+| C5 | **M** | Broadcast Audit | `fleet/broadcast.ts:291-403` | **Broadcast does not record an audit chain event.** Kill activations correctly call `recordKillAuditEvent()` to append to `.claws/audit/chain.jsonl`, but broadcast — which pushes policy changes to potentially dozens of workspaces — records no audit chain event at all. This is a significant gap: policy distribution is a governance-significant action that must be in the tamper-evident audit log. An auditor asking "show me all policy changes" would see kills but not broadcasts. |
+| C6 | **W** | Snapshot Provenance | `snapshot/provenance.ts` | **Provenance lacks HMAC signature.** `PromoteProvenance` records `clawsVersion`, `workspaceHash`, `timestamp`, `signer`, and `bundleHash` — but the provenance itself is not HMAC-signed. The audit chain uses `signAuditEntry()` from `artifact-signer.ts`, but provenance is just plain JSON. An auditor could ask: "How do I know the provenance hasn't been tampered with?" The bundleHash proves file integrity, but nothing proves the provenance metadata (signer, timestamp) is authentic. |
+| C7 | **W** | Snapshot Promotion | `snapshot/promote.ts:29-30` | **Hardcoded SDK version constant.** `CLAWS_VERSION = '0.36.0'` is duplicated in both `save.ts:22` and `promote.ts:29`. If these drift, snapshot provenance will claim a different version than the manifest. This should be sourced from a single location (e.g., `package.json`). For audit traceability, the version in evidence must match the actual software version. |
+| C8 | **W** | Drift Severity | `fleet/severity.ts:145-170` | **Deny constraint detection relies on regex line matching.** `collectDenyRules()` uses `line.match(/^\s*-\s*deny:\s*(.+)/)` to find deny rules in policy YAML. This is fragile — it won't detect multi-line deny blocks, nested deny rules, or deny rules using different YAML formatting (flow style, anchors). A policy change that removes a deny constraint in a non-matching format would be classified as LOW severity instead of HIGH. For compliance evidence, severity misclassification means audit findings could be under-reported. |
+| C9 | **W** | Trust Monotonicity | `fleet/trust-compat.ts:113-118` | **Workspace with unreadable trust tier (0) bypasses monotonic check.** When `readWorkspaceTrustTier()` returns 0 (parse failure, missing file), the broadcast is allowed regardless of policy tier. A misconfigured workspace (corrupted claws.json) could receive a policy that lowers its effective trust floor. The safe default for compliance should be to block broadcasts to workspaces with unreadable trust tiers, not allow them. |
+| C10 | **W** | Compliance Matrix | `fleet/report.ts:188-199` | **Compliance matrix conflates drift with framework compliance.** A workspace with drift is marked as `fail` for all applied frameworks, even if the drift is LOW severity (metadata change) and unrelated to the specific framework. A SOC2-compliant workspace with a minor formatting change in an unrelated policy would show as SOC2:FAIL. This produces false negatives in audit reports, which erodes auditor trust in the evidence. |
+| C11 | **W** | Fleet Report | `fleet/report.ts:240-328` | **Report generation has no timestamp of evidence collection.** The report records `timestamp` (generation time) but not the scan timestamp or drift detection timestamp. If there's a delay between scan and report (e.g., large fleet), the evidence could be stale. SOC2 requires evidence to be current at the time of assertion. The report should include `scanTimestamp` and `driftDetectedAt` fields. |
+| C12 | **W** | Snapshot Diff | `snapshot/diff.ts:338-398` | **Diff reads manifests twice.** `diff()` reads both manifests in the verification loop (lines 344-351), then reads them again for timestamps (lines 365-366). Minor inefficiency, but more importantly, if a manifest were modified between reads (unlikely but not impossible), the diff would use verified data from the first read but timestamps from the unverified second read. For tamper-evident evidence, use the already-loaded manifests. |
+| C13 | **N** | Report Formats | `fleet/report-format.ts` | **CSV output uses framework-aware compliance evidence format.** Three output formats (CSV, JSON, table) are well-structured for audit consumption. CSV includes both summary statistics and per-workspace compliance matrix — suitable for import into GRC tools. JSON preserves full fidelity for programmatic access. Terminal table uses ANSI color coding for at-a-glance triage. This is good compliance output design. |
+| C14 | **N** | Atomic Broadcast | `fleet/broadcast.ts:183-231` | **Atomic write with staging + rename is correct for Windows.** The broadcast uses a staging directory with rename-based atomic writes, handles EBUSY/EPERM retries with exponential backoff, and has a copyFile fallback. Orphaned staging recovery is also implemented. This prevents partial policy writes that could leave workspaces in an inconsistent governance state. |
+| C15 | **N** | Kill Audit Trail | `fleet/kill-audit.ts` + `fleet/double-kill.ts` | **Kill operations are properly audited.** Every kill activation (fresh or re-activation of stale sentinel) records a `KILL_ACTIVATED` event in the audit chain via `recordKillAuditEvent()`. The event includes killPath, reason, actor, workspace path, policy version, and severity 5. Double-kill prevention avoids redundant audit entries for recent kills. This meets SOC2 CC7.2 requirements for incident response logging. |
+| C16 | **N** | Trust Monotonicity | `fleet/trust-compat.ts` | **Monotonic tightening enforcement is architecturally sound.** Trust floor can only rise (T1->T2 allowed, T3->T2 blocked). Per-workspace compatibility checking prevents fleet-wide trust regressions. This is a strong governance primitive for enterprise deployments. |
+| C17 | **N** | Snapshot Integrity | `snapshot/integrity.ts` + `snapshot/restore.ts` | **Restore-time integrity verification is correctly sequenced.** `restore()` verifies the manifest before copying any files, and throws `TamperError` on mismatch. The verification recomputes SHA-256 for every file and compares against stored hashes. The composite `workspaceHash` provides a single root hash for the entire snapshot. This meets the "tamper-evident" requirement. |
+| C18 | **N** | CLI Adapter Pattern | All CLI commands | **CLI commands are thin adapters with no business logic.** All six CLI commands (snap, scan, drift, broadcast, kill, report) delegate to SDK functions and only handle argument parsing and output rendering. This is the correct architecture for compliance — business logic in one auditable location (SDK), presentation separate. |
+
+---
+
+## Severity Legend
+
+- **M** (Must fix): Defect that would cause an auditor to issue a finding or that produces incorrect compliance evidence
+- **W** (Warning): Risk that could weaken audit readiness or produce misleading evidence under specific conditions
+- **N** (Note): Positive observation or minor suggestion that does not block
+
+---
+
+## Verdict
+
+**5 Must-fix, 7 Warnings, 6 Notes**
+
+The architecture is compliance-aware and well-structured. The must-fix items are:
+- **C1** is a bug: the report reads the wrong kill sentinel file, producing incorrect compliance evidence
+- **C2** needs approver validation for exception governance
+- **C3** needs expired exception lifecycle management
+- **C4** needs a central broadcast audit log
+- **C5** needs broadcast events in the audit chain (parity with kill audit)
+
+After the must-fix items are resolved, the fleet compliance surface would be ready for a SOC2 Type II evidence package with high auditor acceptance. The warnings (C6-C12) should be addressed before GA but are not blockers for the current checkpoint.

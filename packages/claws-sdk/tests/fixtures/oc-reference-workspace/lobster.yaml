@@ -1,0 +1,15 @@
+name: research-draft-review
+description: Gather information, draft a document, and review it
+
+steps:
+  - name: research
+    skill: web-lookup
+    description: Search for background information on the topic
+
+  - name: draft
+    skill: summarize
+    description: Synthesize research into a draft document
+
+  - name: review
+    skill: email-drafter
+    description: Format findings as an email and route for approval

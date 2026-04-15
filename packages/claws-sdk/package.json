@@ -36,6 +36,50 @@
       "import": "./dist/detect/index.js",
       "types": "./dist/detect/index.d.ts"
     },
+    "./config": {
+      "import": "./dist/config/index.js",
+      "types": "./dist/config/index.d.ts"
+    },
+    "./init": {
+      "import": "./dist/init/index.js",
+      "types": "./dist/init/index.d.ts"
+    },
+    "./watch": {
+      "import": "./dist/watch/index.js",
+      "types": "./dist/watch/index.d.ts"
+    },
+    "./doctor": {
+      "import": "./dist/doctor/index.js",
+      "types": "./dist/doctor/index.d.ts"
+    },
+    "./amend": {
+      "import": "./dist/amend/index.js",
+      "types": "./dist/amend/index.d.ts"
+    },
+    "./snapshot": {
+      "import": "./dist/snapshot/index.js",
+      "types": "./dist/snapshot/index.d.ts"
+    },
+    "./fleet": {
+      "import": "./dist/fleet/index.js",
+      "types": "./dist/fleet/index.d.ts"
+    },
+    "./keys": {
+      "import": "./dist/keys/index.js",
+      "types": "./dist/keys/index.d.ts"
+    },
+    "./scaffold": {
+      "import": "./dist/scaffold/index.js",
+      "types": "./dist/scaffold/index.d.ts"
+    },
+    "./annotate": {
+      "import": "./dist/annotate/index.js",
+      "types": "./dist/annotate/index.d.ts"
+    },
+    "./publish": {
+      "import": "./dist/publish/index.js",
+      "types": "./dist/publish/index.d.ts"
+    },
     "./compliance/*": {
       "import": "./dist/compliance/*.js",
       "types": "./dist/compliance/*.d.ts"
@@ -50,6 +94,9 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@craftworks/compiler-sdk": "file:../compiler-sdk",

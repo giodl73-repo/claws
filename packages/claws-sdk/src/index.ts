@@ -5,7 +5,8 @@
  */
 
 export { CLAWS_SIDECAR_LAYOUT, CLAWS_CONFIG_FILE, type ClawsSidecarDir } from './types/sidecar.js';
-export { initSidecar, CLAWS_SIDECAR_VERSION, CLAWS_GITIGNORE_DIRS } from './types/sidecar.js';
+export { CLAWS_SIDECAR_VERSION, CLAWS_GITIGNORE_DIRS } from './types/sidecar.js';
+export { scaffoldSidecar as initSidecar } from './init/sidecar-scaffold.js';
 export type { Platform, EnforcementModel, PlatformCapability } from './types/platform.js';
 export { detect } from './detect/index.js';
 export type {
@@ -66,3 +67,9 @@ export {
   verifyAuditEntry,
   type AuditChainEntry,
 } from './compliance/artifact-signer.js';
+export {
+  appendAuditEvent,
+  readAuditChain,
+  resolveActor,
+  type AuditEventInput,
+} from './compliance/audit-chain.js';

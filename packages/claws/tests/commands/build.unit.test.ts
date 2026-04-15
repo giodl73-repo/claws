@@ -229,6 +229,27 @@ describe('claws build', () => {
     }
   });
 
+  it('verbose auto-detect prints platform and method', async () => {
+    tmpRoot = await createOCWorkspace();
+    const ctx = makeCtx({ workspaceRoot: tmpRoot });
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const exitCode = await runBuild(ctx, { force: true, json: false, verbose: true });
+      // 0=clean, 1=violations; both are valid successful build paths
+      expect(exitCode).toBeLessThanOrEqual(1);
+
+      const output = consoleSpy.mock.calls.flat().join(' ');
+      expect(output).toContain('Platform:');
+      // Verbose auto-detect shows the detection method in parentheses
+      expect(output).toMatch(/Platform:\s+\S+\s+\(/);
+    } finally {
+      consoleSpy.mockRestore();
+      warnSpy.mockRestore();
+    }
+  });
+
   it('verbose mode prints platform and stage progress', async () => {
     tmpRoot = await createOCWorkspace();
     const ctx = makeCtx({ workspaceRoot: tmpRoot });
@@ -269,6 +290,29 @@ describe('claws build', () => {
     }
   });
 
+  it('parse halt with --json returns JSON error', async () => {
+    tmpRoot = await mkdtemp(join(tmpdir(), 'claws-build-empty-'));
+    await writeFile(join(tmpRoot, 'claws.json'), JSON.stringify({ trustTier: 2 }));
+
+    const ctx = makeCtx({ workspaceRoot: tmpRoot });
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const exitCode = await runBuild(ctx, { force: true, json: true, verbose: false }, 'openclaw');
+      expect(exitCode).toBe(3);
+
+      expect(consoleSpy).toHaveBeenCalledTimes(1);
+
+      const output = consoleSpy.mock.calls[0]?.[0];
+      expect(typeof output).toBe('string');
+
+      const parsed = JSON.parse(output as string);
+      expect(parsed.error.code).toBe('CLAWS-E021');
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
   it('parse halt returns exit code 3 with no-source-files error', async () => {
     // Create workspace with claws.json but no governance source files
     tmpRoot = await mkdtemp(join(tmpdir(), 'claws-build-empty-'));
@@ -283,6 +327,52 @@ describe('claws build', () => {
 
       const output = consoleSpy.mock.calls.flat().join(' ');
       expect(output).toContain('CLAWS-E021');
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
+  it('returns exit 3 when auto-detect fails (invalid platform in config)', async () => {
+    tmpRoot = await mkdtemp(join(tmpdir(), 'claws-build-badplat-'));
+    await writeFile(join(tmpRoot, 'claws.json'), JSON.stringify({ trustTier: 2, platform: 'invalidxyz' }));
+    await writeFile(join(tmpRoot, 'TOOLS.md'), '# Tools\n\n## file-read\nReads files.\nRisk: R2\n');
+
+    const ctx = makeCtx({
+      workspaceRoot: tmpRoot,
+      config: { trustTier: 2, platform: 'invalidxyz' },
+    });
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      // No targetArg — forces auto-detect path which will fail on invalid platform
+      const exitCode = await runBuild(ctx, { force: true, json: false, verbose: false });
+      expect(exitCode).toBe(3);
+
+      const output = consoleSpy.mock.calls.flat().join(' ');
+      expect(output).toContain('Platform detection failed');
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
+  it('returns exit 3 with JSON when auto-detect fails', async () => {
+    tmpRoot = await mkdtemp(join(tmpdir(), 'claws-build-badplat-'));
+    await writeFile(join(tmpRoot, 'claws.json'), JSON.stringify({ trustTier: 2, platform: 'invalidxyz' }));
+    await writeFile(join(tmpRoot, 'TOOLS.md'), '# Tools\n\n## file-read\nReads files.\nRisk: R2\n');
+
+    const ctx = makeCtx({
+      workspaceRoot: tmpRoot,
+      config: { trustTier: 2, platform: 'invalidxyz' },
+    });
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const exitCode = await runBuild(ctx, { force: true, json: true, verbose: false });
+      expect(exitCode).toBe(3);
+
+      const output = consoleSpy.mock.calls.flat().join('');
+      const parsed = JSON.parse(output);
+      expect(parsed.error.code).toBe('CLAWS-E020');
     } finally {
       consoleSpy.mockRestore();
     }

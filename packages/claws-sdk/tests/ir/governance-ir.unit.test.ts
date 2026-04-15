@@ -23,7 +23,7 @@ import type {
   LabelIntent,
   CompilerMeta,
 } from '../../src/ir/index.js';
-import { CLAWS_E001, validateFailModes } from '../../src/ir/index.js';
+import { CLAWS_E001, validateFailModes, serialize, deserialize, hashIR, hashRaw } from '../../src/ir/index.js';
 
 /** Helper: build a minimal valid GovernanceIR for testing. */
 function minimalIR(overrides?: Partial<GovernanceIR>): GovernanceIR {
@@ -92,6 +92,53 @@ describe('GovernanceIR', () => {
     expect(ir.compiler.compilerVersion).toBe('1.2.3');
     expect(ir.compiler.compiledAt).toBe('2026-04-12T12:00:00Z');
     expect(ir.compiler.schemaVersion).toBe(2);
+  });
+});
+
+describe('serialize / deserialize / hashIR / hashRaw', () => {
+  it('serialize produces deterministic JSON', () => {
+    const ir = minimalIR();
+    const json = serialize(ir);
+    expect(json).toContain('"compilerVersion"');
+    // Keys should be sorted alphabetically
+    const parsed = JSON.parse(json);
+    expect(parsed).toBeDefined();
+  });
+
+  it('deserialize round-trips through serialize', () => {
+    const ir = minimalIR();
+    const json = serialize(ir);
+    const roundTripped = deserialize(json);
+    expect(roundTripped.compiler.compilerVersion).toBe('0.1.0');
+    expect(roundTripped.intents).toEqual([]);
+  });
+
+  it('hashIR produces a deterministic SHA-256 hex string', () => {
+    const ir = minimalIR();
+    const hash1 = hashIR(ir);
+    const hash2 = hashIR(ir);
+    expect(hash1).toBe(hash2);
+    expect(hash1).toHaveLength(64); // SHA-256 hex
+  });
+
+  it('hashIR produces different hashes for different IRs', () => {
+    const ir1 = minimalIR();
+    const ir2 = minimalIR({
+      compiler: { compilerVersion: '9.9.9', compiledAt: '2026-01-01T00:00:00Z', schemaVersion: 1 },
+    });
+    expect(hashIR(ir1)).not.toBe(hashIR(ir2));
+  });
+
+  it('hashRaw produces a deterministic SHA-256 hex string', () => {
+    const hash = hashRaw('hello world');
+    expect(hash).toHaveLength(64);
+    expect(hashRaw('hello world')).toBe(hash);
+  });
+
+  it('hashRaw normalizes line endings', () => {
+    const unix = hashRaw('line1\nline2');
+    const windows = hashRaw('line1\r\nline2');
+    expect(unix).toBe(windows);
   });
 });
 

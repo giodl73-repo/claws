@@ -1,12 +1,14 @@
 /**
- * Compiler version constants — single source of truth for version strings
- * embedded in GovernanceIR and audit events.
+ * Compiler version constants — version strings embedded in
+ * GovernanceIR and audit events.
  *
  * @module claws-sdk/compile/version
  */
 
+import { CLAWS_SDK_VERSION } from '../version.js';
+
 /** Compiler version embedded in every GovernanceIR. */
-export const COMPILER_VERSION = '0.36.0';
+export const COMPILER_VERSION = CLAWS_SDK_VERSION;
 
 /** GovernanceIR schema version. */
 export const SCHEMA_VERSION = 1;

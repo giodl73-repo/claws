@@ -274,6 +274,28 @@ describe('claws compile', () => {
     }
   });
 
+  it('text output includes IR path when workspace has governance directives', async () => {
+    tmpRoot = await createMinimalWorkspace();
+    // Create a workspace that triggers conflicts by having conflicting governance directives
+    await writeFile(
+      join(tmpRoot, 'SOUL.md'),
+      '# Soul\n\nAllow all network access.\nDeny all network access.\n',
+    );
+    const ctx = makeCtx({ workspaceRoot: tmpRoot });
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      const exitCode = await runCompile(ctx, { force: true, json: false, verbose: false });
+      // Regardless of whether conflicts are detected, verify the output path renders
+      expect(exitCode).toBeLessThanOrEqual(1);
+
+      const output = consoleSpy.mock.calls.flat().join(' ');
+      expect(output).toContain('governance-ir.json');
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
   it('parse halt with --json returns JSON error', async () => {
     tmpRoot = await mkdtemp(join(tmpdir(), 'claws-compile-empty-'));
     await writeFile(join(tmpRoot, 'claws.json'), JSON.stringify({ trustTier: 2 }));

@@ -3,7 +3,7 @@ slug: claws-fleet-ops
 preset: "claws"
 plan: "2 headlines: claws pinch --fleet checks 47 workspaces in <120s, claws broadcast reports per-workspace status with retry on transient failures"
 area: claws
-status: Draft
+status: Closed
 phase: anubis
 atoms: [atom:fleet-broadcast, atom:fleet-drift, atom:fleet-scan, atom:fleet-doctor, atom:fleet-comply, atom:kill-switch]
 specs: [CL-01, CL-02, CL-03, CL-05]

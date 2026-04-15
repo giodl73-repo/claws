@@ -58,15 +58,44 @@ export function extractAgentsIntents(entry: FileEntryPresent): IntentResult<Dele
 
     if (current === undefined) continue;
 
-    // Parse "- Tools: X, Y, Z" or "Tools: X, Y, Z" line
-    const toolsMatch = /^(?:[-*+]\s+)?Tools:\s*(\S[^\n]*)$/i.exec(trimmed);
+    // Parse tools — three formats:
+    // 1. "- Tools: X, Y, Z" (comma-separated, single line)
+    // 2. "- tools:" (nested list follows on subsequent indented lines)
+    // 3. "Tools: X, Y, Z" (no bullet)
+    const toolsMatch = /^(?:[-*+]\s+)?tools:\s*(\S[^\n]*)?$/i.exec(trimmed);
     if (toolsMatch) {
-      current.tools = toolsMatch[1]!.split(',').map(t => t.trim()).filter(t => t.length > 0);
+      const inline = toolsMatch[1]?.trim();
+      if (inline && inline.length > 0) {
+        // Comma-separated on same line
+        current.tools = inline.split(',').map(t => t.trim()).filter(t => t.length > 0);
+      } else {
+        // Nested list: collect subsequent indented "- item" lines
+        const nested: string[] = [];
+        let j = i + 1;
+        while (j < lines.length) {
+          const nextLine = lines[j]!;
+          const nextTrimmed = nextLine.trim();
+          // Must be indented and start with bullet
+          if (nextLine.match(/^\s+[-*+]\s+/) && nextTrimmed.length > 0) {
+            const item = nextTrimmed.replace(/^[-*+]\s+/, '').trim();
+            if (item.length > 0) nested.push(item);
+            j++;
+          } else {
+            break;
+          }
+        }
+        if (nested.length > 0) {
+          current.tools = nested;
+          i = j - 1; // advance past consumed lines
+        }
+      }
       continue;
     }
 
-    // Parse "- Delegates to: AgentName" or "Delegates to: AgentName" line
-    const delegateMatch = /^(?:[-*+]\s+)?Delegates\s+to:\s*(\S[^\n]*)$/i.exec(trimmed);
+    // Parse delegation — three formats:
+    // 1. "- Delegates to: AgentName" or "Delegates to: AgentName"
+    // 2. "- delegates_to: AgentName"
+    const delegateMatch = /^(?:[-*+]\s+)?(?:delegates[\s_]to|delegates_to):\s*(\S[^\n]*)$/i.exec(trimmed);
     if (delegateMatch) {
       current.delegatesTo = delegateMatch[1]!.split(',').map(t => t.trim()).filter(t => t.length > 0);
     }

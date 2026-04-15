@@ -36,13 +36,13 @@ describe('Rule 13: no-unredacted-pii (branch coverage)', () => {
     expect(result.findings[0]!.rule).toBe('no-unredacted-pii');
   });
 
-  it('detects PII in template literal span', () => {
+  it('detects PII in template literal span (TemplateTail with email)', () => {
     const code = 'function f(x: string) { return `Contact: ${x} at john@example.com end`; }';
     const result = scanCode(code, [noUnredactedPii]);
-    // The template span literal (after substitution) contains "john@example.com end"
-    // which is a TemplateTail — check if detected
-    expect(result.findings.length).toBeGreaterThanOrEqual(0);
-    // The template head and spans are checked via the TemplateExpression branch
+    // The span.literal text is " at john@example.com end" — contains email PII
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0]!.rule).toBe('no-unredacted-pii');
+    expect(result.findings[0]!.remediation).toContain('template literal');
   });
 
   it('detects PII in no-substitution template literal return', () => {
@@ -198,5 +198,31 @@ describe('Rule 16: no-chain-bypass (branch coverage)', () => {
   it('does not flag unrelated boolean variables', () => {
     const result = scanCode('const isEnabled = true;', [noChainBypass]);
     expect(result.findings).toHaveLength(0);
+  });
+
+  it('does not flag property { skipValidation: false } (correctly disabled)', () => {
+    const code = 'const config = { skipValidation: false };';
+    const result = scanCode(code, [noChainBypass]);
+    // skipValidation: false is intentionally safe — the outer condition matches
+    // but the inner guard only pushes for validate: false
+    expect(result.findings).toHaveLength(0);
+  });
+});
+
+// ── Rule 13: no-unredacted-pii — template expression branch ───────────
+
+describe('Rule 13: no-unredacted-pii (template span branch)', () => {
+  it('detects PII phone number in template span', () => {
+    const code = 'function f(x: string) { return `Call ${x} at 555-123-4567 now`; }';
+    const result = scanCode(code, [noUnredactedPii]);
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0]!.rule).toBe('no-unredacted-pii');
+  });
+
+  it('detects PII email in string literal within return', () => {
+    const code = 'function f() { return "contact: admin@company.org"; }';
+    const result = scanCode(code, [noUnredactedPii]);
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0]!.severity).toBe('high');
   });
 });

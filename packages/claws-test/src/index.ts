@@ -52,3 +52,56 @@ export {
   toPassSecurityScan,
 } from './matchers/governance.js';
 export type { ScanInput } from './matchers/governance.js';
+
+// GatewaySim
+export { GatewaySim } from './gateway-sim.js';
+export type {
+  AuditEntry,
+  FireResult,
+  GatewaySimOptions,
+  ResetOptions,
+} from './gateway-sim.js';
+
+// Mock Governance Host
+export { MockGovernanceHost } from './gateway-sim/mock-governance-host.js';
+export type {
+  GovernanceHost,
+  MockGovernanceHostConfig,
+  PolicyResult,
+  RiskResolution,
+  DiagnosticReport,
+} from './gateway-sim/mock-governance-host.js';
+
+// Tool Call Builder
+export { ToolCallBuilder, toolCall } from './tool-call-builder.js';
+export type { ToolCallPayload } from './tool-call-builder.js';
+
+// SimReport
+export { SimReport, hasRegressions, diffSeverity } from './gateway-sim/report.js';
+export type {
+  EnforcementEntry,
+  EnforcementOutcome,
+  WorkspaceMetadata,
+  SiemEntry,
+  SimReportJSON,
+  ToolDiff,
+  SimDiff,
+  DiffSeverity,
+} from './gateway-sim/report.js';
+
+// Plugin Loader
+export { PluginLoadError } from './gateway-sim/plugin-loader.js';
+export type { PluginHooks } from './gateway-sim/plugin-loader.js';
+
+// Timing
+export type { TimingEntry, TimingBaseline } from './gateway-sim/timing.js';
+
+// Gateway Matchers
+export {
+  toBlock,
+  toAllow,
+  toElicit,
+  toHaveAuditEntries,
+  toEnforceWithin,
+  toHaveValidAuditChain,
+} from './matchers/gateway.js';

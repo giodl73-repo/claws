@@ -26,18 +26,31 @@ import {
 
 /**
  * Map keyword to mechanical intent kind.
+ *
+ * Handles both formal keywords ("never", "must not") and natural language
+ * patterns ("don't let", "check with me before") per CL-09 format tolerance.
  */
 function keywordToIntentKind(keyword: string): SoulIntent['intentKind'] {
   switch (keyword) {
     case 'never':
     case 'must not':
+    case "don't ever":
+    case 'under no circumstances':
       return 'deny';
-    case 'always':
-    case 'require':
-      return 'require';
+    case "don't let":
+    case 'do not':
+    case 'not allowed to':
+      return 'deny';
     case 'should not':
     case 'avoid':
       return 'deny';
+    case 'always':
+    case 'require':
+    case 'make sure':
+      return 'require';
+    case 'always check with me before':
+    case 'check with me before':
+      return 'elicit';
     case 'prefer':
       return 'label';
     case 'be careful':

@@ -11,9 +11,9 @@ import {
   CLAWS_CONFIG_FILE,
   CLAWS_SIDECAR_VERSION,
   CLAWS_GITIGNORE_DIRS,
-  initSidecar,
   type ClawsSidecarDir,
 } from '../../src/types/sidecar.js';
+import { scaffoldSidecar as initSidecar } from '../../src/init/sidecar-scaffold.js';
 
 describe('sidecar constants', () => {
   it('has 13 subdirectories', () => {

@@ -13,8 +13,10 @@ import { join } from 'node:path';
 const SRC_DIR = join(__dirname, '..', '..', 'src');
 // Budget: src/ TypeScript source (excluding node_modules, dist).
 // The 45KB CL-06 target was for dist output. Source includes 12 governance
-// checks, 16 security rules, scenario engine, matchers — 75KB is realistic.
-const MAX_SOURCE_SIZE_KB = 75;
+// checks, 16 security rules, scenario engine, matchers, and now the
+// GatewaySim test harness (gateway-sim, report, timing, plugin-loader,
+// mock-governance-host, tool-call-builder, gateway matchers) — 115KB is realistic.
+const MAX_SOURCE_SIZE_KB = 115;
 
 async function getDirectorySize(dir: string): Promise<number> {
   let totalSize = 0;

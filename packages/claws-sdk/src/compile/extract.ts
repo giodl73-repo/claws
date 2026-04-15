@@ -177,13 +177,15 @@ function extractAgentRoster(ast: GovernanceAST): AgentRosterEntry[] {
   const allAgents = new Set([...agentTools.keys(), ...agentDelegates.keys()]);
 
   for (const name of allAgents) {
+    // All agents in allAgents are guaranteed to be in all 4 maps because
+    // both "from" and "to" paths initialize entries in every map.
     entries.push({
       name,
-      tools: [...(agentTools.get(name) ?? [])],
-      delegatesTo: [...(agentDelegates.get(name) ?? [])],
+      tools: [...agentTools.get(name)!],
+      delegatesTo: [...agentDelegates.get(name)!],
       delegationDepth: computeDelegationDepth(name, delegationGraph),
-      source: agentSources.get(name) ?? 'AGENTS.md',
-      line: agentLines.get(name) ?? 1,
+      source: agentSources.get(name)!,
+      line: agentLines.get(name)!,
     });
   }
 

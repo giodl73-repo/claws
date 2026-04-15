@@ -139,4 +139,25 @@ describe('analyze()', () => {
     expect(result.violations[0]!.fixSuggestions).toEqual([]);
     expect(result.violations[0]!.toolFuzzyMatches).toEqual([]);
   });
+
+  it('suppresses violations matching suppressedRules', () => {
+    const registry = createRegistry();
+    registry.register(makeRule('R-KEEP', [{ severity: 'high', message: 'keep this' }]));
+    registry.register(makeRule('R-DROP', [{ severity: 'critical', message: 'drop this' }]));
+
+    const result = analyze(makeManifest(), registry, { suppressedRules: ['R-DROP'] });
+
+    expect(result.violations).toHaveLength(1);
+    expect(result.violations[0]!.ruleId).toBe('R-KEEP');
+  });
+
+  it('returns all violations when suppressedRules is empty array', () => {
+    const registry = createRegistry();
+    registry.register(makeRule('R-A', [{ severity: 'low', message: 'a' }]));
+    registry.register(makeRule('R-B', [{ severity: 'medium', message: 'b' }]));
+
+    const result = analyze(makeManifest(), registry, { suppressedRules: [] });
+
+    expect(result.violations).toHaveLength(2);
+  });
 });

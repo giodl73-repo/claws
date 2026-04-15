@@ -8,8 +8,6 @@
  * @module claws-cli/commands/check
  */
 
-import { join } from 'node:path';
-
 import {
   parse,
   extractAllIntents,
@@ -17,6 +15,8 @@ import {
   extract,
   buildCapabilityManifest,
   analyze,
+  ExtractorLLM,
+  buildRegexIntentMap,
 } from '@bic/claws-sdk/compile';
 import { createDefaultRegistry } from '@bic/claws-sdk/governance';
 import type { GovViolation } from '@bic/claws-sdk/ir';
@@ -28,6 +28,10 @@ import { createPalette } from '../output/color.js';
 import { renderCheckOutput } from '../output/format-default.js';
 import type { RenderableViolation, CheckResult } from '../output/format-default.js';
 import { renderCheckJson } from '../output/format-json.js';
+import { getFormatter } from '../format/index.js';
+import type { FormatName } from '../format/index.js';
+import type { LLMFlags } from '../core/llm.js';
+import { createLLMProvider } from '../core/llm.js';
 import {
   formatError,
   formatErrorJson,
@@ -49,16 +53,18 @@ function toRenderable(v: GovViolation): RenderableViolation {
 }
 
 /**
- * Run the check pipeline: parse → extract → analyze → render.
+ * Run the check pipeline: parse → extract → [llm-extract] → analyze → render.
  * Read-only except for bypass audit events.
  *
  * @param ctx - Platform context from pre-command hook
  * @param opts - Command options (json, verbose, color)
+ * @param llmFlags - Optional LLM flags (--llm, --llm-model)
  * @returns Exit code (0=clean, 1=violations, 2=bypass, 3=error)
  */
 export async function runCheck(
   ctx: PlatformContext,
-  opts: { json: boolean; verbose: boolean; color: boolean },
+  opts: { json: boolean; verbose: boolean; color: boolean; format?: FormatName },
+  llmFlags: LLMFlags = { llm: false },
 ): Promise<number> {
   const timer = createTimer();
 
@@ -81,6 +87,11 @@ export async function runCheck(
     return 3;
   }
 
+  // ── Validate LLM provider (if --llm) ─────────────────────────────────
+  const llmResult = await createLLMProvider(llmFlags, opts.json);
+  if (llmResult !== null && !llmResult.ok) return llmResult.exitCode;
+  const llmExtractor = new ExtractorLLM(llmResult?.provider ?? null);
+
   // ── Parse phase ──────────────────────────────────────────────────────
   const parseResult = await parse(ctx.workspaceRoot);
 
@@ -94,31 +105,51 @@ export async function runCheck(
   const intentResults = extractAllIntents(parseResult);
   const ast = buildGovernanceAST(intentResults);
 
+  // ── LLM extraction → verify → merge (when --llm) ────────────────────
+  if (llmExtractor.available) {
+    const regexIntentsBySource = buildRegexIntentMap(ast);
+    const pipeline = await llmExtractor.extractVerifyMerge(
+      parseResult.entries,
+      regexIntentsBySource,
+    );
+    if (pipeline && opts.verbose) {
+      const count = pipeline.extractionResults.reduce((sum, r) => sum + r.intents.length, 0);
+      const verified = pipeline.verificationResults.reduce(
+        (sum, v) => sum + v.exactCount + v.fuzzyCount, 0,
+      );
+      const dropped = pipeline.verificationResults.reduce(
+        (sum, v) => sum + v.mismatchCount, 0,
+      );
+      const merged = pipeline.mergeResults.reduce(
+        (sum, m) => sum + m.intents.length, 0,
+      );
+      console.log(`LLM extracted ${count} intent(s) via ${llmExtractor.modelId}`);
+      console.log(`  Verified: ${verified} passed, ${dropped} dropped`);
+      console.log(`  Merged: ${merged} total intent(s)`);
+    }
+  }
+
   // ── Manifest extraction ──────────────────────────────────────────────
   const manifest = extract(ast);
   const capabilityManifest = buildCapabilityManifest(manifest);
 
   // ── Governance analysis ──────────────────────────────────────────────
   const registry = createDefaultRegistry(capabilityManifest);
-  const rawAnalysis = analyze(capabilityManifest, registry);
-
-  // ── Suppress rules from claws.json ──────────────────────────────────
-  const suppressSet = new Set(ctx.suppressedRules);
-  const suppressed = rawAnalysis.violations.filter((v) => suppressSet.has(v.ruleId));
-  const activeViolations = suppressSet.size > 0
-    ? rawAnalysis.violations.filter((v) => !suppressSet.has(v.ruleId))
-    : rawAnalysis.violations;
-  if (suppressed.length > 0) {
-    console.warn(`${suppressed.length} violation(s) suppressed by claws.json`);
-  }
+  const analysisResult = analyze(capabilityManifest, registry, {
+    suppressedRules: ctx.suppressedRules,
+  });
 
   const elapsed = timer.elapsed();
 
   // ── Render output ────────────────────────────────────────────────────
-  const violations = activeViolations.map(toRenderable);
+  const violations = analysisResult.violations.map(toRenderable);
   const result: CheckResult = { violations, durationMs: elapsed };
 
-  if (opts.json) {
+  if (opts.format) {
+    // --format flag routes through the format registry
+    const formatter = getFormatter(opts.format);
+    console.log(formatter(result, ctx.workspaceRoot));
+  } else if (opts.json) {
     console.log(renderCheckJson(result));
   } else {
     const palette = createPalette(opts.color);

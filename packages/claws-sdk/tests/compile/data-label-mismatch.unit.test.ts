@@ -225,4 +225,37 @@ describe('detectDataLabelMismatch()', () => {
     const entries = detectDataLabelMismatch(makeAST(), makeManifest({ dataLabels, agents }));
     expect(entries).toEqual([]);
   });
+
+  it('skips reachable agent not found in manifest.agents', () => {
+    // Agent A delegates to B, but B is only in delegatesTo, not in manifest.agents
+    const dataLabels: DataLabelEntry[] = [
+      { label: 'secrets', sensitivity: 'restricted', retention: 'session', source: 'MEMORY.md', line: 3 },
+    ];
+    const agents: AgentRosterEntry[] = [
+      { name: 'A', tools: ['Read'], delegatesTo: ['Ghost'], delegationDepth: 1, source: 'AGENTS.md', line: 3 },
+    ];
+
+    const entries = detectDataLabelMismatch(makeAST(), makeManifest({ dataLabels, agents }));
+    expect(entries).toEqual([]);
+  });
+
+  it('handles buildReachability BFS with circular delegation gracefully', () => {
+    // A -> B -> A (circular), both have Read tools, restricted data
+    const dataLabels: DataLabelEntry[] = [
+      { label: 'secrets', sensitivity: 'restricted', retention: 'session', source: 'MEMORY.md', line: 3 },
+    ];
+    const agents: AgentRosterEntry[] = [
+      { name: 'A', tools: ['Read'], delegatesTo: ['B'], delegationDepth: 1, source: 'AGENTS.md', line: 3 },
+      { name: 'B', tools: ['Read'], delegatesTo: ['A'], delegationDepth: 1, source: 'AGENTS.md', line: 5 },
+    ];
+    const memoryIntents: MemoryIntent[] = [
+      { label: 'secrets', sensitivity: 'restricted', retention: 'session', line: 3 },
+    ];
+
+    const ast = makeAST({ memory: [{ source: 'MEMORY.md', intents: memoryIntents }] });
+    const entries = detectDataLabelMismatch(ast, makeManifest({ dataLabels, agents }));
+
+    // Should produce at least one conflict for the circular chain
+    expect(entries.length).toBeGreaterThanOrEqual(1);
+  });
 });

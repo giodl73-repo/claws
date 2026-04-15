@@ -3,7 +3,7 @@ slug: claws-init-uninstall
 preset: "claws"
 plan: "2 headlines: claws init --template soc2 produces a governed OC workspace in <5s, claws uninstall leaves zero traces"
 area: claws
-status: Draft
+status: Closed
 phase: anubis
 atoms: [atom:claws-init, atom:claws-uninstall, atom:claws-bypass, atom:claws-json]
 specs: [CL-01, CL-03, CL-05]

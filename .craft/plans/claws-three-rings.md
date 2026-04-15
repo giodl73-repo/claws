@@ -3,7 +3,7 @@ slug: claws-three-rings
 preset: "claws"
 plan: "2 headlines: claws watch catches a TOOLS.md violation within 1 second of save, claws doctor --post-upgrade handles OC version gap with migration"
 area: claws
-status: Draft
+status: Closed
 phase: anubis
 atoms: [atom:claws-watch, atom:claws-doctor, atom:three-rings, atom:upgrade-lifecycle]
 specs: [CL-05, CL-01, CL-03]

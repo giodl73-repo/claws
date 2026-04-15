@@ -3,7 +3,7 @@ slug: claws-snap-restore
 preset: "claws"
 plan: "2 headlines: snap save/restore round-trips governance state with SHA-256 integrity, snap diff shows semantic governance changes"
 area: claws
-status: Draft
+status: Closed
 phase: anubis
 atoms: [atom:snap, atom:snap-restore]
 specs: [CL-01, CL-05]

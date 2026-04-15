@@ -47,6 +47,15 @@ describe('format-default output', () => {
       const result = formatViolation(v, palette);
       expect(result).toContain('LOW');
     });
+
+    it('omits target segment when target is empty', () => {
+      const v = makeViolation({ target: '' });
+      const result = formatViolation(v, palette);
+      expect(result).toContain('HIGH');
+      expect(result).toContain('Tool exceeds risk threshold');
+      // No target segment — the empty target branch should not add a space+target
+      expect(result).not.toContain('  TOOLS.md');
+    });
   });
 
   describe('countBySeverity', () => {
@@ -95,6 +104,22 @@ describe('format-default output', () => {
       expect(summary).toContain('1 medium');
       expect(summary).toContain('1 low');
       expect(summary).toContain('0.5s');
+    });
+
+    it('omits zero-count buckets from breakdown', () => {
+      // Only medium violations — high and low should not appear
+      const result: CheckResult = {
+        violations: [
+          makeViolation({ level: 3 }),
+          makeViolation({ level: 3 }),
+        ],
+        durationMs: 200,
+      };
+      const summary = formatSummary(result, palette);
+      expect(summary).toContain('FAIL');
+      expect(summary).toContain('2 medium');
+      expect(summary).not.toContain('high');
+      expect(summary).not.toContain('low');
     });
   });
 

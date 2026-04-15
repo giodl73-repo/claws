@@ -15,7 +15,7 @@ export { preCommand } from './hooks/pre-command.js';
 export type { PlatformContext, ClawsJsonConfig } from './hooks/pre-command.js';
 export { createTimer, postCommand } from './hooks/post-command.js';
 export type { CommandTiming } from './hooks/post-command.js';
-export { formatError, formatErrorJson, noWorkspaceError, compileFailedError, noSourceFilesError } from './output/errors.js';
+export { formatError, formatErrorJson, noWorkspaceError, compileFailedError, noSourceFilesError, alreadyInitializedError, initDetectFailedError, initWriteFailedError } from './output/errors.js';
 export type { ClawsError } from './output/errors.js';
 export { createPalette, isColorDisabled, severityColor, severityLabel } from './output/color.js';
 export type { Palette } from './output/color.js';

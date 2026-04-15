@@ -3,7 +3,7 @@ slug: claws-scaffold
 preset: "claws"
 plan: "2 headlines: claws new skill derives scaffold risk from workspace trust tier, scaffold produces pinch-clean output at target tier"
 area: claws
-status: Draft
+status: Closed
 phase: anubis
 atoms: [atom:tier-adoption, atom:claws-compiler, atom:skill-kit, atom:governance-badge]
 specs: [CL-05]

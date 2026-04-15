@@ -134,6 +134,151 @@ describe('extract() — agent roster', () => {
   });
 });
 
+describe('extract() — skill entries', () => {
+  it('produces skill entries from skill intents', () => {
+    const skillIntents: SkillIntent[] = [
+      { name: 'build-run', description: 'Build and run', requiredTools: ['Bash', 'Read'], line: 3 },
+    ];
+
+    const ast = makeAST({
+      skill: [{ source: 'skills/', intents: skillIntents }],
+    });
+
+    const manifest = extract(ast);
+
+    expect(manifest.skills).toHaveLength(1);
+    expect(manifest.skills[0]!.name).toBe('build-run');
+    expect(manifest.skills[0]!.requiredTools).toContain('Bash');
+    expect(manifest.skills[0]!.source).toBe('skills/');
+  });
+});
+
+describe('extract() — delegation depth and agent fallbacks', () => {
+  it('computes delegation depth for multi-hop chain', () => {
+    const delegationIntents: DelegationIntent[] = [
+      { from: 'Root', to: 'Mid', tools: ['Read'], line: 3 },
+      { from: 'Mid', to: 'Leaf', tools: ['Write'], line: 5 },
+    ];
+
+    const ast = makeAST({
+      delegation: [{ source: 'AGENTS.md', intents: delegationIntents }],
+    });
+
+    const manifest = extract(ast);
+
+    const root = manifest.agents.find(a => a.name === 'Root');
+    expect(root).toBeDefined();
+    expect(root!.delegationDepth).toBe(2);
+
+    const mid = manifest.agents.find(a => a.name === 'Mid');
+    expect(mid).toBeDefined();
+    expect(mid!.delegationDepth).toBe(1);
+
+    const leaf = manifest.agents.find(a => a.name === 'Leaf');
+    expect(leaf).toBeDefined();
+    expect(leaf!.delegationDepth).toBe(0);
+  });
+
+  it('handles delegation cycle without infinite loop in depth computation', () => {
+    const delegationIntents: DelegationIntent[] = [
+      { from: 'A', to: 'B', tools: ['Read'], line: 3 },
+      { from: 'B', to: 'A', tools: ['Read'], line: 5 },
+    ];
+
+    const ast = makeAST({
+      delegation: [{ source: 'AGENTS.md', intents: delegationIntents }],
+    });
+
+    const manifest = extract(ast);
+
+    // Both should have depth >= 1 and not hang
+    const a = manifest.agents.find(ag => ag.name === 'A');
+    expect(a).toBeDefined();
+    expect(a!.delegationDepth).toBeGreaterThanOrEqual(1);
+  });
+
+  it('uses default source AGENTS.md when agent has no explicit source', () => {
+    // Single delegation edge — both agents get source from group.source
+    const delegationIntents: DelegationIntent[] = [
+      { from: 'Alpha', to: 'Beta', tools: [], line: 10 },
+    ];
+
+    const ast = makeAST({
+      delegation: [{ source: 'custom-agents.md', intents: delegationIntents }],
+    });
+
+    const manifest = extract(ast);
+    const alpha = manifest.agents.find(a => a.name === 'Alpha');
+    expect(alpha).toBeDefined();
+    expect(alpha!.source).toBe('custom-agents.md');
+  });
+
+  it('agent only referenced as "to" has empty delegatesTo and tools from intent', () => {
+    // When an agent appears only as a "to" target, it gets tools from the intent
+    // but has no delegation targets of its own
+    const delegationIntents: DelegationIntent[] = [
+      { from: 'Manager', to: 'Worker', tools: ['Read', 'Write'], line: 5 },
+    ];
+
+    const ast = makeAST({
+      delegation: [{ source: 'AGENTS.md', intents: delegationIntents }],
+    });
+
+    const manifest = extract(ast);
+    const worker = manifest.agents.find(a => a.name === 'Worker');
+    expect(worker).toBeDefined();
+    expect(worker!.tools).toContain('Read');
+    expect(worker!.tools).toContain('Write');
+    expect(worker!.delegatesTo).toEqual([]);
+    expect(worker!.delegationDepth).toBe(0);
+  });
+
+  it('agent referenced in multiple delegation groups accumulates tools', () => {
+    // Two different groups reference the same target agent with different tools
+    const ast = makeAST({
+      delegation: [
+        { source: 'AGENTS.md', intents: [{ from: 'A', to: 'C', tools: ['Read'], line: 3 }] },
+        { source: 'AGENTS.md', intents: [{ from: 'B', to: 'C', tools: ['Write'], line: 5 }] },
+      ],
+    });
+
+    const manifest = extract(ast);
+    const c = manifest.agents.find(a => a.name === 'C');
+    expect(c).toBeDefined();
+    expect(c!.tools).toContain('Read');
+    expect(c!.tools).toContain('Write');
+  });
+
+  it('deny intent with scope not "tool" does not cross-reference tools', () => {
+    const toolIntents: ToolManifestEntry[] = [
+      { name: 'Read', riskClass: 1, oboFlag: false, capabilities: ['read'], description: 'Read files', line: 3 },
+    ];
+
+    const denyIntents: SoulIntent[] = [
+      {
+        keyword: 'never',
+        confidence: 0.95,
+        scope: 'action', // Not 'tool' — should be skipped
+        pattern: 'read production data',
+        rawLine: 'Never read production data',
+        line: 5,
+        autoExtracted: true,
+        intentKind: 'deny',
+      },
+    ];
+
+    const ast = makeAST({
+      tool: [{ source: 'TOOLS.md', intents: toolIntents }],
+      deny: [{ source: 'SOUL.md', intents: denyIntents }],
+    });
+
+    const manifest = extract(ast);
+    const readTool = manifest.tools.find(t => t.name === 'Read');
+    expect(readTool).toBeDefined();
+    expect(readTool!.denyConstraints).toHaveLength(0);
+  });
+});
+
 describe('extract() — data label inventory', () => {
   it('produces data labels from memory intents', () => {
     const memoryIntents: MemoryIntent[] = [

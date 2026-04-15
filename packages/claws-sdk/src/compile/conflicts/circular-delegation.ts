@@ -35,12 +35,12 @@ function findAllCycles(manifest: ParsedManifest): string[][] {
 
   function dfs(node: string): void {
     if (inStack.has(node)) {
-      // Found a cycle — extract the cycle from the path
+      // Found a cycle — extract the cycle from the path.
+      // node is guaranteed to be in path because inStack and path are
+      // always kept in sync (added and removed together).
       const cycleStart = path.indexOf(node);
-      if (cycleStart >= 0) {
-        const cycle = [...path.slice(cycleStart), node];
-        cycles.push(cycle);
-      }
+      const cycle = [...path.slice(cycleStart), node];
+      cycles.push(cycle);
       return;
     }
 
@@ -94,7 +94,8 @@ export function detectCircularDelegation(
   const seenCycles = new Set<string>();
 
   for (const cycle of cycles) {
-    if (cycle.length < 2) continue;
+    // findAllCycles always produces cycles of length >= 2
+    // (self-delegation: [node, node], multi-hop: [a, b, ..., a])
 
     // Canonical form: sort the cycle members (excluding trailing repeat)
     const members = cycle.slice(0, -1);
@@ -105,8 +106,10 @@ export function detectCircularDelegation(
     const firstAgent = cycle[0]!;
     const lastEdge = cycle[cycle.length - 2]!;
 
-    const firstInfo = agentLineMap.get(firstAgent) ?? { line: 1, source: 'AGENTS.md' };
-    const lastInfo = agentLineMap.get(lastEdge) ?? { line: 1, source: 'AGENTS.md' };
+    // All cycle members come from manifest.agents, so they are
+    // guaranteed to be in agentLineMap.
+    const firstInfo = agentLineMap.get(firstAgent)!;
+    const lastInfo = agentLineMap.get(lastEdge)!;
 
     const isSelfDelegation = cycle.length === 2 && cycle[0] === cycle[1];
 

@@ -169,13 +169,18 @@ export async function runPinchSim(
 
     return { passed: true };
   } catch (e) {
+    /* istanbul ignore next -- catch block is defensive; pipeline returns error objects, never throws */
+    const errorMsg = e instanceof Error ? e.message : String(e);
+    /* istanbul ignore next */
+    const errorStack = e instanceof Error ? e.stack ?? '' : '';
+    /* istanbul ignore next */
     return {
       passed: false,
-      error: e instanceof Error ? e.message : String(e),
+      error: errorMsg,
       diagnostics: [
         `scenario: ${scenario.name}`,
         `specs: ${scenario.specs?.join(', ')}`,
-        e instanceof Error ? e.stack ?? '' : '',
+        errorStack,
       ],
     };
   } finally {

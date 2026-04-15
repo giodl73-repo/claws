@@ -79,4 +79,33 @@ describe('platform-detect', () => {
     expect(result.platform).toBe('cursor');
     expect(result.method).toBe('auto-detect');
   });
+
+  it('throws when config specifies an invalid platform name', async () => {
+    tmpRoot = await mkdtemp(join(tmpdir(), 'claws-detect-'));
+    await writeFile(join(tmpRoot, 'CLAUDE.md'), '# Project\n');
+
+    await expect(
+      detectPlatform(tmpRoot, { platform: 'not-a-real-platform' }),
+    ).rejects.toThrow(/Invalid platform "not-a-real-platform"/);
+  });
+
+  it('throws when config platform is valid but not among detected platforms', async () => {
+    tmpRoot = await mkdtemp(join(tmpdir(), 'claws-detect-'));
+    // Create claude-code markers only
+    await writeFile(join(tmpRoot, 'CLAUDE.md'), '# Project\nClaude Code workspace.\n');
+
+    // Config says cursor but only claude-code is detected
+    await expect(
+      detectPlatform(tmpRoot, { platform: 'cursor' }),
+    ).rejects.toThrow(/Platform "cursor" specified in claws\.json but could not be resolved/);
+  });
+
+  it('throws when config platform is valid but no platforms are detected at all', async () => {
+    tmpRoot = await mkdtemp(join(tmpdir(), 'claws-detect-'));
+    // Empty workspace — no marker files
+
+    await expect(
+      detectPlatform(tmpRoot, { platform: 'openclaw' }),
+    ).rejects.toThrow(/no platforms were detected/);
+  });
 });

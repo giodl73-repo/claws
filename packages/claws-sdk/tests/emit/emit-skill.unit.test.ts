@@ -102,6 +102,34 @@ describe('emitSkill', () => {
     expect(result.content).toContain('tool_0'); // R5 tool
   });
 
+  it('OBO tool without matching elicit intent gets its own approval line', () => {
+    const ir = minimalGovernanceIR();
+
+    // Add an OBO-flagged tool with no matching elicit intent
+    const irWithOrphanObo: GovernanceIR = {
+      ...ir,
+      capabilities: {
+        ...ir.capabilities,
+        tools: [
+          ...ir.capabilities.tools,
+          {
+            name: 'purchase_order',
+            description: 'Create a purchase order on behalf of user',
+            riskLevel: 'high',
+            oboFlag: true,
+            classification: 'finance',
+          },
+        ],
+      },
+    };
+
+    const result = emitSkill(irWithOrphanObo);
+
+    // purchase_order is OBO but has no elicit intent → should get its own line
+    expect(result.content).toContain('purchase_order');
+    expect(result.content).toMatch(/purchase_order.*OBO/);
+  });
+
   it('SKILL.md contains no provenance markers (no claws references in output)', () => {
     const ir = minimalGovernanceIR();
     const result = emitSkill(ir);

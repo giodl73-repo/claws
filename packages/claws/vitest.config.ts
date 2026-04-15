@@ -39,13 +39,15 @@ export default defineConfig({
         'src/**/types.ts',
         'src/**/index.ts',
         'src/cli.ts',  // Commander.js wiring — tested via e2e, not unit
+        'src/version.ts',  // 3-line env resolution — no testable logic
+        'tests/**',  // test utilities are not production code
       ],
       thresholds: {
         perFile: true,
-        statements: 75,
-        branches: 60,
-        functions: 70,
-        lines: 75,
+        statements: 95,
+        branches: 90,
+        functions: 95,
+        lines: 95,
       },
     },
     projects: [
@@ -88,6 +90,16 @@ export default defineConfig({
           include: ['tests/**/*.e2e.test.ts'],
           forceExit: true,
           exclude: sharedExclude,
+        },
+      }),
+      defineProject({
+        resolve: sharedResolve,
+        test: {
+          name: 'accept',
+          include: ['tests/**/*.cli.accept.test.ts'],
+          forceExit: true,
+          exclude: sharedExclude,
+          testTimeout: 60_000,
         },
       }),
     ],

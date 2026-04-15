@@ -9,7 +9,7 @@
  */
 
 import { writeFile, mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 
 import {
   parse,
@@ -22,6 +22,8 @@ import {
   COMPILER_VERSION,
   SCHEMA_VERSION,
   analyze,
+  ExtractorLLM,
+  buildRegexIntentMap,
 } from '@bic/claws-sdk/compile';
 import { createDefaultRegistry } from '@bic/claws-sdk/governance';
 import { serialize } from '@bic/claws-sdk/ir';
@@ -34,6 +36,8 @@ import { createTimer } from '../hooks/post-command.js';
 import { writeBypassAuditEvent } from '../core/audit.js';
 import { detectPlatform, VALID_PLATFORMS } from '../core/platform-detect.js';
 import { checkBuildCache, storeBuildCache } from '../core/cache.js';
+import type { LLMFlags } from '../core/llm.js';
+import { createLLMProvider } from '../core/llm.js';
 import {
   formatError,
   formatErrorJson,
@@ -74,17 +78,19 @@ export interface BuildOptions {
 }
 
 /**
- * Run the build pipeline: detect → parse → extract → analyze → emit artifacts.
+ * Run the build pipeline: detect → parse → extract → [llm-extract] → analyze → emit artifacts.
  *
  * @param ctx - Platform context from pre-command hook
  * @param opts - Command options (force, json, verbose)
  * @param targetArg - Optional target platform from CLI argument
+ * @param llmFlags - Optional LLM flags (--llm, --llm-model)
  * @returns Exit code (0=clean, 1=violations, 2=bypass, 3=error)
  */
 export async function runBuild(
   ctx: PlatformContext,
   opts: BuildOptions,
   targetArg?: string,
+  llmFlags: LLMFlags = { llm: false },
 ): Promise<number> {
   const timer = createTimer();
 
@@ -144,6 +150,11 @@ export async function runBuild(
     }
   }
 
+  // ── Validate LLM provider (if --llm) ─────────────────────────────────
+  const llmResult = await createLLMProvider(llmFlags, opts.json);
+  if (llmResult !== null && !llmResult.ok) return llmResult.exitCode;
+  const llmExtractor = new ExtractorLLM(llmResult?.provider ?? null);
+
   // ── Parse phase ──────────────────────────────────────────────────────
   reportStage('parse', opts.json, opts.verbose);
   const parseResult = await parse(ctx.workspaceRoot);
@@ -162,21 +173,35 @@ export async function runBuild(
   const capabilityManifest = buildCapabilityManifest(manifest);
   const compileConflicts = detectConflicts(ast, manifest);
 
+  // ── LLM extraction → verify → merge (when --llm) ────────────────────
+  // NOTE: In the build pipeline, LLM-merged intents are logged for
+  // observability but not fed back into analysis/IR. The compile command
+  // is the canonical path for LLM-augmented governance; build uses the
+  // merged output only to surface extraction stats. Wiring merged intents
+  // into the IR here would require re-extracting the capability manifest,
+  // which is deferred to a future --llm-merge flag on build.
+  if (llmFlags.llm && llmExtractor.available) {
+    const regexIntentsBySource = buildRegexIntentMap(ast);
+    const pipeline = await llmExtractor.extractVerifyMerge(
+      parseResult.entries,
+      regexIntentsBySource,
+    );
+    if (pipeline && opts.verbose) {
+      const count = pipeline.extractionResults.reduce((sum, r) => sum + r.intents.length, 0);
+      console.log(`  LLM extracted ${count} intent(s) via ${llmExtractor.modelId}`);
+      const merged = pipeline.mergeResults.reduce(
+        (sum, m) => sum + m.intents.length, 0,
+      );
+      console.log(`  Merged: ${merged} total intent(s)`);
+    }
+  }
+
   // ── Analyze phase ────────────────────────────────────────────────────
   reportStage('analyze', opts.json, opts.verbose);
   const registry = createDefaultRegistry(capabilityManifest);
-  const rawAnalysis = analyze(capabilityManifest, registry);
-
-  // ── Suppress rules from claws.json ──────────────────────────────────
-  const suppressSet = new Set(ctx.suppressedRules);
-  const suppressed = rawAnalysis.violations.filter((v) => suppressSet.has(v.ruleId));
-  const activeViolations = suppressSet.size > 0
-    ? rawAnalysis.violations.filter((v) => !suppressSet.has(v.ruleId))
-    : rawAnalysis.violations;
-  if (suppressed.length > 0) {
-    console.warn(`${suppressed.length} violation(s) suppressed by claws.json`);
-  }
-  const analysis = { ...rawAnalysis, violations: activeViolations };
+  const analysis = analyze(capabilityManifest, registry, {
+    suppressedRules: ctx.suppressedRules,
+  });
 
   // Build GovernanceIR
   const ir: GovernanceIR = {
@@ -216,7 +241,7 @@ export async function runBuild(
   for (const artifact of emitResult.artifacts) {
     const artifactPath = join(artifactsDir, artifact.path);
     // Ensure subdirectories exist for nested paths
-    const artifactDir = join(artifactPath, '..');
+    const artifactDir = dirname(artifactPath);
     await mkdir(artifactDir, { recursive: true });
     await writeFile(artifactPath, artifact.content, 'utf-8');
     writtenPaths.push(join(ARTIFACTS_DIR, targetPlatform, artifact.path));

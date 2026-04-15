@@ -195,6 +195,37 @@ describe('G-BOUND rules', () => {
     expect(linearResult.passed).toBe(true);
   });
 
+  it('G-BOUND-04: delegation to non-existent agent (undefined color) passes', () => {
+    const rule = rules.find((r) => r.id === 'G-BOUND-04')!;
+
+    // Agent delegates to an agent not in the manifest (phantom)
+    const agents: AgentCapability[] = [
+      {
+        name: 'delegator',
+        description: 'Delegates to phantom',
+        delegations: [{ from: 'delegator', to: 'phantom', permissions: ['READ'] }],
+        maxAutonomousLevel: 3,
+      },
+    ];
+
+    const manifest = makeManifest({ agents });
+    const result = rule.evaluate(manifest);
+    // No cycle — phantom node is not in the agent list so its color is undefined
+    expect(result.passed).toBe(true);
+  });
+
+  it('G-BOUND-03: passes when critical count is below minimum threshold', () => {
+    const rule = rules.find((r) => r.id === 'G-BOUND-03')!;
+
+    // 5 critical out of 6 = 83% but only 5 critical (below MIN_CRITICAL_COUNT=10)
+    const tools = [
+      ...Array.from({ length: 5 }, (_, i) => makeTool({ name: `crit-${i}`, riskLevel: 'critical' })),
+      makeTool({ name: 'low-1', riskLevel: 'low' }),
+    ];
+    const result = rule.evaluate(makeManifest({ tools }));
+    expect(result.passed).toBe(true);
+  });
+
   it('empty manifest passes all bound rules', () => {
     const emptyManifest = makeManifest();
     for (const rule of rules) {

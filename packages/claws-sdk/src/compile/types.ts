@@ -195,6 +195,7 @@ export const CONFIDENCE_THRESHOLD = 0.5;
  * Keywords are matched case-insensitively at word boundaries.
  */
 export const SOUL_KEYWORD_CONFIDENCE: Record<string, ConfidenceScore> = {
+  // Formal keywords (original)
   'never': 0.95,
   'must not': 0.95,
   'always': 0.90,
@@ -204,6 +205,15 @@ export const SOUL_KEYWORD_CONFIDENCE: Record<string, ConfidenceScore> = {
   'prefer': 0.55,
   'be careful': 0.30,
   'consider': 0.25,
+  // Natural language deny constraints (CL-09 format tolerance)
+  "don't let": 0.90,
+  "don't ever": 0.95,
+  "do not": 0.90,
+  "not allowed to": 0.90,
+  "always check with me before": 0.85,
+  "check with me before": 0.80,
+  "make sure": 0.70,
+  "under no circumstances": 0.95,
 };
 
 /**

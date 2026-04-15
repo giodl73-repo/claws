@@ -1,0 +1,47 @@
+# Panel Review: claws:ciso on CP-5
+
+**Type**: impl
+**Role**: claws/ciso
+**Round**: 1
+**Files reviewed**: claws-sdk/src/compile/llm/types.ts, anthropic-provider.ts, extractor.ts, prompts.ts, verifier.ts, merger.ts, cache.ts, prompts/adversarial-guard.ts, prompts/soul-extract.ts, prompts/tools-extract.ts, prompts/agents-extract.ts, prompts/skill-extract.ts, claws-sdk/src/compile/intent/soul-intent.ts, tools-intent.ts, claws-sdk/src/compile/types.ts, claws-cli/src/commands/compile.ts, check.ts, build.ts, cache.ts, extract.ts, watch.ts, claws-cli/src/core/llm.ts, claws-cli/src/output/errors.ts
+**Date**: 2026-04-14
+
+---
+
+## Findings
+
+### Major (M)
+
+| # | File | Line/Section | Finding | Suggested fix |
+|---|------|-------------|---------|---------------|
+| M1 | compile.ts, check.ts, build.ts | compile:117-125, check:108-114, build:175-182 | **Verifier never called in pipeline.** The SDK provides `verifyExtractionResult()` to detect hallucinated line numbers and fabricated sourceText, but none of the three CLI commands call it. LLM results are extracted and counted but never verified. This means hallucinated intents survive undetected. The verifier is the CISO's primary defense against LLM fabrication — it is critical-path code that is wired up as dead infrastructure. | Insert `verifyExtractionResult()` call on each `ExtractionResult` before any merge or count. Drop `mismatch` intents. Log `CLAWS-LLM-VERIFY-DROP` diagnostics to the audit trail. |
+| M2 | compile.ts, check.ts, build.ts | compile:117-125, check:108-114, build:175-182 | **Merger never called in pipeline.** The `mergeIntents()` function with its raise-only security invariant exists but is never invoked. LLM-extracted intents are collected, counted for verbose output, then discarded. The governance analysis at lines compile:136, check:122, build:187 runs on regex-only intents. The entire LLM extraction stage has zero effect on governance outcomes. | After verification, call `mergeIntents()` for each source file and feed merged intents into `buildGovernanceAST()`. |
+| M3 | merger.ts | 195-196, 203 | **Raise-only invariant is broken for overlap case.** `raiseOnlyRisk(existingRegex.riskClass, undefined)` always passes `undefined` as the LLM risk class. This means `raiseOnlyRisk()` returns the regex risk unchanged — the LLM can never raise risk even when it detects a higher classification. The second argument should be the LLM intent's risk class (which requires extending `LLMIntent` to carry risk or deriving it from intent kind). | Pass the LLM-derived risk class as the second argument: `raiseOnlyRisk(existingRegex.riskClass, llmRiskClass)`. |
+| M4 | anthropic-provider.ts | 79-80 | **Adversarial guard not applied to extraction prompts.** The provider calls generic `buildSystemPrompt()` / `buildUserPrompt()` from `prompts.ts`, which contain NO adversarial resistance instructions. The four file-specific prompt modules (soul-extract, tools-extract, agents-extract, skill-extract) each apply `withAdversarialGuard()` but are never called by the provider. Workspace content is analyzed by the LLM with zero prompt injection defense. | Route extraction through file-specific prompt builders based on `request.source` (e.g., SOUL.md -> `buildSoulSystemPrompt()`). Fall back to generic + `withAdversarialGuard()` for unknown files. |
+| M5 | anthropic-provider.ts | 57-65 | **API key exposed in client constructor on every call.** A new `Anthropic` client is instantiated per `extract()` call with the raw API key from `process.env`. While the SDK is cached, the client is not. In a watch-mode scenario with frequent re-extractions, this creates multiple client instances holding the key in memory. More critically, there is no validation that the key format is plausible before sending it to the API (a malformed key produces an unhandled 401 that surfaces as a generic error). | Cache the client instance alongside the SDK. Validate key format (prefix `sk-ant-`) before constructing the client. |
+| M6 | cache.ts | 207-218 | **Cache import trusts arbitrary JSON shapes as extraction results.** `import()` validates `version` and `entries` being an object, but individual `LLMCacheEntry` values are inserted without schema validation. An attacker who can supply a cache file can inject fabricated intents with arbitrary kind/target/confidence that bypass both the LLM provider and the verifier (cached results skip extraction entirely). This is a supply chain attack vector for governance. | Validate each imported entry against the `LLMCacheEntry`/`ExtractionResult` schema. Reject entries with invalid `kind` values, confidence outside [0,1], or missing required fields. |
+
+### Warning (W)
+
+| # | File | Line/Section | Finding | Suggested fix |
+|---|------|-------------|---------|---------------|
+| W1 | extractor.ts | 80-87 | **LLM extraction is sequential with no rate limit backoff.** `extractAll()` loops sequentially but has no retry or exponential backoff on 429/rate-limit responses. A burst of files will hammer the API and surface cryptic errors. For CISO audit purposes, failed extractions should be logged as diagnostics, not silently swallowed. | Add retry with exponential backoff for 429 responses. Log each extraction attempt (success/failure/retry) as a diagnostic for the audit trail. |
+| W2 | verifier.ts | 70-98 | **Fuzzy match allows case-insensitive bypass.** A workspace author who writes `NEVER access production` can defeat exact-match verification by using inconsistent casing in the LLM response. The fuzzy path halves confidence but still passes the intent through. An adversary could exploit this to smuggle intents through verification with 50% confidence (above the 0.0 threshold). | Consider requiring exact-match for high-risk intent kinds (`deny`, `require`) and only allowing fuzzy for `label`/`elicit`. |
+| W3 | cache.ts | 151-155 | **Cache file written as unprotected JSON in workspace.** `.claws/cache/llm-intents.json` is written with no file permissions restriction. Any process or user with workspace access can modify it. Combined with M6 (no import validation), this creates a local privilege escalation path: tamper cache -> inject fabricated intents -> lower governance risk classification. | Write cache with restrictive permissions (0600). Consider signing cache entries with an HMAC derived from the composite key. |
+| W4 | anthropic-provider.ts | 62-65 | **No TLS certificate pinning or proxy detection.** The Anthropic client uses default HTTPS settings. In an enterprise environment, a compromised proxy could intercept LLM requests containing workspace governance content (which may include sensitive tool declarations, OBO configurations, and denial policies). | Document that enterprises should configure `HTTPS_PROXY` with trusted certificates. Consider supporting `baseUrl` validation against an allowlist. |
+| W5 | watch.ts | 153-201 | **LLM extraction errors in watch mode are silently swallowed.** The `catch` block at line 188 only logs errors in `--verbose` mode. In non-verbose mode, LLM extraction failures produce no diagnostic output at all. For audit trail completeness, all LLM failures should be recorded even when the user does not see them. | Always emit a structured diagnostic for LLM extraction failures, regardless of verbose mode. Write to audit log even if not displayed. |
+| W6 | prompts.ts | 62-106 | **Response parsing silently accepts malformed JSON.** `parseIntentsFromResponse()` returns empty array on parse failure (line 76-77). This means a successful LLM call that returns garbage produces zero intents with zero diagnostics — indistinguishable from a file with genuinely no governance content. | Return a diagnostic when JSON parsing fails, distinguishing "no intents found" from "LLM returned unparseable output". |
+
+### Notes (N)
+
+| # | File | Line/Section | Finding |
+|---|------|-------------|---------|
+| N1 | prompts.ts | 17-27 | Generic `buildSystemPrompt()` asks for "JSON array of intent objects" but does not specify a JSON schema or provide an example. LLM output consistency will vary. The file-specific prompts are much better structured. |
+| N2 | types.ts | 60 | `LLMIntent.confidence` is typed as `number` but semantically must be [0,1]. A branded type or runtime clamp would make the invariant explicit. `parseIntentsFromResponse` does clamp (line 98), but direct construction does not. |
+| N3 | errors.ts | 138-139 | The error message for `CLAWS-E040` includes `export ANTHROPIC_API_KEY="sk-ant-..."` which hints at the key prefix format. While helpful, this could be considered information leakage in a hardened deployment. |
+
+---
+
+## Summary
+
+The LLM extraction pipeline has strong foundational design (provider abstraction, verifier, merger, adversarial guard, composite-key cache) but the critical security components are not wired into the compile path. The verifier and merger are never called by any CLI command (M1, M2), the adversarial guard prompts are defined but unused (M4), and the raise-only invariant has a bug that prevents LLM risk from ever being applied (M3). The cache import accepts arbitrary JSON without schema validation, creating a supply chain injection vector (M6). Taken together, these mean the LLM stage currently has zero effect on governance outcomes and zero adversarial resistance — the security infrastructure exists as dead code. All six Major findings must be resolved before this checkpoint can pass CISO review.

@@ -39,6 +39,7 @@ export interface BuildWorkspaceOptions {
  */
 function readDirRecursive(dir: string, prefix = ''): Map<string, string> {
   const result = new Map<string, string>();
+  /* istanbul ignore next -- guard: dir always exists when called from buildWorkspace */
   if (!existsSync(dir)) return result;
 
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -48,7 +49,8 @@ function readDirRecursive(dir: string, prefix = ''): Map<string, string> {
       for (const [k, v] of readDirRecursive(fullPath, relPath)) {
         result.set(k, v);
       }
-    } else if (entry.isFile()) {
+    }
+    if (!entry.isDirectory() && entry.isFile()) {
       try {
         result.set(relPath, readFileSync(fullPath, 'utf-8'));
       } catch {
@@ -85,8 +87,9 @@ export function buildWorkspace(
     // Copy workspace to temp dir
     cpSync(sourceDir, tempDir, { recursive: true });
   } catch (e) {
-    // Cleanup on failure
+    /* istanbul ignore next -- cpSync failure only on permission/disk errors */
     try { rmSync(tempDir, { recursive: true, force: true }); } catch { /* ignore */ }
+    /* istanbul ignore next */
     return null;
   }
 

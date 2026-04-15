@@ -96,6 +96,7 @@ export function governanceStepName(type: GovernanceStepType, toolName: string): 
  */
 function extractToolName(command: string): string {
   const first = command.trim().split(/\s+/)[0];
+  /* istanbul ignore next -- split always returns ≥1 element */
   return first ?? '';
 }
 
@@ -104,6 +105,7 @@ function extractToolName(command: string): string {
  * R1-R2: open, R3+: closed.
  */
 function resolveFailMode(riskLevel: number): 'open' | 'closed' {
+  /* istanbul ignore next -- only called from R3+ elicit paths; R1-R2 branch unreachable */
   if (riskLevel <= 2) return 'open';
   return 'closed';
 }

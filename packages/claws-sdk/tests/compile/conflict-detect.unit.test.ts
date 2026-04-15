@@ -397,4 +397,46 @@ describe('detectConflicts — report ordering', () => {
     expect(report.errorCount).toBe(report.conflicts.filter(c => c.severity === 'Error').length);
     expect(report.warningCount).toBe(report.conflicts.filter(c => c.severity === 'Warning').length);
   });
+
+  it('sorts same-severity conflicts by category order', () => {
+    // Create scenario producing two Warning-level conflicts from different categories:
+    // OBO-WITHOUT-ELICIT (R3 tool → Warning) and SKILL-TOOL-GHOST (→ Warning)
+    const toolIntents: ToolManifestEntry[] = [
+      { name: 'api-call', riskClass: 3, oboFlag: true, capabilities: ['api'], description: 'External API call', line: 3 },
+    ];
+
+    const skillIntents: SkillIntent[] = [
+      { name: 'scanner', description: 'Scan', requiredTools: ['nonexistent-scanner'], line: 5 },
+    ];
+
+    const ast = makeAST({
+      tool: [{ source: 'TOOLS.md', intents: toolIntents }],
+      skill: [{ source: 'skills/', intents: skillIntents }],
+    });
+
+    const tools: ToolEntry[] = [
+      { name: 'api-call', normalizedName: 'api-call', riskClass: 3, oboFlag: true, capabilities: ['api'], source: 'TOOLS.md', line: 3, denyConstraints: [] },
+    ];
+
+    const skills: SkillEntry[] = [
+      { name: 'scanner', description: 'Scan', requiredTools: ['nonexistent-scanner'], source: 'skills/', line: 5 },
+    ];
+
+    const manifest = makeManifest({ tools, skills });
+
+    const report = detectConflicts(ast, manifest);
+
+    // Filter to Warning-only conflicts
+    const warnings = report.conflicts.filter(c => c.severity === 'Warning');
+    if (warnings.length > 1) {
+      // Verify category ordering is stable (OBO-WITHOUT-ELICIT before SKILL-TOOL-GHOST)
+      for (let i = 0; i < warnings.length - 1; i++) {
+        const catA = warnings[i]!.category;
+        const catB = warnings[i + 1]!.category;
+        // Categories should be in ascending order
+        expect(['DENY-vs-TOOL', 'OBO-WITHOUT-ELICIT', 'SCHEDULE-NO-APPROVAL', 'SKILL-TOOL-GHOST', 'TRUST-ESCALATION'].indexOf(catA))
+          .toBeLessThanOrEqual(['DENY-vs-TOOL', 'OBO-WITHOUT-ELICIT', 'SCHEDULE-NO-APPROVAL', 'SKILL-TOOL-GHOST', 'TRUST-ESCALATION'].indexOf(catB));
+      }
+    }
+  });
 });

@@ -9,6 +9,7 @@ export { resolveDefaultSources, normalizeContent } from './input-resolver.js';
 export { buildGovernanceAST } from './governance-ast.js';
 export { extract } from './extract.js';
 export { analyze } from './analyze.js';
+export type { AnalyzeOptions } from './analyze.js';
 export { detectConflicts } from './conflict-detect.js';
 export { buildCapabilityManifest, riskClassToLevel, riskLevelFromClassification } from './manifest.js';
 export { toIRConflictReport } from './conflicts-ir.js';
@@ -80,3 +81,37 @@ export {
   extractWorkflowIntents,
 } from './intent/index.js';
 export type { AnyIntentResult } from './intent/index.js';
+export {
+  AnthropicLLMProvider,
+  ExtractorLLM,
+  LLMCache,
+  hashContent as llmHashContent,
+  hashPrompt as llmHashPrompt,
+  verifyExtractionResult,
+  mergeIntents,
+  mergeAllIntents,
+  raiseOnlyRisk,
+  buildRegexIntentMap,
+} from './llm/index.js';
+export type {
+  LLMProvider,
+  LLMIntent,
+  LLMIntentKind,
+  LLMExtractionRequest,
+  ExtractionResult,
+  ExtractionUsage,
+  ExtractionOptions,
+  ExtractionHints,
+  MergeResult,
+  AnthropicLLMProviderOptions,
+  CacheKey as LLMCacheKey,
+  LLMCacheEntry,
+  LLMCacheExport,
+  LLMCacheStatus,
+  LLMPipelineResult,
+  VerificationResult,
+  IntentMergeResult,
+  MergedIntent,
+  RegexIntent,
+  ExtractionMethod,
+} from './llm/index.js';

@@ -1,6 +1,6 @@
-# Ptah-scoped acceptance manifest — filtered from design/claws/scenarios/manifest.yaml
-# Only Phase 1 (Ptah) + cross-cutting series with materialized fixtures (74 total)
-# Anubis/Thoth series excluded — fleet-sim stubs, advanced security-sim not materialized
+# Acceptance manifest — Ptah + Anubis CP-1 series
+# Ptah: compile, rules, emit, conflicts, pitfalls (74 scenarios)
+# Anubis CP-1: gateway enforcement, degraded mode, audit chain, before/after diff
 
 series:
   # ── Phase 1: Ptah (Foundation) ──
@@ -80,3 +80,40 @@ series:
     marker: "scenario.yaml"
     spec: CL-01
     description: "7-platform detection — OC, Cursor, Claude, GitHub, Bedrock, LangGraph, CrewAI"
+
+  # ── Phase 2: Anubis CP-1 (Gateway Enforcement) ──
+
+  gateway-enforcement:
+    runners: [gateway-sim]
+    min: 6
+    marker: "scenario.yaml"
+    spec: CL-02, CL-07
+    description: "Runtime enforcement — compile → load plugin → fire tool calls → verify block/allow/elicit per risk tier"
+
+  gateway-degraded:
+    runners: [gateway-sim]
+    min: 3
+    marker: "scenario.yaml"
+    spec: CL-02
+    description: "Degraded mode — R5 fail-closed when GovernanceHost absent/throws/malformed (P-051)"
+
+  gateway-audit-chain:
+    runners: [gateway-sim]
+    min: 3
+    marker: "scenario.yaml"
+    spec: CL-02
+    description: "Audit chain integrity — every outcome writes entry, sequential IDs, HMAC chain (P-052)"
+
+  gateway-before-after:
+    runners: [gateway-sim]
+    min: 2
+    marker: "scenario.yaml"
+    spec: CL-02, CL-07
+    description: "Before/after diff — zero governance vs full governance, SimReport.diff regression detection"
+
+  gateway-pitfalls:
+    runners: [gateway-sim]
+    min: 5
+    marker: "scenario.yaml"
+    spec: CL-02, CL-04
+    description: "Gateway pitfall validation — P-051 (fail-closed), P-052 (audit all outcomes), P-053 (bypass audit), P-057 (OBO elicit), P-062 (default-deny unknown tools), P-064 (trust escalation)"
