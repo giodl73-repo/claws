@@ -14,7 +14,7 @@ export { readRegistry, registerKey, getKey, generateKeyId, updateKey } from './r
 export type { RegisterKeyOptions } from './registry.js';
 export { listKeys, formatKeysTable } from './list.js';
 export type { ListKeysResult } from './list.js';
-export { rotateKey } from './rotate.js';
+export { rotateKey, verifyKeyMaterial } from './rotate.js';
 export type { RotateResult } from './rotate.js';
 export { revokeKey, assertKeyNotRevoked } from './revoke.js';
 export type { RevokeResult } from './revoke.js';
@@ -35,6 +35,10 @@ export {
   recordParticipant,
   deriveSingleDevKey,
   initCeremony,
+  validatePbkdf2Iterations,
+  PBKDF2_DEFAULT_ITERATIONS,
+  PBKDF2_MIN_ITERATIONS,
+  PBKDF2_MAX_ITERATIONS,
 } from './ceremony.js';
 export type {
   CeremonyShare,

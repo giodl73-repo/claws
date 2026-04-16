@@ -12,7 +12,7 @@
 
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
-import { createHash } from 'node:crypto';
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 
 import type { ExtractionResult } from './types.js';
 
@@ -57,6 +57,8 @@ export interface LLMCacheExport {
   readonly entries: Record<string, LLMCacheEntry>;
   /** ISO 8601 timestamp of the export. */
   readonly exportedAt: string;
+  /** HMAC-SHA256 signature of the serialized entries (hex). Present when signed. */
+  readonly hmac?: string;
 }
 
 /**
@@ -190,7 +192,7 @@ export class LLMCache {
     const exportData = this.export();
     const dir = dirname(this.cachePath);
     await mkdir(dir, { recursive: true });
-    await writeFile(this.cachePath, JSON.stringify(exportData, null, 2), 'utf-8');
+    await writeFile(this.cachePath, JSON.stringify(exportData, null, 2), { encoding: 'utf-8', mode: 0o600 });
   }
 
   /**
@@ -298,6 +300,106 @@ export class LLMCache {
     this.hitCount = 0;
     this.missCount = 0;
   }
+}
+
+// ── HMAC Cache Integrity ──────────────────────────────────────────────
+
+/**
+ * Deep-sort all object keys recursively for deterministic serialization.
+ */
+function deepSortKeys(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(deepSortKeys);
+  }
+  if (value !== null && typeof value === 'object') {
+    const sorted: Record<string, unknown> = {};
+    for (const key of Object.keys(value as Record<string, unknown>).sort()) {
+      sorted[key] = deepSortKeys((value as Record<string, unknown>)[key]);
+    }
+    return sorted;
+  }
+  return value;
+}
+
+/**
+ * Compute HMAC-SHA256 of the serialized cache entries.
+ *
+ * Signs only the entries content (deterministic JSON serialization)
+ * to detect tampering between export and import.
+ */
+export function signCacheExport(
+  entries: Record<string, LLMCacheEntry>,
+  hmacKey: string,
+): string {
+  // Deterministic serialization: deep-sort all keys recursively
+  const canonical = deepSortKeys(entries);
+  const payload = JSON.stringify(canonical);
+  return createHmac('sha256', hmacKey).update(payload, 'utf8').digest('hex');
+}
+
+/**
+ * Verify an HMAC-signed cache export.
+ *
+ * Returns null on success, or a descriptive error string on failure
+ * including the expected vs actual HMAC prefix for debugging.
+ */
+export function verifyCacheHmac(
+  data: LLMCacheExport,
+  hmacKey: string,
+): string | null {
+  if (!data.hmac) {
+    return 'cache export is unsigned (no hmac field)';
+  }
+
+  const expected = signCacheExport(data.entries, hmacKey);
+
+  const expectedBuf = Buffer.from(expected, 'hex');
+  const actualBuf = Buffer.from(data.hmac, 'hex');
+  if (expectedBuf.length !== actualBuf.length || !timingSafeEqual(expectedBuf, actualBuf)) {
+    return `HMAC verification failed: expected ${expected.slice(0, 12)}..., got ${data.hmac.slice(0, 12)}...`;
+  }
+
+  return null;
+}
+
+/**
+ * Export cache with HMAC signature.
+ *
+ * Signs the serialized entries using the provided HMAC key.
+ * Import-side verification rejects tampered content.
+ */
+export function exportSigned(
+  entries: Map<string, LLMCacheEntry>,
+  hmacKey: string,
+): LLMCacheExport {
+  const record: Record<string, LLMCacheEntry> = {};
+  for (const [k, v] of entries) {
+    record[k] = v;
+  }
+  return {
+    version: 1,
+    entries: record,
+    exportedAt: new Date().toISOString(),
+    hmac: signCacheExport(record, hmacKey),
+  };
+}
+
+/**
+ * Import cache data with HMAC verification.
+ *
+ * Verifies the HMAC signature before importing. Throws on tampered
+ * or unsigned content.
+ */
+export function importVerified(
+  cache: LLMCache,
+  data: LLMCacheExport,
+  hmacKey: string,
+): { skipped: number; reasons: string[] } {
+  const error = verifyCacheHmac(data, hmacKey);
+  if (error) {
+    throw new Error(`Cache integrity check failed: ${error}`);
+  }
+  return cache.import(data);
 }
 
 // ── Convenience hash functions ─────────────────────────────────────────

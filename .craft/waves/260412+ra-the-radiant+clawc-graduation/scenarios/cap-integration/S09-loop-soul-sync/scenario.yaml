@@ -1,0 +1,139 @@
+name: S09-loop-soul-sync
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that GET /api/loop/soul returns SOUL.md parsed into discrete
+  sections suitable for Loop page rendering, and that PATCH /api/loop/soul
+  updates a single section, writes SOUL.md losslessly, and triggers an
+  incremental recompile. Each section carries governance context so the Loop
+  UI can display deny-rule indicators and lock badges without a second API
+  call. Bidirectional: Loop edits arrive as PATCH, SOUL.md file edits arrive
+  as SSE events to the Loop client.
+
+expect:
+  get_soul_sections:
+    endpoint: "GET /api/loop/soul"
+    response_shape:
+      sections_is_array: true
+      each_section_has:
+        - name
+        - content
+        - governance
+    governance_context:
+      deny_rule_section_has: "governance.denyRules > 0"
+      non_deny_section_has: "governance.denyRules == 0"
+  patch_soul_section:
+    endpoint: "PATCH /api/loop/soul"
+    payload: "{ section: 'preferences', content: 'updated text' }"
+    result:
+      status: "ok"
+      recompile_triggered: true
+      other_sections_unchanged: true
+    lossless_roundtrip:
+      frontmatter_preserved: true
+      section_ordering_preserved: true
+      whitespace_normalized: false
+  recompile:
+    latency_budget_ms: 200
+    incremental: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A Loop page component calls GET /api/loop/soul and receives an array of
+  sections parsed from SOUL.md. The component renders each section as an
+  editable card. A user edits the "preferences" section in Loop, which
+  sends PATCH /api/loop/soul with the section name and new content. The
+  server must: (1) validate the edit through the write-time validation
+  layer, (2) write only the targeted section back to SOUL.md without
+  disturbing other sections or frontmatter, (3) trigger an incremental
+  recompile so downstream chunks reflect the change, (4) return the
+  updated section with refreshed governance context. Concurrently, another
+  user may edit SOUL.md directly in their editor, which must surface as an
+  SSE event to the Loop client so it can refresh.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If a deny rule is embedded in prose (e.g., "Never share credentials
+      with external tools"), removing that text via a Loop PATCH silently
+      weakens governance. The validation layer must detect deny-rule removal
+      and attach a governance warning to the response. This is a warning,
+      not a rejection — the user chose to edit their own SOUL.md — but the
+      Companion App audit trail must record it.
+    spec_impact: "CL-10 /api/loop/soul — deny-rule removal detection in validation layer"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      SOUL.md may contain YAML frontmatter (delimited by ---). The section
+      parser must not treat frontmatter as a section or allow PATCH to
+      overwrite it. If the parser splits on markdown headings, frontmatter
+      must be extracted and preserved separately. A PATCH that returns
+      SOUL.md without its frontmatter corrupts the file for the compiler.
+    spec_impact: "CL-10 /api/loop/soul — frontmatter extraction before section parsing"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Section ordering in SOUL.md may carry semantic meaning (e.g., deny
+      rules before preferences implies priority). If the PATCH handler
+      reconstructs the file by iterating a Map (which preserves insertion
+      order in JS but not necessarily parse order), sections could be
+      reordered. The handler must use an ordered data structure that
+      preserves the original section sequence from the file.
+    spec_impact: "CL-10 /api/loop/soul — ordered section reconstruction on write-back"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Concurrent edits: a user edits SOUL.md in VS Code while Loop sends
+      a PATCH. If the PATCH reads the file, modifies in memory, and writes
+      back, it overwrites the VS Code edit. The write path needs optimistic
+      concurrency — either a file-content hash (ETag) or a last-modified
+      timestamp. PATCH with a stale ETag returns 409 Conflict.
+    spec_impact: "CL-10 /api/loop/soul — ETag-based optimistic concurrency on write"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The governance context attached to each section requires a compiled
+      GovernanceIR. If the compilation cache is cold (server just started),
+      the first GET /api/loop/soul must trigger a full compile before
+      responding. This could push the first response well beyond the 200ms
+      budget. The server should pre-compile on startup, not on first
+      request.
+    spec_impact: "CL-10 claws-serve startup — pre-compile GovernanceIR before accepting requests"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Loop pages have a maximum content size. If SOUL.md exceeds the Loop
+      page size limit (roughly 25,000 characters for Loop components),
+      the GET response must either paginate sections or truncate with a
+      continuation token. Without this, large SOUL.md files cause Loop
+      rendering failures that surface as blank pages with no error message.
+    spec_impact: "CL-10 /api/loop/soul — size limit handling for Loop component compatibility"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The SSE channel (GET /api/events) must emit a soul-updated event
+      when SOUL.md changes on disk (from editor or PATCH). If the PATCH
+      handler itself triggers the file watcher, the Loop client receives
+      a redundant update event for its own edit. The SSE emitter should
+      tag events with a source (patch vs file-watch) so clients can
+      deduplicate.
+    spec_impact: "CL-10 /api/events — source tagging for edit-origin deduplication"
+    pitfall: null

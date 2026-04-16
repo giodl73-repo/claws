@@ -31,6 +31,33 @@ export interface KeyResolutionResult {
 }
 
 /**
+ * Use a resolved signing key as a Buffer, zeroing it after the callback completes.
+ *
+ * Key material is held in a Buffer (not a JS string) during the signing
+ * operation to limit exposure in heap dumps. The buffer is filled with
+ * zeros in a finally block regardless of success or failure.
+ *
+ * @param result - The resolved key from resolveSigningKey()
+ * @param fn - Callback that receives the key Buffer for signing
+ * @returns The return value of the callback
+ */
+export async function useSigningKey<T>(
+  result: KeyResolutionResult,
+  fn: (keyBuffer: Buffer) => T | Promise<T>,
+): Promise<T> {
+  // Key material may be hex-encoded (HMAC) or PEM (Ed25519).
+  // Detect hex-encoded keys (even length, all hex chars) and decode properly.
+  const material = result.keyMaterial;
+  const isHex = material.length > 0 && material.length % 2 === 0 && /^[0-9a-fA-F]+$/.test(material);
+  const keyBuffer = isHex ? Buffer.from(material, 'hex') : Buffer.from(material, 'utf-8');
+  try {
+    return await fn(keyBuffer);
+  } finally {
+    keyBuffer.fill(0);
+  }
+}
+
+/**
  * Environment variable name for CI signing key.
  */
 const CI_SIGNING_KEY_ENV = 'CLAWS_CI_SIGNING_KEY';

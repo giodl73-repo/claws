@@ -46,7 +46,7 @@ describe('runDoctor() — full orchestration', () => {
 
     expect(report.healthy).toBe(true);
     expect(report.summary.errors).toBe(0);
-    expect(report.checks).toHaveLength(4);
+    expect(report.checks).toHaveLength(6);
     expect(report.checks.every((c) => c.passed)).toBe(true);
   });
 

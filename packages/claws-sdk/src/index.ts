@@ -73,3 +73,8 @@ export {
   resolveActor,
   type AuditEventInput,
 } from './compliance/audit-chain.js';
+export {
+  hashContent,
+  type ICompilationHost,
+  type GovernanceIRLike,
+} from './compilation-host.js';

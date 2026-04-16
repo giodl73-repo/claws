@@ -3,7 +3,7 @@ slug: claws-comply-audit
 preset: "claws"
 plan: "3 headlines: claws comply soc2 generates signed evidence package, claws assess classifies EU AI Act Article 6, claws audit verify proves chain integrity"
 area: claws
-status: Draft
+status: Implemented
 phase: thoth
 atoms: [atom:compliance-soc2, atom:compliance-hipaa, atom:compliance-eu-ai-act, atom:claws-assess, atom:audit-chain, atom:audit-verify, atom:siem-export, atom:key-management]
 specs: [CL-02, CL-05, CL-06]

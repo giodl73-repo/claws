@@ -97,6 +97,15 @@ export class AnthropicLLMProvider implements LLMProvider {
   constructor(options?: AnthropicLLMProviderOptions) {
     this.modelId = options?.model ?? DEFAULT_MODEL;
     this.baseUrl = options?.baseUrl;
+
+    // S-W2: Warn when LLM endpoint uses HTTP instead of HTTPS
+    if (this.baseUrl && this.baseUrl.startsWith('http://')) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[claws:security] LLM endpoint uses HTTP (${this.baseUrl}) — ` +
+        'HTTPS is required for production. API keys may be transmitted in cleartext.',
+      );
+    }
   }
 
   /**

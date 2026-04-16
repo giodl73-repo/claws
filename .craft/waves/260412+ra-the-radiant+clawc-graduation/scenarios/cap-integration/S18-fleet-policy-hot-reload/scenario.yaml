@@ -1,0 +1,205 @@
+name: S18-fleet-policy-hot-reload
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that changes to the fleet policy file are detected and applied
+  while claws serve is running, without requiring a restart. The new policy
+  must update locked fields in chunks, emit an SSE event, and handle edge
+  cases including syntax errors (fail-closed), policy downgrades, and
+  interaction with in-flight PATCHes. Fleet policy is the enterprise admin's
+  control surface — hot-reload failures here mean security drift.
+
+expect:
+  hot_reload:
+    trigger: "filesystem watcher on fleet policy path"
+    restart_required: false
+    sse_event_emitted: true
+    sse_event_type: "fleet:policy-updated"
+    sse_payload_has: [policyVersion, changedFields, timestamp]
+  chunk_update:
+    locked_fields_reflect_new_policy: true
+    lock_source_for_new_locks: fleet
+    previously_locked_now_unlocked: "lock.source changes from 'fleet' to 'none' (or next-highest)"
+  syntax_error_handling:
+    behavior: "fail-closed"
+    all_fleet_lockable_fields_locked: true
+    error_surfaced_in: "GET /api/chunks governance.fleetPolicyError"
+    sse_event_type: "fleet:policy-error"
+  version_mismatch:
+    old_version_rejected: true
+    monotonic_version_required: true
+  timing:
+    reload_ms_max: 200
+    chunk_refresh_ms_max: 100
+
+simulate:
+  failures:
+    - stage: fleet_policy
+      type: syntax_error
+      detail: "YAML parse error at line 12: invalid mapping"
+  halt: null
+  budget: null
+
+problem: >
+  An enterprise admin updates the fleet policy file (e.g.,
+  .claws/fleet-policy.yaml) to add a new lock on the 'model' field in
+  IDENTITY.md — agents must not change their own model. claws serve is
+  running with two connected CAP tabs. The system must: (1) detect the
+  file change via filesystem watcher, (2) parse and validate the new
+  policy, (3) update the in-memory policy state, (4) recompute lock
+  sources for all affected chunks, (5) emit a fleet:policy-updated SSE
+  event so connected tabs refresh, (6) serve updated chunks on next GET
+  with the new lock applied. If the policy file has a syntax error, the
+  system must fail-closed (lock all fleet-lockable fields) rather than
+  silently operating with no fleet policy. If the update removes a
+  previously locked field (policy downgrade), the lock source for that
+  field reverts to the next-highest source (governance, r5) or 'none'.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Fleet policy parse failure must fail-closed. If the YAML is corrupt,
+      truncated, or contains unknown directives, the system must treat it
+      as "lock everything fleet could lock" rather than "no fleet locks."
+      Failing open means a syntax error introduced by a admin typo silently
+      unlocks all fleet-controlled fields, creating a security gap that
+      persists until someone notices and fixes the YAML.
+    spec_impact: "CL-10 fleet policy — parse failure = fail-closed; all fleet-lockable fields locked"
+    pitfall: P-272
+
+  - id: F02
+    severity: major
+    description: >
+      A partial fleet policy (valid YAML but missing required sections)
+      must also fail-closed. If the policy schema requires a 'locks'
+      section and a 'version' field, a file containing only 'version: 2'
+      with no 'locks' section should not be interpreted as "no locks."
+      Schema validation must run after parse, and any missing required
+      section triggers fail-closed behavior identical to a parse error.
+    spec_impact: "CL-10 fleet policy — schema validation after parse; missing required sections = fail-closed"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Fleet policy downgrade (a field was locked, now the new policy does
+      not lock it) must correctly recompute the lock source. If the field
+      was locked by fleet AND r5, removing the fleet lock should leave
+      lock.source: 'r5'. If the field was locked only by fleet, it becomes
+      lock.source: 'none'. The lock computation must re-evaluate the full
+      lock stack (r5 > fleet > governance) on every policy change, not
+      just add/remove the fleet layer.
+    spec_impact: "CL-10 lock computation — full stack re-evaluation on fleet policy change, not incremental"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      If a PATCH is in-flight (queued or executing) when the fleet policy
+      reloads, the PATCH was validated against the old policy. The write
+      may succeed for a field that the new policy now locks. The system
+      must either: (a) hold fleet policy reload until the work queue is
+      drained, or (b) re-validate in-flight items against the new policy
+      before committing the write. Option (a) is simpler but delays policy
+      application; option (b) is correct but complex.
+    spec_impact: "CL-10 fleet policy reload — drain work queue before applying new policy, or re-validate in-flight items"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Fleet policy must have a monotonically increasing version number.
+      If the filesystem watcher triggers on a file write that replaces
+      version 3 with version 2 (e.g., admin restores an old backup), the
+      system must reject the downgrade. Accepting an older version could
+      re-enable locks that were intentionally removed, confusing admins
+      and causing support tickets. The rejection should be logged and
+      surfaced via SSE (fleet:policy-version-rejected).
+    spec_impact: "CL-10 fleet policy — monotonic version enforcement; reject version downgrades"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The fleet:policy-updated SSE event must include enough detail for
+      the CAP partner to decide which chunks to refresh. If the event
+      only says "policy changed," the partner must re-fetch all chunks.
+      The event payload should include changedFields (list of field paths
+      whose lock status changed) so the partner can selectively refresh
+      only affected chunks.
+    spec_impact: "CL-10 SSE fleet:policy-updated — include changedFields for selective chunk refresh"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The fleet policy file watcher must handle rapid successive writes
+      (admin saves multiple times while editing). Without debounce, each
+      intermediate save triggers a full policy reload and lock recomputation.
+      The debounce should be shorter than the OC file watcher (100-200ms
+      vs 300ms) because fleet policy changes are security-critical and
+      should apply quickly, but intermediate invalid states should not
+      trigger fail-closed oscillations.
+    spec_impact: "CL-10 fleet policy watcher — debounce 150ms; shorter than OC watcher to prioritize security"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The fail-closed state must be clearly visible in the API response.
+      GET /api/chunks during a fail-closed condition should include
+      governance.fleetPolicyError with the parse error message and a
+      fleetPolicyFailClosed: true flag. Without this, the admin sees
+      fields locked but doesn't know why — they may assume the locks
+      are intentional rather than a symptom of a broken policy file.
+    spec_impact: "CL-10 governance context — fleetPolicyError and fleetPolicyFailClosed fields during fail-closed"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Hot-reloaded fleet policy must be persisted in memory identically
+      to the startup-loaded policy. If the startup path normalizes the
+      policy (e.g., sorting lock entries, deduplicating) but the hot-reload
+      path does not, behavior diverges between startup and runtime. Both
+      paths must share the same parse-validate-normalize pipeline.
+    spec_impact: "CL-10 fleet policy loading — shared pipeline for startup and hot-reload; no divergent code paths"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      If the fleet policy file is deleted (not just modified), the system
+      must decide: treat as fail-closed (policy was expected but is gone)
+      or treat as no-policy (fleet admin removed fleet control). The safer
+      default is fail-closed with a prominent error, since accidental
+      deletion is more likely than intentional removal. An explicit
+      "fleet policy disabled" sentinel file or API call should be the
+      only way to legitimately remove fleet control.
+    spec_impact: "CL-10 fleet policy deletion — fail-closed; explicit disable requires sentinel, not file removal"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The audit trail must log fleet policy reload events with the old
+      and new policy version, the set of fields whose lock status changed,
+      and whether the reload was clean or fail-closed. This provides an
+      enterprise compliance trail showing when fleet controls were
+      tightened, loosened, or broken.
+    spec_impact: "CL-10 audit — fleet policy reload event with version diff, changed locks, and reload status"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Fleet policy hot-reload must work correctly when the policy file
+      is on a network share (common in enterprise). Network filesystem
+      watchers may have higher latency (seconds, not milliseconds) or
+      may not fire at all. The system should support both filesystem
+      watcher and periodic polling (configurable interval, default 5s)
+      as fallback for unreliable watchers.
+    spec_impact: "CL-10 fleet policy watcher — fallback periodic polling for network filesystem reliability"
+    pitfall: null

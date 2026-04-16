@@ -1,0 +1,230 @@
+name: S20-chunk-read-after-crash
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that claws serve recovers gracefully after a crash during a
+  mid-PATCH write operation. On restart, the workspace must be consistent
+  (no partial writes), the health endpoint must report recovery status,
+  and the work queue state must be either restored from persistence or
+  explicitly documented as lost. The system must detect write-without-compile
+  states and force recompilation before serving chunks.
+
+expect:
+  startup_health:
+    endpoint: "GET /api/health"
+    status: 200
+    response_has: [status, workspace, compilation, workQueue, recovery]
+    workspace_consistent: true
+    recovery_has: [crashDetected, walRecovered, forcedRecompile, lostWorkItems]
+  workspace_integrity:
+    no_partial_writes: true
+    wal_based_recovery: true
+    file_hashes_match_compilation: true
+  compilation_state:
+    write_without_compile_detected: true
+    forced_recompile_on_startup: true
+    chunks_not_served_until_compile_complete: true
+  work_queue:
+    persistence_file: ".claws/workqueue.json"
+    restored_on_startup: true
+    in_flight_item_marked_failed: true
+  cache:
+    invalidated_on_crash_recovery: true
+    rebuild_from_source: true
+
+simulate:
+  failures:
+    - stage: write
+      type: process_crash
+      detail: "SIGKILL during TOOLS.md write; file partially written"
+  halt: null
+  budget: null
+
+problem: >
+  A user PATCHes TOOLS.md to add a new tool. The workspace-edit module
+  begins writing the file. Mid-write, the claws serve process crashes
+  (SIGKILL, OOM kill, or power loss). TOOLS.md is now partially written —
+  the file contains the first half of the new content but is truncated.
+  The GovernanceIR was compiled against the pre-PATCH version, so there
+  is a write-without-compile inconsistency. When claws serve restarts,
+  it must: (1) detect the partial write via WAL (write-ahead log) or
+  file hash comparison, (2) restore the original file from the WAL,
+  (3) detect the write-without-compile state (file hash differs from
+  last compilation input hash), (4) force a recompilation before serving
+  any chunks, (5) restore the work queue from .claws/workqueue.json and
+  mark the crashed item as failed, (6) report all recovery actions via
+  the health endpoint.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The write-ahead log (WAL) must be written before any OC file
+      modification begins. The WAL entry records: the target file path,
+      the original file content hash, a copy of the original file content
+      (or path to a backup), and the intended new content. If the process
+      crashes mid-write, the startup recovery reads the WAL and restores
+      the original file. Without a WAL, the only recovery is to detect
+      the truncated file (which may be syntactically valid but semantically
+      incomplete) and hope the user has a backup.
+    spec_impact: "CL-10 workspace-edit — WAL entry written before file modification; includes original content backup"
+    pitfall: P-274
+
+  - id: F02
+    severity: major
+    description: >
+      The .claws/cache directory may be in an inconsistent state after a
+      crash. If the per-phase cache was being updated when the crash
+      occurred, some cache entries may reflect the new compilation while
+      others reflect the old one. On startup, the CompilationHost must
+      invalidate the entire cache and rebuild from source files. A partial
+      cache is worse than no cache — it produces chunks with mixed old/new
+      governance state.
+    spec_impact: "CL-10 CompilationHost — full cache invalidation on crash recovery; rebuild from source"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The startup health endpoint must not return status: 'healthy' until
+      crash recovery completes. If a CAP partner connects immediately after
+      restart and receives healthy status, it will request chunks that may
+      reflect a partially recovered workspace. The health endpoint must
+      return status: 'recovering' with a recovery progress object until
+      WAL replay, recompilation, and cache rebuild are all complete.
+    spec_impact: "CL-10 health endpoint — status: 'recovering' until WAL replay + recompile + cache rebuild complete"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Chunks must not be served during recovery. A GET /api/chunks request
+      arriving during the recovery window must receive a 503 Service
+      Unavailable with a Retry-After header (estimated recovery time in
+      seconds). Serving stale or inconsistent chunks during recovery
+      violates the governance guarantee — locked fields might appear
+      unlocked, risk levels might be wrong.
+    spec_impact: "CL-10 chunk API — 503 during recovery; Retry-After header with estimated completion time"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The write-without-compile detection must compare file hashes against
+      the compilation input hashes stored in .claws/cache/compilation.json.
+      If any OC file's current hash differs from its last-compiled hash,
+      a forced recompilation is required. This catches not only crash
+      scenarios but also cases where files were modified while the server
+      was down (e.g., by another process or manual edit).
+    spec_impact: "CL-10 startup — hash comparison between current OC files and compilation input hashes"
+    pitfall: P-274
+
+  - id: F06
+    severity: major
+    description: >
+      Work queue persistence must use atomic writes. If workqueue.json is
+      written non-atomically (write-in-place), a crash during the write
+      produces a corrupt JSON file. The persistence must use write-to-temp
+      then atomic-rename, and the startup reader must handle corrupt files
+      gracefully (treat as empty queue, log warning).
+    spec_impact: "CL-10 work queue persistence — atomic write (temp + rename); handle corrupt file on read"
+    pitfall: P-280
+
+  - id: F07
+    severity: warning
+    description: >
+      The WAL file itself must survive the crash. If the WAL is stored on
+      the same filesystem as the OC files, a filesystem-level crash (not
+      just process crash) could corrupt both. The WAL should use fsync
+      after writing to ensure it's flushed to disk before the OC file
+      modification begins. Without fsync, the WAL may be in the OS page
+      cache but not on disk when power is lost.
+    spec_impact: "CL-10 WAL — fsync after WAL write; WAL must be durable before OC modification starts"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The in-flight work queue item (the PATCH that was executing when the
+      crash occurred) must be marked as 'failed' with reason 'crash_recovery'
+      in the restored queue. The client that sent this PATCH never received
+      a response (connection dropped on crash). If the client retries the
+      PATCH, the system must handle the duplicate gracefully — either via
+      idempotency key or by detecting that the workspace state doesn't
+      reflect the intended change (file was restored to pre-PATCH state).
+    spec_impact: "CL-10 work queue — crashed items marked failed; idempotency key for client retry dedup"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The recovery process must have a timeout. If recompilation hangs
+      (e.g., due to a corrupt OC file that triggers an infinite loop in
+      the compiler), the server stays in 'recovering' state forever.
+      A configurable recovery timeout (default 30s) should escalate to
+      status: 'recovery_failed' with the specific failure reason, allowing
+      the admin to investigate manually.
+    spec_impact: "CL-10 startup recovery — configurable timeout (default 30s); escalate to recovery_failed on timeout"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      If the WAL contains multiple entries (e.g., the crash occurred during
+      a coalesced write of two files), the recovery must replay them in
+      reverse order (last WAL entry first) to correctly unwind the partial
+      state. Forward replay would apply the intended changes, which is
+      wrong — the goal is to restore the pre-PATCH state, not to complete
+      the interrupted PATCH.
+    spec_impact: "CL-10 WAL recovery — reverse-order replay to restore pre-PATCH state"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      The health endpoint recovery object must include lostWorkItems: a
+      count of work queue items that were pending but not persisted (items
+      that arrived after the last workqueue.json flush). This informs the
+      admin that some PATCHes may need to be re-submitted. The count comes
+      from comparing the in-memory queue size (from the WAL's context) to
+      the persisted queue size.
+    spec_impact: "CL-10 health endpoint — lostWorkItems count for admin awareness of dropped PATCHes"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The startup sequence order matters: (1) WAL replay (restore files),
+      (2) work queue restore, (3) hash comparison (detect write-without-
+      compile), (4) forced recompilation, (5) cache rebuild, (6) health
+      status transitions to 'healthy', (7) begin accepting requests. If
+      recompilation runs before WAL replay, it compiles the corrupted
+      file. If requests are accepted before cache rebuild, chunks reflect
+      stale state.
+    spec_impact: "CL-10 startup — documented recovery sequence: WAL > queue > hash > compile > cache > serve"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      An SSE event should be emitted after recovery completes to notify
+      any CAP partners that reconnected during the recovery window. The
+      event type 'server:recovery-complete' with a payload including
+      recoveryDuration, forcedRecompile (boolean), and lostWorkItems
+      allows the partner to refresh its state and display a transient
+      notification to the user.
+    spec_impact: "CL-10 SSE — server:recovery-complete event after startup recovery finishes"
+    pitfall: null
+
+  - id: F14
+    severity: note
+    description: >
+      The audit trail must log the crash recovery as a critical event,
+      including: crash detection method (WAL present, hash mismatch),
+      files restored, work items lost, forced recompilation result, and
+      total recovery duration. This provides a forensic trail for
+      enterprise compliance and helps correlate user-reported data loss
+      with server-side recovery events.
+    spec_impact: "CL-10 audit — crash recovery event: detection method, restored files, lost items, duration"
+    pitfall: null

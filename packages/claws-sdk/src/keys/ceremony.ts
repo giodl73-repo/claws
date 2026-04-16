@@ -347,6 +347,10 @@ export async function initCeremony(
   const keyMaterial = randomBytes(32);
   const keyHex = keyMaterial.toString('hex');
 
+  // Split via Shamir SSS FIRST — before any persistence.
+  // The raw key must never touch disk; only shares leave this function.
+  const splitResult = shamirSplit(keyHex, opts.totalShares, opts.threshold);
+
   // Register the key in the metadata registry
   const entry = await registerKey(workspaceRoot, {
     algorithm: 'hmac-sha256',
@@ -354,12 +358,11 @@ export async function initCeremony(
     purpose: opts.purpose ?? 'root',
   });
 
-  // Persist key material to file storage
+  // Persist ONLY the key hash for reconstruction verification — never the raw key.
+  // The M-of-N security model requires that the unsplit key exists only in memory
+  // during the ceremony and is recoverable only by recombining threshold shares.
   const storage = createStorage('file', workspaceRoot);
-  await storage.write(entry.id, keyHex);
-
-  // Split via Shamir SSS
-  const splitResult = shamirSplit(keyHex, opts.totalShares, opts.threshold);
+  await storage.write(entry.id, splitResult.keyHash);
 
   return {
     ceremonyId: splitResult.ceremonyId,
@@ -372,20 +375,58 @@ export async function initCeremony(
 }
 
 /**
+ * PBKDF2 iteration bounds -- configurable via claws.json `security.pbkdf2Iterations`.
+ * Default: 600,000 (OWASP 2023 minimum for PBKDF2-SHA256).
+ * Minimum: 100,000 (floor for any deployment).
+ * Maximum: 10,000,000 (ceiling to prevent DoS from misconfiguration).
+ */
+export const PBKDF2_DEFAULT_ITERATIONS = 600_000;
+export const PBKDF2_MIN_ITERATIONS = 100_000;
+export const PBKDF2_MAX_ITERATIONS = 10_000_000;
+
+/**
+ * Validate PBKDF2 iteration count is within acceptable bounds.
+ *
+ * @param iterations - Iteration count to validate
+ * @throws Error if iterations are outside [100,000, 10,000,000]
+ */
+export function validatePbkdf2Iterations(iterations: number): void {
+  if (!Number.isInteger(iterations)) {
+    throw new Error(`PBKDF2 iterations must be an integer, got ${iterations}`);
+  }
+  if (iterations < PBKDF2_MIN_ITERATIONS) {
+    throw new Error(
+      `PBKDF2 iterations must be >= ${PBKDF2_MIN_ITERATIONS}, got ${iterations}`,
+    );
+  }
+  if (iterations > PBKDF2_MAX_ITERATIONS) {
+    throw new Error(
+      `PBKDF2 iterations must be <= ${PBKDF2_MAX_ITERATIONS}, got ${iterations}`,
+    );
+  }
+}
+
+/**
  * Derive a key from a passphrase for single-developer mode.
  *
- * Uses PBKDF2-SHA256 with 600,000 iterations (OWASP 2023 minimum for
- * PBKDF2-SHA256) and a fixed salt derived from the workspace context.
+ * Uses PBKDF2-SHA256 with configurable iterations (default 600,000,
+ * OWASP 2023 minimum for PBKDF2-SHA256). Iteration count is configurable
+ * via claws.json `security.pbkdf2Iterations` -- enterprise deployments
+ * can increase for higher security, or decrease for performance on
+ * resource-constrained systems.
  *
  * @param passphrase - User-provided passphrase
  * @param salt - Context salt (e.g. workspace identifier)
+ * @param iterations - PBKDF2 iteration count (default: 600,000, min: 100,000, max: 10,000,000)
  * @returns Derived key result
  */
 export function deriveSingleDevKey(
   passphrase: string,
   salt: string,
+  iterations: number = PBKDF2_DEFAULT_ITERATIONS,
 ): SingleDevKeyResult {
-  const derived = pbkdf2Sync(passphrase, salt, 600_000, 32, 'sha256');
+  validatePbkdf2Iterations(iterations);
+  const derived = pbkdf2Sync(passphrase, salt, iterations, 32, 'sha256');
   return {
     key: derived.toString('hex'),
     algorithm: 'pbkdf2-sha256',

@@ -1,0 +1,230 @@
+name: S30-budget-ceiling-breach
+series: cap-integration
+version: 1
+specs: [CL-10, CL-12]
+description: >
+  Validates that @openclaw/budget-meter fires a 95% threshold warning when an
+  agent approaches its token budget ceiling during a work queue task, allows
+  the current tool call to complete (95% is warn-not-block), then enforces a
+  hard throttle at 100%. Subsequent tool calls are blocked until the budget is
+  reset. Chunks include governance.budgetWarning. The budget state is visible
+  via GET /api/governance.
+
+expect:
+  at_95_percent:
+    event: "budget:warning"
+    threshold: 0.95
+    tool_call_proceeds: true
+    chunk_field: "governance.budgetWarning"
+    warning_payload:
+      usedTokens: 9500
+      budgetTokens: 10000
+      percentUsed: 95
+      remainingTokens: 500
+  at_100_percent:
+    event: "budget:throttle"
+    tool_call_blocked: true
+    response:
+      status: 429
+      error: "BUDGET_EXCEEDED"
+      message_contains: "Token budget exhausted"
+      retryAfter: "budget reset time"
+  get_governance:
+    endpoint: "GET /api/governance"
+    response_shape:
+      budget:
+        ceiling: 10000
+        used: 10000
+        remaining: 0
+        state: "throttled"
+        lastWarningAt: "ISO 8601"
+        resetPolicy: "per-session"
+  budget_reset:
+    after_reset:
+      state: "active"
+      used: 0
+      remaining: 10000
+
+simulate:
+  failures: []
+  halt: null
+  budget:
+    ceiling: 10000
+    used_at_start: 9400
+    tool_call_cost: 200
+
+problem: >
+  An agent is executing a work queue task and reaches 95% of its configured
+  token budget (9500 of 10000 tokens used). The @openclaw/budget-meter
+  extension fires a threshold warning. The current tool call (costing 200
+  tokens) is allowed to complete because 95% is a warning threshold, not a
+  block. After the tool call, usage is at 9600. The next tool call would push
+  usage to 9800, still under 100%, so it also proceeds. The following tool
+  call would push usage past 10000 — budget-meter fires a throttle event and
+  blocks the call. The agent receives a 429 response. The budget state is
+  visible in GET /api/governance showing state: 'throttled'. The budget
+  remains throttled until explicitly reset (the reset policy determines
+  when: per-session, per-day, or manual). The scenario covers edge cases
+  around reset timing, concurrent tool calls, interaction with R5 approval
+  flows, and misconfiguration.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Budget reset timing ambiguity: the reset policy can be per-turn,
+      per-session, or per-day, but the default is not specified. If the
+      default is per-session and "session" is undefined (is it a WebSocket
+      connection? a CAP settings tab? the agent's process lifetime?),
+      the budget may never reset or reset too often. The reset policy
+      must define "session" precisely: from SSE connection open to SSE
+      connection close, with a maximum duration of 24 hours.
+    spec_impact: "CL-10 budget-meter — define 'session' as SSE connection lifetime (max 24h); document default reset policy"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Budget tracking across multiple concurrent tool calls: if the agent
+      fires 3 tool calls in parallel (via multi-tool-use), each consuming
+      200 tokens, the budget check at dispatch time sees 9400 used and
+      allows all 3 (each individually under 10000). But together they
+      consume 600 tokens, pushing usage to 10000. The budget check must
+      be atomic: reserve tokens before dispatch, deduct on completion,
+      release on failure. Without reservation, concurrent calls can
+      overshoot the ceiling.
+    spec_impact: "CL-10 budget-meter — atomic token reservation before tool dispatch; release on failure"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Budget enforcement interaction with R5 tools: if an R5 tool call
+      is approved by the human but the budget is at 100%, does the budget
+      block override the human approval? The human explicitly authorized
+      the action, but the budget says no. The resolution must be defined:
+      either human approval overrides budget (dangerous — removes the
+      ceiling), or budget takes precedence (the human's approval is wasted
+      and they must reset the budget first). The spec must choose one and
+      document the rationale.
+    spec_impact: "CL-10 budget vs R5 — define precedence: budget blocks even with human approval; human must reset first"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Budget not configured (no ceiling): if the workspace has no
+      budget-meter extension or the ceiling is set to 0 or null, the
+      system must treat it as unlimited. But "unlimited" must be an
+      explicit state, not an absence-of-config fallback. If the governance
+      chunk shows budget: null, the partner UI cannot distinguish between
+      "no budget configured" and "budget data missing due to error." The
+      GET /api/governance response must include budget.configured: true/false
+      as a distinct field.
+    spec_impact: "CL-10 GET /api/governance — include budget.configured boolean; null ceiling = explicitly unlimited"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Budget meter state persistence on server restart: if claws serve
+      crashes and restarts, the budget usage counter must be recovered
+      from persistent state (the .claws directory). If the counter resets
+      to 0 on restart, the agent effectively gets a free budget reset by
+      crashing. The budget state must be persisted in .claws/budget.json
+      and restored on startup, with the same recovery protocol as the
+      work queue (atomic write, WAL-protected).
+    spec_impact: "CL-10 budget-meter — persist usage counter in .claws/budget.json; restore on startup; WAL-protected"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Budget displayed in wrong units: the budget-meter tracks tokens
+      but the partner UI may need to display cost in dollars (for billing
+      dashboards) or in minutes (estimated remaining work time). The
+      GET /api/governance response should provide the raw token count
+      and optionally include a costEstimate field if a token-to-cost
+      multiplier is configured. Mixing units in the response (tokens in
+      one field, dollars in another) without clear labels causes partner
+      UI confusion.
+    spec_impact: "CL-10 GET /api/governance — budget in tokens (primary); optional costEstimate with explicit unit label"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Budget threshold firing multiple times at the same level: if the
+      agent's usage oscillates around 95% (a tool call pushes it to 96%,
+      then a cached response reduces effective usage to 94%, then the
+      next call pushes it to 95% again), the warning fires repeatedly.
+      The budget-meter must track whether a threshold has already been
+      fired and not re-fire until usage drops below a hysteresis band
+      (e.g., 90%) and rises again. Without hysteresis, the partner UI
+      floods with duplicate warnings.
+    spec_impact: "CL-10 budget-meter — hysteresis band for threshold warnings; no re-fire until usage drops below 90%"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The 429 response at budget exhaustion must include enough context
+      for the agent runtime to handle gracefully: the budget ceiling,
+      current usage, the reset policy, and the estimated reset time. If
+      the agent sees only a generic 429, it may retry immediately and
+      burn compute on repeated blocked calls. The Retry-After header
+      must reflect the actual reset time, not a generic backoff.
+    spec_impact: "CL-10 budget 429 — include ceiling, usage, resetPolicy, estimatedResetTime in response body"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Budget ceiling modification while throttled: an admin changes the
+      budget ceiling from 10000 to 15000 via fleet policy while the agent
+      is in throttled state. The budget-meter must detect the ceiling
+      change, recalculate the state (10000 used of 15000 = 66%, no longer
+      throttled), and transition back to active. If the budget-meter only
+      checks the ceiling at startup, mid-session ceiling changes are
+      invisible and the agent remains throttled despite having headroom.
+    spec_impact: "CL-10 budget-meter — react to ceiling changes in real-time; recalculate state on fleet policy update"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Work queue task in progress when budget is exhausted: the agent is
+      mid-task (has already made 3 of 5 planned tool calls for the task).
+      The budget throttle fires at call 4. The task is now stuck — it
+      cannot complete without more tool calls, but the budget blocks them.
+      The work queue must handle the stuck task: mark it as
+      'budget_blocked', emit a workqueue:task-blocked SSE event, and allow
+      the admin to either increase the budget or cancel the task.
+    spec_impact: "CL-10 work queue — budget_blocked task state; SSE event for partner visibility; admin override path"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Budget accounting granularity: does the budget count input tokens,
+      output tokens, or both? If only output tokens are counted, a tool
+      call that reads a large document (high input tokens) but produces
+      a short response (low output tokens) appears cheap. The budget
+      must track total tokens (input + output) to accurately reflect
+      resource consumption. The accounting method must be documented
+      in the budget-meter extension spec.
+    spec_impact: "CL-10 budget-meter — track total tokens (input + output); document accounting method"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Audit trail for budget events: the 95% warning, 100% throttle,
+      and budget reset must all be recorded in the audit chain. Each
+      entry includes the budget state at the time of the event, the
+      tool call that triggered it (if applicable), and the actor who
+      performed the reset (if manual). Without audit entries, a
+      compliance reviewer cannot determine why an agent stopped working
+      (budget throttle) or when it resumed (budget reset).
+    spec_impact: "CL-10 audit — log budget warning, throttle, and reset events with full budget state context"
+    pitfall: null

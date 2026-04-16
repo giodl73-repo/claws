@@ -2,7 +2,7 @@
  * Custom vitest matchers for governance assertions.
  *
  * 4 matchers:
- * - `toPassGovernance()` — all 12 governance checks pass
+ * - `toPassGovernance()` — all 13 governance checks pass
  * - `toHaveRiskLevel(level)` — skill declares specified risk level
  * - `toRequireElicitation()` — R5 tools have elicitation gates
  * - `toPassSecurityScan()` — zero security scanner findings
@@ -34,7 +34,7 @@ function formatGovernanceFailures(result: ValidationResult): string {
     return `  ${c.name}: FAIL\n${findingMsgs.join('\n')}`;
   });
   return [
-    `Expected all 12 governance checks to pass, but ${result.failedChecks} failed:`,
+    `Expected all 13 governance checks to pass, but ${result.failedChecks} failed:`,
     ...lines,
   ].join('\n');
 }
@@ -61,7 +61,7 @@ function riskNumber(riskCode: string): number {
 }
 
 /**
- * toPassGovernance() — asserts all 12 governance checks pass.
+ * toPassGovernance() — asserts all 13 governance checks pass.
  */
 export function toPassGovernance(received: GovernanceCheckInput) {
   const result = validate(received);

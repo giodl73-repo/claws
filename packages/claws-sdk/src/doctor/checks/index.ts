@@ -9,11 +9,15 @@ import { checkConfigSchema } from './config-schema.js';
 import { checkArtifactCompat } from './artifact-compat.js';
 import { checkDependencyAlignment } from './dependency-check.js';
 import { checkPolicySyntax } from './policy-syntax.js';
+import { checkVaultKdf } from './vault-kdf.js';
+import { checkKeyColocationDoctor } from './key-colocation.js';
 
 export { checkConfigSchema } from './config-schema.js';
 export { checkArtifactCompat } from './artifact-compat.js';
 export { checkDependencyAlignment } from './dependency-check.js';
 export { checkPolicySyntax } from './policy-syntax.js';
+export { checkVaultKdf } from './vault-kdf.js';
+export { checkKeyColocation, checkKeyColocationDoctor } from './key-colocation.js';
 
 /**
  * Checks that are relevant after an upgrade (subset of all checks).
@@ -32,6 +36,8 @@ const ALL_CHECKS: readonly DoctorCheck[] = [
   checkArtifactCompat,
   checkDependencyAlignment,
   checkPolicySyntax,
+  checkVaultKdf,
+  checkKeyColocationDoctor,
 ];
 
 /**

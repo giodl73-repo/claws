@@ -44,6 +44,7 @@ export type {
 export {
   resolveSigningKey,
   validateCiKeyFormat,
+  useSigningKey,
 } from './key-resolution.js';
 export type {
   KeySource,
@@ -61,3 +62,20 @@ export type {
   BadgeVersion,
   BadgeStore,
 } from './badge.js';
+
+export {
+  publishToRegistry,
+  queryRegistry,
+  validatePackageForPublish,
+} from './registry-client.js';
+export type {
+  RegistryPackage,
+  RegistryArtifact,
+  RegistryCredentials,
+  PublishResult,
+  RegistryQuery,
+  RegistryQueryResult,
+  QueryResult,
+  PackageValidationIssue,
+  PackageValidationResult,
+} from './registry-client.js';

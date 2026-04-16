@@ -7,7 +7,21 @@
  * @module claws-sdk/compile/llm/prompts
  */
 
-export { ADVERSARIAL_GUARD, withAdversarialGuard } from './adversarial-guard.js';
+export {
+  ADVERSARIAL_GUARD,
+  withAdversarialGuard,
+  DEFAULT_ADVERSARIAL_CONFIDENCE_THRESHOLD,
+  KNOWN_INJECTION_PATTERNS,
+  containsJsonStructure,
+  normalizeForPatternMatch,
+  checkAdversarialIntent,
+  validateAdversarialIntents,
+} from './adversarial-guard.js';
+export type {
+  AdversarialGuardConfig,
+  AdversarialCheckResult,
+  AdversarialValidationResult,
+} from './adversarial-guard.js';
 
 export {
   SOUL_PROMPT_VERSION,

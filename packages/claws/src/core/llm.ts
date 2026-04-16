@@ -80,7 +80,8 @@ export async function createLLMProvider(
 
   // Provider SDK probe passed — construct the LLM provider
   try {
-    const { AnthropicLLMProvider } = await import('@bic/claws-sdk/compile');
+    // A-W1: Import concrete provider from deep path, not barrel
+    const { AnthropicLLMProvider } = await import('@bic/claws-sdk/compile/llm/anthropic-provider');
     const provider = new AnthropicLLMProvider(
       ...(flags.llmModel !== undefined ? [{ model: flags.llmModel }] : []),
     );

@@ -1,0 +1,224 @@
+name: S22-obo-without-elicitation
+series: cap-integration
+version: 1
+specs: [CL-10, CL-12, CL-11]
+description: >
+  Validates that adding a tool with OBO (On Behalf Of) capability but no
+  elicitation gate triggers governance violations. R5/OBO tools without
+  elicitation produce G-ELICIT errors (security gap — agent acts on user's
+  behalf without confirmation). R3/OBO tools without elicitation produce
+  G-ELICIT warnings (configurable via fleet policy). The compilation must
+  force approvalRequired: true on any OBO tool missing its elicitation gate,
+  and the chunk must reflect this forced approval regardless of the user's
+  stated preference.
+
+expect:
+  r5_obo_no_elicitation:
+    endpoint: "PATCH /api/chunks/connections"
+    payload: "{ toolId: 'deploy-production', capabilities: ['obo'], risk: 'R5' }"
+    elicitation_gate: null
+    result:
+      status: "ok_with_errors"
+      edit_applied: true
+      recompilation_triggered: true
+      governance:
+        errors:
+          - type: "G-ELICIT"
+            toolId: "deploy-production"
+            risk: "R5"
+            message: "R5/OBO tool requires elicitation gate"
+      chunk_state:
+        toolId: "deploy-production"
+        approvalRequired: true
+        lock:
+          source: "r5"
+          forced: true
+  r3_obo_no_elicitation:
+    endpoint: "PATCH /api/chunks/connections"
+    payload: "{ toolId: 'send-notification', capabilities: ['obo'], risk: 'R3' }"
+    elicitation_gate: null
+    result:
+      status: "ok_with_warnings"
+      governance:
+        warnings:
+          - type: "G-ELICIT"
+            toolId: "send-notification"
+            risk: "R3"
+            configurable: true
+      chunk_state:
+        toolId: "send-notification"
+        approvalRequired: true
+        lock:
+          source: "governance"
+  r3_obo_fleet_allows:
+    description: "Fleet policy explicitly allows R3/OBO without elicitation"
+    fleet_policy: "{ r3_obo_elicitation: 'optional' }"
+    result:
+      governance:
+        warnings: []
+      chunk_state:
+        approvalRequired: false
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner sends PATCH /api/chunks/connections to add a new
+  tool (deploy-production) that has OBO capability but no elicitation gate
+  configured. OBO means the tool acts on the user's behalf with their
+  identity, making unconfirmed actions a security risk. The compilation must
+  detect the missing elicitation gate by cross-referencing the tool's
+  capability manifest against the elicitation configuration in USER.md or
+  TOOLS.md. For R5/OBO, this is a hard error (G-ELICIT) because the security
+  gap is unacceptable. For R3/OBO, it is a warning that fleet policy can
+  suppress. In both cases, approvalRequired is forced to true until the
+  elicitation gate is properly configured. The challenge is detecting OBO
+  capability reliably, handling cross-file dependencies, and respecting
+  fleet policy overrides.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      A tool's description may mention "on behalf of" or "acts as the user"
+      without declaring OBO in its capability manifest. If OBO detection
+      relies solely on the manifest, a tool could bypass elicitation by
+      omitting the OBO declaration while still performing OBO actions. The
+      compilation must perform semantic capability extraction from tool
+      descriptions as a secondary signal, flagging tools where description
+      implies OBO but manifest does not declare it.
+    spec_impact: "CL-10 compilation — semantic OBO detection from tool descriptions as fallback to manifest"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      A tool may gain OBO capability after a dependency update without any
+      direct edit to the tool's configuration. For example, a skill package
+      update adds an OBO-capable API client that the tool now uses. The
+      compilation must re-evaluate OBO classification on every recompile,
+      not cache it from the initial tool registration. Stale OBO classification
+      creates a silent security gap.
+    spec_impact: "CL-10 compilation — re-evaluate OBO classification on every recompile, no caching"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      OBO tools added via skill install (POST /api/skills/install) versus
+      via PATCH /api/chunks/connections may follow different validation paths.
+      The skill install path may bypass the PATCH validation layer entirely,
+      relying on post-install recompilation to catch the missing elicitation.
+      Between install and recompile, the tool is registered but ungoverned.
+      Skill install must trigger synchronous recompilation before returning
+      success, or the tool must be quarantined (locked) until compilation
+      completes.
+    spec_impact: "CL-10 skill install — synchronous recompilation or quarantine before tool activation"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Fleet policy that explicitly allows R3 OBO without elicitation
+      (r3_obo_elicitation: 'optional') must be respected, but the policy
+      itself must be validated. If the fleet policy is syntactically valid
+      but semantically contradicts R5 policy (e.g., fleet says
+      "r5_obo_elicitation: 'optional'"), the compilation must reject the
+      fleet policy override for R5. Fleet cannot relax R5 constraints.
+    spec_impact: "CL-10 fleet policy validation — fleet cannot override R5 elicitation requirements"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The "Allow all" standing approval button in the Loop UI should NOT
+      grant blanket approval for OBO tools. If "Allow all" covers OBO
+      tools, the user bypasses elicitation with a single click, defeating
+      the purpose. The approval system must exclude OBO tools from "Allow
+      all" scope, requiring per-tool explicit approval. The chunk must
+      show obo_excluded: true for the "Allow all" entry.
+    spec_impact: "CL-10 Allow-all exclusion — OBO tools excluded from standing approval scope"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      If the elicitation gate is configured in USER.md but the tool
+      definition is in TOOLS.md, the compilation has a cross-file
+      dependency. An edit to USER.md (adding an elicitation gate) must
+      trigger recompilation of the affected tool's governance state in
+      TOOLS.md. Without cross-file dependency tracking, the tool remains
+      flagged as G-ELICIT even after the gate is properly configured.
+    spec_impact: "CL-10 cross-file dependency — USER.md elicitation gate changes trigger TOOLS.md recompile"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The G-ELICIT violation for R5/OBO must appear in governance.errors,
+      not governance.warnings. If the compilation produces it as a warning,
+      the Loop UI may render it as an amber banner (dismissible) rather
+      than a red block (non-dismissible). The severity distinction between
+      error and warning for G-ELICIT must be enforced by risk level: R5
+      always error, R3 always warning.
+    spec_impact: "CL-10 G-ELICIT severity — R5 produces governance.errors, R3 produces governance.warnings"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Multiple tools with OBO capability added in a single batch PATCH
+      should produce individual G-ELICIT findings per tool, not a single
+      aggregate finding. The Loop UI needs per-tool granularity to render
+      per-tool approval buttons. A batch finding like "3 OBO tools lack
+      elicitation" does not provide the toolId needed for targeted approval.
+    spec_impact: "CL-10 G-ELICIT findings — per-tool granularity in batch PATCH responses"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      If a tool declares OBO capability but the elicitation gate is
+      configured with a timeout (e.g., "approve within 30 seconds or deny"),
+      the compilation must validate that the timeout is within acceptable
+      bounds. A timeout of 0 seconds is effectively no elicitation. A
+      timeout of 24 hours is effectively blanket approval. The fleet
+      policy should define min/max elicitation timeout bounds.
+    spec_impact: "CL-10 elicitation gate — fleet policy defines min/max timeout bounds"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      The forced approvalRequired: true on OBO tools must persist across
+      recompilations even if the user attempts to set it to false via
+      subsequent PATCH. The lock must be sticky until the elicitation gate
+      is properly configured. A PATCH setting approvalRequired: false on
+      an OBO tool without elicitation must be rejected with
+      OBO_APPROVAL_LOCKED error.
+    spec_impact: "CL-10 OBO lock — approvalRequired sticky until elicitation gate configured"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      If the tool's OBO capability is declared in a skill manifest but
+      the tool itself is configured in TOOLS.md without the OBO flag, the
+      compilation faces a conflict between the skill manifest and the
+      local configuration. The most restrictive interpretation must win:
+      if either source says OBO, the tool is classified as OBO.
+    spec_impact: "CL-10 OBO classification — most restrictive wins when skill manifest and TOOLS.md disagree"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The audit trail for G-ELICIT violations must record the tool's full
+      capability manifest, the elicitation configuration (or lack thereof),
+      the risk level, and the fleet policy that was applied. Without this
+      context, a compliance review cannot determine whether the violation
+      was a misconfiguration or an intentional bypass attempt.
+    spec_impact: "CL-10 audit trail — full context for G-ELICIT violations including fleet policy applied"
+    pitfall: null

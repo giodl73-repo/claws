@@ -5,7 +5,7 @@
  * and buildRegexIntentMap.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ExtractorLLM, buildRegexIntentMap } from '../../../src/compile/llm/extractor.js';
 import type {
   LLMProvider,
@@ -250,6 +250,76 @@ describe('ExtractorLLM', () => {
       expect(merge.overlapping).toBe(0);
     });
   });
+
+  // ── Retry / backoff branch (lines 125-128) ────────────────────────
+
+  describe('extractAll retry/backoff', () => {
+    beforeEach(() => { vi.useFakeTimers(); });
+    afterEach(() => { vi.useRealTimers(); });
+
+    it('retries on provider error and succeeds after transient failure', async () => {
+      let callCount = 0;
+      const failOnce: LLMProvider = {
+        modelId: 'fail-once-v1',
+        async extract(request: LLMExtractionRequest): Promise<ExtractionResult> {
+          callCount++;
+          if (callCount === 1) {
+            throw new Error('rate limit exceeded');
+          }
+          return { source: request.source, intents: [], modelId: 'fail-once-v1' };
+        },
+        async validate(): Promise<ParseDiagnostic[]> { return []; },
+      };
+      const extractor = new ExtractorLLM(failOnce);
+      const promise = extractor.extractAll([presentEntry('SOUL.md', 'test')]);
+      // Advance past backoff delay
+      await vi.advanceTimersByTimeAsync(10_000);
+      const results = await promise;
+      expect(results).toHaveLength(1);
+      expect(callCount).toBe(2);
+    });
+
+    it('exercises non-Error throw path in retry logging', async () => {
+      let callCount = 0;
+      const failWithString: LLMProvider = {
+        modelId: 'fail-string-v1',
+        async extract(): Promise<ExtractionResult> {
+          callCount++;
+          if (callCount === 1) {
+            // eslint-disable-next-line no-throw-literal
+            throw 'string error'; // non-Error throw — exercises String(err) branch
+          }
+          return { source: 'SOUL.md', intents: [], modelId: 'fail-string-v1' };
+        },
+        async validate(): Promise<ParseDiagnostic[]> { return []; },
+      };
+      const extractor = new ExtractorLLM(failWithString);
+      const promise = extractor.extractAll([presentEntry('SOUL.md', 'test')]);
+      await vi.advanceTimersByTimeAsync(10_000);
+      const results = await promise;
+      expect(results).toHaveLength(1);
+      expect(callCount).toBe(2);
+    });
+
+    it('throws after exhausting all retries', async () => {
+      const alwaysFail: LLMProvider = {
+        modelId: 'always-fail-v1',
+        async extract(): Promise<ExtractionResult> {
+          throw new Error('permanent failure');
+        },
+        async validate(): Promise<ParseDiagnostic[]> { return []; },
+      };
+      const extractor = new ExtractorLLM(alwaysFail);
+      const promise = extractor.extractAll([presentEntry('SOUL.md', 'test')]);
+      // Attach catch handler immediately to prevent unhandled rejection on Linux/macOS
+      const caughtPromise = promise.catch((err: unknown) => err);
+      // Advance through all retry backoff delays
+      await vi.advanceTimersByTimeAsync(60_000);
+      const err = await caughtPromise;
+      expect(err).toBeInstanceOf(Error);
+      expect((err as Error).message).toBe('permanent failure');
+    });
+  });
 });
 
 // ── buildRegexIntentMap ─────────────────────────────────────────────
@@ -293,6 +363,49 @@ describe('buildRegexIntentMap', () => {
     expect(map.has('SOUL.md')).toBe(true);
     expect(map.get('SOUL.md')!).toHaveLength(1);
     expect(map.get('SOUL.md')![0]!.target).toBe('Bash');
+  });
+
+  it('maps deny intents without line property (line-undefined branch)', () => {
+    const ast: GovernanceAST = {
+      deny: [
+        {
+          source: 'SOUL.md',
+          intents: [
+            {
+              intentKind: 'deny',
+              pattern: 'Bash',
+              rawLine: 'Never use Bash',
+              confidence: 0.9,
+              // line deliberately omitted at runtime to hit the else branch
+            } as unknown as GovernanceAST['deny'][0]['intents'][0],
+          ],
+        },
+      ],
+      tool: [],
+      context: [],
+      permission: [],
+      memory: [],
+      obo: [],
+      schedule: [],
+      data: [],
+      agents: [],
+      output: [],
+      elicit: [],
+      input: [],
+      user: [],
+      activity: [],
+      workflow: [],
+      supply: [],
+      boundary: [],
+      skill: [],
+    };
+    const map = buildRegexIntentMap(ast);
+    expect(map.has('SOUL.md')).toBe(true);
+    const intents = map.get('SOUL.md')!;
+    expect(intents).toHaveLength(1);
+    expect(intents[0]!.target).toBe('Bash');
+    // The line property should NOT be present since si.line was undefined
+    expect(intents[0]).not.toHaveProperty('line');
   });
 
   it('maps tool intents from AST', () => {

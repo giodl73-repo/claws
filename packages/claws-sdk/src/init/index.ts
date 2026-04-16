@@ -14,8 +14,8 @@ export { scaffoldSidecar } from './sidecar-scaffold.js';
 export { updateGitignore } from './gitignore-update.js';
 export { uninstallWorkspace, workspaceHash } from './uninstall.js';
 export type { UninstallResult } from './uninstall.js';
-export { checkBypass, CLAWS_BYPASS_ENV } from './bypass.js';
-export type { BypassCheckResult, FleetBypassPolicy } from './bypass.js';
+export { checkBypass, CLAWS_BYPASS_ENV } from '../config/bypass.js';
+export type { BypassCheckResult, FleetBypassPolicy } from '../config/bypass.js';
 export {
   applyTemplate,
   getTemplate,

@@ -1,0 +1,83 @@
+# Self-test workflow for claws-action.
+#
+# Validates the action itself by running it on the test fixtures
+# included in the repository. Runs on PRs and pushes to main.
+
+name: Test claws-action
+
+on:
+  pull_request:
+    paths:
+      - 'claws-action/**'
+  push:
+    branches: [main]
+    paths:
+      - 'claws-action/**'
+
+permissions:
+  contents: read
+
+jobs:
+  bats-tests:
+    name: Run bats tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install bats
+        run: npm install -g bats
+
+      - name: Run L0 + L1 tests
+        working-directory: claws-action
+        run: bats tests/
+
+  action-smoke:
+    name: Action smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install claws
+        run: npm install -g @bic/claws-cli
+
+      - name: Run action on fixture workspace
+        uses: ./claws-action
+        with:
+          stage: '1'
+          format: 'sarif'
+          fail-on: 'none'
+          cache: 'true'
+
+  cache-key-test:
+    name: Cache key determinism
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute cache key (first run)
+        id: key1
+        run: |
+          KEY=$(bash claws-action/scripts/cache-key.sh claws-action/tests/fixtures)
+          echo "key=${KEY}" >> "$GITHUB_OUTPUT"
+
+      - name: Compute cache key (second run)
+        id: key2
+        run: |
+          KEY=$(bash claws-action/scripts/cache-key.sh claws-action/tests/fixtures)
+          echo "key=${KEY}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify determinism
+        run: |
+          if [[ "${{ steps.key1.outputs.key }}" != "${{ steps.key2.outputs.key }}" ]]; then
+            echo "::error::Cache key is not deterministic!"
+            exit 1
+          fi
+          echo "Cache key is deterministic: ${{ steps.key1.outputs.key }}"

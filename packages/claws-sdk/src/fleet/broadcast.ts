@@ -73,6 +73,8 @@ export interface BroadcastManifest {
   readonly policyFile: string;
   /** Reason for broadcast (from --reason flag). */
   readonly reason: string;
+  /** C-W1: Policy version resolved from claws.json (no longer hardcoded 'unknown'). */
+  readonly policyVersion: string;
   /** Number of workspaces targeted. */
   readonly targeted: number;
   /** Number of workspaces successfully updated. */
@@ -400,10 +402,25 @@ export async function broadcastPolicy(
     ...errorResults,
   ];
 
+  // M-04: Resolve policyVersion from the source policy YAML content, not
+  // from an arbitrary workspace (governedWorkspaces[0] is non-deterministic
+  // because readdir order varies across platforms and runs).
+  let policyVersion = 'unknown';
+  try {
+    const yaml = await import('yaml');
+    const parsed = yaml.parse(content) as Record<string, unknown> | null;
+    if (parsed && typeof parsed === 'object') {
+      policyVersion = String(parsed['version'] ?? parsed['policyVersion'] ?? 'unknown');
+    }
+  } catch {
+    // fall back to 'unknown' if YAML re-parse fails
+  }
+
   const manifest: BroadcastManifest = {
     timestamp: new Date().toISOString(),
     policyFile: policyFileName,
     reason: options.reason,
+    policyVersion,
     targeted: workspaces.length,
     succeeded: results.filter((r) => r.success).length,
     skippedCount: results.filter((r) => r.skipped).length,
@@ -419,6 +436,7 @@ export async function broadcastPolicy(
           timestamp: manifest.timestamp,
           policyFile: manifest.policyFile,
           reason: manifest.reason,
+          policyVersion: manifest.policyVersion,
           targeted: 1,
           succeeded: 1,
           skippedCount: 0,

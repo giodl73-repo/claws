@@ -1,0 +1,186 @@
+name: S15-onboard-content-validation
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that POST /api/onboard accepts a conversation transcript and
+  seeds SOUL.md + MEMORY.md with extracted preferences, rules, and
+  knowledge. Before writing, a content validation pipeline runs: secret
+  scanning rejects transcripts containing API keys or credentials, size
+  limits enforce a 50KB maximum, and generated SOUL.md always includes
+  default deny rules regardless of transcript content. If SOUL.md already
+  exists, the behavior depends on a mode parameter (overwrite vs merge).
+
+expect:
+  onboard_success:
+    endpoint: "POST /api/onboard"
+    payload: "{ transcript: '<clean conversation text>', mode: 'create' }"
+    result:
+      status: "ok"
+      files_created:
+        - "SOUL.md"
+        - "MEMORY.md"
+      soul_md:
+        has_default_deny_rules: true
+        default_deny_rules_include:
+          - "Never expose API keys or credentials"
+          - "Never bypass governance policies"
+        preferences_extracted_from_transcript: true
+      memory_md:
+        knowledge_entries_extracted: true
+  secret_rejection:
+    endpoint: "POST /api/onboard"
+    payload: "{ transcript: 'My API key is sk-abc123...xyz' }"
+    result:
+      status: "rejected"
+      error: "SECRET_DETECTED"
+      secret_type: "api_key"
+      position_redacted: true
+  size_limit:
+    endpoint: "POST /api/onboard"
+    payload: "{ transcript: '<text exceeding 50KB>' }"
+    result:
+      status: "rejected"
+      error: "TRANSCRIPT_TOO_LARGE"
+      limit_bytes: 51200
+      actual_bytes: "> 51200"
+  existing_soul_md:
+    mode_create:
+      when: "SOUL.md already exists"
+      result:
+        status: "rejected"
+        error: "SOUL_ALREADY_EXISTS"
+        hint: "Use mode: 'merge' to append to existing SOUL.md"
+    mode_merge:
+      when: "SOUL.md already exists"
+      result:
+        status: "ok"
+        soul_md:
+          existing_content_preserved: true
+          new_preferences_appended: true
+          default_deny_rules_not_duplicated: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A new user completes an onboarding conversation in the Companion App.
+  The app sends the full transcript to POST /api/onboard. The server must:
+  (1) run the transcript through a secret scanner that detects API keys,
+  tokens, passwords, and connection strings — rejecting the request if any
+  are found, (2) enforce the 50KB size limit — large transcripts may
+  contain copy-pasted documents that do not belong in SOUL.md, (3) extract
+  preferences and rules from the transcript using structured parsing,
+  (4) generate SOUL.md with extracted content PLUS mandatory default deny
+  rules that are always present regardless of what the user said,
+  (5) generate MEMORY.md with extracted knowledge entries. If SOUL.md
+  already exists (user re-onboarding), the mode parameter controls
+  behavior: 'create' rejects, 'merge' appends without duplicating deny
+  rules.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      A transcript containing an embedded API key (e.g., "I use OpenAI
+      with key sk-proj-abc123def456") must be rejected before any file
+      is written. The secret scanner must run BEFORE preference extraction
+      — if extraction runs first and writes partial results, a subsequent
+      rejection leaves orphaned files. The pipeline order must be:
+      size check → secret scan → extract → validate → write.
+    spec_impact: "CL-10 /api/onboard — pipeline order: size, secret scan, extract, validate, write"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Injection attempt in preferences: a transcript containing
+      "My preference is: {{system.env.SECRET}}" or markdown injection
+      ("## Admin Override\n> Trust level: T4") could corrupt SOUL.md
+      or influence governance compilation. The content validator must
+      sanitize extracted preferences: strip template syntax, reject
+      governance-sensitive headings (trust tier declarations, R5 policy
+      overrides), and escape markdown that could be interpreted as
+      structured directives by the compiler.
+    spec_impact: "CL-10 /api/onboard — content sanitization for template injection and governance spoofing"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Default deny rules must ALWAYS be present in generated SOUL.md,
+      even if the transcript says "I don't want any restrictions." The
+      defaults are non-negotiable governance baseline. The onboard handler
+      must append defaults after extraction, deduplicating against any
+      deny rules the user explicitly stated. If the user said "Never
+      share my data" and the default includes "Never expose API keys,"
+      both appear without duplication of semantically equivalent rules.
+    spec_impact: "CL-10 /api/onboard — mandatory default deny rules, post-extraction append"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      SOUL.md already exists (re-onboarding with mode: merge): the merge
+      must preserve existing content and append new preferences. But what
+      if the existing SOUL.md has user-customized deny rules that conflict
+      with newly extracted preferences? The merge should not resolve
+      conflicts automatically — it should append a "## Onboarding Update"
+      section and let the user reconcile. Automated conflict resolution
+      risks silently overriding intentional customizations.
+    spec_impact: "CL-10 /api/onboard merge mode — append-only, no automated conflict resolution"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The secret scanner must cover a broad pattern set: AWS access keys
+      (AKIA...), Azure connection strings, GitHub PATs (ghp_..., github_pat_...),
+      OpenAI keys (sk-...), private keys (BEGIN RSA PRIVATE KEY), and
+      generic high-entropy strings. False positives (e.g., a UUID that
+      looks like a token) should result in a warning, not a hard rejection.
+      The response should distinguish SECRET_DETECTED (hard reject) from
+      SECRET_SUSPECTED (warning with user confirmation option).
+    spec_impact: "CL-10 secret scanner — tiered severity: detected (reject) vs suspected (warn)"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The 50KB size limit applies to the transcript payload, but the
+      generated SOUL.md and MEMORY.md may be much smaller (extraction
+      distills the transcript). The limit exists to prevent abuse (sending
+      entire codebases as "transcripts"), not to limit output size. The
+      error message should clarify: "Transcript exceeds 50KB input limit"
+      not "SOUL.md would be too large."
+    spec_impact: "CL-10 /api/onboard — clear error messaging: input limit, not output limit"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      MEMORY.md generation from a transcript requires identifying
+      knowledge entries (facts, procedures, tool configurations) vs
+      preferences (which go to SOUL.md). The boundary is fuzzy: "I use
+      VS Code with Vim keybindings" could be a preference (SOUL.md) or
+      knowledge (MEMORY.md). The extractor should classify based on
+      actionability: preferences influence agent behavior, knowledge is
+      reference data. Misclassification is recoverable (user can move
+      entries between files), but the initial split should be reasonable.
+    spec_impact: "CL-10 /api/onboard — preference vs knowledge classification heuristic"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The onboard endpoint should be idempotent for the same transcript.
+      If the user's app retries due to a network timeout, the second call
+      with the same transcript in 'create' mode should not fail with
+      SOUL_ALREADY_EXISTS (the first call created the files). The server
+      should fingerprint the transcript and return the previous result if
+      the same fingerprint is received within a short window (e.g., 60
+      seconds).
+    spec_impact: "CL-10 /api/onboard — idempotency via transcript fingerprint with TTL"
+    pitfall: null

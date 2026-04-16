@@ -1,0 +1,210 @@
+name: S16-chunk-stale-compilation
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that GET /api/chunks returns accurate governance context when the
+  GovernanceIR is stale — i.e., one or more OC files have been modified
+  externally (outside claws serve) since the last compilation. The response
+  must include a compilationStale: true warning, trigger auto-recompilation,
+  and handle concurrent chunk reads during recompile. Also validates that
+  unclassified tools default to R5 with provenance metadata and that the
+  chunk assembler takes an atomic workspace snapshot before assembly.
+
+expect:
+  http:
+    method: GET
+    path: /api/chunks
+    status: 200
+    content_type: application/json
+  response_shape:
+    root_has: [data, governance]
+    governance_has: [compilationStale, lastCompiled, lastModified, autoRecompileTriggered]
+    compilationStale_value: true
+    autoRecompileTriggered_value: true
+  stale_detection:
+    mechanism: "mtime comparison between OC files and .claws/cache/compilation.json"
+    triggers_on: GET_before_serve
+    includes_hash_verification: true
+  unclassified_tool_default:
+    risk_level: R5
+    lock_source: governance
+    provenance: "unclassified — defaulting to R5"
+    distinguishable_from_classified_r5: true
+  workspace_snapshot:
+    atomic: true
+    isolation: "snapshot before assembly; concurrent writes do not corrupt chunk"
+  timing:
+    stale_check_ms_max: 10
+    response_ms_max: 100
+
+simulate:
+  failures:
+    - stage: file_system
+      type: external_modification
+      detail: "TOOLS.md modified by external editor after last compilation"
+  halt: null
+  budget: null
+
+problem: >
+  A user has claws serve running and opens their workspace in VS Code. They
+  edit TOOLS.md directly (adding a new MCP tool definition) without going
+  through the CAP PATCH API. A CAP settings partner then sends
+  GET /api/chunks to render the workspace overview. The GovernanceIR is now
+  stale — it was compiled before the external edit. The chunk response must:
+  (1) detect the stale state via mtime/hash comparison, (2) include
+  compilationStale: true in the governance context so the partner can show a
+  "recompiling..." indicator, (3) trigger an automatic recompilation in the
+  background, (4) still serve the current (stale) chunk data so the partner
+  is not blocked, (5) assign any newly added tools that lack GovernanceIR
+  classification to R5 with provenance metadata distinguishing defaulted-R5
+  from classified-R5. A subsequent GET after recompilation completes should
+  show compilationStale: false with updated governance context.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The stale detection mechanism must compare both mtime and content hash,
+      not mtime alone. On some filesystems (FAT32, network mounts), mtime
+      granularity is 2 seconds — two rapid saves within the same second
+      produce identical mtimes. A content hash (SHA-256 of file bytes) stored
+      alongside the last compilation timestamp in .claws/cache/compilation.json
+      provides a reliable staleness signal regardless of filesystem.
+    spec_impact: "CL-10 stale detection — dual check: mtime as fast path, content hash as verification"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The auto-recompile triggered by a stale GET must not block the response.
+      If recompilation takes 500ms+ (large workspace with many OC files), the
+      chunk API degrades to unacceptable latency. The recompile must be
+      dispatched to a background task, and the GET must return immediately with
+      the stale data plus compilationStale: true. A subsequent GET or SSE event
+      delivers the fresh data.
+    spec_impact: "CL-10 auto-recompile — background dispatch, non-blocking GET response"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      If a PATCH arrives while the auto-recompile (triggered by stale GET) is
+      in progress, the system faces a race: the PATCH writes to an OC file and
+      triggers its own recompile, but the background recompile is already
+      running against the pre-PATCH state. If the background recompile finishes
+      second, it overwrites the PATCH-triggered compile result with stale IR.
+      The compilation queue must detect in-flight recompiles and either cancel
+      the stale one or ensure the latest-write-wins via a sequence number.
+    spec_impact: "CL-10 compilation queue — sequence numbering to prevent stale recompile from overwriting fresh"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The chunk assembler must take an atomic snapshot of the workspace state
+      (all OC files + GovernanceIR) before assembling the response. Without a
+      snapshot, a concurrent external edit mid-assembly could produce a chunk
+      where IDENTITY.md reflects the old state but TOOLS.md reflects the new
+      state. The snapshot can be a filesystem-level read lock or a copy of
+      relevant file hashes verified at assembly end (optimistic concurrency).
+    spec_impact: "CL-10 chunk assembly — atomic workspace snapshot before assembly; retry on concurrent modification"
+    pitfall: P-271
+
+  - id: F05
+    severity: major
+    description: >
+      Unclassified tools (present in TOOLS.md but absent from GovernanceIR)
+      must default to R5 with explicit provenance. The chunk response must
+      include risk.provenance: 'defaulted' (vs 'classified') so the CAP
+      partner can render a distinct UI treatment — e.g., amber "unreviewed"
+      badge vs red "restricted" badge. Without provenance, admins cannot
+      distinguish tools that were deliberately classified R5 from tools that
+      simply haven't been reviewed yet.
+    spec_impact: "CL-10 chunk assembler — risk.provenance field: 'classified' | 'defaulted'"
+    pitfall: P-270
+
+  - id: F06
+    severity: warning
+    description: >
+      The file watcher must debounce external edits to avoid triggering
+      multiple recompiles for a single logical change. An editor saving a file
+      may produce multiple write events (write temp, rename, write metadata).
+      A debounce window of 200-500ms collapses these into one recompile
+      trigger. Too short a window misses multi-file saves; too long delays
+      staleness recovery.
+    spec_impact: "CL-10 file watcher — configurable debounce window (default 300ms) for external edit detection"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      If the auto-recompile fails (e.g., the externally edited TOOLS.md has
+      syntax errors), the stale state persists indefinitely. Subsequent GETs
+      continue returning compilationStale: true but never resolve. The system
+      must surface the compilation error in the governance context
+      (compilationError field) so the partner can show "recompilation failed:
+      TOOLS.md line 14 syntax error" rather than an eternal spinner.
+    spec_impact: "CL-10 governance context — compilationError field when auto-recompile fails"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The stale check runs on every GET, which could be frequent (polling
+      partners, multiple tabs). The mtime check is cheap but the hash check
+      is O(file size). For large OC files (>100KB), the hash computation on
+      every GET adds measurable latency. The system should cache the last-known
+      hash and only recompute when mtime differs, making the common case
+      (no change) a single stat() call.
+    spec_impact: "CL-10 stale detection — cache last-known hash; recompute only when mtime changes"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      An SSE event must be emitted when auto-recompile completes so that
+      connected CAP partners can refresh their chunks. Without this event,
+      partners must poll GET /api/chunks to discover when compilationStale
+      flips to false. The event type should be 'compilation:complete' with
+      a payload including the new compilation hash and timestamp.
+    spec_impact: "CL-10 SSE — emit compilation:complete event after auto-recompile finishes"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      If multiple OC files are modified externally in rapid succession (e.g.,
+      git checkout switching branches), each file change triggers a stale
+      detection. The auto-recompile should coalesce these into a single
+      compilation run rather than queuing N sequential recompiles. The
+      compilation queue must support coalescing: if a recompile is already
+      pending, additional triggers merge into the pending run rather than
+      creating new queue entries.
+    spec_impact: "CL-10 compilation queue — coalesce multiple pending recompile triggers into single run"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The lastCompiled and lastModified timestamps in the governance context
+      must use the same clock source (system monotonic or wall clock). If
+      lastCompiled uses the compilation start time and lastModified uses the
+      filesystem mtime, clock skew between the process clock and the
+      filesystem clock could produce false staleness (lastModified > lastCompiled
+      even when no external edit occurred). Both should use filesystem mtime
+      of the compilation output vs source files.
+    spec_impact: "CL-10 governance timestamps — both lastCompiled and lastModified derive from filesystem mtime"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The compilationStale flag in the response is informational — the chunk
+      data is still served. But a strict CAP partner could interpret stale
+      data as untrustworthy and refuse to render it. The API documentation
+      must clarify that stale chunks are safe to display (governance rules
+      from last compilation still apply) and that staleness only means
+      recently added content may not yet be governed.
+    spec_impact: "CL-10 API docs — clarify stale chunk semantics: safe to display, new content may be ungoverned"
+    pitfall: null

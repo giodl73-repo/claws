@@ -8,7 +8,7 @@
  * @module claws-sdk/compliance/audit-chain
  */
 
-import { appendFile, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { appendFile, mkdir, readFile, writeFile, open, unlink } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
 import { join } from 'node:path';
 import { userInfo } from 'node:os';
@@ -63,6 +63,81 @@ export function resolveActor(): string {
 }
 
 /**
+ * Lock file name within the audit directory.
+ */
+const CHAIN_LOCK_FILE = 'chain.lock';
+
+/**
+ * Default maximum age of a lock file before it is considered stale (60 seconds).
+ */
+const DEFAULT_LOCK_TIMEOUT_MS = 60 * 1000;
+
+/**
+ * Acquire a file lock on the audit chain using atomic O_EXCL create.
+ *
+ * Prevents TOCTOU race where concurrent appenders read the same chain length,
+ * assign duplicate seq numbers, and corrupt the chain. The lock serialises
+ * the read-length + append operation.
+ *
+ * If the lock file exists, checks PID liveness and lock age.
+ * Stale locks (dead PID or expired) are reclaimed and retried once.
+ */
+async function acquireChainLock(auditDir: string, lockTimeoutMs: number = DEFAULT_LOCK_TIMEOUT_MS): Promise<string> {
+  const lockPath = join(auditDir, CHAIN_LOCK_FILE);
+  const lockContent = `${process.pid}\n${Date.now()}\n`;
+
+  try {
+    const fh = await open(lockPath, 'wx');
+    await fh.writeFile(lockContent, 'utf-8');
+    await fh.close();
+    return lockPath;
+  } catch (err: unknown) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code !== 'EEXIST') throw err;
+
+    // Lock file exists — check if it is stale
+    try {
+      const content = await readFile(lockPath, 'utf-8');
+      const [pidStr, tsStr] = content.trim().split('\n');
+      const lockPid = Number(pidStr);
+      const lockTs = Number(tsStr);
+
+      let pidAlive = false;
+      try {
+        process.kill(lockPid, 0);
+        pidAlive = true;
+      } catch {
+        pidAlive = false;
+      }
+
+      if (!pidAlive || (Number.isFinite(lockTs) && Date.now() - lockTs > lockTimeoutMs)) {
+        // Stale lock — remove and retry once with atomic O_EXCL
+        await unlink(lockPath);
+        const fh = await open(lockPath, 'wx');
+        await fh.writeFile(lockContent, 'utf-8');
+        await fh.close();
+        return lockPath;
+      }
+    } catch {
+      // Could not read/parse/clean lock — fall through to throw
+    }
+
+    throw new Error('Audit chain append already in progress (lock file exists). Wait or remove .claws/audit/chain.lock');
+  }
+}
+
+/**
+ * Release the chain lock by unlinking the lock file.
+ */
+async function releaseChainLock(lockPath: string): Promise<void> {
+  try {
+    await unlink(lockPath);
+  } catch {
+    // Best-effort cleanup
+  }
+}
+
+/**
  * Read the current chain length (number of entries) from the chain file.
  * Returns 0 if the file doesn't exist.
  */
@@ -80,7 +155,9 @@ async function readChainLength(chainPath: string): Promise<number> {
  * Get or generate the HMAC signing key.
  *
  * Reads from `.claws/keys/hmac.key` if present, otherwise generates a
- * random 32-byte key and writes it to disk.
+ * random 32-byte key and writes it to disk using O_EXCL (exclusive creation)
+ * to prevent TOCTOU races where two concurrent processes both generate
+ * different keys and the second silently overwrites the first.
  */
 async function getSigningKey(workspaceRoot: string): Promise<Buffer> {
   const keysDir = join(workspaceRoot, CLAWS_SIDECAR_LAYOUT.keys);
@@ -92,8 +169,24 @@ async function getSigningKey(workspaceRoot: string): Promise<Buffer> {
   } catch {
     await mkdir(keysDir, { recursive: true });
     const key = randomBytes(32);
-    await writeFile(keyPath, key.toString('hex') + '\n', 'utf-8');
-    return key;
+
+    try {
+      // O_CREAT | O_EXCL | O_WRONLY — atomic: fails with EEXIST if file already exists.
+      // This prevents a TOCTOU race where two concurrent processes both fail readFile,
+      // both generate different random keys, and the second overwrites the first.
+      const fh = await open(keyPath, 'wx');
+      await fh.writeFile(key.toString('hex') + '\n', 'utf-8');
+      await fh.datasync();
+      await fh.close();
+      return key;
+    } catch (err: unknown) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code !== 'EEXIST') throw err;
+
+      // Another process won the race and created the key — read theirs.
+      const hex = await readFile(keyPath, 'utf-8');
+      return Buffer.from(hex.trim(), 'hex');
+    }
   }
 }
 
@@ -127,28 +220,36 @@ export async function appendAuditEvent(
   const auditDir = join(workspaceRoot, CLAWS_SIDECAR_LAYOUT.audit);
   await mkdir(auditDir, { recursive: true });
 
-  const chainPath = join(auditDir, CHAIN_FILE);
-  const seq = await readChainLength(chainPath);
   const key = await getSigningKey(workspaceRoot);
   const actor = event.actor ?? resolveActor();
 
-  const unsigned = {
-    seq,
-    timestamp: new Date().toISOString(),
-    eventType: event.eventType,
-    actor,
-    target: event.target,
-    action: event.action,
-    outcome: event.outcome,
-    ruleId: event.ruleId,
-    severity: event.severity,
-    policyVersion: event.policyVersion,
-  };
+  // Lock around read-length + append to prevent TOCTOU race where concurrent
+  // appenders read the same chain length and assign duplicate seq numbers.
+  const lockPath = await acquireChainLock(auditDir);
+  try {
+    const chainPath = join(auditDir, CHAIN_FILE);
+    const seq = await readChainLength(chainPath);
 
-  const signed = signAuditEntry(unsigned, key, DEFAULT_KEY_ID);
-  await appendFile(chainPath, JSON.stringify(signed) + '\n', 'utf-8');
+    const unsigned = {
+      seq,
+      timestamp: new Date().toISOString(),
+      eventType: event.eventType,
+      actor,
+      target: event.target,
+      action: event.action,
+      outcome: event.outcome,
+      ruleId: event.ruleId,
+      severity: event.severity,
+      policyVersion: event.policyVersion,
+    };
 
-  return signed;
+    const signed = signAuditEntry(unsigned, key, DEFAULT_KEY_ID);
+    await appendFile(chainPath, JSON.stringify(signed) + '\n', 'utf-8');
+
+    return signed;
+  } finally {
+    await releaseChainLock(lockPath);
+  }
 }
 
 /**
@@ -173,4 +274,4 @@ export async function readAuditChain(workspaceRoot: string): Promise<AuditChainE
   }
 }
 
-export { readPolicyVersion, CHAIN_FILE };
+export { readPolicyVersion, CHAIN_FILE, acquireChainLock, releaseChainLock };

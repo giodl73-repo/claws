@@ -1,0 +1,125 @@
+name: S06-incremental-recompile
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that a PATCH toggling a single tool triggers per-phase incremental
+  recompilation rather than a full workspace rebuild. The compilation pipeline
+  has multiple phases (parse, classify, resolve, emit). Only phases whose inputs
+  changed should recompile. Unchanged phases must hit the PhaseCache. The total
+  recompile duration for a single-file edit must be under 200ms, as required
+  by CL-10's write-time performance target.
+
+expect:
+  http:
+    method: PATCH
+    path: /api/chunks/connections
+    request_body:
+      toolId: code-review
+      field: approval
+      value: enabled
+    status: 200
+    content_type: application/json
+  response_shape:
+    root_has: [status, data, governance]
+    status_value: accepted
+    governance_has: [recompiled, durationMs, phases]
+    governance_recompiled: true
+    governance_durationMs_lt: 200
+    phases_is_array: true
+    phases_item_has: [name, cacheHit, durationMs]
+  cache_behavior:
+    changed_phase_cacheHit: false
+    unchanged_phases_cacheHit: true
+  post_condition:
+    workspace_file_updated: true
+    compilation_clean: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A user enables the code-review tool (R2) via PATCH /api/chunks/connections.
+  The workspace has 9 OC files and 6 compilation phases. Only TOOLS.md is
+  affected by this edit. The compilation pipeline must detect that only the
+  tool-resolution phase needs to rerun (TOOLS.md changed), while identity,
+  governance, memory, heartbeat, and soul phases should use cached results.
+  The response must include per-phase cache hit/miss status and total duration.
+  If the total exceeds 200ms, the per-phase cache is not working correctly.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The per-phase dependency graph must accurately track which OC files
+      feed into which phases. If the dependency graph is overly broad
+      (e.g., marking all phases as dependent on TOOLS.md), every tool
+      edit triggers a full recompile and the 200ms target is missed. The
+      dependency graph must be per-file-per-phase, verified by tests that
+      assert cache hits for unrelated phases after single-file edits.
+    spec_impact: "CL-10 PhaseCache — per-file-per-phase dependency graph; test cache hit ratios after single-file edits"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      If two PATCH requests arrive concurrently (e.g., two CAP tabs editing
+      different tools simultaneously), the compilation pipeline must either
+      serialize them (queue) or handle concurrent recompilation safely. Two
+      concurrent writes to TOOLS.md followed by two recompiles could produce
+      inconsistent results if the second compile reads a partially-written
+      file from the first write. The write-compile pipeline must be
+      serialized per workspace or use file-level locking.
+    spec_impact: "CL-10 write-compile pipeline — serialize concurrent PATCHes per workspace; no parallel writes to same file"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The PhaseCache uses content hashes to determine cache validity. If a
+      file is written with identical content (e.g., re-enabling an already
+      enabled tool), the hash does not change and the phase should be a
+      cache hit. But if the write changes the file's mtime without changing
+      content, an mtime-based cache would incorrectly invalidate. The cache
+      must use content hashing, not mtime, to avoid unnecessary recompiles.
+    spec_impact: "CL-10 PhaseCache — use content hashing (not mtime) for cache invalidation"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      If the PhaseCache becomes corrupted (e.g., cache entry references a
+      phase output that was deleted), the compilation pipeline must detect
+      the corruption and fall back to a full recompile rather than returning
+      stale or incomplete results. The fallback must be automatic and logged.
+      A corrupted cache should never produce a 'clean' compilation status
+      with wrong data.
+    spec_impact: "CL-10 PhaseCache — detect corruption and fall back to full recompile with warning log"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The governance.phases array in the response exposes internal compiler
+      implementation details (phase names, durations, cache status). This is
+      useful for debugging but may leak information about the compilation
+      architecture to external partners. The response should include phases
+      only when a debug flag is set (e.g., X-Debug: true header) or in
+      development mode. Production responses should include only the
+      aggregate durationMs.
+    spec_impact: "CL-10 PATCH response — governance.phases included only in debug mode; production shows aggregate only"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The 200ms target assumes warm cache for unchanged phases. On first
+      request after server startup (cold cache), all phases are cache misses
+      and the total may exceed 200ms. The CL-10 spec should define whether
+      the 200ms target applies to warm-cache only or includes cold-start.
+      If cold-start must also meet 200ms, the server needs eager cache
+      warming on startup.
+    spec_impact: "CL-10 performance target — clarify 200ms applies to warm cache; define cold-start behavior"
+    pitfall: null

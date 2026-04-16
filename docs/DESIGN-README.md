@@ -12,25 +12,34 @@ A governance compiler for OpenClaw agents. Reads 9 workspace files, emits execut
 design/claws/
 ├── CLAUDE.md              ← Session driver
 ├── README.md              ← This file
-├── SPECS.md               ← Spec index (CL-01 through CL-07)
+├── SPECS.md               ← Spec index (CL-01 through CL-12)
+├── ATOMS.md               ← 62 atoms across 10 layers
+├── COMMAND-MAP.md         ← 40 commands, 8 groups
+├── PITFALLS.md            ← 50 pitfalls + HITL map
 ├── DCR.md                 ← Design change records
 ├── specs/                 ← Individual spec files
-│   ├── CL-01-cli-surface.md
+│   ├── CL-01-cli-surface-schema.md
 │   ├── CL-02-security-model.md
 │   ├── CL-03-runtime-enforcement.md
 │   ├── CL-04-compilation-pipeline.md
 │   ├── CL-05-developer-experience.md
 │   ├── CL-06-platform-ecosystem.md
-│   └── CL-07-deep-integration.md
-└── scenarios/             ← Scenario validation (pending)
+│   ├── CL-07-deep-integration.md
+│   ├── CL-08-freemium-boundary.md
+│   ├── CL-09-oc-workspace-format.md
+│   ├── CL-10-cap-integration.md
+│   ├── CL-11-upstream-governance.md
+│   └── CL-12-approval-event-schema.md
+├── surface-contracts/     ← Doc obligation YAML per layer
+└── scenarios/             ← Scenario validation
 
 Related:
-  design/claws/focus/Q01-Q18    ← 18 research questions
-  design/suite/GLINT-MAP.md       ← Command surface (39 commands)
-  design/suite/GLINT-PITFALLS.md  ← 35 pitfalls + HITL map
-  .craft/roles/claws/             ← 8 stakeholder roles
-  .craft/pipelines/claws.yaml     ← Spec pipeline
-  docs/presentations/why-claws.md ← Product pitch
+  design/claws/focus/Q01-Q18         ← 18 research questions
+  design/claws/COMMAND-MAP.md        ← Command surface (40 commands)
+  design/claws/PITFALLS.md           ← 50 pitfalls + HITL map
+  .craft/roles/claws/                ← 8 stakeholder roles
+  .craft/pipelines/claws.yaml        ← Spec pipeline
+  docs/claws/presentations/why-claws.md ← Product pitch
 ```
 
 ## Research Foundation

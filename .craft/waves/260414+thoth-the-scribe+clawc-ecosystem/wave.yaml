@@ -1,0 +1,127 @@
+name: "Thoth the Scribe"
+number: XCV
+deity: thoth
+epithet: the-scribe
+branch: feature/thoth-the-scribe
+description: "claws ecosystem — security hardening, compliance, optimization, maker experience, LSP, HTTP API, CI/CD, upstream contributions"
+status: completed
+completedAt: "2026-04-16T04:30:00Z"
+startedAt: "2026-04-14T00:00:00Z"
+dependsOn: [anubis]
+
+# Aether integration (claws-aether-integration) moved from Ra to Thoth CP-5.
+# Pulses 50-52 emit host-approval-policies.json, verify blob signatures,
+# and extend GuardrailProvider with requiresExternalApproval.
+
+# Dual-coverage CI gate (THOTH-INTEGRATION-COVERAGE)
+# Two vitest runs per checkpoint: unit then integration.
+# Both must pass before checkpoint advances.
+coverage:
+  unit:
+    # Per-file thresholds — existing bar from Anubis
+    statements: 95
+    branches: 90
+    functions: 95
+    lines: 95
+    scope: "*.unit.test.ts"
+  integration:
+    # Whole-package thresholds — new for Thoth
+    # Baseline: 76% stmts / 59% branches (Anubis exit)
+    # Target: close gap so integration tests alone prove the system works
+    statements: 85
+    branches: 70
+    functions: 80
+    lines: 85
+    scope: "*.integration.test.ts + *.e2e.test.ts"
+  enforcement: per-checkpoint-gate
+  notes: >
+    Unit run validates per-file 95/90/95/95. Integration run validates
+    whole-package 85/70/80/85. Integration targets are aspirational for
+    CP-1 (baseline 76/59), mandatory by CP-3. Each gate pulse must run
+    both: `vitest run --project unit --coverage` then
+    `vitest run --project integration --coverage`.
+
+plans:
+  - claws-protect
+  - claws-comply-audit
+  - claws-press-context
+  - claws-maker-commands
+  - claws-badge
+  - claws-lsp
+  - claws-serve
+  - claws-cicd-action
+  - claws-upstream-contrib
+  - claws-aether-integration
+
+stageOrder:
+  - kickoff
+  - setup
+  - scenarios
+  - planning
+  - implementation
+  - review
+  - close
+
+stages:
+  kickoff:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-14T00:00:00Z"
+    notes: "9 plans read, THOTH-FINDINGS.md incorporated, 49 pulses decomposed"
+  setup:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-14T00:00:00Z"
+    notes: "49 pulses across 5 checkpoints, dependency-ordered, scenario codes mapped"
+  scenarios:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-14T00:00:00Z"
+    notes: "90+ scenarios across 20 categories in design/claws/scenarios/, findings applied"
+  planning:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-14T00:00:00Z"
+    notes: "5 checkpoint plans generated, L2/L3 test tiers audited and filled across 30 feature pulses"
+  implementation:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-16T03:07:00Z"
+    notes: "52 pulses across 5 checkpoints, all review panels passed, 17 Majors fixed"
+  review:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-16T03:30:00Z"
+    notes: "5 checkpoint review panels (5 roles each), all Majors resolved"
+  close:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-16T04:30:00Z"
+    notes: "Wave closed — 455 files, 79K lines, 4571 tests, 99 commits"
+
+checkpoints:
+  cp-1:
+    name: "Security Hardening + Protect — Budget, Secrets, Identity, Anubis Findings"
+    pulses: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    status: completed
+    tag: thoth-cp-1
+  cp-2:
+    name: "Compliance + Audit — SOC2, HIPAA, EU AI Act, Audit Chain, Signing"
+    pulses: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    status: completed
+    tag: thoth-cp-2
+  cp-3:
+    name: "Optimization + Maker + Badge — PRESS, Context DAG, Scaffold, Publish, Badges"
+    pulses: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
+    status: completed
+    tag: thoth-cp-3
+  cp-4:
+    name: "Editor + Server — LSP, HTTP API, WebSocket"
+    pulses: [33, 34, 35, 36, 37, 38, 39, 40, 41, 42]
+    status: completed
+    tag: thoth-cp-4
+  cp-5:
+    name: "Ecosystem — CI/CD Action, @openclaw/* Packages, GuardrailProvider Spec, Aether Integration"
+    pulses: [43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
+    status: completed
+    tag: thoth-cp-5

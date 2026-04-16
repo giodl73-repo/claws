@@ -1,0 +1,142 @@
+name: S08-sse-events-on-edit
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that the SSE /api/events stream emits correctly ordered events
+  after a successful PATCH: file_changed followed by compilation_complete.
+  CAP partners subscribe to this stream to update their UI in real-time when
+  workspace state changes. Events must arrive in causal order, carry timing
+  metadata, and reflect the final compilation status.
+
+expect:
+  http:
+    method: GET
+    path: /api/events
+    headers:
+      Accept: text/event-stream
+    status: 200
+    content_type: text/event-stream
+  event_sequence:
+    - event: file_changed
+      data_has: [file, timestamp, changeType]
+      data_file: TOOLS.md
+      data_changeType: modified
+    - event: compilation_complete
+      data_has: [status, durationMs, timestamp, changedPhases]
+      data_status: clean
+      data_durationMs_gt: 0
+  event_ordering:
+    file_changed_before_compilation_complete: true
+    timestamps_monotonic: true
+  post_condition:
+    connection_stays_open: true
+    no_duplicate_events: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner opens an SSE connection to GET /api/events to
+  receive real-time workspace updates. The user then enables a tool via
+  PATCH /api/chunks/connections (successful edit). The SSE stream must emit
+  two events in order: (1) file_changed with file: 'TOOLS.md' and
+  changeType: 'modified', followed by (2) compilation_complete with
+  status: 'clean' and durationMs showing the actual compilation time.
+  The partner uses compilation_complete to refresh the Connections tab
+  data. Events must have monotonically increasing timestamps and no
+  duplicates.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If the SSE connection is dropped and the partner reconnects, events
+      emitted during the disconnection window are lost. The SSE spec
+      supports Last-Event-ID for resumption, but the server must maintain
+      an event buffer with sequential IDs. Without this, a partner that
+      reconnects after a brief network blip misses the compilation_complete
+      event and displays stale data until the next edit. The server must
+      implement Last-Event-ID with a configurable buffer size.
+    spec_impact: "CL-10 SSE /api/events — implement Last-Event-ID resumption with configurable event buffer"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The causal ordering guarantee (file_changed before compilation_complete)
+      must be enforced by the server, not assumed from timing. If the file
+      watcher and compilation pipeline emit events independently (e.g., on
+      separate async paths), a fast compilation could emit
+      compilation_complete before the file watcher emits file_changed. The
+      server must use a single ordered event queue that sequences events
+      causally, not by wall-clock time.
+    spec_impact: "CL-10 SSE /api/events — single ordered event queue for causal ordering; no independent async emitters"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      If multiple rapid PATCHes arrive within a short window (e.g., user
+      toggles 5 tools in quick succession), the SSE stream could emit 10
+      events (5 file_changed + 5 compilation_complete). If the compilation
+      pipeline batches rapid edits (debounce), the event stream should
+      emit one file_changed (with a list of changed files) and one
+      compilation_complete. The debounce behavior must be documented: does
+      the server debounce writes, events, or both?
+    spec_impact: "CL-10 SSE /api/events — define debounce behavior for rapid PATCHes: per-event or per-batch"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The compilation_complete event includes changedPhases, which tells
+      the partner which data chunks may have changed. But the partner
+      must then issue GET requests to fetch updated chunks. If the partner
+      could receive the updated chunk data inline in the SSE event (e.g.,
+      compilation_complete.data includes the affected chunk snapshots),
+      it could update the UI without additional round-trips. The tradeoff
+      is event payload size vs latency. The spec should define whether
+      inline chunk data is included or requires a follow-up GET.
+    spec_impact: "CL-10 SSE compilation_complete — define whether updated chunk snapshots are inline or require follow-up GET"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      If the compilation fails (e.g., after a write that triggers rollback
+      per S07), the SSE stream should emit compilation_complete with
+      status: 'error' (not 'clean'). But if the rollback restores the
+      original file, a file_changed event fires for the rollback write.
+      The partner sees: file_changed (edit), compilation_complete (error),
+      file_changed (rollback). This sequence is confusing. The spec must
+      define whether rollback file changes produce SSE events or are
+      suppressed.
+    spec_impact: "CL-10 SSE /api/events — define event behavior during rollback: suppress or emit with rollback flag"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      Long-lived SSE connections consume server resources (file descriptors,
+      memory for event buffers). If many CAP partners connect simultaneously
+      (e.g., multiple browser tabs), the server may exhaust connection
+      limits. The SSE endpoint should enforce a maximum concurrent
+      connection limit per workspace and return 429 Too Many Requests
+      when exceeded.
+    spec_impact: "CL-10 SSE /api/events — enforce max concurrent connections per workspace; 429 when exceeded"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The SSE stream currently emits file_changed and compilation_complete.
+      But external file edits (user manually editing TOOLS.md in their
+      editor) also trigger file_changed via the file watcher. The partner
+      cannot distinguish between API-initiated changes and external edits.
+      Adding a source field to file_changed (api, external, fleet_sync)
+      would let the partner handle each case differently.
+    spec_impact: "CL-10 SSE file_changed — include source field (api, external, fleet_sync) for change attribution"
+    pitfall: null

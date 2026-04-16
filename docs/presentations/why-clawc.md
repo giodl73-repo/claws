@@ -464,7 +464,7 @@ The ecosystem feeds itself.
 Every governance decision is logged. Each entry references the previous hash. Tamper with one — the chain breaks.
 
 SIEM export: SARIF, CEF, NDJSON, syslog.
-Signing: HMAC-SHA256 (default) or Ed25519 (enterprise).
+Signing: HMAC-SHA256 (default). Ed25519 for non-repudiation (@openclaw/audit-chain and @claws/audit).
 
 </div>
 <div>
@@ -584,6 +584,111 @@ Monotonic tightening: the floor only rises. Hash-based drift detection without r
 
 ---
 
+<!-- _class: small -->
+
+## Build, Test, Eval — One Pipeline
+
+**Scaffold a skill. Test governance. Gate in CI. No manual checking.**
+
+```
+  SKILL AUTHOR PIPELINE (Ptah + Anubis + Thoth)
+  ──────────────────────────────────────────────
+
+  1. SCAFFOLD              claws new skill email-drafter --template communication
+                           → SKILL.md (governance frontmatter)
+                           → handler.ts (@bic/claws-skill-kit decorators)
+                           → vitest.config.ts (governance test projects)
+                           → passes claws pinch on first run — zero manual edits
+
+  2. TEST (12 + 16)        @bic/claws-test — works standalone, no compiler needed
+                           ┌──────────────────────────────────────────────────┐
+                           │ GovernanceValidator  12 checks                   │
+                           │   risk level · OBO boundary · data labels        │
+                           │   fail-mode · elicitation · A2A trust            │
+                           │   input validation · output guards · audit       │
+                           │                                                  │
+                           │ SecurityScanner     16 AST-based rules           │
+                           │   injection (4) · secrets (4)                    │
+                           │   input (4) · output (4)                         │
+                           │                                                  │
+                           │ vitest matchers:                                 │
+                           │   toPassGovernance()  toRequireElicitation()     │
+                           │   toHaveRiskLevel()   toPassSecurityScan()       │
+                           └──────────────────────────────────────────────────┘
+
+  3. EVAL (GatewaySim)     compile → load plugin → fire tool calls → verify
+                           ┌──────────────────────────────────────────────────┐
+                           │ GatewaySim.fromWorkspace('./my-skill')           │
+                           │   .fire('send-email', payload)                   │
+                           │   → BLOCKED (R5, no approval)                    │
+                           │                                                  │
+                           │ SimReport: human + JSON, before/after diff       │
+                           │ Matchers: toBlock() toAllow() toElicit()         │
+                           │ Upgrade regression: SimReport.diff(v1, v2)       │
+                           └──────────────────────────────────────────────────┘
+
+  4. CI GATE               @bic/claws-action (GitHub Actions)
+                           Stage 0: pre-commit    claws pinch --staged
+                           Stage 1: PR check      claws pinch --diff → SARIF annotations
+                           Stage 2: CD gate       claws comply soc2 --sign
+                           Stage 3: fleet cron    claws scan --fleet + drift
+
+                           Gradual rollout: warn-only → fail-on:critical → fail-on:all
+                           .claws/ caching: 8s → <1s on unchanged workspaces
+
+  npm install @bic/claws-test    Works without the compiler. MIT.
+```
+
+---
+
+<!-- _class: small -->
+
+## Eval Pipeline — Plug In Any Harness
+
+**4-tier eval built in. Promptfoo, Inspect AI, or your own — claws speaks all of them.**
+
+```
+  EVAL TIERS (agent-sdk + craftworks-sdk)
+  ───────────────────────────────────────
+
+  L0  STRUCTURAL       runL0Assertions()       sections present, frontmatter valid
+  L1  COMPLETENESS     runL1Assertions()       capabilities match declarations
+  L2  LLM-AS-JUDGE     runL2Judge(rubric)      weighted rubric scoring, anchors per criterion
+  L3  AGENTIC          runL3Execution(mcp)     MCP sandbox, tool call recording, live eval
+
+  RUBRIC SYSTEM                              ASSERTION RUNNER
+  ─────────────                              ────────────────
+  YAML criteria + weighted scoring           Semantic postconditions on LLM output
+  Per-format overlays (Claude, Codex, …)     Auto-retry with violation injection
+  Lifecycle: draft → active → promoted       Budget-tracked (maxRetries: 2)
+  6 starter rubrics (skill-quality,          Soft assertions log, hard assertions halt
+    output-quality, error-handling, …)       Condition sanitizer: 500 char, no injection
+
+  EXTERNAL EVAL HARNESSES — bring your own
+  ─────────────────────────────────────────
+  ┌────────────────────────────────────────────────────────────────┐
+  │  quest.yaml:                                                  │
+  │    external_evals:                                            │
+  │      - name: promptfoo-suite                                  │
+  │        command: "promptfoo eval"                               │
+  │        format: json              ← Promptfoo, Inspect AI,     │
+  │      - name: custom-compliance        JSONL, SARIF, JUnit     │
+  │        command: "python eval.py"                               │
+  │        args: ["--skill", "${skill_name}"]                     │
+  │        blocking: true            ← gates the pipeline         │
+  └────────────────────────────────────────────────────────────────┘
+
+  INGEST ADAPTERS (compiler-sdk)             PIPELINE GATE
+  ──────────────────────────────             ──────────────
+  promptfoo-adapter.ts  → EvalSignal         eval-stage-executor spawns any CLI harness
+  inspect-adapter.ts    → EvalSignal         eval-gate.ts: threshold-based pass/fail
+  jsonl-adapter.ts      → EvalSignal         EvalSignal: score [0,1], pass_rate, failures[]
+
+  Your eval. Our pipeline. Governance included.
+```
+
+---
+
 <!-- _class: split -->
 
 <div>
@@ -600,8 +705,10 @@ Compile-time is ours. The runtime is shared. OC gets better whether or not you u
 <div>
 
 ```
-  CONTRIBUTE (18)
+  CONTRIBUTE (10)
   ──────────────
+  GuardrailProvider spec
+  Approval event schema
   Identity bridge
   Budget meter
   Audit chain
@@ -609,11 +716,9 @@ Compile-time is ours. The runtime is shared. OC gets better whether or not you u
   Secret scanner
   Artifact signer
   Fleet governance
-  Fence runtime
   Policy templates
-  CGR schemas
 
-  KEEP (8)
+  KEEP (6)
   ────────
   Policy compiler
   Guard passes
@@ -624,6 +729,123 @@ Compile-time is ours. The runtime is shared. OC gets better whether or not you u
 ```
 
 </div>
+
+---
+
+<!-- _class: small -->
+
+## GuardrailProvider: The Governance Interface for OpenClaw
+
+**One interface. Any provider. Composable by design.**
+
+*The eval pipeline checks skills at build time. But who checks tool calls at runtime?*
+
+```
+  THE PROBLEM TODAY                           THE GUARDRAILPROVIDER SPEC
+  ─────────────────                           ─────────────────────────
+  exec-approvals.json                         GuardrailProvider interface
+    binary yes/no per tool                      preAuthorize(toolCall) → AuthorizationDecision
+    no risk context                             4 outcomes: allow, deny, review, modify
+    no audit trail                              Risk levels R1-R5 in every decision
+    no composition                              Chain-of-responsibility registry
+    one enforcement point                       Multiple providers compose (deny > review > allow)
+
+  SEQUENCE                                    WHAT THE HOST SEES
+  ────────                                    ──────────────────
+  1. Tool call arrives at Gateway             AllowDecision {
+  2. ProviderRegistry calls ALL providers       decision: 'allow',
+  3. Compose: deny > review > modify > allow    requiresExternalApproval: true,
+  4. requiresExternalApproval? → host gate      riskLevel: 5,
+  5. User approves or denies                    reason: 'R5 OBO — credential forwarding' }
+  6. postAudit() records everything           The host gates. The provider decides. They compose.
+
+  PR TARGET: openclaw/openclaw issue #46441   MIGRATION: ShellExecProvider wraps exec-approvals.json
+  FIRST PR: Week 1 of Wave 1                 Zero breaking changes. Existing deployments keep working.
+```
+
+---
+
+<!-- _class: small -->
+
+## Approval Event Schema: Portable Approval UX
+
+**One schema. Any transport. Every host speaks the same language.**
+
+```
+  TODAY: EVERY HOST INVENTS ITS OWN FORMAT
+  ────────────────────────────────────────
+  Aether:    SSE 'ts' event + internal payload → Cowork dialog
+  ClawPilot: Electron IPC + custom message     → Desktop dialog
+  CLI:       ???                                → Terminal prompt
+
+  Approval UX is not portable. Dashboards can't aggregate across hosts.
+
+  THE STANDARD: SCHEMA, NOT TRANSPORT
+  ────────────────────────────────────
+  ┌──────────────────────────────────────────────────────────────┐
+  │  ApprovalRequestEvent                                        │
+  │    requestId    unique, correlates with response              │
+  │    toolCall     { server, tool, arguments? }                  │
+  │    risk         { level: 1-5, label, reason }                 │
+  │    governance   { provider, ruleId?, fleetPolicyApplied }     │
+  │    context      { conversationId, workspaceId?, agentId? }    │
+  │    extensions   { ... host-specific, consumers ignore }       │
+  └──────────────────────────────────────────────────────────────┘
+           │  SSE, WebSocket, IPC, stdio — host's choice
+           ▼
+  ┌──────────────────────────────────────────────────────────────┐
+  │  ApprovalResponseEvent                                       │
+  │    requestId    correlates with request                       │
+  │    decision     { status: approved|denied|timeout,            │
+  │                   decidedBy: { type, identity? },             │
+  │                   durationMs? }                               │
+  └──────────────────────────────────────────────────────────────┘
+
+  npm install @openclaw/approval-events   ~2KB. TypeScript + JSON Schema. MIT.
+```
+
+---
+
+<!-- _class: small -->
+
+## @openclaw/* — 6 Governance Packages for Every OC Developer
+
+**Real problems. Standalone solutions. No claws required.**
+
+```
+  PACKAGE                  SIZE    WHAT IT DOES
+  ───────────────────────  ─────   ─────────────────────────────────────────────
+  @openclaw/audit-chain    ~20KB   Hash-chained JSONL audit trail
+                                   HMAC-SHA256 integrity · WAL crash recovery
+                                   Export: SARIF, CEF, JSON, NDJSON, syslog
+
+  @openclaw/budget-meter    ~8KB   Token/cost controls
+                                   80/95/100% threshold alerts · Throttle at limit
+
+  @openclaw/identity-bridge ~3KB   Enterprise SSO (OIDC/SAML) for OC agents
+                                   Role mapping · RBAC permission checks
+
+  @openclaw/siem-emitter    ~5KB   SOC integration in 5 standard formats
+                                   CEF · NDJSON · JSON · Syslog RFC 5424 · SARIF 2.1.0
+
+  @openclaw/secret-scanner  ~4KB   Credential leak detection
+                                   8 pattern families · Shannon entropy analysis
+
+  @openclaw/approval-events ~2KB   Approval event helpers
+                                   Schema validation · Timeout policy · Correlation
+
+  ────────────────────────────────────────────────────────────────────────────
+  TOTAL: ~42KB  ·  ALL MIT  ·  ZERO @craftworks/ IMPORTS  ·  ZERO @claws/ IMPORTS
+
+  COMMUNITY DEMAND                           DELIVERY
+  ────────────────                           ────────
+  RBAC: most-requested governance feature (28+ reactions)
+  Cost control: commercial products exist    Wave 1 (wks 1-4): Spec PR + 4 packages
+  Audit: 3rd-party tools filling the gap     Wave 2 (wks 5-8): 2 packages + templates
+  SIEM: enterprise SOC requirement           Wave 3 (wks 9-16): Enterprise + community
+  Secrets: 1.5M tokens exposed in breach
+                                             Full spec: docs/claws/ecosystem/
+```
 
 ---
 

@@ -1,11 +1,12 @@
 /**
  * OpenClaw platform adapter — full fidelity emission.
  *
- * Produces all 4 artifact types:
+ * Produces all 5 artifact types:
  * 1. Gateway plugin (index.ts + hook handlers)
  * 2. SKILL.md (advisory prompt)
  * 3. Compiled workflow (lobster.compiled.yaml)
  * 4. exec-approvals.json (L4 host backup)
+ * 5. host-approval-policies.json (vendor-neutral host approval policies)
  *
  * OC is the reference platform with zero governance loss.
  *
@@ -16,10 +17,11 @@ import type { GovernanceIR } from '../../ir/governance-ir.js';
 import { emitPlugin } from '../emit-plugin.js';
 import { emitSkill } from '../emit-skill.js';
 import { emitExecApprovals } from '../emit-exec-approvals.js';
+import { emitHostApprovalPolicies } from '../emit-host-approval-policies.js';
 import type { PlatformAdapter, PlatformEmitResult, EmittedArtifact } from './platform-adapter.js';
 
 /**
- * OpenClaw adapter — full fidelity, all 4 artifact types.
+ * OpenClaw adapter — full fidelity, all 5 artifact types.
  */
 export const openclawAdapter: PlatformAdapter = {
   platform: 'openclaw',
@@ -46,6 +48,11 @@ export const openclawAdapter: PlatformAdapter = {
     const execResult = emitExecApprovals(ir);
     artifacts.push({ path: 'exec-approvals.json', content: execResult.content });
     warnings.push(...execResult.warnings);
+
+    // 4. host-approval-policies.json
+    const hostPoliciesResult = emitHostApprovalPolicies(ir);
+    artifacts.push({ path: 'host-approval-policies.json', content: hostPoliciesResult.content });
+    warnings.push(...hostPoliciesResult.warnings);
 
     return { platform: 'openclaw', artifacts, warnings };
   },

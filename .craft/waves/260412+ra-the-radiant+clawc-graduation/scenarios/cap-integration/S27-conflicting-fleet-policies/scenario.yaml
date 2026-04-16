@@ -1,0 +1,232 @@
+name: S27-conflicting-fleet-policies
+series: cap-integration
+version: 1
+specs: [CL-10, CL-11, CL-12]
+description: >
+  Validates conflict resolution when two fleet policy sources (fleet.yaml
+  from fleet broadcast and local fleet override in claws.json) have
+  contradictory rules. The system applies fail-closed resolution: the most
+  restrictive interpretation wins for every field. Governance warnings
+  surface the conflict, the chunk shows the winning policy source, and the
+  audit trail records both policies and the resolution. Also covers
+  three-way conflicts, version ordering ambiguity, syntax errors in one
+  policy source, and the interaction with R5 (fleet cannot override R5).
+
+expect:
+  two_source_conflict:
+    fleet_yaml:
+      tool_policy:
+        shell-exec: "allow"
+      trust_minimum: "T2"
+    claws_json_fleet:
+      tool_policy:
+        shell-exec: "block"
+      trust_minimum: "T3"
+    resolution:
+      tool_policy:
+        shell-exec: "block"
+        source: "claws.json"
+        reason: "Most restrictive: claws.json blocks, fleet.yaml allows"
+      trust_minimum: "T3"
+      trust_source: "claws.json"
+    governance:
+      warnings:
+        - type: "FLEET_POLICY_CONFLICT"
+          field: "tool_policy.shell-exec"
+          fleet_yaml: "allow"
+          claws_json: "block"
+          resolution: "block (most restrictive)"
+        - type: "FLEET_POLICY_CONFLICT"
+          field: "trust_minimum"
+          fleet_yaml: "T2"
+          claws_json: "T3"
+          resolution: "T3 (most restrictive)"
+    chunk:
+      lock:
+        source: "fleet"
+        policy_source: "claws.json"
+    audit_event:
+      type: "fleet-policy-conflict"
+      conflicts: 2
+      resolution: "fail-closed"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The agent's workspace has two fleet policy sources: fleet.yaml (pushed by
+  fleet broadcast) says shell-exec is allowed and trust minimum is T2;
+  claws.json local fleet override says shell-exec is blocked and trust
+  minimum is T3. The compilation must: (1) detect the conflict by comparing
+  all fields across both sources, (2) resolve each conflict using fail-closed
+  (most restrictive wins), (3) surface each conflict as a FLEET_POLICY_CONFLICT
+  warning in governance, (4) attribute the winning policy source in the chunk
+  lock, (5) record both policies and the resolution in the audit trail. The
+  challenge is defining "most restrictive" for every possible field type
+  (boolean, enum, list, pattern), handling three-way conflicts when a compiled
+  baseline disagrees with both fleet sources, and ensuring R5 constraints
+  are never weakened by any fleet policy combination.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      "Most restrictive" is ambiguous for list fields like blocklists. If
+      fleet.yaml blocks ["shell-*"] and claws.json blocks ["net-*"], the
+      fail-closed resolution must be the UNION (block both patterns), not
+      the intersection or either one alone. For allowlists, the resolution
+      must be the INTERSECTION (only tools allowed by both). The
+      fail-closed semantics must be defined per field type: union for
+      blocklists, intersection for allowlists, max for minimums, min for
+      maximums.
+    spec_impact: "CL-10 fleet conflict resolution — per-field-type semantics: union/blocklists, intersection/allowlists"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      Three-way conflict: fleet broadcast, local override, and the
+      compiled baseline (from SOUL.md/TOOLS.md governance) may all
+      disagree. The resolution order must be: fleet policies resolve
+      first (fail-closed between broadcast and local), then the fleet
+      resolution is applied on top of the compiled baseline. The
+      compiled baseline can only be made MORE restrictive by fleet, never
+      less. If fleet resolves to "allow" but the compiled baseline says
+      "block", the compiled baseline wins.
+    spec_impact: "CL-10 three-way conflict — fleet resolves first, then applies on top of compiled baseline (never relaxes)"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Fleet policy version ordering: if fleet.yaml has version 2.0 and
+      claws.json has version 1.5, should the newer version win? No —
+      fail-closed means most restrictive wins regardless of version.
+      But if both versions have the same restrictiveness, the version
+      number could break ties. The system must document that version
+      does NOT affect conflict resolution, only restrictiveness does.
+    spec_impact: "CL-10 fleet conflict — version number does not affect resolution, only restrictiveness"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Conflict on the same tool where one policy says "block" and the
+      other says "allow with R3 approval": "block" is more restrictive
+      than "allow with approval", so "block" wins. But what about
+      "allow with R5 approval" vs "block"? R5 approval is very
+      restrictive but still allows use; "block" prevents all use. The
+      system must define a total ordering: block > r5-locked > r3-locked >
+      governance-locked > allow-with-approval > allow.
+    spec_impact: "CL-10 fleet conflict — total ordering of restrictiveness levels for tool policies"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      A syntax error in one fleet policy source (e.g., invalid YAML in
+      fleet.yaml) must not cause the entire fleet policy system to fail.
+      The malformed source should be treated as maximally restrictive
+      (fail-closed on parse failure = assume everything is blocked) or
+      the system should fall back to the valid source with a governance
+      error. The choice between "max-restrict on parse failure" vs
+      "fallback to valid source" must be documented.
+    spec_impact: "CL-10 fleet policy parse failure — fail-closed (max restrict) or fallback with governance error"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      R5 constraints cannot be weakened by ANY fleet policy, even if
+      both fleet sources agree to relax them. If both fleet.yaml and
+      claws.json say "r5_approval: optional", the compilation must
+      ignore this override because R5 is a system invariant. A
+      governance warning must surface the attempted R5 override with
+      message "Fleet policies cannot relax R5 constraints."
+    spec_impact: "CL-10 R5 invariant — fleet policies cannot relax R5, warn on attempted override"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      Fleet policy hot-reload during conflict resolution creates a race
+      condition. If fleet.yaml is updated mid-compilation, the
+      compilation may use old fleet.yaml for some tools and new
+      fleet.yaml for others. The compilation must snapshot both policy
+      sources at the start and use the snapshot consistently throughout.
+      Hot-reloaded policies take effect at the next compilation, not
+      mid-compilation.
+    spec_impact: "CL-10 fleet policy — snapshot at compilation start, hot-reload takes effect next compile"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The governance warnings for fleet policy conflicts must include
+      enough context for the user to resolve the conflict intentionally.
+      Each warning should show: field name, value from fleet.yaml, value
+      from claws.json, which won, and why. The user should be able to
+      review all conflicts at a glance in the Loop UI governance panel.
+    spec_impact: "CL-10 FLEET_POLICY_CONFLICT warnings — full context for user resolution"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      If fleet.yaml and claws.json have different schema versions (e.g.,
+      fleet.yaml uses v2 schema with new fields, claws.json uses v1
+      schema without those fields), the missing fields in the v1 source
+      must be treated as "no opinion" (defer to the other source), not
+      as "default value." A missing field is not the same as an explicit
+      default. The merge logic must distinguish between "absent" and
+      "present with default value."
+    spec_impact: "CL-10 fleet policy merge — distinguish absent fields from explicit defaults"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      The audit trail must record the full content of both fleet policy
+      sources at the time of conflict resolution, not just the conflicting
+      fields. A compliance officer investigating a conflict needs to see
+      the complete policy context, including non-conflicting fields that
+      may explain why a particular resolution was chosen.
+    spec_impact: "CL-11 audit trail — full fleet policy snapshots at conflict resolution time"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      Conflicting policies that resolve to the same effective state (e.g.,
+      fleet.yaml says "block" and claws.json says "block") should not
+      produce a FLEET_POLICY_CONFLICT warning. Both sources agree; there
+      is no conflict. The conflict detection must compare effective values,
+      not just check that both sources define the same field.
+    spec_impact: "CL-10 conflict detection — only warn when effective values differ, not on redundant agreement"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Fleet policy conflicts are likely to be a common operational issue.
+      The system should provide a fleet-policy-diff endpoint that shows
+      all conflicts between the two sources without triggering
+      recompilation. Fleet admins can use this to preview conflicts
+      before pushing a fleet broadcast, reducing surprise conflicts in
+      production.
+    spec_impact: "CL-10 fleet-policy-diff endpoint — preview conflicts without recompilation"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      If the fleet broadcast source is unreachable (network failure),
+      the system should use the last-known fleet.yaml with a governance
+      warning that the policy may be stale. The staleness must be
+      surfaced in the chunk metadata so the Loop UI can show "fleet
+      policy may be outdated" and the user can make an informed decision
+      about proceeding with potentially stale governance.
+    spec_impact: "CL-10 fleet broadcast unavailable — use last-known with staleness warning"
+    pitfall: null

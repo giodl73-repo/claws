@@ -59,8 +59,8 @@ describe('GovernanceValidator integration', () => {
   it('validate() on clean Tier 2 fixture returns 12 passing checks', () => {
     const result = validate(cleanSkillInput);
 
-    expect(result.totalChecks).toBe(12);
-    expect(result.passedChecks).toBe(12);
+    expect(result.totalChecks).toBe(13);
+    expect(result.passedChecks).toBe(13);
     expect(result.failedChecks).toBe(0);
     expect(result.pass).toBe(true);
     expect(result.findings).toHaveLength(0);
@@ -153,7 +153,7 @@ describe('GovernanceValidator integration', () => {
 
     // Run governance validation
     const validationResult = validate(cleanSkillInput);
-    expect(validationResult.totalChecks).toBe(12);
+    expect(validationResult.totalChecks).toBe(13);
 
     // Aggregate: both pipelines produce structured results
     expect(scenarioResults.every(r => typeof r.pass === 'boolean')).toBe(true);

@@ -138,6 +138,63 @@ Every concept in the claws governance compiler, where it is authoritatively defi
 | C92 | `atom:cicd-pipeline` | CI/CD Pipeline Integration (@bic/claws-action) | `design/claws/specs/CL-05-developer-experience.md` | CL-06, COMMAND-MAP | -- | CL-05 |
 | C93 | `atom:claws-publish` | claws publish (governed ClawHub publishing) | `design/claws/COMMAND-MAP.md` | CL-05, CL-06 | -- | CL-05 |
 
+## Serve Layer
+
+| ID | Slug | Name | Authority | Mirrors | Reuses | Spec |
+|----|------|------|-----------|---------|--------|------|
+| C94 | `atom:claws-serve` | claws serve (HTTP governance API) | `design/claws/specs/CL-10-cap-integration.md` | CL-05, CL-04 | -- | CL-10 |
+| C95 | `atom:websocket-events` | WebSocket Governance Events (real-time streaming) | `design/claws/specs/CL-10-cap-integration.md` | CL-05 | -- | CL-10 |
+
+## Upstream Layer
+
+| ID | Slug | Name | Authority | Mirrors | Reuses | Spec |
+|----|------|------|-----------|---------|--------|------|
+| C96 | `atom:guardrail-provider` | GuardrailProvider (composable governance interface) | `design/claws/specs/CL-11-upstream-governance.md` | CL-07, CL-03 | -- | CL-11 |
+| C97 | `atom:approval-event-schema` | Approval Event Schema (host-approval-policies.json) | `design/claws/specs/CL-12-approval-event-schema.md` | CL-07 | -- | CL-12 |
+
+## CI/CD Layer
+
+| ID | Slug | Name | Authority | Mirrors | Reuses | Spec |
+|----|------|------|-----------|---------|--------|------|
+| C98 | `atom:sarif-pipeline` | SARIF Pipeline (CI/CD governance annotation) | `design/claws/specs/CL-05-developer-experience.md` | CL-06, COMMAND-MAP | -- | CL-05 |
+| C99 | `atom:severity-gating` | Severity Gating (gradual CI rollout, 8-week ramp) | `design/claws/specs/CL-05-developer-experience.md` | CL-06 | -- | CL-05 |
+
+## Badge Layer
+
+| ID | Slug | Name | Authority | Mirrors | Reuses | Spec |
+|----|------|------|-----------|---------|--------|------|
+| C100 | `atom:badge-staleness` | Badge Staleness Detection (per-version expiry) | `design/claws/specs/CL-05-developer-experience.md` | CL-06 | -- | CL-05 |
+
+## Security Additions (Thoth)
+
+| ID | Slug | Name | Authority | Mirrors | Reuses | Spec |
+|----|------|------|-----------|---------|--------|------|
+| C101 | `atom:artifact-signer` | Artifact Signer (Ed25519 + HMAC signing) | `design/claws/specs/CL-02-security-model.md` | CL-03, PITFALLS | -- | CL-02 |
+| C102 | `atom:witness-export` | Witness Export (third-party audit attestation) | `design/claws/specs/CL-02-security-model.md` | CL-05 | -- | CL-02 |
+| C103 | `atom:wal-recovery` | WAL Recovery (write-ahead log replay) | `design/claws/specs/CL-02-security-model.md` | CL-03 | A153 `atom:audit-trail` | CL-02 |
+| C106 | `atom:budget-workspace` | Budget Workspace (per-workspace token budgeting) | `design/claws/specs/CL-02-security-model.md` | CL-05, COMMAND-MAP | -- | CL-02 |
+| C107 | `atom:secrets-vault` | Secrets Vault (AES-256-GCM credential storage) | `design/claws/specs/CL-02-security-model.md` | CL-03, PITFALLS | -- | CL-02 |
+| C108 | `atom:blob-integrity` | Blob Integrity Verification (SHA-256 artifact signing) | `design/claws/specs/CL-12-approval-event-schema.md` | CL-07 | -- | CL-12 |
+
+## Optimization Layer (Thoth)
+
+| ID | Slug | Name | Authority | Mirrors | Reuses | Spec |
+|----|------|------|-----------|---------|--------|------|
+| C104 | `atom:context-dag` | Context DAG (governance context dependency graph) | `design/claws/specs/CL-04-compilation-pipeline.md` | CL-06 | -- | CL-04 |
+| C105 | `atom:press-pinch` | PRESS Pinch (governance token compression) | `design/claws/specs/CL-04-compilation-pipeline.md` | CL-06 | A248 `atom:relax` | CL-04 |
+
+## Maker Layer (Thoth)
+
+| ID | Slug | Name | Authority | Mirrors | Reuses | Spec |
+|----|------|------|-----------|---------|--------|------|
+| C109 | `atom:skill-scaffold` | Skill Scaffold (claws new skill) | `design/claws/specs/CL-05-developer-experience.md` | CL-06, COMMAND-MAP | -- | CL-05 |
+
+## Aether Layer (Thoth)
+
+| ID | Slug | Name | Authority | Mirrors | Reuses | Spec |
+|----|------|------|-----------|---------|--------|------|
+| C110 | `atom:host-approval-policies` | Host Approval Policies (host-approval-policies.json) | `design/claws/specs/CL-12-approval-event-schema.md` | CL-07, CL-03 | -- | CL-12 |
+
 ---
 
 ## Summary
@@ -154,6 +211,14 @@ Every concept in the claws governance compiler, where it is authoritatively defi
 | Compliance Frameworks | C70-C76 | 7 | 3 |
 | Operations | C80-C87 | 8 | 1 |
 | Ecosystem | C90-C93 | 4 | 1 |
-| **Total** | | **62** | **24 (39%)** |
+| Serve | C94-C95 | 2 | 0 |
+| Upstream | C96-C97 | 2 | 0 |
+| CI/CD | C98-C99 | 2 | 0 |
+| Badge | C100 | 1 | 0 |
+| Security (Thoth) | C101-C103, C106-C108 | 6 | 1 |
+| Optimization (Thoth) | C104-C105 | 2 | 1 |
+| Maker (Thoth) | C109 | 1 | 0 |
+| Aether (Thoth) | C110 | 1 | 0 |
+| **Total** | | **79** | **26 (33%)** |
 
-62 atoms across 10 layers. 24 reuse Craftworks atoms (39%). 38 are new to claws.
+79 atoms across 18 layers. 26 reuse Craftworks atoms (33%). 53 are new to claws.

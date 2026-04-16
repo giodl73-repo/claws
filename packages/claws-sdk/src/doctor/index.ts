@@ -19,6 +19,7 @@ export {
   checkArtifactCompat,
   checkDependencyAlignment,
   checkPolicySyntax,
+  checkVaultKdf,
 } from './checks/index.js';
 export {
   runMigrations,

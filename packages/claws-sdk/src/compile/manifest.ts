@@ -40,9 +40,36 @@ export function riskLevelFromClassification(
 }
 
 /**
- * Build a CapabilityManifest from a ParsedManifest for rule evaluation.
+ * MCP server configuration entry from workspace mcp.servers config.
+ * Used during parse phase to populate ToolCapability.mcpServer.
  */
-export function buildCapabilityManifest(manifest: ParsedManifest): CapabilityManifest {
+export interface McpServerConfig {
+  /** Server name (key in mcp.servers map). */
+  readonly name: string;
+  /** Tools exposed by this server. */
+  readonly tools: readonly string[];
+}
+
+/**
+ * Build a CapabilityManifest from a ParsedManifest for rule evaluation.
+ *
+ * @param manifest - The parsed manifest from extraction
+ * @param mcpServers - Optional MCP server config for tool→server mapping (CM5)
+ */
+export function buildCapabilityManifest(
+  manifest: ParsedManifest,
+  mcpServers?: readonly McpServerConfig[],
+): CapabilityManifest {
+  // Build tool→server lookup from mcp.servers config
+  const toolServerMap = new Map<string, string>();
+  if (mcpServers) {
+    for (const server of mcpServers) {
+      for (const tool of server.tools) {
+        toolServerMap.set(tool, server.name);
+      }
+    }
+  }
+
   return {
     tools: manifest.tools.map((t) => ({
       name: t.name,
@@ -50,6 +77,7 @@ export function buildCapabilityManifest(manifest: ParsedManifest): CapabilityMan
       riskLevel: riskClassToLevel(t.riskClass),
       oboFlag: t.oboFlag,
       classification: 'custom' as const,
+      ...(toolServerMap.has(t.name) ? { mcpServer: toolServerMap.get(t.name)! } : {}),
     })),
     skills: manifest.skills.map((s) => ({
       name: s.name,

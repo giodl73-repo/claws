@@ -420,19 +420,19 @@ describe('accept: watch commands (CP-2 gate)', () => {
 // ── DOCTOR Acceptance Tests ──────────────────────────────────────────
 
 describe('accept: doctor commands (CP-2 gate)', () => {
-  it('D-6: doctor on healthy workspace — all 4 checks pass', async () => {
+  it('D-6: doctor on healthy workspace — all 6 checks pass', async () => {
     const p = startPhase('doctor-healthy');
     const tempDir = createTempDir('d6');
     copyReferenceWorkspace(tempDir);
     await initWorkspace(tempDir, { template: 'soc2' });
 
     const checks = createDefaultChecks();
-    expect(checks).toHaveLength(4);
+    expect(checks).toHaveLength(6);
 
     const report = await runDoctor(tempDir, checks);
 
-    // All 4 checks should be present
-    expect(report.checks).toHaveLength(4);
+    // All 6 checks should be present
+    expect(report.checks).toHaveLength(6);
     expect(report.durationMs).toBeGreaterThanOrEqual(0);
 
     // Validate each check result structure
@@ -614,12 +614,12 @@ describe('accept: doctor commands (CP-2 gate)', () => {
     // policy-syntax is NOT in post-upgrade mode
     expect(checkIds).not.toContain('policy-syntax');
 
-    // Full checks: 4 checks
+    // Full checks: 6 checks (includes vault-kdf and key-colocation)
     const allChecks = createDefaultChecks();
-    expect(allChecks).toHaveLength(4);
+    expect(allChecks).toHaveLength(6);
 
     const fullReport = await runDoctor(tempDir, allChecks);
-    expect(fullReport.checks).toHaveLength(4);
+    expect(fullReport.checks).toHaveLength(6);
     const fullCheckIds = fullReport.checks.map((c) => c.checkId);
     expect(fullCheckIds).toContain('policy-syntax');
 

@@ -1,0 +1,153 @@
+name: S12-trust-escalation
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that PATCH /api/trust/escalate with a valid manager approval
+  token promotes the agent's trust tier by exactly one level, records the
+  escalation in history, and updates AGENTS.md. Without a valid token, the
+  request is rejected with TRUST_REQUIRES_APPROVAL. Trust tiers range from
+  T0 (untrusted) to T4 (fully autonomous). Escalation is the only way to
+  increase tier — there is no direct-set API.
+
+expect:
+  escalate_with_valid_token:
+    endpoint: "PATCH /api/trust/escalate"
+    payload: "{ approvalToken: '<signed-jwt>' }"
+    result:
+      status: "ok"
+      trustTier:
+        previous: "T1"
+        current: "T2"
+        increment: 1
+      escalation_history:
+        new_entry:
+          from: "T1"
+          to: "T2"
+          approvedBy: "manager@contoso.com"
+          timestamp: "ISO 8601 UTC"
+      agents_md_updated: true
+  escalate_without_token:
+    endpoint: "PATCH /api/trust/escalate"
+    payload: "{}"
+    result:
+      status: "rejected"
+      error: "TRUST_REQUIRES_APPROVAL"
+  escalate_at_max_tier:
+    endpoint: "PATCH /api/trust/escalate"
+    when: "current tier is T4"
+    result:
+      status: "rejected"
+      error: "TRUST_ALREADY_AT_MAX"
+  get_trust:
+    endpoint: "GET /api/trust"
+    response_shape:
+      currentTier: "T2"
+      history_is_array: true
+      each_history_entry_has:
+        - from
+        - to
+        - approvedBy
+        - timestamp
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A Companion App trust management panel displays the agent's current trust
+  tier and escalation history from GET /api/trust. A manager clicks
+  "Approve escalation" which sends a signed JWT approval token to
+  PATCH /api/trust/escalate. The server must: (1) verify the JWT signature
+  against the organization's identity provider, (2) confirm the signer has
+  manager-level permissions, (3) increment the trust tier by exactly 1,
+  (4) append the escalation to the history array, (5) update AGENTS.md
+  to reflect the new tier, (6) trigger a recompile so governance rules
+  that depend on trust tier take effect. Without a token, or with an
+  invalid/expired token, the escalation is rejected. Tier-skipping
+  (T1 to T3) is never allowed regardless of token validity.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Token forgery: if the JWT validation only checks structure (header,
+      payload, signature present) but does not verify the signature against
+      the identity provider's public key, any client can forge an approval
+      token. The server must fetch the IdP's JWKS endpoint and validate
+      the RS256/ES256 signature. A hardcoded symmetric key (HS256) is
+      unacceptable for manager approval — it means any server-side code
+      can mint tokens.
+    spec_impact: "CL-10 /api/trust/escalate — asymmetric JWT validation against IdP JWKS"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Tier-skipping: if the client sends approvalToken with a payload
+      claiming targetTier: T4 and the server trusts the payload, it
+      bypasses incremental escalation. The server must ignore any
+      targetTier in the token payload and always increment by exactly 1
+      from the current compiled tier. The token authorizes "one step up,"
+      not "jump to X."
+    spec_impact: "CL-10 /api/trust/escalate — server-side tier increment, ignore token targetTier"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Manager identity verification: the JWT `sub` claim identifies the
+      approver, but the server must verify that this identity has manager
+      permissions for the agent's workspace. A valid JWT from a non-manager
+      employee should be rejected. This requires a permission check against
+      the organization's role-assignment service, not just token validity.
+    spec_impact: "CL-10 /api/trust/escalate — manager role verification beyond JWT validity"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      What if the manager who approved a previous escalation is later
+      demoted or leaves the organization? The escalation history records
+      their identity, but should past escalations be re-evaluated? For v1,
+      past escalations are immutable (the approval was valid at the time).
+      But the audit trail should flag stale approver identities when
+      queried, so compliance reviews can assess risk.
+    spec_impact: "CL-10 escalation history — stale approver identity flagging on audit query"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Race condition: two managers simultaneously approve an escalation
+      for the same agent. Both tokens are valid. If both PATCH requests
+      execute concurrently, the tier could increment twice (T1 to T3).
+      The escalation handler must be serialized per agent — either via
+      a mutex or optimistic concurrency (read tier, increment, write with
+      compare-and-swap).
+    spec_impact: "CL-10 /api/trust/escalate — serialized execution per agent workspace"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      AGENTS.md update must be lossless. The trust tier is one field in
+      AGENTS.md. If the handler reads AGENTS.md, modifies the tier line,
+      and writes back, it must preserve all other content (comments,
+      formatting, other fields). The workspace-edit module from Phase 2
+      must be used — not a raw file write.
+    spec_impact: "CL-10 AGENTS.md update — use workspace-edit module for lossless field update"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Token expiry window: approval tokens should have a short TTL
+      (e.g., 5 minutes) to prevent a manager approving an escalation
+      and the token being replayed hours later when circumstances have
+      changed. The server must check the `exp` claim and reject expired
+      tokens with a distinct error code (APPROVAL_TOKEN_EXPIRED vs
+      TRUST_REQUIRES_APPROVAL).
+    spec_impact: "CL-10 /api/trust/escalate — distinct error for expired vs missing token"
+    pitfall: null

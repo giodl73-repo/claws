@@ -7,10 +7,10 @@ import { mkdtemp, rm, readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { sign as cryptoSign, verify as cryptoVerify } from 'node:crypto';
-import { registerKey, getKey } from '../../src/keys/registry.js';
+import { registerKey, getKey, updateKey } from '../../src/keys/registry.js';
 import { generateKey } from '../../src/keys/generate.js';
 import { createStorage } from '../../src/keys/storage.js';
-import { rotateKey, acquireLock, releaseLock } from '../../src/keys/rotate.js';
+import { rotateKey, acquireLock, releaseLock, verifyKeyMaterial } from '../../src/keys/rotate.js';
 
 describe('rotateKey', () => {
   let tempDir: string;
@@ -366,5 +366,70 @@ describe('acquireLock / releaseLock', () => {
     const lockPath = await acquireLock(tempDir);
     expect(lockPath).toContain('rotate.lock');
     await releaseLock(lockPath);
+  });
+});
+
+describe('verifyKeyMaterial', () => {
+  it('returns true for identical key material', () => {
+    const key = 'ed25519-private-key-hex-abcdef0123456789';
+    expect(verifyKeyMaterial(key, key)).toBe(true);
+  });
+
+  it('returns false for same-length but different key material', () => {
+    const a = 'aaaa-bbbb-cccc-dddd';
+    const b = 'aaaa-bbbb-cccc-eeee';
+    expect(verifyKeyMaterial(a, b)).toBe(false);
+  });
+
+  it('returns false when keys have different lengths', () => {
+    const short = 'abc';
+    const long = 'abcdefgh';
+    expect(verifyKeyMaterial(short, long)).toBe(false);
+  });
+
+  it('returns false for empty vs non-empty', () => {
+    expect(verifyKeyMaterial('', 'notempty')).toBe(false);
+  });
+
+  it('returns true for two empty strings', () => {
+    expect(verifyKeyMaterial('', '')).toBe(true);
+  });
+
+  it('pads shorter buffer A when B is longer', () => {
+    // A is shorter — exercises the padding branch for bufA
+    expect(verifyKeyMaterial('x', 'xy')).toBe(false);
+  });
+
+  it('pads shorter buffer B when A is longer', () => {
+    // B is shorter — exercises the padding branch for bufB
+    expect(verifyKeyMaterial('xy', 'x')).toBe(false);
+  });
+});
+
+describe('rotateKey edge cases', () => {
+  let tempDir: string;
+
+  afterEach(async () => {
+    if (tempDir) {
+      await rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('throws when ed25519 public key is missing but private key exists', async () => {
+    tempDir = await mkdtemp(join(tmpdir(), 'claws-rot-'));
+
+    const generated = generateKey('ed25519');
+    const storage = createStorage('file', tempDir);
+    await registerKey(tempDir, {
+      id: 'test-no-pubkey',
+      algorithm: 'ed25519',
+      storageTier: 'file',
+    });
+    // Write only the private key, NOT the public key
+    await storage.write('test-no-pubkey', generated.privateKey);
+
+    await expect(rotateKey(tempDir, 'test-no-pubkey')).rejects.toThrow(
+      'Cannot rotate: unable to read current public key material for rollback safety',
+    );
   });
 });

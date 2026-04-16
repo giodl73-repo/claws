@@ -1,0 +1,144 @@
+name: S10-loop-deny-rule-removal
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that PATCH /api/loop/soul with content that removes text
+  containing a deny rule is accepted (not rejected) but returns a
+  governance warning. Deny rules in SOUL.md are user-authored constraints
+  (e.g., "Never use external APIs without approval"). Removing them is the
+  user's prerogative, but the system must surface the removal as a warning
+  in the response and record it in the audit trail. The validation layer
+  must distinguish genuine deny-rule removal from innocuous text edits
+  that happen to contain deny-like keywords.
+
+expect:
+  patch_removes_deny_rule:
+    endpoint: "PATCH /api/loop/soul"
+    payload: "{ section: 'rules', content: 'Be helpful and concise.' }"
+    original_content_contained: "Never share credentials with third parties"
+    result:
+      status: "ok"
+      edit_applied: true
+      governance:
+        warnings:
+          - type: "DENY_RULE_REMOVED"
+            removed_rule: "Never share credentials with third parties"
+            section: "rules"
+      audit_event_emitted: true
+  patch_without_deny_rule_removal:
+    endpoint: "PATCH /api/loop/soul"
+    payload: "{ section: 'preferences', content: 'I prefer TypeScript.' }"
+    result:
+      status: "ok"
+      governance:
+        warnings: []
+  r5_deny_rule_not_removable:
+    description: "Deny rules injected by R5 policy cannot be removed via PATCH"
+    result:
+      status: "rejected"
+      error: "R5_LOCK_VIOLATION"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A Loop user edits the "rules" section of their SOUL.md, removing the
+  line "Never share credentials with third parties." The PATCH request
+  arrives at claws-serve. The validation layer must: (1) diff the old
+  section content against the new content, (2) identify that removed
+  text contained a deny rule, (3) allow the edit (status: ok) because
+  user-authored deny rules are advisory, (4) attach a DENY_RULE_REMOVED
+  warning to the response, (5) emit an audit event. Separately, if an
+  R5-injected deny rule is targeted for removal, the validation layer
+  must reject the edit entirely because R5 locks are non-negotiable.
+  The challenge is classifying which deny rules are user-authored vs
+  R5-injected, and detecting deny-rule semantics in free-form prose.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Defining what constitutes a "deny rule" in free-form markdown is
+      ambiguous. Patterns like "Never ...", "Do not ...", "Must not ...",
+      "Always avoid ..." are heuristic. A sentence like "I never use tabs"
+      is a preference, not a deny rule. The detection must use the compiled
+      GovernanceIR deny-rule registry rather than regex on raw text. If a
+      sentence was classified as a deny rule during compilation, its removal
+      triggers the warning. If it was not classified, no warning fires.
+    spec_impact: "CL-10 validation layer — deny-rule detection via GovernanceIR registry, not regex"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      False positives: if the deny-rule detector is too aggressive, every
+      edit to the rules section produces warnings, causing alert fatigue.
+      Users will ignore governance warnings if they fire on innocuous edits
+      like changing "Never forget to greet the user" to "Always greet the
+      user." The detector should only flag removals where the compiled
+      GovernanceIR had an active DenyRule entry referencing that text span.
+    spec_impact: "CL-10 validation layer — false-positive suppression via compiled DenyRule spans"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      R5-injected deny rules and user-authored deny rules must be
+      distinguishable. If the GovernanceIR does not tag deny rules with
+      their source (r5 vs user), the validation layer cannot decide
+      whether to warn (user-authored) or reject (R5). The GovernanceIR
+      DenyRule type needs a `source` field populated during compilation
+      from the R5 policy overlay.
+    spec_impact: "CL-10 GovernanceIR DenyRule — source field (r5 | user | fleet) required"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The audit event for deny-rule removal must include the full text of
+      the removed rule, not just a section name. Without the removed text,
+      a compliance officer reviewing the audit trail cannot determine what
+      governance was weakened. The audit event schema needs a
+      `removedRuleText` field.
+    spec_impact: "CL-10 audit-chain event schema — removedRuleText field for deny-rule removal"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      If a user rephrases a deny rule (e.g., "Never share credentials"
+      becomes "Do not expose secrets"), the diff shows a removal and an
+      addition. The validation layer sees the removal and fires a warning,
+      even though the user strengthened the rule. Semantic equivalence
+      detection is out of scope for v1, but the warning message should
+      say "deny rule text removed" not "deny rule removed" to acknowledge
+      that the intent may still be present in different words.
+    spec_impact: "CL-10 warning message — 'deny rule text removed' wording to avoid false alarm"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Interaction with R5 enforcement: if R5 policy requires that a
+      specific deny rule exists in SOUL.md, removing it via Loop PATCH
+      should be rejected (not warned). But if the R5 policy only requires
+      "at least one deny rule exists" (not a specific one), removing one
+      of several is allowed with a warning. The validation layer must
+      evaluate R5 constraints against the post-edit state, not just the
+      diff.
+    spec_impact: "CL-10 R5 interaction — evaluate R5 constraints against post-edit GovernanceIR"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The Loop UI should render governance warnings visually (e.g., amber
+      banner) after a PATCH response. If the warning is buried in the JSON
+      response and the Loop component does not render it, the user never
+      sees it. The API contract must document that `governance.warnings`
+      is a first-class response field that Loop components must render.
+    spec_impact: "CL-10 API contract — governance.warnings is a MUST-render field for Loop clients"
+    pitfall: null

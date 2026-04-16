@@ -3,7 +3,7 @@ slug: claws-maker-commands
 preset: "claws"
 plan: "2 headlines: claws new skill scaffolds complete governance-aware skill in <2s, claws publish adds governance badge to ClawHub listing"
 area: claws
-status: Draft
+status: Implemented
 phase: thoth
 atoms: [atom:claws-publish, atom:governance-badge, atom:tier-adoption, atom:claws-compiler]
 specs: [CL-05, CL-06]

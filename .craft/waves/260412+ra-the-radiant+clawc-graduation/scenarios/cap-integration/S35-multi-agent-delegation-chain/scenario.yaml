@@ -1,0 +1,262 @@
+name: S35-multi-agent-delegation-chain
+series: cap-integration
+version: 1
+specs: [CL-10, CL-12]
+description: >
+  Validates that when Agent-A delegates to Agent-B which delegates to Agent-C,
+  and Agent-C tries to use an R5 tool (send-email), the approval request
+  bubbles through the delegation chain to the human. The human sees the full
+  chain context. Approval or denial applies to the specific call, not a
+  blanket approval for the chain. The audit trail records all three agents'
+  involvement.
+
+expect:
+  delegation_chain:
+    agent_a:
+      delegates_to: "agent-b"
+      trust_tier: "T3"
+      has_tool: false
+    agent_b:
+      delegates_to: "agent-c"
+      trust_tier: "T2"
+      has_tool: true
+    agent_c:
+      calls_tool: "send-email"
+      risk_level: "R5"
+      trust_tier: "T2"
+  approval_request:
+    type: "tool:approval-required"
+    payload:
+      toolId: "send-email"
+      riskLevel: "R5"
+      caller: "agent-c"
+      delegationChain:
+        - { agent: "agent-a", role: "originator" }
+        - { agent: "agent-b", role: "delegator" }
+        - { agent: "agent-c", role: "executor" }
+      requiresHumanApproval: true
+  human_approval:
+    method: POST
+    path: /api/approval
+    body: "{ toolCallId: '<id>', decision: 'approve', scope: 'single-call' }"
+    status: 200
+    tool_executes: true
+  audit_trail:
+    entries:
+      - type: "delegation"
+        from: "agent-a"
+        to: "agent-b"
+      - type: "delegation"
+        from: "agent-b"
+        to: "agent-c"
+      - type: "tool_call_requested"
+        agent: "agent-c"
+        tool: "send-email"
+        delegationChain: ["agent-a", "agent-b", "agent-c"]
+      - type: "approval_granted"
+        approvedBy: "human"
+        scope: "single-call"
+      - type: "tool_executed"
+        agent: "agent-c"
+        tool: "send-email"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Agent-A is assigned a complex task that requires email communication. Agent-A
+  does not have the send-email tool but delegates the sub-task to Agent-B.
+  Agent-B delegates further to Agent-C, which does have send-email (R5). When
+  Agent-C calls send-email, the GuardrailProvider returns
+  requiresExternalApproval: true. The approval request must bubble through the
+  delegation chain to the human. The human sees: "Agent-C (delegated by
+  Agent-B, delegated by Agent-A) wants to send-email." The human approves.
+  The approval applies to this specific tool call only — not a blanket approval
+  for Agent-C to send any email, and not an approval for future delegation
+  chains. The audit trail records every delegation hop and the final approval
+  decision. The scenario covers chain depth limits, timeout at each hop,
+  mixed trust tiers, chain audit trails, intermediate approval policies,
+  tools not available at the originator, approval caching, suspended agents,
+  and identity attribution.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Delegation chain depth limit: without a maximum depth, an agent
+      could create an unbounded delegation chain (A -> B -> C -> D -> ...
+      -> Z), making the approval request incomprehensible to the human
+      and creating O(n) overhead for chain traversal. The system must
+      enforce a configurable maximum depth (default 3). Delegation
+      attempts beyond the limit must be rejected with
+      DELEGATION_DEPTH_EXCEEDED. The depth limit must include the
+      originator in the count (A -> B -> C = depth 3).
+    spec_impact: "CL-10 delegation — configurable max depth (default 3); DELEGATION_DEPTH_EXCEEDED on violation"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Approval timeout at each hop: the approval request bubbles from
+      Agent-C through Agent-B through Agent-A to the human. At each hop,
+      there is a potential timeout (the intermediate agent may be slow or
+      unresponsive). The total end-to-end timeout must be the sum of
+      per-hop timeouts, not a single flat timeout. If Agent-B takes 30
+      seconds to relay and the per-hop timeout is 60 seconds, the human
+      still has the full 60 seconds to decide. The system must track
+      elapsed time at each hop and deduct from the remaining budget.
+    spec_impact: "CL-10 delegation approval — per-hop timeout tracking; remaining time budget passed to each hop"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Mixed trust tiers in the chain: Agent-A is T3, Agent-B is T2,
+      Agent-C is T2. The effective trust tier for the tool call should be
+      the minimum tier in the chain (T2), not the executor's tier alone.
+      If Agent-C were T3 but Agent-B were T1, the chain's effective tier
+      is T1 — the weakest link. This prevents trust laundering: a high-
+      tier agent delegating through a low-tier agent to bypass tier
+      restrictions. The effective tier must be computed as min(chain_tiers).
+    spec_impact: "CL-10 delegation — effective trust tier = min(chain_tiers); prevents trust laundering"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Chain audit trail: all three agents must record the delegation and
+      tool call in their respective audit chains. Agent-A's audit shows
+      "delegated to Agent-B," Agent-B's shows "received delegation from
+      Agent-A, delegated to Agent-C," Agent-C's shows "received delegation,
+      called send-email, approved by human." The cross-agent audit
+      correlation requires a shared delegationChainId (a UUID generated
+      at the origination point) that links all entries across agents.
+    spec_impact: "CL-10 audit — shared delegationChainId across all agents in chain; cross-agent correlation"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Intermediate agent (B) has its own approval policy: Agent-B's
+      workspace may have a fleet policy that requires manager approval
+      for any outbound delegation. If Agent-B's delegation to Agent-C
+      requires approval, the chain has two approval gates: one at Agent-B
+      (delegation approval) and one at the human (tool call approval).
+      Both must be resolved. The system must not collapse them into one
+      — they are separate governance decisions with potentially different
+      approvers.
+    spec_impact: "CL-10 delegation — intermediate delegation approvals are separate from tool call approvals"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The originating agent (A) does not have the send-email tool in its
+      workspace. Should a delegation chain be allowed to invoke tools that
+      the originator does not have? If yes, the delegation effectively
+      grants Agent-A access to tools it was never given — a privilege
+      escalation via delegation. The system must enforce one of two
+      policies (configurable): (a) executor-scoped: only the executor's
+      tool set matters, or (b) originator-scoped: the originator must
+      also have the tool. The default should be originator-scoped (more
+      restrictive) with a governance note when the originator lacks the
+      tool.
+    spec_impact: "CL-10 delegation — configurable tool scope (executor vs originator); default originator-scoped"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Approval caching in delegation chains: the human approves Agent-C's
+      send-email call. Later in the same session, Agent-C (via the same
+      delegation chain) tries to send another email. Should the previous
+      approval be cached? The answer must be NO for R5 tools — each R5
+      call requires explicit approval regardless of caching. For R3 tools,
+      the cache should be scoped to the specific delegation chain (same
+      originator, same path, same tool). A different chain (D -> B -> C)
+      must not reuse the approval from (A -> B -> C).
+    spec_impact: "CL-10 delegation approval caching — never cache R5; R3 cache scoped to exact chain + tool"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Delegation chain with a suspended agent: Agent-B is suspended by
+      the fleet admin (e.g., security incident) while a delegation chain
+      is in progress. Agent-A has already delegated to Agent-B, and
+      Agent-B is about to delegate to Agent-C. The suspension must
+      immediately halt the chain — no further delegation from a suspended
+      agent. The system must emit a delegation:chain-broken SSE event
+      and deny any pending tool calls in the chain. The audit trail
+      must record the suspension as the chain termination reason.
+    spec_impact: "CL-10 delegation — suspended agent halts chain immediately; delegation:chain-broken SSE event"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Human approval display: the approval request must present the full
+      delegation chain in a human-readable format. "Agent-C (delegated
+      by Agent-B, delegated by Agent-A) wants to send-email" is minimal.
+      The display must also include: each agent's trust tier, the reason
+      for delegation at each hop (why Agent-A delegated to Agent-B),
+      the tool call parameters (email recipient, subject), and the
+      effective trust tier (min of chain). Without this context, the
+      human cannot make an informed approval decision.
+    spec_impact: "CL-10 approval display — full chain context: per-agent tier, delegation reason, tool params, effective tier"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Identity attribution in the audit trail: the tool call is executed
+      by Agent-C, but the action was initiated by Agent-A. The audit
+      entry for tool_executed must attribute the action to Agent-C
+      (executor) with delegatedFrom: Agent-A (originator). If compliance
+      or legal reviews the audit trail, they need to know both who
+      executed the action and who initiated it. The identity chain must
+      be complete: originator, all intermediaries, and executor.
+    spec_impact: "CL-10 audit — tool_executed entry includes executor + originator + full intermediary chain"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      Denial propagation: the human denies the tool call. The denial
+      must propagate back through the chain: Agent-C receives the denial
+      and cannot execute the tool, Agent-B receives notification that
+      its delegated task failed, Agent-A receives notification that the
+      overall sub-task could not be completed. Each agent must receive
+      enough context to handle the denial (reason, approver, timestamp).
+      Silent denial (only Agent-C knows) leaves Agent-A waiting
+      indefinitely for a result.
+    spec_impact: "CL-10 delegation — denial propagates back through chain; each agent receives failure context"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Delegation chain visualization: the GET /api/governance endpoint
+      should include an active delegation chains section showing all
+      in-progress chains, their current state (waiting for approval,
+      executing, completed), and the chain participants. This gives the
+      fleet admin visibility into cross-agent delegation activity without
+      querying each agent's audit trail individually. The visualization
+      must update in real-time via SSE for connected partners.
+    spec_impact: "CL-10 GET /api/governance — active delegation chains section with real-time SSE updates"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      Circular delegation prevention within multi-agent chains: while
+      S28 covers direct circular delegation (A -> B -> A), a multi-agent
+      chain can create indirect cycles (A -> B -> C -> A). The delegation
+      system must maintain a visited set for the entire chain and reject
+      any delegation that would create a cycle. The visited set must be
+      passed along the chain as a delegationContext parameter, not
+      reconstructed from audit logs (which may have latency).
+    spec_impact: "CL-10 delegation — visited set in delegationContext; reject cycles at any depth"
+    pitfall: null

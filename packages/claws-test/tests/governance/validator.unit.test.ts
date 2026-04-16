@@ -1,5 +1,5 @@
 /**
- * L0: GovernanceValidator — all 12 checks individually + validateSubset.
+ * L0: GovernanceValidator — all 13 checks individually + validateSubset.
  */
 
 import { describe, it, expect } from 'vitest';

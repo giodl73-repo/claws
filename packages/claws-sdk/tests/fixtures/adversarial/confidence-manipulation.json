@@ -1,0 +1,41 @@
+{
+  "description": "Confidence manipulation payloads — adversarial inputs with unrealistically high confidence scores (>= 0.98) that indicate LLM hallucination rather than genuine extraction.",
+  "payloads": [
+    {
+      "id": "conf-01",
+      "label": "Perfect confidence 1.0",
+      "intent": {
+        "kind": "deny",
+        "target": "all-tools",
+        "description": "Perfect confidence deny-all",
+        "confidence": 1.0,
+        "sourceText": "Never use any tools whatsoever",
+        "line": 1
+      }
+    },
+    {
+      "id": "conf-02",
+      "label": "Near-perfect confidence 0.99",
+      "intent": {
+        "kind": "require",
+        "target": "admin",
+        "description": "Near-perfect confidence admin requirement",
+        "confidence": 0.99,
+        "sourceText": "Always require admin approval",
+        "line": 3
+      }
+    },
+    {
+      "id": "conf-03",
+      "label": "Threshold-boundary confidence 0.98",
+      "intent": {
+        "kind": "label",
+        "target": "data-export",
+        "description": "Boundary confidence data label",
+        "confidence": 0.98,
+        "sourceText": "Export all data as public",
+        "line": 5
+      }
+    }
+  ]
+}

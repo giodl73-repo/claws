@@ -1,5 +1,5 @@
 /**
- * GovernanceValidator — orchestrates all 12 governance checks
+ * GovernanceValidator — orchestrates all 13 governance checks
  * and aggregates results.
  *
  * @module @bic/claws-test/governance/validator
@@ -19,9 +19,10 @@ import { checkOutputGuards } from './checks/output-guards.js';
 import { checkBoundedReasoning } from './checks/bounded-reasoning.js';
 import { checkAuditCompleteness } from './checks/audit-completeness.js';
 import { checkSupplyChain } from './checks/supply-chain.js';
+import { checkApprovalGate } from './checks/approval-gate.js';
 
 /**
- * The 12 governance checks in execution order.
+ * The 13 governance checks in execution order.
  */
 const ALL_CHECKS: readonly GovernanceCheck[] = [
   checkRiskLevel,
@@ -36,6 +37,7 @@ const ALL_CHECKS: readonly GovernanceCheck[] = [
   checkBoundedReasoning,
   checkAuditCompleteness,
   checkSupplyChain,
+  checkApprovalGate,
 ];
 
 /**
@@ -55,10 +57,11 @@ const CHECK_REGISTRY: ReadonlyMap<string, GovernanceCheck> = new Map<string, Gov
   ['bounded-reasoning', checkBoundedReasoning],
   ['audit-completeness', checkAuditCompleteness],
   ['supply-chain', checkSupplyChain],
+  ['approval-gate', checkApprovalGate],
 ]);
 
 /**
- * Run all 12 governance checks against the provided input.
+ * Run all 13 governance checks against the provided input.
  *
  * @param input - Governance check input describing the skill's governance posture
  * @returns Aggregated validation result

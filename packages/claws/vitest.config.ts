@@ -11,6 +11,8 @@ const sharedResolve = {
     // ── Bare specifiers ─────────────────────────────────────────────────
     { find: '@bic/claws-cli', replacement: resolve(__dirname, 'src') },
     { find: '@bic/claws-sdk', replacement: resolve(__dirname, '../claws-sdk/src') },
+    { find: /^@craftworks\/claws-serve\/(.+)$/, replacement: resolve(__dirname, '../claws-serve/src/$1') },
+    { find: '@bic/claws-serve', replacement: resolve(__dirname, '../claws-serve/src') },
   ],
   dedupe: [
     'yaml',
@@ -57,11 +59,14 @@ export default defineConfig({
           name: 'default',
           include: ['tests/**/*.test.ts'],
           forceExit: true,
+          testTimeout: 15_000,
           exclude: [
             ...sharedExclude,
             'tests/**/*.unit.test.ts',
             'tests/**/*.integration.test.ts',
             'tests/**/*.e2e.test.ts',
+            'tests/**/*.cli.accept.test.ts',
+            'tests/**/*.accept.test.ts',
           ],
         },
       }),

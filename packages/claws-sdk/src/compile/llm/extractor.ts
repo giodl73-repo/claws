@@ -30,6 +30,22 @@ import type { VerificationResult } from './verifier.js';
 import { mergeIntents } from './merger.js';
 import type { RegexIntent, IntentMergeResult } from './merger.js';
 
+// ── D-W1: Exponential backoff constants ─────────────────────────────────
+
+/** Base delay in ms between sequential LLM calls. */
+const BACKOFF_BASE_MS = 200;
+/** Backoff multiplier. */
+const BACKOFF_MULTIPLIER = 2;
+/** Maximum retry attempts per extraction call. */
+const BACKOFF_MAX_RETRIES = 5;
+/** Jitter range in ms (+/- this value). */
+const BACKOFF_JITTER_MS = 50;
+
+/** Sleep for a given number of milliseconds. */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, Math.max(0, ms)));
+}
+
 /**
  * LLM-based governance extractor.
  *
@@ -79,8 +95,12 @@ export class ExtractorLLM {
   /**
    * Extract intents from all present file entries.
    *
-   * Dispatches extraction requests sequentially (LLM calls are
-   * not parallelized to respect rate limits).
+   * Dispatches extraction requests sequentially with exponential backoff
+   * on retry to respect provider rate limits (D-W1).
+   *
+   * Backoff applies only on retry (base 200ms, multiplier 2x, max 5 retries,
+   * jitter +/- 50ms). No additional inter-call delay — avoids double-stacked
+   * backoff (M-07).
    */
   async extractAll(
     entries: readonly FileEntry[],
@@ -90,8 +110,28 @@ export class ExtractorLLM {
     if (!this.provider) return [];
 
     const results: ExtractionResult[] = [];
+
     for (const entry of entries) {
-      const result = await this.extractFile(entry, hints, options);
+      let result: ExtractionResult | null = null;
+      let attempt = 0;
+
+      while (attempt < BACKOFF_MAX_RETRIES) {
+        attempt++;
+        try {
+          result = await this.extractFile(entry, hints, options);
+          break;
+        } catch (err) {
+          // S-W3: Log LLM errors at warning level instead of swallowing silently
+          const msg = err instanceof Error ? err.message : String(err);
+          // eslint-disable-next-line no-console
+          console.warn(`[claws:llm] Extraction attempt ${attempt}/${BACKOFF_MAX_RETRIES} failed for ${entry.status === 'present' ? entry.source : 'unknown'}: ${msg}`);
+          if (attempt >= BACKOFF_MAX_RETRIES) throw err;
+          const delay = BACKOFF_BASE_MS * Math.pow(BACKOFF_MULTIPLIER, attempt - 1);
+          const jitter = (Math.random() - 0.5) * 2 * BACKOFF_JITTER_MS;
+          await sleep(delay + jitter);
+        }
+      }
+
       if (result) {
         results.push(result);
       }

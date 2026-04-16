@@ -1,0 +1,225 @@
+name: S21-boundary-removal-violation
+series: cap-integration
+version: 1
+specs: [CL-10, CL-12]
+description: >
+  Validates behavior when PATCH /api/loop/soul removes ALL deny rules and
+  boundary text from SOUL.md. Compiler-injected deny rules (R5 source) are
+  immutable and must be rejected at write-time. User-authored deny rules may
+  be removed with a governance warning. If ALL user-authored deny rules are
+  removed, compilation produces a G-INPUT violation surfaced as a warning
+  (not a block) because the user may intentionally simplify their governance
+  posture. The response chunks must include governance.warnings with the
+  deny-rule count delta so the Loop UI can render an informed consent prompt.
+
+expect:
+  r5_deny_rules_immutable:
+    endpoint: "PATCH /api/loop/soul"
+    payload: "{ section: 'rules', content: '' }"
+    original_content_contained:
+      - "Never execute destructive shell commands [R5-injected]"
+      - "Never share credentials with third parties [user-authored]"
+      - "Do not access production databases without approval [user-authored]"
+    result:
+      status: "partial_reject"
+      r5_rules_preserved: true
+      user_rules_removed: true
+      governance:
+        errors:
+          - type: "R5_LOCK_VIOLATION"
+            rule: "Never execute destructive shell commands"
+            source: "r5"
+        warnings:
+          - type: "ALL_USER_DENY_RULES_REMOVED"
+            count_before: 2
+            count_after: 0
+            severity: "G-INPUT"
+      audit_event_emitted: true
+  partial_removal_allowed:
+    endpoint: "PATCH /api/loop/soul"
+    payload: "{ section: 'rules', content: 'Do not access production databases without approval' }"
+    result:
+      status: "ok"
+      governance:
+        warnings:
+          - type: "DENY_RULE_REMOVED"
+            removed_rule: "Never share credentials with third parties"
+            count_delta: -1
+  empty_soul_md:
+    description: "SOUL.md becomes entirely empty after edit — boundary text and all content removed"
+    result:
+      status: "partial_reject"
+      r5_rules_preserved: true
+      governance:
+        warnings:
+          - type: "SOUL_MD_EMPTY"
+            severity: "G-INPUT"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A Loop user opens their SOUL.md in the editor and deletes all content,
+  including both compiler-injected R5 deny rules and user-authored deny
+  rules. The PATCH /api/loop/soul request contains an empty string for the
+  rules section. The validation layer must: (1) identify all deny rules in
+  the current content using the GovernanceIR deny-rule registry, (2) classify
+  each as R5-injected or user-authored via the source field, (3) reject
+  removal of R5-injected rules with R5_LOCK_VIOLATION, (4) allow removal of
+  user-authored rules but attach a governance warning, (5) if ALL user-authored
+  deny rules are removed, escalate the warning to G-INPUT severity, (6) return
+  governance.warnings with count delta so the UI can render the impact. The
+  challenge is handling partial rejection (some rules kept, some removed) and
+  ensuring the post-edit SOUL.md is coherent when R5 rules are force-retained
+  but user content around them is removed.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      Partial rejection creates an incoherent SOUL.md. If the user deletes
+      the entire rules section but R5 rules are force-retained, the resulting
+      file has R5 deny rules floating without surrounding context. The
+      validation layer must reconstruct a minimal valid section around the
+      retained R5 rules (e.g., a "## Rules" header) rather than leaving
+      orphaned lines. The post-edit SOUL.md must pass re-compilation.
+    spec_impact: "CL-10 partial-reject — reconstruct minimal valid section around force-retained R5 rules"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      If the PATCH removes text that contains BOTH a deny rule and
+      non-deny-rule instructions in the same paragraph, the validation
+      layer faces a granularity problem. Rejecting the entire paragraph
+      preserves the deny rule but also force-retains unrelated text.
+      Accepting the paragraph removal loses the deny rule. The GovernanceIR
+      must track deny-rule spans at the sentence level, not the paragraph
+      level, to enable surgical retention.
+    spec_impact: "CL-10 GovernanceIR — deny-rule spans at sentence granularity for mixed-content paragraphs"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Partial removal where some user-authored deny rules are removed and
+      others are kept must produce a governance warning with specific detail
+      about which rules were removed and which remain. A generic "some deny
+      rules removed" message does not help the user understand the impact.
+      The warning must list each removed rule by text and each retained rule
+      by text, plus the count delta.
+    spec_impact: "CL-10 governance.warnings — itemized list of removed and retained deny rules"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Text that resembles a deny rule but was never classified as one in
+      the GovernanceIR (e.g., "I never use tabs" or "Don't forget to be
+      polite") should NOT trigger a DENY_RULE_REMOVED warning. The
+      validation must only reference the compiled deny-rule registry, not
+      perform fresh regex matching on the removed text. If the registry
+      is stale (pre-dates the text), no warning fires for text added after
+      the last compilation.
+    spec_impact: "CL-10 deny-rule detection — compiled registry only, no runtime regex matching"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Removal via the Loop UI (PATCH /api/loop/soul) and removal via
+      direct file edit (detected on next GET /api/chunks) must produce
+      the same governance warnings. If the Loop path fires warnings but
+      the external-edit path silently accepts, there is a bypass. The
+      GET path must diff the current file against the last-compiled
+      GovernanceIR and surface retroactive warnings for deny rules that
+      disappeared between compilations.
+    spec_impact: "CL-10 external-edit detection — retroactive deny-rule-removal warnings on GET"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      When SOUL.md becomes completely empty (all text removed), the
+      compilation should produce a G-INPUT violation. But the severity
+      must be a warning, not a block, because an empty SOUL.md is
+      technically valid (the agent has no custom instructions). The
+      warning must clearly state that the agent will operate with
+      zero custom constraints, which may be the user's intent.
+    spec_impact: "CL-10 G-INPUT for empty SOUL.md — warning severity, not block"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      Boundary text that is not a deny rule (e.g., "I am a helpful
+      assistant focused on TypeScript") may contain implied constraints.
+      The GovernanceIR should not classify these as deny rules, but
+      removing all identity/boundary text should produce a separate
+      BOUNDARY_TEXT_REMOVED warning distinct from DENY_RULE_REMOVED.
+      This ensures the user is aware they removed their agent's identity,
+      not just its deny rules.
+    spec_impact: "CL-10 validation — BOUNDARY_TEXT_REMOVED warning separate from DENY_RULE_REMOVED"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      A deny rule written inside a markdown code block (e.g.,
+      ```Never share credentials```) should NOT be classified as an
+      active deny rule. Code blocks are examples or documentation, not
+      live governance constraints. The GovernanceIR parser must skip
+      fenced and inline code blocks when building the deny-rule registry.
+      If a user removes a code block containing deny-rule-like text, no
+      governance warning should fire.
+    spec_impact: "CL-10 GovernanceIR parser — skip fenced and inline code blocks for deny-rule extraction"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Multiple deny rules that reference the same tool (e.g., "Never use
+      shell commands" and "Do not execute bash scripts") may be semantically
+      overlapping. Removing one while keeping the other should produce a
+      warning with reduced severity (the tool is still constrained). The
+      governance engine should detect tool-reference overlap and annotate
+      the warning with "tool still covered by remaining rule(s)."
+    spec_impact: "CL-10 governance engine — overlap detection for tool-referencing deny rules"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      A deny rule that references a tool which no longer exists in TOOLS.md
+      (e.g., "Never use deprecated-api") is a stale rule. Removing a stale
+      deny rule should produce a lower-severity warning or no warning at
+      all, since the constraint was already inoperative. The GovernanceIR
+      must cross-reference deny-rule tool references against the current
+      TOOLS.md to tag rules as stale.
+    spec_impact: "CL-10 GovernanceIR — stale deny-rule detection via tool-reference cross-reference"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      The count delta in governance.warnings (count_before / count_after)
+      must reflect only user-authored deny rules, not R5-injected ones.
+      If the response mixes R5 and user-authored counts, the Loop UI
+      would show misleading numbers (e.g., "0 deny rules remaining" when
+      R5 rules are still active). The delta must be scoped by source.
+    spec_impact: "CL-10 governance.warnings — count_delta scoped to user-authored rules only"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      If the user performs multiple rapid PATCH edits that each remove one
+      deny rule, the governance warnings accumulate across edits but there
+      is no aggregate view. The Loop UI may show three separate "1 rule
+      removed" warnings instead of one "3 rules removed" summary. The API
+      should support a deny-rule-summary endpoint or include cumulative
+      delta since last compilation.
+    spec_impact: "CL-10 governance.warnings — cumulative delta since last compilation for rapid edits"
+    pitfall: null

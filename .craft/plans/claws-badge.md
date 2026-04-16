@@ -3,7 +3,7 @@ slug: claws-badge
 preset: "claws"
 plan: "2 headlines: ClawHub badges distinguish self-reported DECLARED from compiler-verified VERIFIED, badges are per-version with staleness detection"
 area: claws
-status: Draft
+status: Implemented
 phase: thoth
 atoms: [atom:governance-badge, atom:tier-adoption, atom:claws-publish]
 specs: [CL-05, CL-06]

@@ -98,8 +98,10 @@ describe('verifyIntent()', () => {
     expect(diagnostic!.message).toContain('ciso finding');
   });
 
-  it('wrong line — sourceText exists in file but at different line number', () => {
-    // "Always use the Read tool" is at line 5, but we report line 2
+  it('wrong line — sourceText exists nearby, detected as relocated (F2)', () => {
+    // "Always use the Read tool" is at line 5, but we report line 2.
+    // F2: relocated tier — found within RELOCATED_SEARCH_WINDOW (10 lines),
+    // so this is a relocated match with 0.6x confidence, not a mismatch.
     const intent = makeIntent({
       kind: 'require',
       target: 'Read',
@@ -110,12 +112,12 @@ describe('verifyIntent()', () => {
 
     const { verified, diagnostic } = verifyIntent(intent, soulContent, 'SOUL.md');
 
-    // Line 2 is empty, so this is a mismatch even though text exists elsewhere
-    expect(verified.outcome).toBe('mismatch');
-    expect(verified.verified).toBe(false);
-    expect(verified.intent.confidence).toBe(0);
+    expect(verified.outcome).toBe('relocated');
+    expect(verified.verified).toBe(true);
+    expect(verified.intent.confidence).toBeCloseTo(0.80 * 0.6);
     expect(diagnostic).toBeDefined();
-    expect(diagnostic!.severity).toBe('error');
+    expect(diagnostic!.severity).toBe('warning');
+    expect(diagnostic!.code).toBe('CLAWS-LLM-VERIFY-RELOCATED');
   });
 
   it('empty source — empty sourceText is always a mismatch', () => {
@@ -272,6 +274,109 @@ describe('verifyIntent() — branch coverage', () => {
   });
 });
 
+describe('verifyIntent() — D-W2 high-risk fuzzy rejection', () => {
+  it('R4 tool fuzzy match rejected — treated as mismatch (D-W2)', () => {
+    const intent: LLMIntent = {
+      kind: 'deny',
+      target: 'ProductionDeploy',
+      description: 'Block prod deploys',
+      confidence: 0.90,
+      sourceText: 'require approval for production deploys',
+      line: 8,
+      riskClass: 4,
+    };
+
+    const { verified, diagnostic } = verifyIntent(intent, soulContent, 'SOUL.md');
+
+    expect(verified.outcome).toBe('mismatch');
+    expect(verified.verified).toBe(false);
+    expect(verified.intent.confidence).toBe(0);
+    expect(verified.intent.riskClass).toBe(4);
+    expect(diagnostic).toBeDefined();
+    expect(diagnostic!.severity).toBe('error');
+    expect(diagnostic!.code).toBe('CLAWS-LLM-VERIFY-FUZZY-HIGHRISK');
+    expect(diagnostic!.message).toContain('D-W2');
+    expect(diagnostic!.message).toContain('R4');
+  });
+
+  it('R5 tool fuzzy match rejected — exact match required (D-W2)', () => {
+    const intent: LLMIntent = {
+      kind: 'deny',
+      target: 'CriticalTool',
+      description: 'Block critical tool',
+      confidence: 0.95,
+      sourceText: 'never use bash directly',
+      line: 3,
+      riskClass: 5,
+    };
+
+    const { verified, diagnostic } = verifyIntent(intent, soulContent, 'SOUL.md');
+
+    expect(verified.outcome).toBe('mismatch');
+    expect(verified.verified).toBe(false);
+    expect(verified.intent.confidence).toBe(0);
+    expect(diagnostic!.code).toBe('CLAWS-LLM-VERIFY-FUZZY-HIGHRISK');
+  });
+
+  it('R3 tool fuzzy match allowed — below high-risk threshold', () => {
+    const intent: LLMIntent = {
+      kind: 'label',
+      target: 'Read',
+      description: 'Read tool',
+      confidence: 0.80,
+      sourceText: 'always use the read tool',
+      line: 5,
+      riskClass: 3,
+    };
+
+    const { verified, diagnostic } = verifyIntent(intent, soulContent, 'SOUL.md');
+
+    expect(verified.outcome).toBe('fuzzy');
+    expect(verified.verified).toBe(true);
+    expect(verified.intent.confidence).toBe(0.40);
+    expect(diagnostic!.code).toBe('CLAWS-LLM-VERIFY-FUZZY');
+  });
+});
+
+describe('verifyIntent() — relocated with riskClass', () => {
+  it('relocated intent preserves riskClass and applies 0.6x multiplier', () => {
+    const intent: LLMIntent = {
+      kind: 'require',
+      target: 'Read',
+      description: 'Read tool required',
+      confidence: 0.80,
+      sourceText: 'Always use the Read tool for file access.',
+      line: 2,
+      riskClass: 3,
+    };
+
+    const { verified, diagnostic } = verifyIntent(intent, soulContent, 'SOUL.md');
+
+    expect(verified.outcome).toBe('relocated');
+    expect(verified.verified).toBe(true);
+    expect(verified.intent.confidence).toBeCloseTo(0.80 * 0.6);
+    expect(verified.intent.riskClass).toBe(3);
+    expect(diagnostic).toBeDefined();
+    expect(diagnostic!.code).toBe('CLAWS-LLM-VERIFY-RELOCATED');
+  });
+
+  it('relocated intent without riskClass omits it from adjusted intent', () => {
+    const intent: LLMIntent = {
+      kind: 'require',
+      target: 'Read',
+      description: 'Read tool required',
+      confidence: 0.80,
+      sourceText: 'Always use the Read tool for file access.',
+      line: 2,
+    };
+
+    const { verified } = verifyIntent(intent, soulContent, 'SOUL.md');
+
+    expect(verified.outcome).toBe('relocated');
+    expect(verified.intent.riskClass).toBeUndefined();
+  });
+});
+
 describe('verifyExtractionResult()', () => {
   it('processes multiple intents and returns aggregated counts', () => {
     const result: ExtractionResult = {
@@ -311,5 +416,37 @@ describe('verifyExtractionResult()', () => {
     expect(vr.passedIntents).toHaveLength(2);
     expect(vr.verifiedIntents).toHaveLength(3);
     expect(vr.diagnostics).toHaveLength(2); // 1 warning + 1 error
+  });
+
+  it('aggregates relocated intents in counts and passedIntents', () => {
+    const result: ExtractionResult = {
+      source: 'SOUL.md',
+      intents: [
+        makeIntent({
+          kind: 'deny',
+          target: 'Bash',
+          confidence: 0.95,
+          sourceText: 'Never use Bash directly.',
+          line: 3,
+        }),
+        makeIntent({
+          kind: 'require',
+          target: 'Read',
+          confidence: 0.80,
+          sourceText: 'Always use the Read tool for file access.',
+          line: 2, // actually at line 5 — relocated
+        }),
+      ],
+      modelId: 'mock-v1',
+    };
+
+    const vr = verifyExtractionResult(result, soulContent);
+
+    expect(vr.exactCount).toBe(1);
+    expect(vr.relocatedCount).toBe(1);
+    expect(vr.fuzzyCount).toBe(0);
+    expect(vr.mismatchCount).toBe(0);
+    expect(vr.passedIntents).toHaveLength(2);
+    expect(vr.diagnostics).toHaveLength(1); // relocated warning
   });
 });

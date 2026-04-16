@@ -80,9 +80,29 @@
       "import": "./dist/publish/index.js",
       "types": "./dist/publish/index.d.ts"
     },
+    "./protect": {
+      "import": "./dist/protect/index.js",
+      "types": "./dist/protect/index.d.ts"
+    },
+    "./protect/*": {
+      "import": "./dist/protect/*.js",
+      "types": "./dist/protect/*.d.ts"
+    },
+    "./compliance": {
+      "import": "./dist/compliance/index.js",
+      "types": "./dist/compliance/index.d.ts"
+    },
     "./compliance/*": {
       "import": "./dist/compliance/*.js",
       "types": "./dist/compliance/*.d.ts"
+    },
+    "./audit": {
+      "import": "./dist/audit/index.js",
+      "types": "./dist/audit/index.d.ts"
+    },
+    "./maker": {
+      "import": "./dist/maker/index.js",
+      "types": "./dist/maker/index.d.ts"
     }
   },
   "types": "dist/index.d.ts",
@@ -99,6 +119,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@bic/openclaw-lsp": "file:../claws-lsp",
     "@craftworks/compiler-sdk": "file:../compiler-sdk",
     "@craftworks/agent-sdk": "file:../agent-sdk",
     "@types/node": "^20.0.0",

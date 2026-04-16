@@ -166,7 +166,7 @@ describe('initCeremony', () => {
     vi.restoreAllMocks();
   });
 
-  it('generates key, registers, stores, and splits into shares', async () => {
+  it('generates key, registers, stores hash (not raw key), and splits into shares', async () => {
     const mockKeyId = 'hmac-test1234';
     const mockEntry = {
       id: mockKeyId,
@@ -207,11 +207,15 @@ describe('initCeremony', () => {
       purpose: 'root',
     });
 
-    // Verify storage.write was called with keyId and hex material
+    // Verify storage.write persists only the key hash, NOT the raw key material.
+    // The unsplit key must never touch disk — only the SHA-256 hash is stored
+    // for reconstruction verification.
     expect(writeSpy).toHaveBeenCalledOnce();
     expect(writeSpy.mock.calls[0]![0]).toBe(mockKeyId);
-    // Key material is 32 bytes = 64 hex chars
+    // SHA-256 hash is 64 hex chars
     expect(writeSpy.mock.calls[0]![1]).toHaveLength(64);
+    // The stored value must be the keyHash, not raw key material
+    expect(writeSpy.mock.calls[0]![1]).toBe(result.keyHash);
 
     // Verify result structure
     expect(result.keyId).toBe(mockKeyId);
@@ -260,8 +264,8 @@ describe('initCeremony', () => {
     });
   });
 
-  it('shares can reconstruct the stored key material', async () => {
-    let storedMaterial = '';
+  it('stores only the key hash — shares reconstruct to a key that verifies against it', async () => {
+    let storedValue = '';
     const mockEntry = {
       id: 'hmac-roundtrip',
       algorithm: 'hmac-sha256' as const,
@@ -281,8 +285,8 @@ describe('initCeremony', () => {
     const storageModule = await import('../../src/keys/storage.js');
     vi.spyOn(storageModule, 'createStorage').mockReturnValue({
       tier: 'file',
-      write: vi.fn().mockImplementation(async (_id: string, material: string) => {
-        storedMaterial = material;
+      write: vi.fn().mockImplementation(async (_id: string, value: string) => {
+        storedValue = value;
       }),
       read: vi.fn(),
       delete: vi.fn(),
@@ -293,10 +297,15 @@ describe('initCeremony', () => {
       threshold: 3,
     });
 
-    // Reconstruct from 3 shares and verify it matches what was stored
+    // The stored value is the key hash, NOT the raw key material
+    expect(storedValue).toBe(result.keyHash);
+
+    // Reconstruct from 3 shares — the reconstructed key is NOT the stored value
+    // (stored value is the hash), but reconstruction verifies against the hash
     const subset = [result.shares[0]!, result.shares[2]!, result.shares[4]!];
     const reconstructed = shamirReconstruct(subset, result.keyHash);
-    expect(reconstructed.key).toBe(storedMaterial);
     expect(reconstructed.verified).toBe(true);
+    // The reconstructed key is different from what's on disk (hash vs raw key)
+    expect(reconstructed.key).not.toBe(storedValue);
   });
 });

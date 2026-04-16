@@ -1,0 +1,131 @@
+name: S13-workqueue-read
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that GET /api/workqueue returns a unified task list bridging
+  HEARTBEAT.md scheduled entries with runtime agent task state. Tasks from
+  HEARTBEAT.md show their next scheduled run. Tasks assigned by users or
+  other agents show their assigner. The work queue is the To Do / Planner
+  surface for the Lobster collaboration layer — it must be renderable as
+  a task list with status, source, and ownership metadata.
+
+expect:
+  get_workqueue:
+    endpoint: "GET /api/workqueue"
+    response_shape:
+      tasks_is_array: true
+      each_task_has:
+        - id
+        - title
+        - status
+        - source
+      status_values: ["pending", "in_progress", "completed", "failed", "scheduled"]
+      source_values: ["heartbeat", "user", "agent", "fleet"]
+  heartbeat_tasks:
+    source: "heartbeat"
+    has_nextRun: true
+    has_recurrence: true
+  user_assigned_tasks:
+    source: "user"
+    has_assignedBy: true
+    has_assignedAt: true
+  empty_workqueue:
+    when: "no active tasks and HEARTBEAT.md has no entries"
+    result:
+      tasks: []
+      status: "ok"
+  task_ordering:
+    primary_sort: "status (in_progress first, then pending, then scheduled)"
+    secondary_sort: "nextRun ascending for scheduled tasks"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A Companion App To Do widget calls GET /api/workqueue. The server must
+  merge two data sources: (1) HEARTBEAT.md scheduled entries parsed into
+  recurring tasks with nextRun timestamps, and (2) runtime task state from
+  the agent's in-memory task tracker (user-assigned tasks, fleet-dispatched
+  tasks, agent-initiated subtasks). Each task gets a stable `id` (derived
+  from HEARTBEAT.md heading hash for schedule tasks, UUID for runtime
+  tasks), a `title`, a `status`, and a `source` indicating provenance.
+  The merged list is sorted by actionability: in-progress tasks first,
+  then pending, then scheduled. The To Do widget renders this as a
+  checklist with source badges and due dates.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Task state persistence: runtime tasks (source: user, agent, fleet)
+      exist only in memory. If claws-serve restarts, all runtime task
+      state is lost. The work queue must persist runtime tasks to a local
+      file (e.g., .claws/tasks.json) and reload on startup. Without
+      persistence, every server restart clears the user's To Do list,
+      which is unacceptable for a collaboration surface.
+    spec_impact: "CL-10 /api/workqueue — runtime task persistence to .claws/tasks.json"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Stale tasks from crashed agents: if an agent sets a task to
+      in_progress and then crashes, the task stays in_progress forever.
+      The work queue needs a heartbeat timeout — if a task has been
+      in_progress for longer than its expected duration (or a default of
+      30 minutes), it transitions to `failed` with a staleness indicator.
+      The To Do widget should surface stale tasks prominently.
+    spec_impact: "CL-10 /api/workqueue — stale task detection via heartbeat timeout"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Task ID stability: HEARTBEAT.md tasks derive their ID from heading
+      content hash. If a user renames a heading ("Daily standup" to
+      "Morning sync"), the hash changes and the To Do widget treats it as
+      a new task (losing completion history for the old one). The ID
+      should include a stable component (e.g., heading position ordinal
+      as fallback) or HEARTBEAT.md should support explicit task IDs in
+      frontmatter.
+    spec_impact: "CL-10 workqueue task IDs — stable ID strategy for renamed HEARTBEAT.md entries"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Task ordering across sources: a fleet-dispatched task (source:
+      fleet) may be higher priority than a user-assigned task (source:
+      user), but the default sort by status does not account for priority.
+      Fleet tasks should carry a priority field from the fleet dispatch
+      payload. The sort should be: status first, then priority within
+      status, then nextRun for scheduled tasks.
+    spec_impact: "CL-10 /api/workqueue — priority-aware sort within status groups"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Duplicate detection: a HEARTBEAT.md entry and a user-assigned task
+      may describe the same work (e.g., "Review Q3 metrics" in both
+      HEARTBEAT.md and a user message). The work queue would show both
+      as separate tasks. For v1, deduplication is out of scope, but each
+      task should include enough metadata (source, title, createdAt) for
+      the To Do widget to let the user manually merge duplicates.
+    spec_impact: "CL-10 /api/workqueue — metadata sufficient for client-side duplicate detection"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      Completed task retention: should completed tasks remain in the work
+      queue response indefinitely? A growing list of completed tasks
+      degrades response size and UI performance. The API should accept
+      a `?status=pending,in_progress` filter and default to excluding
+      completed tasks older than 7 days. Completed tasks remain accessible
+      via `?includeCompleted=true` for audit purposes.
+    spec_impact: "CL-10 /api/workqueue — status filter with retention window for completed tasks"
+    pitfall: null

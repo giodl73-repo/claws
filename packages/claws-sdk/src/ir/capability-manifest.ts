@@ -36,6 +36,8 @@ export interface ToolCapability {
   readonly classification: ToolClassification;
   /** Trust labels for external content classification. When present, G-INPUT-02 is satisfied. */
   readonly trustLabels?: readonly string[];
+  /** MCP server that hosts this tool, populated during parse phase from mcp.servers config. */
+  readonly mcpServer?: string;
 }
 
 /**

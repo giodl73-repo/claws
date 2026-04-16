@@ -170,6 +170,13 @@ export function validateAmendment(
             message: `Invalid trust tier value: ${String(newTier)}. Must be 1–5.`,
             field: 'value.trustTier',
           });
+        } else if (newTier < trustTier) {
+          // D-01: Monotonic trust tier enforcement — trust can only increase
+          violations.push({
+            ruleId: 'AMEND-V006',
+            message: `Trust tier can only increase (current: T${trustTier}, proposed: T${newTier}).`,
+            field: 'value.trustTier',
+          });
         }
       }
       break;

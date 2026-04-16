@@ -212,6 +212,14 @@ export function mergeIntents(
       });
     } else {
       // LLM-only: gap-fill
+      // C-01: Apply minimum R2 risk floor for LLM-only gap-fill intents.
+      // When the LLM is the sole source (no regex baseline), risk must be
+      // at least R2 to prevent an LLM from assigning R1 to a tool that
+      // deserves higher classification.
+      const gapFillRisk: ToolRiskClass | undefined =
+        li.riskClass !== undefined
+          ? (Math.max(li.riskClass, 2) as ToolRiskClass)
+          : 2 as ToolRiskClass;
       merged.set(key, {
         kind: li.kind,
         target: li.target,
@@ -220,7 +228,7 @@ export function mergeIntents(
         sourceText: li.sourceText,
         extractionMethod: 'llm',
         ...(li.line !== undefined ? { line: li.line } : {}),
-        ...(li.riskClass !== undefined ? { riskClass: li.riskClass } : {}),
+        riskClass: gapFillRisk,
       });
     }
   }

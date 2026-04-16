@@ -8,3 +8,4 @@ export { normalizePath } from './path.js';
 export { normalizeName } from './normalize.js';
 export { levenshtein } from './levenshtein.js';
 export { stripBOM, normalizeLF } from './text.js';
+export { pathExists } from './fs.js';

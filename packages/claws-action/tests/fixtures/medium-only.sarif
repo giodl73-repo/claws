@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "claws",
+          "version": "0.1.0",
+          "informationUri": "https://claws.dev",
+          "rules": [
+            {
+              "id": "G-DATA-002",
+              "name": "G-DATA-002",
+              "shortDescription": {
+                "text": "Governance rule G-DATA-002"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "G-DATA-002",
+          "level": "warning",
+          "message": {
+            "text": "No data classification declared for write_file"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "TOOLS.md"
+                },
+                "region": {
+                  "startLine": 4,
+                  "startColumn": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

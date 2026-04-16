@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "claws",
+          "version": "0.1.0",
+          "informationUri": "https://claws.dev",
+          "rules": [
+            {
+              "id": "G-PERM-001",
+              "name": "G-PERM-001",
+              "shortDescription": {
+                "text": "Governance rule G-PERM-001"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "G-DATA-002",
+              "name": "G-DATA-002",
+              "shortDescription": {
+                "text": "Governance rule G-DATA-002"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "G-INPUT-003",
+              "name": "G-INPUT-003",
+              "shortDescription": {
+                "text": "Governance rule G-INPUT-003"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "G-PERM-001",
+          "level": "error",
+          "message": {
+            "text": "Tool execute_command has no approval gate"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "TOOLS.md"
+                },
+                "region": {
+                  "startLine": 5,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "Add exec_approval: required to the tool declaration"
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "G-DATA-002",
+          "level": "warning",
+          "message": {
+            "text": "No data classification declared for write_file"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "TOOLS.md"
+                },
+                "region": {
+                  "startLine": 4,
+                  "startColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "G-INPUT-003",
+          "level": "note",
+          "message": {
+            "text": "Input validation not declared for read_file"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "TOOLS.md"
+                },
+                "region": {
+                  "startLine": 3,
+                  "startColumn": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

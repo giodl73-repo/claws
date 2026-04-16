@@ -3,7 +3,7 @@ slug: claws-press-context
 preset: "claws"
 plan: "2 headlines: PRESS compression reduces governance SKILL.md from 2400 to 1100 tokens at 92% quality, Context DAG achieves 70% storage reduction for 47-agent fleet"
 area: claws
-status: Draft
+status: Implemented
 phase: thoth
 atoms: [atom:press-pinch, atom:three-engine-model, atom:claws-relax]
 specs: [CL-04, CL-06]

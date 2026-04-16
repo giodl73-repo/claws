@@ -1,0 +1,213 @@
+name: S23-blocklisted-tool-connection
+series: cap-integration
+version: 1
+specs: [CL-10, CL-12, CL-11]
+description: >
+  Validates enforcement when PATCH /api/chunks/connections tries to enable a
+  tool that is on the fleet blocklist. The fleet blocklist is the highest
+  priority enforcement layer — blocklisted tools cannot be enabled by any
+  mechanism (PATCH, skill install, external edit). The scenario also covers
+  retroactive blocklist application (tool was enabled, then blocklist changes
+  to include it) and blocklist removal (tool was blocked, blocklist changes
+  to exclude it). Detection of external-edit bypass (tool added to TOOLS.md
+  outside of the API) is validated on the next GET /api/chunks.
+
+expect:
+  direct_blocklist_violation:
+    endpoint: "PATCH /api/chunks/connections"
+    payload: "{ toolId: 'shell-exec', field: 'enabled', value: true }"
+    fleet_blocklist: ["shell-*"]
+    result:
+      status: 422
+      error: "FLEET_LOCK_VIOLATION"
+      message: "Tool 'shell-exec' matches fleet blocklist pattern 'shell-*'"
+      workspace_files_unchanged: true
+      audit_event_emitted: true
+  external_edit_detection:
+    description: "Tool added to TOOLS.md by external editor, detected on GET"
+    endpoint: "GET /api/chunks/connections"
+    tools_md_contains: "shell-exec"
+    fleet_blocklist: ["shell-exec"]
+    result:
+      tool_present: true
+      lock:
+        source: "fleet"
+        reason: "Tool matches fleet blocklist entry 'shell-exec'"
+      governance:
+        warnings:
+          - type: "FLEET_BLOCKLIST_EXTERNAL_EDIT"
+            toolId: "shell-exec"
+  retroactive_block:
+    description: "Tool was enabled, then fleet blocklist updated to include it"
+    pre_condition:
+      tool_enabled: true
+      fleet_blocklist: []
+    post_condition:
+      fleet_blocklist: ["shell-exec"]
+    result:
+      tool_locked: true
+      lock:
+        source: "fleet"
+      pre_authorization_revoked: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner sends PATCH /api/chunks/connections to enable the
+  tool "shell-exec". The fleet blocklist (sourced from fleet.yaml or
+  claws.json fleet overrides) contains the pattern "shell-*". The validation
+  layer must: (1) match the toolId against all blocklist entries including
+  glob patterns, (2) reject the edit with FLEET_LOCK_VIOLATION, (3) leave
+  workspace files unchanged, (4) log the attempt in the audit trail. The
+  scenario also tests what happens when a tool is added to TOOLS.md by an
+  external editor (not via the API) — on the next GET /api/chunks, the tool
+  must appear with a fleet lock and a warning. Additionally, if the blocklist
+  changes after a tool was already enabled (retroactive block), the tool
+  must be locked on the next compilation and any pre_authorizations revoked.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      Blocklist matching by glob pattern ("shell-*") requires consistent
+      glob semantics. If the PATCH validation uses minimatch but the
+      compilation uses micromatch (or vice versa), a tool could pass PATCH
+      validation but be blocked at compilation, or pass both due to
+      subtle glob differences. The blocklist matcher must be a single
+      shared implementation used by both PATCH validation and compilation.
+    spec_impact: "CL-10 blocklist matcher — single shared implementation for PATCH and compilation"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      Blocklist entries can target tool names, server names, or capability
+      patterns. If the blocklist only matches against toolId but the fleet
+      admin intended to block by server name (e.g., "block all tools from
+      server 'untrusted-mcp'"), tools from that server with different names
+      bypass the blocklist. The blocklist schema must support name, server,
+      and capability qualifiers with explicit syntax.
+    spec_impact: "CL-10 blocklist schema — support name:, server:, and capability: qualifiers"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Retroactive blocklist application on GET /api/chunks must diff the
+      current blocklist against the last-compiled blocklist to detect newly
+      blocked tools. If the GET path simply reads the compiled ChunkedIR
+      without re-evaluating the blocklist, retroactively blocked tools
+      appear as enabled in the chunk until the next full recompilation.
+      GET must perform a lightweight blocklist re-evaluation pass.
+    spec_impact: "CL-10 GET path — lightweight blocklist re-evaluation on every GET"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      When a blocklist entry is removed (tool was blocked, now unblocked),
+      the tool's pre_authorization status is ambiguous. It was revoked
+      when blocked — should it be automatically restored? Restoring stale
+      pre_authorizations could grant access to a tool the user forgot
+      about. The safest behavior is: unblocking does not restore
+      pre_authorization; the user must explicitly re-approve the tool.
+    spec_impact: "CL-10 blocklist removal — pre_authorization NOT auto-restored, requires re-approval"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      A wildcard blocklist entry like "*" (block all tools) is syntactically
+      valid but renders the agent useless. The validation must reject
+      overly broad patterns that would block more than a configurable
+      threshold (e.g., 90% of registered tools). Fleet admins should use
+      explicit patterns, not blanket wildcards.
+    spec_impact: "CL-10 blocklist validation — reject overly broad glob patterns exceeding tool-block threshold"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Blocklist interaction with R5 classification: if a tool is both R5
+      and blocklisted, the lock source should be "fleet" (highest priority),
+      not "r5". If the blocklist is later removed, the lock should
+      downgrade to "r5" (not disappear entirely). Lock source must
+      reflect the highest active enforcement layer with proper fallback.
+    spec_impact: "CL-10 lock source priority — fleet > r5 > governance, with fallback on removal"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      External-edit bypass detection must run on startup (health check)
+      and on every GET, not only on GET. If the claws-serve process
+      restarts and the health check does not evaluate the blocklist
+      against the current TOOLS.md, a blocklisted tool added during
+      downtime is served as enabled on the first GET. The startup
+      health check must include blocklist reconciliation.
+    spec_impact: "CL-10 startup health check — include blocklist reconciliation against TOOLS.md"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Blocklist defined in fleet.yaml versus blocklist defined in
+      claws.json local override may have different update cadences.
+      Fleet.yaml is pushed by fleet broadcast (may be stale); claws.json
+      is local (always current). The validation must merge both sources
+      with union semantics (blocked in either = blocked) and surface the
+      source of each blocklist entry in the lock reason.
+    spec_impact: "CL-10 blocklist merge — union of fleet.yaml and claws.json, source attribution"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The FLEET_LOCK_VIOLATION error message must include the matching
+      blocklist pattern, not just the tool name. If the pattern is "shell-*"
+      and the tool is "shell-exec", the message should say "matches pattern
+      'shell-*'" so the user understands the block is pattern-based and
+      that other "shell-" tools are also blocked.
+    spec_impact: "CL-10 FLEET_LOCK_VIOLATION — include matching pattern in error message"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      If the fleet blocklist is updated via hot-reload while a PATCH
+      request is in flight, the validation may use the old blocklist
+      (PATCH passes) but the subsequent compilation uses the new blocklist
+      (tool gets blocked). This creates a confusing user experience: PATCH
+      succeeds but the tool appears locked on the next GET. The PATCH
+      validation must acquire a read lock on the blocklist to prevent
+      mid-request changes.
+    spec_impact: "CL-10 blocklist hot-reload — read lock during PATCH validation"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      Blocklist entries with regex-like syntax (e.g., "shell-(exec|run)")
+      should be rejected if the blocklist only supports glob patterns. If
+      regex is silently treated as a literal string, the pattern "shell-(exec|run)"
+      would not match "shell-exec" and the blocklist would be ineffective.
+      The blocklist parser must validate pattern syntax and reject unsupported
+      metacharacters with a clear error.
+    spec_impact: "CL-10 blocklist parser — validate pattern syntax, reject non-glob metacharacters"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The audit trail for blocked tool attempts should aggregate repeated
+      attempts (e.g., the same user trying to enable the same blocked tool
+      5 times in a minute) into a single audit entry with a count, rather
+      than creating 5 entries. Repeated attempts may indicate confusion
+      (show better error messages) or a bypass attempt (escalate to fleet
+      admin). The audit system should detect repetition and annotate
+      accordingly.
+    spec_impact: "CL-10 audit trail — aggregate repeated blocklist violation attempts"
+    pitfall: null

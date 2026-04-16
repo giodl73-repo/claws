@@ -109,8 +109,8 @@ describe('ceremony acceptance', () => {
 
     // Verify HMAC signatures are present
     for (const event of ceremonyEvents) {
-      expect(event.hmac).toBeTruthy();
-      expect(typeof event.hmac).toBe('string');
+      expect(event.hmacSignature).toBeTruthy();
+      expect(typeof event.hmacSignature).toBe('string');
     }
 
     // ─── Part 4: Share Isolation ───────────────────────────────────────

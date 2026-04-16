@@ -1,0 +1,254 @@
+name: S34-e2e-onboard-to-first-task
+series: cap-integration
+version: 1
+specs: [CL-10, CL-12]
+description: >
+  Full end-to-end lifecycle: onboard call seeds SOUL.md and MEMORY.md, first
+  compilation produces initial chunks, user assigns a task via work queue,
+  agent calls an R3 tool, approval flow fires, user approves, tool executes,
+  audit chain records the decision. Validates the complete happy-path from
+  zero-state workspace to first audited tool call.
+
+expect:
+  onboard:
+    endpoint: "POST /api/onboard"
+    body: "{ transcript: '<onboard-call-transcript>', agentName: 'Atlas' }"
+    status: 201
+    response_shape:
+      status: "seeded"
+      files_created: ["SOUL.md", "MEMORY.md"]
+      compilationTriggered: true
+  initial_chunks:
+    endpoint: "GET /api/chunks"
+    response_shape:
+      general:
+        name: "Atlas"
+        trustTier: "T0"
+      connections:
+        tools: []
+      loop:
+        soul:
+          seeded: true
+          source: "onboard"
+      governance:
+        auditEvents: 0
+        violations: []
+  task_assignment:
+    method: PATCH
+    path: /api/workqueue
+    body: "{ task: { id: 'task-001', description: 'Research Q3 earnings', tools: ['web-search'] } }"
+    status: 200
+  tool_call:
+    tool: "web-search"
+    risk_level: "R3"
+    approval_event:
+      type: "tool:approval-required"
+      payload_has: [toolId, riskLevel, taskId, agentName]
+  user_approval:
+    method: POST
+    path: /api/approval
+    body: "{ toolCallId: '<id>', decision: 'approve' }"
+    status: 200
+    tool_executes: true
+  audit_trail:
+    endpoint: "GET /api/audit"
+    entries:
+      - type: "onboard"
+      - type: "compilation"
+      - type: "task_assigned"
+      - type: "tool_call_requested"
+      - type: "approval_granted"
+      - type: "tool_executed"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A new agent is being set up for the first time. An admin conducts an onboard
+  call, and the transcript is sent to POST /api/onboard. The system seeds
+  SOUL.md (personality, instructions) and MEMORY.md (initial knowledge sources)
+  from the transcript. The first compilation runs, producing initial chunks
+  with an empty tool set, T0 trust tier, and zero audit events. The user then
+  assigns a task via PATCH /api/workqueue. The task requires the web-search
+  tool (R3). The agent attempts the tool call, which triggers an approval
+  event (R3 at T0 requires explicit approval). The user approves via
+  POST /api/approval. The tool executes. The audit chain records every step.
+  This scenario validates the complete lifecycle and surfaces gaps in the
+  cold-start path.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Onboard content quality: a minimal transcript ("Hi, set up an agent
+      for me") produces a minimal SOUL.md with almost no personality or
+      instructions. The onboard processor must have minimum content
+      thresholds — if the transcript yields fewer than N meaningful
+      directives (e.g., 3), the response should include a
+      qualityWarning: 'insufficient_transcript' flag and a list of
+      suggested follow-up questions. The seeded files are still created
+      (don't block onboarding), but the warning signals that the agent
+      will be underspecified.
+    spec_impact: "CL-10 POST /api/onboard — minimum content threshold; qualityWarning with suggested follow-ups"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      First compilation after onboard runs on a cold cache — no prior
+      GovernanceIR, no cached phases, no incremental compilation possible.
+      This is the slowest compilation path. If the first compilation
+      exceeds the 500ms budget (because there is no cache to skip phases),
+      the system must still complete it before serving chunks. The health
+      endpoint should report compilation mode: 'full' (vs 'incremental')
+      so the partner can set appropriate loading UI expectations.
+    spec_impact: "CL-10 first compilation — cold cache full compile; report compilation mode in health endpoint"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      First chunk request shows governance context with 0 audit events.
+      The partner UI must handle the zero-state gracefully — displaying
+      "No audit history" rather than an empty or broken audit panel. The
+      GET /api/chunks response for a fresh workspace must include explicit
+      zero-state indicators (auditEvents: 0, not auditEvents: null or
+      missing) so the partner can distinguish between "no events yet" and
+      "audit data unavailable."
+    spec_impact: "CL-10 chunks — explicit zero-state indicators (0, not null) for fresh workspaces"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Work queue task assignment via PATCH must validate that the tools
+      referenced in the task (web-search) exist in the workspace. If the
+      task references a tool that is not in TOOLS.md, the PATCH must
+      return a validation error listing the missing tools. Allowing a task
+      with missing tools means the agent will fail at runtime when it
+      tries to call the tool — a poor user experience that could have
+      been prevented at assignment time.
+    spec_impact: "CL-10 PATCH /api/workqueue — validate referenced tools exist in workspace; reject if missing"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      R3 tool approval flow timing: when the approval event fires, the
+      user has a limited time to respond. If the approval timeout expires
+      (e.g., 5 minutes), the tool call must be denied by default (fail
+      closed). The timeout must be configurable per-tool or per-workspace.
+      The approval event must include the timeout duration so the partner
+      UI can display a countdown. An expired approval must emit a
+      tool:approval-timeout SSE event and log the timeout in the audit
+      chain.
+    spec_impact: "CL-10 approval flow — configurable timeout; fail closed on expiry; SSE timeout event; audit log"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Audit chain first entry has prevHash = '0000...0000' (genesis block).
+      The audit-chain extension must handle the genesis case correctly —
+      no prior hash to validate against, but the entry must still be
+      structurally valid (hash, timestamp, type, actor, detail). If the
+      genesis entry is malformed or missing, the entire chain is invalid
+      from the start. The onboard event should be the genesis entry,
+      establishing the chain before any other auditable action occurs.
+    spec_impact: "CL-10 audit-chain — onboard event as genesis entry (prevHash=0); structural validation for first entry"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Tool call after approval timeout: the user's approval arrives 10
+      seconds after the timeout expired. The POST /api/approval must
+      return 410 Gone (approval expired) rather than silently accepting
+      the stale approval. The tool call has already been denied; the
+      user must re-initiate the action. Accepting a post-timeout approval
+      would execute the tool call after the agent has already received a
+      denial and may have moved on to an alternative action.
+    spec_impact: "CL-10 POST /api/approval — 410 Gone for expired approvals; no post-timeout execution"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Concurrent onboard and first task: an admin sends POST /api/onboard
+      while another admin simultaneously sends PATCH /api/workqueue for
+      the same workspace. The onboard is still compiling when the task
+      assignment arrives. The task PATCH must wait for the initial
+      compilation to complete before validating tool references (the tool
+      list is not available until compilation finishes). The PATCH should
+      receive a 503 with Retry-After if the workspace is still in
+      initial compilation.
+    spec_impact: "CL-10 PATCH /api/workqueue — 503 during initial compilation; Retry-After header"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Trust tier at T0 after onboard: a freshly onboarded agent starts at
+      T0 (untrusted), which has very limited permissions. At T0, even R1
+      tools may require approval (depending on fleet policy). The partner
+      UI must clearly communicate the T0 state and provide a path to
+      escalation (link to the escalation flow). If the user assigns a
+      task requiring R3 tools to a T0 agent without understanding the
+      approval burden, every tool call will block on approval — a
+      frustrating experience.
+    spec_impact: "CL-10 onboard — T0 trust tier messaging; partner UI must explain approval burden and escalation path"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      SOUL.md seeding from transcript must not include PII from the
+      onboard call that the agent should not retain. If the admin mentions
+      a customer name, social security number, or other sensitive data
+      during the call, the onboard processor must either redact PII before
+      seeding or flag potential PII for admin review. Seeding unredacted
+      PII into SOUL.md creates a data retention violation — the agent
+      permanently stores sensitive data that was incidentally mentioned.
+    spec_impact: "CL-10 POST /api/onboard — PII detection and redaction before SOUL.md seeding; flag for review"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      The full lifecycle produces 6 audit entries (onboard, compilation,
+      task_assigned, tool_call_requested, approval_granted, tool_executed).
+      The GET /api/audit endpoint must support pagination for workspaces
+      that accumulate thousands of entries over time. The first call in
+      this scenario returns all 6, but the response must already include
+      pagination fields (offset, limit, total) for forward compatibility.
+      Retrofitting pagination later would be a breaking API change.
+    spec_impact: "CL-10 GET /api/audit — pagination from day one (offset, limit, total) even for small result sets"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Onboard-to-first-task latency budget: the total time from
+      POST /api/onboard to the agent's first tool execution (after
+      approval) should be measurable and reportable. This is a key UX
+      metric for the product. The audit trail timestamps enable
+      calculation, but a dedicated metric (onboardToFirstAction_ms)
+      should be computed and included in the health endpoint or a
+      metrics endpoint for product analytics.
+    spec_impact: "CL-10 metrics — compute onboardToFirstAction_ms from audit timestamps; expose in health/metrics"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      Idempotent onboard: if POST /api/onboard is called twice for the
+      same workspace (e.g., network retry), the second call must not
+      overwrite the files seeded by the first call. The endpoint must
+      detect that SOUL.md and MEMORY.md already exist and return 409
+      Conflict with the existing file creation timestamps. Re-onboarding
+      requires an explicit DELETE /api/onboard/reset first (destructive
+      action, separate from the seed path).
+    spec_impact: "CL-10 POST /api/onboard — idempotency guard; 409 if already seeded; explicit reset path"
+    pitfall: null

@@ -1,0 +1,218 @@
+name: S25-skill-install-r5-tools
+series: cap-integration
+version: 1
+specs: [CL-10, CL-11, CL-12]
+description: >
+  Validates governance enforcement when POST /api/skills/install installs a
+  skill package containing R5 tools. R5 tools must automatically receive
+  lock.source: 'r5' and approvalRequired: true with no standing approvals
+  applicable. R3 tools in the same package follow normal fleet/governance
+  policy. The scenario covers mixed-risk packages, tools where declared risk
+  disagrees with capability extraction, tool name conflicts, orphaned
+  pre_authorizations after uninstall, and skill updates that change tool
+  risk levels.
+
+expect:
+  skill_with_r5_tools:
+    endpoint: "POST /api/skills/install"
+    payload: "{ package: 'cloud-ops', version: '2.0.0' }"
+    package_tools:
+      - { toolId: "deploy-prod", declared_risk: "R5", capabilities: ["obo", "write"] }
+      - { toolId: "list-instances", declared_risk: "R1", capabilities: ["read"] }
+      - { toolId: "restart-service", declared_risk: "R3", capabilities: ["write"] }
+    result:
+      status: "ok"
+      recompilation_triggered: true
+      tools_registered: 3
+      governance:
+        r5_tools:
+          - toolId: "deploy-prod"
+            lock:
+              source: "r5"
+            approvalRequired: true
+            standing_approval_excluded: true
+        r3_tools:
+          - toolId: "restart-service"
+            lock:
+              source: "governance"
+            approvalRequired_per_fleet: true
+        r1_tools:
+          - toolId: "list-instances"
+            lock: null
+            approvalRequired: false
+  declaration_disagrees:
+    description: "Skill declares R3 but capability extraction reveals R5"
+    declared_risk: "R3"
+    extracted_risk: "R5"
+    result:
+      effective_risk: "R5"
+      governance:
+        warnings:
+          - type: "RISK_DECLARATION_MISMATCH"
+            declared: "R3"
+            extracted: "R5"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A user installs the "cloud-ops" skill package via POST /api/skills/install.
+  The package contains three tools: deploy-prod (R5/OBO), list-instances
+  (R1/read-only), and restart-service (R3/write). The install process must:
+  (1) write skill files to the skills/ directory, (2) trigger synchronous
+  recompilation, (3) classify each tool by risk level using capability
+  extraction (not just the declared risk), (4) apply R5 locks to R5 tools,
+  (5) apply fleet/governance policy to R3 tools, (6) leave R1 tools unlocked,
+  (7) exclude R5 tools from standing approvals. The challenge is handling
+  packages where the declared risk disagrees with the extracted risk, dealing
+  with tool name conflicts with existing tools, cleaning up governance state
+  after uninstall, and handling skill updates that change tool risk levels.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      If the skill declares a tool as R3 but capability extraction
+      determines it is R5 (e.g., the tool's implementation performs OBO
+      actions not reflected in the manifest), the compilation must use the
+      higher (more restrictive) classification. The declared risk is
+      advisory; the extracted risk is authoritative. A
+      RISK_DECLARATION_MISMATCH warning must alert the user that the skill
+      vendor's declaration does not match the system's analysis.
+    spec_impact: "CL-10 risk classification — extraction authoritative over declaration, warn on mismatch"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      Skill install must trigger synchronous recompilation that completes
+      before the install response is returned. If recompilation is
+      deferred (async), there is a window where the skill's tools are
+      registered in TOOLS.md but ungoverned. During this window, a GET
+      /api/chunks would serve the tools without risk classification or
+      locks. The install endpoint must block until recompilation confirms
+      all tools are classified.
+    spec_impact: "CL-10 skill install — synchronous recompilation, block until all tools classified"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Tool name conflicts: if the installed skill contains a tool named
+      "deploy" and an existing tool is also named "deploy", the install
+      must detect the collision and reject the install (not silently
+      overwrite). The collision check must happen before any file writes,
+      returning a TOOL_NAME_CONFLICT error with both the existing tool's
+      source and the incoming tool's source.
+    spec_impact: "CL-10 skill install — tool name collision detection before file write"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Skill uninstall (DELETE /api/skills/{package}) removes skill files
+      from skills/ but may leave orphaned pre_authorizations in USER.md
+      that reference the uninstalled tools. These orphaned entries do not
+      cause errors but accumulate as dead state. The uninstall process
+      must clean up pre_authorizations for all tools provided by the skill,
+      or at minimum flag them as orphaned in the GovernanceIR.
+    spec_impact: "CL-10 skill uninstall — clean up orphaned pre_authorizations in USER.md"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Skill update (same package, new version) that changes a tool's risk
+      level must follow the risk-drift protocol (S24). The update is
+      effectively an uninstall + reinstall, but the governance state
+      (pre_authorizations, locks, audit history) must carry over where
+      still valid. Pre_authorizations for tools whose risk upgraded must
+      be invalidated; pre_authorizations for unchanged tools must be
+      preserved.
+    spec_impact: "CL-10 skill update — governance state carryover with selective invalidation"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      A skill package with no tool declarations (e.g., a skill that
+      provides prompts or templates but no tools) should install cleanly
+      without governance violations. The compilation should not produce
+      an error for "zero tools classified." The skill's non-tool content
+      (prompts, templates) must still be validated against SOUL.md
+      constraints and fleet policy.
+    spec_impact: "CL-10 compilation — handle skill packages with zero tools gracefully"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      Mixed R1-R5 packages must produce a clear governance summary in the
+      install response. The user needs to see at-a-glance which tools
+      are locked, which are auto-approved, and which require action. A
+      flat list of governance findings per tool is insufficient — the
+      response should group by risk level and highlight tools requiring
+      user action.
+    spec_impact: "CL-10 install response — governance summary grouped by risk level"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      If the skill package contains a tool that is on the fleet blocklist,
+      the install should succeed (skill files are written) but the blocked
+      tool should be immediately locked with FLEET_LOCK_VIOLATION. The
+      install should not fail entirely because other tools in the package
+      may be valid. Partial-success semantics apply: install the package,
+      lock the blocked tools, warn the user.
+    spec_impact: "CL-10 skill install + blocklist — partial success, lock blocked tools, install rest"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The skill package's integrity must be verified before installation.
+      A tampered package could declare R1 for all tools to avoid R5 locks,
+      while the actual tool implementations perform R5 actions. Capability
+      extraction runs post-install on the actual code, but between install
+      and extraction completion, the declared (potentially false) risk is
+      the only classification. The install must quarantine all tools until
+      extraction confirms the risk levels.
+    spec_impact: "CL-10 skill install — quarantine tools until capability extraction confirms risk"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Standing approvals that were granted before the skill install must
+      be re-evaluated. If "Allow all" was active and the new skill brings
+      R5 tools, the "Allow all" scope must be updated to exclude the new
+      R5 tools. The re-evaluation must happen as part of the synchronous
+      recompilation, not deferred to the next GET.
+    spec_impact: "CL-10 standing approval re-evaluation — synchronous with skill install recompile"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      The audit trail for skill install must record the full package
+      manifest including all tools, their declared risks, their extracted
+      risks, and the governance actions taken (locked, approved, blocked).
+      A skill install is a significant governance event and the audit
+      entry must be comprehensive enough for compliance review.
+    spec_impact: "CL-11 audit trail — comprehensive skill install event with full tool manifest"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Skill packages from different vendors may use different capability
+      declaration formats. The capability extraction must normalize
+      across formats before risk classification. If a vendor uses a
+      non-standard capability name (e.g., "delegated-action" instead of
+      "obo"), the extraction should map it to the canonical capability
+      taxonomy. Unknown capabilities should default to high risk.
+    spec_impact: "CL-10 capability extraction — normalize vendor-specific capability names to canonical taxonomy"
+    pitfall: null

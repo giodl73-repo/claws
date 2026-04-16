@@ -54,12 +54,24 @@ export function buildUserPrompt(request: LLMExtractionRequest): string {
 const VALID_KINDS = new Set(['deny', 'elicit', 'require', 'limit', 'label']);
 
 /**
- * Parse LLM response text into structured intents.
+ * S-W4: Typed parse result to distinguish JSON parse failure from "no intents found".
+ *
+ * - 'parse-error': JSON could not be parsed — LLM returned non-JSON
+ * - 'no-intents': JSON parsed but no valid intents found
+ * - 'success': intents extracted successfully
+ */
+export type IntentParseResult =
+  | { readonly type: 'parse-error'; readonly error: string }
+  | { readonly type: 'no-intents' }
+  | { readonly type: 'success'; readonly intents: readonly LLMIntent[] };
+
+/**
+ * Parse LLM response text into a typed result (S-W4).
  *
  * Handles raw JSON arrays and markdown-fenced JSON blocks.
- * Returns empty array on parse failure (never throws).
+ * Returns a typed discriminated union instead of bare array.
  */
-export function parseIntentsFromResponse(content: string, _source: string): LLMIntent[] {
+export function parseIntentsTyped(content: string, _source: string): IntentParseResult {
   const trimmed = content.trim();
 
   // Extract JSON array from response (may be wrapped in markdown code fences)
@@ -72,12 +84,12 @@ export function parseIntentsFromResponse(content: string, _source: string): LLMI
   let parsed: unknown;
   try {
     parsed = JSON.parse(jsonStr);
-  } catch {
-    return [];
+  } catch (err) {
+    return { type: 'parse-error', error: err instanceof Error ? err.message : String(err) };
   }
 
   if (!Array.isArray(parsed)) {
-    return [];
+    return { type: 'parse-error', error: 'Response is not a JSON array' };
   }
 
   const intents: LLMIntent[] = [];
@@ -108,7 +120,25 @@ export function parseIntentsFromResponse(content: string, _source: string): LLMI
     }
   }
 
-  return intents;
+  if (intents.length === 0) {
+    return { type: 'no-intents' };
+  }
+
+  return { type: 'success', intents };
+}
+
+/**
+ * Parse LLM response text into structured intents.
+ *
+ * Handles raw JSON arrays and markdown-fenced JSON blocks.
+ * Returns empty array on parse failure (never throws).
+ *
+ * @deprecated Use parseIntentsTyped for typed result (S-W4).
+ */
+export function parseIntentsFromResponse(content: string, source: string): LLMIntent[] {
+  const result = parseIntentsTyped(content, source);
+  if (result.type === 'success') return [...result.intents];
+  return [];
 }
 
 // ── Validation ──────────────────────────────────────────────────────────

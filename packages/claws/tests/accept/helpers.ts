@@ -9,7 +9,8 @@
 
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mkdtempSync, rmSync, existsSync } from 'node:fs';
+import { mkdtempSync, rmSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
 import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -31,10 +32,10 @@ export interface ClawsResult {
 /** Run claws as a subprocess. Throws on Node-level errors (not claws exit codes). */
 export async function claws(
   args: string[],
-  options: { cwd?: string; timeout?: number } = {},
+  options: { cwd?: string; timeout?: number; env?: Record<string, string> } = {},
 ): Promise<ClawsResult> {
   try {
-    const env = { ...process.env, NO_COLOR: '1' };
+    const env = { ...process.env, NO_COLOR: '1', ...options.env };
     delete env['FORCE_COLOR'];
     const { stdout, stderr } = await execFileAsync('node', [CLAWS_BIN, ...args], {
       cwd: options.cwd ?? process.cwd(),
@@ -84,4 +85,21 @@ export async function initTempWorkspace(): Promise<{ dir: string; cleanup: () =>
     throw new Error(`claws init failed: ${r.stderr}`);
   }
   return ws;
+}
+
+/**
+ * Init a temp workspace with an HMAC audit key seeded.
+ * Use this when testing compliance commands that need a real key path.
+ */
+export async function initTempWorkspaceWithAuditKey(): Promise<{
+  dir: string;
+  auditKey: Buffer;
+  cleanup: () => void;
+}> {
+  const ws = await initTempWorkspace();
+  const keysDir = join(ws.dir, '.claws', 'keys');
+  mkdirSync(keysDir, { recursive: true });
+  const auditKey = randomBytes(32);
+  writeFileSync(join(keysDir, 'hmac.key'), auditKey.toString('hex'));
+  return { ...ws, auditKey };
 }

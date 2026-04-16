@@ -16,6 +16,18 @@ import { CLAWS_SIDECAR_LAYOUT } from '../types/sidecar.js';
 import type { StorageTier } from './types.js';
 
 /**
+ * Log a warning when plaintext key material is written to non-encrypted storage.
+ * Exported for test verification.
+ */
+export function warnPlaintextKeyStorage(filePath: string): void {
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[claws:security] Plaintext key material written to ${filePath} — ` +
+    'consider using encrypted vault storage (claws vault) for key material',
+  );
+}
+
+/**
  * Regex for valid key IDs: alphanumeric, dots, hyphens, underscores only.
  * Rejects path traversal characters (`/`, `\`, `..`) and any other
  * characters that could escape the keys directory.
@@ -166,6 +178,9 @@ export class EnvStorage implements KeyStorage {
 
   /**
    * Persist an env var assignment to the .env file.
+   *
+   * Applies 0o600 permissions (owner read/write only) after writing,
+   * and warns when plaintext key material is stored to a non-encrypted file.
    */
   private async persistEnvFile(name: string, value: string): Promise<void> {
     const lines = await this.readEnvLines();
@@ -179,6 +194,14 @@ export class EnvStorage implements KeyStorage {
     }
     await mkdir(join(this.envFilePath!, '..'), { recursive: true });
     await writeFile(this.envFilePath!, lines.join('\n') + '\n', 'utf-8');
+    // Restrict .env file permissions — owner read/write only (no-op on Windows)
+    try {
+      await chmod(this.envFilePath!, 0o600);
+    } catch {
+      // chmod may fail on Windows; non-fatal
+    }
+    // Warn when plaintext key material is stored in a non-encrypted file
+    warnPlaintextKeyStorage(this.envFilePath!);
   }
 
   /**

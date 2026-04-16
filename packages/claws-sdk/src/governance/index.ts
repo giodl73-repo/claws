@@ -30,12 +30,39 @@ export { createGOutputRules } from './rules/g-output.js';
 export { createGBoundRules } from './rules/g-bound.js';
 export { createGSupplyRules } from './rules/g-supply.js';
 
+export type {
+  AuthorizationDecision,
+  AllowDecision,
+  DenyDecision,
+  ReviewDecision,
+  ModifyDecision,
+  RiskLevel,
+  FailMode,
+  FailModeConfig,
+} from './guardrail-types.js';
+export { DEFAULT_FAIL_MODES, getFailMode } from './guardrail-types.js';
+
+export {
+  resolveApprovalGate,
+  fromFleetOverride,
+  type FleetApprovalOverride,
+  type ApprovalGateResult,
+} from './fleet-precedence.js';
+
+export type { FleetOverride, FleetOverrideAuditEntry } from './fleet-override-types.js';
+
+export {
+  emitRiskChangeEvents,
+  type RiskChangeEvent,
+  type RiskChangeAuditResult,
+} from './risk-change-audit.js';
+
 /** Map manifest risk-level strings to numeric risk levels for G-ELICIT. */
 const RISK_LEVEL_MAP: Record<string, number> = {
   critical: 5,
   high: 4,
   medium: 3,
-  low: 1,
+  low: 2,
 };
 
 /**

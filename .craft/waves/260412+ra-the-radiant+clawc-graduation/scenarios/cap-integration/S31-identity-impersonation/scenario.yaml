@@ -1,0 +1,234 @@
+name: S31-identity-impersonation
+series: cap-integration
+version: 1
+specs: [CL-10, CL-12]
+description: >
+  Validates that PATCH /api/chunks/general allows mutable identity fields
+  (name, description, language) to be changed but rejects edits to
+  governance-locked immutable fields (entra_id, email). Immutable fields are
+  sourced from IDENTITY.md which is managed by Azure Entra, not editable
+  via the API. The chunk response shows lock.source: 'governance' for
+  immutable fields and lock.source: null for mutable fields. Name collisions
+  with other agents in the org produce a warning, not a block.
+
+expect:
+  patch_mutable_name:
+    method: PATCH
+    path: /api/chunks/general
+    body: "{ field: 'name', value: 'Aria' }"
+    status: 200
+    chunk_field_updated: true
+    identity_md_updated: true
+  patch_immutable_entra_id:
+    method: PATCH
+    path: /api/chunks/general
+    body: "{ field: 'entra_id', value: 'fake-guid-1234' }"
+    status: 422
+    response_shape:
+      error: "IDENTITY_FIELD_LOCKED"
+      field: "entra_id"
+      lock_source: "governance"
+      message_contains: "entra_id is managed by Azure Entra"
+  patch_immutable_email:
+    method: PATCH
+    path: /api/chunks/general
+    body: "{ field: 'email', value: 'impersonator@contoso.com' }"
+    status: 422
+    response_shape:
+      error: "IDENTITY_FIELD_LOCKED"
+      field: "email"
+      lock_source: "governance"
+  name_collision:
+    method: PATCH
+    path: /api/chunks/general
+    body: "{ field: 'name', value: 'ExistingAgentName' }"
+    status: 200
+    response_warnings:
+      - type: "IDENTITY_NAME_COLLISION"
+        message_contains: "Another agent in this org has the same name"
+  chunk_field_locks:
+    endpoint: "GET /api/chunks/general"
+    fields:
+      entra_id: { lock: { source: "governance", editable: false } }
+      email: { lock: { source: "governance", editable: false } }
+      name: { lock: null, editable: true }
+      description: { lock: null, editable: true }
+      language: { lock: null, editable: true }
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A user (or malicious actor) opens the CAP settings panel for Agent-A and
+  attempts to change the agent's identity to match Agent-B in the same
+  organization. They PATCH the name to Agent-B's name (allowed — names are
+  not unique identifiers), then attempt to PATCH the entra_id and email to
+  Agent-B's values. The entra_id and email fields are sourced from Azure
+  Entra via IDENTITY.md and are governance-locked. The PATCH must be rejected
+  with IDENTITY_FIELD_LOCKED for immutable fields. The name change succeeds
+  but produces a collision warning. The scenario also covers social engineering
+  via description mimicry, fields that exist in Azure but not in IDENTITY.md,
+  PATCHing nonexistent fields, identity change audit requirements, and
+  propagation of identity changes to Microsoft 365 surfaces.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The immutable field list must be exhaustive and maintained in a single
+      source of truth. If entra_id and email are locked but tenant_id is
+      not (and tenant_id exists in IDENTITY.md), an attacker can change the
+      tenant_id to point to a different organization. Every field sourced
+      from Azure Entra must be governance-locked. The list must be defined
+      in GovernanceIR and enforced at write-time validation, not inferred
+      from the file format.
+    spec_impact: "CL-10 identity governance — exhaustive immutable field list in GovernanceIR; lock all Entra-sourced fields"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Name collision detection requires querying the organization's agent
+      registry. If the registry is not available (network error, service
+      down), the collision check fails open — the name change succeeds
+      without a warning. This is acceptable for availability (name is not
+      a security boundary), but the response must include a
+      collisionCheckSkipped: true flag so the partner UI can display a
+      "could not verify uniqueness" notice instead of silently succeeding.
+    spec_impact: "CL-10 name collision — fail open with collisionCheckSkipped flag when registry unavailable"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Description mimicry: a user sets the agent's description to match
+      another agent's description verbatim (social engineering). The
+      description field is mutable, so the edit succeeds. But if the
+      description is displayed to end users in Teams or Outlook alongside
+      the agent's name, a name + description match creates a convincing
+      impersonation. The compiler should emit an IDENTITY_MIMICRY warning
+      (not block) when both name AND description match another agent,
+      flagging potential social engineering.
+    spec_impact: "CL-10 identity — IDENTITY_MIMICRY warning when name + description both match another agent"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      PATCH attempting to set a field that does not exist in IDENTITY.md
+      (e.g., 'phone_number' or 'department'). The validation layer must
+      distinguish between: (a) field exists and is locked (422,
+      IDENTITY_FIELD_LOCKED), (b) field exists and is mutable (200, edit
+      succeeds), (c) field does not exist (422, IDENTITY_FIELD_UNKNOWN).
+      If unknown fields are silently ignored, the partner UI shows success
+      but the change has no effect — a confusing UX.
+    spec_impact: "CL-10 PATCH validation — three-way field resolution: locked, mutable, or unknown"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Identity fields that exist in Azure Entra but are not represented
+      in IDENTITY.md (e.g., manager, jobTitle, officeLocation). If a user
+      PATCHes a field that exists in Entra but is not in IDENTITY.md, the
+      system must not create the field in IDENTITY.md — that would diverge
+      the file from its Azure source. The validation must check the Entra
+      schema and reject PATCHes for Entra-managed fields even if they are
+      not currently in IDENTITY.md. This requires a schema definition
+      broader than just the current file contents.
+    spec_impact: "CL-10 identity validation — check against Entra schema, not just current IDENTITY.md contents"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Identity change audit trail: every identity field change (mutable or
+      attempted-immutable) must be logged in the audit chain. For mutable
+      changes: previous value, new value, actor, timestamp. For rejected
+      immutable changes: attempted field, attempted value, rejection reason.
+      This audit trail is critical for investigating impersonation attempts.
+      Without it, a series of rejected entra_id changes (probing for valid
+      GUIDs) leaves no forensic trace.
+    spec_impact: "CL-10 audit — log all identity field changes (successful and rejected) with full context"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Identity change propagation to Microsoft 365 surfaces: if the agent's
+      name is changed via PATCH, does the change propagate to the agent's
+      Teams presence, Outlook contacts card, and Calendar entries? If
+      IDENTITY.md is the source of truth for the agent's display name but
+      Teams reads from Azure Entra, there is a split: IDENTITY.md says
+      "Aria" but Teams still shows the Entra-registered name. The
+      propagation path (or lack thereof) must be documented.
+    spec_impact: "CL-10 identity — document propagation path for mutable field changes to M365 surfaces"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Avatar field handling: the agent may have an avatar/icon field that
+      is displayed in the partner UI. Avatars are not a governance concern
+      (no security impact), but an impersonator could set the avatar to
+      match another agent's avatar. The avatar field should be treated as
+      mutable with no governance lock, but the IDENTITY_MIMICRY warning
+      should also consider avatar similarity if both name and avatar
+      match another agent.
+    spec_impact: "CL-10 identity — avatar is mutable, no lock; include in IDENTITY_MIMICRY check alongside name"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Batch identity PATCH: if the partner sends a single PATCH with
+      multiple field changes (name, description, entra_id), the system
+      must apply the valid changes (name, description) and reject the
+      invalid ones (entra_id), not reject the entire PATCH. The response
+      must enumerate per-field results: name=updated, description=updated,
+      entra_id=IDENTITY_FIELD_LOCKED. Atomic-all-or-nothing semantics for
+      identity PATCHes would be overly restrictive since mutable fields
+      should not be held hostage by immutable ones.
+    spec_impact: "CL-10 PATCH — partial success for batch identity edits; per-field result enumeration"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      IDENTITY.md sync with Azure Entra: if an admin changes the agent's
+      email in Azure AD, IDENTITY.md must be updated to reflect the change.
+      But this update path is external to claws serve (it happens via Azure
+      provisioning, not via PATCH). If IDENTITY.md becomes stale (email
+      changed in Entra but not in IDENTITY.md), the governance-locked email
+      field shows the old value. The startup health check should compare
+      IDENTITY.md against the Entra source and flag staleness.
+    spec_impact: "CL-10 startup — compare IDENTITY.md against Entra source; flag stale immutable fields in health check"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The lock.source field in the chunk response must distinguish between
+      governance locks (from GovernanceIR, applied to identity fields),
+      fleet locks (from fleet policy, applied to tool configs), and user
+      locks (from USER.md pre_authorizations). Using a generic "locked"
+      without specifying the source makes it impossible for the partner UI
+      to explain to the user WHO locked the field and HOW to unlock it.
+      Each lock must include source, authority, and unlockPath.
+    spec_impact: "CL-10 chunk locks — include source, authority, and unlockPath in every lock object"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Rate limiting on identity PATCHes: an attacker could probe for valid
+      entra_id values by sending rapid PATCH requests with different GUIDs.
+      Each is rejected, but the rejection confirms the field exists and is
+      locked. Rate limiting on identity field PATCHes (e.g., 5 per minute
+      per field) prevents brute-force probing. The rate limit should be
+      per-field, not per-endpoint, since legitimate name changes should
+      not be throttled by failed entra_id attempts.
+    spec_impact: "CL-10 identity — per-field rate limiting on PATCH; prevent brute-force probing of locked fields"
+    pitfall: null

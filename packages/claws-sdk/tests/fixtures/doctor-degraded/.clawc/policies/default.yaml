@@ -1,0 +1,5 @@
+version: "0.9.0"
+rules:
+  - id: stale-policy
+    tier: R2
+    action: warn

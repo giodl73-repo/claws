@@ -1,0 +1,242 @@
+name: S32-stale-preauthorization-cascade
+series: cap-integration
+version: 1
+specs: [CL-10, CL-12]
+description: >
+  Validates that when a fleet policy changes — reclassifying previously
+  auto-approved R3 tools to require explicit approval — the compiler detects
+  stale pre_authorizations in USER.md during recompilation. Chunks show
+  affected tools with lock.source: 'fleet' overriding the user's stale
+  pre_authorization. Governance warnings enumerate all invalidated
+  pre_authorizations. The admin must re-approve or the tools remain gated.
+
+expect:
+  fleet_policy_change:
+    trigger: "Fleet policy update: web-search reclassified from R3-auto to R3-gated"
+    recompilation: true
+    detection:
+      stale_preauthorizations_found: true
+      count: 3
+  chunks_after_recompile:
+    endpoint: "GET /api/chunks/connections"
+    tools:
+      web-search:
+        preAuthorization: "stale"
+        lock:
+          source: "fleet"
+          overrides: "user"
+        approvalRequired: true
+      calendar-read:
+        preAuthorization: "valid"
+        lock: null
+        approvalRequired: false
+  governance_warnings:
+    endpoint: "GET /api/governance"
+    warnings:
+      - type: "STALE_PREAUTHORIZATION"
+        tools: ["web-search", "file-upload", "database-query"]
+        reason: "Fleet policy reclassified these tools; user pre_authorization no longer valid"
+        resolution: "Admin must re-approve via fleet console or user must re-authorize"
+  admin_reapproval:
+    method: PATCH
+    path: /api/trust/reauthorize
+    body: "{ tools: ['web-search'], approvalToken: '<signed-jwt>' }"
+    status: 200
+    result:
+      web-search:
+        preAuthorization: "valid"
+        lock: null
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A fleet administrator changes the organization's tool policy: web-search,
+  file-upload, and database-query were previously classified R3-auto (no
+  approval needed) and the user had pre_authorizations for them in USER.md.
+  The fleet policy update reclassifies these tools to R3-gated (approval
+  required). On recompilation, the compiler detects that the pre_authorizations
+  in USER.md were granted under the old policy and are now stale. The chunks
+  must show the fleet lock overriding the user's pre_authorization. The
+  governance endpoint must list all stale pre_authorizations. The scenario
+  covers: pre_authorization for tools that no longer exist, tools that
+  jumped from R3 to R5 (double invalidation), bulk invalidation performance,
+  the difference between user-level and fleet-level pre_authorizations,
+  re-approval flows, time-limited approvals, and approvals granted by
+  managers who have since lost authorization.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Pre_authorization for a tool that no longer exists in TOOLS.md: the
+      user pre-authorized 'legacy-search' which was later removed from the
+      workspace. The pre_authorization entry persists in USER.md as an
+      orphan. On recompilation, the compiler must detect orphaned
+      pre_authorizations (tool referenced in USER.md but absent from
+      TOOLS.md) and emit a PREAUTH_ORPHANED warning. The orphan must not
+      be silently ignored — it indicates USER.md drift from the tool
+      inventory.
+    spec_impact: "CL-10 recompilation — detect orphaned pre_authorizations; emit PREAUTH_ORPHANED warning"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Double invalidation: a tool was R3-auto (pre-authorized by user),
+      then fleet policy reclassifies it to R5 (non-negotiable approval).
+      The pre_authorization is stale AND the tool is now R5, meaning the
+      admin re-approval path is also blocked — R5 tools cannot be
+      pre-authorized at all. The governance warning must distinguish
+      between "stale R3 pre-auth (re-approvable)" and "stale pre-auth
+      now R5 (permanently gated)." The resolution path differs: R3 can
+      be re-approved, R5 cannot.
+    spec_impact: "CL-10 stale pre-auth — distinguish R3-gated (re-approvable) from R5 (permanently gated) in warnings"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Bulk pre_authorization invalidation performance: if a fleet policy
+      change affects 50 tools simultaneously (e.g., a blanket R3-auto to
+      R3-gated migration), the recompilation must process all 50
+      invalidations in a single pass without degrading compilation time
+      beyond the 500ms budget. If each invalidation triggers a separate
+      USER.md read-compare-write cycle, the O(n) file I/O dominates. The
+      invalidation must be batched: read USER.md once, compute all stale
+      entries, emit all warnings in one pass.
+    spec_impact: "CL-10 recompilation — batch stale pre-auth detection in single USER.md pass; O(1) file reads"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Pre_authorization in USER.md vs fleet-level pre_authorization: the
+      fleet policy may define org-wide pre_authorizations that apply to all
+      agents. A user-level pre_authorization in USER.md should be overridden
+      by a fleet-level denial, but a fleet-level pre_authorization should
+      not be overridden by a user-level denial. The precedence must be:
+      fleet deny > user allow > fleet allow > user deny. If the precedence
+      is not enforced, a user can pre-authorize a tool that the fleet
+      explicitly gated.
+    spec_impact: "CL-10 pre-auth precedence — fleet deny > user allow > fleet allow > user deny"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      User re-approves after fleet change: the user opens CAP settings and
+      re-authorizes web-search under the new R3-gated policy. The
+      re-authorization requires a fresh approval (not just re-enabling the
+      old pre_authorization). The new pre_authorization must include a
+      policyVersion field that ties it to the current fleet policy version.
+      If the fleet policy changes again, pre_authorizations without a
+      matching policyVersion are automatically stale.
+    spec_impact: "CL-10 pre-auth — include policyVersion in new pre_authorizations; stale if version mismatch"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Pre_authorization expiry: some pre_authorizations may be time-limited
+      (e.g., "approved for 30 days"). On recompilation, the compiler must
+      check the expiresAt timestamp. An expired pre_authorization is stale
+      regardless of fleet policy changes. The expiry check must use the
+      compilation timestamp, not the current wall clock, to ensure
+      deterministic compilation results. The governance warning must
+      distinguish between policy-stale and time-expired pre_authorizations.
+    spec_impact: "CL-10 pre-auth — check expiresAt against compilation timestamp; distinguish policy-stale vs time-expired"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Pre_authorization granted by a manager who is no longer authorized:
+      the pre_authorization in USER.md was approved by manager@contoso.com,
+      but that manager has since been demoted, left the org, or had their
+      approval privileges revoked. The pre_authorization was valid at
+      creation time, but the approver's current status is questionable.
+      For v1, past approvals are immutable (valid at the time), but the
+      compiler should flag stale-approver pre_authorizations as a
+      governance note for compliance review.
+    spec_impact: "CL-10 pre-auth — flag pre_authorizations from deauthorized approvers as governance note"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The chunk lock.source field must accurately reflect the override
+      chain. When a fleet policy overrides a user pre_authorization, the
+      lock should show: lock.source: 'fleet', lock.overrides: 'user',
+      lock.originalPreAuth: { grantedBy, grantedAt, policyVersion }.
+      This gives the partner UI enough context to explain to the user
+      why their pre-authorization is no longer valid and who invalidated
+      it.
+    spec_impact: "CL-10 chunk locks — include override chain with original pre-auth context in fleet locks"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      SSE notification for stale pre_authorizations: when recompilation
+      detects stale pre_authorizations, an SSE event (governance:preauth-stale)
+      must be emitted so connected CAP partners can refresh their tool
+      panels. Without the SSE event, a partner that was connected before
+      the fleet policy change shows stale (valid-looking) pre_authorizations
+      until the user manually refreshes the page.
+    spec_impact: "CL-10 SSE — emit governance:preauth-stale event on recompilation with list of affected tools"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Race condition: fleet policy change arrives while a tool call is
+      in progress using the old pre_authorization. The tool call was
+      dispatched under the old policy (pre-auth valid), but recompilation
+      happens mid-execution. The tool call should complete (it was
+      authorized at dispatch time), but subsequent calls must use the
+      new policy. The pre_authorization staleness takes effect at the
+      next compilation boundary, not retroactively on in-flight calls.
+    spec_impact: "CL-10 pre-auth invalidation — takes effect at next compilation boundary; in-flight calls complete"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      Fleet policy rollback: the admin reverts the fleet policy change
+      (R3-gated back to R3-auto). The stale pre_authorizations in USER.md
+      are now technically valid again, but they were flagged as stale. The
+      compiler must re-evaluate on the next recompilation and remove the
+      stale flag. However, if the pre_authorization policyVersion was set
+      to the old policy (before the gated change), it now matches again.
+      The version check must handle policy rollbacks without leaving
+      permanent stale flags.
+    spec_impact: "CL-10 pre-auth — policy rollback removes stale flag if policyVersion matches restored policy"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Audit trail for pre_authorization lifecycle: every pre_authorization
+      event must be recorded — grant, invalidation (with reason: policy
+      change, expiry, or orphan), re-approval, and rollback restoration.
+      The audit entry must include the fleet policy version that triggered
+      the invalidation, the tool affected, and the approver identity (for
+      grants and re-approvals). Without this, compliance reviewers cannot
+      reconstruct the pre_authorization history for a given tool.
+    spec_impact: "CL-10 audit — log full pre-auth lifecycle: grant, invalidate, re-approve, restore with policy version"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      Governance dashboard aggregation: the GET /api/governance response
+      should include a summary count of stale pre_authorizations (e.g.,
+      stalePreAuthorizations: 3) alongside the detailed list. This allows
+      the partner UI to display a badge or notification count without
+      parsing the full tool list. The count must be consistent with the
+      detailed list (no off-by-one from caching or race conditions).
+    spec_impact: "CL-10 GET /api/governance — include stalePreAuthorizations count alongside detailed list"
+    pitfall: null

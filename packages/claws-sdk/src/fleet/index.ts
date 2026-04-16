@@ -73,6 +73,7 @@ export type {
 export type {
   TrustCompatResult,
   FleetTrustCompatResult,
+  PublishRestriction,
 } from './trust-compat.js';
 export type {
   ComplianceStatus,

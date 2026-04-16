@@ -1,0 +1,122 @@
+name: S05-allow-all-r5-exclusion
+series: cap-integration
+version: 1
+specs: [CL-10, CL-12]
+description: >
+  Validates that PATCH /api/chunks/connections/allow-all approves all R1-R4
+  tools in a single request but explicitly excludes R5 tools. The 'allow all'
+  action is a convenience for users who want to enable everything safe, but
+  R5 tools must never be bulk-enabled because they represent irreversible
+  external actions. The response must enumerate which tools were approved,
+  which remain gated (R5), and provide an audit trail entry for the blanket
+  approval.
+
+expect:
+  http:
+    method: PATCH
+    path: /api/chunks/connections/allow-all
+    status: 200
+    content_type: application/json
+  response_shape:
+    root_has: [approved, still_gated, audit]
+    approved_is_array: true
+    approved_items_have: [toolId, previousApproval, newApproval]
+    approved_newApproval_value: enabled
+    still_gated_is_array: true
+    still_gated_contains: send-email
+    still_gated_items_have: [toolId, reason, risk_level]
+    still_gated_reason_value: R5_NON_NEGOTIABLE
+    audit_has: [timestamp, action, approvedCount, gatedCount]
+  post_condition:
+    r5_tools_approval_unchanged: true
+    r1_r4_tools_enabled: true
+    audit_entry_logged: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A user opens the CAP Connections tab and clicks 'Allow All' to quickly
+  enable all tools. The workspace has 8 tools: 6 classified R1-R4 and 2
+  classified R5 (send-email, execute-payment). The PATCH /api/chunks/
+  connections/allow-all endpoint must enable the 6 R1-R4 tools, leave the
+  2 R5 tools in their current gated state, and return a response that
+  clearly separates approved tools from still-gated tools. The partner UI
+  uses still_gated to show a warning: '2 tools require individual review'.
+  The audit trail records the blanket approval with counts.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If all tools in the workspace are R5-classified, the allow-all
+      endpoint approves zero tools and returns an empty approved array.
+      The partner may interpret this as an error or a no-op. The response
+      must include a clear signal when nothing was approved — either a
+      specific status code (e.g., 200 with approved: [] and a message)
+      or a distinct response shape. The audit trail must still log the
+      attempt.
+    spec_impact: "CL-10 PATCH allow-all — define response when all tools are R5 (approved: [], audit still logged)"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Fleet-locked tools may have their approval field locked regardless
+      of risk level. An R2 tool with fleet lock.source: 'fleet' on the
+      approval field should not be enabled by allow-all. The endpoint must
+      check both R5 exclusion AND fleet locks. Fleet-locked tools should
+      appear in still_gated with reason: 'FLEET_LOCK_VIOLATION', not in
+      approved. The still_gated array needs to support multiple reason
+      types, not just R5_NON_NEGOTIABLE.
+    spec_impact: "CL-10 PATCH allow-all — exclude fleet-locked tools from blanket approval; still_gated supports multiple reasons"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The audit trail for allow-all must record which tools were individually
+      approved, not just a count. If a security review later asks 'who
+      approved tool X?', the audit entry must trace back to the allow-all
+      action with the specific tool list. A count-only audit (approvedCount: 6)
+      is insufficient for forensic analysis.
+    spec_impact: "CL-10 audit trail — allow-all audit entry must include individual toolId list, not just counts"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The allow-all action triggers file writes for each approved tool
+      followed by a recompilation. If the workspace has 20+ R1-R4 tools,
+      the endpoint must batch all writes into a single atomic operation
+      and trigger one recompilation, not 20 sequential write-compile
+      cycles. Without batching, the response latency would exceed the
+      50ms target by orders of magnitude.
+    spec_impact: "CL-10 PATCH allow-all — batch writes + single recompilation for performance; atomic rollback on failure"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      If an R1-R4 tool was already enabled before allow-all, it should
+      appear in the approved array with previousApproval: 'enabled' and
+      newApproval: 'enabled' (no-op). Alternatively, it could be omitted
+      from approved (only changed tools listed). The contract must be
+      explicit. Including no-ops makes the response predictable; excluding
+      them makes the approved count match actual changes. The audit trail
+      should distinguish actual changes from no-ops.
+    spec_impact: "CL-10 PATCH allow-all — define whether already-enabled tools appear in approved array"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The allow-all endpoint is a powerful action that could be abused by
+      a compromised partner or malicious script. Rate limiting or requiring
+      a confirmation token (e.g., X-Confirm: allow-all) would add a layer
+      of protection. Without it, any client with API access can bulk-enable
+      tools with a single unauthenticated request.
+    spec_impact: "CL-10 PATCH allow-all — consider rate limiting or confirmation token for bulk approval"
+    pitfall: null

@@ -36,6 +36,20 @@ import {
   runCacheImport,
   runCacheClear,
 } from './commands/cache.js';
+import {
+  runProtectBudget,
+  runProtectBudgetFleet,
+  runSecretsInit,
+  runSecretsSet,
+  runSecretsGet,
+  runSecretsList,
+  runSecretsDelete,
+  runIdentityConfigure,
+  runIdentityShow,
+} from './commands/protect.js';
+import { runComplySOC2, runComplyHIPAA } from './commands/comply.js';
+import { runComplyEUAIAct } from './commands/comply-eu-ai-act.js';
+import { runServe } from './commands/serve.js';
 import type { SkillTemplateTier } from '@bic/claws-sdk/scaffold';
 import {
   formatError,
@@ -222,6 +236,24 @@ export function createProgram(): Command {
         color: opts.color,
         ...(cmdOpts.llm ? { llm: true } : {}),
         ...(llmProvider !== undefined ? { llmProvider } : {}),
+      });
+      process.exitCode = exitCode;
+    });
+
+  // ── serve ───────────────────────────────────────────────────────────
+  program
+    .command('serve')
+    .description('Start the governance HTTP/WebSocket server')
+    .option('--port <port>', 'Server port (default: 3939, or CLAWS_PORT env)', parseInt)
+    .option('--host <host>', 'Bind address (default: 127.0.0.1)')
+    .option('--no-ws', 'Disable WebSocket endpoint')
+    .action(async (cmdOpts: { port?: number; host?: string; ws: boolean }) => {
+      const opts = program.opts<GlobalOpts>();
+      const exitCode = await runServe({
+        port: cmdOpts.port,
+        host: cmdOpts.host,
+        noWs: !cmdOpts.ws,
+        json: opts.json,
       });
       process.exitCode = exitCode;
     });
@@ -497,6 +529,199 @@ export function createProgram(): Command {
       process.exitCode = exitCode;
     });
 
+  // ── protect ─────────────────────────────────────────────────────────
+  const protect = program
+    .command('protect')
+    .description('Security and budget management');
+
+  protect
+    .command('budget')
+    .description('Show workspace budget usage and threshold alerts')
+    .option('--period <period>', 'Reporting period (daily, weekly, monthly)', 'monthly')
+    .option('--fleet', 'Aggregate budget across all fleet workspaces')
+    .action(async (cmdOpts: { period?: string; fleet?: boolean }) => {
+      const opts = program.opts<GlobalOpts>();
+      const workspaceRoot = process.cwd();
+
+      if (cmdOpts.fleet) {
+        const exitCode = await runProtectBudgetFleet(workspaceRoot, {
+          json: opts.json,
+        });
+        process.exitCode = exitCode;
+        return;
+      }
+
+      const exitCode = await runProtectBudget(workspaceRoot, {
+        json: opts.json,
+        ...(cmdOpts.period !== undefined ? { period: cmdOpts.period } : {}),
+      });
+      process.exitCode = exitCode;
+    });
+
+  // ── protect secrets ─────────────────────────────────────────────────
+  const secrets = protect
+    .command('secrets')
+    .description('Encrypted secrets vault');
+
+  secrets
+    .command('init')
+    .description('Initialize a new encrypted vault')
+    .action(async () => {
+      const opts = program.opts<GlobalOpts>();
+      const workspaceRoot = process.cwd();
+      const exitCode = await runSecretsInit(workspaceRoot, {
+        json: opts.json,
+      });
+      process.exitCode = exitCode;
+    });
+
+  secrets
+    .command('set <key> <value>')
+    .description('Store an encrypted secret')
+    .action(async (key: string, value: string) => {
+      const opts = program.opts<GlobalOpts>();
+      const workspaceRoot = process.cwd();
+      const exitCode = await runSecretsSet(workspaceRoot, key, value, {
+        json: opts.json,
+      });
+      process.exitCode = exitCode;
+    });
+
+  secrets
+    .command('get <key>')
+    .description('Retrieve and decrypt a secret')
+    .action(async (key: string) => {
+      const opts = program.opts<GlobalOpts>();
+      const workspaceRoot = process.cwd();
+      const exitCode = await runSecretsGet(workspaceRoot, key, {
+        json: opts.json,
+      });
+      process.exitCode = exitCode;
+    });
+
+  secrets
+    .command('list')
+    .description('List stored secret keys')
+    .action(async () => {
+      const opts = program.opts<GlobalOpts>();
+      const workspaceRoot = process.cwd();
+      const exitCode = await runSecretsList(workspaceRoot, {
+        json: opts.json,
+      });
+      process.exitCode = exitCode;
+    });
+
+  secrets
+    .command('delete <key>')
+    .description('Delete a secret')
+    .action(async (key: string) => {
+      const opts = program.opts<GlobalOpts>();
+      const workspaceRoot = process.cwd();
+      const exitCode = await runSecretsDelete(workspaceRoot, key, {
+        json: opts.json,
+      });
+      process.exitCode = exitCode;
+    });
+
+  // ── protect identity ───────────────────────────────────────────────
+  const identity = protect
+    .command('identity')
+    .description('SSO/RBAC identity provider management');
+
+  identity
+    .command('configure')
+    .description('Register an OIDC or SAML identity provider')
+    .requiredOption('--provider <type>', 'Provider type (OIDC or SAML)')
+    .option('--issuer <url>', 'OIDC issuer URL')
+    .option('--client-id <id>', 'OIDC client ID')
+    .option('--redirect-uri <uri>', 'OIDC redirect URI')
+    .option('--scopes <scopes>', 'OIDC scopes (comma-separated)')
+    .option('--entity-id <id>', 'SAML entity ID')
+    .option('--sso-url <url>', 'SAML SSO URL')
+    .option('--certificate <cert>', 'SAML certificate (PEM)')
+    .option('--role-mapping <mapping>', 'Role-to-tier mapping (role1:tier1,role2:tier2)')
+    .action(async (cmdOpts: {
+      provider: string;
+      issuer?: string;
+      clientId?: string;
+      redirectUri?: string;
+      scopes?: string;
+      entityId?: string;
+      ssoUrl?: string;
+      certificate?: string;
+      roleMapping?: string;
+    }) => {
+      const opts = program.opts<GlobalOpts>();
+      const workspaceRoot = process.cwd();
+      const exitCode = await runIdentityConfigure(workspaceRoot, {
+        json: opts.json,
+        provider: cmdOpts.provider,
+        issuer: cmdOpts.issuer,
+        clientId: cmdOpts.clientId,
+        redirectUri: cmdOpts.redirectUri,
+        scopes: cmdOpts.scopes,
+        entityId: cmdOpts.entityId,
+        ssoUrl: cmdOpts.ssoUrl,
+        certificate: cmdOpts.certificate,
+        roleMapping: cmdOpts.roleMapping,
+      });
+      process.exitCode = exitCode;
+    });
+
+  identity
+    .command('show')
+    .description('Show current identity provider configuration')
+    .action(async () => {
+      const opts = program.opts<GlobalOpts>();
+      const workspaceRoot = process.cwd();
+      const exitCode = await runIdentityShow(workspaceRoot, {
+        json: opts.json,
+      });
+      process.exitCode = exitCode;
+    });
+
+  // ── comply ──────────────────────────────────────────────────────────
+  const comply = program
+    .command('comply')
+    .description('Compliance evidence generation (SOC2, HIPAA, EU AI Act)');
+
+  comply
+    .command('soc2')
+    .description('Generate SOC2 Type II compliance evidence')
+    .option('--observation-start <date>', 'Observation period start (ISO 8601)')
+    .option('--observation-end <date>', 'Observation period end (ISO 8601)')
+    .action(async (cmdOpts: { observationStart?: string; observationEnd?: string }) => {
+      const opts = program.opts<GlobalOpts>();
+      const workspaceRoot = process.cwd();
+      const complyOpts: { json: boolean; observationStart?: string; observationEnd?: string } = {
+        json: opts.json,
+      };
+      if (cmdOpts.observationStart !== undefined) complyOpts.observationStart = cmdOpts.observationStart;
+      if (cmdOpts.observationEnd !== undefined) complyOpts.observationEnd = cmdOpts.observationEnd;
+      const exitCode = await runComplySOC2(workspaceRoot, complyOpts);
+      process.exitCode = exitCode;
+    });
+
+  comply
+    .command('hipaa')
+    .description('Generate HIPAA Security Rule compliance evidence')
+    .action(async () => {
+      const opts = program.opts<GlobalOpts>();
+      const workspaceRoot = process.cwd();
+      const exitCode = await runComplyHIPAA(workspaceRoot, { json: opts.json });
+      process.exitCode = exitCode;
+    });
+
+  comply
+    .command('eu-ai-act')
+    .description('Generate EU AI Act assessment (Article 6/Annex III classification)')
+    .action(async () => {
+      const opts = program.opts<GlobalOpts>();
+      const workspaceRoot = process.cwd();
+      const exitCode = await runComplyEUAIAct(workspaceRoot, { json: opts.json });
+      process.exitCode = exitCode;
+    });
+
   // ── bare invocation ──────────────────────────────────────────────────
   // When no command is given, show workspace-aware status
   program.action(async () => {
@@ -508,7 +733,7 @@ export function createProgram(): Command {
         console.log(JSON.stringify({
           status: 'no-workspace',
           message: 'No claws.json found. Run `claws init` to get started.',
-          commands: ['init'],
+          commands: ['init', 'protect'],
         }));
       } else {
         console.log('claws — enterprise governance compiler\n');
@@ -517,6 +742,10 @@ export function createProgram(): Command {
         console.log('  claws init                     Create workspace + config');
         console.log('  claws init --template soc2     Start with SOC2 template');
         console.log('  claws init skill my-skill      Scaffold a new skill\n');
+        console.log('Security & budget:');
+        console.log('  claws protect budget           Show budget usage');
+        console.log('  claws protect secrets           Encrypted secrets vault');
+        console.log('  claws protect identity          SSO/RBAC management\n');
         console.log('Run `claws --help` for all commands.');
       }
     } else {
@@ -524,7 +753,7 @@ export function createProgram(): Command {
         console.log(JSON.stringify({
           status: 'workspace-detected',
           workspaceRoot: ctx.workspaceRoot,
-          commands: ['compile', 'check', 'build'],
+          commands: ['compile', 'check', 'build', 'protect'],
         }));
       } else {
         console.log('claws — enterprise governance compiler\n');
@@ -533,6 +762,8 @@ export function createProgram(): Command {
         console.log('  claws compile   Compile governance policies');
         console.log('  claws check     Check compliance (read-only)');
         console.log('  claws build     Compile + emit artifacts\n');
+        console.log('Security & budget:');
+        console.log('  claws protect   Budget, secrets, identity management\n');
         console.log('Run `claws --help` for all commands.');
       }
     }

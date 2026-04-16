@@ -81,8 +81,10 @@ export {
   extractWorkflowIntents,
 } from './intent/index.js';
 export type { AnyIntentResult } from './intent/index.js';
+// A-W1: AnthropicLLMProvider is NOT exported from barrel — only the LLMProvider
+// interface. Consumers should import AnthropicLLMProvider directly from
+// './llm/anthropic-provider.js' when they need the concrete implementation.
 export {
-  AnthropicLLMProvider,
   ExtractorLLM,
   LLMCache,
   hashContent as llmHashContent,

@@ -1,0 +1,125 @@
+name: S04-fleet-lock-enforcement
+series: cap-integration
+version: 1
+specs: [CL-10, CL-12]
+description: >
+  Validates that a PATCH request attempting to change a fleet-locked field is
+  rejected with FLEET_LOCK_VIOLATION. Fleet policies are centrally managed
+  configuration constraints pushed to individual claws by an organization's
+  fleet administrator. When a field is locked by fleet policy, no local edit
+  (via CAP, CLI, or direct file edit) should be able to override it. The
+  validation layer must detect the fleet lock and return a typed PatchError.
+
+expect:
+  http:
+    method: PATCH
+    path: /api/chunks/general
+    request_body:
+      field: name
+      value: "My Custom Agent"
+    status: 422
+    content_type: application/json
+  response_shape:
+    root_has: [status, error, message, field, lock, currentValue]
+    status_value: rejected
+    error_value: FLEET_LOCK_VIOLATION
+    message_contains: "locked by fleet policy"
+    field_value: name
+    lock_has: [source, policyId, policyVersion]
+    lock_source_value: fleet
+  post_condition:
+    field_value_unchanged: true
+    workspace_files_unchanged: true
+    fleet_policy_intact: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An organization's fleet policy locks the agent name field to 'Contoso Assistant'
+  across all managed claws. A user opens the CAP General tab and attempts to
+  rename the agent via PATCH /api/chunks/general with field: 'name',
+  value: 'My Custom Agent'. The write-time validation layer must detect that
+  the name field has lock.source: 'fleet' from the fleet policy, reject the
+  edit with FLEET_LOCK_VIOLATION, and return the fleet policy ID and version
+  so the partner can display 'Locked by fleet policy: contoso-standard-v3'.
+  The workspace IDENTITY.md must remain unchanged.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Fleet policies must be loaded and parsed before the validation layer
+      can enforce them. If the fleet policy file is missing, corrupted, or
+      in an incompatible format version, the validation layer has no lock
+      data. It must fail closed (reject all edits to potentially locked
+      fields) rather than fail open (allow edits when policy is unavailable).
+      The error code should be FLEET_POLICY_UNAVAILABLE, distinct from
+      FLEET_LOCK_VIOLATION.
+    spec_impact: "CL-10 write-time validation — fail closed when fleet policy is unavailable; use FLEET_POLICY_UNAVAILABLE error"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      When both fleet and R5 locks apply to the same field (e.g., a fleet
+      policy locks the approval field of an R5 tool), the validation layer
+      must enforce the higher-precedence lock. The lock source precedence
+      order is r5 > fleet > governance > none. If the fleet lock is removed
+      but R5 still applies, the field must remain locked. The response
+      should return the highest-precedence lock source, not the first one
+      found.
+    spec_impact: "CL-10 write-time validation — lock precedence: r5 > fleet > governance > none; return highest source"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Fleet policies may have an expiration timestamp or version that
+      becomes stale if the fleet management server is unreachable. The
+      validation layer must define behavior for stale policies: enforce
+      the last-known policy (safe but potentially outdated) or require
+      a fresh policy check before allowing edits (safe but blocks edits
+      during outages). A staleness threshold (e.g., 24 hours) should be
+      configurable.
+    spec_impact: "CL-10 fleet policy — define staleness threshold and behavior when fleet server is unreachable"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The fleet policy lock response includes policyId and policyVersion,
+      but the partner also needs a human-readable policy name and the
+      fleet admin's contact information so the user can request an
+      exception. Without this, the user sees 'Locked by contoso-standard-v3'
+      but has no recourse. The lock object should include policyName and
+      adminContact fields.
+    spec_impact: "CL-10 FLEET_LOCK_VIOLATION response — include policyName and adminContact for user recourse"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Fleet policies lock specific fields, but the granularity may not
+      align with the chunk API's field model. A fleet policy might lock
+      'tools.send-email.config.maxRecipients' (a nested tool config field)
+      while the chunk API exposes tools at the top level. The validation
+      layer must map fleet policy field paths to chunk field paths correctly.
+      A mismatch means fleet locks silently fail to enforce.
+    spec_impact: "CL-10 write-time validation — fleet policy field paths must map to chunk API field paths"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      When a fleet-locked field is displayed in the CAP partner's UI, it
+      should be visually distinct (greyed out, lock icon, tooltip). The
+      chunk read endpoint (GET) already returns lock metadata, but if the
+      partner only checks locks on PATCH rejection (reactive), the user
+      types a new value and only then sees the error. The GET response's
+      lock metadata must be sufficient for the partner to disable the
+      input control proactively.
+    spec_impact: "CL-10 GET /api/chunks/general — lock metadata must be complete enough for proactive UI disabling"
+    pitfall: null

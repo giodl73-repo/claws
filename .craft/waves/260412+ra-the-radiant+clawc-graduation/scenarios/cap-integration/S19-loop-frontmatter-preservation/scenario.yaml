@@ -1,0 +1,219 @@
+name: S19-loop-frontmatter-preservation
+series: cap-integration
+version: 1
+specs: [CL-10, CL-11]
+description: >
+  Validates that PATCH /api/loop/soul preserves YAML frontmatter and deny
+  rules byte-for-byte when only the instructions section is modified. The
+  SOUL.md file has a YAML frontmatter block (delimited by ---), deny rules
+  in a rules section, and free-form instructions. A Loop edit targeting
+  the instructions section must leave frontmatter and deny rules completely
+  untouched — no reordering, no whitespace normalization, no encoding changes.
+
+expect:
+  patch:
+    method: PATCH
+    path: /api/loop/soul
+    body: "{ section: 'instructions', content: 'Be helpful, concise, and proactive.' }"
+    status: 200
+  frontmatter:
+    byte_for_byte_preserved: true
+    delimiters_intact: true
+    no_reordering: true
+    no_whitespace_normalization: true
+  deny_rules:
+    intact_after_edit: true
+    detection_method: "GovernanceIR registry lookup, not regex"
+    compiler_injected_tagged: true
+    user_authored_tagged: true
+  section_isolation:
+    only_instructions_modified: true
+    other_sections_hash_unchanged: true
+  encoding:
+    utf8_bom_preserved_if_present: true
+    line_endings_preserved: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A Loop user edits their SOUL.md instructions via the CAP settings UI.
+  Their SOUL.md has: (1) YAML frontmatter between --- delimiters containing
+  agent metadata (name, version, model preferences), (2) a rules section
+  with deny rules like "Never share credentials" and "Do not access
+  production databases," (3) an instructions section with behavioral
+  guidance. The PATCH targets only the instructions section. The system
+  must: (a) parse SOUL.md into sections without mutating non-targeted
+  sections, (b) replace only the instructions section content, (c) write
+  back the file with frontmatter byte-for-byte identical to the original,
+  (d) preserve deny rules exactly (no accidental removal, reordering, or
+  rewording), (e) trigger recompilation which re-evaluates deny rules
+  (all still present) and emits no DENY_RULE_REMOVED warnings.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      YAML frontmatter parsing must handle multiple --- delimiters in the
+      file. The YAML spec uses --- as a document separator. If the
+      instructions section contains a line starting with --- (e.g., a
+      horizontal rule in markdown), a naive parser may treat it as a
+      frontmatter end delimiter, corrupting the section boundaries. The
+      parser must only treat the first --- (line 1) and the next --- as
+      frontmatter delimiters, consistent with the Jekyll/Hugo convention.
+    spec_impact: "CL-10 SOUL.md parser — frontmatter is first-two-dashes-only; subsequent --- are body content"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The workspace-edit module must write the file using a read-modify-write
+      cycle that preserves original bytes for untouched regions. If the
+      module parses the file into a data structure (AST) and serializes it
+      back, the serializer may normalize whitespace, reorder YAML keys, or
+      change quote styles in the frontmatter. The correct approach is byte-
+      range replacement: identify the byte offset of the instructions section,
+      splice in the new content, and write the result — leaving all other
+      bytes untouched.
+    spec_impact: "CL-10 workspace-edit — byte-range splice for section edits; no full-file re-serialization"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Deny rule detection for the post-edit validation must use the
+      GovernanceIR registry, not regex pattern matching on the raw text.
+      The GovernanceIR maps each deny rule to a text span (file, line range).
+      After the edit, the validator checks whether any GovernanceIR deny-rule
+      spans fall within the modified byte range. If a span was in the
+      instructions section and the new content doesn't contain it, a
+      DENY_RULE_REMOVED warning fires. If all deny rules are in the
+      untouched rules section, no warning fires.
+    spec_impact: "CL-10 deny-rule validation — span-based detection from GovernanceIR, scoped to edited section"
+    pitfall: P-276
+
+  - id: F04
+    severity: major
+    description: >
+      Compiler-injected deny rules (from R5 policy) and user-authored deny
+      rules must be tagged with provenance in the GovernanceIR. Without
+      tagging, the validation layer cannot distinguish: (a) a user removing
+      their own deny rule (allowed, with warning) from (b) a user removing
+      an R5-injected deny rule (rejected). The GovernanceIR DenyRule type
+      must include source: 'compiler' | 'user' | 'fleet', populated during
+      compilation from the R5 policy overlay.
+    spec_impact: "CL-11 GovernanceIR DenyRule — source provenance field required for validation decisions"
+    pitfall: P-277
+
+  - id: F05
+    severity: major
+    description: >
+      If the frontmatter contains non-ASCII characters (Unicode agent names,
+      emoji in metadata, CJK descriptions), the byte-range splice must handle
+      multi-byte UTF-8 sequences correctly. A naive character-offset splice
+      on a UTF-8 file corrupts multi-byte characters at boundary points.
+      The splice must operate on byte offsets, not character offsets, and
+      the section boundary detection must be byte-aware.
+    spec_impact: "CL-10 workspace-edit — byte-offset splice, not character-offset; UTF-8 safe"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Line ending preservation is critical on Windows. If the original
+      SOUL.md uses CRLF line endings and the PATCH payload uses LF, the
+      workspace-edit module must normalize the incoming content to match
+      the file's existing line ending style. Otherwise, the file ends up
+      with mixed line endings (CRLF in frontmatter, LF in instructions),
+      which confuses git diff, some YAML parsers, and the hash-based stale
+      detection mechanism.
+    spec_impact: "CL-10 workspace-edit — normalize incoming content line endings to match existing file style"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      If the SOUL.md has a UTF-8 BOM (byte order mark, 0xEF 0xBB 0xBF at
+      file start), the byte-range splice must preserve it. Some Windows
+      editors add BOMs; stripping it changes the file hash and may break
+      downstream tools that expect it. The BOM is not part of the frontmatter
+      content — it precedes the first --- delimiter and must be treated as
+      a file-level invariant.
+    spec_impact: "CL-10 workspace-edit — preserve UTF-8 BOM if present; treat as file-level prefix"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Section reordering after edit must be prohibited. If the original
+      file has sections ordered [frontmatter, rules, instructions, preferences]
+      and the workspace-edit module writes them back as [frontmatter,
+      instructions, rules, preferences], the deny rules moved position.
+      While the content is identical, line numbers in the GovernanceIR spans
+      are now wrong, causing false DENY_RULE_REMOVED warnings on the next
+      PATCH. Section order must be an invariant of the write operation.
+    spec_impact: "CL-10 workspace-edit — preserve original section ordering; no reordering during write"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The post-edit recompilation must update GovernanceIR spans to reflect
+      the new byte offsets. If the instructions section grew by 50 bytes,
+      all deny-rule spans after it shift by 50 bytes. If the recompiler
+      does not recalculate spans, subsequent edits that check deny-rule
+      spans against file content will be off by 50 bytes, producing false
+      positives or missed removals.
+    spec_impact: "CL-10 incremental recompilation — recalculate all GovernanceIR spans after section edit"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Empty frontmatter (--- followed immediately by ---) is valid YAML
+      and must be preserved. The parser must not strip empty frontmatter
+      blocks, as their presence may be semantically meaningful (indicating
+      that frontmatter was intentionally cleared, not that it never existed).
+      The workspace-edit module must distinguish "no frontmatter" (no ---
+      at line 1) from "empty frontmatter" (--- / ---) and preserve both
+      states across edits.
+    spec_impact: "CL-10 SOUL.md parser — distinguish absent frontmatter from empty frontmatter"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Frontmatter may contain YAML anchors and aliases (&anchor / *alias).
+      While uncommon in SOUL.md, the byte-range splice approach handles
+      this naturally (anchors are preserved as bytes). A parse-and-serialize
+      approach would break anchors if the serializer doesn't support them.
+      This is another reason to prefer byte-range splicing over AST
+      round-tripping.
+    spec_impact: "CL-10 workspace-edit — byte-range splice naturally handles YAML anchors; document this advantage"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The hash verification after write must cover the entire file, not
+      just the modified section. The post-write hash is compared against
+      the expected hash (pre-write hash with the known section splice
+      applied). If they don't match, an unexpected mutation occurred
+      (e.g., filesystem encoding conversion, line ending normalization by
+      the OS). The write must be rolled back and reported as
+      UNEXPECTED_MUTATION.
+    spec_impact: "CL-10 workspace-edit — full-file hash verification after write; rollback on unexpected mutation"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      If the instructions section itself contains YAML-like content (e.g.,
+      a code block with key: value pairs), the section boundary parser
+      must not be confused. Section boundaries should be detected by
+      markdown heading markers (## Section Name) or by the GovernanceIR
+      section registry, not by YAML structural elements within the body.
+    spec_impact: "CL-10 section parser — boundary detection via markdown headings or GovernanceIR, not YAML structure"
+    pitfall: null

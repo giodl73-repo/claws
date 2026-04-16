@@ -3,8 +3,8 @@ slug: claws-aether-integration
 preset: "claws"
 plan: "3 headlines: claws build emits host-approval-policies.json consistent with Gateway plugin, blob rehydration verifies governance artifact signatures, GuardrailProvider composes with Aether approval gate"
 area: claws
-status: Draft
-phase: ra
+status: Implemented
+phase: thoth
 atoms: [atom:cicd-pipeline, atom:governance-ir, atom:claws-publish, atom:upstream-contrib]
 specs: [CL-04, CL-07, CL-03]
 ---
@@ -26,9 +26,9 @@ specs: [CL-04, CL-07, CL-03]
    - Validation: Missing signature (pre-signing era) → container starts with WARNING, not failure (backward compatible)
 
 3. **H3: GuardrailProvider spec documents composition with host-level approval gates** — The GuardrailProvider interface (Thoth Pulse 49) defines `preAuthorize()` → `AuthorizationDecision`. Aether's `ApprovalPolicyRegistry` is a separate enforcement point at the orchestrator level. These two systems currently compose accidentally (they don't conflict). This plan makes the composition intentional by documenting the layering in the GuardrailProvider spec and adding a `requiresExternalApproval` field to `AuthorizationDecision` that signals the host (Aether) to gate the tool call even if the provider allows it. This bridges claws's risk classification with Aether's credential-gated approval UX. The `requiresExternalApproval` field maps to all 4 AuthorizationDecision states: `allow` → explicit (provider sets the field), `deny` → N/A (tool blocked, host gate never reached), `review` → implicitly `true` (review decisions always require external confirmation), `modify` → host sees the modified tool call with `requiresExternalApproval` as set by the provider.
-   - Validation: GuardrailProvider returns `{ allowed: true, requiresExternalApproval: true }` → Aether fires SSE approval dialog
-   - Validation: GuardrailProvider returns `{ allowed: false }` → tool blocked without reaching Aether (deny state — `requiresExternalApproval` N/A)
-   - Validation: GuardrailProvider returns `{ allowed: true, requiresExternalApproval: false }` → tool executes without approval dialog (R1-R2 tools)
+   - Validation: GuardrailProvider returns `{ decision: 'allow', requiresExternalApproval: true }` → Aether fires SSE approval dialog
+   - Validation: GuardrailProvider returns `{ decision: 'deny' }` → tool blocked without reaching Aether (deny state — `requiresExternalApproval` N/A)
+   - Validation: GuardrailProvider returns `{ decision: 'allow', requiresExternalApproval: false }` → tool executes without approval dialog (R1-R2 tools)
    - Validation: GuardrailProvider returns `{ decision: "review" }` → implicitly `requiresExternalApproval: true` → Aether fires SSE approval dialog
 
 ## Summary
@@ -105,7 +105,7 @@ No manual `claws deploy` command is needed. The existing blob sync infrastructur
 ```json
 {
   "schemaVersion": 1,
-  "compilerVersion": "0.36.0",
+  "generatorVersion": "0.36.0",
   "policies": [
     {
       "server": "outlook",

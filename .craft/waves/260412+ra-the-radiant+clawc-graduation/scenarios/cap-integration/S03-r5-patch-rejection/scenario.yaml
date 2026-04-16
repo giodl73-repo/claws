@@ -1,0 +1,119 @@
+name: S03-r5-patch-rejection
+series: cap-integration
+version: 1
+specs: [CL-10, CL-12]
+description: >
+  Validates that a PATCH request attempting to disable or modify an R5-classified
+  tool's approval status is rejected with a typed PatchError. R5 tools represent
+  irreversible external actions (e.g., send-email) and are non-negotiable in
+  the governance model. The write-time validation layer must intercept the edit
+  before any file write occurs, return a structured error response, and leave
+  the workspace files completely unchanged.
+
+expect:
+  http:
+    method: PATCH
+    path: /api/chunks/connections
+    request_body:
+      toolId: send-email
+      field: approval
+      value: disabled
+    status: 422
+    content_type: application/json
+  response_shape:
+    root_has: [status, error, message, toolId, field, currentValue]
+    status_value: rejected
+    error_value: R5_NON_NEGOTIABLE
+    message_contains: "R5-classified tools cannot be disabled"
+    toolId_value: send-email
+    field_value: approval
+    currentValue_value: enabled
+  post_condition:
+    tool_approval_unchanged: true
+    workspace_files_unchanged: true
+    audit_entry_logged: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner sends PATCH /api/chunks/connections with a request body
+  to disable the send-email tool (R5-classified). The write-time validation layer
+  must detect that send-email has risk.level: R5, reject the edit with error code
+  R5_NON_NEGOTIABLE, and return a PatchError response with HTTP 422. The tool's
+  approval status must remain 'enabled' in the workspace. The response must
+  include enough context (toolId, field, currentValue) for the partner to show
+  a meaningful error to the user. No file writes, no recompilation, no side
+  effects.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If the toolId in the PATCH request refers to a tool that does not exist
+      in the workspace, the validation layer must distinguish between
+      'tool not found' (404-like) and 'R5 rejection' (422). Returning
+      R5_NON_NEGOTIABLE for a nonexistent tool is misleading. The validation
+      must first verify the tool exists, then check R5 classification. Error
+      precedence: TOOL_NOT_FOUND before R5_NON_NEGOTIABLE.
+    spec_impact: "CL-10 write-time validation — error precedence: existence check before R5 check"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      If the tool exists in TOOLS.md but GovernanceIR has no risk classification
+      for it (compilation is stale or incomplete), the validation layer cannot
+      determine if the tool is R5. Allowing the edit by default would bypass
+      R5 protection for unclassified tools. The validation must require a valid
+      GovernanceIR classification for any tool edit; missing classification
+      should trigger GOVERNANCE_STALE error, not a silent allow.
+    spec_impact: "CL-10 write-time validation — missing GovernanceIR classification blocks edits with GOVERNANCE_STALE error"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The error message 'R5-classified tools cannot be disabled' is
+      technically accurate but lacks actionable guidance. The partner UI
+      needs to explain to the user what R5 means and what they can do
+      (e.g., 'Contact your admin to request an exception'). The PatchError
+      should include a helpUrl or guidance field pointing to R5 documentation.
+    spec_impact: "CL-10 PatchError response — include helpUrl or guidance field for user-facing error context"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The PATCH endpoint accepts a generic toolId + field + value structure,
+      but R5 enforcement should apply to ALL fields on an R5 tool, not just
+      the 'approval' field. If a partner PATCHes the 'description' or
+      'config' field of an R5 tool, should that also be rejected? The R5
+      policy must define which fields are locked (approval only, or all
+      fields) and the validation layer must enforce accordingly.
+    spec_impact: "CL-10 R5 policy — define which fields on R5 tools are non-negotiable (approval only vs all fields)"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The audit entry for a rejected R5 edit must be logged even though no
+      file was changed. If the audit trail only records successful writes,
+      there is no forensic record of attempted R5 bypasses. The audit entry
+      should capture: timestamp, actor, toolId, attempted field, attempted
+      value, rejection reason, and the R5 classification source.
+    spec_impact: "CL-10 audit trail — log rejected R5 edits with full context for security forensics"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      If the partner sends a batch PATCH with multiple tool edits (some
+      R5, some not), the validation layer must decide between rejecting the
+      entire batch (atomic) or rejecting only the R5 edits (partial). Atomic
+      rejection is safer (no partial state) but less ergonomic. The batch
+      behavior must be documented in the API contract.
+    spec_impact: "CL-10 PATCH /api/chunks/connections — define batch edit semantics: atomic rejection vs partial"
+    pitfall: null

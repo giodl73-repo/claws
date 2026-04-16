@@ -1,0 +1,130 @@
+name: S07-patch-atomic-rollback
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that a PATCH which passes write-time validation but fails during
+  post-write compilation rolls back the file write atomically. The
+  validate-write-compile-respond pipeline must guarantee that a failed compile
+  leaves the workspace in exactly the state it was in before the PATCH. No
+  partial writes, no orphaned state, no corruption.
+
+expect:
+  http:
+    method: PATCH
+    path: /api/chunks/connections
+    request_body:
+      toolId: data-analysis
+      field: config
+      value: { maxTokens: -1 }
+    status: 422
+    content_type: application/json
+  response_shape:
+    root_has: [status, error, message, rollback]
+    status_value: rejected
+    error_value: COMPILATION_FAILED
+    message_contains: "compilation failed after write"
+    rollback_has: [performed, fileRestored, previousHash, currentHash]
+    rollback_performed: true
+    rollback_fileRestored: true
+    rollback_previousHash_equals_currentHash: true
+  post_condition:
+    workspace_file_matches_pre_patch: true
+    compilation_state_unchanged: true
+    no_orphaned_temp_files: true
+    audit_entry_logged: true
+
+simulate:
+  failures:
+    - stage: compilation
+      type: semantic_error
+      detail: "maxTokens must be positive integer"
+  halt: null
+  budget: null
+
+problem: >
+  A user PATCHes the data-analysis tool's config with maxTokens: -1. The
+  write-time validation layer checks field-level constraints (type, lock,
+  R5) and passes because maxTokens is a valid integer field with no lock.
+  The workspace-edit module writes the change to TOOLS.md. The subsequent
+  incremental recompilation detects a semantic error (negative maxTokens
+  violates a GovernanceIR constraint discovered only during compilation).
+  The compilation fails. The pipeline must now roll back the TOOLS.md write
+  to its pre-PATCH content, verify the rollback hash matches the original,
+  and return COMPILATION_FAILED with rollback confirmation. The workspace
+  must be byte-for-byte identical to its pre-PATCH state.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The rollback mechanism must preserve the original file content, not
+      just the original field value. If the workspace-edit module reformats
+      TOOLS.md during write (e.g., normalizing YAML whitespace), rolling
+      back the field value alone does not restore the original bytes. The
+      rollback must use a pre-write snapshot (full file content or temp
+      copy) to restore the exact original file, preserving the OC lossless
+      invariant.
+    spec_impact: "CL-10 workspace-edit — rollback uses pre-write file snapshot, not field-level undo"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      If the rollback itself fails (e.g., filesystem permission error,
+      disk full, or concurrent file access), the workspace is left in a
+      corrupted state: the invalid write is persisted but compilation
+      shows it as invalid. The pipeline must handle rollback failure as
+      a critical error, log it prominently, and return a distinct error
+      code (ROLLBACK_FAILED) so the partner and user know the workspace
+      needs manual recovery.
+    spec_impact: "CL-10 write-compile pipeline — ROLLBACK_FAILED error code when rollback itself fails; critical log entry"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      The audit trail for a rolled-back edit must record the full sequence:
+      validation passed, write performed, compilation failed, rollback
+      performed, final state verified. If the audit only records 'rejected',
+      there is no evidence that a write temporarily existed. This matters
+      for security forensics — a brief window where invalid config was on
+      disk could be exploited by a watcher process.
+    spec_impact: "CL-10 audit trail — log full rollback sequence: validate-pass, write, compile-fail, rollback, verify"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The workspace-edit module may create temporary files during the write
+      process (e.g., .tmp files for atomic rename). If the compilation
+      fails and rollback occurs, these temporary files must also be cleaned
+      up. Orphaned temp files accumulate over time, waste disk space, and
+      may confuse file watchers or version control.
+    spec_impact: "CL-10 workspace-edit — clean up all temporary files during rollback; no orphaned .tmp files"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The rollback.previousHash and rollback.currentHash fields in the
+      response allow the partner to verify the rollback succeeded
+      (hashes match). But if the partner does not check these fields,
+      a silent rollback failure could go unnoticed. The response should
+      include a top-level rollback.verified: true/false boolean that
+      the partner can check without comparing hashes.
+    spec_impact: "CL-10 PATCH rollback response — include rollback.verified boolean for simplified partner validation"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      Between the write and the rollback, the file watcher (used for SSE
+      events) may detect the temporary change and emit a file_changed
+      event. If the rollback then triggers another file_changed event,
+      the SSE subscriber sees two events for a net-zero change. The
+      write-compile-rollback pipeline should suppress file watcher
+      notifications until the operation completes, then emit a single
+      'no change' or no event at all.
+    spec_impact: "CL-10 write-compile pipeline — suppress file watcher during write-compile-rollback; no spurious SSE events"
+    pitfall: null

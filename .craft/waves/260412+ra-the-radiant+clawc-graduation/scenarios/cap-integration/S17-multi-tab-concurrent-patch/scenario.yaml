@@ -1,0 +1,204 @@
+name: S17-multi-tab-concurrent-patch
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that two PATCH requests from different CAP tabs arriving
+  simultaneously are serialized correctly, both edits are applied without
+  data loss, and the compilation pipeline coalesces into a single run.
+  Tab A patches TOOLS.md (renaming a tool) while Tab B patches SOUL.md
+  (editing instructions). Neither edit conflicts at the file level, but
+  the compilation pipeline must handle the concurrent writes safely.
+
+expect:
+  concurrent_patches:
+    patch_a:
+      method: PATCH
+      path: /api/chunks/connections
+      body: "{ toolId: 'web-search', field: 'name', value: 'internet-search' }"
+      status: 200
+    patch_b:
+      method: PATCH
+      path: /api/loop/soul
+      body: "{ section: 'instructions', content: 'Be concise and direct.' }"
+      status: 200
+  serialization:
+    mechanism: "FIFO work queue"
+    ordering: "arrival order preserved"
+    no_interleaving: true
+  compilation:
+    coalesced: true
+    runs_once_after_both_patches: true
+    per_phase_cache_consistent: true
+  data_integrity:
+    tools_md_contains_rename: true
+    soul_md_contains_edit: true
+    no_partial_writes: true
+  conflict_handling:
+    same_file_concurrent: "second PATCH receives 409 Conflict with retry hint"
+    different_file_concurrent: "both succeed, coalesced recompile"
+  timing:
+    total_ms_max: 500
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A user has two CAP settings tabs open. In Tab A they rename the web-search
+  tool to internet-search (PATCH /api/chunks/connections). In Tab B they edit
+  their SOUL.md instructions (PATCH /api/loop/soul). Both PATCHes arrive at
+  claws serve within 10ms of each other. The system must: (1) serialize the
+  writes via a FIFO work queue to prevent concurrent file mutations,
+  (2) apply both edits in arrival order, (3) coalesce the two triggered
+  recompilations into a single compilation run (since both complete before
+  the compile starts), (4) return success to both tabs with correct
+  post-edit state, (5) emit a single SSE compilation:complete event.
+  If both PATCHes target the same file, the second must receive a 409
+  Conflict with a Retry-After header.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The work queue must be a true FIFO with single-consumer semantics.
+      If the queue allows concurrent consumers (e.g., thread pool), two
+      PATCHes targeting different files could execute simultaneously,
+      but the compilation triggered by the first PATCH may read the
+      partially-written second file. Single-consumer ensures write A
+      completes (including file flush) before write B begins.
+    spec_impact: "CL-10 work queue — single-consumer FIFO; no concurrent consumers even for different files"
+    pitfall: P-273
+
+  - id: F02
+    severity: major
+    description: >
+      Compilation coalescing must track a dirty-file set. When PATCH A
+      completes, it marks TOOLS.md dirty. When PATCH B completes before
+      compilation starts, it marks SOUL.md dirty. The coalesced compilation
+      reads the dirty set {TOOLS.md, SOUL.md} and recompiles both in one
+      pass. If the dirty set is not tracked, the compilation may only
+      process the file from the last trigger, missing the first edit.
+    spec_impact: "CL-10 compilation queue — dirty-file set accumulation for coalesced recompiles"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      After coalesced compilation, the per-phase cache must reflect both
+      edits. If the cache key is per-file (TOOLS.md hash, SOUL.md hash),
+      both entries must be updated atomically. A crash between updating
+      the TOOLS.md cache entry and the SOUL.md cache entry leaves the
+      cache in a split-brain state. The cache update must be atomic
+      (write all entries then commit) or recoverable (invalidate on
+      inconsistency).
+    spec_impact: "CL-10 per-phase cache — atomic multi-file cache update after coalesced compilation"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      If both PATCHes target the same file (e.g., two edits to TOOLS.md
+      from different tabs), the second PATCH must not silently overwrite
+      the first. The work queue serializes them, but the second PATCH's
+      base state (the pre-edit TOOLS.md it was constructed against) is now
+      stale — the first PATCH already changed the file. The second PATCH
+      must receive a 409 Conflict response with the current file ETag so
+      the client can retry with a fresh base.
+    spec_impact: "CL-10 PATCH — ETag-based optimistic concurrency; 409 Conflict with current ETag on stale base"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The 409 Conflict response must include enough context for client-side
+      retry: the current ETag, the field that was changed by the preceding
+      PATCH, and a Retry-After header (suggesting 100-500ms). Without
+      retry guidance, the client may spin-retry immediately and flood the
+      queue, or give up entirely and lose the edit.
+    spec_impact: "CL-10 409 response — include currentETag, conflictingField, Retry-After header"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Response ordering must match request ordering. If PATCH A arrives
+      first and PATCH B arrives second, Tab A must receive its response
+      before Tab B receives its response. If the queue processes A then B
+      but B's response is sent first (e.g., due to async response
+      handling), Tab A may timeout waiting. The response must be sent
+      synchronously after each queue item completes, not batched.
+    spec_impact: "CL-10 work queue — synchronous response per item; no batched response delivery"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Deadlock prevention: if PATCH A holds a write lock on TOOLS.md and
+      triggers compilation which needs to read SOUL.md, and PATCH B holds
+      a write lock on SOUL.md, the system deadlocks. The single-consumer
+      FIFO design prevents this (only one PATCH executes at a time), but
+      if the design ever moves to file-level locking for performance, the
+      lock ordering must be defined (alphabetical by filename) to prevent
+      deadlock.
+    spec_impact: "CL-10 concurrency design — document lock ordering invariant for future file-level locking"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The SSE event after coalesced compilation must report all changed
+      files, not just the last one. If the event says "SOUL.md recompiled"
+      but omits "TOOLS.md recompiled," a CAP partner watching only the
+      connections chunk would miss the update. The compilation:complete
+      event payload must include the full dirty-file set that was compiled.
+    spec_impact: "CL-10 SSE compilation:complete — payload includes full list of recompiled files"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      If one PATCH fails validation and the other succeeds, the failed
+      PATCH must not prevent the successful one from compiling. The queue
+      processes items independently: PATCH A fails validation and returns
+      422, PATCH B succeeds and triggers compilation for SOUL.md only.
+      The dirty-file set must be maintained per-item, not globally —
+      a failed item does not add to the dirty set.
+    spec_impact: "CL-10 work queue — failed items do not contribute to dirty-file set"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Client-side state after concurrent edits: Tab A sent a rename and
+      received 200. Tab B sent an instruction edit and received 200. Both
+      tabs now have stale local state (they don't know about each other's
+      edit). The compilation:complete SSE event must trigger both tabs to
+      refresh their chunks. If Tab A is not subscribed to SSE (e.g.,
+      connection dropped), it must detect staleness on next GET via the
+      ETag or compilationStale flag.
+    spec_impact: "CL-10 client guidance — tabs must refresh chunks on compilation:complete SSE or detect staleness via ETag"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The work queue depth must be bounded. If a rogue client sends 1000
+      PATCHes in a burst, the queue should reject new entries beyond a
+      configurable limit (e.g., 50) with 429 Too Many Requests. Without
+      a bound, memory grows unbounded and latency for legitimate requests
+      degrades as they wait behind hundreds of queued items.
+    spec_impact: "CL-10 work queue — bounded depth (configurable, default 50); 429 when full"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The audit trail for coalesced compilation must record that multiple
+      PATCHes were coalesced into one compile, listing all contributing
+      request IDs. Without this, an audit reviewer sees one compilation
+      event but two PATCH events, and cannot connect why the compilation
+      processed two files when only one PATCH appears to have triggered it.
+    spec_impact: "CL-10 audit — coalesced compilation event lists all contributing PATCH request IDs"
+    pitfall: null

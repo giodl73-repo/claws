@@ -3,13 +3,15 @@ number: XCIII
 deity: ra
 epithet: the-radiant
 branch: feature/ra-the-radiant
-description: "claws graduation — standalone @claws/compiler (MIT) + @bic/claws-sdk enterprise extension"
+description: "claws graduation — standalone @claws/compiler (MIT) + @bic/claws-sdk enterprise extension + serve API for CAP/Lobster/Companion"
 status: planned
 dependsOn: [ptah, anubis, thoth]
 
 plans:
   - claws-sdk-graduation
   - craftworks-package-extraction
+  - claws-cap-integration
+  - claws-tui
 
 stageOrder:
   - kickoff
@@ -38,7 +40,7 @@ stages:
     notes: "20 pulses across 4 checkpoints, dependency-ordered, roles assigned"
   implementation:
     status: pending
-    notes: "20 pulses across 4 checkpoints (CP-1 through CP-4), ~10 weeks"
+    notes: "63 pulses across 10 checkpoints (CP-1 through CP-10), ~25 weeks"
   review:
     status: pending
   close:
@@ -60,4 +62,34 @@ checkpoints:
   cp-4:
     name: "Publish — Docs, Migration, npm"
     pulses: [19, 20]
+    status: pending
+  cp-5:
+    name: "Serve Read APIs — Chunks for CAP Settings"
+    plan: claws-cap-integration
+    pulses: [21, 22, 23, 24, 25, 26, 27, 28]
+    status: pending
+  cp-6:
+    name: "Serve Write APIs — Validation + PATCH"
+    plan: claws-cap-integration
+    pulses: [29, 30, 31, 32, 33, 34]
+    status: pending
+  cp-7:
+    name: "Lobster Collaboration — Loop, Calendar, Trust, Sessions"
+    plan: claws-cap-integration
+    pulses: [35, 36, 37, 38, 39, 60, 61, 63]
+    status: pending
+  cp-8:
+    name: "Companion + Onboarding"
+    plan: claws-cap-integration
+    pulses: [40, 41, 42, 43, 44]
+    status: pending
+  cp-9:
+    name: "Terminal TUI — ClawPilot Emulation"
+    plan: claws-tui
+    pulses: [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 62]
+    status: pending
+  cp-10:
+    name: "VS Code Extension — Governance-Aware Editing"
+    plan: claws-tui
+    pulses: [56, 57, 58, 59]
     status: pending

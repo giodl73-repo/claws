@@ -1,5 +1,7 @@
 # claws Concept Guides
 
+**Count**: 96 guides
+
 All concept guides for the claws design area, flattened from the original
 subdirectory layout into a single directory for area-scoped consistency.
 
@@ -14,6 +16,18 @@ Read these guides in order. Each builds on the previous.
 5. [Progressive Disclosure](progressive-disclosure.md) -- The 4/18/40 command surface
 
 Start with `claws-init.md`. If you only read one guide, read that one.
+
+## Ecosystem (Server & CI)
+
+These guides cover the claws dev server, CI enforcement, and trust infrastructure. Read them in this order -- each builds on concepts from the previous:
+
+1. [guardrail-provider.md](guardrail-provider.md) -- Governance provider interface (simplest mental model)
+2. [aether-integration.md](aether-integration.md) -- Host approval policies from GovernanceIR
+3. [sarif-pipeline.md](sarif-pipeline.md) -- CI enforcement via GitHub Action
+4. [severity-gating.md](severity-gating.md) -- Gradual adoption of CI enforcement
+5. [artifact-signing.md](artifact-signing.md) -- Trust layer for governance artifacts
+6. [secrets-vault.md](secrets-vault.md) -- Encrypted storage for signing keys
+7. [claws-serve.md](claws-serve.md) -- Dev server (standalone, read anytime)
 
 ## Architecture
 
@@ -79,6 +93,10 @@ Start with `claws-init.md`. If you only read one guide, read that one.
 - [key-management.md](key-management.md) -- Key Management (generation, rotation, KMS)
 - [latency-budget.md](latency-budget.md) -- Latency Budget (50ms hook, 200ms LSP)
 - [snap-restore.md](snap-restore.md) -- Snapshot Restore (governance rollback)
+- [guardrail-provider.md](guardrail-provider.md) -- Guardrail Provider (OC Gateway governance interface)
+- [aether-integration.md](aether-integration.md) -- Aether Integration (host approval policy emission)
+- [artifact-signing.md](artifact-signing.md) -- Artifact Signing (Ed25519/HMAC-SHA256 compliance signing)
+- [secrets-vault.md](secrets-vault.md) -- Secrets Vault (encrypted key-value store)
 - [tool-classification.md](tool-classification.md) -- Tool Classification
 
 ## Maker and DX
@@ -86,6 +104,7 @@ Start with `claws-init.md`. If you only read one guide, read that one.
 - [claws-assess.md](claws-assess.md) -- claws assess (regulatory risk classification)
 - [claws-doctor.md](claws-doctor.md) -- claws doctor (diagnostic + repair)
 - [claws-lsp.md](claws-lsp.md) -- claws-lsp (Language Server)
+- [claws-serve.md](claws-serve.md) -- claws serve (HTTP + WebSocket dev server)
 - [claws-sift.md](claws-sift.md) -- @claws/sift (typed expression engine)
 - [claws-uninstall.md](claws-uninstall.md) -- claws uninstall (clean removal)
 - [error-contract.md](error-contract.md) -- Error Contract (WHAT + HOW + WHERE)
@@ -105,6 +124,8 @@ Start with `claws-init.md`. If you only read one guide, read that one.
 - [kill-switch.md](kill-switch.md) -- Kill Switch
 - [operations-three-rings.md](operations-three-rings.md) -- Three Rings of Continuous Governance
 - [upgrade-lifecycle.md](upgrade-lifecycle.md) -- Upgrade Lifecycle
+- [sarif-pipeline.md](sarif-pipeline.md) -- SARIF Pipeline (CI enforcement via claws-action)
+- [severity-gating.md](severity-gating.md) -- Severity Gating (gradual adoption thresholds)
 - [upstream-contrib.md](upstream-contrib.md) -- Upstream Contribution Strategy (@openclaw/*)
 
 ## Platforms

@@ -3,7 +3,7 @@ slug: claws-serve
 preset: "claws"
 plan: "2 headlines: claws serve binds 127.0.0.1:3939 and returns GovernanceIR at /ir in <100ms, WebSocket streams governance events in real-time"
 area: claws
-status: Draft
+status: Implemented
 phase: thoth
 atoms: []
 specs: [CL-05, CL-04]

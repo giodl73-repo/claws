@@ -1,0 +1,70 @@
+# R1 craft:architect Review — Thoth CP-1 (Security Hardening + Protect)
+
+**Reviewer**: craft:architect
+**Review type**: impl (implementation review)
+**Scope**: 31 source files across claws-cli and claws-sdk
+**Focus**: Type surface stability, barrel exports, API contracts, layered boundaries, cross-package seams
+**Date**: 2026-04-14
+
+---
+
+## Lens Checklist
+
+| # | Verify Question | Pass? | Notes |
+|---|----------------|-------|-------|
+| 1 | Does this change respect the SDK-owns-logic boundary? | YES | All business logic is in claws-sdk (protect, keys, compile, fleet, doctor, publish). CLI `protect.ts` is a thin adapter — parse args, call SDK, render. |
+| 2 | Are dependency arrows pointing inward (CLI -> SDK -> types)? | MOSTLY | CLI imports from SDK only. SDK-internal arrows are mostly correct but see findings M-01 and W-03. |
+| 3 | Would a new contributor understand the module's responsibility from its location? | YES | New modules (`protect/`, doctor checks, registry-client) are in expected locations. Naming is clear. |
+
+---
+
+## Findings
+
+### Major (M)
+
+| ID | File | Line | Finding |
+|----|------|------|---------|
+| M-01 | `claws-sdk/src/compile/llm/index.ts` | 19 | **AnthropicLLMProvider still exported from LLM sub-barrel.** The compile barrel (`compile/index.ts:84`) correctly removes `AnthropicLLMProvider` from its re-exports and adds a comment directing consumers to the deep path. However, the LLM sub-barrel (`compile/llm/index.ts:19`) still exports `AnthropicLLMProvider` as a value export. Any consumer importing from `@bic/claws-sdk/compile/llm` (if that subpath is exposed) can still reach the concrete class. The A-W1 intent is half-implemented. Either (a) remove the value export from the LLM sub-barrel too, or (b) document that the sub-barrel is internal-only and not reachable via package exports. Verify that `package.json` exports do not expose `./compile/llm/*`. |
+| M-02 | `claws-sdk/src/fleet/trust-compat.ts` | 72-145 | **PublishRestriction check is overly permissive — matches any workspace at or below `maxTrustTier` regardless of what tools are being broadcast.** `checkPublishRestrictions()` blocks if `workspaceTier <= r.maxTrustTier`, but does not know what risk-class tools are being broadcast. The restriction says "tools above R{maxRiskTier} may not go to workspaces at or below T{maxTrustTier}", but the check only looks at the workspace tier, not the tool risk tier. Every broadcast to a low-trust workspace will be blocked, even if the policy only contains R1 tools. The function needs the actual tool risk tiers from the policy being broadcast. |
+| M-03 | `claws-sdk/src/compile/llm/extractor.ts` | 108-130 | **Backoff is applied between every call AND on every retry, compounding delays.** The outer loop applies backoff after the first result (`results.length > 0`), and the retry loop inside also sleeps on failure. On the first retry of the second file, the delay is `BACKOFF_BASE_MS * 2^consecutiveFailures` (outer) + `BACKOFF_BASE_MS * 2^1` (inner) = potential 600ms+ dead time before the first retry even fires. The two backoff paths should be unified — either backoff between calls OR on retries, not both stacked. |
+
+### Warning (W)
+
+| ID | File | Line | Finding |
+|----|------|------|---------|
+| W-01 | `claws-sdk/src/compile/cache.ts` | 213-216 | **`Object.freeze(entry)` after `writeFile` is too late and doesn't protect pre-write mutation.** The freeze happens after the file is already serialized and written. If the intent is to prevent callers from mutating a returned cache entry, the freeze should be applied at read-time or on the return value, not after a write. As written, it freezes a local variable that's about to go out of scope. |
+| W-02 | `claws-sdk/src/protect/budget-fleet.ts` | 12-13 | **`budget-fleet.ts` imports from `../fleet/scan.js` and `../fleet/runner.js` — protect depends on fleet internals.** The protect module reaches into fleet's implementation files (`scan.js`, `runner.js`) rather than going through the fleet barrel (`../fleet/index.js`). This creates a hidden dependency on fleet's internal file layout. If fleet refactors its internals, protect breaks. Import through the fleet barrel instead. |
+| W-03 | `claws-sdk/src/protect/identity.ts` | 14 | **`identity.ts` imports `TrustTier` from `../compile/types.js`.** The protect module depends on compile module types. This is a cross-domain dependency that points sideways (protect -> compile) rather than inward to shared types. `TrustTier` should live in `types/` (the shared types package) or `protect/types.ts`, not be imported from compile. |
+| W-04 | `claws-sdk/src/fleet/broadcast.ts` | 19, 407-410 | **`readPolicyVersion` from first governed workspace is fragile.** `policyVersion` is resolved from `governedWorkspaces[0]!.path` — the first workspace in an arbitrary list. If workspaces have different policy versions, this silently picks one. The policy version should come from the source policy file being broadcast, not from a target workspace. |
+| W-05 | `claws-cli/src/commands/protect.ts` | 309-319 | **Identity configure parsing in CLI does role-mapping business logic.** The `runIdentityConfigure` function parses `--role-mapping` strings, validates tier ranges (1-5), and constructs the `FullIdentityConfig` object. This is domain logic (validation, tier range enforcement) that belongs in the SDK, not the CLI adapter. The CLI should pass the raw string to an SDK function that handles parsing and validation. |
+| W-06 | `claws-sdk/src/publish/registry-client.ts` | 229 | **`publishToRegistry` constructs URL by simple string concatenation `${credentials.endpoint}/v1/packages`.** If `endpoint` has a trailing slash, the URL becomes `https://host//v1/packages`. Use `new URL('/v1/packages', credentials.endpoint)` for safe joining. Same issue in `queryRegistry` at line 271. |
+| W-07 | `claws-sdk/src/compile/llm/verifier.ts` | 105-114 | **Relocated search uses exact substring match only.** The `relocated` check searches nearby lines for `trimmedSource` using `includes()` but does not apply the same normalization (lowercase, whitespace collapse) that the fuzzy path uses. A line that would be a fuzzy match at the correct line number could be missed by the relocated search at a nearby line, creating inconsistent behavior between the two paths. |
+
+### Note (N)
+
+| ID | File | Line | Finding |
+|----|------|------|---------|
+| N-01 | `claws-sdk/src/compile/llm/merger.ts` | 218-228 | **R2 risk floor for LLM-only gap-fill is a good security posture.** The C-01 minimum floor prevents LLM from assigning R1 to tools that deserve higher classification. Well-motivated. |
+| N-02 | `claws-sdk/src/compile/llm/verifier.ts` | 137-147 | **D-W2: Fuzzy disable for R4-R5 is a sound architectural decision.** Requiring exact match for high-risk tools prevents silent approval of the wrong tool through near-miss matching. |
+| N-03 | `claws-sdk/src/keys/rotate.ts` | 208-218 | **`verifyKeyMaterial` using `timingSafeEqual` is correct.** Prevents timing side-channel attacks on key material comparison. Export is appropriate for test verification. |
+| N-04 | `claws-sdk/src/keys/storage.ts` | 178-200 | **Plaintext storage warning and chmod(0o600) are defense-in-depth.** The chmod no-op on Windows is correctly handled with a try/catch. |
+| N-05 | `claws-sdk/src/publish/key-resolution.ts` | 39-57 | **`useSigningKey` with Buffer zeroing in finally block is good practice.** Limits key material exposure in heap dumps. The pattern is clean. |
+| N-06 | `claws-sdk/src/doctor/checks/vault-kdf.ts` | 1-94 | **New doctor check for vault KDF is well-structured.** Follows existing check patterns (CheckResult, Diagnostic), handles missing vault gracefully, and distinguishes scrypt-warning from argon2id-info. |
+| N-07 | `claws-sdk/src/doctor/checks/key-colocation.ts` | 1-110 | **Key/audit co-location check is a useful security diagnostic.** Correctly identifies when HMAC key and audit chain share a directory, which would allow chain forgery with single-directory access. |
+| N-08 | `claws-sdk/src/compile/llm/prompts.ts` | 57-68 | **`parseIntentsTyped` discriminated union is a better API surface than bare array.** The `IntentParseResult` type distinguishes parse errors from empty results, enabling better error reporting. Backward-compatible via the preserved `parseIntentsFromResponse` wrapper. |
+| N-09 | `claws-sdk/src/amend/validate.ts` | 175-180 | **D-01 monotonic trust enforcement in amendments is correctly placed.** Prevents trust tier regression through the amend pipeline, consistent with the fleet trust-compat monotonic rule. |
+
+---
+
+## Summary
+
+**Architecture**: The CP-1 changes largely respect the SDK-owns-logic boundary. The new `protect` module is well-organized with clear sub-module responsibilities (budget, secrets, identity). The CLI adapter is appropriately thin.
+
+**3 Must-Fix (Major)**:
+1. **M-01**: AnthropicLLMProvider leak through LLM sub-barrel — the A-W1 intent is only half-applied.
+2. **M-02**: PublishRestriction enforcement is structurally broken — it checks workspace tier but not the tool risk tiers being broadcast, causing over-blocking.
+3. **M-03**: Double-stacked backoff in extractor creates compounding delays on retries.
+
+**7 Warnings**: Role-mapping business logic in CLI (W-05), cross-domain type dependency (W-03), fleet internal imports from protect (W-02), fragile policy version resolution (W-04), URL construction (W-06), inconsistent relocated vs fuzzy normalization (W-07), and a no-op freeze (W-01).
+
+**Positive patterns**: timing-safe key comparison, Buffer zeroing for signing keys, PKCE enforcement for OIDC, R2 risk floor for LLM gap-fill, fuzzy disable for R4-R5, Argon2id with scrypt fallback, doctor checks for vault KDF and key co-location. The security hardening is architecturally sound.

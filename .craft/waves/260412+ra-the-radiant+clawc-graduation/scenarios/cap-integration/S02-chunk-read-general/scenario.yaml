@@ -1,0 +1,121 @@
+name: S02-chunk-read-general
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that GET /api/chunks/general returns identity data with per-field
+  editability metadata. The General tab in CAP settings shows the agent's name,
+  description, managedBy, icon, and locale. Each field carries an editable
+  descriptor (type, constraints, lock) so the partner can render the correct
+  input control and enforce client-side validation before issuing a PATCH.
+
+expect:
+  http:
+    method: GET
+    path: /api/chunks/general
+    status: 200
+    content_type: application/json
+  response_shape:
+    root_has: data
+    data_has: [name, description, managedBy, icon, locale]
+    root_has_editable: true
+    editable_has: [name, description, managedBy, icon, locale]
+    editable_field_has: [type, maxLength, lock]
+    editable_name_type: string
+    editable_name_maxLength_gte: 1
+    editable_description_type: string
+  lock_on_editable:
+    lock_has: [source, editable]
+    non_locked_editable: true
+  timing:
+    response_ms_max: 50
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner sends GET /api/chunks/general to render the General tab.
+  The workspace has IDENTITY.md (name, description, icon), AGENTS.md (managedBy
+  field), and no explicit locale in OC files. The response must assemble data
+  from multiple OC files into a single flat chunk. The name field must be
+  editable (type: string, maxLength: 100, lock.source: 'none', lock.editable: true).
+  The managedBy field is sourced from AGENTS.md, not IDENTITY.md, so the chunk
+  assembler must cross-reference files. The locale field has no OC source and
+  must be returned as null with a note indicating it is not present in the
+  workspace. The partner must be able to render the complete General form from
+  this single response.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If IDENTITY.md is missing from the workspace (a valid state for
+      unconfigured agents), the chunk assembler cannot extract name,
+      description, or icon. Returning a 404 would break the CAP partner's
+      tab rendering. Instead, the chunk must return null values for missing
+      fields with editable metadata intact so the partner can render empty
+      input fields that create IDENTITY.md on first PATCH.
+    spec_impact: "CL-10 chunk assembler — missing IDENTITY.md returns null data with editable metadata, not 404"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The managedBy field lives in AGENTS.md, not IDENTITY.md. The chunk
+      assembler must join data from multiple OC files to build the General
+      chunk. If the assembler only reads IDENTITY.md, managedBy will be
+      missing. This cross-file join must be explicitly wired in the
+      ChunkDataMap builder. If AGENTS.md is missing, managedBy should be
+      null (not omitted), matching the IDENTITY.md-missing behavior.
+    spec_impact: "CL-10 chunk assembler — General chunk joins IDENTITY.md + AGENTS.md; missing file yields null field"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      Locale is not stored in any OC file. The chunk API contract requires
+      locale in the General chunk, but the workspace has no source for it.
+      Returning undefined would break JSON schema validation on the partner
+      side. The chunk must return locale: null with a metadata annotation
+      (e.g., source: 'not_in_workspace') so the partner can render a
+      placeholder or hide the field, and a future PATCH can create the
+      locale entry.
+    spec_impact: "CL-10 GET /api/chunks/general — locale field: null with source annotation when not in OC files"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The editable.maxLength constraint on the name field must be enforced
+      both client-side (by the CAP partner using the metadata) and
+      server-side (by the write-time validation layer). If the chunk only
+      communicates maxLength to the client but the server does not enforce
+      it, a direct API caller can bypass the constraint. The validation
+      layer must mirror all editable constraints.
+    spec_impact: "CL-10 write-time validation — enforce same constraints as editable metadata (maxLength, type, etc.)"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The icon field may be a URL, a base64 data URI, or a named icon
+      reference. The editable.icon.type must specify which formats are
+      accepted. If type is just 'string', the partner cannot validate
+      the icon format before PATCHing. The editable metadata should include
+      a format enum or regex pattern for icon values.
+    spec_impact: "CL-10 GET /api/chunks/general — editable.icon.type should specify accepted formats (url, dataUri, named)"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      The description field in IDENTITY.md may contain markdown formatting.
+      The chunk returns the raw string, but the CAP partner needs to know
+      whether to render a plain text input or a markdown editor. The
+      editable.description metadata should include a format hint
+      (e.g., format: 'markdown' or format: 'plaintext') so the partner
+      renders the correct editing control.
+    spec_impact: "CL-10 GET /api/chunks/general — editable.description should include format hint for markdown vs plaintext"
+    pitfall: null

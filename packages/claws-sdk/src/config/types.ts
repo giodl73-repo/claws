@@ -77,6 +77,12 @@ export const ClawsConfigSchema = z.object({
       allowDeclaredDryRun: z.boolean(),
     }).default({ requireVerifiedPublish: false, allowDeclaredDryRun: true }),
   }).default({ allowBypass: false, publish: { requireVerifiedPublish: false, allowDeclaredDryRun: true } }),
+  security: z.object({
+    /** PBKDF2 iteration count for passphrase-derived keys. Default 600,000 (OWASP 2023 minimum). */
+    pbkdf2Iterations: z.number().int().min(100_000).max(10_000_000).default(600_000),
+    /** Allowed RFC 3161 TSA URLs. Empty array = no restriction. */
+    tsaAllowlist: z.array(z.string().url()).default([]),
+  }).default({ pbkdf2Iterations: 600_000, tsaAllowlist: [] }),
 });
 
 /**

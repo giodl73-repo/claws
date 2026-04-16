@@ -1,0 +1,218 @@
+name: S28-circular-delegation
+series: cap-integration
+version: 1
+specs: [CL-10, CL-11, CL-12]
+description: >
+  Validates that PATCH /api/chunks/general editing the delegation chain to
+  create a cycle (A delegates to B, B delegates to A) is detected and
+  rejected. The compilation produces a G-A2A-DELEGATE violation with the
+  cycle description. The edit is rolled back (AGENTS.md unchanged). The
+  scenario covers direct cycles, longer transitive cycles (A->B->C->A),
+  self-delegation, delegation to non-existent agents, depth limits, and
+  cross-workspace cycle detection.
+
+expect:
+  direct_cycle:
+    endpoint: "PATCH /api/chunks/general"
+    payload: "{ file: 'AGENTS.md', delegations: [{ from: 'agent-a', to: 'agent-b' }] }"
+    existing_delegation: "{ from: 'agent-b', to: 'agent-a' }"
+    result:
+      status: 422
+      error: "G-A2A-DELEGATE"
+      message: "Circular delegation detected: agent-a -> agent-b -> agent-a"
+      cycle: ["agent-a", "agent-b", "agent-a"]
+      workspace_files_unchanged: true
+      audit_event_emitted: true
+  transitive_cycle:
+    description: "A->B->C->A cycle detected through multi-hop traversal"
+    cycle: ["agent-a", "agent-b", "agent-c", "agent-a"]
+    result:
+      status: 422
+      error: "G-A2A-DELEGATE"
+  self_delegation:
+    description: "Agent delegates to itself"
+    payload: "{ file: 'AGENTS.md', delegations: [{ from: 'agent-a', to: 'agent-a' }] }"
+    result:
+      status: 422
+      error: "G-A2A-DELEGATE"
+      message: "Self-delegation detected: agent-a -> agent-a"
+      cycle: ["agent-a", "agent-a"]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner sends PATCH /api/chunks/general to add a delegation
+  entry in AGENTS.md: agent-a delegates to agent-b. However, agent-b already
+  delegates to agent-a (existing entry in AGENTS.md). The compilation must:
+  (1) build the full delegation graph from AGENTS.md, (2) detect the cycle
+  using graph traversal, (3) reject the edit with G-A2A-DELEGATE error
+  including the full cycle path, (4) roll back the file change (AGENTS.md
+  unchanged), (5) log the attempted cycle in the audit trail. The challenge
+  is detecting cycles that span multiple hops (A->B->C->A), handling
+  cross-workspace delegation where the full graph is not locally available,
+  and managing delegation chain depth limits to prevent resource exhaustion
+  during traversal.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      Self-delegation (agent delegates to itself) is the simplest cycle
+      but may be missed if the validation only checks for multi-hop
+      cycles. The cycle detection must include a pre-check for from ==
+      to before graph traversal. Self-delegation should produce a
+      specific error message ("Self-delegation detected") rather than the
+      generic cycle message, as the cause and fix are different.
+    spec_impact: "CL-10 delegation validation — explicit self-delegation check before graph traversal"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      Delegation to a non-existent agent should be rejected with
+      AGENT_NOT_FOUND, not allowed to create a dangling reference.
+      A dangling delegation is not a cycle, but it is a governance error
+      because the delegated work has no valid recipient. The validation
+      must verify agent existence before cycle detection. Error precedence:
+      AGENT_NOT_FOUND before G-A2A-DELEGATE.
+    spec_impact: "CL-10 delegation validation — verify agent existence, AGENT_NOT_FOUND before cycle check"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Delegation chains longer than a maximum depth (e.g., A->B->C->D->...
+      20 hops) may not contain cycles but are still problematic (latency,
+      trust dilution). The system must enforce a maximum delegation depth
+      (configurable via fleet policy) and reject chains that exceed it
+      with DELEGATION_DEPTH_EXCEEDED. The depth check runs after cycle
+      detection (a cycle at depth 3 is caught first).
+    spec_impact: "CL-10 delegation depth limit — configurable max depth, DELEGATION_DEPTH_EXCEEDED error"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Cross-workspace cycles: agent-a (workspace 1) delegates to agent-b
+      (workspace 2), and agent-b delegates to agent-a. The local
+      compilation only sees workspace 1's delegation graph. Without
+      cross-workspace delegation resolution, the cycle is invisible
+      locally. The compilation must either: (a) query the remote
+      workspace's delegation graph via A2A protocol, or (b) mark
+      cross-workspace delegations as "unverified" with a governance
+      warning that cycle detection is limited to the local graph.
+    spec_impact: "CL-10 cross-workspace delegation — A2A query for remote graph or 'unverified' warning"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      A delegation that is valid at creation time may become circular
+      after another agent's edit. Agent-a delegates to agent-b (valid).
+      Later, agent-b's workspace adds a delegation from agent-b to
+      agent-a (creating a cycle). The cycle is not detectable locally
+      until the next cross-workspace check. The compilation must
+      periodically re-validate the delegation graph, not just validate
+      on PATCH. The GET /api/chunks path should include delegation
+      staleness checking.
+    spec_impact: "CL-10 delegation re-validation — periodic cross-workspace cycle checks on GET"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Delegation to an agent at a lower trust tier must produce a
+      governance warning (not an error) because delegated trust should
+      not exceed the delegate's own trust level. If agent-a (T3) delegates
+      to agent-b (T1), agent-b cannot perform T3 actions on behalf of
+      agent-a. The delegation is allowed but the effective trust for
+      delegated tasks is min(delegator_trust, delegate_trust).
+    spec_impact: "CL-10 delegated trust — effective trust is min(delegator, delegate), warn on mismatch"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      Delegation removal that breaks a chain creates an orphaned agent.
+      If A->B->C exists and the A->B delegation is removed, agent-C
+      may still believe it is serving agent-A via agent-B. The removal
+      must propagate downstream: removing A->B should also invalidate
+      B->C's relationship to A (though B->C itself may remain valid
+      for other delegation chains). Orphan detection must surface as a
+      governance warning.
+    spec_impact: "CL-10 delegation removal — propagate downstream, surface orphaned agents as warnings"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The G-A2A-DELEGATE error must include the full cycle path so the
+      user can identify which delegation to remove to break the cycle.
+      For a cycle A->B->C->A, the user needs to see all three edges
+      to decide which one is incorrect. The error message must format
+      the cycle as a readable path (not just a list of agent IDs).
+    spec_impact: "CL-10 G-A2A-DELEGATE error — readable cycle path in error message"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Batch delegation edits (adding multiple delegations in one PATCH)
+      must be validated atomically. If the batch creates a cycle only when
+      all delegations are applied together (each individual delegation is
+      acyclic), the validation must apply all edits to a temporary graph
+      and check for cycles on the combined result. Validating each
+      delegation independently would miss batch-induced cycles.
+    spec_impact: "CL-10 batch delegation — validate on combined graph, not individual edges"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      The rollback on cycle detection must be atomic. If the PATCH
+      partially wrote to AGENTS.md before the cycle was detected (e.g.,
+      the delegation was added and then the cycle check failed), the
+      file must be restored to its pre-PATCH state. The validation
+      should run the cycle check on a temporary in-memory graph BEFORE
+      any file write, not after.
+    spec_impact: "CL-10 delegation cycle check — run on in-memory graph before file write"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      Delegation graphs can become complex in multi-agent environments.
+      The system should provide a GET /api/delegations/graph endpoint
+      that returns the current delegation graph for visualization. This
+      helps users identify potential cycles, long chains, and orphaned
+      agents before they cause governance errors. The graph should include
+      cross-workspace delegations marked as "unverified."
+    spec_impact: "CL-10 delegation graph endpoint — visualization with cross-workspace markers"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The audit trail for delegation cycle attempts must record the
+      attempted delegation, the detected cycle, and the existing
+      delegations that created the conflict. This context helps a
+      compliance officer determine if the cycle was an honest mistake
+      or a deliberate attempt to create a trust-escalation loop (agent-a
+      delegates to agent-b and vice versa to amplify permissions).
+    spec_impact: "CL-11 audit trail — delegation cycle attempt with full graph context"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      Performance of cycle detection in large delegation graphs (hundreds
+      of agents, thousands of edges) must be bounded. The cycle detection
+      algorithm should run in O(V+E) using depth-first search with
+      coloring (white/gray/black). The maximum graph size should be
+      documented and enforced. If the graph exceeds the maximum, the
+      system should degrade gracefully (warn, not crash).
+    spec_impact: "CL-10 cycle detection — O(V+E) algorithm, bounded graph size with graceful degradation"
+    pitfall: null

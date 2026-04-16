@@ -34,7 +34,7 @@ describe('standalone integration', () => {
     };
 
     const result = validate(input);
-    expect(result.totalChecks).toBe(12);
+    expect(result.totalChecks).toBe(13);
     expect(result.pass).toBe(true);
   });
 

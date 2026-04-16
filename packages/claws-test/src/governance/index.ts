@@ -17,3 +17,4 @@ export { checkOutputGuards } from './checks/output-guards.js';
 export { checkBoundedReasoning } from './checks/bounded-reasoning.js';
 export { checkAuditCompleteness } from './checks/audit-completeness.js';
 export { checkSupplyChain } from './checks/supply-chain.js';
+export { checkApprovalGate } from './checks/approval-gate.js';

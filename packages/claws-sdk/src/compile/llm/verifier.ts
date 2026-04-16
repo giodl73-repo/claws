@@ -18,7 +18,7 @@ import type { ParseDiagnostic } from '../types.js';
 /**
  * Outcome of verifying a single LLM intent against source content.
  */
-export type VerificationOutcome = 'exact' | 'fuzzy' | 'mismatch';
+export type VerificationOutcome = 'exact' | 'fuzzy' | 'relocated' | 'mismatch';
 
 /**
  * A verified LLM intent with verification metadata.
@@ -48,6 +48,8 @@ export interface VerificationResult {
   readonly exactCount: number;
   /** Count of fuzzy matches (confidence halved). */
   readonly fuzzyCount: number;
+  /** Count of relocated matches (F2: confidence * 0.6). */
+  readonly relocatedCount: number;
   /** Count of mismatches (dropped). */
   readonly mismatchCount: number;
 }
@@ -61,11 +63,19 @@ function getLines(content: string): readonly string[] {
   return content.split('\n');
 }
 
+/** F2: Window of lines to search for relocated content (each direction). */
+const RELOCATED_SEARCH_WINDOW = 10;
+
+/** F2: Relocated confidence multiplier (0.6x). */
+const RELOCATED_CONFIDENCE_MULTIPLIER = 0.6;
+
 /**
  * Check if sourceText matches the line at the given 1-based line number.
  *
  * Returns 'exact' if the line contains the sourceText exactly,
- * 'fuzzy' if a normalized substring match is found, or 'mismatch'.
+ * 'fuzzy' if a normalized substring match is found,
+ * 'relocated' (F2) if found on a nearby line (within RELOCATED_SEARCH_WINDOW),
+ * or 'mismatch'.
  */
 function checkLine(
   sourceText: string,
@@ -95,16 +105,34 @@ function checkLine(
     return 'fuzzy';
   }
 
+  // F2: Relocated — search nearby lines for exact match (line-number mismatch)
+  const startLine = Math.max(0, lineNumber - 1 - RELOCATED_SEARCH_WINDOW);
+  const endLine = Math.min(lines.length, lineNumber - 1 + RELOCATED_SEARCH_WINDOW + 1);
+  for (let i = startLine; i < endLine; i++) {
+    if (i === lineNumber - 1) continue; // already checked
+    if (lines[i]!.includes(trimmedSource)) {
+      return 'relocated';
+    }
+  }
+
   return 'mismatch';
 }
 
 // ── Public API ────────────────────────────────────────────────────────
 
 /**
+ * D-W2: High-risk threshold — fuzzy matching is disabled for tools at or above this risk class.
+ * A near-miss fuzzy match on an R4-R5 tool could silently approve a different tool.
+ */
+const HIGH_RISK_FUZZY_DISABLE_THRESHOLD = 4;
+
+/**
  * Verify a single LLM intent against source file content.
  *
  * - Exact match → keep intent unchanged
  * - Fuzzy match (case-insensitive substring) → confidence halved + warning
+ *   (D-W2: disabled for R4-R5 tools — treated as mismatch)
+ * - Relocated (F2: found on nearby line) → confidence * 0.6x + warning
  * - Total miss or wrong line → confidence 0 + error diagnostic (ciso finding)
  */
 export function verifyIntent(
@@ -126,7 +154,71 @@ export function verifyIntent(
     };
   }
 
+  // F2: Relocated — found on a nearby line but not at the reported line number.
+  // Apply 0.6x confidence multiplier instead of silent acceptance.
+  // Note: lineNumber is always > 0 here (checkLine returns 'mismatch' for lineNumber < 1).
+  if (outcome === 'relocated') {
+    const adjusted: LLMIntent = {
+      kind: intent.kind,
+      target: intent.target,
+      description: intent.description,
+      confidence: intent.confidence * RELOCATED_CONFIDENCE_MULTIPLIER,
+      sourceText: intent.sourceText,
+      ...(intent.line !== undefined ? { line: intent.line } : {}),
+      ...(intent.riskClass !== undefined ? { riskClass: intent.riskClass } : {}),
+    };
+
+    return {
+      verified: {
+        intent: adjusted,
+        outcome: 'relocated',
+        verified: true,
+      },
+      diagnostic: {
+        severity: 'warning',
+        message: `LLM intent relocated: "${intent.sourceText}" not at line ${lineNumber} but found nearby in ${source} — confidence reduced to ${(intent.confidence * RELOCATED_CONFIDENCE_MULTIPLIER).toFixed(2)}`,
+        file: source,
+        line: lineNumber,
+        code: 'CLAWS-LLM-VERIFY-RELOCATED',
+      },
+    };
+  }
+
+  // Note: lineNumber is always > 0 here (checkLine returns 'mismatch' for lineNumber < 1),
+  // and intent.line is always defined (undefined line → lineNumber=0 → mismatch).
   if (outcome === 'fuzzy') {
+    // D-W2: Disable fuzzy match for high-risk (R4-R5) tools — a near-miss
+    // match could silently approve a different tool. Treat as mismatch.
+    const isHighRisk = intent.riskClass !== undefined
+      && intent.riskClass >= HIGH_RISK_FUZZY_DISABLE_THRESHOLD;
+
+    if (isHighRisk) {
+      const dropped: LLMIntent = {
+        kind: intent.kind,
+        target: intent.target,
+        description: intent.description,
+        confidence: 0,
+        sourceText: intent.sourceText,
+        ...(intent.line !== undefined ? { line: intent.line } : {}),
+        ...(intent.riskClass !== undefined ? { riskClass: intent.riskClass } : {}),
+      };
+
+      return {
+        verified: {
+          intent: dropped,
+          outcome: 'mismatch',
+          verified: false,
+        },
+        diagnostic: {
+          severity: 'error',
+          message: `LLM intent fuzzy match rejected for high-risk R${intent.riskClass} tool "${intent.target}" in ${source} — exact match required for R4-R5 (D-W2)`,
+          file: source,
+          line: lineNumber,
+          code: 'CLAWS-LLM-VERIFY-FUZZY-HIGHRISK',
+        },
+      };
+    }
+
     const adjusted: LLMIntent = {
       kind: intent.kind,
       target: intent.target,
@@ -147,7 +239,7 @@ export function verifyIntent(
         severity: 'warning',
         message: `LLM intent fuzzy match: "${intent.sourceText}" at line ${lineNumber} in ${source} — confidence halved`,
         file: source,
-        ...(lineNumber > 0 ? { line: lineNumber } : {}),
+        line: lineNumber,
         code: 'CLAWS-LLM-VERIFY-FUZZY',
       },
     };
@@ -194,6 +286,7 @@ export function verifyExtractionResult(
   const passedIntents: LLMIntent[] = [];
   let exactCount = 0;
   let fuzzyCount = 0;
+  let relocatedCount = 0;
   let mismatchCount = 0;
 
   for (const intent of result.intents) {
@@ -214,6 +307,10 @@ export function verifyExtractionResult(
         fuzzyCount++;
         passedIntents.push(verified.intent);
         break;
+      case 'relocated':
+        relocatedCount++;
+        passedIntents.push(verified.intent);
+        break;
       case 'mismatch':
         mismatchCount++;
         break;
@@ -227,6 +324,7 @@ export function verifyExtractionResult(
     diagnostics,
     exactCount,
     fuzzyCount,
+    relocatedCount,
     mismatchCount,
   };
 }

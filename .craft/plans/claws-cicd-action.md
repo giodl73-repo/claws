@@ -3,7 +3,7 @@ slug: claws-cicd-action
 preset: "claws"
 plan: "3 headlines: claws-action in a GitHub workflow produces SARIF annotations on PR files, --warn-only mode enables gradual rollout to 200 repos, .claws/ caching reduces CI compile time"
 area: claws
-status: Draft
+status: Implemented
 phase: thoth
 atoms: [atom:cicd-pipeline]
 specs: [CL-05, CL-01]

@@ -1,7 +1,7 @@
 # claws Spec Index
 
-**Version**: 1.0
-**Specs**: 7 (CL-01 through CL-07)
+**Version**: 1.1
+**Specs**: 12 (CL-01 through CL-12)
 **Status**: All Draft
 **Pipeline**: `.craft/pipelines/claws.yaml`
 
@@ -18,6 +18,11 @@
 | CL-05 | [Developer Experience](specs/CL-05-developer-experience.md) | Q12e-f, Q12o, Q12q | Draft | skill-author, new-hire, power-user, platform-eng |
 | CL-06 | [Platform Ecosystem](specs/CL-06-platform-ecosystem.md) | Q12k-l, Q12n | Draft | founder, skill-author, platform-eng |
 | CL-07 | [Deep Integration](specs/CL-07-deep-integration.md) | Q12p, Q12b | Draft | founder, gateway-eng |
+| CL-08 | [Freemium Boundary](specs/CL-08-freemium-boundary.md) | Q12s | Draft | founder, enterprise-architect |
+| CL-09 | [OC Workspace Format](specs/CL-09-oc-workspace-format.md) | Q12t | Draft | gateway-eng, skill-author |
+| CL-10 | [CAP Integration & Serve API](specs/CL-10-cap-integration.md) | CAP Product Day | Draft | founder, gateway-eng, skill-author |
+| CL-11 | [Upstream Governance](specs/CL-11-upstream-governance.md) | Q12b, Thoth | Draft | founder, ciso, gateway-eng |
+| CL-12 | [Approval Event Schema](specs/CL-12-approval-event-schema.md) | Q12b, Thoth | Draft | founder, ciso, gateway-eng |
 
 ## Spec Dependencies
 

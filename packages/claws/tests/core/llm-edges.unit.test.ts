@@ -11,7 +11,7 @@ let constructorArgs: unknown[] = [];
 // Mock the optional provider SDK so the probe in createLLMProvider succeeds
 vi.mock('@anthropic-ai/sdk', () => ({ default: {} }));
 
-vi.mock('@bic/claws-sdk/compile', () => ({
+vi.mock('@bic/claws-sdk/compile/llm/anthropic-provider', () => ({
   AnthropicLLMProvider: class MockAnthropicLLMProvider {
     readonly modelId: string;
     constructor(...args: unknown[]) {

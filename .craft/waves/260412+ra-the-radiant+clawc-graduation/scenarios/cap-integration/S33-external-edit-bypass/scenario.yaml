@@ -1,0 +1,241 @@
+name: S33-external-edit-bypass
+series: cap-integration
+version: 1
+specs: [CL-10, CL-12]
+description: >
+  Validates that when a workspace OC file is edited externally (e.g., directly
+  in VS Code, not via the API), the file watcher detects the change, triggers
+  auto-recompilation, and surfaces governance violations in the next chunk
+  read. The edit has already happened — the API cannot gate external writes.
+  The system's defense is detection and notification, not prevention.
+
+expect:
+  external_edit:
+    file: TOOLS.md
+    change: "Add R5 tool without elicitation gate"
+    detection:
+      file_watcher_fires: true
+      auto_recompile_triggered: true
+  compilation_result:
+    violations:
+      - code: "G-ELICIT"
+        tool: "dangerous-tool"
+        message_contains: "R5 tool requires elicitation gate"
+    sse_events:
+      - type: "governance_warning"
+        payload_has: [violation, file, tool]
+      - type: "compilation:complete"
+  chunks_after_recompile:
+    endpoint: "GET /api/chunks/connections"
+    tool:
+      dangerous-tool:
+        risk_level: "R5"
+        violations: ["G-ELICIT"]
+        approval: "required"
+  file_state:
+    tools_md_modified: true
+    original_not_restored: true
+    note: "External edit is preserved; system detects but does not revert"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer opens TOOLS.md in VS Code and manually adds a new tool entry
+  with risk level R5 but no elicitation gate configuration. They save the file.
+  The claws serve file watcher detects the modification to TOOLS.md. The server
+  triggers auto-recompilation. The compiler processes the updated TOOLS.md and
+  produces a G-ELICIT governance violation (R5 tools require an elicitation
+  gate). An SSE governance_warning event is emitted. The next GET /api/chunks
+  shows the new tool with the violation flag. Critically, the external edit
+  already happened — the file is already modified. The API did not gate it.
+  The system's role is detection and surfacing, not prevention or rollback.
+  The scenario covers file watcher latency, race conditions with concurrent
+  API PATCHes, syntax errors from external edits, file deletion, fleet policy
+  enforcement on recompile, git checkout replacing files, and network
+  filesystem latency.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      File watcher latency: the time between the external edit (file save
+      in VS Code) and the detection by the file watcher determines the
+      vulnerability window. During this window, a GET /api/chunks returns
+      stale data that does not reflect the external edit. The file watcher
+      must use OS-native events (inotify on Linux, ReadDirectoryChangesW
+      on Windows, FSEvents on macOS) for sub-second detection. Polling
+      (checking file mtime every N seconds) creates unacceptable latency
+      for governance-sensitive changes.
+    spec_impact: "CL-10 file watcher — OS-native events required; polling unacceptable for governance detection"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Race condition: an external edit to TOOLS.md occurs while a PATCH
+      to TOOLS.md is in progress via the API. The file watcher fires for
+      the external edit, triggering recompilation. The API PATCH also
+      triggers recompilation. If both recompilations run, one reads the
+      file mid-write (the API PATCH is still writing). The work queue
+      must serialize: external-edit-triggered recompiles enter the same
+      FIFO queue as API-triggered writes. The file watcher event must
+      be queued, not processed immediately.
+    spec_impact: "CL-10 file watcher — external edit events enter the FIFO work queue; no parallel recompilation"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      External edit that makes the workspace un-compilable: a syntax error
+      in TOOLS.md (e.g., invalid YAML, unclosed bracket) causes the
+      compiler to fail. The system must handle compilation failure
+      gracefully: preserve the last successful GovernanceIR, serve chunks
+      from the cached state with a compilationStale: true flag, and emit
+      an SSE compilation:failed event with the parse error details. The
+      system must not crash or serve empty chunks on compilation failure.
+    spec_impact: "CL-10 compilation failure — preserve last valid GovernanceIR; serve stale chunks with flag; emit failure SSE"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      External edit that removes a file entirely: SOUL.md is deleted via
+      the filesystem (rm, VS Code, or File Explorer). The file watcher
+      detects the deletion. The compiler cannot compile without SOUL.md —
+      it is a required OC file. The system must: detect the missing
+      required file, emit a governance_warning SSE event with error
+      OC_FILE_MISSING, serve chunks with a degraded flag indicating the
+      workspace is incomplete, and include the missing file name in the
+      health endpoint. The system must not create a default SOUL.md
+      (that would violate the lossless OC guarantee).
+    spec_impact: "CL-10 file deletion — detect missing required OC file; degraded mode; never auto-create replacements"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      External edit on a fleet-locked field: the developer manually edits
+      TOOLS.md to change a fleet-locked tool's configuration. The file
+      is already modified (external edit cannot be gated). On recompile,
+      the compiler detects the fleet lock violation. The chunk must show
+      the fleet lock with the actual (modified) value and the fleet-
+      enforced value, so the partner UI can display the discrepancy. The
+      system does NOT revert the file to the fleet-enforced value (that
+      would violate lossless OC). Instead, it flags the drift and emits
+      a FLEET_DRIFT governance warning.
+    spec_impact: "CL-10 fleet lock — detect drift on recompile; flag FLEET_DRIFT; never revert external edits"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Git checkout replacing workspace files: the developer runs
+      'git checkout main -- TOOLS.md' which replaces the current TOOLS.md
+      with the version from main. This is an external edit that replaces
+      the entire file content. The file watcher detects the change. The
+      compiler recompiles with the main branch version. If the main branch
+      version has different tool configurations than the workspace was
+      compiled against, all chunks become stale. The system must handle
+      wholesale file replacement the same as incremental edits.
+    spec_impact: "CL-10 file watcher — handle wholesale file replacement (git checkout) same as incremental edit"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      File watcher on network filesystem (NFS, SMB, OneDrive): OS-native
+      file events are unreliable or unavailable on network filesystems.
+      If the workspace is on a network share (common in enterprise
+      environments), the file watcher may miss events entirely. The
+      system must have a fallback polling mode (configurable interval,
+      default 5 seconds) for network filesystems. The health endpoint
+      must report the file watcher mode (native vs polling) so admins
+      can assess detection latency.
+    spec_impact: "CL-10 file watcher — fallback polling mode for network filesystems; report mode in health endpoint"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Rapid successive external edits: the developer is actively editing
+      TOOLS.md and saves multiple times in quick succession (every few
+      seconds). Each save triggers the file watcher. If each trigger
+      immediately starts a recompilation, the system wastes resources
+      recompiling intermediate states. The file watcher must debounce:
+      wait for a configurable quiet period (default 300ms) after the last
+      file event before triggering recompilation. The debounce must be
+      per-file to avoid one rapidly-edited file blocking detection of
+      changes to other files.
+    spec_impact: "CL-10 file watcher — per-file debounce (default 300ms) before triggering recompilation"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The SSE governance_warning event for external edits must distinguish
+      between API-originated changes (which were validated at write time)
+      and external changes (which bypassed validation). The event payload
+      must include origin: 'external' so the partner UI can display a
+      different notification (e.g., "A file was modified outside the
+      settings panel. Governance violations detected."). Without origin
+      tagging, the partner cannot distinguish between a failed API
+      validation and a post-hoc external edit detection.
+    spec_impact: "CL-10 SSE governance_warning — include origin field: 'api' vs 'external' for change provenance"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      File watcher initialization on startup: when claws serve starts,
+      the file watcher must be established before the initial compilation
+      completes. If there is a gap between startup and watcher
+      registration, an external edit during that gap is missed. The
+      startup sequence must be: (1) register file watchers, (2) hash
+      all OC files, (3) compile, (4) begin serving. If a file changes
+      between step 2 and step 3, the watcher catches it and triggers
+      a re-compile after step 3.
+    spec_impact: "CL-10 startup — register file watchers before initial compilation; no detection gap"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      External edits to non-OC files in the workspace directory: the
+      developer saves a .js file or a README.md in the workspace. The
+      file watcher must filter events to only OC files (SOUL.md,
+      TOOLS.md, MEMORY.md, USER.md, AGENTS.md, IDENTITY.md, and
+      extension configs). Processing every file event in the workspace
+      directory would trigger unnecessary recompilations and degrade
+      performance. The filter must be configurable via .claws/config.json.
+    spec_impact: "CL-10 file watcher — filter to OC files only; configurable file list in .claws/config.json"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Audit trail for external edits: the audit chain must record that
+      a change was detected via the file watcher (not via the API). The
+      audit entry should include: file changed, change type (modify,
+      create, delete), detection method (native event vs poll), detection
+      latency (time between file mtime and watcher event), and the
+      resulting compilation outcome (success, failure, violations). This
+      allows compliance reviewers to assess the governance coverage gap
+      for external edits.
+    spec_impact: "CL-10 audit — log external edit detections with file, change type, detection method, and latency"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      The governance_warning for an external R5 edit should include a
+      recommended remediation path. Since the system cannot revert the
+      edit (lossless OC), the remediation is either: (a) the user adds
+      the missing elicitation gate via PATCH (which the API will validate),
+      or (b) the user reverts the external edit manually. The warning
+      must include both options with the specific PATCH endpoint and
+      payload needed to add the elicitation gate.
+    spec_impact: "CL-10 governance_warning — include remediation options with specific PATCH endpoint for R5 violations"
+    pitfall: null

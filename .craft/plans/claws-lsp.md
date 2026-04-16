@@ -3,7 +3,7 @@ slug: claws-lsp
 preset: "claws"
 plan: "2 headlines: editing TOOLS.md shows governance diagnostics in SOUL.md within 200ms, risk-level coloring shows R5 tools in red"
 area: claws
-status: Draft
+status: Implemented
 phase: thoth
 atoms: [atom:claws-lsp, atom:latency-budget, atom:hook-lifecycle]
 specs: [CL-05, CL-04, CL-07]

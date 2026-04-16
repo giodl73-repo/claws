@@ -24,3 +24,6 @@ export { runAnnotate } from './annotate.js';
 export { runPublish } from './publish.js';
 export { runCacheStatus, runCacheExport, runCacheImport, runCacheClear } from './cache.js';
 export { runExtract } from './extract.js';
+export { runProtectBudget, runProtectBudgetFleet, runSecretsInit, runSecretsSet, runSecretsGet, runSecretsList, runSecretsDelete, runIdentityConfigure, runIdentityShow } from './protect.js';
+export { runComplySOC2, runComplyHIPAA } from './comply.js';
+export { runComplyEUAIAct } from './comply-eu-ai-act.js';

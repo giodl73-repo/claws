@@ -33,12 +33,14 @@ export function parseSkillFrontmatter(content: string): {
   tools: string[] | undefined;
 } {
   // Parse YAML frontmatter without regex to avoid ReDoS (CodeQL).
-  const fmStart = content.indexOf('---\n');
+  // Normalize CRLF to LF for cross-platform compatibility (Windows writes CRLF).
+  const normalized = content.replace(/\r\n/g, '\n');
+  const fmStart = normalized.indexOf('---\n');
   if (fmStart !== 0) return { name: undefined, description: undefined, tools: undefined };
-  const fmEnd = content.indexOf('\n---', 4);
+  const fmEnd = normalized.indexOf('\n---', 4);
   if (fmEnd === -1) return { name: undefined, description: undefined, tools: undefined };
 
-  const fmLines = content.slice(4, fmEnd).split('\n');
+  const fmLines = normalized.slice(4, fmEnd).split('\n');
 
   let name: string | undefined;
   let description: string | undefined;

@@ -1,0 +1,130 @@
+name: S01-chunk-read-connections
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that GET /api/chunks/connections returns per-tool risk classification,
+  per-item lock sources, and MCP server grouping. Each tool in the response must
+  carry a risk object (level + label) and a lock object (source indicating who
+  controls editability: r5, fleet, governance, or none). Tools are grouped by
+  their originating MCP server. R5-classified tools must always show
+  lock.source: 'r5'. The response shape must be self-contained so CAP settings
+  partners can render the Connections tab without knowing OC file structure.
+
+expect:
+  http:
+    method: GET
+    path: /api/chunks/connections
+    status: 200
+    content_type: application/json
+  response_shape:
+    root_has: data
+    data_has: [tools, servers, writeBackUrl]
+    tools_item_has: [id, name, risk, lock, serverId]
+    risk_has: [level, label]
+    risk_level_enum: [R1, R2, R3, R4, R5]
+    lock_has: [source, editable]
+    lock_source_enum: [r5, fleet, governance, none]
+  r5_tools:
+    lock_source: r5
+    lock_editable: false
+  servers:
+    item_has: [id, name, toolCount]
+    non_empty: true
+  timing:
+    response_ms_max: 50
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner sends GET /api/chunks/connections to render the
+  Connections tab. The workspace has 3 MCP servers configured: an internal
+  server (2 tools), a third-party server (3 tools), and a system server
+  (1 tool: send-email, classified R5). The response must return all 6 tools
+  grouped by server, each with risk classification from GovernanceIR and lock
+  source from the validation layer. The send-email tool must show
+  risk.level: 'R5', risk.label: 'Irreversible external action', and
+  lock.source: 'r5' with lock.editable: false. The partner must be able
+  to build the full Connections UI from this single response without
+  additional API calls or knowledge of TOOLS.md, GOVERNANCE.md, or any
+  other OC file.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If a tool is defined in TOOLS.md but its originating MCP server is not
+      listed in the workspace configuration, the chunk assembler has no
+      serverId to assign. The tool would appear in the response without server
+      grouping, breaking the CAP partner's UI layout which expects every tool
+      to belong to a server. The chunk assembler must either synthesize an
+      'unknown' server group or reject tools with no server mapping at
+      assembly time.
+    spec_impact: "CL-10 chunk assembler — tools without MCP server mapping must get a synthetic 'unregistered' server group"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      If GovernanceIR does not contain a risk classification for a tool (e.g.,
+      a newly added tool that hasn't been compiled yet), the risk object would
+      be null or missing. CAP partners expect risk.level and risk.label on
+      every tool. The chunk assembler must assign a default risk classification
+      (R3 — 'Unclassified, requires review') for tools missing from
+      GovernanceIR rather than omitting the risk object.
+    spec_impact: "CL-10 chunk assembler — default R3 risk for tools missing GovernanceIR classification"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      If the workspace has MCP servers configured but no tools are registered
+      under them (empty tool lists), the servers array would contain entries
+      with toolCount: 0. CAP partners may render empty server sections or
+      hide them. The API contract should specify whether empty servers are
+      included (with toolCount: 0) or filtered out. Inconsistent behavior
+      here causes partner UI flicker when tools are added or removed.
+    spec_impact: "CL-10 GET /api/chunks/connections — define contract for servers with zero tools"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The response includes risk and lock information but no governance
+      context explaining WHY a tool is locked or classified at a particular
+      level. CAP partners need to show tooltips like 'Locked by fleet policy:
+      acme-corp-standard-v2' or 'R5: sends email to external recipients'.
+      Without a governance.reason field on each tool, partners cannot render
+      meaningful lock/risk explanations to the end user. The chunk must
+      include governance context strings.
+    spec_impact: "CL-10 chunk assembler — include governance.reason string per tool for UI tooltips"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The lock.source field is an enum but the response does not indicate
+      lock precedence when multiple sources apply. A tool could be locked by
+      both fleet policy and R5 classification simultaneously. The current
+      design returns a single lock.source, but if fleet policy is removed,
+      the tool should remain locked due to R5. The chunk must either return
+      an ordered array of lock sources or document that the highest-priority
+      source is always returned.
+    spec_impact: "CL-10 chunk assembler — lock.source precedence: r5 > fleet > governance > none"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The writeBackUrl included in the response must be scoped to the
+      specific chunk. If the URL is a generic /api/chunks/connections PATCH
+      endpoint, the partner has no way to express per-tool edits without
+      constructing tool-specific sub-paths. The writeBackUrl should either
+      point to /api/chunks/connections (with the PATCH body specifying which
+      tool to edit) or provide per-tool writeBackUrls. The contract must be
+      explicit so partners do not guess URL construction.
+    spec_impact: "CL-10 GET /api/chunks/connections — writeBackUrl scoping: per-chunk or per-tool"
+    pitfall: null

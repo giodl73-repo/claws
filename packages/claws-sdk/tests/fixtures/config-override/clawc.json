@@ -1,0 +1,21 @@
+{
+  "trustTier": 3,
+  "suppressions": ["g-data-01"],
+  "format": "json",
+  "policySet": "strict",
+  "auditLevel": "summary",
+  "failMode": {
+    "R1": "gated",
+    "R2": "gated",
+    "R3": "closed",
+    "R4": "closed",
+    "R5": "closed"
+  },
+  "fleet": {
+    "allowBypass": false,
+    "publish": {
+      "requireVerifiedPublish": true,
+      "allowDeclaredDryRun": false
+    }
+  }
+}

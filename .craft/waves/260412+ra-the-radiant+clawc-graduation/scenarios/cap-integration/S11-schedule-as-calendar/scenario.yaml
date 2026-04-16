@@ -1,0 +1,127 @@
+name: S11-schedule-as-calendar
+series: cap-integration
+version: 1
+specs: [CL-10]
+description: >
+  Validates that GET /api/schedule returns HEARTBEAT.md parsed into
+  calendar-renderable events compatible with the Outlook/Teams calendar
+  surface. Each event carries recurrence in iCalendar RRULE format, a
+  computed nextRun timestamp, and an optional calendarEventId for
+  bidirectional sync with Graph API calendar events. One-shot tasks and
+  recurring schedules coexist in the response.
+
+expect:
+  get_schedule:
+    endpoint: "GET /api/schedule"
+    response_shape:
+      events_is_array: true
+      each_event_has:
+        - title
+        - recurrence
+        - nextRun
+      optional_fields:
+        - calendarEventId
+        - description
+        - duration
+    recurrence_format:
+      recurring_event: "RRULE:FREQ=DAILY;INTERVAL=1"
+      one_shot_event: null
+    nextRun_format: "ISO 8601 UTC timestamp"
+  calendar_sync:
+    calendarEventId_present_when: "event was previously synced to Graph API"
+    calendarEventId_absent_when: "event has never been synced"
+  empty_heartbeat:
+    endpoint: "GET /api/schedule"
+    when: "HEARTBEAT.md has no scheduled entries"
+    result:
+      events: []
+      status: "ok"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A Companion App calendar widget calls GET /api/schedule. The server
+  parses HEARTBEAT.md, which contains markdown entries like
+  "## Daily standup reminder\nEvery weekday at 9:00 AM" and
+  "## Q3 review prep\nOnce on 2026-07-01". The parser must extract
+  structured event data: title from the heading, recurrence from the
+  body text (mapped to RRULE), nextRun computed from the recurrence
+  rule and current time. Events previously synced to Outlook calendar
+  via Graph API carry a calendarEventId for update/delete operations.
+  The calendar widget renders events in a timeline view and creates
+  Outlook calendar events for new items.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Timezone handling: HEARTBEAT.md entries may specify times in local
+      timezone ("9:00 AM PST") or implicitly assume the agent workspace
+      timezone. The API must normalize all nextRun values to UTC and
+      include a `timezone` field so calendar clients can display in the
+      user's local time. Without normalization, a user in EST sees PST
+      times rendered as EST, causing meetings to be 3 hours off.
+    spec_impact: "CL-10 /api/schedule — all timestamps in UTC, timezone field on each event"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Recurring events without an end date produce infinite nextRun
+      sequences. The API must compute only the next occurrence (singular
+      nextRun), not all future occurrences. If HEARTBEAT.md says "Every
+      Monday forever," the response includes nextRun for the next Monday
+      only. Calendar clients that need a range can pass ?from=&to= query
+      parameters to get occurrences within a window.
+    spec_impact: "CL-10 /api/schedule — single nextRun per event, range query for multi-occurrence"
+    pitfall: null
+
+  - id: F03
+    severity: warning
+    description: >
+      iCalendar RRULE format is complex (RFC 5545). Natural language in
+      HEARTBEAT.md ("every other Tuesday", "first Monday of each month")
+      must be mapped to RRULE strings. A mapping table for common patterns
+      is feasible, but edge cases ("every 3rd weekday excluding holidays")
+      will fail. The parser should return `recurrence: null` with a
+      `parseWarning` for entries it cannot map, rather than guessing wrong.
+    spec_impact: "CL-10 schedule parser — null recurrence with parseWarning for unmappable entries"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Events without explicit duration default to... what? Calendar APIs
+      require a duration or end time. If HEARTBEAT.md says "Daily standup
+      at 9 AM" with no duration, the API must apply a default (e.g., 30
+      minutes) and mark it as `durationSource: 'default'` so the UI can
+      prompt the user to specify. A zero-duration event in Outlook renders
+      as an all-day event, which is wrong for a standup.
+    spec_impact: "CL-10 /api/schedule — default duration with durationSource metadata"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Graph API calendar event sync requires OAuth tokens with
+      Calendars.ReadWrite scope. If the token is expired or the user
+      has not consented, the calendarEventId field is stale (points to
+      an event the API can no longer update). The response should include
+      a `syncStatus` field per event: 'synced', 'stale', 'unsynced'.
+    spec_impact: "CL-10 /api/schedule — per-event syncStatus for Graph API health"
+    pitfall: null
+
+  - id: F06
+    severity: note
+    description: >
+      HEARTBEAT.md may contain non-schedule entries (prose, notes,
+      commentary). The parser must distinguish scheduled events from
+      free-form text. A heading followed by a recognized time pattern
+      is an event; a heading followed by narrative text is not. False
+      classification (narrative parsed as event) pollutes the calendar
+      with nonsense entries.
+    spec_impact: "CL-10 schedule parser — confidence threshold for event classification"
+    pitfall: null

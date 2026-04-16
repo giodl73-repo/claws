@@ -9,9 +9,9 @@
  * @module claws-sdk/keys/rotate
  */
 
-import { mkdir, readdir, readFile, writeFile, rename } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile, rename, open, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
-import { sign as cryptoSign } from 'node:crypto';
+import { sign as cryptoSign, timingSafeEqual } from 'node:crypto';
 
 import { CLAWS_SIDECAR_LAYOUT } from '../types/sidecar.js';
 import type { KeyEntry } from './types.js';
@@ -37,27 +37,40 @@ export interface RotateResult {
 const LOCK_FILE = 'rotate.lock';
 
 /**
- * Maximum age of a lock file before it is considered stale (10 minutes).
+ * Default maximum age of a lock file before it is considered stale (60 seconds).
  */
-const LOCK_STALE_MS = 10 * 60 * 1000;
+const DEFAULT_LOCK_TIMEOUT_MS = 60 * 1000;
 
 /**
- * Acquire a file lock on the keys directory.
+ * Acquire a file lock on the keys directory using atomic O_EXCL create.
  *
- * Uses a simple lock file. If the lock file exists, checks whether the
- * owning PID is still alive and whether the lock is younger than 10 minutes.
- * Stale locks are auto-cleaned and retried once.
+ * Uses `fs.open` with `O_CREAT | O_EXCL | O_WRONLY` (flag 'wx') for atomic
+ * lock acquisition — the filesystem guarantees that if the file exists, the
+ * open fails with EEXIST. No read-check-delete sequence needed.
+ *
+ * If the lock file exists, checks whether the owning PID is still alive
+ * and whether the lock is younger than the configured timeout.
+ * Stale locks (dead PID or expired) are reclaimed and retried once.
+ *
+ * @param workspaceRoot - Absolute path to workspace root
+ * @param lockTimeoutMs - Maximum age of a lock before it is stale (default 60s)
  */
-async function acquireLock(workspaceRoot: string): Promise<string> {
+async function acquireLock(workspaceRoot: string, lockTimeoutMs: number = DEFAULT_LOCK_TIMEOUT_MS): Promise<string> {
   const keysDir = join(workspaceRoot, CLAWS_SIDECAR_LAYOUT.keys);
   await mkdir(keysDir, { recursive: true });
   const lockPath = join(keysDir, LOCK_FILE);
+  const lockContent = `${process.pid}\n${Date.now()}\n`;
 
   try {
-    // wx flag: fail if file already exists
-    await writeFile(lockPath, `${process.pid}\n${Date.now()}\n`, { flag: 'wx' });
+    // O_CREAT | O_EXCL | O_WRONLY — atomic: fails with EEXIST if file exists
+    const fh = await open(lockPath, 'wx');
+    await fh.writeFile(lockContent, 'utf-8');
+    await fh.close();
     return lockPath;
-  } catch {
+  } catch (err: unknown) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code !== 'EEXIST') throw err;
+
     // Lock file exists — check if it is stale
     try {
       const content = await readFile(lockPath, 'utf-8');
@@ -74,11 +87,12 @@ async function acquireLock(workspaceRoot: string): Promise<string> {
         pidAlive = false;
       }
 
-      if (!pidAlive || (Number.isFinite(lockTs) && Date.now() - lockTs > LOCK_STALE_MS)) {
-        // Stale lock — remove and retry once
-        const { unlink } = await import('node:fs/promises');
+      if (!pidAlive || (Number.isFinite(lockTs) && Date.now() - lockTs > lockTimeoutMs)) {
+        // Stale lock — remove and retry once with atomic O_EXCL
         await unlink(lockPath);
-        await writeFile(lockPath, `${process.pid}\n${Date.now()}\n`, { flag: 'wx' });
+        const fh = await open(lockPath, 'wx');
+        await fh.writeFile(lockContent, 'utf-8');
+        await fh.close();
         return lockPath;
       }
     } catch {
@@ -90,10 +104,9 @@ async function acquireLock(workspaceRoot: string): Promise<string> {
 }
 
 /**
- * Release the file lock.
+ * Release the file lock by unlinking the lock file.
  */
 async function releaseLock(lockPath: string): Promise<void> {
-  const { unlink } = await import('node:fs/promises');
   try {
     await unlink(lockPath);
   } catch {
@@ -169,7 +182,56 @@ async function reSignArtifact(
 }
 
 /**
+ * Clean up archived key files after a failed rotation.
+ *
+ * Removes the versioned archive files and restores the original key
+ * file from the saved material.
+ */
+async function cleanupArchive(
+  workspaceRoot: string,
+  keyId: string,
+  version: number,
+): Promise<void> {
+  const keysDir = join(workspaceRoot, CLAWS_SIDECAR_LAYOUT.keys);
+  const archivePath = join(keysDir, `${keyId}.v${version}.key`);
+  const pubArchivePath = join(keysDir, `${keyId}.v${version}.pub.key`);
+
+  try { await unlink(archivePath); } catch { /* may not exist */ }
+  try { await unlink(pubArchivePath); } catch { /* may not exist */ }
+}
+
+/**
+ * Compare two key material strings using timing-safe comparison.
+ *
+ * Prevents timing side-channel leaks that could reveal partial key
+ * material through response time differences.
+ *
+ * @param a - First key material (hex or PEM string)
+ * @param b - Second key material (hex or PEM string)
+ * @returns true if the key material is identical
+ */
+export function verifyKeyMaterial(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, 'utf-8');
+  const bufB = Buffer.from(b, 'utf-8');
+  const maxLen = Math.max(bufA.length, bufB.length);
+  // Pad shorter buffer to prevent timing leak of key length
+  const paddedA = maxLen > bufA.length
+    ? Buffer.concat([bufA, Buffer.alloc(maxLen - bufA.length)])
+    : bufA;
+  const paddedB = maxLen > bufB.length
+    ? Buffer.concat([bufB, Buffer.alloc(maxLen - bufB.length)])
+    : bufB;
+  const equal = timingSafeEqual(paddedA, paddedB);
+  // Must also confirm original lengths matched — padding makes unequal-length
+  // inputs fail timingSafeEqual, but we check explicitly for clarity.
+  return equal && bufA.length === bufB.length;
+}
+
+/**
  * Rotate a key: generate new version, re-sign artifacts, archive old key.
+ *
+ * On failure after archive, cleans up the archived key material and
+ * restores the original key to its pre-rotation state.
  *
  * @param workspaceRoot - Absolute path to workspace root
  * @param keyId - ID of the key to rotate
@@ -228,10 +290,21 @@ export async function rotateKey(
           artifactsReSigned++;
         }
       } catch (reSignError) {
-        // Partial re-sign failure: rollback — restore old key material.
+        // Partial re-sign failure: rollback — restore old key material,
+        // clean up orphaned archive, and log the rollback action.
         // oldPrivateKey and oldPublicKey are guaranteed non-null by the pre-check above.
         await storage.write(keyId, oldPrivateKey);
-        await storage.write(`${keyId}.pub`, oldPublicKey!);
+        if (oldPublicKey !== null) {
+          await storage.write(`${keyId}.pub`, oldPublicKey);
+        }
+
+        // Clean up orphaned archive files from the failed rotation
+        await cleanupArchive(workspaceRoot, keyId, previousVersion);
+
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[claws:keys] Rotation rollback for ${keyId}: cleaned up archived v${previousVersion}, restored original key`,
+        );
 
         throw new Error(
           `Partial re-sign failure during rotation of ${keyId}: ${String(reSignError instanceof Error ? reSignError.message : reSignError)}. Rolled back to previous version.`,

@@ -3,7 +3,7 @@ slug: claws-upstream-contrib
 preset: "claws"
 plan: "2 headlines: npm install @openclaw/audit-chain works standalone with zero claws dependency, GuardrailProvider spec PR submitted to openclaw/openclaw"
 area: claws
-status: Draft
+status: Implemented
 phase: thoth
 atoms: [atom:upstream-contrib, atom:audit-chain, atom:three-tier-packages]
 specs: [CL-07, CL-06, CL-02]
@@ -13,24 +13,24 @@ specs: [CL-07, CL-06, CL-02]
 
 ## Headlines
 
-1. **H1: `npm install @openclaw/audit-chain` works standalone with zero claws dependency** — 5 runtime packages are contributed upstream under the `@openclaw/` scope with MIT license: (1) `@openclaw/audit-chain` -- hash-chained JSONL audit trails with HMAC-SHA256 integrity verification, WAL for crash recovery, export to SARIF/CEF/JSON/syslog; (2) `@openclaw/budget-meter` -- token and cost controls with 80/95/100% threshold alerts and throttle enforcement; (3) `@openclaw/identity-bridge` -- enterprise SSO integration (OIDC/SAML) for OC agent authentication with RBAC; (4) `@openclaw/siem-emitter` -- SOC integration emitting audit events in 4 standard formats (CEF, NDJSON, syslog, SARIF); (5) `@openclaw/secret-scanner` -- credential leak detection for agent workspaces using regex patterns + entropy analysis. Each package solves a real problem independently. Zero `@claws/*` or `@craftworks/*` imports in any package.
+1. **H1: `npm install @openclaw/audit-chain` works standalone with zero claws dependency** — 6 runtime packages are contributed upstream under the `@openclaw/` scope with MIT license: (1) `@openclaw/audit-chain` -- hash-chained JSONL audit trails with HMAC-SHA256 integrity verification, WAL for crash recovery, export to SARIF/CEF/JSON/NDJSON/syslog; (2) `@openclaw/budget-meter` -- token and cost controls with 80/95/100% threshold alerts and throttle enforcement; (3) `@openclaw/identity-bridge` -- enterprise SSO integration (OIDC/SAML) for OC agent authentication with RBAC; (4) `@openclaw/siem-emitter` -- SOC integration emitting audit events in 5 standard formats (CEF, NDJSON, JSON, syslog, SARIF); (5) `@openclaw/secret-scanner` -- credential leak detection for agent workspaces using regex patterns + entropy analysis; (6) `@openclaw/approval-events` -- typed approval request/response events with JSON Schema, timeout policies, and correlation by requestId. Each package solves a real problem independently. Zero `@claws/*` or `@craftworks/*` imports in any package.
    - Validation: `npm install @openclaw/audit-chain && node -e "require('@openclaw/audit-chain')"` succeeds with zero peer dependencies
    - Validation: `@openclaw/audit-chain` append + verify round-trip produces valid HMAC chain
-   - Validation: `grep -r '@craftworks' node_modules/@openclaw/` returns zero matches across all 5 packages
+   - Validation: `grep -r '@craftworks' node_modules/@openclaw/` returns zero matches across all 6 packages
 
 2. **H2: GuardrailProvider spec PR submitted to openclaw/openclaw targeting issue #46441** — The highest-leverage first contribution defines the governance interface before implementing it. The `GuardrailProvider` interface specifies 3 methods: `preAuthorize(toolCall)` returning `AuthorizationDecision` (allow/deny/review/modify), `postAudit(toolCall, result)` for audit trail recording, and `getCapabilities()` returning provider metadata. A chain-of-responsibility `ProviderRegistry` composes multiple providers (claws is one provider among many). A reference `ShellExecProvider` wraps existing OC exec-approvals.json as a GuardrailProvider implementation. The spec PR includes TypeScript type definitions, sequence diagrams, and a migration path for existing exec-approval users.
    - Validation: GuardrailProvider TypeScript interface compiles cleanly with OC Gateway type definitions
    - Validation: ShellExecProvider reference implementation passes 10 scenarios against existing exec-approvals.json behavior
    - Validation: ProviderRegistry chains 3 providers and applies correct priority ordering (deny > review > modify > allow)
 
-3. **H3: 3-wave roadmap delivers all 5 packages + spec PR across 16 weeks** — Wave 1 (weeks 1-4): GuardrailProvider spec PR + `@openclaw/identity-bridge` + `@openclaw/budget-meter` + `@openclaw/audit-chain`. Wave 2 (weeks 5-8): `@openclaw/siem-emitter` + `@openclaw/secret-scanner` + policy templates + audit chain format spec. Wave 3 (weeks 9-16): community feedback integration, enterprise extensions, documentation site contributions. Each wave is independently valuable. Wave 1 positions Craftworks as the governance architect. Wave 2 fills the ecosystem gaps. Wave 3 builds community trust.
-   - Validation: Wave 1 deliverables (spec PR + 3 packages) are each independently publishable to npm
-   - Validation: All 5 packages pass their own test suites with >= 90% coverage
+3. **H3: 3-wave roadmap delivers all 6 packages + spec PR across 16 weeks** — Wave 1 (weeks 1-4): GuardrailProvider spec PR + `@openclaw/approval-events` + `@openclaw/identity-bridge` + `@openclaw/budget-meter` + `@openclaw/audit-chain`. Wave 2 (weeks 5-8): `@openclaw/siem-emitter` + `@openclaw/secret-scanner` + policy templates + audit chain format spec. Wave 3 (weeks 9-16): community feedback integration, enterprise extensions, documentation site contributions. Each wave is independently valuable. Wave 1 positions Craftworks as the governance architect. Wave 2 fills the ecosystem gaps. Wave 3 builds community trust.
+   - Validation: Wave 1 deliverables (spec PR + 4 packages) are each independently publishable to npm
+   - Validation: All 6 packages pass their own test suites with >= 90% coverage
    - Validation: Zero breaking changes between Wave 1 and Wave 2 package versions (semver-compatible)
 
 ## Summary
 
-This plan contributes 5 runtime governance packages to the OpenClaw ecosystem under the `@openclaw/` scope and submits a `GuardrailProvider` specification PR to the openclaw/openclaw repository. The packages are powered by existing Craftworks infrastructure (agent-sdk govern/, agent-sdk suite/audit/, compiler-sdk crypto patterns) but wrapped with OC-native APIs and zero Craftworks dependencies. The contribute/keep boundary is architectural: contribute runtime primitives that anyone could build (audit trails, identity, budgets, secrets, SIEM); keep compile-time enforcement that only Craftworks can build (policy compiler, guard passes, RELAX evaluator, CGR emission). A standalone monorepo (`craftworks/openclaw-governance`) hosts all 5 packages with independent versioning via Changesets.
+This plan contributes 6 runtime governance packages to the OpenClaw ecosystem under the `@openclaw/` scope and submits a `GuardrailProvider` specification PR to the openclaw/openclaw repository. The packages are powered by existing Craftworks infrastructure (agent-sdk govern/, agent-sdk suite/audit/, compiler-sdk crypto patterns) but wrapped with OC-native APIs and zero Craftworks dependencies. The contribute/keep boundary is architectural: contribute runtime primitives that anyone could build (audit trails, identity, budgets, secrets, SIEM); keep compile-time enforcement that only Craftworks can build (policy compiler, guard passes, RELAX evaluator, CGR emission). A standalone monorepo (`craftworks/openclaw-governance`) hosts all 6 packages with independent versioning via Changesets.
 
 ## Coverage Contract
 
@@ -40,7 +40,7 @@ This plan contributes 5 runtime governance packages to the OpenClaw ecosystem un
 - [ ] CL-02 -- Audit chain (HMAC/Ed25519 hash chain), secret detection, identity/RBAC security foundations
 
 ### Concept Guides
-- [ ] docs/claws/ecosystem/upstream-packages.md -- NEW: 5 packages with APIs, size budgets, usage examples
+- [ ] docs/claws/ecosystem/upstream-packages.md -- NEW: 6 packages with APIs, size budgets, usage examples
 - [ ] docs/claws/ecosystem/guardrail-provider.md -- NEW: interface spec, chain-of-responsibility, migration path
 
 ### Scenario Coverage
@@ -55,7 +55,7 @@ This plan contributes 5 runtime governance packages to the OpenClaw ecosystem un
 - [ ] upstream/secret-scanner-entropy -- entropy analysis flags high-entropy strings
 - [ ] upstream/guardrail-provider-chain -- 3 providers chained, deny takes priority
 - [ ] upstream/guardrail-shell-exec -- ShellExecProvider wraps exec-approvals.json
-- [ ] upstream/zero-craftworks-imports -- all 5 packages have zero @craftworks/ references
+- [ ] upstream/zero-craftworks-imports -- all 6 packages have zero @craftworks/ references
 
 ### Test Tier Targets
 | Tier | Target | Rationale |
@@ -152,11 +152,11 @@ This plan contributes 5 runtime governance packages to the OpenClaw ecosystem un
 
 ## Notes
 
-- All 5 packages use OC-native APIs only. The internal Craftworks infrastructure (agent-sdk, compiler-sdk) provides the PATTERN and ALGORITHM, but the contributed packages are clean-room implementations with OC-native type signatures. No `@craftworks/*` imports appear in published package code.
+- All 6 packages use OC-native APIs only. The internal Craftworks infrastructure (agent-sdk, compiler-sdk) provides the PATTERN and ALGORITHM, but the contributed packages are clean-room implementations with OC-native type signatures. No `@craftworks/*` imports appear in published package code.
 - The contribute/keep boundary (CL-07): contribute runtime primitives that anyone could build (audit trails, OIDC, state machines); keep compile-time enforcement that only Craftworks can build (policy compiler, guard passes, RELAX evaluator, CGR emission, cross-compilation).
 - GuardrailProvider is the highest-leverage first contribution per CL-07: define the interface before shipping implementations. It positions Craftworks as the governance architect, not just a governance vendor.
 - Standalone monorepo (`craftworks/openclaw-governance`) with Changesets for independent versioning. This keeps the contribution cleanly separated from the Craftworks monorepo while allowing internal development to reference both.
 - Community demand alignment (CL-07): RBAC (#8081, 28+ reactions), cost control (OC Firewall exists), audit (Clawprint exists), SIEM (enterprise SOC requirement), secrets (1.5M token breach).
 - Depends on claws-comply-audit being proven first: the audit chain must work in claws before contributing it upstream. The contributed package is a simplified, standalone version of the proven internal implementation.
 - MIT license for all contributed packages (matches OC ecosystem convention per CL-07).
-- **The GuardrailProvider spec PR (Wave 1, Week 1 of Q12b roadmap) ships in parallel with Ptah.** The spec PR costs nothing and establishes Craftworks as the governance architect. The spec PR is a Phase 1 (Ptah) deliverable; the 5 runtime packages stay in Phase 4 (Ra). Submitting the governance interface spec to openclaw/openclaw before the compiler ships gives the community something to react to and positions Craftworks as the governance architect, not just a governance vendor.
+- **The GuardrailProvider spec PR (Wave 1, Week 1 of Q12b roadmap) ships in parallel with Ptah.** The spec PR costs nothing and establishes Craftworks as the governance architect. The spec PR is a Phase 1 (Ptah) deliverable; the 6 runtime packages stay in Phase 4 (Ra). Submitting the governance interface spec to openclaw/openclaw before the compiler ships gives the community something to react to and positions Craftworks as the governance architect, not just a governance vendor.

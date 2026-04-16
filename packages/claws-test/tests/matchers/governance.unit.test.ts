@@ -32,7 +32,7 @@ function makeCleanInput(overrides: Partial<GovernanceCheckInput> = {}): Governan
 }
 
 describe('toPassGovernance()', () => {
-  it('passes on clean skill with all 12 checks passing', () => {
+  it('passes on clean skill with all 13 checks passing', () => {
     const input = makeCleanInput();
     expect(input).toPassGovernance();
   });

@@ -142,4 +142,32 @@ describe('buildCapabilityManifest()', () => {
     const result = buildCapabilityManifest(manifest);
     expect(result.workflows).toEqual([]);
   });
+
+  it('maps mcpServers to tool capabilities (CM14)', () => {
+    const manifest: ParsedManifest = {
+      tools: [
+        { name: 'read_file', normalizedName: 'read_file', riskClass: 1, oboFlag: false, capabilities: ['read'], source: 'TOOLS.md', line: 1, denyConstraints: [] },
+        { name: 'search', normalizedName: 'search', riskClass: 3, oboFlag: false, capabilities: ['search'], source: 'TOOLS.md', line: 5, denyConstraints: [] },
+        { name: 'unmapped_tool', normalizedName: 'unmapped_tool', riskClass: 2, oboFlag: false, capabilities: ['misc'], source: 'TOOLS.md', line: 10, denyConstraints: [] },
+      ],
+      skills: [],
+      agents: [],
+      dataLabels: [],
+      diagnostics: [],
+    };
+
+    const mcpServers = [
+      { name: 'filesystem', tools: ['read_file', 'write_file'] },
+      { name: 'web-search', tools: ['search'] },
+    ] as const;
+
+    const result = buildCapabilityManifest(manifest, mcpServers);
+
+    // read_file maps to 'filesystem' server
+    expect(result.tools[0]!.mcpServer).toBe('filesystem');
+    // search maps to 'web-search' server
+    expect(result.tools[1]!.mcpServer).toBe('web-search');
+    // unmapped_tool has no mcpServer
+    expect(result.tools[2]!.mcpServer).toBeUndefined();
+  });
 });

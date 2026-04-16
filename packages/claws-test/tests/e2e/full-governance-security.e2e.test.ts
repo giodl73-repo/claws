@@ -49,7 +49,7 @@ describe('e2e: full governance + security validation', () => {
 
     // 2. Run governance validation via programmatic API
     const govResult: ValidationResult = validate(skillInput);
-    expect(govResult.totalChecks).toBe(12);
+    expect(govResult.totalChecks).toBe(13);
     expect(govResult.pass).toBe(true);
     expect(govResult.findings).toHaveLength(0);
 

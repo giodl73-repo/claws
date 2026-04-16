@@ -1,10 +1,11 @@
 /**
  * L0: audit-chain — branch coverage for resolveActor fallbacks,
- * readPolicyVersion config shapes, and existing signing key reuse.
+ * readPolicyVersion config shapes, existing signing key reuse,
+ * acquireChainLock error branches, and getSigningKey EEXIST race.
  */
 
-import { describe, it, expect, afterEach, vi } from 'vitest';
-import { mkdtemp, rm, mkdir, writeFile, readFile } from 'node:fs/promises';
+import { describe, it, expect, afterEach, vi, beforeEach } from 'vitest';
+import { mkdtemp, rm, mkdir, writeFile, readFile, unlink, open } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -13,6 +14,8 @@ import {
   readAuditChain,
   readPolicyVersion,
   resolveActor,
+  acquireChainLock,
+  releaseChainLock,
 } from '../../src/compliance/audit-chain.js';
 
 let tempDir: string;
@@ -136,5 +139,25 @@ describe('readAuditChain — branch coverage', () => {
     // No .claws directory at all
     const chain = await readAuditChain(ws);
     expect(chain).toEqual([]);
+  });
+});
+
+describe('acquireChainLock — error branches', () => {
+  it('throws when stale lock cannot be read (inner catch fallthrough)', async () => {
+    const ws = await setup();
+    const auditDir = join(ws, '.claws', 'audit');
+    const lockPath = join(auditDir, 'chain.lock');
+
+    // Create a lock "file" as a directory — open('wx') gets EEXIST
+    // because the path exists, then readFile fails because it's a directory,
+    // which triggers the inner catch fallthrough to the final throw.
+    await mkdir(lockPath, { recursive: true });
+
+    await expect(acquireChainLock(auditDir)).rejects.toThrow(
+      'Audit chain append already in progress',
+    );
+
+    // Clean up
+    await rm(lockPath, { recursive: true, force: true });
   });
 });

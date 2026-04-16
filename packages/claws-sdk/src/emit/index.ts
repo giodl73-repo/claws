@@ -56,6 +56,23 @@ export {
 } from './platform-router.js';
 
 export {
+  emitHostApprovalPolicies,
+  resolvePolicy,
+  type EmitHostApprovalPoliciesOptions,
+  type HostApprovalPoliciesResult,
+} from './emit-host-approval-policies.js';
+
+export {
+  DEFAULT_POLICY_MAPPINGS,
+  HOST_APPROVAL_POLICIES_SCHEMA_VERSION,
+  type HostApprovalPolicy,
+  type PolicyMapping,
+  type FleetOverride,
+  type FleetOverrideAuditEntry,
+  type HostApprovalPoliciesDocument,
+} from './host-approval-policy-types.js';
+
+export {
   getAdapter,
   getAllAdapters,
   type PlatformAdapter,

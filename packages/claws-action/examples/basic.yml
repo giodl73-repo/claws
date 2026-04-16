@@ -1,0 +1,40 @@
+# Minimal PR check workflow with claws SARIF upload.
+#
+# This workflow runs `claws check --format sarif` on every pull request
+# and uploads the results to GitHub Code Scanning so violations appear
+# as inline PR annotations.
+#
+# Prerequisites:
+#   - claws must be installed in the runner (e.g., via npm install -g @bic/claws-cli)
+#   - The repository must have Code Scanning enabled (GitHub Advanced Security)
+
+name: claws Governance Check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write  # Required for SARIF upload
+
+jobs:
+  governance-check:
+    name: Governance Compliance
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install claws
+        run: npm install -g @bic/claws-cli
+
+      - name: Run claws governance check
+        uses: craftworks/claws-action@v1
+        with:
+          stage: '1'
+          format: 'sarif'
+          fail-on: 'critical'

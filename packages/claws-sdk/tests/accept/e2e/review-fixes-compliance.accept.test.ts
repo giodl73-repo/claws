@@ -25,7 +25,7 @@ import {
 import { tmpdir } from 'node:os';
 
 import { initWorkspace } from '../../../src/init/index.js';
-import { checkBypass } from '../../../src/init/bypass.js';
+import { checkBypass } from '../../../src/config/bypass.js';
 import { uninstallWorkspace } from '../../../src/init/uninstall.js';
 import { applyAmendment } from '../../../src/amend/apply.js';
 import { readAuditChain } from '../../../src/compliance/audit-chain.js';

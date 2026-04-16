@@ -8,7 +8,7 @@
  * @module claws-sdk/keys/registry
  */
 
-import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, rename, open, unlink } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { CLAWS_SIDECAR_LAYOUT } from '../types/sidecar.js';
@@ -25,25 +25,48 @@ const REGISTRY_FILE = 'registry.json';
 const REGISTRY_LOCK_FILE = 'registry.lock';
 
 /**
- * Acquire a file lock on the registry to prevent concurrent read-modify-write races.
+ * Default maximum age of a lock file before it is considered stale (60 seconds).
  */
-async function acquireRegistryLock(workspaceRoot: string): Promise<string> {
+const DEFAULT_LOCK_TIMEOUT_MS = 60 * 1000;
+
+/**
+ * Acquire a file lock on the registry using atomic O_EXCL create.
+ *
+ * Uses `fs.open` with `O_CREAT | O_EXCL | O_WRONLY` (flag 'wx') for atomic
+ * lock acquisition. If the lock file exists, checks PID liveness and lock age.
+ * Stale locks (dead PID or expired) are reclaimed and retried once.
+ */
+async function acquireRegistryLock(workspaceRoot: string, lockTimeoutMs: number = DEFAULT_LOCK_TIMEOUT_MS): Promise<string> {
   const keysDir = join(workspaceRoot, CLAWS_SIDECAR_LAYOUT.keys);
   await mkdir(keysDir, { recursive: true });
   const lockPath = join(keysDir, REGISTRY_LOCK_FILE);
 
+  async function writeLock(): Promise<void> {
+    const lockContent = `${process.pid}\n${Date.now()}\n`;
+    const fh = await open(lockPath, 'wx');
+    try {
+      await fh.writeFile(lockContent, 'utf-8');
+    } finally {
+      await fh.close();
+    }
+  }
+
   try {
-    await writeFile(lockPath, `${process.pid}\n${Date.now()}\n`, { flag: 'wx' });
+    // O_CREAT | O_EXCL | O_WRONLY — atomic: fails with EEXIST if file exists
+    await writeLock();
     return lockPath;
-  } catch {
-    // Check for stale lock before giving up
+  } catch (err: unknown) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code !== 'EEXIST') throw err;
+
+    // Lock file exists — check if it is stale
     try {
       const content = await readFile(lockPath, 'utf-8');
       const [pidStr, tsStr] = content.trim().split('\n');
       const lockPid = Number(pidStr);
       const lockTs = Number(tsStr);
 
-      // Stale if PID is dead or lock is older than 10 minutes
+      // Check if PID is still alive
       let pidAlive = false;
       try {
         process.kill(lockPid, 0);
@@ -52,10 +75,10 @@ async function acquireRegistryLock(workspaceRoot: string): Promise<string> {
         pidAlive = false;
       }
 
-      if (!pidAlive || Date.now() - lockTs > 10 * 60 * 1000) {
-        const { unlink } = await import('node:fs/promises');
+      if (!pidAlive || (Number.isFinite(lockTs) && Date.now() - lockTs > lockTimeoutMs)) {
+        // Stale lock — remove and retry once with atomic O_EXCL
         await unlink(lockPath);
-        await writeFile(lockPath, `${process.pid}\n${Date.now()}\n`, { flag: 'wx' });
+        await writeLock();
         return lockPath;
       }
     } catch {
@@ -67,10 +90,9 @@ async function acquireRegistryLock(workspaceRoot: string): Promise<string> {
 }
 
 /**
- * Release the registry lock.
+ * Release the registry lock by unlinking the lock file.
  */
 async function releaseRegistryLock(lockPath: string): Promise<void> {
-  const { unlink } = await import('node:fs/promises');
   try {
     await unlink(lockPath);
   } catch {

@@ -16,7 +16,8 @@ export type {
   MergeResult,
 } from './types.js';
 
-export { AnthropicLLMProvider } from './anthropic-provider.js';
+// A-W1: AnthropicLLMProvider intentionally NOT exported from sub-barrel.
+// Consumers import the concrete provider directly from './anthropic-provider.js'.
 export type { AnthropicLLMProviderOptions } from './anthropic-provider.js';
 
 export { ExtractorLLM, buildRegexIntentMap } from './extractor.js';
@@ -26,12 +27,20 @@ export {
   buildSystemPrompt,
   buildUserPrompt,
   parseIntentsFromResponse,
+  parseIntentsTyped,
   validateExtractionResult,
 } from './prompts.js';
+export type { IntentParseResult } from './prompts.js';
 
 export {
   ADVERSARIAL_GUARD,
   withAdversarialGuard,
+  DEFAULT_ADVERSARIAL_CONFIDENCE_THRESHOLD,
+  KNOWN_INJECTION_PATTERNS,
+  containsJsonStructure,
+  normalizeForPatternMatch,
+  checkAdversarialIntent,
+  validateAdversarialIntents,
   SOUL_PROMPT_VERSION,
   buildSoulSystemPrompt,
   buildSoulUserPrompt,
@@ -44,6 +53,11 @@ export {
   SKILL_PROMPT_VERSION,
   buildSkillSystemPrompt,
   buildSkillUserPrompt,
+} from './prompts/index.js';
+export type {
+  AdversarialGuardConfig,
+  AdversarialCheckResult,
+  AdversarialValidationResult,
 } from './prompts/index.js';
 
 export {
@@ -72,6 +86,10 @@ export {
   LLMCache,
   hashContent,
   hashPrompt,
+  signCacheExport,
+  verifyCacheHmac,
+  exportSigned,
+  importVerified,
 } from './cache.js';
 export type {
   CacheKey,

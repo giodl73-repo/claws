@@ -1,0 +1,216 @@
+name: S26-trust-tier-downgrade
+series: cap-integration
+version: 1
+specs: [CL-10, CL-11, CL-12]
+description: >
+  Validates behavior when a manager revokes trust via PATCH /api/trust,
+  downgrading the agent from T3 to T2 (or lower). Tools requiring T3 become
+  inaccessible, chunks update with governance locks, active work-queue tasks
+  using T3 tools are flagged as blocked_by_trust, and the audit trail records
+  the downgrade with manager identity. Covers edge cases including mid-task
+  downgrade, cascading effects on delegated agents, and the extreme case of
+  downgrade to T0 (zero trust).
+
+expect:
+  t3_to_t2_downgrade:
+    endpoint: "PATCH /api/trust"
+    payload: "{ tier: 'T2', reason: 'Policy review', actor: 'manager@corp.com' }"
+    pre_state:
+      trust_tier: "T3"
+      t3_tools: ["deploy-prod", "delete-resource", "escalate-ticket"]
+    post_state:
+      trust_tier: "T2"
+      t3_tools_locked: true
+      lock:
+        source: "governance"
+        reason: "Requires T3, agent is T2"
+      work_queue:
+        blocked_tasks:
+          - taskId: "task-42"
+            blocked_by: "deploy-prod"
+            status: "blocked_by_trust"
+    governance:
+      warnings:
+        - type: "TRUST_TIER_DOWNGRADE"
+          from: "T3"
+          to: "T2"
+          tools_affected: 3
+          tasks_blocked: 1
+    audit_event:
+      type: "trust-change"
+      from: "T3"
+      to: "T2"
+      actor: "manager@corp.com"
+      reason: "Policy review"
+  t0_downgrade:
+    description: "Downgrade to T0 — all tools locked (zero trust)"
+    post_state:
+      trust_tier: "T0"
+      all_tools_locked: true
+      lock:
+        source: "governance"
+        reason: "Trust tier T0: all tools require explicit approval"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A manager sends PATCH /api/trust to downgrade the agent from T3 to T2.
+  Three tools in the workspace require T3 (deploy-prod, delete-resource,
+  escalate-ticket). One active work-queue task (task-42) is using deploy-prod.
+  The downgrade must: (1) update the trust tier in the governance state,
+  (2) re-evaluate all tool locks against the new trust tier, (3) lock tools
+  that now exceed the agent's trust level, (4) flag active work-queue tasks
+  that depend on newly locked tools as blocked_by_trust, (5) record the
+  downgrade in the audit trail with the manager's identity and reason,
+  (6) update chunks to reflect the new lock state. The challenge is handling
+  the downgrade while the agent is mid-task, cascading the downgrade to
+  delegated agents, invalidating pre_authorizations that assumed the higher
+  trust tier, and handling the extreme case of T0 (all tools locked).
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      Mid-task downgrade: if the agent is actively executing a tool call
+      at T3 level when the trust downgrade arrives, the in-flight call
+      must be handled gracefully. Aborting mid-execution could leave
+      external state inconsistent (e.g., half-deployed resource). The
+      system should: (a) allow in-flight T3 calls to complete, (b)
+      prevent new T3 calls from starting, (c) log the grace period in
+      the audit trail. The grace window must be bounded (e.g., 60 seconds).
+    spec_impact: "CL-10 trust downgrade — grace period for in-flight tool calls with bounded window"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      Delegation cascade: if the downgraded agent (A) has delegated tasks
+      to agent B at T3 level, agent B's delegated trust is derived from
+      agent A's trust tier. Downgrading A from T3 to T2 should
+      transitively downgrade B's delegated trust. The delegation graph
+      must be traversed and all downstream agents' trust evaluated.
+      Without cascade, agent B continues operating at T3 via stale
+      delegation.
+    spec_impact: "CL-10 trust downgrade cascade — traverse delegation graph, re-evaluate downstream trust"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Pre_authorizations that were granted under the assumption of T3
+      trust must be invalidated or re-evaluated. A pre_authorization for
+      deploy-prod was valid at T3 but is meaningless at T2 (the tool is
+      locked). If the trust is later upgraded back to T3, should the old
+      pre_authorization be restored? Safest: invalidate on downgrade,
+      require re-approval on upgrade.
+    spec_impact: "CL-10 trust downgrade — invalidate pre_authorizations, require re-approval on upgrade"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Loop pages showing T3 capabilities need UI refresh after downgrade.
+      If the Loop cache shows T3 tools as available, the user may attempt
+      to use them and receive confusing errors. The trust downgrade must
+      emit an SSE event (from CL-12 real-time channel) that triggers Loop
+      UI refresh. Without this, the UI is stale until the next full page
+      load.
+    spec_impact: "CL-12 SSE event — trust-tier-change event triggers Loop UI refresh"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The HEARTBEAT.md schedule may contain entries that reference T3 tools
+      (e.g., "deploy-prod runs every night at 2 AM"). After trust downgrade,
+      these scheduled entries become partially invalid. The schedule must
+      be re-evaluated and entries depending on locked tools must be flagged
+      as suspended_by_trust, not silently skipped. The user must see which
+      scheduled actions are affected.
+    spec_impact: "CL-10 schedule re-evaluation — flag entries depending on locked tools as suspended_by_trust"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Downgrade to T0 (zero trust) locks ALL tools, including R1 tools
+      that are normally unrestricted. T0 is an emergency lockdown state.
+      The system must handle T0 as a special case: all tools locked with
+      source "governance", all work-queue tasks blocked, all scheduled
+      actions suspended. The Lock UI must show a prominent "Zero Trust
+      Active" banner.
+    spec_impact: "CL-10 T0 lockdown — all tools locked, all tasks blocked, all schedules suspended"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The audit trail must record the manager's identity for the trust
+      change. If the PATCH /api/trust endpoint does not require
+      authentication, any client can downgrade trust. The endpoint must
+      validate the actor field against the fleet's authorized manager list.
+      An unauthorized trust change attempt must be rejected with
+      UNAUTHORIZED_TRUST_CHANGE and logged as a security event.
+    spec_impact: "CL-10 PATCH /api/trust — require authenticated manager identity, reject unauthorized"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Interaction between trust downgrade and fleet policy: if fleet
+      policy says "all agents must be at least T2" and the manager
+      downgrades to T1, does the fleet policy override the manager's
+      decision? Fleet minimum should be enforced: downgrade below fleet
+      minimum produces a FLEET_MINIMUM_TRUST_VIOLATION warning but still
+      applies the downgrade (manager decision takes precedence for
+      immediate security). Fleet policy fires a separate compliance alert.
+    spec_impact: "CL-10 trust + fleet — manager decision overrides fleet minimum with compliance alert"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The work-queue blocked_by_trust status must include enough context
+      for the user to understand why the task is blocked: which tool,
+      what trust tier it requires, what the current tier is, and who
+      downgraded it. A generic "blocked" status without context forces
+      the user to investigate independently.
+    spec_impact: "CL-10 work-queue blocked_by_trust — include tool, required tier, current tier, actor"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Trust tier changes should be rate-limited to prevent rapid
+      flip-flopping (T3→T2→T3→T2) which could be used to exploit race
+      conditions in the lock/unlock cycle. A minimum interval between
+      trust changes (e.g., 5 minutes) or a cooldown after downgrade
+      before upgrade is allowed would prevent this attack vector.
+    spec_impact: "CL-10 trust changes — rate limit or cooldown to prevent rapid flip-flopping"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      If the trust downgrade occurs while the compilation is in progress,
+      the compilation may produce results based on the old trust tier.
+      The trust change must invalidate any in-progress compilation and
+      trigger a fresh recompilation with the new trust tier. Otherwise
+      the compiled GovernanceIR reflects T3 permissions that no longer
+      apply.
+    spec_impact: "CL-10 trust change — invalidate in-progress compilation, trigger fresh recompile"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Trust tier history should be queryable for compliance audits: "show
+      all trust changes for this agent in the last 90 days." The audit
+      system must support filtering by event type (trust-change) and
+      agent identifier. The response should include the full context of
+      each change (from, to, actor, reason, tools affected).
+    spec_impact: "CL-11 audit API — trust-tier history query with full change context"
+    pitfall: null
