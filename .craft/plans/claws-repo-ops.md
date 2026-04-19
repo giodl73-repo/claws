@@ -361,7 +361,14 @@ Writes 3 files from `devtools/repo-ops/atom-templates/`:
 2. `docs/specs/contracts/{slug}.yaml` — scaffolds surface-contract with narrative placeholders
 3. (if `scenario-source: series`) `tests/accept/scenarios/{series-id}/S01-{slug}-happy-path/scenario.yaml` + `fixtures/` placeholder
 
-If `--no-editor` is not set, opens all 3 files in `$EDITOR` (fallback `notepad.exe` on Windows). `--dry-run` prints the unified diff without writing.
+If `--no-editor` is not set, opens all 3 files in an editor chosen by this Windows-aware cascade:
+1. `$EDITOR` env var (POSIX convention; honored on Windows too)
+2. `%VISUAL%` env var (Windows/legacy DOS convention)
+3. `code` on PATH (VS Code — most likely for a Windows dev machine)
+4. `Start-Process <file>` (Windows shell association — opens whatever the user set for `.md` / `.yaml`)
+5. `notepad.exe` (last-resort fallback; mismatched for YAML but never misses)
+
+`--dry-run` prints the unified diff without writing and skips the editor step entirely.
 
 **Validation** (scaffolder's own L2 round-trip test — Theme L):
 - Scaffold a test atom with all field combinations
@@ -433,7 +440,15 @@ claws doctor --dry-run-drop <runner-or-series>  # pre-drop safety (via --check a
 - `--check no-craftworks`: < 2s
 - Total `claws doctor` clean: < 15s on Windows, < 8s on Linux CI
 
-Budgets are measured + logged per-check; regressions > 30% surface in CI as a warning (not failure). Content-addressable cache at `.claws-cache/doctor/` keyed on (atoms.md mtime, contracts/*.yaml mtimes, docs/*/manifest.yaml mtimes) short-circuits repeat runs on unchanged inputs.
+Budgets are measured + logged per-check; regressions > 30% surface in CI as a warning (not failure).
+
+**Content-addressable cache** at `.claws-cache/doctor/` (added to `.gitignore` by the CP-2 migration + explicit entry reinforcement in CP-4 `bic-operations`). Spec:
+
+- **Keys**: hash-based, not mtime-based (Windows NTFS 1-second mtime resolution + Defender touching FILETIME on scan would produce stale cache hits). Cache key = `sha256(content bytes)` of the input set, per-check.
+- **Eviction**: LRU, max 100 entries OR max 50 MB (whichever trips first); oldest-entry eviction emits `CACHE_EVICT_LRU` telemetry line.
+- **Corruption recovery**: if a cache entry fails JSON-parse or hash-verify on read, the entry is deleted + the check runs fresh + emits `CACHE_CORRUPT_RECOVERED` telemetry.
+- **Inspection**: `claws doctor --cache-stats` subcommand prints entry count / total bytes / oldest entry age / hit-rate-since-boot.
+- **Bypass**: `claws doctor --no-cache` forces full run (useful for debugging regressions where cache may lie).
 
 ## Scope
 
@@ -579,6 +594,8 @@ Runner names (`e2e-loop-sim`, `approval-flow-sim`, `host-shape-sim`, `compile-si
 
 Composition: `doctor.yml` is the top-level gate on merges; per-check workflows are fast PR-time gates.
 
+**`doctor.yml` artifact persistence**: composite `doctor` run emits `--format json`; the workflow step uploads the JSON to `actions/upload-artifact@v4` (named `doctor-results-{sha}`, retention 90 days) AND writes a Markdown summary to `$GITHUB_STEP_SUMMARY` so the PR checks tab surfaces gap counts + severity without a download. External dashboards are out-of-scope for this plan; they consume the artifact API in a later ops wave.
+
 ### Doc + code scrubbing protocol (applied during CP-2 migration + verified here — Theme H + architect F-06)
 
 Each migrated doc + code file passes through a 5-step scrub before landing in bic/claws:
@@ -639,6 +656,7 @@ Per-file coverage floor: 95/90/95/95 (stmts/branches/funcs/lines). Enforced per-
 - **claws-sim-approval-flows (plan 5)** — consumes `approval-flow-sim` runner type from this plan; no code-level dependency (runners + atoms live in this plan).
 - **claws-sim-host-presets (plan 6)** — consumes `host-shape-sim` runner type from this plan; same.
 - **Schema-drift inventory (ops F-07)** — before port: every Zod schema lifted from craftworks has its type-dependencies inventoried in `devtools/repo-ops/src/doc-validator/LIFT-MANIFEST.md`. Port-time rule: if a ported schema references a type that doesn't exist in bic/claws yet, create it in `@bic/openclaw-*` first OR inline-define as a local interface. No `z.any()` or `as any` to unblock.
+- **`LIFT-MANIFEST.md` shape + lifecycle** — the manifest is a structured Markdown file with one H2 section per lifted file. Each section lists: source path (craftworks-relative, historical), destination path (bic/claws-relative), external type dependencies (package + type name), ported status (`not-started` / `in-progress` / `complete`), ported-at timestamp, ported-by commit-sha. Ownership: `@bic/claws-release-eng` team CODEOWNERS. Lifecycle: file exists during CP-3 port work; at CP-8 wave-close it's either (a) archived to `docs/research/lift-manifest-archive.md` if history is useful, or (b) deleted if no residual value (decision made at close). Documented in `docs/concepts/doc-validation.md`.
 - **Peer-version pinning**: `@bic/repo-ops` pins `@bic/openclaw-*` via `devDependencies` (repo-ops is internal-only, so these are not peer deps in the published sense). CI gates mismatch via a workflow step.
 
 ## Out of scope
@@ -651,18 +669,18 @@ Per-file coverage floor: 95/90/95/95 (stmts/branches/funcs/lines). Enforced per-
 - **Parallelizing `claws doctor` checks** — later optimization gated on measured runtime; sequential-by-default documented in H8.
 - **CL-15 reservation** — this plan does NOT claim a canonical CL number for the canonicalizer spec; citation is by draft filename. Spec-number coordinator reserves at CP-5.
 
-## Ordering note (Theme F — CP renumbering cascade, DEFERRED TO TEAM-LEAD SWEEP)
+## Ordering note (Theme F — CP renumbering cascade, APPLIED)
 
-This plan's originally-proposed CP-3 insertion shifts downstream checkpoints. **Per Theme F, the cascade edits are flagged for a separate sweep by the team lead**, not silently applied in this plan:
+This plan inserts at **CP-3**, shifting downstream checkpoints by 1. The cascade was applied by the team-lead in a coordinated sweep (commit 480e34a0d):
 
-- **REPLAN.md** — CP table (lines 21-39) needs CP-3..CP-7 → CP-3..CP-8 update
-- **Plan 4 (`claws-e2e-sim-harness`)** — any `CP-5 deploy` / `Stage 3` references re-check against the new numbering
-- **Plan 5 (`claws-sim-approval-flows`)** — same
-- **Plan 6 (`claws-sim-host-presets`)** — same
-- **`claws-bic-operations`** — deliverables list needs the 5 repo-ops workflows added (separately from the CP-number cascade)
-- **`wave.yaml`** — already updated to 8 CPs per R1-consolidated Theme F notes (✓)
+- ✅ **REPLAN.md** — CP table updated 7 → 8 CPs, claws-repo-ops inserted as CP-3
+- ✅ **Plan 4 (`claws-e2e-sim-harness`)** — all `CP-5 deploy` references rewritten to semantic `wave close / deploy stage`; zero hard-coded CP-N references remain
+- ✅ **Plan 5 (`claws-sim-approval-flows`)** — same semantic rewrite applied
+- ✅ **Plan 6 (`claws-sim-host-presets`)** — `CP-7` wave close → `CP-8`
+- ✅ **`claws-bic-operations`** — Deliverables list extended with 5 new workflows (doc-validation, accept-tests, atoms-oracle, no-craftworks, doctor) + CODEOWNERS entry for `.no-craftworks-allowlist.yaml`
+- ✅ **`wave.yaml`** — 8 CPs, claws-repo-ops at CP-3
 
-**This plan does NOT unilaterally claim CP-3**. Wave-lead resolves sequencing. Until then, this plan is "lands within or adjacent to bic-operations in Horus Stage 3"; any CP-number cascade edits happen in a coordinated sweep.
+**8-CP sequence (final)**: pre-extraction (CP-1) → repo-migration (CP-2) → **repo-ops (CP-3)** → bic-operations (CP-4) → e2e-sim-harness (CP-5) → sim-approval-flows (CP-6) → sim-host-presets (CP-7) → close (CP-8).
 
 ## Severity + traceability notes
 
