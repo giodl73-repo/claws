@@ -1,13 +1,16 @@
 ---
 slug: claws-repo-ops
 preset: "claws"
-plan: "3 headlines: port doc-validation system (surface-matrix, gap-detector, known-gaps) into packages/repo-ops/doc-validator/ so atoms have authoritative doc obligations; port domain.manifest + accept-test runner into packages/repo-ops/accept-runner/ so atoms have authoritative scenario obligations; publish atoms registry at docs/atoms.md as the oracle both gates validate against + add no-craftworks CI gate. All code bic/claws-native, zero craftworks mentions."
+plan: "3 headlines: port doc-validation system (surface-matrix, gap-detector, known-gaps) into devtools/repo-ops/doc-validator/ so atoms have authoritative doc obligations; port domain.manifest + accept-test runner into devtools/repo-ops/accept-runner/ so atoms have authoritative scenario obligations; publish atoms registry at docs/concepts/atoms-registry.md as the oracle both gates validate against + add no-craftworks CI gate with allowlist. All code bic/claws-native, zero craftworks mentions."
 area: claws
 status: Draft
 phase: horus
-atoms: [atom:claws-repo-boundary, atom:repo-ops, atom:doc-validation, atom:accept-test, atom:atoms-registry]
-specs: [CL-13, CL-15]
+revision: R1-findings-applied
+atoms: [atom:claws-repo-boundary, atom:repo-ops, atom:doc-validation, atom:accept-test, atom:atoms-registry, atom:no-craftworks-gate, atom:doc-scrubber, atom:atom-scaffolder]
+specs: [CL-13, CL-NEW-canonicalizer-byte-identical]
 ---
+
+> **R1 revision note (2026-04-19)**: This plan was revised following R1 panel reviews (architect, conformance, operations — 30 findings across 15 themes A-O, consolidated at `.craft/waves/260416+horus-the-heir+claws-migration/panels/plan-repo-ops/R1-consolidated.md`). Major changes: (a) CL-13 rename amendment filed at `specs/drafts/CL-13-amendment-rename-to-claws.md` and cited in Coverage Contract; (b) 2-package split collapsed to 1 package with subpaths; (c) moved from `packages/` to `devtools/` (non-published, internal); (d) atom schema extended to preserve Authority/Mirrors/Reuses/Spec fields and adds `status` + `scenario-source` exemption + semantic series-ids decoupled from runner types; (e) no-craftworks gate given scope + allowlist; (f) scrubber ported to Node.js `scrub-doc.mjs`; (g) `claws doctor` composition semantics specified; (h) per-runner Zod schemas + scaffolder command + orphan-detection sweep added; (i) test tier expanded 48/14/6 → 76/21/8. CP renumbering cascade (Theme F) is flagged pending separate sweep by the team lead across REPLAN.md + plans 4/5/6.
 
 # claws-repo-ops — Validation Gates, Atoms Registry, Scrubbing Protocol
 
@@ -18,167 +21,481 @@ CP-2 `claws-repo-migration` lifts content out of craftworks into bic/claws. Lift
 **This plan ports two gates + an oracle**:
 
 1. **Doc-validation gate** — surface contracts + gap detector. Every atom declares the docs it needs (guide? deck? tutorial?); every doc declares the atoms it serves; gap detector fails the build if declarations and reality don't match.
-2. **Accept-test gate** — domain manifests + scenario runner. Every atom declares a scenario domain; every scenario proves an atom's behaviour; accept-tests fail the build if a scenario lies.
-3. **Atoms registry (`docs/atoms.md`)** — the single source of truth both gates consult. Adding an atom means declaring both obligations. No atom ships without both.
+2. **Accept-test gate** — domain manifests + scenario runner. Every atom declares a scenario series; every scenario proves an atom's behaviour; accept-tests fail the build if a scenario lies.
+3. **Atoms registry (`docs/concepts/atoms-registry.md`)** — the single source of truth both gates consult. Adding an atom means declaring both obligations. No atom ships without both (or a documented exemption).
 
-Plus a **no-craftworks enforcement** — the new repo cannot mention craftworks. CI grep fails on any occurrence in docs, code, config, or git metadata.
+Plus a **no-craftworks enforcement** with scope + allowlist — the new repo cannot mention craftworks in active code; a short, CODEOWNERS-gated allowlist covers attribution/migration docs.
+
+Plus a **code + doc scrubber** (`scrub-doc.mjs`) and an atom **scaffolder** (`claws make atom`) so the registry stays cheap to extend and migrations stay mechanical.
 
 ## Headlines
 
-### H1 — Port doc-validation into `packages/repo-ops/doc-validator/`
+### H1 — Port doc-validation into `devtools/repo-ops/src/doc-validator/`
 
-The doc-validation system from craftworks (`craftworks-sdk/src/domains/docs/`) lifts into a dedicated `@bic/repo-ops-doc-validator` package in the new repo. All 7 core files port with adaptations:
+The doc-validation system from craftworks (`craftworks-sdk/src/domains/docs/`) lifts into the `/doc-validator` subpath of a single `@bic/repo-ops` package (see H4 for the single-package structure). All 7 core files port with adaptations:
 
-- `surface-matrix.ts` — the 11×15 lookup table (11 surfaces × 3 visibilities × 5 docTypes → requirement levels). Surface names stay (guide/deck/tutorial/trace/spec/story/howto/example/research/index/root) because these are generic doc-system concepts.
-- `doc-domain-schema.ts` — Zod schema for per-atom doc obligations. Adapts atom-layer identifiers to claws's atom taxonomy (see H3 atoms registry).
+- `surface-matrix.ts` — the 11-surface lookup table (surfaces × visibilities × docTypes → requirement levels). Surface names stay (guide/deck/tutorial/trace/spec/story/howto/example/research/index/root) because these are generic doc-system concepts.
+- `doc-domain-schema.ts` — Zod schema for per-atom doc obligations. Adapts atom-layer identifiers to claws's extended atom taxonomy (see H3 atoms registry).
 - `doc-manifest-schema.ts` — Zod schema for `docs/*/doc-manifest.yaml` — docs declare what they serve.
-- `gap-detector.ts` — diffs required × declared; emits 15 gap types. Pure function, no I/O.
+- `gap-detector.ts` — diffs required × declared; emits 15 gap types (each with `{code, severity, message, hint, docsLink}` for CI diagnostics). Pure function, no I/O.
 - `known-gaps-schema.ts` — schema for `docs/known-gaps.yaml` (acknowledged temporary gaps; each gap cites a plan that will close it).
 - `doc-sync-integration.ts` — `assessConceptGuides()`, `assessPitchDecks()` — CLI-facing entry points called by `claws doctor`.
 - `tests/*.unit.test.ts` — port + re-express test cases against bic/claws atoms.
 
 **Validations**:
-- Every claws atom in `docs/atoms.md` has a `surface-contract.yaml` in `docs/specs/contracts/{atom-id}.yaml`
-- Every `docs/*/doc-manifest.yaml` references only atoms declared in `docs/atoms.md`
-- `claws doctor --check docs` runs the gap detector and exits non-zero on unacknowledged gaps
+- Every claws atom in `docs/concepts/atoms-registry.md` has a `surface-contract.yaml` in `docs/specs/contracts/{atom-id}.yaml`
+- Every `docs/*/doc-manifest.yaml` references only atoms declared in `docs/concepts/atoms-registry.md`
+- `claws doctor --check docs` runs the gap detector and exits non-zero on unacknowledged gaps; runtime budget < 3s on a ~200-doc tree (Windows dev machine)
 - `.github/workflows/doc-validation.yml` runs `claws doctor --check docs` on every PR
-- Unit tests cover: all 15 gap types, known-gap acceptance, surface-matrix lookup, manifest loader edge cases
-- No `@craftworks/*` or `craftworks` string anywhere in ported files (CI-enforced)
+- Unit tests cover: all 15 gap types, known-gap acceptance, surface-matrix lookup, manifest loader edge cases, hint-rendering correctness
+- No `@craftworks/*` or bare `craftworks` string in active code (CI-enforced per H5; allowlist governs exceptions)
 
-### H2 — Port domain manifest + accept-test runner into `packages/repo-ops/accept-runner/`
+### H2 — Port domain manifest + accept-test runner into `devtools/repo-ops/src/accept-runner/`
 
-The accept-test system from craftworks (`claws-sdk/tests/accept/`) lifts into `@bic/repo-ops-accept-runner`. Core files port with minor adaptation:
+The accept-test system from craftworks (`claws-sdk/tests/accept/`) lifts into the `/accept-runner` subpath of `@bic/repo-ops`. Core files port with minor adaptation:
 
 - `manifest-runner.ts` — generic dispatcher; `runFromManifest(path)` is domain-agnostic; no rewrite needed beyond import paths.
-- `scenario-loader.ts` — discovers `{series}/{S##-name}/scenario.yaml`; Zod-validates.
-- Runners port individually per claws's domains:
-  - `compile-sim` — generator round-trip (full compile pipeline)
-  - `harness-sim` — plan 4 harness fixture validation
-  - `approval-sim` — plan 5 approval flow scenarios
-  - `preset-sim` — plan 6 preset matrix scenarios
-  - `pinch-sim` — rule-level checks (kept generic)
-  - `emit-sim` — artifact validation (kept generic)
-  - `security-sim` — A2A trust (kept generic; ties into guardrails)
-  - Drop `fleet-sim` (stub in craftworks; redesign if needed in a later wave)
-- `manifest.yaml` — top-level registry of series + runner assignments + min counts.
+- `scenario-loader.ts` — discovers `{series}/{S##-name}/scenario.yaml`; Zod-validates; Windows-rigor pass (long paths, case-sensitive matching, symlink rejection per Theme J).
+
+**Runners (renamed to semantic, domain-grounded names — Theme E)**:
+- `compile-sim` — generator round-trip (full compile pipeline) *(name retained — already semantic)*
+- `e2e-loop-sim` — full decide/track/enforce+review loop (**was**: `harness-sim`; plan 4's harness is its primary consumer but the runner name names the behaviour)
+- `approval-flow-sim` — approval-handle lifecycle + envelope stickiness (**was**: `approval-sim`)
+- `host-shape-sim` — preset matrix across openclaw / lobster / aether host shapes (**was**: `preset-sim`)
+- `pinch-sim` — rule-level checks *(name retained — already semantic)*
+- `emit-sim` — artifact validation *(name retained — already semantic)*
+- `security-sim` — A2A trust, injection defense, provenance (**name retained** — already semantic; ties into guardrails)
+- **Drop `fleet-sim`** — pre-drop safety: `claws doctor --check atoms --dry-run-drop fleet-sim` runs first; asserts zero orphan scenarios + zero orphan atoms reference the runner before allowing the drop. Rationale: `fleet-sim` was a stub in craftworks intended to test multi-plugin fleet coordination; claws does not currently ship multi-plugin fleet composition (C60-C64 fleet atoms cover the concept at CLI level, not runner level). If a future wave adds fleet composition scenarios, a new semantic runner (e.g., `fleet-composition-sim`) lands then — there is nothing to carry forward. Pre-drop scan: `rg "runner: fleet-sim" design/claws/scenarios/` expected zero hits.
+
+**Per-runner Zod schemas (Theme K)**: each runner ships a typed Zod schema for its `expect` block, validated at scenario-load time. Top-level `scenario.yaml` schema stays permissive (`z.record(z.string(), z.unknown())`) for forward-compat; a dispatcher selects the concrete schema by runner-name or by the series → runner mapping in `manifest.yaml`. Unknown keys fail with a named diagnostic; missing required keys fail with a named diagnostic. 7 small Zod schemas + one dispatcher, collectively contributing ~28 L0 tests (4 per runner minimum).
+
+- `manifest.yaml` — top-level registry of **semantic series-ids** (Theme E) mapped to runners + min counts (see §Manifest.yaml shape below).
 - `tests/accept/` entry points — one per series, 3-line import pattern (`runFromManifest(...)`).
 
-**Adaption**: runner signatures align to claws's `scenario.yaml` permissive schema (`z.record(z.string(), z.unknown())` for `expect`); each runner owns its expect-block shape.
-
 **Validations**:
-- `manifest.yaml` lists every accept-test series with runner + min count
-- Every `docs/atoms.md` atom has a matching scenario series in `tests/accept/scenarios/{series}/`
+- `manifest.yaml` lists every accept-test series by semantic id with runner + min count
+- Every `docs/concepts/atoms-registry.md` atom has a matching series-id (or an explicit `scenario-source: unit-test` exemption per Theme F)
 - Every series has ≥ its declared min count of scenarios
 - `.github/workflows/accept-tests.yml` runs `vitest run --project accept` on every PR
-- Unit tests cover: runFromManifest happy path, missing-series error, min-count enforcement, malformed scenario.yaml
-- No `@craftworks/*` or `craftworks` string anywhere
+- Unit tests cover: runFromManifest happy path, missing-series error, min-count enforcement, malformed scenario.yaml, per-runner schema happy + error + schema-dispatch lookup
+- Runtime budget < 5s on a ~350-scenario tree (Windows)
+- No `@craftworks/*` or bare `craftworks` string in active code
 
-### H3 — Atoms registry (`docs/atoms.md`) is the oracle both gates validate against
+### H3 — Atoms registry (`docs/concepts/atoms-registry.md`) is the oracle both gates validate against
 
-`docs/atoms.md` is the single source of truth. For each atom:
+`docs/concepts/atoms-registry.md` is the single source of truth. The location mirrors the sibling concept-guide pattern (plan 5's `docs/concepts/governance/...`, plan 4's `docs/testing/...`) — the registry is itself a concept guide that describes how atoms are authored and declared, with the canonical atom table as its payload. A one-paragraph "Registry location rationale" in the guide explains: the registry is read by `claws doctor`, tracked as authority, and serves as the narrative entry-point for contributors adding an atom.
 
-- **Identity**: `atom:{slug}` (e.g., `atom:guardrail-provider`)
-- **Layer**: layer bucket (e.g., `governance`, `workspace`, `testing`, `cli`)
-- **Visibility**: `public` | `internal` | `private`
-- **DocType**: `concept` | `process` | `command` | `spec` | `domain`
-- **Surface obligations** (per H1): declared in `docs/specs/contracts/{atom-id}.yaml` — which of 11 surfaces required
-- **Scenario obligation** (per H2): declared by presence of `tests/accept/scenarios/{series}/` with series name matching atom slug
+#### Extended atom schema (Theme D)
 
-**Atoms tracked** (initial set, lifted + augmented):
+The schema preserves all existing `design/claws/ATOMS.md` fields AND adds the obligation-tracking fields the oracle needs. Every atom row has:
 
-| Atom | Layer | Visibility | DocType | Surfaces required | Scenario series |
-|---|---|---|---|---|---|
-| `atom:guardrail-provider` | governance | public | spec | guide + spec + howto | harness-sim + approval-sim |
-| `atom:file-ingest-provider` | governance | public | spec | guide + spec | harness-sim + approval-sim |
-| `atom:provider-lifecycle` | governance | public | spec | guide + spec | harness-sim |
-| `atom:snap-registry` | workspace | public | spec | guide + spec + howto | preset-sim (lobster/aether) |
-| `atom:policy-generator` | workspace | public | command | guide + spec + command | compile-sim + harness-sim |
-| `atom:audit-chain` | governance | public | spec | guide + spec + howto | approval-sim |
-| `atom:approval-handle` | governance | public | spec | guide + spec | approval-sim |
-| `atom:canonicalizer` | workspace | public | spec | guide + spec | harness-sim |
-| `atom:host-preset` | testing | internal | domain | guide + example | preset-sim |
-| `atom:e2e-harness` | testing | internal | domain | guide + howto | harness-sim |
-| `atom:scope-flip` | cli | public | command | guide + command | preset-sim (cross-preset) |
-| `atom:repo-ops` | ops | internal | domain | guide | (self-hosted: doc-validator + accept-runner) |
-| `atom:doc-validation` | ops | internal | domain | spec + howto | (covered by accept-runner unit tests) |
-| `atom:accept-test` | ops | internal | domain | spec + howto | (covered by accept-runner unit tests) |
-| `atom:atoms-registry` | ops | internal | domain | spec | (covered by doc-validator unit tests) |
+**Required (preserved from existing claws ATOMS.md — authority / mirror invariants)**:
+- `id` — `atom:{slug}` (e.g., `atom:guardrail-provider`)
+- `slug` — the identifier suffix
+- `name` — human-readable display name
+- `authority` — where the canonical definition lives (one per atom; mirrors stay consistent)
+- `mirrors` — list of mirror locations that must stay consistent with authority
+- `reuses` — list of atoms this extends/reuses (cross-registry refs to `docs/ATOMS.md` A## atoms remain permitted during migration; post-migration they become `atom:{slug}` refs)
+- `spec` — governing spec IDs (`CL-01` through `CL-13` and later; `CL-NEW-*` draft references permitted until promotion)
 
-Adding an atom means three edits in one PR: `docs/atoms.md` entry + `docs/specs/contracts/{atom-id}.yaml` + `tests/accept/scenarios/{series}/` directory with at least 1 scenario. The gates refuse to merge a PR that does less.
+**Required (new for oracle)**:
+- `layer` — layer bucket (e.g., `compiler`, `security`, `runtime`, `cli`, `governance`, `workspace`, `testing`, `ops`)
+- `visibility` — `public | internal | private`
+- `docType` — `concept | process | command | spec | domain`
+- `status` — `draft | stable | deprecated` (**Theme D + architect F-09**; deprecated atoms list `replaces: atom:{new-slug}`; gates ignore deprecated atoms for coverage requirements but retain them in the registry)
+- `surfaces` — list of required doc surfaces per the 11-surface matrix (declared in `docs/specs/contracts/{atom-id}.yaml`)
+- `scenario-source` — `series | unit-test` (**Theme F / conformance F-06** exemption field; `unit-test` means the atom's behaviour is proven by the implementing package's unit tests rather than a top-level scenario series)
+- `scenario-series` — list of `series:{semantic-id}` refs (if `scenario-source: series`); the series-ids are semantic and decoupled from runner types (see Theme E)
+
+#### Atom port scope
+
+- **Port all 82 existing atoms** from `design/claws/ATOMS.md` (C01-C121, minus any intentionally archived ones). Identity mapping preserved: every existing ID is retained; every existing slug is retained. Authority locations may shift from `design/claws/specs/CL-*.md` (craftworks-side) to `docs/specs/CL-*.md` (bic/claws-side) in lock-step with spec-file migration under CP-2, but the atom-slug never renames as part of the port.
+- **Add 15 new atoms** sourced from the openclaw-upstream proposal (many already in ATOMS.md as C118-C121). The 11 new atoms NOT yet in ATOMS.md — `atom:file-ingest-provider`, `atom:provider-lifecycle`, `atom:snap-registry`, `atom:policy-generator`, `atom:approval-handle`, `atom:canonicalizer`, `atom:host-preset`, `atom:e2e-harness`, `atom:scope-flip`, `atom:no-craftworks-gate`, `atom:doc-scrubber`, `atom:atom-scaffolder` — are marked `status: draft` at port time and flip to `stable` at CP-5 deploy once their authority specs are signed.
+- **0 dropped** — the port is additive; any existing atom whose spec was retired before Horus is ported with `status: deprecated` and its `replaces` field pointing at the successor (if any). Explicit deprecation preserves historical references in git log, older PRs, and mirrored documents.
+
+A dedicated subsection of `docs/concepts/atoms-registry.md` documents the port: 82 existing atoms ported via identity mapping, 15 new atoms added (3 marked `source: openclaw-upstream`), 0 dropped, and the Authority/Mirrors consistency rule inherited from craftworks.
+
+#### Sample atom rows (selected; full registry ports all 82 + 15)
+
+| id | slug | name | layer | visibility | docType | status | surfaces | scenario-source | scenario-series |
+|---|---|---|---|---|---|---|---|---|---|
+| `atom:guardrail-provider` | `guardrail-provider` | GuardrailProvider | governance | public | spec | stable | guide, spec, howto | series | `series:governance-decision`, `series:tool-at-risk-approval` |
+| `atom:file-ingest-provider` | `file-ingest-provider` | FileIngestProvider | governance | public | spec | draft | guide, spec | series | `series:file-ingest-review` |
+| `atom:provider-lifecycle` | `provider-lifecycle` | ProviderLifecycle | governance | public | spec | draft | guide, spec | series | `series:provider-lifecycle-init` |
+| `atom:snap-registry` | `snap-registry` | Snap Registry | workspace | public | spec | draft | guide, spec, howto | series | `series:preset-matrix` (host-shape-sim) |
+| `atom:policy-generator` | `policy-generator` | Policy Generator | workspace | public | command | draft | guide, spec, command | series | `series:compile-roundtrip`, `series:governance-decision` |
+| `atom:audit-chain` | `audit-chain` | Audit Chain (HMAC/Ed25519) | governance | public | spec | stable | guide, spec, howto | series | `series:security-provenance`, `series:tool-at-risk-approval` |
+| `atom:approval-handle` | `approval-handle` | Approval Handle | governance | public | spec | draft | guide, spec | series | `series:tool-at-risk-approval`, `series:file-ingest-review` |
+| `atom:canonicalizer` | `canonicalizer` | RFC 8785 JCS Canonicalizer | workspace | public | spec | draft | guide, spec | series | `series:compile-roundtrip` |
+| `atom:host-preset` | `host-preset` | Host Preset (openclaw/lobster/aether) | testing | internal | domain | draft | guide, example | series | `series:preset-matrix`, `series:tenant-isolation` |
+| `atom:e2e-harness` | `e2e-harness` | E2E Harness | testing | internal | domain | draft | guide, howto | series | `series:governance-decision` |
+| `atom:scope-flip` | `scope-flip` | `--scope` Flag (openclaw publish rewrite) | cli | public | command | draft | guide, command | series | `series:preset-matrix` |
+| `atom:repo-ops` | `repo-ops` | repo-ops Package (doc-validator + accept-runner + atoms-registry + scrubber) | ops | internal | domain | draft | guide | unit-test | — |
+| `atom:doc-validation` | `doc-validation` | Doc-Validation Gate | ops | internal | domain | draft | spec, howto | unit-test | — |
+| `atom:accept-test` | `accept-test` | Accept-Test Gate | ops | internal | domain | draft | spec, howto | unit-test | — |
+| `atom:atoms-registry` | `atoms-registry` | Atoms Registry | ops | internal | domain | draft | spec | unit-test | — |
+| `atom:no-craftworks-gate` | `no-craftworks-gate` | No-Craftworks Gate + Allowlist | ops | internal | domain | draft | spec, howto | unit-test | — |
+| `atom:doc-scrubber` | `doc-scrubber` | Doc + Code Scrubber (scrub-doc.mjs) | ops | internal | domain | draft | spec, howto | unit-test | — |
+| `atom:atom-scaffolder` | `atom-scaffolder` | Atom Scaffolder (`claws make atom`) | ops | internal | command | draft | guide, command | series | `series:atom-scaffold-roundtrip` |
+
+(…plus the 82 existing claws atoms ported via identity mapping.)
+
+The 6 ops atoms listed with `scenario-source: unit-test` are exempt from requiring a top-level scenario series; their behaviour is covered by the implementing package's L0 unit tests. The exemption is a first-class field in the schema — not a special-case in the validator — so exemption audit is mechanical.
+
+Adding an atom means **three edits in one PR**: `docs/concepts/atoms-registry.md` entry + `docs/specs/contracts/{atom-id}.yaml` + (if `scenario-source: series`) `tests/accept/scenarios/{series-id}/` directory with at least 1 scenario. The gates refuse to merge a PR that does less. To make this cheap, the plan ships a scaffolder (see H6).
 
 **Validations**:
-- `docs/atoms.md` parses as structured markdown; each atom row has all 6 fields
-- Every row's surface obligations appear in a contract YAML file
-- Every row's scenario series (if non-empty) appears in `manifest.yaml`
-- Unit test: construct a registry with missing surface contract → gap-detector flags; construct one with missing scenario series → accept-runner flags
-- CI: `claws doctor --check atoms` runs both checks on every PR
+- `docs/concepts/atoms-registry.md` parses as structured markdown; each atom row has all 13 fields (10 required always + 3 required when `scenario-source: series`)
+- Authority/mirrors consistency: when authority changes, `claws doctor --check atoms` flags any mirror with stale content (hash-based; via CL-NEW-canonicalizer for content-addressable comparison)
+- Every row's surface obligations appear in a contract YAML file (registry → contract direction)
+- **Bidirectional sweep (Theme M)**: every contract YAML has an atom-registry entry (contract → registry, orphan-contract detection); every scenario series directory has an atom-registry entry with matching series-id (orphan-scenario detection)
+- **Pre-drop safety**: `claws doctor --check atoms --dry-run-drop <runner-or-series>` simulates the drop and reports any atoms that would be orphaned; exits non-zero if any
+- Unit tests cover: registry parser happy/malformed, contract cross-ref, scenario cross-ref, orphan detection (both directions), `--dry-run-drop` reporter, status-field filter (deprecated atoms skipped for coverage)
+- CI: `claws doctor --check atoms` runs on every PR; runtime budget < 1s
 
-## Scope
+### H4 — Single `@bic/repo-ops` package at `devtools/repo-ops/` with subpaths (Themes B + C)
 
-### Packages (bic/claws layout)
+Repo-ops is test infrastructure for the repo, not a contribution-path product. It does NOT live under `packages/` (where `@bic/openclaw-*` + `@bic/claws-*` contribution + internal-compiler packages sit). It lives under `devtools/` as a single `@bic/repo-ops` package marked `"private": true` in `package.json`, excluded from publish workflows, and named to signal its internal role.
+
+Package structure (mirrors the `@openclaw/guardrails` subpath pattern from proposal §1):
 
 ```
-packages/
+devtools/
 └── repo-ops/
-    ├── doc-validator/
-    │   ├── src/
-    │   │   ├── index.ts                  (public API)
+    ├── package.json                   (@bic/repo-ops, "private": true)
+    ├── src/
+    │   ├── index.ts                   (top-level barrel re-exporting subpath barrels)
+    │   ├── doc-validator/
+    │   │   ├── index.ts
     │   │   ├── surface-matrix.ts
     │   │   ├── doc-domain-schema.ts
     │   │   ├── doc-manifest-schema.ts
     │   │   ├── known-gaps-schema.ts
     │   │   ├── gap-detector.ts
     │   │   └── doc-sync-integration.ts
-    │   ├── test/
-    │   │   └── unit/
-    │   │       ├── surface-matrix.unit.test.ts
-    │   │       ├── gap-detector.unit.test.ts
-    │   │       └── ...
-    │   └── package.json             (@bic/repo-ops-doc-validator)
-    └── accept-runner/
-        ├── src/
-        │   ├── index.ts
-        │   ├── manifest-runner.ts
-        │   ├── scenario-loader.ts
-        │   └── runners/
-        │       ├── compile-sim.ts
-        │       ├── harness-sim.ts
-        │       ├── approval-sim.ts
-        │       ├── preset-sim.ts
-        │       ├── pinch-sim.ts
-        │       ├── emit-sim.ts
-        │       └── security-sim.ts
-        ├── test/
-        │   └── unit/
-        │       ├── manifest-runner.unit.test.ts
-        │       ├── scenario-loader.unit.test.ts
-        │       └── runners/*.unit.test.ts
-        └── package.json             (@bic/repo-ops-accept-runner)
+    │   ├── accept-runner/
+    │   │   ├── index.ts
+    │   │   ├── manifest-runner.ts
+    │   │   ├── scenario-loader.ts
+    │   │   ├── schemas/
+    │   │   │   ├── compile-sim.schema.ts
+    │   │   │   ├── e2e-loop-sim.schema.ts
+    │   │   │   ├── approval-flow-sim.schema.ts
+    │   │   │   ├── host-shape-sim.schema.ts
+    │   │   │   ├── pinch-sim.schema.ts
+    │   │   │   ├── emit-sim.schema.ts
+    │   │   │   ├── security-sim.schema.ts
+    │   │   │   └── dispatcher.ts
+    │   │   └── runners/
+    │   │       ├── compile-sim.ts
+    │   │       ├── e2e-loop-sim.ts
+    │   │       ├── approval-flow-sim.ts
+    │   │       ├── host-shape-sim.ts
+    │   │       ├── pinch-sim.ts
+    │   │       ├── emit-sim.ts
+    │   │       └── security-sim.ts
+    │   ├── atoms-registry/
+    │   │   ├── index.ts
+    │   │   ├── registry-parser.ts    (reads docs/concepts/atoms-registry.md)
+    │   │   ├── cross-ref.ts          (bidirectional sweep; orphan detection)
+    │   │   └── dry-run-drop.ts       (pre-drop safety check)
+    │   ├── scrubber/
+    │   │   ├── index.ts
+    │   │   ├── scrub-rules.ts        (regex table; shared with scripts/scrub-doc.mjs)
+    │   │   ├── scrub-file.ts         (idempotent, CRLF-preserving, deterministic report)
+    │   │   └── runtime-code-scrub.ts (handles .ts/.tsx/.mjs/.js — Theme H + architect F-06)
+    │   └── no-craftworks/
+    │       ├── index.ts
+    │       ├── allowlist-schema.ts   (Zod for .no-craftworks-allowlist.yaml)
+    │       ├── walker.ts             (Node.js regex walker via @nodelib/fs.walk — Theme J)
+    │       └── report.ts             (scope + exit-code + fix-hint)
+    ├── atom-templates/
+    │   ├── atoms-registry-row.md.hbs
+    │   ├── surface-contract.yaml.hbs
+    │   └── scenario.yaml.hbs
+    └── test/
+        ├── unit/
+        │   ├── doc-validator/*.unit.test.ts
+        │   ├── accept-runner/
+        │   │   ├── manifest-runner.unit.test.ts
+        │   │   ├── scenario-loader.unit.test.ts
+        │   │   ├── schemas/*.unit.test.ts
+        │   │   └── runners/*.unit.test.ts
+        │   ├── atoms-registry/*.unit.test.ts
+        │   ├── scrubber/*.unit.test.ts
+        │   └── no-craftworks/*.unit.test.ts
+        ├── integration/
+        │   ├── doc-validator.integration.test.ts
+        │   ├── accept-runner.integration.test.ts
+        │   ├── atoms-registry.integration.test.ts
+        │   ├── scrubber.integration.test.ts
+        │   ├── no-craftworks.integration.test.ts
+        │   └── doctor-perCheck.integration.test.ts
+        └── e2e/
+            └── doctor-orchestration.e2e.test.ts
+```
+
+`@bic/repo-ops/*` subpath imports are the consumption surface (e.g., `import { gapDetector } from '@bic/repo-ops/doc-validator'`). The top-level `src/index.ts` re-exports the subpath barrels for callers that want `import { gapDetector } from '@bic/repo-ops'`. All subpaths share one TypeScript project, one Zod version, and one atoms-registry reader — the "atoms registry as oracle" invariant is load-bearing and requires co-location.
+
+**Publish policy**: `"private": true`, no `prepublishOnly` hook. The `.github/workflows/publish.yml` already skips `devtools/**`. Added belt-and-braces: a dedicated check in the publish pipeline asserts `devtools/repo-ops/package.json` has `"private": true` — prevents accidental unflipping.
+
+**Scope-flip exclusion**: Ra's `claws policy generate --scope=openclaw` flip logic walks `packages/openclaw-*/` only; `devtools/` is outside its scan. No special-case logic needed.
+
+### H5 — `no-craftworks` CI gate with scope + allowlist (Theme G)
+
+The gate's scope is explicit (not "any match anywhere"):
+
+**In-scope files** (gate runs on these):
+- `docs/**` (except `docs/contributing/migration.md` — see allowlist below)
+- `packages/**/src/**`, `packages/**/test/**`
+- `devtools/**/src/**`, `devtools/**/test/**`
+- `scripts/**`
+- `tests/**`
+- `*.yaml`, `*.yml`, `*.json` (at any depth in-scope)
+- `*.md` (at any depth in-scope)
+- Active code file extensions: `.ts`, `.tsx`, `.mjs`, `.js`, `.cjs`, `.json`, `.yaml`, `.yml`, `.md`
+
+**Out-of-scope** (gate does not scan):
+- `.git/**` — immutable history; CP-2 filter-repo rewrites were the authoritative history pass
+- `dist/**`, `build/**`, `node_modules/**` — generated / vendored
+- Binary files (extension-based skip): `.pdf`, `.png`, `.jpg`, `.gif`, `.ico`, `.woff`, `.woff2`, `.ttf`, `.otf`
+- `CHANGELOG.md` (see allowlist for carve-out rationale)
+
+**Allowlist** (`.no-craftworks-allowlist.yaml` at repo root):
+
+```yaml
+version: 1
+# Allowlist entries describe legitimate craftworks references that survive by necessity.
+# Adding an entry requires CODEOWNERS approval by the `@bic/claws-release-eng` team.
+# The atoms-registry oracle flags any entry that is stale (no longer needed).
+entries:
+  - path: MIGRATION.md
+    pattern: 'craftworks'
+    reason: |
+      Root-level migration narrative explaining the lift from bic/claws
+      to bic/claws. Required attribution; cannot be removed.
+    reviewer: '@bic/claws-release-eng'
+    expires: null  # permanent
+  - path: LICENSE
+    pattern: 'craftworks'
+    reason: 'Copyright attribution if present in original MIT license.'
+    reviewer: '@bic/claws-release-eng'
+    expires: null
+  - path: NOTICE
+    pattern: 'craftworks'
+    reason: 'Third-party attribution file if present.'
+    reviewer: '@bic/claws-release-eng'
+    expires: null
+  - path: scripts/scrub-doc.mjs
+    pattern: '@craftworks/|craftworks'
+    reason: |
+      Scrubber script MUST contain the regex it enforces. Excluding its own
+      source is required for the gate to be self-consistent.
+    reviewer: '@bic/claws-release-eng'
+    expires: null
+  - path: .no-craftworks-allowlist.yaml
+    pattern: 'craftworks'
+    reason: |
+      Allowlist file itself names the pattern it allows. Self-reference exempt.
+    reviewer: '@bic/claws-release-eng'
+    expires: null
+  - path: docs/contributing/migration.md
+    pattern: 'craftworks'
+    reason: |
+      Contributor-facing narrative documenting the migration origin. Required
+      for git archaeology / onboarding context.
+    reviewer: '@bic/claws-release-eng'
+    expires: null
+  - path: devtools/repo-ops/src/**
+    pattern: '@craftworks/|craftworks'
+    reason: |
+      Scrubber + no-craftworks gate source MUST name the regex it enforces.
+      Scoped to devtools/repo-ops/src/** so it does not widen.
+    reviewer: '@bic/claws-release-eng'
+    expires: null
+  - path: devtools/repo-ops/test/**
+    pattern: '@craftworks/|craftworks'
+    reason: |
+      Gate tests use fixtures that contain the string to verify the gate fires.
+    reviewer: '@bic/claws-release-eng'
+    expires: null
+```
+
+**CODEOWNERS**: `.no-craftworks-allowlist.yaml` is owned by `@bic/claws-release-eng` (single team). Any edit requires team approval. `.github/CODEOWNERS` adds the entry as a boundary-critical path (matches CL-13 §9 2-maintainer rule for boundary-critical PRs).
+
+**Gate enforcement (Node.js, not bash — Theme J)**: implemented in `devtools/repo-ops/src/no-craftworks/walker.ts` using `@nodelib/fs.walk` for cross-platform determinism. Windows grep under Git Bash is not relied upon. The walker:
+1. Reads `.no-craftworks-allowlist.yaml` and compiles entries
+2. Enumerates in-scope files (respecting scope rules above)
+3. For each file, runs the regex scan
+4. Filters out matches covered by an allowlist entry
+5. Emits a structured report (`{file, line, match, allowlistHit: boolean, allowlistReason}`)
+
+**`claws doctor --check no-craftworks`** invokes the walker with `--strict` mode (default): fails on any non-allowlisted match. A secondary mode `--stale-audit` (run monthly via cron, not on every PR) flags allowlist entries with zero active matches (stale entries) — these are removed in a release-eng PR.
+
+**Exit codes**:
+- 0: clean
+- 2: non-allowlisted match found (distinct from generic gate failure per Theme I)
+
+**Runtime budget**: < 2s on the full repo tree (Windows).
+
+### H6 — `claws make atom <slug>` scaffolder (Theme L / ops F-06)
+
+The 3-file PR tax (atoms-registry + surface-contract + scenario dir) is high friction. Scaffolder:
+
+```bash
+claws make atom <slug> \
+  --layer <layer> \
+  --visibility <public|internal|private> \
+  --doc-type <concept|process|command|spec|domain> \
+  --surfaces <comma-list> \
+  --scenario-source <series|unit-test> \
+  --scenario-series <series:semantic-id> \
+  [--authority <path>] \
+  [--status <draft|stable|deprecated>] \
+  [--dry-run] \
+  [--no-editor]
+```
+
+Writes 3 files from `devtools/repo-ops/atom-templates/`:
+1. `docs/concepts/atoms-registry.md` — inserts a new row at the correct layer
+2. `docs/specs/contracts/{slug}.yaml` — scaffolds surface-contract with narrative placeholders
+3. (if `scenario-source: series`) `tests/accept/scenarios/{series-id}/S01-{slug}-happy-path/scenario.yaml` + `fixtures/` placeholder
+
+If `--no-editor` is not set, opens all 3 files in `$EDITOR` (fallback `notepad.exe` on Windows). `--dry-run` prints the unified diff without writing.
+
+**Validation** (scaffolder's own L2 round-trip test — Theme L):
+- Scaffold a test atom with all field combinations
+- Run `claws doctor --check atoms` on the scaffolded output
+- Assert clean pass
+- Run `claws doctor --check atoms --dry-run-drop series:{scaffold-series}`; assert orphan detection reports the scaffolded atom
+
+### H7 — Node.js doc + code scrubber (`scripts/scrub-doc.mjs` — Themes H + J / architect F-06 / ops F-02)
+
+`scripts/scrub-doc.sh` from the current plan was a Windows portability landmine. The port is `scripts/scrub-doc.mjs` (Node.js ESM), invoked as `node scripts/scrub-doc.mjs <paths...>` or `node scripts/scrub-doc.mjs --stdin`. Implementation lives in `devtools/repo-ops/src/scrubber/` and is re-exported by the thin `scripts/scrub-doc.mjs` wrapper.
+
+**Scrub rules** (shared `devtools/repo-ops/src/scrubber/scrub-rules.ts`):
+1. **Import rewrite** (runtime code + YAML + JSON):
+   - `@craftworks/openclaw-*` → `@bic/openclaw-*` (contributed-staged scope)
+   - `@craftworks/claws-*` → `@bic/claws-*` (internal-only scope)
+   - `@craftworks/*` (other) → flag for manual review (drop or reword)
+2. **Terminology translation** (Markdown + narrative):
+   - Bare `craftworks` as org-reference → drop ("the claws repo" → "the monorepo") unless inside an allowlist-protected file
+   - `phase:` → `checkpoint:` (claws calls them CPs; only in narrative prose)
+   - `wave:` → drop (craftworks ceremony; narrative only)
+3. **Runtime-code scrub** (new — architect F-06): applies to `.ts`, `.tsx`, `.mjs`, `.js`, `.cjs` — not just `.md`. Rewrites imports, flags `// @craftworks/*` historical-lineage comments for manual conversion to audit-chain evidence notes.
+4. **Currency + audience checks**: human-judgement during CP-2 landing (NOT automated; scrubber reports candidates only).
+5. **No-craftworks gate** — the automated grep from H5 runs as the final scrub step.
+
+**Scrubber properties**:
+- **Idempotent**: running twice yields the same output (Theme H requirement)
+- **CRLF-preserving**: detects original line ending per file and preserves on write (Windows rigor — Theme J)
+- **BOM-preserving**: UTF-8 BOM markers survive
+- **Deterministic report**: `{filesChanged, rulesMatched: {ruleId: count}, warnings: [{file, line, rule, suggestion}]}` emitted to stdout as JSON (or human-readable with `--format human`)
+
+**L0 tests** (Theme H + ops F-09, 7 tests total):
+- CRLF preservation on a CRLF-input file
+- LF preservation on an LF-input file
+- BOM preservation on a UTF-8-with-BOM file
+- Idempotence (run twice, assert byte-equal output)
+- Import rewrite correctness (`@craftworks/openclaw-*` → `@bic/openclaw-*`)
+- Runtime-code scrub on `.ts` file (import + lineage-comment detection)
+- Deterministic report shape (fixture-golden comparison)
+
+### H8 — `claws doctor` multi-check composition (Theme I / ops F-03)
+
+```bash
+claws doctor                        # all checks, default order, collect-all
+claws doctor --check docs           # single check
+claws doctor --check accept
+claws doctor --check atoms
+claws doctor --check no-craftworks
+claws doctor --fail-fast            # stop on first failure
+claws doctor --format json          # machine-readable (default: human)
+claws doctor --format human
+claws doctor --dry-run-drop <runner-or-series>  # pre-drop safety (via --check atoms)
+```
+
+**Composition semantics (explicit)**:
+- **Sequential order**: `atoms → docs → accept → no-craftworks` (atoms first: it's the oracle the others consult; if atoms malformed, downstream checks emit cascading false-failures that obscure the root cause)
+- **Fail mode**: `collect-all` by default (run every check, report aggregate) — CI needs this; `--fail-fast` for local dev iteration
+- **Exit codes**:
+  - `0` — all checks pass
+  - `1` — one or more gate failures (doc/accept/atom) — CI fails with the report
+  - `2` — `no-craftworks` violation (distinct for SIEM triage per Theme I)
+  - `3` — infrastructure error (missing config file, walker crash, file-system error) — CI triages as "retry or escalate", not "fix the gate output"
+- **Concurrency**: sequential by default; `--parallel` is a later optimization gated on measured runtime
+- **Output format**: `--format json` emits `{checks: [{id, status, findings: [...], runtimeMs}], aggregate: {status, runtimeMs}}`; `--format human` pretty-prints with fix-hints
+
+**Runtime budgets** (ops F-04):
+- `--check atoms`: < 1s
+- `--check docs`: < 3s (on ~200-doc tree)
+- `--check accept`: < 5s (on ~350-scenario tree)
+- `--check no-craftworks`: < 2s
+- Total `claws doctor` clean: < 15s on Windows, < 8s on Linux CI
+
+Budgets are measured + logged per-check; regressions > 30% surface in CI as a warning (not failure). Content-addressable cache at `.claws-cache/doctor/` keyed on (atoms.md mtime, contracts/*.yaml mtimes, docs/*/manifest.yaml mtimes) short-circuits repeat runs on unchanged inputs.
+
+## Scope
+
+### Packages (bic/claws layout, post-amendment)
+
+```
+bic/claws/                                (renamed from bic/claws per CL-13 amendment)
+├── packages/                             (published product packages — NOT repo-ops)
+│   ├── openclaw-workspace/               (@bic/openclaw-workspace — contributed)
+│   ├── openclaw-guardrails/              (@bic/openclaw-guardrails — contributed)
+│   ├── openclaw-policy/                  (@bic/openclaw-policy — contributed)
+│   ├── openclaw-snap/                    (@bic/openclaw-snap — contributed)
+│   ├── claws-compiler/                   (@bic/claws-sdk — internal)
+│   ├── claws-cli/                        (@bic/claws-cli — binary: claws)
+│   └── ...                               (other @bic/claws-* internal packages)
+├── devtools/                             (non-published, internal)
+│   └── repo-ops/                         (@bic/repo-ops — "private": true)
+│       ├── src/
+│       │   ├── doc-validator/
+│       │   ├── accept-runner/
+│       │   ├── atoms-registry/
+│       │   ├── scrubber/
+│       │   └── no-craftworks/
+│       ├── atom-templates/
+│       └── test/
+├── scripts/
+│   └── scrub-doc.mjs                     (Node.js; thin wrapper over devtools/repo-ops/src/scrubber)
+└── .no-craftworks-allowlist.yaml         (CODEOWNERS-gated)
 ```
 
 ### CLI surface
 
-Extend the `claws` CLI with `doctor` subcommand's `--check` options:
+Extend the `claws` CLI with `doctor` multi-check plus `make atom`:
 
 ```bash
-claws doctor                        # all checks
-claws doctor --check docs           # doc-validation gap detector
-claws doctor --check accept         # accept-test manifest consistency
-claws doctor --check atoms          # atoms registry oracle sanity
-claws doctor --check no-craftworks  # grep-level enforcement
+claws doctor                                         # all checks (Theme I)
+claws doctor --check <docs|accept|atoms|no-craftworks>
+claws doctor --fail-fast | --format json | --format human
+claws doctor --dry-run-drop <runner-or-series>       # pre-drop safety (Theme M)
+claws make atom <slug> --layer <...> ...             # scaffolder (Theme L, H6)
 ```
 
-### Docs (bic/claws layout)
+### Docs (bic/claws layout — Theme F / conformance F-10)
 
 ```
 docs/
-├── atoms.md                              # the registry
+├── concepts/
+│   ├── atoms-registry.md                 # Theme E: the oracle + registry (not root-level)
+│   ├── doc-validation.md                 # 15-gap-type reference + fix-hints
+│   ├── accept-test-system.md             # manifest + runner + scenario anatomy
+│   └── no-craftworks-gate.md             # scope, allowlist model, CODEOWNERS rules
+├── contributing/
+│   ├── adding-an-atom.md                 # 3-file PR shape + scaffolder walkthrough
+│   ├── doc-scrub-checklist.md            # 5-step protocol (1-2+5 automated, 3-4 human)
+│   ├── migration.md                      # post-migration contributor context (allowlist-protected)
+│   └── windows-setup.md                  # LongPathsEnabled + case-sensitivity (Theme J)
 ├── specs/
 │   ├── contracts/                        # surface-contracts per atom
 │   │   ├── guardrail-provider.yaml
 │   │   ├── file-ingest-provider.yaml
 │   │   └── ...
-│   └── ...
+│   └── ...                               # spec .md files (CL-01..CL-13)
 ├── doc-manifest.yaml                     # top-level manifest (root)
 └── {domain}/doc-manifest.yaml            # per-subdir manifest
 ```
@@ -189,14 +506,65 @@ docs/
 tests/
 └── accept/
     ├── scenarios/
-    │   ├── manifest.yaml                 # series registry
-    │   └── {series}/
+    │   ├── manifest.yaml                 # series-id registry (semantic ids — Theme E)
+    │   └── {series-id}/
     │       └── S##-{name}/
     │           ├── scenario.yaml
-    │           └── fixtures...
+    │           └── fixtures/
     └── entry-points/
-        └── {series}.accept.test.ts       # 3-line imports
+        └── {series-id}.accept.test.ts    # 3-line imports
 ```
+
+### `manifest.yaml` shape (Theme E — semantic series → runner mapping)
+
+```yaml
+version: 1
+series:
+  governance-decision:
+    runner: e2e-loop-sim
+    min: 4
+    description: |
+      Provider authorization flow: preAuthorize + postAudit + approval routing
+      + audit cross-linking. Atoms: guardrail-provider, audit-chain.
+  tool-at-risk-approval:
+    runner: approval-flow-sim
+    min: 5
+    description: |
+      Approval handle lifecycle for R-tier-elevated tool invocations.
+      Atoms: approval-handle, audit-chain.
+  file-ingest-review:
+    runner: approval-flow-sim
+    min: 3
+    description: |
+      File-ingest approval symmetric to tool-at-risk.
+      Atoms: file-ingest-provider, approval-handle.
+  provider-lifecycle-init:
+    runner: e2e-loop-sim
+    min: 2
+    description: 'ProviderLifecycle.init + onSnapshotPromoted + onStageModeChanged.'
+  preset-matrix:
+    runner: host-shape-sim
+    min: 3
+    description: 'openclaw / lobster / aether host shapes run the same behavioural suite.'
+  tenant-isolation:
+    runner: host-shape-sim
+    min: 3
+    description: 'Per-tenant preset variant; cross-tenant isolation invariants.'
+  compile-roundtrip:
+    runner: compile-sim
+    min: 4
+    description: 'Generator emits → policy plugin consumes → byte-identical round-trip.'
+  security-provenance:
+    runner: security-sim
+    min: 3
+    description: 'A2A trust, injection defense, provenance-based R-tier escalation.'
+  atom-scaffold-roundtrip:
+    runner: compile-sim
+    min: 1
+    description: 'claws make atom → claws doctor --check atoms clean pass.'
+```
+
+Runner names (`e2e-loop-sim`, `approval-flow-sim`, `host-shape-sim`, `compile-sim`, `security-sim`, `pinch-sim`, `emit-sim`) are decoupled from series-ids. An atoms-registry entry names `series:governance-decision`; the `manifest.yaml` resolves which runner implements it. Runner renames/splits no longer cascade across the atoms registry.
 
 ### CI
 
@@ -205,59 +573,124 @@ tests/
 ├── doc-validation.yml                    # runs `claws doctor --check docs` on PR
 ├── accept-tests.yml                      # runs `vitest run --project accept` on PR
 ├── atoms-oracle.yml                      # runs `claws doctor --check atoms` on PR
-└── no-craftworks.yml                     # grep-level enforcement — fails on ANY match
+├── no-craftworks.yml                     # runs `claws doctor --check no-craftworks` — strict + allowlist
+└── doctor.yml                            # runs full `claws doctor` in collect-all mode (overnight + on merge)
 ```
 
-### Doc-scrubbing protocol (applied during CP-2 migration + verified here)
+Composition: `doctor.yml` is the top-level gate on merges; per-check workflows are fast PR-time gates.
 
-Each migrated doc passes through a 5-step scrub before landing in bic/claws:
+### Doc + code scrubbing protocol (applied during CP-2 migration + verified here — Theme H + architect F-06)
 
-1. **Content rewrite** — `@craftworks/*` → `@bic/openclaw-*` or `@bic/repo-ops-*` depending on reference; "craftworks" as org → drop (repo is standalone); "craft-cli" / "compiler-sdk" / "agent-sdk" → drop or reword if the referenced thing exists on our side, delete if not.
-2. **Terminology translation** — "atom:" references remain (atoms lifted); "phase:" → "checkpoint:" (claws calls them CPs); "wave:" references drop (craftworks ceremony).
-3. **Currency check** — reader asks "does this describe a world that still exists?" Delete stale content; don't re-publish outdated guides.
-4. **Audience check** — docs in bic/claws serve engineers working in bic/claws. Craftworks-internal ceremony (pulses, stages, flair) gets stripped.
-5. **No-craftworks gate** — automated grep on the final output. Any "craftworks" or "@craftworks/" string fails the scrub.
+Each migrated doc + code file passes through a 5-step scrub before landing in bic/claws:
 
-A `scripts/scrub-doc.sh` helper automates steps 1-2 + 5; steps 3-4 are human judgement during CP-2 landing.
+1. **Content + import rewrite** — `@craftworks/openclaw-*` → `@bic/openclaw-*`; `@craftworks/claws-*` → `@bic/claws-*`; other `@craftworks/*` flagged; "craftworks" as org-reference dropped or allowlisted; `phase:` → `checkpoint:`; `wave:` dropped in narrative. Applies to BOTH docs (`.md`) AND runtime code (`.ts`, `.tsx`, `.mjs`, `.js`, `.cjs`).
+2. **Terminology translation** — atom: references remain; phase/wave ceremony stripped; historical-lineage comments converted to audit-chain notes.
+3. **Currency check** — reader asks "does this describe a world that still exists?" Delete stale content; don't re-publish outdated guides. (Human judgement.)
+4. **Audience check** — docs in bic/claws serve engineers working in bic/claws. Craftworks-internal ceremony (pulses, stages, flair) gets stripped. (Human judgement.)
+5. **No-craftworks gate** — automated walker on the final output. Any non-allowlisted match fails the scrub.
 
-### Test tier targets
+`scripts/scrub-doc.mjs` automates steps 1-2 + 5 (runtime code + docs + no-craftworks walker in one pass). Steps 3-4 are human judgement during CP-2 landing; scrubber reports candidates.
+
+### Test tier targets (expanded — Theme O / conformance F-07 / ops F-09)
 
 | Tier | Count | Focus |
 |------|-------|-------|
-| L0 unit | 48 | doc-validator: 12 (per-gap-type 15, surface-matrix 4 lookups, manifest loader 5, known-gaps loader 3, schema invalid inputs 5). accept-runner: 25 (manifest-runner 6, scenario-loader 5, per-runner happy + error × 7 = 14). atoms-oracle: 5 (registry parser, contract cross-ref, scenario cross-ref, missing entries, circular refs). scrubber: 6 (content rewrite rules, no-craftworks detection). |
-| L1 integration | 14 | doc-validator + real docs tree (3), accept-runner + real scenarios (3), atoms-oracle end-to-end (2), scrubber + migration pipeline (3), no-craftworks CI dry-run (3). |
-| L2 e2e | 6 | `claws doctor --check docs/accept/atoms/no-craftworks` full runs (4); migration-pipeline-applies-scrubber-to-fixture-doc (1); atoms-registry-round-trip (1). |
+| L0 unit | **76** (was 48) | doc-validator: 15 (15-gap-type, surface-matrix lookups 4, manifest loader 5, known-gaps loader 3, schema invalid inputs 5, hint-rendering 2). accept-runner: 42 (manifest-runner 6, scenario-loader 5, dispatcher 3, **per-runner × 7 = 6 each**: happy, missing-scenario, malformed-expect, runner-specific assertion fail, fixture-load error, cleanup-after-failure = 42 runner tests. atoms-oracle: 7 (parser, contract cross-ref, scenario cross-ref, orphan contract, orphan scenario, status-field filter, dry-run-drop). scrubber: 7 (CRLF, LF, BOM, idempotence, import-rewrite, runtime-code scrub, report shape). no-craftworks: 5 (in-scope/out-of-scope walker, allowlist apply, stale-entry detect, exit-code-2 assertion, Windows regex-walker parity). |
+| L1 integration | **21** (was 14) | doc-validator + real docs tree (3), accept-runner + real scenarios (3), atoms-oracle end-to-end including bidirectional sweep (3), scrubber + migration pipeline with golden fixture (3), no-craftworks CI dry-run via `act` (3), **per-check doctor e2e (4)**, **scaffolder round-trip (2)**: `claws make atom` → `claws doctor --check atoms` clean pass + `--dry-run-drop` orphan report. |
+| L2 e2e | **8** (was 6) | full `claws doctor` (all checks, collect-all) on clean repo (1), full `claws doctor` with injected atom missing contract (fails with hint) (1), `claws doctor` with injected orphan scenario (fails with hint) (1), migration-pipeline-applies-scrubber-to-fixture-doc (1), atoms-registry round-trip (1), **clean-repo-to-first-atom bootstrap via scaffolder (1)**, **orphan-detection after intentional atom removal (1)**, **CI-simulation e2e via `act` running doctor.yml end-to-end (1)**. |
 
-Per-file coverage floor: 95/90/95/95 (stmts/branches/funcs/lines).
+Per-file coverage floor: 95/90/95/95 (stmts/branches/funcs/lines). Enforced per-package via `vitest.config.ts` in `devtools/repo-ops/`.
+
+**Windows-specific coverage** (Theme J / ops F-05) — L0/L1 split:
+- L0: Windows path normalization in scrubber (1), Windows long-path rejection/acceptance in scenario-loader (1), case-sensitive matching forcing on Windows (1)
+- L1: Scenario-loader discovers a scenario with path > 200 chars and asserts it loads (1), `.no-craftworks-allowlist.yaml` with CRLF line endings parses correctly (1)
+
+(Counted within the 76/21/8 totals above.)
+
+**Residue-grep regex coverage** (Theme O / amendment-linked, 4 L0 tests):
+- Canonical regex matches `@craftworks/` import
+- Canonical regex does NOT match allowlist-protected file
+- 3-pass form (source + cross-scope + allowlist) correctness per CL-13 amendment §Validation
+- Evidence file schema round-trip
 
 ## Coverage Contract
 
 ### Specs
-- [ ] CL-13 (repo boundary) — extended with atoms registry as oracle for doc + accept gates. Draft at `.craft/waves/260416+horus-the-heir+claws-migration/specs/drafts/CL-13-amendment-repo-ops-oracle.md` (to be drafted in Stage 3 alongside other spec amendments).
-- [ ] CL-15 (canonicalizer — new spec from sibling plan) — repo-ops leverages canonicalizer for contract YAML hashing + atoms-registry hashing (change detection).
+- [ ] **CL-13 amendment (rename to claws)** — draft at `.craft/waves/260416+horus-the-heir+claws-migration/specs/drafts/CL-13-amendment-rename-to-claws.md` (filed). Amendment covers: `bic/claws` → `bic/claws` repo remote; `claws` → `claws` CLI binary; scope decomposition into `@bic/openclaw-*` contributed (4 pkgs) + `@bic/claws-*` internal (8 pkgs); updated §Validation 3-pass residue-grep regex; §6.1 artifact-path renames. **IN SCOPE: Horus Stage 3** (NOT deferred per team-lead no-deferrals directive 2026-04-19).
+- [ ] **CL-13 amendment (repo-ops oracle)** — separate draft to be filed in Stage 3 covering the "atoms-registry as oracle for doc + accept gates" invariants this plan introduces. Kept separate from the rename amendment so each has a single motivating concern (v1.6 → v1.7 = rename; v1.7 → v1.8 = oracle). Outline in companion amendment section of `CL-13-amendment-rename-to-claws.md`.
+- [ ] **CL-NEW-canonicalizer-byte-identical** — consumed by repo-ops for content-addressable hashing of surface-contract YAMLs and atoms-registry mirror-consistency checks. Cited by draft filename (NOT `CL-15`) per Theme N / conformance F-04; spec-number promotion is the spec-number coordinator's job at CP-5 deploy.
 
 ### Concept guides (bic/claws docs/)
-- [ ] `docs/concepts/atoms-registry.md` — what atoms are, how the registry works, how to add one
-- [ ] `docs/concepts/doc-validation.md` — how the gap detector works, the 11 surfaces, known-gaps lifecycle
-- [ ] `docs/concepts/accept-test-system.md` — manifest + runner + scenario anatomy
-- [ ] `docs/contributing/adding-an-atom.md` — the three-file PR shape required to add an atom
-- [ ] `docs/contributing/doc-scrub-checklist.md` — the 5-step protocol for migrated content
-
-## Out of scope
-
-- **Runtime code behaviour** — repo-ops is infrastructure; the 4 `@bic/openclaw-*` packages own runtime.
-- **Wave/plan/pulse ceremony** — bic/claws uses standard GitHub PRs, not craftworks wave ceremony.
-- **Fleet-sim runner** — stub in craftworks; redesign if needed post-Horus.
-- **Auto-scrub of git history** — filter-repo `--replace-text` rewrites history during CP-2; in-Horus scrub is forward-only on present-day content. (Past commits stay rewritten via CP-2's filter-repo pass.)
-- **Replacing the @bic/claws-rubric package** — it stays as-is if lifted; not a repo-ops concern.
+- [ ] `docs/concepts/atoms-registry.md` — the registry + how atoms are authored, extended schema documentation (13 fields + status + scenario-source), port manifest (82 + 15 + 0)
+- [ ] `docs/concepts/doc-validation.md` — 15 gap types with one canonical example per type + the fix + `--fix=suggest` mode (ops F-10)
+- [ ] `docs/concepts/accept-test-system.md` — manifest + runner + scenario anatomy, per-runner Zod schema reference, runtime budgets
+- [ ] `docs/concepts/no-craftworks-gate.md` — scope (in/out), allowlist model, CODEOWNERS rules, exit-code-2 distinction, Windows walker notes
+- [ ] `docs/contributing/adding-an-atom.md` — the 3-file PR shape + scaffolder walkthrough + exemption (`scenario-source: unit-test`) rules
+- [ ] `docs/contributing/doc-scrub-checklist.md` — the 5-step protocol for migrated content (docs + runtime code)
+- [ ] `docs/contributing/windows-setup.md` — `LongPathsEnabled` registry requirement, Node 18+, case-sensitive matching expectations (Theme J)
+- [ ] `docs/contributing/migration.md` — post-migration contributor context (allowlist-protected file; may mention "craftworks" once per section for lineage)
 
 ## Dependencies
 
-- Blocks on `claws-repo-migration` (CP-2) landing — repo-ops lives in bic/claws, not monorepo
-- `claws-bic-operations` (CP-4) wires the CI workflows that activate these gates — repo-ops builds the gates; bic-operations turns them on
-- `claws-e2e-sim-harness` (plan 4) may reference `packages/repo-ops/accept-runner` for fixture validation in its L1 tests
-- Spec amendments (CL-13 amendment) complete in Stage 3 Horus — no deferrals
+- **CL-13 amendment (rename)** — this plan authors the amendment and depends on its signing at CP-5 deploy
+- **claws-repo-migration (CP-2)** — blocks on this plan's landing target (bic/claws); no dependency inversion
+- **claws-bic-operations** (CI + CODEOWNERS) — wires the 5 workflows this plan creates (`doc-validation.yml`, `accept-tests.yml`, `atoms-oracle.yml`, `no-craftworks.yml`, `doctor.yml`) + the `@bic/claws-release-eng` CODEOWNERS entry for the allowlist. Bic-operations' Deliverables list must be amended to include these 5 workflows — flagged to team-lead for cascade sweep.
+- **claws-e2e-sim-harness (plan 4)** — explicit boundary: plan 4 consumes `@bic/repo-ops/accept-runner` for its L1 fixture-loading tests only. Plan 4 does NOT re-implement `scenario-loader`; it imports the shared loader. Plan 4's harness-specific `fixture-copier.ts` handles harness-internal fixture shaping (not scenarios). Documented in Dependencies on both sides (architect F-10).
+- **claws-sim-approval-flows (plan 5)** — consumes `approval-flow-sim` runner type from this plan; no code-level dependency (runners + atoms live in this plan).
+- **claws-sim-host-presets (plan 6)** — consumes `host-shape-sim` runner type from this plan; same.
+- **Schema-drift inventory (ops F-07)** — before port: every Zod schema lifted from craftworks has its type-dependencies inventoried in `devtools/repo-ops/src/doc-validator/LIFT-MANIFEST.md`. Port-time rule: if a ported schema references a type that doesn't exist in bic/claws yet, create it in `@bic/openclaw-*` first OR inline-define as a local interface. No `z.any()` or `as any` to unblock.
+- **Peer-version pinning**: `@bic/repo-ops` pins `@bic/openclaw-*` via `devDependencies` (repo-ops is internal-only, so these are not peer deps in the published sense). CI gates mismatch via a workflow step.
 
-## Ordering note
+## Out of scope
 
-This plan should land as **CP-3** in the Horus checkpoint sequence, between `claws-repo-migration` (CP-2) and `claws-bic-operations` (renumbered to CP-4). The sim plans shift to CP-5 / CP-6 / CP-7, with close at CP-8.
+- **Runtime code behaviour** — repo-ops is infrastructure; the 4 `@bic/openclaw-*` packages + 8 `@bic/claws-*` packages own runtime.
+- **Wave/plan/pulse ceremony** — bic/claws uses standard GitHub PRs, not craftworks wave ceremony (allowlist-protected `migration.md` explains lineage).
+- **Fleet-sim runner** — dropped in H2 with pre-drop safety scan; redesign if needed post-Horus via a new semantic runner.
+- **Auto-scrub of git history** — filter-repo `--replace-text` during CP-2 handled history; in-Horus scrub is forward-only on present-day content.
+- **Replacing the `@bic/claws-rubric` package** — stays as-is; not a repo-ops concern.
+- **Parallelizing `claws doctor` checks** — later optimization gated on measured runtime; sequential-by-default documented in H8.
+- **CL-15 reservation** — this plan does NOT claim a canonical CL number for the canonicalizer spec; citation is by draft filename. Spec-number coordinator reserves at CP-5.
+
+## Ordering note (Theme F — CP renumbering cascade, DEFERRED TO TEAM-LEAD SWEEP)
+
+This plan's originally-proposed CP-3 insertion shifts downstream checkpoints. **Per Theme F, the cascade edits are flagged for a separate sweep by the team lead**, not silently applied in this plan:
+
+- **REPLAN.md** — CP table (lines 21-39) needs CP-3..CP-7 → CP-3..CP-8 update
+- **Plan 4 (`claws-e2e-sim-harness`)** — any `CP-5 deploy` / `Stage 3` references re-check against the new numbering
+- **Plan 5 (`claws-sim-approval-flows`)** — same
+- **Plan 6 (`claws-sim-host-presets`)** — same
+- **`claws-bic-operations`** — deliverables list needs the 5 repo-ops workflows added (separately from the CP-number cascade)
+- **`wave.yaml`** — already updated to 8 CPs per R1-consolidated Theme F notes (✓)
+
+**This plan does NOT unilaterally claim CP-3**. Wave-lead resolves sequencing. Until then, this plan is "lands within or adjacent to bic-operations in Horus Stage 3"; any CP-number cascade edits happen in a coordinated sweep.
+
+## Severity + traceability notes
+
+Every finding in R1 (30 total: 10 BLOCK / 13 WARN / 7 NOTE) maps to a theme (A-O) in `R1-consolidated.md` and is addressed in this revision:
+
+- **Theme A (wave-wide naming drift)**: CL-13 amendment drafted; Coverage Contract cites it; residue-grep regex + evidence paths updated in amendment.
+- **Theme B (two packages vs one)**: Collapsed to 1 package with 5 subpaths (doc-validator / accept-runner / atoms-registry / scrubber / no-craftworks).
+- **Theme C (packages/ vs devtools/)**: Moved to `devtools/repo-ops/` with `"private": true`; scope-flip exclusion documented.
+- **Theme D (atom schema divergence)**: Extended schema preserves Authority/Mirrors/Reuses/Spec; adds Visibility/DocType/status/surfaces/scenario-source/scenario-series. Port scope: 82 existing + 15 new + 0 dropped.
+- **Theme E (runner-type as series-id)**: Atoms declare semantic series-ids (`series:governance-decision`, etc.); manifest.yaml maps series → runner. Runner names made semantic (`e2e-loop-sim`, `approval-flow-sim`, `host-shape-sim`).
+- **Theme F (CP renumbering cascade)**: Flagged to team-lead for separate sweep; this plan does NOT silently renumber.
+- **Theme G (no-craftworks scope + allowlist)**: `.no-craftworks-allowlist.yaml` with entries, CODEOWNERS-gated; exit-code-2 distinction.
+- **Theme H (Windows-safe scrubber)**: `scripts/scrub-doc.mjs` (Node.js) with CRLF/BOM preservation + idempotence + deterministic report + runtime-code pass.
+- **Theme I (doctor composition)**: Explicit order, fail-mode, exit codes, runtime budgets, format flags.
+- **Theme J (Windows-first rigor)**: Long paths, case-sensitive, symlinks rejected, `@nodelib/fs.walk` walker, antivirus-latency budget.
+- **Theme K (per-runner Zod schemas)**: 7 typed schemas + dispatcher; top-level permissive; ~28 L0 tests.
+- **Theme L (scaffolder)**: `claws make atom <slug>`; L2 round-trip test.
+- **Theme M (bidirectional orphan detection)**: `--check atoms` sweeps both directions; `--dry-run-drop` pre-drop safety.
+- **Theme N (CL-15 reservation)**: Cite by draft filename; no unilateral CL-number claim.
+- **Theme O (test tier expansion)**: 48/14/6 → 76/21/8 with per-runner + per-check + scaffolder + CI-simulation breadth.
+
+Plus the non-theme WARN/NOTE findings:
+- Architect F-05 (fleet-sim drop): explicit rationale + pre-drop orphan scan in H2.
+- Architect F-06 (runtime-code scrub): H7 covers `.ts/.tsx/.mjs/.js/.cjs` explicitly.
+- Architect F-09 (atom status field): added to schema in H3; deprecated atoms skip coverage.
+- Architect F-10 (plan 4 fixture boundary): Dependencies section declares plan 4 consumes `@bic/repo-ops/accept-runner` for L1 fixture loading only.
+- Ops F-04 (runtime budgets): per-check budgets in H8.
+- Ops F-07 (Zod schema drift): LIFT-MANIFEST.md + no-`any` rule in Dependencies.
+- Ops F-10 (fix hints / `--fix=suggest`): 15 gap types get `{code, severity, message, hint, docsLink}` shape; `--fix=suggest` prints unified diff; `--fix=apply --yes` applies trivial fixes.
+- Conformance F-06 (4 ops atoms without scenario series): exemption field `scenario-source: unit-test` (now 6 ops atoms exempt in H3).
+- Conformance F-10 (`docs/atoms.md` location): moved to `docs/concepts/atoms-registry.md` with rationale paragraph.

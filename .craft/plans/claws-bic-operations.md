@@ -74,7 +74,12 @@ The internal `claws` CLI binary (bic/claws's private OpenClaw-equivalent) hosts 
 
 - [ ] `.github/workflows/ci.yml` — matrix for every PR. Split gates: **per-PR**: unit tests across all 4 packages on Linux + Windows (target <5 minutes). **Nightly + tag**: full matrix (unit + integration + e2e + 95/90/95/95 per-file coverage) across Linux + Windows + macOS.
 - [ ] `.github/workflows/publish.yml` — tag-triggered GHE Packages publish
-- [ ] `.github/CODEOWNERS` — per-package reviewers
+- [ ] `.github/workflows/doc-validation.yml` — runs `claws doctor --check docs` on every PR (gap detector over surface contracts + doc manifests; activates CP-3 repo-ops gate)
+- [ ] `.github/workflows/accept-tests.yml` — runs `vitest run --project accept` on every PR (activates CP-3 accept-runner gate)
+- [ ] `.github/workflows/atoms-oracle.yml` — runs `claws doctor --check atoms` on every PR (bidirectional sweep: atom → contract + scenario, and contract/scenario → atom for orphan detection)
+- [ ] `.github/workflows/no-craftworks.yml` — runs `claws doctor --check no-craftworks` on every PR (distinct exit code 2 for SIEM triage; consults `.no-craftworks-allowlist.yaml` at repo root)
+- [ ] `.github/workflows/doctor.yml` — composite `claws doctor` run for non-PR events (push to main, scheduled nightly); full atoms + docs + accept + no-craftworks sweep with `--format json` output for dashboards
+- [ ] `.github/CODEOWNERS` — per-package reviewers, plus `@bic/claws-release-eng` ownership of `.no-craftworks-allowlist.yaml` (allowlist edits require release-eng review)
 - [ ] Branch protection rules on `main` (configured via settings, documented in repo)
 - [ ] `CONTRIBUTING.md`
 - [ ] `CODE_OF_CONDUCT.md`
