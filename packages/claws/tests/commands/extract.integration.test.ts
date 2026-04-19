@@ -78,7 +78,7 @@ describe('claws extract --preview integration', () => {
 
       const output = consoleSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E010');
+      expect(parsed.error.code).toBe('OC-POLICY-E010');
     } finally {
       consoleSpy.mockRestore();
     }
@@ -101,7 +101,7 @@ describe('claws extract --preview integration', () => {
       expect(exitCode).toBe(3);
 
       const output = consoleSpy.mock.calls.flat().join(' ');
-      expect(output).toContain('CLAWS-E040');
+      expect(output).toContain('OC-POLICY-E040');
     } finally {
       consoleSpy.mockRestore();
       if (originalKey !== undefined) {
@@ -129,7 +129,7 @@ describe('claws extract --preview integration', () => {
       expect(exitCode).toBe(3);
 
       const output = consoleSpy.mock.calls.flat().join(' ');
-      expect(output).toContain('CLAWS-E021');
+      expect(output).toContain('OC-POLICY-E021');
     } finally {
       consoleSpy.mockRestore();
       if (originalKey !== undefined) {

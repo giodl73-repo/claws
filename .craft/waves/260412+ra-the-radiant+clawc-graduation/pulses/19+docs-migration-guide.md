@@ -13,9 +13,9 @@ test_tiers:
   L3_accept: 0
 test_scope:
   run:
-    - "cd packages/@claws/compiler && npx vitest run --project integration --coverage"
+    - "cd packages/@bic/claws-sdk && npx vitest run --project integration --coverage"
   typecheck:
-    - "cd packages/@claws/compiler && npx tsc --noEmit"
+    - "cd packages/@bic/claws-sdk && npx tsc --noEmit"
     - "cd packages/@bic/claws-sdk && npx tsc --noEmit"
 checkpoint: 4
 checkpoint_gate: false
@@ -25,21 +25,21 @@ checkpoint_gate: false
 
 ## Objective
 
-Write the migration guide for consumers moving from the `@bic/claws-sdk` monolith to the new two-package model: `@claws/compiler` (free, MIT) + `@bic/claws-sdk` (enterprise extension). The guide covers three migration paths: (1) free-tier-only consumers who only need the compiler, (2) enterprise consumers who keep the full extension, and (3) consumers who want to cherry-pick dialect packages. Includes an API mapping table showing every old import path and its new equivalent.
+Write the migration guide for consumers moving from the `@bic/claws-sdk` monolith to the new two-package model: `@bic/claws-sdk` (free, MIT) + `@bic/claws-sdk` (enterprise extension). The guide covers three migration paths: (1) free-tier-only consumers who only need the compiler, (2) enterprise consumers who keep the full extension, and (3) consumers who want to cherry-pick dialect packages. Includes an API mapping table showing every old import path and its new equivalent.
 
 Also update CHANGELOG.md for both packages to document the 1.0.0 launch.
 
 ## Deliverables
 
-- [ ] `docs/claws/migration/graduation-guide.md` -- Migration guide with three sections: "Free Tier Only" (uninstall @bic/claws-sdk, install @claws/compiler, update imports), "Enterprise Extension" (install @bic/claws-sdk which pulls @claws/compiler as dependency, no import changes needed), "Cherry-Pick Packages" (install individual @craftworks/ dialect packages for minimal footprint). Step-by-step instructions with before/after code samples.
-- [ ] `docs/claws/migration/api-mapping.md` -- Complete API mapping table: every public symbol, its old import path (`@bic/claws-sdk/...`), and its new import path(s) (`@claws/compiler`, `@claws/compiler/governance`, `@bic/claws-sdk`). Organized by module (governance, emit, audit, test, crypto, enforce, etc.). Marks which symbols are free-tier vs enterprise-only.
-- [ ] `packages/@claws/compiler/CHANGELOG.md` (EDIT) -- Document 1.0.0 release: standalone compiler extracted from @bic/claws-sdk, MIT license, curated public API with N symbols, 2 emit targets (OC + Claude Code), R5 fail-closed enforcement, Ed25519 audit chain.
-- [ ] `packages/@bic/claws-sdk/CHANGELOG.md` -- Document 1.0.0 release: enterprise extension model, depends on @claws/compiler ^1.0.0 with integrity pinning, enterprise modules (fleet, compliance, SIEM, PRESS, RELAX, identity, budget, LSP, snapshots, context, serve).
+- [ ] `docs/claws/migration/graduation-guide.md` -- Migration guide with three sections: "Free Tier Only" (uninstall @bic/claws-sdk, install @bic/claws-sdk, update imports), "Enterprise Extension" (install @bic/claws-sdk which pulls @bic/claws-sdk as dependency, no import changes needed), "Cherry-Pick Packages" (install individual @craftworks/ dialect packages for minimal footprint). Step-by-step instructions with before/after code samples.
+- [ ] `docs/claws/migration/api-mapping.md` -- Complete API mapping table: every public symbol, its old import path (`@bic/claws-sdk/...`), and its new import path(s) (`@bic/claws-sdk`, `@bic/claws-sdk/governance`, `@bic/claws-sdk`). Organized by module (governance, emit, audit, test, crypto, enforce, etc.). Marks which symbols are free-tier vs enterprise-only.
+- [ ] `packages/@bic/claws-sdk/CHANGELOG.md` (EDIT) -- Document 1.0.0 release: standalone compiler extracted from @bic/claws-sdk, MIT license, curated public API with N symbols, 2 emit targets (OC + Claude Code), R5 fail-closed enforcement, Ed25519 audit chain.
+- [ ] `packages/@bic/claws-sdk/CHANGELOG.md` -- Document 1.0.0 release: enterprise extension model, depends on @bic/claws-sdk ^1.0.0 with integrity pinning, enterprise modules (fleet, compliance, SIEM, PRESS, RELAX, identity, budget, LSP, snapshots, context, serve).
 - [ ] `docs/claws/architecture/packages.md` (EDIT) -- Update architecture docs to describe the two-package model, dependency graph, and freemium boundary.
 - [ ] `docs/claws/architecture/graduation.md` -- New guide: internalization strategy, what was internalized and why, the extension-not-fork principle, how bug fixes propagate through semver.
-- [ ] `packages/@claws/compiler/tests/migration-docs.unit.test.ts` -- L0: migration guide file exists and contains all three migration path sections (1), API mapping table lists all public symbols from @claws/compiler barrel export (1)
-- [ ] `packages/@claws/compiler/tests/migration-paths.integration.test.ts` -- L1: old @bic/claws-sdk import paths still work for enterprise consumers (1 test), @claws/compiler exports match the API mapping table (1 test)
-- [ ] `tests/migration-e2e.e2e.test.ts` -- L2: simulate free-tier migration (install @claws/compiler only, run compile+pinch+build, verify success without @craftworks/) (1 test)
+- [ ] `packages/@bic/claws-sdk/tests/migration-docs.unit.test.ts` -- L0: migration guide file exists and contains all three migration path sections (1), API mapping table lists all public symbols from @bic/claws-sdk barrel export (1)
+- [ ] `packages/@bic/claws-sdk/tests/migration-paths.integration.test.ts` -- L1: old @bic/claws-sdk import paths still work for enterprise consumers (1 test), @bic/claws-sdk exports match the API mapping table (1 test)
+- [ ] `tests/migration-e2e.e2e.test.ts` -- L2: simulate free-tier migration (install @bic/claws-sdk only, run compile+pinch+build, verify success without @craftworks/) (1 test)
 
 ## Acceptance Criteria
 

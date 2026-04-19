@@ -18,9 +18,9 @@ specs: [CL-04, CL-02]
    - Validation: Round-trip test: `parse(serialize(ir))` === `ir` (deep equality)
    - Validation: `claws inspect` reads the IR and displays the capability manifest
 
-2. **H2: R5 fail-open is structurally unrepresentable** — `FailMode<R>` is a parameterized type that makes it impossible to construct a governance rule with R5 risk and fail-open mode. The compiler aborts with `CLAWS-E001` if any code path attempts it.
+2. **H2: R5 fail-open is structurally unrepresentable** — `FailMode<R>` is a parameterized type that makes it impossible to construct a governance rule with R5 risk and fail-open mode. The compiler aborts with `OC-POLICY-E001` if any code path attempts it.
    - Validation: Unit test attempts to create `FailMode<5>` with `'open'` — TypeScript compiler rejects it
-   - Validation: Integration test feeds a policy YAML with `failMode: open` for an R5 tool — `claws compile` emits `CLAWS-E001`
+   - Validation: Integration test feeds a policy YAML with `failMode: open` for an R5 tool — `claws compile` emits `OC-POLICY-E001`
    - Validation: Every audit event is HMAC-signed from the first `claws pinch` — `chain.jsonl` entries include `hmac` field
 
 ## Summary
@@ -56,7 +56,7 @@ The GovernanceIR is the foundation of claws — the typed intermediate represent
 - `claws-sdk/src/ir/capability-manifest.ts` (NEW) — CapabilityManifest type
 - `claws-sdk/src/ir/gov-analysis.ts` (NEW) — GovAnalysis type (violations, warnings, enforcement plan)
 - `claws-sdk/src/ir/mechanical-intent.ts` (NEW) — DenyIntent, ElicitIntent, RequireIntent, LimitIntent, LabelIntent
-- `claws-sdk/src/ir/fail-mode.ts` (NEW) — FailMode<R> parameterized type, CLAWS-E001 diagnostic
+- `claws-sdk/src/ir/fail-mode.ts` (NEW) — FailMode<R> parameterized type, OC-POLICY-E001 diagnostic
 - `claws-sdk/src/ir/index.ts` (NEW) — Re-exports
 - `claws-sdk/src/types/config.ts` (NEW) — ClawsConfig (claws.json v2 schema, Zod)
 - `claws-sdk/src/types/platform.ts` (NEW) — Platform enum, detection types
@@ -78,7 +78,7 @@ The GovernanceIR is the foundation of claws — the typed intermediate represent
 - [ ] claws-sdk/src/types/platform.ts — Platform type + marker file map
 - [ ] claws-sdk/src/types/index.ts — barrel exports
 - [ ] claws-sdk/tests/ir/governance-ir.unit.test.ts — serialization, deep equality, hash stability
-- [ ] claws-sdk/tests/ir/fail-mode.unit.test.ts — R5 constraint, CLAWS-E001 emission
+- [ ] claws-sdk/tests/ir/fail-mode.unit.test.ts — R5 constraint, OC-POLICY-E001 emission
 - [ ] claws-sdk/tests/ir/mechanical-intent.unit.test.ts — all 5 intent types
 - [ ] claws-sdk/tests/ir/capability-manifest.unit.test.ts — tool/skill/agent manifest
 - [ ] claws-sdk/tests/fixtures/minimal/ — minimal OC workspace (SOUL.md, TOOLS.md, claws.json)
@@ -105,7 +105,7 @@ The GovernanceIR is the foundation of claws — the typed intermediate represent
 **From fail-mode scenarios:**
 - [ ] FailMode<R> input validation at claws.json schema level — reject R5 fail-open BEFORE the type system (fail-S01-F01)
 - [ ] Error code registry planning: E0xx type-level, E1xx parse, E2xx rule, E3xx emit (fail-S01-F02)
-- [ ] CLAWS-E001 per-tool granularity: report per-tool, not reject entire config (fail-S01-F07)
+- [ ] OC-POLICY-E001 per-tool granularity: report per-tool, not reject entire config (fail-S01-F07)
 - [ ] R5 reclassification as fail-mode workaround — document that lowering to R4 is only way to get fail-open (fail-S01-F03)
 - [ ] Developer-friendly error messages: include WHY, not just WHAT (fail-S01-F04)
 - [ ] R3-R4 default fail mode: explicitly document as fail-closed (fail-S03-F02)

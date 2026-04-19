@@ -1,0 +1,212 @@
+name: S40-error-path-consistency
+series: cap-integration
+version: 2
+specs: [CL-10, CL-03, CL-08]
+description: >
+  Validates that every 4xx/5xx error response across all API endpoints
+  includes a consistent structure: oc:// path (oc_path field), ISO 8601 UTC
+  timestamp, ULID for event/correlation IDs, and the same error response
+  shape. Errors from Layer 1, Layer 2, batch, and session config all use an
+  identical error envelope. The oc_path field uses oc:// format (never API
+  paths or filesystem paths). Timestamps never use local time or Unix epoch.
+
+expect:
+  error_envelope:
+    root_has: [error, oc_path, timestamp, correlation_id]
+    error_has: [type, message, status]
+    oc_path_format: "oc://"
+    timestamp_format: ISO_8601_UTC
+    correlation_id_format: ULID
+  consistency:
+    layer1_errors: identical_envelope
+    layer2_errors: identical_envelope
+    batch_errors: identical_envelope
+    session_config_errors: identical_envelope
+    fleet_errors: identical_envelope
+  forbidden_formats:
+    no_api_paths_in_oc_path: true
+    no_filesystem_paths_in_oc_path: true
+    no_unix_epoch_timestamps: true
+    no_local_timezone_timestamps: true
+    no_uuid_v4_for_event_ids: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner integrates with all API surfaces and implements a
+  unified error handler. The partner expects every error response to follow
+  the same envelope structure so that a single error parser works for all
+  endpoints. The partner triggers errors across surfaces: Layer 1 404 (missing
+  file), Layer 2 403 (R5 locked), batch 400 (conflicting operations), session
+  config 422 (invalid ceiling), and fleet 503 (policy unavailable). Each error
+  response must include oc_path in oc:// format pointing to the relevant
+  resource, a UTC timestamp, and a ULID correlation_id for support ticket
+  cross-referencing. The partner compares all error responses and verifies they
+  share the same top-level structure, differing only in the error.type and
+  error.message fields.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      Every error response must include an oc_path field in oc:// format.
+      Layer 1 naturally has the oc:// path (from the request URL). Layer 2
+      must resolve the chunk_id back to the oc:// path. Batch errors must
+      include the oc_path of the failing operation. If any endpoint returns
+      an API path (/api/oc/TOOLS.md) or a filesystem path
+      (C:\workspace\TOOLS.md) in the oc_path field, the partner's unified
+      error handler breaks. The error response builder must enforce the
+      oc:// format.
+    spec_impact: "CL-10 error responses — oc_path always in oc:// format; builder enforces format; no API or filesystem paths"
+    pitfall: P-306
+
+  - id: F02
+    severity: critical
+    description: >
+      The error response builder must be a shared utility function (e.g.,
+      buildErrorResponse(status, type, message, ocPath, context)) used by
+      all route handlers. If route handlers construct error responses inline,
+      field names drift (oc_path vs ocPath vs path), timestamps use
+      different formats, and correlation_ids are sometimes missing. The
+      builder is the single source of truth for error envelope structure.
+    spec_impact: "CL-10 error builder — shared utility enforcing envelope; no inline error construction in route handlers"
+    pitfall: P-306
+
+  - id: F03
+    severity: critical
+    description: >
+      All timestamps in error responses must be ISO 8601 UTC (e.g.,
+      "2026-04-16T14:30:00.000Z"). No Unix epoch integers, no local
+      timezone offsets, no date-only formats. The ApiFormats module (P-307)
+      must provide a single timestamp serializer that all error and success
+      responses use. If success responses use ISO 8601 but error responses
+      use Unix epoch, the partner needs two parsers — a consistency violation.
+    spec_impact: "CL-10 timestamps — ISO 8601 UTC everywhere; shared ApiFormats serializer; no format variance"
+    pitfall: P-307
+
+  - id: F04
+    severity: major
+    description: >
+      The correlation_id must be a ULID (Universally Unique Lexicographically
+      Sortable Identifier), not a UUID v4. ULIDs are time-sortable, which
+      allows the partner to sort errors chronologically by ID alone. UUID v4
+      is random and unsortable. The ULID must be generated per-request (not
+      per-session or per-connection) so that each error has a unique, sortable
+      identifier. The ULID generator must be monotonic within the same
+      millisecond to guarantee uniqueness.
+    spec_impact: "CL-10 correlation_id — ULID per-request; monotonic within millisecond; time-sortable"
+    pitfall: P-307
+
+  - id: F05
+    severity: major
+    description: >
+      Layer 2 errors must include BOTH oc_path and chunk_id. The oc_path
+      is for the partner's unified error handler. The chunk_id is for
+      Layer 2-specific retry logic. If Layer 2 only includes chunk_id, the
+      partner must maintain a chunk-to-path mapping to feed the unified
+      handler. Including both eliminates the mapping requirement. Layer 1
+      errors include oc_path only (no chunk_id concept in Layer 1).
+    spec_impact: "CL-10 Layer 2 errors — include both oc_path and chunk_id; Layer 1 includes oc_path only"
+    pitfall: P-306
+
+  - id: F06
+    severity: major
+    description: >
+      Batch error responses must include the operation_index of the failing
+      operation AND the oc_path of the resource it targeted. If a batch of
+      5 operations fails on operation[3] targeting oc://TOOLS.md/Tools/deploy,
+      the error must include operation_index: 3 and oc_path: "oc://TOOLS.md/Tools/deploy".
+      Without the oc_path, the partner knows which operation failed but not
+      which resource — they must re-read the batch payload to correlate.
+    spec_impact: "CL-10 batch errors — include operation_index + oc_path of failing operation in error envelope"
+    pitfall: P-306
+
+  - id: F07
+    severity: major
+    description: >
+      Fleet-related errors (FLEET_POLICY_UNAVAILABLE, FLEET_LOCK) may not
+      have an obvious oc_path because they apply workspace-wide. The oc_path
+      for fleet errors should be "oc://" (the workspace root) to indicate
+      the scope. If oc_path is null or absent for fleet errors, the partner's
+      error handler receives an unexpected shape. Every error, even workspace-
+      scoped ones, must have an oc_path — use the root path as the convention.
+    spec_impact: "CL-10 fleet errors — oc_path is 'oc://' (workspace root) for workspace-scoped errors"
+    pitfall: P-306
+
+  - id: F08
+    severity: major
+    description: >
+      The error.type field must be an enumerated string (e.g., NOT_FOUND,
+      R5_NON_NEGOTIABLE, VALIDATION_ERROR, FLEET_POLICY_UNAVAILABLE,
+      CONFLICT, PRECONDITION_FAILED, PRECONDITION_REQUIRED). If error.type
+      is a free-form string that varies by route handler, the partner cannot
+      switch on it programmatically. The enum must be documented and
+      exhaustive. New error types require a spec amendment, not just a code
+      change.
+    spec_impact: "CL-10 error types — enumerated strings; documented; new types require spec amendment"
+    pitfall: P-306
+
+  - id: F09
+    severity: warning
+    description: >
+      SSE error events must follow the same envelope structure as HTTP error
+      responses. If a watcher detects a file corruption and emits an SSE
+      event, the event data must include oc_path, timestamp, and
+      correlation_id in the same format as HTTP errors. Partners subscribe
+      to SSE and HTTP — if the error shapes differ, they need two parsers.
+      The error builder should be usable for both HTTP responses and SSE
+      event payloads.
+    spec_impact: "CL-10 SSE errors — same error envelope as HTTP; shared builder for both HTTP and SSE"
+    pitfall: P-306
+
+  - id: F10
+    severity: warning
+    description: >
+      Error responses must not leak internal implementation details. No
+      stack traces, no internal module paths, no database connection strings,
+      no temporary file paths. The error.message must be descriptive enough
+      for the partner to take action but not revealing of server internals.
+      A sanitization step in the error builder must strip any message
+      containing filesystem paths (detected by / or \\ patterns outside
+      the oc:// prefix).
+    spec_impact: "CL-10 error sanitization — strip filesystem paths, stack traces, internal details from error.message"
+    pitfall: P-306
+
+  - id: F11
+    severity: warning
+    description: >
+      Error responses for 5xx errors should include a retry_after field
+      (in seconds) when the error is transient (e.g., 503 during recovery,
+      503 during fleet reload). For non-transient 5xx errors (e.g., 500
+      internal server error), retry_after should be absent — retrying will
+      not help. The partner uses the presence of retry_after to decide
+      between automatic retry and user escalation.
+    spec_impact: "CL-10 5xx errors — retry_after present for transient errors only; absent for non-transient"
+    pitfall: P-307
+
+  - id: F12
+    severity: note
+    description: >
+      A CI contract test should validate the error envelope schema across
+      all endpoints. The test triggers every known error type on every
+      endpoint and asserts that the response body matches the error envelope
+      JSON schema. If a new endpoint is added without using the shared error
+      builder, the contract test catches it. The test should be auto-
+      generated from the endpoint registry to stay in sync.
+    spec_impact: "Test infrastructure — auto-generated error envelope contract test across all endpoints"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      The error response should include a request_id field (separate from
+      correlation_id) that matches the request identifier logged by the
+      server. This allows the partner to include the request_id in support
+      tickets, and the operator can find the exact server log entry. The
+      request_id is generated at the HTTP middleware level before routing,
+      so it is available even for routing-level errors (404 for unknown paths).
+    spec_impact: "CL-10 error responses — request_id from HTTP middleware; separate from correlation_id; for log correlation"
+    pitfall: null

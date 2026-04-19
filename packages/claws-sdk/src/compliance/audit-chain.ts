@@ -275,3 +275,63 @@ export async function readAuditChain(workspaceRoot: string): Promise<AuditChainE
 }
 
 export { readPolicyVersion, CHAIN_FILE, acquireChainLock, releaseChainLock };
+
+/**
+ * Pluggable audit-chain emission surface — CP-7 R1 ciso M2.
+ *
+ * Governance-significant modules (trust-manager, violation-state machine,
+ * session-config-editor, auto-snapshot) accept an optional sink in their
+ * constructor options. When supplied the module calls `emit()` at every
+ * audit-relevant mutation; when omitted audit emission is a silent no-op so
+ * unit tests and tree-shaken consumers keep working without ceremony.
+ *
+ * The sink receives the same {@link AuditEventInput} shape the
+ * `appendAuditEvent` helper accepts. `fire-and-forget` is the contract:
+ * the sink MUST NOT throw back at the caller — persistence failures are
+ * expected to land in operator logs, not in a user PATCH response (the
+ * audit trail is a compliance artifact, not a request-path precondition).
+ *
+ * The serve layer wires a single {@link createFsAuditChainSink} instance
+ * backed by `.claws/audit/chain.jsonl`; tests inject an in-memory capturing
+ * sink to assert that the right events fired with the right fields.
+ */
+export interface AuditChainSink {
+  readonly emit: (event: AuditEventInput) => void;
+}
+
+/**
+ * Options for {@link createFsAuditChainSink}.
+ */
+export interface FsAuditChainSinkOptions {
+  /** Absolute workspace root. Used to resolve the chain file path. */
+  readonly workspaceRoot: string;
+  /**
+   * Optional error observer. Invoked with the caught error when a write
+   * fails. Defaults to `console.error`. Tests inject a spy so they can
+   * assert the sink never throws while still surfacing failures.
+   */
+  readonly onError?: (err: unknown) => void;
+}
+
+/**
+ * Construct a filesystem-backed {@link AuditChainSink} that appends each
+ * emitted event to `.claws/audit/chain.jsonl` as a signed HMAC-chained
+ * entry. The returned sink is fire-and-forget — the caller's call site
+ * never awaits the persistence. Append-safety comes from the existing
+ * `acquireChainLock` + signed-entry machinery in {@link appendAuditEvent}.
+ */
+export function createFsAuditChainSink(
+  options: FsAuditChainSinkOptions,
+): AuditChainSink {
+  const onError =
+    options.onError ??
+    ((err: unknown): void => {
+      // eslint-disable-next-line no-console
+      console.error('[audit-chain] sink write failed:', err);
+    });
+  return {
+    emit(event: AuditEventInput): void {
+      void appendAuditEvent(options.workspaceRoot, event).catch(onError);
+    },
+  };
+}

@@ -20,7 +20,7 @@ expect:
       rules_evaluated: true
       signature_check: true
   violations:
-    - code: CLAWS-E234
+    - code: OC-POLICY-E234
       message: "VERIFIED badge signature stale — handler.ts modified after verification, tier downgraded to DECLARED"
       severity: error
   warnings:

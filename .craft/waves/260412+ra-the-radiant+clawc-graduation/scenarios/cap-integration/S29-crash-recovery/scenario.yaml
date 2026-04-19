@@ -1,0 +1,204 @@
+name: S29-crash-recovery
+series: cap-integration
+version: 2
+specs: [CL-10, CL-06, CL-08]
+description: >
+  Validates crash recovery when claws serve crashes mid-PATCH. On restart, the
+  system detects write-without-compile state, forces a recompile, serves 503
+  during recovery, and restores or documents the work queue as lost. WAL-based
+  recovery, cache invalidation, work queue persistence, startup sequence, and
+  recovery timeout are all tested.
+
+expect:
+  crash_mid_patch:
+    state_on_disk: "file written, no compilation"
+    detection: write_without_compile
+  restart_behavior:
+    health_check: forces_recompile
+    during_recovery:
+      status: 503
+      header: "Retry-After: 5"
+    after_recovery:
+      status: 200
+      compilation_consistent: true
+  work_queue:
+    persistence: file_based
+    recovery: best_effort
+    lost_tasks_documented: true
+  wal:
+    present: true
+    replayed_on_startup: true
+  recovery_timeout:
+    max_duration: 30
+    exceeded_behavior: degraded_mode
+
+simulate:
+  failures:
+    - type: process_crash
+      during: "PATCH /api/oc/TOOLS.md write phase"
+  halt: null
+  budget: null
+
+problem: >
+  claws serve is processing a PATCH /api/oc/TOOLS.md that adds a new tool. The
+  write phase completes (TOOLS.md is updated on disk) but the process crashes
+  before the compilation phase runs. On disk, TOOLS.md contains the new tool but
+  the GovernanceIR does not. This is a write-without-compile inconsistency. The
+  user restarts claws serve. The startup health check must: (1) detect that
+  TOOLS.md mtime > last compilation timestamp (write-without-compile), (2) force
+  a recompile before serving any requests, (3) return 503 with Retry-After during
+  recovery, (4) replay the WAL if present (in case the crash corrupted the last
+  write), (5) restore the work queue from its persistence file (or document which
+  tasks were lost), (6) complete recovery within a timeout (30s) or enter degraded
+  mode. After recovery, all APIs must serve consistent data.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The startup health check must compare file mtimes against the last
+      compilation timestamp. If any OC file has mtime > compilation_timestamp,
+      the system is in write-without-compile state and must force a recompile
+      before serving requests. If the health check only verifies that the IR
+      file exists (not its freshness), stale IR is served as authoritative.
+      The mtime check must cover ALL OC files, not just the ones known to
+      have been modified.
+    spec_impact: "CL-06 startup health — mtime check all OC files vs last compilation timestamp; force recompile if any file is newer"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      During recovery (recompile in progress), all API endpoints must return
+      503 Service Unavailable with a Retry-After header. If the server returns
+      200 with stale IR data during recovery, partners cache stale governance
+      context. The 503 must apply to ALL endpoints (GET, PATCH, workqueue)
+      not just compilation-dependent ones. A partner receiving 503 knows to
+      retry; a partner receiving 200 with stale data does not.
+    spec_impact: "CL-10 recovery mode — 503 with Retry-After on ALL endpoints during recompile; no stale 200 responses"
+    pitfall: null
+
+  - id: F03
+    severity: critical
+    description: >
+      If the crash occurred mid-write (TOOLS.md partially written), the file
+      on disk is corrupted. The WAL (write-ahead log) must contain the
+      pre-write state so the system can replay to a consistent point. If no
+      WAL exists, the system must detect the corrupted file (e.g. schema
+      validation fails) and either restore from the last known good backup
+      or enter a manual recovery mode with a clear error message. Silent
+      acceptance of a corrupted file produces a garbage IR.
+    spec_impact: "CL-10 WAL recovery — replay to last consistent state; detect corruption via schema validation; manual recovery if no WAL"
+    pitfall: null
+
+  - id: F04
+    severity: critical
+    description: >
+      The work queue must be persisted to disk so that in-progress tasks
+      survive a crash. If the queue is in-memory only, all queued work is
+      lost on crash. The persistence file must be updated atomically (write
+      to temp, rename) to avoid corruption. On startup, the queue is
+      loaded from the persistence file. Tasks that were in 'executing' state
+      at crash time must be marked as 'interrupted' and documented in the
+      recovery report.
+    spec_impact: "CL-08 work queue persistence — atomic file-based persistence; interrupted tasks marked and documented on recovery"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The recovery recompile must complete within a timeout (e.g. 30s). If
+      the workspace is large and compilation takes longer, the server cannot
+      stay in 503 indefinitely. After the timeout, the system should enter
+      degraded mode: serve GET requests from stale IR with a
+      X-OC-Governance: degraded header, but continue blocking PATCHes until
+      compilation completes. Degraded mode is better than indefinite 503
+      because partners can at least read the workspace.
+    spec_impact: "CL-10 recovery timeout — 30s limit; degraded mode after timeout (stale GETs allowed, PATCHes blocked)"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Cache invalidation on restart must be complete. If the .claws-cache
+      directory contains stale entries from before the crash, and the
+      recompile uses incremental compilation that trusts the cache, it may
+      produce an incorrect IR. The startup sequence must invalidate the
+      entire cache before recompiling. A fresh build is slower but
+      guaranteed correct. Cache can be rebuilt during the recovery compile.
+    spec_impact: "CL-06 startup — full cache invalidation before recovery recompile; no incremental compilation from potentially stale cache"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The startup sequence must be ordered: (1) WAL replay, (2) file
+      integrity check, (3) cache invalidation, (4) recompile, (5) queue
+      recovery, (6) ready. If steps execute out of order (e.g. queue
+      recovery before recompile), recovered tasks may reference tools that
+      don't exist in the post-recovery IR. Each step must complete before
+      the next begins. The health endpoint should report which step is
+      currently executing.
+    spec_impact: "CL-10 startup sequence — ordered: WAL -> integrity -> cache invalidate -> recompile -> queue -> ready; health reports current step"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      If the PATCH that was in progress at crash time modified multiple
+      files atomically (e.g. TOOLS.md and GOVERNANCE.md), the crash may
+      have written one but not the other. The WAL must record the entire
+      atomic operation so replay either applies all writes or none. If
+      the WAL only records individual file writes, a partial replay
+      creates cross-file inconsistency that the compiler may not detect.
+    spec_impact: "CL-10 WAL atomicity — record multi-file operations as atomic units; replay all-or-nothing"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The recovery report (available via GET /api/health/recovery) must
+      document: crash timestamp (from WAL or process logs), files in
+      write-without-compile state, WAL entries replayed, queue tasks
+      recovered vs lost, and total recovery duration. This report helps
+      the admin understand what happened and whether any data was lost.
+      Without it, the admin must manually investigate log files.
+    spec_impact: "CL-10 recovery report — GET /api/health/recovery with crash details, WAL replay summary, queue recovery status"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Connected SSE clients will have their connections dropped when the
+      server crashes. On restart, the SSE endpoint must be available as
+      soon as the server starts (even during 503 mode) so clients can
+      reconnect and receive the RECOVERY_IN_PROGRESS event. If the SSE
+      endpoint is also 503 during recovery, clients cannot reconnect and
+      must poll the health endpoint instead, which is less efficient.
+    spec_impact: "CL-10 SSE during recovery — SSE endpoint available immediately; emit RECOVERY_IN_PROGRESS event to reconnecting clients"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      If the server crashes and restarts multiple times in quick succession
+      (crash loop), the startup sequence must not accumulate WAL entries or
+      create multiple concurrent recompiles. A lock file should prevent
+      concurrent recovery processes. If a previous recovery is incomplete
+      (lock file exists but process is dead), the new process must detect
+      the stale lock (e.g. via PID check) and take over recovery. Crash
+      loop detection should emit a CRASH_LOOP_DETECTED audit event.
+    spec_impact: "CL-10 crash loop — lock file prevents concurrent recovery; stale lock detection via PID; CRASH_LOOP_DETECTED audit event"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The recovery duration should be tracked as a metric over time. If
+      recovery takes progressively longer (growing workspace, more OC files),
+      the admin needs visibility to plan capacity. The metric should be
+      available via GET /api/metrics/recovery and include: last_recovery_ms,
+      average_recovery_ms, max_recovery_ms, and recovery_count. This helps
+      right-size the recovery timeout configuration.
+    spec_impact: "CL-10 metrics — recovery duration tracking; available via metrics endpoint; informs timeout configuration"
+    pitfall: null

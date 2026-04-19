@@ -75,7 +75,7 @@ Implement 7-platform emission through the Spec 108 loss matrix. The path enumera
 - fail-S06-F02: Platform-specific timeout for non-Node targets
 - fail-S01-F02: Error code registry (E0xx type, E1xx parse, E2xx rule, E3xx emit)
 - fail-S01-F04: Developer-friendly error messages with WHY context
-- fail-S01-F07: Per-tool error granularity (CLAWS-E001 per-tool)
+- fail-S01-F07: Per-tool error granularity (OC-POLICY-E001 per-tool)
 - fail-S03-F06: Risk-level branching in handler generation
 - CP-S03-F07: Conditional artifact count (3 when lobster.yaml absent)
 

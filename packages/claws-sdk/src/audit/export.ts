@@ -14,7 +14,7 @@
  * @module claws-sdk/audit/export
  */
 
-import { canonicalJson } from '@craftworks/agent-sdk/suite';
+import { canonicalJson } from '../util/canonical-json.js';
 import type { ChainEntry, RedactionOptions, StreamExportOptions } from './types.js';
 
 /**

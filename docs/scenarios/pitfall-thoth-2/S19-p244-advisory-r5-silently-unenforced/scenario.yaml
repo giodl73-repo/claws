@@ -19,7 +19,7 @@ expect:
       platform_class: advisory
       r5_tools_detected: 2
   violations:
-    - code: CLAWS-E301
+    - code: OC-POLICY-E301
       message: "R5 tool 'database-delete' requires mandatory enforcement — advisory platform 'cursor' cannot guarantee compliance"
       severity: error
   warnings:

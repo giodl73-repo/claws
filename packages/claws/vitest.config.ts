@@ -95,6 +95,9 @@ export default defineConfig({
           include: ['tests/**/*.e2e.test.ts'],
           forceExit: true,
           exclude: sharedExclude,
+          // e2e tests spawn real subprocesses; under parallel-project load
+          // Windows can take several seconds per `node dist/cli.js` start.
+          testTimeout: 60_000,
         },
       }),
       defineProject({

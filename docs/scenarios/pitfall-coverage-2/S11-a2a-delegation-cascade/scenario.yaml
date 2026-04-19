@@ -12,7 +12,7 @@ description: >
 expect:
   rules_applied: [G-A2A-TRUST, G-A2A-IDENTITY, G-A2A-FLOW, G-A2A-ESCALATE, G-A2A-DELEGATE]
   violations:
-    - code: CLAWS-E030
+    - code: OC-POLICY-E030
       rule: G-A2A-TRUST
       description: "Agent 'research-bot' has delegated tools but no trust declaration"
   pass: false
@@ -123,7 +123,7 @@ findings:
     severity: note
     description: >
       The unreachable agent pattern (P-088) should be a distinct diagnostic
-      code (CLAWS-E030) separate from "agent with no trust" (which might be
+      code (OC-POLICY-E030) separate from "agent with no trust" (which might be
       intentional for isolated agents). The diagnostic must specifically flag
       delegation + no trust = unreachable, not just missing trust in general.
     spec_impact: "CL-02 G-A2A-TRUST — unreachable agent diagnostic code"

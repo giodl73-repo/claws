@@ -13,7 +13,7 @@ specs: [CL-05, CL-06]
 
 ## Headlines
 
-1. **H1: `claws new skill email-drafter --template communication` scaffolds a complete governance-aware skill in <2s** — The maker scaffold reads a template registry (communication, data-processing, browser-automation, developer-tools, custom), generates a SKILL.md with governance frontmatter (risk, OBO, data sensitivity pre-filled from template), a `src/handler.ts` with `@bic/claws-skill-kit` imports and governance decorators, a `package.json` with `@bic/claws-skill-kit` + `@bic/claws-test` as peer dependencies, a `vitest.config.ts` with governance test projects, and a `.claws-manifest` stub. `claws annotate` does the reverse -- it reads an existing SKILL.md and `src/handler.ts`, infers governance metadata from capability analysis (tool usage patterns, OBO indicators, data labels), and suggests frontmatter additions for Tier 1 DECLARED adoption. `claws import skill` migrates an existing OC skill into the claws compilation pipeline by adding governance annotations and generating the `.claws/` directory structure.
+1. **H1: `claws new skill email-drafter --template communication` scaffolds a complete governance-aware skill in <2s** — The maker scaffold reads a template registry (communication, data-processing, browser-automation, developer-tools, custom), generates a SKILL.md with governance frontmatter (risk, OBO, data sensitivity pre-filled from template), a `src/handler.ts` with `@bic/skill-kit` imports and governance decorators, a `package.json` with `@bic/skill-kit` + `@bic/test` as peer dependencies, a `vitest.config.ts` with governance test projects, and a `.claws-manifest` stub. `claws annotate` does the reverse -- it reads an existing SKILL.md and `src/handler.ts`, infers governance metadata from capability analysis (tool usage patterns, OBO indicators, data labels), and suggests frontmatter additions for Tier 1 DECLARED adoption. `claws import skill` migrates an existing OC skill into the claws compilation pipeline by adding governance annotations and generating the `.claws/` directory structure.
    - Validation: `claws new skill test-skill --template communication` creates a directory with SKILL.md (governance frontmatter), handler.ts (decorators), package.json, and vitest.config.ts -- all files pass `tsc --noEmit`
    - Validation: `claws annotate` on an existing SKILL.md without governance frontmatter suggests `risk: R3`, `obo: email`, `data: INTERNAL` based on detected `send-email` capability
    - Validation: `claws import skill ./legacy-skill` produces a `.claws/` directory and governance annotations without modifying original files
@@ -108,7 +108,7 @@ The maker commands provide the skill creation workflow for claws: scaffold new g
 
 **From skill-lifecycle S01 (scaffold-new-skill):**
 - [ ] Trust tier derivation: scaffold reads workspace trust tier from claws.json, defaults risk to max allowed (S01-F01, P-225)
-- [ ] Dependency bootstrapping: check @bic/claws-skill-kit presence, auto-install or guided install (S01-F02)
+- [ ] Dependency bootstrapping: check @bic/skill-kit presence, auto-install or guided install (S01-F02)
 - [ ] Scaffold default tier: TYPED by default, `--tier declared` for minimal scaffold (S01-F03)
 - [ ] Version alignment: generated package.json uses same major version as running claws binary (S01-F04)
 - [ ] .gitignore in scaffold template with `.claws/` entry (S01-F05)
@@ -151,8 +151,8 @@ The maker commands provide the skill creation workflow for claws: scaffold new g
 
 ## Out of Scope
 
-- @bic/claws-skill-kit package (that's claws-skill-kit plan -- scaffold generates import stubs, skill-kit provides the runtime)
-- @bic/claws-test package (that's claws-test-framework plan -- scaffold generates test config, test package provides the harness)
+- @bic/skill-kit package (that's claws-skill-kit plan -- scaffold generates import stubs, skill-kit provides the runtime)
+- @bic/test package (that's claws-test-framework plan -- scaffold generates test config, test package provides the harness)
 - ClawHub server-side badge rendering (ClawHub is external -- this plan only generates the metadata payload)
 - SKILL.md compilation pipeline (CL-05 PARSE/EXTRACT/ANALYZE/GENERATE/EMIT -- that's the emit plan for skills)
 - Cross-compile targets for scaffolded skills (cursor, claude templates -- Phase 3+)

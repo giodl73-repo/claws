@@ -152,6 +152,19 @@ Every concept in the claws governance compiler, where it is authoritatively defi
 | C96 | `atom:guardrail-provider` | GuardrailProvider (composable governance interface) | `design/claws/specs/CL-11-upstream-governance.md` | CL-07, CL-03 | -- | CL-11 |
 | C97 | `atom:approval-event-schema` | Approval Event Schema (host-approval-policies.json) | `design/claws/specs/CL-12-approval-event-schema.md` | CL-07 | -- | CL-12 |
 
+## Integration Consumer Layer (Horus)
+
+| ID | Slug | Name | Authority | Mirrors | Reuses | Spec |
+|----|------|------|-----------|---------|--------|------|
+| C114 | `atom:aether-serve-consumer` | Aether Runtime Consumer (ApprovalPolicyRegistry + GuardrailProvider + SSE dialog) | `.craft/plans/aether-claws-serve-integration.md` | CL-07, CL-11, CL-13 | A `atom:guardrail-provider` | CL-07 |
+| C115 | `atom:lobster-serve-consumer` | Lobster Container + Cowork + M365 Connectors (sidecar host, chunk-bound UI, Graph connectors) | `.craft/plans/lobster-claws-serve-integration.md` | CL-10, CL-11, CL-12 | A `atom:claws-serve` | CL-10 |
+| C116 | `atom:claws-sim-harness` | Local Sim Harness (`claws sim run`, boot-sequence contract, dispatch protocol, parity differ) | `.craft/plans/claws-local-sim-evolution.md` | CL-04, CL-07, CL-10, CL-11 | -- | CL-10 |
+| C117 | `atom:claws-repo-boundary` | claws Repo Boundary (craftworks ↔ bic/claws two-repo architecture on microsoft.ghe.com, GHE Packages consumption contract) | `.craft/plans/claws-repo-migration.md` | CL-13 | -- | CL-13 |
+| C118 | `atom:openclaw-workspace` | `@openclaw/workspace` package — oc:// URI scheme + typed AST (parse/mutate/emit) + RFC 8785 JCS canonicalize | `docs/claws/proposals/openclaw-upstream/workspace.md` | `docs/claws/concepts/openclaw-workspace.md`, spec §2 | A `atom:upstream-contrib` | CL-11 |
+| C119 | `atom:openclaw-guardrails` | `@openclaw/guardrails` package — `GuardrailProvider` + `FileIngestProvider` contracts + 6 runtime subpaths (audit/approvals/budget/identity/siem/secrets) | `docs/claws/proposals/openclaw-upstream/guardrails.md` | `docs/claws/concepts/openclaw-guardrails.md`, spec §1 | A `atom:upstream-contrib` | CL-11 |
+| C120 | `atom:openclaw-policy` | `@openclaw/policy` package — workspace → PolicyIR generator; emits `policy-ir.json` + `audit-manifest.json` + `gateway-plugin.ts`; `--scope` flip | `docs/claws/proposals/openclaw-upstream/policy.md` | `docs/claws/concepts/openclaw-policy.md`, spec §3, `policy-commands.md` | A `atom:upstream-contrib` | CL-11 |
+| C121 | `atom:openclaw-snap` | `@openclaw/snap` package — content-addressable snapshot registry + HTTP server; NONE → STAGED → UPLOADED → PROMOTED state machine; canonical `SnapError` envelope | `docs/claws/proposals/openclaw-upstream/snap.md` | `docs/claws/concepts/openclaw-snap.md`, spec §4, `snap-commands.md` | A `atom:upstream-contrib` | CL-11 |
+
 ## CI/CD Layer
 
 | ID | Slug | Name | Authority | Mirrors | Reuses | Spec |
@@ -219,6 +232,7 @@ Every concept in the claws governance compiler, where it is authoritatively defi
 | Optimization (Thoth) | C104-C105 | 2 | 1 |
 | Maker (Thoth) | C109 | 1 | 0 |
 | Aether (Thoth) | C110 | 1 | 0 |
-| **Total** | | **79** | **26 (33%)** |
+| Upstream Packages (Ra) | C118-C121 | 4 | 0 |
+| **Total** | | **83** | **26 (31%)** |
 
-79 atoms across 18 layers. 26 reuse Craftworks atoms (33%). 53 are new to claws.
+83 atoms across 19 layers. 26 reuse Craftworks atoms (31%). 57 are new to claws.

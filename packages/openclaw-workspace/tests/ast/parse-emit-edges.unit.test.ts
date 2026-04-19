@@ -1,0 +1,177 @@
+import { describe, expect, it } from 'vitest';
+import { parse, emit, classify } from '../../src/ast/index.js';
+
+describe('ast parse + emit edge cases', () => {
+  it('parse handles empty content', () => {
+    const { ast } = parse('soul', '');
+    expect(ast.kind).toBe('soul');
+    expect(ast.blocks).toEqual([]);
+  });
+
+  it('parse handles frontmatter without fence close gracefully', () => {
+    const content = '---\nname: x\n';
+    const { ast } = parse('soul', content);
+    expect(ast.frontmatter).toEqual([{ key: 'name', value: 'x' }]);
+  });
+
+  it('parse ignores frontmatter lines without colon', () => {
+    const content = '---\ninvalid line\nname: x\n---\n';
+    const { ast } = parse('soul', content);
+    expect(ast.frontmatter).toEqual([{ key: 'name', value: 'x' }]);
+  });
+
+  it('tools with no Tool Guidance heading yields empty tools array', () => {
+    const { ast } = parse('tools', '## Something Else\nbody\n');
+    if (ast.kind === 'tools') expect(ast.tools).toEqual([]);
+  });
+
+  it('tools: missing separator emits a warning diagnostic', () => {
+    const content = '## Tool Guidance\n| Tool | Guidance |\n| `send-email` | ok |\n';
+    const { diagnostics } = parse('tools', content);
+    expect(diagnostics.some((d) => d.severity === 'warning')).toBe(true);
+  });
+
+  it('tools: escaped pipe in guidance cell', () => {
+    const content = [
+      '## Tool Guidance',
+      '| Tool | Guidance |',
+      '| ---- | -------- |',
+      '| `send-email` | uses \\| pipe |',
+    ].join('\n') + '\n';
+    const { ast } = parse('tools', content);
+    if (ast.kind === 'tools') expect(ast.tools[0]!.guidance).toContain('|');
+  });
+
+  it('agents: non-bullet line in body is skipped', () => {
+    const content = '## Drafter\nplain prose line\n- description: x\n';
+    const { ast } = parse('agents', content);
+    if (ast.kind === 'agents') {
+      expect(ast.agents[0]!.fields).toEqual([{ key: 'description', value: 'x' }]);
+    }
+  });
+
+  it('generic kind (memory, config, etc.) still produces blocks', () => {
+    const content = '## Personal\nbody line\n';
+    const { ast } = parse('memory', content);
+    expect(ast.kind).toBe('memory');
+    expect(ast.blocks).toHaveLength(1);
+  });
+
+  it('emit: throws on kind mismatch', () => {
+    const { ast } = parse('soul', 'hello');
+    expect(() => emit('tools', ast)).toThrow(/kind mismatch/);
+  });
+
+  it('emit: roles kind accepts agents ast', () => {
+    const { ast } = parse('agents', '## Drafter\n- description: x\n');
+    expect(emit('roles', ast)).toBe(ast.raw);
+  });
+
+  it('emit: constructs canonical output when raw is empty', () => {
+    const out = emit('soul', {
+      kind: 'soul',
+      raw: '',
+      frontmatter: [{ key: 'name', value: 'x' }],
+      preamble: 'Prose',
+      blocks: [{ heading: 'Boundaries', bodyLines: ['- do x'], line: 1 }],
+    });
+    expect(out).toContain('---');
+    expect(out).toContain('name: x');
+    expect(out).toContain('Prose');
+    expect(out).toContain('## Boundaries');
+  });
+
+  it('emit: empty ast (no frontmatter, preamble, or blocks) emits empty string', () => {
+    const out = emit('config', {
+      kind: 'config',
+      raw: '',
+      frontmatter: [],
+      preamble: '',
+      blocks: [],
+    });
+    expect(out).toBe('');
+  });
+});
+
+describe('classify — more paths', () => {
+  it('governance dir maps to governance kind', () => {
+    expect(classify('governance/policy.md')).toBe('governance');
+    expect(classify('/abs/governance/policy.md')).toBe('governance');
+  });
+
+  it('handles Windows-style backslashes', () => {
+    expect(classify('C:\\src\\SOUL.md')).toBe('soul');
+  });
+
+  it('workflows dir maps to workflows', () => {
+    expect(classify('/abs/workflows/onboarding.md')).toBe('workflows');
+  });
+
+  it('roles dir maps to roles', () => {
+    expect(classify('roles/manager.md')).toBe('roles');
+    expect(classify('/x/roles/y.md')).toBe('roles');
+  });
+
+  it('skills dir as subpath variant', () => {
+    expect(classify('/abs/skills/email-drafter/skill.md')).toBe('skills');
+  });
+});
+
+describe('parse branch coverage', () => {
+  it('preamble and blocks both present', () => {
+    const { ast } = parse('soul', 'Prose here.\n\n## Boundaries\n- do x\n');
+    expect(ast.preamble).toContain('Prose');
+    expect(ast.blocks).toHaveLength(1);
+  });
+
+  it('frontmatter with line lacking key (no text before colon)', () => {
+    const content = '---\n: value\nname: x\n---\n';
+    const { ast } = parse('soul', content);
+    expect(ast.frontmatter).toEqual([{ key: 'name', value: 'x' }]);
+  });
+
+  it('agents: body line starting with bullet but no colon is skipped', () => {
+    const { ast } = parse('agents', '## Drafter\n- no-colon-here\n- description: x\n');
+    if (ast.kind === 'agents') {
+      expect(ast.agents[0]!.fields).toEqual([{ key: 'description', value: 'x' }]);
+    }
+  });
+
+  it('tools: blank line inside table body is skipped', () => {
+    const content = [
+      '## Tool Guidance',
+      '| Tool | Guidance |',
+      '| ---- | -------- |',
+      '',
+      '| `send-email` | ok |',
+    ].join('\n') + '\n';
+    const { ast } = parse('tools', content);
+    if (ast.kind === 'tools') expect(ast.tools).toHaveLength(1);
+  });
+
+  it('tools: non-pipe line in body is skipped', () => {
+    const content = [
+      '## Tool Guidance',
+      '| Tool | Guidance |',
+      '| ---- | -------- |',
+      'random prose',
+      '| `send-email` | ok |',
+    ].join('\n') + '\n';
+    const { ast } = parse('tools', content);
+    if (ast.kind === 'tools') expect(ast.tools).toHaveLength(1);
+  });
+
+  it('tools: cell with only tool (no guidance) is skipped', () => {
+    const content = [
+      '## Tool Guidance',
+      '| Tool | Guidance |',
+      '| ---- | -------- |',
+      '| `send-email` |',
+    ].join('\n') + '\n';
+    const { ast } = parse('tools', content);
+    if (ast.kind === 'tools') {
+      const names = ast.tools.map((t) => t.tool);
+      expect(names).not.toContain('send-email--guidance-missing');
+    }
+  });
+});

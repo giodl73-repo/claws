@@ -4,7 +4,7 @@ version: 1
 specs: [CL-08]
 description: >
   Validates that diamond dependencies across the 17-package graph resolve to
-  a single copy of each shared package. When @claws/compiler and
+  a single copy of each shared package. When @bic/claws-sdk and
   @bic/claws-sdk both depend on @craftworks/crypto (directly or
   transitively), npm must deduplicate to one installed copy. Duplicate module
   instances break instanceof checks, corrupt shared audit chains, and double
@@ -28,25 +28,25 @@ simulate:
   budget: null
 
 problem: >
-  Install @claws/compiler (which depends on @craftworks/crypto, @craftworks/forma,
+  Install @bic/claws-sdk (which depends on @craftworks/crypto, @craftworks/forma,
   @craftworks/workspace, @craftworks/codegen, @craftworks/emit-oc, @craftworks/emit-cc)
-  alongside @bic/claws-sdk (which depends on @claws/compiler plus additional
+  alongside @bic/claws-sdk (which depends on @bic/claws-sdk plus additional
   Layer 1 blocks including @craftworks/governance, @craftworks/context, etc.).
-  The diamond occurs because claws-sdk depends on @claws/compiler AND directly on
-  some of the same Layer 1 blocks that @claws/compiler also depends on.
+  The diamond occurs because claws-sdk depends on @bic/claws-sdk AND directly on
+  some of the same Layer 1 blocks that @bic/claws-sdk also depends on.
   Run npm ls --all and verify that each @craftworks/* package appears exactly once
   in the resolved tree. Then run an instanceof check: create an AuditChain in
-  @craftworks/crypto, pass it to @claws/compiler, and verify that
+  @craftworks/crypto, pass it to @bic/claws-sdk, and verify that
   chain instanceof AuditChain returns true (proves single module instance).
 
 findings:
   - id: F01
     severity: major
     description: >
-      @claws/compiler pins Layer 1 dependencies to exact versions (CL-08 line
+      @bic/claws-sdk pins Layer 1 dependencies to exact versions (CL-08 line
       608-621). @bic/claws-sdk also pins its Layer 1 dependencies to
       exact versions (line 630). If claws-sdk pins @craftworks/crypto@1.1.0
-      while @claws/compiler pins @craftworks/crypto@1.0.0, npm cannot deduplicate
+      while @bic/claws-sdk pins @craftworks/crypto@1.0.0, npm cannot deduplicate
       and installs two copies. The AuditChain created by crypto@1.0.0 fails
       instanceof against crypto@1.1.0's class, breaking cross-layer audit chain
       passing. Both layers must coordinate version pins via @craftworks/platform
@@ -57,7 +57,7 @@ findings:
   - id: F02
     severity: major
     description: >
-      @craftworks/forma depends on @craftworks/crypto for IR hashing. @claws/compiler
+      @craftworks/forma depends on @craftworks/crypto for IR hashing. @bic/claws-sdk
       depends on both @craftworks/forma and @craftworks/crypto directly. This creates
       a diamond: compiler -> forma -> crypto AND compiler -> crypto. If forma declares
       crypto as a peerDependency (recommended in forma S01-F03), but compiler declares
@@ -71,9 +71,9 @@ findings:
     severity: major
     description: >
       Singleton registries (EmitRegistry in @craftworks/codegen, RuleRegistry in
-      @claws/compiler) store global state in module-level variables. If codegen is
+      @bic/claws-sdk) store global state in module-level variables. If codegen is
       duplicated, EmitRegistry.register() in one copy does not affect the other.
-      @claws/compiler registers emit-oc and emit-cc emitters. If @bic/claws-sdk
+      @bic/claws-sdk registers emit-oc and emit-cc emitters. If @bic/claws-sdk
       gets a different codegen instance, its additional emitter registrations
       (emit-cursor, emit-copilot, etc.) land in a separate registry. The compile
       orchestrator then sees only a subset of registered emitters depending on
@@ -153,7 +153,7 @@ findings:
       A diamond that deduplicates at the npm level may produce two copies
       in a bundle if the bundler does not follow the same hoisting rules.
       The scenario should include a bundler smoke test: esbuild a consumer
-      that imports from both @claws/compiler and @bic/claws-sdk,
+      that imports from both @bic/claws-sdk and @bic/claws-sdk,
       verify the output contains one copy of crypto module code.
     spec_impact: "CL-08 testing strategy — bundler dedup smoke test alongside npm dedup test"
     pitfall: null

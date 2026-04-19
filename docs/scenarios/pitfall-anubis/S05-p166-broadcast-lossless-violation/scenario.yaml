@@ -16,7 +16,7 @@ expect:
     overlay_used: false
     direct_write_detected: true
   violations:
-    - code: CLAWS-E100
+    - code: OC-POLICY-E100
       message: "Lossless violation — broadcast wrote directly to AGENTS.md"
       severity: error
   warnings:

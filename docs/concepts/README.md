@@ -1,6 +1,6 @@
 # claws Concept Guides
 
-**Count**: 96 guides
+**Count**: 104 guides
 
 All concept guides for the claws design area, flattened from the original
 subdirectory layout into a single directory for area-scoped consistency.

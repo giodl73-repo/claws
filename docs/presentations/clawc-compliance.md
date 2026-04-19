@@ -435,7 +435,7 @@ Opposing counsel will challenge: "Is the log complete?" (witness protocol), "Are
   1. Locked sections carry a role identifier (e.g., governance-admin)
   2. SHA-256 hash of section content stored in SOUL.md frontmatter
   3. FE6 fence pass verifies locks during PARSE phase
-  4. Modifications by unauthorized roles → CLAWS-E401 (compile error)
+  4. Modifications by unauthorized roles → OC-POLICY-E401 (compile error)
   5. Hash verification detects both unauthorized AND accidental edits
   6. Cross-platform: line endings normalized (CRLF/LF) before hashing
 

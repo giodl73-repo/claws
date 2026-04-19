@@ -9,8 +9,8 @@ stage: implementation
 test_tiers:
   L0_unit: 6
   L1_integration: 3
-  L2_e2e: 0
-  L3_accept: 0
+  L2_e2e: 1
+  L3_accept: 1
 test_scope:
   run:
     - "cd claws-sdk && npx vitest run --project unit --coverage"
@@ -38,6 +38,8 @@ The free tier supports exactly 2 emit targets: OC (this pulse) and Claude Code (
 - [ ] `claws-sdk/src/compiler/emit/index.ts` -- Barrel exports for emit module
 - [ ] `claws-sdk/tests/compiler/emit/oc-emitter.unit.test.ts` -- L0: OC emit produces manifest file (1), OC emit produces config file (1), OC emit produces handler files (1), OC emit calls compileGuard (1), OC emit respects dryRun flag (1), OC emit rejects unsupported platform (1)
 - [ ] `claws-sdk/tests/compiler/emit/oc-emitter.integration.test.ts` -- L1: full emit from fixture IR produces valid OC plugin directory (1), emit output contains no @craftworks/ references (1), registry returns OC emitter by target enum (1)
+- [ ] `claws-sdk/tests/compiler/emit/oc-emitter.e2e.test.ts` -- L2: end-to-end OC emit from fixture workspace through full pipeline (1)
+- [ ] `claws-sdk/tests/compiler/emit/oc-emitter.accept.test.ts` -- L3: scenario acceptance test verifying emit-oc/codegen findings (5)
 
 ## Acceptance Criteria
 
@@ -69,5 +71,7 @@ Load these role files before starting:
 
 - [ ] L0 unit (6 tests): manifest output (1), config output (1), handler output (1), compileGuard call (1), dryRun (1), unsupported platform (1)
 - [ ] L1 integration (3 tests): full emit from fixture (1), zero @craftworks/ in output (1), registry lookup (1)
+- [ ] L2 e2e (1 test): end-to-end OC emit from fixture workspace (1)
+- [ ] L3 acceptance (1 test): emit-oc/codegen scenario findings verified (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

@@ -18,7 +18,7 @@ expect:
       compliance_check: true
       serialization: canonical-json
   violations:
-    - code: CLAWS-E228
+    - code: OC-POLICY-E228
       message: "Evidence hash divergence — Windows SHA-256 does not match Linux SHA-256 for identical chain"
       severity: error
   warnings:

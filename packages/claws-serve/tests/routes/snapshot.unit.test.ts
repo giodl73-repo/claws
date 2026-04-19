@@ -7,6 +7,7 @@ import { contentType } from '../../src/middleware/content-type.js';
 import { CompilationHost } from '../../src/compilation-host.js';
 import { minimalGovernanceIR } from '../fixtures/governance-ir.js';
 
+import { TEST_TRUST_SIGNING_KEY } from '../fixtures/trust-key.js';
 async function request(
   server: Server,
   method: string,

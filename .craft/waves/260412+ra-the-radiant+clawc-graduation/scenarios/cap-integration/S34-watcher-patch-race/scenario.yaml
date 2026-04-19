@@ -1,0 +1,199 @@
+name: S34-watcher-patch-race
+series: cap-integration
+version: 2
+specs: [CL-10, CL-14, CL-06]
+description: >
+  Validates coordination between the file watcher and the API write path when
+  an external edit and an API PATCH arrive simultaneously on the same file.
+  A per-file lock prevents corruption, the watcher defers recompilation while
+  the PATCH lock is held, a dirty set accumulates both changes, and a single
+  coalesced recompilation covers all mutations. No edits are lost, no
+  concurrent recompiles run on the same file, and the final IR reflects both
+  the external edit and the API PATCH.
+
+expect:
+  lock:
+    per_file_lock_prevents_corruption: true
+    watcher_defers_while_lock_held: true
+    lock_is_reentrant: false
+    lock_timeout_ms: 5000
+  dirty_set:
+    accumulates_watcher_and_patch_changes: true
+    single_coalesced_recompile: true
+  ordering:
+    patch_wins_over_concurrent_external_edit: false
+    last_writer_wins_with_notification: true
+  sse:
+    OC_FILE_UPDATED_after_patch: true
+    COMPILATION_COMPLETE_after_recompile: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has TOOLS.md with 5 tools. Two mutations happen within the same
+  10ms window: (1) VS Code saves TOOLS.md after the user edits a tool
+  description, and (2) a CAP partner sends PATCH /api/oc/TOOLS.md#Tools/timely-updates/enabled
+  to toggle the enabled field. The file watcher detects the VS Code save and
+  queues a recompile. The PATCH handler acquires the per-file lock, writes to
+  temp, compiles, and renames. The watcher's recompile attempt runs — but the
+  file is now the PATCH result, not the VS Code edit. The watcher must detect
+  that the file changed again (due to the rename) and add it to the dirty set
+  for another recompile. The challenge is: both mutations must be reflected in
+  the final compiled state, no data is lost, and the partner receives
+  consistent responses throughout.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The per-file write lock must be shared between the PATCH handler and
+      the watcher's recompile trigger. When the PATCH handler holds the lock,
+      the watcher must not trigger a recompile on the same file. Instead, the
+      watcher adds the file to the dirty set and defers. When the PATCH handler
+      releases the lock, the dirty set is checked and a recompile fires if
+      needed. If the watcher and PATCH use separate lock instances, they
+      run concurrently and corrupt the file.
+    spec_impact: "CL-14 watcher — shares per-file lock with PATCH handler; defers recompile while lock held"
+    pitfall: P-287
+
+  - id: F02
+    severity: critical
+    description: >
+      The PATCH handler's atomic rename generates a filesystem event that
+      the watcher will detect. If the watcher does not distinguish between
+      "external edit" and "PATCH-triggered rename", it queues a redundant
+      recompile. The watcher must ignore filesystem events that originated
+      from the API write path. This can be achieved by having the PATCH
+      handler set a "suppress next event" flag on the watcher before the
+      rename, or by comparing the file mtime against the just-completed
+      compilation timestamp.
+    spec_impact: "CL-14 watcher — suppress self-triggered events from PATCH rename; flag or mtime comparison"
+    pitfall: P-287
+
+  - id: F03
+    severity: major
+    description: >
+      Data loss scenario: the external edit changes tool A's description,
+      the PATCH changes tool B's enabled field. The PATCH handler reads the
+      pre-external-edit version of the file, applies tool B's change, writes
+      to temp, and renames — overwriting the external edit to tool A. The
+      PATCH handler must read the file under the lock AFTER acquiring it,
+      not before. If the file was modified between "read" and "lock acquire",
+      the handler must re-read. Read-under-lock prevents lost updates.
+    spec_impact: "CL-10 PATCH — read file under lock to prevent lost external edits; re-read if modified since initial read"
+    pitfall: P-287
+
+  - id: F04
+    severity: major
+    description: >
+      The dirty set must be a Set<FilePath> that both the watcher and the
+      PATCH handler can add to atomically. After a PATCH completes (lock
+      released), the compilation queue checks the dirty set: if the file is
+      in the set (the watcher added it while the lock was held), a single
+      recompile runs. If the dirty set is not atomic (e.g., a plain array
+      with push), concurrent additions from the watcher and the PATCH handler
+      can lose entries. Use a concurrent set or synchronize access.
+    spec_impact: "CL-06 dirty set — concurrent-safe Set<FilePath>; atomic add from watcher and PATCH handler"
+    pitfall: P-287
+
+  - id: F05
+    severity: major
+    description: >
+      Lock timeout: if the PATCH handler's compilation takes >5 seconds
+      (large file, slow compiler), the watcher is blocked for that duration.
+      External edits to OTHER files must not be blocked by a lock on one
+      file. The lock must be per-file, not workspace-wide. If a global lock
+      is used for simplicity, all file edits are serialized and the 500ms
+      watcher SLA is violated for unrelated files.
+    spec_impact: "CL-14 lock granularity — per-file locks; different-file operations fully parallel; no global write lock"
+    pitfall: P-287
+
+  - id: F06
+    severity: major
+    description: >
+      The compilation queue must coalesce dirty-set entries. If TOOLS.md is
+      in the dirty set twice (once from the watcher, once from the PATCH
+      handler), only one recompile runs. The queue drains the dirty set
+      atomically — snapshot the set, clear it, compile all files in the
+      snapshot. If new entries arrive during compilation, they go into the
+      next dirty set and trigger another compile after the current one
+      finishes. This prevents infinite recompile loops.
+    spec_impact: "CL-06 compilation queue — snapshot-and-clear dirty set; new entries trigger next cycle, not current"
+    pitfall: P-287
+
+  - id: F07
+    severity: major
+    description: >
+      SSE event ordering must reflect the actual sequence: OC_FILE_UPDATED
+      (from PATCH), then COMPILATION_COMPLETE (from the coalesced recompile).
+      If the watcher's deferred event fires before the PATCH completion event,
+      the partner sees OC_FILE_UPDATED from the external edit, then
+      OC_FILE_UPDATED from the PATCH, then one COMPILATION_COMPLETE. The
+      events must include the source (api vs external) to disambiguate.
+    spec_impact: "CL-14 SSE — OC_FILE_UPDATED includes source field (api | external); ordered with COMPILATION_COMPLETE"
+    pitfall: P-287
+
+  - id: F08
+    severity: warning
+    description: >
+      The lock must not be reentrant. If a PATCH handler calls another
+      internal function that also tries to acquire the lock on the same file
+      (e.g., a validation step that reads the file under lock), the reentrant
+      acquire would succeed, defeating the purpose. All lock acquisitions must
+      happen at the outermost layer of the write path. Inner functions receive
+      the already-locked file content as a parameter.
+    spec_impact: "CL-10 write lock — non-reentrant; acquired at outermost write-path layer only"
+    pitfall: P-287
+
+  - id: F09
+    severity: warning
+    description: >
+      Edge case: the watcher detects a file change, adds it to the dirty set,
+      and the compilation queue picks it up. Meanwhile, the PATCH handler
+      acquires the lock and starts a new write. The compilation queue must
+      not compile a file that is currently locked for writing — it would
+      read an in-progress temp state. The compilation queue must skip locked
+      files and leave them in the dirty set for the next cycle.
+    spec_impact: "CL-06 compilation queue — skip locked files; retain in dirty set for next cycle"
+    pitfall: P-287
+
+  - id: F10
+    severity: warning
+    description: >
+      Deadlock prevention: if the PATCH handler holds the file lock and
+      then waits for the compilation to complete (synchronous compile), and
+      the compilation queue is waiting for the file lock to release before
+      compiling, a deadlock occurs. The PATCH handler must compile directly
+      (not via the queue) while holding the lock, or the compilation queue
+      must not require the file lock. The architectural choice must be
+      explicit: PATCH does its own compile, queue handles watcher-triggered
+      compiles.
+    spec_impact: "CL-10 deadlock prevention — PATCH compiles directly under lock; queue handles watcher compiles only"
+    pitfall: P-287
+
+  - id: F11
+    severity: note
+    description: >
+      Metrics: the lock contention rate (how often the watcher defers due to
+      PATCH lock) and the dirty-set coalescing ratio (how many dirty entries
+      are merged per compile cycle) should be exposed as metrics. High lock
+      contention suggests the PATCH path is too slow (optimize compilation).
+      High coalescing ratio is healthy — it means rapid edits are efficiently
+      batched.
+    spec_impact: "CL-14 metrics — lock contention rate and dirty-set coalescing ratio as observability metrics"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Test strategy: the race condition must be tested with controlled timing.
+      A test harness should: (1) start a PATCH that pauses after acquiring the
+      lock but before rename, (2) trigger a watcher event on the same file,
+      (3) verify the watcher defers, (4) resume the PATCH, (5) verify a
+      single coalesced recompile runs. Without controlled timing, the test
+      is flaky — it passes when the PATCH is fast and fails when it's slow.
+    spec_impact: "Test infrastructure — controlled-timing harness for watcher-PATCH race condition testing"
+    pitfall: null

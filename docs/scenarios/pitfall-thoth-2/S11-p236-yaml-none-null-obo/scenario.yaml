@@ -21,7 +21,7 @@ expect:
       rules_evaluated: true
       parse_check: true
   violations:
-    - code: CLAWS-E236
+    - code: OC-POLICY-E236
       message: "obo field parsed as null — did you mean 'none' (quoted string)? YAML treats None as null"
       severity: error
   warnings:

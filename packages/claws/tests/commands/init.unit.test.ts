@@ -143,7 +143,7 @@ describe('claws init', () => {
       expect(exitCode).toBe(2);
 
       const output = consoleSpy.mock.calls.flat().join(' ');
-      expect(output).toContain('CLAWS-E080');
+      expect(output).toContain('OC-POLICY-E080');
       expect(output).toContain('already initialized');
     } finally {
       consoleSpy.mockRestore();
@@ -180,7 +180,7 @@ describe('claws init', () => {
 
       const output = consoleSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E080');
+      expect(parsed.error.code).toBe('OC-POLICY-E080');
       expect(parsed.error.what).toContain('already initialized');
     } finally {
       consoleSpy.mockRestore();
@@ -227,7 +227,7 @@ describe('claws init', () => {
       expect(exitCode).toBe(2);
 
       const errorOutput = consoleErrorSpy.mock.calls.flat().join(' ');
-      expect(errorOutput).toContain('CLAWS-E081');
+      expect(errorOutput).toContain('OC-POLICY-E081');
     } finally {
       consoleSpy.mockRestore();
       consoleErrorSpy.mockRestore();
@@ -246,7 +246,7 @@ describe('claws init', () => {
 
       const errorOutput = consoleErrorSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(errorOutput);
-      expect(parsed.error.code).toBe('CLAWS-E081');
+      expect(parsed.error.code).toBe('OC-POLICY-E081');
     } finally {
       consoleSpy.mockRestore();
       consoleErrorSpy.mockRestore();
@@ -262,7 +262,7 @@ describe('claws init', () => {
       expect(exitCode).toBe(1);
 
       const output = consoleErrorSpy.mock.calls.flat().join(' ');
-      expect(output).toContain('CLAWS-E082');
+      expect(output).toContain('OC-POLICY-E082');
       expect(output).toContain('nonexistent-tpl-xyz');
     } finally {
       consoleErrorSpy.mockRestore();
@@ -279,7 +279,7 @@ describe('claws init', () => {
 
       const output = consoleErrorSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E082');
+      expect(parsed.error.code).toBe('OC-POLICY-E082');
       expect(parsed.error.what).toContain('nonexistent-tpl-xyz');
     } finally {
       consoleErrorSpy.mockRestore();

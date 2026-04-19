@@ -1,0 +1,4 @@
+description: A lobster file with no name field
+steps:
+  - name: scan
+    command: npm audit

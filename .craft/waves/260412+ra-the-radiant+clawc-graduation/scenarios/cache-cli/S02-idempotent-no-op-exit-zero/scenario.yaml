@@ -1,0 +1,174 @@
+name: S02-idempotent-no-op-exit-zero
+series: cache-cli
+version: 1
+specs: [CL-08]
+description: >
+  Validates that `claws cache {stats, list, prune, clear}` are safe to
+  invoke against an empty cache directory — every no-op path exits 0,
+  produces no errors, and does not mutate state beyond creating the cache
+  directory if it does not exist. Per plan H4 the cache CLI is a routine
+  operator tool, and routine tools must be idempotent. A CI pipeline that
+  runs `cache clear` before every job must not fail when the cache is
+  already empty.
+
+expect:
+  step_1_clear_on_empty:
+    exit_code: 0
+    mutations: "none (dir creation if absent OK)"
+  step_2_prune_older_than_7d_on_empty:
+    exit_code: 0
+    entries_removed: 0
+    report_format: "stdout line or JSON with removedCount: 0"
+  step_3_list_on_empty:
+    exit_code: 0
+    stdout_lines: 0
+    stderr: "empty"
+  step_4_stats_on_empty:
+    exit_code: 0
+    output_format: "json"
+    entry_count: 0
+    size_bytes: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Start with an empty state: either no cache directory at all, or an empty
+  cache directory. Run each cache subcommand in sequence and assert: (1)
+  `cache clear` on empty cache exits 0 with no error output; creating the
+  cache directory if it does not exist is acceptable but nothing else
+  should change. (2) `cache prune --older-than 7d` on empty cache exits 0
+  and reports 0 entries removed (via human-readable line or JSON with
+  removedCount: 0). (3) `cache list` on empty cache produces no stdout
+  lines (or an empty JSON array with --json) and exit 0; no errors on
+  stderr. (4) `cache stats` on empty cache outputs JSON with entryCount 0
+  and sizeBytes 0, exit 0. No command errors on "cache is empty". No
+  command accidentally writes an entry or mutates metadata. Running the
+  full sequence twice in a row produces identical results — idempotent.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The "cache does not exist" and "cache exists but empty" cases must
+      be handled identically. A common bug: `cache stats` errors on
+      ENOENT if the cache dir is absent but succeeds if the dir exists
+      empty. Operators hit the ENOENT case on first run of a fresh
+      checkout and the tool appears broken. The resolver must treat
+      missing dir as empty-cache, creating the dir lazily if a write
+      is needed or just reporting 0 entries for reads.
+    spec_impact: "H4 — missing cache dir treated as empty-cache for read commands"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      `cache clear` must be tolerant of concurrent callers. If two
+      processes run `cache clear` simultaneously (e.g., a CI pipeline
+      with parallel jobs), the second call may see files vanish
+      mid-traversal as the first call deletes them. The implementation
+      must handle ENOENT during iteration (file already gone, not an
+      error) and race-free "directory already empty" states.
+    spec_impact: "H4 — `cache clear` tolerant of concurrent clears, ENOENT mid-traversal"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Exit code 0 for every no-op path is a contract with shell scripts.
+      A CI pre-clean step like `claws cache clear || true` hides real
+      failures behind `|| true`. If the no-op path itself exits non-zero,
+      scripts must use `|| true` prophylactically, masking genuine
+      errors. The contract "no-op is success" must be firm.
+    spec_impact: "H4 — no-op paths exit 0; scripts need not defensive-`||`"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      `cache list` on empty cache output must be consistent with
+      populated output. If populated mode outputs ndjson lines but empty
+      mode outputs nothing (not even an empty line), parsers that read
+      "one JSON object per line" handle both correctly. But if empty
+      mode outputs a human-readable "(no entries)" string while
+      populated mode outputs JSON, parsers break. Empty stdout (0 bytes)
+      is the cleanest ndjson-empty representation.
+    spec_impact: "H4 — `cache list` empty output is 0 bytes, consistent with ndjson streaming"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      `cache stats` on empty cache must still emit the full JSON schema
+      with zero values, not an empty object `{}`. Consumers parsing the
+      output expect the `entryCount`, `sizeBytes`, `hitCount`,
+      `missCount`, `version` fields to always be present. A dashboard
+      that charts cache size over time must not crash when the cache
+      is empty; it charts a zero data point.
+    spec_impact: "H4 — `cache stats` emits full schema with zero values on empty cache"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Side-effect creation of the cache directory during a read-only
+      command (stats, list) is undesirable. If `cache stats` auto-creates
+      the directory, operators running the command just to check a state
+      accidentally provision empty cache dirs on read-only systems. Read
+      commands should NOT create state; only write commands (compile,
+      clear-as-initialize) should. If an operator runs `cache stats`
+      before any compile, the stats should read "cache uninitialized"
+      (entryCount 0) without creating the dir.
+    spec_impact: "H4 — read commands (stats, list) do not create cache dir; only write paths do"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      `cache prune` on empty cache must not scan or touch the filesystem
+      unnecessarily. If the implementation stat()s every expected-location
+      path looking for entries, empty-cache invocations are slow
+      proportional to cache size history. A fast check "is the directory
+      empty?" (readdir with early exit) before any deeper work keeps the
+      no-op path cheap.
+    spec_impact: "H4 — `cache prune` short-circuits on empty dir without expensive filesystem traversal"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Running the full sequence twice in a row should produce identical
+      output and identical filesystem state. This is the strongest form
+      of idempotence. A scenario variant that runs the sequence once,
+      snapshots state, runs it again, and asserts no diff catches
+      subtle write-on-read bugs.
+    spec_impact: "H4 — full command sequence is strictly idempotent across repeated runs"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      `cache clear --yes` (or equivalent confirmation skip) on empty
+      cache must not prompt even in interactive mode. There is nothing
+      to confirm — no data to lose. The confirmation prompt should
+      short-circuit on empty cache, reducing friction for the
+      pre-clean-step workflow.
+    spec_impact: "H4 — `cache clear` confirmation skipped when cache is empty"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Permissions and ownership of the cache dir (if absent) should
+      default to the invoking user's umask. If a command creates the
+      dir with 0700 on one invocation and 0755 on another (e.g., one
+      runs as root under sudo), subsequent access from different users
+      breaks. Permissions on any lazily-created dirs must be
+      deterministic and documented.
+    spec_impact: "H4 — lazy cache dir creation uses deterministic permissions (umask-respecting)"
+    pitfall: null
+
+implementation_status: pending
+tags: [claws-compile-dx, cache-cli, idempotence]

@@ -4,7 +4,7 @@
 
 claws is the governance compiler for OpenClaw agents. It reads 9 workspace files, compiles governance rules into executable TypeScript skills that run inside the OC Gateway, and provides 11+ shared libraries as the .NET for OpenClaw.
 
-**Specs**: `SPECS.md` — 12 specs (CL-01 through CL-12), all Draft
+**Specs**: `SPECS.md` — 13 specs (CL-01 through CL-13), all Draft
 **Scenarios**: `scenarios/` — 30 series, 331 scenarios
 **DCRs**: `DCR.md` — 0 filed
 **Research**: `design/claws/focus/Q01-Q18` — 18 questions, all Proposed
@@ -12,15 +12,15 @@ claws is the governance compiler for OpenClaw agents. It reads 9 workspace files
 **Deck**: `docs/claws/presentations/why-claws.md` — product pitch
 **Pitfalls**: `design/claws/PITFALLS.md` — 50 pitfalls + HITL map
 **Command Map**: `design/claws/COMMAND-MAP.md` — 40 commands
-**Atoms**: `ATOMS.md` — 79 atoms across 13 layers
-**Concept Guides**: `docs/claws/concepts/` — 89 guides
+**Atoms**: `ATOMS.md` — 83 atoms across 19 layers
+**Concept Guides**: `docs/claws/concepts/` — 104 guides
 
 ## Current Status
 
 | Area | Status |
 |------|--------|
 | Research | Complete — 18 questions (Q01-Q18), all Proposed |
-| Specs | Complete — 12 specs (CL-01 through CL-12), all Draft |
+| Specs | Complete — 13 specs (CL-01 through CL-13), all Draft |
 | Deck | Complete — why-claws.md + .pptx |
 | Roles | Complete — 8 roles + openclaw domain lens |
 | Pitfalls | Complete — 50 pitfalls + HITL map |
@@ -33,7 +33,7 @@ claws is the governance compiler for OpenClaw agents. It reads 9 workspace files
 | Phase | Focus | Status |
 |-------|-------|--------|
 | 0 | Research (Q01-Q18) | Complete — 18 questions |
-| 1 | Specs (CL-01 through CL-12) | Complete — 12 specs |
+| 1 | Specs (CL-01 through CL-13) | Complete — 13 specs |
 | 2 | Scenario accumulation | Complete — 331 scenarios, 30 series |
 | 3 | Role-based reviews | Complete — per-checkpoint reviews |
 | 4 | Implementation (Ptah) | Complete — foundation wave XC (453 tests) |
@@ -56,6 +56,7 @@ claws is the governance compiler for OpenClaw agents. It reads 9 workspace files
 | CL-10 | CAP Integration & Serve API | CAP Product Day | Draft |
 | CL-11 | Upstream Governance | Q12b, Thoth | Draft |
 | CL-12 | Approval Event Schema | Q12b, Thoth | Draft |
+| CL-13 | Repo Boundary | Horus / claws-repo-migration | Draft |
 
 ## Key Design Decisions (from research)
 

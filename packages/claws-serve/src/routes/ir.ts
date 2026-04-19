@@ -9,11 +9,24 @@
 
 import { Router, type Request, type Response } from 'express';
 import type { CompilationHost } from '../compilation-host.js';
+import { getTimeTravelState } from '../middleware/time-travel.js';
+import { TIME_TRAVEL_CACHE_CONTROL } from './ir-resolution.js';
 
 export function irRouter(host: CompilationHost): Router {
   const router = Router();
 
-  router.get('/ir', (_req: Request, res: Response) => {
+  router.get('/ir', (req: Request, res: Response) => {
+    // Historical read — the time-travel middleware already resolved the
+    // `?at=` parameter into a concrete `GovernanceIR`. Serve that IR
+    // directly with the immutable cache header because snapshots are
+    // content-addressed and never change.
+    const timeTravel = getTimeTravelState(req);
+    if (timeTravel !== undefined) {
+      res.set('Cache-Control', TIME_TRAVEL_CACHE_CONTROL);
+      res.status(200).json(timeTravel.governanceIR);
+      return;
+    }
+
     const ir = host.getCachedIR();
 
     if (ir === undefined) {

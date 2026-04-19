@@ -1,0 +1,50 @@
+{
+  "name": "@bic/openclaw-workspace",
+  "version": "0.1.0",
+  "description": "OpenClaw workspace utilities — oc:// URI paths, PEG grammar strings + hand-authored AST, RFC 8785 JCS canonicalize",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./path": {
+      "types": "./dist/path/index.d.ts",
+      "import": "./dist/path/index.js",
+      "require": "./dist/path/index.cjs"
+    },
+    "./ast": {
+      "types": "./dist/ast/index.d.ts",
+      "import": "./dist/ast/index.js",
+      "require": "./dist/ast/index.cjs"
+    },
+    "./canonicalize": {
+      "types": "./dist/canonicalize/index.d.ts",
+      "import": "./dist/canonicalize/index.js",
+      "require": "./dist/canonicalize/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist"],
+  "publishConfig": {
+    "registry": "https://npm.pkg.microsoft.ghe.com/"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit"
+  }
+}

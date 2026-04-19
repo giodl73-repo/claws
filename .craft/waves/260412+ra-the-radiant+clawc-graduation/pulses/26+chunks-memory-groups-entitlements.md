@@ -9,8 +9,8 @@ stage: implementation
 test_tiers:
   L0_unit: 4
   L1_integration: 2
-  L2_e2e: 0
-  L3_accept: 0
+  L2_e2e: 1
+  L3_accept: 1
 test_scope:
   run:
     - "cd claws-sdk && npx vitest run --project unit --coverage"
@@ -26,7 +26,7 @@ checkpoint_gate: false
 
 ## Objective
 
-Wire the GET endpoints for the remaining three CAP settings tabs: Memory & Knowledge (`GET /api/chunks/memory`), Groups (`GET /api/chunks/groups`), and Entitlements (`GET /api/chunks/entitlements`). These three tabs complete the 6-tab CAP Agent Settings surface.
+Layer 2 chunk routes for the remaining three CAP settings tabs: Memory & Knowledge (`GET /api/chunks/memory`), Groups (`GET /api/chunks/groups`), and Entitlements (`GET /api/chunks/entitlements`). These three tabs complete the 6-tab CAP Agent Settings surface. Internally, chunk assembly reads underlying OC files via the generic Layer 1 `/api/oc/{path}` router (KNOWLEDGE.md for memory, AGENTS.md for groups, ENTITLEMENTS.md for entitlements).
 
 Memory chunk includes knowledge source array with per-source data labels (PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED) and ItemLock for governance-controlled sources. Groups chunk separates M365, security, and on-premise group memberships. Entitlements chunk separates core vs governance roles with optional expiration dates -- entitlements are read-only (no writeBack URL).
 
@@ -39,6 +39,8 @@ Memory chunk includes knowledge source array with per-source data labels (PUBLIC
 - [ ] `claws-serve/tests/routes/chunks-groups.unit.test.ts` -- L0: groups chunk separates m365/security/onPremise arrays (1 test)
 - [ ] `claws-serve/tests/routes/chunks-entitlements.unit.test.ts` -- L0: entitlements chunk has no writeBack field (1 test)
 - [ ] `claws-serve/tests/routes/chunks-memory-groups-entitlements.integration.test.ts` -- L1: memory chunk knowledge sources match parsed KNOWLEDGE.md with governance-derived locks (1 test), entitlements chunk separates core vs governance roles from ENTITLEMENTS.md (1 test)
+- [ ] `claws-serve/tests/routes/chunks-memory-groups-entitlements.e2e.test.ts` -- L2: end-to-end memory/groups/entitlements chunk endpoints from fixture workspace (1)
+- [ ] `claws-serve/tests/routes/chunks-memory-groups-entitlements.accept.test.ts` -- L3: scenario acceptance test verifying S29 findings (1)
 
 ## Acceptance Criteria
 
@@ -50,6 +52,7 @@ Memory chunk includes knowledge source array with per-source data labels (PUBLIC
 - [ ] Entitlements chunk omits `writeBack` -- read-only in CAP UI
 - [ ] Expired entitlements include `expiresAt` ISO date string
 - [ ] Missing KNOWLEDGE.md returns empty knowledge sources array, not error
+- [ ] Chunks include `governance.violations` when state != CLEAN.
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0 for both claws-sdk and claws-serve
 
@@ -67,5 +70,7 @@ Load these role files before starting:
 
 - [ ] L0 unit (4 tests): memory knowledge sources with data labels (1), RESTRICTED governance lock (1), groups m365/security/onPremise separation (1), entitlements no writeBack (1)
 - [ ] L1 integration (2 tests): knowledge sources match KNOWLEDGE.md with governance locks (1), entitlements core vs governance separation (1)
+- [ ] L2 e2e (1 test): end-to-end memory/groups/entitlements chunk endpoints (1)
+- [ ] L3 acceptance (1 test): S29 scenario findings verified (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

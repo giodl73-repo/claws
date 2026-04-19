@@ -54,6 +54,7 @@ This is the CP-5 gate pulse. After this pulse, all GET endpoints return typed JS
 - [ ] Multiple concurrent clients all receive the same events
 - [ ] Reconnecting client can detect sequence gap (current sequence > last received + 1)
 - [ ] Events are wired to `claws watch` file watcher via CompilationHost event emitter
+- [ ] SSE emits `governance_state_changed` event on state transitions with `{ from, to, activeViolations, timestamp }`.
 - [ ] Every CL-10 section (S1-S11) is traceable to at least one pulse deliverable via a spec-to-pulse traceability table in the CP-5 review
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0 for both claws-sdk and claws-serve

@@ -14,13 +14,14 @@
  * serialization via sorted keys, preventing false tamper-detection from
  * non-deterministic property ordering.
  *
- * Wraps agent-sdk suite/audit/hash-chain.ts for canonical JSON primitives.
+ * Uses the internalized canonicalJson helper (`../util/canonical-json.js`)
+ * for RFC 8785 (JCS) serialization -- no external SDK dependency.
  *
  * @module claws-sdk/audit/chain
  */
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { canonicalJson } from '@craftworks/agent-sdk/suite';
+import { canonicalJson } from '../util/canonical-json.js';
 import type { AuditEntry, ChainEntry, ChainVerifyResult } from './types.js';
 
 /**

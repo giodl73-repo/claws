@@ -5,13 +5,13 @@ specs: [CL-02, CL-04]
 description: >
   Validates the type-level R5 fail-open prevention. The compiler must refuse
   to emit a GovernanceRule with riskLevel 5 and failMode "fail-open". This
-  produces CLAWS-E001, a hard compile error. R5 fail-closed is non-negotiable,
+  produces OC-POLICY-E001, a hard compile error. R5 fail-closed is non-negotiable,
   non-configurable, and structurally unrepresentable in the GovernanceIR.
 
 expect:
   rules_applied: [G-CLASS]
   violations:
-    - code: CLAWS-E001
+    - code: OC-POLICY-E001
       severity: error
       message_pattern: "R5 fail-open is structurally prohibited"
       tool: dangerous-tool
@@ -29,7 +29,7 @@ problem: >
   claws.json overrides the fail mode for "dangerous-tool" (R5/TRANSACT) to
   "fail-open". The compiler's FailMode<R> type constraint makes this
   structurally unrepresentable: FailMode<5> resolves to only "fail-closed".
-  The EMIT phase checks this at the IR level and aborts with CLAWS-E001.
+  The EMIT phase checks this at the IR level and aborts with OC-POLICY-E001.
   No override, no escape hatch, no enterprise exception exists.
 
 findings:
@@ -47,7 +47,7 @@ findings:
   - id: F02
     severity: major
     description: >
-      CLAWS-E001 is the first error code in what must be a comprehensive error
+      OC-POLICY-E001 is the first error code in what must be a comprehensive error
       registry. The registry should categorize errors: E0xx for type-level
       violations, E1xx for parse errors, E2xx for rule violations, E3xx for
       emit errors. The code space must be planned before implementation.
@@ -81,7 +81,7 @@ findings:
       This is the "Dragon" constraint from CL-04. The name comes from the
       review that identified the type-level enforcement pattern. The scenario
       validates the Dragon constraint end-to-end: claws.json input -> type
-      check -> CLAWS-E001 output.
+      check -> OC-POLICY-E001 output.
     spec_impact: "CL-04 Dragon constraint — end-to-end validation"
     pitfall: null
 
@@ -100,7 +100,7 @@ findings:
     severity: warning
     description: >
       If claws.json has multiple R5 tools and only one has fail-open override,
-      the compiler must report CLAWS-E001 for the specific tool, not reject
+      the compiler must report OC-POLICY-E001 for the specific tool, not reject
       the entire configuration. Other R5 tools with fail-closed should still
       compile. Error granularity matters for large configurations.
     spec_impact: "CL-04 diagnostics — per-tool error granularity"

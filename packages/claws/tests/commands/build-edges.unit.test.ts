@@ -134,7 +134,7 @@ describe('claws build — edge-case branches', () => {
 
       const output = consoleSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E020');
+      expect(parsed.error.code).toBe('OC-POLICY-E020');
     } finally {
       consoleSpy.mockRestore();
       logSpy.mockRestore();

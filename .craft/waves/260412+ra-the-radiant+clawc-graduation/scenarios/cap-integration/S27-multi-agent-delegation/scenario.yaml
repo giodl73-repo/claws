@@ -1,0 +1,205 @@
+name: S27-multi-agent-delegation
+series: cap-integration
+version: 2
+specs: [CL-10, CL-08, CL-12, CL-07]
+description: >
+  End-to-end delegation chain: Agent-A delegates to Agent-B delegates to
+  Agent-C. Agent-C calls an R5 tool. The approval request must carry the
+  full delegation chain and propagate to the human. Trust tier is min(chain).
+  Approval must be routed through each hop. Suspended agents in the chain,
+  cycle detection, and chain depth limits are all tested.
+
+expect:
+  delegation_chain:
+    agents: [A, B, C]
+    depth: 3
+    r5_tool_call_by: C
+    approval_propagation:
+      request_carries_chain: [A, B, C]
+      human_sees_full_chain: true
+      approval_routes_back_through: [C, B, A]
+  trust_tier:
+    agent_a: T2
+    agent_b: T1
+    agent_c: T0
+    effective_tier: T0
+    reason: "min(chain)"
+  chain_depth_limit:
+    max_depth: 5
+    exceeded_response: 403
+    error_type: DELEGATION_DEPTH_EXCEEDED
+  cycle_detection:
+    chain: [A, B, C, A]
+    detected: true
+    error_type: DELEGATION_CYCLE_DETECTED
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Agent-A (trust tier T2) is assigned a complex task. It delegates subtask-1
+  to Agent-B (T1), which further delegates subtask-1a to Agent-C (T0). Agent-C
+  needs to call 'deploy-service' (R5). The approval request must propagate from
+  Agent-C through Agent-B through Agent-A to the human. The human must see the
+  full delegation chain (who delegated to whom, why, with what context) to make
+  an informed approval decision. The effective trust tier for the R5 call is
+  min(T2, T1, T0) = T0, which means maximum restrictions apply. Additionally:
+  (1) if Agent-B is suspended mid-chain, the approval must still reach the human,
+  (2) a delegation cycle (A -> B -> C -> A) must be detected and rejected,
+  (3) chain depth exceeding the limit (5) must be rejected, (4) each agent in
+  the chain must log the delegation in its session audit.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The ApprovalRequestEvent must carry the full delegation chain as an
+      ordered array of agent identifiers with their trust tiers. If the event
+      only includes the requesting agent (C) without the chain, the human
+      cannot assess the delegation context. A direct R5 call from a T2 agent
+      is very different from a T0 agent at the end of a 3-hop chain. The
+      chain must include: [{ agent_id, trust_tier, delegation_reason }] for
+      each hop.
+    spec_impact: "CL-08 ApprovalRequestEvent — delegation_chain array with agent_id, trust_tier, delegation_reason per hop"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      The effective trust tier for a tool call through a delegation chain
+      must be min(chain). Agent-C at T0 calling an R5 tool through a chain
+      starting at Agent-A (T2) does not elevate Agent-C's tier. The minimum
+      tier determines the policy: T0 applies, which means R3 requires approval
+      and R5 is denied via alwaysDenyRiskLevels. If the system uses the
+      delegating agent's tier (T2) instead of min(chain), a low-trust agent
+      gains elevated access by being delegated to from a high-trust agent.
+    spec_impact: "CL-12 delegation trust — effective tier is min(chain); no trust elevation via delegation"
+    pitfall: null
+
+  - id: F03
+    severity: critical
+    description: >
+      Cycle detection must prevent A -> B -> C -> A delegation loops. A cycle
+      means the delegation chain revisits an agent that already delegated in
+      the same chain. The system must check for cycles at delegation time (not
+      at tool call time) because a cycle can cause infinite delegation recursion
+      before any tool is called. The check must use agent_id equality, not
+      session_id, because the same agent may have multiple sessions.
+    spec_impact: "CL-08 delegation — cycle detection at delegation time using agent_id; reject with DELEGATION_CYCLE_DETECTED"
+    pitfall: null
+
+  - id: F04
+    severity: critical
+    description: >
+      Chain depth must be limited to prevent unbounded delegation. A depth
+      limit of 5 is reasonable for most scenarios. When depth is exceeded,
+      the delegation request (not the tool call) must be rejected with
+      DELEGATION_DEPTH_EXCEEDED. The error must include the current chain
+      and the max_depth so the delegating agent can restructure its approach.
+      Without a depth limit, agents can create chains that exhaust system
+      resources.
+    spec_impact: "CL-08 delegation — max_depth limit enforced at delegation time; DELEGATION_DEPTH_EXCEEDED with chain context"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      If Agent-B is suspended (e.g. paused, crashed, or rate-limited) while
+      the approval request is in transit from C to the human, the approval
+      must still reach the human. The approval routing must not depend on
+      intermediate agents being active. The approval system should route
+      directly to the human with the full chain context, not relay hop-by-hop
+      through each agent. Hop-by-hop routing creates a single point of failure
+      at every intermediate agent.
+    spec_impact: "CL-08 approval routing — direct to human with chain context; not hop-by-hop through intermediate agents"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Each agent in the chain must record the delegation in its own session
+      audit trail. Agent-A's audit shows "delegated to B with reason X",
+      Agent-B's shows "received from A, delegated to C with reason Y",
+      Agent-C's shows "received from B, called tool Z." The complete chain
+      is reconstructable by joining audit trails across sessions. If any
+      agent skips the audit entry, the chain has a gap that security
+      reviewers cannot bridge.
+    spec_impact: "CL-07 audit — per-agent delegation audit entries; chain reconstructable via cross-session join"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The human's approval or denial must propagate back through the chain.
+      If the human approves, Agent-C receives the approval and executes the
+      tool. If denied, Agent-C receives the denial and must propagate the
+      failure back to Agent-B, which propagates to Agent-A. Each agent
+      must handle the approval result (success or failure) and adjust its
+      task execution accordingly. If the back-propagation fails silently,
+      Agent-A may hang waiting for a result that never arrives.
+    spec_impact: "CL-08 approval back-propagation — denial/approval relayed through chain; each agent handles the result; timeout if relay fails"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      When the human views the approval request, the UI must render the
+      full delegation chain in a human-readable format: "Agent-C (T0) wants
+      to call deploy-service (R5), delegated by Agent-B (T1), delegated by
+      Agent-A (T2), for task: [description]." The chain rendering must show
+      trust tiers at each hop so the human can see the trust degradation.
+      A flat "Agent-C wants to call deploy-service" hides the delegation
+      context entirely.
+    spec_impact: "CL-08 approval UI contract — render full chain with per-hop trust tiers and delegation reasons"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Two agents delegating to the same agent simultaneously (A -> C and
+      B -> C) creates two independent chains. Agent-C may call the same R5
+      tool under both chains with different effective trust tiers (min(A,C)
+      vs min(B,C)). The system must track chain context per-delegation, not
+      per-agent. If chain context is stored on the agent (singleton), the
+      second delegation overwrites the first, corrupting the chain.
+    spec_impact: "CL-08 delegation context — per-delegation chain tracking, not per-agent singleton; support concurrent chains"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      If a delegation chain crosses workspace boundaries (Agent-A in
+      workspace-1 delegates to Agent-B in workspace-2), the trust tier
+      calculation must use the minimum trust tier from BOTH workspaces.
+      Cross-workspace delegation may be prohibited entirely by policy.
+      The system must either block cross-workspace delegation or apply
+      the stricter of the two workspace policies. The error message must
+      explain which workspace boundary was violated.
+    spec_impact: "CL-08 cross-workspace delegation — blocked by default; if allowed, stricter policy of both workspaces applies"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      The delegation_reason field at each hop should be validated for
+      minimum content. An empty reason ("") or a generic reason ("needed")
+      provides no value for human approval decisions. The system should
+      require a minimum-length reason (e.g. 10 characters) or at least
+      warn when the reason is suspiciously short. This improves the quality
+      of the approval prompt the human sees.
+    spec_impact: "CL-08 delegation — validate delegation_reason for minimum content; warn on suspiciously short reasons"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Chain depth statistics (average, max, distribution) should be tracked
+      as operational metrics. If average chain depth increases over time, it
+      may indicate agents over-delegating rather than executing directly.
+      The metrics should be available via GET /api/metrics/delegation and
+      included in periodic governance reports. This enables governance teams
+      to set or adjust the max_depth limit based on actual usage patterns.
+    spec_impact: "CL-07 metrics — delegation chain depth statistics; available via metrics endpoint and governance reports"
+    pitfall: null

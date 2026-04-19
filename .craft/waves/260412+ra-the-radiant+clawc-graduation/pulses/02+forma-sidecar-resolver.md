@@ -9,8 +9,8 @@ stage: implementation
 test_tiers:
   L0_unit: 4
   L1_integration: 2
-  L2_e2e: 0
-  L3_accept: 0
+  L2_e2e: 1
+  L3_accept: 1
 test_scope:
   run:
     - "cd claws-sdk && npx vitest run --project unit --coverage"
@@ -37,6 +37,8 @@ The sidecar resolver handles: locating `.claws` in the workspace directory, pars
 - [ ] `claws-sdk/src/compiler/sidecar/index.ts` -- Barrel exports for sidecar module
 - [ ] `claws-sdk/tests/compiler/sidecar/resolver.unit.test.ts` -- L0: valid YAML sidecar parses correctly (1), valid JSON sidecar parses correctly (1), missing sidecar falls back to heuristics (1), invalid sidecar produces error with path (1)
 - [ ] `claws-sdk/tests/compiler/sidecar/sidecar.integration.test.ts` -- L1: resolver + heuristics integration with fixture workspace (1), sidecar overrides heuristic defaults when both present (1)
+- [ ] `claws-sdk/tests/compiler/sidecar/sidecar.e2e.test.ts` -- L2: end-to-end sidecar resolution from fixture workspace directory (1)
+- [ ] `claws-sdk/tests/compiler/sidecar/sidecar.accept.test.ts` -- L3: scenario acceptance test verifying forma findings (3)
 
 ## Acceptance Criteria
 
@@ -65,5 +67,7 @@ Load these role files before starting:
 
 - [ ] L0 unit (4 tests): YAML sidecar parse (1), JSON sidecar parse (1), missing sidecar heuristic fallback (1), invalid sidecar error (1)
 - [ ] L1 integration (2 tests): resolver + heuristics with fixture workspace (1), sidecar overrides heuristics (1)
+- [ ] L2 e2e (1 test): end-to-end sidecar resolution from fixture workspace (1)
+- [ ] L3 acceptance (1 test): forma scenario findings verified (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

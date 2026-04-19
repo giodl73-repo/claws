@@ -1,0 +1,203 @@
+name: S19-incremental-recompile
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12]
+description: >
+  Validates that a single-tool PATCH triggers per-file incremental
+  recompilation completing under 200ms. Only changed compilation phases
+  re-run; unchanged phases serve from cache. Rapid successive edits are
+  coalesced into a single recompile via a debounce window. The
+  incremental recompile is the performance backbone of the write path
+  — without it, every edit triggers a full workspace recompile that
+  scales linearly with workspace size.
+
+expect:
+  single_tool_patch:
+    endpoint: "PATCH /api/chunks/connections/outlook"
+    request_body:
+      toolId: outlook-read
+      field: approval
+      value: enabled
+    response:
+      status: 200
+      recompile:
+        type: incremental
+        durationMs_lt: 200
+        phases_rerun: [governance]
+        phases_cached: [parsing, assembly, risk-classification]
+  cache_behavior:
+    unchanged_files: "cache hit, phase skipped"
+    changed_file: "cache miss, phase re-runs"
+  coalescing:
+    rapid_edits_within_50ms: "coalesced into single recompile"
+    result: "one recompile, not N"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A user toggles a single tool's approval status in the Companion App.
+  The PATCH modifies one field in one connection file. The server must
+  recompile only the affected phases: the governance phase re-runs
+  (tool approval changed), but parsing, assembly, and risk-classification
+  phases serve from cache since the underlying connection definition did
+  not change. The recompile completes in under 200ms. The user then
+  rapidly toggles three more tools in succession (within 150ms). The
+  server coalesces these into a single recompile covering all four
+  changes, rather than running four separate recompiles.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Cache correctness after multi-file change: if a PATCH affects
+      multiple files (e.g., batch endpoint), the cache invalidation
+      must identify ALL affected files and invalidate their phase
+      caches. If the dependency graph misses a transitive dependency
+      (file A depends on file B which was changed), file A's cache
+      serves stale data and the recompile produces incorrect
+      GovernanceIR. Cache invalidation must walk the full dependency
+      graph, not just direct dependencies.
+    spec_impact: "CL-10 incremental recompile — transitive dependency invalidation in cache"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Cold cache full recompile: on server startup or after cache
+      corruption, the cache is empty and every phase must run for every
+      file. This full recompile must complete within a reasonable time
+      bound (e.g., under 2 seconds for a workspace with 50 files). If
+      the cold recompile takes too long, the server should perform it
+      asynchronously on startup and serve a "compiling" status on API
+      requests until ready, rather than blocking the first request.
+    spec_impact: "CL-10 cold recompile — async on startup with 'compiling' status, not blocking first request"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Dependency graph accuracy: the incremental recompile relies on a
+      dependency graph that maps files to compilation phases. If the
+      graph is incomplete (missing an edge), a change to file A may not
+      invalidate the cache for phase P that depends on A, producing
+      stale output. The dependency graph must be computed from the actual
+      compiler phase inputs, not maintained manually. A phase that reads
+      file X must automatically register X as a dependency.
+    spec_impact: "CL-10 dependency graph — auto-registered from phase inputs, not manually maintained"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Concurrent recompile queue: if a PATCH triggers a recompile and
+      a second PATCH arrives before the first recompile completes, the
+      server must not run two recompiles concurrently on the same
+      workspace. Concurrent recompiles can produce conflicting outputs
+      and corrupt the cache. The server should queue the second recompile
+      (or coalesce it with the first if still in the debounce window)
+      and run it after the first completes.
+    spec_impact: "CL-10 recompile concurrency — serial execution with queue, no parallel recompiles"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Phase cache corruption recovery: if the cache file is corrupted
+      (partial write, disk error), the phase should detect corruption
+      on read (e.g., checksum mismatch) and fall back to a full re-run
+      rather than serving corrupt data. The corrupted cache entry should
+      be evicted and regenerated. Silent serving of corrupt cache data
+      would produce incorrect GovernanceIR that propagates to all API
+      responses.
+    spec_impact: "CL-10 phase cache — checksum validation on read, evict and regenerate on corruption"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The 200ms target for incremental recompile assumes a warm cache.
+      The API response should include recompile metadata (type:
+      incremental/full, durationMs, phasesRerun, phasesCached) so
+      the Companion App and monitoring tools can track recompile
+      performance. If incremental recompiles consistently exceed 200ms,
+      it indicates cache misses or dependency graph issues that need
+      investigation.
+    spec_impact: "CL-10 recompile response metadata — type, durationMs, phases breakdown"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Debounce window sizing: the coalescing window must balance
+      responsiveness and efficiency. Too short (10ms) and rapid edits
+      still trigger multiple recompiles. Too long (500ms) and the user
+      perceives lag between their edit and the updated governance
+      display. A 50ms debounce is a reasonable default — most UI
+      interactions have at least 50ms between discrete actions. The
+      debounce should be configurable for testing.
+    spec_impact: "CL-10 recompile coalescing — 50ms debounce window, configurable"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Cache key design: the cache key for a phase must include the
+      file content hash AND the phase version. If the compiler is
+      updated (phase logic changes), old cache entries are invalid
+      even though the file content has not changed. A phase version
+      bump must invalidate all cache entries for that phase. Without
+      phase versioning, a compiler update serves stale governance
+      computed by the old logic.
+    spec_impact: "CL-10 phase cache key — file content hash + phase version, invalidate on compiler update"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The recompile must produce deterministic output for the same
+      input. If the governance phase uses non-deterministic logic
+      (e.g., random sampling, current timestamp in output), the cache
+      cannot be used reliably — the same input could produce different
+      outputs. All compilation phases must be pure functions of their
+      inputs for caching to be correct.
+    spec_impact: "CL-10 compilation phases — pure functions of inputs for cache correctness"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Cache eviction policy: the phase cache grows as the workspace
+      accumulates historical file versions. Old cache entries (for
+      file content hashes that no longer exist) consume disk space
+      without benefit. The cache should have a size limit or TTL-based
+      eviction. A reasonable policy: evict entries not accessed in 7
+      days, or cap total cache size at 100MB.
+    spec_impact: "CL-10 phase cache — eviction policy: 7-day TTL or 100MB size cap"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      SSE event timing: the SSE event for a workspace change should
+      fire after the recompile completes, not after the file write.
+      If the SSE fires after file write but before recompile, connected
+      clients will GET stale GovernanceIR (the old IR is still cached,
+      new one not yet computed). The SSE event must include the new
+      workspace version which is assigned after recompile success.
+    spec_impact: "CL-10 SSE timing — fire after recompile completion, not after file write"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Metrics for cache hit ratio: the server should track cache hit
+      rate per phase over time. A consistently low hit rate for a
+      specific phase indicates that the phase's inputs change frequently
+      or the cache key is too granular. These metrics should be exposed
+      via a diagnostics endpoint (e.g., GET /api/diagnostics/cache)
+      for operational monitoring.
+    spec_impact: "CL-10 diagnostics — cache hit ratio per phase, exposed for monitoring"
+    pitfall: null

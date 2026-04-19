@@ -16,7 +16,7 @@ expect:
     read_consistent: true
     toctou_detected: false
   violations:
-    - code: CLAWS-E105
+    - code: OC-POLICY-E105
       message: "IR file TOCTOU — outer ring read partially-written governance-ir.json"
       severity: error
   warnings: []

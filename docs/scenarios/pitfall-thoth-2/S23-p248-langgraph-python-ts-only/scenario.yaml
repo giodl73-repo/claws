@@ -19,7 +19,7 @@ expect:
       target_platform: langgraph
       target_language: python
   violations:
-    - code: CLAWS-E302
+    - code: OC-POLICY-E302
       message: "LangGraph target requires Python code generation — TypeScript output is not usable"
       severity: error
   warnings: []

@@ -25,7 +25,7 @@ describe('CLI binary loads without import errors', () => {
 
   const commandGroups = [
     'compile', 'check', 'build', 'extract', 'init',
-    'uninstall', 'watch', 'doctor', 'snap', 'scan',
+    'uninstall', 'watch', 'extract-watch', 'doctor', 'snap', 'scan',
     'keys', 'annotate', 'publish', 'cache',
   ];
 

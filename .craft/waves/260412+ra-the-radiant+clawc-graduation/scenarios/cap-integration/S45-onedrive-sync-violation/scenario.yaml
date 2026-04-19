@@ -1,0 +1,239 @@
+name: S45-onedrive-sync-violation
+series: cap-integration
+version: 2
+specs: [CL-10, CL-14, CL-06, CL-12]
+description: >
+  Validates behavior when an agent workspace on OneDrive (Lobster model)
+  receives a synced TOOLS.md change from another device. The change adds a
+  tool without proper risk classification. The file watcher detects the
+  OneDrive sync event (rename-and-replace pattern), captures an auto-snapshot,
+  recompiles, classifies the new tool as R5 (OBO detected, no elicitation
+  gate), and enters DEGRADED_R5. Tests OneDrive-specific sync patterns,
+  partial sync handling, and conflict resolution.
+
+expect:
+  onedrive_detection:
+    pattern: rename_and_replace
+    watcher_detects: true
+    debounce_handles_multi_event: true
+  auto_snapshot:
+    trigger: before_recompile
+    captures: pre_sync_state
+  violation:
+    type: R5_MISSING_ELICITATION
+    source: onedrive_sync
+    state: DEGRADED_R5
+  partial_sync:
+    detection: file_stability_check
+    recompile_waits_for_stable: true
+  conflict:
+    onedrive_conflict_file_detected: true
+    conflict_not_compiled: true
+
+simulate:
+  failures:
+    - type: onedrive_sync
+      target: TOOLS.md
+      content: "tool with OBO pattern, no elicitation gate"
+  halt: null
+  budget: null
+
+problem: >
+  An agent workspace uses the Lobster model and is stored on OneDrive. The
+  developer edits TOOLS.md on their laptop, adding a "deploy-infra" tool with
+  an on-behalf-of pattern but no elicitation gate. They save and close the
+  laptop. Later, the desktop syncs the change from OneDrive. OneDrive's sync
+  uses a rename-and-replace pattern: the old TOOLS.md is renamed to a temp
+  name, the new version is written, then the old file is deleted. This
+  produces multiple file system events. The file watcher must: (1) detect the
+  sync as a single logical change (not three separate events), (2) capture an
+  auto-snapshot of the pre-sync state, (3) wait for the sync to stabilize
+  (file is fully written), (4) recompile and detect the R5 violation,
+  (5) enter DEGRADED_R5, (6) handle edge cases: partial sync (file
+  half-written), OneDrive conflict files, offline cache staleness, and
+  rollback propagation.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      OneDrive sync uses a rename-and-replace pattern that produces
+      multiple file system events: (1) TOOLS.md renamed to
+      TOOLS.md.tmp, (2) new TOOLS.md written from cloud, (3) temp file
+      deleted. The file watcher must coalesce these into a single logical
+      change event. If the watcher fires on event (1) (rename = file
+      deleted), it sees TOOLS.md as missing and may trigger a "file
+      deleted" recompile that removes the tool from the IR. The watcher
+      must use a debounce window (e.g., 500ms) that captures all three
+      events as one change.
+    spec_impact: "CL-14 OneDrive pattern — 500ms debounce coalesces rename-and-replace into single change event"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      During the debounce window, the file may be in an intermediate
+      state (old file renamed away, new file not yet written). If the
+      compiler reads TOOLS.md during this gap, it gets a "file not found"
+      error or reads a zero-byte file. The compiler must wait for file
+      stability before reading — the file's size must be non-zero and
+      unchanged for at least two consecutive checks (e.g., 200ms apart).
+      A stability check prevents compiling a partially synced file.
+    spec_impact: "CL-14 file stability — wait for non-zero size + unchanged across 2 checks before compiling; no partial file reads"
+    pitfall: null
+
+  - id: F03
+    severity: critical
+    description: >
+      The auto-snapshot must capture the pre-sync state (the old
+      TOOLS.md content, before OneDrive renamed it away). Because the
+      rename happens before the new file arrives, the snapshot must be
+      triggered on the first file system event and must read the file
+      content at that moment. If the snapshot is triggered after the
+      debounce window, the old file is already gone and the snapshot
+      captures the new (synced) content — defeating the purpose. The
+      snapshot logic must be separate from the debounce: snapshot on
+      first event, compile after debounce settles.
+    spec_impact: "CL-06 snapshot timing — triggered on first event (before rename); separate from compile debounce"
+    pitfall: null
+
+  - id: F04
+    severity: critical
+    description: >
+      The violation must be attributed to onedrive_sync, not to
+      oc_runtime or admin. The file watcher can detect OneDrive sync by
+      recognizing the rename-and-replace pattern (temp file name matches
+      OneDrive's naming convention, e.g., ~$TOOLS.md or TOOLS.md.tmp
+      with OneDrive metadata). If attribution is impossible (generic
+      rename pattern), the source should be "external_sync" rather than
+      "unknown." Accurate attribution helps the admin understand that
+      the violation originated on another device.
+    spec_impact: "CL-14 sync attribution — detect OneDrive pattern; attribute to onedrive_sync or external_sync; never unknown"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      OneDrive sync may deliver a partially written file if the network
+      is slow or the file is large. A partially synced TOOLS.md may be
+      valid YAML/markdown up to the truncation point but missing the
+      violating tool entirely (it is at the end of the file). The
+      compiler would compile successfully with no violation. When the
+      rest of the file syncs seconds later, a second recompile detects
+      the violation. The auto-snapshot from the first sync captures
+      the partial content, not the pre-sync content. The system must
+      detect partial sync (file size changes within the stability
+      window) and wait for the full file.
+    spec_impact: "CL-14 partial sync — detect size changes during stability window; extend wait until file stops growing"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      OneDrive conflict files (e.g., "TOOLS (Desktop - Conflict).md")
+      must NOT be compiled. The compiler's file discovery must filter
+      out OneDrive conflict files by name pattern. If a conflict file is
+      compiled, the IR may contain duplicate tools with conflicting
+      configurations. The conflict file should be flagged in the status
+      endpoint as "conflict detected — manual resolution required" so
+      the admin knows to merge the changes.
+    spec_impact: "CL-06 conflict files — excluded from compilation; detected and reported in status endpoint"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The violation attribution (onedrive_sync vs local edit) affects
+      the admin's resolution strategy. A violation from onedrive_sync
+      means the fix must be made on the source device (the laptop) and
+      re-synced, or made locally (on the desktop) and synced back. If
+      the admin fixes TOOLS.md locally, the fix syncs to OneDrive and
+      then to the laptop. But if the laptop has offline changes that
+      haven't synced yet, the fix may be overwritten on the next sync.
+      The status endpoint should warn: "violation source is another
+      device — fix may be overwritten by pending sync."
+    spec_impact: "CL-10 sync resolution warning — status warns about potential overwrite from pending device sync"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      Restoring an auto-snapshot in a OneDrive-synced workspace has
+      side effects. If the admin calls POST /api/snapshots/restore,
+      the files revert locally. OneDrive detects the local change and
+      syncs it back to the cloud, effectively propagating the rollback
+      to all devices. This may be desirable (fix propagates everywhere)
+      or dangerous (overwrites work on other devices). The restore
+      endpoint must warn: "This workspace is OneDrive-synced. Restoring
+      will propagate the rollback to all synced devices."
+    spec_impact: "CL-06 OneDrive restore warning — snapshot restore propagates via sync; explicit warning before restore"
+    pitfall: null
+
+  - id: F09
+    severity: major
+    description: >
+      If OneDrive is offline (airplane mode, network outage), the
+      workspace operates on cached files. Changes made locally are
+      queued for sync. The file watcher works normally (detecting local
+      edits) but OneDrive sync events do not occur. When OneDrive
+      reconnects, a burst of sync events may arrive. The file watcher
+      must handle this burst without overwhelming the compiler —
+      coalescing all changes into a single recompile. If the burst
+      triggers N recompiles, the system thrashes.
+    spec_impact: "CL-14 offline reconnect — coalesce burst sync events into single recompile; no compiler thrashing"
+    pitfall: null
+
+  - id: F10
+    severity: major
+    description: >
+      OneDrive sync event deduplication is essential. OneDrive may emit
+      duplicate file system events (a known Windows behavior where
+      ReadDirectoryChangesW fires twice for a single write). The file
+      watcher must deduplicate events by file path and timestamp. If
+      two events for TOOLS.md arrive within 50ms with the same file
+      size and mtime, they are duplicates. Without deduplication, the
+      debounce window restarts on each duplicate, delaying compilation
+      unnecessarily.
+    spec_impact: "CL-14 event dedup — deduplicate by path + mtime within 50ms window; prevent debounce restart on duplicates"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      Large file sync performance must be considered. If TOOLS.md is
+      unusually large (e.g., 200+ tools, 100KB+ file), OneDrive sync
+      takes longer and the stability window may need to be extended.
+      The file watcher should use an adaptive stability window based
+      on file size: small files (< 10KB) use 200ms, large files
+      (> 50KB) use 1000ms. This prevents premature compilation of
+      large files while keeping small file latency low.
+    spec_impact: "CL-14 adaptive stability — window scales with file size; 200ms for small, 1000ms for large"
+    pitfall: null
+
+  - id: F12
+    severity: warning
+    description: >
+      The file watcher must handle OneDrive's "Files On-Demand" feature
+      where files may be cloud-only (placeholder). If TOOLS.md is a
+      cloud-only placeholder and OneDrive hydrates it (downloads the
+      content) in response to a read, the hydration triggers a file
+      system event. This event is not a content change — the file
+      content is the same, just now locally available. The watcher must
+      detect hydration events (file attribute change, not content change)
+      and skip them to avoid unnecessary recompilation.
+    spec_impact: "CL-14 Files On-Demand — detect hydration vs content change; skip recompile for hydration-only events"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      The audit trail for OneDrive sync violations should include the
+      OneDrive sync metadata if available: the originating device name,
+      the sync timestamp from OneDrive (which may differ from the local
+      file mtime), and whether the sync was a full file replacement or
+      a delta sync. This metadata helps the admin trace the violation
+      back to the specific device and edit session that introduced it.
+      OneDrive metadata may be available via the Windows property system
+      or the OneDrive API.
+    spec_impact: "CL-14 sync audit metadata — device name, cloud timestamp, sync type if available; aids cross-device tracing"
+    pitfall: null

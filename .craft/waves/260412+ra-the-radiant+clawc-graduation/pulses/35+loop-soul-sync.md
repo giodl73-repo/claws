@@ -28,14 +28,14 @@ checkpoint_gate: false
 
 ## Objective
 
-Implement GET /api/loop/soul and PATCH /api/loop/soul endpoints that expose SOUL.md as Loop-syncable sections (business logic in claws-sdk/src/workspace/, route is thin HTTP adapter). Each section of SOUL.md becomes an independently addressable unit that M365 Loop can render and edit. The section parser in claws-sdk decomposes SOUL.md into typed sections with governance context: deny rule count per section, compiler-injected marking detection via GovernanceIR, and lock source attribution (r5, fleet, governance, none). PATCH writes route through the existing write-time validation layer before modifying the underlying OC file.
+Implement `GET/PATCH /api/oc/SOUL.md` with section-level responses via the Layer 1 generic router. The "loop" concept is how the RESPONSE is formatted -- sections with governance context for M365 Loop rendering -- not a separate endpoint. `GET /api/oc/SOUL.md` returns typed SoulSection[] where each section is an independently addressable unit (business logic in claws-sdk/src/workspace/, route served by the generic Layer 1 router from pulse 27). The section parser in claws-sdk decomposes SOUL.md into typed sections with governance context: deny rule count per section, compiler-injected marking detection via GovernanceIR, and lock source attribution (r5, fleet, governance, none). `PATCH /api/oc/SOUL.md` writes route through the existing write-time validation layer before modifying the underlying OC file.
 
 This is a HEAVY pulse. The soul-sections parser must handle arbitrary SOUL.md structures (nested headings, free-form content between sections, YAML frontmatter) while preserving lossless round-trip fidelity. Governance context enrichment queries GovernanceIR for deny rules that apply to each section, attaching rule counts and lock indicators so the Loop UI can render read-only vs. editable regions correctly.
 
 ## Deliverables
 
 - [ ] `claws-sdk/src/workspace/soul-sections.ts` — Section parser: decompose SOUL.md into typed SoulSection[] with id, heading, content, governanceContext (denyRuleCount, compilerInjected, lockSource). Uses GovernanceIR to detect deny rules per section. Lossless: reassembled sections reproduce original file byte-for-byte.
-- [ ] `claws-serve/src/routes/loop-soul.ts` — GET /api/loop/soul: returns SoulSection[] with governance context. PATCH /api/loop/soul: accepts section id + new content, validates via write-time validation layer, writes back to SOUL.md, triggers incremental recompile.
+- [ ] `claws-serve/src/routes/loop-soul.ts` — Section-level response formatter for `/api/oc/SOUL.md`. Registers with the generic Layer 1 router (pulse 27) to provide soul-specific section decomposition. GET returns SoulSection[] with governance context. PATCH accepts section id + new content, validates via write-time validation layer, writes back to SOUL.md, triggers incremental recompile.
 - [ ] `claws-sdk/tests/workspace/soul-sections.unit.test.ts` — L0: parse single-section SOUL.md (1), parse multi-section with nested headings (1), round-trip lossless (1), governance context attaches deny rule counts (1), compiler-injected marking detected (1), empty SOUL.md returns empty array (1), frontmatter preserved in round-trip (1), section ids are stable across parses (1)
 - [ ] `claws-serve/tests/routes/loop-soul.unit.test.ts` — L0 covered by sdk tests above
 - [ ] `claws-serve/tests/routes/loop-soul.integration.test.ts` — L1: GET returns sections with governance context (1), PATCH updates section content (1), PATCH rejected for locked section (1), PATCH triggers recompile (1)
@@ -44,9 +44,9 @@ This is a HEAVY pulse. The soul-sections parser must handle arbitrary SOUL.md st
 
 ## Acceptance Criteria
 
-- [ ] GET /api/loop/soul returns typed SoulSection[] with governance context per section
+- [ ] `GET /api/oc/SOUL.md` returns typed SoulSection[] with governance context per section
 - [ ] Each section includes denyRuleCount, compilerInjected boolean, and lockSource
-- [ ] PATCH /api/loop/soul validates against write-time validation layer before writing
+- [ ] `PATCH /api/oc/SOUL.md` validates against write-time validation layer before writing
 - [ ] Locked sections (r5, fleet, governance) reject PATCH with appropriate PatchError
 - [ ] Round-trip: parse -> reassemble reproduces original SOUL.md byte-for-byte
 - [ ] Incremental recompile triggered after successful PATCH

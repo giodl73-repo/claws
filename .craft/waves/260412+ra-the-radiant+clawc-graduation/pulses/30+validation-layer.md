@@ -2,7 +2,7 @@
 pulse: 30
 slug: validation-layer
 plan: claws-cap-integration
-depends_on: [29, 23]
+depends_on: [29, 23, 66]
 governing_roles: [craft:architect, claws:platform-eng, claws:ciso]
 scenario_codes: [cap-integration/S03, cap-integration/S04, cap-integration/S21, cap-integration/S22, cap-integration/S23, cap-integration/S24, cap-integration/S27, S32]
 stage: implementation
@@ -54,6 +54,7 @@ The PatchError union covers 8 error codes: `R5_LOCKED`, `FLEET_LOCKED`, `GOVERNA
 - [ ] `claws-sdk/tests/fixtures/workspace-edit/governance-deny/` — fixture workspace with GovernanceIR containing deny rules
 - [ ] `claws-sdk/src/workspace-edit/error-messages.ts` — human-readable message template for each PatchError code. Co-designed with the error codes, not added later.
 - [ ] Deny rule removal validator — checks if an edit removes deny rule text from SOUL.md. Compiler-injected deny rules: BLOCKED. User-authored deny rules: WARNING (allowed with governance warning).
+- [ ] All PatchError responses include oc:// path (mapped to HTTP path segments via `ocPathToRoute()`) referencing the specific field that triggered the error. Example: `R5_NON_NEGOTIABLE at oc://TOOLS.md/Tools/send-email` in error messages, `/api/oc/TOOLS.md/Tools/send-email` in HTTP context.
 
 ## Acceptance Criteria
 

@@ -9,6 +9,7 @@ import { compileRouter } from '../../src/routes/compile.js';
 import type { ServerState } from '../../src/server.js';
 import { minimalGovernanceIR } from '../fixtures/governance-ir.js';
 
+import { TEST_TRUST_SIGNING_KEY } from '../fixtures/trust-key.js';
 async function request(
   server: Server,
   method: string,

@@ -1,0 +1,29 @@
+id: nist-ai-rmf
+version: "1.0"
+framework: NIST AI RMF 1.0
+requirements:
+  - id: GOVERN-1.1
+    title: Governance structure — policy and accountability
+    kind: static
+    predicate: has-governance-rules
+    description: Governance rule surface must exist with named accountable rules.
+  - id: MAP-1.1
+    title: Context mapping — authority boundaries
+    kind: static
+    predicate: authority-bounds-declared
+    description: USER authority bounds must be mapped for the AI system context.
+  - id: MEASURE-2.7
+    title: Measurable logs — event retention
+    kind: structural
+    predicate: audit-retention-1-year
+    description: Event logs retained for measurement windows (NIST RMF 1-year minimum).
+  - id: MANAGE-4.1
+    title: Incident response — high-risk transparency
+    kind: static
+    predicate: every-r5-has-irreversible-external
+    description: High-risk (R5) tools must declare reversibility posture for incident review.
+  - id: MANAGE-4.2
+    title: Tamper-evident audit
+    kind: structural
+    predicate: audit-tamper-seal-present
+    description: Tamper seal required for trustworthy incident forensics.

@@ -38,7 +38,7 @@
 |---|------|-------------|---------|
 | N1 | prompts.ts | 17-27 | Generic `buildSystemPrompt()` asks for "JSON array of intent objects" but does not specify a JSON schema or provide an example. LLM output consistency will vary. The file-specific prompts are much better structured. |
 | N2 | types.ts | 60 | `LLMIntent.confidence` is typed as `number` but semantically must be [0,1]. A branded type or runtime clamp would make the invariant explicit. `parseIntentsFromResponse` does clamp (line 98), but direct construction does not. |
-| N3 | errors.ts | 138-139 | The error message for `CLAWS-E040` includes `export ANTHROPIC_API_KEY="sk-ant-..."` which hints at the key prefix format. While helpful, this could be considered information leakage in a hardened deployment. |
+| N3 | errors.ts | 138-139 | The error message for `OC-POLICY-E040` includes `export ANTHROPIC_API_KEY="sk-ant-..."` which hints at the key prefix format. While helpful, this could be considered information leakage in a hardened deployment. |
 
 ---
 

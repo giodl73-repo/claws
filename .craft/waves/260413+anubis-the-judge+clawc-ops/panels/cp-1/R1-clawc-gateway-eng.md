@@ -143,7 +143,7 @@ function extractRuleId(reason: string): string {
 }
 ```
 
-The error contract in `claws-cli/src/errors/codes.ts` uses `CLAWS-E{NNN}` codes, and governance rules use `G-` prefixed IDs. `extractRuleId()` only matches `G-` prefixes. If a block reason contains a `CLAWS-E040` code instead of (or in addition to) a `G-` prefixed rule, the audit entry will record `ruleId: 'default'` instead of the actual code.
+The error contract in `claws-cli/src/errors/codes.ts` uses `OC-POLICY-E{NNN}` codes, and governance rules use `G-` prefixed IDs. `extractRuleId()` only matches `G-` prefixes. If a block reason contains a `OC-POLICY-E040` code instead of (or in addition to) a `G-` prefixed rule, the audit entry will record `ruleId: 'default'` instead of the actual code.
 
 ---
 

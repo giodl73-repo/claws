@@ -40,7 +40,7 @@ A user wanting SARIF for CI integration or CSV for fleet reports has no way to r
 
 The `init` command writes errors directly with `console.error()` strings (`'claws.json already exists in this directory.'`) instead of using the error contract. The error code registry (`errors/codes.ts`) allocates codes E080-E089 for init errors, and the `DiagnosticError` class (`errors/contract.ts`) provides the WHAT+HOW+WHERE pattern, but `init.ts` uses neither. This breaks the user journey contract: every other command produces structured errors with codes, fix instructions, and doc references. Init is the first command a new user runs — and it is the only one that breaks the diagnostic pattern.
 
-**Fix**: Have `runInit` throw or return `DiagnosticError` instances using the allocated init error codes (CLAWS-E080 for "already initialized", CLAWS-E082 for "template not found", etc.).
+**Fix**: Have `runInit` throw or return `DiagnosticError` instances using the allocated init error codes (OC-POLICY-E080 for "already initialized", OC-POLICY-E082 for "template not found", etc.).
 
 ---
 
@@ -85,7 +85,7 @@ This is a user experience gap: a `claws build` that takes 2+ seconds gives no in
 
 ### NAV-08 [W] — `claws build` with no platform autodetection fallback gives a developer-facing error
 
-When platform autodetection fails (no markers, no config), the error originates from `platform-detect.ts:101` calling `resolve(inventory)` which throws. The `build` command at line 140 catches this and wraps it with `compileFailedError()`, producing: `CLAWS-E020: Compilation failed: Platform detection failed: <SDK internal message>`. The SDK error message is implementation-facing (e.g., "No platforms detected in inventory"). The user sees a compile error code (E020) for what is actually a workspace setup issue.
+When platform autodetection fails (no markers, no config), the error originates from `platform-detect.ts:101` calling `resolve(inventory)` which throws. The `build` command at line 140 catches this and wraps it with `compileFailedError()`, producing: `OC-POLICY-E020: Compilation failed: Platform detection failed: <SDK internal message>`. The SDK error message is implementation-facing (e.g., "No platforms detected in inventory"). The user sees a compile error code (E020) for what is actually a workspace setup issue.
 
 **Fix**: Use a workspace-category error code (E010-E019 range) and an actionable message: "No platform detected. Run `claws init` to configure your workspace, or pass `--target <platform>` explicitly."
 

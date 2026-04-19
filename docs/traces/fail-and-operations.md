@@ -120,7 +120,7 @@ The OBO boundary prevents agents from performing privileged actions without expl
        ▼
   [Elicitation Gate]
        │  "SSN" → prohibited field → BLOCK
-       │  Emit: CLAWS-ELICIT-001 "Prohibited information request"
+       │  Emit: OC-POLICY-ELICIT-001 "Prohibited information request"
        ▼
   Question blocked, diagnostic logged
 ```

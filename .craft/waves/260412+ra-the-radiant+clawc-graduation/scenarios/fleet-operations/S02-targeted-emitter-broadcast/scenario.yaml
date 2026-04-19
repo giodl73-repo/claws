@@ -76,7 +76,7 @@ findings:
       After upgrading emit-cursor in 19 workspaces, the broadcast tool must
       verify compilation success. If the upgrade introduces a TypeScript
       type incompatibility (e.g., emit-cursor@1.1.1 exports a changed
-      type that @claws/compiler's EmitRegistry expects differently), the
+      type that @bic/claws-sdk's EmitRegistry expects differently), the
       workspace compiles fail. The broadcast tool must include a rollback
       mechanism: restore the previous package-lock.json and node_modules
       for any workspace where post-upgrade compilation fails.

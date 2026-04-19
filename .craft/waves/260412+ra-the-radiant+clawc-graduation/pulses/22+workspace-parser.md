@@ -9,8 +9,8 @@ stage: implementation
 test_tiers:
   L0_unit: 6
   L1_integration: 2
-  L2_e2e: 0
-  L3_accept: 0
+  L2_e2e: 1
+  L3_accept: 1
 test_scope:
   run:
     - "cd claws-sdk && npx vitest run --project unit --coverage"
@@ -40,6 +40,8 @@ All business logic lives in claws-sdk. claws-serve only calls `parseWorkspace(di
 - [ ] `claws-sdk/src/workspace/parser.ts` -- `parseWorkspace(dir: string): Promise<WorkspaceState>` function. Reads all 9 files from the workspace directory. Parses markdown frontmatter + body into typed sections. Returns null for missing optional files. Throws `WorkspaceError` if SOUL.md is missing.
 - [ ] `claws-sdk/tests/workspace/parser.unit.test.ts` -- L0: parses minimal workspace with only SOUL.md (1 test), parses full 9-file workspace into all sections (1 test), missing optional file returns null section (1 test), missing SOUL.md throws WorkspaceError (1 test), preserves raw content byte-for-byte (1 test), handles BOM and CRLF in workspace files (1 test)
 - [ ] `claws-sdk/tests/workspace/parser.integration.test.ts` -- L1: parses fixture workspace directory with all 9 files and validates cross-file references (1 test), parser output feeds into CompilationHost without errors (1 test)
+- [ ] `claws-sdk/tests/workspace/parser.e2e.test.ts` -- L2: end-to-end workspace parse from fixture directory through full pipeline (1)
+- [ ] `claws-sdk/tests/workspace/parser.accept.test.ts` -- L3: scenario acceptance test verifying S02 findings (1)
 
 ## Acceptance Criteria
 
@@ -66,5 +68,7 @@ Load these role files before starting:
 
 - [ ] L0 unit (6 tests): minimal workspace parse (1), full 9-file parse (1), missing optional returns null (1), missing SOUL.md throws (1), raw byte fidelity (1), BOM/CRLF handling (1)
 - [ ] L1 integration (2 tests): fixture workspace cross-file validation (1), parser output feeds CompilationHost (1)
+- [ ] L2 e2e (1 test): end-to-end workspace parse from fixture directory (1)
+- [ ] L3 acceptance (1 test): S02 scenario findings verified (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

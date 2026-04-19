@@ -17,7 +17,8 @@ import { runBuild } from './commands/build.js';
 import { runExtract } from './commands/extract.js';
 import { runInit } from './commands/init.js';
 import { runUninstall } from './commands/uninstall.js';
-import { runWatch } from './commands/watch.js';
+import { runWatch, parseDebounceFlag } from './commands/watch.js';
+import { runExtractWatch } from './commands/extract-watch.js';
 import { runDoctorCmd } from './commands/doctor.js';
 import {
   runSnapSave,
@@ -37,6 +38,12 @@ import {
   runCacheClear,
 } from './commands/cache.js';
 import {
+  runCacheStats as runCompileCacheStats,
+  runCacheList as runCompileCacheList,
+  runCachePrune as runCompileCachePrune,
+  runCacheClear as runCompileCacheClear,
+} from './commands/cache/index.js';
+import {
   runProtectBudget,
   runProtectBudgetFleet,
   runSecretsInit,
@@ -50,6 +57,7 @@ import {
 import { runComplySOC2, runComplyHIPAA } from './commands/comply.js';
 import { runComplyEUAIAct } from './commands/comply-eu-ai-act.js';
 import { runServe } from './commands/serve.js';
+import { runFleetCompile, parseMaxConcurrency } from './commands/fleet-compile.js';
 import type { SkillTemplateTier } from '@bic/claws-sdk/scaffold';
 import {
   formatError,
@@ -210,10 +218,28 @@ export function createProgram(): Command {
       process.exitCode = exitCode;
     });
 
-  // ── watch ───────────────────────────────────────────────────────────
+  // ── watch (pulse-81 compile-watch) ──────────────────────────────────
   program
     .command('watch')
-    .description('Watch workspace files and re-check on changes')
+    .description('Watch workspace files and recompile on changes (debounced)')
+    .option('--debounce <ms>', 'Debounce window in milliseconds (default: 300, minimum 50)')
+    .action(async (cmdOpts: { debounce?: string }) => {
+      const opts = program.opts<GlobalOpts>();
+      const ctx = await preCommand();
+      const debounceMs = parseDebounceFlag(cmdOpts.debounce);
+      const exitCode = await runWatch(ctx, {
+        json: opts.json,
+        verbose: opts.verbose,
+        color: opts.color,
+        ...(debounceMs !== undefined ? { debounceMs } : {}),
+      });
+      process.exitCode = exitCode;
+    });
+
+  // ── extract-watch (legacy LLM-integrated extraction watcher) ────────
+  program
+    .command('extract-watch')
+    .description('Watch workspace files and re-run LLM extraction on changes (legacy)')
     .option('--llm', LLM_HELP_TEXT, false)
     .option('--llm-model <model>', 'Override LLM model (default: claude-sonnet-4-20250514)')
     .action(async (cmdOpts: { llm: boolean; llmModel?: string }) => {
@@ -230,7 +256,7 @@ export function createProgram(): Command {
       }
       const llmProvider = llmResult?.provider;
 
-      const exitCode = await runWatch(ctx, {
+      const exitCode = await runExtractWatch(ctx, {
         json: opts.json,
         verbose: opts.verbose,
         color: opts.color,
@@ -484,12 +510,12 @@ export function createProgram(): Command {
       process.exitCode = exitCode;
     });
 
-  // ── cache ────────────────────────────────────────────────────────────
-  const cache = program
-    .command('cache')
+  // ── extract-cache (LLM extraction cache) ─────────────────────────────
+  const extractCache = program
+    .command('extract-cache')
     .description('LLM extraction cache management');
 
-  cache
+  extractCache
     .command('status')
     .description('Show cache statistics')
     .action(async () => {
@@ -499,7 +525,7 @@ export function createProgram(): Command {
       process.exitCode = exitCode;
     });
 
-  cache
+  extractCache
     .command('export')
     .description('Export cache as JSON to stdout')
     .action(async () => {
@@ -509,7 +535,7 @@ export function createProgram(): Command {
       process.exitCode = exitCode;
     });
 
-  cache
+  extractCache
     .command('import <file>')
     .description('Import cache from a JSON file')
     .action(async (file: string) => {
@@ -519,13 +545,68 @@ export function createProgram(): Command {
       process.exitCode = exitCode;
     });
 
-  cache
+  extractCache
     .command('clear')
     .description('Clear all LLM cache entries')
     .action(async () => {
       const opts = program.opts<GlobalOpts>();
       const workspaceRoot = process.cwd();
       const exitCode = await runCacheClear(workspaceRoot, { json: opts.json });
+      process.exitCode = exitCode;
+    });
+
+  // ── cache (compilation cache) ────────────────────────────────────────
+  const cache = program
+    .command('cache')
+    .description('Compilation cache management');
+
+  cache
+    .command('stats')
+    .description('Show compilation cache statistics as JSON')
+    .action(async () => {
+      const workspaceRoot = process.cwd();
+      const exitCode = await runCompileCacheStats(workspaceRoot);
+      process.exitCode = exitCode;
+    });
+
+  cache
+    .command('list')
+    .description('List compilation cache entries (sorted by lastAccess DESC)')
+    .option('--json', 'Emit newline-delimited JSON instead of a table', false)
+    .action(async (cmdOpts: { json: boolean }) => {
+      // Honor either the global `--json` or the subcommand-local `--json`;
+      // Commander's parent-option precedence means the global flag wins when
+      // users type `claws --json cache list`, but `claws cache list --json`
+      // sets the local flag.
+      const globalOpts = program.opts<GlobalOpts>();
+      const workspaceRoot = process.cwd();
+      const exitCode = await runCompileCacheList(workspaceRoot, {
+        json: cmdOpts.json || globalOpts.json,
+      });
+      process.exitCode = exitCode;
+    });
+
+  cache
+    .command('prune')
+    .description('Remove compile-cache entries older than a duration (e.g. 7d, 24h, 15m, 30s)')
+    .requiredOption('--older-than <duration>', 'Maximum age: /^\\d+(s|m|h|d)$/')
+    .action(async (cmdOpts: { olderThan: string }) => {
+      const workspaceRoot = process.cwd();
+      const exitCode = await runCompileCachePrune(workspaceRoot, { olderThan: cmdOpts.olderThan });
+      process.exitCode = exitCode;
+    });
+
+  cache
+    .command('clear')
+    .description('Clear the compilation cache; use --yes to skip prompt')
+    .option('--yes', 'Skip interactive confirmation', false)
+    .option('--reset-counters', 'Also zero hit/miss counters', false)
+    .action(async (cmdOpts: { yes: boolean; resetCounters: boolean }) => {
+      const workspaceRoot = process.cwd();
+      const exitCode = await runCompileCacheClear(workspaceRoot, {
+        yes: cmdOpts.yes,
+        resetCounters: cmdOpts.resetCounters,
+      });
       process.exitCode = exitCode;
     });
 
@@ -719,6 +800,48 @@ export function createProgram(): Command {
       const opts = program.opts<GlobalOpts>();
       const workspaceRoot = process.cwd();
       const exitCode = await runComplyEUAIAct(workspaceRoot, { json: opts.json });
+      process.exitCode = exitCode;
+    });
+
+  // ── fleet ────────────────────────────────────────────────────────────
+  const fleet = program
+    .command('fleet')
+    .description('Fleet-wide operations across multiple workspaces');
+
+  fleet
+    .command('compile <fleet-dir>')
+    .description('Compile every workspace under <fleet-dir> with bounded parallelism')
+    .option(
+      '--max-concurrency <n>',
+      'Cap in-flight compiles; positive integer (default: os.cpus().length). Tune down on memory-limited CI runners.',
+    )
+    .option('--json', 'Emit newline-delimited JSON (one result per line + final summary)', false)
+    .option('--stats', 'Include peak-concurrency and parallelism ratio in the human summary', false)
+    .option('--output-dir <path>', 'Base output directory; each workspace gets a subdirectory', '.claws/fleet-out')
+    .action(async (
+      fleetDir: string,
+      cmdOpts: { maxConcurrency?: string; json?: boolean; stats?: boolean; outputDir: string },
+    ) => {
+      const opts = program.opts<GlobalOpts>();
+      let maxConcurrency: number;
+      try {
+        maxConcurrency = parseMaxConcurrency(cmdOpts.maxConcurrency);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (opts.json || cmdOpts.json === true) {
+          process.stderr.write(`${JSON.stringify({ error: msg })}\n`);
+        } else {
+          process.stderr.write(`claws fleet compile: ${msg}\n`);
+        }
+        process.exitCode = 1;
+        return;
+      }
+      const exitCode = await runFleetCompile(fleetDir, {
+        maxConcurrency,
+        json: opts.json || cmdOpts.json === true,
+        stats: cmdOpts.stats === true,
+        outputDir: cmdOpts.outputDir,
+      });
       process.exitCode = exitCode;
     });
 

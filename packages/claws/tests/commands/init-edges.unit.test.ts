@@ -127,7 +127,7 @@ describe('claws init — edge-case branches', () => {
       expect(exitCode).toBe(2);
 
       const output = consoleSpy.mock.calls.flat().join(' ');
-      expect(output).toContain('CLAWS-E081');
+      expect(output).toContain('OC-POLICY-E081');
       expect(output).toContain('raw string error');
     } finally {
       consoleSpy.mockRestore();
@@ -144,7 +144,7 @@ describe('claws init — edge-case branches', () => {
       expect(exitCode).toBe(1);
 
       const output = consoleSpy.mock.calls.flat().join(' ');
-      expect(output).toContain('CLAWS-E082');
+      expect(output).toContain('OC-POLICY-E082');
     } finally {
       consoleSpy.mockRestore();
     }
@@ -161,7 +161,7 @@ describe('claws init — edge-case branches', () => {
 
       const output = consoleSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E082');
+      expect(parsed.error.code).toBe('OC-POLICY-E082');
     } finally {
       consoleSpy.mockRestore();
     }
@@ -181,7 +181,7 @@ describe('claws init — edge-case branches', () => {
 
       const output = consoleSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E080');
+      expect(parsed.error.code).toBe('OC-POLICY-E080');
     } finally {
       consoleSpy.mockRestore();
     }
@@ -200,7 +200,7 @@ describe('claws init — edge-case branches', () => {
       expect(exitCode).toBe(2);
 
       const output = consoleSpy.mock.calls.flat().join(' ');
-      expect(output).toContain('CLAWS-E080');
+      expect(output).toContain('OC-POLICY-E080');
     } finally {
       consoleSpy.mockRestore();
     }

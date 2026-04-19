@@ -1,10 +1,13 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import express from 'express';
+import express, { type Request, type RequestHandler } from 'express';
 import type { Server } from 'node:http';
 import { irRouter } from '../../src/routes/ir.js';
 import { CompilationHost } from '../../src/compilation-host.js';
+import { TIME_TRAVEL_CACHE_CONTROL } from '../../src/routes/ir-resolution.js';
+import type { ResolvedAt } from '@bic/claws-sdk/workspace';
 import { minimalGovernanceIR } from '../fixtures/governance-ir.js';
 
+import { TEST_TRUST_SIGNING_KEY } from '../fixtures/trust-key.js';
 async function request(
   server: Server,
   path: string,
@@ -94,5 +97,47 @@ describe('GET /ir', () => {
     expect(status).toBe(404);
     const json = JSON.parse(body) as Record<string, unknown>;
     expect(json['error']).toBe('No compiled IR available. POST /compile first.');
+  });
+
+  it('returns the time-travel IR with immutable cache header when req.timeTravel is stamped', async () => {
+    const liveIR = minimalGovernanceIR();
+    const historicalIR = {
+      ...minimalGovernanceIR(),
+      compiler: {
+        ...minimalGovernanceIR().compiler,
+        compiledAt: '2026-03-01T00:00:00.000Z',
+      },
+    };
+    const host = new CompilationHost(async () => liveIR, '/test');
+    await host.compile(); // warm the live cache so we can verify we do NOT serve it
+
+    const stampTimeTravel: RequestHandler = (req, _res, next) => {
+      const resolved: ResolvedAt = {
+        mode: 'version',
+        governanceIR: historicalIR,
+        version: 42,
+        compiledAt: historicalIR.compiler.compiledAt,
+        raw: 'v42',
+      };
+      (req as Request & { timeTravel?: ResolvedAt }).timeTravel = resolved;
+      next();
+    };
+
+    const app = express();
+    app.use(stampTimeTravel);
+    app.use(irRouter(host));
+    server = await listen(app);
+
+    const { status, body, headers } = await request(server, '/ir');
+
+    expect(status).toBe(200);
+    expect(headers.get('cache-control')).toBe(TIME_TRAVEL_CACHE_CONTROL);
+
+    const json = JSON.parse(body) as {
+      compiler: { compiledAt: string };
+    };
+    // Verify we got the historical IR, not the warmed live IR.
+    expect(json.compiler.compiledAt).toBe('2026-03-01T00:00:00.000Z');
+    expect(json.compiler.compiledAt).not.toBe(liveIR.compiler.compiledAt);
   });
 });

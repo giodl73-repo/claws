@@ -76,7 +76,7 @@ export async function loadConfig(
     parsed = JSON.parse(raw);
   } catch (err) {
     const detail: ConfigValidationError = {
-      code: 'CLAWS-E001',
+      code: 'OC-POLICY-E001',
       what: `Invalid JSON in ${CLAWS_CONFIG_FILE}: ${err instanceof Error ? err.message : String(err)}`,
       how: `Fix the JSON syntax in ${configPath}. Use a JSON linter to find the error.`,
       where: { file: configPath, line: 1, column: 1 },
@@ -92,9 +92,9 @@ export async function loadConfig(
       .map((i) => `  - ${i.path.join('.')}: ${i.message}`)
       .join('\n');
     const detail: ConfigValidationError = {
-      code: 'CLAWS-E001',
+      code: 'OC-POLICY-E001',
       what: `Invalid ${CLAWS_CONFIG_FILE}: schema validation failed\n${issues}`,
-      how: `Fix the fields listed above in ${configPath}. Run \`claws help CLAWS-E001\` for the expected schema.`,
+      how: `Fix the fields listed above in ${configPath}. Run \`claws help OC-POLICY-E001\` for the expected schema.`,
       where: { file: configPath, line: 1, column: 1 },
       docsUrl: null,
     };

@@ -4,7 +4,7 @@ version: 1
 specs: [CL-08]
 description: >
   Validates CL-08 constraint C12: removing all extracted @craftworks/* packages
-  and @claws/* packages and reverting to the pre-extraction compiler-sdk version
+  and @bic/claws-* packages and reverting to the pre-extraction compiler-sdk version
   produces identical behavior. This is the escape hatch — if the extraction has
   unforeseen problems, consumers can downgrade to the monolith without data loss,
   behavior changes, or broken builds. The downgrade must be clean.
@@ -16,7 +16,7 @@ expect:
       "@craftworks/context", "@craftworks/execution", "@craftworks/eval",
       "@craftworks/input", "@craftworks/emit-oc", "@craftworks/emit-cc",
       "@craftworks/emit-cursor", "@craftworks/emit-copilot", "@craftworks/emit-bedrock",
-      "@craftworks/emit-langgraph", "@craftworks/emit-crewai", "@claws/compiler",
+      "@craftworks/emit-langgraph", "@craftworks/emit-crewai", "@bic/claws-sdk",
       "@bic/claws-skill-kit", "@bic/claws-test"]
     npm_install: "@craftworks/compiler-sdk@pre-extraction-version"
     behavior: "identical"
@@ -33,14 +33,14 @@ simulate:
   budget: null
 
 problem: >
-  A consumer project currently uses the extracted architecture: @claws/compiler
+  A consumer project currently uses the extracted architecture: @bic/claws-sdk
   for governance compilation, @craftworks/forma for workspace reading, and
   @bic/claws-sdk for enterprise features. Due to a critical bug in one
   of the extracted packages, the team decides to downgrade entirely to the
   pre-extraction compiler-sdk monolith. They run npm uninstall on all 20+
   extracted packages and npm install the last pre-extraction compiler-sdk
   version. All import statements must be updated from @craftworks/* and
-  @claws/* paths to compiler-sdk paths. The existing audit chain (JSONL file
+  @bic/claws-* paths to compiler-sdk paths. The existing audit chain (JSONL file
   with hash-linked entries created by @craftworks/crypto) must be readable
   and verifiable by compiler-sdk's built-in crypto module. No data loss, no
   behavior change, no broken hash chains.
@@ -75,7 +75,7 @@ findings:
   - id: F03
     severity: major
     description: >
-      @claws/compiler adds 29 G-rules and GovernanceIR that do not exist in
+      @bic/claws-sdk adds 29 G-rules and GovernanceIR that do not exist in
       the pre-extraction compiler-sdk. Downgrading to compiler-sdk means
       losing claws-specific governance capabilities. The downgrade is NOT
       truly "identical behavior" — it is identical for the building-block

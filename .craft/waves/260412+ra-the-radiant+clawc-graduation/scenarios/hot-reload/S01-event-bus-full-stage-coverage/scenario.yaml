@@ -1,0 +1,220 @@
+name: S01-event-bus-full-stage-coverage
+series: hot-reload
+version: 1
+specs: [CL-08, CL-14]
+description: >
+  Validates that a `CompilerEventBus` passed via `options.events` to
+  `compile()` emits a structured event at every stage of a successful
+  compile against the canonical fixture. Per plan H5, the event-bus
+  interface is Ra's deliverable; the live OC Gateway consumer is Horus's.
+  Ra's obligation is that the event surface is complete, typed, and
+  ordered — every PARSE / ENFORCE / EMIT / VALIDATE / CACHE / COMPILE
+  boundary emits a recorded event, and every payload type-checks against
+  the CompilerEvent discriminated union defined in CL-14 §9.2 (once
+  ratified). The hot-reload runtime and any future observability
+  consumer rely on this contract.
+
+expect:
+  event_emission:
+    compile_start: 1
+    read_start: 9
+    read_complete: 9
+    enforce_start: 1
+    enforce_complete: 1
+    emit_start: 2
+    emit_complete: 2
+    validate_start: 2
+    validate_complete: 2
+    cache_write: 1
+    compile_complete: 1
+    total_events: 31
+  ordering:
+    compile_start_first: true
+    compile_complete_last: true
+    read_complete_before_enforce: true
+    enforce_complete_before_emit: true
+    emit_complete_before_validate: true
+    validate_complete_before_cache: true
+  payload_shape:
+    discriminated_union: "CompilerEvent"
+    type_check_per_event: true
+    required_fields_present: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Construct a `CompilerEventBus` instance (public subpath
+  `@bic/claws-sdk/compiler/events`). Register a listener that
+  records every event by type into an ordered array. Invoke `compile()`
+  against the canonical fixture with `options.events = bus`. On
+  successful completion, the recorded array must contain, in order:
+  (1) one `compile.start`, (2) nine `read.start` + nine `read.complete`
+  paired — one pair per reader stage: soul, tools, agents, memory,
+  identity, user, heartbeat, skills, lobster, (3) one `enforce.start` +
+  one `enforce.complete`, (4) two `emit.start` + two `emit.complete`
+  pairs — one per emitter: oc and claude-code, (5) two `validate.start`
+  + two `validate.complete` pairs (one per emit target), (6) one
+  `cache.write`, (7) one `compile.complete`. Total 31 events. Every
+  payload must type-check against the CompilerEvent discriminated union
+  — `kind` field narrows to the correct interface (CompileStartEvent,
+  ReadStartEvent, etc.), required fields (timestamp, workspace,
+  stage, duration) are populated. Ordering constraints: compile.start
+  is first; compile.complete is last; all read.* events precede
+  enforce.start; enforce.complete precedes any emit.start; the two
+  emit pairs can interleave with each other but each emit.complete
+  precedes the matching validate.start; cache.write follows all
+  validate.complete events.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The event-bus contract is Ra's Horus seam. If Ra ships an incomplete
+      or wrongly-typed event surface, Horus wave cannot build hot-reload
+      without amending Ra's contract — a cross-wave change that breaks
+      layering. Every event type in plan H5 (compile.start, read.complete,
+      enforce.denied, emit.start, emit.complete, validate.failed,
+      compile.complete, compile.failed) must be emitted by the success
+      path OR explicitly documented as "only emitted on failure" with a
+      test covering the failure case. Ra must not ship H5 with any
+      unemitted event type; Horus will depend on every one.
+    spec_impact: "H5 — every documented event type must have an emission site or failure-only scenario"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Event payloads must be a discriminated union keyed on `kind` (or
+      `type`), not a loose record with optional fields. A discriminated
+      union lets TypeScript consumers narrow via switch and exhaustiveness
+      check — adding a new event type without updating consumers produces
+      a compile error. A loose record lets consumers silently miss new
+      events. CL-14 §9.2 ratification should define the union exactly;
+      Ra's implementation must match that ratified shape byte-for-byte.
+    spec_impact: "H5 — CompilerEvent is a discriminated union, not a loose record; exhaustiveness checkable"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Event ordering constraints must hold even under parallel emit
+      stages. Per CL-14 the ts-builder and target emitters may run
+      concurrently. The event bus must linearize events into a single
+      ordered stream (e.g., via serialized emission or per-event
+      timestamps with monotonic sequence numbers). If events arrive
+      out of order, hot-reload consumers that drive UI state (e.g.,
+      "emit started → show spinner; emit completed → hide spinner")
+      display inconsistent state. The bus must guarantee either total
+      order or per-key order with explicit sequence numbers.
+    spec_impact: "H5 — event ordering guarantee (total or sequenced) is part of the contract"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Listener backpressure must be handled. If a hot-reload consumer's
+      listener is slow (e.g., writing to a remote log), the event bus
+      must not block the compile. Options: (1) fire-and-forget, listeners
+      run on their own queue; (2) bounded buffer, drop events on overflow
+      with a warning; (3) synchronous, compile waits for listener. Each
+      has tradeoffs. Ra must pick one and document it. Horus's hot-reload
+      implementation will encode the assumption into its gateway.
+    spec_impact: "H5 — document event-bus backpressure semantics (async fire-and-forget recommended)"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Error handling for failing listeners must not abort the compile.
+      If a registered listener throws (e.g., hot-reload gateway crashes
+      mid-compile), the event bus must catch and log, not propagate.
+      Compile success must not depend on listener health. The listener
+      contract includes "listeners MAY throw; bus MUST swallow". Tests
+      for this are essential — a compile without a listener registered
+      behaves identically to one with a throwing listener.
+    spec_impact: "H5 — listener exceptions caught at bus boundary; compile unaffected"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The `read.start` / `read.complete` count of 9 assumes the 9-reader
+      set: soul, tools, agents, memory, identity, user, heartbeat, skills,
+      lobster. If the reader set changes (adding rituals, splitting
+      agents), the event count changes. The scenario must not hardcode 9
+      brittly — it should assert `readStartCount === readerCount` where
+      readerCount is derived from the canonical reader registry. Same
+      for emit count (currently 2: oc, claude-code) and validate count.
+    spec_impact: "H5 — event counts derived from reader/emitter registries, not hardcoded"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The `cache.write` event must fire only on success. If the compile
+      fails (enforce denies, emit throws), no cache.write should be
+      emitted — the cache entry must not exist and no event may suggest
+      it does. A scenario variant covering the failure path (not this
+      scenario, but paired with it) asserts cache.write absence on
+      compile.failed.
+    spec_impact: "H5 — `cache.write` fires only on success path; pair scenario covers failure"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Every event payload should carry a `workspace` field identifying
+      which workspace the event pertains to. In fleet mode, multiple
+      workspaces compile concurrently and their events interleave on
+      the shared bus. Without a workspace identifier, consumers cannot
+      route events correctly. The workspace field should be a stable
+      identifier (e.g., absolute path or content-hash) not a mutable
+      label.
+    spec_impact: "H5 — every CompilerEvent payload carries `workspace` identifier for fleet-mode routing"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      Event timestamps must be monotonic per compile to support
+      duration calculations. A consumer computing
+      `enforce.complete.ts - enforce.start.ts` needs the timestamps
+      to be from the same monotonic source (e.g., process.hrtime),
+      not wall-clock (which can jump backward on NTP sync). The bus
+      should provide a monotonic timestamp by default and optionally
+      attach wall-clock for logging.
+    spec_impact: "H5 — event timestamps use monotonic clock; wall-clock optional sidecar field"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The event-bus subpath export (`@bic/claws-sdk/compiler/events`)
+      must follow the CL-14 extension pattern: public subpath,
+      extension-only stability, not re-exported from the top-level
+      barrel. This keeps the event surface discoverable for hot-reload
+      consumers without bloating the main barrel. Adding it to the
+      top-level barrel would imply stability guarantees Ra is not
+      committing to at ship time.
+    spec_impact: "H5 — events subpath follows CL-14 extension-only pattern, excluded from top-level barrel"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Horus wave's hot-reload consumer scenarios live in Horus, not Ra.
+      Ra's scope is event emission with typed payloads. Any test in Ra
+      that depends on Horus's live OC Gateway would pull in an unshipped
+      dependency. This scenario stops strictly at "events emitted with
+      typed payloads" — no assertions about downstream consumer behavior,
+      no imports from Horus-owned packages.
+    spec_impact: "H5 — Ra scenarios scope to event emission; consumer scenarios live in Horus wave"
+    pitfall: null
+
+implementation_status: implemented
+implementation_pulse: 83
+implementation_test: claws-sdk/tests/e2e/event-bus-full-stage-coverage.e2e.test.ts
+tags: [claws-compile-dx, hot-reload, event-bus, horus-seam]

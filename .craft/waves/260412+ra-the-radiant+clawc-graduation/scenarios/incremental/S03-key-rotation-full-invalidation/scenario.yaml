@@ -1,0 +1,183 @@
+name: S03-key-rotation-full-invalidation
+series: incremental
+version: 1
+specs: [CL-01, CL-04, CL-14]
+plan: claws-compile-dx
+headline: >
+  H2 validation seam: crypto/key rotation invalidates ALL cache entries
+  because the key (compiler.version / audit-chain signing key) is part
+  of every stage cache key.
+description: >
+  Validates the CM-4 cache-key invariant that compiler.version AND the
+  audit-chain signing key are both part of every per-stage cache key.
+  After rotating either (a) compiler.version via supported mechanism or
+  (b) the audit-chain signing key, the next compile must show EVERY
+  reader stage as cacheHit:false — all 9 readers re-run, all downstream
+  stages re-run, and the bottom-line compile cache miss also. This is
+  the safety seam: key rotation is the operator's escape hatch to
+  guarantee a from-scratch compile, and a missing key bit in any one
+  stage's cache key would silently serve stale output after rotation.
+
+expect:
+  first_compile:
+    mode: "fresh"
+    populates_all_stage_caches: true
+    baseline_wall_clock_recorded: true
+  key_rotation:
+    mechanism: "compiler.version bump OR audit-chain signing key rotation"
+    no_oc_file_edits: true
+    expected_effect: "invalidate every cache key"
+  second_compile_stage_timings:
+    soul: { cacheHit: false }
+    tools: { cacheHit: false }
+    agents: { cacheHit: false }
+    memory: { cacheHit: false }
+    identity: { cacheHit: false }
+    user: { cacheHit: false }
+    heartbeat: { cacheHit: false }
+    skills: { cacheHit: false }
+    lobster: { cacheHit: false }
+  downstream:
+    modelToIR: { cacheHit: false }
+    baselineAnalysis: { cacheHit: false }
+    emit: { cacheHit: false }
+    validate: { cacheHit: false }
+  bottom_line:
+    compile_cache_miss: true
+    wall_clock_matches_baseline: true
+  emit_output:
+    regenerated_from_scratch: true
+    byte_identical_to_baseline_if_inputs_unchanged: false
+
+implementation_status: pending
+tags: [claws-compile-dx, incremental, H2, cache, crypto, key-rotation]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Starting from a fresh fully-compiled canonical fixture, the test
+  rotates either compiler.version (e.g., the test harness patches the
+  version string via the supported mechanism) or the audit-chain
+  signing key (via the crypto package's rotate API) — without touching
+  any of the 9 OC input files. The second compile must treat every
+  reader stage as a cache miss: all 9 reader cacheHit values are
+  false, every downstream stage re-runs, and the bottom-line compile
+  cache also misses. Wall-clock for the second compile must match the
+  from-scratch baseline within variance (not the ≥80% reduction of
+  S01/S02). This proves the version/key bits are included in every
+  cache key — a subtle bug where one stage omits the version bit would
+  cause that single stage to cacheHit after rotation, serving output
+  computed under the old key, which is a correctness hazard for
+  compliance and audit integrity.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Per CL-14 §1.4 and the CM-4 seam note, compiler.version must
+      be part of every stage cache key. Omitting it from even one
+      stage means a compiler upgrade (which bumps version but
+      shouldn't require operator intervention) could serve stale
+      IR from the OLD compiler version. Users hit behavioral
+      regressions until they manually `claws cache clear`. This
+      scenario makes the invariant test-verified rather than
+      documentation-only.
+    spec_impact: "CL-04 + CL-14 — compiler.version in every stage cache key, test-enforced"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Audit-chain signing key rotation must also invalidate caches
+      because emitted artifacts include signed metadata. If the
+      emit stage cacheHits after key rotation, the emitted
+      governance plugin carries stale signatures that no longer
+      verify against the current key — breaking the audit chain at
+      runtime without surfacing an error at compile time. Emit's
+      cache key must include a hash of the signing key material
+      (or its key-id).
+    spec_impact: "CL-04 emit cache key — include signing key identity (hash or key-id)"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The "supported mechanism" for rotating compiler.version must
+      be well-defined. If the test harness can only patch the
+      version by rebuilding the compiler package, the test becomes
+      an integration monster. The spec should define a deterministic
+      rotation hook (e.g., an env var CLAWS_COMPILER_VERSION_OVERRIDE
+      that only works in test mode) so this scenario is runnable in
+      CI without a full rebuild cycle.
+    spec_impact: "CL-04 test hooks — deterministic compiler.version override for test harness"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      After key rotation, the emit output should NOT be byte-identical
+      to the pre-rotation output even if all 9 input files are
+      unchanged. Signed metadata differs (new signatures under new
+      key). If the output IS byte-identical, either the signing
+      was a no-op (signatures not actually embedded in the emit) or
+      the key rotation wasn't effective. The expectation
+      "byte_identical_to_baseline_if_inputs_unchanged: false" makes
+      this verifiable — and surfaces silent signing bugs.
+    spec_impact: "CL-04 emit — signatures embedded in output, rotation produces new bytes"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Wall-clock for the second compile should match the from-scratch
+      baseline within ~10% variance. A second compile that is
+      significantly FASTER than baseline indicates partial caching
+      (some stage didn't include the rotated key). A significantly
+      SLOWER compile indicates the rotation itself introduced
+      overhead (e.g., re-initializing the crypto context each call)
+      — also a regression worth flagging.
+    spec_impact: "CL-04 rotation overhead — rotation itself should not add compile-time cost"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Rotation granularity: the spec should distinguish
+      compiler.version rotation (global, invalidates everything) from
+      signing key rotation (may only need to invalidate emit/validate,
+      not readers). This scenario collapses both into "all-invalidate"
+      for simplicity, but a more surgical invalidation (reader
+      caches preserved across key rotation, only emit regenerates)
+      would be a future optimization worth documenting as deferred.
+    spec_impact: "CL-04 cache key scoping — future optimization to preserve reader caches on key-only rotation"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Cache key serialization must be deterministic and versioned. If
+      future changes to the cache key derivation logic (e.g., adding
+      a new input to the hash) don't bump a cache-key-schema version,
+      old cache entries may collide with new entries under the same
+      key but different semantics. Each cache entry should carry a
+      key-schema-version alongside the content, and mismatches should
+      force cache miss.
+    spec_impact: "CL-04 cache entries — key-schema-version embedded, mismatch forces miss"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      This scenario complements the cache-cli/S01 suite: `claws cache
+      clear` is the operator's manual escape; key rotation is the
+      automatic escape triggered by version/key bumps. Both must
+      produce identical from-scratch compile behavior. A future
+      test could assert that a compile after `claws cache clear`
+      produces byte-identical emit output to a compile after key
+      rotation (if inputs and keys are equivalent) — proving the
+      two paths converge.
+    spec_impact: "CL-04 cache correctness — manual clear and key rotation converge on same from-scratch state"
+    pitfall: null

@@ -49,7 +49,7 @@ describe('loadCliConfig()', () => {
     // Write invalid JSON that the SDK will reject as a validation error
     // The SDK throws an Error whose message is a JSON-serialized ConfigValidationError
     const validationError = JSON.stringify({
-      code: 'CLAWS-E040',
+      code: 'OC-POLICY-E040',
       what: 'Invalid trustTier value',
       how: 'Set trustTier to a value between 1 and 5',
       where: { file: overridePath, line: 1, column: 1 },

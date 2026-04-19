@@ -11,7 +11,7 @@ description: >
 expect:
   rules_applied: [G-DATA, G-A2A-FLOW]
   violations:
-    - code: CLAWS-E025
+    - code: OC-POLICY-E025
       rule: G-DATA
       description: "Unknown data label 'SENSITIVE' — did you mean 'PII' or 'CONFIDENTIAL'?"
     - code: CLAWS-W028
@@ -60,7 +60,7 @@ findings:
       label against the known enum and, for non-matches, compute similarity
       (Levenshtein distance or synonym lookup). "SENSITIVE" suggests "PII"
       or "CONFIDENTIAL." "PRIVATE" suggests "CONFIDENTIAL" or "RESTRICTED."
-      CLAWS-E025 provides actionable guidance.
+      OC-POLICY-E025 provides actionable guidance.
     spec_impact: "CL-02 G-DATA — synonym suggestion for unknown labels"
     pitfall: "P-147"
 

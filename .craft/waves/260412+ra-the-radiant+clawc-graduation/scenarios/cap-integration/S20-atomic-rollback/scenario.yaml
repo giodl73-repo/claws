@@ -1,0 +1,207 @@
+name: S20-atomic-rollback
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12]
+description: >
+  Validates that when a PATCH passes validation but compilation fails,
+  the file write is rolled back and the workspace is left unchanged.
+  This is the safety net for the write path: validation checks what it
+  can statically, but the compiler may discover issues only during
+  actual compilation (e.g., circular references, schema violations in
+  generated IR). The rollback must be complete — file content restored,
+  version counter unchanged, audit event logged for the failed edit.
+
+expect:
+  patch_compile_failure:
+    endpoint: "PATCH /api/chunks/connections/outlook"
+    request:
+      headers:
+        If-Match: '"v42"'
+      body:
+        field: prompt
+        value: "Prompt that causes circular reference in GovernanceIR"
+    response:
+      status: 500
+      error: COMPILATION_FAILED
+      message_contains: "circular reference detected"
+      rollback: true
+  post_condition:
+    file_hash_unchanged: true
+    workspace_version_unchanged: '"v42"'
+    audit_event:
+      category: edit-failed
+      has: [timestamp, sessionId, chunkPath, error, rolledBack]
+      rolledBack: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A user edits the Outlook connection prompt with content that passes
+  schema validation but causes a circular reference during GovernanceIR
+  compilation. The server writes the updated file, triggers recompile,
+  and the compiler fails with a circular reference error. The server must
+  roll back the file write (restore the previous content), keep the
+  workspace version at v42 (no increment), return COMPILATION_FAILED
+  to the client, and log an audit event recording the failed edit
+  attempt with the rollback status. The workspace must be in the exact
+  same state as before the PATCH.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Rollback verification via file hash: after rollback, the file
+      content must be byte-identical to the pre-PATCH state. The server
+      should compute a hash of the file before writing, store it, and
+      verify after rollback that the hash matches. If the file is
+      modified by another process between write and rollback (race
+      condition), the rollback would restore stale content. The write
+      path must hold a file lock during the write-compile-rollback
+      sequence.
+    spec_impact: "CL-10 atomic rollback — file hash verification, file lock during write-compile cycle"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Rollback failure on disk full: if the rollback itself fails (e.g.,
+      disk is full, the backup copy was not saved), the workspace is in
+      a corrupted state — the new (invalid) content is on disk but
+      compilation failed. The server must handle rollback failure as a
+      critical error: log it prominently, set a workspace health flag
+      to 'degraded', and refuse further writes until an admin intervenes.
+      The backup strategy should use write-ahead logging (write to
+      journal, then replace original) rather than write-then-restore.
+    spec_impact: "CL-10 rollback failure — workspace health flag 'degraded', refuse writes until admin recovery"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Concurrent PATCH during rollback: if a second PATCH arrives while
+      the first PATCH is in the write-compile-rollback sequence, the
+      second PATCH must not proceed until the rollback completes. Without
+      serialization, the second PATCH could read the (about-to-be-rolled-
+      back) file, base its edit on invalid state, and produce another
+      compilation failure. Write path serialization (one PATCH at a time)
+      prevents this.
+    spec_impact: "CL-10 write path — serialized PATCH execution, no concurrent mutations"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The COMPILATION_FAILED error response must include enough detail
+      for the user to fix their edit. A generic "compilation failed" is
+      not actionable. The error should include: the phase that failed,
+      the specific error (e.g., "circular reference between tool X and
+      tool Y"), and ideally a pointer to the problematic content in
+      the user's edit. The compiler error must be translated into a
+      user-friendly message, not a raw stack trace.
+    spec_impact: "CL-10 COMPILATION_FAILED — structured error with phase, detail, and content pointer"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Startup health check for write-without-compile: if the server
+      crashes between file write and rollback, the workspace has a
+      written file that was never successfully compiled. On startup, the
+      server must detect this state — the file's last modified timestamp
+      is newer than the last successful compilation timestamp. The health
+      check should trigger a recompile; if it fails, the file should be
+      rolled back from the backup, or the workspace flagged as degraded.
+    spec_impact: "CL-10 startup health — detect write-without-compile, trigger recompile or rollback"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Audit event for failed edits: the audit trail must record failed
+      edit attempts even though no state change occurred. The event
+      should include: timestamp, sessionId, the attempted change
+      (chunkPath, field, value), the compilation error, and
+      rolledBack: true. This provides forensic value — if many edits
+      fail with the same error, it suggests a systemic workspace
+      configuration problem.
+    spec_impact: "CL-10 audit trail — log failed edits with rolledBack flag and compilation error"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Workspace version must NOT increment on a rolled-back edit. If
+      the version counter increments before compilation and is not
+      decremented on rollback, the version sequence has a gap (v42 →
+      v43 on write → rollback to v42, but version stays v43). The
+      version increment must happen AFTER successful compilation, not
+      before. Pre-increment with rollback creates phantom versions
+      that confuse clients checking for changes.
+    spec_impact: "CL-10 version counter — increment after successful compile, not before"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The write-ahead approach is safer than write-then-restore. Instead
+      of: (1) backup original, (2) write new, (3) compile, (4) rollback
+      if failed — use: (1) write new to temp, (2) compile from temp,
+      (3) if success, atomically rename temp to original. This way,
+      the original file is never modified until compilation succeeds.
+      The only risk is orphaned temp files on crash, which is far less
+      dangerous than a corrupted original.
+    spec_impact: "CL-10 write path — write-to-temp, compile, rename on success (no restore needed)"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The rollback must also undo any in-memory state changes. If the
+      server updated an in-memory cache or index during the write phase
+      (before compilation), the rollback must revert those caches too.
+      A stale in-memory cache that reflects the rolled-back write would
+      cause subsequent GETs to return data that does not match the on-
+      disk state.
+    spec_impact: "CL-10 rollback — revert in-memory caches alongside file restore"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      SSE event handling: a rolled-back edit must NOT emit a workspace
+      change SSE event. If the SSE fires before compilation completes
+      (optimistically), connected clients will see a change notification
+      and reload, only to find the workspace unchanged. SSE events must
+      fire only after the write-compile cycle succeeds, never during
+      or before.
+    spec_impact: "CL-10 SSE — fire only after successful compile, suppress on rollback"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Compilation timeout: if the compiler hangs or takes too long
+      (e.g., due to exponential blowup on pathological input), the
+      write path should have a compilation timeout (e.g., 5 seconds).
+      On timeout, the server rolls back the write and returns
+      COMPILATION_TIMEOUT. Without a timeout, a pathological edit
+      could block the write path indefinitely, making the workspace
+      unresponsive to all further edits.
+    spec_impact: "CL-10 compilation timeout — 5s default, COMPILATION_TIMEOUT error on expiry"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The client receiving COMPILATION_FAILED should be offered
+      actionable next steps: retry with different content, or use
+      dryRun to preview the edit first. The error response should
+      include a suggestDryRun: true hint encouraging the client to
+      validate complex edits with dryRun before committing. This
+      reduces the frequency of write-compile-rollback cycles by
+      catching errors earlier.
+    spec_impact: "CL-10 COMPILATION_FAILED response — suggestDryRun hint for client guidance"
+    pitfall: null

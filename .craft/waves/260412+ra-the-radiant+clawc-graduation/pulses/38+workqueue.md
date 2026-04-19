@@ -9,7 +9,7 @@ stage: implementation
 test_tiers:
   L0_unit: 4
   L1_integration: 2
-  L2_e2e: 0
+  L2_e2e: 1
   L3_accept: 1
 test_scope:
   run:
@@ -35,6 +35,7 @@ The workqueue store handles persistence, conflict resolution (HEARTBEAT.md is au
 - [ ] `claws-serve/src/state/workqueue-store.ts` — Persistent store backed by .claws/workqueue.json (P-280). Manages runtime task state (status transitions, completion timestamps). HEARTBEAT.md is authoritative for task definitions; store tracks only runtime state. Stale entries cleaned on HEARTBEAT.md change. Atomic writes with temp file + rename.
 - [ ] `claws-serve/tests/state/workqueue-store.unit.test.ts` — L0: store persists to .claws/workqueue.json (1), stale entries cleaned on heartbeat change (1), atomic write uses temp + rename (1), status transitions validated (1)
 - [ ] `claws-serve/tests/routes/workqueue.integration.test.ts` — L1: GET returns merged task list (1), status filter works (1)
+- [ ] `claws-serve/tests/routes/workqueue.e2e.test.ts` — L2: end-to-end work queue merge + status transitions (1)
 - [ ] L3 acceptance: S13 (work queue merges HEARTBEAT.md with runtime state for To Do integration) (1)
 
 ## Acceptance Criteria
@@ -46,6 +47,7 @@ The workqueue store handles persistence, conflict resolution (HEARTBEAT.md is au
 - [ ] Persistence uses atomic writes (temp file + rename) per P-280
 - [ ] Status filter (?status=) correctly filters items
 - [ ] S13 acceptance: work queue merges HEARTBEAT.md with runtime state
+- [ ] Work queue shows `blocked_by_violation` status on tasks that require tools locked by active violations.
 - [ ] All 4 L0 unit tests pass
 - [ ] All 2 L1 integration tests pass
 
@@ -63,6 +65,7 @@ Load these role files before starting:
 
 - [ ] L0 unit (4 tests): store persists to .claws/workqueue.json, stale entries cleaned, atomic write temp + rename, status transitions validated
 - [ ] L1 integration (2 tests): GET returns merged task list, status filter works
+- [ ] L2 e2e (1 test): end-to-end work queue merge + status transitions (1)
 - [ ] L3 acceptance (1 test): S13 work queue merges HEARTBEAT.md with runtime state
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

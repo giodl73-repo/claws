@@ -1,0 +1,158 @@
+name: S03-ctrl-c-cleanup
+series: watch
+version: 1
+specs: [CL-01, CL-04]
+plan: claws-compile-dx
+headline: >
+  H1 validation: Ctrl-C exits cleanly; no orphaned watcher or node process
+  remains.
+description: >
+  Validates that sending SIGINT to a running `claws watch` process
+  shuts down cleanly: the main process exits with a platform-appropriate
+  code (0 on POSIX convention for clean exit, or 130 / 128+SIGINT for
+  strict POSIX), no orphaned child watcher processes remain on the
+  system, and no partial-write state exists on disk (no half-written
+  handler files, no temp files lingering in the emit output directory).
+  This is the shutdown-hygiene guarantee that lets developers trust
+  `claws watch` as a foreground tool in their dev loop.
+
+expect:
+  sigint_handling:
+    signal: "SIGINT"
+    exit_code_in: [0, 130]
+    exit_within_ms: 2000
+  process_cleanup:
+    orphan_node_processes: 0
+    orphan_chokidar_watchers: 0
+    file_handles_released: true
+  disk_state:
+    no_partial_emit_files: true
+    no_tempfile_leftovers: true
+    emit_directory_consistent: true
+  in_flight_compile:
+    completes_or_discards_cleanly: true
+    no_corrupt_output_on_disk: true
+
+implementation_status: pending
+tags: [claws-compile-dx, watch, H1, lifecycle]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer runs `claws watch` in a terminal, makes a few edits that
+  trigger compiles, then presses Ctrl-C. The watcher must install a
+  SIGINT handler that (a) stops the fs watcher from accepting new
+  events, (b) allows any in-flight compile to either complete or be
+  safely discarded (no half-written emit files), (c) closes any open
+  file handles held by chokidar/fs.watch, and (d) exits the process
+  with a clean exit code within 2 seconds. After exit, a process
+  listing must show zero orphaned claws/node processes related to the
+  watch session. The emit output directory must contain only complete
+  files — no `.tmp`, `.partial`, or zero-byte files. If an in-flight
+  compile is interrupted, the already-existing emit file (from the
+  previous successful compile) must remain intact; the interrupted
+  compile's work is discarded cleanly.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      chokidar holds native file-watcher handles that do not release
+      automatically on process exit. If the SIGINT handler calls
+      process.exit(0) without first calling watcher.close(), the
+      handles leak. On Windows this produces ERROR_SHARING_VIOLATION
+      on subsequent writes; on macOS it exhausts kqueue descriptors
+      over repeated start/stop cycles. The handler MUST await
+      watcher.close() before exiting.
+    spec_impact: "CL-04 watch lifecycle — SIGINT handler awaits watcher.close() before exit"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      An in-flight compile interrupted mid-write leaves partial emit
+      files. The emit pipeline MUST write to a tempfile and rename on
+      success (atomic rename) so that an interrupted compile leaves
+      either the old complete file or the new complete file — never
+      a partial. Without atomic rename, Ctrl-C during emit produces
+      corrupt governance plugin output that fails to load on next
+      startup.
+    spec_impact: "CL-04 emit pipeline — atomic tempfile + rename, not in-place write"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Node's default SIGINT behavior (without a handler) is to exit
+      with code 130 immediately, skipping cleanup. If the watch
+      command registers a handler, the handler becomes responsible
+      for the full cleanup sequence. Missing a cleanup step (e.g.,
+      not draining a pending compile queue) leaves state that affects
+      the NEXT invocation. Test harness must verify state on next
+      `claws watch` cold start.
+    spec_impact: "CL-04 watch SIGINT — handler responsible for full cleanup, validate on cold restart"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Orphan detection across platforms is non-trivial. On POSIX,
+      the test harness can check `ps -ef | grep claws` after exit.
+      On Windows, `tasklist /fi "imagename eq node.exe"` with PID
+      tracking from before/after is required. The harness must
+      capture the pre-SIGINT PID set of node/claws processes
+      spawned by the watch command and assert the post-exit PID
+      set is a strict subset (no new orphans, and the parent has
+      exited).
+    spec_impact: "CL-04 watch test harness — cross-platform orphan detection"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      A second SIGINT arriving during cleanup (impatient developer
+      hitting Ctrl-C twice) should force-exit quickly rather than
+      deadlock on await watcher.close() if the close hangs. The
+      handler should install a 1-second timeout after the first
+      SIGINT; a second SIGINT OR the timeout triggers process.exit(1)
+      as a hard-abort with logged warning.
+    spec_impact: "CL-04 watch SIGINT — double-signal force-exit with 1s timeout fallback"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The exit code range [0, 130] reflects POSIX convention: 0 for
+      clean exit regardless of signal source, OR 130 (128 + SIGINT=2)
+      indicating SIGINT specifically. Shell-script callers may check
+      for 130 to distinguish user-interrupt from genuine errors. The
+      chosen convention must be documented in CL-01 and consistent
+      across all claws commands that install SIGINT handlers.
+    spec_impact: "CL-01 exit codes — document clean-exit convention for SIGINT across all commands"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Temp files from an interrupted compile (e.g.,
+      plugins/claws-governance/index.ts.tmp-<pid>) must be cleaned
+      up by the SIGINT handler OR by a startup sweep in the next
+      watch invocation. Leaving them on disk accumulates junk and
+      creates phantom "recent edits" that confuse developers
+      inspecting emit output.
+    spec_impact: "CL-04 emit tempfiles — cleanup on SIGINT or on next startup sweep"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      On Windows, SIGINT from Ctrl-C behaves differently in Git Bash
+      vs cmd.exe vs PowerShell — Git Bash forwards the signal, cmd
+      and PowerShell may send SIGBREAK. The handler should register
+      for both SIGINT and SIGBREAK on Windows and treat both as
+      clean-exit triggers.
+    spec_impact: "CL-04 watch Windows — handle SIGBREAK alongside SIGINT"
+    pitfall: null

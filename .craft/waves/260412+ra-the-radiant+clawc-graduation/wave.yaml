@@ -1,17 +1,22 @@
 name: "Ra the Radiant"
 number: XCIII
+phase: 55
 deity: ra
 epithet: the-radiant
-branch: feature/ra-the-radiant
-description: "claws graduation — standalone @claws/compiler (MIT) + @bic/claws-sdk enterprise extension + serve API for CAP/Lobster/Companion"
-status: planned
+branch: feature/ra-the-radiant-v2
+description: "claws graduation — standalone @bic/claws-sdk (MIT at source level) + @bic/claws-sdk enterprise extension + serve API for CAP/Lobster/Companion + 4 @bic/openclaw-* upstream-shape packages (workspace, guardrails, policy, snap) + filter-repo lift manifest for Horus handoff."
+status: completed
+completedAt: "2026-04-19T15:10:00Z"
 dependsOn: [ptah, anubis, thoth]
 
 plans:
   - claws-sdk-graduation
-  - craftworks-package-extraction
   - claws-cap-integration
-  - claws-tui
+  - claws-compile-dx
+  - claws-pre-extraction-packaging
+  # Deferred from Ra II to post-Horus: claws-tui, claws-eval-api
+  # (original companion/TUI/VSCode deliverables rebuild against final @bic/openclaw-* package names)
+  # craftworks-package-extraction — cut from Ra; deferred to future craftworks-modularization wave
 
 stageOrder:
   - kickoff
@@ -25,71 +30,97 @@ stageOrder:
 stages:
   kickoff:
     status: completed
+    reviewDecision: approved
     completedAt: "2026-04-12T00:00:00Z"
     notes: "Graduation plan created, R1 review applied (5 roles, 46 findings, 6 consensus fixes)"
   setup:
     status: completed
+    reviewDecision: approved
     completedAt: "2026-04-12T00:00:00Z"
     notes: "20 pulses, 4 checkpoints, freemium boundary defined"
   scenarios:
-    status: pending
-    notes: "Graduation-specific scenarios TBD during implementation"
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-12T00:00:00Z"
+    notes: "23 scenario areas, findings applied to plans and pulses"
   planning:
     status: completed
+    reviewDecision: approved
     completedAt: "2026-04-12T00:00:00Z"
     notes: "20 pulses across 4 checkpoints, dependency-ordered, roles assigned"
   implementation:
-    status: pending
-    notes: "63 pulses across 10 checkpoints (CP-1 through CP-10), ~25 weeks"
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-19T14:00:00Z"
+    notes: "~76 pulses across 12 checkpoints (Ra I CP-1..CP-7 = 53 pulses; Ra II CP-8..CP-12 = 23 pulses). +5 pulses (79-83) from claws-compile-dx plan amending CP-3/CP-4/CP-7. -2 pulses (17, 18) craftworks extraction deferred to future craftworks-modularization wave. +P75 (subtree-disposition) + P76 (claws-lsp-rename) split from P54."
   review:
-    status: pending
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-19T14:30:00Z"
+    notes: "12 checkpoint review panels (3-6 roles each, tension-model clusters). Zero unresolved Majors at close across all CPs."
   close:
-    status: pending
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-19T15:10:00Z"
+    notes: "Card + history + DOC-UPDATES.md + plan status Implemented. Ready for Horus filter-repo handoff via claws-sdk/FILTER-REPO-MANIFEST.md."
 
 checkpoints:
   cp-1:
     name: "Infrastructure — Readers, Crypto, Audit, R5"
     pulses: [1, 2, 3, 4, 5, 6]
-    status: pending
+    status: completed
   cp-2:
     name: "Emit + Compile — Emitters, Validator, Cache, Host"
     pulses: [7, 8, 9, 10, 11, 12]
-    status: pending
+    status: completed
   cp-3:
-    name: "Package Split — Remove Deps, Create Packages, API Contract"
-    pulses: [13, 14, 15, 16, 17, 18]
-    status: pending
+    name: "Package Split — Create @bic Packages, API Contract, Cache CLI"
+    pulses: [13, 14, 15, 16, 79]
+    status: completed
+    notes: "Pulses 17 (extract 10 @craftworks dialect packages) and 18 (extract 7 per-platform emitters) cut from Ra — claws has no runtime dependency on @craftworks internals. Deferred to future craftworks-modularization wave."
   cp-4:
-    name: "Publish — Docs, Migration, npm"
-    pulses: [19, 20]
-    status: pending
+    name: "Publish + DX — Docs, Migration, npm, Incremental, Watch, Event Bus"
+    pulses: [19, 20, 80, 81, 83]
+    status: completed
   cp-5:
-    name: "Serve Read APIs — Chunks for CAP Settings"
+    name: "Serve Read APIs — Chunks + Schema + Path Syntax"
     plan: claws-cap-integration
-    pulses: [21, 22, 23, 24, 25, 26, 27, 28]
-    status: pending
+    pulses: [21, 22, 66, 23, 24, 25, 26, 27, 28, 64]
+    status: completed
   cp-6:
-    name: "Serve Write APIs — Validation + PATCH"
+    name: "Serve Write APIs — Validation + PATCH + DryRun + Batch + Versioning"
     plan: claws-cap-integration
-    pulses: [29, 30, 31, 32, 33, 34]
-    status: pending
+    pulses: [29, 30, 31, 32, 33, 34, 67, 68, 69, 70, 71]
+    status: completed
   cp-7:
-    name: "Lobster Collaboration — Loop, Calendar, Trust, Sessions"
+    name: "Lobster Collaboration — Loop, Calendar, Trust, Sessions, Fleet Compile"
     plan: claws-cap-integration
-    pulses: [35, 36, 37, 38, 39, 60, 61, 63]
-    status: pending
+    pulses: [35, 36, 37, 38, 39, 60, 61, 63, 65, 72, 73, 82]
+    status: completed
   cp-8:
-    name: "Companion + Onboarding"
-    plan: claws-cap-integration
-    pulses: [40, 41, 42, 43, 44]
-    status: pending
+    name: "Spec Polish"
+    plan: claws-pre-extraction-packaging
+    pulses: [40, 41, 42]
+    status: completed
   cp-9:
-    name: "Terminal TUI — ClawPilot Emulation"
-    plan: claws-tui
-    pulses: [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 62]
-    status: pending
+    name: "Shape Scenarios"
+    plan: claws-pre-extraction-packaging
+    pulses: [43, 44, 45, 46]
+    status: completed
   cp-10:
-    name: "VS Code Extension — Governance-Aware Editing"
-    plan: claws-tui
-    pulses: [56, 57, 58, 59]
-    status: pending
+    name: "Foundation Consolidation — @bic/openclaw-workspace + @bic/openclaw-guardrails"
+    plan: claws-pre-extraction-packaging
+    pulses: [47, 48, 49, 50]
+    status: completed
+  cp-11:
+    name: "Core Consolidation + @craftworks Decoupling + CLI Handlers"
+    plan: claws-pre-extraction-packaging
+    pulses: [51, 52, 53, 54, 55, 75, 76, 56]
+    status: completed
+    notes: "P75 (subtree-disposition) and P76 (claws-lsp-rename) split out of P54 per architect M1 — 8 pulses total (was 6)."
+  cp-12:
+    name: "CLI + E2E + Horus-Ready"
+    plan: claws-pre-extraction-packaging
+    pulses: [57, 58, 59, 74]
+    status: completed
+    notes: "Final Ra gate + Horus handoff. Original Ra II scope (Companion, TUI, VSCode ext, Eval API) deferred to post-Horus waves — those surfaces rebuild against the final @bic/openclaw-* package names."

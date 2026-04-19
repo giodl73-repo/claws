@@ -35,7 +35,7 @@ specs: [CL-04, CL-07, CL-03]
 
 This plan bridges claws's compile-time governance with Aether's runtime approval infrastructure. The key insight is that risk classification should be computed once (by claws) and consumed by both enforcement points (OC Gateway plugin + Aether ApprovalPolicyRegistry). Today these are independent systems that happen not to conflict. This plan makes them consistent by design: same compilation produces both artifacts, signature verification prevents tampering in transit, and the GuardrailProvider spec explicitly documents the composition model.
 
-All implementation stays loyal to the upstream contribution strategy: the GuardrailProvider composition model is contributed to OpenClaw (it works with ANY host, not just Aether), the approval policy format is a standard JSON artifact (any orchestrator can consume it), and the blob signature verification uses the same @openclaw/audit-chain infrastructure from Thoth CP-5.
+All implementation stays loyal to the upstream contribution strategy: the GuardrailProvider composition model is contributed to OpenClaw (it works with ANY host, not just Aether), the approval policy format is a standard JSON artifact (any orchestrator can consume it), and the blob signature verification uses the same @bic/openclaw-guardrails/audit infrastructure from Thoth CP-5.
 
 ## Coverage Contract
 
@@ -168,7 +168,7 @@ No manual `claws deploy` command is needed. The existing blob sync infrastructur
 ## Notes
 
 - The `host-approval-policies.json` artifact is consumed by Aether's `openclaw_manager.py` when provisioning the container. Currently Emmanuel hardcodes `{"server": "*", "tool": "*", "requires_approval": true}`. With this plan, the manager reads the compiled artifact from blob instead.
-- Blob integrity verification requires a change in the Aether repo (`blob_mount.py`). The verification LOGIC lives in claws-sdk (or @openclaw/audit-chain), but the CALL SITE is in the adapter. This means the Aether repo gets a small PR that imports the verification function.
+- Blob integrity verification requires a change in the Aether repo (`blob_mount.py`). The verification LOGIC lives in claws-sdk (or @bic/openclaw-guardrails/audit), but the CALL SITE is in the adapter. This means the Aether repo gets a small PR that imports the verification function.
 - The `requiresExternalApproval` field in AuthorizationDecision is an OPTIONAL extension to the GuardrailProvider spec. Providers that don't set it default to `false` (no host gate). This preserves backward compatibility.
 - All 9 Graph MCP servers in Aether (outlook, outlook_calendar, m365_teams, sharepoint_onedrive, sharepoint_lists, me_profile, m365_search, m365_copilot, dynamics_sales) would get per-tool policies instead of the current blanket `"*"` wildcard.
 - This plan is loyal to the upstream strategy: claws emits standard artifacts, OpenClaw's GuardrailProvider is the interface, and Aether is just one consumer. Any orchestrator that reads `host-approval-policies.json` gets the same governance.

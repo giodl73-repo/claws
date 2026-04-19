@@ -17,7 +17,7 @@ expect:
   output:
     language: typescript
     valid_syntax: true
-    imports_only: ["@claws/*", "@openclaw/*"]
+    imports_only: ["@bic/*"]
     no_craftworks_refs: true
   lifecycle:
     validate_called_before_emit: true

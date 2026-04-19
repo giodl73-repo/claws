@@ -13,7 +13,7 @@ specs: [CL-05, CL-06]
 
 ## Headlines
 
-1. **H1: ClawHub badges visually distinguish self-reported DECLARED from compiler-verified VERIFIED, with self-reported qualifier** — DECLARED-tier badges carry a "self-reported" qualifier on all governance fields (risk, OBO, data sensitivity). At DECLARED tier, `obo: none` means "the developer claims no OBO" -- unverified. At VERIFIED tier, `obo: none` means "claws confirmed no OBO through analysis of the handler code via @bic/claws-test's 12 governance checks." The badge renders this distinction: DECLARED badges show "R3 (self-reported)" while VERIFIED badges show "R3 (verified)". Supply chain badge (signed/unsigned) is independent of governance tier -- a DECLARED skill published via `claws publish` is unsigned but governed, while a VERIFIED skill published via raw `clawhub publish` is signed but ungoverned on ClawHub. Inconsistent metadata (e.g., R1 risk + transact OBO) is flagged on the badge, not silently displayed.
+1. **H1: ClawHub badges visually distinguish self-reported DECLARED from compiler-verified VERIFIED, with self-reported qualifier** — DECLARED-tier badges carry a "self-reported" qualifier on all governance fields (risk, OBO, data sensitivity). At DECLARED tier, `obo: none` means "the developer claims no OBO" -- unverified. At VERIFIED tier, `obo: none` means "claws confirmed no OBO through analysis of the handler code via @bic/test's 12 governance checks." The badge renders this distinction: DECLARED badges show "R3 (self-reported)" while VERIFIED badges show "R3 (verified)". Supply chain badge (signed/unsigned) is independent of governance tier -- a DECLARED skill published via `claws publish` is unsigned but governed, while a VERIFIED skill published via raw `clawhub publish` is signed but ungoverned on ClawHub. Inconsistent metadata (e.g., R1 risk + transact OBO) is flagged on the badge, not silently displayed.
    - Validation: DECLARED badge renders "R3 (self-reported)" not just "R3"
    - Validation: VERIFIED badge renders "R3 (verified)" with verification seal
    - Validation: Supply chain badge shows "unsigned" even for a DECLARED skill with full governance frontmatter
@@ -115,7 +115,7 @@ The badge plan covers ClawHub governance badge generation, storage, staleness de
 - ClawHub server-side badge rendering and display (external system)
 - Manifest signing infrastructure (that's claws-comply-audit + claws-key-management plans)
 - Publish pipeline and fleet policy (that's claws-publish plan)
-- @bic/claws-test governance checks (that's claws-test-framework plan)
+- @bic/test governance checks (that's claws-test-framework plan)
 - Badge color/icon accessibility design (UX work, not compiler logic)
 - Fleet-wide badge aggregation and reporting (that's claws-fleet-ops plan)
 

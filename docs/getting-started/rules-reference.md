@@ -12,7 +12,7 @@ Quick reference for the 29 governance rules, severity levels, and how to read cl
 | R4 | High | closed | High risk — requires approval before execution |
 | R5 | Critical | closed (always) | Critical — fail-closed is non-negotiable, cannot be overridden |
 
-R5 rules are structurally enforced: `FailMode<5>` resolves to `'closed'` only at the TypeScript type level. Attempting to assign `'open'` to an R5 rule produces a compilation error (`CLAWS-E001`).
+R5 rules are structurally enforced: `FailMode<5>` resolves to `'closed'` only at the TypeScript type level. Attempting to assign `'open'` to an R5 rule produces a compilation error (`OC-POLICY-E001`).
 
 ## The 29 Governance Rules
 
@@ -128,7 +128,7 @@ LOSS:  openclaw 0/7 | claude-code 3/7 | cursor 5/7
 
 | Range | Category | Example |
 |-------|----------|---------|
-| E0xx | Type-level | CLAWS-E001: R5 fail-open forbidden |
-| E1xx | Parse | CLAWS-E101: Invalid .crest syntax |
-| E2xx | Rule | CLAWS-E201: Rule conflict detected |
-| E3xx | Emit | CLAWS-E301: Empty artifact, E310: strict-loss block |
+| E0xx | Type-level | OC-POLICY-E001: R5 fail-open forbidden |
+| E1xx | Parse | OC-POLICY-E101: Invalid .crest syntax |
+| E2xx | Rule | OC-POLICY-E201: Rule conflict detected |
+| E3xx | Emit | OC-POLICY-E301: Empty artifact, E310: strict-loss block |

@@ -72,7 +72,7 @@ describe('claws compile --llm', () => {
     }
   });
 
-  it('returns exit 3 with CLAWS-E040 when --llm but no API key', async () => {
+  it('returns exit 3 with OC-POLICY-E040 when --llm but no API key', async () => {
     tmpRoot = await createWorkspace();
     const ctx = makeCtx({ workspaceRoot: tmpRoot });
 
@@ -89,7 +89,7 @@ describe('claws compile --llm', () => {
       expect(exitCode).toBe(3);
 
       const output = consoleSpy.mock.calls.flat().join(' ');
-      expect(output).toContain('CLAWS-E040');
+      expect(output).toContain('OC-POLICY-E040');
     } finally {
       consoleSpy.mockRestore();
       if (originalKey !== undefined) {
@@ -116,7 +116,7 @@ describe('claws compile --llm', () => {
 
       const output = consoleSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E040');
+      expect(parsed.error.code).toBe('OC-POLICY-E040');
     } finally {
       consoleSpy.mockRestore();
       if (originalKey !== undefined) {

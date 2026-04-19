@@ -1,0 +1,227 @@
+name: S14-trust-escalation
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12]
+description: >
+  Validates the trust escalation workflow: GET /api/trust returns the
+  current trust tier and escalation history, PATCH /api/trust/escalate
+  with a valid manager JWT promotes the tier. Trust escalation is a
+  security-critical operation that gates access to higher-risk tool
+  tiers. The JWT must pass 5 verification checks from P-279 (signature,
+  expiry, audience, issuer, nonce). Without a valid token, the API
+  returns TRUST_REQUIRES_APPROVAL. The maximum tier is T4 (capped).
+  Every escalation is recorded in the audit trail and written to
+  AGENTS.md.
+
+expect:
+  get_trust:
+    endpoint: "GET /api/trust"
+    response_shape:
+      has: [currentTier, maxTier, history, escalatedAt, escalatedBy]
+      currentTier_type: integer
+      maxTier_value: 4
+      history_is_array: true
+      each_history_entry_has: [fromTier, toTier, timestamp, approvedBy, method]
+  escalate_success:
+    endpoint: "PATCH /api/trust/escalate"
+    request:
+      headers:
+        Authorization: "Bearer <manager-jwt>"
+      body:
+        targetTier: 3
+    response:
+      status: 200
+      currentTier: 3
+      history_appended: true
+      agents_md_updated: true
+  escalate_no_token:
+    endpoint: "PATCH /api/trust/escalate"
+    request:
+      body:
+        targetTier: 3
+    response:
+      status: 403
+      error: TRUST_REQUIRES_APPROVAL
+      message_contains: "manager approval required"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer needs R3 tool access and requests a trust escalation from
+  T2 to T3. Their manager generates a signed JWT and provides it. The
+  developer calls PATCH /api/trust/escalate with the JWT and targetTier: 3.
+  The server verifies the JWT (5 checks from P-279), promotes the trust
+  tier, appends an entry to the trust history, updates AGENTS.md with
+  the new tier, and logs an audit event. The Companion App trust panel
+  then shows the updated tier and history via GET /api/trust. A second
+  developer attempts the same escalation without a JWT and receives
+  TRUST_REQUIRES_APPROVAL.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      JWT signature verification (P-279 check 1): the manager JWT must
+      be signed with the organization's private key. The server must
+      verify the signature against the known public key. If the server
+      accepts unsigned tokens or tokens signed with an unknown key, any
+      actor can forge an escalation. The verification must use a
+      well-tested JWT library (e.g., jsonwebtoken), not custom crypto.
+      Key rotation must be supported — the server should accept tokens
+      signed with the current or previous key.
+    spec_impact: "CL-10 trust escalation — JWT signature verification with key rotation support"
+    pitfall: "P-279"
+
+  - id: F02
+    severity: major
+    description: >
+      JWT expiry verification (P-279 check 2): the token must include
+      an 'exp' claim and the server must reject expired tokens. A token
+      with no 'exp' claim is invalid — the server must not treat missing
+      exp as "never expires." Clock skew tolerance should be configurable
+      (default 30 seconds). Short-lived tokens (5-15 minutes) are
+      preferred to reduce the window for stolen token use.
+    spec_impact: "CL-10 trust escalation — exp claim required, clock skew tolerance configurable"
+    pitfall: "P-279"
+
+  - id: F03
+    severity: major
+    description: >
+      JWT audience verification (P-279 check 3): the 'aud' claim must
+      match the workspace identifier. A token issued for workspace A
+      must not be accepted by workspace B. Without audience verification,
+      a manager who approves escalation for one workspace could have
+      their token replayed against another workspace they did not intend
+      to approve.
+    spec_impact: "CL-10 trust escalation — aud claim must match workspace ID"
+    pitfall: "P-279"
+
+  - id: F04
+    severity: major
+    description: >
+      JWT issuer verification (P-279 check 4): the 'iss' claim must
+      match the expected identity provider (e.g., the organization's
+      Entra tenant ID). Tokens from unknown issuers must be rejected.
+      This prevents cross-tenant attacks where a manager from a
+      different organization issues a valid-looking token.
+    spec_impact: "CL-10 trust escalation — iss claim must match configured identity provider"
+    pitfall: "P-279"
+
+  - id: F05
+    severity: major
+    description: >
+      JWT nonce / replay prevention (P-279 check 5): the token must
+      include a unique 'jti' (JWT ID) claim. The server must track
+      consumed JTI values and reject tokens with previously seen JTIs.
+      Without nonce verification, a stolen token can be replayed
+      indefinitely until it expires. The JTI store must persist across
+      restarts (e.g., written to the audit chain) and can be pruned
+      after the token's expiry time passes.
+    spec_impact: "CL-10 trust escalation — jti nonce tracking, persisted across restarts"
+    pitfall: "P-279"
+
+  - id: F06
+    severity: major
+    description: >
+      Tier skipping: the API must enforce sequential tier promotion
+      (T1→T2→T3→T4). A request to escalate from T2 to T4 directly
+      must be rejected with TIER_SKIP_NOT_ALLOWED. Each tier grants
+      incrementally more access, and skipping tiers bypasses the
+      incremental review that each escalation represents. The manager
+      must explicitly approve each tier transition.
+    spec_impact: "CL-10 trust escalation — sequential tier promotion only, no skipping"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      T4 cap enforcement: the maximum trust tier is T4. A request to
+      escalate beyond T4 (targetTier: 5) must be rejected with
+      TIER_CAP_EXCEEDED. The response should indicate the current
+      maximum (maxTier: 4) so the client knows the cap. The cap
+      should be configurable at the fleet level for organizations
+      that want a lower maximum (e.g., maxTier: 3).
+    spec_impact: "CL-10 trust escalation — T4 hard cap, fleet-configurable maximum"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Expired token error message: when the JWT fails any of the 5
+      verification checks, the error response should identify WHICH
+      check failed without leaking security details. Returning
+      TOKEN_EXPIRED is acceptable; returning the actual exp timestamp
+      from the token is not (it reveals server clock to attackers).
+      Error codes: TOKEN_EXPIRED, TOKEN_INVALID_SIGNATURE,
+      TOKEN_WRONG_AUDIENCE, TOKEN_WRONG_ISSUER, TOKEN_REPLAYED.
+    spec_impact: "CL-10 trust escalation — typed error codes per JWT check, no clock leakage"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Manager demotion: if the manager who approved the escalation
+      is later removed from the manager role, previously approved
+      escalations should remain valid (they were valid at approval
+      time). However, the trust history should include the manager's
+      identity so auditors can trace approvals back to specific
+      individuals. If the organization revokes trust retroactively,
+      that is a separate administrative action (trust downgrade).
+    spec_impact: "CL-10 trust history — manager identity preserved, retroactive revocation is separate action"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      AGENTS.md write failure: after a successful trust escalation, the
+      server updates AGENTS.md with the new tier. If the file write
+      fails (disk full, permissions), the in-memory trust state and
+      AGENTS.md diverge. The API must treat the AGENTS.md write as
+      part of the atomic escalation — if the write fails, the
+      escalation is rolled back, and the response returns
+      ESCALATION_WRITE_FAILED. The tier must not change without the
+      file being updated.
+    spec_impact: "CL-10 trust escalation — AGENTS.md write is atomic with tier change"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      Concurrent escalation requests: two managers simultaneously
+      approve escalation from T2→T3. The second request arrives while
+      the first is still writing AGENTS.md. The server must serialize
+      escalation operations — only one escalation can proceed at a
+      time. The second request should either queue or fail with
+      ESCALATION_IN_PROGRESS. Concurrent execution risks corrupting
+      AGENTS.md or double-incrementing the tier.
+    spec_impact: "CL-10 trust escalation — serialized execution, no concurrent mutations"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The trust history returned by GET /api/trust should include the
+      'method' field indicating how the escalation was performed (e.g.,
+      'jwt_approval', 'fleet_override', 'initial_setup'). The initial
+      T1 trust level set during workspace creation should appear as the
+      first history entry with method 'initial_setup'. This provides a
+      complete audit trail from workspace creation through all tier
+      changes.
+    spec_impact: "CL-10 trust history — method field, initial T1 entry with 'initial_setup'"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      Downgrade scenario: while this scenario focuses on escalation,
+      the GET /api/trust response must also handle the case where a
+      trust tier has been downgraded (e.g., T3→T2 by fleet admin).
+      The history should include downgrade entries with method
+      'fleet_downgrade' or 'admin_revoke'. The currentTier must
+      always reflect the most recent state, not the highest ever
+      achieved.
+    spec_impact: "CL-10 trust history — supports downgrade entries, currentTier is latest state"
+    pitfall: null

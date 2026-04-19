@@ -1,6 +1,7 @@
 # CL-08: Package Architecture and Graduation Model
 
 **Status**: Draft
+**Version**: 1.2
 **Source**: claws-sdk-graduation plan, R1 review (5 roles, 46 findings), package-extraction plan R2 review (10+7 model locked)
 **Reviewers**: claws:founder, claws:ciso, craft:architect
 
@@ -1128,3 +1129,33 @@ These apply to ALL 7 emitter plugins (@craftworks/emit-oc, emit-cc, emit-cursor,
 | CL-04 Compilation Pipeline | 5-phase pipeline, GovernanceIR as stable pivot, emit 4-artifact model |
 | CL-07 Deep Integration | FORMA sidecar, atom reuse, eval framework, contribute/keep boundary |
 | CL-06 Platform Ecosystem | 7-platform detection, multi-platform emit, package ecosystem |
+
+---
+
+## v1.1 Amendment (Horus wave, 2026-04-16)
+
+**Supersedes**: §Overview Layer-3 proprietary tier classification for `@bic/claws-sdk`.
+
+Per `contract-seams.md` S1 (Horus wave 260416+horus-the-heir+claws-migration) and CL-13 §1:
+
+- **All claws packages — including the `claws-sdk` paid extension — move to `bic/claws` during Horus** and publish as `@bic/claws-*` on GitHub Packages (GPR).
+- The **freemium packaging decision is deferred to a post-Horus wave**: which packages ship under commercial terms vs MIT at public launch is an open question.
+- During Horus and the ~2-month Horus-to-public-launch window, packages are effectively private (GitHub-auth-gated GPR install).
+- The original §Overview Layer-3 classification is retained for historical context but no longer governs package location. Version bumped to v1.1.
+
+This spec remains Draft. A follow-up amendment or successor spec will close the freemium decision at public-launch time.
+
+---
+
+## v1.2 Amendment (bic pivot, 2026-04-16)
+
+**Supersedes**: §v1.1 "freemium packaging deferred to post-Horus" framing.
+
+Horus relocated claws from `github.com/gim-home/claws` to `microsoft.ghe.com/bic/claws`. Consequences for CL-08:
+
+- **claws is Microsoft-internal during Horus and the foreseeable post-Horus period.** Freemium commercial-tiering (MIT vs proprietary, Layer 1/2/3 split, enterprise-SKU framing) is only meaningful if/when claws ships publicly.
+- **This spec is effectively paused**, not deferred. The freemium decision is not on any roadmap during Horus. A future "public distribution" wave (if ever) would re-open CL-08.
+- **Source license posture**: claws source remains MIT-licensed at the file level (`LICENSE`), which preserves option value for any future re-licensing or redistribution decision without contractual friction.
+- **Layer-3 `@craftworks/*` tier classification** (from §Overview) is now moot: no Horus packages carry `@craftworks/*`; everything is `@bic/*`.
+
+Version bumped to 1.2. Retain v1.1 for historical context.

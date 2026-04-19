@@ -1,0 +1,150 @@
+name: S02-rapid-edits-coalesce
+series: watch
+version: 1
+specs: [CL-01, CL-04]
+plan: claws-compile-dx
+headline: >
+  H1 validation: a 10-edit rapid-fire burst coalesces into ≤3 compile runs
+  (debounced).
+description: >
+  Validates that ten rapid-fire edits to SOUL.md, each fired less than
+  50ms apart, coalesce into at most three compile invocations via the
+  300ms debounce window. Every compile must produce valid emit output
+  (no partial writes, no corrupted IR). The FINAL emitted output must
+  reflect the content of the LAST edit — no edit is lost, no earlier
+  state leaks past the final compile. This scenario is the stress test
+  for the debouncer; a broken debouncer produces N compiles for N edits,
+  wasting work and potentially racing on cache writes.
+
+expect:
+  burst:
+    edit_count: 10
+    inter_edit_gap_ms_lt: 50
+    target_file: "SOUL.md"
+  compile_coalescing:
+    total_compiles_lte: 3
+    rationale: "ceil(10 edits at <50ms / 300ms window) ≈ 2-3 compiles max"
+  per_compile_validity:
+    emit_output_parseable: true
+    no_partial_writes: true
+    no_corrupted_IR: true
+  final_state:
+    last_edit_content_reflected: true
+    no_lost_updates: true
+  stage_timings:
+    every_compile_includes: true
+    final_compile_sees_fresh_soul: true
+
+implementation_status: pending
+tags: [claws-compile-dx, watch, H1, debounce]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer in active editing flow saves SOUL.md ten times in rapid
+  succession (<50ms apart — think auto-save on keystroke or rapid
+  Cmd+S). The watcher's debouncer must coalesce these bursts. With a
+  300ms trailing-edge debounce window and 50ms inter-edit gap, the
+  entire 10-edit burst completes within ~450ms and fires a SINGLE
+  compile after the last edit settles. At most, if the burst happens
+  to straddle a debounce window boundary (e.g., a pause at the 5th edit
+  allows the timer to fire, then edits 6-10 fire after), the total
+  compile count rises to 2 or 3. Any count above 3 indicates a broken
+  debouncer that is treating bursts as individual events. Every compile
+  that does fire must produce a valid emit — partial writes or
+  half-constructed IR from racing compiles would corrupt downstream
+  consumers. The final emit must reflect the 10th edit's content.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Race condition between debouncer and compile: if edit #10 lands
+      while the compile for edit #5 is still running, the in-flight
+      compile's output must not be written over by a delayed write of
+      an earlier compile's partial output. Compile invocations must be
+      serialized per-workspace, or each compile must carry a monotonic
+      generation number and late writes must be discarded. Without
+      this, rapid bursts produce non-deterministic final output.
+    spec_impact: "CL-04 watch compile serialization — per-workspace serial queue, discard stale writes"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Debouncer must use trailing-edge semantics: the timer resets on
+      every new event, firing 300ms AFTER the last event, not 300ms
+      after the first. Leading-edge debounce would fire a compile on
+      the first edit, then suppress the rest — losing edits 2-10's
+      content. Leading+trailing (immediate + final) doubles the compile
+      count unnecessarily.
+    spec_impact: "CL-04 watch debouncer — trailing-edge only, reset timer on each event"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Lost-update failure mode: if the final compile reads SOUL.md
+      BEFORE edit #10 has flushed to disk (OS buffered write), the
+      emit output reflects edit #9 content while the user expects
+      edit #10. The compiler must either (a) wait for fsync on the
+      triggering fs event, or (b) re-stat the input file at compile
+      time and use the on-disk content. Either way, the assertion
+      "last edit content reflected" must be robust against OS write
+      buffering.
+    spec_impact: "CL-04 watch compile — read input at compile time, not at event dispatch time"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The ≤3 compile bound depends on the exact burst timing. CI
+      machines under load may stretch the 50ms inter-edit gap to 80ms
+      or more, causing what should be one 450ms burst to straddle
+      multiple debounce windows. The test harness must use a real-time
+      monotonic clock to measure actual inter-edit gaps and either
+      fail the run (documented CI noise) or assert a looser bound
+      (≤5 compiles on slow CI) with explicit documentation.
+    spec_impact: "CL-04 watch test harness — real-time gap measurement, CI-specific bound tuning"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Each compile that DOES fire must include stage timings. If the
+      middle compile (between edit 5 and edit 6, say) omits timings
+      due to the debouncer skipping the stage-timing populator, the
+      assertion "every compile includes stage timings" fails. The
+      timing collector must run on every compile path, not only the
+      full-fresh path.
+    spec_impact: "CL-04 incremental compile — stage timings collected on every invocation"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Partial emit detection: the test must verify emit output
+      parseability after EACH compile, not just the final one. A
+      partial write from a racing compile could produce valid-looking
+      output whose content is a mix of two generations — this
+      wouldn't trigger a parse error but would corrupt semantics.
+      The validity check should include a compile-identity field
+      (e.g., compiled_from_soul_hash) that ties the emit to the
+      input hash.
+    spec_impact: "CL-04 emit output — include input-hash identity in emitted artifact"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      The debounce window (300ms) is a tuning knob. Too short and
+      bursts fragment into many compiles; too long and developers
+      perceive lag. 300ms matches VS Code's default auto-save debounce
+      and the web's 300ms "tap vs drag" perception threshold.
+      Exposing this as a CLI flag (--debounce-ms N) allows power
+      users to tune per workflow without rebuild.
+    spec_impact: "CL-04 watch flags — --debounce-ms configurable, default 300"
+    pitfall: null

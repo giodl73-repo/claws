@@ -1,0 +1,37 @@
+domain: openclaw
+description: "OpenClaw Gateway architecture, workspace files, runtime model, and ecosystem"
+specs:
+  - "Q12a: One CLI (claws), claws.json + .claws/"
+  - "Q12c: 39 commands, 8 groups, pinch + snap"
+  - "Q12g: GlintConfig v2 (three-layer schema)"
+  - "Q12h: 4 security layers, 29 governance rules"
+  - "Q12i: 5 runtime insertion points"
+  - "Q12j: 5-phase compilation pipeline"
+  - "Q12m: claws-sdk sibling architecture"
+terminology:
+  Gateway: "OC Gateway — Node.js process that routes messages and executes tools"
+  SOUL.md: "Agent identity and behavioral constraints"
+  AGENTS.md: "Subagent definitions and delegation config"
+  TOOLS.md: "Tool permissions and capabilities"
+  IDENTITY.md: "Agent authentication and SSO/RBAC"
+  USER.md: "User preferences and OBO scope"
+  MEMORY.md: "Memory config and knowledge bases"
+  HEARTBEAT.md: "Cron jobs and scheduled tasks"
+  lobster.yaml: "Workflow definitions (OC's DAG format)"
+  ClawHub: "Public skill marketplace (13,729 skills pre-purge, 3,286 post)"
+  ACP: "Agent Communication Protocol (A2A)"
+  exec-approvals: "OC's native human-in-the-loop gate for tool execution"
+  before_tool_call: "Gateway hook that fires before every tool invocation"
+constraints:
+  - "claws is add-only by default; the only allowed edits to existing OC files are explicitly enumerated, reversible operations (init overlays, uninstall cleanup) with backup/restore"
+  - "Generated code must look OC-native — pass the 'would an OC developer understand this?' test"
+  - "100% round-trip fidelity — read(file) → IR → emit(IR) === file"
+  - "@craftworks/* imports NEVER appear in generated output"
+  - "R5 fail-closed is non-negotiable and non-configurable"
+ecosystem:
+  skills: 5198
+  categories: 30
+  obo_skills: 165
+  malicious_rate: "37% (pre-purge)"
+  cves: 138
+  exposed_instances: 135000

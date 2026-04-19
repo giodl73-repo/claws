@@ -247,10 +247,20 @@ export async function runSecretsGet(
     return 0;
   } catch (err: unknown) {
     const msg = (err as Error).message;
+    const wrongPassphrase = /wrong passphrase/i.test(msg);
     if (opts.json) {
-      console.log(JSON.stringify({ status: 'error', error: '[redacted]' }));
+      console.log(
+        JSON.stringify({
+          status: 'error',
+          error: wrongPassphrase ? 'wrong passphrase' : '[redacted]',
+        }),
+      );
     } else {
-      console.error('Error: failed to retrieve secret');
+      console.error(
+        wrongPassphrase
+          ? 'Error: wrong passphrase'
+          : 'Error: failed to retrieve secret',
+      );
     }
     return 1;
   }

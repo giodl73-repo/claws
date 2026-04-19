@@ -1,0 +1,184 @@
+name: S01-round-trip-stats-prune-clear-list
+series: cache-cli
+version: 1
+specs: [CL-08]
+description: >
+  Validates the full round-trip of `claws cache {stats, list, prune, clear}`
+  against a populated cache. Per plan H4, these commands expose cache
+  internals to the operator and must share the same `CompilationCache` API
+  used by the compile path — meaning the CLI observes and mutates the same
+  state the compiler writes. The scenario drives the cache through a
+  realistic sequence (populate → stats → list → prune → clear → stats)
+  and asserts each command's output shape and state transition.
+
+expect:
+  step_1_populate:
+    compiles_run: 3
+    cache_entries_created: 3
+  step_2_stats:
+    output_format: "json"
+    fields: [sizeBytes, entryCount, hitCount, missCount, version]
+    entry_count: 3
+    size_bytes: ">0"
+  step_3_list_json:
+    output_format: "ndjson"
+    lines: 3
+    per_line_fields: [key, sizeBytes, createdAt, lastAccessedAt]
+  step_4_prune_older_than_1d:
+    entries_removed: 0
+    reason: "all entries are new (<1d old)"
+    exit_code: 0
+  step_5_clear:
+    cache_dir_emptied: true
+    exit_code: 0
+  step_6_stats_after_clear:
+    entry_count: 0
+    size_bytes: 0
+    exit_code: 0
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Execute the cache-cli round-trip against a fresh cache directory. (1) Run
+  3 compiles against distinct fixtures to populate the cache with 3 entries.
+  (2) `claws cache stats` — must output JSON with sizeBytes, entryCount,
+  hitCount, missCount, version fields; entryCount must be 3; sizeBytes must
+  be positive. (3) `claws cache list --json` — must emit one JSON line per
+  entry (3 lines total), each containing key, sizeBytes, createdAt, and
+  lastAccessedAt. (4) `claws cache prune --older-than 1d` — on the fresh
+  cache (all entries < 1d old), removes 0 entries; exit 0. (5) `claws cache
+  clear` — empties the cache directory; exit 0. (6) `claws cache stats`
+  after clear — entryCount 0, sizeBytes 0, exit 0. Each step's output
+  shape is documented in CL-08 H4 and must match exactly. Round-trip
+  correctness means the cache state after each step is the state the
+  next command observes — shared CompilationCache API, not two separate
+  stores.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The CLI and the compile path must share the same CompilationCache
+      implementation. If the CLI reads from one directory and the compile
+      path writes to another (e.g., CLI uses XDG_CACHE_HOME, compile uses
+      a hardcoded .claws-cache/), the round-trip test passes in isolation
+      but real operator workflows break. The cache location must be
+      resolved through a single function (e.g., resolveCacheDir()) used
+      by both paths.
+    spec_impact: "H4 — cache dir resolution must be a single shared function for CLI and compile"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      JSON output shape stability is a contract. Dashboards parse stats
+      output by field name. If a future version renames `entryCount` to
+      `entries` or drops `version`, downstream tooling breaks silently.
+      The JSON schema for each command's output must be locked in a
+      spec (CL-08 section on cache CLI) and validated by a schema check
+      in CI. Adding fields is backwards-compatible; renaming or removing
+      is a breaking change requiring a major version bump.
+    spec_impact: "H4 — JSON output shapes are versioned contracts; schema validation in CI"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      `cache list --json` must emit ndjson (one JSON object per line), not
+      a single JSON array. ndjson streams incrementally — operators can
+      `claws cache list --json | head -n 10` for large caches without
+      waiting for the full list to build. A JSON array requires full
+      materialization. For a 10,000-entry cache, the array form could
+      consume hundreds of MB of memory; ndjson streams in constant memory.
+    spec_impact: "H4 — `cache list --json` emits ndjson, not a JSON array"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      `prune --older-than` argument parsing must accept common duration
+      formats: `1d`, `7d`, `24h`, `30m`, `1w`. If the parser rejects
+      anything but `d` (days), operators writing scripts in different
+      styles hit friction. The parser should use a well-known duration
+      library (e.g., ms, humanize-duration) and document supported units.
+    spec_impact: "H4 — --older-than accepts multiple duration units (d, h, m, w)"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      `cache clear` is destructive. A confirmation prompt (or a required
+      --yes flag) prevents accidental cache wipes when the command is
+      mistyped. The scenario's clear step can pass --yes explicitly so
+      the test is deterministic; interactive use requires the prompt.
+      Without the safety, an operator who confuses `cache stats` with
+      `cache clear` in a tired moment loses their cache and waits for
+      cold recompiles across the fleet.
+    spec_impact: "H4 — `cache clear` requires --yes or confirmation for interactive use"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      `cache list` output must be deterministic. If entries are returned
+      in filesystem directory traversal order, that order varies across
+      filesystems and between runs. Operators comparing two `cache list`
+      outputs see spurious diffs. The command should sort by a stable
+      key (e.g., createdAt descending, or key lexicographic) and document
+      the sort order.
+    spec_impact: "H4 — `cache list` output sorted by stable key; sort order documented"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      `cache stats`'s `hitCount` and `missCount` must survive `cache
+      clear`. Clearing cache entries and zeroing hit/miss counters are
+      separate concerns — operators may want to clear entries (e.g., after
+      an emit format change) while retaining hit-rate telemetry. If clear
+      resets counters too, long-running hit-rate trends are lost. The
+      command should support `cache clear --reset-counters` as an opt-in.
+    spec_impact: "H4 — `cache clear` does not reset hit/miss counters by default; --reset-counters opt-in"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The `version` field in `cache stats` output identifies the cache
+      format version. If a newer claws reads an older cache dir, it must
+      detect the version mismatch and either migrate or refuse cleanly.
+      Operators seeing `cache stats` output with a low version number
+      know their cache predates their current claws. This is also useful
+      for debugging — "my cache hit rate dropped to 0% after upgrade"
+      is often a format version mismatch.
+    spec_impact: "H4 — cache `version` field exposed for migration/compat debugging"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      `cache prune --older-than 1d` on a fresh cache removing 0 entries
+      must exit 0, not a non-zero "nothing to prune" code. Exit codes
+      communicate success/failure to scripts, not "work was done". A
+      no-op prune is a success. Scripts that chain `cache prune && next
+      step` must not break on a 0-entry prune.
+    spec_impact: "H4 — no-op `prune` exits 0, following Unix exit-code conventions"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The `createdAt` and `lastAccessedAt` timestamps in `cache list`
+      should be ISO 8601 (e.g., `2026-04-16T14:23:00Z`), not Unix epoch
+      seconds or a local-timezone string. ISO 8601 sorts lexicographically,
+      is unambiguous across timezones, and is standard for JSON APIs.
+      Locale-sensitive formats leak the operator's timezone into cache
+      logs and break cross-machine comparisons.
+    spec_impact: "H4 — cache list timestamps are ISO 8601 UTC"
+    pitfall: null
+
+implementation_status: pending
+tags: [claws-compile-dx, cache-cli, round-trip]

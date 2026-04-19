@@ -2,9 +2,9 @@
  * L0: Branch/line coverage gaps in emit/platform-router.ts.
  *
  * Targets:
- * - Lines ~257-265: no adapter registered for a platform (CLAWS-E311 branch)
- * - Lines ~170-192: verifyEmitResult — empty artifact content (CLAWS-E301),
- *   forbidden imports (CLAWS-E302), non-TS/JS files skipped
+ * - Lines ~257-265: no adapter registered for a platform (OC-POLICY-E311 branch)
+ * - Lines ~170-192: verifyEmitResult — empty artifact content (OC-POLICY-E301),
+ *   forbidden imports (OC-POLICY-E302), non-TS/JS files skipped
  * - Lines ~123-141: extractR5Tools — critical tools from capability manifest
  */
 
@@ -14,7 +14,7 @@ import { minimalGovernanceIR } from '../fixtures/minimal/governance-ir.js';
 import type { GovernanceIR } from '../../src/ir/governance-ir.js';
 
 describe('platform-router branch coverage', () => {
-  it('unknown platform (no adapter) produces CLAWS-E311 block', () => {
+  it('unknown platform (no adapter) produces OC-POLICY-E311 block', () => {
     const ir = minimalGovernanceIR();
 
     // Pass a fake platform that has no registered adapter
@@ -27,7 +27,7 @@ describe('platform-router branch coverage', () => {
     expect(result.emittedCount).toBe(0);
     expect(result.routes).toHaveLength(1);
     expect(result.routes[0]!.blocked).toBe(true);
-    expect(result.routes[0]!.blockReason).toContain('CLAWS-E311');
+    expect(result.routes[0]!.blockReason).toContain('OC-POLICY-E311');
     expect(result.routes[0]!.blockReason).toContain('No adapter registered');
   });
 

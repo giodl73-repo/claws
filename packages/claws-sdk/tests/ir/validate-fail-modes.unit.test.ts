@@ -52,14 +52,14 @@ describe('validateFailModes', () => {
     expect(() => validateFailModes(ir)).not.toThrow();
   });
 
-  it('throws CLAWS-E001 when R5 intent has failMode:open in raw JSON', () => {
+  it('throws OC-POLICY-E001 when R5 intent has failMode:open in raw JSON', () => {
     const tampered = {
       id: 'i-1', kind: 'deny' as const, ruleId: 'SEC-001', level: 5 as const,
       description: 'Block OBO', target: 'proxy', reason: 'R5',
       failMode: 'open',
     };
     const ir = minimalIR({ intents: [tampered as unknown as DenyIntent] });
-    expect(() => validateFailModes(ir)).toThrow('CLAWS-E001');
+    expect(() => validateFailModes(ir)).toThrow('OC-POLICY-E001');
     expect(() => validateFailModes(ir)).toThrow('SEC-001');
   });
 
@@ -72,7 +72,7 @@ describe('validateFailModes', () => {
       intents: [deny],
       delegationMap: [{ ruleId: 'SEC-002', mechanism: 'audit-only', target: 'log' }],
     });
-    expect(() => validateFailModes(ir)).toThrow('CLAWS-E001');
+    expect(() => validateFailModes(ir)).toThrow('OC-POLICY-E001');
     expect(() => validateFailModes(ir)).toThrow('audit-only');
   });
 
@@ -109,7 +109,7 @@ describe('validateFailModes', () => {
         effectiveR5Count: { derived: 0, overridden: 0, total: 0 },
       },
     });
-    expect(() => validateFailModes(ir)).toThrow('CLAWS-E001');
+    expect(() => validateFailModes(ir)).toThrow('OC-POLICY-E001');
     expect(() => validateFailModes(ir)).toThrow('auditOnlyRules');
   });
 
@@ -136,7 +136,7 @@ describe('validateFailModes', () => {
         effectiveR5Count: { derived: 0, overridden: 0, total: 0 },
       },
     });
-    expect(() => validateFailModes(ir)).toThrow('CLAWS-E001');
+    expect(() => validateFailModes(ir)).toThrow('OC-POLICY-E001');
     expect(() => validateFailModes(ir)).toThrow('ruleSuppression');
   });
 
@@ -167,7 +167,7 @@ describe('validateFailModes', () => {
         effectiveR5Count: { derived: 0, overridden: 0, total: 0 },
       },
     });
-    expect(() => validateFailModes(ir)).toThrow('CLAWS-E001');
+    expect(() => validateFailModes(ir)).toThrow('OC-POLICY-E001');
     expect(() => validateFailModes(ir)).toThrow('missing blocking deny intent');
   });
 

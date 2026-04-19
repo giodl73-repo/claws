@@ -9,8 +9,8 @@ stage: implementation
 test_tiers:
   L0_unit: 8
   L1_integration: 3
-  L2_e2e: 0
-  L3_accept: 0
+  L2_e2e: 1
+  L3_accept: 1
 test_scope:
   run:
     - "cd claws-sdk && npx vitest run --project unit --coverage"
@@ -38,6 +38,8 @@ The 12 checks validate: (1) schema conformance, (2) required field presence, (3)
 - [ ] `claws-sdk/src/compiler/validate/index.ts` -- Barrel exports for validate module
 - [ ] `claws-sdk/tests/compiler/validate/checks.unit.test.ts` -- L0: schema conformance check passes valid IR (1), required field check detects missing field (1), trust level check detects inconsistency (1), R5 check detects fail-open violation (1), emit target check rejects unknown platform (1), circular dependency check detects cycle (1), output hash check detects instability (1), overall validator returns correct pass/fail counts (1)
 - [ ] `claws-sdk/tests/compiler/validate/validator.integration.test.ts` -- L1: full validation of fixture workspace passes all 12 checks (1), validation of intentionally broken workspace reports expected failures (1), validation report JSON format matches schema (1)
+- [ ] `claws-sdk/tests/compiler/validate/validator.e2e.test.ts` -- L2: end-to-end 12-check validation from fixture workspace through full pipeline (1)
+- [ ] `claws-sdk/tests/compiler/validate/validator.accept.test.ts` -- L3: scenario acceptance test verifying eval findings (4)
 
 ## Acceptance Criteria
 
@@ -68,5 +70,7 @@ Load these role files before starting:
 
 - [ ] L0 unit (8 tests): schema conformance (1), required fields (1), trust consistency (1), R5 fail-open (1), emit target (1), circular deps (1), hash stability (1), pass/fail counts (1)
 - [ ] L1 integration (3 tests): full 12-check pass (1), intentional failures (1), JSON format (1)
+- [ ] L2 e2e (1 test): end-to-end 12-check validation from fixture workspace (1)
+- [ ] L3 acceptance (1 test): eval scenario findings verified (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

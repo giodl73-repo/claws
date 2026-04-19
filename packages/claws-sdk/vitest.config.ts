@@ -19,7 +19,7 @@ const sharedResolve = {
     { find: '@bic/claws-test', replacement: resolve(__dirname, '../claws-test/src') },
     { find: '@bic/claws-serve', replacement: resolve(__dirname, '../claws-serve/src') },
     // ── LSP package (for acceptance tests) ─────────────────────────────
-    { find: /^@craftworks\/claws-lsp\/(.+)$/, replacement: resolve(__dirname, '../claws-lsp/src/$1') },
+    { find: /^@bic\/openclaw-lsp\/(.+)$/, replacement: resolve(__dirname, '../claws-lsp/src/$1') },
     { find: '@bic/openclaw-lsp', replacement: resolve(__dirname, '../claws-lsp/src') },
   ],
   dedupe: [
@@ -32,6 +32,8 @@ const sharedExclude = [
   '**/node_modules/**',
   '**/dist/**',
   '**/*.stress.ts',
+  '**/*.tmpl',
+  '**/*.tmpl.*',
 ];
 
 export default defineConfig({
@@ -39,6 +41,11 @@ export default defineConfig({
   test: {
     include: ['tests/**/*.test.ts'],
     forceExit: true,
+    // Windows filesystem + full-suite parallel load (4695 tests across
+    // 4 projects, tmpdir crypto/IO-heavy tests) pushes well past the
+    // 5s vitest default. 15s gives real hangs room to surface while
+    // absorbing cross-project thrash. e2e keeps its 60s override below.
+    testTimeout: 15_000,
     exclude: sharedExclude,
     coverage: {
       provider: 'v8',
@@ -47,6 +54,11 @@ export default defineConfig({
       exclude: [
         'src/**/*.d.ts',
         'src/**/index.ts',
+        // ── Consolidated sub-packages own their own coverage gates ────────
+        // `claws-sdk/packages/{workspace,guardrails,policy,snap}/` each run
+        // vitest independently with per-file 95/90/95/95 thresholds; the
+        // parent claws-sdk suite must NOT double-count their source.
+        'packages/**',
         // ── Pure-type files (no runtime code) ─────────────────────────────
         // protect/types.ts has runtime functions, so it is NOT excluded.
         'src/compile/types.ts',
@@ -64,7 +76,20 @@ export default defineConfig({
         'src/types/platform.ts',
         'src/maker/types.ts',
         'src/maker/badge-types.ts',
+        'src/compiler/ir/field-types.ts',
+        'src/compiler/ir/workspace-ir.ts',
+        'src/compiler/enforce/types.ts',
+        'src/compiler/emit/types.ts',
+        'src/compiler/cache/types.ts',
+        'src/compiler/host/types.ts',
+        'src/compiler/fleet/types.ts',
+        'src/workspace/schema-types.ts',
         'tests/**',
+        // ── Template source files (scaffolding output, not runtime) ──────
+        '**/*.tmpl',
+        '**/*.tmpl.*',
+        '**/*.ts.tmpl',
+        'src/emit/templates/**',
       ],
       // ── Dual-coverage CI gate ──────────────────────────────────────────
       // Unit:        npx vitest run --project unit --coverage
@@ -87,6 +112,7 @@ export default defineConfig({
           name: 'default',
           include: ['tests/**/*.test.ts'],
           forceExit: true,
+          testTimeout: 15_000,
           exclude: [
             ...sharedExclude,
             'tests/**/*.unit.test.ts',
@@ -102,6 +128,7 @@ export default defineConfig({
           name: 'unit',
           include: ['tests/**/*.unit.test.ts'],
           forceExit: true,
+          testTimeout: 15_000,
           exclude: sharedExclude,
         },
       }),
@@ -111,6 +138,7 @@ export default defineConfig({
           name: 'integration',
           include: ['tests/**/*.integration.test.ts'],
           forceExit: true,
+          testTimeout: 15_000,
           exclude: sharedExclude,
         },
       }),
@@ -120,6 +148,7 @@ export default defineConfig({
           name: 'e2e',
           include: ['tests/**/*.e2e.test.ts'],
           forceExit: true,
+          testTimeout: 60_000,
           exclude: sharedExclude,
         },
       }),
@@ -129,6 +158,7 @@ export default defineConfig({
           name: 'accept',
           include: ['tests/**/*.accept.test.ts'],
           forceExit: true,
+          testTimeout: 15_000,
           exclude: sharedExclude,
         },
       }),

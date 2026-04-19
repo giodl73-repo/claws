@@ -11,7 +11,7 @@ description: >
 expect:
   rules_applied: [G-EXEC-APPROVALS]
   violations:
-    - code: CLAWS-E035
+    - code: OC-POLICY-E035
       rule: G-EXEC-APPROVALS
       description: "Field 'deny' not in OC exec-approvals schema — expected 'blocked'"
   pass: false

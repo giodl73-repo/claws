@@ -11,7 +11,7 @@ description: >
 expect:
   rules_applied: [G-ELICIT]
   violations:
-    - code: CLAWS-E065
+    - code: OC-POLICY-E065
       rule: G-ELICIT
       description: "Elicitation policy 'send_payment' matches no tool — did you mean 'send-payment'?"
   pass: false
@@ -54,14 +54,14 @@ findings:
       elicitation policies is cross-referenced against TOOLS.md declarations.
       If a policy name does not match any tool exactly, the compiler
       computes similarity (normalized: remove hyphens, underscores, and
-      case). If a near-match exists, CLAWS-E065 fires with the suggestion.
+      case). If a near-match exists, OC-POLICY-E065 fires with the suggestion.
     spec_impact: "CL-02 G-ELICIT — fuzzy match cross-validation"
     pitfall: "P-155"
 
   - id: F03
     severity: major
     description: >
-      CLAWS-E065 is a hard error, not a warning. An elicitation policy
+      OC-POLICY-E065 is a hard error, not a warning. An elicitation policy
       that matches no tool is always a bug. There is no legitimate use
       case for a policy that references a non-existent tool. The developer
       must fix the name or remove the policy. Hard error prevents shipping
@@ -73,7 +73,7 @@ findings:
     severity: major
     description: >
       The cross-validation must also check the reverse: R5 tools in
-      TOOLS.md that have NO elicitation policy. This is CLAWS-E066:
+      TOOLS.md that have NO elicitation policy. This is OC-POLICY-E066:
       "R5 tool 'send-payment' has no elicitation policy." An R5 tool
       without a policy is a governance gap as dangerous as a mismatched
       policy.

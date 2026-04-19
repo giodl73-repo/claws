@@ -4,13 +4,18 @@ slug: cache-compile
 plan: claws-sdk-graduation
 depends_on: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 governing_roles: [craft:architect, craft:perf-stress, claws:platform-eng]
-scenario_codes: [execution/S01, execution/S03, cross-package/S03]
+# cache/S01..S05 are cache-specific scenarios first surfaced by the CP-2 R1
+# review (CM-12). They are not yet registered under design/claws/scenarios/;
+# follow-up: add a `cache/` scenario directory covering hit (S01), LRU
+# eviction (S02), TTL expiry (S03), corrupt manifest (S04), and options key
+# (S05 — depends on CM-4 landing).
+scenario_codes: [execution/S01, execution/S03, cross-package/S03, cache/S01, cache/S02, cache/S03, cache/S04, cache/S05]
 stage: implementation
 test_tiers:
   L0_unit: 6
   L1_integration: 3
   L2_e2e: 1
-  L3_accept: 0
+  L3_accept: 1
 test_scope:
   run:
     - "cd claws-sdk && npx vitest run --project unit --coverage"
@@ -41,6 +46,7 @@ The free-tier cache is file-based (one cache directory per workspace) with conte
 - [ ] `claws-sdk/tests/compiler/cache/cache.unit.test.ts` -- L0: set→get round-trip (1), cache miss returns undefined (1), content-hash is deterministic (1), content-hash changes when file content changes (1), LRU eviction removes oldest entry (1), cache stats track hits and misses (1)
 - [ ] `claws-sdk/tests/compiler/host/compile.integration.test.ts` -- L1: compile from fixture workspace succeeds (1), compile with cache hit skips recompilation (1), compile with changed file invalidates cache (1)
 - [ ] `claws-sdk/tests/compiler/host/compile.e2e.test.ts` -- L2: full compile pipeline from fixture: read 9 files → parse → analyze → enforce → emit OC + CC → validate → cache (1)
+- [ ] `claws-sdk/tests/compiler/host/compile.accept.test.ts` -- L3: scenario acceptance test verifying execution/cross-package findings (3)
 
 ## Acceptance Criteria
 
@@ -82,5 +88,6 @@ Load these role files before starting:
 - [ ] L0 unit (6 tests): set→get (1), cache miss (1), hash deterministic (1), hash changes (1), LRU eviction (1), cache stats (1)
 - [ ] L1 integration (3 tests): fixture compile (1), cache hit (1), cache invalidation (1)
 - [ ] L2 e2e (1 test): full pipeline from fixture (1)
+- [ ] L3 acceptance (1 test): execution/cross-package scenario findings verified (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

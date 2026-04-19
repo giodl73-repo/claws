@@ -18,7 +18,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { canonicalJson } from '@craftworks/agent-sdk/suite';
+import { canonicalJson } from '../util/canonical-json.js';
 
 /**
  * WAL entry persisted to disk. Records approval start time, timeout,

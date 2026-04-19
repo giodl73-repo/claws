@@ -1,0 +1,228 @@
+name: S25-cron-unattended-approval
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12, CL-08]
+description: >
+  Validates that cron/unattended sessions hitting R3-gated tools force failMode
+  to 'deny' because no human is present to approve. R5 tools are protected by
+  alwaysDenyRiskLevels regardless of session type. R3-R4 tools in attended
+  sessions get normal approval flow, but in unattended sessions the approval
+  is queued until the user returns. Agent sessions are also unattended. Channel
+  sessions may be attended or unattended depending on presence. The approval
+  queue persists across restarts and has configurable timeout behavior.
+
+expect:
+  cron_r3_tool:
+    session_type: cron
+    tool_risk: R3
+    human_present: false
+    result:
+      failMode: deny
+      approval_queued: true
+      approval_status: pending_human
+  cron_r5_tool:
+    session_type: cron
+    tool_risk: R5
+    result:
+      failMode: deny
+      reason: alwaysDenyRiskLevels
+      approval_queued: false
+  attended_r3_tool:
+    session_type: main
+    tool_risk: R3
+    human_present: true
+    result:
+      failMode: prompt
+      approval_status: awaiting_response
+  agent_session:
+    session_type: agent
+    human_present: false
+    result:
+      failMode: deny
+      approval_queued: true
+  channel_session:
+    session_type: channel
+    presence_varies: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A cron job runs at 3 AM invoking a tool pipeline that includes 'write-db'
+  (R3), 'send-notification' (R3), and 'deploy-service' (R5). No human is
+  present. The system must: (1) deny deploy-service immediately via
+  alwaysDenyRiskLevels, (2) queue approvals for write-db and send-notification
+  until a human returns, (3) force failMode to 'deny' for the queued tools
+  (not 'allow' which would silently approve). When the user opens their main
+  session at 9 AM, the queued approvals are presented. Meanwhile, an agent
+  session (spawned by the main session but running autonomously) also hits R3
+  tools -- it is also unattended. A channel session (Slack integration) may or
+  may not have a human watching -- the system must check presence. The approval
+  queue must persist across server restarts and timeout after a configurable
+  duration.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The failMode for unattended sessions must be 'deny', never 'allow'.
+      If the default failMode for cron sessions is configurable and someone
+      sets it to 'allow', all R3-R4 tool calls in cron jobs silently succeed
+      without approval. The unattended session policy must override any
+      user-configured failMode. The override hierarchy is: alwaysDenyRiskLevels
+      > unattended_session_policy > user_configured_failMode > default.
+    spec_impact: "CL-12 failMode hierarchy — unattended_session_policy overrides user-configured failMode; deny is not configurable for unattended"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      R5 tools in cron sessions must be denied immediately via
+      alwaysDenyRiskLevels, NOT queued for approval. An R5 tool call should
+      never enter the approval queue because even when a human returns, R5
+      requires synchronous interactive approval (not async queue-based). If
+      R5 calls are queued, a user approving a stale queue at 9 AM might
+      authorize a destructive operation that was requested at 3 AM with
+      different system state. R5 = immediate deny, no queue.
+    spec_impact: "CL-12 R5 in unattended — immediate deny via alwaysDenyRiskLevels; never enters approval queue"
+    pitfall: null
+
+  - id: F03
+    severity: critical
+    description: >
+      Agent sessions must be classified as unattended even though they are
+      spawned by an attended main session. The agent runs autonomously and
+      cannot relay approval prompts to the human in real-time. If agent
+      sessions inherit the main session's attended status, agent tool calls
+      bypass the unattended policy. Session type classification must be
+      based on the session's own interactivity, not its parent's.
+    spec_impact: "CL-08 session classification — agent sessions are always unattended regardless of parent session type"
+    pitfall: null
+
+  - id: F04
+    severity: critical
+    description: >
+      The approval queue must persist across server restarts. If the queue
+      is in-memory only, a crash at 4 AM loses all queued approvals. When
+      the user opens their session at 9 AM, they see zero pending approvals
+      and the cron job's work silently failed. The queue must be persisted
+      to disk (WAL, SQLite, or file-based) and recovered on startup. Each
+      queued approval must include: tool_id, session_id, timestamp, payload
+      hash, and expiry.
+    spec_impact: "CL-08 approval queue — persisted to disk; recovered on startup with full context (tool, session, timestamp, payload, expiry)"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      When the user returns and opens their main session, the queued approvals
+      must be presented with full context: which cron job, which tool, what
+      arguments, when it was requested, and whether the request is still
+      relevant (not expired). A bare "approve write-db?" without context
+      forces the user to investigate before approving. The approval prompt
+      must include a staleness indicator if the request is older than a
+      configurable threshold (e.g. 1 hour).
+    spec_impact: "CL-08 approval presentation — full context (job, tool, args, timestamp) with staleness indicator for aged requests"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Channel sessions (e.g. Slack bot) have ambiguous attendance. A Slack
+      channel may have an active human reading messages or may be unmonitored.
+      The system must check presence via an explicit signal (e.g. the channel
+      session carries an attended: true/false flag set by the integration, or
+      the system pings the channel and waits for a response within a timeout).
+      Defaulting channel sessions to attended is dangerous; defaulting to
+      unattended is conservative but may over-block.
+    spec_impact: "CL-08 channel sessions — explicit attendance signal from integration; default to unattended if no signal received within timeout"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The approval queue timeout must be configurable with a sensible default
+      (e.g. 8 hours). After timeout, the queued approval is expired and the
+      tool call returns a timeout error to the cron job. If there is no timeout,
+      stale approvals accumulate indefinitely and the user faces a backlog of
+      irrelevant requests. The timeout must be per-request, not per-queue.
+      Different tools may warrant different timeout durations.
+    spec_impact: "CL-08 approval timeout — configurable per-tool with default 8h; expired approvals return timeout error to caller"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      The same tool called from a main (attended) session must get the normal
+      interactive approval flow, not the queue-based flow. Session type must
+      be checked at the point of the tool call, not at session creation. If
+      a main session's attendance is cached at creation and the user steps
+      away (screen locked), the session is still marked attended and approval
+      prompts go unanswered. Consider a heartbeat-based presence detection
+      with configurable idle timeout.
+    spec_impact: "CL-08 attendance detection — heartbeat-based presence with idle timeout; not cached at session creation"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Multiple queued approvals for the same tool from different cron runs
+      should be coalesced or clearly separated. If three cron runs each
+      queued 'write-db' approval, the user should see three distinct requests
+      (each with different arguments and timestamps), not one "write-db needs
+      approval" prompt. But if the payloads are identical, coalescing with a
+      count (3 identical requests) reduces cognitive load. The queue should
+      support both modes.
+    spec_impact: "CL-08 approval queue — support coalescing identical requests with count; distinct display for different payloads"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      When a queued approval is approved or denied by the user, the result
+      must be relayed back to the cron session (if still alive) or recorded
+      for the next cron run (if the session ended). If the cron job has a
+      5-minute timeout and the approval comes 6 hours later, the job already
+      failed. The approval result should be stored so the next cron run can
+      reference it: "This tool was approved at 9:15 AM for identical payload."
+      This enables retry-after-approval patterns.
+    spec_impact: "CL-08 approval relay — store approval results persistently; support retry-after-approval for subsequent cron runs"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      The audit trail for unattended denials must distinguish between
+      "denied by alwaysDenyRiskLevels" (R5, permanent), "denied by unattended
+      policy, queued" (R3, temporary), and "denied by queue timeout" (R3,
+      expired). Each produces a different audit event type. Security teams
+      use these to distinguish misconfigured cron jobs (hitting R5 tools)
+      from legitimate approval delays (R3 tools awaiting human return).
+    spec_impact: "CL-08 audit events — three distinct denial types: alwaysDeny, unattended_queued, queue_timeout"
+    pitfall: null
+
+  - id: F12
+    severity: warning
+    description: >
+      If the cron session specifies a custom failMode in its session
+      configuration (e.g. failMode: 'skip'), the unattended policy must
+      still override it for gated tools. The 'skip' failMode (skip the
+      tool call and continue the pipeline) is acceptable for R1 tools but
+      not for R3+ gated tools. The override must be risk-level-aware:
+      R1 tools respect session failMode, R3+ tools enforce unattended deny.
+    spec_impact: "CL-12 failMode override — risk-level-aware: R1 respects session failMode; R3+ enforces unattended deny regardless"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      The approval queue should emit an SSE event when a new approval is
+      queued so that any connected attended session can render it immediately.
+      If the user has a main session open while a cron job runs, they should
+      see the approval request appear in real-time rather than waiting until
+      they actively check the queue. The SSE event type should be
+      APPROVAL_QUEUED with the full request context.
+    spec_impact: "CL-10 SSE events — APPROVAL_QUEUED event with full request context for real-time rendering in attended sessions"
+    pitfall: null

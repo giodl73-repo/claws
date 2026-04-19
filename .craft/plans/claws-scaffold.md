@@ -19,9 +19,9 @@ specs: [CL-05]
    - Validation: `claws new skill purchase-handler` includes a comment suggesting `obo: purchase` in the generated frontmatter
    - Validation: Scaffold in a T4 workspace defaults to the workspace maximum risk, not a hardcoded value
 
-2. **H2: Scaffold dependency management ensures @bic/claws-skill-kit is available and version-aligned** — When the scaffold generates handler.ts importing from `@bic/claws-skill-kit`, the package must be installed or the first build fails. `claws new skill` checks for `@bic/claws-skill-kit` in the workspace's node_modules; if absent, it either auto-installs (when `--install` is passed or interactive mode prompts) or emits a clear instruction: `Run: npm install @bic/claws-skill-kit@^{version}`. The `@bic/claws-skill-kit` version in the generated package.json uses the same major version as the running claws binary, preventing version mismatch. The scaffold includes `.gitignore` with `.claws/` to prevent generated files from polluting version control.
-   - Validation: Scaffold in a workspace without @bic/claws-skill-kit emits an install instruction with the correct version range
-   - Validation: Generated package.json references `@bic/claws-skill-kit@^2.0.0` when claws binary is v2.x
+2. **H2: Scaffold dependency management ensures @bic/skill-kit is available and version-aligned** — When the scaffold generates handler.ts importing from `@bic/skill-kit`, the package must be installed or the first build fails. `claws new skill` checks for `@bic/skill-kit` in the workspace's node_modules; if absent, it either auto-installs (when `--install` is passed or interactive mode prompts) or emits a clear instruction: `Run: npm install @bic/skill-kit@^{version}`. The `@bic/skill-kit` version in the generated package.json uses the same major version as the running claws binary, preventing version mismatch. The scaffold includes `.gitignore` with `.claws/` to prevent generated files from polluting version control.
+   - Validation: Scaffold in a workspace without @bic/skill-kit emits an install instruction with the correct version range
+   - Validation: Generated package.json references `@bic/skill-kit@^2.0.0` when claws binary is v2.x
    - Validation: Generated .gitignore includes `.claws/` entry
    - Validation: Skill name in handler.ts `skill()` factory matches the directory name
 
@@ -42,8 +42,8 @@ The scaffold plan extracts the skill creation pipeline from claws-maker-commands
 - [ ] scaffold/trust-tier-t4-cap -- scaffold in T4 workspace caps risk at R4 max
 - [ ] scaffold/tier-flag-declared -- --tier declared produces minimal frontmatter
 - [ ] scaffold/tier-flag-typed -- --tier typed produces decorators + frontmatter
-- [ ] scaffold/dependency-missing -- @bic/claws-skill-kit not installed, instruction emitted
-- [ ] scaffold/dependency-present -- @bic/claws-skill-kit found, no install instruction
+- [ ] scaffold/dependency-missing -- @bic/skill-kit not installed, instruction emitted
+- [ ] scaffold/dependency-present -- @bic/skill-kit found, no install instruction
 - [ ] scaffold/version-alignment -- generated package.json matches claws major version
 - [ ] scaffold/obo-hint-email -- skill name "send-email" triggers obo: email suggestion
 - [ ] scaffold/obo-hint-purchase -- skill name "purchase-handler" triggers obo: purchase suggestion
@@ -66,7 +66,7 @@ The scaffold plan extracts the skill creation pipeline from claws-maker-commands
 ### SDK Logic (claws-sdk)
 - `claws-sdk/src/maker/scaffold.ts` (EDIT) -- add trust tier reading from claws.json, risk cap logic, --tier flag handling
 - `claws-sdk/src/maker/scaffold-defaults.ts` (NEW) -- workspace trust tier -> max risk mapping, OBO hinting from skill name
-- `claws-sdk/src/maker/dependency-check.ts` (NEW) -- check @bic/claws-skill-kit in node_modules, version alignment logic
+- `claws-sdk/src/maker/dependency-check.ts` (NEW) -- check @bic/skill-kit in node_modules, version alignment logic
 - `claws-sdk/src/maker/templates/` (EDIT) -- ensure all templates respect trust tier cap, include .gitignore
 
 ## Deliverables
@@ -77,7 +77,7 @@ The scaffold plan extracts the skill creation pipeline from claws-maker-commands
 ### SDK Logic (claws-sdk)
 - [ ] claws-sdk/src/maker/scaffold.ts -- trust tier reading + risk cap + tier flag dispatch
 - [ ] claws-sdk/src/maker/scaffold-defaults.ts -- workspace tier -> max risk mapping, OBO keyword heuristics
-- [ ] claws-sdk/src/maker/dependency-check.ts -- @bic/claws-skill-kit presence + version alignment check
+- [ ] claws-sdk/src/maker/dependency-check.ts -- @bic/skill-kit presence + version alignment check
 - [ ] claws-sdk/tests/maker/scaffold-defaults.unit.test.ts -- trust tier cap, OBO hinting, version alignment
 - [ ] claws-sdk/tests/maker/dependency-check.unit.test.ts -- missing/present dependency, version mismatch
 - [ ] claws-sdk/tests/maker/scaffold-tier-flag.unit.test.ts -- declared/typed/verified tier flag output
@@ -92,7 +92,7 @@ The scaffold plan extracts the skill creation pipeline from claws-maker-commands
 
 **From skill-lifecycle S01 (scaffold-new-skill):**
 - [ ] Trust tier derivation: scaffold reads workspace trust tier from claws.json, defaults risk to max allowed (S01-F01, P-225)
-- [ ] Dependency bootstrapping: check @bic/claws-skill-kit presence, emit install instruction or auto-install (S01-F02)
+- [ ] Dependency bootstrapping: check @bic/skill-kit presence, emit install instruction or auto-install (S01-F02)
 - [ ] Tier flag: `--tier declared` for minimal scaffold, `--tier typed` for full decorators (S01-F03)
 - [ ] Version alignment: generated package.json uses same major version as running claws binary (S01-F04)
 - [ ] .gitignore in scaffold template with `.claws/` entry (S01-F05)
@@ -107,7 +107,7 @@ The scaffold plan extracts the skill creation pipeline from claws-maker-commands
 ## Out of Scope
 
 - Full scaffold file generation engine (that's claws-maker-commands -- this plan focuses on trust tier awareness and dependency management)
-- @bic/claws-skill-kit package (that's claws-skill-kit plan)
+- @bic/skill-kit package (that's claws-skill-kit plan)
 - Template registry and template customization (that's claws-maker-commands plan)
 - CLI argument parsing for `claws new skill` (that's claws-cli-foundation plan)
 - SKILL.md compilation pipeline (that's claws-parse/claws-emit plans)

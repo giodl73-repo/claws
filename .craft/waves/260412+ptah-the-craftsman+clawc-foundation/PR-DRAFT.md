@@ -179,7 +179,7 @@ type FailMode<R extends RuleLevel> =
 const bad: FailMode<5> = 'open';  // TypeScript error! Does not compile.
 ```
 
-Runtime guard catches deserialized tampering — `validateFailModes(ir)` throws `CLAWS-E001` if R5 fail-open appears in JSON loaded from disk.
+Runtime guard catches deserialized tampering — `validateFailModes(ir)` throws `OC-POLICY-E001` if R5 fail-open appears in JSON loaded from disk.
 
 ---
 

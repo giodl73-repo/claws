@@ -1,0 +1,199 @@
+name: S38-etag-cross-layer
+series: cap-integration
+version: 2
+specs: [CL-10, CL-03]
+description: >
+  Validates that the ETag/version system is consistent across Layer 1 (generic
+  OC API), Layer 2 (chunk API), and Layer 3 (session/audit API). A PATCH via
+  Layer 2 increments the workspace-wide version counter; a subsequent GET via
+  Layer 1 returns the same ETag. Batch operations increment the version once.
+  The version counter survives server restart. There is a single workspace-wide
+  counter, not per-route or per-file ETags.
+
+expect:
+  version_counter:
+    workspace_wide: true
+    single_counter: true
+    atomic_cas: true
+    persisted_to_disk: true
+    survives_restart: true
+  etag:
+    consistent_across_layers: true
+    format: quoted_strong_etag
+    incremented_after_successful_write: true
+    batch_increments_once: true
+  if_match:
+    required_on_write: true
+    412_on_mismatch: true
+    428_when_absent: true
+
+simulate:
+  failures: [server_restart_mid_sequence, concurrent_write_etag_conflict]
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner reads TOOLS.md via Layer 1 GET and receives
+  ETag: "17". It then edits a tool via Layer 2 chunk PATCH with
+  If-Match: "17" — the edit succeeds and the response includes ETag: "18".
+  The partner then reads via Layer 1 GET again — the ETag must be "18", not
+  still "17" or a different counter. A batch operation modifying 3 files
+  returns ETag: "19" (one increment, not "20" or "21"). After a server
+  restart, the partner reads again and the ETag is still "19" (persisted).
+  A concurrent PATCH with If-Match: "18" (stale) receives 412 Precondition
+  Failed. A PATCH without If-Match receives 428 Precondition Required. The
+  challenge is ensuring a single counter works across all API layers without
+  per-route versioning inconsistencies.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The workspace-wide version counter must be a single atomic integer
+      stored in a shared location (e.g., a version file or an in-memory
+      counter backed by disk). If Layer 1 and Layer 2 maintain separate
+      counters, a PATCH via Layer 2 increments Layer 2's counter but
+      Layer 1's counter remains stale. All layers must read and write
+      the same counter. The counter implementation must support atomic
+      compare-and-swap (CAS) to prevent lost increments under concurrency.
+    spec_impact: "CL-10 versioning — single workspace-wide atomic counter; CAS for concurrent safety; shared across all layers"
+    pitfall: P-285
+
+  - id: F02
+    severity: critical
+    description: >
+      The version counter must be persisted to disk synchronously (fsync)
+      after each increment. If the counter is only in memory, a server
+      crash loses the latest version. On restart, the counter reloads from
+      disk and partners that cached the old ETag can continue using If-Match
+      correctly. If persistence is async (write-behind), a crash between
+      increment and flush loses the version, causing ETag collision (two
+      different states with the same version number).
+    spec_impact: "CL-10 versioning — fsync after each increment; counter on disk is source of truth; no write-behind"
+    pitfall: P-285
+
+  - id: F03
+    severity: critical
+    description: >
+      A PATCH without If-Match must return 428 Precondition Required, not
+      200 or 412. This forces all write clients to use optimistic concurrency
+      control. Without this enforcement, a client that omits If-Match silently
+      overwrites concurrent changes. The 428 response must include the current
+      ETag so the client can retry with the correct value. This requirement
+      applies to ALL write endpoints across all layers.
+    spec_impact: "CL-10 write endpoints — 428 when If-Match absent; response includes current ETag; applies to all layers"
+    pitfall: P-285
+
+  - id: F04
+    severity: major
+    description: >
+      Batch operations must increment the version counter exactly once,
+      regardless of how many files are modified. If a batch modifies 5 files
+      and increments 5 times, a concurrent reader might see versions 18-22
+      during the batch, observing intermediate states. A single increment
+      at the end of the atomic batch (after all files are written and
+      compiled) ensures readers see either the pre-batch or post-batch
+      state, never an intermediate.
+    spec_impact: "CL-10 batch versioning — single increment after all mutations complete; no intermediate versions visible"
+    pitfall: P-285
+
+  - id: F05
+    severity: major
+    description: >
+      The ETag format must be a quoted strong ETag per HTTP spec (e.g.,
+      "\"17\"" in the header). Weak ETags (W/"17") are not appropriate
+      because the OC API requires byte-level consistency for writes. The
+      ETag value should be the stringified version number, not a hash —
+      hashes are expensive to compute per-request and version numbers are
+      already unique. If the format changes in the future, backward
+      compatibility must be maintained (old ETags still parseable).
+    spec_impact: "CL-10 ETag format — quoted strong ETag; stringified version number; backward-compatible format"
+    pitfall: P-285
+
+  - id: F06
+    severity: major
+    description: >
+      Cross-layer ETag consistency test: PATCH via Layer 2, read via Layer 1,
+      and compare ETags. The ETags must be byte-identical. If Layer 1 formats
+      the ETag differently (e.g., different quoting, different padding), the
+      partner's If-Match header constructed from Layer 1's ETag fails on
+      Layer 2. The ETag serialization function must be shared infrastructure
+      (part of the ApiFormats module from P-307).
+    spec_impact: "CL-10 ETag serialization — shared ApiFormats function; byte-identical output across all layers"
+    pitfall: P-285
+
+  - id: F07
+    severity: major
+    description: >
+      The version increment must happen AFTER the write succeeds (file
+      renamed, compilation completed), not before. If the version is
+      incremented before the write and the write fails (compile error, disk
+      full), the counter is ahead of the actual state. Subsequent requests
+      see a version that does not correspond to any real change. The
+      increment is the last step in the write pipeline, after atomic rename
+      and compilation.
+    spec_impact: "CL-10 version lifecycle — increment after successful rename + compile; never increment on failure"
+    pitfall: P-285
+
+  - id: F08
+    severity: warning
+    description: >
+      File-level ETags are a trap. If each file has its own ETag (e.g.,
+      TOOLS.md v5, GOVERNANCE.md v3), a PATCH to TOOLS.md changes its ETag
+      but not GOVERNANCE.md's. A partner editing both files needs two ETags.
+      Cross-file operations (batch, allow-all) must somehow combine ETags.
+      The workspace-wide counter avoids all of this: one ETag covers all
+      files. The tradeoff is false conflicts (editing TOOLS.md conflicts
+      with a concurrent GOVERNANCE.md edit), but this is safer than missed
+      conflicts.
+    spec_impact: "CL-10 versioning — workspace-wide by design; false conflicts preferred over missed conflicts"
+    pitfall: P-285
+
+  - id: F09
+    severity: warning
+    description: >
+      On server restart, the counter must be restored before accepting any
+      requests. If the server starts serving with counter 0 while clients
+      have cached ETag "19", all PATCHes with If-Match: "19" fail with 412.
+      The startup sequence must: read counter from disk, validate it's
+      monotonically increasing (not reset by corruption), then open the
+      HTTP listener. If the counter file is missing or corrupt, start from
+      0 but log a critical warning — all existing client caches are invalid.
+    spec_impact: "CL-10 startup — restore counter before accepting requests; critical warning if counter file missing"
+    pitfall: P-285
+
+  - id: F10
+    severity: warning
+    description: >
+      Race between two concurrent PATCHes: both read version 17, both
+      attempt CAS(17, 18). One succeeds, the other gets 412 Precondition
+      Failed. The failing PATCH must receive the NEW ETag ("18") in the
+      412 response so it can retry without an extra GET. If the 412 does
+      not include the current ETag, the client must issue a GET to discover
+      the new version, adding a round trip.
+    spec_impact: "CL-10 412 response — include current ETag in 412 Precondition Failed for retry without GET"
+    pitfall: P-285
+
+  - id: F11
+    severity: note
+    description: >
+      The version counter must be monotonically increasing (never reset,
+      never decremented). A counter that wraps at MAX_INT would cause
+      collisions. Using a 64-bit integer gives 9.2 * 10^18 increments —
+      at 1 million writes per day, this lasts 25 billion years. The counter
+      does not need wrap-around handling but the implementation must use
+      a data type that does not overflow (BigInt in JavaScript, int64 in Go).
+    spec_impact: "CL-10 versioning — 64-bit monotonically increasing counter; no wrap-around; BigInt or int64"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The version counter file should include a checksum (e.g., CRC32 of
+      the counter value) to detect corruption. On startup, if the checksum
+      does not match, the counter file is corrupt. The recovery strategy:
+      scan all OC file mtimes, set the counter to a value higher than any
+      mtime-derived version (to ensure monotonicity), and log the recovery.
+      This is an edge case but prevents silent counter regression.
+    spec_impact: "CL-10 version persistence — CRC32 checksum; recovery via mtime scan on corruption"
+    pitfall: null

@@ -10,7 +10,7 @@ test_tiers:
   L0_unit: 6
   L1_integration: 2
   L2_e2e: 0
-  L3_accept: 0
+  L3_accept: 1
 test_scope:
   run:
     - "cd claws-sdk && npx vitest run --project unit --coverage"
@@ -38,6 +38,7 @@ This is a type-only pulse -- no runtime logic. The types must be precise enough 
 - [ ] `claws-sdk/tests/compiler/ir/workspace-ir.unit.test.ts` -- L0: OCWorkspaceIR constructs with all 9 sub-IRs (1), SoulIR tolerates missing optional fields (1), ToolsIR validates trust level range (1), DiagnosticSeverity enum values are correct (1)
 - [ ] `claws-sdk/tests/compiler/ir/serialization.unit.test.ts` -- L0: round-trip serialize→deserialize produces identical IR (1), deserialize rejects malformed JSON with error (1)
 - [ ] `claws-sdk/tests/compiler/ir/ir-integration.integration.test.ts` -- L1: reader output (pulse 1 fixture) maps to OCWorkspaceIR (1), IR serialization round-trip preserves all field types including dates and enums (1)
+- [ ] `claws-sdk/tests/compiler/ir/ir.accept.test.ts` -- L3: scenario acceptance test verifying forma/cross-package findings (1)
 
 ## Acceptance Criteria
 
@@ -66,5 +67,6 @@ None -- this is a type-only pulse with no runtime dependencies. However, the typ
 
 - [ ] L0 unit (6 tests): OCWorkspaceIR construction (1), SoulIR optional fields (1), ToolsIR trust validation (1), DiagnosticSeverity enum (1), round-trip serialization (1), malformed JSON rejection (1)
 - [ ] L1 integration (2 tests): reader fixture maps to IR (1), round-trip preserves complex types (1)
+- [ ] L3 acceptance (1 test): forma/cross-package scenario findings verified (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

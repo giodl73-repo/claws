@@ -14,6 +14,19 @@ import { createHash } from 'node:crypto';
 import { DEFAULT_FILE_SOURCES } from './types.js';
 
 import { CLAWS_SDK_VERSION } from '../version.js';
+import {
+  PhaseCache,
+  DependencyGraph,
+  type PhaseName,
+  type PhaseOutput,
+  type CachedOutput,
+  type PhaseCacheOptions,
+} from './phase-cache.js';
+import {
+  CompilationQueue,
+  type CompileTrigger,
+  type CompileResult as QueueCompileResult,
+} from './compilation-queue.js';
 
 /**
  * Cache file location within the .claws sidecar.
@@ -213,3 +226,171 @@ export async function store(
     { encoding: 'utf-8', mode: 0o600 },
   );
 }
+
+/**
+ * Per-file hash entry tracked by {@link IncrementalCompilationCache}.
+ * Holds the current SHA-256 of the file's on-disk content so callers
+ * can detect which file(s) actually changed between recompiles.
+ */
+export interface FileHashEntry {
+  readonly filePath: string;
+  readonly hash: string;
+}
+
+/**
+ * Plan returned from {@link IncrementalCompilationCache.planRecompile}.
+ * `phases` is the minimal set of phases to re-run; `changedFiles` is
+ * the subset of tracked files whose hash differs from the stored value.
+ * A null or empty `phases` signals a full-rebuild fallback — either
+ * the dependency graph is unpopulated or an unknown file changed.
+ */
+export interface RecompilePlan {
+  readonly fullRebuild: boolean;
+  readonly phases: readonly PhaseName[];
+  readonly changedFiles: readonly string[];
+}
+
+/**
+ * Options for {@link IncrementalCompilationCache}.
+ */
+export interface IncrementalCacheOptions {
+  readonly phaseCache?: PhaseCacheOptions;
+}
+
+/**
+ * Incremental compilation cache — binds per-file hashes, a phase-output
+ * cache, and a file→phase dependency graph into a single coordinator.
+ *
+ * Hot path:
+ * 1. File changes on disk → caller updates the file hash.
+ * 2. {@link planRecompile} inspects hash deltas → returns minimal phase
+ *    list from the dependency graph.
+ * 3. Caller iterates phases; {@link getPhase} returns cached output
+ *    for unchanged inputs, {@link setPhase} caches fresh outputs.
+ *
+ * This class sits on top of the existing file-level `check`/`store`
+ * functions rather than replacing them: the on-disk cache still guards
+ * cold starts, while this in-memory layer drives warm recompiles.
+ */
+export class IncrementalCompilationCache {
+  private readonly fileHashes = new Map<string, string>();
+  readonly phases: PhaseCache;
+  readonly graph: DependencyGraph;
+
+  constructor(options: IncrementalCacheOptions = {}) {
+    this.phases = new PhaseCache(options.phaseCache);
+    this.graph = new DependencyGraph();
+  }
+
+  /**
+   * Record the current on-disk hash for an OC file. Returns `true` if
+   * the hash changed from the previous value (or was never seen),
+   * `false` if it is byte-identical to the last recording.
+   */
+  updateFileHash(filePath: string, content: string): boolean {
+    const hash = hashContent(content);
+    const prior = this.fileHashes.get(filePath);
+    this.fileHashes.set(filePath, hash);
+    return prior !== hash;
+  }
+
+  /**
+   * Explicitly install a pre-computed hash. Used by callers that
+   * already hashed the file for another purpose (manifest signing,
+   * audit chain) and want to avoid the re-read.
+   */
+  setFileHash(filePath: string, hash: string): void {
+    this.fileHashes.set(filePath, hash);
+  }
+
+  /** Current hash for a tracked file, or `undefined`. */
+  getFileHash(filePath: string): string | undefined {
+    return this.fileHashes.get(filePath);
+  }
+
+  /**
+   * Determine the minimal recompile plan given a set of candidate
+   * file changes. A file whose hash matches the stored value is
+   * dropped from the plan; a file the graph does not know about
+   * triggers a full rebuild.
+   *
+   * **VersionStore coordination invariant** (see B2): a `{ phases: [],
+   * fullRebuild: false, changedFiles: [] }` result means "no recompile
+   * required" — but it does NOT mean "no version recorded." Every
+   * successful PATCH that advances the version counter MUST record a
+   * `VersionSnapshot` before returning, even when this planner reports
+   * nothing to do. The caller re-uses the previous IR reference in that
+   * case (hash-equal write → same GovernanceIR, new version number).
+   * Skipping the record() would leave `VersionStore.get(vN)` returning
+   * `out_of_range` for a version the ETag chain already advertised to
+   * the client, breaking time-travel of recent writes.
+   */
+  planRecompile(candidateFiles: readonly FileHashEntry[]): RecompilePlan {
+    if (!this.graph.hasDependencies) {
+      return { fullRebuild: true, phases: [], changedFiles: candidateFiles.map((c) => c.filePath) };
+    }
+    const changed: string[] = [];
+    for (const { filePath, hash } of candidateFiles) {
+      if (this.fileHashes.get(filePath) !== hash) changed.push(filePath);
+    }
+    if (changed.length === 0) {
+      return { fullRebuild: false, phases: [], changedFiles: [] };
+    }
+    const affected = new Set<PhaseName>();
+    for (const file of changed) {
+      const phases = this.graph.phasesFor(file);
+      if (phases.size === 0) {
+        return { fullRebuild: true, phases: [], changedFiles: changed };
+      }
+      for (const phase of phases) affected.add(phase);
+    }
+    return { fullRebuild: false, phases: [...affected], changedFiles: changed };
+  }
+
+  /**
+   * Get a cached phase output keyed by the composite hash of its
+   * inputs. Convenience wrapper over {@link PhaseCache.get}.
+   */
+  getPhase(phase: PhaseName, inputHashes: readonly string[]): CachedOutput | undefined {
+    return this.phases.get(phase, inputHashes);
+  }
+
+  /**
+   * Store a fresh phase output and record its input dependencies.
+   * `dependsOn` is the list of OC files whose content fed the phase;
+   * the dependency graph uses it to route future invalidations.
+   */
+  setPhase(
+    phase: PhaseName,
+    inputHashes: readonly string[],
+    output: PhaseOutput,
+    dependsOn: readonly string[] = [],
+  ): void {
+    this.phases.set(phase, inputHashes, output);
+    if (dependsOn.length > 0) this.graph.record(phase, dependsOn);
+  }
+
+  /** Drop phase entries affected by `filePath` via the dependency graph. */
+  invalidateFile(filePath: string): void {
+    this.phases.invalidateByFile(filePath, this.graph);
+  }
+
+  /** Full reset — drops file hashes, phases, and the dependency graph. */
+  clear(): void {
+    this.fileHashes.clear();
+    this.phases.clear();
+    this.graph.clear();
+  }
+}
+
+export {
+  PhaseCache,
+  DependencyGraph,
+  CompilationQueue,
+  type PhaseName,
+  type PhaseOutput,
+  type CachedOutput,
+  type PhaseCacheOptions,
+  type CompileTrigger,
+  type QueueCompileResult,
+};

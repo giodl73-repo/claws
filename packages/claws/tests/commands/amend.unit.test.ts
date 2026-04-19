@@ -153,7 +153,7 @@ describe('claws amend', () => {
     try {
       const code = await runAmendCmd(ctx, { ...defaultOpts });
       expect(code).toBe(3);
-      expect(spy.mock.calls.flat().join(' ')).toContain('CLAWS-E010');
+      expect(spy.mock.calls.flat().join(' ')).toContain('OC-POLICY-E010');
     } finally {
       spy.mockRestore();
     }
@@ -166,7 +166,7 @@ describe('claws amend', () => {
       const code = await runAmendCmd(ctx, { ...defaultOpts, json: true });
       expect(code).toBe(3);
       const parsed = JSON.parse(spy.mock.calls.flat().join(''));
-      expect(parsed.error.code).toBe('CLAWS-E010');
+      expect(parsed.error.code).toBe('OC-POLICY-E010');
     } finally {
       spy.mockRestore();
     }

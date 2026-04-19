@@ -26,9 +26,9 @@ export type FailMode<R extends RuleLevel> = R extends 5
   : 'open' | 'closed';
 
 /**
- * CLAWS-E001: R5 rule cannot have fail-open mode.
+ * OC-POLICY-E001: R5 rule cannot have fail-open mode.
  *
  * Thrown at runtime when deserializing GovernanceIR from JSON
  * and an R5 rule is found with `failMode: 'open'`.
  */
-export const CLAWS_E001 = 'CLAWS-E001: R5 rule must fail-closed — fail-open is forbidden for critical rules';
+export const OC_POLICY_E001 = 'OC-POLICY-E001: R5 rule must fail-closed — fail-open is forbidden for critical rules';

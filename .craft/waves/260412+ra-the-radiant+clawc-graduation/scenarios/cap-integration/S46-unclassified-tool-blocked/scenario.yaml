@@ -1,0 +1,263 @@
+name: S46-unclassified-tool-blocked
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12, CL-06, CL-14]
+description: >
+  Validates that tools present in workspace files but absent from the last-good
+  GovernanceIR are treated as unclassified and blocked under fail-closed R5
+  semantics during DEGRADED_R5. The OC runtime installs a skill whose tools
+  exist in TOOLS.md but were never compiled into the IR. Those tools receive
+  a defaulted risk classification (level 5, label "transact") with provenance
+  "unclassified" rather than a genuine R5 classification from the compiler.
+  Chunks expose the distinction via lock.source. Once the violation is fixed
+  and a clean compile runs, the tools receive real classifications and become
+  available.
+
+expect:
+  degraded_state:
+    trigger: oc_runtime_skill_install
+    state: DEGRADED_R5
+    last_good_ir_served: true
+  unclassified_tools:
+    present_in_workspace: true
+    absent_from_last_good_ir: true
+    block.source: 'r5'
+    lock_source: "unclassified"
+    defaulted_risk:
+      level: 5
+      label: "transact"
+  provenance_distinction:
+    classified_r5_lock_source: "classified"
+    unclassified_r5_lock_source: "unclassified"
+  resolution:
+    fix_elicitation_gate: true
+    clean_compile: true
+    tools_reclassified: true
+    final_state: CLEAN
+
+simulate:
+  failures:
+    - type: oc_runtime_write
+      target: TOOLS.md
+      content: "skill with 3 new tools not in last-good IR"
+  halt: null
+  budget: null
+
+problem: >
+  An agent's OC runtime installs a skill by writing to TOOLS.md. The skill
+  adds three tools: "provision-env", "rotate-secrets", and "deploy-canary".
+  The file watcher detects the write, the system enters DEGRADED_R5 because
+  the skill was installed without an elicitation gate. The last-good
+  GovernanceIR serves, but these three tools do not exist in that IR — they
+  are entirely new. The system must: (1) detect that the tools are in the
+  workspace schema but absent from the serving IR, (2) treat them as
+  unclassified and block them under fail-closed R5 semantics, (3) mark them
+  distinctly from tools that were compiled and genuinely classified as R5,
+  (4) expose the distinction in chunk metadata (lock.source "unclassified" vs
+  "classified"), (5) default their risk to {level: 5, label: "transact"} since
+  no compiler classification exists, (6) block approval events for unclassified
+  tools (cannot approve what has not been classified), (7) handle the case
+  where 10+ tools are all unclassified without per-tool overhead degrading
+  chunk assembly performance, (8) check session-tool lists also block
+  unclassified tools, (9) show prior classification if the tool existed in a
+  previous version (time-travel), (10) include "unclassified — pending
+  compilation" in chunk governance context, (11) on fix and clean compile,
+  reclassify all tools and make them available, (12) handle USER.md pre-auth
+  for unclassified tools (pre-auth on defaulted R5 still requires per-call
+  approval).
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      Tools present in workspace files but absent from the last-good
+      GovernanceIR must be blocked under fail-closed semantics. The chunk
+      assembly layer must compare the workspace schema (tools discovered in
+      TOOLS.md by the file parser) against the serving IR (the last-good
+      compilation). Any tool in the workspace schema but missing from the IR
+      is unclassified. The system must never serve an unclassified tool as
+      "available" or "unblocked." If the chunk assembly skips tools not in
+      the IR, the partner sees them in the workspace file but not in chunks,
+      creating a confusing gap. They must appear in chunks as blocked.
+    spec_impact: "CL-12 fail-closed — unclassified tools appear in chunks as blocked; never omitted, never available"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      The chunk metadata must distinguish between "classified R5" (the
+      compiler evaluated the tool and assigned risk level 5) and "unclassified
+      defaulted to R5" (the tool was never compiled, so the system applied
+      fail-closed defaults). The distinction is in lock.source: "classified"
+      means the compiler produced the R5 classification; "unclassified" means
+      the system defaulted to R5 because no classification exists. Partners
+      need this provenance to render different UX — a classified R5 tool
+      needs elicitation gate configuration, while an unclassified tool needs
+      compilation first. If both show the same lock.source, the admin cannot
+      tell which tools need compilation vs which need policy changes.
+    spec_impact: "CL-12 provenance — lock.source distinguishes 'classified' (compiler R5) from 'unclassified' (defaulted R5)"
+    pitfall: null
+
+  - id: F03
+    severity: critical
+    description: >
+      The defaulted risk for unclassified tools must be {level: 5, label:
+      "transact"} — the highest risk level. The label "transact" is the
+      default because unclassified tools have unknown side effects that may
+      include transactional operations. The system must NOT default to a
+      lower risk level (e.g., R3 "read") based on the tool's name or
+      description heuristics. Fail-closed means assume worst case. If the
+      default risk is configurable, it must only be configurable by fleet
+      policy, not by the workspace admin — otherwise an admin could lower
+      the default to bypass classification.
+    spec_impact: "CL-10 fail-closed default — always R5 transact; not heuristic; not admin-configurable; fleet-policy only"
+    pitfall: null
+
+  - id: F04
+    severity: critical
+    description: >
+      Approval events must be rejected for unclassified tools. If a partner
+      sends POST /api/approval with a tool ID that has lock.source
+      "unclassified", the response must be 422 with error
+      TOOL_NOT_CLASSIFIED: "Cannot approve an unclassified tool. Fix the
+      elicitation gate violation and recompile to classify this tool." An
+      unclassified tool has no compiler-assigned risk level, trust tier, or
+      governance policy — there is nothing to approve against. Allowing
+      approval would create an approval record with no backing classification,
+      which becomes invalid the moment the tool is compiled with a different
+      risk level.
+    spec_impact: "CL-12 approval block — 422 TOOL_NOT_CLASSIFIED for unclassified tools; no approval without classification"
+    pitfall: null
+
+  - id: F05
+    severity: critical
+    description: >
+      Session tool lists (the per-session tool roster served to the agent)
+      must also block unclassified tools. The session tool list is derived
+      from the GovernanceIR, and unclassified tools are not in the IR. If
+      the session tool list is built from the workspace schema instead of
+      the IR, unclassified tools could appear as available in the session.
+      The session tool list must be built from the IR (which excludes
+      unclassified tools), with unclassified tools appended as blocked
+      entries. The agent must see the tool in its roster (so it knows the
+      tool exists) but with status "blocked" and reason "unclassified."
+    spec_impact: "CL-12 session tools — built from IR + unclassified appended as blocked; agent sees tool exists but cannot invoke"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      When 10 or more tools are all unclassified (e.g., a large skill
+      installs a tool suite), chunk assembly must not degrade in performance.
+      If each unclassified tool requires an individual lookup against the IR
+      to confirm absence, 10 lookups per chunk request adds latency. The
+      chunk assembly should build an unclassified tool set once during the
+      workspace-schema-to-IR reconciliation (which runs at recompile time)
+      and cache it. Subsequent chunk requests consult the cached set (O(1)
+      per tool) rather than re-querying the IR. The cache must be invalidated
+      on recompile.
+    spec_impact: "CL-06 performance — unclassified set cached at recompile time; O(1) lookup per tool in chunk assembly"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      If the tool existed in a previous compilation version (e.g., version
+      N-2 classified it as R3), the chunk metadata should include a
+      time-travel hint: {previous_classification: {version: "N-2", risk:
+      {level: 3, label: "read"}}}. This tells the admin that the tool was
+      once classified and may have been removed and re-added. The
+      time-travel hint is informational only — it does not affect the
+      current blocking decision (fail-closed still applies). The hint is
+      sourced from the version store's historical IR entries. If the version
+      store does not have the tool's history, the hint is omitted (not
+      fabricated).
+    spec_impact: "CL-06 time-travel — chunk includes previous_classification from version store; informational only; no effect on blocking"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      The chunk governance context for unclassified tools must include the
+      string "unclassified — pending compilation" so that partners rendering
+      governance UX can display a clear message. The governance context must
+      also include the reason the tool is unclassified: "Tool present in
+      workspace schema but absent from serving GovernanceIR. System is in
+      DEGRADED_R5. A clean compile is required to classify this tool." This
+      is distinct from the governance context for a classified-R5 tool,
+      which would say "R5: requires elicitation gate and per-call approval."
+    spec_impact: "CL-10 governance context — 'unclassified — pending compilation' with reason; distinct from classified R5 message"
+    pitfall: null
+
+  - id: F09
+    severity: major
+    description: >
+      The fix path must be: (1) admin fixes the elicitation gate violation
+      that caused DEGRADED_R5, (2) system recompiles (triggered by file
+      watcher or manual POST /api/compile), (3) compilation succeeds and
+      classifies all tools including the previously unclassified ones,
+      (4) the unclassified tool set is cleared, (5) state transitions to
+      CLEAN, (6) tools become available with their real classifications.
+      If the fix only resolves the DEGRADED_R5 trigger but the compilation
+      still cannot classify a tool (e.g., the tool definition is malformed),
+      that tool remains unclassified and the system stays in or re-enters
+      a degraded state.
+    spec_impact: "CL-10 fix path — fix violation, recompile, classify all, clear unclassified set, CLEAN; malformed tools stay unclassified"
+    pitfall: null
+
+  - id: F10
+    severity: major
+    description: >
+      If the admin pre-authorizes an unclassified tool in USER.md (e.g.,
+      adding "allow: provision-env" to the user's tool permissions), the
+      pre-authorization must NOT bypass the fail-closed block. Pre-auth on
+      a defaulted-R5 tool still requires per-call approval, and per-call
+      approval is rejected for unclassified tools (see F04). The pre-auth
+      record is stored but dormant until the tool is classified. Once the
+      tool is compiled and classified (e.g., as R4), the pre-auth may take
+      effect per the R4 policy. The system must not confuse "pre-authorized"
+      with "approved for execution."
+    spec_impact: "CL-12 pre-auth dormancy — USER.md pre-auth stored but dormant for unclassified tools; activates after classification"
+    pitfall: null
+
+  - id: F11
+    severity: major
+    description: >
+      The SSE event for an unclassified tool block must include the tool
+      name, the lock.source ("unclassified"), the defaulted risk, and the
+      number of unclassified tools in the current batch. The event type is
+      "governance:tool_blocked" with a sub-type "unclassified." Partners
+      subscribing to SSE must be able to filter for unclassified-specific
+      events vs classified-R5 events. If 10 tools are unclassified, one
+      aggregate SSE event with the list is preferred over 10 individual
+      events to reduce event storm on the SSE channel.
+    spec_impact: "CL-10 SSE events — governance:tool_blocked sub-type 'unclassified'; aggregate event for batch; filterable"
+    pitfall: null
+
+  - id: F12
+    severity: warning
+    description: >
+      The status endpoint must report unclassified tools separately from
+      classified-R5 blocked tools. The response should include:
+      {blocked_tools: [{name, lock_source: "classified", risk: {...}}, ...],
+      unclassified_tools: [{name, lock_source: "unclassified",
+      defaulted_risk: {...}}]}. Merging both into a single blocked_tools
+      array without the lock_source distinction forces the admin to inspect
+      each tool individually to understand why it is blocked.
+    spec_impact: "CL-10 status endpoint — separate unclassified_tools array from blocked_tools; clear provenance per tool"
+    pitfall: null
+
+  - id: F13
+    severity: warning
+    description: >
+      If the system has both classified-R5 tools (from the last-good IR)
+      and unclassified tools (new, not in IR) simultaneously, the violation
+      state is still DEGRADED_R5 (same state, not a new state). But the
+      violation list must contain two categories: {type:
+      "R5_MISSING_ELICITATION", tools: [...]} and {type: "UNCLASSIFIED",
+      tools: [...]}. When the admin fixes the elicitation gate and
+      recompiles, the classified-R5 tools may become compliant while the
+      formerly unclassified tools get their first classification. Both
+      categories must be tracked independently through the resolution.
+    spec_impact: "CL-10 mixed violations — two violation categories in same DEGRADED_R5 state; tracked and resolved independently"
+    pitfall: null

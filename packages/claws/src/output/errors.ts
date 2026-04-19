@@ -13,7 +13,7 @@
  * Structured error for user-facing output.
  */
 export interface ClawsError {
-  /** Error code (e.g. "CLAWS-E001", "CLAWS-E002"). */
+  /** Error code (e.g. "OC-POLICY-E001", "OC-POLICY-E002"). */
   readonly code: string;
   /** WHAT happened — concise description. */
   readonly what: string;
@@ -21,7 +21,7 @@ export interface ClawsError {
   readonly howToFix: string;
   /** WHERE in docs — URL or CLI help hint. */
   readonly docsRef: string;
-  /** Optional CLI help command hint (e.g. "Run `claws help CLAWS-E080`"). */
+  /** Optional CLI help command hint (e.g. "Run `claws help OC-POLICY-E080`"). */
   readonly docsHint?: string;
 }
 
@@ -52,7 +52,7 @@ export function formatErrorJson(err: ClawsError): string {
  */
 export function noWorkspaceError(): ClawsError {
   return {
-    code: 'CLAWS-E010',
+    code: 'OC-POLICY-E010',
     what: 'No claws.json found in this directory or any parent.',
     howToFix: 'Run `claws init` to create a governance configuration.',
     docsRef: 'https://claws.dev/docs/getting-started',
@@ -64,7 +64,7 @@ export function noWorkspaceError(): ClawsError {
  */
 export function compileFailedError(reason: string): ClawsError {
   return {
-    code: 'CLAWS-E020',
+    code: 'OC-POLICY-E020',
     what: `Compilation failed: ${reason}`,
     howToFix: 'Check your workspace files (SOUL.md, TOOLS.md, etc.) for syntax errors.',
     docsRef: 'https://claws.dev/docs/compile',
@@ -76,7 +76,7 @@ export function compileFailedError(reason: string): ClawsError {
  */
 export function noSourceFilesError(): ClawsError {
   return {
-    code: 'CLAWS-E021',
+    code: 'OC-POLICY-E021',
     what: 'No governance source files found (SOUL.md, TOOLS.md, etc.).',
     howToFix: 'Create at least one governance file. Run `claws init --template soc2` for a starter.',
     docsRef: 'https://claws.dev/docs/workspace-files',
@@ -88,11 +88,11 @@ export function noSourceFilesError(): ClawsError {
  */
 export function alreadyInitializedError(configPath: string): ClawsError {
   return {
-    code: 'CLAWS-E080',
+    code: 'OC-POLICY-E080',
     what: `Workspace already initialized: ${configPath} exists.`,
     howToFix: `Remove or rename ${configPath} and run \`claws init\` again to reinitialize.`,
     docsRef: 'https://claws.dev/docs/init',
-    docsHint: 'Run `claws help CLAWS-E080` for details',
+    docsHint: 'Run `claws help OC-POLICY-E080` for details',
   };
 }
 
@@ -101,11 +101,11 @@ export function alreadyInitializedError(configPath: string): ClawsError {
  */
 export function initDetectFailedError(reason: string): ClawsError {
   return {
-    code: 'CLAWS-E083',
+    code: 'OC-POLICY-E083',
     what: `Platform detection failed: ${reason}`,
     howToFix: 'Check file permissions in the workspace and run `claws init` again.',
     docsRef: 'https://claws.dev/docs/init',
-    docsHint: 'Run `claws help CLAWS-E083` for details',
+    docsHint: 'Run `claws help OC-POLICY-E083` for details',
   };
 }
 
@@ -114,11 +114,11 @@ export function initDetectFailedError(reason: string): ClawsError {
  */
 export function initWriteFailedError(reason: string): ClawsError {
   return {
-    code: 'CLAWS-E081',
+    code: 'OC-POLICY-E081',
     what: `Init failed: ${reason}`,
     howToFix: 'Check write permissions in the workspace directory and try again.',
     docsRef: 'https://claws.dev/docs/init',
-    docsHint: 'Run `claws help CLAWS-E081` for details',
+    docsHint: 'Run `claws help OC-POLICY-E081` for details',
   };
 }
 
@@ -130,11 +130,11 @@ export function templateNotFoundError(
   available: readonly string[],
 ): ClawsError {
   return {
-    code: 'CLAWS-E082',
+    code: 'OC-POLICY-E082',
     what: `Template "${name}" not found.`,
     howToFix: `Available templates: ${available.join(', ')}. Use --template <name>.`,
     docsRef: 'https://claws.dev/docs/templates',
-    docsHint: 'Run `claws help CLAWS-E082` for details',
+    docsHint: 'Run `claws help OC-POLICY-E082` for details',
   };
 }
 
@@ -143,7 +143,7 @@ export function templateNotFoundError(
  */
 export function llmApiKeyMissingError(provider = 'Anthropic', envVar = 'ANTHROPIC_API_KEY'): ClawsError {
   return {
-    code: 'CLAWS-E040',
+    code: 'OC-POLICY-E040',
     what: `--llm requires ${provider} API key (${envVar}), but it is not set.`,
     howToFix: `Set ${envVar} in your environment before running claws with --llm.`,
     docsRef: 'https://claws.dev/docs/llm-extraction',
@@ -155,7 +155,7 @@ export function llmApiKeyMissingError(provider = 'Anthropic', envVar = 'ANTHROPI
  */
 export function llmSdkMissingError(sdkPackage = '@anthropic-ai/sdk'): ClawsError {
   return {
-    code: 'CLAWS-E041',
+    code: 'OC-POLICY-E041',
     what: `--llm requires ${sdkPackage}, but the package is not installed.`,
     howToFix: `Install the LLM SDK: npm install ${sdkPackage}`,
     docsRef: 'https://claws.dev/docs/llm-extraction',

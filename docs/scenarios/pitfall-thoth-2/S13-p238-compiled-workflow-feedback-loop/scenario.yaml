@@ -18,7 +18,7 @@ expect:
     analysis:
       rules_evaluated: true
   violations:
-    - code: CLAWS-E201
+    - code: OC-POLICY-E201
       message: "Compiled workflow detected as source input — workflow.yaml contains claws compilation markers"
       severity: error
   warnings: []
@@ -56,7 +56,7 @@ findings:
       frontmatter marker (e.g., __claws_compiled: true, version: X,
       compiled_at: timestamp) that the PARSE phase checks before processing.
       If the marker is present, the file is rejected as source with
-      CLAWS-E201. The marker must be in a location that survives common
+      OC-POLICY-E201. The marker must be in a location that survives common
       file transformations (renaming, moving, copying).
     spec_impact: "CL-04 PARSE — compiled artifact detection marker"
     pitfall: P-238

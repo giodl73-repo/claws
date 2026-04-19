@@ -1,7 +1,7 @@
 # CL-04: Compilation Pipeline
 
-**Status**: Draft
-**Source**: Q12j, Q12m
+**Status**: Draft v1.1
+**Source**: Q12j, Q12m, claws-compile-dx plan (Ra)
 **Reviewers**: compiler-architect, platform-engineer, security-architect
 
 ---
@@ -183,11 +183,11 @@ Workspace files      claws compile (phases 1-3)         claws build (phases 4-5)
 
 **Platform field name mapping** (emit-S08-F07): exec-approvals.json MUST use the OC platform's field names. A field name mapping layer in the emit phase translates claws's internal names to platform-native names per platform version.
 
-**Per-tool error granularity** (fail-S01-F07): If claws.json has multiple R5 tools and only one has fail-open override, the compiler reports CLAWS-E001 for the specific tool, not the entire configuration. Other R5 tools with fail-closed compile normally.
+**Per-tool error granularity** (fail-S01-F07): If claws.json has multiple R5 tools and only one has fail-open override, the compiler reports OC-POLICY-E001 for the specific tool, not the entire configuration. Other R5 tools with fail-closed compile normally.
 
-**Error code registry planning** (fail-S01-F02): CLAWS-E001 is the first error code. The registry categorizes codes: E0xx for type-level violations, E1xx for parse errors (CLAWS-P series), E2xx for rule violations, E3xx for emit errors. Warning code ranges: W015-W019 (G-CLASS), W020-W029 (G-ELICIT), W025-W026 (fail-mode), W030+ (runtime). The code space is planned before implementation. *(Source: SCV-S10-F07)*
+**Error code registry planning** (fail-S01-F02): OC-POLICY-E001 is the first error code. The registry categorizes codes: E0xx for type-level violations, E1xx for parse errors (CLAWS-P series), E2xx for rule violations, E3xx for emit errors. Warning code ranges: W015-W019 (G-CLASS), W020-W029 (G-ELICIT), W025-W026 (fail-mode), W030+ (runtime). The code space is planned before implementation. *(Source: SCV-S10-F07)*
 
-**Developer-friendly error messages** (fail-S01-F04): Error messages include both the technical constraint and the WHY. CLAWS-E001 message: "R5 fail-open is structurally prohibited — R5 tools act as the user; if the governance hook crashes, the tool must NOT execute."
+**Developer-friendly error messages** (fail-S01-F04): Error messages include both the technical constraint and the WHY. OC-POLICY-E001 message: "R5 fail-open is structurally prohibited — R5 tools act as the user; if the governance hook crashes, the tool must NOT execute."
 
 **Fail-open code generation correctness** (fail-S02-F05): The generated plugin code for R1 fail-open MUST contain `catch(err) { return undefined; }` (allow). The code for R3 fail-closed MUST contain `catch(err) { return { block: true, blockReason: ... } }`. A test verifies the generated catch behavior per risk level.
 
@@ -416,7 +416,7 @@ const r5rule: GovernanceRule<5> = { riskLevel: 5, failMode: "fail-closed" };
 //                                                ^^^^^^^^ Type '"fail-open"' is not assignable to type '"fail-closed"'
 ```
 
-The EMIT phase checks this at the IR level before code generation. If any GovernanceRule with `riskLevel: 5` has `failMode !== "fail-closed"`, the compiler aborts with `CLAWS-E001: R5 fail-open is structurally prohibited`. This is the compiler's refusal to emit R5 fail-open, implemented as a type constraint rather than a runtime assertion.
+The EMIT phase checks this at the IR level before code generation. If any GovernanceRule with `riskLevel: 5` has `failMode !== "fail-closed"`, the compiler aborts with `OC-POLICY-E001: R5 fail-open is structurally prohibited`. This is the compiler's refusal to emit R5 fail-open, implemented as a type constraint rather than a runtime assertion.
 
 ### Conformance: IR Naming and Craftworks Patterns
 
@@ -987,7 +987,7 @@ The key insight: L2-L4 enforcement consumes ZERO tokens. The governance plugin i
 
 **Multi-plugin handler registry** (PF2-S12-F07 warning): Registry includes ALL handler exports from ALL plugins, not just claws-generated ones. Requires parsing all plugin index.ts files.
 
-**Unconditional deny-on-timeout generation** (PF2-S23-F02 major): Emit ALWAYS generates deny-on-timeout. `approveOnTimeout: true` = CLAWS-E042 build failure.
+**Unconditional deny-on-timeout generation** (PF2-S23-F02 major): Emit ALWAYS generates deny-on-timeout. `approveOnTimeout: true` = OC-POLICY-E042 build failure.
 
 **Platform-version-independent timeout override** (PF2-S23-F06 warning): Generated handler always includes deny override regardless of platform version. Defends against version regression.
 
@@ -1165,9 +1165,9 @@ The key insight: L2-L4 enforcement consumes ZERO tokens. The governance plugin i
 
 ### Lossless Round-Trip
 
-**P-237: Generated Skill Directory Collision** *(Sources: PT2-S12-F01, PT2-S12-F02, PT2-S12-F03, PT2-S12-F04, PT2-S12-F05, PT2-S12-F06, PT2-S12-F07, PT2-S12-F08)*: The EMIT phase must scan the target directory for existing files before writing, failing with CLAWS-E200 if user-authored content exists (determined by absence of a .claws-generated marker). The reserved directory name must be configurable in claws.json (defaulting to .claws-governance/ to minimize collision). A .claws-generated marker file distinguishes emitted files from user-authored files. Collision checks must be recursive across subdirectories, case-insensitive on Windows/macOS, and run before any file writes to ensure atomic emission. Error messages must identify both the intended path and existing content, and mixed-ownership directories must only overwrite marker-bearing files.
+**P-237: Generated Skill Directory Collision** *(Sources: PT2-S12-F01, PT2-S12-F02, PT2-S12-F03, PT2-S12-F04, PT2-S12-F05, PT2-S12-F06, PT2-S12-F07, PT2-S12-F08)*: The EMIT phase must scan the target directory for existing files before writing, failing with OC-POLICY-E200 if user-authored content exists (determined by absence of a .claws-generated marker). The reserved directory name must be configurable in claws.json (defaulting to .claws-governance/ to minimize collision). A .claws-generated marker file distinguishes emitted files from user-authored files. Collision checks must be recursive across subdirectories, case-insensitive on Windows/macOS, and run before any file writes to ensure atomic emission. Error messages must identify both the intended path and existing content, and mixed-ownership directories must only overwrite marker-bearing files.
 
-**P-238: Compiled Workflow Feedback Loop** *(Sources: PT2-S13-F01, PT2-S13-F02, PT2-S13-F03, PT2-S13-F05, PT2-S13-F06, PT2-S13-F07)*: Every claws-compiled artifact must contain an immutable header marker (e.g., __claws_compiled: true) that the PARSE phase checks before processing, rejecting the file with CLAWS-E201 if detected. Detection must be content-based rather than filename-based since users routinely rename files. A single compilation cycle must be idempotent: compiling already-compiled output must produce an error, not compound governance rules. The PARSE phase must also distinguish source from output directories via claws.json configuration and detect structural patterns of compiled output even without the marker as defense-in-depth. The compiled artifact marker should include a source hash chain for staleness detection.
+**P-238: Compiled Workflow Feedback Loop** *(Sources: PT2-S13-F01, PT2-S13-F02, PT2-S13-F03, PT2-S13-F05, PT2-S13-F06, PT2-S13-F07)*: Every claws-compiled artifact must contain an immutable header marker (e.g., __claws_compiled: true) that the PARSE phase checks before processing, rejecting the file with OC-POLICY-E201 if detected. Detection must be content-based rather than filename-based since users routinely rename files. A single compilation cycle must be idempotent: compiling already-compiled output must produce an error, not compound governance rules. The PARSE phase must also distinguish source from output directories via claws.json configuration and detect structural patterns of compiled output even without the marker as defense-in-depth. The compiled artifact marker should include a source hash chain for staleness detection.
 
 **P-239: UTF-8 BOM First Constraint Missed** *(Sources: PT2-S14-F01, PT2-S14-F02, PT2-S14-F03, PT2-S14-F04, PT2-S14-F05, PT2-S14-F06, PT2-S14-F07)*: BOM stripping must occur at the I/O boundary as the very first file reading operation, before any content reaches the parser. The parser must count expected constraints against extracted constraints, producing at minimum a warning on mismatch. BOM handling must cover all three variants: UTF-8 (EF BB BF), UTF-16 LE (FF FE), and UTF-16 BE (FE FF), normalizing to UTF-8 after stripping. The GovernanceIR must record a diagnostic entry noting which files had BOMs. Only the leading BOM is stripped; interior BOM-like sequences are preserved. The GovernanceIR content hash must be computed on BOM-stripped content, and test fixtures must include actual BOM bytes committed as binary blobs with .gitattributes protection.
 
@@ -1237,6 +1237,130 @@ The key insight: L2-L4 enforcement consumes ZERO tokens. The governance plugin i
 
 **IB-S04: Section Locks FE6** *(Sources: IB-S04-F02, IB-S04-F07)*: The `<!-- lock:admin -->` directive is an HTML comment that must survive all parser stages. If FORMA's frontmatter extraction strips HTML comments during section extraction, the lock is silently removed and enforcement is bypassed -- lock directives must be treated as metadata, not content. Section hash computation must normalize line endings before hashing to prevent false-positive lock violations when files move between Windows (CRLF) and macOS (LF) environments.
 
+## Incremental Stages
+
+*Added by the `claws-compile-dx` plan (Ra wave). Drives `claws watch` (H1) by making per-file edits cheap; layers per-subsystem caching on top of the existing content-hash compile-level cache (CP-2, commit abf6d45d8).*
+
+The compile pipeline today has a single monolithic content-hash cache key — any file change invalidates the whole cache entry. Incremental compile adds a **per-stage cache layer** so that changing one input file only invalidates the stages that depend on it. The compile-level cache remains as a short-circuit fast path; per-stage caches run only when the compile-level cache misses.
+
+### §IS.1 Per-subsystem cache keys
+
+Each reader stage (`soul`, `tools`, `agents`, `memory`, `identity`, `user`, `heartbeat`, `skills`, `lobster`) gets its own cache entry. A stage's cache key is derived from:
+
+- The **content hash of the specific file(s) that stage reads** (e.g., `soul` stage's key is the SOUL.md content hash — not the whole workspace). The hash uses the same BOM-stripped, LF-normalized hashing as the IR hash (see LR-S02, LR-S03). The hash algorithm is **SHA-256**. *(Source: incremental/S01-F06)*
+- Plus `compiler.version` (per CL-14 §1.4 — a version bump invalidates all stage caches, matching the existing compile-level cache rule).
+- Plus any stage-specific configuration that affects output (e.g., the governance rule set version for stages that resolve against claws.json).
+- Plus the effective crypto/key identifier (see §IS.2 — key rotation is part of the effective cache key).
+- **Plus a `keySchemaVersion`** — a monotonic integer bumped whenever the set of inputs to cache-key derivation changes (e.g. adding a new input to the hash formula). Each cache entry stores its `keySchemaVersion` alongside the content; on read, a mismatch forces a cache miss. Without this, a future change to key derivation could produce silent hash collisions where two logically-different entries map to the same key. *(Source: incremental/S03-F07)*
+
+**Downstream stage cache keys** (`modelToIR`, `baselineAnalysis`, `enforceR5`, `emit`, `validate`) **MUST** include the content hashes (or `byteHash` outputs per §IS.4) of ALL upstream IR outputs they consume, so an upstream invalidation propagates transitively through the cache. A downstream stage whose key tracks only direct inputs could `cacheHit` on stale upstream output — serving the analyzer's output derived from a pre-edit `soul` IR, for example, and silently missing new principles in the emit. *(Source: incremental/S01-F03, S02-F04)*
+
+**Emit stage cache key additional input**: the emit stage's cache key **MUST** include a hash of the audit-chain signing key material (or the key's stable `key-id`). Emitted artifacts embed signed metadata; rotating the signing key without invalidating the emit cache would cause stale signatures to be served, silently breaking the audit chain at runtime without surfacing a compile-time error. The reader stages (pre-emit) are not required to include signing-key identity because their outputs do not carry signatures. *(Source: incremental/S03-F02)*
+
+**Cache lookup fast-path** *(Source: incremental/S01-F04)*: A naive lookup that re-reads each input file to compute its content hash costs ~1ms per file (file I/O dominates); eight lookups = ~8ms, blowing the "≤2ms per cacheHit stage" budget from the incremental scenarios. Stage cache lookups therefore MUST use an **mtime fast-path**: stat the input (~50μs) and compare against the stored mtime; only when mtime has changed does the reader re-hash the content to confirm the cache entry is still valid. Content-hash remains the authoritative correctness check — mtime is a hint that makes the common no-change case cheap.
+
+Stage cache entries are stored under `.claws/cache/stages/<stage-name>/<key>.json` alongside the existing compile-level entries. The `.claws/` boundary documented in LR-S01-F08 applies: stage caches are internal pipeline state, not workspace files.
+
+### §IS.2 Invalidation rules
+
+- **File change** → the corresponding reader stage's cache entry is invalidated (its content hash changes); downstream dependents are invalidated transitively via the dependency graph in §IS.3. Sibling readers that do not share the changed file stay cached.
+- **Key rotation** → **ALL** stage caches are invalidated. Crypto keys are part of the effective cache key because they affect OBO signing, sidecar encryption, and any stage output that embeds or references key material. A key rotation must not serve pre-rotation cached output.
+- **Compiler upgrade** (`compiler.version` bump) → **ALL** stage caches are invalidated. This matches the existing compile-level behavior from LR-S04-F08: generated-code template changes in a new compiler version must invalidate stale caches even when source content is byte-identical.
+- **claws.json change that affects rule resolution** → stages that consume the rule set are invalidated; file-only readers (pure content hash) are not.
+
+### §IS.3 Dependency graph between stages
+
+Reader stages are leaf nodes — they depend only on their own input file. Downstream stages depend on the reader outputs they consume.
+
+```
+Readers (leaves — cache per input file):
+  soul       ← SOUL.md              (no upstream dependency)
+  tools      ← TOOLS.md             (no upstream dependency)
+  agents     ← AGENTS.md            (no upstream dependency)
+  memory     ← MEMORY.md            (no upstream dependency)
+  identity   ← IDENTITY.md          (no upstream dependency)
+  user       ← USER.md              (no upstream dependency)
+  heartbeat  ← HEARTBEAT.md         (no upstream dependency)
+  skills     ← skills/*             (no upstream dependency)
+  lobster    ← lobster.yaml         (no upstream dependency)
+
+Aggregator and downstream stages:
+  modelToIR         ← ALL 9 reader outputs           (aggregator)
+  baselineAnalysis  ← modelToIR                      (ANALYZE phase)
+  enforceR5         ← baselineAnalysis               (analysis consumer)
+  emit              ← modelToIR + baselineAnalysis   (EMIT phase)
+  validate          ← emit output                    (post-emit checks)
+  cache.set         ← all of the above               (final compile-level cache entry)
+```
+
+**Invalidation semantics**: when a reader file changes, that reader's cache entry invalidates, but sibling readers can `cacheHit`. `modelToIR` re-runs because one of its inputs changed, but its work is cheap because 8 of 9 reader outputs are cached. `baselineAnalysis`, `enforceR5`, `emit`, and `validate` re-run transitively. The **bottom-line compile cache key still aggregates everything** (same CM-4 content-hash key), so a lobster-only edit still writes a fresh compile-level cache entry — but the per-stage work leading up to it is mostly skipped.
+
+**No cross-reader dependencies**: the 9 readers are deliberately independent so a change to any one file invalidates exactly one reader entry. Cross-file governance conflicts (§7 Cross-File Conflicts) are detected in `baselineAnalysis`, not in readers, so they do not create hidden dependencies between reader stages.
+
+### §IS.4 `CompileResult.stageTimings`
+
+A new field on the `CompileResult` type exposes per-stage cache outcomes so watch-mode UI (H1) and operators can see which stages were cached vs re-run:
+
+```typescript
+type StageName =
+  | 'soul' | 'tools' | 'agents' | 'memory' | 'identity'
+  | 'user' | 'heartbeat' | 'skills' | 'lobster'
+  | 'modelToIR' | 'baselineAnalysis' | 'enforceR5'
+  | 'emit' | 'validate';
+
+interface StageTiming {
+  readonly stage: StageName;
+  readonly cacheHit: boolean;
+  readonly durationMs: number;
+  readonly byteHash: string;  // content hash of the stage's effective input, for traceability
+}
+
+interface CompileResult {
+  // ... existing fields ...
+  readonly stageTimings: readonly StageTiming[];
+}
+```
+
+`byteHash` is the same normalized content hash used for the stage's cache key, which lets consumers correlate a `StageTiming` entry with the on-disk cache entry without re-hashing.
+
+`stageTimings` is **always populated**, including when the compile-level cache hits — in that case timings are synthesized from cached IR metadata so watch-mode UI can still show which stages were relevant even though none re-ran. Synthesized timings report `cacheHit: true` and `durationMs: 0`.
+
+### §IS.5 Backward compatibility with the compile-level cache
+
+Incremental stages layer on top of the existing content-hash compile-level cache (CP-2, commit abf6d45d8). The coexistence rules:
+
+- **The existing compile-level cache is NOT removed.** It remains a fast-path for the common case where the entire workspace is unchanged (a re-invocation with no edits).
+- **Compile-level cache hit → short-circuit.** If the compile-level cache hits, stage-level caches are never consulted. The short-circuit avoids redundant hashing work and keeps no-change compiles at their current sub-millisecond cost. `stageTimings` is synthesized from cached IR metadata per §IS.4.
+- **Compile-level cache miss → stage caches run first, THEN the bottom-line entry is written.** On miss, each stage consults its per-stage cache; hits skip the stage's work. At the end, the aggregated result is written to the compile-level cache so a future identical workspace re-hit takes the fast path.
+- **`stageTimings` is always populated** (fresh or synthesized), regardless of which cache path served the compile.
+
+This layering preserves the CP-2 performance guarantee for the no-change case while adding the per-stage optimization for the single-file-edit case that dominates `claws watch` usage.
+
+### §IS.6 Cross-references
+
+- **CL-14 §1.4** — `compiler.version` is part of every stage cache key (and the compile-level key).
+- **CL-14 §9** — `CompilerEventBus` emits per-stage events carrying the same `cacheHit` / `durationMs` payload surfaced on `StageTiming`.
+- **CL-01** — `claws watch` (pulse TBD) consumes `stageTimings` for per-change output; `claws cache list` (pulse TBD) enumerates stage cache entries alongside compile-level entries.
+- **LR-S02, LR-S03** — normalized hashing rules (BOM strip, LF normalize) that stage cache keys inherit.
+- **LR-S04-F08** — compiler-version-triggered invalidation; §IS.2 extends this from compile-level to stage-level.
+- **Plan**: `.craft/plans/claws-compile-dx.md` — H2 "Incremental compile skips unchanged subsystems" drove this amendment.
+
+### §IS.7 Emit atomic write + principle observability
+
+*Added by the scenario findings audit (watch/S03, incremental/S02, incremental/S03).*
+
+**Atomic emit writes** *(Source: watch/S03-F02, fleet/S01-F03)*: The emit pipeline MUST write every output file using **tempfile-plus-atomic-rename**, never in-place writes. An interrupted compile (SIGINT, SIGTERM, process crash, power loss) MUST leave either the old complete file or the new complete file on disk — never a partial. This guarantee underwrites (a) `claws watch` Ctrl-C cleanup (CL-01 §claws watch), (b) `claws fleet compile` per-workspace failure isolation (CL-01 §claws fleet compile), and (c) emit pipeline robustness generally. In-place writes are prohibited in the emit path.
+
+The tempfile naming convention is `<target-path>.tmp-<pid>-<nonce>` (e.g. `plugins/claws-governance/index.ts.tmp-4812-a3f1`). Stale tempfiles MUST be cleaned up either by the SIGINT handler OR by a startup sweep on the next compile invocation — stale tempfiles accumulating on disk confuse operators inspecting emit output. *(Source: watch/S03-F07)*
+
+**Principles observable in emit** *(Source: incremental/S02-F03)*: The emit contract MUST guarantee that SOUL.md principles surface in the generated governance plugin output in an **observable form** — either as generated code comments, exported constants, or runtime-queryable metadata on the plugin's exported object. Emitting principles as silent pipeline metadata (parsed but not rendered) would defeat the `incremental/S02` test assertion that an added principle reaches the emitted artifact, and more importantly would mean operators cannot verify that their SOUL.md edits are actually reaching production governance.
+
+**Signatures embedded in emit** *(Source: incremental/S03-F04)*: Emitted artifacts that carry signed metadata (per the audit chain) MUST embed the signature bytes directly in the emit output — not by reference to an external key material file. This makes key-rotation effects observable: after rotating the audit-chain signing key, the emit output bytes MUST differ from the pre-rotation bytes even if all 9 input files are unchanged. A byte-identical emit across a key rotation indicates either the signing step was a no-op or the rotation wasn't effective — both are silent bugs.
+
+**Deterministic JSON key ordering** *(Source: incremental/S01-F08)*: Emitted JSON files (e.g. `.claws-manifest.json`, Bedrock guardrail JSON) MUST use a stable key order — either alphabetic sort or a fixed schema-driven order. Non-deterministic key order defeats snapshot testing and produces spurious diffs across builds. This subsumes the general CL-14 §2.4 determinism requirement.
+
+**Stage-timing stability for snapshot testing**: `stageTimings` output (§IS.4) SHOULD be serializable to a deterministic JSON form (keys sorted, durations optionally rounded when snapshotting) so CI snapshots can detect cache-behavior regressions over time without bit-flip noise. *(Source: incremental/S01-F08)*
+
 ## Open Questions
 
 1. Should the compiler include an LLM-assisted extraction mode for SOUL.md constraints below the 0.5 confidence threshold?
@@ -1258,3 +1382,12 @@ The key insight: L2-L4 enforcement consumes ZERO tokens. The governance plugin i
 | Q12j | 5-phase pipeline, GovernanceIR types, mechanical intent extraction from 9 files, 7 cross-file conflict categories, workflow inversion, guard library architecture |
 | Q12m | claws-sdk sibling architecture, OperationIR TS emitter (OP9), QueryIR openclaw-memory target, DataFrame adapter inversion, IR reuse map (4 DIRECT, 4 EXTEND, 5 INSPIRE, 36 SKIP) |
 | R1 review | CB-10 SDK mapping fix, Dragon type-level R5 constraint, EMIT phase 4-artifact model, conformance to FORMA/RELAX/PRESS, three-engine model, skill vs plugin correction |
+| claws-compile-dx plan (Ra) | §Incremental Stages: per-subsystem cache keys, 9-reader dependency graph, `CompileResult.stageTimings`, compile-level/stage-level cache layering |
+
+## Version History
+
+| Version | Change | Source |
+|---------|--------|--------|
+| v1.0 | Initial draft: 5-phase pipeline, GovernanceIR, 7 cross-file conflicts, EMIT 4-artifact model, all amendment sections (PC2, PF1, PF2, Anubis-Thoth, Pitfall P-162+, Integration) | Q12j, Q12m, R1 review |
+| v1.1 | Added §Incremental Stages: per-subsystem cache keys, 9-reader dependency graph, `CompileResult.stageTimings` field, compile-level/stage-level cache layering rules. Enables `claws watch` (H1) and skips unchanged subsystems (H2). | `.craft/plans/claws-compile-dx.md` H2 |
+| v1.2 | Scenario findings audit (claws-compile-dx R1): §IS.1 strengthened (downstream-key includes upstream IR hashes, emit-key includes signing-key identity, SHA-256 explicit, mtime fast-path, keySchemaVersion); §IS.7 added (atomic emit writes, principles observable in emit, signatures embedded, deterministic JSON ordering, stageTimings snapshot stability) | `.craft/waves/260412+ra-the-radiant+claws-graduation/panels/claws-compile-dx-findings-audit/R1-audit.md` |

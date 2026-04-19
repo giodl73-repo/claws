@@ -58,7 +58,7 @@ findings:
     description: >
       Fleet-level agent registration must include a collision detection
       step. When a new agent registers with a name that already exists in
-      any workspace in the fleet, claws scan must emit a CLAWS-E-IDENTITY
+      any workspace in the fleet, claws scan must emit a OC-POLICY-E-IDENTITY
       error with both workspace paths and trust profiles. Silent collision
       is the worst outcome because it creates an exploitable ambiguity.
     spec_impact: "CL-02 G-A2A-IDENTITY — fleet-wide collision detection"

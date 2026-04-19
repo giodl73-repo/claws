@@ -10,7 +10,7 @@ description: >
 expect:
   rules_applied: [G-PERM]
   violations:
-    - code: CLAWS-E020
+    - code: OC-POLICY-E020
       rule: G-PERM
       description: "Non-standard capability 'READWRITE' — normalized to ['READ', 'WRITE']"
   pass: false
@@ -58,7 +58,7 @@ findings:
     severity: major
     description: >
       If normalization fails (no known mapping for the declared capability),
-      the parser must emit CLAWS-E020 as a hard error. An unrecognizable
+      the parser must emit OC-POLICY-E020 as a hard error. An unrecognizable
       capability cannot be silently ignored because ignoring it means
       no permission constraint. The developer must fix the declaration.
     spec_impact: "CL-02 G-PERM — unrecognizable capability is hard error"
@@ -101,7 +101,7 @@ findings:
       Custom capabilities: if a workspace defines custom capability types
       (e.g., "APPROVE" for financial workflows), they must be declared in
       claws.json capabilities.custom enum. Custom capabilities not in
-      the custom enum are treated as non-standard and trigger CLAWS-E020.
+      the custom enum are treated as non-standard and trigger OC-POLICY-E020.
     spec_impact: "CL-01 schema — custom capability types"
     pitfall: "P-146"
 

@@ -9,7 +9,7 @@ stage: implementation
 test_tiers:
   L0_unit: 4
   L1_integration: 2
-  L2_e2e: 0
+  L2_e2e: 1
   L3_accept: 1
 test_scope:
   run:
@@ -39,6 +39,7 @@ Key edge case: an all-R5 workspace (every tool is R5) → allow-all approves 0 t
 - [ ] `claws-serve/src/routes/allow-all.ts` (audit) — Audit trail entry on every allow-all: timestamp, actor identity, tools enabled (list), tools skipped (list with skip reason: 'r5'), before/after tool states. Writes to audit log via existing audit chain integration.
 - [ ] `claws-serve/tests/routes/allow-all.unit.test.ts` — L0: allow-all enables all non-R5 tools and returns correct summary (1), all-R5 workspace returns 200 with 0 enabled (1), already-enabled tools counted correctly in summary (1), audit entry includes full tool lists (1)
 - [ ] `claws-serve/tests/routes/allow-all.integration.test.ts` — L1: allow-all on mixed workspace (R1-R5 tools) → only R1-R4 enabled, R5 skipped, audit logged (1), allow-all → GET /api/chunks/connections reflects all non-R5 tools enabled (1)
+- [ ] `claws-serve/tests/routes/allow-all.e2e.test.ts` — L2: end-to-end allow-all on mixed workspace with R5 enforcement (1)
 - [ ] `claws-serve/tests/routes/allow-all.accept.test.ts` — L3: S05 acceptance — all-R5 workspace → allow-all approves 0 tools (1)
 - [ ] `claws-serve/tests/fixtures/all-r5-workspace/` — fixture workspace where every tool is classified R5
 - [ ] `claws-serve/tests/fixtures/mixed-risk-workspace/` — fixture workspace with tools at R1, R2, R3, R4, R5
@@ -52,6 +53,7 @@ Key edge case: an all-R5 workspace (every tool is R5) → allow-all approves 0 t
 - [ ] Audit trail entry logged with full tool lists, actor identity, and before/after states
 - [ ] Subsequent GET /api/chunks/connections reflects the allow-all changes
 - [ ] Route handler delegates to claws-sdk — no business logic in claws-serve
+- [ ] Allow-all is rejected (503) in ERROR state. In DEGRADED states, allow-all excludes tools with `lock.source: 'violation'` or `'unclassified'` in addition to R5 and fleet-locked.
 - [ ] `npx vitest run --project unit --coverage` passes coverage thresholds
 - [ ] `npx vitest run --project integration --coverage` passes coverage thresholds
 - [ ] `npm run build` exits 0
@@ -72,6 +74,7 @@ Load these role files before starting:
 
 - [ ] L0 unit (4 tests): allow-all enables non-R5 tools with correct summary (1), all-R5 workspace returns 200 with 0 enabled (1), already-enabled counted correctly (1), audit entry includes full tool lists (1)
 - [ ] L1 integration (2 tests): mixed workspace allow-all with audit (1), allow-all → GET consistency (1)
+- [ ] L2 e2e (1 test): end-to-end allow-all on mixed workspace (1)
 - [ ] L3 accept (1 test): S05 all-R5 workspace acceptance (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

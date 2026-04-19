@@ -11,8 +11,8 @@
  * @module claws-serve/compilation-host
  */
 
-import { hashContent, type GovernanceIR, type ICompilationHost } from '@bic/claws-sdk';
-export { hashContent } from '@bic/claws-sdk';
+import { hashContent, type GovernanceIR, type ICompilationHost } from '../../claws-sdk/src/index.js';
+export { hashContent } from '../../claws-sdk/src/index.js';
 
 /**
  * A compile function supplied by the consumer. Given a workspace root,

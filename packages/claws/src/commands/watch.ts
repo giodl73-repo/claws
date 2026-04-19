@@ -1,29 +1,32 @@
 /**
- * `claws watch` command — thin CLI adapter for the SDK watch engine.
+ * `claws watch` command — compile-watch CLI wrapper (pulse 81).
  *
- * Displays file change events in the terminal as they happen:
- *   file changed → re-checking → analyze → violations → recompile
+ * Thin UI adapter over the SDK's `startWatcher` (CL-01 §claws watch):
+ * parses --debounce / --verbose, resolves workspace root, starts the
+ * single-process chokidar watcher, installs SIGINT / SIGBREAK handlers,
+ * and renders one summary line per settled compile burst. Never prints
+ * absolute paths — every path surfaced to the user is workspace-relative
+ * (watch/S01-F05).
  *
- * When `--llm` is active, regex extraction runs immediately (sub-second)
- * and LLM extraction is queued as a background job. When the LLM result
- * returns, it merges into the next compile cycle.
- *
- * No business logic lives here. The SDK's Watcher, IncrementalParser,
- * AutoAnalyzer, AutoRecompiler, ExtractorLLM, and content-hash layer
- * do all the work.
+ * No business logic lives here. The debouncer, compile-queue, signal
+ * lifecycle, and atomic-write discipline all live in the SDK.
  *
  * @module claws-cli/commands/watch
  */
 
-import { parse } from '@bic/claws-sdk/compile';
-import type { ExtractionResult, LLMProvider } from '@bic/claws-sdk/compile';
+import { join } from 'node:path';
 import {
-  Watcher,
-  IncrementalParser,
-  AutoAnalyzer,
-  AutoRecompiler,
-} from '@bic/claws-sdk/watch';
-import type { WatchBatchEvent } from '@bic/claws-sdk/watch';
+  startWatcher,
+  installSignalHandlers,
+  toRelative,
+  DEFAULT_DEBOUNCE_MS,
+  MIN_DEBOUNCE_MS,
+} from '@bic/claws-sdk/compiler/watch';
+import type {
+  WatcherHandle,
+  WatchCompileSummary,
+} from '@bic/claws-sdk/compiler/watch';
+import { AutoSnapshotManager } from '@bic/claws-sdk/workspace';
 
 import type { PlatformContext } from '../hooks/pre-command.js';
 import { createPalette } from '../output/color.js';
@@ -37,39 +40,28 @@ import {
  * Options for the watch command.
  */
 export interface WatchOptions {
-  json: boolean;
-  verbose: boolean;
-  color: boolean;
-  llm?: boolean;
-  llmProvider?: LLMProvider;
+  readonly json: boolean;
+  readonly verbose: boolean;
+  readonly color: boolean;
+  /** Debounce window in ms. Undefined ⇒ SDK default (300ms). */
+  readonly debounceMs?: number;
 }
 
-/** LLM debounce window in milliseconds. */
-const LLM_DEBOUNCE_MS = 200;
+/** Default output directory for emitted artifacts (matches compile). */
+const DEFAULT_OUTPUT_DIR = '.claws/compiled';
 
-/** Maximum LLM extraction timeout in milliseconds. */
-const LLM_TIMEOUT_MS = 30_000;
-
-/**
- * Pending LLM job state — tracks an in-flight extraction so it can be
- * cancelled by rapid edits.
- */
-interface PendingLLMJob {
-  /** Files being extracted. */
-  readonly files: readonly string[];
-  /** AbortController for cancellation. */
-  readonly controller: AbortController;
-  /** Debounce timer handle. */
-  readonly timer: ReturnType<typeof setTimeout>;
-}
+/** Default cache directory (matches compile + cache CLI). */
+const DEFAULT_CACHE_DIR = '.claws/cache';
 
 /**
- * Run the watch command — start watching OC workspace files and display
- * change events in the terminal.
+ * Run the compile-watch command. Never resolves until the user sends a
+ * shutdown signal (SIGINT / SIGBREAK) — the signal handler routes through
+ * the SDK lifecycle module which awaits `handle.close()` before resolving
+ * the outer promise with exit code 0.
  *
  * @param ctx - Platform context from pre-command hook
- * @param opts - Command options
- * @returns Exit code (0 on graceful shutdown, 3 on error)
+ * @param opts - Command options (json, verbose, debounceMs)
+ * @returns Exit code (0 on graceful shutdown, 3 on no-workspace)
  */
 export async function runWatch(
   ctx: PlatformContext,
@@ -82,251 +74,191 @@ export async function runWatch(
   }
 
   const palette = createPalette(opts.color);
-  const llmEnabled = opts.llm === true && opts.llmProvider !== undefined;
-  const provider = llmEnabled ? opts.llmProvider! : null;
-
-  // Initial full parse to seed the incremental parser
-  const initialResult = await parse(ctx.workspaceRoot);
-  const incremental = new IncrementalParser(ctx.workspaceRoot);
-  incremental.seed(initialResult);
-
-  // Initialize auto-analyze and auto-recompile
-  const analyzer = new AutoAnalyzer();
-  const recompiler = new AutoRecompiler(ctx.workspaceRoot);
-
-  // Run initial analysis to establish baseline
-  const initialAnalysis = analyzer.run(initialResult);
-
-  const presentFiles = initialResult.entries
-    .filter(e => e.status === 'present')
-    .map(e => e.source);
+  const outputDir = join(ctx.workspaceRoot, DEFAULT_OUTPUT_DIR);
+  const cacheDir = join(ctx.workspaceRoot, DEFAULT_CACHE_DIR);
+  const debounceMs = opts.debounceMs ?? DEFAULT_DEBOUNCE_MS;
 
   if (opts.json) {
     console.log(JSON.stringify({
       event: 'start',
       workspaceRoot: ctx.workspaceRoot,
-      watchedFiles: presentFiles,
-      initialViolations: initialAnalysis.analysis.violations.length,
-      ...(llmEnabled ? { llm: { enabled: true, modelId: provider!.modelId } } : {}),
+      debounceMs,
     }));
   } else {
-    console.log(`${palette.bold('claws watch')} — monitoring ${presentFiles.length} files`);
-    console.log(`${palette.dim(`  ${initialAnalysis.analysis.violations.length} violation(s) at start`)}`);
-    if (llmEnabled) {
-      console.log(`${palette.dim(`  LLM extraction: ${provider!.modelId}`)}`);
-    }
+    console.log(`${palette.bold('claws watch')} — compile-watch (debounce ${debounceMs}ms)`);
     console.log(`${palette.dim('Press Ctrl+C to stop.')}\n`);
   }
 
-  // ── LLM debounce state ────────────────────────────────────────────────
+  // CP-7 R2 RR3 — auto-snapshot hook: every debounced burst captures the
+  // PRE-edit compiled state under `.claws/snapshots/auto/{version}.json`
+  // so an operator can rollback if the post-edit compile surfaces a
+  // violation. FIX-B wired the option on `WatcherOptions`; FIX-K
+  // supplies it in production so the persisted index actually fills.
+  // Rehydrate fire-and-forget so prior sessions' snapshots survive restarts.
+  const autoSnapshotManager = new AutoSnapshotManager({
+    workspaceRoot: ctx.workspaceRoot,
+  });
+  void autoSnapshotManager.load().catch((err: unknown) => {
+    // Hook failures cannot take down the watcher; log and continue.
+    // eslint-disable-next-line no-console
+    console.error(
+      'auto-snapshot rehydrate failed:',
+      err instanceof Error ? err.message : err,
+    );
+  });
 
-  /** Pending LLM extraction results from the last completed background job. */
-  let pendingLLMResults: readonly ExtractionResult[] | null = null;
+  // Track the most recent CLEAN compile so the hook can capture the
+  // pre-edit state. `lastGoodState` is null until the first compile
+  // lands; before that we SKIP the snapshot (nothing to roll back to).
+  let lastGoodState:
+    | { version: number; governanceIrHash: string; fileHashes: Record<string, string> }
+    | null = null;
+  let versionCounter = 0;
 
-  /** Current in-flight LLM job, if any. */
-  let currentLLMJob: PendingLLMJob | null = null;
+  const handle: WatcherHandle = startWatcher(ctx.workspaceRoot, {
+    targets: ['oc'],
+    outputDir,
+    cacheEnabled: true,
+    cacheDir,
+    ...(opts.debounceMs !== undefined ? { debounceMs: opts.debounceMs } : {}),
+    autoSnapshot: {
+      manager: autoSnapshotManager,
+      trigger: 'external_edit',
+      previousState: () => lastGoodState,
+    },
+  });
 
-  /**
-   * Cancel any pending LLM job (rapid-edit cancellation).
-   */
-  function cancelPendingLLMJob(): void {
-    if (currentLLMJob) {
-      clearTimeout(currentLLMJob.timer);
-      currentLLMJob.controller.abort();
-      currentLLMJob = null;
+  handle.onCompile((summary) => {
+    if (!summary.stale && summary.result !== undefined && summary.result.success) {
+      versionCounter += 1;
+      lastGoodState = {
+        version: versionCounter,
+        governanceIrHash: summary.result.contentHash,
+        fileHashes: summary.changedPaths.reduce<Record<string, string>>(
+          (acc, p) => {
+            acc[toRelative(ctx.workspaceRoot, p)] = summary.result!.contentHash;
+            return acc;
+          },
+          {},
+        ),
+      };
+    }
+    renderSummary(ctx.workspaceRoot, summary, opts, palette);
+  });
+
+  return new Promise<number>((resolve) => {
+    const uninstall = installSignalHandlers(
+      {
+        close: async () => {
+          uninstall();
+          await handle.close();
+          if (opts.json) {
+            console.log(JSON.stringify({ event: 'stop' }));
+          } else {
+            console.log('\nStopped watching.');
+          }
+          resolve(0);
+        },
+      },
+      {
+        exit: () => {
+          // Graceful close drives `resolve(0)` itself. The SDK only calls
+          // our `exit` on the force-exit paths (double signal or close
+          // timeout), which we surface as exit code 1.
+          resolve(1);
+        },
+      },
+    );
+  });
+}
+
+/**
+ * Render a single compile summary to stdout. Always uses workspace-relative
+ * paths; never leaks absolute paths (§watch/S01-F05).
+ */
+function renderSummary(
+  workspaceRoot: string,
+  summary: WatchCompileSummary,
+  opts: WatchOptions,
+  palette: ReturnType<typeof createPalette>,
+): void {
+  const relativeChanged = summary.changedPaths.map((p) =>
+    toRelative(workspaceRoot, p),
+  );
+  const cacheHits = countCacheHits(summary);
+  const cacheTotal = summary.result?.stageTimings.length ?? 0;
+  const diagnostics = summary.result?.diagnostics.length ?? 0;
+
+  if (opts.json) {
+    console.log(JSON.stringify({
+      event: 'compile',
+      timestamp: summary.timestamp,
+      changed: relativeChanged,
+      stale: summary.stale,
+      durationMs: summary.durationMs,
+      cacheHits,
+      cacheTotal,
+      diagnostics,
+      ...(opts.verbose && summary.result !== undefined
+        ? {
+            stageTimings: summary.result.stageTimings.map((t) => ({
+              stage: t.stage,
+              cacheHit: t.cacheHit,
+              durationMs: t.durationMs,
+            })),
+          }
+        : {}),
+    }));
+    return;
+  }
+
+  const timestamp = new Date(summary.timestamp).toLocaleTimeString();
+  const changed = relativeChanged.length > 0
+    ? relativeChanged.join(', ')
+    : '(startup)';
+  const staleTag = summary.stale ? ` ${palette.warn('stale')}` : '';
+  const verb = summary.stale ? 'discarded' : 'compiled';
+  const cacheTag = cacheTotal > 0
+    ? ` cacheHit ${cacheHits}/${cacheTotal}`
+    : '';
+  const diagnosticsTag = diagnostics > 0
+    ? ` ${palette.warn(`${diagnostics} diag`)}`
+    : '';
+
+  console.log(
+    `${palette.dim(timestamp)} ${palette.bold(verb)} ${changed} — ${summary.durationMs}ms${cacheTag}${diagnosticsTag}${staleTag}`,
+  );
+
+  if (opts.verbose && summary.result !== undefined) {
+    for (const t of summary.result.stageTimings) {
+      const hit = t.cacheHit ? palette.dim('hit') : palette.info('run');
+      console.log(`  ${t.stage.padEnd(20)} ${hit} ${t.durationMs}ms`);
     }
   }
+}
 
-  /**
-   * Queue an LLM extraction for changed files. Cancels any existing pending
-   * job first (only the latest file version is extracted).
-   */
-  function queueLLMExtraction(
-    changedFiles: readonly string[],
-    entries: readonly { source: string; status: string; content?: string }[],
-  ): void {
-    cancelPendingLLMJob();
-
-    const controller = new AbortController();
-
-    const timer = setTimeout(() => {
-      (async () => {
-        try {
-          const results: ExtractionResult[] = [];
-          for (const file of changedFiles) {
-            const entry = entries.find(e => e.source === file && e.status === 'present');
-            if (!entry || !('content' in entry) || typeof entry.content !== 'string') continue;
-
-            const result = await provider!.extract({
-              source: entry.source,
-              content: entry.content,
-              options: {
-                timeout: LLM_TIMEOUT_MS,
-                signal: controller.signal,
-              },
-            });
-            results.push(result);
-          }
-
-          // Only store results if this job was not cancelled
-          if (!controller.signal.aborted) {
-            pendingLLMResults = results;
-
-            const intentCount = results.reduce((sum, r) => sum + r.intents.length, 0);
-            if (intentCount > 0) {
-              if (opts.json) {
-                console.log(JSON.stringify({
-                  event: 'llm-update',
-                  intents: intentCount,
-                  files: results.map(r => r.source),
-                  timestamp: Date.now(),
-                }));
-              } else {
-                console.log(`${palette.dim(`  LLM extraction updated: +${intentCount} intent(s)`)}`);
-              }
-            }
-          }
-        } catch (err: unknown) {
-          // Ignore abort errors (expected on cancellation)
-          if (err instanceof Error && err.name === 'AbortError') return;
-
-          // On timeout or other LLM errors, fall back to regex-only silently
-          if (opts.verbose) {
-            const message = err instanceof Error ? err.message : String(err);
-            console.error(`${palette.dim(`  LLM extraction error: ${message}`)}`);
-          }
-        } finally {
-          if (currentLLMJob?.controller === controller) {
-            currentLLMJob = null;
-          }
-        }
-      })().catch((err: unknown) => {
-        // Outer safety net — catch any rejection that escapes the inner try/catch
-        if (opts.verbose) {
-          const message = err instanceof Error ? err.message : String(err);
-          console.error(`${palette.dim(`  LLM debounce error: ${message}`)}`);
-        }
-      });
-    }, LLM_DEBOUNCE_MS);
-
-    currentLLMJob = { files: changedFiles, controller, timer };
+/**
+ * Count stages served from cache in a compile summary.
+ */
+function countCacheHits(summary: WatchCompileSummary): number {
+  if (!summary.result) return 0;
+  let hits = 0;
+  for (const t of summary.result.stageTimings) {
+    if (t.cacheHit) hits += 1;
   }
+  return hits;
+}
 
-  const watcher = new Watcher(ctx.workspaceRoot, {
-    onBatch: async (event: WatchBatchEvent) => {
-      if (opts.json) {
-        console.log(JSON.stringify({
-          event: 'change',
-          files: event.changedFiles,
-          timestamp: event.timestamp,
-        }));
-      } else {
-        const fileList = event.changedFiles.join(', ');
-        console.log(`${palette.dim(new Date(event.timestamp).toLocaleTimeString())} ${palette.bold('changed:')} ${fileList}`);
-        console.log(`${palette.dim('  re-checking...')}`);
-      }
-
-      // Re-parse changed files (immediate regex pipeline)
-      const updated = await incremental.update(event.changedFiles);
-
-      // Auto-analyze
-      const analyzeResult = analyzer.run(updated);
-      const { diff } = analyzeResult;
-
-      // Auto-recompile
-      const recompileResult = await recompiler.recompile(event.changedFiles);
-
-      // Consume any pending LLM results
-      const llmResults = pendingLLMResults;
-      pendingLLMResults = null;
-
-      if (opts.json) {
-        console.log(JSON.stringify({
-          event: 'result',
-          presentCount: updated.presentCount,
-          diagnosticCount: updated.diagnostics.length,
-          violations: {
-            total: diff.totalCount,
-            delta: diff.delta,
-            added: diff.added.length,
-            resolved: diff.resolved.length,
-          },
-          recompile: {
-            triggered: recompileResult.triggered,
-            count: recompileResult.recompiledCount,
-            durationMs: recompileResult.durationMs,
-          },
-          ...(llmResults !== null ? {
-            llm: {
-              merged: true,
-              intents: llmResults.reduce((s, r) => s + r.intents.length, 0),
-            },
-          } : {}),
-          analyzeDurationMs: analyzeResult.durationMs,
-          timestamp: Date.now(),
-        }));
-      } else {
-        // Violation summary
-        const deltaStr = diff.delta > 0
-          ? `+${diff.delta}`
-          : diff.delta < 0
-            ? `${diff.delta}`
-            : '±0';
-        console.log(`${palette.dim(`  ${diff.totalCount} violation(s) (${deltaStr})`)} — ${analyzeResult.durationMs}ms`);
-
-        if (diff.added.length > 0) {
-          console.log(`${palette.dim(`  new: ${diff.added.map(v => v.ruleId).join(', ')}`)}`);
-        }
-        if (diff.resolved.length > 0) {
-          console.log(`${palette.dim(`  resolved: ${diff.resolved.map(v => v.ruleId).join(', ')}`)}`);
-        }
-
-        // LLM merge info
-        if (llmResults !== null) {
-          const intentCount = llmResults.reduce((s, r) => s + r.intents.length, 0);
-          if (intentCount > 0) {
-            console.log(`${palette.dim(`  LLM merged: +${intentCount} intent(s)`)}`);
-          }
-        }
-
-        // Recompile summary
-        if (recompileResult.triggered) {
-          console.log(`${palette.dim(`  recompiled ${recompileResult.recompiledCount} artifact(s) — ${recompileResult.durationMs}ms`)}`);
-        } else if (recompileResult.compiledDirExists) {
-          console.log(`${palette.dim('  artifacts up-to-date')}`);
-        }
-
-        console.log();
-      }
-
-      // Queue LLM extraction for next cycle (after regex results displayed)
-      if (llmEnabled) {
-        queueLLMExtraction(event.changedFiles, updated.entries);
-      }
-    },
-    onError: (err) => {
-      if (opts.verbose) {
-        console.error(`${palette.dim('watch error:')} ${err.message}`);
-      }
-    },
-  });
-
-  await watcher.start();
-
-  // Keep process alive until interrupted
-  return new Promise<number>((resolve) => {
-    const shutdown = () => {
-      cancelPendingLLMJob();
-      watcher.stop();
-      if (opts.json) {
-        console.log(JSON.stringify({ event: 'stop' }));
-      } else {
-        console.log('\nStopped watching.');
-      }
-      resolve(0);
-    };
-
-    process.on('SIGINT', shutdown);
-    process.on('SIGTERM', shutdown);
-  });
+/**
+ * Normalize a CLI --debounce flag. Accepts a string from commander, returns
+ * a number ≥ MIN_DEBOUNCE_MS, or undefined when the flag is absent.
+ *
+ * Exported for CLI wiring in `cli.ts` and unit tests.
+ */
+export function parseDebounceFlag(raw: string | undefined): number | undefined {
+  if (raw === undefined) return undefined;
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed)) return undefined;
+  if (parsed < MIN_DEBOUNCE_MS) return MIN_DEBOUNCE_MS;
+  return parsed;
 }

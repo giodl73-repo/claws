@@ -11,6 +11,15 @@ specs: [CL-04]
 
 # claws-sdk-bootstrap — Package Scaffolding
 
+> **Historical note (2026-04-18).** This plan reflects the original Ptah-phase
+> bootstrap posture where `@bic/claws-sdk` took runtime dependencies on
+> `@craftworks/compiler-sdk` and `@craftworks/agent-sdk`. Ra Phase 56 CP-11
+> removes those runtime deps (see `claws-pre-extraction-packaging` plan and
+> pulses 54/55/56) — post-Ra, `@bic/*` packages have zero `@craftworks/*`
+> runtime imports. The dependency declarations below remain as the frozen
+> as-built record of the Ptah bootstrap; do not use this plan as guidance
+> for new work.
+
 ## Headlines
 
 1. **H1: `npm run build` succeeds for claws-sdk and claws-cli with zero source files** — Both packages are registered in the root `package.json` workspaces, have valid `tsconfig.json` extending the monorepo base, a `vitest.config.ts` with unit/integration/e2e projects, and a `package.json` with correct `@bic/claws-sdk` / `@bic/claws-cli` naming, dependency declarations, and build scripts. The build produces empty `dist/` directories with no errors.

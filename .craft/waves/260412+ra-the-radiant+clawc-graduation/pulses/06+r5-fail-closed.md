@@ -9,7 +9,7 @@ stage: implementation
 test_tiers:
   L0_unit: 6
   L1_integration: 4
-  L2_e2e: 0
+  L2_e2e: 1
   L3_accept: 1
 test_scope:
   run:
@@ -40,6 +40,7 @@ This is the CP-1 gate pulse. All prior infrastructure (readers, sidecar, IR, cry
 - [ ] `claws-sdk/src/compiler/enforce/index.ts` -- Barrel exports for enforce module
 - [ ] `claws-sdk/tests/compiler/enforce/r5.unit.test.ts` -- L0: clean analysis passes R5 (1), ambiguous rule triggers fail-closed (1), conflicting rules trigger fail-closed (1), multiple violations collected (1), empty analysis passes (1), analysis with all rules resolved passes (1)
 - [ ] `claws-sdk/tests/compiler/enforce/guard.integration.test.ts` -- L1: compileGuard passes clean analysis (1), compileGuard throws CompilationDeniedError on violation (1), error message includes rule-by-rule explanation (1), guard integrates with reader output and IR types (1)
+- [ ] `claws-sdk/tests/compiler/enforce/r5.e2e.test.ts` -- L2: end-to-end R5 enforcement through full compile pipeline (1)
 - [ ] `claws-sdk/tests/compiler/enforce/r5.accept.test.ts` -- L3: acceptance test verifying R5 cannot be bypassed: no config flag, no environment variable, no constructor option disables fail-closed in the free tier module (1)
 
 ## Acceptance Criteria
@@ -76,6 +77,7 @@ Load these role files before starting:
 
 - [ ] L0 unit (6 tests): clean passes (1), ambiguous fails (1), conflicting fails (1), multiple violations (1), empty passes (1), all resolved passes (1)
 - [ ] L1 integration (4 tests): guard passes clean (1), guard throws on violation (1), error includes explanation (1), reader+IR integration (1)
+- [ ] L2 e2e (1 test): end-to-end R5 enforcement through full compile pipeline (1)
 - [ ] L3 acceptance (1 test): R5 non-bypassable verification (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

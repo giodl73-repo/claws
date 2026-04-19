@@ -84,7 +84,7 @@ describe('loss-routing', () => {
     const cursorRoute = result.routes.find((r) => r.platform === 'cursor');
     expect(cursorRoute).toBeDefined();
     expect(cursorRoute!.blocked).toBe(true);
-    expect(cursorRoute!.blockReason).toContain('CLAWS-E310');
+    expect(cursorRoute!.blockReason).toContain('OC-POLICY-E310');
     expect(cursorRoute!.blockReason).toContain('--strict-loss');
 
     // Blocked platforms report should include R5 tools and missing capabilities

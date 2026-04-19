@@ -21,7 +21,7 @@ expect:
       rules_evaluated: true
       publish_check: true
   violations:
-    - code: CLAWS-E235
+    - code: OC-POLICY-E235
       message: "Publish failed after local state mutation — local version 1.2.0 but remote is 1.1.0"
       severity: error
   warnings:

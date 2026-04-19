@@ -114,7 +114,7 @@ The publish plan covers the `claws publish` command's governance pre-flight, man
 ## Out of Scope
 
 - Manifest generation and signing infrastructure (that's claws-comply-audit + claws-key-management plans)
-- @bic/claws-skill-kit package (that's claws-skill-kit plan)
+- @bic/skill-kit package (that's claws-skill-kit plan)
 - Scaffold and template generation (that's claws-scaffold + claws-maker-commands plans)
 - ClawHub server-side badge rendering (external system -- this plan generates the payload only)
 - Fleet-wide skill inventory scanning (that's claws-fleet-ops plan)

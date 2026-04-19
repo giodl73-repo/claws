@@ -1,0 +1,8 @@
+description: Intentionally missing required "name" field so the lobster reader
+  emits an error-severity workspace diagnostic. That diagnostic flows through
+  modelToIR into workspace.diagnostics and is classified as a fail-closed R5
+  violation by enforceR5.
+
+steps:
+  - name: attempt-compile
+    command: claws compile

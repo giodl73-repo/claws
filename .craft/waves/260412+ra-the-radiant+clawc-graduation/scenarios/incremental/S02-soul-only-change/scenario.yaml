@@ -1,0 +1,174 @@
+name: S02-soul-only-change
+series: incremental
+version: 1
+specs: [CL-01, CL-04]
+plan: claws-compile-dx
+headline: >
+  H2 validation: changing SOUL.md invalidates the soul-reader cache entry
+  but keeps everything else cached; downstream dependents re-run and the
+  new principle is reflected in emit output.
+description: >
+  Validates the symmetric case to incremental/S01: modifying only
+  SOUL.md (e.g., adding a principle line) must invalidate only the
+  soul-reader stage while all other reader stages
+  (tools/agents/memory/identity/user/heartbeat/skills/lobster)
+  cacheHit. Downstream stages that consume the soul IR must re-run
+  and the emit output must reflect the new principle. This scenario
+  validates that per-stage cache scoping works bidirectionally — not
+  just for lobster (S01) but for every reader stage. If only S01
+  passes and S02 fails, the incremental design is biased or broken
+  for non-lobster inputs.
+
+expect:
+  first_compile:
+    mode: "fresh"
+    populates_all_stage_caches: true
+  second_compile_setup:
+    modification: "SOUL.md"
+    example: "add a principle"
+  second_compile_stage_timings:
+    tools: { cacheHit: true, durationMs_lte: 2 }
+    agents: { cacheHit: true, durationMs_lte: 2 }
+    memory: { cacheHit: true, durationMs_lte: 2 }
+    identity: { cacheHit: true, durationMs_lte: 2 }
+    user: { cacheHit: true, durationMs_lte: 2 }
+    heartbeat: { cacheHit: true, durationMs_lte: 2 }
+    skills: { cacheHit: true, durationMs_lte: 2 }
+    lobster: { cacheHit: true, durationMs_lte: 2 }
+    soul: { cacheHit: false, runs_fresh: true }
+  downstream_reruns:
+    modelToIR: { runs_fresh: true }
+    baselineAnalysis: { runs_fresh: true }
+    emit: { runs_fresh: true }
+    validate: { runs_fresh: true }
+  emit_content:
+    new_principle_reflected: true
+    rendered_in_plugin_output: true
+  wall_clock:
+    second_compile_reduction_pct_gte: 80
+
+implementation_status: pending
+tags: [claws-compile-dx, incremental, H2, cache, soul]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Starting from a fresh fully-compiled canonical fixture, the test
+  modifies SOUL.md by appending a new principle line. The second
+  compile's stageTimings must show the soul reader as cacheHit:false
+  (running fresh) while all 8 sibling reader stages (tools, agents,
+  memory, identity, user, heartbeat, skills, lobster) report
+  cacheHit:true with durationMs ≤2ms each. Downstream stages
+  (modelToIR, baselineAnalysis, emit, validate) must re-run because
+  the soul IR changed. The emitted governance plugin output must
+  contain a representation of the new principle (either rendered
+  inline or referenced by id), proving the edit flowed through the
+  full pipeline. Wall-clock reduction must match or exceed the 80%
+  target from the S01 benchmark.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Mirror of S01 F01: cache scoping must be symmetric. If the
+      soul-reader's cache key were workspace-scoped, changing
+      SOUL.md would invalidate every stage, defeating incremental
+      compile. The spec must treat all 9 readers uniformly —
+      each reader's key includes only its own input file hash.
+      The test proves SOUL.md edits do not cascade to lobster.yaml
+      cache, validating the scoping rule works in both directions.
+    spec_impact: "CL-04 per-stage cache — uniform scoping rule across all 9 readers"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      SOUL.md is often the first file a developer edits when tuning
+      governance. If SOUL.md changes produce slow compiles (because
+      downstream invalidation isn't well-scoped), the dev loop feels
+      laggy in the most common workflow. This scenario specifically
+      protects the "edit SOUL, see result fast" critical path. An
+      80% wall-clock reduction here is the minimum bar for acceptable
+      DX on the primary editing target.
+    spec_impact: "CL-04 incremental target — SOUL edit is the primary DX critical path"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      "New principle reflected in emit output" requires that the
+      principle text (or id reference) is actually rendered into the
+      governance plugin output. If the emit path only writes
+      skill-kit scaffolding and treats principles as silent metadata,
+      the assertion fails even though the compile was correct. The
+      emit contract must guarantee principles surface in a way that
+      is observable in the output file — either as generated
+      comments, exported constants, or runtime-queryable metadata.
+    spec_impact: "CL-04 emit — principles observable in emitted artifact, not silent metadata"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Downstream staleness risk: if baselineAnalysis cacheHits on
+      stale soul IR (because its cache key doesn't include soul IR
+      hash), the new principle is parsed but never analyzed. The
+      emit then renders the analyzer's stale output, missing the
+      new principle. Downstream cache keys must include ALL
+      upstream IR hashes, verified by this scenario's content
+      reflection assertion.
+    spec_impact: "CL-04 downstream cache key — include all upstream IR hashes"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The "add a principle" edit must be non-trivial enough to
+      change behavior — adding a comment line to SOUL.md would
+      change the file hash (triggering soul-reader re-run) but
+      wouldn't affect the IR, so downstream would have nothing
+      to re-render. The scenario's edit must be a real principle
+      addition (e.g., `- Never edit without explicit user intent`)
+      whose text is verifiable in emit output.
+    spec_impact: "CL-04 test edits — use semantically meaningful changes verifiable in emit"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      SOUL.md format may accept multiple equivalent representations
+      of a principle (e.g., markdown list vs heading-separated vs
+      YAML frontmatter). The test edit must use the canonical
+      representation to avoid tripping a parser edge case that
+      inflates runtime and invalidates the wall-clock comparison.
+      The canonical fixture should document which format is used.
+    spec_impact: "CL-04 test fixture — canonical SOUL format documented"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      S01 (lobster-only) and S02 (soul-only) together establish the
+      scoping invariant. A full validation would iterate over all 9
+      reader stages, but 2 scenarios are sufficient for the headline
+      assertion — the remaining 7 follow from the same scoping rule.
+      Pulse implementation should add a parametrized unit test
+      covering all 9 stages as a complement to these 2 e2e
+      scenarios.
+    spec_impact: "CL-04 unit coverage — parametrized per-stage scoping test for all 9 readers"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      Emit output diffability: comparing pre-edit and post-edit
+      emit output should show a small localized diff (the new
+      principle's rendering only). A large diff on a small SOUL
+      edit indicates non-determinism in the emit pipeline (e.g.,
+      timestamp injection, non-stable sort order). Snapshot-diff
+      testing of emit output would catch this regression early.
+    spec_impact: "CL-04 emit — deterministic output, small diff for small edit"
+    pitfall: null

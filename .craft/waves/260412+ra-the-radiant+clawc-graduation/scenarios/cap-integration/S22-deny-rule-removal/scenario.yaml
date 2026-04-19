@@ -1,0 +1,228 @@
+name: S22-deny-rule-removal
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12]
+description: >
+  Validates behavior when PATCH /api/oc/SOUL.md#Boundaries removes deny rule
+  text. Compiler-injected deny rules are BLOCKED (error). User-authored deny
+  rules produce WARNING (not block). Detection uses the GovernanceIR deny-rule
+  registry with provenance tagging (compiler vs user source), never regex. The
+  Loop sync path (/api/oc/SOUL.md) enforces the same rules as the generic OC
+  path -- no enforcement gap between API surfaces. Partial removal, false
+  positives (deny-like text that is not a rule), and code-block exclusion are
+  all tested.
+
+expect:
+  compiler_injected_removal:
+    endpoint: "PATCH /api/oc/SOUL.md#Boundaries"
+    payload: "{ content: '' }"
+    result:
+      status: 403
+      error_type: COMPILER_DENY_RULE_BLOCKED
+      governance:
+        errors:
+          - type: "DENY_RULE_IMMUTABLE"
+            source: "compiler"
+            rule_text: "Never execute code that deletes system files"
+  user_authored_removal:
+    endpoint: "PATCH /api/oc/SOUL.md#Boundaries"
+    payload: "{ content: 'compiler-injected rule only' }"
+    result:
+      status: 200
+      governance:
+        warnings:
+          - type: "USER_DENY_RULE_REMOVED"
+            source: "user"
+            removed_count: 2
+            severity: "G-INPUT"
+  loop_sync_parity:
+    endpoint: "PATCH /api/oc/SOUL.md"
+    same_enforcement_as: "PATCH /api/oc/SOUL.md#Boundaries"
+  provenance:
+    detection_method: GovernanceIR
+    regex_used: false
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP partner sends PATCH /api/oc/SOUL.md#Boundaries with content that removes
+  deny rules from the Boundaries section. The SOUL.md contains 3 deny rules: one
+  compiler-injected (marked with [compiler] source in the GovernanceIR) and two
+  user-authored. The partner attempts: (1) removing all deny rules (full wipe),
+  (2) removing only user-authored rules, (3) removing only the compiler-injected
+  rule, (4) editing text that looks like a deny rule but is not one (e.g. "I
+  don't deny requests"), (5) removing a deny rule that appears inside a markdown
+  code block (documentation, not active). The validation layer must use the
+  compiled GovernanceIR deny-rule registry with provenance tags to distinguish
+  compiler vs user rules. It must NOT use regex to detect deny rules at
+  validation time. The Loop sync path (/api/oc/SOUL.md) must apply the same
+  enforcement -- a deny rule removed via the Loop UI faces the same checks as
+  one removed via the generic OC API.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      Deny rule detection at validation time must use the GovernanceIR registry,
+      not runtime regex or keyword matching. If the validator runs a regex like
+      /^never|do not|don't/i against the diff, it will false-positive on text
+      like "I don't use tabs" and false-negative on deny rules phrased as
+      affirmative constraints ("All code must be reviewed"). The GovernanceIR
+      tags each deny rule at compile time with an ID, span, and source. The
+      validator diffs the proposed content against the registry by ID.
+    spec_impact: "CL-10 deny-rule detection — GovernanceIR registry lookup by rule ID, never runtime regex"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      Provenance tagging must be set at compile time and stored in the
+      GovernanceIR. Each deny rule carries a source field: 'compiler' for
+      rules injected by the governance pipeline (R5 protections, fleet
+      mandates) and 'user' for rules the human authored. The validator uses
+      this source field to decide error vs warning. If provenance is missing
+      or defaults to 'user', compiler-injected rules become removable with
+      only a warning, which is a security bypass.
+    spec_impact: "CL-12 GovernanceIR — provenance source field on every deny rule; missing provenance defaults to 'compiler' (fail-closed)"
+    pitfall: null
+
+  - id: F03
+    severity: critical
+    description: >
+      The Loop sync path (PATCH /api/oc/SOUL.md) must invoke the same
+      validation layer as the generic OC path (PATCH /api/oc/SOUL.md#Boundaries).
+      If the Loop path has its own deny-rule check (or none at all), a bypass
+      exists. Both routes must call the same validateDenyRuleRemoval() function
+      with the same GovernanceIR input. Test: remove a compiler-injected rule
+      via each path and verify identical 403 responses.
+    spec_impact: "CL-10 enforcement parity — Loop sync and generic OC API share single deny-rule validation function"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Partial removal where the partner deletes one user-authored rule but
+      keeps the other must produce a warning listing the specific rule
+      removed and the specific rule retained. A generic "deny rules changed"
+      warning is insufficient. The warning must include: removed_rules (array
+      of rule texts), retained_rules (array of rule texts), and count_delta.
+      The partner uses this to render an informed consent prompt.
+    spec_impact: "CL-10 governance.warnings — itemized removed_rules and retained_rules arrays with count_delta"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Text that resembles a deny rule but was never compiled as one must NOT
+      trigger a warning. Example: "I don't deny requests from anyone" contains
+      "deny" but is not a governance constraint. If the validator falls back to
+      regex when the GovernanceIR lookup fails (e.g. stale IR), it will
+      false-positive. The validator must ONLY use the registry. If the IR is
+      stale and a text segment is not in the registry, no warning fires for
+      that segment -- the next recompile will register new rules.
+    spec_impact: "CL-10 deny-rule validation — no fallback to regex; unregistered text produces no warning"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      A deny rule written inside a markdown fenced code block (triple backtick)
+      or inline code (single backtick) is documentation, not an active rule.
+      The GovernanceIR parser must exclude code blocks when building the
+      deny-rule registry. If a partner removes a code block containing
+      deny-rule-like text, no governance warning or error should fire. Test:
+      SOUL.md with ```Never share credentials``` in a code block -- removing
+      that block produces zero governance events.
+    spec_impact: "CL-10 GovernanceIR parser — exclude fenced and inline code blocks from deny-rule extraction"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      When all user-authored deny rules are removed but compiler-injected
+      rules remain, the governance result must clearly distinguish the
+      two populations. The response should show user_deny_rules: 0,
+      compiler_deny_rules: 2 (or however many). If the response only shows
+      total_deny_rules: 2, the partner cannot tell whether the user has
+      any custom constraints left. The UI needs the per-source breakdown
+      to render "Your custom rules: none. System rules: 2 active."
+    spec_impact: "CL-10 governance response — per-source deny rule counts (user vs compiler) in every deny-rule-related response"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      A PATCH that replaces the entire Boundaries section with new text
+      that happens to contain the same deny rule text but rephrased (e.g.
+      "Never share secrets" becomes "Do not share secrets") is semantically
+      a removal + addition. The validator sees the original rule ID missing
+      and a new unregistered text segment. It must warn about the removed
+      rule even though replacement text exists. The replacement is not
+      registered until the next compilation.
+    spec_impact: "CL-10 deny-rule lifecycle — removal warning fires even when replacement text exists; new rules register only at compile"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      If the SOUL.md file is edited externally (outside the API) and the
+      next GET /api/oc/SOUL.md detects deny rules missing compared to the
+      GovernanceIR, the GET response must include retroactive warnings.
+      This is the same enforcement as the PATCH path but triggered by
+      external-edit detection. Without this, a user can bypass the API
+      entirely by editing the file on disk and relying on the next GET
+      to silently accept the change.
+    spec_impact: "CL-10 external-edit detection — retroactive deny-rule-removal warnings on GET when IR differs from disk"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Multiple deny rules may reference the same tool or capability.
+      "Never use shell commands" and "Do not execute bash scripts" both
+      constrain shell access. Removing one while keeping the other should
+      produce a reduced-severity warning annotated with "capability still
+      constrained by remaining rule(s)." The GovernanceIR should track
+      tool-reference overlap to enable this annotation.
+    spec_impact: "CL-10 governance warnings — overlap annotation when removing one of multiple rules constraining the same capability"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      A deny rule that spans multiple lines in SOUL.md (e.g. a numbered
+      list of prohibited actions under a single heading) is one logical
+      rule or multiple? The GovernanceIR must define rule granularity.
+      If a multi-line block is one rule, partial removal of lines within
+      it is a modification (not removal) and produces a different warning.
+      If each line is a separate rule, partial removal triggers per-line
+      warnings. The spec must define the unit of a deny rule.
+    spec_impact: "CL-12 GovernanceIR — define deny-rule granularity: heading-scoped block vs individual line"
+    pitfall: null
+
+  - id: F12
+    severity: warning
+    description: >
+      When the PATCH removes a compiler-injected deny rule and the response
+      is 403, the response body should NOT include the full text of the
+      compiler-injected rule. Exposing the exact rule text in error responses
+      gives an attacker information about the governance posture. The error
+      should reference the rule by ID and type (e.g. "compiler rule CR-001
+      is immutable") without echoing the constraint text. The rule text is
+      visible via GET, not via error messages.
+    spec_impact: "CL-10 error response — reference compiler deny rules by ID, not full text, in 403 responses"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      Rapid successive PATCHes that each remove one user-authored deny rule
+      produce individual warnings. The API should track cumulative delta
+      since last compilation so the partner can render "3 rules removed since
+      last compile" instead of three separate "1 rule removed" warnings. This
+      is a UX enhancement for the Loop UI's informed consent prompt.
+    spec_impact: "CL-10 governance.warnings — cumulative deny-rule delta since last compilation for batch-edit UX"
+    pitfall: null

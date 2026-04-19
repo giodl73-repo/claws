@@ -19,7 +19,7 @@ expect:
       chain_integrity: tampered
       rewritten_entries: 847
   violations:
-    - code: CLAWS-E227
+    - code: OC-POLICY-E227
       message: "Post-break chain rewrite detected — 847 entries have valid internal hashes but mismatched witness attestations"
       severity: error
   warnings: []

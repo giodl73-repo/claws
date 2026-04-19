@@ -1,0 +1,196 @@
+name: S13-session-tools
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12]
+description: >
+  Validates that GET /api/sessions/cron:daily-triage/tools returns the
+  session-scoped tool permissions for a specific session. Tool permissions
+  are computed from the intersection of workspace-level governance
+  (GovernanceIR) and session-level overrides defined in AGENTS.md. Cron
+  sessions default to R1-R2 tools only; R3+ tools require explicit
+  pre-authorization in the session definition. R5 tools are always locked
+  regardless of session configuration. The response includes each tool's
+  effective permission, the source of that permission, and any lock
+  attribution.
+
+expect:
+  get_session_tools:
+    endpoint: "GET /api/sessions/cron:daily-triage/tools"
+    response_shape:
+      tools_is_array: true
+      each_tool_has:
+        - toolId
+        - riskLevel
+        - effectivePermission
+        - permissionSource
+        - locked
+        - lockSource
+      effectivePermission_enum: [allowed, pre_authorized, denied, locked]
+      permissionSource_enum: [workspace_default, session_override, fleet_policy, r5_lock]
+  cron_defaults:
+    r1_r2_tools: "effectivePermission: allowed"
+    r3_r4_tools: "effectivePermission: denied unless session_override grants pre_authorized"
+    r5_tools: "effectivePermission: locked, lockSource: r5_lock"
+  r5_always_locked:
+    override_attempted: true
+    result: "locked, ignoring session override"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A Companion App user inspects the tool permissions for the cron:daily-triage
+  session. The workspace has 20 tools: 10 at R1, 5 at R2, 3 at R3, 1 at R4,
+  and 1 at R5 (send-email). The cron session definition in AGENTS.md
+  pre-authorizes one R3 tool (github-create-issue). The API must return all
+  20 tools with their effective permissions: R1-R2 tools allowed, the
+  pre-authorized R3 tool allowed, the other two R3 tools and the R4 tool
+  denied, and the R5 tool locked. The user then adds a new R2 tool to the
+  workspace. On the next GET, the session tools must include the new tool
+  with permission 'allowed' — live recomputation, not a stale cache.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Tool added after session creation must appear in session tools via
+      live recomputation. If session tool permissions are computed once
+      at session creation and cached, newly added workspace tools will
+      not appear. The API must recompute session tools from the current
+      GovernanceIR + session overrides on every GET request, or
+      invalidate the cache when workspace tools change. Stale caches
+      create a security gap where new R5 tools bypass session-level
+      locking until the cache refreshes.
+    spec_impact: "CL-10 session tools — live recomputation on each request or cache invalidation on tool change"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Fleet lock on a session tool: a fleet policy may lock a tool at
+      the organization level, overriding workspace and session
+      permissions. The session tools response must reflect fleet locks
+      with lockSource: 'fleet_policy'. If the API only checks workspace
+      governance and session overrides but ignores fleet policies, a
+      fleet-locked tool could appear as 'allowed' at the session level,
+      creating a false sense of availability.
+    spec_impact: "CL-10 session tools — fleet policy locks override workspace+session permissions"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Session tools vs workspace tools divergence: the workspace-level
+      GET /api/chunks/connections returns tools with workspace-level
+      governance. The session-level GET /api/sessions/:id/tools returns
+      tools with session-scoped governance. A tool that is 'allowed' at
+      workspace level may be 'denied' at session level (e.g., R3 tool
+      in a cron session without pre-auth). The API must make this
+      layering explicit so the Companion App can show "allowed in
+      workspace, denied in this session" rather than just "denied".
+    spec_impact: "CL-10 session tools — include workspacePermission alongside effectivePermission for layered display"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Lock source attribution: when a tool is locked, the lockSource
+      field must identify WHY it is locked. Possible sources: 'r5_lock'
+      (inherent R5 classification), 'fleet_policy' (organization-level
+      lock), 'deny_rule' (workspace deny rule). If lockSource is a
+      generic 'locked' without attribution, operators cannot diagnose
+      why a tool is unavailable or whom to contact to unlock it. Each
+      lock source should include a reference (policy ID, rule name).
+    spec_impact: "CL-10 lockSource — typed enum with reference ID for each lock origin"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Session override attempting to grant R5 tool access must be
+      silently ignored, not cause an error. If the AGENTS.md session
+      definition includes 'pre-authorize: send-email' for an R5 tool,
+      the compilation phase should log a warning but the session tools
+      endpoint must still show the tool as locked. Raising an error
+      would prevent the entire session from loading, which is too
+      disruptive for a single misconfiguration.
+    spec_impact: "CL-10 R5 override — silently ignored with compilation warning, not session load error"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The permissionSource field for a tool that falls through to
+      workspace defaults should be 'workspace_default', not null. A null
+      source is ambiguous — it could mean the permission was not computed
+      or that the source is unknown. Explicit source attribution for
+      every tool, even defaults, enables the Companion App to show
+      "this tool uses workspace defaults" vs "this tool has a session
+      override".
+    spec_impact: "CL-10 permissionSource — always populated, 'workspace_default' for fallthrough"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Tool removal from workspace after session references it: if a
+      session definition pre-authorizes tool X, and tool X is later
+      removed from the workspace, the session tools response must
+      handle the dangling reference. Options: omit the tool entirely
+      (session only shows workspace tools) or include it with status
+      'removed' and effectivePermission 'denied'. Omitting is simpler
+      but loses the signal that the session config is stale.
+    spec_impact: "CL-10 session tools — removed workspace tool shown as status 'removed' with denied permission"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Risk level changes: if a tool is reclassified from R2 to R4
+      (e.g., a connection gains write capabilities), the session tools
+      must reflect the new risk level immediately. A cron session that
+      previously had access (R2 is allowed by default) now needs
+      explicit pre-authorization (R4 requires it). The recomputation
+      must use the current risk classification, not the classification
+      at session creation time.
+    spec_impact: "CL-10 session tools — recompute on risk level reclassification, not cached at creation"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Multiple sessions referencing the same tool can have different
+      effective permissions. The main session allows R3 tools by default
+      (interactive approval), while the cron session denies them without
+      pre-auth. The API must scope responses to the specific session
+      being queried. A bug where session tools are computed from a
+      shared workspace cache without session-specific overlay would
+      give all sessions the same permissions.
+    spec_impact: "CL-10 session tools — scoped computation, no shared cache across sessions"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The tool list for a session with many tools (50+) should support
+      filtering by riskLevel or effectivePermission. The Companion App
+      tool panel may want to show only locked or denied tools for
+      troubleshooting. Server-side filtering (e.g., ?riskLevel=R5 or
+      ?permission=denied) avoids transferring the full tool list when
+      only a subset is needed.
+    spec_impact: "CL-10 GET /api/sessions/:id/tools — ?riskLevel= and ?permission= filter params"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The response should include a computedAt timestamp indicating
+      when the permissions were evaluated. This helps operators know
+      if the permissions are fresh. If the API caches session tools
+      for performance, computedAt reveals cache age. Combined with
+      GovernanceIR lastCompiledAt, operators can verify that session
+      tools reflect the latest compilation.
+    spec_impact: "CL-10 session tools response — include computedAt timestamp for freshness"
+    pitfall: null

@@ -18,9 +18,10 @@ specs: [CL-04, CL-03, CL-02]
    - Validation: The generated `plugins/claws-governance/index.ts` type-checks with `tsc --noEmit` against OC plugin types
    - Validation: The generated `exec-approvals.json` contains entries for every R5 tool in the manifest
 
-2. **H2: Generated code passes the OC developer test — zero @craftworks/ imports** — Every line of generated TypeScript looks like something an OC developer would write themselves. Generated code imports from `@openclaw/*` only. No `@craftworks/*`, no `@claws/*` (skill-kit is for authoring, not generated output), no internal SDK references. The OC adapter layer translates GovernanceIR concepts into OC-native hook registrations, config formats, and file paths.
+2. **H2: Generated code passes the OC developer test — zero @craftworks/ imports** — Every line of generated TypeScript looks like something an OC developer would write themselves. Generated code imports from the scope set by `--scope` at generate time: default `@bic/openclaw-*` for BIC-internal builds, `@openclaw/*` for upstream-submission builds (the two are byte-identical except for import lines — verified in CP-12 P57). No `@craftworks/*`, no internal SDK references (skill-kit is for authoring, not generated output). The OC adapter layer translates GovernanceIR concepts into OC-native hook registrations, config formats, and file paths.
    - Validation: `grep -r '@craftworks' plugins/claws-governance/` returns zero matches
    - Validation: `grep -r '@claws' plugins/claws-governance/` returns zero matches
+   - Validation: `claws policy generate --scope @bic/openclaw` vs `--scope @openclaw` produces byte-identical `policy-ir.json` + `audit-manifest.json`; the only diff is in `gateway-plugin.ts` import lines
    - Validation: Generated plugin follows `OpenClawPluginDefinition` interface exactly
 
 3. **H3: Workflow inversion rewrites lobster.yaml with governance steps** — The compiler reads `lobster.yaml`, identifies governance-sensitive steps (R3+ tools, OBO actions, A2A delegation, sensitive data), and emits `lobster.compiled.yaml` with governance steps injected before and after sensitive operations. An R5/OBO `send-email` step gets a `claws-elicit-send-email` gate injected before it and a `claws-audit-send-email` step after it.
@@ -170,7 +171,7 @@ The emit phase builds on compiler-sdk's existing emit infrastructure (`compiler-
 - [ ] Generated code comment policy (emit-S08-F04)
 - [ ] Transitive dependency audit (emit-S08-F06)
 - [ ] Platform field name mapping in exec-approvals (emit-S08-F07)
-- [ ] Per-tool error granularity: CLAWS-E001 per-tool, not whole config (fail-S01-F07)
+- [ ] Per-tool error granularity: OC-POLICY-E001 per-tool, not whole config (fail-S01-F07)
 - [ ] Error code registry: E0xx type-level, E1xx parse, E2xx rule, E3xx emit (fail-S01-F02)
 - [ ] Developer-friendly error messages with WHY context (fail-S01-F04)
 - [ ] Fail-open code generation correctness: verify catch behavior per risk level (fail-S02-F05, fail-S03-F05)
@@ -403,7 +404,7 @@ The emit phase builds on compiler-sdk's existing emit infrastructure (`compiler-
 - [ ] Redaction routing in generated handler per-channel (PF2-S16-F05)
 - [ ] Output path redaction coverage verification (PF2-S16-F07)
 - [ ] Unconditional deny-on-timeout generation (PF2-S23-F02)
-- [ ] approveOnTimeout true = CLAWS-E042 build failure (PF2-S23-F03)
+- [ ] approveOnTimeout true = OC-POLICY-E042 build failure (PF2-S23-F03)
 - [ ] Post-emit timeout handler AST verification (PF2-S23-F07)
 - [ ] Platform-version-independent timeout override (PF2-S23-F06)
 

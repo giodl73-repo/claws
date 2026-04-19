@@ -7,7 +7,7 @@
  * risk-level coloring (green/blue/yellow/orange/red) and underline
  * modifiers for OBO declarations.
  *
- * @module claws-lsp/providers/semantic-tokens
+ * @module openclaw-lsp/providers/semantic-tokens
  */
 
 import type { SemanticTokensLegend, SemanticTokens } from 'vscode-languageserver';

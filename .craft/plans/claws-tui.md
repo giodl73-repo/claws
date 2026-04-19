@@ -17,7 +17,7 @@ specs: [CL-10, CL-05]
 
 2. **H2: TUI supports PATCH edits with live governance feedback via SSE** — Toggle a tool, edit the prompt, change the schedule — the TUI sends `PATCH /api/chunks/{tab}/{section}` and shows the governance result inline: warnings, errors, R5 rejections, fleet lock violations. SSE events update the UI in real-time when files change externally. This validates the full write-time validation layer, incremental recompilation, and error response contract before any partner builds a real UI.
 
-3. **H3: Lobster surface previews — trust dashboard, calendar, work queue** — Three additional TUI screens that preview the Lobster collaboration APIs: trust tier with escalation history, HEARTBEAT.md as a calendar view, and the work queue as a task list. These aren't full M365 integrations — they're terminal renderings of the same JSON that Loop, Calendar, and To Do would consume.
+3. **H3: Lobster surface previews — trust dashboard, calendar, work queue** — Three additional TUI screens that preview the Lobster collaboration APIs via Layer 1 (`/api/oc/SOUL.md`, `/api/oc/MEMORY.md`, `/api/oc/HEARTBEAT.md#Schedule`): trust tier with escalation history, HEARTBEAT.md as a calendar view, and the work queue as a task list. These aren't full M365 integrations — they're terminal renderings of the same JSON that Loop, Calendar, and To Do would consume.
 
 4. **H4: VS Code extension with governance-aware editing of OC workspace files** — The existing claws-lsp (6 providers: diagnostics, hover, code actions, code lens, completions, semantic tokens) gets wired to the CL-10 write-time validation layer. When you edit TOOLS.md in VS Code, you see risk badges as decorations, lock indicators in the gutter, deny rule highlighting in SOUL.md, and governance warnings as diagnostics — all live, as you type. A webview sidebar panel renders the same chunk data as the TUI (Connections with risk badges, governance dashboard, trust tier) inside VS Code. Code actions provide governance fixes: "Add elicitation gate for R5 tool", "This tool is fleet-locked — contact admin". The extension is a fourth consumer of `claws serve`, alongside the TUI, CAP partners, and the Companion App.
 
@@ -33,7 +33,7 @@ specs: [CL-10, CL-05]
 
 ## Scope
 
-### TUI Screens — 3 Experiences, 15 Screens
+### TUI Screens — 3 Experiences, 19 Screens
 
 **Experience 1: Agent Settings (CAP)** — Form-based configuration, same as CAP tabs.
 
@@ -50,21 +50,22 @@ specs: [CL-10, CL-05]
 
 | Screen | API | Features |
 |--------|-----|----------|
-| **Soul Editor** | `GET/PATCH /api/loop/soul` | SOUL.md as editable sections. Deny rules highlighted with governance context. Edit a section → see recompile result. Warnings on deny rule removal. Compiler-injected rules shown as locked. |
-| **Memory Browser** | `GET/PATCH /api/loop/memory` | MEMORY.md sections: "Things I've Learned", "People Who Matter", "Preferences". Editable with data label indicators. |
+| **Soul Editor** | `GET/PATCH /api/oc/SOUL.md` (Layer 1) | SOUL.md as editable sections. Deny rules highlighted with governance context. Edit a section → see recompile result. Warnings on deny rule removal. Compiler-injected rules shown as locked. |
+| **Memory Browser** | `GET/PATCH /api/oc/MEMORY.md` (Layer 1) | MEMORY.md sections: "Things I've Learned", "People Who Matter", "Preferences". Editable with data label indicators. |
 | **Trust Dashboard** | `GET /api/trust` | Current tier badge (T0-T4). Escalation history timeline. Next-tier requirements progress bar. "Request Escalation" button triggers approval flow. |
-| **Schedule** | `GET /api/schedule` | Calendar-style list of HEARTBEAT.md events. Recurrence indicators. Next-run countdown. Timezone display. |
+| **Schedule** | `GET /api/oc/HEARTBEAT.md#Schedule` (Layer 1) | Calendar-style list of HEARTBEAT.md events. Recurrence indicators. Next-run countdown. Timezone display. |
 | **Work Queue** | `GET /api/workqueue` | Task list with status badges. Source indicators (heartbeat/user/agent). Add task. Mark complete. |
 
 **Experience 3: ClawPilot (Sessions + Management)** — Emulates ClawPilot's session-aware UX.
 
 | Screen | API | Features |
 |--------|-----|----------|
-| **Sessions Overview** | `GET /api/sessions` | All sessions: main, cron, channel, agent. Status badges (running/idle/errored/scheduled). Session count summary. |
-| **Session Detail** | `GET /api/sessions/:id` | Per-session view: status, last activity, tool permissions scoped to this session, pinned chat summary. |
-| **Cron Run History** | `GET /api/sessions/:id/runs` | Run history timeline for cron sessions: status, duration, errors. Error detail expandable. |
-| **Session Tools** | `GET /api/sessions/:id/tools` | Tool permissions for THIS session (may differ from workspace-level). Risk badges, locks. |
+| **Sessions Overview** | `GET /api/sessions` (Layer 3) | All sessions: main, cron, channel, agent. Status badges (running/idle/errored/scheduled). Session count summary. |
+| **Session Detail** | `GET /api/sessions/:id` (Layer 3) | Per-session view: status, last activity, tool permissions scoped to this session, pinned chat summary. |
+| **Cron Run History** | `GET /api/sessions/:id/runs` (Layer 3) | Run history timeline for cron sessions: status, duration, errors. Error detail expandable. |
+| **Session Tools** | `GET /api/sessions/:id/tools` (Layer 3) | Tool permissions for THIS session (may differ from workspace-level). Risk badges, locks. |
 | **Governance Dashboard** | `GET /api/governance` | Compilation status, risk distribution chart (R1-R5), gated tool count, deny rule count, budget usage bar, fleet policy status. |
+| **History** | `GET /api/diff`, `GET /api/oc/{path}?at=` (Layer 1 time-travel) | Version history as a scrollable timeline. Each entry shows version number, timestamp, changed paths (oc:// format), and change summary. Drill into a version to see the full GovernanceIR diff. Powered by the time-travel API -- makes historical governance state discoverable without raw `?at=` queries. (Navigator N-03: progressive disclosure surface for time-travel.) |
 | **Audit Trail** | `GET /api/audit` | Scrollable event timeline. Filterable by category + session. Hash chain integrity indicator. Export (SARIF/CEF). |
 | **Activity Feed** | `SSE /api/events` | Live stream with session-level events. Session state changes in real-time. |
 | **Skills Store** | `GET /api/skills` | Available skills list. Installed indicator. "Install" action → shows governance impact. |
@@ -84,8 +85,8 @@ specs: [CL-10, CL-05]
 
 | Interaction | API Call | What TUI Shows |
 |-------------|---------|----------------|
-| Edit soul section | `PATCH /api/loop/soul` | Sections update. Governance warnings if deny rule affected. Compiler-injected rules show as immutable. |
-| Edit memory | `PATCH /api/loop/memory` | Memory sections update. Data label warnings if sensitivity changes. |
+| Edit soul section | `PATCH /api/oc/SOUL.md` (Layer 1) | Sections update. Governance warnings if deny rule affected. Compiler-injected rules show as immutable. |
+| Edit memory | `PATCH /api/oc/MEMORY.md` (Layer 1) | Memory sections update. Data label warnings if sensitivity changes. |
 | Request trust escalation | `PATCH /api/trust/escalate` | Without token: rejection with "requires manager approval." With token: tier promotes, history updates. |
 | Add work queue task | `POST /api/workqueue` | Task appears in list. Source: "user". Status: "pending". |
 
@@ -104,7 +105,7 @@ specs: [CL-10, CL-05]
 |-------------|---------|----------------|
 | Try to disable R5 tool | `PATCH /api/chunks/connections/outlook` | Red banner: "R5_NON_NEGOTIABLE — send-email cannot be ungated" |
 | Try to edit fleet-locked field | `PATCH /api/chunks/connections/planner` | Red banner: "FLEET_LOCK_VIOLATION — contact fleet admin" |
-| Remove all deny rules | `PATCH /api/loop/soul` | Yellow warning: "2 deny rules removed. R5 deny rules preserved (immutable)." |
+| Remove all deny rules | `PATCH /api/oc/SOUL.md` (Layer 1) | Yellow warning: "2 deny rules removed. R5 deny rules preserved (immutable)." |
 | Trigger risk drift | *(edit TOOLS.md to add OBO capability)* | Tool badge changes R3→R5. Pre-authorizations invalidated. Audit event fires. |
 
 ### TUI Components (Ink/React)
@@ -121,9 +122,9 @@ specs: [CL-10, CL-05]
 | `<ScheduleView>` | Calendar event list | Schedule screen |
 | `<TaskList>` | Work queue tasks | Work Queue screen |
 
-## Pulse Breakdown (15 pulses)
+## Pulse Breakdown (16 pulses)
 
-### Terminal TUI (11 pulses)
+### Terminal TUI (12 pulses)
 
 | Pulse | Deliverable | Complexity |
 |-------|------------|-----------|
@@ -138,6 +139,7 @@ specs: [CL-10, CL-05]
 | 9 | Companion screens — Governance Dashboard, Audit Trail (paginated), Activity Feed (SSE), Skills Store | Medium |
 | 10 | SSE live updates — external edit detection, auto-refresh, governance warning banners, sequence-based gap detection | Medium |
 | 11 | Demo mode — guided walkthrough (7 steps), fixture workspace, keyboard shortcuts, help panel | Medium |
+| 62 | Sessions TUI — Sessions Overview, Session Detail, Cron Run History, Session Tools screens rendering Layer 3 session data | Medium |
 
 ### VS Code Extension (4 pulses)
 
@@ -147,6 +149,14 @@ specs: [CL-10, CL-05]
 | 13 | Editor decorations — risk badges as gutter icons on tool declarations in TOOLS.md (green R1 → red R5), lock indicators for fleet-locked tools, deny rule background highlighting in SOUL.md, data label badges in MEMORY.md | Medium |
 | 14 | Code actions — "Add elicitation gate for R5 tool", "This tool is fleet-locked", "Add deny rule for {tool}", "Upgrade trust tier to access {tool}". Quick-fix integration with the write-time validation layer. | Medium |
 | 15 | Webview sidebar — chunk-based governance panel inside VS Code. Renders Connections (risk + locks), Governance Dashboard (compilation status, risk distribution), Trust tier. Same JSON as TUI, rendered as HTML in a VS Code webview. Refreshes on save via LSP notifications. | Heavy |
+
+## Implementation Note
+
+Some pulses bundle multiple screens (e.g., pulse 9 covers Governance Dashboard,
+Audit Trail, Activity Feed, and Skills Store). During implementation, heavy pulses
+may be split if velocity requires it. The pulse structure is a planning target, not
+a hard constraint -- if a single pulse cannot land all its screens at acceptable
+quality, it should be decomposed rather than shipping partial polish.
 
 ## Package Location
 
@@ -190,14 +200,16 @@ The workspace is fully editable — governance enforcement lives in the server, 
 in file permissions. External edits (e.g., `vim TOOLS.md` in another terminal)
 trigger SSE events and TUI refresh, demonstrating the full file watcher flow.
 
-**Guided walkthrough** (7 steps, shown as overlay on first launch):
+**Guided walkthrough** (9 steps, shown as overlay on first launch):
 1. "Welcome to your agent's governance dashboard."
 2. "→ Settings: See your agent's tools and their risk levels."
 3. "→ Try toggling send-email. Watch what happens." (R5 rejection)
 4. "→ Soul Editor: See your agent's boundaries."
 5. "→ Try removing a deny rule. Watch the governance warning."
-6. "→ Trust: See your agent's trust tier and what it unlocks."
-7. "→ Audit: Every governance decision is recorded here."
+6. "→ Schedule: See your agent's upcoming tasks as calendar events."
+7. "→ Work Queue: Tasks your agent is working on right now."
+8. "→ Trust: See your agent's trust tier and what it unlocks."
+9. "→ Audit: Every governance decision is recorded here."
 
 ## Screen Navigation
 

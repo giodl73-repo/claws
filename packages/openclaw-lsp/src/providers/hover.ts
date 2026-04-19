@@ -5,7 +5,7 @@
  * with OBO status, capability list, and classification. Uses the CompilationHost's
  * cached GovernanceIR to resolve tool metadata.
  *
- * @module claws-lsp/providers/hover
+ * @module openclaw-lsp/providers/hover
  */
 
 import type { GovernanceIRLike } from '../compilation-host.js';

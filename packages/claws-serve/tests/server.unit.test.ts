@@ -3,6 +3,7 @@ import type { Server } from 'node:http';
 import { createApp, resolvePort, startServer, registerGracefulShutdown } from '../src/server.js';
 import type { ServerState } from '../src/server.js';
 
+import { TEST_TRUST_SIGNING_KEY } from './fixtures/trust-key.js';
 function listen(app: ReturnType<typeof createApp>): Promise<Server> {
   return new Promise((resolve) => {
     const s = app.listen(0, '127.0.0.1', () => { resolve(s); });
@@ -191,6 +192,82 @@ describe('startServer', () => {
     const result = startServer({ port: 0, host: '127.0.0.1', noWs: true });
     server = result.server;
     expect(result.clientManager).toBeUndefined();
+  });
+
+  it('runs startup health check when compileFn is supplied (S33)', async () => {
+    // Exercises the startup health-check wiring: supply a compileFn + a
+    // fleetPolicyFile, start the server, and wait for the async health
+    // check to update `state.mode`. We don't assert the mode's value
+    // here (health-check.unit tests do that); we only need coverage of
+    // the branch that kicks off runStartupHealthCheck.
+    const result = startServer({
+      port: 0,
+      host: '127.0.0.1',
+      noWs: true,
+      compileFn: async () => {
+        throw new Error('broken workspace');
+      },
+      trustSigningKey: TEST_TRUST_SIGNING_KEY,
+      workspaceRoot: process.cwd(),
+      fleetPolicyFile: '/does/not/exist.json',
+    });
+    server = result.server;
+
+    // Poll for the async health check to complete (up to 500ms).
+    for (let i = 0; i < 50; i += 1) {
+      if (result.state.mode === 'degraded') break;
+      await new Promise((r) => setTimeout(r, 10));
+    }
+    expect(result.state.mode).toBe('degraded');
+    expect(result.state.degradedReason?.kind).toBe('compile-failed');
+  });
+
+  it('runs startup health check with no fleetPolicyFile option (S33)', async () => {
+    // The other branch of the Parameters<...>[0] conditional — omit
+    // fleetPolicyFile so the health options object has only `host`.
+    const result = startServer({
+      port: 0,
+      host: '127.0.0.1',
+      noWs: true,
+      compileFn: async () => ({
+        capabilities: { tools: [], skills: [], agents: [], workflows: [] },
+        analysis: {
+          violations: [],
+          warnings: [],
+          enforcementPlan: {
+            blockedTools: [],
+            requiredApprovals: [],
+            auditOnlyRules: [],
+            channelRedactions: [],
+            ruleSuppressions: [],
+          },
+          reclassificationTable: [],
+          effectiveR5Count: { derived: 0, overridden: 0, total: 0 },
+        },
+        intents: [],
+        delegationMap: [],
+        conflicts: {
+          oboConflicts: [],
+          multiConstraintConflicts: [],
+          haltReason: null,
+          hasOboWithoutElicit: false,
+          totalConflicts: 0,
+        },
+        compiler: {
+          compilerVersion: '0.1.0',
+          compiledAt: '2026-04-17T00:00:00.000Z',
+          schemaVersion: 1,
+        },
+      }),
+      trustSigningKey: TEST_TRUST_SIGNING_KEY,
+      workspaceRoot: process.cwd(),
+    });
+    server = result.server;
+    for (let i = 0; i < 50; i += 1) {
+      if (result.state.mode === 'healthy' && result.state.degradedReason === undefined) break;
+      await new Promise((r) => setTimeout(r, 10));
+    }
+    expect(result.state.mode).toBe('healthy');
   });
 });
 

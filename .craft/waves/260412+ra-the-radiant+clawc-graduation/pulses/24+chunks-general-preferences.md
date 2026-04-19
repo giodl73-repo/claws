@@ -9,7 +9,7 @@ stage: implementation
 test_tiers:
   L0_unit: 4
   L1_integration: 2
-  L2_e2e: 0
+  L2_e2e: 1
   L3_accept: 1
 test_scope:
   run:
@@ -26,9 +26,9 @@ checkpoint_gate: false
 
 ## Objective
 
-Wire the first two chunk GET endpoints: `GET /api/chunks/general/identity` (General tab -- agent name, description, language, managed-by) and `GET /api/chunks/preferences/*` (Preferences tab -- instructions, reviewers, schedule). These are the simplest chunk routes and establish the pattern that pulses 25-27 follow: route handler calls `assembleChunks`, extracts the relevant Chunk<K>, and serializes as JSON.
+Layer 2 chunk routes for General and Preferences tabs. Chunks assemble data from multiple Layer 1 `oc://` reads (IDENTITY.md + AGENTS.md for General, SOUL.md + USER.md + HEARTBEAT.md for Preferences) into partner-friendly blobs. The two chunk GET endpoints are: `GET /api/chunks/general/identity` (General tab -- agent name, description, language, managed-by) and `GET /api/chunks/preferences/*` (Preferences tab -- instructions, reviewers, schedule). These are the simplest chunk routes and establish the pattern that pulses 25-27 follow: route handler calls `assembleChunks`, extracts the relevant Chunk<K>, and serializes as JSON.
 
-Routes are thin adapters in claws-serve. All chunk assembly logic is in claws-sdk (pulse 23). The route handler pattern: get CompilationHost from Fastify decoration, call `assembleChunks(workspace, governanceIR)`, return `Chunk<'general'>` or `Chunk<'preferences'>`.
+Routes are thin adapters in claws-serve. All chunk assembly logic is in claws-sdk (pulse 23). Internally, chunk assembly calls the generic Layer 1 `/api/oc/{path}` router to read underlying OC files. The route handler pattern: get CompilationHost from Fastify decoration, call `assembleChunks(workspace, governanceIR)`, return `Chunk<'general'>` or `Chunk<'preferences'>`.
 
 ## Deliverables
 
@@ -37,6 +37,7 @@ Routes are thin adapters in claws-serve. All chunk assembly logic is in claws-sd
 - [ ] `claws-serve/tests/routes/chunks-general.unit.test.ts` -- L0: general/identity returns 200 with Chunk shape (1 test), general/identity includes editable fields with correct types (1 test)
 - [ ] `claws-serve/tests/routes/chunks-preferences.unit.test.ts` -- L0: preferences/instructions returns 200 with instructions text (1 test), preferences/schedule returns null schedule when HEARTBEAT.md missing (1 test)
 - [ ] `claws-serve/tests/routes/chunks-general.integration.test.ts` -- L1: general chunk data matches parsed IDENTITY.md + AGENTS.md fields (1 test), preferences chunk includes writeBack URLs for editable sections (1 test)
+- [ ] `claws-serve/tests/routes/chunks-general-preferences.e2e.test.ts` -- L2: end-to-end general + preferences chunk endpoints from fixture workspace (1)
 - [ ] `claws-serve/tests/routes/chunks-general-preferences.accept.test.ts` -- L3: S02 acceptance -- full workspace parse through general + preferences chunk endpoints returns valid Chunk JSON matching CL-10 spec examples (1 test)
 
 ## Acceptance Criteria
@@ -49,6 +50,7 @@ Routes are thin adapters in claws-serve. All chunk assembly logic is in claws-sd
 - [ ] `GET /api/chunks/preferences/schedule` returns null schedule when HEARTBEAT.md is absent
 - [ ] Missing IDENTITY.md returns 404 with structured JSON error
 - [ ] Response JSON matches CL-10 spec Chunk Format examples
+- [ ] Chunk response includes `governance.violations` when violation state is not CLEAN.
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0 for both claws-sdk and claws-serve
 
@@ -66,6 +68,7 @@ Load these role files before starting:
 
 - [ ] L0 unit (4 tests): general/identity shape (1), general/identity editable types (1), preferences/instructions 200 (1), preferences/schedule null handling (1)
 - [ ] L1 integration (2 tests): general chunk matches parsed workspace (1), preferences writeBack URLs present (1)
+- [ ] L2 e2e (1 test): end-to-end general + preferences chunk endpoints (1)
 - [ ] L3 acceptance (1 test): S02 -- full workspace through general + preferences endpoints matches CL-10 spec (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

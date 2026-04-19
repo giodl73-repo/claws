@@ -6,7 +6,7 @@
  * recompilation entirely. A 300ms batch window collects rapid saves into
  * a single compile pass, preventing redundant recompiles during burst editing.
  *
- * @module claws-lsp/compilation-host
+ * @module openclaw-lsp/compilation-host
  */
 
 import { hashContent, type ICompilationHost, type GovernanceIRLike } from '@bic/claws-sdk';

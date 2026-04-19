@@ -115,7 +115,7 @@ The annotate plan covers the `claws annotate` command's governance inference heu
 ## Out of Scope
 
 - LLM-assisted annotation (future -- heuristics are keyword-anchored only in this plan)
-- @bic/claws-skill-kit package (that's claws-skill-kit plan)
+- @bic/skill-kit package (that's claws-skill-kit plan)
 - Scaffold template generation (that's claws-scaffold plan)
 - ClawHub badge generation (that's claws-badge plan)
 - Legacy skill import pipeline (that's claws-maker-commands plan)

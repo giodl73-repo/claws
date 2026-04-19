@@ -1,0 +1,207 @@
+name: S11-session-list
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12]
+description: >
+  Validates that GET /api/sessions returns all workspace sessions with
+  their type, status, lastActivity timestamp, and lastRunStatus. The
+  session list is the primary dashboard view in the Companion App,
+  showing main, cron, channel, and agent session types. Each session
+  carries enough metadata for the UI to render status badges, sort by
+  recency, and surface errored sessions prominently. The response
+  includes a summary object with counts per type and per status.
+
+expect:
+  get_sessions:
+    endpoint: "GET /api/sessions"
+    response_shape:
+      sessions_is_array: true
+      each_session_has:
+        - id
+        - type
+        - status
+        - lastActivity
+        - lastRunStatus
+        - createdAt
+      type_enum: [main, cron, channel, agent]
+      status_enum: [active, idle, errored, stopped]
+    summary:
+      shape_has: [total, byType, byStatus]
+      byType_keys: [main, cron, channel, agent]
+      byStatus_keys: [active, idle, errored, stopped]
+      total_equals: "sum of all byType values"
+  errored_cron:
+    session_type: cron
+    status: errored
+    lastRunStatus: error
+    lastRunStatus_not: success
+  ordering:
+    default_sort: "lastActivity desc"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A user opens the Companion App dashboard and it calls GET /api/sessions
+  to populate the session list. The workspace has four session types: a
+  main interactive session (active), a cron:daily-triage session that
+  errored on its last run, a channel:slack session (idle), and an
+  agent:code-review session (active). The API must return all four with
+  accurate type/status/lastActivity/lastRunStatus. The summary counts
+  must reflect 2 active, 1 idle, 1 errored. The errored cron session
+  must show lastRunStatus='error' so the UI can render a red badge. The
+  dashboard sorts by lastActivity descending by default.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Empty session list handling: a brand-new workspace with no sessions
+      created yet must return an empty array, not a 404 or null. The
+      summary object must still be present with all counts at zero. If
+      the API returns 404 for no sessions, the Companion App dashboard
+      will show an error state instead of an empty state with a "create
+      your first session" prompt.
+    spec_impact: "CL-10 GET /api/sessions — empty workspace returns [] with zero-count summary, never 404"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Session without lastActivity: a session that was created but never
+      executed (e.g., a cron session defined in AGENTS.md but not yet
+      triggered) has no lastActivity timestamp. The API must handle this
+      gracefully — either return lastActivity as null or use createdAt
+      as the fallback. Returning undefined causes JSON serialization
+      issues and breaks client-side sorting. The sort algorithm must
+      handle null lastActivity by placing such sessions at the end.
+    spec_impact: "CL-10 session schema — lastActivity nullable, fallback to createdAt for sorting"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Session type validation: the type field is an enum constrained to
+      main/cron/channel/agent. If a future AGENTS.md introduces a new
+      session type (e.g., 'webhook'), the API must either reject the
+      unknown type at creation time or surface it as type='unknown' in
+      the list response. Silently dropping sessions with unrecognized
+      types would hide them from the dashboard. The enum must be
+      extensible with a documented unknown fallback.
+    spec_impact: "CL-10 session type enum — extensible with 'unknown' fallback for forward compatibility"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Summary count drift: if the summary counts are computed separately
+      from the session array (e.g., cached counter vs live query), they
+      can diverge. A race condition where a session is created between
+      the summary computation and the array fetch would show a session
+      in the list that is not counted in the summary, or vice versa.
+      The summary must be derived from the same snapshot as the session
+      array, computed atomically in a single pass.
+    spec_impact: "CL-10 /api/sessions summary — derived from session array in same snapshot, not cached separately"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The lastRunStatus field for a session that has never run is
+      ambiguous. Returning null means "never ran" but could be confused
+      with "status unknown." Returning a sentinel like 'never' is more
+      explicit but adds a non-standard value. The API contract must
+      define the semantics: null means never executed, and clients
+      must distinguish null from 'error' and 'success'.
+    spec_impact: "CL-10 session schema — lastRunStatus null means never executed, documented in API contract"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Multiple sessions of the same type: the workspace may have several
+      cron sessions (cron:daily-triage, cron:weekly-report) or several
+      agent sessions. The byType summary counts must reflect the total
+      count per type, not just presence/absence. The dashboard groups
+      sessions by type, so the count must be accurate for rendering
+      section headers like "Cron Sessions (3)".
+    spec_impact: "CL-10 summary.byType — integer counts, not boolean presence flags"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Status transitions are not always monotonic. A session can go from
+      errored back to active if a cron job succeeds on its next run. The
+      lastRunStatus captures the most recent run, but the session status
+      reflects the current state. If a cron session errored at 10:00 and
+      succeeded at 11:00, status should be 'active' and lastRunStatus
+      should be 'success'. The API must not show stale error status
+      after a successful recovery.
+    spec_impact: "CL-10 session status — reflects current state, not historical worst case"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Agent sessions may be ephemeral (spawned for a single task and
+      then stopped). A workspace with heavy agent usage could accumulate
+      hundreds of stopped agent sessions. The GET /api/sessions endpoint
+      must support filtering by status (e.g., ?status=active) to avoid
+      returning a massive list of stopped agent sessions that overwhelms
+      the dashboard. Without filtering, the default response grows
+      unbounded.
+    spec_impact: "CL-10 GET /api/sessions — ?status= filter parameter, default excludes stopped sessions or paginates"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The createdAt and lastActivity timestamps must use ISO 8601 format
+      with timezone (UTC). If the server serializes timestamps in local
+      time or epoch milliseconds, the Companion App must know the format
+      to parse and display correctly. Inconsistent timestamp formats
+      across different session types (e.g., cron uses epoch, agent uses
+      ISO 8601) will cause rendering bugs. The API contract must mandate
+      a single timestamp format.
+    spec_impact: "CL-10 session timestamps — ISO 8601 UTC mandatory for createdAt and lastActivity"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Session identity stability: the session id field must be stable
+      across server restarts. If session IDs are generated in memory
+      (e.g., incrementing counter), a restart resets them and breaks
+      any client-side bookmarks or links. Session IDs should be derived
+      from the session definition (e.g., 'cron:daily-triage' as the ID
+      for the daily triage cron) or use persistent UUIDs stored on disk.
+    spec_impact: "CL-10 session id — stable across restarts, derived from definition or persisted"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The main session is special: there is always exactly one main
+      session per workspace. The API must enforce this invariant. If
+      the summary shows byType.main != 1, something is wrong. The
+      Companion App may hard-code UI assumptions about the main session
+      (e.g., pinning it at the top of the list), so the invariant must
+      be guaranteed server-side.
+    spec_impact: "CL-10 session invariant — exactly one main session per workspace, enforced server-side"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The response does not include session configuration details (e.g.,
+      the cron schedule, the channel webhook URL). This is intentional
+      for the list endpoint — detailed config should be on the individual
+      session endpoint (GET /api/sessions/:id). But the list must include
+      enough metadata for the dashboard to render meaningful labels. The
+      session 'name' or 'label' field (derived from the session ID) should
+      be included so the UI does not have to parse the ID to display it.
+    spec_impact: "CL-10 session list response — include displayName or label for UI rendering"
+    pitfall: null

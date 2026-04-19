@@ -13,11 +13,11 @@ test_tiers:
   L3_accept: 2
 test_scope:
   run:
-    - "cd packages/@claws/compiler && npx vitest run --project unit --coverage"
-    - "cd packages/@claws/compiler && npx vitest run --project integration --coverage"
+    - "cd packages/@bic/claws-sdk && npx vitest run --project unit --coverage"
+    - "cd packages/@bic/claws-sdk && npx vitest run --project integration --coverage"
     - "cd packages/@bic/claws-sdk && npx vitest run --project unit --coverage"
   typecheck:
-    - "cd packages/@claws/compiler && npx tsc --noEmit"
+    - "cd packages/@bic/claws-sdk && npx tsc --noEmit"
     - "cd packages/@bic/claws-sdk && npx tsc --noEmit"
 checkpoint: 4
 checkpoint_gate: true
@@ -27,32 +27,32 @@ checkpoint_gate: true
 
 ## Objective
 
-Build the npm publish pipeline for both packages: `@claws/compiler` (public npm, MIT) and `@bic/claws-sdk` (private registry, proprietary). The pipeline enforces the freemium boundary at publish time: the CI gate verifies that the free-tier tarball contains zero `@craftworks/` references in its dependency tree. Integrity hash generation pins the exact @claws/compiler version in @bic/claws-sdk.
+Build the npm publish pipeline for both packages: `@bic/claws-sdk` (MIT) and `@bic/claws-sdk` (proprietary). Both publish to GHE Packages (bic-internal GitHub Enterprise). The pipeline enforces the freemium boundary at publish time: the CI gate verifies that the free-tier tarball contains zero `@craftworks/` references in its dependency tree. Integrity hash generation pins the exact @bic/claws-sdk version in @bic/claws-sdk.
 
 This is the CP-4 gate pulse. Both packages must be publishable with all quality gates passing before the wave can advance to CP-5.
 
 ## Deliverables
 
-- [ ] `.github/workflows/publish-claws-compiler.yml` -- GitHub Actions workflow for @claws/compiler: triggers on version tag (`v*`), runs full test suite (L0+L1+L2), runs publint, runs API diff check against baseline, builds package, runs `npm pack` and inspects tarball for zero @craftworks/ references, publishes to public npm with provenance. Manual approval step before actual publish.
-- [ ] `.github/workflows/publish-craftworks-claws-sdk.yml` -- GitHub Actions workflow for @bic/claws-sdk: triggers on version tag, runs full test suite, verifies @claws/compiler dependency is pinned with integrity hash, builds package, publishes to private registry. Must run AFTER @claws/compiler publish completes (sequential dependency).
-- [ ] `packages/@claws/compiler/scripts/check-tarball.ts` -- Script that runs `npm pack --dry-run`, inspects the tarball file list, and verifies: (1) zero files import from @craftworks/, (2) package.json has zero @craftworks/ dependencies, (3) license file is MIT, (4) no test files included, (5) no source maps in production build. Exits non-zero on any violation.
-- [ ] `packages/@claws/compiler/scripts/pin-integrity.ts` -- Script that generates the SHA-512 integrity hash of the @claws/compiler tarball and updates @bic/claws-sdk's package.json with the pinned version + hash. Produces a lockfile-style integrity entry.
-- [ ] `packages/@claws/compiler/scripts/publish-preflight.ts` -- Pre-publish checklist script: runs publint, API diff, tarball check, integrity hash generation, CHANGELOG check (current version has entry), and version tag check. All must pass before publish is allowed.
-- [ ] `packages/@claws/compiler/tests/publish-pipeline.unit.test.ts` -- L0: tarball check script detects @craftworks/ in dependencies (1 test), integrity hash is deterministic across runs (1 test)
-- [ ] `packages/@claws/compiler/tests/publish-gate.integration.test.ts` -- L1: publish-preflight script passes for valid package (1 test), publish-preflight script fails when @craftworks/ dependency is injected (1 test)
-- [ ] `tests/publish-e2e.e2e.test.ts` -- L2: full publish dry-run for @claws/compiler (npm pack + all checks pass) (1 test), full publish dry-run for @bic/claws-sdk (npm pack + integrity hash matches) (1 test)
-- [ ] `tests/publish-acceptance.accept.test.ts` -- L3: @claws/compiler tarball installs in clean project and runs compile+pinch+build (1 test), @bic/claws-sdk tarball installs with @claws/compiler and enterprise features are accessible (1 test)
+- [ ] `.github/workflows/publish-claws-compiler.yml` -- GitHub Actions workflow for @bic/claws-sdk: triggers on version tag (`v*`), runs full test suite (L0+L1+L2), runs publint, runs API diff check against baseline, builds package, runs `npm pack` and inspects tarball for zero @craftworks/ references, publishes to GHE Packages with provenance. Manual approval step before actual publish.
+- [ ] `.github/workflows/publish-claws-sdk.yml` -- GitHub Actions workflow for @bic/claws-sdk: triggers on version tag, runs full test suite, verifies @bic/claws-sdk dependency is pinned with integrity hash, builds package, publishes to GHE Packages. Must run AFTER @bic/claws-sdk publish completes (sequential dependency).
+- [ ] `packages/@bic/claws-sdk/scripts/check-tarball.ts` -- Script that runs `npm pack --dry-run`, inspects the tarball file list, and verifies: (1) zero files import from @craftworks/, (2) package.json has zero @craftworks/ dependencies, (3) license file is MIT, (4) no test files included, (5) no source maps in production build. Exits non-zero on any violation.
+- [ ] `packages/@bic/claws-sdk/scripts/pin-integrity.ts` -- Script that generates the SHA-512 integrity hash of the @bic/claws-sdk tarball and updates @bic/claws-sdk's package.json with the pinned version + hash.
+- [ ] `packages/@bic/claws-sdk/scripts/publish-preflight.ts` -- Pre-publish checklist script: runs publint, API diff, tarball check, integrity hash generation, CHANGELOG check (current version has entry), and version tag check. All must pass before publish is allowed.
+- [ ] `packages/@bic/claws-sdk/tests/publish-pipeline.unit.test.ts` -- L0: tarball check script detects @craftworks/ in dependencies (1 test), integrity hash is deterministic across runs (1 test)
+- [ ] `packages/@bic/claws-sdk/tests/publish-gate.integration.test.ts` -- L1: publish-preflight script passes for valid package (1 test), publish-preflight script fails when @craftworks/ dependency is injected (1 test)
+- [ ] `tests/publish-e2e.e2e.test.ts` -- L2: full publish dry-run for @bic/claws-sdk (npm pack + all checks pass) (1 test), full publish dry-run for @bic/claws-sdk (npm pack + integrity hash matches) (1 test)
+- [ ] `tests/publish-acceptance.accept.test.ts` -- L3: @bic/claws-sdk tarball installs in clean project and runs compile+pinch+build (1 test), @bic/claws-sdk tarball installs with @bic/claws-sdk and enterprise features are accessible (1 test)
 
 ## Acceptance Criteria
 
-- [ ] @claws/compiler publish workflow runs successfully in dry-run mode
 - [ ] @bic/claws-sdk publish workflow runs successfully in dry-run mode
-- [ ] CI gate: `npm pack @claws/compiler` tarball has zero `@craftworks/` in dependency tree
-- [ ] CI gate: @claws/compiler tarball has MIT license, no test files, no source maps
+- [ ] @bic/claws-sdk publish workflow runs successfully in dry-run mode
+- [ ] CI gate: `npm pack @bic/claws-sdk` tarball has zero `@craftworks/` in dependency tree
+- [ ] CI gate: @bic/claws-sdk tarball has MIT license, no test files, no source maps
 - [ ] Integrity hash is generated and pinned in @bic/claws-sdk package.json
 - [ ] Publish-preflight checklist passes: publint, API diff, tarball check, integrity, CHANGELOG, version tag
-- [ ] Sequential dependency: @bic/claws-sdk publish waits for @claws/compiler publish
-- [ ] Manual approval gate before actual npm publish
+- [ ] Sequential dependency: @bic/claws-sdk publish waits for @bic/claws-sdk publish
+- [ ] Manual approval gate before actual GHE Packages publish
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0
 

@@ -9,8 +9,8 @@ stage: implementation
 test_tiers:
   L0_unit: 6
   L1_integration: 3
-  L2_e2e: 0
-  L3_accept: 0
+  L2_e2e: 1
+  L3_accept: 1
 test_scope:
   run:
     - "cd claws-sdk && npx vitest run --project unit --coverage"
@@ -36,6 +36,8 @@ This is the target that proves the free-tier value proposition: "compile your go
 - [ ] `claws-sdk/src/compiler/emit/registry.ts` (EDIT) -- Register ClaudeCodeEmitter alongside OCEmitter in the emit registry
 - [ ] `claws-sdk/tests/compiler/emit/cc-emitter.unit.test.ts` -- L0: CC emit produces CLAUDE.md (1), CC emit produces settings.json (1), CC emit produces command stubs for each skill (1), CC emit calls compileGuard (1), CC emit CLAUDE.md contains persona from SoulIR (1), CC emit settings.json contains permissions from ToolsIR (1)
 - [ ] `claws-sdk/tests/compiler/emit/cc-emitter.integration.test.ts` -- L1: full emit from fixture IR produces valid Claude Code workspace (1), emit output contains no @craftworks/ references (1), registry returns CC emitter by target enum (1)
+- [ ] `claws-sdk/tests/compiler/emit/cc-emitter.e2e.test.ts` -- L2: end-to-end Claude Code emit from fixture workspace through full pipeline (1)
+- [ ] `claws-sdk/tests/compiler/emit/cc-emitter.accept.test.ts` -- L3: scenario acceptance test verifying emit-cc/codegen findings (4)
 
 ## Acceptance Criteria
 
@@ -67,5 +69,7 @@ Load these role files before starting:
 
 - [ ] L0 unit (6 tests): CLAUDE.md output (1), settings.json output (1), command stubs (1), compileGuard call (1), persona in CLAUDE.md (1), permissions in settings.json (1)
 - [ ] L1 integration (3 tests): full emit from fixture (1), zero @craftworks/ in output (1), registry lookup (1)
+- [ ] L2 e2e (1 test): end-to-end Claude Code emit from fixture workspace (1)
+- [ ] L3 acceptance (1 test): emit-cc/codegen scenario findings verified (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

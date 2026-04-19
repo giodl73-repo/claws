@@ -1,7 +1,7 @@
 # PITFALLS — OpenClaw Operational Pitfalls Catalog
 
-**Version**: v1.1
-**Date**: 2026-04-12
+**Version**: v1.5
+**Date**: 2026-04-17
 **Status**: Living document
 **Purpose**: Comprehensive catalog of OpenClaw operational pitfalls that claws addresses. Each pitfall maps to a claws command, governance rule, or three-ring detection point. Sources: boss's operational tooling, community GitHub issues, web research.
 **Lineage**: Q12e (upgrade experience) + boss's tooling dump
@@ -1433,7 +1433,7 @@ Each pitfall has:
 **Severity**: High
 **Source**: Scenario pitfall-coverage-2/S09-F05, S09-F06
 **What happens**: "READWRITE" not in enum. Never matches constraints. Tool unconstrained.
-**claws response**: Parser normalization + CLAWS-E020. See CL-02 Amendment A90.
+**claws response**: Parser normalization + OC-POLICY-E020. See CL-02 Amendment A90.
 **Detection ring**: Inner (compile -- parse)
 **Governance rule**: G-PERM -- normalization.
 
@@ -1463,7 +1463,7 @@ Each pitfall has:
 **Severity**: Critical
 **Source**: Scenario pitfall-coverage-2/S11-F01, S11-F02
 **What happens**: Agent receives work but cannot return results. Silent data loss.
-**claws response**: CLAWS-E030 hard error. See CL-02 Amendment A97.
+**claws response**: OC-POLICY-E030 hard error. See CL-02 Amendment A97.
 **Detection ring**: Inner (compile -- A2A analysis)
 **Governance rule**: G-A2A-TRUST -- delegation implies trust.
 
@@ -2853,6 +2853,567 @@ User ──→ Agent ──→ Classification Gate ──→ Tool ──→ Effe
 
 ---
 
+## Category N: Integration & Boundary (Horus)
+
+(Pitfalls harvested from Horus wave scenario findings — `260416+horus-the-heir+claws-migration`. BLOCKER + MAJOR findings clustered by root cause across 16 scenarios spanning migration, aether, lobster, sim, and cross-plan seams.)
+
+### P-300: R5 non-negotiable bypass via registry reload timing
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/aether/provider-hang-under-latency-budget-stress.md` F1; `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S3-sidecar-boot-race-condition-when-verifier-slow.md` F6, F9
+**What happens**: Aether's snapshot rule ("call started under registry N completes against registry N") contradicts the risk-uplift rule ("R3→R5 reloads applied synchronously"). A tool in flight during an uplift reload can complete under old-R3 rules while the new policy classifies it R5. R5 non-negotiability collapses to "R5 unless you happened to be mid-call during a reload."
+**Today**: Plan H1 contradicts itself; implementation inherits the ambiguity.
+**claws response**: aether-claws-serve-integration §H1 — drain in-flight calls before applying uplift, re-gate under R5 for any call already inside `before_tool_call`; compiler emits the drain path deterministically.
+**Detection ring**: Inner (live)
+**Governance rule**: G-R5 — R5 classification is ratcheted, never bypassable via reload window
+
+---
+
+### P-301: Silent audit-write gap on dispatch failure
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/aether/audit-chain-storage-full-degraded-mode.md` F1; `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S7-audit-chain-producer-consumer-provenance-e2e.md` F2; `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S10-dotnet-node-dispatch-protocol-version-mismatch-recovery.md` F2, F9
+**What happens**: Aether's `AuditChainWriter.cs` dispatches entries through the S10 JSON-RPC stdio protocol. If the Node sidecar crashes mid-write, if the pipe breaks, if the handshake version-mismatches after reconnect, or if storage silently swallows the write, enforcement continues while audit is lost. CISO-fatal: the tool call happened, the record did not.
+**Today**: No retry policy, no WAL fallback, no fsync-confirm semantics on the dispatch boundary.
+**claws response**: aether plan §H3 adds truth-table cell 10 (audit-write fault → fail-closed DENY + retry + WAL fallback + `ALERT_AUDIT_WRITE_FAILURE`); contract-seams §S10 mandates fsync-confirm write responses and idempotent entryId-keyed retries; local durable spool captures every entry before dispatch.
+**Detection ring**: Inner (live)
+**Governance rule**: G-AUDIT-DURABLE — no enforcement decision without a persisted audit entry (primary chain or durable spool)
+
+---
+
+### P-302: Cross-tenant audit query leakage (missing tenant field on BaseEntry)
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S7-audit-chain-producer-consumer-provenance-e2e.md` F3
+**What happens**: `BaseEntry.workspace: WorkspaceRef` does not guarantee tenant isolation; `correlationId` is a plain string with no tenant prefix. An auditor for Tenant A running `claws audit query --correlationId cid-1` can receive result rows referencing Tenant B's workspace. SEV-1 compliance incident.
+**Today**: S7 schema has no mandatory tenant field; query engine has no tenant filter.
+**claws response**: contract-seams §S7 — `BaseEntry.tenant: TenantRef` becomes a REQUIRED field; `correlationId` format `{tenantId}:{uuidv7}`; `claws audit query` refuses cross-tenant results unless caller holds global-auditor role with `--tenant all`.
+**Detection ring**: Inner (live)
+**Governance rule**: G-TENANT-ISOLATE — audit queries are tenant-scoped by default; cross-tenant reads require explicit role + flag
+
+---
+
+### P-303: VM suspend/resume stale governance (clock jump + stale artifacts)
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/lobster/sidecar-clock-skew-time-travel-inconsistency.md` F2
+**What happens**: Azure Container Apps nodes drift through VM-suspend/resume cycles (maintenance, live migration). On resume, the wall clock jumps forward by minutes while the monotonic clock did not advance. Sidecar transitions back to `SidecarReady` without re-verifying governance artifacts; SSE events held in the Node event loop flush with old timestamps. The pod serves stale policy against new tool calls.
+**Today**: S3 boot-sequence assumes continuous time; no `SuspendDetected → ReverifyArtifacts` sub-path.
+**claws response**: lobster plan §Scope adds `SuspendDetected → ReverifyArtifacts → SidecarReady` transition; `WorkspaceBoot.cs` detects wall-clock jumps >30s and triggers artifact re-verification before resuming traffic; readiness probe asserts `|sidecarClock - hostClock| < 5s`.
+**Detection ring**: Inner (live)
+**Governance rule**: G-SUSPEND-REVERIFY — post-suspend resume re-enters verify-before-parse before accepting traffic
+
+---
+
+### P-304: Windows Ctrl-C mid-stage orphan storm
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/sim/windows-ctrl-c-mid-harness-orphan-storm.md` F1, F5, F7
+**What happens**: Developer hits Ctrl-C during sim harness boot; Windows's CTRL_C_EVENT does not propagate through Node→.NET→claws-serve chain. Spawn-to-registry races leave untracked PIDs; repeated Ctrl-C bypasses graceful shutdown via `process.exit(130)`; descendant `powershell.exe`/`conhost.exe`/`npm.cmd` chains escape `taskkill /T`. Next `claws sim run` fails mysteriously; author writes batch-script workarounds.
+**Today**: `process-tree.ts` assumes synchronous PID registration and direct descendant tree.
+**claws response**: claws-local-sim-evolution §Scope — all spawns wrap in a Windows Job Object (`JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`); PID registry pre-allocates placeholder entries before spawn; first Ctrl-C blocks further signals for 10s then escalates to `taskkill /F /T` + job-handle close; cleanup covers transitive descendants via command-line signature match.
+**Detection ring**: Inner (live)
+**Governance rule**: G-SIM-CLEANUP — Windows sim harness leaves zero orphan processes across N*1000 mid-stage interruptions
+
+---
+
+### P-305: Port TIME_WAIT blocks next sim cold-start (Windows)
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/sim/windows-ctrl-c-mid-harness-orphan-storm.md` F3, F11
+**What happens**: `cowork-ui-sim` binds a fixed default port. Mid-boot Ctrl-C leaves the kernel holding the port in TIME_WAIT for up to 4 minutes. Next `claws sim run` fails with `EADDRINUSE` — indistinguishable from "another harness instance is running." The <10s cold-start SLO becomes stochastic.
+**Today**: No dynamic port allocation, no port-probe orphan detection at startup.
+**claws response**: sim harness binds to `:0` (kernel-assigned), reads assigned port back, prints + records in PID file; startup orphan detector also probes default ports via `net.createServer().listen()` and offers to kill the holder.
+**Detection ring**: Inner (live)
+**Governance rule**: n/a
+
+---
+
+### P-306: Dry-run vs real extraction silent divergence
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/migration/filter-repo-dry-run-vs-real-divergence.md` F1, F3, F7
+**What happens**: The migration plan's §Preparation mentions a dry-run but does not place it in the §7 state machine; dry-run has no evidence artifact, no entry gate. Between dry-run and real-run, PRs land on residue files (`scripts/rewrite-file-deps.sh`, `.mailmap`, Q12 docs) that are NOT in the Freeze path-globs. Two clones produce different filter-repo outputs; the team reviews the dry-run and ships the real-run.
+**Today**: `history-preservation-evidence.json` schema has no `dryRunCommitSetSha256` or `sourceUpstreamSha` field; extraction script is not source-SHA-pinned.
+**claws response**: CL-13 §7 — add state `DryRunExtract` with entry/exit gates, `dry-run-evidence.json` artifact; state 4 exit includes `dry-run-parity-evidence.json`; extraction script takes `--source-sha` as mandatory; freeze-path globs extended to residue files.
+**Detection ring**: Middle (upgrade — repo boundary migration)
+**Governance rule**: G-MIGRATION-PARITY — what was reviewed equals what was deployed
+
+---
+
+### P-307: 24h deletion SLA miss with no state-machine escape
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/migration/deletion-pr-24h-sla-miss-scenarios.md` F1, F4, F7
+**What happens**: CL-13 §7 state 7 (`DeletePR`) has a hard 24h SLA exit. If missed due to red `main` CI (unrelated path), reviewer-OOO over holidays, or manifest-rejection re-signing cycles, the state machine is silent — no SlaExtended state, no sla-extension-evidence artifact, no documented consequence matrix. The R6 post-merge rollback procedure is disproportionate for a 3-file residue fix, so operators quietly fix residue without filing evidence — audit gap.
+**Today**: Plan has only a hard number and an R6 heavy-weight procedure.
+**claws response**: CL-13 §7 — add sub-states `DeletePR:SlaExtended`, `DeletePR:Failed`; add `sla-extension-evidence.json` (signed, 7-year); add R6.1 lightweight residue-fix path (`residue-fix-evidence.json`, 1-year); consequence matrix 24h/48h/72h documented.
+**Detection ring**: Middle (upgrade — repo boundary migration)
+**Governance rule**: G-SLA-EVIDENCE — every SLA deviation produces a signed evidence artifact
+
+---
+
+### P-308: Real-serve binary fingerprint drift (cache + mirror + republish)
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/sim/real-serve-binary-cache-vs-gpr-version-drift.md` F1, F2, F3, F4
+**What happens**: `parity-check` SHA-256 fingerprint has no specified trust root. If the canonical fingerprint is read from the same `node_modules/` or npm cache that holds the binary, cache tampering bypasses the check trivially. Same-version GPR republish, air-gapped mirrors, offline developers, and malformed manifests all produce mismatches with no specified fail-mode. The check applies only to `claws serve`; the dispatch server binary is not fingerprinted.
+**Today**: C2 BLOCKER says "fails loudly on mismatch" but is silent on trust root, republish semantics, offline mode, and dispatch-server coverage.
+**claws response**: sim plan §Scope `binary-fingerprint.ts` — canonical fingerprints pulled from a signed `fingerprint-manifest.json` on a dedicated HTTPS endpoint (distinct trust root); `(packageName, version, integrityHash, binarySha256)` 4-tuple append-only registry; three modes `strict | offline | pinned` with `.claws-sim-fingerprints.lock` for enterprise mirrors; coverage extended to all dispatched binaries.
+**Detection ring**: Middle (upgrade — pre-release certification)
+**Governance rule**: G-FINGERPRINT — sim's runtime binaries are cryptographically pinned to a signed manifest from a trust root distinct from the binary distribution channel
+
+---
+
+### P-309: Audit-chain prevHash order non-determinism under concurrency
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/sim/parity-check-flaky-nondeterministic-output.md` F1
+**What happens**: Audit-chain `prevHash = SHA256(prev || canonicalBody)` is order-dependent. Concurrent tool calls in real Aether write entries in load-dependent order (`[d1, a1, d2, a2]` vs `[d1, d2, a1, a2]`). Sim's deterministic order never matches. Byte-diffing chain hashes produces flaky failures that team hides by widening canonicalization (hides real divergences behind the flake).
+**Today**: No canonicalization rule covers chain-hash semantics; differ compares bytes.
+**claws response**: sim §Scope `parity/divergence-report.ts` — `audit-chain-entry-set` rule: compare multiset of per-entry canonical bodies + causal constraints (every ApprovalEntry has matching DecisionEntry via correlationId); prevHash chain NOT compared cross-trace; separate scenario tests chain internal consistency.
+**Detection ring**: Middle (upgrade — parity certification)
+**Governance rule**: G-CHAIN-MULTISET — chain equivalence is multiset + causal, not byte-exact prevHash
+
+---
+
+### P-310: Parity differ canonicalization rot (widening hides real divergence)
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/sim/parity-check-flaky-nondeterministic-output.md` F2, F7, F9
+**What happens**: Every flaky parity failure tempts the team to add another canonicalization rule. Rules strip correlation IDs from strings (over-aggressive → strips legitimate content, under-aggressive → misses leaked IDs). "SSE parity at SEMANTIC level" allows event reordering that breaks ordering-sensitive consumers. New canonicalization rules land without author, justification, or field enumeration — the differ slowly becomes a rubber stamp.
+**Today**: Canonicalization rules are implicit; no ownership, no review gate on additions.
+**claws response**: sim §Scope — `CanonicalizationRules.ts` requires `author`, `addedAt`, `justification`, `contractFieldsCovered`; CI gate blocks merges without justification; producer-scoped strict SSE ordering + cross-producer multiset; scenario `canonicalization-does-not-hide-real-divergence` runs quarterly with planted deltas.
+**Detection ring**: Middle (upgrade — parity certification)
+**Governance rule**: G-DIFFER-REVIEW — every canonicalization rule is documented, justified, and field-bounded
+
+---
+
+### P-311: Concurrent .NET dispatch isolation (per-test-class, unique data-dir)
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S10-dotnet-node-dispatch-protocol-version-mismatch-recovery.md` F3, F10
+**What happens**: Parallel .NET test runners (xUnit, Vitest integration) spawn the sim subprocess per-test-method (memory blow-up, Windows kernel object exhaustion) OR share one subprocess (requestId collisions, shared `--data-dir` WAL contention). Both choices break realistic test parallelism; tests flake under load with no diagnostic.
+**Today**: S10 is silent on concurrency model and `--data-dir` parameterization.
+**claws response**: contract-seams §S10 + sim `dispatch-protocol.md §Concurrency` — subprocess is per-test-class (xUnit `IClassFixture`); each gets unique `--data-dir` via `Path.GetTempFileName()`; requestIds are subprocess-scoped monotonic UUIDv7; Windows spawn semaphore caps concurrency at 4.
+**Detection ring**: Inner (live) + Middle (upgrade — test infra)
+**Governance rule**: n/a
+
+---
+
+### P-312: ServeClient `Promise<never>` breaks ClawPilot plug-in (type-level foreclosure)
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S4-serveclient-clawpilot-plug-in-refactor-verification.md` F1
+**What happens**: S4 promises "no refactor needed when ClawPilot plugs in." But `Layer3Client.getSession(ref): Promise<never>` is a breaking type change when ClawPilot replaces it with `Promise<Session>`. Consumers who typed to `Promise<never>` had dead-code-eliminated branches; those branches now execute. Type-system foreclosure violates the plug-in promise before any logic runs.
+**Today**: Plan shipped `Promise<never>` as the Horus stub.
+**claws response**: contract-seams §S4 — Layer3Client returns `Promise<Session>` TODAY with implementation throwing `NotImplementedInHorusError`. Runtime stub, not type stub. Same pattern applies to every reserved extension point (see P-322).
+**Detection ring**: Compile-time
+**Governance rule**: G-STUB-RUNTIME — reserved extension points use runtime throws, never `never`-typed foreclosures
+
+---
+
+### P-313: Provider hang leaks orphan tasks (DoS primitive from rogue workspace)
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/aether/provider-hang-under-latency-budget-stress.md` F3, F5
+**What happens**: H3 has a 100ms GuardrailProvider sub-budget enforced via `Task.WhenAny(providerTask, Task.Delay(100))`. `WhenAny` doesn't cancel the loser — the orphan `providerTask` keeps running, holding the V8 isolate or CLR continuation. Under sustained hang (buggy or malicious workspace), each tool call leaks memory until the pod OOMs. Rogue workspace author ships a hanging plugin and bricks every Aether pod it runs on.
+**Today**: No `CancellationToken` threaded into provider invocation; concurrency model not documented.
+**claws response**: aether §H3 + Scope `GuardrailProviderBridge.cs` — `CancellationToken` passed to provider with hard cancellation at timeout + 50ms grace; `PROVIDER_CANCELLATION_IGNORED` telemetry counter; `PROVIDER_QUEUE_DEPTH` metric; fail-closed `PROVIDER_FAULT_OVERLOAD` when queue depth exceeds threshold.
+**Detection ring**: Inner (live)
+**Governance rule**: G-PROVIDER-CANCEL — every provider invocation carries a cancellation token honored by contract
+
+---
+
+### P-314: Tenant-flip mid-session stale registry + wrong-tenant audit
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/lobster/m365-tenant-migration-mid-session.md` F1, F2, F10
+**What happens**: M365 tenant migrations (A→B: mergers, divestitures, geo moves) flip the workspace's tenancy while the sidecar keeps running on tenant A's mounted blob. Running sidecar serves tenant A's `ApprovalPolicyRegistry` to tenant B's user (R5 tools may be R2 in A) — governance bypass. Audit entries land in tenant A's chain against tenant B's principal — non-repudiation broken in both directions.
+**Today**: Container has no concept of tenancy axis; no tenant assertion on sidecar requests.
+**claws response**: lobster §Scope — `TenantChangeDetected → ContainerFailed` transition added to S3; every sidecar request asserts `X-Tenant-Id` matching mounted blob; mismatch returns `TENANT_MISMATCH` HTTP 409; `AUDIT_TENANT_MISMATCH` forces restart before retry.
+**Detection ring**: Inner (live)
+**Governance rule**: G-TENANT-BOUNDARY — container tenancy is immutable for the process lifetime; tenant flips force restart
+
+---
+
+### P-315: Approval dialog walk-away (no expiry, unbounded pending state)
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/lobster/copilot-approval-dialog-user-walks-away.md` F1, F2, F3; `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/aether/provider-hang-under-latency-budget-stress.md` F4
+**What happens**: User's provider returns `{allow, requiresExternalApproval: true}`, SSE dialog fires, user closes laptop. Plan specifies no expiry. Tool call held in orchestrator memory indefinitely; pending-approval map grows unboundedly (300 × 1000 users = 300k records). Container restart (Azure scale-to-zero) silently loses every pending approval; upstream returns `PROVIDER_FAULT_HANG` — an audit entry that mis-represents what happened. R5 tools held hostage with no documented resolution.
+**Today**: `ApprovalEntry.outcome` includes `'timeout'` but no trigger is specified; no persistence across restart; no cross-surface (Teams/Outlook) reminder path.
+**claws response**: aether §H3 + lobster §Scope — approval carries `expiresAt` (default 7d, tenant-configurable); pending approvals persist to audit-chain with `kind: 'pending-approval'`; boot-time restore at `RegistryReady → SidecarStarting`; timeout writes `ApprovalEntry.outcome: 'timeout'` + fail-closed DENY; pending state emits SIEM events on creation AND resolution; decision re-validated under current registry on user approve.
+**Detection ring**: Inner (live)
+**Governance rule**: G-APPROVAL-EXPIRY — every pending approval has a durable expiry that fails closed to DENY
+
+---
+
+### P-316: R5 ApprovalEntry dropped under audit backpressure
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/aether/audit-chain-storage-full-degraded-mode.md` F2
+**What happens**: Plan states R5 ApprovalEntries are "ALWAYS emitted, regardless of sampling." But "emitted" is ambiguous — emit-attempted vs emit-persisted. Under backpressure or storage pressure, R5 entries land in the general queue with everything else; attempted-but-not-persisted entries can be lost on process crash. CISO non-negotiable becomes theater.
+**Today**: R5 entries use the same general writer path as everything else.
+**claws response**: aether §H3 — R5 ApprovalEntry persistence is a PRE-CONDITION for R5 tool execution; R5 tool does NOT execute until ApprovalEntry has persisted to primary chain OR local durable spool; R5 entries bypass general backpressure via dedicated fast-path with its own durable channel.
+**Detection ring**: Inner (live)
+**Governance rule**: G-R5-PERSIST — no R5 execution without confirmed durable R5 ApprovalEntry
+
+---
+
+### P-317: Stale trust store from credential-gated refresh
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/aether/gpr-auth-token-expires-mid-container-boot.md` F5, F9
+**What happens**: `trusted-keys.pem` is distributed via a tenant config channel that is itself GPR-token-gated. If the same token is used for both blob access and trust-store refresh, a single credential failure makes BOTH unavailable — the adapter validates signatures against a stale trust store missing the new signing key. Workspaces signed under the new key fail with `GOVERNANCE_UNKNOWN_SIGNING_KEY`, which to an operator looks like attacker activity.
+**Today**: Trust-store channel and blob channel share a credential surface.
+**claws response**: aether §H2 + `ghe-packages-auth.md` — trust-store distribution MUST be independent of the blob-access credential (e.g., Azure Managed Identity, not GPR-gated); cached trust store from last successful refresh is used on primary-channel failure with `TRUST_STORE_STALE` telemetry if cache age > 24h.
+**Detection ring**: Middle (upgrade) + Inner (live)
+**Governance rule**: G-TRUST-INDEPENDENT — trust-root distribution is channel-independent from the content it signs
+
+---
+
+### P-318: Deletion manifest write-once vs realistic review cycles
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/migration/deletion-pr-24h-sla-miss-scenarios.md` F6, F13
+**What happens**: §6.1 treats `deletion-manifest.yaml` as write-once from PR-open. But reviewers will realistically request changes (path-mapping errors). Re-signing the corrected manifest is a "compliance-reportable event" — which no one actually reports. Operators either silently overwrite (undocumented compliance event) or append a v2 (ambiguous which is canonical). Plan doesn't distinguish `draft` from `signed-final`.
+**Today**: Single write-once state; no transition event for approval.
+**claws response**: CL-13 §6.1 — evidence artifacts have `draft` status pending review; transition to `signed-final` is a distinct event with its own timestamp; amending `draft` is not a compliance event, amending `signed-final` IS; transition fires at PR approval, not PR open; reviewerPrincipal recorded on state 7 exit.
+**Detection ring**: Middle (upgrade — repo migration)
+**Governance rule**: G-EVIDENCE-DRAFT — review-amendable artifacts have an explicit draft status distinct from signed-final
+
+---
+
+### P-319: Hand-enumerated deletion list misses sibling directories
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/migration/deletion-pr-24h-sla-miss-scenarios.md` F3, F11; `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/migration/ra-still-open-horus-cannot-start-dependency-trap.md` F5, F12
+**What happens**: Plan §craftworks cleanup hand-enumerates delete paths (`design/claws/`, `docs/claws/`, `.craft/plans/claws-*.md`). Siblings like `docs/claws-historical/`, `docs/claws-archive/`, `claws-legacy-tests/` survive silently. Residue-grep regex `@craftworks/claws-(lsp|serve|sdk|skill-kit|compiler|cli|test|sim)` excludes `runtime` and matches neither transitive peer-deps in published tarballs nor old-world refs in Q12 docs. Ra-closure check reads only `dependencies`, not `devDependencies` / `peerDependencies` / `optionalDependencies`.
+**Today**: Verification is by hand-written pattern; generated inventory missing.
+**claws response**: migration plan §Deliverables — `tools/migration/claws-inventory.sh` outputs every `**/*claws*` path matching basename and path; reviewed + signed as `deletion-inventory-evidence.json`; tarball-dep-sweep runs `npm ls --all --json` from `@gim-home/*`-only registry across all 4 dep classes with `tarball-dep-sweep-evidence.json`.
+**Detection ring**: Middle (upgrade — repo migration)
+**Governance rule**: G-INVENTORY-GENERATED — migration inventories are generated + signed, never hand-maintained
+
+---
+
+### P-320: Boot states 5/6 have no named owner (RegistryReady gate never emits)
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S3-sidecar-boot-race-condition-when-verifier-slow.md` F1, F2
+**What happens**: S3 9-state machine requires sidecar-start to wait on state 6 (`RegistryReady`). But aether plan §Scope only names `BlobRehydrator.cs` emitting PhaseEvents for states 2–4; states 5–6 have NO named emitter across all 4 plans. Lobster listens for `RegistryReady` in practice (code drift) — spawning sidecar against an unloaded registry, the exact integrity failure S3 is supposed to prevent. Event-name typos are compile-silent.
+**Today**: PhaseEvent state names are strings; no typed discriminated union.
+**claws response**: aether §H1 — `ApprovalPolicyLoader.cs` emits state 5/6 PhaseEvents; contract-seams §S3 gains emit-responsibility matrix; `boot-sequence.ts` exports typed discriminated union so wrong event names are compile errors; .NET-side schema generated from TS source.
+**Detection ring**: Compile-time
+**Governance rule**: G-BOOT-OWNER — every S3 state has a named emitter in exactly one plan
+
+---
+
+### P-321: Boot state-machine backward transitions contradict monotonicity
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S3-sidecar-boot-race-condition-when-verifier-slow.md` F3, F8
+**What happens**: S3 says "strictly monotonic; no backward transitions except reload 6→5'→6." But sidecar-crash recovery spec says `7 → 7'` and `8 → 7'` — backward transitions not covered by the monotonicity rule. A reload-in-flight simultaneous with a sidecar crash has no valid transition; race conditions between crash and reload handlers leave the system stuck or skip reload completion.
+**Today**: The contract's invariant and recovery rule contradict; ambiguity exploited by implementations.
+**claws response**: contract-seams §S3 — enumerate full allowed backward set `{6→5'→6, 7→7'→7, 8→7'→8, state-4/5/6 → ContainerFailed-or-retry-from-N}`; priority rule: crashes during reload abort reload and restart from state 5; sim scenario injects crash during reload; explicit state-machine diagram.
+**Detection ring**: Compile-time + Inner (live)
+**Governance rule**: G-BOOT-TRANSITIONS — the set of allowed backward transitions is enumerated, no implicit recoveries
+
+---
+
+### P-322: SessionRef + Chunk.lock.owner closed unions foreclose ClawPilot
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S4-serveclient-clawpilot-plug-in-refactor-verification.md` F9, F11
+**What happens**: `SessionRef.kind: 'main' | 'cron' | 'channel' | 'agent'` and `Chunk.fields[*].lock.owner.kind: 'user' | 'admin' | 'fleet' | 'governance'` are closed unions. When ClawPilot adds a 5th kind (`'debug'`, `'session-owner'`), every type-narrowing switch in ServeClient, PatchErrorSurface, LockIcon must be extended — a refactor tax. Same pattern as P-312 at the union level.
+**Today**: Closed discriminated unions in Horus-shipped types.
+**claws response**: contract-seams §S8 + lobster §Scope — both fields become open-ended branded string types (same pattern as `PatchErrorCode`), with current values as named constants; Ra `claws-cap-integration` coordination.
+**Detection ring**: Compile-time
+**Governance rule**: G-EXTENSION-OPEN — reserved extension-point unions are open-ended branded types
+
+---
+
+### P-323: Partial artifact download + WARN path silent security downgrade
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/aether/gpr-auth-token-expires-mid-container-boot.md` F2, F8
+**What happens**: Mid-download credential expiry can produce a truncated artifact. Under `requireSignedArtifacts: false`, a truncated manifest can look like "missing signature" and take the WARN-and-proceed path — silent security downgrade. Cross-tenant divergent blast radius: `requireSignedArtifacts: true` hard-fails; `false` silently boots in unknown state. Same incident, different outcomes, no correlation in the incident report.
+**Today**: §H2 verify-before-parse assumes complete artifact set; WARN path gated on missing signature, not on cause.
+**claws response**: aether §H2 + `BlobRehydrator.cs` — adapter downloads full set into staging buffer; any artifact shorter than manifest-declared length → reject whole set with `PARTIAL_ARTIFACT_DOWNLOAD` (never WARN); backward-compat WARN is gated on manifest ABSENT, not artifacts INCOMPLETE; both tenants log WARN-level audit events for missing signatures to cross-tenant SIEM rollup.
+**Detection ring**: Inner (live)
+**Governance rule**: G-TRUNCATION-FAIL — truncated artifacts are never backward-compat WARN; always fail closed
+
+---
+
+### P-324: Clock authority undefined across sidecar/container/client
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/lobster/sidecar-clock-skew-time-travel-inconsistency.md` F1, F6, F8
+**What happens**: `?at=` time-travel resolves against undefined clock; sidecar (Node `Date.now()`), container (.NET `DateTime.UtcNow`), client (browser) can diverge. `DecisionEntry.timestamp` stamped by sidecar; container logs stamped by runtime — 2-min drift breaks SOC2 correlation ("tool call at 02:47" vs "audit entry at 02:49" look unrelated). Idempotency 24h expiry uses wall-clock → drift produces double-execute OR stale ghost success.
+**Today**: Sidecar clock is authoritative by accident, not by spec.
+**claws response**: lobster §Notes — authoritative clock is sidecar wall-clock at request entry; server returns `effectiveAt` in every `?at=` response; `DecisionEntry.timestamp` is HOST container wall-clock stamped at audit-chain write time via S10; idempotency cache uses monotonic time delta, not wall clock; trust-escalation expiry uses audit-chain sequence, not wall clock.
+**Detection ring**: Inner (live)
+**Governance rule**: G-CLOCK-AUTHORITY — every time-dependent decision has a named authoritative clock source
+
+---
+
+### P-325: DST and calendar-connector stable-event-ID phantom deletes
+**Severity**: Medium
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/lobster/sidecar-clock-skew-time-travel-inconsistency.md` F9
+**What happens**: HEARTBEAT.md schedule `"every Tuesday 02:30 PT"` has no occurrence on spring-forward day. Calendar connector's stable event ID hashes schedule entry identity and produces an event; Outlook skips the non-existent occurrence; connector's delta-query concludes the event "disappeared" and deletes it, then recreates the next week. User sees false "Meeting deleted" + "New meeting created" toasts.
+**Today**: Stable event ID ignores resolved occurrence timestamp.
+**claws response**: lobster §Scope `HeartbeatCalendarSync.cs` — detect DST-gap schedule entries at compile time, emit `HEARTBEAT_DST_GAP` warning; stable event ID includes resolved occurrence timestamp; gap occurrences skipped without delete.
+**Detection ring**: Inner (live)
+**Governance rule**: n/a
+
+---
+
+### P-326: Duplicate DecisionEntry from late provider response
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/aether/provider-hang-under-latency-budget-stress.md` F2, F11
+**What happens**: Provider returns at 99ms; `Task.Delay(100)` races in a tight tick. If timeout path fires first and writes `PROVIDER_FAULT_TIMEOUT`, then the provider's response arrives at 100.1ms. Plan row 9 treats provider faults as terminal but a hung provider that eventually returns can cause a second DecisionEntry. Audit chain for one tool call has two conflicting rows — "Your Honor, the audit chain shows the tool was both approved and denied."
+**Today**: No per-decision idempotency at the writer layer.
+**claws response**: aether §H3 — per-decision `correlationId` + writer-side idempotency: once a DecisionEntry is written for `(toolCall, correlationId)`, subsequent writes rejected with `DUPLICATE_DECISION_ENTRY`; late provider response discarded and `PROVIDER_LATE_RESPONSE` telemetered separately from the chain; dialog emits only after decision fully written.
+**Detection ring**: Inner (live)
+**Governance rule**: G-DECISION-IDEMPOTENT — exactly one DecisionEntry per (toolCall, correlationId)
+
+---
+
+### P-327: generatorVersion format discontinuity across migration boundary
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S7-audit-chain-producer-consumer-provenance-e2e.md` F1
+**What happens**: `ProducerEntry.generatorVersion: string` has no structural format. Example is `'0.1.0+legacyBase:craftworks-pre-migration'`. Migration plan resets semver; the same `0.1.0` post-migration in `@bic/claws-sdk` is a DIFFERENT compiler than pre-migration craftworks builds. Auditor chasing 3-year-old `policyArtifactSha256` cannot disambiguate.
+**Today**: Format is free-form string.
+**claws response**: contract-seams §S7 — `generatorVersion` format `{semver}+{repo}:{commitSha}` (e.g., `0.1.0+bic/claws:abc1234`); pre-migration artifacts use `+craftworks:sha` form; producer-side validation refuses malformed versions.
+**Detection ring**: Middle (upgrade — repo migration) + Inner (live — producer writes)
+**Governance rule**: G-GENERATOR-VERSION — generatorVersion carries repo + commit SHA for cross-migration provenance
+
+---
+
+### P-328: Producer-entry amendment deferred → dangling policyArtifactSha256 window
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S7-audit-chain-producer-consumer-provenance-e2e.md` F4
+**What happens**: Migration plan §Notes: producer-side `ProducerEntry` emission is deferred to a Ra follow-up amendment "not blocked by Horus." Artifacts emitted between Horus close and Ra amendment landing carry `policyArtifactSha256` pointers with NO `ProducerEntry` target — every `DecisionEntry` in the gap has a dangling pointer. Audit chain has broken provenance for weeks or months.
+**Today**: Blocker deferred out of scope of Horus.
+**claws response**: claws-repo-migration §Notes — Ra amendment BLOCKS post-Horus GPR publish of `@bic/claws-sdk@0.1.0`; OR Horus defines a bootstrap ProducerEntry emitted at first build per artifact, backfilled from compiler metadata; contract-seams §S7 adds bootstrap-entry clause.
+**Detection ring**: Middle (upgrade — repo migration)
+**Governance rule**: G-PROVENANCE-GAP — no post-migration publish until producer-side provenance is live
+
+---
+
+### P-329: R1/R2 DecisionEntry sampling breaks evidence completeness
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S7-audit-chain-producer-consumer-provenance-e2e.md` F5; `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/aether/provider-hang-under-latency-budget-stress.md` F10
+**What happens**: Aether's Notes: "R1/R2 DecisionEntries are emitted at SAMPLED rate (1-in-100 by default)." Compliance asks "was there an R1 read of /etc/passwd at 02:47" — 99% chance no entry. Fault signal (`PROVIDER_FAULT_HANG` on R1) gets sampled away too — a malicious provider that only hangs on R1 is invisible.
+**Today**: Sampling applies to all R1/R2 entries uniformly.
+**claws response**: aether §Notes + contract-seams §S7 — two-tier schema: `LightDecisionEntry {entryId, timestamp, toolCall.argsHash, decision}` emitted for EVERY call (small, append-only, searchable); `FullDecisionEntry` sampled at 1-in-100; `PROVIDER_FAULT_*` entries ALWAYS full, never sampled; `decision: deny | review | modify` always full; sampling never dynamic.
+**Detection ring**: Inner (live)
+**Governance rule**: G-SAMPLE-LIGHT — every tool call produces at minimum a light entry; full entries are sampled
+
+---
+
+### P-330: UTF-8 stdio encoding mismatch corrupts non-ASCII audit content
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S10-dotnet-node-dispatch-protocol-version-mismatch-recovery.md` F4
+**What happens**: Node stdio defaults to UTF-8. .NET on Windows defaults to system codepage (1252 on en-US). Non-ASCII content (curly quotes, emojis, non-English workspace names, user principal names with accented characters) in JSON strings through the dispatch pipe mangles silently. Audit entries with non-ASCII content corrupt with no error.
+**Today**: Encoding unspecified; whichever side happens to match the other's default works.
+**claws response**: contract-seams §S10 — BOTH sides UTF-8 unconditionally; Node `process.stdout.setDefaultEncoding('utf8')`; .NET `ProcessStartInfo.StandardOutputEncoding = Encoding.UTF8` + matching stdin; dispatch-protocol.md includes startup-code samples.
+**Detection ring**: Inner (live) + Compile-time (startup assertion)
+**Governance rule**: G-DISPATCH-UTF8 — all stdio dispatch is UTF-8; other encodings fail at handshake
+
+---
+
+### P-331: .NET parent missing Windows JobObject → Node orphans on crash
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/cross-plan/S10-dotnet-node-dispatch-protocol-version-mismatch-recovery.md` F5
+**What happens**: Sim plan C1 covers SIM-side orphan cleanup (PID registry, `taskkill /T`, signal handlers). But when the .NET PARENT (xUnit test runner, `dotnet test`) crashes, sim-side `process-tree.ts` cannot help — the Node subprocess becomes orphan. Windows has no parent-death signal analogous to Unix; explicit JobObject binding is the only reliable cleanup.
+**Today**: Aether plan §Scope does not specify JobObject wrapping.
+**claws response**: contract-seams §S10 — .NET parent MUST wrap subprocess in Windows `JobObject` with `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`; OS kills Node when .NET process exits regardless of reason; sim scenario `dispatch-protocol-parent-crash-cleanup` validates.
+**Detection ring**: Inner (live) + Middle (test-infra)
+**Governance rule**: G-PARENT-JOBOBJECT — .NET-spawned dispatch subprocesses are OS-bound to parent lifetime
+
+---
+
+### P-332: Credential-expiry telemetry conflated with governance-tamper
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/aether/gpr-auth-token-expires-mid-container-boot.md` F1, F6
+**What happens**: §H2 emits only `GOVERNANCE_INTEGRITY_FAILED`, `GOVERNANCE_UNKNOWN_SIGNING_KEY`, `GOVERNANCE_UNLISTED_ARTIFACT`. Blob SAS expiry, GPR token expiry, trust-store-refresh-blocked all surface as governance-tamper codes. SIEM alerting rules fire as if an attack is in progress — high-cost false positive degrading trust in the rule. Token revocation (security incident) indistinguishable from expiry (routine rotation) at the error layer.
+**Today**: Error vocabulary is governance-biased; credential failures piggyback.
+**claws response**: aether §H2 + `siem-mapping.md` — add `CREDENTIAL_EXPIRED_BLOB`, `CREDENTIAL_EXPIRED_GPR`, `CREDENTIAL_REVOKED`, `TRUST_STORE_STALE`, `PARTIAL_ARTIFACT_DOWNLOAD` codes with severity distinct from governance-tamper; revocation signal polling with 30s max latency to boot abort.
+**Detection ring**: Middle (upgrade — auth rotation) + Inner (live)
+**Governance rule**: G-CREDENTIAL-DISTINCT — credential failures and governance failures have disjoint telemetry codes
+
+---
+
+### P-333: Ra-reopening impossible after wrongly-declared-closed (R6 infinite loop)
+**Severity**: Critical
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/migration/ra-still-open-horus-cannot-start-dependency-trap.md` F3, F6
+**What happens**: R6 post-merge rollback says "re-enter §7 state machine at PreFlight." But PreFlight's entry requires "Ra wave closed." If R6 surfaces that Ra's "closed" declaration was wrong (peer-dep leak, test-time import to `@craftworks/*`, untested GPR workflow), the rollback is infinite-looped: can't re-enter PreFlight because entry requires Ra closed; Ra needs to be re-opened; no process for re-opening a closed prior wave exists.
+**Today**: Rollback path assumes prior-wave state is immutable.
+**claws response**: CL-13 §6 — add R6.2 "Prerequisite wave re-opening": `prerequisite-wave-reopen-evidence.json` (signed, 7-year) captures prior wave id, defect, re-open approver + timeline; `docs/operations/prior-wave-reopen-runbook.md` documents the process; Ra-close-evidence schema enumerates all dep classes + transitive closure as mandatory fields.
+**Detection ring**: Middle (upgrade — repo migration)
+**Governance rule**: G-PREREQ-REOPEN — prior-wave defects discovered in rollback reopen the prior wave with signed evidence
+
+---
+
+### P-334: Concurrent sim invocations corrupt shared fixture state
+**Severity**: High
+**Source**: `.craft/waves/260416+horus-the-heir+claws-migration/scenarios/sim/parity-check-flaky-nondeterministic-output.md` F4
+**What happens**: Two concurrent `claws sim run` invocations against `fixtures/golden/` share the fixture working directory. One test writes an audit entry; the other sees it. Correlation IDs from test A appear in test B's trace. Parity-check flakes, indistinguishable from real divergence. Plan's `--data-dir` only isolates WAL/audit from host install, not between concurrent sim instances.
+**Today**: Fixture directory is implicitly single-reader.
+**claws response**: sim §Scope `harness/index.ts` — `runSim()` acquires fixture-level lock (`fixtures/{name}/.sim-lock` with PID) on entry; second invocation waits (dev mode) or fails with `FIXTURE_LOCKED` (CI mode); `--isolate` flag copies fixture to per-run tmp path for true parallel isolation.
+**Detection ring**: Middle (upgrade — test infra)
+**Governance rule**: G-FIXTURE-LOCK — fixture directories are exclusively acquired per sim instance
+
+---
+
+## Category N+: Aether Runtime-Hosted Architecture (post-pivot 2026-04-16)
+
+(Pitfalls arising from the architecture pivot to the aether runtime-hosted model — `docs/claws/proposals/aether-integration.md` §3 + Appendix B and `.craft/waves/260416+horus-the-heir+claws-migration/aether-reconciliation.md` §5. The shift from a standalone sidecar to an aether-hosted governance forwarder dissolves 3 previously-considered pitfalls (post-verification tamper, loopback impersonation, binary integrity — all addressed structurally by the runtime-hosted design) and introduces 6 new failure modes at the claws↔aether seam.)
+
+**DISSOLVED by architecture pivot (2026-04-16)** — three previously-considered pitfalls were proposed during reconciliation but were retired before landing in this catalog because the runtime-hosted design eliminates them structurally:
+
+- **Post-verification tamper** — aether's trusted-process model means the loaded policy image cannot be swapped between verify and enforce; no tamper window exists.
+- **Loopback impersonation** — the `coclaw-governance` forwarder runs in-process within aether; there is no loopback socket a local attacker could race.
+- **Binary integrity** — the runtime ships as part of aether's signed release; claws does not distribute a standalone enforcement binary that could drift.
+
+---
+
+### P-338: Runtime-unreachable blocks all tools (fleet-wide impact)
+**Severity**: Critical
+**Source**: Architecture pivot 2026-04-16 — `docs/claws/proposals/aether-integration.md` §3 + Appendix B; aether PR #5408 §5.6 (fail-closed plugin)
+**What happens**: Aether runtime outage (pod crash, gRPC stream break, network partition) causes the `coclaw-governance` forwarder to fail every `before_tool_call` hook, blocking every OpenClaw tool call across the entire fleet. Planned outages are graceful; unplanned outages are service-visible and fleet-wide. A single runtime regression becomes a universal kill switch.
+**Today**: No cached verdict, no degraded mode, no local fallback policy; fail-closed is absolute with no tier-limited exception.
+**claws response**: aether plan H2 validation `aether-serve-consumer/claws-serve-unreachable`; deployment §3.3 graceful-degrade notes. Propose with Eduardo: tier-limited cached verdict for a tight window (e.g., R1/R2 only, <60s) OR local degraded-policy file for runtime outages, so that outages degrade R5 strictly while allowing low-risk tools to proceed.
+**Detection ring**: Inner (live)
+**Governance rule**: n/a
+
+---
+
+### P-339: Haiku LLM judge budget collapse under DoS
+**Severity**: High
+**Source**: Architecture pivot 2026-04-16 — aether PR #5408 §5.4 (Haiku tier 3 judge); cost-envelope reasoning in `docs/claws/proposals/aether-integration.md` Appendix B
+**What happens**: High tool-call rate combined with workspace/tenant policy that pushes many tools to `action: "evaluate"` (LLM-judged) blows the Haiku API budget. The circuit breaker trips; all "evaluate" tools fall through to `on_uncertain`. If `on_uncertain: allow`, the outcome is silent bypass; if `on_uncertain: ask`, it is an approval storm that DoSes the user. Either way, the LLM-judge tier collapses.
+**Today**: No rate limit, no circuit breaker, no telemetered budget spend per tenant.
+**claws response**: align with Eduardo's planned Ship 3 (Haiku) circuit-breaker + workspace-tier cannot author `action: "evaluate"` (aether PR #5408 §5.11.4). Workspace-tier field-allowlist enforcement rejects disallowed rules at load; claws compile-time refuses to emit `action: "evaluate"` from workspace-tier sources; per-tenant LLM-judge budget telemetry alerts before breaker trips.
+**Detection ring**: Inner (live)
+**Governance rule**: n/a
+
+---
+
+### P-340: Workspace-policy allowlist bypass via format trickery
+**Severity**: High
+**Source**: Architecture pivot 2026-04-16 — aether PR #5408 §5.11.4 workspace-tier field allowlist; attacker mental model in `.craft/waves/260416+horus-the-heir+claws-migration/aether-reconciliation.md` §5
+**What happens**: A crafted workspace file (compromised skill writing `.aether/governance.json`) uses nested structures, aliased field names, JSON5 extensions, comment-smuggled fields, or casing variations to sneak disallowed fields (`policies[]`, `action: "evaluate"`, custom `default`) past the allowlist validator. The structural clamp that prevents workspace-tier from authoring enterprise-tier rules is defeated; workspace writes escalate privilege.
+**Today**: The validator rejects whole-file on unknown top-level fields, but subtly-malformed aliased or nested fields may slip through depending on parser quirks.
+**claws response**: fuzz-test the allowlist before Ship 2; contribute a reference validator implementation to the `@openclaw/governance-policy-format` package with canonical parser + strict mode; claws's emit side refuses to produce nested or aliased disallowed structures; conformance tests span aether + claws.
+**Detection ring**: Compile-time + Inner (live)
+**Governance rule**: G-ALLOWLIST — workspace-tier field allowlist is enforced against a canonical parse tree, not a textual match (new in CL-04 §5.10)
+
+---
+
+### P-341: Schema drift between claws-emit and aether-consume
+**Severity**: Medium
+**Source**: Architecture pivot 2026-04-16 — `.craft/waves/260416+horus-the-heir+claws-migration/aether-reconciliation.md` §5 + cross-team ownership boundary
+**What happens**: claws emits workspace policy at format version v1.0; aether runtime upgrades to v1.1 with a new optional field; claws lags behind. Aether gracefully ignores unknown fields but consumer-side tests drift out of parity. The reverse case is worse: aether still on v1.0, claws emits v1.1 → aether rejects the file → workspace tier goes dark across the fleet. No schema version negotiation is documented.
+**Today**: Schema version is implicit in the shared package; no semver discipline, no conformance tests, no parity-check gate.
+**claws response**: contribute `@openclaw/governance-policy-format` with semver + conformance tests; aether and claws both pin to the same minor version; a parity-check scenario fails CI on drift; schema-version field mandatory in every emitted policy file; aether reports its accepted version range on handshake.
+**Detection ring**: Compile-time
+**Governance rule**: G-SCHEMA-VERSION — emitted and consumed schema versions are negotiated at handshake and asserted at load (new)
+
+---
+
+### P-342: Container-to-runtime gRPC latency tail
+**Severity**: Medium
+**Source**: Architecture pivot 2026-04-16 — aether PR #5408 §5.6 (35s timeout); p99 latency reasoning in `docs/claws/proposals/aether-integration.md` §3
+**What happens**: The 35s plugin timeout in the `coclaw-governance` forwarder translates directly into 35s of hung tool call whenever aether is slow (network jitter, GC pause, high tail, noisy-neighbor pod). The user experiences a freeze; the agent loop blocks. Without a tighter p99 budget, occasional tail latency from a healthy runtime is indistinguishable from an outage, and user perception of "claws is slow" is captured by the longest outlier.
+**Today**: A single fixed 35s timeout with no p99 guidance, no per-tier budget, no telemetry feedback to tune it.
+**claws response**: sim plan harness measures p99 across tiers; propose tighter p99 targets with Eduardo (e.g., 2s p99 for simple tools, 10s p99 for LLM-judged, 35s reserved as hard ceiling); explicit budget documented per tier; latency-budget breach surfaces as telemetry, not as hang.
+**Detection ring**: Inner (live)
+**Governance rule**: G-LATENCY-BUDGET — every tool dispatch carries a per-tier p99 budget, breach is telemetered (new, or amend CL-03)
+
+---
+
+### P-343: Compile failure rejects workspace write
+**Severity**: High
+**Source**: Architecture pivot 2026-04-16 — `docs/claws/proposals/aether-integration.md` §3.2 Seam A (write-gateway compile-in-loop)
+**What happens**: Under the trusted write-gateway model, every workspace write triggers a recompile before the write is acknowledged. If the write introduces a rule conflict (e.g., an R5 tool missing a required guard), the compile fails and the write is rejected. This is expected behavior, but if error propagation is poor (opaque message, no fix suggestion, no diff pointer), users get stuck and may retry the same edit indefinitely — or worse, assume the save worked and move on.
+**Today**: No compile-error surface on write; writes land silently even if they break governance, so users have no reference point for this new rejection class.
+**claws response**: typed error responses via `/v1/workspace-write`; a PatchError catalog maps compile-errors to user-actionable messages (14-code catalog with fix hints); Cowork UX renders compile-error as an inline diagnostic with source pointer; documented retry/override protocol.
+**Detection ring**: Compile-time
+**Governance rule**: n/a (process-quality)
+
+---
+
+### Ownership split + snapshot-push (2026-04-16 follow-up)
+
+(Pitfalls arising from the ownership-split + guardrail-provider-library + snapshot-push model introduced in `docs/claws/proposals/aether-integration.md` §3 + §3.4. Eduardo's gateway owns workspace writes and forest-cache push; claws ships the `@openclaw/guardrail-provider` library consumed by in-container skills; snapshot IDs become the push unit between compile and consume. These seams introduce 7 new failure modes at the ownership boundary.)
+
+---
+
+### P-344: Guardrail-provider classifier compromised / misclassification
+**Severity**: High
+**Source**: Proposal §3.4.3 trust model analysis
+**What happens**: Compromised in-container skill substitutes or bypasses `@openclaw/guardrail-provider` library to return lower classification (e.g., R1 for an R5 tool) to aether via the `ApprovalExtensionEnvelope`. Attacker hopes aether trusts the envelope and routes the tool through a lighter tier than workspace policy demands.
+**Today**: No structural prevention — compile didn't happen yet; aether would honor envelope-supplied classification as-is.
+**claws response**: Envelope is **advisory**; aether Tier 0 consults compiled workspace-tier policy independently. Workspace policy says R5 → Tier 0 fires regardless of envelope contents. Envelope rationale annotated `source: container` so Haiku judge can discount it. Library shipped as part of gateway image, not dynamic-loaded — supply-chain verify at plugin load.
+**Detection ring**: Compile-time + Inner (live)
+**Governance rule**: G-CLASSIFIER-ADVISORY — container-sourced classification envelopes are advisory; authoritative tier is the compiled workspace policy (new)
+
+---
+
+### P-345: Rollback snapshot authorization gap
+**Severity**: High
+**Source**: Proposal §3.2.2 rollback control
+**What happens**: Admin initiates rollback to snapshot v8. Snapshot v8's policy is more permissive than current (allowed a tool current policy denies). Rollback succeeds without write-time validation → security regression in one click, with the rollback presenting as a routine operational action rather than a policy change.
+**Today**: No re-validation on rollback; rollback path bypasses the write-gateway's compile-in-loop entirely.
+**claws response**: Rollbacks are writes; flow through `/v1/workspace-write` with `target_snapshot` field. Write-time validator runs against the target's artifacts. If target policy would regress R5/fleet/governance posture, rollback is rejected OR requires explicit `--force-security-regression` flag + RollbackEntry audit with reviewer approval.
+**Detection ring**: Compile-time
+**Governance rule**: G-ROLLBACK-VALIDATE — rollbacks flow through the write gateway and are rejected on security regression without explicit override (new)
+
+---
+
+### P-346: Snapshot evicted between push and consume
+**Severity**: Medium
+**Source**: Proposal §3.1.1 forest cache
+**What happens**: Eduardo receives `snapshot_id` from `CompileIncremental`. Before calling `GetArtifacts`, forest cache evicts (LRU pressure from other workspaces). `GetArtifacts(snapshot_id)` returns StaleError; the write acknowledgement path breaks mid-flight.
+**Today**: No promote-before-eviction guarantee; LRU does not know a consumer is holding the ID.
+**claws response**: Snapshots Eduardo has received are tagged "in-flight" and exempt from LRU eviction until Eduardo calls `ReleaseSnapshot()` or a TTL expires (default 60s). For durable named snapshots (`claws snap save`), last-good pin + blob backup; cache fails-closed on eviction race, returns IssueRecompile hint.
+**Detection ring**: Dispatch boundary
+**Governance rule**: n/a
+
+---
+
+### P-347: Stale snapshot_id pushed to container
+**Severity**: Medium
+**Source**: Proposal §3.2 snapshot-as-push-unit
+**What happens**: Eduardo pushes snapshot_id X. Meanwhile user wrote new content producing snapshot X+1. Container now reflects older policy. Gap between compile time and container-rehydration time becomes a race window where stale governance is enforced against current user intent.
+**Today**: Race condition without sequencing; push path has no generational check.
+**claws response**: Push protocol includes `expect_snapshot_id`; if Eduardo attempts to push X while canonical state is already at X+1, the push is rejected with `StalePushRejected`. Cowork UX shows "you're looking at snapshot X; current is X+1" banner. Auto-retry flag on the push if rejection is transient.
+**Detection ring**: Dispatch boundary
+**Governance rule**: n/a
+
+---
+
+### P-348: Compile-service unreachable mid-write
+**Severity**: High
+**Source**: Proposal §3.3 — claws-serve sidecar availability
+**What happens**: Eduardo's `/v1/workspace-write` receives a write. Calls `CompileService.CompileIncremental`; my sidecar is crashed, restarting, or partitioned. Writes queue; cumulative latency to user; worst case — aether pod drains, writes back up unboundedly, gateway OOMs.
+**Today**: No fallback path, no queue limit, no degrade protocol documented.
+**claws response**: Eduardo's gateway queues writes with bounded queue (e.g., 500 entries). If queue depth exceeds threshold, reject new writes with `CompileServiceUnavailable`; surface to Cowork UX. Sidecar liveness probe + auto-restart. For stateless-compile services, alternate sidecar instance can pick up. Graceful degrade: use last-good snapshot if queue TTL exceeded.
+**Detection ring**: Inner (live)
+**Governance rule**: n/a
+
+---
+
+### P-349: Cross-workspace cache key collision
+**Severity**: Medium
+**Source**: Proposal §3.1.1 forest cache, per-workspace guarantee
+**What happens**: Hash collision OR buggy cache key derivation causes workspace A's compile to reference workspace B's cache entry. Workspace A deploys workspace B's policy → cross-tenant data leak with governance-level blast radius (wrong tools allowed, wrong R-tier, wrong approvers).
+**Today**: Cache keys not validated against workspace ID at read; a derivation bug could land silently.
+**claws response**: Cache keys mandatory-prefixed with `workspace_id`; read-side assertion validates key prefix matches requested workspace; key derivation uses SHA-256 (collision-safe); fuzz-test cache-key derivation; audit log on cache-key-mismatch error.
+**Detection ring**: Compile-time + Inner (live)
+**Governance rule**: G-WORKSPACE-NAMESPACE — cache keys are mandatory-prefixed with workspace_id and validated on read (new)
+
+---
+
+### P-350: Snapshot lineage walk breaks
+**Severity**: Medium
+**Source**: Proposal §3.2 snapshot parent_id linkage
+**What happens**: Auditor walks snapshot lineage (v12 → v11 → v10 → ...); one snapshot's `parent_id` is missing, corrupted, or dangling. Walk halts; provenance chain breaks; audit-evidence report for a compliance review cannot produce a full policy history.
+**Today**: Lineage walk has no integrity verification; a dangling pointer ends the trail without diagnostic.
+**claws response**: `parent_id` is a content hash of the parent snapshot (not a mutable ID). Lineage walk verifies hash match at each step. Corrupt `parent_id` surfaces as `LineageBroken` error with the first broken link. Backup: blob storage retains full lineage as a separate structure; walk can fall back to blob if cache is corrupt.
+**Detection ring**: Compile-time
+**Governance rule**: n/a
+
+---
+
+### P-351: R-tier laundering via intra-agent tool-argument chain
+**Severity**: High
+**Source**: Horus container threat model 2026-04-17 — D4 tool-argument chaining; CL-02 Amendment A489; CL-09 `args_from` schema
+**What happens**: Compromised skill orchestrates a two-tool chain: R1 reader (e.g., `read-document`, `query-database`, `get-memory`) fetches RESTRICTED-labeled data; R1 sender (e.g., `send-email`, `post-slack`, `http-post`) receives that output as an argument and egresses it externally. Neither tool is R5 individually, so neither trips the elicitation gate. The chain, however, is R5: RESTRICTED data crossing an IRREVERSIBLE_EXTERNAL boundary. Classic defense (per-tool R1-R5 classification) fails silently — no approval is requested, no diagnostic is emitted, the data leaves the workspace.
+**Today**: G-CLASS classifies tools individually. G-A2A-FLOW covers inter-agent flow but not intra-agent tool-to-tool provenance. G-DATA labels data but does not propagate labels through tool outputs into the next tool's arguments. Result: per-tool R1 ceiling is authoritative even when the effective chain is R5.
+**claws response**: G-CHAIN rule family (CL-02 A489) with 5 sub-rules. TOOLS.md tool declarations may include `args_from: { arg: [source_labels] }` (CL-09 schema). Compile-time rules: provenance schema validation (G-CHAIN-01), source-to-risk propagation with tier elevation (G-CHAIN-02 — RESTRICTED source into IRREVERSIBLE_EXTERNAL consumer → effective R5), default-deny for R3+ tools without `args_from` (G-CHAIN-03), transitive chain walk terminating in user_prompt / memory / agent_literal (G-CHAIN-04), and mandatory `args_from` for IRREVERSIBLE_EXTERNAL capabilities (G-CHAIN-05). Runtime: forwarder envelope carries `arg_provenance`; aether Tier 0 validates declared ⊇ actual; missing provenance → fall through to worst-case static elevation. Residual risk: agent manually re-types RESTRICTED data into `user_prompt` format to bypass chain declaration — covered by Tier 3 LLM-judge output-scan, not G-CHAIN.
+**Detection ring**: Compile-time (G-CHAIN-01 through G-CHAIN-05) + runtime (Aether Tier 0 provenance validation)
+**Governance rule**: G-CHAIN-01 / G-CHAIN-02 / G-CHAIN-03 / G-CHAIN-04 / G-CHAIN-05
+
+---
+
 ## Summary
 
 ### By Category
@@ -2889,27 +3450,31 @@ User ──→ Agent ──→ Classification Gate ──→ Tool ──→ Effe
 | Skill lifecycle scenarios | 5 | 0 | 4 | 1 |
 | Lossless round-trip scenarios | 6 | 0 | 6 | 0 |
 | Platform detection scenarios | 7 | 1 | 5 | 1 |
-| **Total** | **250** | **70** | **167** | **13** |
+| Integration & Boundary (Horus) | 35 | 20 | 14 | 1 |
+| Aether runtime-hosted architecture | 6 | 1 | 3 | 2 |
+| Ownership split + snapshot-push | 7 | 0 | 3 | 4 |
+| **Total** | **298** | **91** | **187** | **20** |
 
 ### By Detection Ring
 
 | Ring | Pitfalls detected | Notes |
 |------|------------------|-------|
-| Inner (live) | 45 | Config changes, TOOLS.md drift, skill changes, cron config, A2A policy, OBO classification, injection patterns, supply chain, permissions, fail-mode validation, approval token binding, elicitation gates, boundary markers, memory poisoning, chain validation, context truncation, platform marker alignment (P-257), governance singleton check (P-266) |
-| Middle (upgrade) | 44 | All upgrade breakage, most security changes, plugin issues, key rotation checks, snapshot lifecycle, dead man switch, doctor fix atomicity, signature staleness, publish atomicity, evidence reproducibility, CEF mapping, Bedrock API versioning, transitive dep audit (P-252), publish gate dedup (P-253), compat completeness (P-254), audit chain format (P-258), monolith downgrade (P-268) |
+| Inner (live) | 68 | Config changes, TOOLS.md drift, skill changes, cron config, A2A policy, OBO classification, injection patterns, supply chain, permissions, fail-mode validation, approval token binding, elicitation gates, boundary markers, memory poisoning, chain validation, context truncation, platform marker alignment (P-257), governance singleton check (P-266), Horus live runtime pitfalls (P-300–P-305, P-313–P-316, P-323–P-326, P-329), Aether runtime-hosted pitfalls (P-338 unreachable, P-339 Haiku budget, P-340 allowlist bypass, P-342 gRPC latency tail), Ownership-split pitfalls (P-344 classifier compromise, P-348 compile-service unreachable, P-349 cache key collision) |
+| Middle (upgrade) | 55 | All upgrade breakage, most security changes, plugin issues, key rotation checks, snapshot lifecycle, dead man switch, doctor fix atomicity, signature staleness, publish atomicity, evidence reproducibility, CEF mapping, Bedrock API versioning, transitive dep audit (P-252), publish gate dedup (P-253), compat completeness (P-254), audit chain format (P-258), monolith downgrade (P-268), Horus repo-migration + upgrade pitfalls (P-306–P-308, P-317–P-319, P-327, P-328, P-332–P-334) |
 | Outer (fleet) | 33 | Baseline drift, fleet-wide version skew, fleet compliance, broadcast partial failure, discovery gaps, version compatibility, trust tier drift, delegation format, fleet inheritance, compliance inflation, DNS exfiltration, audit chain integrity, PHI storage, drift resolved versions (P-259), broadcast cascade (P-260), fleet rollback (P-261), mixed-version IR (P-262), fleet dedup (P-253) |
 | Fleet | 6 | Kill switch deny-all, unreachable workspace escalation, double-kill prevention, L0 impersonation, cross-workspace trust detection, DECLARED tier badge |
-| Compile-time | 30 | Token verification, group bridging, transitive flow, delegation cycle, all-delegation warning, scaffold risk, YAML disambiguation, directory collision, BOM handling, CRLF normalization, JSON determinism, error preservation, platform detection, advisory enforcement, delimiter management, merge strategy, multi-language codegen, config evolution, type ownership (P-250), ghost imports (P-251), subpath dangling (P-255), emitter output scan (P-256), pipeline equivalence (P-263), registry collision (P-264), emit error wrapping (P-265), wildcard re-export (P-267), cross-layer types (P-269) |
+| Compile-time | 41 | Token verification, group bridging, transitive flow, delegation cycle, all-delegation warning, scaffold risk, YAML disambiguation, directory collision, BOM handling, CRLF normalization, JSON determinism, error preservation, platform detection, advisory enforcement, delimiter management, merge strategy, multi-language codegen, config evolution, type ownership (P-250), ghost imports (P-251), subpath dangling (P-255), emitter output scan (P-256), pipeline equivalence (P-263), registry collision (P-264), emit error wrapping (P-265), wildcard re-export (P-267), cross-layer types (P-269), Horus type-system extension-point pitfalls (P-312, P-320, P-321, P-322), Aether runtime-hosted pitfalls (P-340 allowlist bypass, P-341 schema drift, P-343 compile-on-write rejection), Ownership-split pitfalls (P-344 classifier advisory, P-345 rollback validation, P-349 workspace namespace, P-350 lineage hash) |
 | Runtime (guard stubs) | 6 | Prompt injection enforcement, memory isolation, output redaction, approval flow, tool output isolation, URL validation |
+| Dispatch boundary | 5 | Horus .NET↔Node dispatch pitfalls (P-311 concurrent isolation, P-330 UTF-8 encoding, P-331 JobObject parent binding), Ownership-split snapshot-push pitfalls (P-346 in-flight eviction, P-347 stale snapshot push) |
 | Outside claws scope | 4 | Runtime channel bugs, gateway stability, message tracing, incident correlation |
 
 ### The Scope Boundary
 
-**In claws scope (238 of 250)**: Config migration, security policy, skill governance, drift detection, trust tier enforcement, audit trail, snapshot/restore, baseline comparison, A2A trust boundaries, OBO elicitation gates, per-tool classification, data sensitivity labels, injection defense patterns, supply chain scanning, bounded reasoning, fail-mode enforcement, key management, sidecar enforcement, broadcast recovery, fleet discovery, kill switch out-of-band, version compatibility, three-ring coordination, fleet operations, snapshot lifecycle, OBO elicitation, A2A governance, injection defense, compliance evidence, skill lifecycle, lossless round-trip, platform detection, package extraction (P-250 through P-269: type ownership, ghost imports, transitive deps, diamond dedup, re-export stability, subpath resolution, emitter isolation, marker alignment, audit chain format, drift detection, broadcast cascade, fleet rollback, mixed-version IR, pipeline equivalence, registry collision, emit lifecycle, governance singleton, wildcard re-exports, monolith downgrade, cross-layer types).
+**In claws scope (287 of 299)**: Config migration, security policy, skill governance, drift detection, trust tier enforcement, audit trail, snapshot/restore, baseline comparison, A2A trust boundaries, OBO elicitation gates, per-tool classification, data sensitivity labels, injection defense patterns, supply chain scanning, bounded reasoning, fail-mode enforcement, key management, sidecar enforcement, broadcast recovery, fleet discovery, kill switch out-of-band, version compatibility, three-ring coordination, fleet operations, snapshot lifecycle, OBO elicitation, A2A governance, injection defense, compliance evidence, skill lifecycle, lossless round-trip, platform detection, package extraction (P-250 through P-269: type ownership, ghost imports, transitive deps, diamond dedup, re-export stability, subpath resolution, emitter isolation, marker alignment, audit chain format, drift detection, broadcast cascade, fleet rollback, mixed-version IR, pipeline equivalence, registry collision, emit lifecycle, governance singleton, wildcard re-exports, monolith downgrade, cross-layer types), Horus integration & boundary (P-300 through P-334: R5 reload timing, audit dispatch failure, cross-tenant audit leakage, VM suspend/resume, Windows Ctrl-C orphans, port TIME_WAIT, dry-run divergence, 24h SLA states, binary fingerprint trust-root, chain-hash concurrency, canonicalization rot, dispatch concurrency, Promise&lt;never&gt; foreclosure, provider hang orphan, tenant flip, approval dialog expiry, R5 persistence pre-condition, trust-store independence, evidence draft status, generated deletion inventory, boot emit ownership, boot backward transitions, closed-union extension points, partial download WARN path, clock authority, DST phantom deletes, duplicate DecisionEntry, generatorVersion format, producer-entry gap, R1/R2 two-tier sampling, UTF-8 dispatch encoding, JobObject parent binding, credential telemetry distinct, prerequisite wave reopen, fixture lock), Aether runtime-hosted architecture (P-338 through P-343: runtime-unreachable fleet block, Haiku budget collapse, workspace allowlist bypass, schema drift, gRPC latency tail, compile-on-write rejection), Ownership split + snapshot-push (P-344 through P-350: guardrail-provider classifier compromise, rollback authorization gap, in-flight snapshot eviction, stale snapshot push, compile-service unreachable, cross-workspace cache key collision, snapshot lineage hash verification), Container threat-model (P-351: R-tier laundering via intra-agent tool-argument chain — closed by G-CHAIN rule family + TOOLS.md `args_from` schema).
 
-**Partially in scope — compile-time patterns + runtime stubs (8 of 250)**: Prompt injection (P-030), link preview exfil (P-031), memory poisoning (P-033), tool output isolation (P-030), output redaction, URL validation, DNS exfiltration (P-220), context truncation (P-225). claws emits runtime guard stubs; enforcement requires the platform runtime.
+**Partially in scope — compile-time patterns + runtime stubs (8 of 299)**: Prompt injection (P-030), link preview exfil (P-031), memory poisoning (P-033), tool output isolation (P-030), output redaction, URL validation, DNS exfiltration (P-220), context truncation (P-225). claws emits runtime guard stubs; enforcement requires the platform runtime.
 
-**Outside claws scope (4 of 250)**: Channel connector runtime bugs (P-013 partially), gateway restart stability (P-019), message-level tracing (P-022), incident correlation (P-023). These require runtime observability, not compile-time governance.
+**Outside claws scope (4 of 299)**: Channel connector runtime bugs (P-013 partially), gateway restart stability (P-019), message-level tracing (P-022), incident correlation (P-023). These require runtime observability, not compile-time governance.
 
 The boundary: **claws governs the agent definition, policy compliance, trust boundaries, and human approval gates. It does not manage the platform runtime.** For injection defense, claws emits structural patterns (guard stubs) that the runtime enforces — claws sets the rules, the runtime executes them.
 
@@ -2929,3 +3494,7 @@ The boundary: **claws governs the agent definition, policy compliance, trust bou
 | Q12n ecosystem mapping | P-036, P-037, P-038, P-039, P-040, P-041, P-042 |
 | R1 consolidated review (CB-01 through CB-09) | P-043, P-044, P-045, P-046, P-047, P-048, P-049, P-050 |
 | Ra wave package acceptance scenarios (70 scenarios, 572 findings) | P-250, P-251, P-252, P-253, P-254, P-255, P-256, P-257, P-258, P-259, P-260, P-261, P-262, P-263, P-264, P-265, P-266, P-267, P-268, P-269 |
+| Horus wave scenario findings (16 scenarios, 232 findings) | P-300, P-301, P-302, P-303, P-304, P-305, P-306, P-307, P-308, P-309, P-310, P-311, P-312, P-313, P-314, P-315, P-316, P-317, P-318, P-319, P-320, P-321, P-322, P-323, P-324, P-325, P-326, P-327, P-328, P-329, P-330, P-331, P-332, P-333, P-334 |
+| Architecture pivot 2026-04-16 (aether runtime-hosted) — `docs/claws/proposals/aether-integration.md` + `.craft/waves/260416+horus-the-heir+claws-migration/aether-reconciliation.md` + aether PR #5408 | P-338, P-339, P-340, P-341, P-342, P-343 (plus 3 dissolved: post-verification tamper, loopback impersonation, binary integrity) |
+| Ownership split + snapshot-push model — `docs/claws/proposals/aether-integration.md` §3 + §3.4 (guardrail-provider library, forest cache, write-gateway, snapshot lineage) | P-344, P-345, P-346, P-347, P-348, P-349, P-350 |
+| Horus container threat model 2026-04-17 — CL-02 A489 G-CHAIN + CL-09 `args_from` schema (tool-argument provenance / R-tier laundering) | P-351 |

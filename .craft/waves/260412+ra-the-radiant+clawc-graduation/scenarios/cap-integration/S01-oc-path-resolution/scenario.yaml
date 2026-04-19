@@ -1,0 +1,202 @@
+name: S01-oc-path-resolution
+series: cap-integration
+version: 2
+specs: [CL-10, CL-03]
+description: >
+  Validates that GET /api/oc/{path} resolves oc:// paths at every granularity:
+  file-only (oc://TOOLS.md), file/section (oc://TOOLS.md/Tools),
+  file#section/item (oc://TOOLS.md/Tools/timely-updates),
+  file#section/item/field (oc://TOOLS.md/Tools/timely-updates/enabled),
+  directory glob (oc://skills/*), and lobster step paths
+  (oc://lobster.yaml/steps/onboard). Each depth level narrows the returned
+  content. Missing files return 404. Every successful response includes
+  governance context from the most recent compilation. The oc:// path in the
+  request is echoed back in the response for roundtrip fidelity.
+
+expect:
+  http:
+    method: GET
+    path: /api/oc/{path}
+    status: 200
+    content_type: application/json
+  response_shape:
+    root_has: [data, meta]
+    meta_has: [oc_path, resolved_at, governance_context]
+    data_varies_by_depth: true
+    file_level_data_has: [content, sections]
+    section_level_data_has: [items]
+    item_level_data_has: [fields]
+    field_level_data_is: scalar_or_object
+  error_shape:
+    status_404_has: [error, oc_path, suggestion]
+  governance:
+    present_on_every_200: true
+    governance_context_has: [compilation_id, timestamp]
+  roundtrip:
+    request_path_echoed_in_meta: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner navigates the OC workspace through the generic Layer 1
+  API. The workspace contains TOOLS.md (3 sections, 6 tools), GOVERNANCE.md,
+  USER.md, AGENTS.md, lobster.yaml (4 steps), and skills/ (2 skill files). The
+  partner issues GET requests at every depth: /api/oc/TOOLS.md returns the full
+  file with section listing, /api/oc/TOOLS.md#Tools returns the Tools section
+  with item listing, /api/oc/TOOLS.md#Tools/timely-updates returns the item
+  with field listing, /api/oc/TOOLS.md#Tools/timely-updates/enabled returns
+  the field value. Additionally, /api/oc/skills/* returns an array of skill
+  file summaries, and /api/oc/lobster.yaml#steps/onboard returns the onboard
+  step definition. A request for /api/oc/MISSING.md returns 404 with the
+  original oc:// path and a suggestion for similar files.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Fragment parsing must handle the # character appearing in section names
+      themselves. If a section is named 'C# Tools', the path
+      /api/oc/TOOLS.md#C# Tools contains an ambiguous second #. The parser
+      must treat only the first # as the fragment delimiter and everything
+      after it as the section name. Without this rule, paths with # in names
+      silently resolve to the wrong section or return 404.
+    spec_impact: "CL-03 oc:// parser — first # is fragment delimiter; subsequent # are literal section name characters"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Item names may contain special characters: spaces (timely updates),
+      slashes (input/output), dots (v2.config), and Unicode (emoji labels).
+      The path /api/oc/TOOLS.md#Tools/input/output is ambiguous — is 'output'
+      a field of item 'input' or part of item name 'input/output'? The API
+      must define URL encoding rules: item names with slashes must be
+      percent-encoded (%2F) in the path. Without this, nested paths break.
+    spec_impact: "CL-03 oc:// path encoding — slashes in item names must be percent-encoded; define canonical encoding rules"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      A request for a section that exists but contains zero items (e.g.,
+      TOOLS.md#Disabled after all tools are removed) must return 200 with
+      an empty items array, not 404. The distinction between 'section does
+      not exist' (404) and 'section exists but is empty' (200, items: [])
+      is critical for the partner to render an empty state vs an error.
+      Conflating these produces incorrect UI feedback.
+    spec_impact: "CL-10 GET /api/oc/ — 200 with empty items for existing empty sections; 404 only for missing sections"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The oc:// path echoed in meta.oc_path must be normalized to canonical
+      form regardless of how the caller specified it. /api/oc/tools.md and
+      /api/oc/TOOLS.md must both resolve and echo oc://TOOLS.md (uppercase
+      canonical). If the echo preserves caller casing, partners cannot use
+      the response path as a cache key, causing duplicate cache entries for
+      the same resource.
+    spec_impact: "CL-03 oc:// normalization — responses must echo canonical-cased oc:// path regardless of request casing"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      When the requested oc:// path points to a file that was deleted
+      externally after the last compilation, the API has stale IR data.
+      Returning 200 with stale content is worse than returning 404 because
+      it presents phantom data the user cannot edit. The resolver must
+      stat the file before returning cached IR content. If the file is
+      missing on disk, return 404 with a governance warning that the
+      compilation is stale.
+    spec_impact: "CL-10 GET /api/oc/ — file-existence check before returning cached IR; 404 + stale warning if file missing on disk"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The governance_context field on every response must include at minimum
+      the compilation_id and timestamp. If the workspace has never been
+      compiled (fresh init), governance_context should be null with a
+      warning header (X-OC-Governance: pending). Partners that require
+      governance context for rendering (e.g., risk badges) must handle the
+      null case gracefully. The API must not block on compilation to serve
+      a read request.
+    spec_impact: "CL-10 governance_context — null with X-OC-Governance: pending header for uncompiled workspaces"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The skills/* glob path returns an array of skill file summaries, but
+      if skills/ contains subdirectories (skills/custom/my-skill.md), the
+      glob must decide between shallow (only top-level files) and recursive
+      (all nested files). The API contract must specify glob depth. A shallow
+      glob misses nested skills; a recursive glob may return hundreds of
+      entries in large workspaces. Pagination or depth parameter needed.
+    spec_impact: "CL-03 oc:// glob paths — define default depth for directory globs; support ?depth=N parameter"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Lobster.yaml step paths (oc://lobster.yaml/steps/onboard) traverse
+      YAML structure, not markdown sections. The fragment parser must
+      detect file type (.yaml vs .md) and switch between YAML path
+      traversal and markdown section parsing. If the parser assumes
+      markdown for all files, YAML paths silently fail or return the
+      entire file unparsed.
+    spec_impact: "CL-03 oc:// parser — file-type-aware fragment resolution: YAML key paths for .yaml, section headers for .md"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      A 404 response includes a suggestion field for similar files (e.g.,
+      requesting TOOL.md suggests TOOLS.md). The suggestion algorithm must
+      be bounded — computing Levenshtein distance against all OC files is
+      cheap for 9 files but the contract should specify a max_suggestions
+      count (e.g., 3) and a minimum similarity threshold to avoid returning
+      irrelevant suggestions like lobster.yaml for a TOOL.md typo.
+    spec_impact: "CL-10 GET /api/oc/ 404 — max 3 suggestions with similarity threshold; no suggestions below 50% match"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      The roundtrip fidelity guarantee means that if a partner reads
+      meta.oc_path from a GET response and uses it to construct a PATCH
+      URL, the PATCH must resolve to exactly the same resource. If GET
+      returns meta.oc_path: 'oc://TOOLS.md/Tools/timely-updates' but the
+      PATCH endpoint expects /api/oc/TOOLS.md%23Tools%2Ftimely-updates
+      (fully encoded), the roundtrip breaks. The API must define a single
+      path format usable in both GET and PATCH without re-encoding.
+    spec_impact: "CL-03 oc:// roundtrip — meta.oc_path must be directly usable as PATCH path without re-encoding"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Field-level resolution (/api/oc/TOOLS.md#Tools/timely-updates/enabled)
+      returns a scalar or simple object. If the field value is a complex
+      nested structure (e.g., a tool's config object with 10 sub-fields),
+      the response could be large. The API should support field-level depth
+      limiting via a ?depth=N query parameter to let partners fetch just
+      the top-level field value without nested expansion.
+    spec_impact: "CL-10 GET /api/oc/ field-level — support ?depth=N for nested field structures"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Concurrent GET requests for the same oc:// path during a recompilation
+      could see inconsistent governance_context — one request returns the old
+      compilation_id while a parallel request returns the new one. The API
+      should serve a consistent snapshot per compilation_id and include an
+      ETag header tied to the compilation. Partners can use If-None-Match
+      for efficient polling.
+    spec_impact: "CL-10 GET /api/oc/ — ETag based on compilation_id for consistent snapshot reads and conditional polling"
+    pitfall: null

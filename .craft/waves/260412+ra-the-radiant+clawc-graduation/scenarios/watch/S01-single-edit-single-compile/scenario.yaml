@@ -1,0 +1,142 @@
+name: S01-single-edit-single-compile
+series: watch
+version: 1
+specs: [CL-01, CL-04]
+plan: claws-compile-dx
+headline: >
+  H1: `claws watch` auto-rebuilds on file change — developer saves SOUL.md
+  (or any of the 9 OC files) and emit output is updated within 1 second.
+description: >
+  Validates that a single edit to SOUL.md in a watched workspace triggers
+  exactly one incremental compile, the compile fires within the 300ms
+  debounce window plus reasonable buffer, and the emitted output file's
+  mtime advances past the original within 1000ms. The watcher is a single
+  debounced process reusing the in-process CompilationCache singleton.
+  This scenario is the baseline for watch-mode correctness — if a single
+  edit does not produce a single compile with fresh output, nothing else
+  in the watch surface works.
+
+expect:
+  watcher_startup:
+    command: "claws watch <fixture>"
+    stdout_contains: ["watching", "workspace"]
+    process_alive: true
+  single_edit:
+    action: "write SOUL.md once"
+    debounce_window_ms: 300
+    compile_fires_within_ms: 1000
+    compile_count: 1
+  emit_output:
+    path: "plugins/claws-governance/index.ts"
+    mtime_advances: true
+    mtime_delta_ms_lt: 1000
+  stdout_change_report:
+    contains_path: "SOUL.md"
+    contains_status: ["compiled", "ok"]
+  cache_reuse:
+    cache_instance: "in-process singleton"
+    stage_timings_present: true
+
+implementation_status: pending
+tags: [claws-compile-dx, watch, H1]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer runs `claws watch` against a canonical fixture workspace.
+  They edit SOUL.md once (e.g., add a principle line). The watcher must
+  observe the fs event, wait the configured 300ms debounce window, then
+  trigger a single incremental compile. Exactly one compile must fire —
+  not zero (debounce too aggressive / event missed) and not more than one
+  (duplicate event, re-entrancy). The emit output file's mtime must be
+  newer than the pre-edit baseline within 1000ms of the edit landing on
+  disk. The compile must reuse the in-process CompilationCache singleton
+  so prior cached reader stages are available for the incremental path.
+  Stdout must surface a per-change summary identifying the changed path.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Debounce window behavior must be observable. If the debounce fires
+      too early, bursts of edits produce multiple compiles (breaks S02).
+      If it fires too late, a single edit feels laggy (breaks 1000ms
+      target). The 300ms default must be measured from the LAST event in
+      the debounce window, not the FIRST — otherwise mid-burst edits are
+      dropped when the timer fires before the final event arrives.
+    spec_impact: "CL-04 watch debouncer — trailing-edge debounce, reset timer on each event"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      chokidar (or node:fs.watch) may fire duplicate events for a single
+      write on some platforms — particularly editors that save via
+      temp-file-then-rename. The watcher must coalesce duplicates within
+      the debounce window to meet the "exactly one compile" assertion.
+      Naive per-event compile triggers would fire twice for a single
+      logical save from VS Code.
+    spec_impact: "CL-04 watch debouncer — coalesce duplicate fs events within debounce window"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The CompilationCache singleton must be shared between the watcher's
+      compile invocation and any other in-process consumer. If the
+      watcher instantiates a fresh cache per compile, incremental reader
+      stages have no cached data on the second edit and the wall-clock
+      target of 1000ms is unachievable on workspaces with heavy skill
+      trees. Cache lifetime must span the watch session.
+    spec_impact: "CL-04 watch mode — CompilationCache lifetime spans watch session, not per-compile"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      Output mtime comparison is sensitive to filesystem resolution. On
+      Windows NTFS, mtime resolution is 100ns; on macOS HFS+ it was 1s
+      historically (APFS is nanosecond). The test must capture the
+      pre-edit mtime, sleep a platform-appropriate buffer before the
+      edit, and compare post-edit mtime with a platform-aware tolerance.
+      Hard-coded 100ms buffer would produce flaky failures on slow CI.
+    spec_impact: "CL-04 watch test harness — platform-aware mtime resolution buffer"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The stdout change report must identify the changed path relative
+      to the workspace root, not the absolute path. Absolute paths leak
+      user home directories into logs and break snapshot tests across
+      machines. The per-change summary format should be stable and
+      documented so downstream tools (editor integrations, CI parsers)
+      can rely on it.
+    spec_impact: "CL-04 watch stdout — workspace-relative paths, stable summary format"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      A watch session that never receives events (developer starts watch
+      but makes no edits) must still exit cleanly on SIGINT. This
+      scenario validates the edit path; S03 validates SIGINT cleanup.
+      They share the watcher lifecycle — if the watcher's event loop
+      holds references to timers that block process exit, the watcher
+      leaks even with no edits.
+    spec_impact: "CL-04 watch lifecycle — event loop does not block process exit when idle"
+    pitfall: null
+
+  - id: F07
+    severity: note
+    description: >
+      Stage timings from the incremental compile should be surfaced to
+      stdout (optionally gated behind a --verbose flag) so developers
+      can observe which subsystems recompiled on their edit. This
+      builds operator intuition for the incremental cache and makes
+      watch-mode debugging tractable when cache behavior surprises.
+    spec_impact: "CL-04 watch stdout — optional --verbose stage timing output"
+    pitfall: null

@@ -23,7 +23,7 @@ import type {
   LabelIntent,
   CompilerMeta,
 } from '../../src/ir/index.js';
-import { CLAWS_E001, validateFailModes, serialize, deserialize, hashIR, hashRaw } from '../../src/ir/index.js';
+import { OC_POLICY_E001, validateFailModes, serialize, deserialize, hashIR, hashRaw } from '../../src/ir/index.js';
 
 /** Helper: build a minimal valid GovernanceIR for testing. */
 function minimalIR(overrides?: Partial<GovernanceIR>): GovernanceIR {
@@ -155,9 +155,9 @@ describe('FailMode<R>', () => {
     //   Type '"open"' is not assignable to type '"closed"'.
     //
     // We verify by asserting the runtime value is 'closed' and that
-    // the CLAWS_E001 diagnostic exists for runtime enforcement.
-    expect(CLAWS_E001).toContain('CLAWS-E001');
-    expect(CLAWS_E001).toContain('fail-closed');
+    // the OC_POLICY_E001 diagnostic exists for runtime enforcement.
+    expect(OC_POLICY_E001).toContain('OC-POLICY-E001');
+    expect(OC_POLICY_E001).toContain('fail-closed');
 
     // Runtime guard: validateFailModes catches deserialized R5 open
     const ir = minimalIR({
@@ -174,7 +174,7 @@ describe('FailMode<R>', () => {
         } as unknown as DenyIntent,
       ],
     });
-    expect(() => validateFailModes(ir)).toThrow('CLAWS-E001');
+    expect(() => validateFailModes(ir)).toThrow('OC-POLICY-E001');
   });
 
   it('FailMode<3> accepts both open and closed', () => {

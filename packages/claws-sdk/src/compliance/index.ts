@@ -95,7 +95,10 @@ export {
   readAuditChain,
   resolveActor,
   readPolicyVersion,
+  createFsAuditChainSink,
   type AuditEventInput,
+  type AuditChainSink,
+  type FsAuditChainSinkOptions,
 } from './audit-chain.js';
 
 // Manifest types

@@ -100,7 +100,9 @@ NDJSON/syslog output directly.
 
 Your `tenant.tools.policy.get/set` (admin-managed tool approval) and our
 `host-approval-policies.json` (compiler-generated per-tool risk policies) compose
-as two layers:
+as two layers. The claws serve API exposes tool governance through Layer 1
+(`PATCH /api/oc/TOOLS.md#Tools/{tool}`) for direct OC file access and Layer 2
+(`PATCH /api/chunks/connections/{server}`) for CAP settings partners:
 
 ```
 Compile-time (claws):
@@ -112,6 +114,11 @@ Runtime (your admin API):
   tenant.tools.policy.set --> admin overrides
   Admin can relax R3 tools ("auto-approve send-teams for this tenant")
   Admin CANNOT relax R5 tools (non-negotiable)
+
+Serve API (claws serve):
+  Layer 1: PATCH /api/oc/TOOLS.md#Tools/{tool}  --> direct OC file edit
+  Layer 2: PATCH /api/chunks/connections/{server} --> CAP chunk edit
+  Both route through write-time validation (R5/fleet/governance)
 ```
 
 The `GuardrailProvider` interface we're submitting to openclaw/openclaw defines how
@@ -131,7 +138,13 @@ Compose: deny > review > modify > allow
 If R5: requiresExternalApproval forced true (non-negotiable)
 ```
 
-Your admin policy becomes another provider in the chain.
+Your admin policy becomes another provider in the chain. To be precise: your
+admin policy and our compiled policy are PEERS in the ProviderRegistry, not
+caller/callee. Both register independently. The registry composes their decisions
+using the `deny > review > modify > allow` precedence. Neither your API nor ours
+calls the other at runtime -- both contribute policy decisions that the registry
+merges. The chunk API (`/api/chunks/connections/*`) is for UX consumers (CAP, TUI),
+not for your runtime enforcement.
 
 ---
 
@@ -179,17 +192,18 @@ declarations + data labels. Not immediate — flagging for future convergence.
 
 ## Timeline
 
-| Our Wave 1 (wks 1-4) | Your Workstream |
-|----------------------|-----------------|
-| GuardrailProvider spec PR | WS-4 (tool policy) |
-| @openclaw/identity-bridge | WS-1 (OIDC auth) |
-| @openclaw/audit-chain | WS-6 (audit log) |
-| @openclaw/approval-events | WS-8 (local tools) |
+| Our Wave 1 (wks 1-4) | Your Workstream | Serve API Layer |
+|----------------------|-----------------|-----------------|
+| GuardrailProvider spec PR | WS-4 (tool policy) | Layer 1: `/api/oc/TOOLS.md`, Layer 2: `/api/chunks/connections/*` |
+| @openclaw/identity-bridge | WS-1 (OIDC auth) | — (standalone package) |
+| @openclaw/audit-chain | WS-6 (audit log) | — (standalone package) |
+| @openclaw/approval-events | WS-8 (local tools) | Layer 3: `/api/sessions/:id` |
+| @openclaw/oc-path | — (shared addressing) | Layer 1: `oc://` URI scheme for `/api/oc/{path}` |
 
-| Our Wave 2 (wks 5-8) | Your Workstream |
-|----------------------|-----------------|
-| @openclaw/secret-scanner | WS-11 (CI security) |
-| @openclaw/siem-emitter | WS-6 (audit export) |
+| Our Wave 2 (wks 5-8) | Your Workstream | Serve API Layer |
+|----------------------|-----------------|-----------------|
+| @openclaw/secret-scanner | WS-11 (CI security) | — (standalone package) |
+| @openclaw/siem-emitter | WS-6 (audit export) | — (standalone package) |
 
 If your WS-1 or WS-6 are starting soon, let us know — we can prioritize those
 packages.

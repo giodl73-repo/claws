@@ -1,0 +1,169 @@
+name: S02-max-concurrency-cap
+series: fleet
+version: 1
+specs: [CL-08]
+description: >
+  Validates that `--max-concurrency N` caps the number of in-flight compile
+  processes to N. A fleet directory of 10 workspaces invoked with
+  `--max-concurrency 3` must never have more than 3 compile tasks active
+  simultaneously; all 10 must complete; wall-clock time must scale as
+  ceil(10/3) × per-workspace-time, not 10× serial. This proves the executor
+  implements a real concurrency guard, not a best-effort hint, and that
+  fleet compile scales predictably for operator capacity planning.
+
+expect:
+  concurrency_guard:
+    declared_max: 3
+    observed_peak: 3
+    exceeded_ever: false
+  completion:
+    total_workspaces: 10
+    succeeded: 10
+    failed: 0
+  wall_clock:
+    scaling_factor: "ceil(10/3) * per_workspace_time"
+    not_serial: true
+    parallelism_ratio: ">= 2.5x vs serial baseline"
+  process_count:
+    peak_concurrent_compiles: 3
+    probe_method: "process-count probe OR instrumented guard counter"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Construct a fleet directory with 10 workspace subdirectories, each a
+  canonical healthy fixture (SOUL.md, tools/, agents/, valid lobster.yaml).
+  Invoke `claws fleet compile <fleet-dir> --max-concurrency 3`. Two
+  verification paths: (1) a process-count probe that samples the OS process
+  table at high frequency during the run and records peak concurrent compile
+  processes, or (2) an instrumented concurrency guard in the executor that
+  increments a counter on task start and decrements on task end, asserting
+  the counter never exceeds 3. Both must pass. Wall-clock time must be
+  proportional to ceil(10/3) × per-workspace-time (~4× single-workspace
+  time), not 10× (serial). All 10 workspaces must complete with EmitResult.
+  success=true. The concurrency cap must hold even if some workspaces finish
+  faster than others — the executor must immediately schedule the next
+  queued workspace when a slot opens, keeping the peak at 3.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The concurrency cap must be enforced by a real semaphore or bounded
+      task queue, not a hint to the runtime. A naive implementation that
+      awaits all promises inside a Promise.all() ignores --max-concurrency
+      entirely — it starts all 10 compiles concurrently and the flag becomes
+      cosmetic. The executor must acquire a permit before starting each
+      compile and release it on completion.
+    spec_impact: "H3 — concurrency must use bounded semaphore, not best-effort scheduling"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Observability of peak concurrency matters for operator debugging. If
+      the fleet command runs with --max-concurrency 3 but a user reports
+      "it only seems to run 1 at a time", there must be a way to verify. An
+      instrumented guard counter exposed via --verbose or --stats output
+      lets operators confirm the parallelism they requested is actually
+      happening. Without observability, concurrency bugs are invisible.
+    spec_impact: "H3 — expose peak concurrency and parallelism ratio in --stats output"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Wall-clock scaling proves real parallelism. If per-workspace compile
+      takes T seconds, --max-concurrency 3 on 10 workspaces should finish
+      in ~4T (ceil(10/3) × T) plus scheduling overhead. If the run takes
+      10T, there is no parallelism despite the flag. If it takes 3T, the
+      cap is being violated. The scenario must measure wall-clock and
+      assert the expected scaling band (e.g., 3.5T to 5T).
+    spec_impact: "H3 — wall-clock must fall in expected scaling band, not serial or unbounded"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      --max-concurrency 1 must work and be equivalent to serial execution.
+      If the executor has a bug where N=1 deadlocks (e.g., single permit
+      acquired but never released on a synchronous early-return path), the
+      flag becomes unusable for debugging. The scenario should include a
+      sub-case with --max-concurrency 1 over 3 workspaces to verify serial
+      correctness.
+    spec_impact: "H3 — --max-concurrency 1 must function as serial execution without deadlock"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      The default --max-concurrency value (absent the flag) must be
+      documented and reasonable. Common choices: os.cpus().length, a fixed
+      4, or unlimited. Unlimited defaults are dangerous — a 1000-workspace
+      fleet spawns 1000 compile processes and exhausts file descriptors or
+      memory. The default should cap at a safe value (e.g., min(cpus, 8))
+      and be documented in --help output.
+    spec_impact: "H3 — default --max-concurrency must be safe; documented in help"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Invalid --max-concurrency values (0, -1, "foo") must error cleanly at
+      argument parse time, not silently fall through to unexpected behavior.
+      --max-concurrency 0 could deadlock (no permits ever acquirable).
+      --max-concurrency -1 could overflow the semaphore counter.
+      --max-concurrency "foo" should produce "must be a positive integer".
+    spec_impact: "H3 — argument validation for --max-concurrency with clear error messages"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Per-compile resource usage (CPU, memory, file descriptors) at N=3
+      concurrency must be sustainable. If each compile uses 500MB of
+      memory, --max-concurrency 3 uses 1.5GB — acceptable on a laptop but
+      a significant fraction of a CI runner. Documentation should advise
+      operators on memory budgeting: recommended N for various fleet sizes
+      and machine specs.
+    spec_impact: "H3 — document per-compile resource envelope to inform --max-concurrency sizing"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      If workspace compile durations vary (workspace A takes 1s, B takes
+      10s), the steady-state concurrency may dip below N near the tail —
+      at 9 seconds in, only the long tasks remain, so observed concurrency
+      falls from N to 1 naturally. The peak-concurrency assertion must
+      measure peak, not steady-state, to avoid false negatives.
+    spec_impact: "H3 — concurrency assertion measures peak, not mean, observed parallelism"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      Process-count probe accuracy depends on sampling frequency. If the
+      probe samples every 100ms but compiles take 200ms each, the probe
+      may miss peak moments. For reliable observation, either sample at
+      10× the per-task rate or use an instrumented guard counter that
+      records every increment/decrement with a timestamp.
+    spec_impact: "H3 — sampling frequency for concurrency probe must exceed task completion rate"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      If the fleet command forks child processes (not worker threads), the
+      OS-visible process tree shows the supervisor plus N compile children.
+      The process-count probe must filter to compile processes only
+      (matching a known process name or --tag), not count the supervisor.
+      Otherwise the baseline is off by 1 and assertions near the cap fail.
+    spec_impact: "H3 — probe must distinguish compile children from supervisor process"
+    pitfall: null
+
+implementation_status: pending
+tags: [claws-compile-dx, fleet, concurrency]

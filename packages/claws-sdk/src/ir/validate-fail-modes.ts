@@ -9,7 +9,7 @@
  * @module claws-sdk/ir/validate-fail-modes
  */
 
-import { CLAWS_E001 } from './fail-mode.js';
+import { OC_POLICY_E001 } from './fail-mode.js';
 import type { GovernanceIR } from './governance-ir.js';
 
 /**
@@ -26,7 +26,7 @@ import type { GovernanceIR } from './governance-ir.js';
  * 4. EnforcementPlan ruleSuppressions (R5 must NOT be suppressed)
  * 5. Every R5 violation must have blocking intent (not just warning)
  *
- * @throws {Error} CLAWS-E001 if any R5 rule has fail-open semantics.
+ * @throws {Error} OC-POLICY-E001 if any R5 rule has fail-open semantics.
  */
 export function validateFailModes(ir: GovernanceIR): void {
   // Collect all R5 rule IDs from intents
@@ -39,7 +39,7 @@ export function validateFailModes(ir: GovernanceIR): void {
       // (possible from raw JSON), catch it here.
       const raw = intent as unknown as Record<string, unknown>;
       if (raw['failMode'] === 'open') {
-        throw new Error(`${CLAWS_E001} (rule: ${intent.ruleId})`);
+        throw new Error(`${OC_POLICY_E001} (rule: ${intent.ruleId})`);
       }
       // Check ALL delegation entries — audit-only implies fail-open semantics for R5.
       // Use some() instead of find() so we don't miss entries after the first match.
@@ -47,7 +47,7 @@ export function validateFailModes(ir: GovernanceIR): void {
         (d) => d.ruleId === intent.ruleId && d.mechanism === 'audit-only',
       );
       if (hasAuditOnly) {
-        throw new Error(`${CLAWS_E001} (rule: ${intent.ruleId}, delegation: audit-only)`);
+        throw new Error(`${OC_POLICY_E001} (rule: ${intent.ruleId}, delegation: audit-only)`);
       }
     }
   }
@@ -56,14 +56,14 @@ export function validateFailModes(ir: GovernanceIR): void {
   const plan = ir.analysis.enforcementPlan;
   for (const auditOnlyRuleId of plan.auditOnlyRules) {
     if (r5RuleIds.has(auditOnlyRuleId)) {
-      throw new Error(`${CLAWS_E001} (rule: ${auditOnlyRuleId}, enforcementPlan: auditOnlyRules)`);
+      throw new Error(`${OC_POLICY_E001} (rule: ${auditOnlyRuleId}, enforcementPlan: auditOnlyRules)`);
     }
   }
 
   // Check enforcementPlan.ruleSuppressions — R5 rules must NOT be suppressed
   for (const suppression of plan.ruleSuppressions) {
     if (r5RuleIds.has(suppression.ruleId)) {
-      throw new Error(`${CLAWS_E001} (rule: ${suppression.ruleId}, enforcementPlan: ruleSuppression)`);
+      throw new Error(`${OC_POLICY_E001} (rule: ${suppression.ruleId}, enforcementPlan: ruleSuppression)`);
     }
   }
 
@@ -74,7 +74,7 @@ export function validateFailModes(ir: GovernanceIR): void {
         (intent) => intent.ruleId === violation.ruleId && intent.kind === 'deny',
       );
       if (!hasBlockingIntent) {
-        throw new Error(`${CLAWS_E001} (rule: ${violation.ruleId}, missing blocking deny intent)`);
+        throw new Error(`${OC_POLICY_E001} (rule: ${violation.ruleId}, missing blocking deny intent)`);
       }
     }
   }

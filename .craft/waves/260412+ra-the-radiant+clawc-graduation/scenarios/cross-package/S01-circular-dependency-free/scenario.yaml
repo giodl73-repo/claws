@@ -29,7 +29,7 @@ simulate:
 
 problem: >
   Run madge --circular across all 21 packages (10 core @craftworks/*, 7
-  @craftworks/emit-*, @craftworks/platform, @claws/compiler, @bic/claws-skill-kit,
+  @craftworks/emit-*, @craftworks/platform, @bic/claws-sdk, @bic/claws-skill-kit,
   @bic/claws-test, @bic/claws-sdk). The tool must resolve all TypeScript
   import paths including subpath exports, barrel re-exports, and type-only
   imports. Each package is built in topological order — leaf packages first
@@ -42,11 +42,11 @@ findings:
   - id: F01
     severity: major
     description: >
-      Type re-exports from @claws/compiler back into @craftworks/* create a
-      hidden Layer 2 -> Layer 1 cycle. CL-08 line 406-431 shows @claws/compiler
+      Type re-exports from @bic/claws-sdk back into @craftworks/* create a
+      hidden Layer 2 -> Layer 1 cycle. CL-08 line 406-431 shows @bic/claws-sdk
       re-exporting types from @craftworks/forma, @craftworks/workspace, and
       @craftworks/crypto. If any @craftworks/* package imports a type that
-      @claws/compiler defines (e.g., GovernanceIR) — even as a type-only import
+      @bic/claws-sdk defines (e.g., GovernanceIR) — even as a type-only import
       — madge may not detect it since TypeScript type-only imports are erased at
       compile time but still create a logical dependency. CI must run madge on
       .ts sources, not compiled .js output.
@@ -70,13 +70,13 @@ findings:
   - id: F03
     severity: major
     description: >
-      @bic/claws-sdk imports from @claws/compiler (Rule 1, CL-08 line
+      @bic/claws-sdk imports from @bic/claws-sdk (Rule 1, CL-08 line
       521-524) and also imports additional Layer 1 blocks directly (relax,
-      context, governance, execution, eval — line 365-369). If @claws/compiler
+      context, governance, execution, eval — line 365-369). If @bic/claws-sdk
       internally re-exports a symbol from one of those same Layer 1 blocks,
-      both claws-sdk and @claws/compiler pull in the same block through different
+      both claws-sdk and @bic/claws-sdk pull in the same block through different
       paths. This is not a cycle but it creates a version-coherence risk: claws-sdk
-      might pin @craftworks/governance@2.0.0 while @claws/compiler pins
+      might pin @craftworks/governance@2.0.0 while @bic/claws-sdk pins
       @craftworks/governance@1.0.0, causing two copies of governance in the
       dependency tree. madge --circular will not detect this — a separate
       version-coherence check is needed.
@@ -113,7 +113,7 @@ findings:
     description: >
       Test files may import from packages that create cycles not present in
       production code. For example, @craftworks/forma tests importing test
-      utilities from @bic/claws-test (which depends on @claws/compiler, which
+      utilities from @bic/claws-test (which depends on @bic/claws-sdk, which
       depends on @craftworks/forma) creates a test-time cycle. madge should
       scan src/ directories only, not test/ directories. But if test utilities
       are exported from the package root, they contaminate the production

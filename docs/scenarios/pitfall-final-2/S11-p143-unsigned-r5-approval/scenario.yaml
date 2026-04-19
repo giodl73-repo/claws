@@ -11,7 +11,7 @@ description: >
 expect:
   rules_applied: [G-ELICIT-AUDIT]
   violations:
-    - code: CLAWS-E055
+    - code: OC-POLICY-E055
       rule: G-ELICIT-AUDIT
       description: "R5 elicitation approval recorded without HMAC — inadmissible in legal discovery"
   pass: false

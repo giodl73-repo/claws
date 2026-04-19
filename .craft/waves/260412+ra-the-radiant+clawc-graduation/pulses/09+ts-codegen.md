@@ -4,13 +4,13 @@ slug: ts-codegen
 plan: claws-sdk-graduation
 depends_on: [7]
 governing_roles: [craft:codegen, craft:type-system, claws:platform-eng]
-scenario_codes: [codegen/S01, codegen/S02, codegen/S03, codegen/S04]
+scenario_codes: [codegen/S01, codegen/S02, codegen/S03, codegen/S04, emit-bedrock/S01, emit-copilot/S01, emit-crewai/S01, emit-cursor/S01, emit-langgraph/S01]
 stage: implementation
 test_tiers:
   L0_unit: 6
   L1_integration: 3
   L2_e2e: 1
-  L3_accept: 0
+  L3_accept: 1
 test_scope:
   run:
     - "cd claws-sdk && npx vitest run --project unit --coverage"
@@ -39,6 +39,7 @@ The codegen produces: handler functions (typed request→response), configuratio
 - [ ] `claws-sdk/tests/compiler/codegen/ts-emitter.unit.test.ts` -- L0: handler function has correct signature (1), request/response types generated (1), configuration interface includes all governance fields (1), barrel export includes all generated files (1), generated code includes do-not-edit header (1), ESM/CJS module format respected (1)
 - [ ] `claws-sdk/tests/compiler/codegen/codegen.integration.test.ts` -- L1: full codegen from fixture IR produces valid TS project structure (1), generated barrel exports resolve all types (1), generated code contains no @craftworks/ imports (1)
 - [ ] `claws-sdk/tests/compiler/codegen/codegen.e2e.test.ts` -- L2: generate TS from fixture → write to temp dir → run `tsc --strict --noEmit` on output → verify zero errors (1)
+- [ ] `claws-sdk/tests/compiler/codegen/codegen.accept.test.ts` -- L3: scenario acceptance test verifying codegen/emit-platform findings (9)
 
 ## Acceptance Criteria
 
@@ -71,5 +72,6 @@ Load these role files before starting:
 - [ ] L0 unit (6 tests): handler signature (1), request/response types (1), config interface (1), barrel exports (1), do-not-edit header (1), module format (1)
 - [ ] L1 integration (3 tests): full codegen from fixture (1), barrel resolution (1), zero @craftworks/ (1)
 - [ ] L2 e2e (1 test): generate → tsc --strict → zero errors (1)
+- [ ] L3 acceptance (1 test): codegen/emit-platform scenario findings verified (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

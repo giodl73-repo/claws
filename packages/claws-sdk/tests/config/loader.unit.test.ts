@@ -117,7 +117,7 @@ describe('loadConfig()', () => {
     expect(result.config.fleet.allowBypass).toBe(false);
   });
 
-  it('throws CLAWS-E001 for invalid JSON', async () => {
+  it('throws OC-POLICY-E001 for invalid JSON', async () => {
     tmpRoot = await mkdtemp(join(tmpdir(), 'claws-config-'));
     await writeFile(join(tmpRoot, 'claws.json'), '{ not valid json!!!');
 
@@ -127,7 +127,7 @@ describe('loadConfig()', () => {
       await loadConfig(tmpRoot);
     } catch (e) {
       const detail = JSON.parse((e as Error).message);
-      expect(detail.code).toBe('CLAWS-E001');
+      expect(detail.code).toBe('OC-POLICY-E001');
       expect(detail.what).toContain('Invalid JSON');
       expect(detail.how).toContain('Fix the JSON syntax');
       expect(detail.where.file).toContain('claws.json');
@@ -136,7 +136,7 @@ describe('loadConfig()', () => {
     }
   });
 
-  it('throws CLAWS-E001 for schema validation failure', async () => {
+  it('throws OC-POLICY-E001 for schema validation failure', async () => {
     tmpRoot = await mkdtemp(join(tmpdir(), 'claws-config-'));
     // trustTier must be 1-5 integer; 99 is out of range
     await writeFile(join(tmpRoot, 'claws.json'), JSON.stringify({
@@ -149,7 +149,7 @@ describe('loadConfig()', () => {
       await loadConfig(tmpRoot);
     } catch (e) {
       const detail = JSON.parse((e as Error).message);
-      expect(detail.code).toBe('CLAWS-E001');
+      expect(detail.code).toBe('OC-POLICY-E001');
       expect(detail.what).toContain('schema validation failed');
       expect(detail.how).toContain('Fix the fields');
     }
@@ -178,7 +178,7 @@ describe('loadConfig()', () => {
     }
   });
 
-  it('includes non-Error value in CLAWS-E001 what field', async () => {
+  it('includes non-Error value in OC-POLICY-E001 what field', async () => {
     tmpRoot = await mkdtemp(join(tmpdir(), 'claws-config-'));
     await writeFile(join(tmpRoot, 'claws.json'), '{"trustTier": 2}');
 
@@ -193,7 +193,7 @@ describe('loadConfig()', () => {
       // We need to restore JSON.parse first to parse it
       vi.restoreAllMocks();
       const detail = JSON.parse((e as Error).message);
-      expect(detail.code).toBe('CLAWS-E001');
+      expect(detail.code).toBe('OC-POLICY-E001');
       expect(detail.what).toContain('42');
     }
   });

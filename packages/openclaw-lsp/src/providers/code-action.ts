@@ -10,7 +10,7 @@
  *   5. Add data label
  *   6. Add deny intent
  *
- * @module claws-lsp/providers/code-action
+ * @module openclaw-lsp/providers/code-action
  */
 
 import type {

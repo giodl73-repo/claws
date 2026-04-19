@@ -100,6 +100,63 @@ built-in tools internally. This file is guidance only.
 descriptions (production, write, send, exec → higher risk). Custom risk
 annotations (`Risk: R5`) override heuristics.
 
+#### `args_from` — tool-argument provenance (G-CHAIN)
+
+TOOLS.md tool sections MAY declare `args_from` to constrain where each argument
+may originate. This is the schema surface for the G-CHAIN governance-rule family
+(CL-02 Amendment A489) — it closes the R-tier laundering gap where two R1 tools
+chain to produce an R5 effect.
+
+```markdown
+## send-email
+- Risk: R1
+- Capabilities: COMMUNICATE, IRREVERSIBLE_EXTERNAL
+- args_from:
+    body: [user_prompt, tool_output.read-document?]
+    recipient: [user_prompt]
+    subject: [user_prompt, agent_literal]
+```
+
+Source-label grammar (exhaustive):
+
+| Label | Meaning |
+|-------|---------|
+| `user_prompt` | The user's current prompt text. Always trusted at declared sensitivity. |
+| `tool_output.<name>` | Structured output of a prior tool call. Sensitivity inherits via G-DATA label propagation. |
+| `memory.<label>` | A MEMORY.md entry with the named sensitivity label (PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED). |
+| `agent_literal` | Planner-produced constant not derived from data. |
+
+**Grammar rules**:
+
+1. Trailing `?` marks a source as optional; an unmarked source is required.
+2. The value of `args_from[arg]` is a YAML list of source labels (1 or more).
+3. Source labels are case-sensitive.
+4. `tool_output.<name>` references must resolve to a tool defined in the same
+   TOOLS.md or inherited via fleet policy.
+5. Cycles (A's output feeds B's output feeds A) are rejected at compile time
+   (OC-POLICY-E230).
+
+**Mandatory vs optional declaration**:
+
+| Tool classification | `args_from` declaration |
+|--------------------|-------------------------|
+| Capabilities include IRREVERSIBLE_EXTERNAL | **Required.** Omission → OC-POLICY-E233. |
+| Declared R3+ and consumes non-`user_prompt` data | **Required.** Omission → OC-POLICY-E231. |
+| Declared R1 or R2 consuming only `user_prompt` | Optional. Omission → CLAWS-W030 warning. |
+
+**Interaction with existing extraction heuristics**: `args_from` is an explicit
+override surface like `Risk: R5`. When present, it suppresses provenance-guessing
+heuristics. When absent, the compiler falls back to default-deny for R3+ tools
+(G-CHAIN-03) and advisory warning for R1/R2 tools.
+
+**Lossless round-trip**: The compiler preserves `args_from` in the emitted policy
+artifact (GovernanceIR) and the runtime envelope format. Reading TOOLS.md and
+re-emitting it produces byte-identical output (consistent with the claws lossless
+rule for all workspace files).
+
+See CL-02 Amendment A489 for the full G-CHAIN rule semantics and runtime
+enforcement.
+
 ### AGENTS.md
 
 Operating instructions for the agent. Covers architecture, coding style,

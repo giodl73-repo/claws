@@ -1,0 +1,200 @@
+name: S28-fleet-policy-hot-reload
+series: cap-integration
+version: 2
+specs: [CL-10, CL-04, CL-12]
+description: >
+  Validates that fleet policy file changes while claws serve is running are
+  detected and applied without restart. New locks are applied to chunks, an
+  SSE event notifies connected clients, and chunks reflect the updated policy.
+  Partial policy (syntax error) triggers fail-closed behavior. Policy downgrade,
+  in-flight PATCH during reload, and policy version tracking are all tested.
+
+expect:
+  hot_reload:
+    trigger: "fleet policy file changed on disk"
+    restart_required: false
+    new_locks_applied: true
+    sse_event:
+      type: FLEET_POLICY_UPDATED
+      includes: [policy_version, changed_rules, timestamp]
+    chunks_updated: true
+  syntax_error:
+    partial_policy: true
+    behavior: fail_closed
+    previous_policy_retained: true
+    sse_event:
+      type: FLEET_POLICY_RELOAD_FAILED
+      includes: [parse_error, line_number]
+  policy_downgrade:
+    old_policy: "R3 minimum for all tools"
+    new_policy: "R1 minimum for all tools"
+    result:
+      locks_relaxed: true
+      audit_event: FLEET_POLICY_DOWNGRADED
+  in_flight_patch:
+    patch_during_reload: true
+    result: serialized_after_reload
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A fleet admin updates the fleet policy file while claws serve is running with
+  active connections. The policy change tightens tool locks (new rule: all tools
+  with network access require R3 minimum). The system must: (1) detect the file
+  change via fs watcher or polling, (2) parse and validate the new policy, (3)
+  apply new locks to all affected chunks, (4) emit an SSE event so connected
+  CAP tabs update, (5) serve subsequent GET/PATCH requests under the new policy.
+  The admin then introduces a syntax error in the policy file. The system must
+  fail-closed: retain the previous valid policy and emit an error SSE event.
+  The admin then downgrades the policy (relaxing locks). A PATCH is in-flight
+  during the reload. All of these scenarios must be handled without restart.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      Policy reload must be atomic: either the entire new policy is applied
+      or none of it is. If the reload applies some rules from the new policy
+      before discovering a later rule is invalid, the workspace is in a
+      partial state (some rules old, some new). The reload must parse and
+      validate the entire policy file before applying any changes. A two-phase
+      approach: parse -> validate -> swap pointer to new policy atomically.
+    spec_impact: "CL-04 fleet reload — atomic swap: parse and validate entire policy before applying; no partial application"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      A syntax error in the fleet policy file must trigger fail-closed behavior:
+      the previous valid policy remains in effect. The system must NOT fall back
+      to a permissive default or an empty policy. If the previous policy required
+      R3 for network tools, a syntax error must not relax that to R1. The error
+      must be logged, an SSE event emitted (FLEET_POLICY_RELOAD_FAILED with
+      parse error details), and the admin notified. The health endpoint should
+      report degraded status.
+    spec_impact: "CL-04 fleet reload — fail-closed on syntax error; retain previous policy; SSE error event; health endpoint degraded"
+    pitfall: null
+
+  - id: F03
+    severity: critical
+    description: >
+      A PATCH request in-flight during policy reload must be serialized after
+      the reload completes, not processed under the old policy. If the PATCH
+      is validated against the old policy and the new policy is stricter, the
+      PATCH may allow an action that the new policy forbids. The request queue
+      must hold PATCHes during reload and process them under the new policy.
+      GET requests can be served from the old IR during reload (reads are safe).
+    spec_impact: "CL-10 PATCH during reload — hold in queue; process under new policy after reload completes; GETs continue from old IR"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The SSE event for policy updates must include a diff of what changed,
+      not just "policy updated." Connected CAP tabs need to know which tools
+      are affected to update their UI. The event should include: policy_version,
+      changed_rules (array of { rule_id, old_value, new_value }), and
+      affected_tools (array of tool_ids whose lock level changed). Without
+      the diff, the partner must re-fetch all chunks to discover changes.
+    spec_impact: "CL-10 SSE events — FLEET_POLICY_UPDATED includes changed_rules diff and affected_tools list"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Policy version tracking must be monotonically increasing. Each reload
+      (successful or failed) increments the version counter. The version is
+      included in every API response (header or body) so partners can detect
+      stale responses. If two successive reloads produce the same version
+      number (e.g. version is a hash of content and the admin reverts), the
+      partner cannot distinguish them. Use a monotonic counter, not a content hash.
+    spec_impact: "CL-04 fleet policy — monotonically increasing version counter; included in all API responses; not content-hash-based"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Policy downgrade (relaxing locks) must produce an audit event
+      (FLEET_POLICY_DOWNGRADED) with the same detail as an upgrade. Downgrades
+      are security-relevant because they expand the set of allowed actions.
+      The audit event must include: old_policy_version, new_policy_version,
+      relaxed_rules (what changed), and the admin identity if available. The
+      event should be flagged for security review.
+    spec_impact: "CL-07 audit — FLEET_POLICY_DOWNGRADED event with old/new versions, relaxed rules, admin identity"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      Multiple rapid policy changes (admin saves, realizes mistake, saves
+      again) must each be processed sequentially. If the fs watcher fires
+      twice in quick succession, the system must not skip the first change
+      and only apply the second. Each change must be fully applied before
+      the next is processed. A reload queue with sequential execution
+      prevents race conditions between overlapping reloads.
+    spec_impact: "CL-04 fleet reload — sequential reload queue; no skipping intermediate changes; each fully applied before next"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      After a successful reload, all chunks must reflect the new policy.
+      If there are 50 tools and the new policy changes locks on 10 of them,
+      those 10 chunks must be updated. The system must not lazily update
+      chunks on access (which leaves stale chunks visible via GET). A full
+      chunk refresh must complete as part of the reload before the system
+      reports ready. The refresh must be efficient (only update changed chunks).
+    spec_impact: "CL-10 chunk refresh — eager update of affected chunks during reload; no lazy evaluation; complete before ready signal"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The fs watcher must handle the fleet policy file being replaced
+      atomically (write to temp file, rename) vs in-place edit. Some editors
+      use atomic replacement (creates a new inode), which may cause the
+      watcher to lose the file if it watches by inode rather than by path.
+      The watcher must use path-based watching and handle the
+      rename-and-replace pattern that is standard on many editors and deployment tools.
+    spec_impact: "CL-04 fs watcher — path-based watching; handle atomic rename-and-replace pattern"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      If the fleet policy file is deleted (not just modified), the system
+      must decide: treat as empty policy (no fleet rules, maximum permissiveness)
+      or treat as error (fail-closed, retain last known policy). Deletion
+      should be treated as an error with fail-closed behavior, because
+      accidental deletion should not relax all fleet controls. The system
+      should emit FLEET_POLICY_DELETED SSE event and retain the last valid
+      policy until an admin explicitly provides a new file.
+    spec_impact: "CL-04 fleet policy deletion — fail-closed; retain last valid policy; FLEET_POLICY_DELETED SSE event"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      The reload must validate semantic consistency, not just syntax. A
+      syntactically valid policy that contains contradictions (e.g. "all tools
+      require R5" and "tool X is exempt from all risk levels") must produce
+      a warning, not a silent accept. Contradictory rules should be flagged
+      in the SSE event and the first rule wins (or a defined precedence order).
+      Without contradiction detection, admin intent is ambiguous.
+    spec_impact: "CL-04 fleet validation — semantic consistency check; contradictory rules produce warnings with precedence resolution"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Reload latency (time from file change detection to all chunks updated)
+      should be measured and available via the health endpoint. If reload
+      takes >2s for a large policy, the hold-PATCH-queue strategy may cause
+      noticeable latency spikes. The health endpoint should report
+      last_reload_duration_ms and the partner can use this to set appropriate
+      timeouts for PATCH requests during policy change windows.
+    spec_impact: "CL-10 health endpoint — last_reload_duration_ms metric; informs partner timeout configuration"
+    pitfall: null

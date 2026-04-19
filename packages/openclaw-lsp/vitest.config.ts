@@ -7,7 +7,7 @@ const sharedResolve = {
     { find: /^#src\/(.+)$/, replacement: resolve(__dirname, 'src/$1') },
     { find: /^#fixtures\/(.+)$/, replacement: resolve(__dirname, 'tests/fixtures/$1') },
     // -- Sub-path exports (must come before bare specifiers) ----------------
-    { find: /^@craftworks\/claws-lsp\/(.+)$/, replacement: resolve(__dirname, 'src/$1') },
+    { find: /^@bic\/openclaw-lsp\/(.+)$/, replacement: resolve(__dirname, 'src/$1') },
     { find: /^@craftworks\/claws-sdk\/(.+)$/, replacement: resolve(__dirname, '../claws-sdk/src/$1') },
     // -- Bare specifiers ----------------------------------------------------
     { find: '@bic/openclaw-lsp', replacement: resolve(__dirname, 'src') },

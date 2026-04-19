@@ -1,0 +1,201 @@
+name: S37-fleet-atomic-reload
+series: cap-integration
+version: 2
+specs: [CL-08, CL-10, CL-14]
+description: >
+  Validates fleet policy hot-reload behavior: when the fleet policy file
+  changes on disk while claws serve is running, the reload is atomic via
+  shadow-cache swap. The old policy continues to serve requests until the
+  new one is fully parsed and validated. A syntax error in the new policy
+  retains the previous valid policy (fail-closed). Real-time merge of fleet
+  and workspace policy occurs at chunk read time. An SSE event notifies
+  subscribers of changed fields and affected tools.
+
+expect:
+  reload:
+    atomic_shadow_swap: true
+    old_policy_serves_during_parse: true
+    syntax_error_retains_previous: true
+    validation_before_swap: true
+  merge:
+    fleet_merged_at_read_time: true
+    not_only_at_compile_time: true
+    workspace_policy_combined: true
+  sse:
+    FLEET_POLICY_UPDATED_event: true
+    includes_changed_rules: true
+    includes_affected_tools: true
+  fail_closed:
+    unreachable_blocks_all_edits: true
+    deletion_retains_last_policy: true
+    error_type: FLEET_POLICY_UNAVAILABLE
+
+simulate:
+  failures: [syntax_error_in_new_policy, policy_file_deleted, policy_file_locked_by_other_process]
+  halt: null
+  budget: null
+
+problem: >
+  A fleet administrator updates the fleet policy file to add a new R5 tool
+  (deploy-prod) while 3 active sessions are using the workspace. The file
+  watcher detects the change. The system must: (1) parse the new policy in a
+  shadow buffer without affecting the active policy, (2) validate the new
+  policy schema, (3) if valid, atomically swap the shadow buffer into the
+  active slot, (4) emit SSE FLEET_POLICY_UPDATED with the diff (added rule:
+  deploy-prod R5), (5) subsequent GET /api/chunks/ requests merge the new
+  fleet state at read time — deploy-prod now shows as R5-locked. Separately,
+  the admin introduces a syntax error. The parser rejects it, the previous
+  policy stays active, and an error is logged. Then the admin deletes the
+  policy file entirely. The system retains the last known valid policy and
+  blocks all edits with FLEET_POLICY_UNAVAILABLE until a valid policy is
+  restored.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The shadow-cache swap must be truly atomic: no request can observe a
+      state where the old policy is partially replaced by the new one.
+      Implementation: parse the new policy into a separate object, validate
+      it completely, then swap the reference (e.g., AtomicReference or
+      volatile pointer swap). If the swap involves multiple fields (rules
+      array + metadata + timestamp), all must be updated together — a struct
+      swap, not field-by-field update.
+    spec_impact: "CL-08 fleet reload — single atomic reference swap; struct-level, not field-by-field"
+    pitfall: P-290
+
+  - id: F02
+    severity: critical
+    description: >
+      A syntax error in the new policy file must not affect the active policy.
+      The parser must validate the entire file before any swap attempt. If the
+      parser applies changes incrementally (parse-and-apply each rule), a
+      syntax error mid-file leaves a partially-applied policy. The parser must
+      produce a complete policy object or fail entirely — no partial results.
+      The error must be logged with the line number and parse error detail.
+    spec_impact: "CL-08 fleet parser — complete-or-fail parsing; no partial application; log parse error with line number"
+    pitfall: P-290
+
+  - id: F03
+    severity: critical
+    description: >
+      Fleet policy deletion must trigger fail-closed behavior: all edits are
+      blocked with FLEET_POLICY_UNAVAILABLE. The system retains the last
+      known valid policy for READ purposes (so existing locks are still
+      visible in GET responses) but rejects all WRITEs that require fleet
+      policy evaluation. This prevents a malicious deletion from unlocking
+      all fleet-controlled tools. The fail-closed state persists until a
+      valid policy file is restored.
+    spec_impact: "CL-08 fleet deletion — fail-closed for writes; retain last policy for reads; FLEET_POLICY_UNAVAILABLE"
+    pitfall: P-290
+
+  - id: F04
+    severity: major
+    description: >
+      Fleet state must be merged at chunk read time, not only at compilation
+      time. If the fleet policy changes between compilations, the compiled IR
+      does not reflect the new fleet rules. Chunk assembly must overlay the
+      current fleet policy on top of the compiled IR. This means the chunk
+      response for a tool shows the LIVE fleet lock status, not the
+      compilation-time fleet status. Cache invalidation must trigger on fleet
+      policy change, not just on OC file change.
+    spec_impact: "CL-10 fleet merge — chunks overlay live fleet policy on compiled IR; cache invalidated on fleet change"
+    pitfall: P-290
+
+  - id: F05
+    severity: major
+    description: >
+      The SSE FLEET_POLICY_UPDATED event must include a diff: which rules
+      were added, removed, or modified, and which tools are affected by each
+      change. A blanket "policy changed" event forces the partner to re-fetch
+      everything. The diff allows the partner to update only affected tools
+      in its UI. The diff must be computed by comparing the old and new policy
+      objects before the swap (both are available at that moment).
+    spec_impact: "CL-08 SSE — FLEET_POLICY_UPDATED includes changed_rules diff and affected_tools array"
+    pitfall: P-290
+
+  - id: F06
+    severity: major
+    description: >
+      PATCHes arriving during the reload window must be handled correctly.
+      If a PATCH arrives after the file watcher detects a change but before
+      the shadow swap completes, the PATCH must be evaluated against the
+      OLD policy (the one still active). Queuing PATCHes during reload is
+      acceptable but adds latency. The simpler approach: the PATCH reads
+      the active policy reference, which is still the old one until the
+      swap. No queuing needed if the swap is atomic.
+    spec_impact: "CL-10 fleet + PATCH — PATCH during reload evaluated against active (old) policy; no queuing if swap is atomic"
+    pitfall: P-290
+
+  - id: F07
+    severity: major
+    description: >
+      Cache TTL for fleet policy must be < 60 seconds. If the fleet policy
+      is fetched from a remote server (not just a local file), the cached
+      version must be refreshed frequently. A 5-minute cache means a tool
+      unlocked by fleet stays locked in the API for up to 5 minutes. The
+      TTL must be configurable with a sane default (30s). Webhook-based
+      invalidation is preferred over polling but both must be supported.
+    spec_impact: "CL-08 fleet freshness — cache TTL < 60s (default 30s); webhook invalidation supported; polling fallback"
+    pitfall: P-290
+
+  - id: F08
+    severity: warning
+    description: >
+      Schema validation of the new policy must check for: required fields
+      present, rule types valid, tool name references resolvable against
+      the workspace, risk level values in allowed set (R1-R5), and no
+      duplicate rules for the same tool. A policy that parses as valid YAML
+      but has semantic errors (e.g., risk_level: R6) must be rejected before
+      the swap. Schema validation is a separate step from syntax parsing.
+    spec_impact: "CL-08 fleet validation — semantic schema check (risk levels, duplicates, resolvable tool names) after syntax parse"
+    pitfall: P-290
+
+  - id: F09
+    severity: warning
+    description: >
+      When the fleet policy file is locked by another process (e.g., an
+      editor), the watcher detects a change but the reload cannot read the
+      file. This must be treated as a transient error: retry 3 times with
+      exponential backoff (100ms, 200ms, 400ms). If all retries fail, log
+      an error and retain the current policy. Do not treat a locked file
+      as deletion (which would trigger fail-closed). The distinction is:
+      file exists but unreadable (transient) vs file deleted (permanent).
+    spec_impact: "CL-14 fleet watcher — retry on EACCES/EBUSY (3x exponential); distinguish locked from deleted"
+    pitfall: P-290
+
+  - id: F10
+    severity: warning
+    description: >
+      Multi-tenant consideration: if the same claws serve instance handles
+      multiple workspaces, each workspace may have a different fleet policy.
+      The shadow-cache swap must be scoped to the workspace, not global.
+      A policy change for workspace A must not affect workspace B's active
+      policy reference. The fleet policy loader must be instantiated per
+      workspace.
+    spec_impact: "CL-08 fleet loader — per-workspace instance; shadow swap scoped to workspace; no cross-workspace leakage"
+    pitfall: P-290
+
+  - id: F11
+    severity: note
+    description: >
+      Observability: the fleet reload pipeline should emit structured logs
+      at each stage: file_change_detected, parse_started, parse_completed
+      (or parse_failed), validation_completed (or validation_failed),
+      swap_completed, sse_emitted. Each log includes the workspace_id and
+      a correlation_id for the reload cycle. This allows operators to
+      diagnose reload failures without enabling debug logging on all routes.
+    spec_impact: "CL-08 fleet observability — structured log per reload stage with workspace_id and correlation_id"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The fleet policy file format should support a version field for
+      backward compatibility. When a new server version introduces new rule
+      types, old policy files without those rule types still parse correctly.
+      Unknown rule types in a policy file should be logged as warnings and
+      ignored, not rejected — this allows fleet admins to deploy new policy
+      features before all servers are upgraded.
+    spec_impact: "CL-08 fleet schema — version field; unknown rule types logged and ignored; forward compatibility"
+    pitfall: null

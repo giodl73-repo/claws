@@ -9,8 +9,8 @@ stage: implementation
 test_tiers:
   L0_unit: 8
   L1_integration: 4
-  L2_e2e: 0
-  L3_accept: 0
+  L2_e2e: 1
+  L3_accept: 1
 test_scope:
   run:
     - "cd claws-sdk && npx vitest run --project unit --coverage"
@@ -41,6 +41,8 @@ This is the security foundation for the free tier. Ed25519 signing is in the fre
 - [ ] `claws-sdk/tests/compiler/crypto/ed25519.unit.test.ts` -- L0: keypair generation produces valid pair (1), sign→verify round-trip (1), wrong key fails verification (1), signature is deterministic for same input (1)
 - [ ] `claws-sdk/tests/compiler/crypto/hash.unit.test.ts` -- L0: SHA-256 matches known test vector (1)
 - [ ] `claws-sdk/tests/compiler/crypto/crypto.integration.test.ts` -- L1: AES + HMAC pipeline (encrypt then HMAC the ciphertext) (1), Ed25519 sign + SHA-256 hash pipeline (1), keypair save→load from PEM round-trip (1), cross-verification: sign with key A, fail verify with key B (1)
+- [ ] `claws-sdk/tests/compiler/crypto/crypto.e2e.test.ts` -- L2: end-to-end crypto pipeline from key generation through sign/verify/encrypt/decrypt (1)
+- [ ] `claws-sdk/tests/compiler/crypto/crypto.accept.test.ts` -- L3: scenario acceptance test verifying crypto findings (2)
 
 ## Acceptance Criteria
 
@@ -70,5 +72,7 @@ None -- crypto is a leaf module with no dependencies on other graduation pulses.
 
 - [ ] L0 unit (8 tests): AES round-trip (1), AES wrong key (1), AES tampered ciphertext (1), Ed25519 keypair valid (1), Ed25519 sign→verify (1), Ed25519 wrong key (1), Ed25519 deterministic (1), SHA-256 test vector (1)
 - [ ] L1 integration (4 tests): AES+HMAC pipeline (1), Ed25519+SHA-256 pipeline (1), PEM round-trip (1), cross-key verification failure (1)
+- [ ] L2 e2e (1 test): end-to-end crypto pipeline (1)
+- [ ] L3 acceptance (1 test): crypto scenario findings verified (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

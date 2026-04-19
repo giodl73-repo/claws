@@ -1,0 +1,186 @@
+name: S03-workspace-schema
+series: cap-integration
+version: 2
+specs: [CL-10, CL-03]
+description: >
+  Validates that GET /api/oc/ (root path, no file specified) returns a workspace
+  introspection schema listing all 9 OC files with their existence status,
+  section inventory, editability flags, active sessions, and the most recent
+  compilation status. This is the partner's entry point for discovering workspace
+  structure without prior knowledge of OC file names or layout. The schema must
+  be stable across recompilations — only content changes, not structure.
+
+expect:
+  http:
+    method: GET
+    path: /api/oc/
+    status: 200
+    content_type: application/json
+  response_shape:
+    root_has: [files, sessions, compilation]
+    files_is_array: true
+    files_item_has: [name, exists, sections, editable, oc_path]
+    files_count: 9
+    sections_is_array: true
+    sections_item_has: [name, item_count]
+    editable_is_boolean: true
+    compilation_has: [id, timestamp, status, warnings_count]
+    compilation_status_enum: [clean, dirty, pending, error]
+    sessions_is_array: true
+    sessions_item_has: [id, type, active]
+  empty_workspace:
+    all_files_exists_false: true
+    compilation_status: pending
+    sessions_empty: true
+  timing:
+    response_ms_max: 30
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner loads for the first time and needs to discover the
+  workspace structure. It sends GET /api/oc/ and receives the full schema.
+  The workspace has 7 of 9 OC files present (TOOLS.md, GOVERNANCE.md,
+  USER.md, AGENTS.md, CONTEXT.md, SESSION.md, lobster.yaml exist;
+  skills/ directory has 2 files; FLEET.md is missing). The compilation ran
+  successfully 30 seconds ago with 2 warnings. Two sessions are active:
+  main and cron:daily-triage. The partner uses this response to build the
+  navigation sidebar, showing present files as clickable, missing files as
+  'create' prompts, and compilation status as a badge.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The files array must always contain exactly 9 entries corresponding to
+      the canonical OC file set, even when files are missing. Missing files
+      appear with exists: false, sections: [], editable: false. If the API
+      only returns existing files, the partner cannot render 'create' prompts
+      for missing files because it doesn't know what files should exist.
+      The canonical file list must be hardcoded in the API, not derived from
+      disk.
+    spec_impact: "CL-10 GET /api/oc/ — always return 9-entry files array from canonical set; exists: false for missing"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The skills/ directory is not a single file but a directory of skill
+      files. The files array entry for skills must represent it as a
+      directory with child_count instead of sections. If skills/ is treated
+      as a regular file, the sections field is meaningless and the partner
+      cannot navigate into individual skill files. The schema needs a
+      'type' field (file | directory) to distinguish the two.
+    spec_impact: "CL-10 workspace schema — files entries need type: 'file' | 'directory'; directories have child_count, not sections"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      When lobster.yaml is absent, the workspace cannot compile a valid
+      onboarding flow. The compilation.status should reflect this — either
+      'error' with a diagnostic pointing to the missing lobster.yaml, or
+      'dirty' with a warning. If the compilation succeeds silently without
+      lobster.yaml, the workspace appears healthy but onboarding is broken.
+      The compilation must treat missing lobster.yaml as a warning at minimum.
+    spec_impact: "CL-03 compilation — missing lobster.yaml produces compilation warning; schema surfaces it in compilation.warnings"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      An empty workspace (no OC files at all, fresh init) must return a
+      valid schema with all 9 files showing exists: false, compilation
+      status: 'pending', and sessions: []. If the API returns 500 or an
+      empty body for an empty workspace, the partner cannot render the
+      onboarding flow. The empty workspace is a valid state, not an error.
+    spec_impact: "CL-10 GET /api/oc/ — empty workspace returns valid 200 with all files exists: false, compilation: pending"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The editable flag per file must account for fleet locks and governance
+      rules. FLEET.md may exist but be marked editable: false because the
+      fleet policy locks it. If editable only reflects file existence (exists
+      implies editable), partners would offer edit UI for files the user
+      cannot modify, leading to failed PATCHes and confused error flows.
+      Editability must be computed from governance + fleet state.
+    spec_impact: "CL-10 workspace schema — editable computed from governance + fleet locks, not just file existence"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The sections array for each file lists section names and item counts.
+      If a file has been modified externally but not yet recompiled, the
+      sections data from the last compilation is stale. The schema must
+      indicate staleness — either a per-file 'stale' flag or a file-level
+      last_modified timestamp that partners can compare against
+      compilation.timestamp. Without this, partners render outdated section
+      counts.
+    spec_impact: "CL-10 workspace schema — per-file last_modified timestamp for staleness detection vs compilation.timestamp"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The compilation.warnings_count is a number, but partners need to show
+      warning details (e.g., 'TOOLS.md: tool "foo" has no risk classification').
+      Including full warning messages in the root schema bloats the response.
+      The schema should include warnings_count with a link to
+      /api/oc/_compilation/warnings for full details. Partners can lazily
+      fetch warnings only when the user clicks the badge.
+    spec_impact: "CL-10 workspace schema — warnings_count only at root; full warnings at /api/oc/_compilation/warnings"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The schema structure must be stable across recompilations — same
+      fields, same types, same file ordering. If a recompilation adds a
+      new field or reorders files, partners that cache the schema break.
+      The API must version the schema (e.g., schema_version: 2) and
+      guarantee backward compatibility within a major version. Partners
+      can use schema_version to detect breaking changes.
+    spec_impact: "CL-10 workspace schema — include schema_version field; guarantee field stability within major version"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The oc_path field on each file entry provides the canonical oc://
+      path for navigating to that file. For the skills/ directory, the
+      oc_path should be oc://skills/* (glob) or oc://skills/ (directory).
+      If oc_path for directories uses the same format as files
+      (oc://skills), partners cannot distinguish file navigation from
+      directory listing when constructing subsequent GET requests.
+    spec_impact: "CL-10 workspace schema — oc_path for directories uses trailing slash: oc://skills/"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Sessions in the schema show active sessions but not their risk
+      ceilings or tool counts. A partner rendering a session switcher
+      needs to know 'cron:daily-triage has 5 tools, ceiling R2' without
+      making per-session API calls. Including summary metadata per session
+      in the root schema (tool_count, risk_ceiling) saves N+1 queries
+      for partners with session-aware UIs.
+    spec_impact: "CL-10 workspace schema — session entries include summary: tool_count, risk_ceiling for partner session switcher"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The compilation.id should be an opaque string (e.g., SHA-256 of the
+      compiled IR) that partners can use as a cache key. If it's a
+      monotonic integer, partners cannot detect compilation identity across
+      server restarts (counter resets). A content-addressed ID ensures
+      that identical workspace content produces the same compilation.id,
+      enabling efficient client-side caching.
+    spec_impact: "CL-10 compilation — compilation.id should be content-addressed (hash of IR), not monotonic counter"
+    pitfall: null

@@ -289,13 +289,13 @@ The governance rule engine wires existing compiler-sdk IR types (PolicyIR, Gover
 - [ ] G-CLASS: tool name behavioral heuristic -- verb-to-risk mapping (PC2-S09-F01, F02)
 - [ ] G-CLASS: classification override downgrade warning (PC2-S09-F08)
 - [ ] G-PERM: permissive default advisory when R4/R5 tools present (PC2-S09-F03, F04)
-- [ ] G-PERM: capability name parser with CLAWS-E020 suggestions (PC2-S09-F05, F06)
+- [ ] G-PERM: capability name parser with OC-POLICY-E020 suggestions (PC2-S09-F05, F06)
 - [ ] G-DATA: unknown label synonym suggestion in CLAWS-W010 (PC2-S10-F01, F02)
 - [ ] G-DATA: partial enforcement warning for mixed labels (PC2-S10-F06)
 - [ ] G-OUTPUT: per-channel PII redaction matrix (PC2-S10-F03, F04, F05)
 - [ ] G-OUTPUT: safe default max redaction for unconfigured channels (PC2-S10-F07)
 - [ ] G-OUTPUT: salted PII hashing for audit chain (PC2-S10-F08)
-- [ ] G-A2A-TRUST: delegation-without-trust CLAWS-E030 hard error (PC2-S11-F01, F02)
+- [ ] G-A2A-TRUST: delegation-without-trust OC-POLICY-E030 hard error (PC2-S11-F01, F02)
 - [ ] G-A2A-*: dependency suppression scaling (PC2-S11-F03, F04, F05, F06)
 - [ ] G-A2A-TRUST: capability-dependent minimum trust (PC2-S11-F07)
 - [ ] G-A2A-*: agent-less workspace precondition gate (PC2-S11-F10)
@@ -318,11 +318,11 @@ The governance rule engine wires existing compiler-sdk IR types (PolicyIR, Gover
 **New test additions from pitfall-coverage-2:**
 - [ ] claws-sdk/tests/governance/rules/g-class.unit.test.ts -- tool name behavioral heuristic
 - [ ] claws-sdk/tests/governance/rules/g-class.unit.test.ts -- override downgrade warning
-- [ ] claws-sdk/tests/governance/rules/g-perm.unit.test.ts -- CLAWS-E020 non-standard capability
+- [ ] claws-sdk/tests/governance/rules/g-perm.unit.test.ts -- OC-POLICY-E020 non-standard capability
 - [ ] claws-sdk/tests/governance/rules/g-data.unit.test.ts -- synonym suggestion
 - [ ] claws-sdk/tests/governance/rules/g-data.unit.test.ts -- partial enforcement warning
 - [ ] claws-sdk/tests/governance/rules/g-output.unit.test.ts -- per-channel redaction matrix
-- [ ] claws-sdk/tests/governance/rules/g-a2a.unit.test.ts -- CLAWS-E030 delegation-without-trust
+- [ ] claws-sdk/tests/governance/rules/g-a2a.unit.test.ts -- OC-POLICY-E030 delegation-without-trust
 - [ ] claws-sdk/tests/governance/rules/g-a2a.unit.test.ts -- suppression scaling
 - [ ] claws-sdk/tests/governance/rules/g-a2a.unit.test.ts -- L0 fleet impersonation
 - [ ] claws-sdk/tests/governance/rules/g-context.unit.test.ts -- config-only check
@@ -392,16 +392,16 @@ The governance rule engine wires existing compiler-sdk IR types (PolicyIR, Gover
 - [ ] G-CLASS: classification disagreement diagnostic CLAWS-W023 (PF2-S13-F04)
 - [ ] G-CLASS: compound name verb extraction (PF2-S13-F06)
 - [ ] G-PERM: non-standard capability normalization table (PF2-S14-F01, F02)
-- [ ] G-PERM: unrecognizable capability CLAWS-E020 hard error (PF2-S14-F03)
+- [ ] G-PERM: unrecognizable capability OC-POLICY-E020 hard error (PF2-S14-F03)
 - [ ] G-PERM: case-insensitive capability matching (PF2-S14-F04)
 - [ ] G-PERM: normalization confirmation diagnostic CLAWS-W019 (PF2-S14-F05)
 - [ ] G-PERM: multi-separator capability splitting (PF2-S14-F06)
 - [ ] G-PERM: absent capabilities advisory CLAWS-W040 for R4/R5 (PF2-S25-F01, F02, F03)
 - [ ] G-PERM: auto-suggested capability constraints (PF2-S25-F04)
-- [ ] G-PERM: fleet mandatory capabilities CLAWS-E040 (PF2-S25-F05)
+- [ ] G-PERM: fleet mandatory capabilities OC-POLICY-E040 (PF2-S25-F05)
 - [ ] G-PERM: absent vs empty capabilities distinction (PF2-S25-F06)
 - [ ] G-DATA: unknown label bypass detection (PF2-S15-F01)
-- [ ] G-DATA: label synonym suggestion CLAWS-E025 (PF2-S15-F02)
+- [ ] G-DATA: label synonym suggestion OC-POLICY-E025 (PF2-S15-F02)
 - [ ] G-DATA: partial enforcement false sense CLAWS-W028 (PF2-S15-F03, F04)
 - [ ] G-DATA: unknown label A2A bypass warning (PF2-S15-F05)
 - [ ] G-DATA: unknown label conservative RESTRICTED default (PF2-S15-F08)
@@ -409,7 +409,7 @@ The governance rule engine wires existing compiler-sdk IR types (PolicyIR, Gover
 - [ ] G-OUTPUT: forensic decryption authorization (PF2-S16-F03)
 - [ ] G-OUTPUT: consistent non-reversible tokenization (PF2-S16-F04)
 - [ ] G-OUTPUT: PII field identification from MEMORY.md labels (PF2-S16-F06)
-- [ ] G-A2A-TRUST: delegation implies bidirectional trust CLAWS-E030 (PF2-S17-F01, F02)
+- [ ] G-A2A-TRUST: delegation implies bidirectional trust OC-POLICY-E030 (PF2-S17-F01, F02)
 - [ ] G-A2A-*: violation cascade dependency suppression (PF2-S17-F03, F04)
 - [ ] G-A2A-*: verbose mode for suppressed violations (PF2-S17-F05)
 - [ ] G-A2A-*: conservative suppression algorithm (PF2-S17-F07)
@@ -420,7 +420,7 @@ The governance rule engine wires existing compiler-sdk IR types (PolicyIR, Gover
 - [ ] G-CONTEXT: compile-time scope restriction to configuration only (PF2-S19-F01, F02, F03)
 - [ ] G-CONTEXT: false positive rate target <1% (PF2-S19-F05)
 - [ ] G-CONTEXT: false positive suppression mechanism (PF2-S19-F06)
-- [ ] G-CONTEXT: per-sub-rule diagnostic codes CLAWS-E060-01 through -08 (PF2-S20-F01, F02)
+- [ ] G-CONTEXT: per-sub-rule diagnostic codes OC-POLICY-E060-01 through -08 (PF2-S20-F01, F02)
 - [ ] G-CONTEXT: rich sub-rule diagnostic messages (PF2-S20-F03)
 - [ ] All rules: sub-rule codes as general convention (PF2-S20-F04)
 - [ ] All rules: independent sub-rule violations (PF2-S20-F05)
@@ -431,13 +431,13 @@ The governance rule engine wires existing compiler-sdk IR types (PolicyIR, Gover
 - [ ] G-BOUND: risk-scaled severity for missing bounds (PF2-S21-F05)
 - [ ] G-BOUND: cross-dimension bound interaction (PF2-S21-F07)
 - [ ] G-ELICIT: fuzzy match cross-validation for policy names (PF2-S22-F01, F02)
-- [ ] G-ELICIT: unmatched policy CLAWS-E065 hard error (PF2-S22-F03)
-- [ ] G-ELICIT: R5 tool without policy CLAWS-E066 (PF2-S22-F04)
+- [ ] G-ELICIT: unmatched policy OC-POLICY-E065 hard error (PF2-S22-F03)
+- [ ] G-ELICIT: R5 tool without policy OC-POLICY-E066 (PF2-S22-F04)
 - [ ] G-ELICIT: normalization algorithm documented (PF2-S22-F05)
 - [ ] G-ELICIT: glob pattern coverage validation (PF2-S22-F07)
 - [ ] G-ELICIT-TIMEOUT: platform approve-on-timeout contradiction (PF2-S23-F01)
 - [ ] G-ELICIT-TIMEOUT: unconditional deny-on-timeout (PF2-S23-F02)
-- [ ] G-ELICIT-TIMEOUT: approveOnTimeout true = CLAWS-E042 (PF2-S23-F03)
+- [ ] G-ELICIT-TIMEOUT: approveOnTimeout true = OC-POLICY-E042 (PF2-S23-F03)
 - [ ] G-ELICIT-TIMEOUT: all risk levels deny on timeout (PF2-S23-F04)
 - [ ] G-ELICIT-TIMEOUT: immutable timeout config Object.freeze (PF2-S26-F02)
 - [ ] G-ELICIT-AUDIT: unsigned approval inadmissibility (PF2-S11-F01)

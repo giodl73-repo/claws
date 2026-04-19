@@ -1,0 +1,219 @@
+name: S23-obo-without-elicitation
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12, CL-06]
+description: >
+  Validates that adding a tool with OBO (on-behalf-of) capability to TOOLS.md
+  via PATCH /api/oc/TOOLS.md without satisfying the elicitation gate produces
+  a G-ELICIT governance violation. R5/OBO tools must be errors (hard block),
+  not warnings. The elicitation gate is a cross-file dependency -- the gate
+  definition lives in USER.md, but enforcement applies to TOOLS.md edits.
+  OBO presence is detected in both the capability field and the description
+  text. Fleet policy allowing R3 OBO does not override the elicitation
+  requirement. "Allow all" does not cover R5/OBO tools.
+
+expect:
+  obo_tool_without_elicitation:
+    endpoint: "PATCH /api/oc/TOOLS.md#Tools"
+    payload: "{ tool: 'impersonate-user', capabilities: ['obo'], risk_level: 'R5' }"
+    result:
+      status: 403
+      error_type: G_ELICIT_VIOLATION
+      severity: error
+      governance:
+        errors:
+          - type: "G-ELICIT"
+            tool: "impersonate-user"
+            required_gate: "obo_consent"
+            gate_location: "oc://USER.md/ElicitationGates"
+  obo_in_description:
+    endpoint: "PATCH /api/oc/TOOLS.md#Tools"
+    payload: "{ tool: 'helper', description: 'acts on behalf of the user' }"
+    result:
+      governance:
+        warnings:
+          - type: "OBO_DETECTED_IN_DESCRIPTION"
+            tool: "helper"
+  allow_all_exclusion:
+    allow_all_active: true
+    r5_obo_still_block.source: 'r5'
+  fleet_r3_obo:
+    fleet_policy_allows_r3_obo: true
+    elicitation_still_required: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP partner adds a new tool 'impersonate-user' to TOOLS.md with OBO
+  capability and R5 risk level. The USER.md file contains an ElicitationGates
+  section that defines required consent flows for OBO tools, but the partner
+  has not completed the elicitation flow. The PATCH must be rejected with
+  G-ELICIT. The partner then tries: (1) adding OBO in the description text
+  instead of the capabilities array, (2) adding a benign R3 tool and later
+  updating it to add OBO, (3) using "Allow all" to bypass, (4) relying on
+  fleet policy that permits R3 OBO. The validation must detect OBO in both
+  structured fields and free text, enforce elicitation regardless of trust
+  level or fleet policy, and block R5/OBO as error while warning on R3/OBO
+  without elicitation.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      OBO capability detection must scan both the structured capabilities
+      array and the free-text description field. A tool with capabilities: []
+      but description: "acts on behalf of the user to send emails" has
+      implicit OBO. The GovernanceIR must tag tools with obo_detected: true
+      from either source. If detection is limited to the capabilities array,
+      description-based OBO escapes the elicitation gate entirely.
+    spec_impact: "CL-12 OBO detection — scan capabilities array AND description text; GovernanceIR tags obo_detected from either source"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      R5/OBO tools must produce a hard error (403), not a warning (200 with
+      governance.warnings). The G-ELICIT violation severity is determined by
+      the tool's risk level: R5 + OBO = error, R3 + OBO = warning, R1-R2 +
+      OBO = warning with lower severity. If the severity mapping is missing
+      or defaults to warning for all risk levels, R5/OBO tools can be added
+      with only a dismissible warning, which is a critical governance failure.
+    spec_impact: "CL-12 G-ELICIT severity — R5+OBO = error (403 block); R3+OBO = warning (200); severity keyed to risk_level"
+    pitfall: null
+
+  - id: F03
+    severity: critical
+    description: >
+      "Allow all" (the user's blanket pre-authorization) must NOT cover R5/OBO
+      tools. The alwaysDenyRiskLevels list must include R5/OBO combinations
+      even when allow_all is active. If "Allow all" is implemented as a bypass
+      of ALL governance checks, R5/OBO tools sail through. The implementation
+      must check alwaysDenyRiskLevels BEFORE checking allow_all. Order matters:
+      deny-list first, allow-list second.
+    spec_impact: "CL-12 Allow all — alwaysDenyRiskLevels checked before allow_all; R5+OBO never covered by blanket authorization"
+    pitfall: null
+
+  - id: F04
+    severity: critical
+    description: >
+      The elicitation gate is a cross-file dependency: the gate definition
+      lives in USER.md#ElicitationGates, but enforcement applies to TOOLS.md
+      edits. The validator for PATCH /api/oc/TOOLS.md must read the current
+      USER.md to check whether the elicitation flow for OBO has been completed.
+      If the validator only reads TOOLS.md, it has no way to know whether
+      elicitation occurred. The cross-file read must use the compiled IR, not
+      a fresh file read, to avoid TOCTOU issues.
+    spec_impact: "CL-06 cross-file governance — TOOLS.md validator reads USER.md elicitation state from compiled GovernanceIR"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      A tool that starts as R3 without OBO and later gains OBO via an update
+      PATCH must trigger the elicitation gate on the update. The validator
+      cannot cache "this tool passed validation at creation" -- every PATCH
+      that changes capabilities or description must re-evaluate OBO detection.
+      If the validator skips re-evaluation for existing tools, a two-step
+      bypass exists: create benign tool, then add OBO.
+    spec_impact: "CL-10 PATCH validation — re-evaluate OBO detection on every capabilities/description change, not just creation"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Fleet policy may allow R3 OBO tools (e.g. fleet permits delegated
+      email access at R3). This does NOT waive the elicitation requirement.
+      Fleet policy controls whether a tool CAN exist at a given risk level;
+      the elicitation gate controls whether the USER has consented. These
+      are independent checks. The validator must enforce: fleet_allows AND
+      elicitation_completed. Fleet allow without elicitation = G-ELICIT warning.
+    spec_impact: "CL-12 fleet + elicitation — independent checks; fleet allows existence, elicitation confirms user consent; both required"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The G-ELICIT error response must include the specific gate that is
+      unsatisfied (obo_consent), the location of the gate definition
+      (oc://USER.md/ElicitationGates), and a link or instructions for
+      completing the elicitation flow. Without this, the partner receives
+      a generic "elicitation required" error with no path to resolution.
+      The response must be actionable.
+    spec_impact: "CL-10 G-ELICIT response — include gate name, gate location (oc:// path), and completion instructions"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      OBO detection in description text must use semantic analysis from
+      the GovernanceIR, not simple keyword matching. "On behalf of" in
+      "This tool does NOT act on behalf of the user" is a negation. If
+      detection is keyword-based, negated statements trigger false positives.
+      The compiler's OBO tagger must handle negation, conditional phrasing
+      ("may act on behalf of if approved"), and passive voice ("actions are
+      performed on behalf of").
+    spec_impact: "CL-12 OBO detection — semantic analysis in GovernanceIR tagger; handle negation, conditional, and passive phrasing"
+    pitfall: null
+
+  - id: F09
+    severity: major
+    description: >
+      When USER.md is missing entirely (new workspace, not yet created),
+      the elicitation gate cannot be checked. The validator must treat
+      missing USER.md as "no elicitation completed" and block all OBO tools.
+      If the validator treats missing USER.md as "no gates defined, therefore
+      no gates to satisfy," all OBO tools pass. Missing file must be fail-closed.
+    spec_impact: "CL-06 missing USER.md — treat as zero completed elicitations; fail-closed for all OBO tools"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      A tool's description may reference another tool's OBO capability
+      ("This tool calls impersonate-user which acts on behalf of the user").
+      The OBO tagger must distinguish first-person OBO (this tool itself
+      has OBO) from third-party reference (this tool mentions another tool
+      that has OBO). Only first-person OBO triggers the elicitation gate.
+      Third-party references should produce an informational note, not a
+      gate requirement.
+    spec_impact: "CL-12 OBO detection — distinguish first-person vs third-party OBO references in description text"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      The elicitation gate completion state in USER.md must have an expiry
+      or version. If the user completed OBO elicitation 6 months ago for
+      tool v1 and the tool has since changed significantly, the stale
+      elicitation should not cover the new version. The gate definition
+      should include a version or timestamp that the validator compares
+      against the tool's last-modified date.
+    spec_impact: "CL-06 elicitation expiry — gate completion carries version/timestamp; stale elicitation re-triggers gate"
+    pitfall: null
+
+  - id: F12
+    severity: warning
+    description: >
+      Multiple tools with OBO capability added in a single batch PATCH
+      must each independently satisfy the elicitation gate. If the batch
+      contains 3 OBO tools, all 3 must have completed elicitation. A
+      partial pass (2 of 3 elicited) must reject the entire batch or
+      accept the 2 and reject the 1, depending on the atomicity contract.
+      The response must itemize which tools passed and which failed.
+    spec_impact: "CL-10 batch PATCH — per-tool elicitation check; itemized pass/fail in response for batch OBO additions"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      The audit trail for G-ELICIT violations should distinguish between
+      "elicitation never attempted" and "elicitation attempted but incomplete."
+      A partner that started the elicitation flow but abandoned it mid-way
+      is a different signal than one that never tried. The audit event should
+      include elicitation_state: never_started | in_progress | expired to
+      support security review of OBO tool addition patterns.
+    spec_impact: "CL-10 audit — G-ELICIT event includes elicitation_state discriminator (never_started, in_progress, expired)"
+    pitfall: null

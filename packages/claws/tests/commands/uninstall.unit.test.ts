@@ -164,7 +164,7 @@ describe('claws uninstall', () => {
       expect(exitCode).toBe(3);
 
       const output = consoleSpy.mock.calls.flat().join(' ');
-      expect(output).toContain('CLAWS-E085');
+      expect(output).toContain('OC-POLICY-E085');
       expect(output).toContain('Permission denied');
     } finally {
       consoleSpy.mockRestore();
@@ -181,7 +181,7 @@ describe('claws uninstall', () => {
 
       const output = consoleSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E085');
+      expect(parsed.error.code).toBe('OC-POLICY-E085');
       expect(parsed.error.what).toContain('EACCES');
     } finally {
       consoleSpy.mockRestore();

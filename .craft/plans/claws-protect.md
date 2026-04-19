@@ -109,6 +109,6 @@ The PROTECT group provides budget management, secret storage, and identity confi
 - Budget thresholds (80%/95%/100%) follow the same pattern as agent-sdk govern/GovernanceManager thresholds
 - Secrets vault REUSES compiler-sdk `integrity/` for AES-256-GCM operations -- extends with Argon2id key derivation
 - Argon2id is the preferred KDF via the `argon2` npm package (WASM-based, no native addon required); Node.js does NOT have native Argon2 support — native alternatives are scrypt/PBKDF2 from `node:crypto`. Fallback to scrypt (`crypto.scrypt`) for environments where the argon2 package cannot be installed
-- Identity SSO bridge REUSES the pattern from `@openclaw/identity-bridge` (CL-06 Tier 1 package)
+- Identity SSO bridge REUSES the pattern from `@bic/openclaw-guardrails/identity` (Ra II CP-10 consolidated the former `@bic/identity-bridge` into this subpath)
 - `claws budget --fleet` depends on fleet workspace discovery -- uses the same scan logic as `claws scan`
 - Depends on claws-governance-ir (ClawsConfig for budget/identity config schema) and claws-fleet-ops (fleet scan for budget aggregation, soft dependency -- fleet budget can be implemented after single-workspace budget)

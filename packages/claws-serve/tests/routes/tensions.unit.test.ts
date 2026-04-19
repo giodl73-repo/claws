@@ -7,6 +7,7 @@ import { CompilationHost } from '../../src/compilation-host.js';
 import { minimalGovernanceIR } from '../fixtures/governance-ir.js';
 import { governanceIRWithViolations } from '../fixtures/governance-ir-with-violations.js';
 
+import { TEST_TRUST_SIGNING_KEY } from '../fixtures/trust-key.js';
 async function request(
   server: Server,
   path: string,

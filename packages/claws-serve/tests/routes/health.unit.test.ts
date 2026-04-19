@@ -10,6 +10,7 @@ function makeState(overrides: Partial<ServerState> = {}): ServerState {
   return {
     startedAt: Date.now(),
     compileCount: 0,
+    mode: 'healthy',
     ...overrides,
   };
 }
@@ -70,6 +71,97 @@ describe('GET /health', () => {
     const json = JSON.parse(body) as Record<string, unknown>;
 
     expect(json['uptime']).toBeGreaterThanOrEqual(1);
+  });
+
+  it('falls back to mode=healthy when state.mode is undefined (backwards compatibility)', async () => {
+    // Covers the `state.mode ?? 'healthy'` branch — tests that bypass the
+    // startup health check (pre-S33 behaviour) leave `mode` unset.
+    const state = { startedAt: Date.now(), compileCount: 0 };
+    const app = express();
+    app.use(healthRouter(state));
+    server = await listen(app);
+
+    const { body } = await request(server, 'GET', '/health');
+    const json = JSON.parse(body) as Record<string, unknown>;
+
+    expect(json['mode']).toBe('healthy');
+  });
+
+  it('response body includes server mode (healthy) (S33)', async () => {
+    const state = makeState();
+    const app = express();
+    app.use(healthRouter(state));
+    server = await listen(app);
+
+    const { body } = await request(server, 'GET', '/health');
+    const json = JSON.parse(body) as Record<string, unknown>;
+
+    expect(json['mode']).toBe('healthy');
+    expect(json['degradedReason']).toBeUndefined();
+  });
+
+  it('response body includes mode=degraded and a sanitized reason code when set (S33)', async () => {
+    const state = makeState({
+      mode: 'degraded',
+      degradedReason: {
+        kind: 'compile-failed',
+        compilerMessage: 'SOUL.md broken at /abs/workspace/SOUL.md line 42',
+      },
+    });
+    const app = express();
+    app.use(healthRouter(state));
+    server = await listen(app);
+
+    const { body } = await request(server, 'GET', '/health');
+    const json = JSON.parse(body) as Record<string, unknown>;
+
+    expect(json['mode']).toBe('degraded');
+    expect(json['degradedReasonCode']).toBe('COMPILATION_FAILED_AT_STARTUP');
+    // The full reason object (with compilerMessage) must NOT leak to the
+    // anonymous /health endpoint — operators read it from server logs.
+    expect(json['degradedReason']).toBeUndefined();
+  });
+
+  it('fleet-policy-missing degraded response never leaks the policyFile path', async () => {
+    const state = makeState({
+      mode: 'degraded',
+      degradedReason: {
+        kind: 'fleet-policy-missing',
+        policyFile: '/etc/claws/secret-location/fleet.json',
+      },
+    });
+    const app = express();
+    app.use(healthRouter(state));
+    server = await listen(app);
+
+    const { body } = await request(server, 'GET', '/health');
+    const json = JSON.parse(body) as Record<string, unknown>;
+
+    expect(json['degradedReasonCode']).toBe('FLEET_POLICY_MISSING');
+    // Response must never contain the absolute policy path.
+    expect(body).not.toContain('/etc/claws/secret-location/fleet.json');
+    expect(body).not.toContain('policyFile');
+  });
+
+  it('fleet-policy-corrupt degraded response never leaks the parser cause', async () => {
+    const state = makeState({
+      mode: 'degraded',
+      degradedReason: {
+        kind: 'fleet-policy-corrupt',
+        policyFile: '/etc/claws/fleet.json',
+        cause: 'Unexpected token { in JSON at position 142',
+      },
+    });
+    const app = express();
+    app.use(healthRouter(state));
+    server = await listen(app);
+
+    const { body } = await request(server, 'GET', '/health');
+    const json = JSON.parse(body) as Record<string, unknown>;
+
+    expect(json['degradedReasonCode']).toBe('FLEET_POLICY_CORRUPT');
+    expect(body).not.toContain('Unexpected token');
+    expect(body).not.toContain('/etc/claws/fleet.json');
   });
 });
 

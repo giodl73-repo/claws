@@ -47,6 +47,7 @@ Additionally, implement a session-scoped tool resolver that returns tool permiss
 - [ ] Agent sessions inherit delegator permissions minus revoked tools
 - [ ] `ToolCall.context` includes `sessionId` and `sessionType` (CL-11)
 - [ ] Within claws serve, tool calls with missing sessionId are denied (fail-closed, treated as unclassified = R5 per fail-mode table)
+- [ ] Unattended session approval (C-1) enforced: cron and agent sessions force failMode: 'deny' for R3+ gated tools. If a gated tool (R3+) triggers `requiresExternalApproval: true` in an unattended session, the timeout `failMode` is forced to `'deny'` regardless of configuration.
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0 for claws-sdk
 

@@ -10,6 +10,11 @@ import type { GovernanceIR } from '@bic/claws-sdk';
 import { createApp } from '@bic/claws-serve';
 import type { ServerState } from '@bic/claws-serve';
 
+const TEST_TRUST_SIGNING_KEY: Buffer = Buffer.from(
+  'claws-test-trust-key-32-bytes-00',
+  'utf-8',
+);
+
 function makeIRWithViolationsAndConflicts(): GovernanceIR {
   return {
     capabilities: {
@@ -126,6 +131,7 @@ describe('SDK acceptance: diagnostics, tensions, classify', () => {
       compileFn,
       workspaceRoot: '/test',
       rateLimitMax: 100,
+      trustSigningKey: TEST_TRUST_SIGNING_KEY,
     });
     server = await listen(app);
 

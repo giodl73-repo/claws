@@ -20,7 +20,7 @@ expect:
       rules_evaluated: true
       risk_check: true
   violations:
-    - code: CLAWS-E232
+    - code: OC-POLICY-E232
       message: "Scaffold risk R5 exceeds workspace trust tier T2 — clamped to R2"
       severity: error
   warnings:

@@ -1,0 +1,89 @@
+{
+  "name": "@bic/openclaw-guardrails",
+  "version": "0.1.0",
+  "description": "OpenClaw governance package — GuardrailProvider + FileIngestProvider interfaces plus six runtime subpaths (audit, approvals, budget, identity, siem, secrets).",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./audit": {
+      "types": "./dist/audit/index.d.ts",
+      "import": "./dist/audit/index.js"
+    },
+    "./approvals": {
+      "types": "./dist/approvals/index.d.ts",
+      "import": "./dist/approvals/index.js"
+    },
+    "./budget": {
+      "types": "./dist/budget/index.d.ts",
+      "import": "./dist/budget/index.js"
+    },
+    "./identity": {
+      "types": "./dist/identity/index.d.ts",
+      "import": "./dist/identity/index.js"
+    },
+    "./siem": {
+      "types": "./dist/siem/index.d.ts",
+      "import": "./dist/siem/index.js"
+    },
+    "./secrets": {
+      "types": "./dist/secrets/index.d.ts",
+      "import": "./dist/secrets/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "peerDependencies": {
+    "@bic/openclaw-workspace": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^3.1.1",
+    "typescript": "^5.7.0",
+    "vitest": "^3.1.1"
+  },
+  "keywords": [
+    "openclaw",
+    "guardrail",
+    "governance",
+    "audit",
+    "approvals",
+    "budget",
+    "identity",
+    "siem",
+    "secrets",
+    "bic"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://microsoft.ghe.com/bic/claws.git",
+    "directory": "claws-sdk/packages/guardrails"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.microsoft.ghe.com/"
+  },
+  "author": "",
+  "bugs": {
+    "url": "https://microsoft.ghe.com/bic/claws/issues"
+  },
+  "homepage": "https://microsoft.ghe.com/bic/claws#readme"
+}

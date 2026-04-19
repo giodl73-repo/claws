@@ -37,7 +37,7 @@ type FailMode<R extends RuleLevel> = R extends 5
 - `FailMode<1|2|3|4>` resolves to `'open' | 'closed'`.
 
 If deserialized JSON contains an R5 rule with `failMode: 'open'`, the
-runtime validator throws `CLAWS-E001`.
+runtime validator throws `OC-POLICY-E001`.
 
 ## Inspecting the IR
 

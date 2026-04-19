@@ -12,7 +12,7 @@
  *   F: Context scope collision — RULES.md context constraints conflict across files
  *   G: Suppression override conflict — suppression in one file overrides enforcement in another
  *
- * @module claws-lsp/tension/cross-file
+ * @module openclaw-lsp/tension/cross-file
  */
 
 import type { GovernanceIRLike } from '../compilation-host.js';

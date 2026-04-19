@@ -5,7 +5,7 @@ specs: [CL-08]
 description: >
   Validates that the same OC workspace compiled through the pre-extraction
   monolith path (compiler-sdk) and the post-extraction building-blocks path
-  (@craftworks/* + @claws/compiler) produces byte-identical GovernanceIR and
+  (@craftworks/* + @bic/compiler) produces byte-identical GovernanceIR and
   emit artifacts. This is the extraction correctness proof: if outputs diverge,
   the extraction introduced a behavioral change that breaks existing consumers.
 
@@ -37,7 +37,7 @@ problem: >
   readOCWorkspaceViaFORMA() -> FORMA -> EXTRACT -> ANALYZE -> OPTIMIZE -> EMIT.
   Save all intermediate and final artifacts. Then compile the same workspace
   through the extracted building-blocks pipeline: @craftworks/forma
-  WorkspaceReader.read() -> @claws/compiler compile(). Compare GovernanceIR
+  WorkspaceReader.read() -> @bic/compiler compile(). Compare GovernanceIR
   serialization, OC Gateway plugin output (plugins/claws-governance/index.ts),
   Claude Code output (CLAUDE.md + .claude/settings.json), and audit chain
   hashes. All must be byte-identical after normalizing non-deterministic fields
@@ -79,7 +79,7 @@ findings:
       generated TypeScript code with import paths. The pre-extraction emitter
       may generate imports referencing compiler-sdk internal paths. The
       post-extraction emitter must generate imports referencing @craftworks/*
-      and @claws/* paths. These outputs are NOT byte-identical by design —
+      and @bic/* paths. These outputs are NOT byte-identical by design —
       the import paths intentionally change. The equivalence test must
       normalize import paths before byte comparison, or the test will always
       fail. CL-08 must define which parts of emit output are expected to
@@ -92,7 +92,7 @@ findings:
     description: >
       The compile orchestrator sequences phases: PARSE -> EXTRACT -> ANALYZE ->
       OPTIMIZE -> EMIT. The pre-extraction orchestrator is a monolith function
-      in compiler-sdk. The post-extraction orchestrator in @claws/compiler
+      in compiler-sdk. The post-extraction orchestrator in @bic/compiler
       calls across package boundaries (forma for PARSE, its own modules for
       EXTRACT/ANALYZE/OPTIMIZE, codegen+emitters for EMIT). If any phase
       returns a result type that was structurally identical in the monolith
@@ -120,14 +120,14 @@ findings:
     description: >
       RELAX expressions in the OC workspace are evaluated during ANALYZE.
       If the pre-extraction path uses compiler-sdk's relax module and the
-      post-extraction path uses @craftworks/relax (which @claws/compiler
+      post-extraction path uses @craftworks/relax (which @bic/compiler
       does NOT depend on — relax is in the enterprise tier per CL-08 line
-      365-369), then @claws/compiler cannot evaluate RELAX expressions at
+      365-369), then @bic/compiler cannot evaluate RELAX expressions at
       all. This means the post-extraction output for workspaces containing
       RELAX expressions will differ by design. The equivalence test must
       either restrict to RELAX-free workspaces or document this as an
       enterprise-only feature gap.
-    spec_impact: "CL-08 Layer 2 scope — clarify whether @claws/compiler evaluates RELAX or defers to enterprise tier"
+    spec_impact: "CL-08 Layer 2 scope — clarify whether @bic/compiler evaluates RELAX or defers to enterprise tier"
     pitfall: null
 
   - id: F07

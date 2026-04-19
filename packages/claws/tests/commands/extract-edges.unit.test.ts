@@ -271,7 +271,7 @@ describe('claws extract — edge-case branches', () => {
 
       const output = consoleSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E021');
+      expect(parsed.error.code).toBe('OC-POLICY-E021');
     } finally {
       consoleSpy.mockRestore();
     }

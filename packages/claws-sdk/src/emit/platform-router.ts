@@ -163,7 +163,7 @@ function checkR5Enforcement(
  * Post-emit verification — validates all generated outputs.
  *
  * Checks:
- * - No forbidden imports (@craftworks/, @claws/) in generated code
+ * - No forbidden imports (`@craftworks`-scoped, `@claws`-scoped) in generated code
  * - All artifacts have non-empty content
  */
 function verifyEmitResult(result: PlatformEmitResult): readonly string[] {
@@ -173,7 +173,7 @@ function verifyEmitResult(result: PlatformEmitResult): readonly string[] {
     // Empty content check
     if (artifact.content.length === 0) {
       failures.push(
-        `CLAWS-E301: Empty artifact "${artifact.path}" for platform "${result.platform}"`,
+        `OC-POLICY-E301: Empty artifact "${artifact.path}" for platform "${result.platform}"`,
       );
     }
 
@@ -182,7 +182,7 @@ function verifyEmitResult(result: PlatformEmitResult): readonly string[] {
       const forbidden = verifyNoForbiddenImports(artifact.content);
       for (const ref of forbidden) {
         failures.push(
-          `CLAWS-E302: Forbidden import "${ref}" in "${artifact.path}" for platform "${result.platform}"`,
+          `OC-POLICY-E302: Forbidden import "${ref}" in "${artifact.path}" for platform "${result.platform}"`,
         );
       }
     }
@@ -231,7 +231,7 @@ export function routeAndEmit(
       const missingCapabilities = checkR5Enforcement(matrix, platform);
       if (missingCapabilities.length > 0) {
         const blockReason =
-          `CLAWS-E310: Platform "${platform}" blocked by --strict-loss: ` +
+          `OC-POLICY-E310: Platform "${platform}" blocked by --strict-loss: ` +
           `R5 tools [${r5Tools.join(', ')}] require L2+ enforcement, ` +
           `but platform is missing capabilities: [${missingCapabilities.join(', ')}]. ` +
           `Use --allow-advisory-r5 to override.`;
@@ -259,7 +259,7 @@ export function routeAndEmit(
         platform,
         lossScore,
         blocked: true,
-        blockReason: `CLAWS-E311: No adapter registered for platform "${platform}"`,
+        blockReason: `OC-POLICY-E311: No adapter registered for platform "${platform}"`,
       });
       continue;
     }

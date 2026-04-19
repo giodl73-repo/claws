@@ -18,7 +18,7 @@ expect:
       compilation_failed: true
       last_known_good_preserved: true
   violations:
-    - code: CLAWS-E100
+    - code: OC-POLICY-E100
       message: "Compilation failed — syntax error in RULES.md line 15"
       severity: error
   warnings:

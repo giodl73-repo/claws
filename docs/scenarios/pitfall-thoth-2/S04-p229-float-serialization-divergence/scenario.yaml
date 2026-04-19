@@ -19,7 +19,7 @@ expect:
       compliance_check: true
       numeric_serialization: string-representation
   violations:
-    - code: CLAWS-E229
+    - code: OC-POLICY-E229
       message: "Floating-point serialization divergence in 14 audit chain entries — budget_remaining: 0.1 vs 0.10000000000000001"
       severity: error
   warnings:

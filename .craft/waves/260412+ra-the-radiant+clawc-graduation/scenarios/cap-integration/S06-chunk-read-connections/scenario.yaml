@@ -1,0 +1,209 @@
+name: S06-chunk-read-connections
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12]
+description: >
+  Validates that GET /api/chunks/connections returns per-tool risk classification,
+  per-item lock sources, and MCP server grouping. This is the Layer 2 chunk
+  endpoint built on top of Layer 1 OC file reads. Each tool in the response
+  carries a risk object (level + label), a lock object (source + editable),
+  and governance context explaining the classification. Tools are grouped by
+  their originating MCP server. R5-classified tools always show
+  lock.source: 'r5' and lock.editable: false. Fleet overrides are visible
+  as lock.source: 'fleet'. The response is self-contained for rendering
+  the CAP Connections tab.
+
+expect:
+  http:
+    method: GET
+    path: /api/chunks/connections
+    status: 200
+    content_type: application/json
+  response_shape:
+    root_has: [data, meta]
+    data_has: [tools, servers, writeBackUrl]
+    meta_has: [compilation_id, etag, timestamp]
+    tools_item_has: [id, name, risk, lock, serverId, governance]
+    risk_has: [level, label]
+    risk_level_enum: [R1, R2, R3, R4, R5]
+    lock_has: [source, editable, precedence]
+    lock_source_enum: [r5, fleet, governance, none]
+    governance_has: [reason, classified_by, classified_at]
+    servers_item_has: [id, name, toolCount, status]
+  r5_tools:
+    lock_source: r5
+    lock_editable: false
+    risk_level: R5
+  fleet_overrides:
+    visible_in_lock: true
+    lock_source: fleet
+  empty_workspace:
+    tools: []
+    servers: []
+  timing:
+    response_ms_max: 50
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner sends GET /api/chunks/connections to render the
+  Connections tab. The workspace has 4 MCP servers: an internal server
+  (3 tools at R1-R2), a third-party server (2 tools at R3), a system server
+  (1 tool: send-email at R5), and a fleet-managed server (2 tools at R2,
+  one fleet-locked). The response must return all 8 tools grouped by server,
+  each with risk classification from GovernanceIR, lock source from the
+  validation layer, and governance context explaining the classification.
+  The send-email tool shows risk.level: 'R5', lock.source: 'r5', lock.editable:
+  false. The fleet-locked tool shows lock.source: 'fleet'. The partner builds
+  the entire Connections UI from this single response.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If a tool exists in TOOLS.md but its originating MCP server is not in
+      the workspace configuration, the chunk assembler has no serverId to
+      assign. The tool would appear without server grouping, breaking the
+      partner's UI which expects every tool to belong to a server. The
+      assembler must synthesize an 'unregistered' server group for orphaned
+      tools and include a governance warning on each orphaned tool.
+    spec_impact: "CL-10 chunk assembler — orphaned tools get synthetic 'unregistered' server group + governance warning"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      GovernanceIR may not contain a risk classification for newly added tools
+      that haven't been through a full compilation cycle. The risk object would
+      be null or missing. Partners expect risk.level and risk.label on every
+      tool. The chunk assembler must assign default R3 ('Unclassified, requires
+      review') for tools missing from GovernanceIR. The governance.reason must
+      indicate 'default classification — not yet reviewed'.
+    spec_impact: "CL-10 chunk assembler — default R3 with 'unclassified' reason for tools missing GovernanceIR entry"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The lock.source field returns the highest-priority source when multiple
+      lock sources apply simultaneously. A tool could be locked by both R5
+      classification and fleet policy. The lock.precedence field must document
+      the priority order (r5 > fleet > governance > none). If fleet policy is
+      later removed, the tool remains locked due to R5. Without precedence,
+      partners cannot predict lock behavior when sources change.
+    spec_impact: "CL-10 chunk assembler — lock.precedence field with priority order: r5 > fleet > governance > none"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The governance context per tool must include the reason string, who
+      classified it (classified_by: 'compiler' | 'fleet' | 'user'), and when
+      (classified_at timestamp). Without governance context, partners cannot
+      render tooltips explaining why a tool is at a particular risk level.
+      A tool showing R5 without explanation appears arbitrary to the user.
+      The governance object is the trust signal for the classification.
+    spec_impact: "CL-10 chunk assembler — governance context per tool: reason, classified_by, classified_at"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The servers array must include server status (connected, disconnected,
+      error). A server that is configured but not responding should show
+      status: 'disconnected' with its tools still listed but marked as
+      unavailable. If disconnected servers are omitted from the response,
+      partners cannot show 'Server X is down, 3 tools unavailable'. Server
+      status is runtime information, not compilation state.
+    spec_impact: "CL-10 chunk assembler — servers include status field; disconnected servers still listed with their tools"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The writeBackUrl must point to /api/chunks/connections for PATCH
+      operations, but the partner needs to know how to construct per-tool
+      PATCH paths. The URL should either be a template
+      (/api/chunks/connections/{toolId}) or the response should include
+      per-tool writeBackUrls. A flat writeBackUrl without tool-level
+      addressing forces partners to construct URLs by convention, which
+      is fragile and undocumented.
+    spec_impact: "CL-10 GET /api/chunks/connections — writeBackUrl as template: /api/chunks/connections/{toolId}"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Empty servers (configured but with zero tools) create ambiguity. The
+      servers array entry would have toolCount: 0 and no tools reference it.
+      Partners may render empty server sections or filter them. The contract
+      must specify whether empty servers appear in the response. Including
+      them enables 'add tool to server' workflows; excluding them keeps the
+      response minimal. Either choice must be documented.
+    spec_impact: "CL-10 GET /api/chunks/connections — define whether servers with zero tools appear in response"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The chunk assembly reads from multiple OC files (TOOLS.md for tools,
+      GOVERNANCE.md for risk, fleet config for locks). If these files are
+      at different compilation versions (e.g., TOOLS.md was recompiled but
+      GOVERNANCE.md wasn't), the chunk contains inconsistent data. The
+      assembler must verify all source files share the same compilation_id
+      before assembling. If versions differ, trigger a full recompilation
+      before serving the chunk.
+    spec_impact: "CL-10 chunk assembly — verify compilation_id consistency across source files; recompile if mismatched"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Fleet overrides may change the lock state of tools without triggering
+      a local recompilation (fleet policies are fetched from a remote
+      server). The chunk must merge local compilation state with live fleet
+      state at read time. If fleet state is only incorporated during
+      compilation, a fleet policy change would not be visible until the
+      next recompile. Lock.source: 'fleet' must reflect real-time fleet
+      state.
+    spec_impact: "CL-10 chunk assembly — merge real-time fleet state at read time, not just at compilation time"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      The meta.etag on the chunk response must be computed from all
+      contributing sources (tools + governance + fleet + server status).
+      If the ETag only covers the tools data, a fleet policy change would
+      not invalidate the ETag, and partners would cache stale lock states.
+      The ETag must be a composite hash covering all data sources that
+      contribute to the chunk.
+    spec_impact: "CL-10 chunk ETag — composite hash covering tools + governance + fleet + server status"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The response_ms_max target of 50ms assumes the chunk is pre-assembled
+      from compiled IR. If the chunk must be assembled on every request
+      (reading 4+ files, merging governance, querying fleet), the 50ms
+      target is unrealistic for large workspaces. The chunk should be
+      cached in memory after compilation and invalidated on recompile.
+      Read-time assembly should only apply to runtime data (server status).
+    spec_impact: "CL-10 chunk caching — pre-assemble on compilation; merge only runtime data (server status) at read time"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Partners that only care about a specific server's tools should be
+      able to filter: GET /api/chunks/connections?server=internal. Without
+      server-level filtering, partners rendering a single-server view must
+      fetch all servers and filter client-side. For workspaces with 20+
+      servers, this wastes bandwidth and processing. A server query
+      parameter reduces payload size proportionally.
+    spec_impact: "CL-10 GET /api/chunks/connections — support ?server={id} filter for single-server views"
+    pitfall: null

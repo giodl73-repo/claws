@@ -29,7 +29,7 @@ Define the GovernanceIR interface as the stable pivot between analysis and emiss
 ## Deliverables
 
 - [ ] `claws-sdk/src/ir/governance-ir.ts` — GovernanceIR interface with capability manifest, analysis, intents, delegation map, compiler version metadata
-- [ ] `claws-sdk/src/ir/fail-mode.ts` — `FailMode<R>` parameterized type: `R extends 5 ? 'closed' : 'open' | 'closed'`, CLAWS-E001 diagnostic
+- [ ] `claws-sdk/src/ir/fail-mode.ts` — `FailMode<R>` parameterized type: `R extends 5 ? 'closed' : 'open' | 'closed'`, OC-POLICY-E001 diagnostic
 - [ ] `claws-sdk/src/ir/mechanical-intent.ts` — DenyIntent, ElicitIntent, RequireIntent, LimitIntent, LabelIntent types
 - [ ] `claws-sdk/src/ir/capability-manifest.ts` — CapabilityManifest type stub (tools, skills, agents, workflows)
 - [ ] `claws-sdk/src/ir/gov-analysis.ts` — GovAnalysis type stub (violations, warnings, enforcementPlan)
@@ -79,5 +79,5 @@ Pulse 01 must be complete — claws-sdk package must exist with build tooling be
 
 ### Dragon: FailMode Deserialization Guard
 - [ ] Add runtime validation: when deserializing GovernanceIR from JSON, validate that no R5 rule has fail-open mode
-- [ ] `validateFailModes(ir: GovernanceIR): void` throws CLAWS-E001 if violation found
+- [ ] `validateFailModes(ir: GovernanceIR): void` throws OC-POLICY-E001 if violation found
 - [ ] This guards against hand-edited .claws/compiled/governance-ir.json tampering

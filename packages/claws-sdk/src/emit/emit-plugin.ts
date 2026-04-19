@@ -5,7 +5,7 @@
  * with before_tool_call, A2A firewall, and elicitation gate hooks.
  *
  * Key constraints:
- * - Zero @craftworks/ or @claws/ imports in generated output (OC developer test)
+ * - Zero `@craftworks`-scoped or `@claws`-scoped imports in generated output (OC developer test)
  * - Pre-computed ReadonlyMap risk lookup — no regex or dynamic classification
  * - Unknown tool defaults to R5 (fail-closed) via `?? 5`
  * - Catch clause: minimal map lookup, constant default, fire-and-forget audit

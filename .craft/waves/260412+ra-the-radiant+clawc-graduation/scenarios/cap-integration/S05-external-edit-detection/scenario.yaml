@@ -1,0 +1,202 @@
+name: S05-external-edit-detection
+series: cap-integration
+version: 2
+specs: [CL-10, CL-03, CL-14]
+description: >
+  Validates that when an OC file is edited outside the API (VS Code, vim,
+  direct file write), the file watcher detects the change, triggers an
+  automatic recompilation, and emits SSE events to connected partners. The
+  recompilation may produce governance warnings (e.g., new tool added without
+  risk classification). Stale chunks from the previous compilation are
+  invalidated and refreshed. Partners subscribed to the SSE stream receive
+  a 'workspace:changed' event with the affected file path and new
+  compilation_id.
+
+expect:
+  file_watcher:
+    detects_change_within_ms: 500
+    triggers_recompile: true
+    emits_sse_event: true
+  sse_event:
+    type: workspace:changed
+    data_has: [file, compilation_id, timestamp, warnings]
+    file_is_oc_path: true
+  post_recompile:
+    chunks_refreshed: true
+    stale_etags_invalidated: true
+    governance_warnings_surfaced: true
+  error_handling:
+    syntax_error_in_edit:
+      compilation_status: error
+      sse_event_type: workspace:error
+      previous_chunks_preserved: true
+    file_deletion:
+      sse_event_type: workspace:file_deleted
+      schema_updated: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A developer has the CAP settings UI open in their browser while
+  simultaneously editing TOOLS.md in VS Code. They add a new tool
+  'code-review' to the Tools section and save the file. The file watcher
+  detects the change within 500ms, triggers a recompilation that classifies
+  the new tool as R3 (unclassified default), and emits an SSE event to the
+  partner. The partner receives the event and refreshes its tool list, showing
+  the new 'code-review' tool with an R3 warning badge. In a second scenario,
+  the developer introduces a YAML syntax error in lobster.yaml. The
+  recompilation fails, the SSE event carries the error, and the partner
+  shows a compilation error banner while preserving the previous valid chunk
+  data.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The file watcher must debounce rapid saves. An editor like VS Code
+      may trigger multiple file system events for a single save (tmp file
+      write, rename, metadata update). Without debouncing (e.g., 200ms
+      window), each event triggers a separate recompilation. Three
+      recompilations in 500ms waste resources and emit confusing SSE events.
+      The watcher must coalesce events within a debounce window into a
+      single recompilation.
+    spec_impact: "CL-14 file watcher — 200ms debounce window; coalesce multiple fs events into single recompilation"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      A race condition exists between external edits and API PATCHes. If a
+      user saves TOOLS.md in VS Code at the exact moment a partner sends a
+      PATCH to the same file, the PATCH may write its change, then the
+      watcher triggers a recompilation that sees the VS Code change but
+      not the PATCH (or vice versa). The API must acquire a file-level
+      lock before writing, and the watcher must check the lock before
+      triggering recompilation. Concurrent external + API writes without
+      locking corrupt the file.
+    spec_impact: "CL-14 file watcher + PATCH — file-level lock coordination; watcher defers recompile while PATCH lock held"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      When a syntax error is introduced via external edit (e.g., invalid
+      YAML in lobster.yaml), the recompilation fails. The API must preserve
+      the last valid compilation state for chunk reads — GET /api/chunks/
+      connections must still return data from the previous successful
+      compilation, not 500. The SSE event carries the error for partners
+      to display a warning, but reads remain functional against stale-but-valid
+      data.
+    spec_impact: "CL-14 compilation failure — preserve last-valid compilation for reads; SSE error event for partners"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      If an OC file is deleted externally (e.g., rm TOOLS.md), the watcher
+      must emit a workspace:file_deleted SSE event and update the workspace
+      schema (the file's exists flag becomes false). The compilation must
+      handle the missing file gracefully — either recompile without it or
+      mark the workspace as dirty. If the watcher ignores deletions,
+      partners show phantom data for a file that no longer exists.
+    spec_impact: "CL-14 file watcher — detect file deletion; emit workspace:file_deleted; update schema exists flag"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The SSE event must include the oc:// path of the changed file, not
+      the filesystem path. Partners only understand oc:// paths — a
+      filesystem path like C:\Users\dev\.claude\TOOLS.md is meaningless
+      to them. The watcher must map filesystem events back to canonical
+      oc:// paths before emitting events. Without this mapping, partners
+      cannot correlate SSE events with their cached resources.
+    spec_impact: "CL-14 SSE events — file field uses oc:// path, not filesystem path; watcher does path mapping"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Watcher latency varies by platform. On Windows, ReadDirectoryChangesW
+      has different timing characteristics than Linux inotify or macOS
+      FSEvents. The 500ms detection target must be validated cross-platform.
+      If the watcher relies on polling (e.g., 1s interval) instead of
+      native OS events, the worst-case latency is 1s+ which may feel
+      sluggish for interactive editing scenarios.
+    spec_impact: "CL-14 file watcher — use native OS file system events, not polling; validate 500ms target on Windows/macOS/Linux"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      ETags from the previous compilation must be invalidated after an
+      external edit triggers recompilation. If a partner holds ETag "abc123"
+      from before the external edit, a subsequent PATCH with that ETag must
+      return 412. The recompilation must generate new ETags for all affected
+      files. If ETag invalidation is missed, partners can overwrite the
+      external edit with stale data.
+    spec_impact: "CL-14 external edit — recompilation must generate new ETags; previous ETags become invalid"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      When an external edit adds a new tool without risk classification,
+      the recompilation assigns default R3. The SSE event's warnings array
+      must include this classification warning so partners can highlight
+      the new tool for review. If warnings are only available via GET
+      /api/oc/_compilation/warnings and not in the SSE event, partners
+      must make an additional API call after every SSE event to check
+      for warnings.
+    spec_impact: "CL-14 SSE events — include governance warnings in workspace:changed event data, not just compilation_id"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The file watcher must ignore non-OC files in the workspace directory.
+      If the user creates a README.md or .gitignore alongside OC files, the
+      watcher should not trigger recompilation. A whitelist of known OC file
+      names (TOOLS.md, GOVERNANCE.md, etc.) must filter watcher events.
+      Without filtering, every file creation in the workspace directory
+      triggers a spurious recompilation.
+    spec_impact: "CL-14 file watcher — whitelist filter for OC file names; ignore non-OC files in workspace directory"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      If the SSE connection drops (network blip, browser tab sleep), the
+      partner misses events. When reconnecting, the partner needs to know
+      what changed since its last known compilation_id. The SSE endpoint
+      should support a Last-Event-ID header for resumption, or the partner
+      must do a full GET /api/oc/ to resync. Without reconnection support,
+      partners show stale data indefinitely after a connection drop.
+    spec_impact: "CL-14 SSE reconnection — support Last-Event-ID for event replay; or document full-resync requirement"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Multiple partners may be connected to the SSE stream simultaneously.
+      The watcher must fan out events to all connected clients. If the SSE
+      implementation uses a single-subscriber model, only the first partner
+      receives events. A pub-sub or broadcast model is required for
+      multi-partner scenarios.
+    spec_impact: "CL-14 SSE fan-out — broadcast to all connected partners, not single-subscriber"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The recompilation triggered by an external edit should be incremental
+      (only recompile the changed file and dependents), but external edits
+      may be large (e.g., paste an entire TOOLS.md from another workspace).
+      The incremental compiler must detect when a diff is too large for
+      incremental compilation and fall back to full recompilation. A
+      threshold (e.g., >50% of file changed) triggers the fallback.
+    spec_impact: "CL-14 external edit compilation — incremental by default; full recompile fallback when diff exceeds threshold"
+    pitfall: null

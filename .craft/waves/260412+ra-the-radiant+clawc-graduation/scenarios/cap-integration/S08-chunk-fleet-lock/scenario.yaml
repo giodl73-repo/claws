@@ -1,0 +1,193 @@
+name: S08-chunk-fleet-lock
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12, CL-08]
+description: >
+  Validates that PATCH /api/chunks/connections/{serverId} attempting to change
+  a fleet-locked tool is rejected with FLEET_LOCK_VIOLATION. Fleet locks are
+  centrally managed policies that override local workspace edits. The rejection
+  must include lock.source: 'fleet', the fleet policy ID, and the oc:// path.
+  Fleet policy absence must fail closed (reject the edit, not allow it).
+  When both R5 and fleet lock apply to the same tool, R5 takes precedence in
+  the lock.source field.
+
+expect:
+  http:
+    method: PATCH
+    path: /api/chunks/connections/planner
+    status: 403
+    content_type: application/json
+  request_body:
+    has: [toolId, enabled]
+    toolId_value: schedule-meeting
+    enabled_value: true
+  error_shape:
+    root_has: [error, oc_path, message, lock, fleet_policy]
+    error_code: FLEET_LOCK_VIOLATION
+    lock_source: fleet
+    lock_editable: false
+    fleet_policy_has: [id, name, enforced_at, source_url]
+  post_condition:
+    file_unchanged: true
+    etag_unchanged: true
+    compilation_not_triggered: true
+  fail_closed:
+    fleet_policy_unreachable: true
+    result: rejection
+    error_code: FLEET_POLICY_UNAVAILABLE
+  dual_lock:
+    r5_and_fleet: true
+    lock_source: r5
+    lock_precedence: [r5, fleet]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner tries to enable the 'schedule-meeting' tool on the
+  planner server. The tool is fleet-locked by corporate policy
+  'acme-corp-standard-v2' which mandates that scheduling tools remain disabled
+  in developer workspaces. The partner sends PATCH /api/chunks/connections/
+  planner with body { "toolId": "schedule-meeting", "enabled": true }. The API
+  checks the fleet policy, finds the tool is locked, and returns 403
+  FLEET_LOCK_VIOLATION with the policy details. In a second scenario, the fleet
+  policy server is unreachable — the API fails closed and rejects the edit with
+  FLEET_POLICY_UNAVAILABLE. In a third scenario, the send-email tool is both
+  R5 and fleet-locked — the lock.source shows 'r5' (higher precedence) with
+  fleet listed in lock.precedence array.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Fleet policy absence (policy server unreachable, DNS failure, timeout)
+      must fail closed — reject the edit, not allow it. If the API allows
+      edits when it cannot verify fleet state, a network outage effectively
+      disables all fleet governance. The error code FLEET_POLICY_UNAVAILABLE
+      must be distinct from FLEET_LOCK_VIOLATION so partners can display
+      'Fleet policy server is unreachable — edits are blocked until
+      connectivity is restored' rather than 'This tool is fleet-locked.'
+    spec_impact: "CL-08 fleet fail-closed — FLEET_POLICY_UNAVAILABLE on unreachable policy server; block all edits"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The fleet_policy object in the error response must include the policy
+      ID, human-readable name, enforcement timestamp, and a source_url
+      pointing to the fleet admin portal for this policy. Without the
+      policy ID, administrators cannot look up which policy blocked the
+      edit. Without source_url, the user has no escalation path. The
+      fleet_policy object is the auditability contract for fleet governance.
+    spec_impact: "CL-08 fleet error response — fleet_policy includes id, name, enforced_at, source_url"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      When both R5 and fleet lock apply to a tool, the lock.source must
+      show 'r5' (highest precedence) and the lock.precedence array must
+      list all applicable sources in order: [r5, fleet]. If the API only
+      returns one source without the precedence array, removing the fleet
+      policy would appear to unlock the tool, but it would remain locked
+      due to R5. The precedence array gives partners the full lock stack.
+    spec_impact: "CL-10 dual lock — lock.source is highest precedence; lock.precedence is ordered array of all sources"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Fleet policies may be updated remotely between API requests. If the
+      API caches fleet policies with a long TTL (e.g., 1 hour), a policy
+      change (unlock a tool) would not take effect for up to an hour. The
+      API must either poll fleet policies at a short interval (< 60s) or
+      support a webhook from the fleet server for real-time policy updates.
+      The cache TTL must be documented and configurable.
+    spec_impact: "CL-08 fleet policy refresh — cache TTL < 60s or webhook-based invalidation; configurable"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Fleet lock attribution must be visible in GET /api/chunks/connections
+      responses, not just in PATCH rejection errors. Each tool in the GET
+      response must show its lock.source. If fleet lock attribution only
+      appears in error responses, partners cannot render lock badges on the
+      Connections tab proactively — they would have to attempt a PATCH to
+      discover lock state, which is inefficient and user-hostile.
+    spec_impact: "CL-10 GET /api/chunks/connections — lock.source: 'fleet' visible on tools in read response"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The rejection must not trigger a compilation or file write. Fleet lock
+      rejections are authorization failures, not state changes. If the
+      rejection handler accidentally touches the file system (e.g., logging
+      to the OC directory), it could trigger the file watcher and cause a
+      spurious recompilation. The rejection path must be completely
+      side-effect-free with respect to the OC workspace.
+    spec_impact: "CL-08 fleet rejection — zero OC workspace side effects; no file writes, no compilation"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Fleet policies may lock specific fields (e.g., only the 'enabled' field)
+      or the entire tool configuration. The error response must indicate the
+      locked scope: lock.scope: 'enabled' vs lock.scope: 'all'. A partner
+      trying to rename a fleet-locked tool should succeed if only the enabled
+      field is locked, but fail if the entire tool is locked. Without scope
+      information, partners cannot determine which edits are allowed.
+    spec_impact: "CL-08 fleet lock scope — lock.scope field: 'enabled' | 'config' | 'all' per fleet policy"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Multiple fleet policies may apply to the same tool (e.g., a corporate
+      policy and a team policy both lock 'schedule-meeting'). The
+      fleet_policy field should be an array when multiple policies apply,
+      not just the first match. If only one policy is returned, removing
+      it would appear to unlock the tool, but the second policy still
+      applies. Partners need the full policy stack for accurate UI rendering.
+    spec_impact: "CL-08 fleet policies — return array of all applicable policies per tool, not just first match"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The FLEET_LOCK_VIOLATION audit entry must include the fleet policy
+      ID and the requesting partner identity. Fleet administrators need
+      to know which users are attempting to override fleet policies — this
+      is a compliance signal. If audit entries only record the tool and
+      action without the policy and requester, fleet compliance reviews
+      cannot correlate violations with policies.
+    spec_impact: "CL-08 fleet audit — include policy_id and partner identity in FLEET_LOCK_VIOLATION audit entry"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Fleet policy hot-reload must not cause a window where locks are
+      temporarily unenforced. If the API clears the old policy cache before
+      loading the new policy, there's a brief interval where no fleet locks
+      are enforced. The reload must be atomic: load new policies into a
+      shadow cache, then swap the active reference. Without atomic reload,
+      a well-timed PATCH during reload could bypass fleet locks.
+    spec_impact: "CL-08 fleet hot-reload — atomic swap: load into shadow cache, then swap active reference"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The error message for FLEET_LOCK_VIOLATION should include the fleet
+      administrator's contact information or a support link. End users
+      encountering fleet locks need an escalation path. A message like
+      'Contact your fleet administrator at fleet-admin@acme.com to request
+      an exception' is more actionable than 'This tool is locked by fleet
+      policy.' The contact info comes from the fleet policy metadata.
+    spec_impact: "CL-08 fleet error message — include administrator contact or support link from fleet policy metadata"
+    pitfall: null

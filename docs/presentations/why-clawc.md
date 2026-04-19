@@ -266,30 +266,16 @@ This is npm before package-lock.json. Before audit. Before provenance. We saw ho
 
 ---
 
+<!-- Pinch/PRESS slide commented out pending patent approval
 <!-- _class: small -->
 
 ## Pinch: Over Budget → Under Budget, With Governance
 
 **Your agent is 4,500 tokens over budget and has zero governance. Pinch fixes both.**
 
-```
-  BEFORE PINCH                               AFTER PINCH
-  ════════════                               ═══════════
-  SOUL.md               1,800 tok            SOUL.md              1,400 tok
-  skills (6)            4,200 tok            skills               2,100 tok
-  tool descriptions     1,200 tok            tools                  900 tok
-  memory context        1,500 tok            memory                 800 tok
-  chat history          3,800 tok            chat                 1,200 tok
-  ─────────────────────────────              governance skill       800 tok  ← NEW
-  TOTAL:               12,500 tok            elicitation + audit    400 tok  ← NEW
-  BUDGET:               8,000 tok            ─────────────────────────────
-  STATUS:               4,500 OVER           TOTAL:               7,600 tok
-  GOVERNANCE:           none                 BUDGET:              8,000 tok
-                                             STATUS:              FITS
-                                             GOVERNANCE:          full
-```
+(slide content removed — patent pending)
 
-**You had no governance and were over budget. Now you have both.**
+-->
 
 ---
 
@@ -705,10 +691,11 @@ Compile-time is ours. The runtime is shared. OC gets better whether or not you u
 <div>
 
 ```
-  CONTRIBUTE (10)
+  CONTRIBUTE (11)
   ──────────────
   GuardrailProvider spec
   Approval event schema
+  oc:// path syntax
   Identity bridge
   Budget meter
   Audit chain
@@ -845,6 +832,145 @@ Compile-time is ours. The runtime is shared. OC gets better whether or not you u
   SIEM: enterprise SOC requirement           Wave 3 (wks 9-16): Enterprise + community
   Secrets: 1.5M tokens exposed in breach
                                              Full spec: docs/claws/ecosystem/
+```
+
+---
+
+<!-- _class: small -->
+
+## oc:// — One Address for Every Piece of Your Agent
+
+**One path syntax. Works everywhere — URIs, HTTP, shell, logs, audit.**
+
+```
+  THE PROBLEM                                 THE SOLUTION: oc://
+  ───────────                                 ─────────────────────
+  "Which file has the email tool?"            oc://TOOLS.md/Tools/send-email
+  "Where's the deny rule?"                    oc://SOUL.md/Boundaries/deny-rule-1
+  "What risk level?"                          oc://TOOLS.md/Tools/send-email/risk
+  "Which cron job failed?"                    oc://HEARTBEAT.md/Schedule/daily-triage
+  "That skill's handler?"                     oc://skills/email-drafter/handler.ts
+  "Workflow step?"                            oc://lobster.yaml/steps/triage
+  "Session-scoped?"                           oc://TOOLS.md/Tools/send-email?session=cron:daily
+
+  ONE FORM EVERYWHERE                          SAME PATH IN:
+  ──────────────────                          ─────────────
+  Error messages:   "R5_NON_NEGOTIABLE        oc:// URIs
+    at oc://TOOLS.md/Tools/send-email"        HTTP APIs
+  Audit trail:      { path: "oc://TOOLS.md    Shell scripts
+    /Tools/create-task", action: "enabled" }  YAML configs
+  VS Code:          Diagnostic at oc://SOUL   Logs + audit
+    .md/Boundaries → file:line in editor      No escaping.
+  API:              GET /api/oc/TOOLS.md      No conversion.
+    /Tools/send-email → tool with risk+lock   One parse.
+
+  npm install @openclaw/oc-path   ~1KB. Parser + formatter. MIT.
+```
+
+---
+
+<!-- _class: small -->
+
+## claws serve: 3-Layer API for Every Consumer
+
+<!-- Navigator N-06: This slide is dense — consider splitting into two for
+     presentations: (a) "Three layers, one API" with the architecture diagram and
+     WHO USES WHAT table, (b) "Write path: validate, write, recompile, audit"
+     with the write path details. The audience absorbs architecture and write
+     semantics better as two separate concepts. -->
+
+**One API. Three layers. Every UX surface served.**
+
+```
+  Layer 1: GENERIC                  Layer 2: CHUNKS               Layer 3: RUNTIME
+  ──────────────────                ───────────────                ────────────────
+  GET /api/oc/{path}                GET /api/chunks/{tab}         GET /api/sessions
+  Any OC file, any section          Partner-friendly blobs        GET /api/governance
+  Uses oc:// addressing             Assembled from Layer 1        GET /api/trust
+  Governance context included       + editable + locks            GET /api/audit
+  Session-scoped views              + write-back URL              SSE /api/events
+
+  WHO USES WHAT
+  ─────────────
+  CAP Settings partners  ──── Layer 2 (chunks)    "Give me a JSON blob I can render"
+  TUI + VS Code          ──── Layer 1 (generic)   "Give me the raw file with governance"
+  ClawPilot              ──── Layer 3 (sessions)   "Show me cron runs and session tools"
+  Companion App          ──── Layer 3 (runtime)    "Dashboard, audit trail, skills store"
+
+  WRITE PATH (any layer)              TIME TRAVEL
+  ──────────────────────              ───────────
+  PATCH → validate → write            GET /api/oc/TOOLS.md?at=v38
+    → recompile (~40ms) → audit         "What did tools look like at v38?"
+  ?dryRun=true — preview impact       GET /api/oc/TOOLS.md?at=snap:pre-upgrade
+  POST /api/batch — atomic tx           "Before the upgrade?"
+  ETag/If-Match — 409 on conflict     GET /api/diff?from=v38&to=current
+                                        "What changed?"
+```
+
+---
+
+<!-- _class: small -->
+
+## Every Edit Is Safe
+
+**The governance never breaks. The agent never stops.**
+
+```
+  ① v43 CLEAN                ② v44 DEGRADED_R5            ③ v45 ERROR                 ④ v46 CLEAN
+  (normal operation)          (OC installs R5 skill)       (someone corrupts SOUL.md)  (admin fixes it)
+  ─────────────────           ──────────────────           ────────────────────         ────────────────
+  ● read-email     ✓          ● read-email     ✓           ● read-email     ✓          ● read-email     ✓
+  ● create-task    ✓          ● create-task    ✓           ● create-task    ✓          ● create-task    ✓
+  ● send-email     🔒 R5      ● send-email     🔒 R5       ● send-email     🔒 R5      ● send-email     🔒 R5
+  ● timely-updates ✓          ● timely-updates ✓           ● timely-updates ✓          ● timely-updates ✓
+                              ● new-tool-ok    ✓ classified ● new-tool-ok    ✓          ● new-tool-ok    ✓
+                              ● new-r5-tool    🚫 blocked   ● new-r5-tool    🚫         ● new-r5-tool    ✓ gate added
+
+  Serving IR: v43             Serving IR: v44 (new)        Serving IR: v44 (pinned)    Serving IR: v46 (new)
+  Compiled: ✓ clean           Compiled: ✓ with violation   Compiled: ✗ parse failed    Compiled: ✓ clean
+  PATCH: normal               PATCH: normal + warnings     PATCH: repair only (503)    PATCH: normal
+                              ─────────────────►           ─────────────────►          ─────────────────►
+
+  DEGRADED = compilation succeeded, one tool blocked. New IR serves — other new tools ARE classified.
+  ERROR = compilation failed. Last successful IR (v44) serves. No new classifications possible.
+
+  edit → auto-snapshot → validate → write-to-temp → compile (~40ms) → atomic rename → audit
+```
+
+---
+
+<!-- _class: small -->
+
+## Eval: Score Every Prompt Change
+
+**Four tiers. Zero to LLM. Configurable per file.**
+
+```
+  TIER     WHAT IT CHECKS                   COST          WHEN
+  ────     ──────────────                   ────          ────
+  G0       Files parse, frontmatter valid   Free, <10ms   Every compile (automatic)
+  G1       Conflicts, trust tiers, sift     Free, <100ms  Every compile (automatic)
+  G2       Boundary quality (LLM-as-judge)  1 LLM call    On prompt change (configurable)
+  G3       Mock Gateway fires tool calls    Mock setup     On tool change (configurable)
+
+  claws.json:
+    "eval": {
+      "onCompile":      ["G0", "G1"],                  ← free, always
+      "onPromptChange": ["G0", "G1", "G2"],            ← SOUL.md edit triggers LLM eval
+      "onToolChange":   ["G0", "G1", "G3"],            ← TOOLS.md edit triggers mock test
+      "ci":             ["G0", "G1", "G2", "G3"]       ← full eval in CI gate
+    }
+
+  SIFT QUERY (zero cost, sub-millisecond)
+  ───────────────────────────────────────
+  POST /api/eval/sift { expression: "risk >= R3 AND obo = true" }
+  → { matches: ["send-email", "calendar-delegate"], count: 2, evaluatedIn: "0.3ms" }
+
+  "Show me all R5 tools"          sift('risk = R5')
+  "Which sources are restricted?" sift('data_label = RESTRICTED')
+  "Cron tools with OBO?"          sift('obo = true AND session = cron')
+
+  Custom sift checks in claws.json. Competitive profiles: soc2 / hipaa / minimal / dev.
 ```
 
 ---

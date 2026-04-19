@@ -4,7 +4,7 @@
  * tension diagnostics: editing TOOLS.md triggers reanalysis of SOUL.md deny
  * intents, AGENTS.md delegation graphs, and MEMORY.md data labels.
  *
- * @module claws-lsp/providers/diagnostic
+ * @module openclaw-lsp/providers/diagnostic
  */
 
 import type { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver';
@@ -172,7 +172,7 @@ export function extractDiagnostics(ir: GovernanceIRLike): readonly RawDiagnostic
   // 6. fail-mode: from violations with fail-mode diagnosticCode prefix
   if (analysis?.violations) {
     for (const v of analysis.violations) {
-      if (v.diagnosticCode?.startsWith('CLAWS-E001') || v.level === 5) {
+      if (v.diagnosticCode?.startsWith('OC-POLICY-E001') || v.level === 5) {
         result.push({
           category: 'fail-mode',
           message: v.message,
@@ -185,7 +185,7 @@ export function extractDiagnostics(ir: GovernanceIRLike): readonly RawDiagnostic
   // 7. capability-gap: violations referencing missing capabilities
   if (analysis?.violations) {
     for (const v of analysis.violations) {
-      if (v.diagnosticCode && !v.diagnosticCode.startsWith('CLAWS-E001') && v.level !== 5) {
+      if (v.diagnosticCode && !v.diagnosticCode.startsWith('OC-POLICY-E001') && v.level !== 5) {
         result.push({
           category: 'capability-gap',
           message: v.message,

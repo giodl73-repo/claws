@@ -13,13 +13,13 @@ description: >
 expect:
   rules_applied: [G-ELICIT-TIMEOUT, G-SUPPLY]
   violations:
-    - code: CLAWS-E042
+    - code: OC-POLICY-E042
       rule: G-ELICIT-TIMEOUT
       description: "Platform default approve-on-timeout not overridden in generated handler"
-    - code: CLAWS-E047
+    - code: OC-POLICY-E047
       rule: G-SUPPLY
       description: "Unsigned skill in production environment — error severity"
-    - code: CLAWS-E048
+    - code: OC-POLICY-E048
       rule: G-SUPPLY
       description: "Signed skill unverifiable — no trusted key store at .claws/keys/"
   pass: false

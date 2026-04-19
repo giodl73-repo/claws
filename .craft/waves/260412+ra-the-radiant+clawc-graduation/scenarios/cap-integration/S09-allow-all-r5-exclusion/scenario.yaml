@@ -1,0 +1,198 @@
+name: S09-allow-all-r5-exclusion
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12, CL-08]
+description: >
+  Validates that PATCH /api/chunks/connections/allow-all approves all R1-R4
+  tools in a single request but explicitly excludes R5 tools. R5 tools appear
+  in the still_gated array with reason R5_NON_NEGOTIABLE. Fleet-locked tools
+  are also excluded. The response includes an audit trail entry for the blanket
+  approval. Pre-authorizations for approved tools are written to USER.md.
+  An all-R5 workspace returns approved: [] with the audit still logged.
+
+expect:
+  http:
+    method: PATCH
+    path: /api/chunks/connections/allow-all
+    status: 200
+    content_type: application/json
+  response_shape:
+    root_has: [approved, still_gated, audit]
+    approved_is_array: true
+    approved_items_have: [toolId, previousApproval, newApproval]
+    approved_newApproval_value: enabled
+    still_gated_is_array: true
+    still_gated_items_have: [toolId, reason, risk_level, lock]
+    still_gated_reason_enum: [R5_NON_NEGOTIABLE, FLEET_LOCK_VIOLATION]
+    audit_has: [timestamp, action, approvedCount, gatedCount, toolIds]
+  post_condition:
+    r5_tools_approval_unchanged: true
+    fleet_locked_tools_unchanged: true
+    r1_r4_tools_enabled: true
+    pre_authorizations_written_to_user_md: true
+    single_recompilation: true
+  all_r5_workspace:
+    approved: []
+    still_gated_count_equals_total: true
+    audit_logged: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A user opens the CAP Connections tab and clicks 'Allow All' to quickly
+  enable all safe tools. The workspace has 10 tools: 5 at R1-R2, 2 at R3-R4,
+  2 at R5 (send-email, execute-payment), and 1 fleet-locked at R2
+  (schedule-meeting). The PATCH /api/chunks/connections/allow-all endpoint
+  must enable the 7 non-excluded R1-R4 tools (5 R1-R2 + 2 R3-R4), leave the
+  2 R5 tools and 1 fleet-locked tool in still_gated, write pre_authorizations
+  for the 7 approved tools to USER.md, trigger a single recompilation, and
+  return the response with audit trail. The partner shows '7 tools enabled,
+  3 require individual review.'
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If all tools in the workspace are R5-classified, allow-all approves
+      zero tools and returns approved: []. The partner may interpret this as
+      an error or a no-op. The response must include a clear signal:
+      approved: [] with audit.approvedCount: 0 and a message field like
+      'All tools require individual review (R5).' The audit must still
+      log the attempt with gatedCount equal to total tool count.
+    spec_impact: "CL-10 allow-all — valid 200 with approved: [] when all tools are R5; audit logs attempt"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Fleet-locked tools must be excluded from blanket approval regardless
+      of their risk level. An R2 tool with fleet lock should appear in
+      still_gated with reason: 'FLEET_LOCK_VIOLATION', not in approved.
+      The still_gated array must support multiple reason types. If
+      fleet-locked tools are only excluded when they're also R5, non-R5
+      fleet-locked tools get incorrectly approved, violating fleet policy.
+    spec_impact: "CL-10 allow-all — exclude fleet-locked tools; still_gated supports R5_NON_NEGOTIABLE and FLEET_LOCK_VIOLATION"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The audit trail must record individual toolIds, not just counts. If
+      a security review asks 'was tool X approved by allow-all?', the audit
+      entry must contain the tool list. The audit.toolIds array must include
+      every approved tool's ID. Count-only auditing (approvedCount: 7) is
+      insufficient for forensic analysis and compliance.
+    spec_impact: "CL-10 allow-all audit — include toolIds array in audit entry, not just approvedCount"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      The allow-all endpoint writes pre_authorizations to USER.md for each
+      approved tool. This is a multi-tool write that must be atomic — either
+      all pre_authorizations are written or none are. If the write fails
+      partway (e.g., disk full after 4 of 7 tools), the file is in an
+      inconsistent state. The endpoint must write all changes to a temporary
+      file and rename atomically, then trigger recompilation.
+    spec_impact: "CL-10 allow-all atomic write — all pre_authorizations written atomically; rollback on partial failure"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The allow-all action must trigger exactly one recompilation after all
+      writes complete, not one per tool. Writing 7 tools individually with
+      7 recompilations would take 7x longer and emit 7 SSE events. The
+      endpoint must batch all file writes, then trigger a single compilation.
+      The response timing must stay within the 200ms budget for the entire
+      batch-write-compile cycle.
+    spec_impact: "CL-10 allow-all performance — single recompilation after batch write; not per-tool compilation"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      If an R1-R4 tool was already enabled before allow-all, it should
+      appear in approved with previousApproval: 'enabled', newApproval:
+      'enabled' (no-op). The contract must be explicit: include all R1-R4
+      tools in approved regardless of current state, or only changed tools.
+      Including no-ops makes the response predictable for partners that
+      always render the full list. The audit should note actual changes
+      vs no-ops.
+    spec_impact: "CL-10 allow-all — include already-enabled tools in approved with no-op indication"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The still_gated items must include lock information sufficient for
+      the partner to render different UI treatments: R5 tools get a red
+      'irreversible' badge, fleet-locked tools get a blue 'fleet policy'
+      badge. The lock object in still_gated must include lock.source so
+      partners can distinguish between R5 and fleet exclusions without
+      parsing the reason string.
+    spec_impact: "CL-10 allow-all still_gated — include lock.source per item for partner badge rendering"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Pre-authorizations written to USER.md must be idempotent. If the user
+      clicks 'Allow All' twice, the second invocation should not duplicate
+      pre_authorization entries. The endpoint must check existing
+      pre_authorizations before writing. Duplicate entries in USER.md would
+      cause confusion during governance review and may affect compilation
+      output if the compiler counts duplicate approvals.
+    spec_impact: "CL-10 allow-all idempotency — check existing pre_authorizations; no duplicates in USER.md"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The allow-all action interacts with session scoping. If called from
+      a cron session with risk ceiling R2, should it approve only R1-R2
+      tools (session-scoped) or all R1-R4 tools (workspace-scoped)? The
+      endpoint must define its scope: session-aware (respects ceiling) or
+      workspace-global (ignores session). A cron agent approving R4 tools
+      it cannot even see would be a privilege escalation.
+    spec_impact: "CL-10 allow-all + sessions — define whether allow-all is session-scoped or workspace-global"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      The still_gated array for R5 tools must include the tool's
+      risk_level: 'R5' field. Partners need this to render the severity of
+      the gating. If still_gated only includes toolId and reason, the
+      partner must make additional API calls to determine the risk level
+      for badge rendering. Including risk_level in still_gated makes the
+      response self-contained.
+    spec_impact: "CL-10 allow-all still_gated — include risk_level per item for self-contained rendering"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The allow-all endpoint could support a 'scope' parameter to allow
+      partial blanket approvals: /api/chunks/connections/allow-all?scope=R1
+      would only approve R1 tools. This gives cautious users a graduated
+      approval path. Without scope support, the only options are 'all safe
+      tools' or 'one at a time', missing the middle ground of tier-by-tier
+      approval.
+    spec_impact: "CL-10 allow-all — optional ?scope=R1|R2|R3|R4 for tier-limited blanket approval"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Rate limiting on allow-all is important because it's a high-impact
+      bulk operation. A malicious or buggy partner could call allow-all
+      in a loop, generating audit entries and recompilations on every call.
+      The endpoint should enforce a cooldown (e.g., once per 60 seconds)
+      or require a confirmation token (X-Confirm: allow-all) to prevent
+      automated abuse.
+    spec_impact: "CL-10 allow-all — rate limit or confirmation token to prevent automated abuse"
+    pitfall: null

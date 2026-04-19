@@ -1,0 +1,209 @@
+name: S31-oc-path-encoding-fuzz
+series: cap-integration
+version: 2
+specs: [CL-03, CL-10]
+description: >
+  Fuzz test for the oc:// path parser covering every encoding edge case
+  identified in P-283. Input paths include: # in section names ("C# Tools"),
+  slashes in item names ("input/output"), dots in names ("v2.config"), Unicode
+  characters (emoji, CJK, accented), percent-encoded characters (%23, %2F),
+  empty path segments, trailing slashes, double-encoded sequences, and
+  mixed-case file names. Every input must parse without panic, roundtrip
+  through format-then-parse, and produce a valid HTTP route path when mapped
+  to the REST API surface.
+
+expect:
+  parser:
+    no_panic_on_any_input: true
+    roundtrip_fidelity: true
+    canonical_casing_on_echo: true
+    first_hash_is_fragment_delimiter: true
+    subsequent_hashes_literal: true
+    slashes_in_names_percent_encoded: true
+  http_mapping:
+    produces_valid_route_path: true
+    no_double_encoding: true
+    decoded_path_equals_original: true
+  error_handling:
+    empty_segment_returns_400: true
+    unresolvable_path_returns_404: true
+    error_includes_oc_path: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner constructs oc:// paths from user input — section
+  names and item names that contain arbitrary characters. The workspace has
+  TOOLS.md with a section named "C# Tools" containing an item named
+  "input/output" and another named "v2.config". A skills/ directory contains
+  a file with Unicode in the name. The partner issues GET and PATCH requests
+  using these paths. The oc:// parser must correctly parse the fragment
+  delimiter (first # only), percent-encode slashes within item names (%2F),
+  handle dots without confusing them for file extensions, process Unicode
+  without mojibake, reject empty segments with 400, and produce canonical
+  output. The same parser is used for both inbound request routing and
+  outbound response echo — roundtrip fidelity must hold for every test vector.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The path oc://TOOLS.md/C# Tools contains two # characters. The parser
+      must split only on the first # — "C# Tools" is the section name. If the
+      parser splits on every # or uses a naive regex like /#(.+)/, it will
+      produce fragment "C" and discard "# Tools". The rule is: first # is the
+      fragment delimiter; all subsequent # characters are literal. This must
+      be enforced via indexOf('#') not split('#').
+    spec_impact: "CL-03 oc:// parser — # in section names (like C# Tools) must be percent-encoded as %23 since / is the only delimiter"
+    pitfall: P-283
+
+  - id: F02
+    severity: critical
+    description: >
+      The item name "input/output" must be percent-encoded as "input%2Foutput"
+      in the oc:// path. Without encoding, the path
+      oc://TOOLS.md/Tools/input/output is ambiguous — the parser cannot
+      distinguish item "input" field "output" from item "input/output". The
+      encoder must percent-encode exactly the characters that conflict with
+      path delimiters (/ and #), not apply full URI encoding that would also
+      encode spaces, dots, and Unicode.
+    spec_impact: "CL-03 oc:// encoding — percent-encode only delimiter-conflicting chars (/ as %2F, # as %23) in names"
+    pitfall: P-283
+
+  - id: F03
+    severity: major
+    description: >
+      Roundtrip fidelity: parseOcPath(formatOcPath(parsed)) must produce
+      a structurally identical result to the original parse for every input.
+      If the formatter emits "oc://TOOLS.md/C%23 Tools" but the parser does
+      not decode %23 back to #, the roundtrip breaks. The parser must
+      percent-decode name segments after splitting on structural delimiters.
+      Test with at least 50 vectors covering all character classes.
+    spec_impact: "CL-03 roundtrip — parseOcPath(formatOcPath(x)) === x for all valid parsed structures"
+    pitfall: P-283
+
+  - id: F04
+    severity: major
+    description: >
+      Double-encoding trap: if a caller percent-encodes the path before
+      passing it to the API, and the API also percent-encodes on receipt,
+      %2F becomes %252F. The parser must detect and reject double-encoded
+      sequences. A path containing %25 followed by a hex pair should be
+      treated as a client error (400) with a message explaining that paths
+      must not be pre-encoded. Without this, the roundtrip silently corrupts.
+    spec_impact: "CL-03 oc:// parser — detect and reject double-encoded sequences with 400 + explanation"
+    pitfall: P-283
+
+  - id: F05
+    severity: major
+    description: >
+      Unicode characters in section and item names (emoji tool labels, CJK
+      file names, accented characters) must survive the parse-format roundtrip
+      without mojibake. The parser must handle UTF-8 throughout. Percent-encoding
+      of Unicode should follow RFC 3986 (encode UTF-8 bytes, not UTF-16
+      surrogates). Test vectors: emoji (U+1F680), CJK (U+4E2D), accented
+      (U+00E9), combining marks (e + U+0301), and zero-width joiners.
+    spec_impact: "CL-03 oc:// Unicode — UTF-8 throughout; percent-encode per RFC 3986; no surrogate encoding"
+    pitfall: P-283
+
+  - id: F06
+    severity: major
+    description: >
+      Empty path segments (e.g., oc://TOOLS.md/Tools//enabled or
+      oc://TOOLS.md//Tools) must be rejected with 400, not silently
+      collapsed. If the parser strips empty segments, the path
+      oc://TOOLS.md///secret resolves to oc://TOOLS.md/secret, potentially
+      accessing a different resource than intended. The parser must treat
+      consecutive delimiters as an error, not normalize them away.
+    spec_impact: "CL-03 oc:// parser — reject empty path segments with 400; do not collapse consecutive delimiters"
+    pitfall: P-283
+
+  - id: F07
+    severity: major
+    description: >
+      Trailing slashes must be handled consistently. oc://skills/ is a
+      directory reference; oc://TOOLS.md/Tools/ with a trailing slash
+      after a section name is ambiguous. The convention must be: trailing
+      slash on a directory path is canonical (oc://skills/), trailing slash
+      on a non-directory path is stripped during canonicalization. The parser
+      must not create phantom empty segments from trailing slashes.
+    spec_impact: "CL-03 oc:// paths — trailing slash canonical for directories; stripped for non-directory paths"
+    pitfall: P-283
+
+  - id: F08
+    severity: warning
+    description: >
+      Dots in item names (e.g., "v2.config") must not be confused with file
+      extensions. The path oc://TOOLS.md/Tools/v2.config refers to an item
+      named "v2.config", not a file "v2" with extension ".config". The parser
+      must not apply file-extension heuristics to path segments below the
+      file level. Only the first segment (the file name) should be checked
+      for extension-based type detection.
+    spec_impact: "CL-03 oc:// parser — no extension detection on sub-file path segments; dots are literal in names"
+    pitfall: P-283
+
+  - id: F09
+    severity: warning
+    description: >
+      The HTTP route mapping from oc:// paths must produce paths that are
+      valid in HTTP/1.1. Characters outside the unreserved set (RFC 3986)
+      must be percent-encoded in the HTTP path. The mapping function must
+      ensure that oc://TOOLS.md/C# Tools becomes /api/oc/TOOLS.md%23C%23%20Tools
+      or an equivalent encoding. The response meta.oc_path field returns the
+      canonical oc:// form (not the HTTP-encoded form) so partners can
+      display human-readable paths.
+    spec_impact: "CL-10 HTTP mapping — oc:// to HTTP route encoding per RFC 3986; response echo uses canonical oc:// form"
+    pitfall: P-283
+
+  - id: F10
+    severity: warning
+    description: >
+      Case sensitivity: file names are case-insensitive on Windows but
+      case-sensitive on Linux. The oc:// parser must apply canonical casing
+      from the OC file registry (the 9 known file names) regardless of
+      platform. A request for oc://tools.md must resolve to oc://TOOLS.md
+      and echo the canonical form. For section and item names within files,
+      case is preserved from the source file — the parser must not normalize
+      sub-file segments.
+    spec_impact: "CL-03 canonical casing — file-level from registry; sub-file segments preserve source casing"
+    pitfall: P-283
+
+  - id: F11
+    severity: warning
+    description: >
+      Fuzzing must cover pathological inputs that could cause denial of
+      service: extremely long paths (>8KB), deeply nested segments (>100
+      depth), repeated percent-encoding sequences, and null bytes (%00).
+      The parser must reject inputs exceeding length/depth limits with 414
+      (URI Too Long) or 400, not attempt to parse them. Max path length
+      should be configurable with a sane default (4KB). Null bytes must
+      be rejected outright.
+    spec_impact: "CL-03 oc:// parser — length limit (4KB default), depth limit (50 segments), null byte rejection"
+    pitfall: P-283
+
+  - id: F12
+    severity: note
+    description: >
+      The fuzz corpus should be committed to the test suite as a fixture
+      file for regression testing. As new edge cases are discovered in
+      production, they should be added to the corpus. The fixture format
+      should include input path, expected parse result (or error), and
+      expected canonical form. This ensures that parser fixes do not
+      regress on previously-discovered edge cases.
+    spec_impact: "Test infrastructure — committed fuzz corpus fixture for oc:// parser regression testing"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      Performance constraint: the parser must handle 10,000 path parse
+      operations per second on a single core. Fuzz inputs with complex
+      encoding should not degrade performance by more than 2x compared to
+      simple paths. If percent-decoding triggers repeated string allocations,
+      the parser should use a pre-allocated buffer. Benchmark as part of
+      the fuzz suite.
+    spec_impact: "CL-03 oc:// parser — 10K ops/sec target; benchmark included in fuzz test suite"
+    pitfall: null

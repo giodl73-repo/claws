@@ -18,7 +18,7 @@ expect:
       compliance_check: true
       cef_mapping: incomplete
   violations:
-    - code: CLAWS-E231
+    - code: OC-POLICY-E231
       message: "No CEF severity mapping for 8 governance event types — SIEM correlation rules will not match"
       severity: error
   warnings:
@@ -93,7 +93,7 @@ findings:
     description: >
       CEF severity 0 (Unknown) as a default defeats the purpose of the
       severity field. If the exporter encounters an unmapped event type,
-      it should fail loudly with CLAWS-E231 rather than silently defaulting
+      it should fail loudly with OC-POLICY-E231 rather than silently defaulting
       to 0. An unmapped event type is a configuration error that must be
       fixed before the CEF export is operational.
     spec_impact: "CL-02 SIEM Export Amendment — fail-loud on unmapped event types"

@@ -1,0 +1,210 @@
+name: S04-layer1-patch
+series: cap-integration
+version: 2
+specs: [CL-10, CL-03, CL-12]
+description: >
+  Validates that PATCH /api/oc/TOOLS.md#Tools/timely-updates routes a tool
+  toggle through write-time validation, updates the OC file on disk, triggers
+  an automatic recompilation, and returns the governance result in the response.
+  The write path is: validate PATCH body -> check ETag -> check editability ->
+  write file -> recompile -> return updated resource with new governance context.
+  Every error response includes the oc:// path of the resource that failed.
+
+expect:
+  http:
+    method: PATCH
+    path: /api/oc/TOOLS.md#Tools/timely-updates
+    status: 200
+    content_type: application/json
+    request_headers: [If-Match]
+  request_body:
+    has: [enabled]
+    enabled_is_boolean: true
+  response_shape:
+    root_has: [data, meta, governance]
+    meta_has: [oc_path, etag, compilation_id]
+    governance_has: [status, warnings]
+    data_reflects_patch: true
+  error_responses:
+    missing_etag:
+      status: 428
+      error_code: ETAG_REQUIRED
+    stale_etag:
+      status: 412
+      error_code: PRECONDITION_FAILED
+    non_existent_item:
+      status: 404
+      error_has: [oc_path]
+    read_only:
+      status: 403
+      error_code: READ_ONLY
+  post_condition:
+    file_updated_on_disk: true
+    recompile_triggered: true
+    new_etag_differs_from_old: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner toggles the 'timely-updates' tool from enabled to
+  disabled. The partner sends PATCH /api/oc/TOOLS.md#Tools/timely-updates
+  with body { "enabled": false } and header If-Match: "abc123". The API
+  validates the ETag matches the current file version, checks that the tool
+  is not read-only (not R5, not fleet-locked), writes the change to TOOLS.md
+  on disk, triggers a recompilation, and returns the updated tool with a new
+  ETag and fresh governance context. A concurrent PATCH from another partner
+  with the same stale ETag receives 412 Precondition Failed. A PATCH to a
+  non-existent item receives 404. A PATCH to GOVERNANCE.md (read-only)
+  receives 403.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The PATCH endpoint must require the If-Match header with a valid ETag.
+      If the header is missing, the API must return 428 Precondition Required,
+      not silently accept the write. Without mandatory ETag checks, concurrent
+      PATCHes from multiple partners cause last-write-wins data loss. The 428
+      status is standard HTTP for missing precondition headers and partners
+      can handle it distinctly from 412 (stale ETag).
+    spec_impact: "CL-10 PATCH /api/oc/ — 428 Precondition Required when If-Match header is absent"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Concurrent PATCHes to different items in the same file (e.g., two
+      partners toggling different tools in TOOLS.md simultaneously) both
+      read the same ETag. The first PATCH succeeds and changes the ETag.
+      The second PATCH fails with 412 even though it touches a different
+      item. File-level ETags create false conflicts for item-level edits.
+      The API must either use item-level ETags or implement OT/CRDT
+      merge for non-overlapping changes within the same file.
+    spec_impact: "CL-10 PATCH concurrency — item-level ETags or non-overlapping merge to avoid false 412 on same-file different-item edits"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The PATCH triggers a recompilation, but if the recompilation fails
+      (e.g., the new tool state creates a governance violation), the file
+      has already been written to disk. The API must implement write-ahead
+      validation: compile the proposed change in memory before writing to
+      disk. If compilation fails, return 422 with the governance errors
+      and leave the file unchanged. Write-then-compile risks leaving the
+      workspace in a dirty state.
+    spec_impact: "CL-10 PATCH write path — compile proposed change in memory first; write to disk only on successful compilation"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      A PATCH to a non-existent item (e.g., /api/oc/TOOLS.md#Tools/phantom)
+      returns 404, but the error must include the oc:// path
+      (oc://TOOLS.md/Tools/phantom) so the partner can display which resource
+      was not found. If the error only includes a generic message without the
+      path, the partner cannot render a helpful error to the user. The oc://
+      path in error responses is the traceability contract.
+    spec_impact: "CL-03 error responses — every 4xx/5xx must include oc_path field with the requested oc:// path"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      PATCH to a read-only section (GOVERNANCE.md, or any section locked by
+      fleet policy) must return 403 with error_code: READ_ONLY and include
+      the lock source (governance, fleet, r5) in the error body. A generic
+      403 without lock source forces the partner to make additional API calls
+      to determine why the write was rejected. The error body must include
+      lock.source and a human-readable reason string.
+    spec_impact: "CL-10 PATCH 403 — include lock.source and reason in error body for read-only rejections"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The response includes a new ETag after successful PATCH. If the
+      recompilation takes significant time (>50ms), the partner receives
+      the response with a new ETag but the compilation may still be in
+      progress. The partner could immediately send another PATCH with the
+      new ETag while the compilation is running, causing a race. The
+      response must only include the new ETag after compilation completes,
+      meaning the PATCH is synchronous through compilation.
+    spec_impact: "CL-10 PATCH response — synchronous through compilation; ETag reflects post-compilation state"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The governance field in the response includes warnings from the
+      recompilation (e.g., 'disabling timely-updates removes automatic
+      security patching'). These warnings are informational, not blocking —
+      the write succeeded. Partners must distinguish governance warnings
+      (yellow badge) from governance errors (write rejected, 422). The
+      response must use governance.status: 'warning' vs 'error' to make
+      this distinction explicit.
+    spec_impact: "CL-10 PATCH governance response — governance.status: 'clean' | 'warning' | 'error' for partner badge rendering"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The PATCH body schema must be validated before any file operation.
+      If the partner sends { "enabled": "yes" } (string instead of boolean),
+      the API must return 400 with a schema validation error, not attempt
+      to write "yes" to the file. Schema validation must be per-field,
+      using the OC file's type definitions. Without strict schema validation,
+      partners can corrupt OC files with type-incorrect values.
+    spec_impact: "CL-10 PATCH body validation — strict per-field type checking against OC schema; 400 on type mismatch"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      After a successful PATCH, the oc:// path in the error response for
+      a subsequent failed PATCH must use the same canonical path format.
+      If the success response uses meta.oc_path: 'oc://TOOLS.md/Tools/
+      timely-updates' but a 404 error uses error.oc_path: '/api/oc/TOOLS.md
+      #Tools/timely-updates' (API path instead of oc:// path), the
+      partner's error handling breaks because it expects consistent path
+      formats across success and error responses.
+    spec_impact: "CL-03 oc:// consistency — all responses (2xx and 4xx) use oc:// path format, never raw API paths"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      A PATCH that changes a tool's enabled state may cascade to other
+      files. For example, disabling a tool in TOOLS.md may require updating
+      pre_authorizations in USER.md. The PATCH endpoint must either handle
+      cascading writes atomically or return a 'cascade' field listing
+      affected files. If cascades are silent, the partner sees TOOLS.md
+      updated but USER.md remains stale until the next full recompilation.
+    spec_impact: "CL-10 PATCH cascading — document whether single-file or multi-file; include cascade list in response if multi"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The recompilation triggered by PATCH should be incremental — only
+      recompile the affected file and its dependents, not the entire
+      workspace. A full recompilation on every PATCH would make the
+      endpoint latency proportional to workspace size. The compilation
+      engine must track file-level dependency graphs for incremental
+      compilation.
+    spec_impact: "CL-10 PATCH compilation — incremental recompilation scoped to changed file + dependents"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The response should include a timing field (e.g., meta.timing_ms)
+      reporting how long the write + compile cycle took. Partners can
+      use this for performance monitoring and to set appropriate timeout
+      values on their HTTP clients. Without server-side timing, partners
+      can only measure round-trip latency which includes network overhead.
+    spec_impact: "CL-10 PATCH response — include meta.timing_ms for server-side write+compile duration"
+    pitfall: null

@@ -6,7 +6,7 @@
  * RELAX expression context. Policy template snippets offer pre-built governance
  * patterns (e.g., deny-by-default, least-privilege tool set).
  *
- * @module claws-lsp/providers/completion
+ * @module openclaw-lsp/providers/completion
  */
 
 import type { GovernanceIRLike } from '../compilation-host.js';

@@ -31,7 +31,7 @@ The color system maps risk tiers (R1-R5) and severity levels (CRITICAL/HIGH/MEDI
 ## Deliverables
 
 - [ ] `claws-cli/src/errors/contract.ts` — DiagnosticError class extending Error with WHAT, HOW, WHERE (file+line+column), and optional docsUrl fields; `toDiagnostic()` method for structured output. **docsUrl is optional** (R1 review SA-M02): when docsUrl is not provided, the diagnostic falls back to an inline `claws help {code}` suggestion that resolves the error code description from the registry. External doc URLs are added incrementally as docs are written.
-- [ ] `claws-cli/src/errors/codes.ts` — CLAWS-E001..E099 error code registry with human-readable descriptions, categorized by domain (parse, compile, governance, emit, config)
+- [ ] `claws-cli/src/errors/codes.ts` — OC-POLICY-E001..E099 error code registry with human-readable descriptions, categorized by domain (parse, compile, governance, emit, config)
 - [ ] `claws-cli/src/color/risk.ts` — Risk tier colors: R1=green, R2=cyan, R3=yellow, R4=red, R5=bright-red
 - [ ] `claws-cli/src/color/severity.ts` — Severity colors: CRITICAL=bright-red, HIGH=red, MEDIUM=yellow, LOW=dim
 - [ ] `claws-cli/src/color/index.ts` — NO_COLOR + FORCE_COLOR support, `isColorEnabled()` function, color application helpers
@@ -42,7 +42,7 @@ The color system maps risk tiers (R1-R5) and severity levels (CRITICAL/HIGH/MEDI
 ## Acceptance Criteria
 
 - [ ] DiagnosticError instances always contain WHAT, HOW, WHERE; docsUrl is optional with `claws help {code}` inline fallback when absent
-- [ ] Error code registry covers CLAWS-E001 through CLAWS-E099 range with no gaps in allocated codes
+- [ ] Error code registry covers OC-POLICY-E001 through OC-POLICY-E099 range with no gaps in allocated codes
 - [ ] R1-R5 risk tiers each map to a distinct terminal color
 - [ ] CRITICAL/HIGH/MEDIUM/LOW severities each map to a distinct terminal color
 - [ ] Setting `NO_COLOR=1` disables all color output

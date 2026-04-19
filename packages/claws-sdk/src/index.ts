@@ -18,7 +18,7 @@ export type {
 } from './detect/index.js';
 export { normalizePath, normalizeName, levenshtein, stripBOM, normalizeLF } from './util/index.js';
 export {
-  CLAWS_E001,
+  OC_POLICY_E001,
   validateFailModes,
   serialize,
   deserialize,
@@ -78,3 +78,10 @@ export {
   type ICompilationHost,
   type GovernanceIRLike,
 } from './compilation-host.js';
+export { compile } from './compiler/host/index.js';
+export type {
+  CompileOptions,
+  CompileResult,
+  CompileDiagnostic,
+  CompileStage,
+} from './compiler/host/index.js';

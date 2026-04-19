@@ -5,6 +5,7 @@ export default defineConfig({
     index: 'src/index.ts',
     'ir/index': 'src/ir/index.ts',
     'compile/index': 'src/compile/index.ts',
+    'compile/violation-aware-compile': 'src/compile/violation-aware-compile.ts',
     'governance/index': 'src/governance/index.ts',
     'emit/index': 'src/emit/index.ts',
     'adapter/index': 'src/adapter/index.ts',
@@ -34,10 +35,38 @@ export default defineConfig({
     'maker/index': 'src/maker/index.ts',
     'optimize/index': 'src/optimize/index.ts',
     'context/index': 'src/context/index.ts',
+    'compiler/crypto/index': 'src/compiler/crypto/index.ts',
+    'compiler/readers/index': 'src/compiler/readers/index.ts',
+    'compiler/sidecar/index': 'src/compiler/sidecar/index.ts',
+    'compiler/ir/index': 'src/compiler/ir/index.ts',
+    'compiler/audit/index': 'src/compiler/audit/index.ts',
+    'compiler/enforce/index': 'src/compiler/enforce/index.ts',
+    'compiler/validate/index': 'src/compiler/validate/index.ts',
+    'compiler/emit/index': 'src/compiler/emit/index.ts',
+    'compiler/emit/ts-builder': 'src/compiler/emit/ts-builder.ts',
+    'compiler/cache/index': 'src/compiler/cache/index.ts',
+    'compiler/host/index': 'src/compiler/host/index.ts',
+    'compiler/events/index': 'src/compiler/events/index.ts',
+    'compiler/watch/index': 'src/compiler/watch/index.ts',
+    'compiler/fleet/index': 'src/compiler/fleet/index.ts',
+    'workspace/index': 'src/workspace/index.ts',
+    'workspace/fs-atomic': 'src/workspace/fs-atomic.ts',
+    'workspace/session-config-editor': 'src/workspace/session-config-editor.ts',
+    'workspace/session-config-types': 'src/workspace/session-config-types.ts',
+    'workspace/violation-state': 'src/workspace/violation-state.ts',
+    'workspace/violation-types': 'src/workspace/violation-types.ts',
+    'workspace-edit/index': 'src/workspace-edit/index.ts',
   },
   format: ['esm'],
   dts: true,
-  sourcemap: true,
+  // Sourcemaps stay OFF for the internal SDK prod build too: @bic/claws-sdk
+  // bundles this slice via tsup `noExternal`, and esbuild carries inline
+  // `//# sourceMappingURL=` comments + `//# sourceURL=file:///...` developer
+  // paths into the @bic tarball when the upstream bundle has sourcemaps on.
+  // Freemium boundary requires zero implementation leakage in the shipped
+  // chunks. Developers who need sourcemaps during iteration should run tsup
+  // directly with `--watch --sourcemap` as a dev-only invocation.
+  sourcemap: false,
   clean: true,
-  external: ['@anthropic-ai/sdk'],
+  external: ['@anthropic-ai/sdk', 'chokidar', 'typescript', 'zod'],
 });

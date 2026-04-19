@@ -1,0 +1,216 @@
+name: S17-batch-edits
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12]
+description: >
+  Validates that POST /api/batch accepts multiple edit operations
+  (toggle tool, edit prompt, change schedule) and executes them
+  atomically. All operations succeed or all fail — partial application
+  is never allowed. A single recompile runs after all edits are applied,
+  and the response includes a combined governance result. This endpoint
+  powers the Companion App's "apply all changes" action when a user
+  makes multiple edits in a single session.
+
+expect:
+  batch_success:
+    endpoint: "POST /api/batch"
+    request_body:
+      operations:
+        - type: toggle_tool
+          toolId: slack-send
+          field: approval
+          value: enabled
+        - type: edit_prompt
+          chunkPath: connections/outlook
+          field: prompt
+          value: "Updated prompt"
+        - type: change_schedule
+          sessionId: "cron:daily-triage"
+          field: schedule
+          value: "0 9 * * 1-5"
+    response:
+      status: 200
+      results_count: 3
+      all_succeeded: true
+      recompile_count: 1
+      governance:
+        has: [warnings, riskChanges, affectedSessions]
+  batch_partial_failure:
+    endpoint: "POST /api/batch"
+    request_body:
+      operations:
+        - type: toggle_tool
+          toolId: send-email
+          field: approval
+          value: disabled
+        - type: edit_prompt
+          chunkPath: connections/outlook
+          field: prompt
+          value: "Updated prompt"
+    response:
+      status: 422
+      all_rolled_back: true
+      failed_operation_index: 0
+      error: R5_NON_NEGOTIABLE
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A user in the Companion App makes three changes: enables the slack-send
+  tool, updates the Outlook connection prompt, and changes the daily-triage
+  cron schedule from hourly to weekday mornings. They click "Apply All" which
+  calls POST /api/batch with all three operations. The server validates all
+  three, applies them atomically, runs a single recompile, and returns the
+  combined governance result. In a second test, the batch includes disabling
+  an R5 tool (send-email) alongside a valid prompt edit. The R5 rejection
+  causes the entire batch to roll back — the prompt edit is also reverted.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Batch with one failing operation must roll back all operations. If
+      the server applies operations sequentially and the third fails, the
+      first two must be reverted. This requires either write-ahead logging
+      (apply to journal, then commit) or in-memory staging (compute all
+      changes, validate all, then write atomically). Sequential
+      apply-and-hope with manual rollback on failure is fragile and risks
+      partial state if the rollback itself fails.
+    spec_impact: "CL-10 POST /api/batch — write-ahead or staged application for atomic semantics"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Batch size limit: the API must enforce a maximum batch size to
+      prevent resource exhaustion. A batch of 1,000 operations would
+      consume excessive memory during staging and take too long to
+      validate. A limit of 20 operations is reasonable for UI workflows.
+      The limit must be documented in the API contract and the error
+      response (BATCH_SIZE_EXCEEDED) must include the maximum.
+    spec_impact: "CL-10 POST /api/batch — max 20 operations, BATCH_SIZE_EXCEEDED error with limit"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Batch with dryRun: POST /api/batch?dryRun=true must validate all
+      operations and return a combined governance preview without writing
+      anything. Each operation's preview should be individually
+      addressable in the response (by index) so the client can show
+      per-operation governance impact. The combined preview must also
+      surface cross-operation interactions (e.g., enabling tool A and
+      changing prompt B together triggers a warning that neither would
+      trigger alone).
+    spec_impact: "CL-10 batch dryRun — per-operation preview plus cross-operation interaction warnings"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Empty batch: POST /api/batch with an empty operations array must
+      return 400 EMPTY_BATCH, not 200 with empty results. An empty
+      batch is always a client bug. Accepting it silently would trigger
+      a no-op recompile and return a vacuous success, wasting server
+      resources and producing a confusing audit entry.
+    spec_impact: "CL-10 POST /api/batch — empty operations array returns 400 EMPTY_BATCH"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Batch with conflicting edits to the same file: if two operations
+      in the batch both modify connections/outlook (e.g., edit prompt
+      and toggle a tool in the same connection), the server must detect
+      the conflict during validation. Options: reject the batch with
+      CONFLICTING_OPERATIONS, or merge the edits intelligently (both
+      changes applied to the same file). Rejecting is safer — the client
+      should combine related edits into a single operation.
+    spec_impact: "CL-10 POST /api/batch — detect same-file conflicts, reject with CONFLICTING_OPERATIONS"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Single recompile after batch: the server must coalesce all file
+      changes from the batch into a single recompile pass. If each
+      operation triggers its own recompile, a 10-operation batch runs
+      10 recompiles instead of 1, degrading performance by 10x. The
+      batch handler should collect all file mutations, write them
+      atomically, and then invoke one recompile.
+    spec_impact: "CL-10 POST /api/batch — coalesced single recompile after all writes"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The response must identify which operation failed in a rollback
+      scenario. The failed_operation_index field tells the client which
+      operation caused the batch failure. Without this, the client must
+      guess which of the N operations is the problem. The response
+      should include the error details for the failed operation and
+      a generic "rolled back" status for the others.
+    spec_impact: "CL-10 batch failure response — failed_operation_index with error details, others show 'rolled_back'"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Operation ordering within the batch may matter. If operation 1
+      enables a tool and operation 2 edits that tool's config, the
+      enable must happen before the edit for the edit to be valid. The
+      API must process operations in array order and validate each
+      against the cumulative state (not the original state). This means
+      validation is sequential even though the final write is atomic.
+    spec_impact: "CL-10 POST /api/batch — sequential validation in array order, cumulative state"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Audit trail for batch operations: a successful batch should
+      produce a single audit event with all operations listed (not N
+      separate events). This preserves the atomicity semantics in the
+      audit trail — the batch either happened entirely or not at all.
+      The audit event should include the operation count, the batch
+      ID, and a summary of changes.
+    spec_impact: "CL-10 batch audit — single audit event for atomic batch, not per-operation events"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      The combined governance result must include riskChanges that
+      reflect the net effect of all operations. If operation 1 increases
+      risk (enabling a tool) and operation 2 decreases it (tightening
+      a prompt), the net risk change may be neutral. The governance
+      result should show both the per-operation changes and the net
+      effect, so the user understands the full impact.
+    spec_impact: "CL-10 batch governance — per-operation changes plus net effect summary"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Batch operations should support an optional 'comment' field per
+      operation, which is included in the audit trail. This lets the
+      user annotate why each change was made (e.g., "Enabling slack-send
+      per team request #42"). Without comments, the audit trail shows
+      what changed but not why, reducing its value for compliance reviews.
+    spec_impact: "CL-10 batch operations — optional comment field, included in audit event"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Idempotency: POST /api/batch is not naturally idempotent. If the
+      client retries a batch after a network timeout (unsure if the
+      first request succeeded), the batch may be applied twice. The
+      API should support an Idempotency-Key header — the server tracks
+      recent keys and returns the cached response for duplicate requests.
+      Without this, network retries risk double-applying edits.
+    spec_impact: "CL-10 POST /api/batch — Idempotency-Key header support for safe retries"
+    pitfall: null

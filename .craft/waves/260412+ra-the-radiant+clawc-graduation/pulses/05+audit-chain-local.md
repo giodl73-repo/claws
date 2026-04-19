@@ -10,7 +10,7 @@ test_tiers:
   L0_unit: 8
   L1_integration: 4
   L2_e2e: 1
-  L3_accept: 0
+  L3_accept: 1
 test_scope:
   run:
     - "cd claws-sdk && npx vitest run --project unit --coverage"
@@ -41,6 +41,7 @@ The free tier audit chain is local-only: entries are signed with a local Ed25519
 - [ ] `claws-sdk/tests/compiler/audit/wal.unit.test.ts` -- L0: WAL buffers entries before flush (1), WAL recovers uncommitted entries (1)
 - [ ] `claws-sdk/tests/compiler/audit/audit.integration.test.ts` -- L1: chain create→append→verify→persist→reload round-trip (1), tampered file detected on reload (1), concurrent append serialization (1), WAL recovery after simulated crash (1)
 - [ ] `claws-sdk/tests/compiler/audit/audit.e2e.test.ts` -- L2: full lifecycle: generate keypair, create chain, append 100 entries, persist to file, reload from file, verify entire chain, tamper one entry, verify detects tampering (1)
+- [ ] `claws-sdk/tests/compiler/audit/audit.accept.test.ts` -- L3: scenario acceptance test verifying crypto findings (2)
 
 ## Acceptance Criteria
 
@@ -71,5 +72,6 @@ Load these role files before starting:
 - [ ] L0 unit (8 tests): append increments (1), hash linking (1), first entry null previous (1), verify valid (1), verify tampered (1), verify broken link (1), WAL buffer (1), WAL recovery (1)
 - [ ] L1 integration (4 tests): full round-trip (1), tampered file detection (1), concurrent append (1), WAL crash recovery (1)
 - [ ] L2 e2e (1 test): full lifecycle 100-entry chain with tamper detection (1)
+- [ ] L3 acceptance (1 test): crypto scenario findings verified (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

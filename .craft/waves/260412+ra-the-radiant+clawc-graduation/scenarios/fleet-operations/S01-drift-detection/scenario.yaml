@@ -30,7 +30,7 @@ simulate:
 
 problem: >
   An enterprise deployment has 47 workspaces across 4 teams. Each workspace
-  has its own package.json with @craftworks/* and @claws/* dependencies. Over
+  has its own package.json with @craftworks/* and @bic/claws-* dependencies. Over
   6 months, teams have upgraded packages independently: Team A is on
   @craftworks/forma@1.2.0, Team B on @craftworks/forma@1.0.0, Team C on
   @craftworks/forma@1.1.0. The @craftworks/platform manifest v1.0.0 declares

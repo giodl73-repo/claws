@@ -76,12 +76,12 @@ fi
 
 # ── Run claws ─────────────────────────────────────────────────────────
 
-CLAWS_EXIT=0
+OC_POLICY_EXIT=0
 
 if [[ -n "${SARIF_FILE}" ]]; then
-  claws "${CLAWS_ARGS[@]}" > "${SARIF_FILE}" || CLAWS_EXIT=$?
+  claws "${CLAWS_ARGS[@]}" > "${SARIF_FILE}" || OC_POLICY_EXIT=$?
 else
-  claws "${CLAWS_ARGS[@]}" || CLAWS_EXIT=$?
+  claws "${CLAWS_ARGS[@]}" || OC_POLICY_EXIT=$?
 fi
 
 # ── Count violations from SARIF (total + per severity) ───────────────
@@ -129,7 +129,7 @@ fi
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
   echo "sarif-file=${SARIF_FILE}" >> "${GITHUB_OUTPUT}"
   echo "violation-count=${VIOLATION_COUNT}" >> "${GITHUB_OUTPUT}"
-  echo "exit-code=${CLAWS_EXIT}" >> "${GITHUB_OUTPUT}"
+  echo "exit-code=${OC_POLICY_EXIT}" >> "${GITHUB_OUTPUT}"
   echo "cache-hit=${CACHE_HIT}" >> "${GITHUB_OUTPUT}"
 fi
 
@@ -200,7 +200,7 @@ if [[ "${INPUT_WARN_ONLY:-false}" == "true" ]]; then
 fi
 
 # Stage 2 (CD gate) uses fail-on threshold (defaults to all)
-if [[ "${INPUT_STAGE}" -eq 2 && "${CLAWS_EXIT}" -eq 1 ]]; then
+if [[ "${INPUT_STAGE}" -eq 2 && "${OC_POLICY_EXIT}" -eq 1 ]]; then
   if should_block_for_severity "${INPUT_FAIL_ON:-all}"; then
     echo "::error::CD gate: ${VIOLATION_COUNT} governance violation(s) found (threshold: ${INPUT_FAIL_ON:-all})"
     exit 1
@@ -210,7 +210,7 @@ if [[ "${INPUT_STAGE}" -eq 2 && "${CLAWS_EXIT}" -eq 1 ]]; then
 fi
 
 # For other stages, apply severity-based gating
-if [[ "${CLAWS_EXIT}" -eq 1 ]]; then
+if [[ "${OC_POLICY_EXIT}" -eq 1 ]]; then
   if should_block_for_severity "${INPUT_FAIL_ON:-all}"; then
     exit 1
   fi
@@ -218,4 +218,4 @@ if [[ "${CLAWS_EXIT}" -eq 1 ]]; then
   exit 0
 fi
 
-exit "${CLAWS_EXIT}"
+exit "${OC_POLICY_EXIT}"

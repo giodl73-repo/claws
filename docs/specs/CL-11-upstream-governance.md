@@ -1150,6 +1150,52 @@ the source of truth from which they are generated.
 
 ---
 
+## 8b. @openclaw/oc-path
+
+**Universal addressing for OpenClaw workspace files.**
+
+~1KB | MIT | Zero dependencies
+
+Any OC tool (IDE extensions, governance compilers, admin UIs, CLI tools) needs to
+reference specific pieces of a workspace: a tool in TOOLS.md, a deny rule in SOUL.md,
+a cron job in HEARTBEAT.md. The `oc://` path syntax provides a canonical addressing
+scheme.
+
+### API
+
+```typescript
+import { parseOcPath, formatOcPath, type OcPath } from '@openclaw/oc-path';
+
+const path = parseOcPath('oc://TOOLS.md/Tools/send-email/risk');
+// { file: 'TOOLS.md', section: 'Tools', item: 'send-email', field: 'risk' }
+
+const uri = formatOcPath({ file: 'SOUL.md', section: 'Boundaries' });
+// 'oc://SOUL.md/Boundaries'
+
+// Session-scoped
+const scoped = parseOcPath('oc://TOOLS.md/Tools/send-email?session=cron:daily');
+// { file: 'TOOLS.md', section: 'Tools', item: 'send-email', session: 'cron:daily' }
+
+// Lobster workflow
+const step = parseOcPath('oc://lobster.yaml/steps/triage/tools');
+// { file: 'lobster.yaml', section: 'steps', item: 'triage', field: 'tools' }
+
+// Skills
+const skill = parseOcPath('oc://skills/email-drafter/SKILL.md');
+// { file: 'skills', item: 'email-drafter', field: 'SKILL.md' }
+```
+
+### Why Upstream
+
+The `oc://` scheme is vendor-neutral — it addresses OC workspace structure, not
+claws-specific concepts. Any tool that reads or writes OC workspace files benefits:
+- IDE extensions: map `oc://` paths to file:line locations for diagnostics
+- Admin UIs: reference specific settings in error messages
+- Audit systems: record what was changed using canonical paths
+- Governance providers: reference tools and rules in AuthorizationDecision metadata
+
+---
+
 ## 9. Contribute/Keep Boundary
 
 The architectural boundary is: contribute **runtime** governance primitives that

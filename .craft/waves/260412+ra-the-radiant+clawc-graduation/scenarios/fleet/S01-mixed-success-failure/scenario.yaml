@@ -1,0 +1,183 @@
+name: S01-mixed-success-failure
+series: fleet
+version: 1
+specs: [CL-08]
+description: >
+  Validates failure isolation in `claws fleet compile <fleet-dir>`. A fleet
+  directory containing 3 workspace subdirectories — 2 healthy, 1 intentionally
+  broken (missing SOUL.md or malformed lobster.yaml) — must compile the 2
+  healthy workspaces to completion and emit a structured CompileDiagnostic
+  for the broken one without short-circuiting the batch. Per plan H3: the
+  broken workspace's failure does NOT abort the remaining in-flight compiles;
+  the batch exits non-zero but reports per-workspace status for all three.
+
+expect:
+  batch_execution:
+    total_workspaces: 3
+    succeeded: 2
+    failed: 1
+    short_circuit: false
+    exit_code_nonzero: true
+  per_workspace_reporting:
+    healthy_ws1:
+      status: "success"
+      emit_result_success: true
+      plugin_output_written: true
+    healthy_ws2:
+      status: "success"
+      emit_result_success: true
+      plugin_output_written: true
+    broken_ws:
+      status: "failure"
+      diagnostic_kind: "CompileDiagnostic"
+      structured_error: true
+      plugin_output_written: false
+  stdout:
+    format: "per-workspace status lines"
+    includes_all_three: true
+    includes_failure_reason: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Construct a fleet directory with 3 workspace subdirectories. Two workspaces
+  have valid SOUL.md, tools/, agents/, and lobster.yaml — canonical fixture
+  layout that compiles cleanly. The third workspace is broken in a realistic
+  way: either SOUL.md is missing, or lobster.yaml contains malformed YAML, or
+  a required frontmatter field is absent. Invoke `claws fleet compile
+  <fleet-dir>`. Observe: (1) all three workspaces are attempted, (2) the two
+  healthy workspaces complete fully (plugin output on disk, EmitResult.success
+  true, cache entry written), (3) the broken workspace surfaces a structured
+  CompileDiagnostic with a failure kind and message, (4) the batch exit code
+  is non-zero, (5) stdout reports status for all three, including a failure
+  reason for the broken one. The broken workspace MUST NOT abort or cancel
+  the two concurrent compiles.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Failure isolation requires that the broken workspace's error propagation
+      does not reach into the shared fleet executor's task queue. If the
+      executor uses Promise.all(), a single rejection cancels sibling promises
+      in some runtime configurations and short-circuits the batch. The
+      implementation must use Promise.allSettled() or an equivalent per-task
+      try/catch that converts failures into structured FleetWorkspaceResult
+      records without throwing out of the batch loop.
+    spec_impact: "H3 — fleet executor must use allSettled semantics, never short-circuit on first failure"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The broken workspace's CompileDiagnostic must be a structured object, not
+      a free-form Error with a string message. Consumers (CI systems, dashboards,
+      Horus hot-reload gateway) need a discriminated union with a `kind` field
+      (e.g., "MissingSoulFile", "MalformedLobsterYaml", "MissingFrontmatterField")
+      so they can route to different remediation flows. If the fleet command
+      stringifies the error, downstream consumers lose structure and must parse
+      human-readable text.
+    spec_impact: "H3 — CompileDiagnostic is a typed union; fleet must preserve shape end-to-end"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Per-workspace cache state must be independent. If the broken workspace's
+      failure corrupts the shared cache lock file or leaves a partial entry,
+      subsequent fleet runs see phantom hits for workspaces that never
+      completed. Each workspace's cache write must be atomic (write-then-rename
+      or equivalent) and occur only after EmitResult.success is true. A failed
+      workspace writes no cache entry.
+    spec_impact: "H3 — cache writes are per-workspace and atomic; failures leave no residue"
+    pitfall: null
+
+  - id: F04
+    severity: warning
+    description: >
+      The batch exit code must be non-zero on any per-workspace failure, but
+      the specific exit code should distinguish "partial success" (1+ succeeded,
+      1+ failed) from "total failure" (0 succeeded). CI pipelines may treat
+      these differently — partial success might still promote built artifacts
+      for the healthy workspaces while total failure aborts the pipeline. A
+      single exit code of 1 collapses this distinction.
+    spec_impact: "H3 — consider distinct exit codes for partial vs total failure"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Stdout format for per-workspace status must be machine-parseable. If the
+      fleet command emits only human-readable prose ("Workspace foo: ok.
+      Workspace bar: failed due to missing SOUL.md"), dashboards cannot
+      aggregate. A `--json` or `--format=ndjson` flag emitting one
+      FleetWorkspaceResult per line is required for programmatic consumption.
+      Without it, Horus hot-reload cannot consume fleet output as a signal.
+    spec_impact: "H3 — machine-parseable stdout (ndjson) required for Horus consumption"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The broken workspace detection point matters. If the diagnostic fires
+      during PARSE (SOUL.md missing), the workspace never reaches ENFORCE or
+      EMIT — CompileDiagnostic.kind reflects the earliest failure stage. If
+      the diagnostic fires at ENFORCE (governance denies a lobster.yaml
+      extension), the workspace consumed PARSE resources. The fleet command
+      must report the stage at which failure occurred, not just the terminal
+      error, so operators can diagnose root cause quickly.
+    spec_impact: "H3 — CompileDiagnostic must carry `stage` field identifying failure point"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Signal handling (SIGINT, SIGTERM) during a 3-workspace batch must be
+      graceful. If the operator Ctrl+C's mid-batch, the command should cancel
+      pending compiles and report the in-flight state cleanly (completed,
+      cancelled, not-started). If it leaves zombie compile processes or
+      half-written plugin output, the fleet state becomes ambiguous. A
+      cancellation handler must propagate through the executor.
+    spec_impact: "H3 — fleet compile must handle SIGINT gracefully with in-flight cleanup"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The broken-workspace fixture should cover multiple failure modes, not
+      just one. A comprehensive test suite cycles through: missing SOUL.md,
+      malformed lobster.yaml (bad YAML syntax), lobster.yaml missing required
+      field, SOUL.md frontmatter type mismatch, unreadable file permissions.
+      Each produces a distinct CompileDiagnostic.kind and exercises a
+      different failure isolation path.
+    spec_impact: "H3 — scenario variants for each failure mode are valuable coverage"
+    pitfall: null
+
+  - id: F09
+    severity: note
+    description: >
+      The healthy workspaces' compile output should be deterministic across
+      the batch. If workspace order influences emitted file contents (e.g.,
+      timestamps in headers, non-sorted collections), repeated runs produce
+      diffs that mask real regressions. The fleet command should sort
+      workspace traversal order (lexicographic) and ensure plugin output is
+      byte-stable.
+    spec_impact: "H3 — deterministic traversal order and byte-stable output per workspace"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Fleet stdout should include aggregate metrics at the end of the run:
+      total workspaces, succeeded, failed, skipped, wall-clock time,
+      parallelism used. Without aggregate metrics, operators reading the log
+      must count lines manually to assess batch health. A final summary line
+      is low-cost and high-value for CI log readers.
+    spec_impact: "H3 — aggregate metrics summary required after per-workspace status block"
+    pitfall: null
+
+implementation_status: pending
+tags: [claws-compile-dx, fleet, failure-isolation]

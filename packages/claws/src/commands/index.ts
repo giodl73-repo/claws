@@ -10,6 +10,7 @@ export { runBuild } from './build.js';
 export { runInit } from './init.js';
 export { runUninstall } from './uninstall.js';
 export { runWatch } from './watch.js';
+export { runExtractWatch } from './extract-watch.js';
 export { runDoctorCmd } from './doctor.js';
 export { runAmendCmd } from './amend.js';
 export { runSnapSave, runSnapRestore, runSnapList, runSnapDelete } from './snap.js';

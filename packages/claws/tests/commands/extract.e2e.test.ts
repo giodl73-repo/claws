@@ -117,7 +117,7 @@ describe('claws --llm e2e', () => {
 
       const output = consoleSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E040');
+      expect(parsed.error.code).toBe('OC-POLICY-E040');
       expect(parsed.error.what).toContain('ANTHROPIC_API_KEY');
       expect(parsed.error.howToFix).toContain('ANTHROPIC_API_KEY');
     } finally {
@@ -146,7 +146,7 @@ describe('claws --llm e2e', () => {
 
       const output = consoleSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E040');
+      expect(parsed.error.code).toBe('OC-POLICY-E040');
       expect(parsed.error.docsRef).toContain('llm-extraction');
     } finally {
       consoleSpy.mockRestore();

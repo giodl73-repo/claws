@@ -1,0 +1,29 @@
+id: hipaa-security-rule
+version: "1.0"
+framework: HIPAA Security Rule (45 CFR §164.312)
+requirements:
+  - id: "164.312(a)(1)"
+    title: Access control — unique user identification and automatic logoff
+    kind: static
+    predicate: authority-bounds-declared
+    description: USER authority bounds must be declared to scope PHI access.
+  - id: "164.312(b)"
+    title: Audit controls — record PHI access
+    kind: structural
+    predicate: audit-tamper-seal-present
+    description: Tamper-evident audit log required for all PHI-touching tools.
+  - id: "164.312(c)(1)"
+    title: Integrity — protect PHI from improper alteration
+    kind: static
+    predicate: has-governance-rules
+    description: Governance rules must constrain PHI-write tools.
+  - id: "164.312(e)(1)"
+    title: Transmission security
+    kind: static
+    predicate: every-r5-has-irreversible-external
+    description: R5 transmission tools must declare IRREVERSIBLE_EXTERNAL.
+  - id: "164.316(b)(2)"
+    title: Documentation retention — 6 years
+    kind: structural
+    predicate: audit-retention-1-year
+    description: Minimum audit retention gate (full 6-year retention checked separately).

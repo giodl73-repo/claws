@@ -6,7 +6,7 @@
  * count, and tension count. Display format:
  *   "{N} tools: {risk breakdown} | {OBO count} OBO boundaries | {tension count} tension"
  *
- * @module claws-lsp/providers/code-lens
+ * @module openclaw-lsp/providers/code-lens
  */
 
 import type { GovernanceIRLike } from '../compilation-host.js';

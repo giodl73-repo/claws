@@ -1,0 +1,195 @@
+name: S33-write-to-temp-atomicity
+series: cap-integration
+version: 2
+specs: [CL-10, CL-06]
+description: >
+  Validates the write-ahead architecture for PATCH operations: write to a
+  temp file, compile from the temp file, and atomically rename to the target
+  on success. On compile failure the temp file is deleted and the original
+  remains untouched. On crash during PATCH, startup health detects orphaned
+  temp files and recovers. No dirty state is left on disk after any failure
+  mode. This architecture prevents the workspace from entering an
+  uncompilable state due to partial writes.
+
+expect:
+  write_path:
+    writes_to_temp_first: true
+    compiles_from_temp: true
+    renames_on_success: true
+    temp_deleted_on_compile_failure: true
+    original_unchanged_on_failure: true
+  crash_recovery:
+    startup_detects_orphan_temps: true
+    orphan_temp_deleted_on_recovery: true
+    original_file_verified_intact: true
+  atomicity:
+    no_partial_content_on_disk: true
+    concurrent_read_sees_old_or_new: true
+    never_sees_temp_content: true
+
+simulate:
+  failures: [compile_failure, crash_mid_write, crash_after_temp_before_rename]
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner sends PATCH /api/oc/TOOLS.md to add a new tool. The
+  write path creates a temp file (TOOLS.md.tmp), writes the patched content,
+  and invokes the compiler on the temp file. Scenario 1: compilation succeeds
+  — the temp file is atomically renamed to TOOLS.md, the old content is gone.
+  Scenario 2: the patched content has a syntax error that the compiler rejects
+  — the temp file is deleted and TOOLS.md retains its original content. Scenario
+  3: the process crashes after writing the temp file but before renaming — on
+  restart, health check finds TOOLS.md.tmp, verifies TOOLS.md is intact, and
+  deletes the orphan. Scenario 4: the process crashes after rename but before
+  compilation completes — on restart, the file is the new content but IR is
+  stale; the startup sequence triggers a full recompile. In all cases, the
+  workspace is never left in a half-written state.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The temp file must be written to the same filesystem as the target to
+      ensure atomic rename. If the temp directory is on a different mount
+      (e.g., /tmp on Linux), rename() becomes a copy-then-delete which is
+      not atomic. The temp file must be created adjacent to the target:
+      TOOLS.md.tmp in the same directory as TOOLS.md. The naming convention
+      must be deterministic (not random UUID) so the recovery process can
+      identify which target file the temp belongs to.
+    spec_impact: "CL-10 write-ahead — temp file adjacent to target (same directory, .tmp suffix); deterministic naming"
+    pitfall: P-286
+
+  - id: F02
+    severity: critical
+    description: >
+      On compile failure, the temp file must be deleted before the error
+      response is sent. If the deletion is deferred (e.g., in a finally
+      block that might not run on certain error paths), an orphaned temp
+      file accumulates. The delete must be synchronous and verified — if
+      unlink fails (EACCES on Windows due to antivirus lock), the error
+      response must include a warning that manual cleanup is needed.
+    spec_impact: "CL-10 write-ahead — synchronous temp deletion on compile failure; warn if unlink fails"
+    pitfall: P-286
+
+  - id: F03
+    severity: critical
+    description: >
+      The original file must not be modified or moved during the PATCH
+      operation. If the implementation writes to the original (even
+      partially) before verifying compilation, any failure leaves the
+      original corrupted. The only mutation of the original is the atomic
+      rename from the temp file. Read operations against the original must
+      continue to see the pre-PATCH content until the rename completes.
+    spec_impact: "CL-10 write-ahead — original file is immutable during PATCH; only mutated via atomic rename"
+    pitfall: P-286
+
+  - id: F04
+    severity: major
+    description: >
+      Crash recovery at startup must follow a specific sequence: (1) scan
+      the workspace for .tmp files, (2) for each .tmp file, check if the
+      corresponding target file exists and is valid, (3) if the target is
+      intact, delete the .tmp (it was an incomplete PATCH), (4) if the
+      target is missing or corrupt, attempt to restore from the .tmp (it
+      was a completed rename that lost the original), (5) log every
+      recovery action. The startup sequence must complete before the server
+      accepts any requests.
+    spec_impact: "CL-10 startup recovery — ordered temp-file scan, integrity check, restore-or-delete, log, then serve"
+    pitfall: P-286
+
+  - id: F05
+    severity: major
+    description: >
+      Windows-specific: atomic rename via MoveFileEx with
+      MOVEFILE_REPLACE_EXISTING is atomic on NTFS but not on FAT32. The
+      rename function must verify the filesystem type or use a two-phase
+      strategy (rename original to .bak, rename temp to target, delete .bak)
+      on non-NTFS. On Linux, rename() on the same filesystem is atomic.
+      On macOS, renamex_np with RENAME_SWAP is preferred. The write-ahead
+      module must abstract platform differences.
+    spec_impact: "CL-10 write-ahead — platform-specific atomic rename: MoveFileEx on NTFS, renamex_np on macOS, rename on Linux"
+    pitfall: P-286
+
+  - id: F06
+    severity: major
+    description: >
+      Concurrent PATCH requests to the same file must be serialized. If two
+      PATCHes write two temp files simultaneously, both compile, and both
+      attempt rename, the last rename wins and the first PATCH's changes are
+      silently lost. The per-file write lock (P-287) must be acquired before
+      creating the temp file. The second PATCH waits or receives 409 Conflict.
+    spec_impact: "CL-10 write lock — per-file lock acquired before temp file creation; 409 on contention"
+    pitfall: P-286
+
+  - id: F07
+    severity: major
+    description: >
+      The compiler must be invoked on the temp file path, not the target
+      path. If the compiler reads the file by path and the path is the
+      target, it reads the old content. The compiler input must be explicitly
+      set to the temp file. Additionally, the compiled IR must reference the
+      target path (not the temp path) in its metadata, so that after rename
+      the IR path is correct without needing a post-rename fixup.
+    spec_impact: "CL-06 compilation — compile from temp file path; IR metadata references target path for post-rename correctness"
+    pitfall: P-286
+
+  - id: F08
+    severity: major
+    description: >
+      Multi-file atomicity (batch PATCH): when a batch modifies 3 files,
+      all 3 temp files must be created, all 3 compiled, and all 3 renamed
+      atomically. If file 2 fails compilation, file 1's temp must also be
+      cleaned up (not renamed). This requires a write-ahead log (WAL) that
+      tracks the batch state: all-or-nothing semantics. The WAL itself must
+      be crash-safe (fsync before commit).
+    spec_impact: "CL-10 batch write-ahead — WAL for multi-file atomicity; all-or-nothing rename; fsync WAL before commit"
+    pitfall: P-286
+
+  - id: F09
+    severity: warning
+    description: >
+      The temp file must have restrictive permissions (owner read/write only)
+      to prevent other processes from reading partially-written content. On
+      Windows, the temp file should be created with FILE_ATTRIBUTE_TEMPORARY
+      and not shared. If the temp file is world-readable, a concurrent reader
+      (e.g., the file watcher) might pick it up as a new OC file and attempt
+      to compile it, causing a spurious compilation error.
+    spec_impact: "CL-10 write-ahead — restrictive temp file permissions; exclude .tmp from watcher glob"
+    pitfall: P-286
+
+  - id: F10
+    severity: warning
+    description: >
+      Disk space exhaustion during temp file write must be handled gracefully.
+      If the disk is full, the temp file write fails but the original is
+      intact. The error response must clearly indicate ENOSPC and not attempt
+      the compile step. The partial temp file must be cleaned up. If the
+      cleanup also fails (disk truly full, no space for directory entry
+      deletion), log the failure for manual intervention.
+    spec_impact: "CL-10 write-ahead — ENOSPC handling: fail fast, clean up temp, clear error message, no compile attempt"
+    pitfall: P-286
+
+  - id: F11
+    severity: warning
+    description: >
+      The ETag/version counter must only be incremented after the successful
+      rename, not after the successful compile. If the version is incremented
+      after compile but before rename, and the rename fails, the version is
+      ahead of the actual content. Concurrent readers would see a version bump
+      with no content change, causing phantom If-Match failures. Version
+      increment must be atomic with the rename.
+    spec_impact: "CL-10 versioning — version increment atomic with rename; never increment on compile success alone"
+    pitfall: P-286
+
+  - id: F12
+    severity: note
+    description: >
+      Observability: every temp-file lifecycle event (create, compile-start,
+      compile-end, rename, delete, recovery) should emit a structured log
+      entry with the target file path, temp file path, and duration. This
+      allows operators to diagnose slow PATCHes (long compile times) and
+      detect temp file accumulation (cleanup failures). The log level for
+      normal operations is debug; failures are warn or error.
+    spec_impact: "CL-10 observability — structured log for temp-file lifecycle; debug for normal, warn/error for failures"
+    pitfall: null

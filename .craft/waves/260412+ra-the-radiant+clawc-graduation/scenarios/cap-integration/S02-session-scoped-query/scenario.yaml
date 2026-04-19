@@ -1,0 +1,186 @@
+name: S02-session-scoped-query
+series: cap-integration
+version: 2
+specs: [CL-10, CL-07]
+description: >
+  Validates that GET /api/oc/TOOLS.md#Tools?session=cron:daily-triage returns
+  a session-scoped subset of tools. Session types (main, cron, ephemeral,
+  delegated) determine which tools are visible and at what default risk tier.
+  A cron session defaults to R1-R2 tools only unless the session manifest
+  explicitly whitelists higher-risk tools. The response includes session
+  metadata (type, id, default_risk_ceiling) alongside the filtered tool list.
+  The main session returns all tools with no filtering.
+
+expect:
+  http:
+    method: GET
+    path: /api/oc/TOOLS.md#Tools?session=cron:daily-triage
+    status: 200
+    content_type: application/json
+  response_shape:
+    root_has: [data, meta, session]
+    session_has: [id, type, default_risk_ceiling, tool_count]
+    session_type_value: cron
+    session_default_risk_ceiling: R2
+    data_has: items
+    items_all_risk_lte: R2
+  main_session:
+    path: /api/oc/TOOLS.md#Tools?session=main
+    returns_all_tools: true
+    no_risk_ceiling: true
+  unknown_session:
+    path: /api/oc/TOOLS.md#Tools?session=unknown:xyz
+    status: 400
+    error_has: [code, message, valid_sessions]
+  timing:
+    response_ms_max: 50
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A background cron agent queries the OC workspace for available tools scoped
+  to its session. The workspace has 8 tools: 3 at R1, 2 at R2, 2 at R3, and
+  1 at R5. The cron:daily-triage session has a default risk ceiling of R2,
+  meaning only the 5 R1-R2 tools should be visible. The partner sends
+  GET /api/oc/TOOLS.md#Tools?session=cron:daily-triage and expects a filtered
+  tool list with session metadata. A separate request with ?session=main
+  returns all 8 tools. A request with ?session=unknown:xyz returns 400 with
+  available session IDs. The session filtering happens at the API layer, not
+  in the partner UI — the partner must trust the API to enforce the ceiling.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      If the session parameter is omitted entirely, the API must decide between
+      two behaviors: treat it as the main session (all tools) or reject with
+      400 requiring explicit session. Defaulting to main is convenient but
+      dangerous — a partner that forgets the session param accidentally gets
+      full tool access. Requiring explicit session is safer but breaks
+      backward compatibility with Layer 1 clients that don't know about
+      sessions. The contract must specify the default.
+    spec_impact: "CL-07 session scoping — define behavior when ?session is omitted: default to main or require explicit"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      A cron session's risk ceiling filters out R3+ tools, but the session
+      manifest may explicitly whitelist specific R3 tools needed for the
+      cron job (e.g., a triage bot needs an R3 'create-issue' tool). The
+      API must check the session manifest's whitelist after applying the
+      ceiling. Without manifest override support, cron sessions cannot
+      access any tool above R2, making them useless for non-trivial
+      automation.
+    spec_impact: "CL-07 session manifest — support explicit tool whitelist that overrides default_risk_ceiling per session"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The session.tool_count in the response must match the actual number of
+      items in data.items. If the count is computed from the workspace total
+      and the items are filtered, a mismatch confuses the partner into
+      thinking tools are missing from the response body. The count must be
+      computed after session filtering, not before.
+    spec_impact: "CL-07 session response — session.tool_count must equal len(data.items) after filtering"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      When session=unknown:xyz returns 400, the valid_sessions array must
+      be dynamically generated from the workspace's session registry, not
+      hardcoded. If a new session type is added (e.g., ephemeral:review-42),
+      it must appear in valid_sessions immediately. Stale session lists
+      cause partners to retry with outdated IDs in a loop.
+    spec_impact: "CL-07 session validation — 400 response must include dynamically generated valid_sessions from workspace registry"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Session type validation must distinguish between invalid format
+      (session=foobar, no colon) and valid format but unknown ID
+      (session=cron:nonexistent). The first is a 400 with 'invalid session
+      format', the second is a 400 with 'unknown session ID'. Partners
+      need distinct error codes to display appropriate UI messages —
+      'check your session syntax' vs 'this session no longer exists'.
+    spec_impact: "CL-07 session validation — distinct error codes for format errors vs unknown session IDs"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The main session returns all tools with no risk ceiling, but it should
+      still include session metadata (type: 'main', default_risk_ceiling: null,
+      tool_count: N). If the response shape changes between session types
+      (main omits the session block), partners must branch on response shape
+      rather than reading a consistent structure. Uniform response shape
+      regardless of session type simplifies partner integration.
+    spec_impact: "CL-07 session response — main session includes session block with type: 'main' and null ceiling"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      A delegated session (session=delegated:agent-42) inherits the parent
+      session's risk ceiling but may have additional restrictions. If the
+      parent is cron:daily-triage (ceiling R2) and delegates to an agent,
+      the agent session must not exceed R2 even if the agent manifest
+      requests R3. The API must enforce transitive ceiling inheritance
+      for delegated sessions.
+    spec_impact: "CL-07 delegated sessions — transitive ceiling: delegated session ceiling <= parent session ceiling"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Session-scoped queries interact with fleet locks. A tool may be within
+      the session's risk ceiling (R2) but fleet-locked to disabled. The
+      response should include the tool in data.items (it's visible to the
+      session) but with lock.editable: false. If fleet-locked tools are
+      silently filtered out, the session sees fewer tools than expected
+      and cannot distinguish 'not available due to ceiling' from 'locked
+      by fleet'.
+    spec_impact: "CL-07 session + fleet lock — fleet-locked tools visible in session with lock info; not silently filtered"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The ?session parameter applies to any oc:// path, not just TOOLS.md.
+      GET /api/oc/AGENTS.md?session=cron:daily-triage should return a
+      session-scoped view of agent configuration. If session filtering only
+      works on TOOLS.md, the API has an inconsistency — some paths honor
+      sessions and others ignore them. The contract must specify which
+      OC files are session-aware.
+    spec_impact: "CL-07 session scoping — define which OC files are session-aware vs session-agnostic"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      Performance: session filtering should happen in-memory against the
+      compiled IR, not by re-reading and re-parsing OC files per request.
+      If the session filter triggers a file read, concurrent session queries
+      would thrash the file system. The compiled IR must include pre-indexed
+      risk levels so session filtering is a simple array filter, not an
+      I/O operation.
+    spec_impact: "CL-07 session filtering — must operate on compiled IR risk index, not raw file reads"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Session metadata should include a created_at timestamp and ttl field
+      for ephemeral sessions. A cron session created 24 hours ago may have
+      an expired TTL, meaning the API should return 410 Gone instead of
+      stale session data. Without TTL enforcement, zombie sessions
+      accumulate in the registry and partners may query sessions that no
+      longer correspond to active agents.
+    spec_impact: "CL-07 session lifecycle — ephemeral/cron sessions should have TTL; 410 Gone for expired sessions"
+    pitfall: null

@@ -1,0 +1,206 @@
+name: S16-dry-run-patch
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12]
+description: >
+  Validates that PATCH /api/chunks/connections/outlook?dryRun=true
+  executes the full validation and governance pipeline but does NOT
+  write any files or trigger recompilation. Dry-run mode lets the
+  Companion App preview the effect of an edit — including governance
+  warnings, risk level changes, and validation errors — before
+  committing. The response includes the governance preview (what would
+  change) and the file hash remains unchanged after the request.
+
+expect:
+  dry_run_patch:
+    endpoint: "PATCH /api/chunks/connections/outlook?dryRun=true"
+    request_body:
+      field: prompt
+      value: "Updated system prompt for Outlook connection"
+    response:
+      status: 200
+      dryRun: true
+      governance_preview:
+        has: [warnings, riskLevel, affectedTools, wouldRecompile]
+      file_hash_unchanged: true
+      no_recompile_triggered: true
+      no_audit_event: true
+  dry_run_r5_rejection:
+    endpoint: "PATCH /api/chunks/connections/outlook?dryRun=true"
+    request_body:
+      toolId: send-email
+      field: approval
+      value: disabled
+    response:
+      status: 422
+      error: R5_NON_NEGOTIABLE
+      dryRun: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A Companion App user wants to change the system prompt on the Outlook
+  connection but is unsure if the edit will trigger governance warnings.
+  They call PATCH /api/chunks/connections/outlook?dryRun=true with the
+  new prompt. The server runs the full validation pipeline: schema
+  validation, R5 checks, governance simulation. The prompt change would
+  trigger a warning about increased scope but no errors. The response
+  returns the governance preview with the warning. The file hash of
+  connections.md is checked before and after — it must be identical.
+  No recompilation runs. The user then tries a dry-run on disabling an
+  R5 tool and gets the same 422 R5_NON_NEGOTIABLE error they would get
+  on a real patch.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Dry-run R5 rejection must produce the same error as a real PATCH.
+      If dryRun=true returns a softer error (e.g., 200 with a warning
+      instead of 422), the user gets a false positive — they think the
+      edit will succeed and are surprised when the real PATCH fails. The
+      error response must be byte-identical except for the dryRun:true
+      field. This applies to all validation errors, not just R5.
+    spec_impact: "CL-10 dryRun — validation errors identical to real PATCH, plus dryRun:true marker"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Dry-run success must return a governance preview with actionable
+      detail. The preview must include: warnings (e.g., "prompt change
+      increases tool scope"), risk level assessment (current vs proposed),
+      list of affected tools, and whether a recompile would be triggered.
+      A dry-run that returns only "OK" without preview data defeats the
+      purpose — the user needs to see what would happen before committing.
+    spec_impact: "CL-10 dryRun success — governance preview with warnings, riskLevel, affectedTools, wouldRecompile"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      File hash must be unchanged after a dry-run. The server must verify
+      that no file writes occurred, even internally. If the implementation
+      writes to a temp file and then discards it, a crash between write
+      and discard could leave stale temp files. The safest implementation
+      runs the validation pipeline in a read-only mode that never
+      instantiates a file writer. Post-request file hash verification
+      is a safety net, not the primary mechanism.
+    spec_impact: "CL-10 dryRun — read-only pipeline mode, no temp file writes"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      No recompile must be triggered by a dry-run. The governance
+      preview should be computed from the current GovernanceIR plus
+      the proposed change, without invoking the compiler. If the
+      dry-run triggers a recompile, it has side effects (compilation
+      cache updated, compilation timestamp changed) that violate the
+      dry-run contract. The preview must use a hypothetical merge of
+      the proposed change into the current IR, not a real compilation.
+    spec_impact: "CL-10 dryRun — hypothetical governance merge, no compiler invocation"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      Dry-run should NOT create an audit event. Audit events record
+      actual state changes. A dry-run that logs an audit event would
+      pollute the trail with non-events, inflating the chain and
+      confusing compliance reviews. If the organization requires
+      logging of dry-run attempts for security monitoring, it should
+      be a separate log category (category: 'dry-run-attempt') that
+      is excluded from the governance audit chain.
+    spec_impact: "CL-10 dryRun — no governance audit event, optional separate dry-run log"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      Dry-run on the batch endpoint (POST /api/batch?dryRun=true) must
+      also be supported. A batch dry-run validates all operations in
+      the batch and returns a combined governance preview. If only the
+      single-resource PATCH supports dryRun but the batch endpoint does
+      not, users must decompose their batch into individual dry-runs,
+      which does not capture cross-operation interactions (e.g., two
+      edits that together trigger a risk escalation but individually
+      do not).
+    spec_impact: "CL-10 dryRun — supported on batch endpoint with combined preview"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The dryRun query parameter must be strictly boolean. Values like
+      dryRun=false, dryRun=0, or the absence of the parameter must all
+      mean "real PATCH." If the server treats any truthy string as
+      dry-run (e.g., dryRun=yes, dryRun=1), inconsistent clients may
+      accidentally trigger real writes thinking they are in dry-run
+      mode. The API must accept only dryRun=true as the dry-run trigger.
+    spec_impact: "CL-10 dryRun parameter — only 'true' activates, all other values = real PATCH"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The governance preview may include warnings that reference current
+      workspace state (e.g., "this prompt change conflicts with fleet
+      policy X"). If the workspace state changes between the dry-run
+      and the real PATCH, the preview is stale. The response should
+      include a previewValidUntil timestamp or a workspace version ETag
+      that the client can use to detect staleness before committing.
+    spec_impact: "CL-10 dryRun response — include workspace version for staleness detection"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Dry-run must be idempotent — calling it multiple times with the
+      same input must return the same result (assuming no workspace
+      changes between calls). If the dry-run has side effects (e.g.,
+      incrementing a request counter, updating a rate limit bucket),
+      repeated dry-runs could exhaust rate limits meant for real edits.
+      Dry-runs should be excluded from edit rate limiting.
+    spec_impact: "CL-10 dryRun — idempotent, excluded from edit rate limits"
+    pitfall: null
+
+  - id: F10
+    severity: note
+    description: >
+      The governance preview for a prompt change should include a diff
+      of the governance impact — what changes from the current state.
+      Simply returning the full proposed governance for the tool does
+      not help the user understand what their edit changes. A diff-style
+      preview (e.g., riskLevel: R2 → R3, newWarnings: [...]) is more
+      actionable than a flat snapshot.
+    spec_impact: "CL-10 dryRun governance preview — diff format showing current vs proposed"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Performance: dry-run should be faster than a real PATCH since it
+      skips file writes and recompilation. If the governance simulation
+      is expensive (e.g., requires full IR traversal), the dry-run may
+      still be slow. The response should include a processingMs field
+      so the client can display a "this edit would take ~Xms to apply"
+      estimate, setting user expectations for the real PATCH.
+    spec_impact: "CL-10 dryRun response — include processingMs for performance estimation"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The dry-run response should include a confirmationToken — a
+      short-lived opaque token that the client can pass with the real
+      PATCH to skip re-validation. This optimizes the common flow
+      where a user dry-runs, reviews the preview, and immediately
+      commits. Without the token, the server re-runs the full
+      validation pipeline on the real PATCH, duplicating work. The
+      token must expire quickly (30 seconds) to prevent stale commits.
+    spec_impact: "CL-10 dryRun — optional confirmationToken for fast-path real PATCH"
+    pitfall: null

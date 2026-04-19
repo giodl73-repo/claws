@@ -84,7 +84,7 @@ findings:
     description: >
       In enterprise fleets, absent capabilities should be an error, not
       a warning. The fleet policy can set fleet.requireCapabilities: true,
-      which elevates CLAWS-W040 to CLAWS-E040 for all fleet members. This
+      which elevates CLAWS-W040 to OC-POLICY-E040 for all fleet members. This
       ensures no workspace joins the fleet without a capabilities section.
     spec_impact: "CL-05 fleet — mandatory capabilities policy"
     pitfall: "P-159"

@@ -1,0 +1,200 @@
+name: S36-delegation-chain-full
+series: cap-integration
+version: 2
+specs: [CL-08, CL-10, CL-12]
+description: >
+  Validates the full delegation chain model: Agent-A delegates to Agent-B,
+  which delegates to Agent-C, which calls an R5 tool. The ApprovalRequestEvent
+  carries an ordered delegation_chain array, the effective trust tier is
+  min(chain), depth limit is enforced (max 5), cycle detection blocks A->B->A
+  loops, and approval routes directly to the human (not hop-by-hop through
+  intermediate agents). Suspended or crashed intermediate agents do not block
+  approval delivery.
+
+expect:
+  delegation_chain:
+    ordered_array: true
+    per_hop_trust_tier: true
+    per_hop_reason: true
+    per_hop_agent_id: true
+  trust_tier:
+    effective_is_min_of_chain: true
+    escalation_within_chain_block.source: 'r5'
+  limits:
+    max_depth: 5
+    cycle_detection: true
+    cycle_detection_at_delegation_time: true
+  approval_routing:
+    direct_to_human: true
+    not_hop_by_hop: true
+    survives_intermediate_crash: true
+
+simulate:
+  failures: [intermediate_agent_crash, intermediate_agent_suspended]
+  halt: null
+  budget: null
+
+problem: >
+  A workspace uses multi-agent delegation. Agent-A (trust tier 3, "code
+  reviewer") delegates file editing to Agent-B (trust tier 2, "code writer"),
+  which delegates tool invocation to Agent-C (trust tier 1, "tool executor").
+  Agent-C attempts to invoke send-email, an R5 tool that requires human
+  approval. The system must: (1) build a delegation_chain of [A, B, C] with
+  per-hop metadata, (2) compute effective trust tier as min(3, 2, 1) = 1,
+  (3) route the approval request directly to the human, not to Agent-B or
+  Agent-A, (4) handle the case where Agent-B crashes while the approval is
+  pending — the human can still approve and Agent-C can still receive the
+  result. Separately, Agent-C tries to delegate to Agent-A, which would
+  create a cycle — this must be blocked at delegation time with a clear error.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The delegation_chain must be an ordered array carried in the
+      ApprovalRequestEvent, not reconstructed from scattered session metadata.
+      Each entry includes: agent_id, trust_tier, delegation_reason, and
+      delegated_at timestamp. If the chain is reconstructed by walking
+      session parents, a crashed intermediate agent's session may be
+      unavailable, breaking the reconstruction. The chain must be built
+      incrementally: each delegation appends to the existing chain.
+    spec_impact: "CL-08 delegation — chain is an ordered array appended per-delegation, not reconstructed; carried in events"
+    pitfall: P-305
+
+  - id: F02
+    severity: critical
+    description: >
+      Cycle detection must happen at delegation time, not at tool invocation
+      time. If Agent-C delegates to Agent-A (creating A->B->C->A), the
+      delegation itself must be rejected with a DELEGATION_CYCLE error. If
+      detection happens only at invocation, the cycle has already been
+      established and the agents may be in an infinite delegation loop.
+      Detection is by agent_id: if the proposed delegate's agent_id appears
+      anywhere in the current chain, reject.
+    spec_impact: "CL-08 delegation — cycle detection at delegation time by agent_id; DELEGATION_CYCLE error; no infinite loops"
+    pitfall: P-305
+
+  - id: F03
+    severity: critical
+    description: >
+      The depth limit (max 5) must be enforced at delegation time, not at
+      chain inspection. If the chain already has 5 entries and Agent-F tries
+      to delegate to Agent-G, the delegation is rejected with
+      DELEGATION_DEPTH_EXCEEDED. The limit is configurable via fleet policy
+      but defaults to 5. The error includes the current chain length and
+      the max allowed depth.
+    spec_impact: "CL-08 delegation — max depth 5 (configurable); enforced at delegation time; error includes chain length"
+    pitfall: P-305
+
+  - id: F04
+    severity: critical
+    description: >
+      Approval must route directly to the human, bypassing all intermediate
+      agents in the chain. If approval is routed hop-by-hop (C asks B, B
+      asks A, A asks human), a crashed intermediate agent blocks the entire
+      chain. Direct-to-human routing means the ApprovalRequestEvent is
+      delivered to the human's session/UI regardless of intermediate agent
+      state. The approval result is then delivered directly to the requesting
+      agent (C), not back through the chain.
+    spec_impact: "CL-08 approval routing — direct to human; result delivered directly to requesting agent; no hop-by-hop"
+    pitfall: P-305
+
+  - id: F05
+    severity: major
+    description: >
+      The effective trust tier is min(chain). Agent-A at tier 3 delegates
+      to Agent-B at tier 2 — Agent-B's effective tier is min(3, 2) = 2.
+      Agent-B delegates to Agent-C at tier 1 — effective is min(3, 2, 1) = 1.
+      A malicious agent cannot escalate by claiming a higher tier than its
+      delegator. The trust tier is computed from the chain, not from the
+      agent's self-declared tier alone. If an agent's declared tier is
+      higher than the delegator's, the effective tier is still capped.
+    spec_impact: "CL-08 trust — effective tier = min(chain); agent cannot exceed delegator's effective tier"
+    pitfall: P-305
+
+  - id: F06
+    severity: major
+    description: >
+      The delegation chain must be immutable once built. Agent-C must not
+      be able to modify the chain entries for Agent-A or Agent-B (e.g.,
+      to elevate their trust tiers). The chain is append-only: each agent
+      can only add its own entry. Integrity could be ensured by signing
+      each chain entry with the delegating agent's session key, or by
+      maintaining the chain in a tamper-evident structure (e.g., hash chain).
+    spec_impact: "CL-08 delegation — chain is append-only; agents cannot modify prior entries; integrity via hash chain or signing"
+    pitfall: P-305
+
+  - id: F07
+    severity: major
+    description: >
+      When an intermediate agent (B) crashes while an approval is pending,
+      the approval workflow must continue. The human approves, and the result
+      is delivered to Agent-C (the requester). If Agent-B's crash causes its
+      session to be cleaned up, and the approval result references B's session,
+      the delivery fails. The approval result must reference the requesting
+      agent's session (C), not the delegating chain. The delivery path is
+      human -> approval service -> Agent-C, with no intermediate hops.
+    spec_impact: "CL-08 approval resilience — result references requesting agent session; survives intermediate cleanup"
+    pitfall: P-305
+
+  - id: F08
+    severity: major
+    description: >
+      The delegation_chain in the ApprovalRequestEvent must include enough
+      context for the human to make an informed decision. Each hop should
+      show: agent_id, agent_name (human-readable), trust_tier, and
+      delegation_reason (e.g., "code review -> code writing -> tool execution").
+      Without the reason chain, the human sees "Agent-C wants to send email"
+      but not WHY the chain exists or what the original task was.
+    spec_impact: "CL-08 approval context — chain entries include agent_name and delegation_reason for human review"
+    pitfall: P-305
+
+  - id: F09
+    severity: warning
+    description: >
+      Edge case: Agent-A delegates to Agent-B, Agent-B completes its task
+      and terminates, then Agent-A delegates to Agent-C. Agent-C's chain
+      should be [A, C], not [A, B, C]. The chain reflects the active
+      delegation path, not the historical delegation graph. If B's entry
+      persists in A's delegation state, new delegations carry stale chain
+      entries. The chain must be scoped to the current delegation path.
+    spec_impact: "CL-08 delegation — chain scoped to active path; terminated agents removed from delegation state"
+    pitfall: P-305
+
+  - id: F10
+    severity: warning
+    description: >
+      The approval queue must persist delegation chain context. If the server
+      restarts while an approval is pending, the queue entry must include
+      the full delegation_chain so that on restart, the approval can be
+      displayed to the human with full context. If only the requesting
+      agent_id is persisted, the chain context is lost and the human cannot
+      evaluate the delegation path.
+    spec_impact: "CL-08 approval persistence — full delegation_chain serialized in queue entry; survives restart"
+    pitfall: P-305
+
+  - id: F11
+    severity: warning
+    description: >
+      Audit trail for delegation: each delegation event must be recorded in
+      the audit chain as a DELEGATION_CREATED event with the full chain
+      snapshot at that point. This allows security review of delegation
+      patterns (e.g., Agent-X always delegates to Agent-Y, which always
+      triggers R5 approvals). The audit event is separate from the approval
+      event — delegation itself is audited regardless of whether a tool
+      invocation follows.
+    spec_impact: "CL-10 audit — DELEGATION_CREATED event with chain snapshot; separate from approval events"
+    pitfall: P-305
+
+  - id: F12
+    severity: note
+    description: >
+      Performance: chain validation (cycle detection + depth check) must be
+      O(n) where n is the chain length (max 5). Do not use graph traversal
+      algorithms designed for larger structures. A simple array scan for
+      duplicate agent_id and length check is sufficient. If the max depth
+      is raised to 20+ in the future, the scan is still fast. Premature
+      optimization (e.g., bloom filter for cycle detection) is unnecessary
+      at depth 5.
+    spec_impact: "CL-08 delegation — O(n) validation; simple array scan; no premature optimization at depth <= 5"
+    pitfall: null

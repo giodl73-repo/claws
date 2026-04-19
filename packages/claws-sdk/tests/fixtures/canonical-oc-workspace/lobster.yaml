@@ -1,0 +1,31 @@
+name: canonical-oc-lobster
+description: >
+  Canonical compile benchmark lobster federation. Declares three handlers
+  so the lobster reader has real work to parse and the emit path renders
+  non-trivial content. Keeps the step graph intentionally small so the
+  dominant cost is reader work, not lobster traversal.
+
+steps:
+  - name: scan
+    command: npm audit --audit-level=moderate
+  - name: lint
+    command: npm run lint
+  - name: typecheck
+    command: npx tsc --noEmit
+  - name: test-unit
+    command: npx vitest run --project unit
+  - name: test-integration
+    command: npx vitest run --project integration
+  - name: policy-digest
+    command: node scripts/governance/policy-digest.mjs
+  - name: emit-verify
+    command: node scripts/governance/emit-verify.mjs
+  - name: audit-flush
+    command: node scripts/governance/audit-flush.mjs
+
+dependencies:
+  test-unit: [typecheck, lint]
+  test-integration: [test-unit]
+  policy-digest: [test-unit, scan]
+  emit-verify: [policy-digest]
+  audit-flush: [emit-verify]

@@ -17,7 +17,7 @@ expect:
     analysis:
       rules_evaluated: true
   violations:
-    - code: CLAWS-E200
+    - code: OC-POLICY-E200
       message: "Emit path collision — generated skill directory 'governance' already exists as user-authored skill"
       severity: error
   warnings: []
@@ -54,7 +54,7 @@ findings:
       The EMIT phase must scan the target directory for existing files before
       writing any output. If the directory exists and contains files not
       previously emitted by claws (determined by absence of a .claws-generated
-      marker or metadata), the emit must fail with CLAWS-E200. This is the
+      marker or metadata), the emit must fail with OC-POLICY-E200. This is the
       core lossless guarantee: claws never destroys user content.
     spec_impact: "CL-04 EMIT — pre-write collision scan requirement"
     pitfall: P-237

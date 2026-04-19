@@ -1,7 +1,7 @@
 /**
  * @bic/openclaw-lsp — language server for governance compilation.
  *
- * @module claws-lsp
+ * @module openclaw-lsp
  */
 
 export { CompilationHost, hashContent } from './compilation-host.js';

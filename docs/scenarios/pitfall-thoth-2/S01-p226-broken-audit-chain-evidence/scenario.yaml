@@ -21,7 +21,7 @@ expect:
       break_scope: 1
       post_break_entries: 5479
   violations:
-    - code: CLAWS-E226
+    - code: OC-POLICY-E226
       message: "Audit chain break at entry 4521 — all 5479 post-break entries have uncertain provenance"
       severity: error
   warnings:

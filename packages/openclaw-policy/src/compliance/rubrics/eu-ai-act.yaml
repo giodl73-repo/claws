@@ -1,0 +1,29 @@
+id: eu-ai-act
+version: "1.0"
+framework: EU AI Act (Regulation 2024/1689)
+requirements:
+  - id: Art.9
+    title: Risk management system
+    kind: static
+    predicate: has-governance-rules
+    description: A governance rule surface must exist covering identified risks.
+  - id: Art.12
+    title: Record-keeping — automatic event logs
+    kind: structural
+    predicate: audit-tamper-seal-present
+    description: Tamper-evident audit chain for high-risk systems.
+  - id: Art.13
+    title: Transparency — instructions for use
+    kind: static
+    predicate: model-allowlist-nonempty
+    description: Model allowlist must be declared so downstream users know which models serve.
+  - id: Art.14
+    title: Human oversight — review path for high-risk actions
+    kind: static
+    predicate: every-r5-has-irreversible-external
+    description: R5 tools must route through human review via IRREVERSIBLE_EXTERNAL.
+  - id: Art.19
+    title: Automatically generated logs retained
+    kind: structural
+    predicate: audit-retention-1-year
+    description: Minimum 1-year retention floor for Article 19 obligations.

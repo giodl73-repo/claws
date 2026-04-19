@@ -1,0 +1,194 @@
+name: S32-stale-compilation-detection
+series: cap-integration
+version: 2
+specs: [CL-10, CL-14, CL-06]
+description: >
+  Validates that when an OC file is modified (externally or via API) but not
+  yet recompiled, every GET endpoint detects the staleness. The response
+  includes a stale_since timestamp, chunks carry compilationStale: true, and
+  the file watcher triggers recompilation within 500ms. Deleted files must
+  not return phantom 200 responses from cached IR. The stale-detection
+  utility is a shared module used by all read paths (Layer 1, Layer 2, chunk
+  assembly).
+
+expect:
+  staleness:
+    every_get_checks_mtime: true
+    stale_response_includes_stale_since: true
+    stale_since_format: ISO_8601_UTC
+    chunks_include_compilationStale_flag: true
+  watcher:
+    recompile_trigger_within_ms: 500
+    debounce_coalesces_rapid_edits: true
+  phantom_prevention:
+    deleted_file_returns_404: true
+    deleted_file_triggers_recompile: true
+  shared_module:
+    used_by_layer1: true
+    used_by_layer2: true
+    used_by_chunk_assembly: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner reads TOOLS.md via GET /api/oc/TOOLS.md and receives
+  fresh data with compilation_id C1. An external editor (VS Code) modifies
+  TOOLS.md on disk, adding a new tool. The partner issues another GET before
+  the watcher recompiles. The response must indicate staleness so the partner
+  can show a "recompiling..." indicator. After 500ms the watcher fires, a new
+  compilation C2 is produced, and subsequent GETs return fresh data. Separately,
+  GOVERNANCE.md is deleted externally. The partner requests GET
+  /api/oc/GOVERNANCE.md — the cached IR still has it, but the file is gone.
+  The API must return 404, not a phantom 200 from the stale cache. The
+  challenge is ensuring that stale detection is consistent across all read
+  surfaces and that the watcher-to-recompile pipeline is fast enough to
+  minimize the staleness window.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      Every GET handler must call the stale-detection utility before returning
+      cached IR data. This means a stat() call on the source file, comparing
+      its mtime against the compilation timestamp in the IR metadata. If any
+      GET path skips this check (e.g., the chunk assembly path assumes IR is
+      always fresh), stale data leaks to partners without any warning. The
+      stale check must be mandatory infrastructure, not opt-in per route.
+    spec_impact: "CL-10 GET paths — mandatory stale-detection call before returning any cached IR data"
+    pitfall: P-284
+
+  - id: F02
+    severity: critical
+    description: >
+      A file deleted externally must return 404, not a phantom 200 from the
+      cache. The stale-detection utility must distinguish between "file
+      modified" (stale_since + 200) and "file missing" (404 + governance
+      warning). If the utility only checks mtime, a missing file throws
+      ENOENT which must be caught and converted to 404. Returning stale
+      content for a deleted file is worse than a temporary 404 because the
+      partner cannot edit or delete a phantom resource.
+    spec_impact: "CL-10 deleted files — ENOENT from stat converts to 404; never return cached IR for missing files"
+    pitfall: P-284
+
+  - id: F03
+    severity: major
+    description: >
+      The stale_since field must be the file's mtime (when the modification
+      happened), not the current timestamp (when staleness was detected).
+      This allows the partner to calculate how long the data has been stale
+      and decide whether to wait for recompilation or show a warning. If
+      stale_since is the detection time, two requests 100ms apart show
+      different stale_since values for the same edit, confusing the partner.
+    spec_impact: "CL-10 stale_since — file mtime (modification time), not request time; consistent across requests"
+    pitfall: P-284
+
+  - id: F04
+    severity: major
+    description: >
+      Chunk responses must include a compilationStale boolean when any
+      contributing file has been modified since compilation. If a chunk
+      assembles data from TOOLS.md (stale) and GOVERNANCE.md (fresh), the
+      chunk is stale. The flag must be the OR of all contributing files'
+      staleness. Additionally, the chunk should list which files are stale
+      in a stale_files array so the partner knows which parts to distrust.
+    spec_impact: "CL-10 chunk staleness — compilationStale: true if any contributing file stale; stale_files array"
+    pitfall: P-284
+
+  - id: F05
+    severity: major
+    description: >
+      The file watcher must trigger recompilation within 500ms of detecting
+      a change, but rapid successive edits (e.g., VS Code auto-save every
+      100ms) must be debounced to avoid 5 recompiles in 500ms. The debounce
+      window should accumulate a dirty set of changed files, then fire a
+      single recompile covering all of them. The 500ms SLA is measured from
+      the last edit in a burst, not the first.
+    spec_impact: "CL-14 watcher — 500ms recompile SLA from last edit; dirty-set debounce for rapid successive edits"
+    pitfall: P-284
+
+  - id: F06
+    severity: major
+    description: >
+      Race condition: a GET request arrives exactly when a recompilation is
+      in progress (old IR being replaced by new). The GET must see a
+      consistent snapshot — either the old compilation (with stale_since)
+      or the new one (fresh), never a half-written IR. The stale-detection
+      utility must coordinate with the compilation writer, either via a
+      read-write lock or by atomically swapping the IR reference.
+    spec_impact: "CL-10 read consistency — atomic IR swap during recompilation; GET never sees partial IR state"
+    pitfall: P-284
+
+  - id: F07
+    severity: major
+    description: >
+      The stale-detection module must handle platform-specific mtime
+      resolution. Windows NTFS has 100ns resolution; macOS HFS+ has 1s
+      resolution. On HFS+, an edit within the same second as the compilation
+      may have the same mtime, making staleness undetectable. The module
+      should use a compilation marker file or content hash as a secondary
+      check when mtime comparison is inconclusive (equal timestamps).
+    spec_impact: "CL-10 stale detection — secondary content hash check when mtime resolution is insufficient"
+    pitfall: P-284
+
+  - id: F08
+    severity: warning
+    description: >
+      When a file is stale, the response should include an HTTP header
+      (X-OC-Stale: true) in addition to the body field. Some partners may
+      check headers before parsing the body for efficiency. The header
+      allows proxy caches (if any) to avoid caching stale responses.
+      The Vary header must include X-OC-Stale to prevent cache poisoning.
+    spec_impact: "CL-10 stale responses — X-OC-Stale: true header; Vary includes X-OC-Stale for cache correctness"
+    pitfall: P-284
+
+  - id: F09
+    severity: warning
+    description: >
+      The watcher must detect file deletion (not just modification) and
+      trigger an immediate recompile. After recompilation with the deleted
+      file absent, the IR no longer contains its data, and subsequent GETs
+      return 404 naturally. But during the window between deletion and
+      recompile, the stale-detection stat() call catches the deletion. The
+      watcher and the stale-detector must agree on the file's canonical
+      path to avoid the watcher missing a deletion that stat() catches.
+    spec_impact: "CL-14 watcher — deletion detection triggers recompile; canonical path agreement with stale-detector"
+    pitfall: P-284
+
+  - id: F10
+    severity: warning
+    description: >
+      Multiple files can become stale simultaneously (e.g., git checkout
+      replaces 5 OC files at once). The stale-detection utility must handle
+      batch staleness efficiently — a single workspace-level "any stale?"
+      check rather than per-file stat on every request. A workspace-level
+      mtime cache (refreshed by the watcher) avoids N stat calls per GET.
+      The cache must be invalidated atomically when the watcher detects changes.
+    spec_impact: "CL-10 stale detection — workspace-level mtime cache for batch staleness; invalidated by watcher events"
+    pitfall: P-284
+
+  - id: F11
+    severity: warning
+    description: >
+      SSE event for staleness: when the watcher detects a file change, it
+      should emit an SSE event (OC_FILE_CHANGED) before recompilation starts,
+      then COMPILATION_COMPLETE when the recompile finishes. Partners
+      subscribing to SSE can show a spinner between these two events. If
+      only COMPILATION_COMPLETE is emitted, the partner has no signal that
+      a recompile is in progress and may poll repeatedly.
+    spec_impact: "CL-14 SSE — OC_FILE_CHANGED event on detection; COMPILATION_COMPLETE on recompile finish"
+    pitfall: P-284
+
+  - id: F12
+    severity: note
+    description: >
+      Performance: the stat() call on every GET adds latency. On a local SSD
+      this is ~0.1ms, but on a network-mounted workspace it could be 50ms+.
+      The stale-detection module should support a "trust watcher" mode where
+      the stat is skipped if the watcher is healthy and has not reported any
+      changes since the last compilation. If the watcher is unhealthy (lagging,
+      crashed), fall back to per-request stat.
+    spec_impact: "CL-10 stale detection — trust-watcher optimization with fallback to per-request stat on watcher failure"
+    pitfall: null

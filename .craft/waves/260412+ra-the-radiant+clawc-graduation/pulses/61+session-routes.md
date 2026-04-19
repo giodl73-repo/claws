@@ -30,28 +30,29 @@ Add session HTTP routes to `claws serve`. Four endpoints expose the session mode
 
 ## Deliverables
 
-- [ ] `claws-serve/src/routes/sessions.ts` — Four route handlers registered under `/api/sessions`:
+- [x] `claws-serve/src/routes/sessions.ts` — Four route handlers registered under `/api/sessions`:
   - `GET /api/sessions` — list all sessions in the workspace, returns `SessionSummary[]`, supports `?type=cron` filter query param. Each session includes `lastRunStatus` for cron sessions. Overview shows errored cron sessions with a red indicator.
   - `GET /api/sessions/:id` — get session detail by ID, returns `SessionState`, 404 if not found
   - `GET /api/sessions/:id/runs` — list runs for a session, returns run history array with status/timing, supports `?limit=N` pagination
   - `GET /api/sessions/:id/tools` — list tools available to a session, delegates to `resolveSessionTools` from claws-sdk, returns filtered `ToolDefinition[]`
-- [ ] Wire session routes into `registerRoutes` in `claws-serve/src/routes/index.ts`
-- [ ] `claws-serve/tests/routes/sessions.unit.test.ts` — L0: GET /sessions returns array (1), GET /sessions?type=cron filters by type (1), GET /sessions/:id returns session detail (1), GET /sessions/:id returns 404 for unknown ID (1), GET /sessions/:id/runs returns run history (1), GET /sessions/:id/tools delegates to session tool resolver (1)
-- [ ] `claws-serve/tests/routes/sessions.integration.test.ts` — L1: session list reflects workspace state (1), session detail matches created session (1), run history orders by most recent first (1), tool list respects session-type restrictions (1)
-- [ ] `claws-serve/tests/routes/sessions.e2e.test.ts` — L2: full lifecycle: create workspace, start session, list sessions, get tools, verify session-scoped permissions (1)
+- [x] Wire session routes into `registerRoutes` in `claws-serve/src/routes/index.ts`
+- [x] `claws-serve/tests/routes/sessions.unit.test.ts` — L0: GET /sessions returns array (1), GET /sessions?type=cron filters by type (1), GET /sessions/:id returns session detail (1), GET /sessions/:id returns 404 for unknown ID (1), GET /sessions/:id/runs returns run history (1), GET /sessions/:id/tools delegates to session tool resolver (1)
+- [x] `claws-serve/tests/routes/sessions.integration.test.ts` — L1: session list reflects workspace state (1), session detail matches created session (1), run history orders by most recent first (1), tool list respects session-type restrictions (1)
+- [x] `claws-serve/tests/routes/sessions.e2e.test.ts` — L2: full lifecycle: create workspace, start session, list sessions, get tools, verify session-scoped permissions (1)
 
 ## Acceptance Criteria
 
-- [ ] `GET /api/sessions` returns `SessionSummary[]` with correct shape
-- [ ] `GET /api/sessions?type=cron` filters to cron sessions only
-- [ ] `GET /api/sessions/:id` returns 200 with `SessionState` for valid ID
-- [ ] `GET /api/sessions/:id` returns 404 with structured error for unknown ID
-- [ ] `GET /api/sessions/:id/runs` returns run history ordered by most recent first
-- [ ] `GET /api/sessions/:id/runs?limit=5` limits results
-- [ ] `GET /api/sessions/:id/tools` returns session-scoped tool list (not workspace-level)
-- [ ] Routes are registered in the existing `registerRoutes` function
-- [ ] `npm run build` exits 0
-- [ ] `npx tsc --noEmit` exits 0 for both claws-sdk and claws-serve
+- [x] `GET /api/sessions` returns `SessionSummary[]` with correct shape
+- [x] `GET /api/sessions?type=cron` filters to cron sessions only
+- [x] `GET /api/sessions/:id` returns 200 with `SessionState` for valid ID
+- [x] `GET /api/sessions/:id` returns 404 with structured error for unknown ID
+- [x] `GET /api/sessions/:id/runs` returns run history ordered by most recent first
+- [x] `GET /api/sessions/:id/runs?limit=5` limits results
+- [x] `GET /api/sessions/:id/tools` returns session-scoped tool list (not workspace-level)
+- [x] Routes are registered in the existing `registerRoutes` function
+- [x] Session tools endpoint reflects violation state: unclassified tools blocked, structurally-affected chains blocked. Session status includes `violationImpact` when violations affect this session.
+- [x] `npm run build` exits 0
+- [x] `npx tsc --noEmit` exits 0 for both claws-sdk and claws-serve
 
 ## Governing Roles
 
@@ -66,8 +67,8 @@ Load these role files before starting:
 
 ## Test Gates
 
-- [ ] L0 unit (6 tests): GET /sessions returns array (1), GET /sessions?type=cron filters by type (1), GET /sessions/:id returns session detail (1), GET /sessions/:id returns 404 for unknown (1), GET /sessions/:id/runs returns run history (1), GET /sessions/:id/tools delegates to resolver (1)
-- [ ] L1 integration (4 tests): session list reflects workspace state (1), session detail matches created session (1), run history orders by most recent first (1), tool list respects session-type restrictions (1)
-- [ ] L2 e2e (1 test): full lifecycle — create workspace, start session, list, get tools, verify session-scoped permissions (1)
-- [ ] `npm run build` exits 0
-- [ ] `npx tsc --noEmit` exits 0
+- [x] L0 unit (6 tests): GET /sessions returns array (1), GET /sessions?type=cron filters by type (1), GET /sessions/:id returns session detail (1), GET /sessions/:id returns 404 for unknown (1), GET /sessions/:id/runs returns run history (1), GET /sessions/:id/tools delegates to resolver (1)
+- [x] L1 integration (4 tests): session list reflects workspace state (1), session detail matches created session (1), run history orders by most recent first (1), tool list respects session-type restrictions (1)
+- [x] L2 e2e (1 test): full lifecycle — create workspace, start session, list, get tools, verify session-scoped permissions (1)
+- [x] `npm run build` exits 0
+- [x] `npx tsc --noEmit` exits 0

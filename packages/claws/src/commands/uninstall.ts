@@ -62,10 +62,10 @@ export async function runUninstall(
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
     const uninstallErr: ClawsError = {
-      code: 'CLAWS-E085',
+      code: 'OC-POLICY-E085',
       what: `Uninstall failed: ${reason}`,
       howToFix: 'Check write permissions and that no other process is using .claws/.',
-      docsRef: 'Run `claws help CLAWS-E085` for details',
+      docsRef: 'Run `claws help OC-POLICY-E085` for details',
     };
     console.error(opts.json ? formatErrorJson(uninstallErr) : formatError(uninstallErr));
     return 3;

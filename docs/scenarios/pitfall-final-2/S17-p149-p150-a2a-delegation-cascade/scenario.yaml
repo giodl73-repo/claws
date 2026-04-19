@@ -56,7 +56,7 @@ findings:
   - id: F02
     severity: major
     description: >
-      CLAWS-E030 hard error: delegation to an agent without bidirectional
+      OC-POLICY-E030 hard error: delegation to an agent without bidirectional
       trust must be a compile-time error, not a runtime failure. The trust
       graph is known at compile time. The error must name both agents and
       the missing trust direction: "ops-bot -> finance-bot: trust declared.
@@ -83,7 +83,7 @@ findings:
       violation. G-A2A-FLOW, G-A2A-IDENTITY, G-DATA, and G-PERM are
       dependent violations that would be resolved by fixing the root.
       The rule evaluator must identify the dependency chain and suppress
-      dependent violations, showing only: "CLAWS-E030: Fix bidirectional
+      dependent violations, showing only: "OC-POLICY-E030: Fix bidirectional
       trust (4 additional violations will resolve)."
     spec_impact: "CL-02 rule evaluation — dependency suppression"
     pitfall: "P-150"

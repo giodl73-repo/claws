@@ -1,0 +1,207 @@
+name: S10-chunk-assembly-atomic
+series: cap-integration
+version: 2
+specs: [CL-10, CL-03]
+description: >
+  Validates that GET /api/chunks/general returns a consistent chunk even when
+  AGENTS.md is being edited concurrently (external edit or concurrent PATCH).
+  The chunk assembler must detect snapshot mismatches between the files it reads
+  and retry assembly until a consistent snapshot is obtained. This implements
+  the P-271 snapshot verification mechanism. If retries exceed the limit, the
+  API returns 503 with a retry-after header rather than serving inconsistent
+  data. No stale cross-file data may appear in any successful response.
+
+expect:
+  http:
+    method: GET
+    path: /api/chunks/general
+    status: 200
+    content_type: application/json
+  response_shape:
+    root_has: [data, meta]
+    meta_has: [compilation_id, snapshot_id, assembly_attempts]
+    data_is_consistent: true
+    no_cross_file_staleness: true
+  retry_behavior:
+    on_snapshot_mismatch: retry
+    max_retries: 3
+    retry_delay_ms: 10
+    backoff: exponential
+  failure_mode:
+    after_max_retries:
+      status: 503
+      headers: [Retry-After]
+      error_code: SNAPSHOT_INCONSISTENT
+      error_has: [files_in_conflict, compilation_ids]
+  performance:
+    response_ms_max_no_contention: 50
+    response_ms_max_with_retries: 200
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner sends GET /api/chunks/general to render the General
+  settings tab. The general chunk assembles data from AGENTS.md (agent
+  configuration), USER.md (user preferences), and CONTEXT.md (context rules).
+  Concurrently, the developer is editing AGENTS.md in VS Code, which triggers
+  file watcher recompilation. The chunk assembler reads AGENTS.md (compilation
+  v5), then reads USER.md (compilation v5), then reads CONTEXT.md — but by
+  this point, the watcher has completed recompilation and CONTEXT.md is now at
+  compilation v6. The assembler detects the snapshot mismatch (v5 vs v6),
+  discards the partial assembly, and retries. On retry, all three files are at
+  v6 and the chunk is assembled consistently. The response includes
+  meta.assembly_attempts: 2.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The snapshot verification mechanism must compare compilation_ids across
+      all files read during assembly. If the assembler reads files
+      sequentially and checks compilation_id only at the end, it may serve
+      data where AGENTS.md is at v5 and CONTEXT.md is at v6 — a cross-file
+      inconsistency. The check must happen after reading ALL contributing
+      files and before assembling the response. Any mismatch triggers a
+      full re-read, not a partial re-read of just the mismatched file.
+    spec_impact: "CL-10 P-271 snapshot verification — check compilation_ids of all files after reading all; full re-read on mismatch"
+    pitfall: "P-271"
+
+  - id: F02
+    severity: major
+    description: >
+      The retry limit must be finite and documented. Without a limit, the
+      assembler could retry indefinitely under sustained contention (e.g.,
+      continuous external edits), causing request timeout. A max_retries
+      of 3 with exponential backoff (10ms, 20ms, 40ms) bounds the worst
+      case to ~70ms of retry overhead. If all retries fail, return 503
+      Service Unavailable with a Retry-After header suggesting 1 second.
+    spec_impact: "CL-10 P-271 retry — max 3 retries with exponential backoff; 503 with Retry-After on exhaustion"
+    pitfall: "P-271"
+
+  - id: F03
+    severity: major
+    description: >
+      The 503 error response must include which files had conflicting
+      compilation_ids so the partner can display a meaningful message:
+      'AGENTS.md and CONTEXT.md are being updated — retry in 1 second.'
+      A generic 503 without conflict details forces the partner to
+      display 'Something went wrong', which is unhelpful. The error body
+      must include files_in_conflict and their respective compilation_ids.
+    spec_impact: "CL-10 P-271 503 error — include files_in_conflict with per-file compilation_ids"
+    pitfall: "P-271"
+
+  - id: F04
+    severity: major
+    description: >
+      The snapshot_id in meta must be a composite identifier derived from
+      all contributing file compilation_ids. Partners can use snapshot_id
+      as a cache key for the chunk. If two requests return the same
+      snapshot_id, the data is guaranteed identical. If the snapshot_id
+      is missing or not composite, partners cannot implement efficient
+      client-side caching for chunks.
+    spec_impact: "CL-10 chunk meta — snapshot_id is composite hash of all contributing file compilation_ids"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The assembly_attempts field in meta must accurately count retries.
+      If assembly succeeds on first try, assembly_attempts: 1. If it retries
+      twice, assembly_attempts: 3. Partners can use this for performance
+      monitoring — if average assembly_attempts exceeds 1.5, the workspace
+      is under heavy contention and the partner may throttle its polling
+      interval. Misreporting attempts (e.g., always 1) hides contention
+      from monitoring.
+    spec_impact: "CL-10 chunk meta — assembly_attempts accurately reflects total read attempts including retries"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The retry mechanism must re-read all contributing files, not just the
+      file with a mismatched compilation_id. If only the mismatched file is
+      re-read, a second file may have changed between the first read and
+      the retry, creating a new mismatch. Full re-read on every retry
+      ensures atomic consistency at the cost of slightly more I/O.
+      Partial re-reads save I/O but risk cascading mismatches.
+    spec_impact: "CL-10 P-271 retry — full re-read of all contributing files on mismatch, not partial re-read"
+    pitfall: "P-271"
+
+  - id: F07
+    severity: warning
+    description: >
+      Under sustained contention (e.g., an automated tool continuously
+      editing OC files), the assembler may exhaust retries on every request.
+      The API should track 503 rates and emit a metric/log when the
+      contention rate exceeds a threshold (e.g., >10% of requests return
+      503 in a 1-minute window). Without monitoring, sustained contention
+      degrades the API silently and partners experience intermittent
+      failures without explanation.
+    spec_impact: "CL-10 P-271 monitoring — track 503 rate; alert when contention exceeds 10% of requests in 1-minute window"
+    pitfall: "P-271"
+
+  - id: F08
+    severity: warning
+    description: >
+      The exponential backoff between retries (10ms, 20ms, 40ms) adds
+      latency to the response. The performance target is 50ms without
+      contention and 200ms with retries. If backoff is too aggressive
+      (100ms, 200ms, 400ms), the worst case exceeds the 200ms target.
+      If backoff is too small (1ms, 2ms, 4ms), retries may hit the same
+      compilation window repeatedly. The 10ms base delay must be tunable
+      per deployment.
+    spec_impact: "CL-10 P-271 backoff — configurable base delay; default 10ms; worst case within 200ms budget"
+    pitfall: "P-271"
+
+  - id: F09
+    severity: warning
+    description: >
+      The chunk assembler reads from compiled IR, not raw files. If the IR
+      cache is invalidated between reads (e.g., a recompilation completes
+      mid-assembly), the assembler sees a new compilation_id on subsequent
+      reads. The assembler should either lock the IR cache for the duration
+      of assembly (preventing cache replacement) or read from a versioned
+      snapshot. Without locking, the retry mechanism fights the cache
+      invalidation system.
+    spec_impact: "CL-10 P-271 IR cache — lock or snapshot IR during assembly; prevent cache invalidation mid-read"
+    pitfall: "P-271"
+
+  - id: F10
+    severity: warning
+    description: >
+      If the general chunk depends on N files and each file has an
+      independent compilation_id, the probability of a consistent snapshot
+      decreases as N increases. For the general chunk (3 files), the window
+      is manageable. For a hypothetical chunk depending on all 9 OC files,
+      sustained editing would make consistent snapshots rare. The architecture
+      must consider a global snapshot mechanism (single compilation_id for
+      the entire workspace) rather than per-file compilation_ids.
+    spec_impact: "CL-10 P-271 scalability — consider global workspace compilation_id instead of per-file for snapshot consistency"
+    pitfall: "P-271"
+
+  - id: F11
+    severity: note
+    description: >
+      The Retry-After header in the 503 response should be in seconds, not
+      milliseconds, per HTTP spec (RFC 7231). A value of 1 (one second) is
+      appropriate for transient contention. Partners with automatic retry
+      logic can respect this header to avoid hammering the API. If
+      Retry-After is omitted, partners may retry immediately, worsening
+      contention.
+    spec_impact: "CL-10 P-271 503 response — Retry-After: 1 (seconds) per RFC 7231"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The performance budget of 200ms with retries assumes local file I/O.
+      If the compiled IR is stored remotely (e.g., in a database or cloud
+      storage), each retry incurs network latency. The architecture should
+      document the assumption that IR is local and define a separate
+      performance budget for remote IR deployments. Partners need latency
+      expectations that match their deployment topology.
+    spec_impact: "CL-10 P-271 performance — document local IR assumption; define separate budget for remote IR"
+    pitfall: null

@@ -11,10 +11,10 @@ description: >
 expect:
   rules_applied: [G-CLASS, G-PERM]
   violations:
-    - code: CLAWS-E010
+    - code: OC-POLICY-E010
       rule: G-CLASS
       description: "send-invoice misclassified R3 by keywords, actual R5 by behavior"
-    - code: CLAWS-E020
+    - code: OC-POLICY-E020
       rule: G-PERM
       description: "Capability 'READWRITE' is not in closed enum"
   pass: false
@@ -105,7 +105,7 @@ findings:
     description: >
       Capability name normalization: the parser must uppercase all capability
       names and validate against the closed enum. "read" -> "READ" (valid).
-      "READWRITE" -> not in enum (parse error CLAWS-E020). "Read-Write" ->
+      "READWRITE" -> not in enum (parse error OC-POLICY-E020). "Read-Write" ->
       not in enum (parse error). The error must suggest the closest valid
       values: "Did you mean READ and WRITE?"
     spec_impact: "CL-02 G-PERM — parser normalization + suggestions"

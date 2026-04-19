@@ -11,7 +11,7 @@ description: >
 expect:
   rules_applied: [G-CONTEXT]
   violations:
-    - code: CLAWS-E060-03
+    - code: OC-POLICY-E060-03
       rule: G-CONTEXT-INPUT-VALIDATION
       description: "Input field 'query' lacks sanitization constraint — injection vector"
   pass: false
@@ -42,7 +42,7 @@ findings:
       P-153 core: "G-CONTEXT violation" is analogous to "syntax error"
       without a line number. It tells the developer something is wrong
       but not what or where. Each of G-CONTEXT's 8 sub-rules needs its
-      own diagnostic code: CLAWS-E060-01 through CLAWS-E060-08. The
+      own diagnostic code: OC-POLICY-E060-01 through OC-POLICY-E060-08. The
       code identifies the specific defense that is missing or misconfigured.
     spec_impact: "CL-02 G-CONTEXT — per-sub-rule diagnostic codes"
     pitfall: "P-153"
@@ -61,7 +61,7 @@ findings:
   - id: F03
     severity: major
     description: >
-      The diagnostic message for CLAWS-E060-03 must include: the specific
+      The diagnostic message for OC-POLICY-E060-03 must include: the specific
       input field ("query"), the expected constraint (sanitization rule
       or allowlist), and a reference to the documentation that explains
       how to add the constraint. A bare code without context is only
@@ -94,7 +94,7 @@ findings:
     severity: warning
     description: >
       The sub-rule codes should be machine-parseable for CI integration.
-      A CI pipeline can fail on CLAWS-E060-03 (input validation) but
+      A CI pipeline can fail on OC-POLICY-E060-03 (input validation) but
       warn on CLAWS-W060-07 (response filtering). Severity can differ
       per sub-rule: input validation is error (direct injection vector),
       response filtering is warning (defense-in-depth).
@@ -106,7 +106,7 @@ findings:
     description: >
       Documentation for each sub-rule code must include: what the sub-rule
       checks, why it matters (threat model), how to fix it (code example),
-      and when to suppress it (if legitimate). `claws explain CLAWS-E060-03`
+      and when to suppress it (if legitimate). `claws explain OC-POLICY-E060-03`
       should display this documentation inline.
     spec_impact: "CL-05 DX — inline sub-rule documentation"
     pitfall: "P-153"

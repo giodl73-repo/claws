@@ -102,7 +102,7 @@ describe('claws doctor', () => {
     try {
       const code = await runDoctorCmd(ctx, { json: false, color: false, postUpgrade: false, fix: false });
       expect(code).toBe(3);
-      expect(spy.mock.calls.flat().join(' ')).toContain('CLAWS-E010');
+      expect(spy.mock.calls.flat().join(' ')).toContain('OC-POLICY-E010');
     } finally {
       spy.mockRestore();
     }
@@ -115,7 +115,7 @@ describe('claws doctor', () => {
       const code = await runDoctorCmd(ctx, { json: true, color: false, postUpgrade: false, fix: false });
       expect(code).toBe(3);
       const parsed = JSON.parse(spy.mock.calls.flat().join(''));
-      expect(parsed.error.code).toBe('CLAWS-E010');
+      expect(parsed.error.code).toBe('OC-POLICY-E010');
     } finally {
       spy.mockRestore();
     }

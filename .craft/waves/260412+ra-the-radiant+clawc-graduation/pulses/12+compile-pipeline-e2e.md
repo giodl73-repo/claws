@@ -4,11 +4,11 @@ slug: compile-pipeline-e2e
 plan: claws-sdk-graduation
 depends_on: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 governing_roles: [craft:architect, craft:conformance, claws:platform-eng]
-scenario_codes: [cross-package/S01, cross-package/S03, emit-oc/S02, emit-cc/S02, governance/S01, execution/S01]
+scenario_codes: [cross-package/S01, cross-package/S03, emit-oc/S02, emit-cc/S02, governance/S01, execution/S01, backward-compat/S01, context/S01, relax/S01, pitfall-coverage/S01]
 stage: implementation
 test_tiers:
   L0_unit: 2
-  L1_integration: 0
+  L1_integration: 2
   L2_e2e: 4
   L3_accept: 2
 test_scope:
@@ -66,6 +66,7 @@ Load these role files before starting:
 ## Test Gates
 
 - [ ] L0 unit (2 tests): fixture workspace contains 9 expected files (1), broken-governance fixture contains conflicting rules (1)
+- [ ] L1 integration (2 tests): compile pipeline modules integrate without manual wiring (1), emit targets produce output from parsed workspace state (1)
 - [ ] L2 e2e (4 tests): full pipeline both targets (1), R5 fail-closed rejection (1), cache hit (1), audit chain signed (1)
 - [ ] L3 acceptance (2 tests): zero @craftworks/ imports in compiler tree (1), zero @craftworks/ in package dependencies (1)
 - [ ] `npm run build` exits 0

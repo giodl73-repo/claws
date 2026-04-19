@@ -132,12 +132,12 @@ Pulse 04 would create a second color system in a different directory (`src/color
 
 ---
 
-### N-02: Error code registry CLAWS-E001..E099 is premature allocation
+### N-02: Error code registry OC-POLICY-E001..E099 is premature allocation
 
 **Pulse:** 04 (base-cli-error-contract)
 **Severity:** Note
 
-The acceptance criterion "Error code registry covers CLAWS-E001 through CLAWS-E099 range with no gaps in allocated codes" implies pre-allocating 99 error codes in CP-1. At this stage, only a handful of error categories exist (parse, compile, config validation). Pre-allocating codes that have no implementation leads to placeholder entries that will drift from actual errors as the system evolves.
+The acceptance criterion "Error code registry covers OC-POLICY-E001 through OC-POLICY-E099 range with no gaps in allocated codes" implies pre-allocating 99 error codes in CP-1. At this stage, only a handful of error categories exist (parse, compile, config validation). Pre-allocating codes that have no implementation leads to placeholder entries that will drift from actual errors as the system evolves.
 
 **Recommendation:** Allocate codes on demand (define the registry mechanism and the first 10-15 codes actually needed by CP-1). Reserve ranges for future categories but do not require "no gaps."
 

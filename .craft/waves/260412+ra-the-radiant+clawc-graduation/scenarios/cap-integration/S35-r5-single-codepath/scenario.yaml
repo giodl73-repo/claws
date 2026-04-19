@@ -1,0 +1,214 @@
+name: S35-r5-single-codepath
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12, CL-08]
+description: >
+  Validates that R5 lock enforcement uses a single shared validator module
+  across ALL write surfaces: Layer 1 PATCH, Layer 2 chunk PATCH, batch
+  endpoint, Loop sync, session config, and onboard. Every surface must
+  produce the identical R5_NON_NEGOTIABLE error shape. The validator is
+  imported once, not reimplemented per route. A fix to the validator
+  propagates to all surfaces without per-route patching. Also validates
+  that a cron session with restricted tools cannot access main-session
+  tools by claiming a different sessionType. The R5 validator enforces
+  tool access based on the session's assigned type at creation, which is
+  immutable -- a cron session cannot elevate to main-session tool access
+  regardless of the write surface used.
+
+expect:
+  shared_validator:
+    single_module: true
+    imported_by_all_surfaces: true
+    no_duplicated_logic: true
+  error_parity:
+    error_type: R5_NON_NEGOTIABLE
+    identical_across_surfaces: true
+    error_fields: [error, oc_path, locked_field, lock_source, locked_fields_list]
+  surfaces_tested:
+    layer1_patch: true
+    layer2_chunk_patch: true
+    batch: true
+    loop_sync: true
+    session_config: true
+    onboard: true
+  error_precedence:
+    404_before_403: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A workspace has send-email as an R5 tool. A security auditor tests all 6
+  write surfaces to verify R5 enforcement is consistent. Surface 1: PATCH
+  /api/oc/TOOLS.md#Tools/send-email/approval_required with value false —
+  expect 403 R5_NON_NEGOTIABLE. Surface 2: PATCH /api/chunks/{chunk_id} with
+  the same field change — expect identical 403. Surface 3: POST /api/batch
+  with one operation targeting the R5 field — expect 403 with the failing
+  operation identified. Surface 4: PUT /api/oc/SOUL.md (Loop sync) with a config that
+  would disable R5 approval — expect 403. Surface 5: PATCH /api/session/config
+  with tool overrides that lower R5 — expect 403. Surface 6: POST /api/onboard
+  with seed content that sets an R5 tool to approval_required: false — expect
+  rejection during seed validation. All 6 surfaces must produce structurally
+  identical error responses with the same fields in the same format.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The R5 validator must be a single exported function (e.g.,
+      validateR5Lock(tool, proposedChange, governanceIR)) that lives in
+      claws-sdk/src/validators/r5.ts. All 6 route handlers import and call
+      this function. If any route handler implements its own R5 check (even
+      a simple if-statement), it is a duplication that will drift. A linter
+      rule or architectural test should verify that no route handler contains
+      inline R5 logic.
+    spec_impact: "CL-10 R5 validator — single exported function in claws-sdk; architectural test prevents inline R5 logic"
+    pitfall: P-288
+
+  - id: F02
+    severity: critical
+    description: >
+      Error precedence: if the oc:// path points to a non-existent tool,
+      the response must be 404 (not found), not 403 (R5 locked). The
+      validator must not be invoked on a missing resource. Route handlers
+      must resolve the resource first, then call the R5 validator. If the
+      order is reversed (validate R5, then resolve), the 403 reveals that
+      a tool with that name exists in R5 — an information leak.
+    spec_impact: "CL-10 error precedence — resolve resource (404 check) before R5 validation (403); no existence leak"
+    pitfall: P-288
+
+  - id: F03
+    severity: critical
+    description: >
+      The R5 validator must read the lock status exclusively from the
+      GovernanceIR, never from the raw file content. If the batch endpoint
+      reads the raw TOOLS.md while the Layer 1 PATCH reads the GovernanceIR,
+      they disagree during the window between file edit and recompilation.
+      The validator's sole input for lock determination is the GovernanceIR's
+      risk_level and locked_fields for the tool. If no GovernanceIR exists
+      (first boot), fail-closed: treat all tools as R5.
+    spec_impact: "CL-12 R5 source — GovernanceIR only; raw file never consulted; fail-closed without IR"
+    pitfall: P-288
+
+  - id: F04
+    severity: major
+    description: >
+      The batch endpoint must report WHICH operation in the batch triggered
+      the R5 rejection. If a batch of 5 operations has operation[2] targeting
+      an R5 field, the error response must include operation_index: 2 with
+      the standard R5_NON_NEGOTIABLE fields. The entire batch is rejected
+      (all-or-nothing), but the partner needs to know which operation to fix.
+      If the batch reports only "R5 violation" without identifying the
+      operation, the partner must guess.
+    spec_impact: "CL-10 batch R5 — error includes operation_index; entire batch rejected; partner can identify failing op"
+    pitfall: P-288
+
+  - id: F05
+    severity: major
+    description: >
+      Loop sync may attempt to modify R5 tools indirectly — e.g., syncing
+      a config that sets all tools to approval_required: false. The R5
+      validator must be called per-tool in the sync payload, not just on the
+      top-level config object. If the validator only checks explicit tool
+      references and misses blanket settings, R5 is bypassed via config-level
+      override. The validator must expand blanket settings to per-tool checks.
+    spec_impact: "CL-10 Loop R5 — expand blanket config settings to per-tool R5 checks; no config-level bypass"
+    pitfall: P-288
+
+  - id: F06
+    severity: major
+    description: >
+      Session config must not allow tool-level overrides that weaken R5.
+      A session that sets tools.send-email.approval_required = false is an
+      R5 bypass attempt via session scoping. The R5 validator must be invoked
+      when session config is applied, not just when the underlying file is
+      PATCHed. Session-level permissions are always <= workspace-level for
+      R5 tools.
+    spec_impact: "CL-08 session R5 — R5 validator invoked on session config apply; session cannot weaken R5 locks"
+    pitfall: P-288
+
+  - id: F07
+    severity: major
+    description: >
+      Onboard (workspace initialization) with seed content must validate R5
+      constraints on the seed before writing any files. If the seed contains
+      TOOLS.md with send-email set to approval_required: false but R5 is
+      mandated by fleet policy, the onboard must reject the seed. The R5
+      validator runs on proposed content, not just existing content. This
+      prevents bootstrapping a workspace into an R5-violating state.
+    spec_impact: "CL-10 onboard R5 — validate seed content against R5 + fleet before writing; reject non-compliant seed"
+    pitfall: P-288
+
+  - id: F08
+    severity: major
+    description: >
+      The locked_fields_list in the error response must enumerate all R5-locked
+      fields for the tool, not just the one the caller attempted to modify.
+      This allows the partner to know upfront which fields are off-limits and
+      construct a valid PATCH without trial-and-error. The list comes from the
+      GovernanceIR's lock model, which defines locked_fields per risk level.
+    spec_impact: "CL-12 R5 error — locked_fields_list enumerates all locked fields; derived from GovernanceIR lock model"
+    pitfall: P-288
+
+  - id: F09
+    severity: warning
+    description: >
+      Cross-layer parity assertion: a CI test must PATCH the same R5 field
+      via all 6 surfaces and diff the response bodies. The diff must show
+      zero structural differences (field names, types, nesting). The only
+      allowed difference is surface-specific metadata (e.g., chunk_id present
+      in Layer 2 but not Layer 1). If parity breaks, the shared validator has
+      been bypassed or a surface-specific wrapper is mangling the response.
+    spec_impact: "Test infrastructure — CI cross-surface parity test; diff response bodies across all 6 write surfaces"
+    pitfall: P-288
+
+  - id: F10
+    severity: warning
+    description: >
+      The audit event for R5 bypass attempts must be identical across all 6
+      surfaces. The event includes: surface (layer1, layer2, batch, loop,
+      session, onboard), oc_path, tool_id, attempted_field, session_id, and
+      timestamp. If different surfaces emit different event schemas, the
+      security team cannot run a single query for all bypass attempts.
+      The audit event builder is a shared function called by the R5 validator,
+      not by each route handler.
+    spec_impact: "CL-10 audit — R5_BYPASS_ATTEMPT event emitted by shared validator, not per-route; uniform schema"
+    pitfall: P-288
+
+  - id: F11
+    severity: warning
+    description: >
+      The R5 validator must handle the case where the tool's risk level was
+      recently changed (e.g., downgraded from R5 to R3 via a governance
+      update). The validator reads the current GovernanceIR, which may reflect
+      the downgrade. If a PATCH arrives during the recompile window where the
+      old IR (R5) is being replaced by the new IR (R3), the validator must
+      use the IR that is currently active (not the one being compiled). This
+      is the same atomic IR swap requirement from P-284.
+    spec_impact: "CL-12 R5 validator — uses active IR snapshot; not affected by in-progress recompilation"
+    pitfall: P-288
+
+  - id: F12
+    severity: note
+    description: >
+      Documentation: each write surface's API docs must include a section on
+      R5 enforcement with a link to the shared validator's behavior spec.
+      If a partner discovers R5 rejection on one surface, they should be able
+      to find the same behavior documented for all other surfaces without
+      searching. The R5 error response should include a help_url pointing
+      to the relevant documentation section.
+    spec_impact: "CL-10 R5 error — help_url field in error response linking to R5 enforcement documentation"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      The validator must log (at debug level) every invocation with the
+      surface name, tool ID, and result (allowed/denied). This allows
+      operators to trace R5 enforcement across surfaces without enabling
+      full request logging. The log must not include the proposed field
+      values (which may contain sensitive content), only the field names.
+    spec_impact: "CL-10 R5 observability — debug-level log per invocation with surface, tool_id, result; no field values"
+    pitfall: null

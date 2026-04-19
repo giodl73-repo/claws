@@ -43,7 +43,7 @@ governance effect. Five of six reviewers independently flagged this as the top i
 |---|---------|-----------|-----|
 | **CM7** | **Anthropic client created per extract call** — new SDK instance on every call causes connection pool thrash in watch mode. | Gateway M1/M3, Architect W1, CISO M5 | Cache client instance in provider constructor |
 | **CM8** | **Unhandled rejection in watch debounce** — async function inside setTimeout has no outer try/catch. Non-AbortError rejections crash the watcher. | Gateway M2 | Wrap debounce async in try/catch |
-| **CM9** | **Vendor lock-in in error contract** — CLAWS-E040/E041 bake "Anthropic" into user-facing errors. Default model pinned to specific dated version. | Founder M1/M2/M3 | Parameterize error messages; use stable model alias or require explicit --llm-model |
+| **CM9** | **Vendor lock-in in error contract** — OC-POLICY-E040/E041 bake "Anthropic" into user-facing errors. Default model pinned to specific dated version. | Founder M1/M2/M3 | Parameterize error messages; use stable model alias or require explicit --llm-model |
 
 ### Theme D: Test & Security Gaps
 

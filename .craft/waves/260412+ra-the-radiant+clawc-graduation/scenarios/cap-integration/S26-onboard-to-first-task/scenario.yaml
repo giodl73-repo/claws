@@ -1,0 +1,206 @@
+name: S26-onboard-to-first-task
+series: cap-integration
+version: 2
+specs: [CL-10, CL-03, CL-06, CL-07, CL-08]
+description: >
+  End-to-end lifecycle: POST /api/onboard seeds OC files, GET /api/oc/ shows
+  the workspace, a task is assigned via workqueue, the agent calls a tool,
+  the user approves, and the audit trail records the full chain. Validates
+  cold-cache first compilation, T0 trust tier limits on tool access, first
+  audit chain entry format, onboard content validation (secret scan), and
+  approval timeout behavior on the very first tool call.
+
+expect:
+  onboard:
+    endpoint: "POST /api/onboard"
+    status: 201
+    creates: [TOOLS.md, SOUL.md, USER.md, GOVERNANCE.md, lobster.yaml]
+    triggers_compilation: true
+    content_validated: true
+    secret_scan: passed
+  workspace_read:
+    endpoint: "GET /api/oc/"
+    status: 200
+    lists_all_seeded_files: true
+    governance_context_present: true
+    compilation_id_present: true
+  task_assignment:
+    endpoint: "POST /api/workqueue"
+    status: 201
+    task_visible_in: "GET /api/workqueue"
+  first_tool_call:
+    trust_tier: T0
+    tool_risk: R3
+    approval_required: true
+    timeout: 300
+  audit:
+    chain_starts_at: onboard
+    entries: [onboard, compilation, task_assigned, tool_call, approval, tool_executed]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A new user onboards for the first time. POST /api/onboard sends a seed
+  payload containing initial TOOLS.md (3 tools: list-files R1, write-db R3,
+  deploy R5), SOUL.md (2 deny rules), USER.md (empty elicitation gates), and
+  GOVERNANCE.md (default policy). The onboard endpoint validates the content
+  (secret scan, schema validation), writes the files, and triggers the first
+  compilation. The compilation runs on a cold cache (no prior IR). The user
+  then reads their workspace via GET /api/oc/ to verify setup. A task is
+  assigned via POST /api/workqueue. The agent picks up the task and calls
+  write-db (R3). At T0 trust tier, approval is required. The user approves.
+  The audit trail must show the complete chain from onboard through execution.
+  The challenge is: everything is first-time (cold cache, T0 trust, first
+  audit entry) with no prior state to rely on.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The first compilation runs on a cold cache with no prior GovernanceIR.
+      The compiler must handle the absence of a previous IR gracefully --
+      there is no delta to compute, only a full initial build. If the compiler
+      assumes a prior IR exists (e.g. for incremental compilation), it crashes
+      or produces an empty IR on first run. The cold-cache path must be
+      explicitly tested: no .claws-cache directory, no prior compilation_id,
+      no stale chunks to invalidate.
+    spec_impact: "CL-06 compiler — explicit cold-cache codepath; handle missing .claws-cache, zero prior IR, no delta computation"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      Onboard content must pass a secret scan before being written to disk.
+      If the seed TOOLS.md contains an API key in the description field
+      (e.g. "Use key sk-abc123 for auth"), the onboard endpoint must reject
+      the entire payload with a SECRET_DETECTED error. Secrets in seed
+      content indicate a misconfigured integration partner. The scan must
+      cover all seeded files, not just specific ones.
+    spec_impact: "CL-10 onboard validation — secret scan all seeded files before write; reject entire payload on detection"
+    pitfall: null
+
+  - id: F03
+    severity: critical
+    description: >
+      T0 trust tier must restrict tool access to the minimum. At T0, the
+      agent has no history, no completed tasks, no earned trust. R3 tools
+      require approval at T0 (whereas at T2 they might be pre-authorizable).
+      R5 tools are denied at all trust tiers. R1 tools are allowed at T0.
+      If T0 defaults are permissive (e.g. pre-authorize R3), the first
+      session has more access than intended. T0 policy must be explicitly
+      defined and conservative.
+    spec_impact: "CL-12 trust tiers — T0 explicit policy: R1 allowed, R3 requires approval, R5 denied; no implicit permissiveness"
+    pitfall: null
+
+  - id: F04
+    severity: critical
+    description: >
+      The first audit chain entry (the onboard event) establishes the chain
+      root. If the onboard event is missing or malformed, the entire audit
+      chain for this workspace has no anchor. The onboard event must include:
+      workspace_id, timestamp, seed_files (list), compilation_id (from the
+      triggered compile), and the integration partner identity. All subsequent
+      events reference this chain root via workspace_id.
+    spec_impact: "CL-07 audit chain — onboard event is chain root; must include workspace_id, seed_files, first compilation_id, partner identity"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The compilation triggered by onboard must complete before GET /api/oc/
+      returns governance context. If the GET arrives before compilation
+      finishes (race condition on fast GET after POST), the response must
+      either wait (blocking, bad for UX) or return with governance_context:
+      null and X-OC-Governance: compiling header. The partner must handle
+      the compiling state. A 503 with Retry-After is also acceptable.
+    spec_impact: "CL-10 onboard race — GET before compilation completes returns governance_context: null with X-OC-Governance: compiling or 503"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Seed content schema validation must verify that TOOLS.md tools have
+      required fields (name, risk_level, description), SOUL.md has valid
+      markdown structure, and GOVERNANCE.md follows the expected schema.
+      If the onboard endpoint writes malformed files, the subsequent
+      compilation fails and the workspace is stuck in a broken state with
+      no prior good compilation to fall back to. Validation before write
+      prevents unrecoverable first-boot failures.
+    spec_impact: "CL-10 onboard validation — schema validation for all seeded files before write; reject malformed payloads"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The first tool call approval has a timeout. If the user does not
+      respond within the timeout (e.g. 300s), the tool call must fail with
+      APPROVAL_TIMEOUT, not silently succeed. At T0, there is no cached
+      approval preference to fall back to. The timeout error must be
+      recorded in the audit trail as a distinct event type (APPROVAL_TIMEOUT)
+      separate from APPROVAL_DENIED. The agent should receive an actionable
+      error with retry guidance.
+    spec_impact: "CL-08 approval timeout — APPROVAL_TIMEOUT distinct from APPROVAL_DENIED; audit event records timeout; agent gets retry guidance"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      The workqueue task assignment must be visible in GET /api/workqueue
+      before the agent picks it up. If the POST /api/workqueue returns 201
+      but the task is not immediately visible in GET (eventual consistency),
+      the agent may poll and find no work. The workqueue must be consistent:
+      after 201, the task is visible in the next GET. If async indexing is
+      used, the POST must block until the task is queryable.
+    spec_impact: "CL-10 workqueue consistency — task visible in GET immediately after 201 POST; no eventual consistency gap"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      If the onboard POST is called twice for the same workspace (retry after
+      network timeout, or partner bug), the second call must be idempotent.
+      It should not create duplicate files or trigger a second compilation
+      that overwrites the first. Idempotency can be achieved via a client-
+      provided idempotency key or server-side workspace existence check. The
+      second call returns 200 (already onboarded) instead of 201.
+    spec_impact: "CL-10 onboard idempotency — second POST returns 200 with existing workspace; no duplicate files or compilations"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      The audit chain must be queryable end-to-end: given a workspace_id,
+      return all events from onboard through the latest tool execution in
+      chronological order. If audit events are scattered across different
+      stores (onboard in one table, tool calls in another), the query must
+      join them. The GET /api/audit?workspace_id=X endpoint must return a
+      unified timeline, not fragmented per-event-type results.
+    spec_impact: "CL-07 audit query — unified timeline query by workspace_id across all event types; chronological ordering"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      The onboard seed payload may contain a lobster.yaml with step
+      definitions. If a step references a tool not in the seeded TOOLS.md,
+      the compilation should produce a warning (broken reference) but not
+      fail. The workspace is still usable -- the broken step will fail at
+      runtime. But the onboard response should surface these warnings so
+      the partner can fix the seed content.
+    spec_impact: "CL-06 compilation warnings — broken tool references in lobster.yaml produce warnings, not compilation failure; surfaced in onboard response"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The time from POST /api/onboard to the first tool call being ready
+      (compilation complete, workspace readable, workqueue accepting tasks)
+      is the cold-start latency. This should be measured and included in
+      the onboard response as meta.ready_in_ms. If cold-start takes >5s,
+      the partner needs to show a loading state. The measurement helps
+      optimize the onboard path and set partner UX expectations.
+    spec_impact: "CL-10 onboard response — meta.ready_in_ms for cold-start latency measurement; informs partner UX loading state"
+    pitfall: null

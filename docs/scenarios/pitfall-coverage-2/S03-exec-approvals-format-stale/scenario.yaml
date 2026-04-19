@@ -11,10 +11,10 @@ description: >
 expect:
   rules_applied: [G-EXEC-APPROVALS]
   violations:
-    - code: CLAWS-E040
+    - code: OC-POLICY-E040
       rule: G-EXEC-APPROVALS
       description: "exec-approvals.json schema mismatch"
-    - code: CLAWS-E041
+    - code: OC-POLICY-E041
       rule: G-EXEC-APPROVALS
       description: "exec-approvals.json stale — tool set does not match TOOLS.md"
   pass: false

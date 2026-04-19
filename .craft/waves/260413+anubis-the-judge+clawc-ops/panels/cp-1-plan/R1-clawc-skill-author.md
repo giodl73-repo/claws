@@ -33,7 +33,7 @@ A new developer encountering `fixtures/oc-reference-workspace/` sees 15+ files w
 
 ### M-02: Error contract (Pulse 04) has WHAT+HOW+WHERE but no concrete docsUrl strategy
 
-Pulse 04 specifies that every DiagnosticError must have a `docsUrl` field. This is excellent -- it is the single most important field for a skill author who hits an error. But the pulse has no deliverable for the actual documentation those URLs point to. The error codes file (`codes.ts`) maps CLAWS-E001..E099 to descriptions, but there is no plan for creating the docs at those URLs.
+Pulse 04 specifies that every DiagnosticError must have a `docsUrl` field. This is excellent -- it is the single most important field for a skill author who hits an error. But the pulse has no deliverable for the actual documentation those URLs point to. The error codes file (`codes.ts`) maps OC-POLICY-E001..E099 to descriptions, but there is no plan for creating the docs at those URLs.
 
 If docsUrl points to a 404, it is worse than no URL at all. The skill author clicks, gets nothing, loses trust. The plan references `docs/claws/getting-started/init.md` in the init-uninstall plan but nothing in CP-1 itself.
 

@@ -1,0 +1,206 @@
+name: S12-cron-run-history
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12]
+description: >
+  Validates that GET /api/sessions/cron:daily-triage/runs returns the
+  run history for a specific cron session. Each run record includes
+  startedAt, completedAt, status, duration, toolCalls count, and an
+  error message for failed runs. The history is ordered by startedAt
+  descending (most recent first). This endpoint powers the cron
+  monitoring panel in the Companion App, letting operators inspect
+  past executions, diagnose failures, and track reliability trends.
+
+expect:
+  get_runs:
+    endpoint: "GET /api/sessions/cron:daily-triage/runs"
+    response_shape:
+      runs_is_array: true
+      each_run_has:
+        - runId
+        - startedAt
+        - completedAt
+        - status
+        - durationMs
+        - toolCalls
+      status_enum: [success, error, timeout, in_progress]
+    ordering: "startedAt desc"
+  error_run:
+    status: error
+    has_errorMessage: true
+    errorMessage_not_empty: true
+  success_run:
+    status: success
+    has_durationMs: true
+    has_toolCalls: true
+    durationMs_gt: 0
+  pagination:
+    endpoint: "GET /api/sessions/cron:daily-triage/runs?cursor=<runId>&limit=25"
+    nextCursor_present_when: "more runs exist"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  An operator opens the Companion App cron monitoring panel for the
+  daily-triage session. The panel calls GET /api/sessions/cron:daily-triage/runs
+  to load the run history. The session has 150 past runs: 140 successful,
+  8 errored, and 2 timed out. The most recent run is currently in progress.
+  The API must return runs ordered by startedAt descending with the
+  in-progress run first. Error runs must include the error message.
+  Successful runs must include duration and tool call count. The panel
+  shows 25 runs per page with cursor-based pagination for the remaining
+  125.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Empty history for a new cron session: a cron session defined in
+      AGENTS.md but never triggered has zero runs. The API must return
+      an empty array with 200 OK, not 404. Returning 404 would be
+      ambiguous — it could mean the session does not exist or has no
+      runs. The response should include the session ID in metadata so
+      the client can confirm it is querying the right session.
+    spec_impact: "CL-10 GET /api/sessions/:id/runs — empty history returns [], session metadata included"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Very long history without pagination: a cron session running
+      hourly for 6 months accumulates ~4,300 runs. Returning all runs
+      in a single response is impractical. Cursor-based pagination is
+      mandatory, not optional. The default limit should be 25 runs,
+      with a maximum of 100. The cursor should be the runId of the
+      last returned run, enabling stable forward pagination even as
+      new runs are added.
+    spec_impact: "CL-10 /api/sessions/:id/runs — cursor pagination mandatory, default limit 25, max 100"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Run in progress: a run with status 'in_progress' has startedAt
+      but no completedAt or durationMs. The API must return null for
+      completedAt and durationMs on in-progress runs, not omit them.
+      Omitting fields breaks client-side type expectations. The toolCalls
+      count for an in-progress run should reflect the current count
+      (updated live) or be null if live counting is not supported.
+    spec_impact: "CL-10 run schema — in_progress runs have null completedAt/durationMs, not omitted"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Timeout vs error distinction: a run that exceeded its time budget
+      should have status 'timeout', not 'error'. The distinction matters
+      for operational diagnosis — timeouts suggest the task is too large
+      or the budget too small, while errors suggest bugs. The timeout
+      run should include the configured budget in the response (e.g.,
+      budgetMs: 30000) alongside durationMs so operators can see how
+      far over budget the run went.
+    spec_impact: "CL-10 run status — 'timeout' distinct from 'error', includes budgetMs for context"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Run referencing tools that no longer exist: a successful run from
+      last week may have called a tool (e.g., 'jira-create') that has
+      since been removed from the workspace. The run record must store
+      the tool names at execution time, not resolve them from current
+      workspace state. If toolCalls is a list of tool names, stale
+      references are informational. If the API tries to enrich tool
+      names with current metadata (risk level, approval status), missing
+      tools must show as 'tool removed' rather than causing a crash.
+    spec_impact: "CL-10 run.toolCalls — snapshot at execution time, stale tools shown as removed"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The errorMessage for failed runs may contain sensitive information
+      (stack traces, file paths, environment variables). The API must
+      sanitize error messages before returning them. A structured error
+      object with code + message + details is safer than a raw stack
+      trace. The details field can include a sanitized excerpt, while
+      the full stack is logged server-side only.
+    spec_impact: "CL-10 run error response — structured error object, no raw stack traces in API"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Concurrent runs for the same cron session: if a cron trigger fires
+      while a previous run is still in progress, the system must decide
+      whether to queue, skip, or run concurrently. The run history must
+      reflect the actual execution — if runs overlap, both appear in
+      history with their own startedAt. The API should include an
+      'overlapped' flag or 'previousRunId' reference so operators can
+      detect scheduling pile-ups.
+    spec_impact: "CL-10 cron run concurrency — define policy (queue/skip/overlap), surface in run history"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Run ID stability and format: runIds must be unique, sortable by
+      time (e.g., ULID or timestamp-prefixed UUID), and stable across
+      restarts. If runIds are sequential integers reset on restart,
+      cursor pagination breaks when runs from before the restart have
+      IDs that collide with new runs. ULIDs combine timestamp ordering
+      with uniqueness without coordination.
+    spec_impact: "CL-10 runId format — ULID or equivalent, sortable and restart-safe"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      The toolCalls field on successful runs should be an integer count
+      for the list endpoint (keeping response size small) but the
+      individual run detail endpoint (GET /api/sessions/:id/runs/:runId)
+      should include the full tool call list with names, timestamps, and
+      results. Returning full tool call details in the list response
+      would make pagination responses excessively large for sessions
+      with complex runs.
+    spec_impact: "CL-10 toolCalls — integer count in list, full detail in individual run endpoint"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      Filtering run history by status: the monitoring panel should let
+      operators filter to only error or timeout runs for diagnosis. The
+      API should support ?status=error to return only failed runs. Without
+      server-side filtering, the client must load all 4,300 runs to find
+      the 8 errors, which is wasteful and slow.
+    spec_impact: "CL-10 GET /api/sessions/:id/runs — ?status= filter parameter"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Run retention: old run records should be subject to a retention
+      policy. A cron session running for years will accumulate tens of
+      thousands of records. The API or the underlying store should
+      support configurable retention (e.g., keep last 1000 runs or
+      last 90 days). Pruned runs should still appear in aggregate
+      statistics (total runs, total errors) even if individual records
+      are removed.
+    spec_impact: "CL-10 run history retention — configurable retention with aggregate preservation"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Time zone handling in startedAt and completedAt: all timestamps
+      must be ISO 8601 UTC. The Companion App converts to local time
+      for display. If the server serializes in local time, operators
+      in different time zones see incorrect run times. The durationMs
+      field avoids timezone issues since it is a relative measure, but
+      start and completion times must be absolute UTC.
+    spec_impact: "CL-10 run timestamps — ISO 8601 UTC, client converts for display"
+    pitfall: null

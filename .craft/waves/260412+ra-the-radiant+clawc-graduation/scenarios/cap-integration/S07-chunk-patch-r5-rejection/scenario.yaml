@@ -1,0 +1,194 @@
+name: S07-chunk-patch-r5-rejection
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12]
+description: >
+  Validates that PATCH /api/chunks/connections/{serverId} attempting to disable
+  an R5-classified tool is rejected with R5_NON_NEGOTIABLE error. The rejection
+  must include the oc:// path of the affected tool, a human-readable message
+  explaining why R5 tools cannot be modified, and leave the file unchanged on
+  disk. The ETag remains valid after rejection (no state change occurred).
+  DryRun mode returns the same rejection without any side effects.
+
+expect:
+  http:
+    method: PATCH
+    path: /api/chunks/connections/outlook
+    status: 403
+    content_type: application/json
+  request_body:
+    has: [toolId, enabled]
+    toolId_value: send-email
+    enabled_value: false
+  error_shape:
+    root_has: [error, oc_path, message, lock]
+    error_code: R5_NON_NEGOTIABLE
+    oc_path_format: "oc://TOOLS.md/Tools/send-email"
+    message_is_human_readable: true
+    lock_has: [source, editable, reason]
+    lock_source: r5
+    lock_editable: false
+  post_condition:
+    file_unchanged: true
+    etag_unchanged: true
+    compilation_not_triggered: true
+    audit_entry_logged: true
+  dry_run:
+    header: X-DryRun
+    same_error_shape: true
+    no_audit_entry: true
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner renders the Connections tab and the user clicks
+  'Disable' on the send-email tool (classified R5 — irreversible external
+  action). The partner sends PATCH /api/chunks/connections/outlook with
+  body { "toolId": "send-email", "enabled": false }. The API immediately
+  rejects with 403 R5_NON_NEGOTIABLE because R5 tools cannot be toggled
+  through any API surface. The error includes oc://TOOLS.md/Tools/send-email
+  so the partner can highlight the specific tool. The file is not modified.
+  The ETag is unchanged. The partner shows 'This tool cannot be disabled —
+  it performs irreversible external actions (R5).' In a follow-up test, the
+  partner sends the same request with X-DryRun: true and receives the
+  identical rejection.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      The rejection must use HTTP 403 Forbidden, not 400 Bad Request or 422
+      Unprocessable Entity. 403 semantically means 'the server understood
+      the request but refuses to authorize it' — which is exactly what R5
+      enforcement is. Using 400 implies the request is malformed (it isn't).
+      Using 422 implies the content is wrong (it isn't — the request is
+      valid, just unauthorized). Partners key on status codes for error
+      categorization; using the wrong one breaks error handling.
+    spec_impact: "CL-10 R5 rejection — 403 Forbidden (authorization refusal), not 400 or 422"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The error response must include the oc:// path of the specific tool
+      that triggered the rejection, not just the server path. If the error
+      only says 'R5_NON_NEGOTIABLE on /api/chunks/connections/outlook', the
+      partner cannot determine which tool on the outlook server was R5.
+      The oc_path must resolve to the exact tool:
+      oc://TOOLS.md/Tools/send-email.
+    spec_impact: "CL-10 R5 error response — oc_path must resolve to specific tool, not server"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      The human-readable message must be suitable for direct display to
+      end users, not a technical error code. 'R5_NON_NEGOTIABLE' is an
+      error code, not a message. The message field must contain prose like
+      'The send-email tool cannot be disabled because it performs
+      irreversible external actions and is classified R5.' Partners that
+      display error.message directly to users need complete sentences,
+      not enum values.
+    spec_impact: "CL-10 R5 error response — message is user-facing prose; error is machine-readable code"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      If the PATCH references a toolId that does not exist on the specified
+      server, the API must return 404 Not Found (tool not found), not 403
+      (R5 rejection). The error precedence must be: 404 (tool doesn't exist)
+      before 403 (tool exists but locked). If the API checks R5 before
+      existence, it would return 403 for phantom tools, which is misleading.
+      Existence checks must precede authorization checks.
+    spec_impact: "CL-10 error precedence — 404 (not found) before 403 (forbidden); existence check before lock check"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      The rejection must log an audit entry recording the attempted
+      modification. Security audit trails must capture failed attempts,
+      not just successful writes. The audit entry should include: timestamp,
+      toolId, attempted_action ('disable'), rejection_reason
+      ('R5_NON_NEGOTIABLE'), and the requesting session/partner identity.
+      Without audit logging for rejections, security reviews cannot detect
+      repeated unauthorized access attempts.
+    spec_impact: "CL-10 R5 rejection — audit log entry for rejected attempts; include partner identity"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      DryRun mode (X-DryRun: true header) must return the exact same error
+      shape as a real rejection but must NOT log an audit entry. If DryRun
+      logs audit entries, partner testing and preflight checks pollute the
+      audit trail with phantom attempts. The audit system must check the
+      DryRun flag before logging. The response should include a
+      'dry_run: true' field so partners can confirm the mode.
+    spec_impact: "CL-10 DryRun — same response shape but no audit entry; include dry_run: true in response"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      The error.lock object includes source, editable, and reason. The
+      reason field must explain the R5 classification specifically, not
+      just repeat the error code. For send-email, the reason should be
+      'Sends email to external recipients — classified as irreversible
+      external action.' This reason comes from GovernanceIR and must be
+      fetched at rejection time, not hardcoded per risk level.
+    spec_impact: "CL-10 R5 lock.reason — tool-specific governance reason from GovernanceIR, not generic per-level text"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The ETag must remain unchanged after a rejection because no state
+      change occurred. If the rejection handler accidentally bumps the
+      ETag (e.g., by touching a file timestamp), subsequent PATCHes from
+      other partners using the previous ETag would receive false 412
+      Precondition Failed errors. The rejection path must be completely
+      side-effect-free with respect to file state and ETags.
+    spec_impact: "CL-10 R5 rejection — zero side effects: no file write, no ETag change, no compilation"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      A partner may attempt to PATCH an R5 tool to change non-lock fields
+      (e.g., rename the tool or change its description). The R5 lock applies
+      to the enabled/disabled toggle, not necessarily all fields. The API
+      must define which fields are locked by R5: is it the entire tool
+      item or just the enabled field? If R5 locks everything, tool metadata
+      corrections require fleet-level overrides. If R5 only locks enabled,
+      other fields remain editable.
+    spec_impact: "CL-10 R5 lock scope — define locked fields: entire tool item vs enabled field only"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      The rejection response does not include a retry mechanism because R5
+      rejections are permanent (the tool's classification cannot change
+      through the API). The response should include a 'permanent: true'
+      field so partners know not to retry. Without this signal, partners
+      with automatic retry logic would repeatedly attempt the same rejected
+      PATCH, wasting resources and flooding audit logs.
+    spec_impact: "CL-10 R5 rejection — include permanent: true to signal no retry; distinguish from transient failures"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      The rejection response should include a 'how_to_resolve' field
+      pointing partners to the appropriate escalation path. For R5 tools,
+      resolution requires fleet-level policy change or governance review.
+      The field could contain a URL to the fleet admin portal or instructions
+      for requesting a governance exception. This turns a dead-end error
+      into an actionable next step for the user.
+    spec_impact: "CL-10 R5 rejection — include how_to_resolve with escalation path (fleet admin URL or governance review)"
+    pitfall: null

@@ -6,7 +6,7 @@ pitfall: P-253
 description: >
   Validates that `claws check --dedup` detects diamond dependency situations
   where npm installs duplicate instances of a shared package. When
-  @claws/compiler and @bic/claws-sdk pin different versions of
+  @bic/claws-sdk and @bic/claws-sdk pin different versions of
   @craftworks/crypto, npm cannot deduplicate, breaking instanceof checks
   and singleton registries like EmitRegistry.
 
@@ -15,12 +15,12 @@ expect:
   prevention: "`claws check --dedup` verifies zero duplication via `npm ls --all` at manifest-declared versions. Platform manifest is the single source of truth for version pins. Publish gate rejects manifest versions that produce duplicates."
 
 simulate:
-  failures: ["Diamond dependency between @claws/compiler and @bic/claws-sdk installs duplicate @craftworks/crypto instances"]
+  failures: ["Diamond dependency between @bic/claws-sdk and @bic/claws-sdk installs duplicate @craftworks/crypto instances"]
   halt: null
   budget: null
 
 problem: >
-  @claws/compiler pins @craftworks/crypto@1.0.0 while @bic/claws-sdk
+  @bic/claws-sdk pins @craftworks/crypto@1.0.0 while @bic/claws-sdk
   pins @craftworks/crypto@1.1.0. A consumer installs both packages. npm cannot
   deduplicate crypto — two copies exist at different tree levels. Code creates
   an AuditChain using crypto@1.0.0's constructor, then passes it to a function

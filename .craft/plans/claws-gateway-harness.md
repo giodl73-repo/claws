@@ -129,8 +129,8 @@ claws build && claws test --sim --assert-no-regressions
 
 - claws-sdk (GovernanceIR, compile pipeline, emit) — shipped in Ptah
 - claws-cli (compile, check, build commands) — shipped in Ptah
-- @bic/claws-skill-kit (MockGateway base) — shipped in Ptah
-- @bic/claws-test (ScenarioRunner, GovernanceValidator) — shipped in Ptah
+- @bic/skill-kit (MockGateway base) — shipped in Ptah
+- @bic/test (ScenarioRunner, GovernanceValidator) — shipped in Ptah
 
 ## Coverage Contract
 

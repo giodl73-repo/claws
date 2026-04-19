@@ -28,14 +28,14 @@ problem: >
   checks G-A2A-TRUST and finds no trust relationship between the two agents.
   The communication is blocked. At compile time, FE6 detects the same
   configuration gap: agents declared without trust declarations produce
-  CLAWS-E030 (Amendment A97). The scenario validates both compile-time and
+  OC-POLICY-E030 (Amendment A97). The scenario validates both compile-time and
   runtime enforcement of default-deny.
 
 findings:
   - id: F01
     severity: major
     description: >
-      Amendment A97 makes delegation-without-trust a hard error (CLAWS-E030).
+      Amendment A97 makes delegation-without-trust a hard error (OC-POLICY-E030).
       But the error fires only when delegation exists (tools are delegated to
       the agent). Two agents that merely need to communicate (not delegate)
       need a trust declaration but may not have delegation. G-A2A-TRUST must
@@ -122,7 +122,7 @@ findings:
     description: >
       The scenario tests runtime blocking, but the compile-time FE6 check
       should prevent this workspace from building at all. If FE6 produces
-      CLAWS-E030 (hard error), the workspace cannot compile, and the runtime
+      OC-POLICY-E030 (hard error), the workspace cannot compile, and the runtime
       scenario never occurs. The scenario is valuable for cases where FE6
       is bypassed (advisory mode, dynamic agents, stale compilation). The
       runtime handler is the last line of defense.

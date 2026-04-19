@@ -20,7 +20,7 @@ expect:
       hipaa_mode: true
       chain_classification: phi-storage
   violations:
-    - code: CLAWS-E230
+    - code: OC-POLICY-E230
       message: "Audit chain contains PHI — chain file not flagged as PHI storage in compliance metadata"
       severity: error
   warnings:

@@ -7,6 +7,7 @@ import { ClientManager, attachWsHandler, type WsEvent } from '../src/ws/events.j
 import { governanceIRWithViolations } from './fixtures/governance-ir-with-violations.js';
 import { minimalGovernanceIR } from './fixtures/governance-ir.js';
 
+import { TEST_TRUST_SIGNING_KEY } from './fixtures/trust-key.js';
 function listen(app: ReturnType<typeof createApp>): Promise<Server> {
   return new Promise((resolve) => {
     const s = app.listen(0, '127.0.0.1', () => { resolve(s); });
@@ -92,6 +93,7 @@ describe('full daemon lifecycle E2E', () => {
     const state: ServerState = { startedAt: Date.now(), compileCount: 0 };
     const app = createApp(state, {
       compileFn,
+      trustSigningKey: TEST_TRUST_SIGNING_KEY,
       workspaceRoot: '/test',
       rateLimitMax: 100,
     }, clientManager);
@@ -187,6 +189,7 @@ describe('full daemon lifecycle E2E', () => {
     const state: ServerState = { startedAt: Date.now(), compileCount: 0 };
     const app = createApp(state, {
       compileFn,
+      trustSigningKey: TEST_TRUST_SIGNING_KEY,
       workspaceRoot: '/test',
       rateLimitMax: 100,
     });

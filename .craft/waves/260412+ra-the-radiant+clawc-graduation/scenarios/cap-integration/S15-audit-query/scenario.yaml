@@ -1,0 +1,216 @@
+name: S15-audit-query
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12]
+description: >
+  Validates that GET /api/audit returns the governance audit trail as
+  a queryable, hash-chained event log. Events are linked by prevHash
+  references forming a tamper-evident chain. The API supports filtering
+  by category and session ID, cursor-based pagination, and SARIF export
+  for integration with security tooling. This is the Layer 3 runtime
+  variant — audit events include session context and run references
+  that Layer 1/2 events do not have.
+
+expect:
+  get_audit:
+    endpoint: "GET /api/audit"
+    response_shape:
+      events_is_array: true
+      each_event_has:
+        - id
+        - timestamp
+        - category
+        - sessionId
+        - description
+        - hash
+        - prevHash
+      first_event_prevHash: null
+      chain_integrity: "hash[n].prevHash == hash[n-1].hash"
+  filtering:
+    by_category:
+      endpoint: "GET /api/audit?category=trust-escalation"
+      result: "only events with category == trust-escalation"
+    by_session:
+      endpoint: "GET /api/audit?sessionId=cron:daily-triage"
+      result: "only events from that session"
+    combined:
+      endpoint: "GET /api/audit?category=tool-call&sessionId=agent:code-review"
+      result: "intersection of both filters"
+  pagination:
+    endpoint: "GET /api/audit?cursor=<eventId>&limit=50"
+    nextCursor_present_when: "more events exist"
+  sarif_export:
+    endpoint: "GET /api/audit?format=sarif"
+    content_type: "application/sarif+json"
+    sarif_version: "2.1.0"
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A compliance officer queries the audit trail to investigate a trust
+  escalation that occurred during a cron session. They call
+  GET /api/audit?category=trust-escalation&sessionId=cron:daily-triage&limit=20.
+  The server reads the audit chain, filters to matching events, and returns
+  the 20 most recent with hash chain references. The officer verifies chain
+  integrity, then exports the full trust-escalation category as SARIF for
+  their security information system. The audit chain has 5,000 events
+  total, 200 in the trust-escalation category.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Large chain performance: the audit chain is append-only and grows
+      without bound. A workspace active for months could have tens of
+      thousands of events. Reading the entire chain and filtering in
+      memory is O(n) per request. The audit subsystem must maintain a
+      secondary index (by category, by sessionId, by timestamp) for
+      efficient queries. Without indexing, the compliance officer's
+      filtered query scans all 5,000 events to find 200 matches.
+    spec_impact: "CL-10 /api/audit — secondary index for category+sessionId, not full-chain scan"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Integrity check timing: verifying the full hash chain on every
+      GET request is O(n) with hash computation. For 5,000 events with
+      SHA-256, this adds measurable latency. The server should verify
+      chain integrity periodically (startup + background interval) and
+      cache the result. A chainVerifiedAt timestamp in the response
+      tells the client when integrity was last confirmed. A ?verify=true
+      parameter forces on-demand re-verification for audit spot-checks.
+    spec_impact: "CL-10 /api/audit — cached integrity, chainVerifiedAt in response, ?verify=true for on-demand"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Empty chain: a brand-new workspace with no governance events yet
+      must return an empty array with 200 OK. The chain integrity for
+      an empty chain is trivially valid. The response should include
+      metadata (chainLength: 0, chainVerifiedAt: <timestamp>) so the
+      client can distinguish "empty chain" from "query returned no
+      results for this filter." An empty chain with a filter applied
+      should also return [] with the filter echoed in the response.
+    spec_impact: "CL-10 /api/audit — empty chain returns [] with chainLength:0 metadata"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Filter by session ID: the audit chain must include sessionId on
+      every event. Events that are not session-scoped (e.g., workspace-
+      level config changes) should have sessionId: null. Filtering by
+      sessionId must match exact session IDs (e.g., 'cron:daily-triage'),
+      not partial matches. A query for sessionId='cron' must not match
+      'cron:daily-triage' — use an exact match, not prefix match.
+    spec_impact: "CL-10 audit event schema — sessionId field on all events, exact match filtering"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Retention policy: some organizations require audit logs retained
+      for N years; others require deletion after N days (regulatory).
+      An append-only hash chain conflicts with deletion. The chain must
+      support tombstone deletion — replacing event content with a
+      deletion marker while preserving the hash link. This maintains
+      chain integrity (hash of tombstone is deterministic) while
+      removing PII. The API must surface tombstoned events as
+      category: 'redacted' with no content.
+    spec_impact: "CL-10 audit chain — tombstone deletion preserving hash integrity for retention compliance"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      SARIF export format correctness: SARIF 2.1.0 schema requires
+      specific structure (schema, version, runs array with tool,
+      results, invocations). Mapping audit events to SARIF results
+      requires conventions: category maps to ruleId, description maps
+      to message.text, timestamp maps to a property bag. The export
+      must validate against the SARIF 2.1.0 JSON schema — a malformed
+      SARIF file will be rejected by security tools (e.g., GitHub
+      Advanced Security, Azure DevOps).
+    spec_impact: "CL-10 SARIF export — validate against SARIF 2.1.0 JSON schema"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Filtered queries break chain verification. When filtering by
+      category, the returned events are a subset. The prevHash on each
+      event points to the preceding event in the FULL chain, not the
+      filtered subset. The client cannot verify integrity on filtered
+      results alone. The response should include chainVerifiedAt from
+      the last full verification and a note that filtered results
+      reference the full chain.
+    spec_impact: "CL-10 /api/audit — filtered responses include chainVerifiedAt, not verifiable per-subset"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Cursor pagination stability: the cursor is an event ID pointing
+      into the chain. If new events are appended between paginated
+      requests, the cursor remains valid (events are append-only, IDs
+      are stable). However, the total count may change between pages.
+      The response should include totalEstimate (approximate count for
+      the current filter) rather than an exact total, since exact
+      counts require scanning the full chain.
+    spec_impact: "CL-10 /api/audit pagination — stable cursor, totalEstimate instead of exact count"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      Concurrent writes during audit reads: if a new audit event is
+      being appended while a GET request is reading the chain, the
+      read must see a consistent snapshot. A partially written event
+      (hash computed but not yet linked to prevHash) could corrupt
+      the integrity check. The audit chain must support concurrent
+      readers with a single writer, using append-only file semantics
+      or a write lock.
+    spec_impact: "CL-10 audit chain — consistent read snapshot during concurrent writes"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      The hash algorithm must be specified in the response metadata
+      (e.g., hashAlgorithm: 'sha256'). If the algorithm changes in
+      a future version, clients verifying integrity need to know which
+      algorithm to use. A chain that migrates from sha256 to sha3-256
+      must include a transition event marking the algorithm change,
+      and each event's hash must use the algorithm active at its
+      insertion time.
+    spec_impact: "CL-10 audit response — hashAlgorithm in metadata, algorithm transition event"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      SARIF export for large chains should support streaming or
+      paginated export. Exporting 5,000 events as a single SARIF JSON
+      document could produce a multi-megabyte response. The API should
+      support ?format=sarif&limit=500 for paginated SARIF export, or
+      return a 202 with a download URL for asynchronous generation of
+      the full export file.
+    spec_impact: "CL-10 SARIF export — paginated or async for large chains"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Audit events may contain PII (user emails, manager names, edited
+      content). The SARIF export and API responses must respect caller
+      authorization. A read-only user should see event metadata but PII
+      fields should be redacted. Role-based field filtering ensures
+      compliance officers see full events while regular users see
+      sanitized summaries.
+    spec_impact: "CL-10 /api/audit — role-based PII redaction in responses and exports"
+    pitfall: null

@@ -16,7 +16,7 @@ expect:
     recompile_triggered: true
     obo_conflicts_detected: 1
   violations:
-    - code: CLAWS-E080
+    - code: OC-POLICY-E080
       message: "Stale cache detected — file timestamp mismatch on AGENTS.md"
       severity: error
   warnings:

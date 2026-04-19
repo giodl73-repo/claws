@@ -39,7 +39,7 @@ describe('createLLMProvider — SDK edge cases', () => {
     constructorArgs = [];
   });
 
-  it('returns error with CLAWS-E041 when SDK constructor throws', async () => {
+  it('returns error with OC-POLICY-E041 when SDK constructor throws', async () => {
     const originalKey = process.env['ANTHROPIC_API_KEY'];
     process.env['ANTHROPIC_API_KEY'] = 'sk-ant-test-fake-key';
     shouldThrow = 'module';
@@ -54,7 +54,7 @@ describe('createLLMProvider — SDK edge cases', () => {
       }
 
       const output = consoleSpy.mock.calls.flat().join(' ');
-      expect(output).toContain('CLAWS-E041');
+      expect(output).toContain('OC-POLICY-E041');
     } finally {
       consoleSpy.mockRestore();
       if (originalKey !== undefined) {
@@ -78,7 +78,7 @@ describe('createLLMProvider — SDK edge cases', () => {
 
       const output = consoleSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E041');
+      expect(parsed.error.code).toBe('OC-POLICY-E041');
     } finally {
       consoleSpy.mockRestore();
       if (originalKey !== undefined) {

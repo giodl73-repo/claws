@@ -11,7 +11,7 @@ description: >
 expect:
   rules_applied: [G-ELICIT-TIMEOUT]
   violations:
-    - code: CLAWS-E042
+    - code: OC-POLICY-E042
       rule: G-ELICIT-TIMEOUT
       description: "Platform default approve-on-timeout not overridden — R5 auto-executes on inaction"
   pass: false
@@ -63,7 +63,7 @@ findings:
     severity: major
     description: >
       If claws.json explicitly sets approveOnTimeout: true, the build
-      fails with CLAWS-E042: "approveOnTimeout: true is a prohibited
+      fails with OC-POLICY-E042: "approveOnTimeout: true is a prohibited
       configuration. claws requires deny-on-timeout for all risk levels.
       This configuration cannot be overridden because it would allow
       ungoverned R5 tool execution on human inaction."

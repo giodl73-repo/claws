@@ -1,0 +1,202 @@
+name: S21-r5-bypass-layer1
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12, CL-03]
+description: >
+  Validates that PATCH /api/oc/TOOLS.md#Tools/send-email attempting to disable
+  R5 approval via the generic Layer 1 API produces the same R5_NON_NEGOTIABLE
+  rejection as the equivalent Layer 2 chunk PATCH. The generic OC API shares
+  the identical validation layer with the chunk-specialized API -- there is no
+  bypass path. The error response must include the oc:// path, the locked field,
+  and the R5 source annotation. Any field not covered by the R5 lock (e.g.
+  description, display_name) may be edited freely even on an R5 tool.
+
+expect:
+  http:
+    method: PATCH
+    path: /api/oc/TOOLS.md#Tools/send-email
+    status: 403
+    content_type: application/json
+  response_shape:
+    root_has: [error, oc_path, locked_field, lock_source]
+    error_type: R5_NON_NEGOTIABLE
+    oc_path_echoed: "oc://TOOLS.md/Tools/send-email"
+    lock_source: r5
+  layer_parity:
+    layer1_status: 403
+    layer2_status: 403
+    error_type_identical: true
+    error_body_fields_identical: [error, locked_field, lock_source]
+  unlocked_field_edit:
+    field: description
+    status: 200
+    r5_lock_unaffected: true
+  governance:
+    audit_event_emitted: true
+    audit_event_type: R5_BYPASS_ATTEMPT
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A CAP settings partner uses the generic Layer 1 API (PATCH /api/oc/{path})
+  to edit send-email, an R5-locked tool in TOOLS.md. The PATCH payload attempts
+  to set approval_required: false, which would effectively disable R5 protection.
+  The validation layer must reject this identically to the Layer 2 chunk PATCH
+  endpoint. The partner then tries editing the description field (not covered by
+  R5 lock) on the same tool, which must succeed. The challenge is ensuring that
+  the R5 validation is not bypassed by using a different API surface, that the
+  error carries the oc:// path for client-side rendering, and that non-locked
+  fields remain editable on R5 tools without false rejections.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      Layer 1 (PATCH /api/oc/) and Layer 2 (PATCH /api/chunks/) must share a
+      single validation codepath for R5 lock enforcement. If they are separate
+      implementations, a bug fix in one may not propagate to the other, creating
+      a bypass window. The validator must be a shared module invoked by both
+      route handlers, not duplicated logic. Test: patch the same R5 field via
+      both endpoints and diff the response bodies -- they must be structurally
+      identical.
+    spec_impact: "CL-10 validation — single shared R5 validator for Layer 1 and Layer 2; no duplicated codepaths"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      The error response must include the oc:// path (oc://TOOLS.md/Tools/send-email)
+      so the CAP partner can render the rejection in context. If Layer 1 returns
+      an oc:// path but Layer 2 returns a chunk_id, the partner must translate
+      between them. Both layers should include BOTH identifiers (oc_path and
+      chunk_id) in the error body so the partner does not need to maintain a
+      mapping table.
+    spec_impact: "CL-10 error response — include both oc_path and chunk_id in R5 rejection for cross-layer client compatibility"
+    pitfall: null
+
+  - id: F03
+    severity: critical
+    description: >
+      R5 lock determination must come from a single source of truth -- the
+      GovernanceIR risk_level field populated during compilation. If Layer 1
+      checks the raw TOOLS.md frontmatter while Layer 2 checks the compiled
+      GovernanceIR, they may disagree when the file is edited but not yet
+      recompiled. Both layers must read from the GovernanceIR. If no
+      compilation exists, both must fail-closed (treat as R5).
+    spec_impact: "CL-12 R5 determination — GovernanceIR is single source of truth; both API layers read from compiled IR only"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      A PATCH that edits a field NOT in the R5 lock (e.g. description,
+      display_name, examples) must succeed even on an R5 tool. The lock
+      covers specific fields (approval_required, risk_level, enabled) not
+      the entire tool record. If the validator rejects the entire PATCH
+      because the tool is R5-classified, it over-blocks legitimate edits.
+      The lock must be field-granular, not tool-granular.
+    spec_impact: "CL-12 R5 lock scope — field-granular locking; non-locked fields on R5 tools remain editable"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      If a PATCH payload contains BOTH a locked field (approval_required: false)
+      and an unlocked field (description: 'Updated'), the validator must reject
+      only the locked field change. Two strategies: reject the entire PATCH
+      (simpler, partner retries without locked field) or partial-apply (accept
+      description, reject approval_required). The API contract must specify
+      which strategy is used. Partial-apply risks the partner not noticing the
+      rejection; full-reject is safer but requires the partner to split edits.
+    spec_impact: "CL-10 PATCH atomicity — define all-or-nothing vs partial-apply for mixed locked/unlocked field PATCHes"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      A creative bypass: the partner PATCHes the tool name from 'send-email'
+      to 'send-email-v2' via Layer 1, creating a new tool identity. The R5
+      lock is keyed to 'send-email' -- the renamed tool might escape the lock.
+      The validator must track tool identity by a stable ID (not name) or
+      reject name changes on R5 tools entirely. Without this, rename is a
+      trivial R5 bypass.
+    spec_impact: "CL-12 R5 lock identity — lock keyed to stable tool ID, not mutable name; reject name change on R5 tools"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      When the Layer 1 PATCH targets a path depth that skips the tool level
+      (e.g. /api/oc/TOOLS.md#Tools with a payload that replaces the entire
+      section), the section-level write must still enforce per-tool R5 locks.
+      The validator cannot only check field-level writes -- it must detect that
+      a section-level replacement would overwrite R5-locked tool fields. Diff
+      the proposed section content against the compiled IR to find locked field
+      changes hidden inside a bulk edit.
+    spec_impact: "CL-10 PATCH depth — section-level writes must diff against IR to enforce per-tool R5 locks within bulk edits"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      The audit event for an R5 bypass attempt must capture: the API layer
+      used (layer1 vs layer2), the oc:// path, the specific field targeted,
+      the session identity, and a timestamp. If Layer 1 bypass attempts
+      produce a different audit event schema than Layer 2 attempts, the
+      security team cannot correlate cross-layer attacks. Both layers must
+      emit the same audit event type (R5_BYPASS_ATTEMPT) with a layer field.
+    spec_impact: "CL-10 audit — unified R5_BYPASS_ATTEMPT event schema across both API layers with layer discriminator"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      A partner that receives a 403 R5_NON_NEGOTIABLE from Layer 1 may
+      retry via Layer 2 (or vice versa) hoping for a different result.
+      Rate limiting must apply per-session across both layers, not per-endpoint.
+      If rate limits are endpoint-scoped, a determined partner gets double
+      the attempts. The rate limiter key should be (session_id, tool_id,
+      locked_field) regardless of API layer.
+    spec_impact: "CL-10 rate limiting — R5 rejection rate limit keyed to (session, tool, field), not endpoint"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      If the GovernanceIR is stale (file edited since last compile) and
+      the raw file shows the tool at R3 but the IR has it at R5, which
+      wins? The IR must win (fail-closed). But the response should include
+      a governance.stale_warning so the partner knows a recompile may change
+      the result. Without the warning, the partner has no signal to trigger
+      a recompile before retrying the edit.
+    spec_impact: "CL-12 stale IR — fail-closed to R5 with governance.stale_warning indicating recompile may change result"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      Layer 1 uses oc:// paths while Layer 2 uses chunk IDs. The error
+      response from Layer 1 must resolve the oc:// path to the same tool
+      identity that Layer 2 uses. If the path resolution has a bug (e.g.
+      case sensitivity, trailing slash), Layer 1 might resolve to a
+      different tool than Layer 2, causing the R5 check to pass on one
+      layer while failing on the other. Path resolution must be canonical
+      and tested for equivalence.
+    spec_impact: "CL-03 oc:// resolution — canonical path resolution tested for equivalence with chunk ID resolution"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The Layer 1 PATCH endpoint accepts JSON payloads with arbitrary field
+      names. A partner could send a field name with a typo (e.g.
+      aproval_required instead of approval_required). The validator must
+      reject unknown fields on tool records rather than silently ignoring
+      them. Silent ignore means the partner believes they edited a locked
+      field when they actually edited nothing -- the 200 response misleads
+      them into thinking R5 was bypassed.
+    spec_impact: "CL-10 PATCH validation — reject unknown fields on tool records; no silent ignore"
+    pitfall: null

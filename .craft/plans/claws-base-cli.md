@@ -62,7 +62,7 @@ claws-base-cli is the output foundation for the claws CLI product line -- equiva
 
 ## Scope
 
-- `claws-base-cli/package.json` (NEW) -- `@craftworks/claws-base-cli`, type-only dependency on `@bic/claws-sdk`
+- `claws-base-cli/package.json` (NEW) -- `@bic/claws-base-cli`, type-only dependency on `@bic/claws-sdk`
 - `claws-base-cli/tsconfig.json` (NEW) -- extends monorepo base, strict mode
 - `claws-base-cli/vitest.config.ts` (NEW) -- unit/integration/e2e projects
 - `claws-base-cli/.eslintrc.cjs` (NEW) -- `no-restricted-imports` blocks shared-cli, craftworks-sdk; `consistent-type-imports` enforces type-only from claws-sdk

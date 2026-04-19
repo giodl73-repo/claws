@@ -10,7 +10,7 @@
 
 import path from 'node:path';
 import { Router, type Request, type Response } from 'express';
-import { serialize, type GovernanceIR, type GovViolation } from '@bic/claws-sdk';
+import { serialize, type GovernanceIR, type GovViolation } from '../../../claws-sdk/src/index.js';
 import type { CompilationHost } from '../compilation-host.js';
 import type { ClientManager } from '../ws/events.js';
 import { createEvent } from '../ws/events.js';

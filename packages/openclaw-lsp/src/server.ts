@@ -5,7 +5,7 @@
  * (open, change, close, save). Wires the CompilationHost to the diagnostic
  * provider so that governance violations surface as real-time editor diagnostics.
  *
- * @module claws-lsp/server
+ * @module openclaw-lsp/server
  */
 
 import type {

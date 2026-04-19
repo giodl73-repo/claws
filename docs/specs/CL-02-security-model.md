@@ -22,7 +22,7 @@ The OBO boundary -- where an agent acts AS the user rather than FOR the user -- 
 - Injection defense (16 compile-time rules across 4 layers)
 - Elicitation gates (OBO boundary, deny-default, signed approval tokens)
 - OWASP Agentic Top 10 mapping
-- 29 governance rules across 8 rule groups
+- 34 governance rules across 9 rule groups (adds G-CHAIN for tool-argument provenance)
 
 **Out of scope**:
 - Runtime enforcement mechanics (CL-03)
@@ -65,13 +65,14 @@ Trust Tier (T0-T4)          -- CEILING: can this workspace use this tool?
         No transitive OBO delegation
 ```
 
-### Governance Rule Table (29 rules)
+### Governance Rule Table (34 rules)
 
 | Rule Group | Rules | OWASP Risk | Compile-time? |
 |-----------|-------|-----------|--------------|
 | **G-CLASS** | Per-tool R1-R5 risk scoring | #1 Excessive Agency | Yes |
 | **G-PERM** | Capability-based permissions (READ/WRITE/COMMUNICATE/EXECUTE/TRANSACT) | #2 Access Control | Yes |
 | **G-DATA** | Data sensitivity labels (PUBLIC/INTERNAL/CONFIDENTIAL/RESTRICTED) | #2 Access Control | Partial |
+| **G-CHAIN** (5 rules) | Tool-argument provenance; R-tier laundering defense via intra-agent chains | #1 Excessive Agency | Yes |
 | **G-A2A-IDENTITY** | Agent identity verification (L0 declared through L3 attested/PKI) | #5 Inter-Agent | Yes |
 | **G-A2A-TRUST** | Default-deny trust boundaries between agents | #5 Inter-Agent | Yes |
 | **G-A2A-FLOW** | Data flow labels across agent boundaries | #5 Inter-Agent | Yes |
@@ -1212,7 +1213,7 @@ G-CLASS includes tool name analysis in behavioral heuristic. Verb-to-risk mappin
 
 **Source**: PC2-S09-F05 (major), PC2-S09-F06 (major)
 
-Parser uppercases names and validates against closed enum. "READWRITE" -> CLAWS-E020: "Did you mean READ and WRITE?"
+Parser uppercases names and validates against closed enum. "READWRITE" -> OC-POLICY-E020: "Did you mean READ and WRITE?"
 
 ### Amendment A91: Classification Override Downgrade Warning (G-CLASS)
 
@@ -1254,7 +1255,7 @@ Workspace-specific salt in `.claws/keys/` prevents rainbow table attacks.
 
 **Source**: PC2-S11-F01 (major), PC2-S11-F02 (major)
 
-Delegation with no trust declaration produces CLAWS-E030 (hard error). Developer must make explicit trust decision.
+Delegation with no trust declaration produces OC-POLICY-E030 (hard error). Developer must make explicit trust decision.
 
 ### Amendment A98: A2A Rule Suppression Scaling (G-A2A-*)
 
@@ -1954,7 +1955,7 @@ Non-English tool names: English verb map does not apply. Falls through to descri
 
 **Source**: PF2-S14-F03 (major)
 
-No known mapping = CLAWS-E020 hard error. Cannot silently ignore because ignoring = no constraint.
+No known mapping = OC-POLICY-E020 hard error. Cannot silently ignore because ignoring = no constraint.
 
 ### Amendment A214: Case-Insensitive Capability Matching (G-PERM)
 
@@ -1978,7 +1979,7 @@ Split on underscore, hyphen, comma, pipe. "READ_WRITE", "READ-WRITE", "READ,WRIT
 
 **Source**: PF2-S14-F07 (warning)
 
-Custom capabilities declared in claws.json capabilities.custom enum. Not in custom enum = non-standard = CLAWS-E020.
+Custom capabilities declared in claws.json capabilities.custom enum. Not in custom enum = non-standard = OC-POLICY-E020.
 
 ### Amendment A218: Unknown Data Label Bypass (G-DATA)
 
@@ -1990,7 +1991,7 @@ Unknown label not in enum. No flow restrictions, no redaction, no A2A boundary c
 
 **Source**: PF2-S15-F02 (major)
 
-Levenshtein/synonym lookup. "SENSITIVE" suggests "PII" or "CONFIDENTIAL." CLAWS-E025 provides actionable guidance.
+Levenshtein/synonym lookup. "SENSITIVE" suggests "PII" or "CONFIDENTIAL." OC-POLICY-E025 provides actionable guidance.
 
 ### Amendment A220: Partial Enforcement False Sense of Security (G-DATA)
 
@@ -2068,13 +2069,13 @@ Post-emit verification checks every output path includes channel-specific redact
 
 **Source**: PF2-S17-F01 (major), PF2-S17-F02 (major)
 
-Unidirectional trust creates one-way channel. Work executes but output lost. CLAWS-E030 compile-time hard error naming both agents and missing trust direction.
+Unidirectional trust creates one-way channel. Work executes but output lost. OC-POLICY-E030 compile-time hard error naming both agents and missing trust direction.
 
 ### Amendment A233: Violation Cascade Dependency Suppression (G-A2A-*)
 
 **Source**: PF2-S17-F03 (major), PF2-S17-F04 (major)
 
-Missing trust triggers 5 violations from 1 root cause. Evaluator suppresses dependents: "CLAWS-E030: Fix bidirectional trust (4 additional violations will resolve)."
+Missing trust triggers 5 violations from 1 root cause. Evaluator suppresses dependents: "OC-POLICY-E030: Fix bidirectional trust (4 additional violations will resolve)."
 
 ### Amendment A234: Verbose Mode for Suppressed Violations (G-A2A-*)
 
@@ -2176,13 +2177,13 @@ SKILL.md scanned at emit time with relaxed rules (trusted, claws-generated), not
 
 **Source**: PF2-S20-F01 (major), PF2-S20-F02 (major)
 
-8 sub-rules: CLAWS-E060-01 (input validation) through -08 (memory poisoning). Stable across versions. New sub-rules get new codes; existing never change.
+8 sub-rules: OC-POLICY-E060-01 (input validation) through -08 (memory poisoning). Stable across versions. New sub-rules get new codes; existing never change.
 
 ### Amendment A251: Rich Sub-Rule Diagnostic Messages (G-CONTEXT)
 
 **Source**: PF2-S20-F03 (major)
 
-CLAWS-E060-03 includes: input field name, expected constraint, documentation reference. Bare code without context only marginally better than no code.
+OC-POLICY-E060-03 includes: input field name, expected constraint, documentation reference. Bare code without context only marginally better than no code.
 
 ### Amendment A252: Sub-Rule Codes as General Convention (All Rules)
 
@@ -2206,7 +2207,7 @@ Machine-parseable for CI. Severity differs per sub-rule: input validation = erro
 
 **Source**: PF2-S20-F07 (warning)
 
-`claws explain CLAWS-E060-03` displays: what, why (threat model), how (code example), when to suppress.
+`claws explain OC-POLICY-E060-03` displays: what, why (threat model), how (code example), when to suppress.
 
 ### Amendment A256: G-BOUND Individual Sub-Rule Enforcement (G-BOUND)
 
@@ -2254,19 +2255,19 @@ Slow tools exhaust maxDuration before maxSteps. Effective bound analysis account
 
 **Source**: PF2-S22-F01 (major), PF2-S22-F02 (major)
 
-Hyphen/underscore/case mismatches cause silent bypass. Cross-validate against TOOLS.md. Normalize: remove hyphens, underscores, lowercase. Near-match triggers CLAWS-E065 with suggestion.
+Hyphen/underscore/case mismatches cause silent bypass. Cross-validate against TOOLS.md. Normalize: remove hyphens, underscores, lowercase. Near-match triggers OC-POLICY-E065 with suggestion.
 
 ### Amendment A264: Unmatched Elicitation Policy Is Hard Error (G-ELICIT)
 
 **Source**: PF2-S22-F03 (major)
 
-CLAWS-E065 hard error. Policy matching no tool is always a bug. No legitimate use case.
+OC-POLICY-E065 hard error. Policy matching no tool is always a bug. No legitimate use case.
 
 ### Amendment A265: R5 Tool Without Policy Detection (G-ELICIT)
 
 **Source**: PF2-S22-F04 (major)
 
-CLAWS-E066: R5 tool with no elicitation policy. Governance gap as dangerous as mismatched policy.
+OC-POLICY-E066: R5 tool with no elicitation policy. Governance gap as dangerous as mismatched policy.
 
 ### Amendment A266: Normalization Algorithm Documentation (G-ELICIT)
 
@@ -2302,7 +2303,7 @@ Emit UNCONDITIONALLY generates deny-on-timeout. Non-configurable. Returns `{bloc
 
 **Source**: PF2-S23-F03 (major)
 
-`approveOnTimeout: true` in claws.json = CLAWS-E042 build failure. Prohibited configuration.
+`approveOnTimeout: true` in claws.json = OC-POLICY-E042 build failure. Prohibited configuration.
 
 ### Amendment A272: All Risk Levels Deny on Timeout (G-ELICIT-TIMEOUT)
 
@@ -2380,7 +2381,7 @@ Advisory proposes minimal capabilities. send-payment: `{allowed:["TRANSACT"], re
 
 **Source**: PF2-S25-F05 (major)
 
-fleet.requireCapabilities:true elevates CLAWS-W040 to CLAWS-E040 for all fleet members.
+fleet.requireCapabilities:true elevates CLAWS-W040 to OC-POLICY-E040 for all fleet members.
 
 ### Amendment A285: Absent vs Empty Capabilities Distinction (G-PERM)
 
@@ -2514,7 +2515,7 @@ The signed approval token must include the tool invocation parameters (or a hash
 
 **Source**: OE-S01-F03 (major)
 
-If the approval key is unavailable (missing, corrupted), the approval token cannot be signed. The elicitation flow defaults to DENY -- consistent with fail-closed for R5. Allowing execution without a valid signature is never acceptable. The missing key condition produces CLAWS-E067 at runtime.
+If the approval key is unavailable (missing, corrupted), the approval token cannot be signed. The elicitation flow defaults to DENY -- consistent with fail-closed for R5. Allowing execution without a valid signature is never acceptable. The missing key condition produces OC-POLICY-E067 at runtime.
 
 ### Amendment A306: Token-to-Audit-Entry Linkage (G-ELICIT-AUDIT)
 
@@ -2652,7 +2653,7 @@ The compiler validates standing approval conditions at compile time: time window
 
 **Source**: OE-S05-F02 (major)
 
-Unconditional R5 standing approval (no scope limits, no time bounds) permanently disables the OBO gate for an R5 tool. The compiler emits CLAWS-W041: "Unconditional standing approval for R5 tool send-email. Consider adding scope conditions." In strict mode, this escalates to CLAWS-E041 (hard error).
+Unconditional R5 standing approval (no scope limits, no time bounds) permanently disables the OBO gate for an R5 tool. The compiler emits CLAWS-W041: "Unconditional standing approval for R5 tool send-email. Consider adding scope conditions." In strict mode, this escalates to OC-POLICY-E041 (hard error).
 
 ### Amendment A329: Overlapping Standing Approval Detection (G-ELICIT)
 
@@ -3324,7 +3325,7 @@ The assessment maps claws configuration to specific Article 14(4) requirements: 
 
 **Source**: CE-S03-F10 (warning)
 
-If the system is classified as unacceptable risk (e.g., social scoring), the compiler refuses to generate compliance evidence. It emits CLAWS-E080: "System classified as unacceptable risk under EU AI Act Article 5. Deployment prohibited." Analogous to the R5 fail-closed non-negotiable.
+If the system is classified as unacceptable risk (e.g., social scoring), the compiler refuses to generate compliance evidence. It emits OC-POLICY-E080: "System classified as unacceptable risk under EU AI Act Article 5. Deployment prohibited." Analogous to the R5 fail-closed non-negotiable.
 
 ### Amendment A440: Break Scope Assessment in chainIntegrity Reporting (Audit Chain)
 
@@ -3540,7 +3541,7 @@ The approval key must NEVER exist in the workspace directory tree. The claws ini
 
 ### Amendment A475: Fleet-Level Agent Identity Requirements (G-A2A-IDENTITY)
 
-L0 identity (name-only, no cryptographic binding) is insufficient for fleet contexts. The fleet identity layer must enforce minimum L1 identity: workspace-qualified names that prevent cross-workspace ambiguity. Fleet-wide collision detection must emit CLAWS-E-IDENTITY when agents share names across workspaces. Cross-workspace delegation resolution must fail deterministically on ambiguous names, not depend on scan order or hash table insertion. The compiler must emit a diagnostic warning when a workspace uses L0 identity in a fleet context. Audit events must always show fully qualified workspace/agent paths, never bare display names, to prevent display-name spoofing.
+L0 identity (name-only, no cryptographic binding) is insufficient for fleet contexts. The fleet identity layer must enforce minimum L1 identity: workspace-qualified names that prevent cross-workspace ambiguity. Fleet-wide collision detection must emit OC-POLICY-E-IDENTITY when agents share names across workspaces. Cross-workspace delegation resolution must fail deterministically on ambiguous names, not depend on scan order or hash table insertion. The compiler must emit a diagnostic warning when a workspace uses L0 identity in a fleet context. Audit events must always show fully qualified workspace/agent paths, never bare display names, to prevent display-name spoofing.
 
 *(Sources: PT1-S13-F01, PT1-S13-F02, PT1-S13-F03, PT1-S13-F04, PT1-S13-F05)*
 
@@ -3618,9 +3619,69 @@ When HIPAA compliance mode is active, the audit chain must be automatically clas
 
 ### Amendment A488: Normative CEF Severity Mapping for SIEM Export (SIEM Export)
 
-Every governance event type must have an explicit mapping to CEF severity levels 0-10, included in CL-02 as a normative reference. The mapping must align with the governance risk model: R5 deny events map to CEF 9-10, R4 deny to CEF 7-8, R3 to CEF 5-6, R2 to CEF 3-4, R1 to CEF 1-2, informational events to CEF 0. Custom governance rules must require a severity field or derive it from risk classification; unmapped event types must fail loudly with CLAWS-E231 rather than defaulting to 0 (Unknown). The mapping table must also define deviceAction, deviceEventClassId (claws-specific namespace), and extension fields. The severity mapping should be configurable per-workspace with a floor (R5 events cannot be mapped below CEF 7). The severity model should be format-agnostic (internal 1-10 scale) with per-format adapters for CEF, LEEF, JSON syslog, and OpenTelemetry.
+Every governance event type must have an explicit mapping to CEF severity levels 0-10, included in CL-02 as a normative reference. The mapping must align with the governance risk model: R5 deny events map to CEF 9-10, R4 deny to CEF 7-8, R3 to CEF 5-6, R2 to CEF 3-4, R1 to CEF 1-2, informational events to CEF 0. Custom governance rules must require a severity field or derive it from risk classification; unmapped event types must fail loudly with OC-POLICY-E231 rather than defaulting to 0 (Unknown). The mapping table must also define deviceAction, deviceEventClassId (claws-specific namespace), and extension fields. The severity mapping should be configurable per-workspace with a floor (R5 events cannot be mapped below CEF 7). The severity model should be format-agnostic (internal 1-10 scale) with per-format adapters for CEF, LEEF, JSON syslog, and OpenTelemetry.
 
 *(Sources: PT2-S06-F01, PT2-S06-F02, PT2-S06-F03, PT2-S06-F04, PT2-S06-F05, PT2-S06-F07)*
+
+## Horus Container Threat-Model Amendments
+
+### Amendment A489: G-CHAIN Tool-Argument Provenance — New Rule Family (G-CHAIN)
+
+G-CHAIN is a new governance-rule family that defends against **R-tier laundering via intra-agent tool chains**. The canonical attack: an R1 reader tool (e.g., `read-document`) fetches RESTRICTED data; its output becomes an argument to an R1 sender tool (e.g., `send-email`). Neither tool is R5 individually; the *chain* is. G-A2A-FLOW handles inter-agent data flow; G-CHAIN handles intra-agent tool-to-tool provenance.
+
+**Schema additions (CL-09)**
+
+TOOLS.md tool declarations MAY include an `args_from` field declaring the permitted provenance for each argument:
+
+```yaml
+- name: send-email
+  risk: R1
+  args_from:
+    body: [user_prompt, tool_output.read-document?]
+    recipient: [user_prompt]
+  capabilities: [COMMUNICATE, IRREVERSIBLE_EXTERNAL]
+```
+
+Source-label grammar:
+- `user_prompt` — the user's current prompt text
+- `tool_output.<name>` — the structured output of a prior tool call
+- `memory.<label>` — a MEMORY.md entry with the named sensitivity label
+- `agent_literal` — constants produced by the agent's planner, not derived from data
+- Trailing `?` — optional source; omitted `?` → required source
+
+**Five rules (G-CHAIN-01 through G-CHAIN-05)**
+
+1. **G-CHAIN-01 Provenance schema validation** — reject malformed `args_from` declarations at compile time (unknown source labels, cyclic references). OC-POLICY-E230.
+2. **G-CHAIN-02 Source-to-risk propagation** — if any declared source produces RESTRICTED-labeled data (via G-DATA label propagation), the consuming tool's effective risk tier elevates by one (R1→R2, R3→R4). If any source in the chain carries RESTRICTED + IRREVERSIBLE_EXTERNAL consumer → effective tier R5. The elevated tier drives G-CLASS, G-ELICIT, and all downstream enforcement.
+3. **G-CHAIN-03 Unspecified-provenance default-deny** — tools with R3+ classification that consume non-`user_prompt` data without declaring `args_from` are rejected at compile time (OC-POLICY-E231). R1/R2 tools omitting `args_from` produce CLAWS-W030 warning, not error.
+4. **G-CHAIN-04 Transitive provenance walk** — when `args_from` references `tool_output.B`, the compiler walks B's own `args_from` to determine the *ultimate* source labels. The chain graph must terminate in `user_prompt`, `memory.<label>`, or `agent_literal`. Unbounded or incomplete chains produce OC-POLICY-E232.
+5. **G-CHAIN-05 Irreversible-external mandatory declaration** — any tool whose capability set includes IRREVERSIBLE_EXTERNAL (send-email, post-slack, http-post-external, file-upload-external, transact) MUST declare `args_from` for every argument. Omission → OC-POLICY-E233 (hard error; no advisory downgrade).
+
+**Runtime enforcement**
+
+The compiled GovernanceIR carries the `args_from` declarations. Aether Tier 0 receives them as part of the workspace-policy artifact and validates the declared chain against the actual argument provenance:
+
+- Forwarder envelope includes `arg_provenance: { arg_name: source_label }` for each tool-call argument, populated from the agent's planner trace.
+- Aether Tier 0 cross-checks: declared permitted sources ⊇ actual provenance. Mismatch → deny + audit.
+- If `arg_provenance` is missing from the envelope (malformed, tampered, or planner does not emit), Tier 0 falls through to G-CHAIN-02 static elevation — the worst-case tier applies.
+
+**Interaction with existing rules**
+
+- **G-A2A-FLOW** remains the inter-agent check; G-CHAIN handles intra-agent. Both may fire for the same call when an agent forwards chain-tainted data across an A2A boundary.
+- **G-DATA** label propagation feeds G-CHAIN-02: a tool's output inherits the highest label of its declared sources; that label drives risk elevation.
+- **G-CLASS** risk classification consumes G-CHAIN's elevated tier; chain-elevated tier is authoritative when higher than statically declared tier.
+- **G-ELICIT** fires against the effective (elevated) tier, not the static declaration. A nominally R1 send-email fed RESTRICTED data elicits approval as R5.
+
+**Defense against D4 (container threat model)**
+
+G-CHAIN closes the R-tier laundering gap identified in the Horus container threat model (`docs/claws/proposals/aether-integration.md` §3.4.3; PITFALLS.md P-351). Attack: compromised skill builds a two-tool chain that moves secrets to external egress without either tool individually tripping R5. Defense: chain walk elevates the sender to R5 at compile time; elicitation gate fires; user sees the approval request with provenance.
+
+**Limits of the rule**
+
+- G-CHAIN is a **compile-time + runtime declarative** check. It cannot detect provenance laundering through agent-level transformation (e.g., the agent reads RESTRICTED data, manually re-types the content into `user_prompt` format, then invokes a tool). That residual risk is covered by Tier 3 LLM-judge output-scan rules, not G-CHAIN.
+- G-CHAIN assumes the agent planner emits honest `arg_provenance`. When the planner is compromised, envelope tampering is the operative attack; defended by Invariant 2 (compiled policy authoritative) + Invariant 3 (correlationId/replay defense).
+
+*(Sources: Horus container threat model D4 — tool-argument chaining; `docs/claws/proposals/aether-integration.md` §3.4.3 trust model; PITFALLS.md P-351 — R-tier laundering via intra-agent chain)*
 
 ## Praetor Integration Amendments
 
@@ -3630,7 +3691,7 @@ Every governance event type must have an explicit mapping to CEF severity levels
 
 **SSO groups to trust tiers** *(CL-07 §6)*: Enterprise identity provider groups (Azure AD groups, Okta groups, LDAP groups) map to workspace trust tiers (T0-T4). The mapping is defined in `claws.json` under `identity.groupMapping` and evaluated at compile time to determine the effective trust tier for the authenticated principal. Group-to-tier mapping follows a highest-tier-wins policy when a principal belongs to multiple groups. Unmapped groups default to T1 (conservative). The mapping must be auditable and produce a clear trail from IdP group membership to effective trust tier.
 
-**Section locks (FE6)** *(CL-07 §6)*: SOUL.md governance sections are locked by role using the FE6 fence pass mechanism with hash verification. Each locked section carries a role identifier (e.g., `governance-admin`) and a SHA-256 hash of the section content. Modifications to locked sections by unauthorized roles produce CLAWS-E401 diagnostics at compile time. The lock mechanism is enforced during the PARSE phase before any IR construction. Hash verification detects both unauthorized modifications and accidental edits. The lock metadata is stored in SOUL.md frontmatter, not in external files, to maintain lossless round-trip properties.
+**Section locks (FE6)** *(CL-07 §6)*: SOUL.md governance sections are locked by role using the FE6 fence pass mechanism with hash verification. Each locked section carries a role identifier (e.g., `governance-admin`) and a SHA-256 hash of the section content. Modifications to locked sections by unauthorized roles produce OC-POLICY-E401 diagnostics at compile time. The lock mechanism is enforced during the PARSE phase before any IR construction. Hash verification detects both unauthorized modifications and accidental edits. The lock metadata is stored in SOUL.md frontmatter, not in external files, to maintain lossless round-trip properties.
 
 **Fleet identity scoping** *(CL-07 §6)*: Fleet scan and broadcast operations respect identity-based workspace access controls. An authenticated principal can only scan workspaces their IdP groups grant access to. Fleet-level commands (`claws fleet scan`, `claws fleet broadcast`) filter workspace lists through the identity bridge before execution. Workspace access is determined by the intersection of fleet membership and IdP group-to-workspace mapping. Unauthorized workspace access attempts are recorded in the audit chain with the requesting principal's identity.
 
@@ -3648,7 +3709,7 @@ Every governance event type must have an explicit mapping to CEF severity levels
 
 **Fleet identity timeout and caching** *(INT-IB-S05)*: Fleet scan operations touching hundreds of workspaces must cache identity verification results to avoid per-workspace IdP round-trips. The cache TTL must be configurable (default 5 minutes) and must not exceed the IdP session lifetime. Cache invalidation must be triggered by IdP session revocation events when supported by the IdP (OIDC back-channel logout).
 
-**OBO approval chain of custody** *(INT-IB-S06)*: OBO approval tokens must carry a verifiable chain of custody: original requester identity, approving principal identity, approval timestamp, and scope constraints. The chain of custody is verified at runtime before tool execution. Forged or tampered approval tokens produce CLAWS-E402 diagnostics and a critical audit chain event. The verification must be constant-time to prevent timing attacks on approval token structure.
+**OBO approval chain of custody** *(INT-IB-S06)*: OBO approval tokens must carry a verifiable chain of custody: original requester identity, approving principal identity, approval timestamp, and scope constraints. The chain of custody is verified at runtime before tool execution. Forged or tampered approval tokens produce OC-POLICY-E402 diagnostics and a critical audit chain event. The verification must be constant-time to prevent timing attacks on approval token structure.
 
 **Input provenance for package sources** *(INT-IR-S04)*: When governance inputs are resolved from package sources (@claws/* or @openclaw/* packages), the provenance record must include package name, version, registry URL, and package integrity hash. This enables supply chain verification for governance rules distributed through npm registries.
 

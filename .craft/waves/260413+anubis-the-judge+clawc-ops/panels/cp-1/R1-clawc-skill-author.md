@@ -136,7 +136,7 @@ A skill author learning from the reference workspace will see that skills don't 
 
 **Files**: `claws-cli/src/errors/contract.ts:76-78`, `claws-cli/src/cli.ts`
 
-The `DiagnosticError.toDiagnostic()` method falls back to `Run \`claws help ${this.code}\`` when no docsUrl is provided. This is the right pattern -- local help is more resilient than external URLs. But the CLI program (`cli.ts`) registers only four commands: `compile`, `check`, `build`, `init`. There is no `help` command. Running `claws help CLAWS-E010` will print the Commander.js help text (flags and commands), not the error code explanation.
+The `DiagnosticError.toDiagnostic()` method falls back to `Run \`claws help ${this.code}\`` when no docsUrl is provided. This is the right pattern -- local help is more resilient than external URLs. But the CLI program (`cli.ts`) registers only four commands: `compile`, `check`, `build`, `init`. There is no `help` command. Running `claws help OC-POLICY-E010` will print the Commander.js help text (flags and commands), not the error code explanation.
 
 This was flagged as M-02 in the plan review. The implementation addressed it with the fallback pattern but did not create the `help` subcommand. The skill author who follows the diagnostic's advice will hit a dead end.
 

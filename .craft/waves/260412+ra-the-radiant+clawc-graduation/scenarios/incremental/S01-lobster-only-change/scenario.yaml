@@ -1,0 +1,180 @@
+name: S01-lobster-only-change
+series: incremental
+version: 1
+specs: [CL-01, CL-04]
+plan: claws-compile-dx
+headline: >
+  H2: Incremental compile skips unchanged subsystems — when only lobster.yaml
+  changes, soul/tools/agents/memory/identity/user/heartbeat/skills reader
+  stages all cacheHit; only lobster-reader + downstream re-run.
+description: >
+  Validates per-subsystem cache scoping. Given a fresh fully-compiled
+  workspace (populating all 9 reader-stage caches), modifying only
+  lobster.yaml (e.g., renaming a federation or changing a handler ref)
+  must produce a second compile whose stageTimings record shows the
+  eight unchanged reader stages all as cacheHit:true with durationMs
+  ≤2ms, while the lobster reader runs fresh and downstream stages
+  (modelToIR, baselineAnalysis, emit, validate) also re-run. Total
+  wall-clock for the incremental compile must be ≥80% lower than the
+  from-scratch baseline on the canonical fixture. This is the primary
+  payoff scenario for H2 — if this fails, incremental compile delivers
+  no user-visible speedup.
+
+expect:
+  first_compile:
+    mode: "fresh"
+    populates_all_stage_caches: true
+    baseline_wall_clock_recorded: true
+  second_compile_setup:
+    modification: "lobster.yaml"
+    examples: ["rename federation", "change handler ref"]
+  second_compile_stage_timings:
+    soul: { cacheHit: true, durationMs_lte: 2 }
+    tools: { cacheHit: true, durationMs_lte: 2 }
+    agents: { cacheHit: true, durationMs_lte: 2 }
+    memory: { cacheHit: true, durationMs_lte: 2 }
+    identity: { cacheHit: true, durationMs_lte: 2 }
+    user: { cacheHit: true, durationMs_lte: 2 }
+    heartbeat: { cacheHit: true, durationMs_lte: 2 }
+    skills: { cacheHit: true, durationMs_lte: 2 }
+    lobster: { cacheHit: false, runs_fresh: true }
+  downstream_reruns:
+    modelToIR: { runs_fresh: true }
+    baselineAnalysis: { runs_fresh: true }
+    emit: { runs_fresh: true }
+    validate: { runs_fresh: true }
+  wall_clock:
+    second_compile_reduction_pct_gte: 80
+    measured_against: "first (fresh) compile baseline"
+
+implementation_status: pending
+tags: [claws-compile-dx, incremental, H2, cache]
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  The canonical fixture workspace has all 9 OC input files populated.
+  The test compiles once fresh, recording baseline wall-clock and
+  populating all reader-stage caches. The test then modifies only
+  lobster.yaml (e.g., renames a federation entry) and compiles again.
+  The second compile's stageTimings object must show all eight
+  non-lobster reader stages as cacheHit:true with durationMs ≤2ms
+  each — proving the per-subsystem cache wrapper correctly scopes
+  entries by input file hash, not by workspace-wide hash. The lobster
+  reader must run fresh (cacheHit:false) because its input changed.
+  Downstream stages that depend on the lobster-derived IR
+  (modelToIR, baselineAnalysis, emit, validate) must re-run because
+  their inputs changed. Wall-clock for the second compile must be
+  ≥80% lower than the fresh baseline, demonstrating that the 8
+  cached stages actually short-circuit real work rather than just
+  reporting fake hits.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Per-stage cache key must include the specific input file's
+      content hash, not a workspace-wide hash. If the cache key is
+      a hash over all 9 OC files, a change to lobster.yaml
+      invalidates every stage — defeating the entire incremental
+      design. CL-04 §Incremental Stages must specify that the
+      soul-reader's cache key includes SOUL.md content hash only
+      (plus compiler.version), independent of lobster.yaml state.
+    spec_impact: "CL-04 per-stage cache key — scope to the stage's specific input file hash"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      The 80% wall-clock reduction target assumes the 8 cached stages
+      were non-trivial in the baseline. On a tiny fixture (e.g., empty
+      SOUL.md, no tools, no agents), the baseline compile may already
+      be <50ms, and the 2ms cacheHit stages still take ≥16ms total,
+      leaving little room for an 80% reduction. The scenario must
+      use a canonical fixture representative of real workspaces (not
+      a minimal stub) so the 80% target is both achievable and
+      meaningful.
+    spec_impact: "CL-04 benchmark fixture — canonical representative workspace, not minimal stub"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Downstream stages (modelToIR, baselineAnalysis, emit, validate)
+      must re-run when any upstream reader produces a new IR. If
+      downstream stages have independent cache keys that only track
+      their direct inputs, they might cacheHit when they should not
+      — serving stale downstream output derived from a stale
+      lobster IR. The IR identity must propagate through each cache
+      key: downstream stages include all upstream IR hashes in their
+      cache keys.
+    spec_impact: "CL-04 downstream cache — keys include upstream IR hashes, propagate invalidation"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      "cacheHit: true with durationMs ≤2ms" means the hit itself is
+      cheap. If the cache lookup re-reads the input file to compute
+      its hash (needed to form the key), the lookup I/O costs ~1ms
+      per file. Eight lookups = ~8ms, blowing the 2ms-per-stage
+      budget. The reader should check mtime first (stat is ~50μs)
+      and only re-hash if mtime changed. This mtime-fast-path vs
+      content-hash authoritative-check distinction must be documented.
+    spec_impact: "CL-04 cache lookup — mtime fast-path, content-hash authoritative"
+    pitfall: null
+
+  - id: F05
+    severity: warning
+    description: >
+      stageTimings structure must be stable and documented. Tests
+      assert on fields like stageTimings.soul.cacheHit — so the
+      shape is part of the public contract (or at least the
+      subpath-exported contract via compiler/events per H5).
+      Renaming a stage (e.g., soul-reader → identity-reader) would
+      break this scenario. The stage name enumeration must be
+      frozen in the spec.
+    spec_impact: "CL-04 stageTimings schema — frozen stage name enumeration"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      False cacheHit from hash collision: the per-stage cache uses
+      content hashes as keys. Two different lobster.yaml contents
+      that happen to produce the same SHA-256 hash (astronomically
+      unlikely but non-zero) would produce a false cacheHit
+      returning stale IR. The scenario is infeasible to trigger
+      but the spec should document SHA-256 as the chosen hash and
+      reference the collision-resistance assumption.
+    spec_impact: "CL-04 cache hash — SHA-256 explicit, collision assumption documented"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      A change that is semantically irrelevant to the emit output
+      (e.g., reformatting whitespace in lobster.yaml) still
+      invalidates the lobster cache because content hash changes.
+      Downstream stages then re-run even though the lobster IR is
+      identical. An optional "IR identity check" — hash the parsed
+      IR, not the source — could short-circuit downstream when
+      content changed but IR did not. Out of scope for S01 but
+      worth documenting as a future optimization.
+    spec_impact: "CL-04 IR identity optimization — post-parse IR hash can short-circuit downstream"
+    pitfall: null
+
+  - id: F08
+    severity: note
+    description: >
+      The test should verify stageTimings values are RECORDED in a
+      stable serialized form (JSON, deterministic key order). A
+      hosted CI run comparing stageTimings snapshots across builds
+      would detect regressions in cache behavior over time. Making
+      stageTimings snapshot-friendly is a small plumbing step worth
+      calling out in the pulse plan.
+    spec_impact: "CL-04 stageTimings — deterministic JSON serialization for snapshot testing"
+    pitfall: null

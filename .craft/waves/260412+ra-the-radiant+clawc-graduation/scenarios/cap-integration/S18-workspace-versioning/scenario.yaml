@@ -1,0 +1,216 @@
+name: S18-workspace-versioning
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12]
+description: >
+  Validates optimistic concurrency control via ETag-based workspace
+  versioning. GET requests return an ETag header reflecting the current
+  workspace version. PATCH requests require If-Match with the current
+  ETag; a stale ETag returns 409 VERSION_CONFLICT. The version counter
+  is monotonic, survives server restarts, and is included in SSE events
+  so connected clients can detect staleness without polling.
+
+expect:
+  get_with_etag:
+    endpoint: "GET /api/chunks/connections"
+    response:
+      headers:
+        ETag: '"v42"'
+      status: 200
+  patch_with_match:
+    endpoint: "PATCH /api/chunks/connections/outlook"
+    request:
+      headers:
+        If-Match: '"v42"'
+      body:
+        field: prompt
+        value: "Updated prompt"
+    response:
+      status: 200
+      headers:
+        ETag: '"v43"'
+  patch_with_stale:
+    endpoint: "PATCH /api/chunks/connections/outlook"
+    request:
+      headers:
+        If-Match: '"v41"'
+      body:
+        field: prompt
+        value: "Conflicting prompt"
+    response:
+      status: 409
+      error: VERSION_CONFLICT
+      currentVersion: '"v43"'
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  Two Companion App tabs are open on the same workspace. Tab A loads
+  connections and receives ETag "v42". Tab B loads the same data and
+  also receives ETag "v42". Tab A edits the Outlook prompt and sends
+  PATCH with If-Match: "v42" — it succeeds, version becomes v43. Tab B
+  then edits the same prompt with If-Match: "v42" (stale) and receives
+  409 VERSION_CONFLICT with currentVersion "v43". Tab B must reload,
+  merge the user's changes with the new state, and retry with "v43".
+  Meanwhile, both tabs receive an SSE event with version v43 so they
+  know the workspace changed.
+
+findings:
+  - id: F01
+    severity: major
+    description: >
+      Concurrent PATCHes race condition: two PATCH requests arrive
+      simultaneously with the same valid ETag. Only one can win. The
+      server must serialize version increments — compare-and-swap on the
+      version counter. If both requests pass the If-Match check before
+      either increments the version, both succeed and the second write
+      silently overwrites the first. The version check and increment
+      must be atomic (e.g., file lock, or in-memory mutex with
+      persistent flush).
+    spec_impact: "CL-10 workspace versioning — atomic compare-and-swap on version counter"
+    pitfall: null
+
+  - id: F02
+    severity: major
+    description: >
+      Version must survive server restart. If the version counter is
+      in-memory only, a restart resets it to 0 or 1. Clients holding
+      ETags from before the restart will send If-Match headers with
+      values that accidentally match the reset counter, causing silent
+      overwrites. The version counter must be persisted to disk (e.g.,
+      in a workspace metadata file) and loaded on startup. Alternatively,
+      derive the version from a content hash of the workspace files.
+    spec_impact: "CL-10 workspace version — persisted to disk, loaded on startup"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Version in SSE events: when a workspace change occurs, the SSE
+      event must include the new version. Connected clients compare
+      the SSE version with their local ETag — if different, they know
+      their data is stale and should reload. Without version in SSE,
+      clients receive change notifications but cannot determine if the
+      change affects their cached data or was their own edit coming
+      back.
+    spec_impact: "CL-10 SSE events — include workspace version for client-side staleness detection"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      ETag must be consistent across all Layer 1, Layer 2, and Layer 3
+      endpoints. A GET on /api/workspace-config (Layer 1) and a GET on
+      /api/chunks/connections (Layer 2) must return the same ETag if
+      the workspace version is the same. If different endpoints use
+      different version counters, a PATCH on one endpoint may not
+      conflict with a concurrent PATCH on another, even though both
+      modify the same underlying workspace files.
+    spec_impact: "CL-10 ETag — single workspace-wide version counter shared across all endpoints"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Batch increments version once: a POST /api/batch with 5 operations
+      must increment the version counter by 1, not 5. The batch is
+      atomic, so it represents a single state transition. If the version
+      increments per operation within a batch, SSE listeners see 5
+      intermediate versions that represent incomplete states, and
+      concurrent PATCHes may interleave between batch operations.
+    spec_impact: "CL-10 batch versioning — single version increment for atomic batch"
+    pitfall: null
+
+  - id: F06
+    severity: warning
+    description: >
+      The 409 VERSION_CONFLICT response must include the current version
+      so the client can decide whether to reload and retry. Without the
+      current version, the client must make an additional GET to obtain
+      the fresh ETag before retrying, doubling the round trips. The
+      response should also include a summary of what changed since the
+      client's stale version (e.g., changedSince: [{version, timestamp,
+      summary}]).
+    spec_impact: "CL-10 409 response — include currentVersion and changedSince summary"
+    pitfall: null
+
+  - id: F07
+    severity: warning
+    description: >
+      Missing If-Match header on PATCH: the server must decide how to
+      handle a PATCH without an If-Match header. Options: reject with
+      428 PRECONDITION_REQUIRED (strict), or allow the edit without
+      concurrency check (lenient). Strict mode is safer for the
+      Companion App but may break simple API clients. The API should
+      default to strict and offer a ?force=true parameter for clients
+      that intentionally skip concurrency checks.
+    spec_impact: "CL-10 PATCH without If-Match — 428 PRECONDITION_REQUIRED by default, ?force=true bypass"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      Version counter monotonicity: the counter must never decrease or
+      reuse values. A counter based on file modification timestamps
+      could go backwards if the system clock is adjusted. Use a simple
+      incrementing integer persisted to a version file. On startup,
+      read the file and continue from the stored value. If the file is
+      corrupted, start from the maximum of (stored value, count of
+      audit events) to avoid regression.
+    spec_impact: "CL-10 workspace version — monotonic integer, corruption recovery strategy"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      External file edits (user editing AGENTS.md directly in their
+      editor) bypass the API and do not increment the version counter.
+      The file watcher that detects external edits must also increment
+      the version and emit an SSE event. Without this, the API version
+      and actual file state diverge — a GET returns stale data with a
+      "current" ETag, and the next PATCH based on that ETag would
+      succeed but overwrite the external edit.
+    spec_impact: "CL-10 external edit detection — increment version counter and emit SSE on file change"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      ETag format: the ETag must be a quoted string per HTTP spec (e.g.,
+      '"v42"'). Weak ETags (W/"v42") are not appropriate since the
+      version represents exact byte-level state. The version string
+      should be opaque to clients — they compare for equality only.
+      Encoding the version as a simple integer is fine internally but
+      the ETag format should not promise a specific encoding so the
+      server can change to content hashing later without breaking
+      clients.
+    spec_impact: "CL-10 ETag format — quoted strong ETag, opaque to clients"
+    pitfall: null
+
+  - id: F11
+    severity: note
+    description: >
+      Rate of version increments: in a workspace with active automation
+      (cron sessions writing back, frequent edits), the version counter
+      could increment rapidly. Clients that cache the ETag and poll
+      periodically will frequently see stale versions. SSE is the
+      primary mechanism for real-time freshness; polling should be a
+      fallback. The API should include a Cache-Control: no-cache header
+      to prevent intermediaries from caching stale ETags.
+    spec_impact: "CL-10 version freshness — Cache-Control: no-cache, SSE primary, polling fallback"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      The version counter value should be exposed in the workspace
+      metadata endpoint (GET /api/workspace-config) alongside other
+      workspace state. This lets monitoring tools track version velocity
+      (versions per hour) as a proxy for workspace activity. Unusual
+      spikes in version velocity could indicate runaway automation or
+      concurrent edit storms.
+    spec_impact: "CL-10 workspace metadata — version counter exposed for monitoring"
+    pitfall: null

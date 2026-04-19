@@ -16,6 +16,23 @@ export { toIRConflictReport } from './conflicts-ir.js';
 export { COMPILER_VERSION, SCHEMA_VERSION } from './version.js';
 export { check as cacheCheck, store as cacheStore } from './cache.js';
 export type { CacheEntry, CacheCheckResult, CacheOptions } from './cache.js';
+export {
+  IncrementalCompilationCache,
+  PhaseCache,
+  DependencyGraph,
+  CompilationQueue,
+} from './cache.js';
+export type {
+  FileHashEntry,
+  RecompilePlan,
+  IncrementalCacheOptions,
+  PhaseName,
+  PhaseOutput,
+  CachedOutput,
+  PhaseCacheOptions,
+  CompileTrigger,
+  QueueCompileResult,
+} from './cache.js';
 export type {
   ParseResult,
   ParseDiagnostic,
@@ -84,6 +101,13 @@ export type { AnyIntentResult } from './intent/index.js';
 // A-W1: AnthropicLLMProvider is NOT exported from barrel — only the LLMProvider
 // interface. Consumers should import AnthropicLLMProvider directly from
 // './llm/anthropic-provider.js' when they need the concrete implementation.
+export {
+  compileWithViolationGuard,
+  type CompileFn as ViolationAwareCompileFn,
+  type ViolationAwareCompileOptions,
+  type ViolationAwareCompileResult,
+  type ViolationClassifier,
+} from './violation-aware-compile.js';
 export {
   ExtractorLLM,
   LLMCache,

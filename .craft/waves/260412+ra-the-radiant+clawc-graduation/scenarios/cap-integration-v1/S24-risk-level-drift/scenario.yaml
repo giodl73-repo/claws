@@ -1,0 +1,221 @@
+name: S24-risk-level-drift
+series: cap-integration
+version: 1
+specs: [CL-10, CL-11, CL-12]
+description: >
+  Validates behavior when a tool's risk level changes between compilations.
+  A tool classified as R3 at last compilation is now R5 due to changes in
+  TOOLS.md or the skill package. Existing pre_authorizations granted at R3
+  level are now invalid (R5 requires explicit approval). The risk-change
+  audit event from CL-11 fires, chunks reflect the upgraded lock, and
+  "Allow all" standing approvals no longer cover the tool. Also covers
+  the inverse: risk downgrade from R5 to R3 and its permission implications.
+
+expect:
+  risk_upgrade_r3_to_r5:
+    description: "Tool was R3, skill update changes it to R5"
+    pre_state:
+      toolId: "data-export"
+      risk: "R3"
+      pre_authorization: "auto-approved"
+      lock: null
+    post_state:
+      risk: "R5"
+      pre_authorization: "invalidated"
+      lock:
+        source: "r5"
+        reason: "Risk upgraded from R3 to R5, pre-authorization invalidated"
+      approvalRequired: true
+    governance:
+      warnings:
+        - type: "RISK_LEVEL_CHANGED"
+          toolId: "data-export"
+          previous: "R3"
+          current: "R5"
+    audit_event:
+      type: "risk-change"
+      toolId: "data-export"
+      from: "R3"
+      to: "R5"
+      trigger: "skill-update"
+  risk_downgrade_r5_to_r3:
+    description: "Tool was R5, now reclassified as R3"
+    post_state:
+      risk: "R3"
+      pre_authorization: "requires_reapproval"
+      lock:
+        source: null
+    governance:
+      warnings:
+        - type: "RISK_LEVEL_CHANGED"
+          toolId: "data-export"
+          previous: "R5"
+          current: "R3"
+  allow_all_exclusion:
+    description: "Allow-all standing approval no longer covers upgraded tool"
+    standing_approval: "allow-all"
+    post_upgrade_tool_covered: false
+
+simulate:
+  failures: []
+  halt: null
+  budget: null
+
+problem: >
+  A tool "data-export" was classified as R3 at the last compilation and
+  received an auto-approved pre_authorization. A skill package update changes
+  the tool's capability manifest to include OBO, which triggers R5
+  classification on the next compilation. The recompilation must: (1) detect
+  the risk-level change by comparing the new GovernanceIR against the
+  previous GovernanceIR, (2) invalidate the existing pre_authorization, (3)
+  upgrade the lock from governance to r5, (4) fire a risk-change audit event,
+  (5) exclude the tool from the "Allow all" standing approval scope. The
+  challenge is handling the window between the skill update and the
+  recompilation (stale GovernanceIR serves the old risk level), handling
+  multiple simultaneous risk changes, and ensuring the user is clearly
+  informed that previously approved tools now require re-approval.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      Risk downgrade (R5 to R3) is not automatically safe. The tool had
+      R5 restrictions; downgrading to R3 means it could receive
+      auto-approved pre_authorization under fleet policy. But the
+      downgrade may be a misclassification (capability extraction failed
+      to detect OBO in the new version). Downgrades should require
+      re-approval rather than auto-granting R3 permissions. The
+      compilation must treat downgrades with the same scrutiny as
+      upgrades.
+    spec_impact: "CL-10 risk downgrade — requires re-approval, not automatic permission expansion"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      Pre-authorization invalidation cascade: if tool A's risk changes to
+      R5, and tool B has a dependency on tool A (e.g., tool B delegates to
+      tool A), tool B's pre_authorization may also need invalidation because
+      its effective risk level changed. The compilation must traverse tool
+      dependency graphs when invalidating pre_authorizations, not just
+      invalidate the directly affected tool.
+    spec_impact: "CL-10 pre-authorization invalidation — traverse tool dependency graph"
+    pitfall: null
+
+  - id: F03
+    severity: major
+    description: >
+      Multiple tools changing risk simultaneously (e.g., a skill package
+      update affects 5 tools) must produce individual risk-change events
+      per tool, not a single batch event. The Loop UI needs per-tool
+      granularity to render re-approval prompts. The audit trail must
+      record each tool's risk change independently with its own trigger
+      source.
+    spec_impact: "CL-10 risk-change events — per-tool granularity for batch risk changes"
+    pitfall: null
+
+  - id: F04
+    severity: major
+    description: >
+      Risk change detected by external edit (user edits TOOLS.md directly)
+      versus by skill update follows different detection paths. External
+      edits are detected on GET /api/chunks by diffing current files
+      against compiled state. Skill updates trigger recompilation. If the
+      external-edit path does not perform risk-level comparison, a risk
+      upgrade via external edit is invisible until the next full
+      recompilation. The GET path must include risk-level drift detection.
+    spec_impact: "CL-10 GET path — risk-level drift detection for external edits"
+    pitfall: null
+
+  - id: F05
+    severity: major
+    description: >
+      Between a risk change and the next recompilation, the stale
+      GovernanceIR reports the old risk level. If a chunk is served during
+      this window, the Loop UI shows the tool as R3 when it is actually R5.
+      The chunk response must include a staleness indicator
+      (compiledAt timestamp vs file mtime) so the Loop UI can show a
+      "recompilation pending" badge on potentially stale tools.
+    spec_impact: "CL-10 chunk staleness — compiledAt vs mtime indicator for stale risk levels"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The "Allow all" standing approval must be re-evaluated after any
+      risk-level change. If "Allow all" was granted when all tools were R3
+      or below, and one tool upgrades to R5, "Allow all" must be scoped
+      down to exclude the R5 tool. The standing approval is not revoked
+      entirely — only the R5 tool is excluded. The chunk for the standing
+      approval must update its coverage list.
+    spec_impact: "CL-10 Allow-all re-evaluation — exclude R5 tools after risk upgrade"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      Fleet overrides that fix a tool's risk level (e.g., "fleet says
+      data-export is always R3") must take precedence over the compilation's
+      capability-based classification. If the fleet says R3 but the
+      compilation detects R5 capabilities, the fleet override wins but a
+      governance warning must surface the disagreement. The audit trail
+      must record that fleet overrode the classification.
+    spec_impact: "CL-10 fleet risk override — fleet wins but governance warning surfaces disagreement"
+    pitfall: null
+
+  - id: F08
+    severity: warning
+    description: >
+      The risk-change audit event must include the trigger source: was the
+      change caused by a skill update, an external edit, a fleet policy
+      change, or a recompilation with new heuristics? Without trigger
+      attribution, the compliance officer cannot determine if the change
+      was intentional or incidental.
+    spec_impact: "CL-11 risk-change audit event — trigger source attribution"
+    pitfall: null
+
+  - id: F09
+    severity: warning
+    description: >
+      If a tool oscillates between R3 and R5 across compilations (e.g.,
+      due to intermittent capability extraction results), the user
+      experiences repeated approval/invalidation cycles. The system
+      should detect risk oscillation (same tool changing risk more than
+      N times in M compilations) and flag it for manual classification
+      review rather than continuing to auto-classify.
+    spec_impact: "CL-10 risk oscillation detection — flag tools with unstable risk classification"
+    pitfall: null
+
+  - id: F10
+    severity: warning
+    description: >
+      The chunk served after a risk upgrade must clearly explain WHY the
+      tool was upgraded, not just that it was upgraded. The lock reason
+      should include the specific capability that triggered R5
+      classification (e.g., "OBO capability detected in deploy action")
+      so the user can evaluate whether the classification is correct.
+    spec_impact: "CL-10 lock reason — include specific capability that triggered risk upgrade"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      Pre-authorization invalidation must be persisted to USER.md (or
+      wherever pre_authorizations live), not just reflected in the in-memory
+      GovernanceIR. If the claws-serve process restarts after an
+      invalidation that was only in memory, the old pre_authorization
+      would be re-read from disk and restored. Invalidation must be a
+      write operation.
+    spec_impact: "CL-10 pre-authorization invalidation — persist to disk, not just in-memory"
+    pitfall: null
+
+  - id: F12
+    severity: note
+    description: >
+      Risk-level history should be queryable via the audit API. An admin
+      investigating a tool's risk trajectory should be able to ask "show
+      me all risk-level changes for tool X in the last 30 days" rather
+      than scanning raw audit logs. This implies the audit system needs
+      a tool-centric index, not just a time-ordered log.
+    spec_impact: "CL-11 audit API — tool-centric risk-level history query"
+    pitfall: null

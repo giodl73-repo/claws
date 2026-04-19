@@ -60,7 +60,7 @@ findings:
       edges. If agent X is in group A and group B, there is an edge A-B
       through X. The compiler should compute connected components: if groups
       that should be isolated share a connected component through bridging
-      agents, emit CLAWS-E-BRIDGE. Graph connectivity analysis (BFS/DFS
+      agents, emit OC-POLICY-E-BRIDGE. Graph connectivity analysis (BFS/DFS
       on the group membership bipartite graph) is the correct algorithm.
     spec_impact: "CL-02 FE6 — bipartite group membership graph analysis"
     pitfall: P-211

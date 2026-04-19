@@ -1,0 +1,261 @@
+name: S47-structural-violation-chain-block
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12, CL-06, CL-08]
+description: >
+  Validates that a broken delegation trust chain in AGENTS.md triggers a
+  DEGRADED_STRUCTURAL state (escalated from DEGRADED_R5). An external edit
+  downgrades agent-A from T3 to T1 while agent-A still delegates to agent-B
+  at T3. This is a structural violation — the delegation chain is compromised
+  because agent-B's trust tier exceeds its delegator's tier. ALL tools in
+  agent-B's session are blocked (not just one tool), while agent-A's T1-level
+  tools continue to function. The violation scope is "structural" with the
+  affected chain identified via dependency graph traversal.
+
+expect:
+  structural_violation:
+    trigger: delegation_chain_broken
+    type: TRUST_CHAIN_EXCEEDED
+    state: DEGRADED_STRUCTURAL
+    escalated_from: DEGRADED_R5
+  chain_identification:
+    method: dependency_graph_traversal
+    affected_agents: [agent-B]
+    unaffected_agents: [agent-A]
+  tool_blocking:
+    granularity: per_session
+    agent_b_all_tools_block.source: 'r5'
+    agent_a_t1_tools_operational: true
+    lock_source: "structural_violation"
+  recovery:
+    fix_agents_md: true
+    clean_compile: true
+    chain_restored: true
+    final_state: CLEAN
+
+simulate:
+  failures:
+    - type: external_edit
+      target: AGENTS.md
+      content: "agent-A downgraded T3->T1; agent-A still delegates to agent-B at T3"
+  halt: null
+  budget: null
+
+problem: >
+  A developer edits AGENTS.md externally, downgrading agent-A from trust tier
+  T3 to T1 in the same edit that leaves agent-A's delegation to agent-B at T3
+  intact. This creates a structural violation: agent-B operates at T3 via
+  delegation from agent-A, but agent-A is now T1 and cannot delegate T3
+  authority. The system must: (1) detect this as a structural violation (not
+  just an isolated tool violation), (2) enter DEGRADED_STRUCTURAL state
+  (escalated beyond DEGRADED_R5), (3) traverse the delegation dependency graph
+  to identify all affected agents (agent-B and any agents it delegates to),
+  (4) block ALL tools in agent-B's session (the entire session is compromised,
+  not individual tools), (5) leave agent-A's T1-level tools operational
+  (agent-A is still valid at T1), (6) mark blocked tools with lock.source
+  "structural_violation", (7) include the full chain in SSE events, (8) handle
+  deeper chains (A->B->C), (9) distinguish delegation chain breaks from
+  delegation cycles, (10) handle concurrent structural + isolated violations,
+  (11) handle fleet policy structural violations differently from delegation
+  violations.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The system must detect that a trust tier downgrade on a delegating
+      agent invalidates the entire delegation chain beneath it. When agent-A
+      is downgraded from T3 to T1, every agent that received T3 authority
+      via delegation from agent-A now holds authority its delegator cannot
+      grant. This is not a per-tool violation — it is a structural violation
+      affecting the trust fabric. The compiler must perform a dependency
+      graph traversal from the modified agent outward, collecting all agents
+      whose effective trust tier exceeds their delegator's tier. The
+      traversal must be breadth-first to correctly identify the first
+      broken link in multi-level chains.
+    spec_impact: "CL-12 chain traversal — BFS from downgraded agent; collect all agents with tier > delegator tier; structural scope"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      DEGRADED_STRUCTURAL must be a distinct state from DEGRADED_R5 in
+      the state machine. DEGRADED_R5 blocks individual tools;
+      DEGRADED_STRUCTURAL blocks entire sessions. The severity ordering
+      must be: CLEAN < DEGRADED_WARN < DEGRADED_R5 < DEGRADED_STRUCTURAL
+      < ERROR. If DEGRADED_STRUCTURAL is conflated with DEGRADED_R5, the
+      middleware applies per-tool blocking instead of per-session blocking,
+      leaving some of agent-B's tools unblocked. The state file
+      (violation-state.json) must persist the state as "DEGRADED_STRUCTURAL"
+      with a violations array containing the chain definition.
+    spec_impact: "CL-10 state hierarchy — DEGRADED_STRUCTURAL between DEGRADED_R5 and ERROR; per-session blocking; persisted"
+    pitfall: null
+
+  - id: F03
+    severity: critical
+    description: >
+      All tools in agent-B's session must be blocked, not just tools that
+      require T3 authority. Even if agent-B has tools that would normally
+      operate at T1, those tools are blocked because agent-B's session
+      identity is compromised. The agent obtained its session via a
+      delegation that is no longer valid. The session itself is tainted,
+      not individual tool authorizations. If only T3+ tools are blocked,
+      agent-B could still execute T1 tools under a session identity that
+      was granted on false premises (a T3 delegation that no longer holds).
+    spec_impact: "CL-12 session-level block — all tools in compromised session blocked; session identity is tainted, not individual tools"
+    pitfall: null
+
+  - id: F04
+    severity: critical
+    description: >
+      Agent-A's tools at T1 level must continue to function. Agent-A is
+      still a valid agent at T1 — the downgrade did not revoke agent-A's
+      existence, only its tier. Tools that require T1 or lower authority
+      remain operational for agent-A's session. If the system blocks
+      agent-A entirely (because it caused the structural violation), T1
+      work is unnecessarily halted. The distinction is: agent-A is the
+      violator but still valid at its new tier; agent-B is the victim
+      whose session is compromised. The chunk for agent-A's session must
+      show tools at T1 as active, tools at T2-T3 as "tier_exceeded."
+    spec_impact: "CL-12 delegator continuity — agent-A operational at T1; T2+ tools show 'tier_exceeded'; agent-B fully blocked"
+    pitfall: null
+
+  - id: F05
+    severity: critical
+    description: >
+      In a 3-level chain (A delegates to B, B delegates to C), all
+      downstream agents must be blocked. If A is downgraded from T3 to T1,
+      both B (direct delegatee) and C (transitive delegatee) are affected.
+      The BFS traversal must follow delegation edges transitively. If the
+      traversal only checks direct delegatees, agent-C continues operating
+      at T3 via agent-B's now-invalid delegation. The violation scope must
+      list the full chain: [A(T1) -> B(T3, BLOCKED) -> C(T3, BLOCKED)]
+      so the admin sees the cascade.
+    spec_impact: "CL-12 transitive chains — BFS follows delegation edges transitively; all downstream agents blocked; full chain in scope"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      Trust tier downgrade and delegation cycle are different structural
+      violations with different scopes. A tier downgrade breaks a valid
+      chain (linear, has a root). A delegation cycle (A delegates to B,
+      B delegates to A) creates a circular dependency with no root. The
+      cycle violation blocks all agents in the cycle because no agent has
+      a valid authority source. The tier downgrade blocks only downstream
+      agents — the root agent (the one downgraded) is still valid at its
+      new tier. The violation type must distinguish these:
+      TRUST_CHAIN_EXCEEDED vs DELEGATION_CYCLE, with different recovery
+      guidance.
+    spec_impact: "CL-12 violation types — TRUST_CHAIN_EXCEEDED (downstream blocked) vs DELEGATION_CYCLE (all in cycle blocked)"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      The SSE event for a structural violation must include the full
+      dependency chain, not just the trigger. The event payload must be:
+      {type: "governance:structural_violation", violation:
+      "TRUST_CHAIN_EXCEEDED", chain: [{agent: "A", tier_before: 3,
+      tier_after: 1, status: "downgraded"}, {agent: "B", tier: 3,
+      delegated_by: "A", status: "blocked"}, {agent: "C", tier: 3,
+      delegated_by: "B", status: "blocked"}], state:
+      "DEGRADED_STRUCTURAL"}. Partners need the chain to render a
+      dependency graph in the UI. Without the chain, the admin sees
+      "structural violation" but cannot determine which agents are affected
+      without querying additional endpoints.
+    spec_impact: "CL-10 SSE chain payload — full dependency chain with agent, tier, delegator, status per node"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      Chunks for agent-B's session must show ALL tools with lock.source
+      "structural_violation" and include the chain context: {lock: {source:
+      "structural_violation", reason: "Delegating agent 'A' downgraded from
+      T3 to T1; delegation chain compromised", chain: ["A->B"]}}. This is
+      distinct from lock.source "classified" (compiler R5) or "unclassified"
+      (defaulted R5). A partner rendering the chunk can show "This tool is
+      blocked because the delegation chain from agent-A is compromised"
+      rather than a generic "tool blocked" message.
+    spec_impact: "CL-12 chunk lock metadata — structural_violation source with chain context and human-readable reason"
+    pitfall: null
+
+  - id: F09
+    severity: major
+    description: >
+      If a concurrent isolated violation exists alongside the structural
+      violation (e.g., agent-D has an R5 tool violation unrelated to the
+      chain), the worst state wins. DEGRADED_STRUCTURAL is worse than
+      DEGRADED_R5. The violation list must contain both: [{type:
+      "TRUST_CHAIN_EXCEEDED", scope: "structural", agents: ["B", "C"]},
+      {type: "R5_MISSING_ELICITATION", scope: "isolated", tools:
+      ["deploy-prod"]}]. When the structural violation is fixed, the system
+      transitions to DEGRADED_R5 (not CLEAN) because the isolated violation
+      persists. The state machine must re-evaluate after each fix.
+    spec_impact: "CL-10 concurrent violations — worst state wins; partial fix transitions to next-worst state; both tracked"
+    pitfall: null
+
+  - id: F10
+    severity: major
+    description: >
+      The recovery path is: (1) admin fixes AGENTS.md (restore agent-A to
+      T3 or remove the delegation), (2) file watcher detects the fix,
+      (3) system recompiles, (4) compiler re-traverses delegation graph
+      and finds no broken chains, (5) state transitions from
+      DEGRADED_STRUCTURAL to CLEAN (or to DEGRADED_R5 if other violations
+      persist), (6) agent-B's session tools are unblocked, (7) SSE event
+      "governance:structural_resolved" is emitted with the restored chain.
+      The recompile must re-traverse the ENTIRE delegation graph, not just
+      the previously broken chain, because the fix may have introduced new
+      delegation relationships.
+    spec_impact: "CL-10 recovery — full graph re-traversal on recompile; not just previously broken chain; SSE structural_resolved"
+    pitfall: null
+
+  - id: F11
+    severity: major
+    description: >
+      Fleet policy structural violations are distinct from delegation
+      chain violations. A fleet policy violation occurs when the fleet
+      controller sets a maximum trust tier (e.g., T2) and an agent in the
+      workspace is configured at T3. This is a policy violation, not a
+      delegation chain break. The state is still DEGRADED_STRUCTURAL but
+      the violation type is FLEET_TIER_EXCEEDED (not TRUST_CHAIN_EXCEEDED).
+      The scope is the individual agent (not a chain), and only that
+      agent's T3+ tools are blocked (not the entire session). The
+      distinction matters for recovery: delegation chain fixes require
+      editing AGENTS.md; fleet tier fixes require either lowering the
+      agent's tier or requesting a fleet policy exception.
+    spec_impact: "CL-08 fleet structural — FLEET_TIER_EXCEEDED type; per-agent scope; T3+ tools blocked; different recovery path"
+    pitfall: null
+
+  - id: F12
+    severity: warning
+    description: >
+      The dependency graph used for chain traversal must be cached and
+      updated incrementally. Building the full delegation graph from
+      AGENTS.md on every compilation is acceptable for small workspaces
+      (< 20 agents) but may be slow for large fleet deployments (100+
+      agents). The graph should be built once and updated incrementally
+      when AGENTS.md changes. The graph data structure should support
+      efficient BFS traversal and cycle detection (adjacency list with
+      reverse edges). The graph must be invalidated on any AGENTS.md
+      change, not just delegation-related changes, because a tier change
+      on any agent may affect the chain.
+    spec_impact: "CL-06 graph performance — cached adjacency list; incremental update; BFS + cycle detection; invalidated on any AGENTS.md change"
+    pitfall: null
+
+  - id: F13
+    severity: warning
+    description: >
+      The admin should be able to query the delegation graph via
+      GET /api/delegation-graph to see the current chain structure, trust
+      tiers, and any violations. The response should include: {agents:
+      [{name, tier, delegated_by, delegatees, status}], violations:
+      [{type, chain, affected_agents}]}. This allows the admin to
+      understand the delegation topology before making fixes. Without this
+      endpoint, the admin must manually parse AGENTS.md and mentally
+      reconstruct the graph, which is error-prone for deep or branching
+      chains.
+    spec_impact: "CL-10 delegation graph endpoint — GET /api/delegation-graph; topology, tiers, violations; admin debugging aid"
+    pitfall: null

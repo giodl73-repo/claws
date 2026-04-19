@@ -15,7 +15,7 @@ expect:
     workspace_version: "1.0.0"
     mismatch_detected: true
   violations:
-    - code: CLAWS-E095
+    - code: OC-POLICY-E095
       message: "Version mismatch — platform 2.0.0 reading workspace 1.0.0 files"
       severity: error
   warnings:

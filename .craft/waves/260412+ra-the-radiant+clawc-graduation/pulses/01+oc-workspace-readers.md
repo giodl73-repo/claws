@@ -10,7 +10,7 @@ test_tiers:
   L0_unit: 8
   L1_integration: 4
   L2_e2e: 1
-  L3_accept: 0
+  L3_accept: 1
 test_scope:
   run:
     - "cd claws-sdk && npx vitest run --project unit --coverage"
@@ -49,6 +49,7 @@ Each reader handles its own parsing, BOM stripping, and CRLF normalization (Arch
 - [ ] `claws-sdk/tests/compiler/readers/lobster-reader.unit.test.ts` -- L0: valid lobster.yaml parses (1), missing required field produces error (1)
 - [ ] `claws-sdk/tests/compiler/readers/workspace-reader.integration.test.ts` -- L1: full 9-file workspace reads successfully (1), missing optional file produces warning (1), missing required file produces error (1), cross-platform path normalization (1)
 - [ ] `claws-sdk/tests/compiler/readers/workspace-reader.e2e.test.ts` -- L2: end-to-end read from fixture directory with all 9 files, verify OCWorkspaceModel shape (1)
+- [ ] `claws-sdk/tests/compiler/readers/workspace-reader.accept.test.ts` -- L3: scenario acceptance test verifying workspace/forma/input findings (1)
 
 ## Acceptance Criteria
 
@@ -79,5 +80,6 @@ None -- this is the first pulse in CP-1.
 - [ ] L0 unit (8 tests): BOM stripping UTF-8 (1), BOM stripping UTF-16 LE (1), CRLF→LF (1), trailing newline (1), SOUL.md valid parse (1), SOUL.md missing section warning (1), lobster.yaml valid parse (1), lobster.yaml missing field error (1)
 - [ ] L1 integration (4 tests): full 9-file workspace read (1), missing optional file warning (1), missing required file error (1), cross-platform paths (1)
 - [ ] L2 e2e (1 test): end-to-end fixture read with OCWorkspaceModel shape verification (1)
+- [ ] L3 acceptance (1 test): workspace/forma/input scenario findings verified (1)
 - [ ] `npm run build` exits 0
 - [ ] `npx tsc --noEmit` exits 0

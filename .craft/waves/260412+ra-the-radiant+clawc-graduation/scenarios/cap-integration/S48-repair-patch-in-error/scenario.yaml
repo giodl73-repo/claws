@@ -1,0 +1,268 @@
+name: S48-repair-patch-in-error
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12, CL-06, CL-04]
+description: >
+  Validates that PATCH requests targeting files in the pendingViolations list
+  are allowed during ERROR state as repair operations. VS Code corrupts
+  SOUL.md causing a structural parse error. The system enters ERROR and serves
+  last-good IR. An admin sends PATCH /api/chunks/preferences/instructions to
+  fix SOUL.md — this is allowed because SOUL.md is in pendingViolations. The
+  repair triggers recompile, succeeds, and the system returns to CLEAN.
+  A PATCH targeting a non-violation file (e.g., connections/outlook) is
+  rejected with 503. Batch operations mixing repair and non-repair are also
+  rejected.
+
+expect:
+  error_state:
+    trigger: structural_parse_failure
+    file: SOUL.md
+    state: ERROR
+    last_good_ir_served: true
+  repair_patch:
+    target: "PATCH /api/chunks/preferences/instructions"
+    maps_to_file: SOUL.md
+    allowed: true
+    triggers_recompile: true
+  non_repair_patch:
+    target: "PATCH /api/chunks/connections/outlook"
+    maps_to_file: CONNECTIONS.md
+    rejected: true
+    status: 503
+  batch_mixed:
+    target: "POST /api/batch"
+    contains_repair_and_non_repair: true
+    rejected: true
+    status: 503
+  resolution:
+    recompile_succeeds: true
+    final_state: CLEAN
+
+simulate:
+  failures:
+    - type: structural_parse_failure
+      target: SOUL.md
+      content: "corrupted YAML structure from VS Code save"
+  halt: null
+  budget: null
+
+problem: >
+  VS Code performs a save operation on SOUL.md that corrupts the file's YAML
+  structure (e.g., a partial write due to crash or encoding issue). The file
+  watcher detects the change, the compiler attempts to parse SOUL.md and fails
+  with a structural error, and the system enters ERROR state. The last-good
+  GovernanceIR serves. All PATCH requests are normally blocked with 503 in
+  ERROR state. However, the admin needs to fix SOUL.md to recover. The system
+  must: (1) maintain a pendingViolations list identifying which files caused
+  the ERROR, (2) allow PATCH requests that target files in pendingViolations
+  (repair PATCHes), (3) map chunk paths to source files (e.g.,
+  /api/chunks/preferences/instructions maps to SOUL.md), (4) validate repair
+  PATCHes through the normal validation layer (R5 checks etc.), (5) trigger
+  recompile after a successful repair PATCH, (6) reject PATCH requests
+  targeting files NOT in pendingViolations with 503, (7) handle the case where
+  the repair PATCH itself introduces a new violation, (8) handle multiple
+  files in error simultaneously, (9) handle partial recovery (one file fixed,
+  another still errored), (10) include guidance in the 503 response, (11)
+  allow repair via Layer 1 endpoint as well, (12) reject batch operations
+  that mix repair and non-repair targets.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The middleware must maintain a pendingViolations set — a list of
+      source files that caused the current ERROR state. When the compiler
+      fails, it reports which files had parse errors. These file paths are
+      stored in the violation state. The PATCH middleware checks: (1) is
+      the system in ERROR? (2) does the PATCH target map to a file in
+      pendingViolations? If yes, the PATCH is a repair operation and is
+      allowed. If the pendingViolations set is not populated (e.g., the
+      compiler reports a generic error without file attribution), the
+      middleware cannot distinguish repair from non-repair, and ALL PATCHes
+      must be blocked (fail-closed). The compiler MUST attribute parse
+      errors to specific files.
+    spec_impact: "CL-10 pendingViolations — compiler attributes errors to files; middleware checks target against set; fail-closed if unattributed"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      The chunk-path-to-file mapping must be deterministic and maintained
+      by the chunk assembly layer. PATCH /api/chunks/preferences/instructions
+      targets the "instructions" chunk within the "preferences" section,
+      which is sourced from SOUL.md. The mapping is: chunk path -> section
+      -> source file. This mapping must be the same one used during
+      compilation (so the repair targets the correct file). If the mapping
+      is computed differently in the PATCH handler vs the compiler, the
+      repair may write to the wrong file. The mapping must be a shared
+      registry, not duplicated logic.
+    spec_impact: "CL-06 chunk-to-file mapping — shared registry between compiler and PATCH handler; deterministic; not duplicated"
+    pitfall: null
+
+  - id: F03
+    severity: critical
+    description: >
+      Repair PATCHes must still pass through the normal validation layer.
+      Even though the system is in ERROR and the PATCH targets a violation
+      file, the PATCH content must be validated: schema validation (is the
+      PATCH body well-formed?), R5 checks (does the new content introduce
+      R5 tools without elicitation gates?), and structural validation (is
+      the resulting file valid YAML/markdown?). If the repair PATCH skips
+      validation because "it's a repair," the admin could introduce an R5
+      violation while fixing a parse error, transitioning from ERROR to a
+      state where the file parses but an R5 violation exists. The repair
+      must not create new violations.
+    spec_impact: "CL-12 repair validation — full validation pipeline on repair PATCHes; no bypass; repair must not introduce new violations"
+    pitfall: null
+
+  - id: F04
+    severity: critical
+    description: >
+      If the repair PATCH itself creates a NEW violation (e.g., fixes the
+      YAML structure but introduces an R5 tool), the system must remain in
+      ERROR or transition to the appropriate degraded state. The repair
+      triggers a recompile. If the recompile succeeds structurally but
+      finds an R5 violation, the system transitions from ERROR to
+      DEGRADED_R5 (not CLEAN). If the recompile fails again (the repair
+      introduced a different structural error), the system stays in ERROR
+      with updated pendingViolations. The admin sees progress (one error
+      fixed, new issue found) rather than a misleading "repair succeeded"
+      followed by immediate re-degradation.
+    spec_impact: "CL-10 cascading violations — repair may transition ERROR->DEGRADED_R5 or ERROR->ERROR(updated); never false CLEAN"
+    pitfall: null
+
+  - id: F05
+    severity: critical
+    description: >
+      When two files are in error simultaneously (e.g., SOUL.md and
+      AGENTS.md both have parse errors), both must be in pendingViolations,
+      and repair PATCHes to either file must be allowed. Fixing one file
+      and recompiling may succeed partially: if SOUL.md is fixed but
+      AGENTS.md still has errors, the recompile still fails on AGENTS.md.
+      The system stays in ERROR but with an updated pendingViolations that
+      contains only AGENTS.md (SOUL.md is removed because it now parses).
+      The next repair PATCH targets AGENTS.md. The pendingViolations set
+      must be updated after each recompile attempt, not just on full
+      success.
+    spec_impact: "CL-10 multi-file error — both in pendingViolations; partial fix updates set; stays ERROR until all files parse"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The 503 response for rejected (non-repair) PATCHes must include
+      actionable guidance. The response body must contain: {error:
+      "SERVICE_UNAVAILABLE", state: "ERROR", message: "System is in ERROR
+      state. Only repair operations targeting violation files are allowed.",
+      pendingViolations: ["SOUL.md"], guidance: "Fix SOUL.md first, then
+      other edits will be unblocked."}. The pendingViolations list in the
+      response tells the admin exactly which files need repair. Without
+      this guidance, the admin receives a generic 503 and must query
+      GET /api/status separately to understand the situation.
+    spec_impact: "CL-10 503 guidance — include pendingViolations list and human-readable guidance in rejection response"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      Repair via the Layer 1 endpoint (PATCH /api/oc/SOUL.md/Instructions)
+      must also be allowed during ERROR state. Layer 1 operates on OC files
+      directly rather than through the chunk abstraction. The same
+      pendingViolations check applies: SOUL.md is in the set, so the PATCH
+      is allowed. Layer 1 PATCHes must also go through validation. The
+      middleware must not be hardcoded to only check Layer 2 chunk paths —
+      it must resolve both Layer 1 file paths and Layer 2 chunk paths to
+      the underlying source file and check against pendingViolations.
+    spec_impact: "CL-04 Layer 1 repair — PATCH /api/oc/{file}/{section} also allowed; middleware resolves both layers to source file"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      Batch operations (POST /api/batch) that mix repair and non-repair
+      targets must be rejected entirely. If a batch contains [{op: "PATCH",
+      target: "preferences/instructions"}, {op: "PATCH", target:
+      "connections/outlook"}], the first is a repair (SOUL.md in
+      violations) and the second is not (CONNECTIONS.md not in violations).
+      The batch must be rejected with 503 because atomic batch execution
+      would require executing the non-repair PATCH, which is blocked. The
+      response should identify which operations are repair-eligible and
+      which are blocked: {rejected_ops: [{index: 1, target:
+      "connections/outlook", reason: "not in pendingViolations"}]}.
+    spec_impact: "CL-10 batch rejection — mixed repair+non-repair batch rejected; response identifies blocked ops by index"
+    pitfall: null
+
+  - id: F09
+    severity: major
+    description: >
+      A batch containing ONLY repair operations (all targets in
+      pendingViolations) should be allowed. If SOUL.md and AGENTS.md are
+      both in error, a batch repairing both is more efficient than
+      sequential PATCHes (one recompile instead of two). The batch must
+      apply all repairs atomically, then trigger a single recompile. If
+      the batch partially fails (one repair valid, one invalid per
+      validation), the entire batch rolls back — no partial repair. This
+      prevents a state where one file is fixed and the other has a new
+      validation error, requiring the admin to also undo the first fix.
+    spec_impact: "CL-10 repair-only batch — allowed if all targets in pendingViolations; atomic apply + single recompile; rollback on partial failure"
+    pitfall: null
+
+  - id: F10
+    severity: major
+    description: >
+      The repair PATCH must trigger a recompile automatically after the
+      file write succeeds. The admin should not need to manually call
+      POST /api/compile after a repair PATCH. The flow is: PATCH received
+      -> validation passes -> file written -> recompile triggered -> result
+      evaluated -> state transition. The PATCH response should include the
+      recompile result: {status: 200, repair: "applied", recompile:
+      {success: true, new_state: "CLEAN"}} or {status: 200, repair:
+      "applied", recompile: {success: false, remaining_violations:
+      ["AGENTS.md"]}}. If the recompile is async, the response should
+      include a poll URL.
+    spec_impact: "CL-10 auto-recompile — repair PATCH triggers recompile; response includes result or poll URL; no manual compile needed"
+    pitfall: null
+
+  - id: F11
+    severity: major
+    description: >
+      The transition from ERROR to CLEAN must emit an SSE event:
+      {type: "governance:state_changed", from: "ERROR", to: "CLEAN",
+      trigger: "repair_patch", repaired_files: ["SOUL.md"],
+      recompile_version: "..."}. The event must be emitted AFTER the state
+      file is persisted and the new IR is installed, so partners receiving
+      the event can immediately query chunks and get the new IR. If the
+      event fires before the IR is installed, partners may query the
+      old (last-good) IR and see stale data despite the CLEAN state.
+    spec_impact: "CL-10 SSE ordering — state_changed emitted after state persistence AND IR installation; no stale reads"
+    pitfall: null
+
+  - id: F12
+    severity: warning
+    description: >
+      If an admin attempts a repair PATCH with a dry-run flag
+      (X-Dry-Run: true), the system should validate the PATCH content and
+      report whether it would fix the violation WITHOUT actually writing
+      the file or triggering a recompile. The dry-run response should
+      include: {dry_run: true, validation: "passed", would_fix:
+      ["SOUL.md"], remaining_violations: []}. This allows the admin to
+      verify their fix before committing. Dry-run must still check against
+      pendingViolations — a dry-run PATCH to a non-violation file should
+      still return 503 to maintain consistent behavior.
+    spec_impact: "CL-10 dry-run repair — validate without applying; report would_fix and remaining_violations; 503 for non-violation targets"
+    pitfall: null
+
+  - id: F13
+    severity: warning
+    description: >
+      The audit trail must record repair PATCH operations with elevated
+      detail: the actor (admin), the target file, the chunk path used,
+      the content before and after the repair (redacted if sensitive), the
+      recompile result, and the state transition. Repair PATCHes are
+      high-privilege operations (writing to the system during ERROR state)
+      and must be fully traceable. If the audit trail treats repair PATCHes
+      the same as normal PATCHes, post-incident review cannot distinguish
+      intentional repairs from routine edits that happened to occur during
+      ERROR state.
+    spec_impact: "CL-10 repair audit — elevated detail; actor, file, content diff, recompile result, state transition; distinguishable from normal PATCHes"
+    pitfall: null

@@ -16,6 +16,14 @@
       "import": "./dist/compile/index.js",
       "types": "./dist/compile/index.d.ts"
     },
+    "./compile/*": {
+      "import": "./dist/compile/*.js",
+      "types": "./dist/compile/*.d.ts"
+    },
+    "./compile/*.js": {
+      "import": "./dist/compile/*.js",
+      "types": "./dist/compile/*.d.ts"
+    },
     "./governance": {
       "import": "./dist/governance/index.js",
       "types": "./dist/governance/index.d.ts"
@@ -103,6 +111,78 @@
     "./maker": {
       "import": "./dist/maker/index.js",
       "types": "./dist/maker/index.d.ts"
+    },
+    "./compiler/crypto": {
+      "import": "./dist/compiler/crypto/index.js",
+      "types": "./dist/compiler/crypto/index.d.ts"
+    },
+    "./compiler/readers": {
+      "import": "./dist/compiler/readers/index.js",
+      "types": "./dist/compiler/readers/index.d.ts"
+    },
+    "./compiler/sidecar": {
+      "import": "./dist/compiler/sidecar/index.js",
+      "types": "./dist/compiler/sidecar/index.d.ts"
+    },
+    "./compiler/ir": {
+      "import": "./dist/compiler/ir/index.js",
+      "types": "./dist/compiler/ir/index.d.ts"
+    },
+    "./compiler/audit": {
+      "import": "./dist/compiler/audit/index.js",
+      "types": "./dist/compiler/audit/index.d.ts"
+    },
+    "./compiler/enforce": {
+      "import": "./dist/compiler/enforce/index.js",
+      "types": "./dist/compiler/enforce/index.d.ts"
+    },
+    "./compiler/validate": {
+      "import": "./dist/compiler/validate/index.js",
+      "types": "./dist/compiler/validate/index.d.ts"
+    },
+    "./compiler/emit": {
+      "import": "./dist/compiler/emit/index.js",
+      "types": "./dist/compiler/emit/index.d.ts"
+    },
+    "./compiler/emit/ts-builder": {
+      "import": "./dist/compiler/emit/ts-builder.js",
+      "types": "./dist/compiler/emit/ts-builder.d.ts"
+    },
+    "./compiler/cache": {
+      "import": "./dist/compiler/cache/index.js",
+      "types": "./dist/compiler/cache/index.d.ts"
+    },
+    "./compiler/host": {
+      "import": "./dist/compiler/host/index.js",
+      "types": "./dist/compiler/host/index.d.ts"
+    },
+    "./compiler/events": {
+      "import": "./dist/compiler/events/index.js",
+      "types": "./dist/compiler/events/index.d.ts"
+    },
+    "./compiler/watch": {
+      "import": "./dist/compiler/watch/index.js",
+      "types": "./dist/compiler/watch/index.d.ts"
+    },
+    "./compiler/fleet": {
+      "import": "./dist/compiler/fleet/index.js",
+      "types": "./dist/compiler/fleet/index.d.ts"
+    },
+    "./workspace": {
+      "import": "./dist/workspace/index.js",
+      "types": "./dist/workspace/index.d.ts"
+    },
+    "./workspace/*": {
+      "import": "./dist/workspace/*.js",
+      "types": "./dist/workspace/*.d.ts"
+    },
+    "./workspace/*.js": {
+      "import": "./dist/workspace/*.js",
+      "types": "./dist/workspace/*.d.ts"
+    },
+    "./workspace-edit": {
+      "import": "./dist/workspace-edit/index.js",
+      "types": "./dist/workspace-edit/index.d.ts"
     }
   },
   "types": "dist/index.d.ts",
@@ -116,6 +196,9 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@bic/openclaw-workspace": "^0.1.0",
+    "chokidar": "^4.0.3",
+    "typescript": "^5.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -126,7 +209,6 @@
     "@vitest/coverage-v8": "^4.0.0",
     "eslint": "^9.0.0",
     "tsup": "^8.0.0",
-    "typescript": "^5.0.0",
     "vitest": "^4.0.0"
   },
   "overrides": {

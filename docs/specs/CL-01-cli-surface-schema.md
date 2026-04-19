@@ -1,8 +1,16 @@
 # CL-01: CLI Surface & Schema
 
-**Status**: Draft
+**Status**: Draft v1.2
 **Source**: Q12a, Q12c, Q12d, Q12g
 **Reviewers**: platform-engineer, enterprise-architect, ux-designer
+
+## Version History
+
+| Version | Change | Source |
+|---------|--------|--------|
+| v1.2 | Scenario findings audit (claws-compile-dx R1): watch debounce/cleanup strengthened, cache CLI idempotence + missing-dir + ISO 8601 + shared resolver + clear safety, fleet diagnostic shape + observability + arg validation + deterministic order | `.craft/waves/260412+ra-the-radiant+claws-graduation/panels/claws-compile-dx-findings-audit/R1-audit.md` |
+| v1.1 | `claws watch`, `claws cache {stats, prune, clear, list}`, `claws fleet compile` commands added | claws-compile-dx plan — watch/cache/fleet commands |
+| v1.0 | Initial Draft — 40-command surface, 8 groups, claws.json v2 schema | Q12a-d, Q12g |
 
 ---
 
@@ -46,9 +54,10 @@ The `claws.json` schema is the workspace-level configuration contract. Its three
 | **Comply** | comply, comply \<framework\>, assess | 3 | Scope-sensitive |
 | **Audit** | audit, audit verify, audit export, audit history | 4 | Workspace + 1 fleet |
 | **Snap** | snap save/restore/diff/promote | 4 | Scope-sensitive |
-| **Fleet** | scan, broadcast, drift, report, push, kill | 6 | Always fleet |
+| **Fleet** | scan, broadcast, drift, report, push, kill, compile | 7 | Always fleet |
 | **Protect** | budget, secrets init, secrets set, identity | 4 | Scope-sensitive |
 | **Live** | watch, session, amend | 3 | Always workspace |
+| **Cache** | cache stats, cache prune, cache clear, cache list | 4 | Always workspace |
 | **Maker** | new skill, publish, annotate, import | 4 | Always workspace |
 | **Meta** | uninstall | 1 | Always workspace |
 
@@ -65,9 +74,11 @@ Developer (18 commands -- full build + governance):
   Build:  init build compile optimize test diff import inspect watch amend doctor
   Govern: check comply assess audit
 
-Advanced (40 commands -- fleet + snapshots + protect + maker + meta):
+Advanced (45 commands -- fleet + snapshots + protect + cache + maker + meta):
   + snap [save|restore|diff|promote]
   + scan broadcast drift report push kill
+  + fleet compile
+  + cache [stats|prune|clear|list]
   + budget secrets [init|set] identity session
   + new skill, publish, annotate, import
   + uninstall
@@ -298,6 +309,183 @@ claws uninstall --global         # Remove ~/.claws/ global config
 - Prints what was removed and where the backup lives
 - `--keep-audit` and `--keep-secrets` can be combined
 
+### `claws watch` (Live group)
+
+`claws watch` observes the workspace directory and triggers an incremental compile whenever any of the 9 OC input files changes:
+
+```bash
+claws watch                          # defaults: debounce 300ms
+claws watch --debounce 500           # override debounce window (ms)
+```
+
+**Watched inputs**: the 9 governance input files
+`SOUL.md`, `TOOLS.md`, `AGENTS.md`, `MEMORY.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`, `lobster.yaml`, and `skills/*/SKILL.md` (recursive within `skills/`).
+
+**Behavior**:
+- **MUST** trigger an incremental compile on every change event for any watched input. Compilation routes through the same per-subsystem cache path documented in CL-04 §Incremental Stages -- unchanged readers MUST short-circuit on `cacheHit: true`.
+- **MUST** debounce rapid-fire edits using **trailing-edge** semantics: the debounce timer resets on every new fs event and fires `<debounce-window>` ms AFTER the last event, never after the first. Leading-edge or leading+trailing debounce is prohibited because it either loses mid-burst edits or doubles compile work. Default window is 300ms; a 10-edit burst **MUST** coalesce into `≤ 3` compile runs. *(Source: watch/S01-F01, S02-F02)*
+- **MUST** coalesce duplicate filesystem events inside the debounce window. Editors that save via temp-file-then-rename (VS Code on Windows, many macOS editors) produce multiple fs events for a single logical save; the watcher MUST treat them as one edit, not N. *(Source: watch/S01-F02)*
+- **MUST** serialize per-workspace compile invocations OR carry a monotonic compile-generation number and discard stale writes. In-flight compiles MUST NOT have their emit output overwritten by late writes from earlier generations. *(Source: watch/S02-F01)*
+- **MUST** read input files at compile time, not at fs-event dispatch time, so OS write buffering cannot cause the compile to observe a pre-edit byte image. The "last edit content reflected" guarantee depends on re-stat / re-read at compile entry. *(Source: watch/S02-F03)*
+- **MUST** keep the `CompilationCache` lifetime span the watch SESSION, not per-compile. Instantiating a fresh cache per compile defeats incremental compile because reader stages have no cached data to short-circuit on. *(Source: watch/S01-F03)*
+- **MUST** publish the same compile events used by the in-process path to a `CompilerEventBus` (see CL-14 §9 CompilerEventBus). The watch session is a primary bus publisher.
+- **MUST** exit cleanly on Ctrl-C (SIGINT). Clean exit means, in order:
+  1. Stop the fs watcher from accepting new events (call `watcher.close()` and **await** its completion — chokidar's native watch handles do not release automatically and a synchronous `process.exit()` leaks them, causing `ERROR_SHARING_VIOLATION` on Windows and kqueue descriptor exhaustion on macOS). *(Source: watch/S03-F01)*
+  2. Allow any in-flight compile to complete OR discard cleanly — if discarded, the already-existing emit file from the previous successful compile MUST remain intact (no partial overwrite).
+  3. Emit output writes MUST use tempfile-plus-atomic-rename, never in-place writes, so an interrupted compile leaves either the old complete file or the new complete file — never a partial. *(Source: watch/S03-F02)* *(See also CL-04 emit pipeline.)*
+  4. Clean up any leftover emit tempfiles (e.g. `plugins/claws-governance/index.ts.tmp-<pid>`) on SIGINT OR on next-startup sweep. *(Source: watch/S03-F07)*
+  5. Exit with code `0` within 2000ms.
+- **MUST** handle a second SIGINT arriving during cleanup as a force-exit trigger. A 1-second timeout fallback applies: if `watcher.close()` hangs or a second SIGINT arrives, the process exits with code `1` and logs a warning. Impatient users hitting Ctrl-C twice must not be deadlocked on a slow close. *(Source: watch/S03-F05)*
+- **MUST** register for SIGBREAK alongside SIGINT on Windows. cmd.exe and PowerShell may send SIGBREAK where Git Bash forwards SIGINT; both MUST be treated as clean-exit triggers. *(Source: watch/S03-F08)*
+- **SHOULD** print a single-line compile summary per change to stdout: timestamp, triggering path (as a **workspace-relative path**, NEVER absolute — absolute paths leak user home directories into logs and break snapshot tests across machines), elapsed, stage cacheHit count, diagnostic count. The per-change summary format is part of the CLI contract; downstream parsers (editor integrations, CI log readers) rely on stable column shape. *(Source: watch/S01-F05)*
+
+**Flags**:
+
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--debounce <ms>` | number | 300 | Debounce window for coalescing rapid-fire edits. Minimum 50ms. |
+| `--no-color` | boolean | false | Disable ANSI colors in compile summaries. |
+
+**Exit codes**:
+- `0` -- Ctrl-C received after clean shutdown
+- `130` -- terminated by SIGINT without completing shutdown (reserved for watcher leaks — must never occur under the cleanup MUST)
+
+**Output contract** (per-change line):
+
+```
+$ claws watch
+  claws watch -- debouncing 300ms, watching 9 inputs
+  09:14:22  SOUL.md           compile  142ms  cacheHit 8/9  diagnostics 0
+  09:14:41  skills/ingest/SKILL.md  compile  218ms  cacheHit 7/9  diagnostics 1 [MEDIUM]
+  ^C  watcher stopped, no orphan processes
+```
+
+Implementation lands in pulse TBD of Ra CP-4 (Publish).
+
+### `claws cache` (Cache group)
+
+The `claws cache` subcommand surfaces operator control over the compilation cache. It shares the same `CompilationCache` API used by the compile path (see CL-04 cache key derivation).
+
+#### Shared contract (all cache subcommands)
+
+- **MUST** resolve the cache directory through a **single shared function** (e.g. `resolveCacheDir(workspaceRoot)`) used by both the CLI path and the compile path. Two separate resolvers (CLI reads one location, compile writes another) would pass the round-trip test in isolation but break real operator workflows. *(Source: cache-cli/S01-F01)*
+- **MUST** treat "cache directory does not exist" and "cache directory exists but empty" as **identical states** for all read commands (`stats`, `list`). Read paths MUST NOT fail with ENOENT on a fresh checkout; they report zero-state. *(Source: cache-cli/S02-F01)*
+- **MUST** emit stable JSON shapes. Each subcommand's JSON output schema is a versioned contract (field names, types, required-vs-optional). Additions are backwards-compatible; renames or removals are a breaking change requiring a major version bump. Dashboards and CI pipelines parse by field name. *(Source: cache-cli/S01-F02)*
+- Read commands (`stats`, `list`) **MUST NOT** create the cache directory. Only write paths (compile, `clear`) may lazily create the directory. An operator running `cache stats` before any compile reads a zero-state without provisioning an empty directory on a read-only system. *(Source: cache-cli/S02-F06)*
+- Any lazily-created cache directory **MUST** use deterministic, umask-respecting permissions. A dir created 0700 on one invocation and 0755 on another (mixed sudo/non-sudo) breaks cross-user access. *(Source: cache-cli/S02-F10)*
+- No-op paths (empty cache, zero matches) **MUST** exit `0`. A CI pre-clean step like `claws cache clear` must not need defensive `|| true`. *(Source: cache-cli/S02-F03)*
+
+```bash
+claws cache stats                     # print cache statistics as JSON
+claws cache prune --older-than 7d     # prune entries older than duration
+claws cache clear                     # empty the cache directory
+claws cache list                      # list entries (table format)
+claws cache list --json               # list entries (JSON, one entry per line)
+```
+
+#### `claws cache stats`
+
+- **MUST** print a single JSON object to stdout with exactly these keys:
+  - `sizeBytes` (number) -- total on-disk size of cache entries
+  - `entryCount` (number) -- count of cache entries
+  - `hitCount` (number) -- cumulative cache-hit count since last explicit counter reset (see `cache clear --reset-counters` below)
+  - `missCount` (number) -- cumulative cache-miss count since last explicit counter reset
+  - `version` (string) -- cache schema version (tracks `CompilationCache` contract)
+- On an empty cache (no entries, missing dir, or post-clear), **MUST** emit the full schema with zero values (`entryCount: 0`, `sizeBytes: 0`), never an empty object `{}`. Dashboards charting cache size over time rely on field presence. *(Source: cache-cli/S02-F05)*
+- Exit `0` on success, `1` on unreadable cache directory.
+
+#### `claws cache prune --older-than <duration>`
+
+- **MUST** accept a duration string matching `/^\d+(s|m|h|d)$/` (e.g., `30s`, `15m`, `24h`, `7d`).
+- **MUST** remove cache entries whose `lastAccess` is older than the provided duration.
+- **MUST** print a summary line: `pruned <N> entries (<M> bytes)`.
+- **MUST** exit `0` when zero entries match (no-op is not an error).
+
+#### `claws cache clear`
+
+- **MUST** empty the cache directory (delete all entries; directory itself remains).
+- **MUST** exit `0` even if the cache was already empty.
+- **MUST NOT** touch `.claws/audit/`, `.claws/secrets/`, or `.claws/snapshots/` -- only compile/boost/eval caches.
+- **MUST** be tolerant of concurrent callers. If two processes run `claws cache clear` simultaneously (e.g., parallel CI jobs), ENOENT from a file disappearing mid-traversal is NOT an error. The implementation MUST handle race-free "directory already empty" states. *(Source: cache-cli/S02-F02)*
+- **MUST NOT** reset `hitCount` / `missCount` counters by default. Clearing entries and zeroing telemetry are separate concerns — operators may want to clear entries (e.g., after an emit format change) while retaining hit-rate trends. `claws cache clear --reset-counters` is the explicit opt-in for counter reset. *(Source: cache-cli/S01-F07)*
+- For interactive use, `claws cache clear` **MUST** require explicit `--yes` (or a confirmation prompt) to prevent accidental wipes when the command is mistyped. On an empty cache, the confirmation prompt SHOULD short-circuit — there is nothing to lose. *(Source: cache-cli/S01-F05, S02-F09)*
+
+#### `claws cache list [--json]`
+
+- Default output: human-readable table with columns `key`, `sizeBytes`, `created`, `lastAccess`.
+- `--json`: emits one JSON object per line (newline-delimited JSON) with the same fields plus `stage` and `inputHash`. Machine-readable for pipelines.
+- **MUST** sort output by a stable key (default: `lastAccess` descending; alternatively `key` lexicographic). Filesystem directory traversal order varies across filesystems and between runs; relying on it produces spurious diffs for operators comparing two `cache list` outputs. The chosen sort order MUST be documented. *(Source: cache-cli/S01-F06)*
+- Timestamps (`created`, `lastAccess`) **MUST** be emitted as **ISO 8601 UTC** strings (e.g. `2026-04-16T14:23:00Z`), never Unix epoch seconds or locale-sensitive strings. ISO 8601 sorts lexicographically, is unambiguous, and standard for JSON APIs. *(Source: cache-cli/S01-F10)*
+- On an empty cache, `cache list` (with or without `--json`) **MUST** produce `0` bytes on stdout and exit `0`. A human-readable "(no entries)" string would break ndjson consumers parsing "one JSON object per line". *(Source: cache-cli/S02-F04)*
+- Exit `0` on success.
+
+**Output contract** (`claws cache stats`):
+
+```json
+{"sizeBytes":184221,"entryCount":47,"hitCount":312,"missCount":18,"version":"1"}
+```
+
+Implementation lands in pulse TBD of Ra CP-3 (Package Split).
+
+### `claws fleet compile <fleet-dir>` (Fleet group)
+
+`claws fleet compile` compiles every workspace under `<fleet-dir>` in parallel. It is the batch counterpart to `claws build`.
+
+```bash
+claws fleet compile /path/to/fleet                       # compile all workspaces, default concurrency
+claws fleet compile /path/to/fleet --max-concurrency 4   # cap at 4 in-flight compiles
+```
+
+**Semantics**:
+- **MUST** discover workspaces by walking immediate child directories of `<fleet-dir>` in **lexicographic order**. Deterministic traversal is required so repeated runs produce byte-stable aggregate output; filesystem readdir order varies and masks real regressions. *(Source: fleet/S01-F09)*
+- **MUST** run compiles in parallel. Per-workspace cache state **MUST** be isolated -- concurrent compiles **MUST NOT** share any in-process cache mutable state. Each workspace uses its own `.claws/cache/` directory.
+- **MUST** write per-workspace cache entries **atomically** (write-to-tempfile + rename, or equivalent). A failed workspace MUST leave NO cache residue — no partial entries, no corrupted lock files — so subsequent fleet runs do not observe phantom hits. *(Source: fleet/S01-F03)*
+- **MUST NOT** short-circuit on per-workspace failure. Each failure is reported in the aggregate output; the remaining workspaces complete. Implementation MUST use `Promise.allSettled`-style semantics (or per-task `try`/`catch`) — never `Promise.all`, which cancels sibling promises on first rejection. *(Source: fleet/S01-F01)*
+- **MUST** cap concurrent compiles to the value of `--max-concurrency` using a **real bounded semaphore or task queue**, not a runtime hint. A `Promise.all` with 10 promises ignores the flag entirely. The executor MUST acquire a permit before starting each compile and release it on completion. *(Source: fleet/S02-F01)*
+- **MUST** validate `--max-concurrency` arguments at parse time: values `0`, negative integers, and non-integers MUST produce a clear error (`"--max-concurrency must be a positive integer"`) and exit with code `1`, not silently fall through. `--max-concurrency 1` MUST function as serial execution without deadlock. *(Source: fleet/S02-F04, S02-F06)*
+- **MUST** handle SIGINT / SIGTERM gracefully: cancel pending compiles, report in-flight state (completed, cancelled, not-started) per-workspace, and leave no half-written plugin output on disk. *(Source: fleet/S01-F07)*
+
+**Default concurrency tradeoff** *(Source: fleet/S02-F05)*: The default `--max-concurrency` value is `os.cpus().length`. On a 64-core build machine with a 1000-workspace fleet this spawns 64 parallel compiles, each potentially consuming hundreds of MB of memory. Operators running on memory-constrained CI runners SHOULD set `--max-concurrency` explicitly. The `--help` text MUST document the default and advise on memory budgeting.
+
+**Structured diagnostic contract** *(Source: fleet/S01-F02, S01-F06)*: Per-workspace failures surface as structured `CompileDiagnostic` records, NOT free-form error strings. The diagnostic is a discriminated union with these required fields:
+
+- `kind` (string) — one of `MissingSoulFile`, `MalformedLobsterYaml`, `MissingFrontmatterField`, `PermissionDenied`, `CompileFailed`, `EmitFailed`, `ValidationFailed` (extensible — new kinds additive-only per major version)
+- `workspace` (string) — workspace-relative path under `<fleet-dir>`
+- `stage` (string) — which pipeline stage failed (`parse`, `enforce`, `emit`, `validate`) so operators can route to the right remediation flow
+- `message` (string) — human-readable explanation
+- `path` (string, optional) — the specific file inside the workspace that failed, when known
+- `exitCode` (number, optional) — if the failure was a subprocess crash
+
+Consumers (CI dashboards, Horus hot-reload gateway) route by `kind` and `stage`; string-stringified errors break this routing.
+
+**Observability output** *(Source: fleet/S02-F02, S01-F10)*: `--json` output MUST emit newline-delimited JSON (ndjson), one `FleetWorkspaceResult` per line, followed by a final aggregate `FleetSummary` line containing: `totalWorkspaces`, `succeeded`, `failed`, `skipped`, `wallClockMs`, `peakConcurrency`, `parallelismRatio`, `maxConcurrency`. Aggregate metrics exposed via `--stats` (text mode) or embedded in the final ndjson line (`--json` mode) let operators confirm the parallelism they requested actually happened — a fleet reporting `peakConcurrency: 1` with `--max-concurrency 3` is a silent concurrency bug the text output alone would not surface.
+
+**Flags**:
+
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--max-concurrency <N>` | number | `os.cpus().length` | Cap in-flight compiles. |
+| `--json` | boolean | false | Emit structured JSON aggregate instead of human-readable table. |
+
+**Exit codes** (follows the P-174 fleet exit-code contract above):
+- `0` -- every workspace compiled successfully
+- `2` -- partial success (at least one workspace succeeded, at least one failed)
+- `1` -- total failure (zero workspaces succeeded, or the fleet-dir itself could not be scanned)
+
+**Output contract** (human-readable):
+
+```
+$ claws fleet compile ./fleet --max-concurrency 2
+  claws fleet compile -- 3 workspaces, concurrency 2
+  ✓  fleet/alpha       ok      312ms
+  ✓  fleet/bravo       ok      284ms
+  ✗  fleet/charlie     failed  OC-POLICY-E201 missing SOUL.md
+
+  3 workspaces: 2 ok, 1 failed in 618ms
+```
+
+Implementation lands in pulse TBD of Ra CP-7 (Lobster Collaboration).
+
 ### `CLAWS_BYPASS=1` Emergency Override
 
 Setting `CLAWS_BYPASS=1` in the environment disables all claws governance enforcement. This is the emergency escape hatch.
@@ -433,9 +621,9 @@ CLAWS_BYPASS=1 claws check      # Check exits 0 with warning: "BYPASS active"
 
 ## Integration Scenario Amendments
 
-**URL policy SRI validation** *(INT-IR-S01)*: When `inputs` entries use `url` source type, the InputResolver must validate Subresource Integrity (SRI) hashes before accepting remote policy files. Missing or mismatched SRI hashes produce CLAWS-E301 diagnostics. The SRI algorithm must support SHA-256 and SHA-384. Expired or unreachable URLs fall back to cached versions with a staleness warning.
+**URL policy SRI validation** *(INT-IR-S01)*: When `inputs` entries use `url` source type, the InputResolver must validate Subresource Integrity (SRI) hashes before accepting remote policy files. Missing or mismatched SRI hashes produce OC-POLICY-E301 diagnostics. The SRI algorithm must support SHA-256 and SHA-384. Expired or unreachable URLs fall back to cached versions with a staleness warning.
 
-**INPUT-RESOLVE diagnostics** *(INT-IR-S02)*: Input resolution failures must produce structured diagnostics with source type, attempted path/URL, resolution strategy, and suggested fixes. The diagnostic code namespace CLAWS-E3xx is reserved for InputResolver errors. Each diagnostic must include the claws.json line number where the failing input was declared.
+**INPUT-RESOLVE diagnostics** *(INT-IR-S02)*: Input resolution failures must produce structured diagnostics with source type, attempted path/URL, resolution strategy, and suggested fixes. The diagnostic code namespace OC-POLICY-E3xx is reserved for InputResolver errors. Each diagnostic must include the claws.json line number where the failing input was declared.
 
 **Package manifest format** *(INT-PO-S01)*: The `packages` output section must generate a `.claws-manifest.json` for each declared package containing build provenance (source hash, compiler version, build timestamp, signer identity). The manifest format must be stable across claws versions for registry verification.
 
@@ -443,7 +631,7 @@ CLAWS_BYPASS=1 claws check      # Check exits 0 with warning: "BYPASS active"
 
 **Platform versioning in loss matrix** *(INT-LA-S02)*: The loss matrix must include platform version information so that governance fidelity assessments are reproducible. As platforms evolve enforcement capabilities, the same workspace may have different loss profiles across platform versions. The `--loss-report` output must include the platform-capabilities-version used for assessment.
 
-**claws.json validation ordering** *(INT-IR-S03)*: Schema validation for the new `inputs` and `packages` keys must run before InputResolver execution. A malformed `inputs` entry must produce a schema validation error (CLAWS-E101 namespace), not an InputResolver runtime error (CLAWS-E3xx namespace). This ordering ensures consistent diagnostic experiences.
+**claws.json validation ordering** *(INT-IR-S03)*: Schema validation for the new `inputs` and `packages` keys must run before InputResolver execution. A malformed `inputs` entry must produce a schema validation error (OC-POLICY-E101 namespace), not an InputResolver runtime error (OC-POLICY-E3xx namespace). This ordering ensures consistent diagnostic experiences.
 
 ## Open Questions
 

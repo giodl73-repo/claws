@@ -1,0 +1,205 @@
+name: S39-cold-cache-startup
+series: cap-integration
+version: 2
+specs: [CL-10, CL-06, CL-07]
+description: >
+  Validates the first-run experience: brand new workspace, first claws serve
+  startup, no cache, no IR, no snapshots. Full compilation must complete
+  before the server serves data requests. The health endpoint returns
+  "recovering" status until ready. The first GET after startup has valid
+  governance context. Onboard works on an empty workspace. This is the
+  cold-cache codepath that must be explicitly tested as a distinct path
+  from the warm-cache (incremental recompile) path.
+
+expect:
+  startup:
+    full_compilation_before_serving: true
+    health_status_during_compile: recovering
+    health_status_after_compile: ready
+    503_with_retry_after_during_recovery: true
+  first_request:
+    valid_governance_context: true
+    compilation_id_present: true
+    no_stale_warning: true
+  onboard:
+    works_on_empty_workspace: true
+    seed_validated_before_write: true
+    secret_scan_on_seed: true
+  cold_cache:
+    explicit_codepath: true
+    no_delta_assumptions: true
+    full_build_not_incremental: true
+
+simulate:
+  failures: [compilation_timeout, invalid_seed_content, workspace_with_corrupt_files]
+  halt: null
+  budget: null
+
+problem: >
+  A new workspace is created via claws init. The workspace has 9 OC files
+  (all default content from the onboard template). The user runs claws serve
+  for the first time. There is no .claws/ cache directory, no compiled IR,
+  and no workspace version counter. The server must: (1) detect the cold-cache
+  state, (2) start the health endpoint immediately (returning "recovering"),
+  (3) perform a full compilation of all 9 files, (4) initialize the version
+  counter to 1, (5) flip the health status to "ready", (6) begin serving data
+  requests. During step 3, any GET /api/oc/ request must receive 503 with
+  Retry-After header. After step 5, the first GET returns valid data with
+  governance_context populated. Separately, a partner calls POST /api/onboard
+  with seed content — the seed is schema-validated, secret-scanned, written,
+  compiled, and the workspace is ready.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The cold-cache codepath must be a distinct code branch from the
+      warm-cache (incremental) codepath. If the cold path uses the
+      incremental compiler with "no previous IR" as a special case, edge
+      cases arise: delta computation against null throws, cache lookups
+      return undefined, snapshot verification has nothing to compare against.
+      The cold-cache path must: skip delta computation, skip cache lookup,
+      perform full compilation of all files, and initialize all caches from
+      scratch. A flag (e.g., isColdStart: true) should be passed through
+      the compilation pipeline.
+    spec_impact: "CL-06 cold cache — distinct codepath with isColdStart flag; skip delta/cache; full build only"
+    pitfall: P-304
+
+  - id: F02
+    severity: critical
+    description: >
+      All endpoints except /health must return 503 with Retry-After during
+      the recovery phase. If some endpoints (e.g., /api/session) are
+      available before compilation completes, they return data without
+      governance context, which is misleading. The 503 must include a
+      recovery_progress field (e.g., "compiling 5/9 files") so the partner
+      can show meaningful progress. The Retry-After value should be
+      estimated from compilation progress, not a fixed constant.
+    spec_impact: "CL-10 recovery mode — 503 on ALL data endpoints; Retry-After estimated; recovery_progress in body"
+    pitfall: P-304
+
+  - id: F03
+    severity: critical
+    description: >
+      The health endpoint must be available immediately on server start,
+      before any compilation begins. It returns { status: "recovering",
+      phase: "compiling", progress: "0/9" }. Load balancers and orchestrators
+      use this to decide when to route traffic. If the health endpoint is
+      unavailable during startup, the orchestrator may kill the server
+      (assuming it crashed) and restart it, creating a boot loop.
+    spec_impact: "CL-10 health — available immediately; returns recovering status with phase and progress"
+    pitfall: P-304
+
+  - id: F04
+    severity: major
+    description: >
+      The startup sequence must be ordered: (1) open health endpoint, (2)
+      scan for orphaned temp files and WAL entries (recovery from prior
+      crash), (3) validate workspace integrity (all expected files present),
+      (4) invalidate any stale cache from a prior run, (5) full compilation,
+      (6) initialize version counter, (7) open all data endpoints, (8)
+      start file watcher. If step 8 happens before step 5, the watcher may
+      trigger incremental recompiles on files that have not been fully
+      compiled yet, causing inconsistent IR.
+    spec_impact: "CL-10 startup — ordered sequence: health, recovery, integrity, cache-clear, compile, version, serve, watcher"
+    pitfall: P-304
+
+  - id: F05
+    severity: major
+    description: >
+      Schema validation of seed content during onboard must run BEFORE any
+      file writes. If the seed is written to disk and then validation fails
+      on the third file, the first two files are already written, leaving
+      the workspace in a partial state. Onboard must validate the entire
+      seed payload in memory, then write all files atomically (using the
+      WAL from P-286 if needed). Secret scanning runs on the in-memory
+      seed, not on the written files.
+    spec_impact: "CL-10 onboard — validate + secret-scan entire seed in memory; atomic write; no partial state"
+    pitfall: P-304
+
+  - id: F06
+    severity: major
+    description: >
+      The first GET after startup must include a valid governance_context
+      with a real compilation_id and timestamp, not a placeholder or null.
+      If the compilation is still in progress when the server starts
+      accepting requests (race condition in step 7), the GET would return
+      null governance_context. The data endpoints must not open until the
+      compilation is complete and the IR is fully populated. There is no
+      "partially ready" state.
+    spec_impact: "CL-10 first GET — guaranteed non-null governance_context; endpoints open only after full compilation"
+    pitfall: P-304
+
+  - id: F07
+    severity: major
+    description: >
+      Recovery timeout: if the full compilation takes longer than 30 seconds,
+      the server should enter a degraded mode where it serves stale data
+      (if any exists from a prior run) with a prominent warning, rather
+      than continuing to return 503 indefinitely. If there is no prior data
+      (true cold start), the server must continue in recovery mode —
+      degraded mode is only available when a previous IR exists. The 30s
+      timeout is configurable.
+    spec_impact: "CL-10 recovery timeout — 30s default; degraded mode with stale data if available; continue recovery if not"
+    pitfall: P-304
+
+  - id: F08
+    severity: warning
+    description: >
+      Workspace with corrupt OC files: if TOOLS.md contains invalid YAML
+      frontmatter on first startup, the cold-cache compilation fails. The
+      server must not crash — it should compile what it can, log errors for
+      corrupt files, and serve the workspace with those files marked as
+      { compilationError: true, error: "..." } in the API responses. The
+      health status should be "ready_with_errors" to distinguish from
+      "ready" (all clean).
+    spec_impact: "CL-06 cold cache — compile what can be compiled; mark corrupt files; ready_with_errors health status"
+    pitfall: P-304
+
+  - id: F09
+    severity: warning
+    description: >
+      The version counter must be initialized to 1 (not 0) on cold start.
+      Version 0 is reserved as "no version" / "never written". If a client
+      receives ETag: "0", it cannot distinguish between "empty workspace"
+      and "uninitialized counter". Starting at 1 after the first compilation
+      makes the first successful GET return ETag: "1", which is unambiguous.
+    spec_impact: "CL-10 versioning — initialize to 1 on cold start; 0 reserved as sentinel for uninitialized"
+    pitfall: P-304
+
+  - id: F10
+    severity: warning
+    description: >
+      The SSE endpoint must be available during recovery, emitting
+      RECOVERY_IN_PROGRESS events with progress updates. Partners that
+      connect during startup can subscribe and wait for the RECOVERY_COMPLETE
+      event instead of polling the health endpoint. If SSE is unavailable
+      during recovery, partners must poll, increasing load on the already-busy
+      server.
+    spec_impact: "CL-10 SSE — available during recovery; RECOVERY_IN_PROGRESS + RECOVERY_COMPLETE events"
+    pitfall: P-304
+
+  - id: F11
+    severity: warning
+    description: >
+      Cache directory initialization: the cold-cache path must create the
+      .claws/ cache directory with correct permissions. If the directory
+      creation fails (read-only filesystem, permission denied), the server
+      must still function in a cache-less mode (compile on every request).
+      The performance degradation is acceptable; crashing on missing cache
+      directory is not. Log a warning for the cache-less mode.
+    spec_impact: "CL-06 cold cache — create .claws/ or fall back to cache-less mode; warn, do not crash"
+    pitfall: P-304
+
+  - id: F12
+    severity: note
+    description: >
+      Performance benchmark: cold-start compilation of a default 9-file
+      workspace must complete in < 2 seconds on a standard developer machine.
+      This sets the expected Retry-After value for a fresh workspace. Larger
+      workspaces (100+ skill files) may take longer — the benchmark should
+      include a "large workspace" profile with 100 files and a 10-second
+      target. If cold start exceeds these targets, the compilation pipeline
+      needs optimization.
+    spec_impact: "CL-06 performance — cold-start benchmark: < 2s for 9 files, < 10s for 100 files"
+    pitfall: null

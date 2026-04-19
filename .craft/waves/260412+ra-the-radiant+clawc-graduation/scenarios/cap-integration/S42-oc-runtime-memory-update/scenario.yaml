@@ -1,0 +1,236 @@
+name: S42-oc-runtime-memory-update
+series: cap-integration
+version: 2
+specs: [CL-10, CL-12, CL-07, CL-14]
+description: >
+  Validates behavior when the OC runtime updates MEMORY.md with conversation
+  data whose sensitivity increases (INTERNAL to CONFIDENTIAL). Recompile
+  detects the data label change. If the agent lacks audit trail configuration
+  for CONFIDENTIAL data, this is a G-DATA governance violation and the system
+  enters DEGRADED_WARN. The agent continues operating with warnings surfaced
+  to the admin. SSE events notify partners of the sensitivity change.
+
+expect:
+  auto_snapshot:
+    trigger: before_recompile
+    captures: memory_state
+    labeled: "auto:pre-memory-update"
+  data_label_inference:
+    method: content_classification
+    detects_sensitivity_change: true
+    from: INTERNAL
+    to: CONFIDENTIAL
+  violation_detection:
+    type: G_DATA_MISSING_AUDIT_TRAIL
+    condition: "CONFIDENTIAL data without audit trail config"
+    degraded_state: DEGRADED_WARN
+  agent_operation:
+    continues: true
+    warnings_surfaced: true
+    patches_allowed_with_warning: true
+  sse_events:
+    sensitivity_change: true
+    degraded_warn_entered: true
+
+simulate:
+  failures:
+    - type: oc_runtime_write
+      target: MEMORY.md
+      content: "conversation data with CONFIDENTIAL content"
+  halt: null
+  budget: null
+
+problem: >
+  An agent's OC runtime appends new data to MEMORY.md from a conversation. The
+  original MEMORY.md contained INTERNAL-labeled data. The new content includes
+  customer PII, production credentials references, or compliance-sensitive
+  information that the classifier labels CONFIDENTIAL. The recompiler detects
+  the data label change from INTERNAL to CONFIDENTIAL. The agent's governance
+  configuration (GOVERNANCE.md) does not have audit trail enabled for
+  CONFIDENTIAL data — a G-DATA violation. The system must: (1) capture an
+  auto-snapshot before recompilation, (2) infer the new data sensitivity,
+  (3) detect the G-DATA violation, (4) enter DEGRADED_WARN (not DEGRADED_R5
+  because this is a governance warning, not a risk-level violation),
+  (5) allow the agent to continue operating with warnings, (6) emit SSE
+  events for the data sensitivity change, (7) surface the warning in chunks
+  and status endpoint, (8) allow admin to fix GOVERNANCE.md to add audit
+  trail config, triggering recompile and CLEAN.
+
+findings:
+  - id: F01
+    severity: critical
+    description: >
+      The auto-snapshot must capture MEMORY.md state before the OC runtime
+      write is processed by the compiler. Because MEMORY.md may contain
+      sensitive data, the snapshot itself must respect the data label of
+      the content at snapshot time (INTERNAL). If the snapshot is taken
+      after the write, it contains CONFIDENTIAL data and the snapshot
+      storage must be reclassified. The snapshot storage layer must tag
+      each snapshot with the highest data label present in the captured
+      files.
+    spec_impact: "CL-07 snapshot data labels — snapshots tagged with highest data label of captured content; pre-write snapshot is INTERNAL"
+    pitfall: null
+
+  - id: F02
+    severity: critical
+    description: >
+      Data label inference must be performed by the compiler during
+      recompilation, not by the file watcher. The file watcher detects
+      that MEMORY.md changed but cannot classify content. The compiler
+      parses the content and applies classification rules (pattern matching
+      for PII, credential patterns, compliance keywords). The classification
+      must be deterministic — the same content always produces the same
+      label. If classification is non-deterministic (e.g., ML-based with
+      stochastic output), repeated recompiles may flip between INTERNAL and
+      CONFIDENTIAL, causing state oscillation.
+    spec_impact: "CL-12 data classification — compiler-phase classification; deterministic rules; no stochastic oscillation"
+    pitfall: null
+
+  - id: F03
+    severity: critical
+    description: >
+      DEGRADED_WARN is distinct from DEGRADED_R5 in its operational impact.
+      In DEGRADED_WARN, the agent continues operating normally — all tools
+      remain active, all PATCHes succeed — but every response includes a
+      governance warning header (X-OC-Governance: degraded_warn) and the
+      status endpoint shows the warning. In DEGRADED_R5, specific tools are
+      blocked. The implementation must not treat DEGRADED_WARN as a subset
+      of DEGRADED_R5. They are parallel states with different triggers and
+      different consequences.
+    spec_impact: "CL-10 DEGRADED_WARN — agent fully operational; warning headers on responses; distinct from DEGRADED_R5"
+    pitfall: null
+
+  - id: F04
+    severity: critical
+    description: >
+      PATCH requests during DEGRADED_WARN must succeed but include the
+      warning in the response body. The response must include a warnings
+      array with the G-DATA violation details. If PATCHes silently succeed
+      without the warning, the partner has no signal that governance is
+      degraded. If PATCHes are blocked (like in DEGRADED_R5), the agent is
+      unnecessarily restricted for a warning-level issue. The warning must
+      be present in the response, not just in the status endpoint.
+    spec_impact: "CL-10 PATCH in DEGRADED_WARN — succeeds with warnings array in response body; never blocked"
+    pitfall: null
+
+  - id: F05
+    severity: critical
+    description: >
+      Chunks served during DEGRADED_WARN must include a governance.warnings
+      array (distinct from governance.violations used in DEGRADED_R5). Each
+      warning must include the violation type (G_DATA_MISSING_AUDIT_TRAIL),
+      the affected file (MEMORY.md), and the recommended action (enable
+      audit trail for CONFIDENTIAL data). Partners rendering chunks must
+      distinguish warnings from violations visually — a yellow badge vs a
+      red badge, for instance. The chunk schema must define both arrays.
+    spec_impact: "CL-10 chunks — governance.warnings array for DEGRADED_WARN; distinct from governance.violations"
+    pitfall: null
+
+  - id: F06
+    severity: major
+    description: >
+      The SSE event for a data sensitivity change must include: the file
+      affected (MEMORY.md), the previous label (INTERNAL), the new label
+      (CONFIDENTIAL), the violation type if any (G_DATA_MISSING_AUDIT_TRAIL),
+      and the resulting state (DEGRADED_WARN). This is a new event type
+      "governance:data_sensitivity_changed" distinct from
+      "governance:violation". Partners may handle sensitivity changes
+      differently from tool violations — e.g., triggering a data review
+      workflow rather than an admin fix workflow.
+    spec_impact: "CL-10 SSE — governance:data_sensitivity_changed event; includes labels, violation type, new state"
+    pitfall: null
+
+  - id: F07
+    severity: major
+    description: >
+      If MEMORY.md grows very large (e.g., 500KB+ from accumulated
+      conversation data), recompilation performance degrades. The compiler
+      must handle large MEMORY.md files without blocking the event loop.
+      Content classification on a 500KB file with regex patterns could take
+      hundreds of milliseconds. The classification should be chunked or
+      run in a worker thread to avoid blocking API responses. The
+      recompile debounce window must account for classification time.
+    spec_impact: "CL-14 performance — large MEMORY.md classification in worker thread; no event loop blocking"
+    pitfall: null
+
+  - id: F08
+    severity: major
+    description: >
+      If the OC runtime writes to MEMORY.md at the same time as an API
+      PATCH to MEMORY.md, a race condition exists. The file watcher may
+      detect the OC runtime write, start recompilation, then the API PATCH
+      overwrites the file. The recompile uses the OC runtime content but
+      the file on disk now has the API content. The system must serialize
+      writes to the same file. The API PATCH acquires a file lock; external
+      writes are detected and queued until the lock is released. If both
+      writes land, the compiler must recompile against the final file state.
+    spec_impact: "CL-14 write serialization — file lock for API writes; external writes queued; recompile uses final state"
+    pitfall: null
+
+  - id: F09
+    severity: major
+    description: >
+      The admin resolution path for G-DATA requires editing GOVERNANCE.md
+      to add audit trail configuration for CONFIDENTIAL data. The fix is
+      not in MEMORY.md itself — the data is legitimate, just inadequately
+      governed. The system must guide the admin: the status endpoint's
+      recommended_action should say "Enable audit trail for CONFIDENTIAL
+      data in GOVERNANCE.md" not "Remove CONFIDENTIAL data from MEMORY.md."
+      Misguided admin action (deleting the data) would violate the lossless
+      OC fidelity principle.
+    spec_impact: "CL-10 resolution guidance — recommended_action points to GOVERNANCE.md config, not data deletion"
+    pitfall: null
+
+  - id: F10
+    severity: major
+    description: >
+      If the data label decreases (CONFIDENTIAL back to INTERNAL) after an
+      admin edits MEMORY.md, the system must also recompile and re-evaluate.
+      If the G-DATA violation was the only reason for DEGRADED_WARN, the
+      state should transition to CLEAN. However, the label decrease itself
+      should be audited — someone removed content that was classified as
+      CONFIDENTIAL, which may indicate data exfiltration or accidental
+      deletion. The audit trail must record label decreases with at least
+      as much detail as label increases.
+    spec_impact: "CL-07 label decreases — audited; may clear DEGRADED_WARN; suspicious pattern flagged"
+    pitfall: null
+
+  - id: F11
+    severity: warning
+    description: >
+      The compiler's data classification rules must be configurable in
+      GOVERNANCE.md. Different workspaces have different sensitivity
+      thresholds. A workspace handling healthcare data may classify any
+      mention of patient names as CONFIDENTIAL, while a general workspace
+      may not. If classification rules are hardcoded, the system cannot
+      adapt to workspace-specific data governance requirements. The rules
+      should be expressed as patterns in GOVERNANCE.md with a sensitivity
+      label for each pattern.
+    spec_impact: "CL-12 classification rules — configurable in GOVERNANCE.md; workspace-specific patterns and labels"
+    pitfall: null
+
+  - id: F12
+    severity: warning
+    description: >
+      Multiple DEGRADED_WARN conditions can coexist (e.g., G-DATA on
+      MEMORY.md and a separate governance warning on SOUL.md). The status
+      endpoint must list ALL active warnings, not just the most recent.
+      Each warning must be independently resolvable — fixing GOVERNANCE.md
+      for the data issue should clear the G-DATA warning even if the
+      SOUL.md warning persists. The state remains DEGRADED_WARN until all
+      warnings are resolved, then transitions to CLEAN.
+    spec_impact: "CL-10 multiple warnings — all listed in status; independently resolvable; CLEAN only when all cleared"
+    pitfall: null
+
+  - id: F13
+    severity: note
+    description: >
+      The data sensitivity label should be visible in the chunk metadata
+      for MEMORY.md. When a partner reads the memory chunk, the metadata
+      should include data_label: CONFIDENTIAL so the partner can apply
+      appropriate handling (e.g., not caching CONFIDENTIAL data in browser
+      localStorage). If the label is only in the compilation output and
+      not in the chunk metadata, the partner must query a separate endpoint
+      to learn the sensitivity — an unnecessary round trip.
+    spec_impact: "CL-10 chunk metadata — data_label field for files with classified content; partners handle appropriately"
+    pitfall: null

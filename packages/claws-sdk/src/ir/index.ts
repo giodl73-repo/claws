@@ -5,7 +5,7 @@
  */
 
 export type { FailMode, RuleLevel } from './fail-mode.js';
-export { CLAWS_E001 } from './fail-mode.js';
+export { OC_POLICY_E001 } from './fail-mode.js';
 export type {
   DenyIntent,
   ElicitIntent,

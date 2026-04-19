@@ -11,10 +11,10 @@ description: >
 expect:
   rules_applied: [G-SUPPLY]
   violations:
-    - code: CLAWS-E047
+    - code: OC-POLICY-E047
       rule: G-SUPPLY
       description: "Unsigned skill 'data-export' in production — error severity"
-    - code: CLAWS-E048
+    - code: OC-POLICY-E048
       rule: G-SUPPLY
       description: "Signed skill 'analytics-helper' unverifiable — .claws/keys/ missing"
   pass: false

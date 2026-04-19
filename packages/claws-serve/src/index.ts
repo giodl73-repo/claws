@@ -14,3 +14,19 @@ export type { CompileFn, CompileResult } from './compilation-host.js';
 export { ClientManager, createEvent, serializeEvent, validateOrigin, attachWsHandler } from './ws/events.js';
 export type { WsEvent, WsEventType } from './ws/events.js';
 export { cors } from './middleware/cors.js';
+export { errorHandler, notFoundHandler, ValidationError, WorkspaceNotFoundError } from './middleware/error-handler.js';
+export { registerRoutes, CLAWS_SERVE_VERSION } from './routes/index.js';
+export type { PrefixRouters, ApiHealthResponse, RegisterRoutesOptions, RegisterRoutesResult } from './routes/index.js';
+export { EventStream, serializeSseFrame } from './sse/event-stream.js';
+export type {
+  SseEventType,
+  SseEnvelope,
+  SseEventPayloads,
+  ClientWriter,
+  FileChangedPayload,
+  RecompiledPayload,
+  GovernanceWarningPayload,
+  GovernanceStatePayload,
+  ConnectedPayload,
+} from './sse/event-stream.js';
+export { eventsRouter } from './routes/events.js';

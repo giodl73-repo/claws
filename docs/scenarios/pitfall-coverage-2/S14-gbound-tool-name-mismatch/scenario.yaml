@@ -14,7 +14,7 @@ expect:
     - code: CLAWS-W032
       rule: G-BOUND
       description: "G-BOUND-02 (maxToolCalls) not configured — unbounded tool calls despite step limits"
-    - code: CLAWS-E037
+    - code: OC-POLICY-E037
       rule: G-ELICIT
       description: "Elicitation policy references 'send_payment' but TOOLS.md declares 'send-payment'"
   pass: false

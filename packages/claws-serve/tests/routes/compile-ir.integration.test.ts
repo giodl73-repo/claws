@@ -5,6 +5,7 @@ import { createApp } from '../../src/server.js';
 import type { ServerState } from '../../src/server.js';
 import { minimalGovernanceIR } from '../fixtures/governance-ir.js';
 
+import { TEST_TRUST_SIGNING_KEY } from '../fixtures/trust-key.js';
 async function request(
   server: Server,
   method: string,
@@ -51,6 +52,7 @@ describe('compile + ir integration', () => {
     const state: ServerState = { startedAt: Date.now(), compileCount: 0 };
     const app = createApp(state, {
       compileFn,
+      trustSigningKey: TEST_TRUST_SIGNING_KEY,
       workspaceRoot: '/test',
       rateLimitMax: 100,
     });
@@ -100,6 +102,7 @@ describe('compile + ir integration', () => {
     const state: ServerState = { startedAt: Date.now(), compileCount: 0 };
     const app = createApp(state, {
       compileFn,
+      trustSigningKey: TEST_TRUST_SIGNING_KEY,
       workspaceRoot: '/test',
       rateLimitMax: 100,
     });

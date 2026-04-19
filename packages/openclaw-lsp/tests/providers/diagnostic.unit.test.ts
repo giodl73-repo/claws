@@ -84,7 +84,7 @@ describe('DiagnosticProvider', () => {
           level: 5,
           message: 'R5 rule must fail-closed',
           target: 'shell-exec',
-          diagnosticCode: 'CLAWS-E001',
+          diagnosticCode: 'OC-POLICY-E001',
         },
       ],
     });
@@ -92,7 +92,7 @@ describe('DiagnosticProvider', () => {
     const rawDiags = extractDiagnostics(ir);
     expect(rawDiags.length).toBeGreaterThanOrEqual(1);
 
-    // Should produce a fail-mode diagnostic for the R5/CLAWS-E001 violation
+    // Should produce a fail-mode diagnostic for the R5/OC-POLICY-E001 violation
     const failModeDiag = rawDiags.find((d) => d.category === 'fail-mode');
     expect(failModeDiag).toBeDefined();
     expect(failModeDiag!.message).toBe('R5 rule must fail-closed');
@@ -466,7 +466,7 @@ describe('DiagnosticProvider', () => {
     expect(denyDiags[0]!.message).toContain('dangerous-tool');
   });
 
-  it('violations with level 5 but no CLAWS-E001 code still map to fail-mode', () => {
+  it('violations with level 5 but no OC-POLICY-E001 code still map to fail-mode', () => {
     const ir = makeIR({
       violations: [
         {

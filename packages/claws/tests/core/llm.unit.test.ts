@@ -34,7 +34,7 @@ describe('createLLMProvider', () => {
       }
 
       const output = consoleSpy.mock.calls.flat().join(' ');
-      expect(output).toContain('CLAWS-E040');
+      expect(output).toContain('OC-POLICY-E040');
     } finally {
       consoleSpy.mockRestore();
       if (originalKey !== undefined) {
@@ -55,7 +55,7 @@ describe('createLLMProvider', () => {
 
       const output = consoleSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E040');
+      expect(parsed.error.code).toBe('OC-POLICY-E040');
     } finally {
       consoleSpy.mockRestore();
       if (originalKey !== undefined) {
@@ -70,7 +70,7 @@ describe('createLLMProvider — SDK probe failure', () => {
     vi.restoreAllMocks();
   });
 
-  it('returns CLAWS-E041 when SDK probe fails (text output)', async () => {
+  it('returns OC-POLICY-E041 when SDK probe fails (text output)', async () => {
     // @anthropic-ai/sdk is not installed, so the dynamic import naturally
     // throws ERR_MODULE_NOT_FOUND, exercising the first catch block.
     const originalKey = process.env['ANTHROPIC_API_KEY'];
@@ -86,7 +86,7 @@ describe('createLLMProvider — SDK probe failure', () => {
       }
 
       const output = consoleSpy.mock.calls.flat().join(' ');
-      expect(output).toContain('CLAWS-E041');
+      expect(output).toContain('OC-POLICY-E041');
     } finally {
       consoleSpy.mockRestore();
       if (originalKey !== undefined) {
@@ -97,7 +97,7 @@ describe('createLLMProvider — SDK probe failure', () => {
     }
   });
 
-  it('returns CLAWS-E041 when SDK probe fails (JSON output)', async () => {
+  it('returns OC-POLICY-E041 when SDK probe fails (JSON output)', async () => {
     const originalKey = process.env['ANTHROPIC_API_KEY'];
     process.env['ANTHROPIC_API_KEY'] = 'sk-ant-test-fake-key';
 
@@ -109,7 +109,7 @@ describe('createLLMProvider — SDK probe failure', () => {
 
       const output = consoleSpy.mock.calls.flat().join('');
       const parsed = JSON.parse(output);
-      expect(parsed.error.code).toBe('CLAWS-E041');
+      expect(parsed.error.code).toBe('OC-POLICY-E041');
     } finally {
       consoleSpy.mockRestore();
       if (originalKey !== undefined) {
