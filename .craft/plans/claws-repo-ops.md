@@ -104,8 +104,10 @@ The schema preserves all existing `design/claws/ATOMS.md` fields AND adds the ob
 - `docType` — `concept | process | command | spec | domain`
 - `status` — `draft | stable | deprecated` (**Theme D + architect F-09**; deprecated atoms list `replaces: atom:{new-slug}`; gates ignore deprecated atoms for coverage requirements but retain them in the registry)
 - `surfaces` — list of required doc surfaces per the 11-surface matrix (declared in `docs/specs/contracts/{atom-id}.yaml`)
-- `scenario-source` — `series | unit-test` (**Theme F / conformance F-06** exemption field; `unit-test` means the atom's behaviour is proven by the implementing package's unit tests rather than a top-level scenario series)
-- `scenario-series` — list of `series:{semantic-id}` refs (if `scenario-source: series`); the series-ids are semantic and decoupled from runner types (see Theme E)
+- `scenario` — discriminated union capturing the scenario obligation:
+  - `{ source: 'series', series: string[] }` — atom's behaviour proven by accept-test series at `tests/accept/scenarios/{series-id}/`; the series-ids are semantic and decoupled from runner types (see Theme E)
+  - `{ source: 'unit-test' }` — exemption (**Theme F / conformance F-06**): atom's behaviour is proven by the implementing package's unit tests rather than a top-level scenario series
+  Zod shape: `z.discriminatedUnion('source', [z.object({source: z.literal('series'), series: z.array(z.string())}), z.object({source: z.literal('unit-test')})])`. The discriminated union eliminates the prior 10-required-always + 3-conditional field-counting ambiguity; there are exactly 13 fields, and `scenario` is one of them.
 
 #### Atom port scope
 
@@ -145,7 +147,7 @@ The 6 ops atoms listed with `scenario-source: unit-test` are exempt from requiri
 Adding an atom means **three edits in one PR**: `docs/concepts/atoms-registry.md` entry + `docs/specs/contracts/{atom-id}.yaml` + (if `scenario-source: series`) `tests/accept/scenarios/{series-id}/` directory with at least 1 scenario. The gates refuse to merge a PR that does less. To make this cheap, the plan ships a scaffolder (see H6).
 
 **Validations**:
-- `docs/concepts/atoms-registry.md` parses as structured markdown; each atom row has all 13 fields (10 required always + 3 required when `scenario-source: series`)
+- `docs/concepts/atoms-registry.md` parses as structured markdown; each atom row has all 13 fields; the `scenario` field is a discriminated union (`{source: 'series', series}` OR `{source: 'unit-test'}`) — no partial/half-set shapes accepted by the Zod validator
 - Authority/mirrors consistency: when authority changes, `claws doctor --check atoms` flags any mirror with stale content (hash-based; via CL-NEW-canonicalizer for content-addressable comparison)
 - Every row's surface obligations appear in a contract YAML file (registry → contract direction)
 - **Bidirectional sweep (Theme M)**: every contract YAML has an atom-registry entry (contract → registry, orphan-contract detection); every scenario series directory has an atom-registry entry with matching series-id (orphan-scenario detection)
@@ -638,7 +640,7 @@ Per-file coverage floor: 95/90/95/95 (stmts/branches/funcs/lines). Enforced per-
 - [ ] **CL-NEW-canonicalizer-byte-identical** — consumed by repo-ops for content-addressable hashing of surface-contract YAMLs and atoms-registry mirror-consistency checks. Cited by draft filename (NOT `CL-15`) per Theme N / conformance F-04; spec-number promotion is the spec-number coordinator's job at CP-5 deploy.
 
 ### Concept guides (bic/claws docs/)
-- [ ] `docs/concepts/atoms-registry.md` — the registry + how atoms are authored, extended schema documentation (13 fields + status + scenario-source), port manifest (82 + 15 + 0)
+- [ ] `docs/concepts/atoms-registry.md` — the registry + how atoms are authored, extended schema documentation (13 fields including discriminated-union `scenario` field + `status` lifecycle), port manifest (82 + 15 + 0)
 - [ ] `docs/concepts/doc-validation.md` — 15 gap types with one canonical example per type + the fix + `--fix=suggest` mode (ops F-10)
 - [ ] `docs/concepts/accept-test-system.md` — manifest + runner + scenario anatomy, per-runner Zod schema reference, runtime budgets
 - [ ] `docs/concepts/no-craftworks-gate.md` — scope (in/out), allowlist model, CODEOWNERS rules, exit-code-2 distinction, Windows walker notes
