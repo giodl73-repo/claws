@@ -37,7 +37,7 @@ The doc-validation system from craftworks (`craftworks-sdk/src/domains/docs/`) l
 - `surface-matrix.ts` — the 11-surface lookup table (surfaces × visibilities × docTypes → requirement levels). Surface names stay (guide/deck/tutorial/trace/spec/story/howto/example/research/index/root) because these are generic doc-system concepts.
 - `doc-domain-schema.ts` — Zod schema for per-atom doc obligations. Adapts atom-layer identifiers to claws's extended atom taxonomy (see H3 atoms registry).
 - `doc-manifest-schema.ts` — Zod schema for `docs/*/doc-manifest.yaml` — docs declare what they serve.
-- `gap-detector.ts` — diffs required × declared; emits 15 gap types (each with `{code, severity, message, hint, docsLink}` for CI diagnostics). Pure function, no I/O.
+- `gap-detector.ts` — diffs required × declared; emits 17 gap types (each with `{code, severity, message, hint, docsLink}` for CI diagnostics). Pure function, no I/O.
 - `known-gaps-schema.ts` — schema for `docs/known-gaps.yaml` (acknowledged temporary gaps; each gap cites a plan that will close it).
 - `doc-sync-integration.ts` — `assessConceptGuides()`, `assessPitchDecks()` — CLI-facing entry points called by `claws doctor`.
 - `tests/*.unit.test.ts` — port + re-express test cases against bic/claws atoms.
@@ -47,7 +47,7 @@ The doc-validation system from craftworks (`craftworks-sdk/src/domains/docs/`) l
 - Every `docs/*/doc-manifest.yaml` references only atoms declared in `docs/concepts/atoms-registry.md`
 - `claws doctor --check docs` runs the gap detector and exits non-zero on unacknowledged gaps; runtime budget < 3s on a ~200-doc tree (Windows dev machine)
 - `.github/workflows/doc-validation.yml` runs `claws doctor --check docs` on every PR
-- Unit tests cover: all 15 gap types, known-gap acceptance, surface-matrix lookup, manifest loader edge cases, hint-rendering correctness
+- Unit tests cover: all 17 gap types, known-gap acceptance, surface-matrix lookup, manifest loader edge cases, hint-rendering correctness
 - No `@craftworks/*` or bare `craftworks` string in active code (CI-enforced per H5; allowlist governs exceptions)
 
 ### H2 — Port domain manifest + accept-test runner into `devtools/repo-ops/src/accept-runner/`
@@ -325,7 +325,12 @@ entries:
 
 **CODEOWNERS**: `.no-craftworks-allowlist.yaml` is owned by `@bic/claws-release-eng` (single team). Any edit requires team approval. `.github/CODEOWNERS` adds the entry as a boundary-critical path (matches CL-13 §9 2-maintainer rule for boundary-critical PRs).
 
-**Gate enforcement (Node.js, not bash — Theme J)**: implemented in `devtools/repo-ops/src/no-craftworks/walker.ts` using `@nodelib/fs.walk` for cross-platform determinism. Windows grep under Git Bash is not relied upon. The walker:
+**Gate enforcement (Node.js, not bash — Theme J)**: implemented in `devtools/repo-ops/src/no-craftworks/scanner.ts`, which consumes a **shared walker factory** at `devtools/repo-ops/src/shared/walker-factory.ts`. The factory uses `@nodelib/fs.walk` for cross-platform determinism and is consumed by (a) this no-craftworks scanner, (b) `atoms-registry/oracle-walker.ts`, and (c) `accept-runner/dry-run-drop-walker.ts` — one factory, three consumers. Windows grep under Git Bash is not relied upon. The walker:
+
+**Unicode homoglyph detection (Stage 5 SC-06 F-03 / P-14 extension)**: ASCII-only regex matching misses intentional or accidental homoglyph substitution (Cyrillic `а` in `crаftworks`, fullwidth `ｃｒａｆｔｗｏｒｋｓ`, etc.). The no-craftworks gate performs a **two-pass scan**:
+1. Pass 1: raw-bytes regex against the original file content (catches straightforward `craftworks` occurrences)
+2. Pass 2: NFKC-normalized regex on a Unicode-normalized copy (catches homoglyph-substituted occurrences). A match in pass 2 that was not in pass 1 emits diagnostic `HOMOGLYPH_BYPASS_DETECTED` (exit code 2, same SIEM triage as direct violation).
+Normalization primitive lives at `devtools/repo-ops/src/shared/unicode-normalizer.ts`.
 1. Reads `.no-craftworks-allowlist.yaml` and compiles entries
 2. Enumerates in-scope files (respecting scope rules above)
 3. For each file, runs the regex scan
@@ -641,7 +646,7 @@ Per-file coverage floor: 95/90/95/95 (stmts/branches/funcs/lines). Enforced per-
 
 ### Concept guides (bic/claws docs/)
 - [ ] `docs/concepts/atoms-registry.md` — the registry + how atoms are authored, extended schema documentation (13 fields including discriminated-union `scenario` field + `status` lifecycle), port manifest (82 + 15 + 0)
-- [ ] `docs/concepts/doc-validation.md` — 15 gap types with one canonical example per type + the fix + `--fix=suggest` mode (ops F-10)
+- [ ] `docs/concepts/doc-validation.md` — 17 gap types with one canonical example per type + the fix + `--fix=suggest` mode (ops F-10)
 - [ ] `docs/concepts/accept-test-system.md` — manifest + runner + scenario anatomy, per-runner Zod schema reference, runtime budgets
 - [ ] `docs/concepts/no-craftworks-gate.md` — scope (in/out), allowlist model, CODEOWNERS rules, exit-code-2 distinction, Windows walker notes
 - [ ] `docs/contributing/adding-an-atom.md` — the 3-file PR shape + scaffolder walkthrough + exemption (`scenario-source: unit-test`) rules
@@ -711,6 +716,6 @@ Plus the non-theme WARN/NOTE findings:
 - Architect F-10 (plan 4 fixture boundary): Dependencies section declares plan 4 consumes `@bic/repo-ops/accept-runner` for L1 fixture loading only.
 - Ops F-04 (runtime budgets): per-check budgets in H8.
 - Ops F-07 (Zod schema drift): LIFT-MANIFEST.md + no-`any` rule in Dependencies.
-- Ops F-10 (fix hints / `--fix=suggest`): 15 gap types get `{code, severity, message, hint, docsLink}` shape; `--fix=suggest` prints unified diff; `--fix=apply --yes` applies trivial fixes.
+- Ops F-10 (fix hints / `--fix=suggest`): 17 gap types get `{code, severity, message, hint, docsLink}` shape; `--fix=suggest` prints unified diff; `--fix=apply --yes` applies trivial fixes.
 - Conformance F-06 (4 ops atoms without scenario series): exemption field `scenario-source: unit-test` (now 6 ops atoms exempt in H3).
 - Conformance F-10 (`docs/atoms.md` location): moved to `docs/concepts/atoms-registry.md` with rationale paragraph.
