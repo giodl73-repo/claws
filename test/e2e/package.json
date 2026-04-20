@@ -3,5 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "description": "Workspace-internal E2E harness + scenarios for claws (pulses 34..47).",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "tree-kill": "^1.2.2"
+  }
 }

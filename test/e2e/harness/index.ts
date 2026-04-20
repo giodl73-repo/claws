@@ -3,7 +3,23 @@
 // Do NOT add re-exports here by hand — follow the pulse that introduces the
 // module and replace the matching stub below.
 
-export type Lifecycle = never;
+export {
+  trackPid,
+  untrackPid,
+  listTracked,
+  killTree,
+  teardownHttpProcess,
+  rmrfWithRetry,
+  checkLeaks,
+} from './lifecycle.ts';
+export type {
+  Label,
+  TrackMeta,
+  Residual,
+  LeakReport,
+  KillOptions,
+  TeardownOptions,
+} from './lifecycle.ts';
 export type SnapRunner = never;
 export type PolicyRunner = never;
 export type HostMock = never;
