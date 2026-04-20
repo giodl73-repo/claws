@@ -7,7 +7,34 @@ export type Lifecycle = never;
 export type SnapRunner = never;
 export type PolicyRunner = never;
 export type HostMock = never;
-export type CompanionMock = never;
+export { CompanionMock } from './companion-mock.ts';
+export type {
+  CompanionMode,
+  VerdictAction,
+  Verdict,
+  ApprovalRequest,
+  ApprovalOutcome,
+  CompanionMockOptions,
+} from './companion-mock.ts';
+export {
+  deriveKey,
+  sign,
+  verify,
+  rotateKey,
+  KeyRegistry,
+  type SigningKey,
+  type VerifyFailure,
+  type VerifyResult,
+} from './hmac-signer.ts';
+export {
+  validateHandle,
+  type ApprovalHandle,
+  type ApprovalInvalidReason,
+  type BindingContext,
+  type ValidationResult,
+} from './handle-binding-validator.ts';
+export { SequenceCounter } from './sequence-counter.ts';
+export { ClockMock, type Clock } from './clock-mock.ts';
 export type HostAdapter = never;
 export type ProviderLifecycle = never;
 export type OnSnapshotPromoted = never;
