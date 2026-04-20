@@ -1,0 +1,68 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    name: build + test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build all workspaces
+        run: npm run build
+
+      - name: Test all workspaces
+        run: npm test --if-present
+
+      - name: Typecheck per package
+        shell: bash
+        run: |
+          set -e
+          FAILURES=()
+          for pkg in packages/*/; do
+            pkg_name=$(basename "$pkg")
+            if [ -f "$pkg/tsconfig.build.json" ]; then
+              echo "== tsc --noEmit -p tsconfig.build.json in $pkg_name"
+              (cd "$pkg" && npx tsc --noEmit -p tsconfig.build.json) || FAILURES+=("$pkg_name")
+            elif [ -f "$pkg/tsconfig.json" ]; then
+              echo "== tsc --noEmit in $pkg_name"
+              (cd "$pkg" && npx tsc --noEmit) || FAILURES+=("$pkg_name")
+            fi
+          done
+          if [ ${#FAILURES[@]} -ne 0 ]; then
+            echo "Typecheck FAILED in: ${FAILURES[*]}"
+            exit 1
+          fi
+          echo "All packages pass tsc --noEmit"
+
+      - name: CLI boot — claws --help
+        shell: bash
+        run: |
+          set -e
+          OUTPUT=$(node packages/claws/bin/claws.js --help)
+          echo "$OUTPUT"
+          echo "$OUTPUT" | grep -qi 'claws' || { echo "FAIL: --help output missing 'claws' branding"; exit 1; }
+
+      - name: CLI boot — claws --version
+        shell: bash
+        run: |
+          set -e
+          node packages/claws/bin/claws.js --version
