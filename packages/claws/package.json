@@ -24,7 +24,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@bic/claws-sdk": "workspace:*",
+    "@bic/claws-sdk": "*",
     "@bic/claws-serve": "file:../claws-serve",
     "commander": "^12.1.0"
   },

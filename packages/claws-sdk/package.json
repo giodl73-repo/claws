@@ -203,7 +203,7 @@
     "yaml": "^2.3.0"
   },
   "devDependencies": {
-    "@bic/openclaw-lsp": "workspace:*",
+    "@bic/openclaw-lsp": "*",
     "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^4.0.0",
     "eslint": "^9.0.0",
