@@ -199,12 +199,11 @@
     "@bic/openclaw-workspace": "^0.1.0",
     "chokidar": "^4.0.3",
     "typescript": "^5.0.0",
-    "zod": "^4.3.6"
+    "zod": "^4.3.6",
+    "yaml": "^2.3.0"
   },
   "devDependencies": {
-    "@bic/openclaw-lsp": "file:../claws-lsp",
-    "@craftworks/compiler-sdk": "file:../compiler-sdk",
-    "@craftworks/agent-sdk": "file:../agent-sdk",
+    "@bic/openclaw-lsp": "workspace:*",
     "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^4.0.0",
     "eslint": "^9.0.0",

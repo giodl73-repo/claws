@@ -1,0 +1,315 @@
+# .no-craftworks-allowlist.yaml
+#
+# Authoritative allowlist for the zero-craftworks-sweep residue scanner.
+# Each entry exempts a path glob from the sweep's `@craftworks/*` and
+# bare-`craftworks` detection, with a written justification + reviewer
+# signature.
+#
+# Schema (enforced by tools/migration/allowlist-validator.ts):
+#   - path:        glob relative to claws repo root
+#   - reason:      ≥ 20 chars, explains WHY the path is exempt
+#   - approvedBy:  signature of the reviewer who authorised the entry
+#
+# Exemption categories (for reviewer clarity):
+#   A. Historical wave directories — Ptah, Anubis, Thoth, Ra-the-Radiant
+#      waves predate the lift; their files are preserved for git-blame
+#      continuity (plan §Notes + REPLAN.md).
+#   B. Migration-prose plans under .craft/plans/** — these files describe
+#      the craftworks→claws migration itself and reference the old
+#      scope as context, not as live imports.
+#   C. Design-era docs — docs/specs, docs/concepts, docs/scenarios, etc.
+#      Written before the lift; reference craftworks as the origin repo.
+#   D. Negative-grep infrastructure — test files, eslint configs, and
+#      src-level scanners whose entire purpose is to detect and reject
+#      `@craftworks/*` patterns. Removing the literal would defeat the
+#      check. These are the sweep's older siblings.
+#   E. Attribution / mailmap — preserved by filter-repo for author
+#      history continuity.
+#
+# Unreviewed additions to this file fail pulse 08's CI check; every
+# change must arrive with reason + approvedBy.
+
+entries:
+  # ── Self — the allowlist itself ───────────────────────────────────────
+  - path: ".no-craftworks-allowlist.yaml"
+    reason: "this file is the allowlist; reason fields necessarily name the craftworks pattern"
+    approvedBy: "clawc-repo-steward"
+
+  # ── A. Historical wave directories ────────────────────────────────────
+  - path: ".craft/waves/**"
+    reason: "historical wave directories preserved for git-blame continuity (ptah, anubis, thoth, ra)"
+    approvedBy: "clawc-repo-steward"
+
+  # ── B. Migration-prose plans ──────────────────────────────────────────
+  - path: ".craft/plans/**"
+    reason: "plan prose describes the craftworks→claws migration itself; refs are context not imports"
+    approvedBy: "clawc-repo-steward"
+
+  - path: ".craft/roles/**"
+    reason: "role definitions reference craftworks origin for provenance context"
+    approvedBy: "clawc-repo-steward"
+
+  # ── C. Design-era documentation ───────────────────────────────────────
+  - path: "docs/specs/**"
+    reason: "specs authored before the lift reference craftworks as origin monorepo"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/concepts/**"
+    reason: "concept guides reference the pre-lift craftworks scope as historical context"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/scenarios/**"
+    reason: "scenario specs retain craftworks references from pre-lift authoring era"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/architecture/**"
+    reason: "architecture docs document the extraction from craftworks for audit trail"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/stories/**"
+    reason: "narrative stories explain craftworks origin; references are prose not imports"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/presentations/**"
+    reason: "decks authored pre-lift reference craftworks as originating codebase"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/tutorials/**"
+    reason: "tutorials reference craftworks repo as source of truth for legacy examples"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/how-to/**"
+    reason: "how-to guides reference craftworks for context on prior workflows"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/examples/**"
+    reason: "example docs reference craftworks repo as origin of sample workflows"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/ecosystem/**"
+    reason: "ecosystem docs reference craftworks as part of project history"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/audits/**"
+    reason: "audit reports reference craftworks as pre-migration audit target"
+    approvedBy: "compliance"
+
+  - path: "docs/proposals/**"
+    reason: "proposal docs describe craftworks integration points as historical record"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/external/**"
+    reason: "external references include craftworks repo URL as provenance link"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/building-skills/**"
+    reason: "skill-building docs reference craftworks as origin of the skills workflow"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/getting-started/**"
+    reason: "getting-started docs reference craftworks as upstream project for context"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/migration/**"
+    reason: "migration docs describe the craftworks→claws extraction itself"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "docs/tutorials-graduation/**"
+    reason: "graduation tutorials reference craftworks as pre-graduation parent repo"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/PITFALLS.md"
+    reason: "pitfalls document references craftworks era as source of historical gotchas"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/ARCHITECTURE.md"
+    reason: "top-level architecture doc explains extraction from craftworks monorepo"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/CLAUDE-DESIGN.md"
+    reason: "design doc references craftworks plugin ecosystem as origin"
+    approvedBy: "clawc-release-eng"
+
+  - path: "docs/COMMAND-MAP.md"
+    reason: "command-map doc references craftworks-era commands for continuity"
+    approvedBy: "clawc-release-eng"
+
+  # ── D. Negative-grep infrastructure — residue-grep surfaces (pulse 08) ─
+  - path: "scripts/residue-grep.sh"
+    reason: "residue-grep script itself contains the literal forbidden patterns by design"
+    approvedBy: "clawc-repo-steward"
+
+  - path: ".github/workflows/no-craftworks.yml"
+    reason: "no-craftworks CI workflow names the forbidden scope in its own name + body"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "docs/operations/residue-grep.md"
+    reason: "operator guide for residue-grep explains what @craftworks residue looks like"
+    approvedBy: "clawc-release-eng"
+
+  - path: "scripts/hooks/pre-commit.template"
+    reason: "pre-commit hook template refs residue-grep script that scans for craftworks residue"
+    approvedBy: "clawc-repo-steward"
+
+  # ── D. Negative-grep infrastructure — claws-sdk ───────────────────────
+  - path: "packages/claws-sdk/eslint.config.cjs"
+    reason: "eslint config explicitly lists @craftworks/* scope as forbidden-import target"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/compiler/util/craftworks-scan.ts"
+    reason: "scanner source detects @craftworks refs; the literal is load-bearing"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/compiler/util/index.ts"
+    reason: "barrel file re-exports craftworks-scan identifiers"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/compiler/emit/base-emitter.ts"
+    reason: "emit error message names forbidden @craftworks-scoped pattern in diagnostics"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/compiler/emit/cc-emitter.ts"
+    reason: "cc-emitter docstring documents the no-craftworks-imports constraint"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/compiler/emit/oc-emitter.ts"
+    reason: "oc-emitter docstring documents the no-craftworks-imports invariant"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/compiler/cache/cache.ts"
+    reason: "cache header documents the zero-craftworks-imports rule for generated output"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/compiler/host/compile.ts"
+    reason: "host compile doc references craftworks boundary for emitter guarantees"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/compiler/readers/types.ts"
+    reason: "reader type docstrings reference craftworks-sdk boundary for compat"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/compiler/sidecar/resolver.ts"
+    reason: "sidecar resolver docstring names craftworks origin for sidecar path provenance"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/compiler/sidecar/types.ts"
+    reason: "sidecar type definitions reference craftworks-era provenance contract"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/compiler/validate/index.ts"
+    reason: "validate barrel documents craftworks-ref negative constraint"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/emit/emit-plugin.ts"
+    reason: "emit-plugin error message names forbidden @craftworks-scoped pattern"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/emit/platform-router.ts"
+    reason: "platform-router docstring states no @craftworks-scoped imports in generated code"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/src/workspace/approval-events.ts"
+    reason: "approval-events docstring names the no-craftworks-runtime-deps invariant"
+    approvedBy: "clawc-repo-steward"
+
+  # ── D. Negative-grep infrastructure — claws-sdk tests ─────────────────
+  - path: "packages/claws-sdk/tests/**"
+    reason: "claws-sdk test suite exercises forbidden-import detection; literals are load-bearing"
+    approvedBy: "clawc-repo-steward"
+
+  # ── D. Negative-grep infrastructure — claws (CLI) ─────────────────────
+  - path: "packages/claws/eslint.config.cjs"
+    reason: "CLI eslint config lists @craftworks/* scope in forbidden-import rule"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws/vitest.config.ts"
+    reason: "vitest config comment references craftworks-era sweep rules"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws/tests/**"
+    reason: "CLI test suite exercises forbidden-import detection on craftworks scope"
+    approvedBy: "clawc-repo-steward"
+
+  # ── D. Negative-grep infrastructure — claws-serve ─────────────────────
+  - path: "packages/claws-serve/vitest.config.ts"
+    reason: "vitest config references the p55 craftworks-sweep regression test naming"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-serve/tests/**"
+    reason: "claws-serve test suite includes p55 craftworks-sweep regression fixtures"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-serve/CRAFTWORKS-SWEEP-LOG.md"
+    reason: "sweep log records the prior craftworks residue removals for audit provenance"
+    approvedBy: "compliance"
+
+  # ── D. Negative-grep infrastructure — claws-skill-kit ─────────────────
+  - path: "packages/claws-skill-kit/.eslintrc.json"
+    reason: "skill-kit eslint config lists craftworks scope in forbidden-import rule"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-skill-kit/vitest.config.ts"
+    reason: "vitest config references craftworks sweep in alias comments"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-skill-kit/tests/**"
+    reason: "skill-kit zero-dep test asserts no craftworks runtime dependencies"
+    approvedBy: "clawc-repo-steward"
+
+  # ── D. Negative-grep infrastructure — claws-test ──────────────────────
+  - path: "packages/claws-test/.eslintrc.json"
+    reason: "claws-test eslint config lists craftworks scope in forbidden-import rule"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-test/vitest.config.ts"
+    reason: "vitest config references craftworks sweep constraints in header comment"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-test/tests/**"
+    reason: "claws-test zero-dep test asserts no craftworks runtime dependencies"
+    approvedBy: "clawc-repo-steward"
+
+  # ── D. Negative-grep infrastructure — claws-action ────────────────────
+  - path: "packages/claws-action/**"
+    reason: "GitHub Action package documents extraction from craftworks monorepo"
+    approvedBy: "clawc-release-eng"
+
+  # ── D. Negative-grep infrastructure — openclaw-policy ─────────────────
+  - path: "packages/openclaw-policy/src/emit/emit-plugin.ts"
+    reason: "policy emit-plugin regex + error message names forbidden @craftworks/* pattern"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/openclaw-policy/tests/**"
+    reason: "policy test suite exercises forbidden-import detection on craftworks scope"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/openclaw-policy/CONSOLIDATION-LOG.md"
+    reason: "consolidation log records craftworks-era history for audit provenance"
+    approvedBy: "compliance"
+
+  # ── D. Negative-grep infrastructure — openclaw-workspace ──────────────
+  - path: "packages/openclaw-workspace/src/path/index.ts"
+    reason: "workspace path index docstring asserts no @craftworks-scoped runtime deps"
+    approvedBy: "clawc-repo-steward"
+
+  # ── E. Package migration records ──────────────────────────────────────
+  - path: "packages/claws-sdk/CRAFTWORKS-SWEEP-LOG.md"
+    reason: "sweep log records pre-lift craftworks residue removals for audit provenance"
+    approvedBy: "compliance"
+
+  - path: "packages/claws-sdk/FILTER-REPO-MANIFEST.md"
+    reason: "filter-repo manifest documents which craftworks paths were retained vs dropped"
+    approvedBy: "compliance"
+
+  - path: "packages/claws-sdk/DISPOSITION.md"
+    reason: "disposition record lists per-file decisions for the craftworks lift"
+    approvedBy: "compliance"
+
+  # ── C. Design-era docs — concept fixture workspaces ───────────────────
+  - path: "packages/claws-sdk/tests/fixtures/**"
+    reason: "test fixtures include workspace examples that name craftworks as origin"
+    approvedBy: "clawc-repo-steward"
+
+  - path: "packages/claws-sdk/tests/compiler/e2e/fixtures/**"
+    reason: "e2e fixtures include workspace configs that reference craftworks origin"
+    approvedBy: "clawc-repo-steward"

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# pre-commit hook — invokes scripts/residue-grep.sh in staged-files mode.
+#
+# Installed by scripts/install-hooks.sh. The hook can be bypassed with
+# `git commit --no-verify`, but CI (.github/workflows/no-craftworks.yml)
+# will still reject the violation on push.
+
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT="${REPO_ROOT}/scripts/residue-grep.sh"
+
+if [ ! -x "$SCRIPT" ]; then
+  echo "pre-commit: scripts/residue-grep.sh missing or not executable" >&2
+  echo "pre-commit: run 'chmod +x scripts/residue-grep.sh' and retry" >&2
+  exit 1
+fi
+
+"$SCRIPT" --mode=staged

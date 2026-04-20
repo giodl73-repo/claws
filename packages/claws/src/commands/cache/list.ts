@@ -8,8 +8,8 @@
  * @module claws-cli/commands/cache/list
  */
 
-import { CompilationCache, resolveCacheDir } from '@bic/claws-sdk/cache';
-import type { CacheEntryInfo } from '@bic/claws-sdk/cache';
+import { CompilationCache, resolveCacheDir } from '@bic/claws-sdk/compiler/cache';
+import type { CacheEntryInfo } from '@bic/claws-sdk/compiler/cache';
 
 /** Options accepted by `claws cache list`. */
 export interface CacheListOptions {

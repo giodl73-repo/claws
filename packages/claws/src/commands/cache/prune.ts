@@ -8,7 +8,7 @@
  * @module claws-cli/commands/cache/prune
  */
 
-import { CompilationCache, resolveCacheDir } from '@bic/claws-sdk/cache';
+import { CompilationCache, resolveCacheDir } from '@bic/claws-sdk/compiler/cache';
 
 /** Options accepted by `claws cache prune`. */
 export interface CachePruneOptions {
