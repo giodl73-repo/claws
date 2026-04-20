@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+*.log
+
+# test/e2e transient output — never committed
+test/e2e/.failures/
+test/e2e/.teardown-reports/
+test/e2e/coverage/
