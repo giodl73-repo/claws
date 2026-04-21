@@ -57,6 +57,7 @@ export default defineConfig({
     projects: [
       defineProject({
         resolve: sharedResolve,
+        root: ROOT,
         test: {
           name: 'unit',
           include: ['harness/__tests__/**/*.unit.test.ts'],
@@ -80,6 +81,7 @@ export default defineConfig({
       }),
       defineProject({
         resolve: sharedResolve,
+        root: ROOT,
         test: {
           name: 'integration',
           include: ['harness/__tests__/**/*.integration.test.ts'],
@@ -103,6 +105,7 @@ export default defineConfig({
       }),
       defineProject({
         resolve: sharedResolve,
+        root: ROOT,
         test: {
           name: 'e2e',
           include: ['scenarios/**/*.e2e.test.ts'],
@@ -113,6 +116,7 @@ export default defineConfig({
       }),
       defineProject({
         resolve: sharedResolve,
+        root: ROOT,
         test: {
           name: 'accept',
           include: ['accept/**/*.accept.test.ts'],
