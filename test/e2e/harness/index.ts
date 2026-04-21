@@ -208,3 +208,8 @@ export {
   type PresuiteHygieneResult,
   type PresuiteProcess,
 } from './presuite-hygiene.ts';
+export {
+  lintNoPostAwaitAssign,
+  scanFunction,
+  type Diagnostic,
+} from './lint-rules/no-post-await-assign.ts';
