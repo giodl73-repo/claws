@@ -13,19 +13,37 @@ import {
 export type SnapshotLoader = (workspace: string, ref: string) => Promise<PolicyIR>;
 
 const defaultSnapshotLoader: SnapshotLoader = async (workspace, ref) => {
-  // Accept either a snapshot id (looked up under `.claws/snapshots/<id>/`)
-  // or a direct path to a `policy-ir.json` on disk. The file-path form lets
-  // callers diff two IRs without staging them as snapshots first.
+  // Accept either a snapshot id (looked up under `.openclaw/snapshots/<id>/`
+  // or the legacy `.claws/snapshots/<id>/`), a literal `current` alias that
+  // points at the current-workspace artifacts, or a direct path to a
+  // `policy-ir.json` on disk. The file-path form lets callers diff two IRs
+  // without staging them as snapshots first.
   const looksLikePath =
     ref.includes('/') ||
     ref.includes('\\') ||
     ref.endsWith('.json') ||
     path.isAbsolute(ref);
-  const irPath = looksLikePath
-    ? ref
-    : path.join(workspace, '.claws', 'snapshots', ref, 'policy-ir.json');
-  const raw = await readFile(irPath, 'utf8');
-  return JSON.parse(raw) as PolicyIR;
+  if (looksLikePath) {
+    const raw = await readFile(ref, 'utf8');
+    return JSON.parse(raw) as PolicyIR;
+  }
+  const candidates =
+    ref === 'current'
+      ? [path.join(workspace, '.openclaw', 'policy', 'policy-ir.json')]
+      : [
+          path.join(workspace, '.openclaw', 'snapshots', ref, 'policy-ir.json'),
+          path.join(workspace, '.claws', 'snapshots', ref, 'policy-ir.json'),
+        ];
+  let lastErr: unknown;
+  for (const candidate of candidates) {
+    try {
+      const raw = await readFile(candidate, 'utf8');
+      return JSON.parse(raw) as PolicyIR;
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error(`snapshot '${ref}' not found`);
 };
 
 /**

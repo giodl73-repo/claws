@@ -1,10 +1,11 @@
 /**
- * L0 unit tests for `claws upgrade` CLI handler (pulse 47.5 D3).
+ * L0 unit tests for `claws upgrade` CLI handler (pulse 47.5 → 47.5.5).
  *
- * Asserts: the migrator-injection seam is preserved; the default migrator
- * performs a real on-disk inspection (not a hardcoded `already-current`);
- * needs-migration exits 1 and flags the pending library gap
- * (`atom:policy-artifact-migration`, pulse 47.5.5).
+ * 47.5.5 shipped the real `migratePolicyArtifacts` library; the handler
+ * now performs actual on-disk migrations rather than surfacing
+ * "needs-migration" + a pending-library note. These tests assert the
+ * live behavior: older versions → `migrated` + exit 0; already-current
+ * → `already-current` + exit 0; parse errors → `error` + exit 1.
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -50,14 +51,12 @@ describe('upgrade handler', () => {
     expect(res.stdout).not.toContain('migration library not yet available');
   });
 
-  it('older IR version → exit 1 with needs-migration and 47.5.5 flag', async () => {
+  it('older IR version → migrator bumps to current, exit 0', async () => {
     seedArtifacts(workdir, '0.9.0', CURRENT_POLICY_SCHEMA_VERSION);
     const res = await handle(argv());
-    expect(res.exitCode).toBe(1);
-    expect(res.stdout).toContain('policy-ir.json: needs-migration (v0.9.0');
+    expect(res.exitCode).toBe(0);
+    expect(res.stdout).toContain('policy-ir.json: migrated (v0.9.0');
     expect(res.stdout).toContain('audit-manifest.json: already-current');
-    expect(res.stdout).toContain('atom:policy-artifact-migration');
-    expect(res.stdout).toContain('pulse 47.5.5');
   });
 
   it('missing artifacts → exit 0 with per-artifact missing status', async () => {
@@ -95,14 +94,15 @@ describe('upgrade handler', () => {
     }
   });
 
-  it('corrupt JSON in policy-ir → needs-migration with unknown from-version', async () => {
+  it('corrupt JSON in policy-ir → error with parse detail, exit 1', async () => {
     const dir = join(workdir, '.openclaw', 'policy');
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, 'policy-ir.json'), '{not json');
     writeFileSync(join(dir, 'audit-manifest.json'), JSON.stringify({ version: CURRENT_POLICY_SCHEMA_VERSION }));
     const res = await handle(argv());
     expect(res.exitCode).toBe(1);
-    expect(res.stdout).toContain('policy-ir.json: needs-migration (vunknown');
+    expect(res.stdout).toContain('policy-ir.json: error');
+    expect(res.stdout).toContain('parse failed');
   });
 
   it('defaultMigrator reports two artifact entries', async () => {
@@ -112,13 +112,25 @@ describe('upgrade handler', () => {
     expect(steps.map((s) => s.artifact).sort()).toEqual(['audit-manifest.json', 'policy-ir.json']);
   });
 
-  it('artifact missing version field → needs-migration with unknown from', async () => {
+  it('artifact missing version field → migrated from unknown to current, exit 0', async () => {
     const dir = join(workdir, '.openclaw', 'policy');
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, 'policy-ir.json'), JSON.stringify({}));
     writeFileSync(join(dir, 'audit-manifest.json'), JSON.stringify({ version: CURRENT_POLICY_SCHEMA_VERSION }));
     const res = await handle(argv());
-    expect(res.exitCode).toBe(1);
-    expect(res.stdout).toContain('policy-ir.json: needs-migration (vunknown');
+    expect(res.exitCode).toBe(0);
+    expect(res.stdout).toContain('policy-ir.json: migrated (vunknown');
+  });
+
+  it('--dry-run inspects without writing; file bytes are unchanged', async () => {
+    const { readFileSync } = await import('node:fs');
+    seedArtifacts(workdir, '0.9.0', CURRENT_POLICY_SCHEMA_VERSION);
+    const irPath = join(workdir, '.openclaw', 'policy', 'policy-ir.json');
+    const before = readFileSync(irPath, 'utf8');
+    const res = await handle(argv(['--dry-run']));
+    expect(res.exitCode).toBe(0);
+    expect(res.stdout).toContain('policy-ir.json: migrated');
+    const after = readFileSync(irPath, 'utf8');
+    expect(after).toBe(before);
   });
 });

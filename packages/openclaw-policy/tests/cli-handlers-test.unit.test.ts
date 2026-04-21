@@ -45,10 +45,11 @@ async function startStub(decision: 'allow' | 'deny'): Promise<string> {
 }
 
 describe('test handler — usage errors', () => {
-  it('exits 2 when --gateway is missing', async () => {
+  it('exits 2 when neither --gateway nor --policy-ir supplied', async () => {
     const result = await handle({ binaryName: 'claws', args: [], cwd: tmp });
     expect(result.exitCode).toBe(2);
     expect(result.stderr).toContain('--gateway');
+    expect(result.stderr).toContain('--policy-ir');
   });
 
   it('exits 2 when the default scenarios dir is absent', async () => {
@@ -142,5 +143,43 @@ describe('test handler — scenario execution', () => {
     });
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('passed=2');
+  });
+
+  it('runs in-memory when --policy-ir is supplied (no external gateway)', async () => {
+    const { waffles } = await import('./helpers/fixture.js');
+    const ir = waffles();
+    const irPath = join(tmp, 'ir.json');
+    await writeFile(irPath, JSON.stringify(ir), 'utf8');
+    const file = join(tmp, 'sc.yaml');
+    await writeFile(
+      file,
+      [
+        'snapshot: sha256-a',
+        'given:',
+        '  tool_call:',
+        '    name: draft-reply',
+        'expect:',
+        '  decision: allow',
+      ].join('\n'),
+      'utf8',
+    );
+    const result = await handle({
+      binaryName: 'claws',
+      args: ['--policy-ir', irPath, '--file', file],
+      cwd: tmp,
+    });
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('passed=1');
+  });
+
+  it('exits 1 when --policy-ir path cannot be read', async () => {
+    const file = join(tmp, 'sc.yaml');
+    await writeFile(file, SINGLE_SCENARIO, 'utf8');
+    const result = await handle({
+      binaryName: 'claws',
+      args: ['--policy-ir', join(tmp, 'no-such-ir.json'), '--file', file],
+      cwd: tmp,
+    });
+    expect(result.exitCode).toBe(1);
   });
 });

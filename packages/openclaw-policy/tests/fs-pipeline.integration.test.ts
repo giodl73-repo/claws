@@ -146,4 +146,57 @@ describe('fsGenerate — on-disk generate + verify round-trip', () => {
       rmSync(ws, { recursive: true, force: true });
     }
   });
+
+  it('honours a caller-supplied `now` (deterministic manifest timestamp)', async () => {
+    const ws = makeWorkspace();
+    try {
+      const fixed = new Date('2100-06-15T12:34:56.000Z');
+      const res = await generate({ workspaceRoot: ws }, { now: () => fixed });
+      expect(res.writtenFiles).toHaveLength(3);
+      const manifest = JSON.parse(
+        readFileSync(join(ws, '.openclaw', 'policy', 'audit-manifest.json'), 'utf8'),
+      ) as { chain: Array<{ timestamp: string }> };
+      for (const entry of manifest.chain) {
+        expect(entry.timestamp).toBe(fixed.toISOString());
+      }
+    } finally {
+      rmSync(ws, { recursive: true, force: true });
+    }
+  });
+
+  it('strict mode + no errors writes all 3 artifacts (positive branch)', async () => {
+    const ws = makeWorkspace();
+    try {
+      const res = await generate({ workspaceRoot: ws, strict: true });
+      expect(res.writtenFiles).toHaveLength(3);
+      expect(res.diagnostics.some((d) => d.severity === 'error')).toBe(false);
+    } finally {
+      rmSync(ws, { recursive: true, force: true });
+    }
+  });
+
+  it('strict mode + governance-fatal aborts before writing', async () => {
+    // R3 tool without args_from triggers E_R3_PROVENANCE_MISSING → error
+    // severity → strict mode aborts with writtenFiles: [].
+    const ws = mkdtempSync(join(tmpdir(), 'openclaw-policy-strict-'));
+    writeFileSync(
+      join(ws, 'TOOLS.md'),
+      [
+        '# fixture — TOOLS',
+        '',
+        '## Tools',
+        '',
+        '### unsourced_r3 # R3 READ',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+    try {
+      const res = await generate({ workspaceRoot: ws, strict: true });
+      expect(res.writtenFiles).toEqual([]);
+      expect(res.diagnostics.some((d) => d.severity === 'error')).toBe(true);
+    } finally {
+      rmSync(ws, { recursive: true, force: true });
+    }
+  });
 });

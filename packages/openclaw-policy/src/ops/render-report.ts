@@ -155,9 +155,170 @@ function renderMarkdown(input: RenderInput): string {
   throw new Error(`renderReport: missing payload for kind=${input.kind}`);
 }
 
+/**
+ * SARIF 2.1.0 static analysis output — consumed by GitHub Code Scanning.
+ * Each compliance `fail`/`partial` becomes a SARIF `result` with an
+ * associated rule on the single tool driver. `pass` results are NOT
+ * emitted; SARIF is intended for findings.
+ *
+ * Spec: https://docs.oasis-open.org/sarif/sarif/v2.1.0/
+ */
+function renderSarif(input: RenderInput): string {
+  const sarif = {
+    $schema: 'https://json.schemastore.org/sarif-2.1.0.json',
+    version: '2.1.0',
+    runs: [buildSarifRun(input)],
+  };
+  return JSON.stringify(sarif, null, 2);
+}
+
+interface SarifRule {
+  readonly id: string;
+  readonly name?: string;
+  readonly shortDescription: { readonly text: string };
+  readonly fullDescription?: { readonly text: string };
+  readonly defaultConfiguration?: { readonly level: 'error' | 'warning' | 'note' };
+}
+
+interface SarifResult {
+  readonly ruleId: string;
+  readonly level: 'error' | 'warning' | 'note';
+  readonly message: { readonly text: string };
+  readonly locations?: ReadonlyArray<{
+    readonly physicalLocation: {
+      readonly artifactLocation: { readonly uri: string };
+    };
+  }>;
+  readonly partialFingerprints?: Readonly<Record<string, string>>;
+}
+
+function buildSarifRun(input: RenderInput): {
+  readonly tool: { readonly driver: Readonly<Record<string, unknown>> };
+  readonly results: readonly SarifResult[];
+} {
+  const rules: SarifRule[] = [];
+  const results: SarifResult[] = [];
+
+  if (input.kind === 'compliance' && input.compliance !== undefined) {
+    collectComplianceSarif(input.compliance, rules, results);
+  } else if (input.kind === 'audit' && input.audit !== undefined) {
+    collectAuditSarif(input.audit, rules, results);
+  } else if (input.kind === 'diff' && input.diff !== undefined) {
+    collectDiffSarif(input.diff, rules, results);
+  }
+
+  return {
+    tool: {
+      driver: {
+        name: 'openclaw-policy',
+        version: '0.1.0',
+        informationUri: 'https://microsoft.ghe.com/bic/claws',
+        rules,
+      },
+    },
+    results,
+  };
+}
+
+function collectComplianceSarif(
+  report: { readonly rubric: { readonly id: string; readonly framework: string }; readonly results: readonly {
+    readonly requirementId: string;
+    readonly title: string;
+    readonly status: 'pass' | 'fail' | 'partial' | 'not_applicable';
+    readonly gaps?: readonly string[];
+  }[] },
+  rules: SarifRule[],
+  results: SarifResult[],
+): void {
+  const seen = new Set<string>();
+  for (const r of report.results) {
+    if (r.status !== 'fail' && r.status !== 'partial') continue;
+    const ruleId = `${report.rubric.id}.${r.requirementId}`;
+    if (!seen.has(ruleId)) {
+      seen.add(ruleId);
+      rules.push({
+        id: ruleId,
+        name: r.requirementId,
+        shortDescription: { text: r.title },
+        fullDescription: {
+          text: `${report.rubric.framework} compliance requirement ${r.requirementId}`,
+        },
+        defaultConfiguration: { level: r.status === 'fail' ? 'error' : 'warning' },
+      });
+    }
+    const gapText = r.gaps !== undefined && r.gaps.length > 0 ? r.gaps.join('; ') : r.title;
+    results.push({
+      ruleId,
+      level: r.status === 'fail' ? 'error' : 'warning',
+      message: { text: `${r.title}: ${gapText}` },
+    });
+  }
+}
+
+function collectAuditSarif(
+  audit: { readonly valid: boolean; readonly length: number; readonly brokenAt?: string },
+  rules: SarifRule[],
+  results: SarifResult[],
+): void {
+  if (audit.valid) return;
+  rules.push({
+    id: 'openclaw-policy.audit-chain-broken',
+    name: 'audit-chain-broken',
+    shortDescription: { text: 'Audit chain integrity check failed' },
+    defaultConfiguration: { level: 'error' },
+  });
+  results.push({
+    ruleId: 'openclaw-policy.audit-chain-broken',
+    level: 'error',
+    message: {
+      text: `Audit chain broken at ${audit.brokenAt ?? 'unknown'} (length=${audit.length})`,
+    },
+  });
+}
+
+function collectDiffSarif(
+  diff: { readonly added: readonly string[]; readonly removed: readonly string[]; readonly modified: readonly string[] },
+  rules: SarifRule[],
+  results: SarifResult[],
+): void {
+  const hasFindings =
+    diff.added.length > 0 || diff.removed.length > 0 || diff.modified.length > 0;
+  if (!hasFindings) return;
+  rules.push({
+    id: 'openclaw-policy.snapshot-diff',
+    name: 'snapshot-diff',
+    shortDescription: { text: 'Policy snapshot diff detected' },
+    defaultConfiguration: { level: 'note' },
+  });
+  for (const name of diff.added) {
+    results.push({
+      ruleId: 'openclaw-policy.snapshot-diff',
+      level: 'note',
+      message: { text: `Added tool: ${name}` },
+    });
+  }
+  for (const name of diff.removed) {
+    results.push({
+      ruleId: 'openclaw-policy.snapshot-diff',
+      level: 'warning',
+      message: { text: `Removed tool: ${name}` },
+    });
+  }
+  for (const name of diff.modified) {
+    results.push({
+      ruleId: 'openclaw-policy.snapshot-diff',
+      level: 'note',
+      message: { text: `Modified tool: ${name}` },
+    });
+  }
+}
+
 export function renderReport(input: RenderInput, format: RenderFormat): string {
   if (format === 'json') {
     return JSON.stringify(input, null, 2);
+  }
+  if (format === 'sarif') {
+    return renderSarif(input);
   }
   if (format === 'html') {
     if (input.kind === 'compliance' && input.compliance !== undefined) {

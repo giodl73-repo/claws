@@ -1,8 +1,13 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 
-import { parseScenarioYaml, runScenarios } from '../ops/run-scenarios.js';
+import {
+  parseScenarioYaml,
+  runScenarios,
+  runScenariosInMemory,
+} from '../ops/run-scenarios.js';
 import type { ScenarioCase, ScenarioRunResult } from '../ops/types.js';
+import type { PolicyIR } from '../types/index.js';
 
 import {
   parseFlags,
@@ -18,7 +23,10 @@ import {
  *   --file <path>       single scenario YAML file
  *   --dir <path>        directory of scenario YAML files
  *                       (default: <cwd>/test/scenarios)
- *   --gateway <url>     gateway URL (required — use sim for a local one)
+ *   --gateway <url>     gateway URL (optional — external sim)
+ *   --policy-ir <path>  PolicyIR JSON; when set and --gateway is not,
+ *                       the handler stands up an ephemeral in-process
+ *                       mock gateway for the run
  *   --json              emit JSON result instead of per-case lines
  *
  * Exit codes:
@@ -29,12 +37,18 @@ import {
 export async function handle(argv: HandlerArgv): Promise<HandlerResult> {
   const { flags } = parseFlags(argv.args);
   const gatewayUrl = typeof flags['gateway'] === 'string' ? flags['gateway'] : undefined;
+  const policyIrPath = typeof flags['policy-ir'] === 'string' ? flags['policy-ir'] : undefined;
   const filePath = typeof flags['file'] === 'string' ? flags['file'] : undefined;
   const dirArg = typeof flags['dir'] === 'string' ? flags['dir'] : undefined;
   const asJson = flags['json'] === true;
 
-  if (gatewayUrl === undefined) {
-    return renderErr(argv.binaryName, 'test', '--gateway <url> required', 2);
+  if (gatewayUrl === undefined && policyIrPath === undefined) {
+    return renderErr(
+      argv.binaryName,
+      'test',
+      'one of --gateway <url> or --policy-ir <path> required',
+      2,
+    );
   }
 
   let cases: ScenarioCase[];
@@ -50,7 +64,12 @@ export async function handle(argv: HandlerArgv): Promise<HandlerResult> {
 
   let result: ScenarioRunResult;
   try {
-    result = await runScenarios({ gatewayUrl, cases });
+    if (gatewayUrl !== undefined) {
+      result = await runScenarios({ gatewayUrl, cases });
+    } else {
+      const policyIR = await loadPolicyIR(policyIrPath!);
+      result = await runScenariosInMemory({ policyIR, cases });
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return renderErr(argv.binaryName, 'test', message, 1);
@@ -59,6 +78,11 @@ export async function handle(argv: HandlerArgv): Promise<HandlerResult> {
   const stdout = asJson ? `${JSON.stringify(result, null, 2)}\n` : formatRun(result);
   const exitCode = result.failed === 0 ? 0 : 1;
   return { exitCode, stdout, stderr: '' };
+}
+
+async function loadPolicyIR(path: string): Promise<PolicyIR> {
+  const raw = await readFile(path, 'utf8');
+  return JSON.parse(raw) as PolicyIR;
 }
 
 async function loadScenarios(

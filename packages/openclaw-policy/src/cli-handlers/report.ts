@@ -48,14 +48,6 @@ export async function handle(argv: HandlerArgv): Promise<HandlerResult> {
     return renderErr(argv.binaryName, 'report', '--input <path> required', 2);
   }
   const format = normaliseFormat(formatArg);
-  if (format === 'sarif') {
-    return renderErr(
-      argv.binaryName,
-      'report',
-      'format=sarif not yet supported by @bic/openclaw-policy library',
-      2,
-    );
-  }
   if (format === null) {
     return renderErr(argv.binaryName, 'report', `unknown format: ${formatArg}`, 2);
   }
@@ -94,10 +86,9 @@ function isValidKind(v: string): v is InputKind {
   return (VALID_KINDS as readonly string[]).includes(v);
 }
 
-function normaliseFormat(v: string): RenderFormat | 'sarif' | null {
+function normaliseFormat(v: string): RenderFormat | null {
   if (v === 'md' || v === 'markdown') return 'markdown';
-  if (v === 'html' || v === 'json' || v === 'pdf') return v;
-  if (v === 'sarif') return 'sarif';
+  if (v === 'html' || v === 'json' || v === 'pdf' || v === 'sarif') return v;
   return null;
 }
 

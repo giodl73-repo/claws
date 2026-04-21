@@ -65,15 +65,21 @@ describe('report handler — usage errors', () => {
     expect(result.stderr).toContain('--input');
   });
 
-  it('exits 2 with helpful message for --format sarif', async () => {
+  it('emits SARIF 2.1.0 JSON for compliance reports when --format sarif', async () => {
     const input = await writeJson(COMPLIANCE_PAYLOAD);
     const result = await handle({
       binaryName: 'claws',
       args: ['--kind', 'compliance', '--input', input, '--format', 'sarif'],
       cwd: tmp,
     });
-    expect(result.exitCode).toBe(2);
-    expect(result.stderr).toContain('sarif');
+    expect(result.exitCode).toBe(0);
+    const sarif = JSON.parse(result.stdout) as {
+      version: string;
+      runs: Array<{ tool: { driver: { name: string } }; results: unknown[] }>;
+    };
+    expect(sarif.version).toBe('2.1.0');
+    expect(sarif.runs[0]?.tool.driver.name).toBe('openclaw-policy');
+    expect(Array.isArray(sarif.runs[0]?.results)).toBe(true);
   });
 
   it('exits 2 when --format is unknown', async () => {

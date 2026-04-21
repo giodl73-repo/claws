@@ -19,7 +19,7 @@ export type RubricCheckKind = 'static' | 'structural' | 'dynamic';
 
 export type RubricStatus = 'pass' | 'fail' | 'partial' | 'not_applicable';
 
-export type RenderFormat = 'markdown' | 'html' | 'json' | 'pdf';
+export type RenderFormat = 'markdown' | 'html' | 'json' | 'pdf' | 'sarif';
 
 export interface RubricRequirement {
   readonly id: string;

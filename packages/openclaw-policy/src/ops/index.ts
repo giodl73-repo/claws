@@ -4,11 +4,15 @@
  * @module @bic/openclaw-policy/ops
  */
 
-export { evaluateCompliance } from './evaluate-compliance.js';
+export { evaluateCompliance, loadPolicyIRFromSnapshot } from './evaluate-compliance.js';
 export { renderReport } from './render-report.js';
 export { verifyAudit } from './verify-audit.js';
 export type { VerifyAuditOptions } from './verify-audit.js';
-export { runScenarios, parseScenarioYaml } from './run-scenarios.js';
+export {
+  runScenarios,
+  runScenariosInMemory,
+  parseScenarioYaml,
+} from './run-scenarios.js';
 export { startMockGateway } from './mock-gateway.js';
 
 export type {

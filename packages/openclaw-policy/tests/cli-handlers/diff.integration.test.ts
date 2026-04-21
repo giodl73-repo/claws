@@ -54,6 +54,49 @@ describe('policy diff handler — default snapshot loader (L1)', () => {
     expect(result.exitCode).toBe(1);
     expect(result.stderr).toMatch(/ENOENT|no such file/i);
   });
+
+  it('accepts a direct path to a policy-ir.json on disk', async () => {
+    const irPath = path.join(workspace, '.claws', 'snapshots', 'snap-a', 'policy-ir.json');
+    const result = await handle({
+      binaryName: 'claws',
+      args: [irPath, irPath, '--workspace', workspace],
+      cwd: '/cwd',
+    });
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('identical');
+  });
+
+  it('resolves snapshots from the new .openclaw/snapshots path when present', async () => {
+    const ocSnap = path.join(workspace, '.openclaw', 'snapshots', 'oc-snap');
+    mkdirSync(ocSnap, { recursive: true });
+    writeFileSync(
+      path.join(ocSnap, 'policy-ir.json'),
+      JSON.stringify(finalizeIR(draftFromIR(waffles()))),
+      'utf8',
+    );
+    const result = await handle({
+      binaryName: 'claws',
+      args: ['oc-snap', 'snap-b', '--workspace', workspace],
+      cwd: '/cwd',
+    });
+    expect(result.exitCode).toBe(0);
+  });
+
+  it('"current" alias resolves to .openclaw/policy/policy-ir.json', async () => {
+    const cur = path.join(workspace, '.openclaw', 'policy');
+    mkdirSync(cur, { recursive: true });
+    writeFileSync(
+      path.join(cur, 'policy-ir.json'),
+      JSON.stringify(finalizeIR(draftFromIR(waffles()))),
+      'utf8',
+    );
+    const result = await handle({
+      binaryName: 'claws',
+      args: ['current', 'snap-b', '--workspace', workspace],
+      cwd: '/cwd',
+    });
+    expect(result.exitCode).toBe(0);
+  });
 });
 
 function draftFromIR(ir: ReturnType<typeof waffles>) {

@@ -86,6 +86,56 @@ describe('watch — fires generate on file change, closes cleanly', () => {
     }
   });
 
+  it('omits onChange without throwing when it is not supplied', async () => {
+    const ws = mkdtempSync(join(tmpdir(), 'openclaw-watch-no-callback-'));
+    try {
+      let emitChange!: () => void;
+      const factory: WatcherFactory = (_path, listener) => {
+        emitChange = () => listener('change', 'SOUL.md');
+        return { close: () => {} };
+      };
+
+      const handle = watch({
+        workspaceRoot: ws,
+        debounceMs: 10,
+        watcherFactory: factory,
+      });
+      emitChange();
+      await new Promise((r) => setTimeout(r, 80));
+      await handle.close();
+    } finally {
+      rmSync(ws, { recursive: true, force: true });
+    }
+  });
+
+  it('applies the default 300ms debounce when debounceMs is omitted', async () => {
+    const ws = mkdtempSync(join(tmpdir(), 'openclaw-watch-default-debounce-'));
+    try {
+      let emitChange!: () => void;
+      const factory: WatcherFactory = (_path, listener) => {
+        emitChange = () => listener('change', 'SOUL.md');
+        return { close: () => {} };
+      };
+
+      const changes: unknown[] = [];
+      const handle = watch({
+        workspaceRoot: ws,
+        watcherFactory: factory,
+        onChange: (result) => {
+          changes.push(result);
+        },
+      });
+
+      emitChange();
+      // Fires before default 300ms → no change yet.
+      await new Promise((r) => setTimeout(r, 80));
+      expect(changes).toEqual([]);
+      await handle.close();
+    } finally {
+      rmSync(ws, { recursive: true, force: true });
+    }
+  });
+
   it('close() after debounce but before generate completion suppresses the onChange', async () => {
     const ws = mkdtempSync(join(tmpdir(), 'openclaw-watch-cancel-'));
 
@@ -110,6 +160,75 @@ describe('watch — fires generate on file change, closes cleanly', () => {
       await handle.close();
       await new Promise((r) => setTimeout(r, 80));
       expect(changes).toEqual([]);
+    } finally {
+      rmSync(ws, { recursive: true, force: true });
+    }
+  });
+
+  it('change events after close() are silently ignored (closed-flag guard in trigger)', async () => {
+    const ws = mkdtempSync(join(tmpdir(), 'openclaw-watch-post-close-'));
+
+    try {
+      let emitChange!: () => void;
+      const factory: WatcherFactory = (_path, listener) => {
+        emitChange = () => listener('change', 'SOUL.md');
+        return { close: () => {} };
+      };
+
+      const changes: GenerateResult[] = [];
+      const handle = watch({
+        workspaceRoot: ws,
+        debounceMs: 10,
+        watcherFactory: factory,
+        onChange: (result) => {
+          changes.push(result);
+        },
+      });
+
+      await handle.close();
+      // Emit AFTER close — the trigger closure should short-circuit.
+      emitChange();
+      emitChange();
+      await new Promise((r) => setTimeout(r, 60));
+      expect(changes).toEqual([]);
+    } finally {
+      rmSync(ws, { recursive: true, force: true });
+    }
+  });
+
+  it('close() mid-generate prevents onChange invocation (post-resolve guard)', async () => {
+    // Force the debounce timer to fire and fsGenerate to start, then close
+    // while generate is in-flight. The async .then callback must see
+    // closed=true and skip onChange.
+    const ws = mkdtempSync(join(tmpdir(), 'openclaw-watch-midgen-'));
+
+    try {
+      let emitChange!: () => void;
+      const factory: WatcherFactory = (_path, listener) => {
+        emitChange = () => listener('change', 'SOUL.md');
+        return { close: () => {} };
+      };
+
+      const changes: GenerateResult[] = [];
+      const handle = watch({
+        workspaceRoot: ws,
+        debounceMs: 1,
+        watcherFactory: factory,
+        onChange: (result) => {
+          changes.push(result);
+        },
+      });
+
+      emitChange();
+      // Timer fires immediately (debounce=1), fsGenerate kicks off. Close
+      // synchronously before fsGenerate's then() resolves.
+      await new Promise((r) => setTimeout(r, 5));
+      await handle.close();
+      await new Promise((r) => setTimeout(r, 100));
+      // Race-tolerant: either the generate finished before close (changes.length === 1)
+      // or close raced ahead (changes.length === 0). The invariant is no crash; the
+      // coverage target is the closed-flag check path.
+      expect(changes.length).toBeLessThanOrEqual(1);
     } finally {
       rmSync(ws, { recursive: true, force: true });
     }

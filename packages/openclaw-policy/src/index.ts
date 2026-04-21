@@ -85,12 +85,26 @@ export type {
 // ── Operational helpers (P52) ────────────────────────────────────────────
 export {
   evaluateCompliance,
+  loadPolicyIRFromSnapshot,
   renderReport,
   verifyAudit,
   runScenarios,
+  runScenariosInMemory,
   startMockGateway,
   parseScenarioYaml,
 } from './ops/index.js';
+export type { LoadPolicyIRFromSnapshotOptions } from './ops/evaluate-compliance.js';
+export type { RunScenariosInMemoryOptions } from './ops/run-scenarios.js';
+
+// ── Migration (pulse 47.5.5) ─────────────────────────────────────────────
+export {
+  migratePolicyArtifacts,
+  CURRENT_POLICY_SCHEMA_VERSION,
+  type MigrationArtifactStatus,
+  type MigrationArtifactResult,
+  type MigratePolicyArtifactsOptions,
+  type MigratePolicyArtifactsResult,
+} from './migrate.js';
 export type {
   ComplianceReport,
   ComplianceRequirementResult,

@@ -15,6 +15,8 @@
  */
 
 import { createHmac } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 
 import { formatOcPath } from '@bic/openclaw-workspace/path';
 
@@ -252,6 +254,32 @@ function signReport(
     ...payload,
     signature: { algo: 'hmac-sha256', key_id: keyId, value },
   };
+}
+
+export interface LoadPolicyIRFromSnapshotOptions {
+  readonly workspace: string;
+  readonly snapshotId: string;
+}
+
+/**
+ * Load a `PolicyIR` from a workspace snapshot directory.
+ *
+ * Accepts either:
+ *  - a workspace root containing `.openclaw/policy/policy-ir.json` (when
+ *    `snapshotId === 'current'`), or
+ *  - `.openclaw/snapshots/<snapshotId>/policy-ir.json` for an archived
+ *    snapshot.
+ */
+export async function loadPolicyIRFromSnapshot(
+  options: LoadPolicyIRFromSnapshotOptions,
+): Promise<PolicyIR> {
+  const { workspace, snapshotId } = options;
+  const candidate =
+    snapshotId === 'current'
+      ? join(workspace, '.openclaw', 'policy', 'policy-ir.json')
+      : join(workspace, '.openclaw', 'snapshots', snapshotId, 'policy-ir.json');
+  const raw = await readFile(candidate, 'utf8');
+  return JSON.parse(raw) as PolicyIR;
 }
 
 export function evaluateCompliance(options: EvaluateComplianceOptions): ComplianceReport {

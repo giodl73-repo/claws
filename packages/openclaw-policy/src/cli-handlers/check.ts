@@ -14,6 +14,7 @@ export type IRLoader = (workspace: string) => Promise<PolicyIR>;
 
 const defaultIRLoader: IRLoader = async (workspace) => {
   const candidates = [
+    path.join(workspace, '.openclaw', 'policy', 'policy-ir.json'),
     path.join(workspace, '.claws', 'policy-ir.json'),
     path.join(workspace, 'policy-ir.json'),
   ];
