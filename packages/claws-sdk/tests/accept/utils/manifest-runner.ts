@@ -15,6 +15,7 @@ import {
   discoverClawsScenarios,
   loadScenarioYaml,
   inferRunnerType,
+  SCENARIOS_BASE_DIR,
   type ScenarioYaml,
   type ScenarioInfo,
 } from './scenario-loader.js';
@@ -194,9 +195,7 @@ export async function runFromManifest(
     );
   }
 
-  const basePath = options?.basePath ?? resolve(
-    __dirname, '../../../../../docs/scenarios',
-  );
+  const basePath = options?.basePath ?? SCENARIOS_BASE_DIR;
 
   const scenarios = discoverClawsScenarios({ basePath, series: seriesName });
   if (scenarios.length < seriesConfig.min) {
@@ -287,9 +286,7 @@ export function discoverSeriesScenarios(
     );
   }
 
-  const basePath = options?.basePath ?? resolve(
-    __dirname, '../../../../../docs/scenarios',
-  );
+  const basePath = options?.basePath ?? SCENARIOS_BASE_DIR;
 
   const scenarios = discoverClawsScenarios({ basePath, series: seriesName });
   return scenarios.map(info => ({
