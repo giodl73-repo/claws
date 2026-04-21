@@ -33,11 +33,12 @@ import {
   buildHostContext,
   copyFixture,
   modifiedArgsHash as computeModifiedArgsHash,
-  startSnap,
+  startHarness as startCanonicalHarness,
   verifyChain,
   type AuditChainEntry,
   type ApprovalEntry,
   type AuditSink,
+  type CanonicalHarness,
   type DecisionEntry,
   type IncomingRequest,
   type JsonValue,
@@ -395,11 +396,17 @@ export async function startHarness(
   });
   await lifecycle.init(providerLifecycle, context);
 
-  // --- optional snap child (SC-06) ---------------------------------------
-  let snap: SnapHandle | null = null;
-  if (opts.track === 'local-dir') {
-    snap = await startSnap({ policyDir });
-  }
+  // --- canonical harness wires adapter + host + optional snap child -----
+  // (SC-06 opts.track === 'local-dir' gates the real claws child). The
+  // scenario-level `invokeTool` below extends the canonical CL-07 §1a
+  // primitive with tier-aware audit-chain writes; delegating adapter /
+  // host / snap wiring keeps a single seam under test.
+  const canonical: CanonicalHarness = await startCanonicalHarness({
+    adapter,
+    hostMock: host,
+    ...(opts.track === 'local-dir' ? { snap: { policyDir } } : {}),
+  });
+  const snap: SnapHandle | null = canonical.snap;
 
   // --- scenario surface ---------------------------------------------------
   async function invokeTool(
@@ -513,13 +520,7 @@ export async function startHarness(
   }
 
   async function shutdown(): Promise<void> {
-    if (snap !== null) {
-      try {
-        await snap.kill();
-      } catch {
-        // best-effort teardown
-      }
-    }
+    await canonical.shutdown();
     for (const dir of [rootTmp, policyDir]) {
       try {
         rmSync(dir, { recursive: true, force: true });

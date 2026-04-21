@@ -11,9 +11,9 @@
 
 import { describe, it, expect } from 'vitest';
 import { runRouter } from '../src/cli-handlers/index.js';
-import { upload } from '../../snap/src/cli-handlers/upload.js';
-import { promote } from '../../snap/src/cli-handlers/promote.js';
-import type { CliContext } from '../../snap/src/cli-handlers/client.js';
+import { upload } from '../../openclaw-snap/src/cli-handlers/upload.js';
+import { promote } from '../../openclaw-snap/src/cli-handlers/promote.js';
+import type { CliContext } from '../../openclaw-snap/src/cli-handlers/client.js';
 
 const CWD = 'C:/src/craftworks/claws-sdk/tests/fixtures/canonical-oc-workspace';
 

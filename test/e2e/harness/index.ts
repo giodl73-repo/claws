@@ -22,6 +22,12 @@ export type {
 } from './lifecycle.ts';
 export { startSnap } from './snap-runner.ts';
 export type { SnapHandle, StartSnapOptions } from './snap-runner.ts';
+export { startHarness } from './start-harness.ts';
+export type {
+  Harness as CanonicalHarness,
+  StartHarnessConfig,
+  InvokeToolResult,
+} from './start-harness.ts';
 export { reservePort } from './port-allocator.ts';
 export type { PortReservation } from './port-allocator.ts';
 export {

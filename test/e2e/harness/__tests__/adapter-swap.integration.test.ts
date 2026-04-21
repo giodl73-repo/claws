@@ -6,12 +6,10 @@
  * — swapping adapters requires no scenario rewrite, only a different
  * `adapter` passed to the scenario driver.
  *
- * Since the full `startHarness` driver lands in a later pulse, this test
- * uses a minimal inline driver that mirrors the CL-07 §1a flow:
- *   extractIdentity → routePolicy → host-mock decision → sink.emit →
- *   shapeResponse.
- *
- * The same driver + same scenario steps must pass under each adapter.
+ * Uses the canonical `startHarness` factory from `harness/start-harness.ts`
+ * (introduced by pulse 45, consolidated in CP-5 cleanup). The inline
+ * mini-driver that previously lived here has been extracted into the
+ * factory so scenario proofs and the seam proof share one code path.
  */
 import { describe, it, expect } from 'vitest';
 import {
@@ -19,58 +17,9 @@ import {
   StubFailingAdapter,
   type HostAdapter,
   type IncomingRequest,
-  type SinkEntry,
 } from '#harness/host-adapter-test-doubles.ts';
 import { HostMock } from '#harness/host-mock.ts';
-
-// --- minimal inline driver that mirrors the CL-07 §1a flow -----------------
-// (startHarness + full invokeTool path lands in a later pulse; this stub is
-// sufficient to prove the adapter seam is load-bearing.)
-
-interface InvokeResult {
-  readonly adapterId: string;
-  readonly correlationId: string;
-  readonly decisionAction: 'allow' | 'deny' | 'review' | 'modify';
-  readonly sinkEntries: readonly SinkEntry[];
-  readonly responseStatus: string;
-}
-
-async function runScenario(
-  adapter: HostAdapter,
-  hostMock: HostMock,
-  req: IncomingRequest
-): Promise<InvokeResult> {
-  const ctx = await adapter.extractIdentity(req);
-  await adapter.routePolicy(ctx);
-  const merged = await hostMock.beforeToolCall({
-    tool: req.tool,
-    args: req.args as never,
-    snapshotId: req.snapshotId,
-    principal: ctx.callerPrincipal,
-  });
-  const sink = adapter.getApprovalSink(ctx);
-  await sink.writeDecision({
-    adapterId: adapter.adapterId,
-    correlationId: ctx.correlationId,
-    canonicalInvocationHash: ctx.canonicalInvocationHash,
-    action: merged.action,
-  });
-  const response = await adapter.shapeResponse(
-    { action: merged.action, requireApproval: merged.requireApproval },
-    ctx
-  );
-  const entries: SinkEntry[] = [];
-  for await (const e of sink.query({ correlationId: ctx.correlationId })) {
-    entries.push(e);
-  }
-  return {
-    adapterId: adapter.adapterId,
-    correlationId: ctx.correlationId,
-    decisionAction: merged.action,
-    sinkEntries: entries,
-    responseStatus: response.status,
-  };
-}
+import { startHarness } from '#harness/start-harness.ts';
 
 function makeHostMock(verdict: 'allow' | 'review' = 'allow'): HostMock {
   const h = new HostMock();
@@ -96,7 +45,7 @@ const REQ: IncomingRequest = {
 
 describe('adapter-swap integration (CL-07 §1a seam proof)', () => {
   it('same harness + same scenario passes under InProcessAdapter AND under a second adapter double', async () => {
-    const clock = () => 1_700_000_000_000;
+    const clock = (): number => 1_700_000_000_000;
 
     const inProc = new InProcessAdapter({
       policyDir: '/tmp/policy-inproc',
@@ -105,37 +54,48 @@ describe('adapter-swap integration (CL-07 §1a seam proof)', () => {
     });
     const stub = new StubFailingAdapter({ adapterId: 'stub-default', clock });
 
-    // Same HostMock is NOT shared (each adapter wraps its own host-mock
-    // decision path), but the scenario steps and expected verdict ARE
+    // Each adapter wraps its own host-mock decision path (HostMock is
+    // stateful), but the scenario steps and expected verdict ARE
     // identical.
-    const h1 = makeHostMock('allow');
-    const h2 = makeHostMock('allow');
+    const h1 = await startHarness({ adapter: inProc, hostMock: makeHostMock('allow') });
+    const h2 = await startHarness({ adapter: stub, hostMock: makeHostMock('allow') });
 
-    const r1 = await runScenario(inProc, h1, REQ);
-    const r2 = await runScenario(stub, h2, REQ);
+    try {
+      const r1 = await h1.invokeTool(REQ);
+      const r2 = await h2.invokeTool(REQ);
 
-    expect(r1.decisionAction).toBe('allow');
-    expect(r2.decisionAction).toBe('allow');
-    expect(r1.responseStatus).toBe('allowed');
-    expect(r2.responseStatus).toBe('allowed');
-    expect(r1.sinkEntries).toHaveLength(1);
-    expect(r2.sinkEntries).toHaveLength(1);
-    // Both adapters drove the same scenario to the same outcome without
-    // any scenario-level changes.
+      expect(r1.decision.action).toBe('allow');
+      expect(r2.decision.action).toBe('allow');
+      expect(r1.response.status).toBe('allowed');
+      expect(r2.response.status).toBe('allowed');
+      expect(r1.sinkEntries).toHaveLength(1);
+      expect(r2.sinkEntries).toHaveLength(1);
+      // Both adapters drove the same scenario to the same outcome without
+      // any scenario-level changes.
+    } finally {
+      await h1.shutdown();
+      await h2.shutdown();
+    }
   });
 
   it('adapter swap at scenario-startup does not require scenario rewrite', async () => {
     // The "scenario" is a fixed function that takes an adapter and runs a
     // sequence of invokes. Swapping adapters at the boundary is the only
     // change — the function body is untouched.
-    async function scenario(adapter: HostAdapter): Promise<Array<'allow' | 'deny' | 'review' | 'modify'>> {
-      const host = makeHostMock('review');
-      const actions: Array<'allow' | 'deny' | 'review' | 'modify'> = [];
-      for (const snapshotId of ['snap-1', 'snap-2', 'snap-3']) {
-        const result = await runScenario(adapter, host, { ...REQ, snapshotId });
-        actions.push(result.decisionAction);
+    async function scenario(
+      adapter: HostAdapter,
+    ): Promise<Array<'allow' | 'deny' | 'review' | 'modify'>> {
+      const harness = await startHarness({ adapter, hostMock: makeHostMock('review') });
+      try {
+        const actions: Array<'allow' | 'deny' | 'review' | 'modify'> = [];
+        for (const snapshotId of ['snap-1', 'snap-2', 'snap-3']) {
+          const result = await harness.invokeTool({ ...REQ, snapshotId });
+          actions.push(result.decision.action);
+        }
+        return actions;
+      } finally {
+        await harness.shutdown();
       }
-      return actions;
     }
 
     const a = await scenario(new InProcessAdapter({ policyDir: '/tmp/p', adapterId: 'a' }));
@@ -158,14 +118,18 @@ describe('adapter-swap integration (CL-07 §1a seam proof)', () => {
     ];
 
     for (const { id, adapter } of adapters) {
-      const host = makeHostMock('allow');
-      const result = await runScenario(adapter, host, REQ);
-      expect(result.adapterId).toBe(id);
-      expect(result.sinkEntries).toHaveLength(1);
-      const [entry] = result.sinkEntries;
-      expect(entry).toBeDefined();
-      expect(entry?.adapterId).toBe(id);
-      expect(entry?.correlationId).toBe(result.correlationId);
+      const harness = await startHarness({ adapter, hostMock: makeHostMock('allow') });
+      try {
+        const result = await harness.invokeTool(REQ);
+        expect(result.adapterId).toBe(id);
+        expect(result.sinkEntries).toHaveLength(1);
+        const [entry] = result.sinkEntries;
+        expect(entry).toBeDefined();
+        expect(entry?.adapterId).toBe(id);
+        expect(entry?.correlationId).toBe(result.correlationId);
+      } finally {
+        await harness.shutdown();
+      }
     }
   });
 });
