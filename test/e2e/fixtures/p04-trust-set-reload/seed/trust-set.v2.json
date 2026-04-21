@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "revision": "v2",
+  "allowedTiers": ["R0", "R1"],
+  "notes": "Seed v2 — R2 revoked. Scenario expects the second call to land as deny after reload."
+}

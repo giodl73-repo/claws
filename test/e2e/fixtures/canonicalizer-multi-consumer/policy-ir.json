@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "canonicalizerVersion": "1.0.0",
+  "scope": "@bic/openclaw",
+  "producer": {
+    "generatedAt": "2026-04-17T12:00:00.000Z",
+    "producerVersion": "1.0.0"
+  },
+  "tools": [
+    {
+      "id": "tool:a",
+      "name": "records.read",
+      "declaredTier": "R3",
+      "capability": "data.internal.read",
+      "dataClassification": "INTERNAL"
+    },
+    {
+      "id": "tool:b",
+      "name": "records.export",
+      "declaredTier": "R5",
+      "capability": "data.restricted.read",
+      "dataClassification": "RESTRICTED",
+      "requiredProviders": ["security-review", "compliance-review"]
+    },
+    {
+      "id": "tool:c",
+      "name": "notes.store",
+      "declaredTier": "R2",
+      "capability": "data.internal.write",
+      "dataClassification": "INTERNAL",
+      "transforms": ["redact-email-addresses"]
+    }
+  ],
+  "trustSet": {
+    "schemaVersion": 1,
+    "revision": "v1",
+    "allowedTiers": ["R0", "R1", "R2", "R3", "R4", "R5"]
+  },
+  "rules": {
+    "deny": [
+      {
+        "name": "prohibit-secrets-exfil",
+        "match": {
+          "capability": "network.http.write",
+          "argKeyPattern": "(?i)secret|token|password|api[-_]?key"
+        },
+        "action": "deny"
+      }
+    ],
+    "modify": [
+      {
+        "name": "redact-email-addresses",
+        "match": {
+          "tool": "notes.store",
+          "argKey": "body"
+        },
+        "transform": "replace-email",
+        "replacement": "[REDACTED-EMAIL]"
+      }
+    ]
+  },
+  "defaults": {
+    "allowByDefault": false,
+    "reviewHighTier": true
+  },
+  "audit": {
+    "policyArtifactSha256Fields": [
+      "schemaVersion",
+      "canonicalizerVersion",
+      "scope",
+      "tools",
+      "trustSet",
+      "rules",
+      "defaults"
+    ]
+  }
+}

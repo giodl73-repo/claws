@@ -25,7 +25,8 @@
   "include": [
     "harness/**/*.ts",
     "scenarios/**/*.ts",
-    "accept/**/*.ts"
+    "accept/**/*.ts",
+    "fixtures/**/*.ts"
   ],
   "exclude": [
     "node_modules",
