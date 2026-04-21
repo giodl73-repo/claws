@@ -18,14 +18,19 @@
  * generate() round-trip the pulse originally described.
  */
 
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import {
   append,
   createChainStore,
+  type AuditEntry,
   type ChainStore,
 } from '@bic/openclaw-guardrails/audit';
 
 import { generateInMemory, generate } from '../src/generator.js';
+import { deriveFixtureHmacKey } from '../src/emit/emit-audit-chain.js';
 import { verifyAudit } from '../src/ops/verify-audit.js';
 import { waffles } from './helpers/fixture.js';
 
@@ -89,10 +94,25 @@ describe('generate + verify round-trip (library contract)', () => {
     expect(result.latest).toBe(store.events[1]!.hash);
   });
 
-  it('generate() filesystem scaffold returns an info diagnostic — pulse 47.6 smoke will catch post-P52 regression', async () => {
-    const res = await generate({ workspaceRoot: '/tmp/fixture-scaffold' });
-    expect(res.writtenFiles).toEqual([]);
-    expect(res.diagnostics[0]?.severity).toBe('info');
-    expect(res.diagnostics[0]?.code).toMatch(/^OC-POLICY-/);
+  it('generate() fs pipeline emits three artifacts whose audit-manifest round-trips through verifyAudit', async () => {
+    const ws = mkdtempSync(join(tmpdir(), 'openclaw-roundtrip-'));
+    try {
+      const res = await generate({ workspaceRoot: ws });
+      expect(res.writtenFiles).toHaveLength(3);
+      const manifestPath = join(ws, '.openclaw', 'policy', 'audit-manifest.json');
+      const raw = readFileSync(manifestPath, 'utf8');
+      const manifest = JSON.parse(raw) as {
+        policyId: string;
+        chain: AuditEntry[];
+      };
+      expect(Array.isArray(manifest.chain)).toBe(true);
+      expect(manifest.chain.length).toBe(3);
+      const key = deriveFixtureHmacKey(manifest.policyId);
+      const result = verifyAudit({ chain: manifest.chain, hmacKey: key });
+      expect(result.valid).toBe(true);
+      expect(result.length).toBe(3);
+    } finally {
+      rmSync(ws, { recursive: true, force: true });
+    }
   });
 });

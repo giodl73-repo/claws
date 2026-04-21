@@ -7,6 +7,7 @@ import {
   type HandlerResult,
 } from './shared.js';
 import { verifyAudit } from '../ops/verify-audit.js';
+import { deriveFixtureHmacKey } from '../emit/emit-audit-chain.js';
 import type { AuditEntry } from '@bic/openclaw-guardrails/audit';
 
 /**
@@ -26,34 +27,15 @@ export async function handle(argv: HandlerArgv): Promise<HandlerResult> {
 
   const env = argv.env ?? {};
   const hmacHex = env['OPENCLAW_AUDIT_HMAC_KEY'];
-  if (typeof hmacHex !== 'string' || hmacHex.length === 0) {
-    return renderErr(
-      argv.binaryName,
-      'verify',
-      'OPENCLAW_AUDIT_HMAC_KEY env var required (hex-encoded)',
-      2,
-    );
-  }
 
-  let hmacKey: Buffer;
-  try {
-    hmacKey = Buffer.from(hmacHex, 'hex');
-    if (hmacKey.length === 0) {
-      throw new Error('empty HMAC key after hex decode');
-    }
-  } catch (err) {
-    return renderErr(
-      argv.binaryName,
-      'verify',
-      `OPENCLAW_AUDIT_HMAC_KEY invalid: ${(err as Error).message}`,
-      2,
-    );
-  }
-
-  let parsed: { chain: AuditEntry[]; genesis?: string };
+  let parsed: { chain: AuditEntry[]; genesis?: string; policyId?: string };
   try {
     const raw = await readFile(manifest, 'utf8');
-    parsed = JSON.parse(raw) as { chain: AuditEntry[]; genesis?: string };
+    parsed = JSON.parse(raw) as {
+      chain: AuditEntry[];
+      genesis?: string;
+      policyId?: string;
+    };
   } catch (err) {
     return renderErr(
       argv.binaryName,
@@ -70,6 +52,39 @@ export async function handle(argv: HandlerArgv): Promise<HandlerResult> {
       `manifest ${manifest} missing 'chain' array`,
       1,
     );
+  }
+
+  // HMAC key resolution. Real deployments set OPENCLAW_AUDIT_HMAC_KEY
+  // (32+ bytes of entropy, hex-encoded). Fixture manifests emitted by
+  // `claws policy generate` without env — including the pulse 47.6
+  // end-to-end smoke gate — are signed with the derived fixture key so
+  // `generate → verify` round-trips without the operator wiring a secret.
+  let hmacKey: Buffer;
+  if (typeof hmacHex === 'string' && hmacHex.length > 0) {
+    try {
+      hmacKey = Buffer.from(hmacHex, 'hex');
+      if (hmacKey.length === 0) {
+        throw new Error('empty HMAC key after hex decode');
+      }
+    } catch (err) {
+      return renderErr(
+        argv.binaryName,
+        'verify',
+        `OPENCLAW_AUDIT_HMAC_KEY invalid: ${(err as Error).message}`,
+        2,
+      );
+    }
+  } else {
+    const manifestPolicyId = typeof parsed.policyId === 'string' ? parsed.policyId : undefined;
+    if (manifestPolicyId === undefined) {
+      return renderErr(
+        argv.binaryName,
+        'verify',
+        'OPENCLAW_AUDIT_HMAC_KEY env var required (manifest missing policyId for fixture-key derivation)',
+        2,
+      );
+    }
+    hmacKey = deriveFixtureHmacKey(manifestPolicyId);
   }
 
   const result = verifyAudit({

@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import {
   check,
@@ -34,10 +37,19 @@ describe('generator top-level surface', () => {
     expect(out.auditManifest).toContain('tool_call');
   });
 
-  it('generate (filesystem entry) returns info diagnostic until P52', async () => {
-    const res = await generate({ workspaceRoot: '/tmp/nonexistent' });
-    expect(res.writtenFiles).toEqual([]);
-    expect(res.diagnostics[0]?.code).toBe('OC-POLICY-I001');
+  it('generate (filesystem entry) emits the three artifacts to disk', async () => {
+    const ws = mkdtempSync(join(tmpdir(), 'openclaw-generate-'));
+    try {
+      const res = await generate({ workspaceRoot: ws });
+      expect(res.writtenFiles).toHaveLength(3);
+      const names = res.writtenFiles.map((p) => p.split(/[\\/]/).pop());
+      expect(names).toContain('policy-ir.json');
+      expect(names).toContain('gateway-plugin.ts');
+      expect(names).toContain('audit-manifest.json');
+      expect(res.workspaceRoot).toBe(ws);
+    } finally {
+      rmSync(ws, { recursive: true, force: true });
+    }
   });
 
   it('check wraps analyze() into CheckResult', () => {
@@ -45,10 +57,24 @@ describe('generator top-level surface', () => {
     expect(ok.ok).toBe(true);
   });
 
-  it('watch returns a no-op close handle', async () => {
-    const h = watch({ workspaceRoot: '.' });
-    await h.close();
-    expect(h.close).toBeTypeOf('function');
+  it('watch returns a handle whose close releases resources', async () => {
+    const ws = mkdtempSync(join(tmpdir(), 'openclaw-watch-'));
+    try {
+      let closed = false;
+      const h = watch({
+        workspaceRoot: ws,
+        watcherFactory: (_path, _listener) => ({
+          close: () => {
+            closed = true;
+          },
+        }),
+      });
+      await h.close();
+      expect(closed).toBe(true);
+      expect(h.close).toBeTypeOf('function');
+    } finally {
+      rmSync(ws, { recursive: true, force: true });
+    }
   });
 
   it('diff reports added, removed, and modified tools', () => {

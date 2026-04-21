@@ -9,11 +9,14 @@
  * discovery wiring.
  */
 
+import { watch as fsWatch } from 'node:fs';
+
 import { canonicalize, computePolicyId, CANONICALIZER_VERSION } from './compile/canonicalize.js';
 import { analyze } from './compile/analyze.js';
 import { emitPolicyIR } from './emit/emit-policy-ir.js';
 import { emitPluginCode, DEFAULT_SCOPE_PREFIX } from './emit/emit-plugin.js';
 import { emitAuditManifest } from './emit/emit-audit-manifest.js';
+import { fsGenerate, type FsGenerateDeps } from './fs-pipeline.js';
 import type {
   CheckResult,
   DiffResult,
@@ -63,19 +66,11 @@ export function generateInMemory(input: InMemoryGenerateInput): InMemoryArtifact
   };
 }
 
-export async function generate(opts: GenerateOptions): Promise<GenerateResult> {
-  return {
-    workspaceRoot: opts.workspaceRoot,
-    writtenFiles: [],
-    diagnostics: [
-      {
-        code: 'OC-POLICY-I001',
-        severity: 'info',
-        message:
-          'generate(): filesystem pipeline is scaffolded; use generateInMemory for draft IR',
-      },
-    ],
-  };
+export async function generate(
+  opts: GenerateOptions,
+  deps: FsGenerateDeps = {},
+): Promise<GenerateResult> {
+  return fsGenerate(opts, deps);
 }
 
 export function check(ir: PolicyIR): CheckResult {
@@ -83,8 +78,63 @@ export function check(ir: PolicyIR): CheckResult {
   return { ok, diagnostics };
 }
 
-export function watch(_opts: GenerateOptions): WatchHandle {
-  return { async close() {} };
+export interface WatchOptions extends GenerateOptions {
+  /** Debounce between filesystem events, milliseconds. Default 300ms. */
+  readonly debounceMs?: number;
+  /** Called on each triggered re-check. Tests supply a stub. */
+  readonly onChange?: (result: GenerateResult) => void | Promise<void>;
+  /** Optional fs-watcher factory for tests. Defaults to node:fs `watch`. */
+  readonly watcherFactory?: WatcherFactory;
+}
+
+export type WatcherFactory = (
+  path: string,
+  listener: (eventType: string, filename: string | null) => void,
+) => { close(): void };
+
+const DEFAULT_DEBOUNCE_MS = 300;
+
+/**
+ * Arm a continuous re-generate against a workspace. Each change to a
+ * watched workspace file triggers `fsGenerate` and invokes `onChange`
+ * with the result.
+ *
+ * The watcher uses node's built-in `fs.watch` (recursive where supported)
+ * rather than pulling in `chokidar`. That keeps the runtime surface tiny;
+ * callers that need cross-platform recursive semantics can pass their own
+ * `watcherFactory` with chokidar wiring.
+ */
+export function watch(opts: WatchOptions): WatchHandle {
+  const debounceMs = opts.debounceMs ?? DEFAULT_DEBOUNCE_MS;
+  const factory = opts.watcherFactory ?? ((path, listener) => fsWatch(path, { recursive: false }, listener));
+  let closed = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const trigger = (): void => {
+    if (closed) return;
+    if (timer !== undefined) clearTimeout(timer);
+    timer = setTimeout(() => {
+      if (closed) return;
+      void fsGenerate(opts).then((result) => {
+        if (closed) return;
+        if (opts.onChange !== undefined) {
+          void opts.onChange(result);
+        }
+      });
+    }, debounceMs);
+  };
+
+  const watcher = factory(opts.workspaceRoot, (_eventType, _filename) => {
+    trigger();
+  });
+
+  return {
+    async close() {
+      closed = true;
+      if (timer !== undefined) clearTimeout(timer);
+      watcher.close();
+    },
+  };
 }
 
 export function diff(a: PolicyIR, b: PolicyIR): DiffResult {

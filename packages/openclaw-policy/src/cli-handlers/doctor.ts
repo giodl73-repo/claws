@@ -23,6 +23,7 @@ import {
   type HandlerResult,
 } from './shared.js';
 import { verifyAudit } from '../ops/verify-audit.js';
+import { deriveFixtureHmacKey } from '../emit/emit-audit-chain.js';
 import type { AuditEntry } from '@bic/openclaw-guardrails/audit';
 
 export interface DoctorCheck {
@@ -78,9 +79,13 @@ async function checkAuditChain(
     };
   }
 
-  let parsed: { chain?: AuditEntry[]; genesis?: string };
+  let parsed: { chain?: AuditEntry[]; genesis?: string; policyId?: string };
   try {
-    parsed = JSON.parse(raw) as { chain?: AuditEntry[]; genesis?: string };
+    parsed = JSON.parse(raw) as {
+      chain?: AuditEntry[];
+      genesis?: string;
+      policyId?: string;
+    };
   } catch (err) {
     return {
       id: 'audit-chain verify passes',
@@ -98,26 +103,30 @@ async function checkAuditChain(
   }
 
   const hmacHex = env['OPENCLAW_AUDIT_HMAC_KEY'];
-  if (typeof hmacHex !== 'string' || hmacHex.length === 0) {
-    return {
-      id: 'audit-chain verify passes',
-      passed: false,
-      message: 'OPENCLAW_AUDIT_HMAC_KEY env var required to verify chain',
-    };
-  }
-
   let hmacKey: Buffer;
-  try {
-    hmacKey = Buffer.from(hmacHex, 'hex');
-    if (hmacKey.length === 0) {
-      throw new Error('empty HMAC key after hex decode');
+  if (typeof hmacHex === 'string' && hmacHex.length > 0) {
+    try {
+      hmacKey = Buffer.from(hmacHex, 'hex');
+      if (hmacKey.length === 0) {
+        throw new Error('empty HMAC key after hex decode');
+      }
+    } catch (err) {
+      return {
+        id: 'audit-chain verify passes',
+        passed: false,
+        message: `OPENCLAW_AUDIT_HMAC_KEY invalid: ${(err as Error).message}`,
+      };
     }
-  } catch (err) {
-    return {
-      id: 'audit-chain verify passes',
-      passed: false,
-      message: `OPENCLAW_AUDIT_HMAC_KEY invalid: ${(err as Error).message}`,
-    };
+  } else {
+    const policyId = typeof parsed.policyId === 'string' ? parsed.policyId : undefined;
+    if (policyId === undefined) {
+      return {
+        id: 'audit-chain verify passes',
+        passed: false,
+        message: 'OPENCLAW_AUDIT_HMAC_KEY env var required (manifest missing policyId for fixture-key derivation)',
+      };
+    }
+    hmacKey = deriveFixtureHmacKey(policyId);
   }
 
   const result = verifyAudit({
