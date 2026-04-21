@@ -84,7 +84,26 @@ export {
 } from './handle-binding-validator.ts';
 export { SequenceCounter } from './sequence-counter.ts';
 export { ClockMock, type Clock } from './clock-mock.ts';
-export type HostAdapter = never;
+export {
+  InProcessAdapter,
+  StubFailingAdapter,
+  makeAdapterFromConfig,
+  type HostAdapter,
+  type AuthorizationContext as AdapterAuthorizationContext,
+  type IncomingRequest,
+  type OutgoingResponse,
+  type PolicyArtifactRef,
+  type AuthorizationDecision,
+  type ApprovalSink,
+  type SinkDecisionEntry,
+  type SinkApprovalEntry,
+  type SinkEntry,
+  type AuditFilter,
+  type InProcessAdapterOptions,
+  type StubFailingAdapterOptions,
+  type AdapterDoubleConfig,
+} from './host-adapter-test-doubles.ts';
+export { runSinkConformance } from './sink-conformance.ts';
 export type ProviderLifecycle = never;
 export type OnSnapshotPromoted = never;
 export type Canonicalizer = never;
