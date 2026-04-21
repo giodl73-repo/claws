@@ -14,6 +14,10 @@ import {
 export interface SimHooks {
   // Hook set for tests: when provided, overrides process signal wiring.
   waitForShutdown?: (handle: MockGatewayHandle) => Promise<void>;
+  // Receives the listening-URL announcement as soon as the gateway binds.
+  // Defaults to `process.stdout.write` so callers see the port immediately
+  // (not only after the handler returns, which would defeat SIGINT tests).
+  announce?: (line: string) => void;
 }
 
 /**
@@ -66,7 +70,9 @@ export async function handle(argv: HandlerArgv, hooks: SimHooks = {}): Promise<H
     return renderErr(argv.binaryName, 'sim', message, 1);
   }
 
-  const stdout = `${argv.binaryName} policy sim: listening on ${handle.url}\n`;
+  const announceLine = `${argv.binaryName} policy sim: listening on ${handle.url}\n`;
+  const announce = hooks.announce ?? ((line: string) => process.stdout.write(line));
+  announce(announceLine);
 
   try {
     if (hooks.waitForShutdown !== undefined) {
@@ -77,25 +83,23 @@ export async function handle(argv: HandlerArgv, hooks: SimHooks = {}): Promise<H
   } finally {
     await handle.close();
   }
-  return { exitCode: 0, stdout, stderr: '' };
+  return { exitCode: 0, stdout: '', stderr: '' };
 }
 
-function blockOnSignals(_handle: MockGatewayHandle): Promise<void> {
+export function blockOnSignals(_handle: MockGatewayHandle): Promise<void> {
   return new Promise<void>((resolvePromise) => {
     const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM'];
     const listeners = new Map<NodeJS.Signals, () => void>();
-    const onSignal = (sig: NodeJS.Signals): void => {
+    const onSignal = (): void => {
       for (const s of signals) {
         const l = listeners.get(s);
         if (l !== undefined) process.off(s, l);
       }
       resolvePromise();
-      void sig;
     };
     for (const s of signals) {
-      const l = (): void => onSignal(s);
-      listeners.set(s, l);
-      process.once(s, l);
+      listeners.set(s, onSignal);
+      process.once(s, onSignal);
     }
   });
 }
