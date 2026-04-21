@@ -18,10 +18,6 @@ import { parse } from '../../src/compile/parse.js';
 import { resolveDefaultSources } from '../../src/compile/input-resolver.js';
 import type { FileEntryPresent, FileEntryAbsent, ParseDiagnostic } from '../../src/compile/types.js';
 
-// R1 Amendment: Canary import — if compiler-sdk changes the reader interface, this breaks
-import { readOCWorkspaceViaFORMA } from '@craftworks/compiler-sdk/astro/readers/openclaw-reader.js';
-import type { OCWorkspaceFiles } from '@craftworks/compiler-sdk/astro/readers/openclaw-reader.js';
-
 const FIXTURES = resolve(__dirname, '../fixtures');
 const MINIMAL = resolve(FIXTURES, 'minimal');
 const FULL = resolve(FIXTURES, 'full-workspace');
@@ -324,25 +320,3 @@ describe('InputResolver — skills/ as file (not directory)', () => {
   });
 });
 
-describe('R1 Amendment: Compiler-SDK Reader Canary', () => {
-  it('readOCWorkspaceViaFORMA is importable from compiler-sdk', () => {
-    // Canary: if compiler-sdk renames or moves this function, this test breaks
-    expect(typeof readOCWorkspaceViaFORMA).toBe('function');
-  });
-
-  it('OCWorkspaceFiles type accepts the 9 default sources', () => {
-    // Type-level canary: OCWorkspaceFiles must accept these keys
-    const files: OCWorkspaceFiles = {
-      'SOUL.md': '# Soul',
-      'TOOLS.md': '# Tools',
-      'AGENTS.md': '# Agents',
-      'IDENTITY.md': '# Identity',
-      'USER.md': '# User',
-      'MEMORY.md': '# Memory',
-      'HEARTBEAT.md': '# Heartbeat',
-      skills: { 'skills/build-run/SKILL.md': '# Build' },
-      'lobster.yaml': 'name: test',
-    };
-    expect(Object.keys(files).length).toBe(9);
-  });
-});

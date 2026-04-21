@@ -34,8 +34,8 @@ describe('tsconfig-no-forbidden-paths', () => {
     }
   });
 
-  describe('claws-cli', () => {
-    const paths = loadTsconfigPaths(resolve(ROOT, '../claws-cli/tsconfig.json'));
+  describe('claws', () => {
+    const paths = loadTsconfigPaths(resolve(ROOT, '../claws/tsconfig.json'));
 
     for (const pkg of FORBIDDEN_PACKAGES) {
       it(`tsconfig.json paths do not alias ${pkg}`, () => {
