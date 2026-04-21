@@ -104,7 +104,39 @@ export {
   type AdapterDoubleConfig,
 } from './host-adapter-test-doubles.ts';
 export { runSinkConformance } from './sink-conformance.ts';
-export type ProviderLifecycle = never;
+export {
+  LifecycleManager,
+  AlreadyInitializedError,
+  type ProviderLifecycle,
+  type StageMode,
+  type SnapshotMeta,
+} from './provider-lifecycle.ts';
+export {
+  validateLayerConfig,
+  type LayerConfig,
+  type LayerConfigValidation,
+  type LayerConfigValid,
+  type LayerConfigInvalid,
+  type LayerConfigInvalidReason,
+  type TrackMode,
+} from './config-validator.ts';
+export {
+  buildHostContext,
+  createLogger,
+  type HostContext,
+  type HostContextHandle,
+  type BuildHostContextOptions,
+  type AuditSink,
+  type AuditSinkDecisionInput,
+  type AuditSinkApprovalInput,
+  type IdentityBridge,
+  type ApprovalHandleSigner,
+  type Snapshot,
+  type Logger,
+  type ReadableLogger,
+  type LogLevel,
+  type LogRecord,
+} from './host-context.ts';
 export type OnSnapshotPromoted = never;
 export type Canonicalizer = never;
 export type AuditChain = never;
