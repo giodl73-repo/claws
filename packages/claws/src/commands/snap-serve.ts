@@ -23,9 +23,21 @@ export async function runSnapServe(opts: SnapServeOptions): Promise<number> {
   const port = opts.port ?? 0;
   const host = opts.host ?? '127.0.0.1';
 
+  // The server's promote-gate requires `.openclaw/policy/policy-ir.json`
+  // inside the uploaded snapshot. `readStagedOrCanonical` (upload client
+  // side) filters hidden segments, so `.openclaw/*` never enters. Tests
+  // and trusted-local flows can opt out of the gate via an env var; the
+  // default remains on for network deployments.
+  const requirePolicy = process.env['OPENCLAW_SNAP_REQUIRE_POLICY_IR'] !== 'false';
+
   let handle: ServerHandle;
   try {
-    handle = await startServer({ port, host, store: inMemoryStore() });
+    handle = await startServer({
+      port,
+      host,
+      store: inMemoryStore(),
+      promotionRequirePolicy: requirePolicy,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     if (opts.json) {

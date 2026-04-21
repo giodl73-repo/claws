@@ -21,9 +21,18 @@ export function isBuiltInRubricId(id: string): id is BuiltInRubricId {
   return (BUILT_INS as readonly string[]).includes(id);
 }
 
-function rubricsDir(): string {
+function rubricsDirCandidates(): readonly string[] {
   const here = dirname(fileURLToPath(import.meta.url));
-  return resolve(here, 'rubrics');
+  // Primary: rubrics co-located with the compiled module (`dist/compliance/rubrics`
+  // once the build copies yamls there). Fallback: the source tree
+  // (`src/compliance/rubrics`), which is always present in the monorepo
+  // even if the build step does not copy yamls into `dist`. The fallback
+  // is what lets `claws policy comply --rubric soc2` work from a freshly
+  // built repo without a separate asset-copy step.
+  return [
+    resolve(here, 'rubrics'),
+    resolve(here, '..', '..', 'src', 'compliance', 'rubrics'),
+  ];
 }
 
 export function parseRubricYaml(yaml: string): Rubric {
@@ -143,9 +152,19 @@ export async function loadRubric(source: BuiltInRubricId | { path: string } | Ru
     if (!isBuiltInRubricId(source)) {
       throw new Error(`unknown built-in rubric: ${source}`);
     }
-    const path = resolve(rubricsDir(), `${source}.yaml`);
-    const yaml = await readFile(path, 'utf8');
-    return parseRubricYaml(yaml);
+    let lastErr: unknown;
+    for (const dir of rubricsDirCandidates()) {
+      const path = resolve(dir, `${source}.yaml`);
+      try {
+        const yaml = await readFile(path, 'utf8');
+        return parseRubricYaml(yaml);
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+    throw lastErr instanceof Error
+      ? lastErr
+      : new Error(`built-in rubric ${source} not found`);
   }
   const yaml = await readFile(source.path, 'utf8');
   return parseRubricYaml(yaml);
