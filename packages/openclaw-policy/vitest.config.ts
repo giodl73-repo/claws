@@ -13,8 +13,6 @@ export default defineConfig({
         'src/**/index.ts',
         'src/cli-handlers/router.ts',
         'src/cli-handlers/shared.ts',
-        'src/cli-handlers/doctor.ts',
-        'src/cli-handlers/upgrade.ts',
         'src/cli-handlers/generate.ts',
         'src/cli-handlers/verify.ts',
         'src/ops/types.ts',
