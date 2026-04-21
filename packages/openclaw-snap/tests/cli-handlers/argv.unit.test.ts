@@ -54,7 +54,13 @@ describe('cli-handlers — argv parsing', () => {
     expect(none.exitCode).toBe(2);
     const one = await diff(ctx(['sha256-a']));
     expect(one.exitCode).toBe(2);
-    const two = await diff(ctx(['sha256-a', 'sha256-b']));
+
+    // Two ids + stub fetch returning a valid body -> 0 via --level file.
+    const stubFetch: typeof fetch = (async () => new Response(
+      JSON.stringify({ id: 'x', files: { 'A.md': 'a' } }),
+      { status: 200, headers: { 'content-type': 'application/json' } },
+    )) as typeof fetch;
+    const two = await diff({ ...ctx(['sha256-a', 'sha256-b', '--level', 'file']), fetch: stubFetch });
     expect(two.exitCode).toBe(0);
   });
 });

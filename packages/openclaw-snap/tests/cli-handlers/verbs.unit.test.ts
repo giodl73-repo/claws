@@ -3,7 +3,11 @@
  * branch (happy path, HTTP error, missing args) is touched.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mkdtempSync, rmSync, mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import { status } from '../../src/cli-handlers/status.js';
 import { list } from '../../src/cli-handlers/list.js';
 import { upload } from '../../src/cli-handlers/upload.js';
@@ -33,6 +37,18 @@ function ctx(argv: string[], fetchImpl?: typeof fetch): CliContext {
   };
 }
 
+let tmpRoot: string;
+
+function freshWorkspace(): string {
+  const root = mkdtempSync(join(tmpdir(), 'snap-verbs-'));
+  writeFileSync(join(root, 'AGENTS.md'), 'agents-content');
+  return root;
+}
+
+beforeEach(() => {
+  if (tmpRoot !== undefined && existsSync(tmpRoot)) rmSync(tmpRoot, { recursive: true, force: true });
+});
+
 describe('cli-handlers verbs — coverage', () => {
   it('status happy + failure', async () => {
     expect((await status(ctx([], stubFetch(200, [])))).exitCode).toBe(0);
@@ -44,17 +60,45 @@ describe('cli-handlers verbs — coverage', () => {
     expect((await list(ctx([], stubFetch(500, {})))).exitCode).toBe(1);
   });
 
-  it('upload happy + failure + usage', async () => {
-    expect((await upload(ctx(['--files', 'x.json'], stubFetch(201, { id: 'sha256-a' })))).exitCode).toBe(0);
-    expect((await upload(ctx(['--files', 'x.json'], stubFetch(400, {})))).exitCode).toBe(1);
+  it('upload happy + failure + usage + custom idempotency key', async () => {
+    tmpRoot = freshWorkspace();
+    expect((await upload(ctx(['--files', tmpRoot], stubFetch(201, { id: 'sha256-a' })))).exitCode).toBe(0);
+
+    tmpRoot = freshWorkspace();
+    expect((await upload(ctx(['--files', tmpRoot], stubFetch(400, {})))).exitCode).toBe(1);
+
     expect((await upload(ctx([]))).exitCode).toBe(2);
-    expect((await upload(ctx(['--files', 'x.json', '--idempotency-key', 'custom'], stubFetch(201, { id: 'x' })))).exitCode).toBe(0);
+
+    tmpRoot = freshWorkspace();
+    expect(
+      (await upload(
+        ctx(['--files', tmpRoot, '--idempotency-key', 'custom'], stubFetch(201, { id: 'x' })),
+      )).exitCode,
+    ).toBe(0);
   });
 
-  it('checkout happy + failure + usage', async () => {
-    expect((await checkout(ctx(['sha256-a'], stubFetch(200, { id: 'sha256-a' })))).exitCode).toBe(0);
+  it('checkout happy + failure + usage + response-shape guard', async () => {
+    tmpRoot = mkdtempSync(join(tmpdir(), 'snap-checkout-'));
+    const fetchOk = stubFetch(200, { id: 'sha256-a', files: { 'A.md': 'alpha' } });
+    expect((await checkout(ctx(['sha256-a', '--root', tmpRoot], fetchOk))).exitCode).toBe(0);
+    expect(readFileSync(join(tmpRoot, 'A.md'), 'utf-8')).toBe('alpha');
+
     expect((await checkout(ctx(['sha256-a'], stubFetch(404, {})))).exitCode).toBe(1);
+
+    // Body without .files -> exit 1 (guard path)
+    expect((await checkout(ctx(['sha256-a'], stubFetch(200, { id: 'x' })))).exitCode).toBe(1);
+
     expect((await checkout(ctx([]))).exitCode).toBe(2);
+
+    // --keep-stage path
+    tmpRoot = mkdtempSync(join(tmpdir(), 'snap-checkout-ks-'));
+    mkdirSync(join(tmpRoot, '.stage'), { recursive: true });
+    writeFileSync(join(tmpRoot, '.stage', 'dirty.md'), 'dirty');
+    const fetchOk2 = stubFetch(200, { id: 'sha256-a', files: { 'A.md': 'a' } });
+    expect(
+      (await checkout(ctx(['sha256-a', '--root', tmpRoot, '--keep-stage'], fetchOk2))).exitCode,
+    ).toBe(0);
+    expect(existsSync(join(tmpRoot, '.stage', 'dirty.md'))).toBe(true);
   });
 
   it('promote happy + failure + usage + custom key', async () => {

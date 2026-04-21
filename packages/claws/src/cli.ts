@@ -381,11 +381,13 @@ export function createProgram(): Command {
   // rollback / stage on|off / discard --stage — each delegates to the shared
   // snap cli handler which hits the snap HTTP surface (endpoint configurable
   // via --endpoint or OPENCLAW_SNAP_STORE env).
-  const snapEndpoint = (): string =>
-    process.env.OPENCLAW_SNAP_STORE ?? 'http://127.0.0.1:8443';
-  const snapCtx = (argv: readonly string[]) => ({
+  const snapEndpoint = (cmdOpts: { endpoint?: string } | undefined): string =>
+    cmdOpts?.endpoint
+      ?? process.env.OPENCLAW_SNAP_STORE
+      ?? 'http://127.0.0.1:8443';
+  const snapCtx = (argv: readonly string[], cmdOpts: { endpoint?: string } | undefined) => ({
     argv,
-    endpoint: snapEndpoint(),
+    endpoint: snapEndpoint(cmdOpts),
     stdout: (l: string) => process.stdout.write(l + '\n'),
     stderr: (l: string) => process.stderr.write(l + '\n'),
   });
@@ -393,30 +395,33 @@ export function createProgram(): Command {
   snap
     .command('upload')
     .description('Commit staged content as a new draft snapshot')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
     .allowUnknownOption()
     .helpOption(false)
-    .action(async (_cmdOpts, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapUpload(snapCtx(cmd.args));
+    .action(async (cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapUpload(snapCtx(cmd.args, cmdOpts));
       process.exitCode = exitCode;
     });
 
   snap
     .command('status')
     .description('Show working tree + stage + drafts + current')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
     .allowUnknownOption()
     .helpOption(false)
-    .action(async (_cmdOpts, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapStatus(snapCtx(cmd.args));
+    .action(async (cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapStatus(snapCtx(cmd.args, cmdOpts));
       process.exitCode = exitCode;
     });
 
   snap
     .command('list-http')
     .description('List snapshots via HTTP (store-backed)')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
     .allowUnknownOption()
     .helpOption(false)
-    .action(async (_cmdOpts, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapListHttp(snapCtx(cmd.args));
+    .action(async (cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapListHttp(snapCtx(cmd.args, cmdOpts));
       process.exitCode = exitCode;
     });
 
@@ -425,61 +430,72 @@ export function createProgram(): Command {
     .description('Semantic diff: --staged (working tree) or <id1> <id2> (two snapshots)')
     .option('--staged', 'Compare staged vs canonical', false)
     .option('--level <level>', 'Diff level (file|semantic)')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
     .allowUnknownOption()
     .helpOption(false)
-    .action(async (_id1, _id2, cmdOpts: { staged: boolean }, cmd: { args: readonly string[] }) => {
+    .action(async (
+      _id1,
+      _id2,
+      cmdOpts: { staged: boolean; endpoint?: string },
+      cmd: { args: readonly string[] },
+    ) => {
       const handler = cmdOpts.staged ? snapDiffStaged : snapDiffIds;
-      const { exitCode } = await handler(snapCtx(cmd.args));
+      const { exitCode } = await handler(snapCtx(cmd.args, cmdOpts));
       process.exitCode = exitCode;
     });
 
   snap
     .command('checkout <id>')
     .description('Reset working tree to a snapshot')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
     .allowUnknownOption()
     .helpOption(false)
-    .action(async (_id, _cmdOpts, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapCheckout(snapCtx(cmd.args));
+    .action(async (_id, cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapCheckout(snapCtx(cmd.args, cmdOpts));
       process.exitCode = exitCode;
     });
 
   snap
     .command('promote <id>')
     .description('Promote a draft snapshot to current')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
     .allowUnknownOption()
     .helpOption(false)
-    .action(async (_id, _cmdOpts, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapPromote(snapCtx(cmd.args));
+    .action(async (_id, cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapPromote(snapCtx(cmd.args, cmdOpts));
       process.exitCode = exitCode;
     });
 
   snap
     .command('rollback <id>')
     .description('Revert to a prior snapshot')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
     .allowUnknownOption()
     .helpOption(false)
-    .action(async (_id, _cmdOpts, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapRollback(snapCtx(cmd.args));
+    .action(async (_id, cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapRollback(snapCtx(cmd.args, cmdOpts));
       process.exitCode = exitCode;
     });
 
   snap
     .command('stage <mode>')
     .description('Toggle auto-staging: snap stage on | off')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
     .allowUnknownOption()
     .helpOption(false)
-    .action(async (_mode, _cmdOpts, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapStage(snapCtx(cmd.args));
+    .action(async (_mode, cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapStage(snapCtx(cmd.args, cmdOpts));
       process.exitCode = exitCode;
     });
 
   snap
     .command('discard-stage')
     .description('Clear .stage/ without uploading')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
     .allowUnknownOption()
     .helpOption(false)
-    .action(async (_cmdOpts, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapDiscardStage(snapCtx(cmd.args));
+    .action(async (cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapDiscardStage(snapCtx(cmd.args, cmdOpts));
       process.exitCode = exitCode;
     });
 

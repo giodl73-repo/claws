@@ -8,6 +8,10 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import { stage } from '../../src/cli-handlers/stage.js';
 import { status } from '../../src/cli-handlers/status.js';
 import { diffStaged } from '../../src/cli-handlers/diffStaged.js';
@@ -55,16 +59,21 @@ describe('claws snap <verb> — exit-code E2E (11 verbs)', () => {
     expect((await discardStage(ctx(['--stage']))).exitCode).toBe(0);
   });
   it('snap upload exits 0 on 201', async () => {
-    expect((await upload(ctx(['--files', 'x.json'], stubFetch(201, { id: 'sha256-a' })))).exitCode).toBe(0);
+    const root = mkdtempSync(join(tmpdir(), 'snap-e2e-upload-'));
+    writeFileSync(join(root, 'AGENTS.md'), 'agents');
+    expect((await upload(ctx(['--files', root], stubFetch(201, { id: 'sha256-a' })))).exitCode).toBe(0);
   });
   it('snap list exits 0 on 200', async () => {
     expect((await list(ctx([], stubFetch(200, [])))).exitCode).toBe(0);
   });
-  it('snap diff exits 0 on 200', async () => {
-    expect((await diff(ctx(['sha256-a', 'sha256-b'], stubFetch(200, { diff: [] })))).exitCode).toBe(0);
+  it('snap diff exits 0 on 200 (file-level)', async () => {
+    const fetchImpl = stubFetch(200, { id: 'sha256-a', files: { 'A.md': 'x' } });
+    expect((await diff(ctx(['sha256-a', 'sha256-b', '--level', 'file'], fetchImpl))).exitCode).toBe(0);
   });
   it('snap checkout exits 0 on 200', async () => {
-    expect((await checkout(ctx(['sha256-a'], stubFetch(200, { id: 'sha256-a' })))).exitCode).toBe(0);
+    const root = mkdtempSync(join(tmpdir(), 'snap-e2e-checkout-'));
+    const body = { id: 'sha256-a', files: { 'A.md': 'alpha' } };
+    expect((await checkout(ctx(['sha256-a', '--root', root], stubFetch(200, body)))).exitCode).toBe(0);
   });
   it('snap promote exits 0 on 200', async () => {
     expect((await promote(ctx(['sha256-a'], stubFetch(200, {})))).exitCode).toBe(0);

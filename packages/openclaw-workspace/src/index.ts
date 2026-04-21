@@ -15,3 +15,4 @@
 export * as path from './path/index.js';
 export * as ast from './ast/index.js';
 export * as canonicalize from './canonicalize/index.js';
+export * as staging from './staging/index.js';
