@@ -38,7 +38,24 @@ export {
   type GeneratePolicyResult,
   type ResolvedCommand,
 } from './policy-runner.ts';
-export type HostMock = never;
+export {
+  HostMock,
+  canonicalize,
+  type JsonValue,
+  type ToolArgs,
+  type DecisionAction,
+  type AuthorizationContext,
+  type ProviderApprovalHandle,
+  type ProviderDecision,
+  type FileIngestContext,
+  type ProviderHooks,
+  type ProviderSpec,
+  type DecisionInvalidReason,
+  type DecisionEntry,
+  type MergedDecision,
+  type HostMockOptions,
+  type ToolCallInputs,
+} from './host-mock.ts';
 export { CompanionMock } from './companion-mock.ts';
 export type {
   CompanionMode,
