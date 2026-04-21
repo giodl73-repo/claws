@@ -137,6 +137,20 @@ export {
   type LogLevel,
   type LogRecord,
 } from './host-context.ts';
-export type OnSnapshotPromoted = never;
+export {
+  SnapshotSwitch,
+  DEFAULT_HOOK_TIMEOUT_MS,
+  type PromoteOptions,
+  type PromoteResult,
+  type InflightHandle,
+  type SnapshotSwitchAuditSink,
+  type SnapshotSwitchOptions,
+} from './snapshot-switch.ts';
+export type {
+  DrainWindowEntry,
+  DrainWindowEntryInput,
+  OnSnapshotPromotedTimeoutEntry,
+  OnSnapshotPromotedTimeoutEntryInput,
+} from './audit-types.ts';
 export type Canonicalizer = never;
 export type AuditChain = never;

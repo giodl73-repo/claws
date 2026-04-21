@@ -117,6 +117,8 @@ describe('provider-lifecycle fan-out & registration', () => {
     mgr.register({ id: 'C' }); // no hook, skipped
 
     const fanout = await mgr.fireSnapshotPromoted({
+      from: null,
+      to: 'snap-42',
       snapshotId: 'snap-42',
       promotedAt: 1_700_000_000_000,
     });

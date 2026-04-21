@@ -29,6 +29,10 @@
 export type StageMode = 'draft' | 'current' | 'superseded';
 
 export interface SnapshotMeta {
+  /** Prior snapshot id. `null` on the first promote after harness startup. */
+  readonly from: string | null;
+  /** Target snapshot id. Alias for `snapshotId` on the existing contract. */
+  readonly to: string;
   readonly snapshotId: string;
   readonly promotedAt: number;
 }
