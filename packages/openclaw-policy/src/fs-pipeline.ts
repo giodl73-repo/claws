@@ -1,16 +1,25 @@
 /**
- * Filesystem-backed implementation of `generate()` — reads SOUL.md,
- * TOOLS.md, AGENTS.md from a workspace root, extracts PolicyIR, and
+ * Filesystem-backed implementation of `generate()` — discovers workspace
+ * files via `@bic/openclaw-workspace/staging`, extracts PolicyIR, and
  * writes the three artifacts (`policy-ir.json`, `gateway-plugin.ts`,
  * `audit-manifest.json`) to `.openclaw/policy/`.
  *
- * Design:
- *  - Missing workspace files produce `info`/`warning` diagnostics but do
- *    NOT abort the generate. A minimal-but-valid PolicyIR is always
- *    emitted so `verify` round-trips, matching CL-07's "default-allow"
- *    posture on empty workspaces.
- *  - `analyze` is run; `error`-severity diagnostics from governance make
- *    the whole generate fail (caller decides via `strict`).
+ * Package boundaries (per the 47.5.5 guardrail):
+ *  - `@bic/openclaw-workspace/staging` owns fs discovery + stage-aware
+ *    reads + classification + parsing. This package MUST NOT import
+ *    from `node:fs` / `node:fs/promises` directly; use the workspace
+ *    helpers so `.stage/` precedence + hidden-dir skip + kind
+ *    classification stay in one place.
+ *  - `@bic/openclaw-policy` owns the semantic pipeline: extract drafts
+ *    from ASTs, analyze, emit 3 artifacts. Writes go through
+ *    `writeSnapshotFiles` (atomic tmp+rename).
+ *
+ * Behavior:
+ *  - Missing workspace files produce `info`-severity diagnostics but do
+ *    not abort the generate. A minimal-but-valid PolicyIR is always
+ *    emitted so `verify` round-trips on empty workspaces.
+ *  - Governance `error` diagnostics from `analyze` short-circuit the
+ *    emit only when `strict: true`.
  *  - The audit-manifest is a real hash-chain (see `emit-audit-chain.ts`)
  *    so `verify --manifest audit-manifest.json` round-trips.
  *
@@ -18,22 +27,20 @@
  */
 
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import type { WorkspaceFileKind } from '@bic/openclaw-workspace/ast';
+import { discoverWorkspaceFiles, writeSnapshotFiles } from '@bic/openclaw-workspace/staging';
+import type { DiscoveredWorkspaceFile } from '@bic/openclaw-workspace/staging';
 
 import { analyze } from './compile/analyze.js';
 import { CANONICALIZER_VERSION, computePolicyId } from './compile/canonicalize.js';
 import { extractDenyRules, extractTools } from './compile/extract.js';
-import { parseWorkspaceFile } from './compile/parse.js';
+import type { ParsedFile } from './compile/parse.js';
 import {
   emitAuditChain,
   serializeAuditChain,
 } from './emit/emit-audit-chain.js';
 import { DEFAULT_SCOPE_PREFIX, emitPluginCode } from './emit/emit-plugin.js';
-
-type ScopePrefix = '@openclaw' | '@bic/openclaw';
 import { emitPolicyIR } from './emit/emit-policy-ir.js';
 import type {
   Diagnostic,
@@ -42,19 +49,11 @@ import type {
   PolicyIR,
 } from './types/index.js';
 
-interface WorkspaceFileSpec {
-  readonly kind: WorkspaceFileKind;
-  readonly relPath: string;
-  readonly required: boolean;
-}
+type ScopePrefix = '@openclaw' | '@bic/openclaw';
 
-const WORKSPACE_FILES: readonly WorkspaceFileSpec[] = [
-  { kind: 'soul', relPath: 'SOUL.md', required: false },
-  { kind: 'tools', relPath: 'TOOLS.md', required: false },
-  { kind: 'agents', relPath: 'AGENTS.md', required: false },
-];
+const ARTIFACTS_RELATIVE = '.openclaw/policy';
 
-const ARTIFACTS_DIR = join('.openclaw', 'policy');
+const REQUIRED_FOR_POLICY = ['soul', 'tools', 'agents'] as const;
 
 export interface FsGenerateDeps {
   readonly hmacKey?: Buffer;
@@ -69,19 +68,38 @@ export async function fsGenerate(
   const diagnostics: Diagnostic[] = [];
   const scope = deps.scope ?? DEFAULT_SCOPE_PREFIX;
 
-  // 1. Discover + parse workspace files.
-  const parsed = await loadWorkspaceFiles(opts.workspaceRoot, diagnostics);
+  // 1. Discover + parse workspace files via the workspace package.
+  //    Policy never touches fs itself.
+  const { files } = await discoverWorkspaceFiles(opts.workspaceRoot);
 
-  // 2. Extract the draft IR pieces.
-  const soulParsed = parsed.find((p) => p.kind === 'soul');
-  const toolsParsed = parsed.find((p) => p.kind === 'tools');
+  // Adapt workspace's DiscoveredWorkspaceFile into policy's ParsedFile
+  // so the existing extract functions keep their typed contract.
+  const parsed: ParsedFile[] = files.map(adaptDiscovered);
 
+  for (const p of parsed) {
+    for (const d of p.diagnostics) diagnostics.push(d);
+  }
+
+  // Surface an info diagnostic for each well-known policy input that
+  // was absent from discovery. This preserves the pulse 47.5.5 promise
+  // that empty workspaces still round-trip.
+  for (const kind of REQUIRED_FOR_POLICY) {
+    if (!parsed.some((p) => p.kind === kind)) {
+      diagnostics.push({
+        code: 'OC-POLICY-I-MISSING-FILE',
+        severity: 'info',
+        message: `no ${kind.toUpperCase()} file discovered at workspace root (using defaults)`,
+      });
+    }
+  }
+
+  // 2. Extract draft IR pieces.
+  const soulParsed = parsed.find((p): p is ParsedFile => p.kind === 'soul');
+  const toolsParsed = parsed.find((p): p is ParsedFile => p.kind === 'tools');
   const denyRules = soulParsed !== undefined ? extractDenyRules(soulParsed) : [];
   const tools = toolsParsed !== undefined ? extractTools(toolsParsed) : [];
 
-  // 3. Build a minimal PolicyIR. Missing inputs yield safe defaults so the
-  //    generate round-trip always produces a valid IR — governance error
-  //    diagnostics surface via analyze, not via crashes.
+  // 3. Build a minimal PolicyIR + stamp policyId.
   const baselineIR: PolicyIR = {
     version: '0.1.0',
     policyId: '',
@@ -108,14 +126,12 @@ export async function fsGenerate(
     },
     identity: { name: 'workspace' },
   };
-  const policyId = computePolicyId(baselineIR);
-  const ir: PolicyIR = { ...baselineIR, policyId };
+  const ir: PolicyIR = { ...baselineIR, policyId: computePolicyId(baselineIR) };
 
-  // 4. Analyze — surface governance errors but do not throw; the handler
-  //    decides whether to return non-zero.
+  // 4. Analyze. Surface governance diagnostics; `strict` turns errors
+  //    into an early return.
   const analyzed = analyze(ir);
   diagnostics.push(...analyzed.diagnostics);
-
   if (opts.strict === true) {
     const hasError = analyzed.diagnostics.some((d) => d.severity === 'error');
     if (hasError) {
@@ -123,12 +139,7 @@ export async function fsGenerate(
     }
   }
 
-  // 5. Emit and write the three artifacts atomically enough for smoke
-  //    gates: mkdir -p + writeFile each. We don't fsync / temp-rename here
-  //    because the caller is either a human CLI invocation or a test.
-  const outDir = join(opts.workspaceRoot, ARTIFACTS_DIR);
-  await mkdir(outDir, { recursive: true });
-
+  // 5. Emit the three artifacts and write atomically via workspace.
   const snapshotId = `sha256-${ir.policyId.replace(/^sha256-/, '')}`;
 
   const policyIrJson = emitPolicyIR(ir);
@@ -154,46 +165,34 @@ export async function fsGenerate(
   const manifest = emitAuditChain(chainOptions);
   const auditManifestJson = serializeAuditChain(manifest);
 
-  const writes: ReadonlyArray<{ relPath: string; body: string }> = [
-    { relPath: 'policy-ir.json', body: policyIrJson },
-    { relPath: 'gateway-plugin.ts', body: gatewayPluginTs },
-    { relPath: 'audit-manifest.json', body: auditManifestJson },
-  ];
+  const emits: Readonly<Record<string, string>> = {
+    [`${ARTIFACTS_RELATIVE}/policy-ir.json`]: policyIrJson,
+    [`${ARTIFACTS_RELATIVE}/gateway-plugin.ts`]: gatewayPluginTs,
+    [`${ARTIFACTS_RELATIVE}/audit-manifest.json`]: auditManifestJson,
+  };
+  await writeSnapshotFiles(opts.workspaceRoot, emits);
 
-  const writtenFiles: string[] = [];
-  for (const w of writes) {
-    const absPath = join(outDir, w.relPath);
-    await writeFile(absPath, w.body, 'utf8');
-    writtenFiles.push(absPath);
-  }
+  const writtenFiles = Object.keys(emits).map((rel) =>
+    join(opts.workspaceRoot, ...rel.split('/')),
+  );
 
   return { workspaceRoot: opts.workspaceRoot, writtenFiles, diagnostics };
 }
 
-async function loadWorkspaceFiles(
-  workspaceRoot: string,
-  diagnostics: Diagnostic[],
-): Promise<ReturnType<typeof parseWorkspaceFile>[]> {
-  const out: ReturnType<typeof parseWorkspaceFile>[] = [];
-  for (const spec of WORKSPACE_FILES) {
-    const path = join(workspaceRoot, spec.relPath);
-    let raw: string;
-    try {
-      raw = await readFile(path, 'utf8');
-    } catch {
-      diagnostics.push({
-        code: 'OC-POLICY-I-MISSING-FILE',
-        severity: spec.required ? 'error' : 'info',
-        message: `workspace file not found: ${spec.relPath} (using defaults)`,
-        path,
-      });
-      continue;
-    }
-    const parsed = parseWorkspaceFile(spec.kind, path, raw);
-    diagnostics.push(...parsed.diagnostics);
-    out.push(parsed);
-  }
-  return out;
+function adaptDiscovered(file: DiscoveredWorkspaceFile): ParsedFile {
+  const diagnostics: Diagnostic[] = file.diagnostics.map((d) => ({
+    code: 'OC-POLICY-W-PARSE',
+    severity: d.severity,
+    message: d.message,
+    path: file.relPath,
+    line: d.line,
+  }));
+  return {
+    kind: file.kind,
+    path: file.relPath,
+    ast: file.ast,
+    diagnostics,
+  };
 }
 
 function sha256Hex(s: string): string {

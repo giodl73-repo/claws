@@ -17,7 +17,7 @@ Status legend:
 
 | Handler | Library function | File | Status | Post-fix evidence |
 |---|---|---|---|---|
-| generate | `generate({workspaceRoot}, deps?)` | src/generator.ts, src/fs-pipeline.ts | ✅ WORKS | Reads SOUL.md/TOOLS.md/AGENTS.md, parses via `@bic/openclaw-workspace/ast`, extracts denyRules+tools, writes 3 artifacts to `.openclaw/policy/`. End-to-end proof at /tmp/cp55-full-final: `scope=@bic/openclaw files=3 diagnostics=0`. Tests: tests/fs-pipeline.integration.test.ts (6 cases). |
+| generate | `generate({workspaceRoot}, deps?)` | src/generator.ts, src/fs-pipeline.ts | ✅ WORKS | Discovers + parses workspace files via `@bic/openclaw-workspace/staging.discoverWorkspaceFiles` (owns fs + stage overlay + classify + parse). Policy extracts denyRules+tools from ASTs, analyses, emits 3 artifacts, then writes via `staging.writeSnapshotFiles` (atomic tmp+rename). End-to-end proof at /tmp/cp55-boundary-proof: `scope=@bic/openclaw files=3 diagnostics=0`. Tests: tests/fs-pipeline.integration.test.ts (9 cases). |
 | generate | `generateInMemory({draft})` | src/generator.ts | ✅ WORKS | Unchanged — still the in-memory engine. Consumed by fs pipeline. |
 | generate | `finalizeIR(draft)` | src/generator.ts | ✅ WORKS | Unchanged. |
 | generate | `emitPolicyIR(ir)` | src/emit/emit-policy-ir.ts | ✅ WORKS | Unchanged. |
@@ -27,7 +27,7 @@ Status legend:
 | verify | `verifyAudit({chain, hmacKey, expectedGenesis?})` | src/ops/verify-audit.ts | ✅ WORKS | Signature unchanged. Handler falls back to fixture-derived key when env absent so `generate → verify` round-trips without secret wiring. |
 | check | `check(ir)` | src/generator.ts | ✅ WORKS | Unchanged. Handler loader now looks in `.openclaw/policy/policy-ir.json` (fs-pipeline output path) before legacy `.claws/`. |
 | diff | `diff(a, b)` | src/generator.ts | ✅ WORKS | Unchanged. Handler loader accepts `current` alias + `.openclaw/snapshots/` path. |
-| watch | `watch({workspaceRoot, debounceMs?, onChange?, watcherFactory?})` | src/generator.ts | ✅ WORKS | node:fs `watch` + debounce + close. Tests inject synthetic events via `watcherFactory` for Windows-stable timing. Tests: tests/watch.integration.test.ts (3 cases). |
+| watch | `watch({workspaceRoot, debounceMs?, onChange?, watcherFactory?})` | src/generator.ts | ✅ WORKS | Delegates fs watching to `@bic/openclaw-workspace/staging.watchWorkspace` (node:fs.watch + debounce + close). Policy's `watch` owns generate-after-change semantics only; fs/debounce live in workspace. Tests: tests/watch.integration.test.ts (7 cases). |
 | report | `renderReport(input, format)` | src/ops/render-report.ts | ✅ WORKS | Adds SARIF 2.1.0 variant with per-rule results for compliance/audit/diff kinds. `$schema: "https://json.schemastore.org/sarif-2.1.0.json"`. End-to-end proof: `claws policy report --kind compliance --format sarif` emits valid SARIF that parses with `JSON.parse`. |
 | test | `runScenarios({gatewayUrl, cases, fetchImpl?})` | src/ops/run-scenarios.ts | ✅ WORKS | Unchanged — the HTTP-gateway-facing function. |
 | test | `runScenariosInMemory({policyIR, cases, host?, port?, fetchImpl?})` | src/ops/run-scenarios.ts **(new)** | ✅ WORKS | Spins up ephemeral `startMockGateway` on an OS-chosen port, dispatches, tears down. Handler now accepts either `--gateway <url>` (external) or `--policy-ir <path>` (in-memory). |
@@ -36,7 +36,7 @@ Status legend:
 | comply | `loadPolicyIRFromSnapshot({workspace, snapshotId})` | src/ops/evaluate-compliance.ts **(new)** | ✅ WORKS | Loads `.openclaw/policy/policy-ir.json` (`snapshotId: 'current'`) or `.openclaw/snapshots/<id>/policy-ir.json`. |
 | sim | `startMockGateway({policyIR, port?, host?})` | src/ops/mock-gateway.ts | ✅ WORKS | Unchanged. |
 | doctor | `realPolicyProbe(workspace, env)` | src/cli-handlers/doctor.ts | ✅ WORKS | Env-var optional; falls back to fixture-derived HMAC key via manifest's embedded `policyId`. |
-| upgrade | `migratePolicyArtifacts({workspace, dryRun?})` | src/migrate.ts **(new)** | ✅ WORKS | Real on-disk migrator: bumps `version` field on `policy-ir.json` + `audit-manifest.json` if older than `CURRENT_POLICY_SCHEMA_VERSION`. Handler `--dry-run` dispatches to dry-run migrator. Statuses: `migrated` \| `already-current` \| `missing` \| `error`. |
+| upgrade | `migratePolicyArtifacts({workspace, dryRun?})` | src/migrate.ts **(new)** | ✅ WORKS | Real on-disk migrator: bumps `version` field on `policy-ir.json` + `audit-manifest.json` if older than `CURRENT_POLICY_SCHEMA_VERSION`. Writes via workspace's `writeAtomic` (tmp+rename). Handler `--dry-run` dispatches to dry-run migrator. Statuses: `migrated` \| `already-current` \| `missing` \| `error`. |
 | snap | handler-internal (upload / checkout / diff) | src/cli-handlers/snap.ts | ✅ WORKS | Unchanged. |
 
 ## D4 integration tests

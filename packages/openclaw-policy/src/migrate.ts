@@ -15,8 +15,10 @@
  * @module @bic/openclaw-policy/migrate
  */
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
+import { writeAtomic } from '@bic/openclaw-workspace/staging';
 
 import { emitPolicyIR } from './emit/emit-policy-ir.js';
 import {
@@ -114,7 +116,7 @@ async function migratePolicyIR(
   }
   const migrated: PolicyIR = { ...parsed, version: CURRENT_POLICY_SCHEMA_VERSION };
   if (!dryRun) {
-    await writeFile(path, emitPolicyIR(migrated), 'utf8');
+    await writeAtomic(path, emitPolicyIR(migrated));
   }
   return {
     artifact: 'policy-ir.json',
@@ -161,7 +163,7 @@ async function migrateAuditManifest(
     version: CURRENT_POLICY_SCHEMA_VERSION,
   };
   if (!dryRun) {
-    await writeFile(path, serializeAuditChain(migrated), 'utf8');
+    await writeAtomic(path, serializeAuditChain(migrated));
   }
   return {
     artifact: 'audit-manifest.json',

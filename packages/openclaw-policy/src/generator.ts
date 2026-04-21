@@ -9,7 +9,8 @@
  * discovery wiring.
  */
 
-import { watch as fsWatch } from 'node:fs';
+import { watchWorkspace } from '@bic/openclaw-workspace/staging';
+import type { WorkspaceWatcherFactory } from '@bic/openclaw-workspace/staging';
 
 import { canonicalize, computePolicyId, CANONICALIZER_VERSION } from './compile/canonicalize.js';
 import { analyze } from './compile/analyze.js';
@@ -81,58 +82,58 @@ export function check(ir: PolicyIR): CheckResult {
 export interface WatchOptions extends GenerateOptions {
   /** Debounce between filesystem events, milliseconds. Default 300ms. */
   readonly debounceMs?: number;
-  /** Called on each triggered re-check. Tests supply a stub. */
+  /** Called on each triggered re-generate with the fresh result. */
   readonly onChange?: (result: GenerateResult) => void | Promise<void>;
-  /** Optional fs-watcher factory for tests. Defaults to node:fs `watch`. */
+  /**
+   * Optional fs-watcher factory for tests. Defaults to the workspace
+   * package's `node:fs.watch`-backed default.
+   */
   readonly watcherFactory?: WatcherFactory;
 }
 
-export type WatcherFactory = (
-  path: string,
-  listener: (eventType: string, filename: string | null) => void,
-) => { close(): void };
-
-const DEFAULT_DEBOUNCE_MS = 300;
+/**
+ * Policy-side alias of the workspace-owned factory type. Consumers get
+ * a stable name without importing `@bic/openclaw-workspace` directly.
+ */
+export type WatcherFactory = WorkspaceWatcherFactory;
 
 /**
- * Arm a continuous re-generate against a workspace. Each change to a
- * watched workspace file triggers `fsGenerate` and invokes `onChange`
- * with the result.
+ * Arm a continuous re-generate against a workspace.
  *
- * The watcher uses node's built-in `fs.watch` (recursive where supported)
- * rather than pulling in `chokidar`. That keeps the runtime surface tiny;
- * callers that need cross-platform recursive semantics can pass their own
- * `watcherFactory` with chokidar wiring.
+ * Filesystem watching itself lives in `@bic/openclaw-workspace/staging`
+ * (`watchWorkspace`). Policy only owns the generate-after-change
+ * semantics: when the workspace emits a debounced change event, run
+ * `fsGenerate` and invoke `onChange` with the result.
+ *
+ * Tests can inject a synthetic `watcherFactory` to fire events
+ * deterministically without relying on real fs notifications.
  */
 export function watch(opts: WatchOptions): WatchHandle {
-  const debounceMs = opts.debounceMs ?? DEFAULT_DEBOUNCE_MS;
-  const factory = opts.watcherFactory ?? ((path, listener) => fsWatch(path, { recursive: false }, listener));
   let closed = false;
-  let timer: ReturnType<typeof setTimeout> | undefined;
 
-  const trigger = (): void => {
-    if (closed) return;
-    if (timer !== undefined) clearTimeout(timer);
-    timer = setTimeout(() => {
+  const workspaceOptions: Parameters<typeof watchWorkspace>[1] = {
+    onChange: async () => {
       if (closed) return;
-      void fsGenerate(opts).then((result) => {
-        if (closed) return;
-        if (opts.onChange !== undefined) {
-          void opts.onChange(result);
-        }
-      });
-    }, debounceMs);
+      const result = await fsGenerate(opts);
+      if (closed) return;
+      if (opts.onChange !== undefined) {
+        await opts.onChange(result);
+      }
+    },
   };
+  if (opts.debounceMs !== undefined) {
+    (workspaceOptions as { debounceMs?: number }).debounceMs = opts.debounceMs;
+  }
+  if (opts.watcherFactory !== undefined) {
+    (workspaceOptions as { watcherFactory?: WatcherFactory }).watcherFactory = opts.watcherFactory;
+  }
 
-  const watcher = factory(opts.workspaceRoot, (_eventType, _filename) => {
-    trigger();
-  });
+  const handle = watchWorkspace(opts.workspaceRoot, workspaceOptions);
 
   return {
     async close() {
       closed = true;
-      if (timer !== undefined) clearTimeout(timer);
-      watcher.close();
+      await handle.close();
     },
   };
 }

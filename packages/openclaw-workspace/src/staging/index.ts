@@ -13,3 +13,15 @@
 
 export { readStagedOrCanonical } from './readStagedOrCanonical.js';
 export { writeAtomic, writeSnapshotFiles, clearStage } from './writeAtomic.js';
+export { discoverWorkspaceFiles } from './discover.js';
+export type {
+  DiscoveredWorkspaceFile,
+  DiscoveryResult,
+} from './discover.js';
+export { watchWorkspace } from './watch.js';
+export type {
+  WatchWorkspaceHandle,
+  WatchWorkspaceOptions,
+  WorkspaceWatcherFactory,
+  WorkspaceWatcherHandle,
+} from './watch.js';
