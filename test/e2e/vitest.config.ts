@@ -25,6 +25,28 @@ const coverageExclude = [
   'harness/**/__tests__/**',
 ];
 
+// Modules whose code only runs when spawning / tearing down real child
+// processes. Exercised exclusively by *.integration.test.ts tiers — exclude
+// from the unit-project coverage gate so its per-file thresholds apply
+// only to pure modules that unit tests can fully cover.
+const unitCoverageExclude = [
+  ...coverageExclude,
+  'harness/snap-runner.ts',
+  'harness/policy-runner.ts',
+];
+
+// Integration coverage applies per-file to modules whose real code paths
+// require spawning child processes or other OS-level side effects that
+// unit tests deliberately do not exercise. Pure modules (parsers,
+// signers, stores) are unit-tiered and excluded here so per-file
+// thresholds don't penalize integration runs for missing their
+// unit-level coverage.
+const integrationCoverageInclude = [
+  'harness/lifecycle.ts',
+  'harness/snap-runner.ts',
+  'harness/policy-runner.ts',
+];
+
 export default defineConfig({
   resolve: sharedResolve,
   test: {
@@ -43,7 +65,7 @@ export default defineConfig({
             provider: 'v8',
             reportsDirectory: 'coverage/unit',
             include: coverageInclude,
-            exclude: coverageExclude,
+            exclude: unitCoverageExclude,
             thresholds: {
               perFile: true,
               statements: 95,
@@ -65,7 +87,7 @@ export default defineConfig({
           coverage: {
             provider: 'v8',
             reportsDirectory: 'coverage/integration',
-            include: coverageInclude,
+            include: integrationCoverageInclude,
             exclude: coverageExclude,
             thresholds: {
               perFile: true,

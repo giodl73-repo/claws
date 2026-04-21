@@ -20,8 +20,24 @@ export type {
   KillOptions,
   TeardownOptions,
 } from './lifecycle.ts';
-export type SnapRunner = never;
-export type PolicyRunner = never;
+export { startSnap } from './snap-runner.ts';
+export type { SnapHandle, StartSnapOptions } from './snap-runner.ts';
+export { reservePort } from './port-allocator.ts';
+export type { PortReservation } from './port-allocator.ts';
+export {
+  copyFixture,
+  UncleanSourceError,
+  SymlinkEscapeError,
+} from './fixture-copier.ts';
+export { guardPath, PathGuardError } from './path-guard.ts';
+export {
+  generatePolicy,
+  PolicyGenerateError,
+  defaultClawsCommand,
+  type GeneratePolicyOpts,
+  type GeneratePolicyResult,
+  type ResolvedCommand,
+} from './policy-runner.ts';
 export type HostMock = never;
 export { CompanionMock } from './companion-mock.ts';
 export type {

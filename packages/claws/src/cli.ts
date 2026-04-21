@@ -26,6 +26,7 @@ import {
   runSnapList,
   runSnapDelete,
 } from './commands/snap.js';
+import { runSnapServe } from './commands/snap-serve.js';
 import { runScan } from './commands/scan.js';
 import { runKeysGenerate, runKeysList, runKeysRotate, runKeysRevoke, runKeysCeremonyInit, runKeysCeremonyReconstruct } from './commands/keys.js';
 import { runInitSkill } from './commands/init.js';
@@ -344,6 +345,21 @@ export function createProgram(): Command {
       const opts = program.opts<GlobalOpts>();
       const workspaceRoot = process.cwd();
       const exitCode = await runSnapDelete(workspaceRoot, name, { json: opts.json });
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('serve')
+    .description('Start the snapshot registry HTTP server')
+    .option('--port <port>', 'Bind port (0 = ephemeral, default 0)', (v) => parseInt(v, 10), 0)
+    .option('--host <host>', 'Bind address (default 127.0.0.1)')
+    .action(async (cmdOpts: { port: number; host?: string }) => {
+      const opts = program.opts<GlobalOpts>();
+      const exitCode = await runSnapServe({
+        port: cmdOpts.port,
+        host: cmdOpts.host,
+        json: opts.json,
+      });
       process.exitCode = exitCode;
     });
 
