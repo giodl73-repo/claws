@@ -2,7 +2,7 @@
  * L0: scenario-loader — discovery, parsing, and runner type inference.
  *
  * Tests the scenario loader utility functions in isolation without
- * requiring real design/claws/scenarios/ on disk.
+ * requiring real docs/scenarios/ on disk.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';

@@ -2,7 +2,7 @@
  * Manifest runner adapter — dispatches claws acceptance scenarios
  * to the correct runner type.
  *
- * Reads design/claws/scenarios/manifest.yaml and provides a dispatch
+ * Reads docs/scenarios/manifest.yaml and provides a dispatch
  * table for the 5 claws runner types.
  *
  * @module claws-sdk/tests/accept/utils/manifest-runner
@@ -195,7 +195,7 @@ export async function runFromManifest(
   }
 
   const basePath = options?.basePath ?? resolve(
-    __dirname, '../../../../design/claws/scenarios',
+    __dirname, '../../../../../docs/scenarios',
   );
 
   const scenarios = discoverClawsScenarios({ basePath, series: seriesName });
@@ -288,7 +288,7 @@ export function discoverSeriesScenarios(
   }
 
   const basePath = options?.basePath ?? resolve(
-    __dirname, '../../../../design/claws/scenarios',
+    __dirname, '../../../../../docs/scenarios',
   );
 
   const scenarios = discoverClawsScenarios({ basePath, series: seriesName });

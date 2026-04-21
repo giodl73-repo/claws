@@ -3,7 +3,7 @@
  *
  * Reuses the discover algorithm from compiler-sdk but overrides:
  * - marker: scenario.yaml (not 20+program.yaml)
- * - basePath: design/claws/scenarios/ (not design/astro/scenarios/)
+ * - basePath: docs/scenarios/ (not design/astro/scenarios/)
  *
  * Validates scenario.yaml with Zod against the claws ScenarioYaml shape.
  *

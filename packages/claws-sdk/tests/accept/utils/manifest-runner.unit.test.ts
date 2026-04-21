@@ -2,7 +2,7 @@
  * L0: manifest-runner — runner dispatch, compatibility checks, and single scenario execution.
  *
  * Tests manifest-runner utility functions in isolation. Does not require
- * the real design/claws/scenarios/ manifest — uses synthetic scenarios.
+ * the real docs/scenarios/ manifest — uses synthetic scenarios.
  */
 
 import { describe, it, expect } from 'vitest';
