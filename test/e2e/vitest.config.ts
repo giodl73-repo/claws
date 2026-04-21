@@ -54,6 +54,11 @@ export default defineConfig({
   test: {
     forceExit: true,
     exclude: sharedExclude,
+    // Build dist once before any project starts so integration tests
+    // spawning `node packages/claws/bin/claws.js` don't race the
+    // accept suite's rebuild (tsup `clean: true` briefly removes
+    // dist/cli.js mid-build).
+    globalSetup: [resolve(ROOT, 'global-setup.ts')],
     projects: [
       defineProject({
         resolve: sharedResolve,

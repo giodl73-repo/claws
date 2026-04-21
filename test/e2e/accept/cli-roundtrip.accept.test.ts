@@ -31,13 +31,13 @@
  *
  * @module test/e2e/accept/cli-roundtrip.accept.test.ts
  */
-import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, describe, expect, it } from 'vitest';
 import { copyFixture, teardownHttpProcess, trackPid } from '#harness';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -262,21 +262,14 @@ interface FixtureTiming {
 }
 const timings: FixtureTiming[] = [];
 
-// D8: force a fresh build so stale dist never masks source changes. Run
-// once before the whole suite; tsx spawn path reads src directly.
-beforeAll(() => {
-  const result = spawnSync('npm', ['run', 'build'], {
-    cwd: REPO_ROOT,
-    encoding: 'utf8',
-    shell: true,
-    stdio: 'pipe',
-  });
-  if (result.status !== 0) {
-    throw new Error(
-      `npm run build failed (exit ${String(result.status)}):\n${result.stdout}\n${result.stderr}`,
-    );
-  }
-}, 300_000);
+// D8: a fresh dist build is required so stale dist never masks source
+// changes. The build runs in `test/e2e/global-setup.ts` — once, before
+// any vitest project starts — rather than in a `beforeAll` here. The
+// previous beforeAll raced the integration project: while accept
+// rebuilt dist (tsup `clean: true` briefly removes dist/cli.js),
+// integration tests spawning `node packages/claws/bin/claws.js` hit
+// ERR_MODULE_NOT_FOUND for the missing cli.js. globalSetup blocks all
+// projects until the build completes.
 
 afterAll(() => {
   if (timings.length === 0) return;
