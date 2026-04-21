@@ -4,6 +4,7 @@ import {
   safeParse,
   CanonicalizeError,
   CanonicalizeErrorCode,
+  CanonicalizerVersionMismatchError,
 } from '../../src/canonicalize/index.js';
 
 describe('canonicalize — edge cases', () => {
@@ -114,5 +115,53 @@ describe('safeParse — edge cases', () => {
     } catch (err) {
       expect((err as CanonicalizeError).code).toBe(CanonicalizeErrorCode.DEPTH);
     }
+  });
+
+  it('unterminated string does not hang tokenizer', () => {
+    // String starts at index 5 and never closes — skipString must walk to end
+    // of input and return text.length, leaving JSON.parse to report the error.
+    const malformed = '{"a":"unterminated';
+    expect(() => safeParse(malformed, { maxDepth: 100 })).toThrow(SyntaxError);
+  });
+
+  it('escape at end of unterminated string still terminates skipString', () => {
+    // The skip-escape branch (i += 2) must not overshoot past text.length
+    // when a backslash is the last char of the input.
+    const malformed = '{"a":"\\';
+    expect(() => safeParse(malformed, { maxDepth: 100 })).toThrow(SyntaxError);
+  });
+});
+
+describe('CanonicalizerVersionMismatchError', () => {
+  it('formats single-peer versions map', () => {
+    const err = new CanonicalizerVersionMismatchError({ 'openclaw-policy': 2 });
+    expect(err).toBeInstanceOf(Error);
+    expect(err.name).toBe('CanonicalizerVersionMismatchError');
+    expect(err.message).toBe(
+      'canonicalizer algorithm version mismatch across peers: openclaw-policy=2',
+    );
+    expect(err.versions).toEqual({ 'openclaw-policy': 2 });
+  });
+
+  it('formats multi-peer versions map joined by comma', () => {
+    const err = new CanonicalizerVersionMismatchError({
+      'openclaw-workspace': 1,
+      'openclaw-policy': 2,
+      'openclaw-snap': 1,
+    });
+    expect(err.message).toContain('openclaw-workspace=1');
+    expect(err.message).toContain('openclaw-policy=2');
+    expect(err.message).toContain('openclaw-snap=1');
+    expect(err.message.startsWith('canonicalizer algorithm version mismatch across peers: ')).toBe(
+      true,
+    );
+    // Comma-separated: two separators for three entries.
+    expect(err.message.split(', ').length).toBe(3);
+  });
+
+  it('exposes versions as a readonly snapshot', () => {
+    const versions = { 'openclaw-policy': 1, 'openclaw-snap': 2 };
+    const err = new CanonicalizerVersionMismatchError(versions);
+    expect(err.versions).toEqual(versions);
   });
 });
