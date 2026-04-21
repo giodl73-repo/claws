@@ -51,5 +51,6 @@ export async function runSnapServe(opts: SnapServeOptions): Promise<number> {
   await new Promise<void>(() => {
     // park until signal
   });
+  /* c8 ignore next -- unreachable: park promise never resolves; shutdown exits via process.exit */
   return 0;
 }
