@@ -26,12 +26,11 @@ function makeCapSink(): {
     async writeDrainWindow(e): Promise<DrainWindowEntry> {
       seq += 1;
       const full: DrainWindowEntry = {
-        kind: 'drain-window',
-        sinkId: 'unit-sink',
-        sequence: seq,
+        type: 'drain-window',
+        ts: new Date(0).toISOString(),
+        seq,
         prevHash: 'sha256:' + '0'.repeat(64),
-        entryHash: 'sha256:' + '1'.repeat(64),
-        emittedAt: 0,
+        hash: 'sha256:' + '1'.repeat(64),
         from: e.from,
         to: e.to,
         inflightCount: e.inflightCount,
@@ -45,12 +44,11 @@ function makeCapSink(): {
     async writeOnSnapshotPromotedTimeout(e): Promise<OnSnapshotPromotedTimeoutEntry> {
       seq += 1;
       const full: OnSnapshotPromotedTimeoutEntry = {
-        kind: 'on-snapshot-promoted-timeout',
-        sinkId: 'unit-sink',
-        sequence: seq,
+        type: 'on-snapshot-promoted-timeout',
+        ts: new Date(0).toISOString(),
+        seq,
         prevHash: 'sha256:' + '0'.repeat(64),
-        entryHash: 'sha256:' + '2'.repeat(64),
-        emittedAt: 0,
+        hash: 'sha256:' + '2'.repeat(64),
         providerId: e.providerId,
         from: e.from,
         snapshotId: e.snapshotId,

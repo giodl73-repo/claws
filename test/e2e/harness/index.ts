@@ -50,8 +50,7 @@ export {
   type FileIngestContext,
   type ProviderHooks,
   type ProviderSpec,
-  type DecisionInvalidReason,
-  type DecisionEntry,
+  type ProviderContribution,
   type MergedDecision,
   type HostMockOptions,
   type ToolCallInputs,
@@ -147,10 +146,26 @@ export {
   type SnapshotSwitchOptions,
 } from './snapshot-switch.ts';
 export type {
+  Tier,
+  AuditDecisionAction,
+  DecisionInvalidReason,
+  ApprovalEntryOutcome,
+  AuditChainFields,
+  AuditChainEntry,
+  ProducerEntry,
+  ProducerEntryInput,
+  DecisionEntry,
+  DecisionEntryInput,
+  ApprovalEntry,
+  ApprovalEntryInput,
   DrainWindowEntry,
   DrainWindowEntryInput,
   OnSnapshotPromotedTimeoutEntry,
   OnSnapshotPromotedTimeoutEntryInput,
+  SidecarUnreachableEntry,
+  SidecarUnreachableEntryInput,
+  CrossTenantAccessDeniedEntry,
+  CrossTenantAccessDeniedEntryInput,
 } from './audit-types.ts';
 export {
   canonicalizerByteIdentical,
@@ -159,4 +174,37 @@ export {
   type CanonicalizerByteResult,
   type CanonicalizerVersionResult,
 } from './canonicalizer-check.ts';
-export type AuditChain = never;
+export {
+  AuditChainWriter,
+  AuditChainReader,
+  verifyChain,
+  computeEntryHash,
+  modifiedArgsHash,
+  GENESIS_HASH,
+  DEFAULT_SCOPE_ALLOWLIST,
+  type AuditChainWriterOptions,
+  type AuditChainReaderOptions,
+  type VerifyChainReason,
+  type VerifyChainResult,
+  type VerifyChainOk,
+  type VerifyChainFail,
+} from './audit-chain.ts';
+export {
+  writeTeardownReport,
+  teardownReportPath,
+  DEFAULT_TEARDOWN_BASE_DIR,
+  type TeardownReport,
+  type SnapExit,
+  type TmpCleanup,
+  type WriteTeardownReportOptions,
+} from './teardown-report.ts';
+export {
+  runPresuiteHygiene,
+  killStaleClawsProcesses,
+  sweepHarnessTmpDirs,
+  parseWmicCsv,
+  parsePsOutput,
+  type PresuiteHygieneOptions,
+  type PresuiteHygieneResult,
+  type PresuiteProcess,
+} from './presuite-hygiene.ts';

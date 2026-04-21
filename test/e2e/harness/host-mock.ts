@@ -78,9 +78,21 @@ export interface ProviderSpec {
   readonly hooks: ProviderHooks;
 }
 
-export type DecisionInvalidReason = 'divergent-content-hash';
+// The subset of DecisionInvalidReason that the per-provider merger can
+// surface — `divergent-content-hash` is the only reason merge-time
+// validation synthesizes today (CL-07 §1a P-02). Other reasons fire at the
+// audit-chain layer and are part of the full `DecisionInvalidReason` union in
+// `audit-types.ts`.
+import type { DecisionInvalidReason } from './audit-types.ts';
+export type { DecisionInvalidReason };
 
-export interface DecisionEntry {
+/**
+ * Per-provider contribution inside `MergedDecision.contributions`. Distinct
+ * from `DecisionEntry` in `audit-types.ts` — that is the CL-11 §3a audit
+ * record written to the sink; this is the merger-internal record of what
+ * each provider returned before OC-7 merging.
+ */
+export interface ProviderContribution {
   readonly providerId: string;
   readonly action: DecisionAction;
   readonly requireApproval: boolean;
@@ -92,7 +104,7 @@ export interface MergedDecision {
   readonly action: DecisionAction;
   readonly requireApproval: boolean;
   readonly modifiedArgs?: ToolArgs;
-  readonly contributions: readonly DecisionEntry[];
+  readonly contributions: readonly ProviderContribution[];
   readonly canonicalInvocationHash: string;
   readonly reason?: string;
 }
@@ -252,7 +264,7 @@ function mergeOc7(
   raw: ReadonlyArray<{ providerId: string; decision: ProviderDecision }>,
   canonicalInvocationHash: string
 ): MergedDecision {
-  const contributions: DecisionEntry[] = [];
+  const contributions: ProviderContribution[] = [];
   let stickyApproval = false;
 
   for (const r of raw) {
@@ -267,7 +279,7 @@ function mergeOc7(
       invalidReason = 'divergent-content-hash';
     }
 
-    const entry: DecisionEntry = {
+    const entry: ProviderContribution = {
       providerId: r.providerId,
       action: d.action,
       requireApproval,

@@ -71,12 +71,11 @@ function makeCapturingSink(): CapturingSink {
     async writeDrainWindow(e): Promise<DrainWindowEntry> {
       seq += 1;
       const full: DrainWindowEntry = {
-        kind: 'drain-window',
-        sinkId: 'cap',
-        sequence: seq,
+        type: 'drain-window',
+        ts: new Date(0).toISOString(),
+        seq,
         prevHash: 'sha256:' + '0'.repeat(64),
-        entryHash: 'sha256:' + '3'.repeat(64),
-        emittedAt: 0,
+        hash: 'sha256:' + '3'.repeat(64),
         from: e.from,
         to: e.to,
         inflightCount: e.inflightCount,
@@ -90,12 +89,11 @@ function makeCapturingSink(): CapturingSink {
     async writeOnSnapshotPromotedTimeout(e): Promise<OnSnapshotPromotedTimeoutEntry> {
       seq += 1;
       const full: OnSnapshotPromotedTimeoutEntry = {
-        kind: 'on-snapshot-promoted-timeout',
-        sinkId: 'cap',
-        sequence: seq,
+        type: 'on-snapshot-promoted-timeout',
+        ts: new Date(0).toISOString(),
+        seq,
         prevHash: 'sha256:' + '0'.repeat(64),
-        entryHash: 'sha256:' + '4'.repeat(64),
-        emittedAt: 0,
+        hash: 'sha256:' + '4'.repeat(64),
         providerId: e.providerId,
         from: e.from,
         snapshotId: e.snapshotId,

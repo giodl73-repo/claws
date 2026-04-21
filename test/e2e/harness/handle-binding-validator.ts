@@ -1,14 +1,7 @@
 import { verify, type KeyRegistry } from './hmac-signer.ts';
+import type { ApprovalInvalidReason } from './audit-types.ts';
 
-export type ApprovalInvalidReason =
-  | 'provider-id-mismatch'
-  | 'content-hash-mismatch'
-  | 'sequence-rollback'
-  | 'principal-mismatch'
-  | 'unknown-keyId'
-  | 'ttl-expired'
-  | 'nonce-reuse'
-  | 'signature-mismatch';
+export type { ApprovalInvalidReason };
 
 export interface ApprovalHandle {
   providerId: string;

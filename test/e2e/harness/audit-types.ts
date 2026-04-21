@@ -1,41 +1,183 @@
 /**
- * test/e2e/harness/audit-types — snapshot-switch audit entry shapes (CL-11 §3a).
+ * test/e2e/harness/audit-types — CL-11 §3a audit entry shapes.
  *
- * Pulse 41 drafts these two entry types so the snapshot-switch module
- * (`snapshot-switch.ts`) can emit them as first-class audit entries
- * alongside the pulse-39 `SinkDecisionEntry` / `SinkApprovalEntry` shapes.
- * The cross-linked hash-chain writer + finalized JCS canonicalization land in
- * pulse 43 — this module fixes the field surface so every CP-5 consumer
- * depends on the same record shape.
+ * Six entry variants compose the sink log:
  *
- * Both entries extend the common `SinkEntry` base so a single `ApprovalSink`
- * can persist them via a unified store (pulse 43 adds the variant case
- * `kind: 'drain-window' | 'on-snapshot-promoted-timeout'` to the sink).
+ *   - `ProducerEntry`               — policy artifact emission (per `claws policy generate`)
+ *   - `DecisionEntry`               — authorization decision per tool call
+ *   - `ApprovalEntry`               — approval verdict record
+ *   - `DrainWindowEntry`            — snapshot-switch drain window envelope
+ *   - `OnSnapshotPromotedTimeoutEntry` — hook timeout per provider
+ *   - `SidecarUnreachableEntry`     — companion sidecar unreachable
+ *   - `CrossTenantAccessDeniedEntry` — tenant-boundary denial
+ *
+ * Every entry carries `ts` (ISO-8601 string), `seq` (monotonic), `prevHash`
+ * (previous entry's `hash`), and `hash` (sha256 of the canonicalized body
+ * excluding the `hash` field itself). Cross-linking is by
+ * `policyArtifactSha256` (producer↔decision) and `correlationId`
+ * (decision↔approval) — the `audit-chain` writer + reader + `verifyChain`
+ * oracle in `audit-chain.ts` enforce the invariants.
+ *
+ * Emission sites for DrainWindow/Timeout/SidecarUnreachable/CrossTenant are
+ * owned by specific adapters (CP-7); the types live here because every CP-5
+ * consumer depends on the same record shape.
  *
  * @module test/e2e/harness/audit-types
  */
 
 // ---------------------------------------------------------------------------
-// Shared base shape — every entry carries sequence / prev+entry hash /
-// emittedAt just like the decision + approval entries from pulse 39.
+// Tier ladder — per CL-07 §1a R0-R5 trust tiers. Authoritative union.
 // ---------------------------------------------------------------------------
 
-interface SinkEntryBase {
-  readonly sinkId: string;
-  readonly sequence: number;
+export type Tier = 'R0' | 'R1' | 'R2' | 'R3' | 'R4' | 'R5';
+
+// ---------------------------------------------------------------------------
+// InvalidReason enums.
+// ---------------------------------------------------------------------------
+
+/**
+ * Reasons a DecisionEntry may carry `invalidReason` — 7 values covering:
+ *  - `divergent-content-hash`        → P-02 canonical invocation hash drift
+ *  - `redirect-path-escape`          → SC-14 redirect target escapes workspace
+ *  - `redirect-path-short-name`      → SC-14 8.3 short-name redirection
+ *  - `redirect-path-ads`             → SC-14 NTFS alternate data stream
+ *  - `redirect-path-symlink-escape`  → SC-14 symlink target escape
+ *  - `ttl-expired`                   → decision evaluated against expired handle
+ *  - `invalid-snapshot`              → snapshot id unknown or unfit
+ */
+export type DecisionInvalidReason =
+  | 'divergent-content-hash'
+  | 'redirect-path-escape'
+  | 'redirect-path-short-name'
+  | 'redirect-path-ads'
+  | 'redirect-path-symlink-escape'
+  | 'ttl-expired'
+  | 'invalid-snapshot';
+
+/**
+ * Reasons an ApprovalEntry may carry `invalidReason` — 8 values covering the
+ * 7 bound fields + HMAC signature pre-check, in the canonical first-failing
+ * order evaluated by pulse-49's handle-binding-validator:
+ *
+ *   1. `provider-id-mismatch`
+ *   2. `content-hash-mismatch`
+ *   3. `sequence-rollback`
+ *   4. `principal-mismatch`
+ *   5. `unknown-keyId`
+ *   6. `ttl-expired`
+ *   7. `nonce-reuse`
+ *   8. `signature-mismatch`    (canonical label; NOT 'bad-signature')
+ */
+export type ApprovalInvalidReason =
+  | 'provider-id-mismatch'
+  | 'content-hash-mismatch'
+  | 'sequence-rollback'
+  | 'principal-mismatch'
+  | 'unknown-keyId'
+  | 'ttl-expired'
+  | 'nonce-reuse'
+  | 'signature-mismatch';
+
+// ---------------------------------------------------------------------------
+// Shared chain fields — every CL-11 §3a entry carries these four.
+// ---------------------------------------------------------------------------
+
+/**
+ * Common hash-chain fields on every sink entry. `ts` is ISO-8601 (UTC); `seq`
+ * is a strictly monotonic integer; `prevHash` is the previous entry's `hash`
+ * (genesis sentinel for the first entry — see `GENESIS_HASH`); `hash` is
+ * sha256 of the canonicalized entry body excluding the `hash` field itself.
+ */
+export interface AuditChainFields {
+  readonly ts: string;
+  readonly seq: number;
   readonly prevHash: string;
-  readonly entryHash: string;
-  readonly emittedAt: number;
+  readonly hash: string;
 }
 
 // ---------------------------------------------------------------------------
-// DrainWindowEntry — emitted for the drain period between promote and admit
-// of N+1, ONLY when at least one in-flight call was captured against
-// snapshot N (R1 invariants F-07 — empty-drain promotes do not emit).
+// ProducerEntry — emitted when a policy artifact is produced
+// (`claws policy generate` output). The `scope` field names the npm scope
+// owning the artifact; validated against a runtime-configurable allowlist so
+// older entries remain deserializable across the `@bic/openclaw` →
+// `@openclaw` scope flip (F-07 widening).
 // ---------------------------------------------------------------------------
 
-export interface DrainWindowEntry extends SinkEntryBase {
-  readonly kind: 'drain-window';
+export interface ProducerEntry extends AuditChainFields {
+  readonly type: 'producer';
+  readonly policyArtifactSha256: string;
+  readonly generatedAt: string;
+  readonly scope: string;
+  readonly producerVersion: string;
+}
+
+// ---------------------------------------------------------------------------
+// DecisionEntry — authorization decision per tool call. `declaredTier` is
+// the provider's self-declared tier; `effectiveTier` is the host's capped
+// result after non-uplift rules (CL-07 §1a Rules 1-4). BOTH are present on
+// every entry, even when equal (SC-01 F-01).
+// ---------------------------------------------------------------------------
+
+/**
+ * Decision action recorded in CL-11 §3a audit entries. Distinct from
+ * `DecisionAction` in host-mock (merger surface, 4 values) because the audit
+ * surface adds `pending-conjunctive` — the provisional state for a decision
+ * waiting on a conjunctive companion approval.
+ */
+export type AuditDecisionAction =
+  | 'allow'
+  | 'deny'
+  | 'review'
+  | 'modify'
+  | 'pending-conjunctive';
+
+export interface DecisionEntry extends AuditChainFields {
+  readonly type: 'decision';
+  readonly correlationId: string;
+  readonly snapshotId: string;
+  readonly policyArtifactSha256: string;
+  readonly tool: string;
+  readonly decision: AuditDecisionAction;
+  readonly declaredTier: Tier;
+  readonly effectiveTier: Tier;
+  readonly modifiedArgsHash?: string;
+  readonly invalidReason?: DecisionInvalidReason;
+}
+
+// ---------------------------------------------------------------------------
+// ApprovalEntry — approval verdict record. Bound to a DecisionEntry by
+// `correlationId`. `keyId` + `sequenceNumber` + `signature` replay the
+// HMAC-signed handle per CL-07 §1a + pulse 38.
+// ---------------------------------------------------------------------------
+
+/**
+ * Outcome recorded in a CL-11 §3a `ApprovalEntry`. Distinct from
+ * `ApprovalOutcome` in `companion-mock.ts` (the signed-response shape the
+ * companion returns before the adapter persists it).
+ */
+export type ApprovalEntryOutcome = 'approve' | 'deny' | 'timeout' | 'rejected';
+
+export interface ApprovalEntry extends AuditChainFields {
+  readonly type: 'approval';
+  readonly correlationId: string;
+  readonly approver: string;
+  readonly outcome: ApprovalEntryOutcome;
+  readonly invalidReason?: ApprovalInvalidReason;
+  readonly ttl: number;
+  readonly nonce: string;
+  readonly keyId: string;
+  readonly sequenceNumber: number;
+  readonly signature: string;
+}
+
+// ---------------------------------------------------------------------------
+// DrainWindowEntry — drain period between promote and admit of N+1, ONLY
+// when at least one in-flight call was captured against snapshot N (R1
+// invariants F-07 — empty-drain promotes do not emit).
+// ---------------------------------------------------------------------------
+
+export interface DrainWindowEntry extends AuditChainFields {
+  readonly type: 'drain-window';
   readonly from: string | null;
   readonly to: string;
   readonly inflightCount: number;
@@ -45,12 +187,12 @@ export interface DrainWindowEntry extends SinkEntryBase {
 }
 
 // ---------------------------------------------------------------------------
-// OnSnapshotPromotedTimeoutEntry — emitted on hook timeout (CL-11 §3a).
-// One entry per provider that did not settle within `timeoutMs`.
+// OnSnapshotPromotedTimeoutEntry — emitted on hook timeout. One entry per
+// provider that did not settle within `timeoutMs`.
 // ---------------------------------------------------------------------------
 
-export interface OnSnapshotPromotedTimeoutEntry extends SinkEntryBase {
-  readonly kind: 'on-snapshot-promoted-timeout';
+export interface OnSnapshotPromotedTimeoutEntry extends AuditChainFields {
+  readonly type: 'on-snapshot-promoted-timeout';
   readonly providerId: string;
   readonly from: string | null;
   readonly snapshotId: string;
@@ -60,17 +202,62 @@ export interface OnSnapshotPromotedTimeoutEntry extends SinkEntryBase {
 }
 
 // ---------------------------------------------------------------------------
-// Inputs — the caller-facing shapes stripped of fields the sink computes
-// (sinkId, sequence, prevHash, entryHash, emittedAt). Parallel to
-// `AuditSinkDecisionInput` in host-context.ts.
+// SidecarUnreachableEntry — companion sidecar failed to answer within the
+// health window. `attempts` captures retries before giving up; `lastError`
+// is the terminal socket/HTTP error surface.
 // ---------------------------------------------------------------------------
 
-export type DrainWindowEntryInput = Omit<
-  DrainWindowEntry,
-  'kind' | 'sinkId' | 'sequence' | 'prevHash' | 'entryHash' | 'emittedAt'
+export interface SidecarUnreachableEntry extends AuditChainFields {
+  readonly type: 'sidecar-unreachable';
+  readonly sidecarId: string;
+  readonly endpoint: string;
+  readonly attempts: number;
+  readonly lastError: string;
+}
+
+// ---------------------------------------------------------------------------
+// CrossTenantAccessDeniedEntry — a decision denied at the tenant boundary.
+// Logged with both `attemptedTenantId` (what the caller claimed / tried)
+// and `callerTenantId` (what identity bridge extracted).
+// ---------------------------------------------------------------------------
+
+export interface CrossTenantAccessDeniedEntry extends AuditChainFields {
+  readonly type: 'cross-tenant-access-denied';
+  readonly correlationId: string;
+  readonly callerTenantId: string | null;
+  readonly attemptedTenantId: string;
+  readonly tool: string;
+  readonly denialReason: string;
+}
+
+// ---------------------------------------------------------------------------
+// AuditChainEntry — the full discriminated union.
+// ---------------------------------------------------------------------------
+
+export type AuditChainEntry =
+  | ProducerEntry
+  | DecisionEntry
+  | ApprovalEntry
+  | DrainWindowEntry
+  | OnSnapshotPromotedTimeoutEntry
+  | SidecarUnreachableEntry
+  | CrossTenantAccessDeniedEntry;
+
+// ---------------------------------------------------------------------------
+// Inputs — the caller-facing shapes stripped of fields the writer computes
+// (ts, seq, prevHash, hash). Parallel to `AuditSinkDecisionInput` in
+// host-context.ts.
+// ---------------------------------------------------------------------------
+
+type Inputize<T extends AuditChainFields & { readonly type: string }> = Omit<
+  T,
+  keyof AuditChainFields | 'type'
 >;
 
-export type OnSnapshotPromotedTimeoutEntryInput = Omit<
-  OnSnapshotPromotedTimeoutEntry,
-  'kind' | 'sinkId' | 'sequence' | 'prevHash' | 'entryHash' | 'emittedAt'
->;
+export type ProducerEntryInput = Inputize<ProducerEntry>;
+export type DecisionEntryInput = Inputize<DecisionEntry>;
+export type ApprovalEntryInput = Inputize<ApprovalEntry>;
+export type DrainWindowEntryInput = Inputize<DrainWindowEntry>;
+export type OnSnapshotPromotedTimeoutEntryInput = Inputize<OnSnapshotPromotedTimeoutEntry>;
+export type SidecarUnreachableEntryInput = Inputize<SidecarUnreachableEntry>;
+export type CrossTenantAccessDeniedEntryInput = Inputize<CrossTenantAccessDeniedEntry>;

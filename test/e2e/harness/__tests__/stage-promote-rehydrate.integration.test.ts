@@ -64,12 +64,11 @@ function makeSwitchSink(): SnapshotSwitchAuditSink {
     async writeDrainWindow(e): Promise<DrainWindowEntry> {
       seq += 1;
       return {
-        kind: 'drain-window',
-        sinkId: 'rehydrate-ss',
-        sequence: seq,
+        type: 'drain-window',
+        ts: new Date(0).toISOString(),
+        seq,
         prevHash: 'sha256:' + '0'.repeat(64),
-        entryHash: 'sha256:' + '3'.repeat(64),
-        emittedAt: 0,
+        hash: 'sha256:' + '3'.repeat(64),
         from: e.from,
         to: e.to,
         inflightCount: e.inflightCount,
@@ -81,12 +80,11 @@ function makeSwitchSink(): SnapshotSwitchAuditSink {
     async writeOnSnapshotPromotedTimeout(e): Promise<OnSnapshotPromotedTimeoutEntry> {
       seq += 1;
       return {
-        kind: 'on-snapshot-promoted-timeout',
-        sinkId: 'rehydrate-ss',
-        sequence: seq,
+        type: 'on-snapshot-promoted-timeout',
+        ts: new Date(0).toISOString(),
+        seq,
         prevHash: 'sha256:' + '0'.repeat(64),
-        entryHash: 'sha256:' + '4'.repeat(64),
-        emittedAt: 0,
+        hash: 'sha256:' + '4'.repeat(64),
         providerId: e.providerId,
         from: e.from,
         snapshotId: e.snapshotId,

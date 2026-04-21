@@ -69,13 +69,13 @@ export interface SnapshotSwitchAuditSink {
   writeDrainWindow(
     entry: Omit<
       DrainWindowEntry,
-      'kind' | 'sinkId' | 'sequence' | 'prevHash' | 'entryHash' | 'emittedAt'
+      'type' | 'ts' | 'seq' | 'prevHash' | 'hash'
     >,
   ): Promise<DrainWindowEntry>;
   writeOnSnapshotPromotedTimeout(
     entry: Omit<
       OnSnapshotPromotedTimeoutEntry,
-      'kind' | 'sinkId' | 'sequence' | 'prevHash' | 'entryHash' | 'emittedAt'
+      'type' | 'ts' | 'seq' | 'prevHash' | 'hash'
     >,
   ): Promise<OnSnapshotPromotedTimeoutEntry>;
 }

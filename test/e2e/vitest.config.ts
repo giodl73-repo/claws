@@ -33,6 +33,7 @@ const unitCoverageExclude = [
   ...coverageExclude,
   'harness/snap-runner.ts',
   'harness/policy-runner.ts',
+  'harness/presuite-hygiene.ts',
 ];
 
 // Integration coverage applies per-file to modules whose real code paths
@@ -45,6 +46,7 @@ const integrationCoverageInclude = [
   'harness/lifecycle.ts',
   'harness/snap-runner.ts',
   'harness/policy-runner.ts',
+  'harness/presuite-hygiene.ts',
 ];
 
 export default defineConfig({
