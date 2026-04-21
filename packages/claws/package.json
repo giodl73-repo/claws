@@ -26,6 +26,7 @@
   "dependencies": {
     "@bic/claws-sdk": "*",
     "@bic/claws-serve": "file:../claws-serve",
+    "@bic/openclaw-policy": "*",
     "@bic/openclaw-snap": "*",
     "commander": "^12.1.0"
   },

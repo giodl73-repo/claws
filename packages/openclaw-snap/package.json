@@ -12,6 +12,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./cli-handlers": {
+      "types": "./dist/cli-handlers/index.d.ts",
+      "import": "./dist/cli-handlers/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

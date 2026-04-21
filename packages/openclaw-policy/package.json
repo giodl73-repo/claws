@@ -20,6 +20,10 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/types/index.js"
     },
+    "./cli-handlers": {
+      "types": "./dist/cli-handlers/index.d.ts",
+      "import": "./dist/cli-handlers/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

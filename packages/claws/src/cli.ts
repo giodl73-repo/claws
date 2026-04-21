@@ -27,6 +27,19 @@ import {
   runSnapDelete,
 } from './commands/snap.js';
 import { runSnapServe } from './commands/snap-serve.js';
+import { runRouter as runPolicyRouter } from '@bic/openclaw-policy/cli-handlers';
+import {
+  stage as snapStage,
+  status as snapStatus,
+  upload as snapUpload,
+  list as snapListHttp,
+  diff as snapDiffIds,
+  diffStaged as snapDiffStaged,
+  checkout as snapCheckout,
+  promote as snapPromote,
+  rollback as snapRollback,
+  discardStage as snapDiscardStage,
+} from '@bic/openclaw-snap/cli-handlers';
 import { runScan } from './commands/scan.js';
 import { runKeysGenerate, runKeysList, runKeysRotate, runKeysRevoke, runKeysCeremonyInit, runKeysCeremonyReconstruct } from './commands/keys.js';
 import { runInitSkill } from './commands/init.js';
@@ -361,6 +374,135 @@ export function createProgram(): Command {
         json: opts.json,
       });
       process.exitCode = exitCode;
+    });
+
+  // ── snap (openclaw-upstream verbs via @bic/openclaw-snap/cli-handlers) ───
+  // upload / status / list / diff / diff --staged / checkout / promote /
+  // rollback / stage on|off / discard --stage — each delegates to the shared
+  // snap cli handler which hits the snap HTTP surface (endpoint configurable
+  // via --endpoint or OPENCLAW_SNAP_STORE env).
+  const snapEndpoint = (): string =>
+    process.env.OPENCLAW_SNAP_STORE ?? 'http://127.0.0.1:8443';
+  const snapCtx = (argv: readonly string[]) => ({
+    argv,
+    endpoint: snapEndpoint(),
+    stdout: (l: string) => process.stdout.write(l + '\n'),
+    stderr: (l: string) => process.stderr.write(l + '\n'),
+  });
+
+  snap
+    .command('upload')
+    .description('Commit staged content as a new draft snapshot')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (_cmdOpts, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapUpload(snapCtx(cmd.args));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('status')
+    .description('Show working tree + stage + drafts + current')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (_cmdOpts, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapStatus(snapCtx(cmd.args));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('list-http')
+    .description('List snapshots via HTTP (store-backed)')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (_cmdOpts, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapListHttp(snapCtx(cmd.args));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('diff [id1] [id2]')
+    .description('Semantic diff: --staged (working tree) or <id1> <id2> (two snapshots)')
+    .option('--staged', 'Compare staged vs canonical', false)
+    .option('--level <level>', 'Diff level (file|semantic)')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (_id1, _id2, cmdOpts: { staged: boolean }, cmd: { args: readonly string[] }) => {
+      const handler = cmdOpts.staged ? snapDiffStaged : snapDiffIds;
+      const { exitCode } = await handler(snapCtx(cmd.args));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('checkout <id>')
+    .description('Reset working tree to a snapshot')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (_id, _cmdOpts, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapCheckout(snapCtx(cmd.args));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('promote <id>')
+    .description('Promote a draft snapshot to current')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (_id, _cmdOpts, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapPromote(snapCtx(cmd.args));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('rollback <id>')
+    .description('Revert to a prior snapshot')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (_id, _cmdOpts, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapRollback(snapCtx(cmd.args));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('stage <mode>')
+    .description('Toggle auto-staging: snap stage on | off')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (_mode, _cmdOpts, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapStage(snapCtx(cmd.args));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('discard-stage')
+    .description('Clear .stage/ without uploading')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (_cmdOpts, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapDiscardStage(snapCtx(cmd.args));
+      process.exitCode = exitCode;
+    });
+
+  // ── policy (openclaw-upstream verbs via @bic/openclaw-policy/cli-handlers) ──
+  // Delegates the entire `claws policy <verb> [args...]` surface to the
+  // shared router, which dispatches to check / generate / watch / comply /
+  // test / sim / report / verify / diff. Also routes `claws doctor` and
+  // `claws upgrade` through the same top-level handlers.
+  program
+    .command('policy [verb] [args...]')
+    .description('Policy surface: check / generate / watch / comply / test / sim / report / verify / diff')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (verb: string | undefined, args: string[] = []) => {
+      const result = await runPolicyRouter({
+        binaryName: 'claws',
+        argv: ['policy', ...(verb !== undefined ? [verb] : []), ...args],
+        cwd: process.cwd(),
+        env: process.env,
+      });
+      if (result.stdout !== '') process.stdout.write(result.stdout);
+      if (result.stderr !== '') process.stderr.write(result.stderr);
+      process.exitCode = result.exitCode;
     });
 
   // ── scan ────────────────────────────────────────────────────────────
