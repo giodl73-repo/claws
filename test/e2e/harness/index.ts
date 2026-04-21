@@ -39,10 +39,8 @@ export { guardPath, PathGuardError } from './path-guard.ts';
 export {
   generatePolicy,
   PolicyGenerateError,
-  defaultClawsCommand,
   type GeneratePolicyOpts,
   type GeneratePolicyResult,
-  type ResolvedCommand,
 } from './policy-runner.ts';
 export {
   HostMock,

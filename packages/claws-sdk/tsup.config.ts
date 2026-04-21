@@ -6,6 +6,7 @@ export default defineConfig({
     'ir/index': 'src/ir/index.ts',
     'compile/index': 'src/compile/index.ts',
     'compile/violation-aware-compile': 'src/compile/violation-aware-compile.ts',
+    'compile/llm/anthropic-provider': 'src/compile/llm/anthropic-provider.ts',
     'governance/index': 'src/governance/index.ts',
     'emit/index': 'src/emit/index.ts',
     'adapter/index': 'src/adapter/index.ts',

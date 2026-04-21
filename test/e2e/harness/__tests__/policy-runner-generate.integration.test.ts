@@ -1,19 +1,31 @@
+/**
+ * policy-runner-generate — spawn the real `claws policy generate` binary
+ * and assert the structured result / error shape.
+ *
+ * Pulse 47.7 dropped the pulse-36 `opts.command` override seam now that
+ * pulses 47.1-47.5 wired the real handler and pulse 47.6 proved it
+ * end-to-end. Every test here runs the shipping `packages/claws/bin/claws.js`
+ * — no injected fakes. If a future test needs to simulate an outcome the
+ * real binary doesn't produce, add the outcome to the binary (or its
+ * fixtures), do NOT restore an override seam.
+ *
+ * These tests depend on a fresh dist build. Run `npm run build` at the
+ * repo root before the suite; the pulse-47.6 accept suite does this in
+ * `beforeAll`.
+ */
+
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  mkdtemp,
-  mkdir,
-  readFile,
-  rm,
-  writeFile,
-} from 'node:fs/promises';
+import { cp, mkdtemp, readFile, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
-  defaultClawsCommand,
   generatePolicy,
   PolicyGenerateError,
-  type ResolvedCommand,
 } from '../policy-runner.ts';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const FIXTURES_ROOT = join(HERE, '..', '..', 'fixtures');
 
 const createdDirs: string[] = [];
 
@@ -33,165 +45,95 @@ afterEach(async () => {
   }
 });
 
-async function makeTmpFixture(): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), 'pulse36-runner-'));
+async function copyFixture(fixtureName: string): Promise<string> {
+  const dir = await mkdtemp(join(tmpdir(), `pulse47-runner-${fixtureName}-`));
   createdDirs.push(dir);
-  await writeFile(join(dir, 'SOUL.md'), '# soul\n', 'utf8');
+  await cp(join(FIXTURES_ROOT, fixtureName), dir, { recursive: true });
   return dir;
 }
 
-// A fake CLI that stands in for `claws policy generate` until pulse 53
-// implements the real subcommand. It writes a policy-ir.json and optionally
-// echoes the --scope flag so the runner's arg wiring is testable.
-function fakeClaws(scriptBody: string): ResolvedCommand {
-  const script =
-    `'use strict';\n` +
-    `const fs = require('fs');\n` +
-    `const path = require('path');\n` +
-    `${scriptBody}`;
-  return {
-    bin: process.execPath,
-    args: ['-e', script, '--'],
-  };
-}
+describe('generatePolicy — real claws policy generate spawn', () => {
+  it(
+    'produces the .openclaw/policy/ artifact tree against a real fixture',
+    async () => {
+      const fixture = await copyFixture('allow-r1-public');
+      const result = await generatePolicy(fixture);
 
-describe('generatePolicy — real child-process spawn + artifact capture', () => {
-  it('produces the expected .openclaw/policy/ artifact tree', async () => {
-    const fixture = await makeTmpFixture();
-    const command = fakeClaws(
-      `const out = path.join(process.cwd(), '.openclaw', 'policy');\n` +
-        `fs.mkdirSync(out, { recursive: true });\n` +
-        `fs.writeFileSync(path.join(out, 'policy-ir.json'), '{"ok":true}');\n` +
-        `process.stdout.write('generated\\n');\n`,
-    );
+      expect(result.exitCode).toBe(0);
+      expect(result.policyDir).toBe(join(fixture, '.openclaw', 'policy'));
+      // The real generator prints `files=<n>` on success and emits the
+      // three artifacts — matches the pulse-47.6 accept-suite contract.
+      expect(result.stdout).toMatch(/files=\d+/);
 
-    const result = await generatePolicy(fixture, { command });
-    expect(result.exitCode).toBe(0);
-    expect(result.policyDir).toBe(join(fixture, '.openclaw', 'policy'));
-    expect(result.stdout).toContain('generated');
+      const st = await stat(result.policyDir);
+      expect(st.isDirectory()).toBe(true);
+      const ir = await readFile(
+        join(result.policyDir, 'policy-ir.json'),
+        'utf8',
+      );
+      expect(JSON.parse(ir).policyId).toMatch(/^sha256-/);
+    },
+    60_000,
+  );
 
-    const ir = await readFile(join(result.policyDir, 'policy-ir.json'), 'utf8');
-    expect(JSON.parse(ir)).toEqual({ ok: true });
-  });
+  it(
+    'forwards --scope into the real binary argv',
+    async () => {
+      const fixture = await copyFixture('allow-r1-public');
+      const result = await generatePolicy(fixture, { scope: '@openclaw' });
 
-  it('honors --scope by forwarding it to the child via argv', async () => {
-    const fixture = await makeTmpFixture();
-    // The fake echoes its argv so we can verify the runner wired the scope
-    // args through. Node's `-e` consumes `--scope` if it appears bare, so
-    // we include a positional marker the script echoes back verbatim.
-    const command: ResolvedCommand = {
-      bin: process.execPath,
-      args: [
-        '-e',
-        `process.stdout.write(process.argv.slice(1).join('|'));`,
-        'scope:@bic/openclaw',
-      ],
-    };
+      expect(result.exitCode).toBe(0);
+      // The real generate handler echoes `scope=<value>` on success.
+      expect(result.stdout).toMatch(/scope=@openclaw/);
+    },
+    60_000,
+  );
 
-    const result = await generatePolicy(fixture, { command });
-    expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain('scope:@bic/openclaw');
-  });
+  it(
+    'defaults to the @bic/openclaw scope when no --scope is passed',
+    async () => {
+      const fixture = await copyFixture('allow-r1-public');
+      const result = await generatePolicy(fixture);
 
-  it('fails with a PolicyGenerateError on non-zero exit', async () => {
-    const fixture = await makeTmpFixture();
-    const command = fakeClaws(
-      `process.stderr.write('malformed fixture\\n');\n` +
-        `process.exit(3);\n`,
-    );
-
-    await expect(generatePolicy(fixture, { command })).rejects.toMatchObject({
-      name: 'PolicyGenerateError',
-      exitCode: 3,
-      stderr: expect.stringContaining('malformed fixture'),
-    });
-  });
-
-  it('captures stderr alongside stdout when generation succeeds with warnings', async () => {
-    const fixture = await makeTmpFixture();
-    const command = fakeClaws(
-      `process.stdout.write('ok\\n');\n` +
-        `process.stderr.write('warning: deprecated syntax\\n');\n` +
-        `fs.mkdirSync(path.join(process.cwd(), '.openclaw', 'policy'), { recursive: true });\n`,
-    );
-
-    const result = await generatePolicy(fixture, { command });
-    expect(result.stdout).toContain('ok');
-    expect(result.stderr).toContain('warning: deprecated syntax');
-  });
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toMatch(/scope=@bic\/openclaw/);
+    },
+    60_000,
+  );
 });
 
-describe('defaultClawsCommand — production argv contract', () => {
-  it('wires `policy generate` + optional --scope into the argv', () => {
-    const cmdDefault = defaultClawsCommand();
-    expect(cmdDefault.args).toContain('policy');
-    expect(cmdDefault.args).toContain('generate');
-    expect(cmdDefault.args).not.toContain('--scope');
+describe('generatePolicy — timeout + error shape', () => {
+  it(
+    'kills the child and rejects with a timeout error when the timeout fires first',
+    async () => {
+      const fixture = await copyFixture('allow-r1-public');
+      // 5ms is far shorter than node startup + policy generate — the
+      // timeout path fires before any real work completes.
+      await expect(
+        generatePolicy(fixture, { timeoutMs: 5 }),
+      ).rejects.toMatchObject({
+        name: 'PolicyGenerateError',
+        exitCode: 124,
+      });
+    },
+    60_000,
+  );
 
-    const cmdScoped = defaultClawsCommand('@openclaw');
-    expect(cmdScoped.args).toContain('--scope');
-    expect(cmdScoped.args).toContain('@openclaw');
-  });
-});
+  it(
+    'surfaces tmpFixtureDir on the structured error (timeout path)',
+    async () => {
+      const fixture = await copyFixture('allow-r1-public');
 
-describe('generatePolicy — timeout + spawn errors', () => {
-  it('kills the child and rejects with a timeout error when it runs too long', async () => {
-    const fixture = await makeTmpFixture();
-    // Sleep long enough that the runner's timeout fires first.
-    const command: ResolvedCommand = {
-      bin: process.execPath,
-      args: ['-e', 'setTimeout(() => {}, 60_000)'],
-    };
-
-    await expect(
-      generatePolicy(fixture, { command, timeoutMs: 200 }),
-    ).rejects.toMatchObject({
-      name: 'PolicyGenerateError',
-      exitCode: 124,
-    });
-  });
-
-  it('rejects with the spawn error when the binary does not exist', async () => {
-    const fixture = await makeTmpFixture();
-    const command: ResolvedCommand = {
-      bin: '/this/binary/does/not/exist/claws-ghost',
-      args: ['policy', 'generate'],
-    };
-
-    await expect(generatePolicy(fixture, { command })).rejects.toThrow();
-  });
-
-  it('falls back to the default command when opts.command is omitted', async () => {
-    const fixture = await makeTmpFixture();
-    // No `command` override — the runner must wire up defaultClawsCommand
-    // and invoke tsx. We give it a tiny timeout so we do not wait for
-    // real tsx startup; whether the process errors or times out, we just
-    // assert that the runner exercised the default path.
-    await expect(
-      generatePolicy(fixture, { timeoutMs: 10 }),
-    ).rejects.toBeDefined();
-  });
-});
-
-describe('generatePolicy — error shape', () => {
-  it('surfaces stdout/stderr/tmpFixtureDir on the structured error', async () => {
-    const fixture = await makeTmpFixture();
-    const command = fakeClaws(
-      `process.stdout.write('partial-progress\\n');\n` +
-        `process.stderr.write('fatal\\n');\n` +
-        `process.exit(7);\n`,
-    );
-
-    try {
-      await generatePolicy(fixture, { command });
-      throw new Error('expected PolicyGenerateError');
-    } catch (err) {
-      expect(err).toBeInstanceOf(PolicyGenerateError);
-      const pge = err as PolicyGenerateError;
-      expect(pge.tmpFixtureDir).toBe(fixture);
-      expect(pge.stdout).toContain('partial-progress');
-      expect(pge.stderr).toContain('fatal');
-      expect(pge.exitCode).toBe(7);
-    }
-  });
+      try {
+        await generatePolicy(fixture, { timeoutMs: 5 });
+        throw new Error('expected PolicyGenerateError');
+      } catch (err) {
+        expect(err).toBeInstanceOf(PolicyGenerateError);
+        const pge = err as PolicyGenerateError;
+        expect(pge.tmpFixtureDir).toBe(fixture);
+        expect(pge.exitCode).toBe(124);
+      }
+    },
+    60_000,
+  );
 });

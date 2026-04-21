@@ -1,19 +1,19 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   AuditChainReader,
   AuditChainWriter,
   verifyChain,
   GENESIS_HASH,
 } from '#harness/audit-chain.ts';
-import {
-  defaultClawsCommand,
-  generatePolicy,
-  type ResolvedCommand,
-} from '#harness/policy-runner.ts';
+import { generatePolicy } from '#harness/policy-runner.ts';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const FIXTURES_ROOT = join(HERE, '..', '..', 'fixtures');
 
 const createdDirs: string[] = [];
 
@@ -37,23 +37,15 @@ function makeScratchDir(): string {
   return dir;
 }
 
-function sha256Hex(bytes: string): string {
-  return 'sha256:' + createHash('sha256').update(bytes, 'utf8').digest('hex');
+function makeFixtureScratchDir(fixtureName: string): string {
+  const dir = mkdtempSync(join(tmpdir(), `audit-chain-writing-${fixtureName}-`));
+  createdDirs.push(dir);
+  cpSync(join(FIXTURES_ROOT, fixtureName), dir, { recursive: true });
+  return dir;
 }
 
-function fakeClawsPolicyGen(outputFile: string): ResolvedCommand {
-  // A fake `claws policy generate` that writes a deterministic policy-ir.json
-  // so the integration test can hash the bytes + compare to the entry shape.
-  const scriptBody =
-    `const fs = require('fs');\n` +
-    `const path = require('path');\n` +
-    `const out = path.join(process.cwd(), '.openclaw', 'policy');\n` +
-    `fs.mkdirSync(out, { recursive: true });\n` +
-    `fs.writeFileSync(path.join(out, 'policy-ir.json'), ${JSON.stringify(outputFile)});\n`;
-  return {
-    bin: process.execPath,
-    args: ['-e', scriptBody, '--'],
-  };
+function sha256Hex(bytes: string): string {
+  return 'sha256:' + createHash('sha256').update(bytes, 'utf8').digest('hex');
 }
 
 describe('audit-chain writing (CL-11 §3a end-to-end)', () => {
@@ -128,35 +120,43 @@ describe('audit-chain writing (CL-11 §3a end-to-end)', () => {
     expect(types).toEqual(['decision', 'approval']);
   });
 
-  it('ProducerEntry emitted on `claws policy generate` — sha256 of output matches entry', async () => {
-    const dir = makeScratchDir();
-    const filePath = join(dir, 'chain.jsonl');
-    const policyBytes = '{"policyId":"p-1","tier":"R1"}';
-    const command = fakeClawsPolicyGen(policyBytes);
+  it(
+    'ProducerEntry emitted on real `claws policy generate` — sha256 of output matches entry',
+    async () => {
+      // Pulse 47.7: uses the real `claws policy generate` binary against a
+      // real CP-5 fixture rather than a pulse-36 Node-based fake. The sha
+      // covers whatever policy-ir.json the real generator produced — the
+      // bytes differ run-over-run only if the generator version changes.
+      const workspace = makeFixtureScratchDir('allow-r1-public');
+      const chainDir = makeScratchDir();
+      const filePath = join(chainDir, 'chain.jsonl');
 
-    const result = await generatePolicy(dir, { command });
-    expect(result.exitCode).toBe(0);
-    const artifact = readFileSync(join(result.policyDir, 'policy-ir.json'), 'utf8');
-    const sha = sha256Hex(artifact);
+      const result = await generatePolicy(workspace);
+      expect(result.exitCode).toBe(0);
+      const artifact = readFileSync(
+        join(result.policyDir, 'policy-ir.json'),
+        'utf8',
+      );
+      const sha = sha256Hex(artifact);
 
-    const w = new AuditChainWriter({ filePath, clock: () => 1_700_003_000_000 });
-    const producer = w.appendProducer({
-      policyArtifactSha256: sha,
-      generatedAt: new Date(1_700_003_000_000).toISOString(),
-      scope: '@bic/openclaw',
-      producerVersion: '1.0.0',
-    });
-    expect(producer.policyArtifactSha256).toBe(sha);
-    expect(producer.prevHash).toBe(GENESIS_HASH);
+      const w = new AuditChainWriter({ filePath, clock: () => 1_700_003_000_000 });
+      const producer = w.appendProducer({
+        policyArtifactSha256: sha,
+        generatedAt: new Date(1_700_003_000_000).toISOString(),
+        scope: '@bic/openclaw',
+        producerVersion: '1.0.0',
+      });
+      expect(producer.policyArtifactSha256).toBe(sha);
+      expect(producer.prevHash).toBe(GENESIS_HASH);
 
-    // Reader finds the producer by sha.
-    const reader = new AuditChainReader({ filePath });
-    const found = reader.byPolicyArtifactSha256(sha);
-    expect(found).toHaveLength(1);
-    expect(found[0]!.type).toBe('producer');
-    // Ensure the fake didn't leak the defaultClawsCommand fallback.
-    expect(defaultClawsCommand).toBeDefined();
-  });
+      // Reader finds the producer by sha.
+      const reader = new AuditChainReader({ filePath });
+      const found = reader.byPolicyArtifactSha256(sha);
+      expect(found).toHaveLength(1);
+      expect(found[0]!.type).toBe('producer');
+    },
+    60_000,
+  );
 
   it('hash chain verifies via verifyChain for a 3-entry run (producer + decision + approval)', () => {
     const dir = makeScratchDir();

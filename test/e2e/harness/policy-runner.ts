@@ -6,9 +6,24 @@
  * path (preCommand hooks, exit-code semantics, stderr framing) and the test
  * would stop being a fair proof that the shipped binary works.
  *
- * The binary is spawned via `tsx cli.ts` against the repo's working
- * `packages/claws/src/cli.ts` so harness runs always see the current source,
- * not a stale `dist/` build.
+ * The binary is spawned via `node bin/claws.js` — the same shipping entry
+ * point exercised by the pulse 47.6 D7 dual-spawn gate. `src/cli.ts` only
+ * exports `createProgram()`; invoking it via `tsx src/cli.ts` produces no
+ * output because nothing calls `parseAsync`. The dist entry wraps that
+ * for us, so the harness runs exactly what users run.
+ *
+ * Pulse 47.7 removed the pulse-36 `command?: ResolvedCommand` override
+ * seam. CP-5.5 wired the real `policy generate` handler (pulses 47.1-47.5)
+ * and pulse 47.6 proved it works end-to-end on the real binary, so the
+ * override is obsolete. The real binary is now authoritative; tests that
+ * want to simulate the runner's spawn/capture plumbing must use the real
+ * CLI or a harness of their own making — they MAY NOT paper over CLI gaps
+ * by injecting a fake command here.
+ *
+ * Callers MUST ensure the dist build is fresh (run `npm run build` before
+ * the suite). The pulse-47.6 accept suite enforces this via a `beforeAll`
+ * build step; other suites that call `generatePolicy` inherit the same
+ * contract.
  */
 
 import { spawn } from 'node:child_process';
@@ -19,12 +34,6 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 
 export interface GeneratePolicyOpts {
   scope?: '@bic/openclaw' | '@openclaw';
-  /**
-   * Override the command executed. Production callers leave this unset;
-   * tests that exercise the runner's spawn/capture plumbing without the
-   * real `policy generate` command injected here.
-   */
-  command?: ResolvedCommand;
   /** Milliseconds before the child is killed; default 30_000. */
   timeoutMs?: number;
   /** Extra env overlayed on `process.env`. */
@@ -36,11 +45,6 @@ export interface GeneratePolicyResult {
   stdout: string;
   stderr: string;
   exitCode: number;
-}
-
-export interface ResolvedCommand {
-  bin: string;
-  args: readonly string[];
 }
 
 export class PolicyGenerateError extends Error {
@@ -58,6 +62,11 @@ export class PolicyGenerateError extends Error {
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 
+interface ResolvedCommand {
+  bin: string;
+  args: readonly string[];
+}
+
 /**
  * Runs `claws policy generate` against `tmpFixtureDir` (which MUST already
  * be a per-scenario tmp copy produced by fixture-copier — we never mutate
@@ -69,7 +78,7 @@ export async function generatePolicy(
   tmpFixtureDir: string,
   opts: GeneratePolicyOpts = {},
 ): Promise<GeneratePolicyResult> {
-  const command = opts.command ?? defaultClawsCommand(opts.scope);
+  const command = resolveClawsCommand(opts.scope);
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const env: NodeJS.ProcessEnv = { ...process.env, ...opts.env };
 
@@ -97,28 +106,29 @@ export async function generatePolicy(
 }
 
 /**
- * Resolve the default command that invokes the in-tree claws CLI through
- * tsx. We target `packages/claws/src/cli.ts` so the test always runs the
- * current source — harness runs don't depend on a fresh `tsup` build.
+ * Build the argv that invokes the shipping claws CLI via `node bin/claws.js`.
+ * This is the same entry point the pulse 47.6 D7 dual-spawn gate uses in
+ * its `node-bin` mode — the artifact users actually run.
  */
-export function defaultClawsCommand(
+function resolveClawsCommand(
   scope?: '@bic/openclaw' | '@openclaw',
 ): ResolvedCommand {
-  const cliPath = join(
+  const binPath = join(
     repoRoot(),
     'packages',
     'claws',
-    'src',
-    'cli.ts',
+    'bin',
+    'claws.js',
   );
-  const args: string[] = ['tsx', cliPath, 'policy', 'generate'];
+  const args: string[] = [binPath, 'policy', 'generate'];
   if (scope !== undefined) {
     args.push('--scope', scope);
   }
-  // The first arg is the bin we actually exec. Passing `tsx` as argv[0]
-  // (a wrapper shim) is fine on Windows because npm puts `tsx.cmd` next
-  // to `tsx` and Node resolves the .cmd for us when `shell: true`.
-  return { bin: args[0]!, args: args.slice(1) };
+  // process.execPath is the absolute node binary; spawnCapture's Windows
+  // shell-mode branch deliberately skips shell wrapping for absolute bins
+  // so paths with spaces (e.g. "C:\Program Files\nodejs") stay quoted
+  // correctly.
+  return { bin: process.execPath, args };
 }
 
 function repoRoot(): string {

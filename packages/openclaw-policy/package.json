@@ -1,6 +1,6 @@
 {
   "name": "@bic/openclaw-policy",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "OpenClaw policy generator + /runtime ABI for generated gateway plugins. Consolidates compile, emit, governance-ast, and runtime helpers into one package.",
   "license": "MIT",
   "type": "module",
