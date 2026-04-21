@@ -376,14 +376,14 @@ const x = 42;
   });
 
   it('fails when @craftworks/ import is present', () => {
-    const code = `import { parse } from '@bic/claws-sdk/compile/parse.js';`;
+    const code = `import { parse } from '@craftworks/compiler-sdk/parse.js';`;
     expect(() => {
       expectNoForbiddenImports(code);
     }).toThrow();
   });
 
   it('fails when @claws/ import is present', () => {
-    const code = `import { something } from '@bic/claws-test/utils.js';`;
+    const code = `import { something } from '@claws/test-utils.js';`;
     expect(() => {
       expectNoForbiddenImports(code);
     }).toThrow();
@@ -391,8 +391,8 @@ const x = 42;
 
   it('fails when both @craftworks/ and @claws/ imports are present', () => {
     const code = `
-import { parse } from '@bic/claws-sdk/compile/parse.js';
-import { something } from '@bic/claws-test/utils.js';
+import { parse } from '@craftworks/compiler-sdk/parse.js';
+import { something } from '@claws/test-utils.js';
 `;
     expect(() => {
       expectNoForbiddenImports(code);
