@@ -5,6 +5,10 @@
   "description": "Workspace-internal E2E harness + scenarios for claws (pulses 34..47).",
   "type": "module",
   "dependencies": {
+    "@bic/openclaw-guardrails": "*",
+    "@bic/openclaw-policy": "*",
+    "@bic/openclaw-snap": "*",
+    "@bic/openclaw-workspace": "*",
     "tree-kill": "^1.2.2"
   }
 }

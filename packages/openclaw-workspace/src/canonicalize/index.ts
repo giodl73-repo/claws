@@ -13,7 +13,9 @@ export {
   computeStrippedHash,
   safeParse,
   CANONICALIZER_VERSION,
+  canonicalizerAlgorithmVersion,
   CanonicalizeError,
   CanonicalizeErrorCode,
+  CanonicalizerVersionMismatchError,
   type CanonicalizeErrorCodeValue,
 } from './canonicalize.js';

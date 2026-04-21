@@ -18,6 +18,8 @@
  */
 import { createHash } from 'node:crypto';
 
+import { canonicalize as jcsCanonicalize } from '@bic/openclaw-workspace/canonicalize';
+
 export type JsonValue =
   | null
   | boolean
@@ -115,42 +117,44 @@ const RANK: Record<DecisionAction, number> = {
   allow: 0,
 };
 
+/**
+ * Compute the canonical invocation hash as `sha256:<hex>` over the
+ * JCS-canonical UTF-8 bytes of the normalized invocation record. The
+ * canonicalization step delegates to `@bic/openclaw-workspace/canonicalize`
+ * so this helper shares one canonicalizer with policy/snap/audit — any
+ * parallel implementation would be a silent drift vector (CL-NEW §1).
+ *
+ * The `sha256:<hex>` prefix is load-bearing for
+ * `ProviderApprovalHandle.contentHash` interop; see
+ * `AuthorizationContext.canonicalInvocationHash` consumers in adapters +
+ * approvals. It is distinct from the `sha256-<base64url>` prefix emitted by
+ * `canonicalHash` in the workspace module (which is reserved for policyId /
+ * snapshotId).
+ */
 export function canonicalize(input: ToolCallInputs | {
   readonly tool: string;
   readonly args: ToolArgs;
   readonly snapshotId: string;
   readonly principal: string;
 }): string {
-  const normalized = canonicalizeJson({
+  if (hasNonFinite(input.args)) {
+    throw new Error('host-mock: non-finite numbers are not JSON-canonicalizable');
+  }
+  const normalized = jcsCanonicalize({
     tool: input.tool,
     args: input.args,
     snapshotId: input.snapshotId,
     principal: input.principal,
   });
-  return 'sha256:' + createHash('sha256').update(normalized).digest('hex');
+  return 'sha256:' + createHash('sha256').update(normalized, 'utf8').digest('hex');
 }
 
-function canonicalizeJson(value: JsonValue): string {
-  if (value === null) return 'null';
-  if (typeof value === 'boolean') return value ? 'true' : 'false';
-  if (typeof value === 'number') {
-    if (!Number.isFinite(value)) {
-      throw new Error('host-mock: non-finite numbers are not JSON-canonicalizable');
-    }
-    return JSON.stringify(value);
-  }
-  if (typeof value === 'string') return JSON.stringify(value);
-  if (Array.isArray(value)) {
-    return '[' + value.map(canonicalizeJson).join(',') + ']';
-  }
-  const keys = Object.keys(value).sort();
-  return (
-    '{' +
-    keys
-      .map((k) => JSON.stringify(k) + ':' + canonicalizeJson(value[k] as JsonValue))
-      .join(',') +
-    '}'
-  );
+function hasNonFinite(value: JsonValue): boolean {
+  if (typeof value === 'number') return !Number.isFinite(value);
+  if (value === null) return false;
+  if (typeof value !== 'object') return false;
+  if (Array.isArray(value)) return value.some(hasNonFinite);
+  return Object.values(value).some(hasNonFinite);
 }
 
 export class HostMock {

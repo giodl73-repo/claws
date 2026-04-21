@@ -47,6 +47,8 @@ export {
   canonicalHash,
   computePolicyId,
   CANONICALIZER_VERSION,
+  canonicalizerAlgorithmVersion,
+  CanonicalizerVersionMismatchError,
   parseWorkspaceFile,
   extractTools,
   extractDenyRules,

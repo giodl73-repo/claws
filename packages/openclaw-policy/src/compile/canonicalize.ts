@@ -13,11 +13,19 @@ import {
   canonicalHash,
   computeStrippedHash,
   CANONICALIZER_VERSION,
+  canonicalizerAlgorithmVersion,
+  CanonicalizerVersionMismatchError,
 } from '@bic/openclaw-workspace/canonicalize';
 
 import type { PolicyIR } from '../types/index.js';
 
-export { canonicalize, canonicalHash, CANONICALIZER_VERSION };
+export {
+  canonicalize,
+  canonicalHash,
+  CANONICALIZER_VERSION,
+  canonicalizerAlgorithmVersion,
+  CanonicalizerVersionMismatchError,
+};
 
 export function computePolicyId(ir: PolicyIR): string {
   return computeStrippedHash(ir, ['policyId', 'canonicalizerVersion']);

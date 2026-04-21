@@ -27,3 +27,13 @@ export type {
 export { inMemoryStore, filesystemStore } from './store/index.js';
 export { startServer } from './server/index.js';
 export type { ServerHandle, StartServerOptions } from './server/startServer.js';
+
+export {
+  canonicalize,
+  canonicalHash,
+  CANONICALIZER_VERSION,
+  canonicalizerAlgorithmVersion,
+  CanonicalizeError,
+  CanonicalizerVersionMismatchError,
+} from '@bic/openclaw-workspace/canonicalize';
+export { computeSnapshotId, computePolicyId } from './canonical.js';

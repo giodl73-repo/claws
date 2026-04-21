@@ -152,5 +152,11 @@ export type {
   OnSnapshotPromotedTimeoutEntry,
   OnSnapshotPromotedTimeoutEntryInput,
 } from './audit-types.ts';
-export type Canonicalizer = never;
+export {
+  canonicalizerByteIdentical,
+  canonicalizerVersionCheck,
+  CanonicalizerVersionMismatchError,
+  type CanonicalizerByteResult,
+  type CanonicalizerVersionResult,
+} from './canonicalizer-check.ts';
 export type AuditChain = never;

@@ -19,6 +19,32 @@ import { createHash } from 'node:crypto';
 /** Current canonicalizer version. Major bump on any output-byte change. */
 export const CANONICALIZER_VERSION = '1.0.0';
 
+/**
+ * Numeric algorithm version for peer-package compatibility checks (CL-NEW §5).
+ * Distinct from `CANONICALIZER_VERSION` (semver string for artifact records);
+ * this is the `canonicalizerAlgorithmVersion` that every consumer re-exports
+ * so peer drift can be detected by value equality.
+ */
+export const canonicalizerAlgorithmVersion: 1 = 1;
+
+/**
+ * Thrown when canonicalizer algorithm versions disagree across consumers of
+ * `@bic/openclaw-workspace/canonicalize`. Any disagreement is a package
+ * install/version drift — all three peers MUST agree on the integer.
+ */
+export class CanonicalizerVersionMismatchError extends Error {
+  readonly versions: Readonly<Record<string, number>>;
+
+  constructor(versions: Readonly<Record<string, number>>) {
+    const entries = Object.entries(versions)
+      .map(([k, v]) => `${k}=${String(v)}`)
+      .join(', ');
+    super(`canonicalizer algorithm version mismatch across peers: ${entries}`);
+    this.name = 'CanonicalizerVersionMismatchError';
+    this.versions = versions;
+  }
+}
+
 export const CanonicalizeErrorCode = {
   NON_FINITE: 'E_NON_FINITE',
   UNDEFINED_IN_ARRAY: 'E_UNDEFINED_IN_ARRAY',

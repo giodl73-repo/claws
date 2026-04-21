@@ -45,3 +45,12 @@ export {
   jsonlExport,
   syslogExport,
 } from './export.js';
+
+export {
+  canonicalize,
+  canonicalHash,
+  CANONICALIZER_VERSION,
+  canonicalizerAlgorithmVersion,
+  CanonicalizeError,
+  CanonicalizerVersionMismatchError,
+} from '@bic/openclaw-workspace/canonicalize';
