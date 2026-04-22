@@ -1,0 +1,39 @@
+{
+  "pulse": 76,
+  "wave": "horus",
+  "repo": "bic/claws",
+  "generated_at": "2026-04-22T00:00:00Z",
+  "indexes_updated": [
+    {
+      "path": "docs/specs/README.md",
+      "changes": [
+        "Version bumped 1.4 → 2.0",
+        "Spec count 14 → 16 (CL-15 + CL-16 added)",
+        "Status tallies updated: 6 Draft, 8 Retired, 2 Horus-promoted",
+        "Per-spec Status column carries successor pointers for retired specs",
+        "Post-Horus advisory added pointing to per-package doc trees"
+      ]
+    },
+    {
+      "path": "docs/README.md",
+      "changes": [
+        "Package directory map established (pulses 74.5 + 74.6 seeded)",
+        "14 package/domain dirs linked: workspace, guardrails, policy, snap, lsp (incubating); cli, action, sdk, serve, skill-kit, test (internal); security, upstream, repo (domains)"
+      ]
+    }
+  ],
+  "tooling_landed": [
+    "tools/doc-sync/verify-indexes.ts",
+    "tools/doc-sync/verify-indexes.integration.test.ts"
+  ],
+  "tests_passed": 6,
+  "verify_indexes_outcome": "clean (0 drift findings)",
+  "atoms_oracle_outcome": "clean (94 atoms, 0 orphans, pulse 75)",
+  "repo_ops_delta": {
+    "new_dirs_clean": true,
+    "pre_existing_findings_out_of_scope": "docs/concepts/fleet-*, docs/traces/*, docs/getting-started/tutorial.md, docs/proposals/openclaw-upstream/* — targeted by future waves beyond Horus close"
+  },
+  "doc_sync_outcome": "clean",
+  "doc_updates_checked": 36,
+  "doc_updates_total": 36
+}
