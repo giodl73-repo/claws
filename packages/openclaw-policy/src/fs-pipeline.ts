@@ -42,6 +42,8 @@ import {
 } from './emit/emit-audit-chain.js';
 import { DEFAULT_SCOPE_PREFIX, emitPluginCode } from './emit/emit-plugin.js';
 import { emitPolicyIR } from './emit/emit-policy-ir.js';
+import type { R5FailOpenDiagnostic } from './generator/diagnostics.js';
+import { validateR5FailOpen } from './generator/validators/r5-fail-open.js';
 import type {
   Diagnostic,
   GenerateOptions,
@@ -137,6 +139,43 @@ export async function fsGenerate(
     if (hasError) {
       return { workspaceRoot: opts.workspaceRoot, writtenFiles: [], diagnostics };
     }
+  }
+
+  // 4b. Declaration-lowering validators (CP-6 pulse 53). R5 + failOpen is
+  //     rejected unconditionally per proposal §1.6 — independent of
+  //     `strict`, because the combination violates a compile-time
+  //     invariant, not a policy preference. No artifacts are emitted on
+  //     failure (SC-07 F-05).
+  const generatorDiagnostics: R5FailOpenDiagnostic[] = [];
+  for (const tool of ir.tools) {
+    const r = validateR5FailOpen(tool);
+    if (!r.ok) generatorDiagnostics.push(r.diagnostic);
+  }
+  if (generatorDiagnostics.length > 0) {
+    for (const gd of generatorDiagnostics) {
+      diagnostics.push({
+        code: 'OC-POLICY-E103',
+        severity: 'error',
+        message: gd.message,
+        path: gd.sourcePath,
+        line: gd.line,
+        column: gd.column,
+      });
+    }
+    return {
+      workspaceRoot: opts.workspaceRoot,
+      writtenFiles: [],
+      diagnostics,
+      generatorDiagnostics: generatorDiagnostics.map((gd) => ({
+        kind: gd.kind,
+        toolName: gd.toolName,
+        sourcePath: gd.sourcePath,
+        line: gd.line,
+        column: gd.column,
+        invalidReason: gd.invalidReason,
+        message: gd.message,
+      })),
+    };
   }
 
   // 5. Emit the three artifacts and write atomically via workspace.

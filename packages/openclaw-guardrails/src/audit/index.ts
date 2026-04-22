@@ -63,3 +63,14 @@ export {
   TRUST_SET_RELOAD_FAILED_TYPE,
   isTrustSetReloadFailedEntry,
 } from './trust-set-reload-failed-entry.js';
+
+export type {
+  NonceEvictionEntry,
+  NonceEvictionSink,
+  NonceScope,
+} from './nonce-eviction-entry.js';
+export {
+  NONCE_EVICTION_REASON,
+  NONCE_EVICTION_TYPE,
+  isNonceEvictionEntry,
+} from './nonce-eviction-entry.js';

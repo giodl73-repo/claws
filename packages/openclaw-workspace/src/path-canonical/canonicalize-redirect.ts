@@ -122,11 +122,20 @@ export function canonicalizeRedirect(
 
   // Step 6: fs.realpath. Symlink escape catches cases where the logical
   // path sits under the stage dir but the physical target (after symlink
-  // resolution) does not.
+  // resolution) does not. Resolve the workspace root through realpath too,
+  // so temp-dir aliases (Windows 8.3 / macOS `/tmp -> /private/tmp`)
+  // compare cleanly against the realpath-resolved candidate.
   if (options.skipRealpath !== true) {
     try {
       const real = realpathSync.native(resolved);
-      if (!isInsideStage(real, stagePrefix)) {
+      let realStagePrefix = stagePrefix;
+      try {
+        realStagePrefix = realpathSync.native(resolve(workspaceRoot)) + sep + STAGE_REL;
+      } catch {
+        // Workspace root may not exist on the filesystem; fall back to
+        // the logical prefix (equivalent when no alias exists).
+      }
+      if (!isInsideStage(real, realStagePrefix)) {
         return { ok: false, invalidReason: 'redirect-path-symlink-escape' };
       }
       return { ok: true, path: real };

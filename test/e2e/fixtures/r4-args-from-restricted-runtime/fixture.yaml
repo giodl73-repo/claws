@@ -1,0 +1,13 @@
+series: tools-at-risk
+scenarioCode: SC-06
+fixtureId: r4-args-from-restricted-runtime
+expected:
+  declaredTier: R4
+  effectiveTier: R5
+  effectiveSensitivity: RESTRICTED
+  escalationSource: runtime-provenance
+  verb: review
+  chainOk: true
+  auditShape:
+    decisions: 1
+    approvals: 1

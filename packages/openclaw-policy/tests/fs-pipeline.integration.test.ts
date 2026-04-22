@@ -199,4 +199,42 @@ describe('fsGenerate — on-disk generate + verify round-trip', () => {
       rmSync(ws, { recursive: true, force: true });
     }
   });
+
+  it('rejects R5 + failOpen without --strict; emits generatorDiagnostics and no artifacts', async () => {
+    // Pulse 53 SC-07: generator guard runs unconditionally — the
+    // r5-fail-open rule is a compile-time invariant, not a strictness
+    // knob. Artifacts MUST NOT hit disk when the guard fires.
+    const ws = mkdtempSync(join(tmpdir(), 'openclaw-policy-r5fo-'));
+    writeFileSync(
+      join(ws, 'TOOLS.md'),
+      [
+        '# fixture — TOOLS',
+        '',
+        '## Tools',
+        '',
+        '### send-email-failopen # R5, COMMUNICATE, IRREVERSIBLE_EXTERNAL, failOpen',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+    try {
+      const res = await generate({ workspaceRoot: ws });
+      expect(res.writtenFiles).toEqual([]);
+      expect(res.generatorDiagnostics).toBeDefined();
+      expect(res.generatorDiagnostics!).toHaveLength(1);
+      const [gd] = res.generatorDiagnostics!;
+      expect(gd!.kind).toBe('r5-fail-open');
+      expect(gd!.invalidReason).toBe('r5-fail-open-declared');
+      expect(gd!.toolName).toBe('send-email-failopen');
+      expect(gd!.line).toBe(5);
+      expect(gd!.column).toBe(5);
+      expect(
+        res.diagnostics.some(
+          (d) => d.severity === 'error' && d.code === 'OC-POLICY-E103',
+        ),
+      ).toBe(true);
+    } finally {
+      rmSync(ws, { recursive: true, force: true });
+    }
+  });
 });

@@ -166,12 +166,15 @@ export interface DecisionEntry extends AuditChainFields {
   readonly failOpenOverridden?: boolean;
   /**
    * Axis on which the tier was escalated (compile-time generator vs
-   * runtime provenance). Always present on every DecisionEntry — `null`
-   * is the "no escalation" sentinel so queries can discriminate between
-   * "no escalation observed" and "escalation field absent on older
-   * entries" (which is a schema drift vector).
+   * runtime provenance). `null` is the "no escalation" sentinel —
+   * writers set it explicitly when `effectiveTier === declaredTier`.
+   * The field is optional at the type level because entries written
+   * before this field existed remain deserializable; new DecisionEntry
+   * writers SHOULD populate it (null or a specific source) so older
+   * "absent" vs newer "explicit null" cases can be distinguished
+   * downstream.
    */
-  readonly escalationSource: EscalationSource;
+  readonly escalationSource?: EscalationSource;
 }
 
 // ---------------------------------------------------------------------------
