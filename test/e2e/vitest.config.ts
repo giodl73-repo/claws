@@ -92,6 +92,14 @@ export default defineConfig({
           include: ['harness/__tests__/**/*.integration.test.ts'],
           forceExit: true,
           testTimeout: 30_000,
+          // Serialize file execution within this project. Integration files
+          // spawn real child processes (snap serve, policy generate) that
+          // contend for OS resources (ephemeral ports, process table) when
+          // run in parallel with each other AND the accept project. Keeps
+          // per-file behavior deterministic without losing parallelism across
+          // unit/integration projects (vitest runs projects in parallel by
+          // default).
+          fileParallelism: false,
           exclude: sharedExclude,
           coverage: {
             provider: 'v8',
@@ -127,6 +135,13 @@ export default defineConfig({
           include: ['accept/**/*.accept.test.ts'],
           forceExit: true,
           testTimeout: 120_000,
+          // Serialize file execution within this project. Accept files spawn
+          // real `claws` binaries via `process.execPath` — 4 fixtures × 2
+          // spawn modes × 22 verbs = up to 176 process spawns. Parallel file
+          // execution on top of that overloads the Windows process table and
+          // ephemeral-port pool. Per-file serial + project-level parallel
+          // (with integration) is the safe sweet spot.
+          fileParallelism: false,
           exclude: sharedExclude,
         },
       }),
