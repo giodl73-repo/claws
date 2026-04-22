@@ -26,8 +26,10 @@ import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { resolve, join, relative, sep } from 'node:path';
 import { argv, exit, stdout, stderr } from 'node:process';
 
+import { validateAcceptScenarios } from './accept-runner/index.ts';
+
 export interface Finding {
-  readonly validator: 'doc-structure' | 'atom-coverage' | 'readme-reachability';
+  readonly validator: 'doc-structure' | 'atom-coverage' | 'readme-reachability' | 'accept-runner';
   readonly severity: 'BLOCK' | 'WARN';
   readonly atomId?: string;
   readonly file?: string;
@@ -341,6 +343,7 @@ export function runAll(docsRoot: string): CheckResult {
     ...validateDocStructure(docsRoot),
     ...validateAtomCoverage(docsRoot),
     ...validateReadmeReachability(docsRoot),
+    ...validateAcceptScenarios(docsRoot),
   ];
   const blockCount = findings.filter((f) => f.severity === 'BLOCK').length;
   const warnCount = findings.filter((f) => f.severity === 'WARN').length;
@@ -373,7 +376,10 @@ function main(): void {
   exit(0);
 }
 
-// Only run main when invoked as script (not when imported by tests)
-if (import.meta.url === `file://${resolve(argv[1] ?? '').replace(/\\/g, '/')}`) {
+// Only run main when invoked as script (not when imported by tests).
+// On Windows tsx, import.meta.url is file:///C:/... — we just compare
+// the resolved path suffix of argv[1] against this module's URL.
+const entryPath = resolve(argv[1] ?? '').replace(/\\/g, '/');
+if (import.meta.url.endsWith(entryPath) || import.meta.url.endsWith(`/${entryPath}`)) {
   main();
 }

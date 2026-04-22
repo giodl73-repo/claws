@@ -9,7 +9,9 @@
     "test": "vitest run"
   },
   "devDependencies": {
+    "@types/node": "*",
     "tsx": "*",
+    "typescript": "*",
     "vitest": "*"
   }
 }
