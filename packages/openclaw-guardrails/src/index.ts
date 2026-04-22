@@ -46,3 +46,16 @@ export { ProviderRegistryImpl, composeDecisions } from './registry.js';
 
 // Reference implementation
 export { ShellExecProvider } from './shell-exec-provider.js';
+
+// Handle-binding validator (CL-07 §1a + CL-11 §3a first-failing order)
+export {
+  validateHandle,
+  EVALUATION_ORDER,
+} from './handle-binding/index.js';
+export type {
+  ApprovalHandle,
+  InvalidReason,
+  ValidationContext,
+  ValidationDeps,
+  ValidationResult,
+} from './handle-binding/index.js';
