@@ -54,3 +54,12 @@ export {
   CanonicalizeError,
   CanonicalizerVersionMismatchError,
 } from '@bic/openclaw-workspace/canonicalize';
+
+export type {
+  TrustSetReloadFailedEntry,
+  TrustSetReloadFailedSink,
+} from './trust-set-reload-failed-entry.js';
+export {
+  TRUST_SET_RELOAD_FAILED_TYPE,
+  isTrustSetReloadFailedEntry,
+} from './trust-set-reload-failed-entry.js';

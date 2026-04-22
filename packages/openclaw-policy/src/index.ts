@@ -150,3 +150,15 @@ export {
   type GovernanceViolation,
   type ProvenanceTrace,
 } from './governance/index.js';
+
+// ── Trust-set loader (pulse 50 / P-04) ──────────────────────────────────
+export { createTrustSetLoader } from './trust-set/index.js';
+export type {
+  Clock as TrustSetClock,
+  CreateTrustSetLoaderOptions,
+  Disposable as TrustSetDisposable,
+  FsWatcherFactory,
+  TrustSetEntry,
+  TrustSetLoader,
+  TrustSetSnapshot,
+} from './trust-set/index.js';
