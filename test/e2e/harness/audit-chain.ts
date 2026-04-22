@@ -459,7 +459,7 @@ export function corruptAuditChain(
       }
       const target = copy[idx] as DecisionEntry;
       // Mutate correlationId to something guaranteed not to match any approval.
-      target.correlationId = `corrupted-${target.correlationId}`;
+      (target as { correlationId: string }).correlationId = `corrupted-${target.correlationId}`;
       // Recompute this entry's hash (content changed, so stored hash must be
       // refreshed to survive the hash-integrity check).
       const { hash: _oldHash, ...body } = target;
@@ -518,7 +518,7 @@ export function corruptAuditChain(
       const target = copy[idx] as DecisionEntry;
       // Flip one benign content field; any mutation that changes canonical
       // bytes is sufficient.
-      target.principal = `${target.principal}-tampered`;
+      (target as { tool: string }).tool = `${target.tool}-tampered`;
       // Leave entry.hash and entry.prevHash untouched so the gap check passes
       // but the content-hash check fails.
       return copy;

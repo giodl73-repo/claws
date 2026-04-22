@@ -16,10 +16,10 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import {
   AuditChainReader,
   AuditChainWriter,
-  type AuditChainEntry,
   corruptAuditChain,
   verifyChain,
 } from '#harness/audit-chain.js';
+import type { AuditChainEntry } from '#harness/audit-types.js';
 
 describe('SC-25 audit-chain correlation-mismatch', () => {
   let cleanChain: readonly AuditChainEntry[];
@@ -37,20 +37,22 @@ describe('SC-25 audit-chain correlation-mismatch', () => {
     });
     w.appendDecision({
       correlationId: 'corr-review',
+      snapshotId: 'snap-sc25',
       policyArtifactSha256: policySha,
-      principal: 'user@example.com',
-      toolName: 'send-email',
-      argsHash: 'sha256:' + '1'.repeat(64),
+      tool: 'send-email',
+      decision: 'review',
       declaredTier: 'R5',
       effectiveTier: 'R5',
-      decision: 'review',
     });
     w.appendApproval({
       correlationId: 'corr-review',
-      handleId: 'handle-1',
-      approverPrincipal: 'supervisor@example.com',
+      approver: 'supervisor@example.com',
       outcome: 'approve',
+      ttl: 60000,
+      nonce: 'nonce-sc25',
       keyId: 'k1',
+      sequenceNumber: 1,
+      signature: 'sha256:' + 'a'.repeat(64),
     });
     cleanChain = new AuditChainReader({ filePath: path }).all();
     // Sanity: clean chain verifies.

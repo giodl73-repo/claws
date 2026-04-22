@@ -15,10 +15,10 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import {
   AuditChainReader,
   AuditChainWriter,
-  type AuditChainEntry,
   corruptAuditChain,
   verifyChain,
 } from '#harness/audit-chain.js';
+import type { AuditChainEntry, DecisionEntry } from '#harness/audit-types.js';
 
 describe('SC-27 audit-chain hash-mismatch', () => {
   let cleanChain: readonly AuditChainEntry[];
@@ -36,13 +36,12 @@ describe('SC-27 audit-chain hash-mismatch', () => {
     });
     w.appendDecision({
       correlationId: 'corr-27',
+      snapshotId: 'snap-sc27',
       policyArtifactSha256: policySha,
-      principal: 'user@example.com',
-      toolName: 'send-email',
-      argsHash: 'sha256:' + '1'.repeat(64),
+      tool: 'send-email',
+      decision: 'allow',
       declaredTier: 'R5',
       effectiveTier: 'R5',
-      decision: 'allow',
     });
     cleanChain = new AuditChainReader({ filePath: path }).all();
     expect(verifyChain(cleanChain).ok).toBe(true);
@@ -69,16 +68,14 @@ describe('SC-27 audit-chain hash-mismatch', () => {
 
   it('F-06: mutation leaves stored hash intact; recomputed differs (that is the signal)', () => {
     const corrupted = corruptAuditChain(cleanChain, { mode: 'hash-mismatch' });
-    const decision = corrupted.find((e) => e.type === 'decision');
+    const decision = corrupted.find((e) => e.type === 'decision') as DecisionEntry | undefined;
     expect(decision).toBeDefined();
     // Stored hash still matches the original chain's decision hash field — the
     // mutation is to content, not hash.
-    const originalDecision = cleanChain.find((e) => e.type === 'decision');
+    const originalDecision = cleanChain.find((e) => e.type === 'decision') as DecisionEntry | undefined;
     expect(decision!.hash).toBe(originalDecision!.hash);
-    // But content differs (principal tampered).
-    expect((decision as { principal: string }).principal).not.toBe(
-      (originalDecision as { principal: string }).principal,
-    );
+    // But content differs (tool tampered).
+    expect(decision!.tool).not.toBe(originalDecision!.tool);
   });
 
   it('F-07: offending seq is cited', () => {

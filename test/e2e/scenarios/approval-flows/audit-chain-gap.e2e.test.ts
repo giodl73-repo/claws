@@ -16,10 +16,10 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import {
   AuditChainReader,
   AuditChainWriter,
-  type AuditChainEntry,
   corruptAuditChain,
   verifyChain,
 } from '#harness/audit-chain.js';
+import type { AuditChainEntry } from '#harness/audit-types.js';
 
 describe('SC-26 audit-chain chain-gap', () => {
   let cleanChain: readonly AuditChainEntry[];
@@ -37,23 +37,21 @@ describe('SC-26 audit-chain chain-gap', () => {
     });
     w.appendDecision({
       correlationId: 'corr-a',
+      snapshotId: 'snap-sc26',
       policyArtifactSha256: policySha,
-      principal: 'user@example.com',
-      toolName: 'send-email',
-      argsHash: 'sha256:' + '1'.repeat(64),
+      tool: 'send-email',
+      decision: 'allow',
       declaredTier: 'R5',
       effectiveTier: 'R5',
-      decision: 'allow',
     });
     w.appendDecision({
       correlationId: 'corr-b',
+      snapshotId: 'snap-sc26',
       policyArtifactSha256: policySha,
-      principal: 'user@example.com',
-      toolName: 'send-email',
-      argsHash: 'sha256:' + '2'.repeat(64),
+      tool: 'send-email',
+      decision: 'allow',
       declaredTier: 'R5',
       effectiveTier: 'R5',
-      decision: 'allow',
     });
     cleanChain = new AuditChainReader({ filePath: path }).all();
     expect(verifyChain(cleanChain).ok).toBe(true);
