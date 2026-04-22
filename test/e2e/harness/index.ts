@@ -107,6 +107,10 @@ export {
   type AdapterDoubleConfig,
 } from './host-adapter-test-doubles.ts';
 export { runSinkConformance } from './sink-conformance.ts';
+export { defineApprovalSinkConformance } from './approval-sink-conformance/suite.ts';
+export type { DefineApprovalSinkConformanceOptions } from './approval-sink-conformance/suite.ts';
+export { InMemoryConformanceSink } from './approval-sink-conformance/sinks/in-memory.ts';
+export { JsonlFileConformanceSink } from './approval-sink-conformance/sinks/jsonl-file.ts';
 export {
   LifecycleManager,
   AlreadyInitializedError,
