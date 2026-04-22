@@ -217,3 +217,16 @@ export {
   scanFunction,
   type Diagnostic,
 } from './lint-rules/no-post-await-assign.ts';
+export {
+  runApprovalFlow,
+  defaultPreset,
+  type RunApprovalFlowOptions,
+} from './approval-flow-sim/run.ts';
+export { defineApprovalFlow, type ItFn } from './approval-flow-sim/dispatch.ts';
+export { resolveFixture, fixturesRoot, FixtureNotFoundError } from './approval-flow-sim/fixtures.ts';
+export type {
+  ApprovalFlowScenario,
+  ApprovalFlowHarness,
+  AdapterPreset,
+  InvokeResult as ApprovalFlowInvokeResult,
+} from './approval-flow-sim/types.ts';
