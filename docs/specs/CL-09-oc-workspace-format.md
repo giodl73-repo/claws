@@ -2,10 +2,16 @@
 spec: CL-09
 title: "OpenClaw Workspace Format Reference"
 version: 1.0
-status: Active
+status: Retired
+successor: workspace/specs/WS-workspace.md
 area: claws
 source: "github.com/openclaw/openclaw (fetched 2026-04-13)"
 ---
+
+> **Status: Retired** — Succeeded by the per-package spec scheme in
+> `c:\src\claws\docs\`. Successor: `workspace/specs/WS-workspace.md`
+> (+ WSA-ast, WSE-emitter, WSP-path, WSC-canonicalize sub-specs).
+> Content preserved for historical reference. Do not amend.
 
 # CL-09: OpenClaw Workspace Format Reference
 

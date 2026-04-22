@@ -1,6 +1,11 @@
 # CL-07: Deep Integration
 
-**Status**: Draft
+> **Status: Retired** — Succeeded by the per-package spec scheme in
+> `c:\src\claws\docs\`. Successor: `guardrails/specs/GRG-guardrail-provider.md`
+> + `GRD-host-adapter.md` + `GRF-file-ingest.md`. Amendments A and B
+> from the Horus wave are ALSO merged into `snap/specs/SNP-promote.md`.
+> Content preserved for historical reference. Do not amend.
+
 **Source**: Q12p, Q12b
 **Reviewers**: compiler-architect, enterprise-architect, open-source-strategist
 

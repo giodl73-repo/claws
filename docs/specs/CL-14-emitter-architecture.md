@@ -1,6 +1,9 @@
 # CL-14 — Emitter Architecture
 
-**Status**: Draft
+> **Status: Retired** — Succeeded by the per-package spec scheme in
+> `c:\src\claws\docs\`. Successor: `workspace/specs/WSE-emitter.md`.
+> Content preserved for historical reference. Do not amend.
+
 **Version**: 1.5
 **Source**: Ra wave CP-4 R1 review / CP-2 R1 review (user directive 2026-04-16) / Pulse 12.5 `emit-ast-codegen` / claws-compile-dx plan H5
 **Atom**: `atom:claws-emitter-architecture` (C118)

@@ -1,6 +1,10 @@
 # CL-03: Runtime Enforcement
 
-**Status**: Draft
+> **Status: Retired** — Succeeded by the per-package spec scheme in
+> `c:\src\claws\docs\`. Successor: `guardrails/specs/GR-guardrails.md`
+> + `GRR-runtime.md`. Content preserved for historical reference.
+> Do not amend.
+
 **Source**: Q12i, Q12r
 **Reviewers**: platform-engineer, security-architect, reliability-engineer
 

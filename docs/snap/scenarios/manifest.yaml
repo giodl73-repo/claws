@@ -1,0 +1,6 @@
+version: 1
+series:
+  SNP:
+    runner: e2e-loop-sim
+    min: 3
+    description: snapshot promote + rollback + non-uplift rules

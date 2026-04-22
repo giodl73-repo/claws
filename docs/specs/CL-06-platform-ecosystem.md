@@ -1,6 +1,10 @@
 # CL-06: Platform Ecosystem
 
-**Status**: Draft
+> **Status: Retired** — Succeeded by the per-package spec scheme in
+> `c:\src\claws\docs\`. Successor: per-package primary specs (`WS-`,
+> `GR-`, `PO-`, `SN-`). Content preserved for historical reference.
+> Do not amend.
+
 **Source**: Q12k, Q12l, Q12n
 **Reviewers**: platform-engineer, enterprise-architect, ecosystem-strategist
 
