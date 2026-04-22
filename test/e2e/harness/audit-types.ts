@@ -131,6 +131,19 @@ export type AuditDecisionAction =
   | 'modify'
   | 'pending-conjunctive';
 
+/**
+ * Why a `DecisionEntry.effectiveTier` differs from `declaredTier`. SC-05 is
+ * the compile-time case (generator reads `args_from` and bakes the R5
+ * uplift into `policy-ir.json`); SC-06 is the runtime case (the runtime
+ * provider observes a RESTRICTED provenance that was not statically
+ * knowable at generate time). `null` means no escalation happened and
+ * `effectiveTier === declaredTier`.
+ */
+export type EscalationSource =
+  | 'generator-compile-time'
+  | 'runtime-provenance'
+  | null;
+
 export interface DecisionEntry extends AuditChainFields {
   readonly type: 'decision';
   readonly correlationId: string;
@@ -142,6 +155,23 @@ export interface DecisionEntry extends AuditChainFields {
   readonly effectiveTier: Tier;
   readonly modifiedArgsHash?: string;
   readonly invalidReason?: DecisionInvalidReason;
+  /**
+   * `true` when the tool declared `failOpen: true` but the host still
+   * denied the call because a non-recoverable invariant fired (TTL expiry
+   * is the only case today, per SC-04 F-04). `undefined` when the tool
+   * did not declare fail-open or when fail-open was honored. Load-bearing
+   * audit marker — governance dashboards filter on this to catch
+   * fail-open regressions.
+   */
+  readonly failOpenOverridden?: boolean;
+  /**
+   * Axis on which the tier was escalated (compile-time generator vs
+   * runtime provenance). Always present on every DecisionEntry — `null`
+   * is the "no escalation" sentinel so queries can discriminate between
+   * "no escalation observed" and "escalation field absent on older
+   * entries" (which is a schema drift vector).
+   */
+  readonly escalationSource: EscalationSource;
 }
 
 // ---------------------------------------------------------------------------

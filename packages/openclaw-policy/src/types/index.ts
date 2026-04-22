@@ -24,11 +24,28 @@ export type Capability =
   | 'FLEET_PRIVILEGED'
   | 'IDENTITY';
 
+/**
+ * Where a tool argument's value originates. Consumers of `argsFrom` use this
+ * to reason about compile-time escalation:
+ *
+ *  - `user_prompt`           — free-form user input, unclassified.
+ *  - `{ tool_output: id }`   — another tool's output; `classification`
+ *                              may mark the upstream output's sensitivity
+ *                              so the generator can escalate the consuming
+ *                              tool's effective tier.
+ *  - `{ memory: Sensitivity }` — memory store tagged with its sensitivity.
+ *  - `agent_literal`         — literal embedded in the agent authoring.
+ *  - `RESTRICTED-classifier` — a compile-time provenance tag asserting the
+ *                              value came from a RESTRICTED classifier /
+ *                              data source. Triggers the SC-05 generator
+ *                              escalation path directly.
+ */
 export type ProvenanceSource =
   | 'user_prompt'
-  | { tool_output: string; optional?: boolean }
+  | { tool_output: string; optional?: boolean; classification?: Sensitivity }
   | { memory: Sensitivity }
-  | 'agent_literal';
+  | 'agent_literal'
+  | 'RESTRICTED-classifier';
 
 export interface DenyRule {
   id: string;
@@ -67,6 +84,14 @@ export interface SourceLocation {
   column: number;
 }
 
+/**
+ * Tier label used in `policy-ir.json` for cross-plane audit alignment.
+ * Mirrors the `Tier` union in `test/e2e/harness/audit-types.ts` so a
+ * `DecisionEntry.effectiveTier` read from an audit log can be compared
+ * directly against `ToolSpec.effectiveTier` from the generated IR.
+ */
+export type PolicyTier = 'R0' | 'R1' | 'R2' | 'R3' | 'R4' | 'R5';
+
 export interface ToolSpec {
   name: string;
   riskLevel: RiskLevel;
@@ -81,6 +106,21 @@ export interface ToolSpec {
    * propagation (CL-07 §1a G-CHAIN, SC-15).
    */
   sensitivity?: Sensitivity;
+  /**
+   * Tier the tool author declared in TOOLS.md. Emitted to `policy-ir.json`
+   * by the generator. Absent means the generator has not populated the
+   * field; consumers should fall back to mapping `riskLevel` →
+   * `R${riskLevel}`.
+   */
+  declaredTier?: PolicyTier;
+  /**
+   * Tier after compile-time escalation rules fire. When the generator
+   * observes a `RESTRICTED-classifier` provenance on any `argsFrom` entry
+   * it sets `effectiveTier: 'R5'` even if `declaredTier` was lower
+   * (SC-05 axis). Absent means the generator has not populated the
+   * field; consumers fall back to `declaredTier`.
+   */
+  effectiveTier?: PolicyTier;
 }
 
 export interface SkillSpec {
