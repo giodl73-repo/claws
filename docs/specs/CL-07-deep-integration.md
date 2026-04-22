@@ -1,6 +1,11 @@
 # CL-07: Deep Integration
 
-**Status**: Draft
+> **Status: Retired** — Succeeded by the per-package spec scheme in
+> `c:\src\claws\docs\`. Successor: `guardrails/specs/GRG-guardrail-provider.md`
+> + `GRD-host-adapter.md` + `GRF-file-ingest.md`. Amendments A and B
+> from the Horus wave are ALSO merged into `snap/specs/SNP-promote.md`.
+> Content preserved for historical reference. Do not amend.
+
 **Source**: Q12p, Q12b
 **Reviewers**: compiler-architect, enterprise-architect, open-source-strategist
 
@@ -524,3 +529,17 @@ This section consolidates 35 integration scenarios across the six Praetor infras
 |--------|-------------------|
 | Q12p | 48 atoms reused, CREST-to-OC file mapping (7/12 reuse), tension-to-conflict mapping (5/7 auto-resolve), eval-to-test framework (G0-G3 tiers), FORMA dual-path as reuse mechanism |
 | Q12b | Upstream contribution roadmap (3 waves, 16 weeks), contribute/keep boundary (18/8/4 split), GuardrailProvider spec PR, package strategy (@openclaw/ scope, MIT license, standalone monorepo), community demand alignment, ecosystem contribution model |
+
+---
+
+## Amendments (Horus wave, 2026-04-22 deploy)
+
+### Amendment A — Peer Interfaces: GuardrailProvider + FileIngestProvider (§1a)
+
+*Source: `.craft/waves/260416+horus-the-heir+clawc-migration/specs/drafts/CL-07-amendment-file-ingest-provider.md`. Adds `FileIngestProvider` as peer interface to `GuardrailProvider`; defines ProviderLifecycle.init(ctx) once-per-registration + HostContext field contract; declares the `HostAdapter` 4-method contract (extractIdentity / routePolicy / getApprovalSink / shapeResponse); declares the `ApprovalSink` interface. Landed via CP-5 (harness) and CP-6 (scenarios).*
+
+### Amendment B — Snapshot-Switch Semantics (§1a Rules 1-4)
+
+*Source: `.craft/waves/260416+horus-the-heir+clawc-migration/specs/drafts/CL-07-amendment-snapshot-switch-semantics.md`. Formalizes the 4 snapshot-switch rules: decision-start capture (Rule 1), admission gate on N+1 (Rule 2), hung/throw tolerance with `hookTimeoutMs` default 5s (Rule 3), per-provider audit via `OnSnapshotPromotedTimeoutEntry` (Rule 4). `DrainWindowEntry` emitted only when `inflightAtStart >= 1`. Implemented in harness pulse 41 and audit-types pulse 43.*
+
+Both amendments landed in-repo as harness code + scenarios; canonical spec text in the drafts is preserved in the wave tree for provenance. Version: CL-07 bumps to v1.3 at deploy.

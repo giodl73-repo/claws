@@ -1,0 +1,26 @@
+# Two-provider OC-7 host config — SC-08/09/10.
+#
+# Registers two independent provider identities. Pulse 54 scenarios wire
+# these into the HostMock merger to prove:
+#
+#   SC-08 — one provider's `review` latches the envelope even when the other
+#           returns `allow` (allow cannot downgrade review).
+#   SC-09 — both providers returning `review` produce two `ApprovalDescriptor`s
+#           whose `contentHash` BOTH equal `ctx.canonicalInvocationHash`
+#           (P-02 mitigation in CL-07 amendment §1a).
+#   SC-10 — with two reviews open, a partial approval keeps the decision in
+#           the first-class `pending-conjunctive` audit state; the tool is
+#           not executed until every review clears.
+#
+# The providerId strings are what each provider stamps into its
+# `ProviderApprovalHandle.providerId` so audit/test tooling can attribute
+# the latch / denial to the right provider.
+host:
+  mergerPrecedence: [deny, review, modify, allow]
+providers:
+  - providerId: security-review
+    description: "classified-data gate"
+    capabilities: [beforeToolCall]
+  - providerId: compliance-review
+    description: "RESTRICTED-records gate"
+    capabilities: [beforeToolCall]

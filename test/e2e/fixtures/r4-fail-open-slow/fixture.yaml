@@ -1,0 +1,16 @@
+series: tools-at-risk
+scenarioCode: SC-04
+fixtureId: r4-fail-open-slow
+expected:
+  declaredTier: R4
+  effectiveTier: R5
+  effectiveSensitivity: RESTRICTED
+  failOpen: true
+  verb: review
+  companionBehavior: stall
+  terminalDecision: deny
+  terminalReason: ttl-expired
+  chainOk: true
+  auditShape:
+    decisions: 1
+    approvals: 1

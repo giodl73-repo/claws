@@ -1,0 +1,104 @@
+name: canonicalizer-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  canonicalizer-byte-identity:
+    name: canonicalizer byte-identity (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build workspace packages (canonicalizer peers)
+        run: npm run build
+
+      - name: Unit — canonicalizer byte-identical across 3 consumers
+        shell: bash
+        run: |
+          set -e
+          ./node_modules/.bin/vitest run \
+            --config test/e2e/vitest.config.ts \
+            --project unit \
+            test/e2e/harness/__tests__/canonicalizer-byte-identical.unit.test.ts \
+            test/e2e/harness/__tests__/canonicalizer-version-mismatch.unit.test.ts
+
+      - name: Integration — canonicalizer byte-identical (cross-OS)
+        shell: bash
+        run: |
+          set -e
+          ./node_modules/.bin/vitest run \
+            --config test/e2e/vitest.config.ts \
+            --project integration \
+            test/e2e/harness/__tests__/canonicalizer-byte-identical.integration.test.ts
+
+      - name: Emit canonical bytes per-OS (artifact for byte-diff forensics)
+        if: always()
+        shell: bash
+        run: |
+          set -e
+          mkdir -p .canonicalizer-artifacts
+          node --input-type=module -e "
+            import('@bic/openclaw-policy').then(p => {
+              import('@bic/openclaw-snap').then(s => {
+                import('@bic/openclaw-guardrails/audit').then(a => {
+                  import('node:fs').then(fs => {
+                    const input = JSON.parse(fs.readFileSync('test/e2e/fixtures/canonicalizer/jcs-edge-cases.json', 'utf8'));
+                    fs.writeFileSync('.canonicalizer-artifacts/policy-${{ matrix.os }}.bytes', p.canonicalize(input));
+                    fs.writeFileSync('.canonicalizer-artifacts/snap-${{ matrix.os }}.bytes', s.canonicalize(input));
+                    fs.writeFileSync('.canonicalizer-artifacts/audit-${{ matrix.os }}.bytes', a.canonicalize(input));
+                    console.log('emitted canonical bytes for ${{ matrix.os }}');
+                  });
+                });
+              });
+            });
+          "
+
+      - name: Upload canonical-bytes artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canonicalizer-bytes-${{ matrix.os }}
+          path: .canonicalizer-artifacts/
+          retention-days: 7
+
+  parallel-canonicalizer-guard:
+    name: grep — no parallel canonicalizer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure no package re-implements canonicalize (SC-08 F-02)
+        shell: bash
+        run: |
+          set -e
+          # Find any ::canonicalize:: function declarations outside the
+          # owner package + test harness. All three consumer packages MUST
+          # import from @bic/openclaw-workspace/canonicalize.
+          OFFENDERS=$(grep -rnE 'export function canonicalize\b|^function canonicalize\b' \
+            packages/openclaw-policy/src \
+            packages/openclaw-snap/src \
+            packages/openclaw-guardrails/src \
+            2>/dev/null || true)
+          if [ -n "$OFFENDERS" ]; then
+            echo "FAIL: parallel canonicalizer detected — canonicalize() must come from @bic/openclaw-workspace/canonicalize"
+            echo "$OFFENDERS"
+            exit 1
+          fi
+          echo "PASS: no parallel canonicalizer in consumer packages"

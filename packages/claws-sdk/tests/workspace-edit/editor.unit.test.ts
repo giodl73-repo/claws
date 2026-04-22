@@ -149,9 +149,10 @@ describe('StructuredEditor (unit)', () => {
       expect(updSlice).toBe(origSlice);
     }
 
-    // Frontmatter and comment survive.
-    expect(updated.startsWith('---\nowner: platform-team')).toBe(true);
-    expect(updated).toContain('<!-- Fixture for workspace-edit tests. Preserves frontmatter + comment -->');
+    // Frontmatter and comment survive (normalize line endings for cross-platform).
+    const normalized = updated.replace(/\r\n/g, '\n');
+    expect(normalized.startsWith('---\nowner: platform-team')).toBe(true);
+    expect(normalized).toContain('<!-- Fixture for workspace-edit tests. Preserves frontmatter + comment -->');
   });
 
   it('frontmatter, comments, and blank lines round-trip through an edit', async () => {

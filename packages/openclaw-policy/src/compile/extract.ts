@@ -12,6 +12,7 @@ import type {
   PolicyIR,
   ProvenanceSource,
   RiskLevel,
+  SourceLocation,
   ToolSpec,
 } from '../types/index.js';
 import type { ParsedFile } from './parse.js';
@@ -113,64 +114,99 @@ export function extractTools(parsed: ParsedFile): ToolSpec[] {
   const block = findBlock(parsed.ast, 'Tools');
   if (!block) return [];
   const tools: ToolSpec[] = [];
-  const body = block.bodyLines.join('\n');
-  const blocks = body.split(/\n(?=###\s)/);
-  for (const sub of blocks) {
-    // First line: `### name [# meta]` — scan linearly.
-    const nlIdx = sub.indexOf('\n');
-    const firstLine = nlIdx === -1 ? sub : sub.slice(0, nlIdx);
-    if (!firstLine.startsWith('###')) continue;
-    let i = 3;
-    if (!isHtab(firstLine[i])) continue;
-    while (isHtab(firstLine[i])) i++;
-    const nameStart = i;
-    while (i < firstLine.length) {
-      const ch = firstLine[i]!;
-      const code = ch.charCodeAt(0);
-      // [\w-] class: letters, digits, underscore, hyphen
-      const isNameChar =
-        (code >= 0x30 && code <= 0x39) || // 0-9
-        (code >= 0x41 && code <= 0x5a) || // A-Z
-        (code >= 0x61 && code <= 0x7a) || // a-z
-        code === 0x5f ||                   // _
-        code === 0x2d;                     // -
-      if (!isNameChar) break;
-      i++;
-    }
-    const name = firstLine.slice(nameStart, i);
-    if (!name) continue;
-    // Optional: ` # meta`
-    let meta = '';
-    while (isHtab(firstLine[i])) i++;
-    if (firstLine[i] === '#') {
-      i++;
-      while (isHtab(firstLine[i])) i++;
-      meta = trimTabsAndSpaces(firstLine.slice(i));
-    } else if (i < firstLine.length && !isHtab(firstLine[i])) {
-      // Trailing garbage is not a valid tool header.
-      continue;
-    }
-    const riskLevel = clampRisk(meta);
-    const capabilities = extractCapabilities(meta);
-    // Find `args_from:` section in the sub-block without lazy lookahead.
-    const marker = 'args_from:';
-    const markerIdx = sub.indexOf(marker);
-    const tool: ToolSpec = { name, riskLevel, capabilities };
-    if (markerIdx !== -1) {
-      let k = markerIdx + marker.length;
-      while (isHtab(sub[k])) k++;
-      if (sub[k] === '\n') {
-        k++;
-        // End at next `\n###` header or end-of-section.
-        let endIdx = sub.indexOf('\n###', k);
-        if (endIdx === -1) endIdx = sub.length;
-        const argsBody = sub.slice(k, endIdx);
-        if (argsBody) tool.argsFrom = extractArgsFrom(argsBody);
+  // Each tool starts at a `### name` line inside bodyLines. Track the
+  // 1-based absolute line number (block heading is at `block.line`; body
+  // lines begin at `block.line + 1`).
+  const bodyLines = block.bodyLines;
+  let sectionStart = -1;
+  for (let li = 0; li <= bodyLines.length; li++) {
+    const line = li < bodyLines.length ? bodyLines[li]! : null;
+    const isHeader = line !== null && line.startsWith('### ');
+    if (isHeader || li === bodyLines.length) {
+      if (sectionStart !== -1) {
+        const sub = bodyLines.slice(sectionStart, li).join('\n');
+        const absLine = block.line + sectionStart + 1;
+        const tool = parseToolSubBlock(sub, parsed.path, absLine);
+        if (tool !== null) tools.push(clampIrreversibleExternal(tool));
       }
+      sectionStart = isHeader ? li : -1;
     }
-    tools.push(clampIrreversibleExternal(tool));
   }
   return tools;
+}
+
+function parseToolSubBlock(
+  sub: string,
+  sourcePath: string,
+  absLine: number,
+): ToolSpec | null {
+  // First line: `### name [# meta]` — scan linearly.
+  const nlIdx = sub.indexOf('\n');
+  const firstLine = nlIdx === -1 ? sub : sub.slice(0, nlIdx);
+  if (!firstLine.startsWith('###')) return null;
+  let i = 3;
+  if (!isHtab(firstLine[i])) return null;
+  while (isHtab(firstLine[i])) i++;
+  const nameStart = i;
+  while (i < firstLine.length) {
+    const ch = firstLine[i]!;
+    const code = ch.charCodeAt(0);
+    // [\w-] class: letters, digits, underscore, hyphen
+    const isNameChar =
+      (code >= 0x30 && code <= 0x39) || // 0-9
+      (code >= 0x41 && code <= 0x5a) || // A-Z
+      (code >= 0x61 && code <= 0x7a) || // a-z
+      code === 0x5f ||                   // _
+      code === 0x2d;                     // -
+    if (!isNameChar) break;
+    i++;
+  }
+  const name = firstLine.slice(nameStart, i);
+  if (!name) return null;
+  // Optional: ` # meta`
+  let meta = '';
+  while (isHtab(firstLine[i])) i++;
+  if (firstLine[i] === '#') {
+    i++;
+    while (isHtab(firstLine[i])) i++;
+    meta = trimTabsAndSpaces(firstLine.slice(i));
+  } else if (i < firstLine.length && !isHtab(firstLine[i])) {
+    return null;
+  }
+  const riskLevel = clampRisk(meta);
+  const capabilities = extractCapabilities(meta);
+  const failOpen = extractFailOpen(meta);
+  // Column: 1-based position where the tool name starts on the header line.
+  // `### ` is 4 chars -> nameStart is 4 -> column is 5 (1-based).
+  const sourceLocation: SourceLocation = {
+    path: sourcePath,
+    line: absLine,
+    column: nameStart + 1,
+  };
+  // Find `args_from:` section in the sub-block without lazy lookahead.
+  const marker = 'args_from:';
+  const markerIdx = sub.indexOf(marker);
+  const tool: ToolSpec = { name, riskLevel, capabilities, sourceLocation };
+  if (failOpen) tool.failOpen = true;
+  if (markerIdx !== -1) {
+    let k = markerIdx + marker.length;
+    while (isHtab(sub[k])) k++;
+    if (sub[k] === '\n') {
+      k++;
+      let endIdx = sub.indexOf('\n###', k);
+      if (endIdx === -1) endIdx = sub.length;
+      const argsBody = sub.slice(k, endIdx);
+      if (argsBody) tool.argsFrom = extractArgsFrom(argsBody);
+    }
+  }
+  return tool;
+}
+
+export function extractFailOpen(meta: string): boolean {
+  // `failOpen` token is any of: `failOpen`, `FAIL_OPEN`, `failopen` (case-insensitive).
+  // Appears as a comma/whitespace-separated token in the meta line.
+  const tokens = meta.split(/[,\s]+/).map((t) => t.trim().toLowerCase());
+  return tokens.includes('failopen') || tokens.includes('fail_open');
 }
 
 export function clampIrreversibleExternal(tool: ToolSpec): ToolSpec {

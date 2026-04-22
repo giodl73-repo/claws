@@ -1,0 +1,6 @@
+version: 1
+series:
+  GRD:
+    runner: host-shape-sim
+    min: 4
+    description: 4 concrete HostAdapter shapes (OpenClaw, Lobster, Aether, claws-service)

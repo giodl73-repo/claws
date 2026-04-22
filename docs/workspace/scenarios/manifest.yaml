@@ -1,0 +1,10 @@
+version: 1
+series:
+  WSP:
+    runner: security-sim
+    min: 3
+    description: 12 oc:// URI rejection vectors
+  WSC:
+    runner: compile-sim
+    min: 3
+    description: RFC 8785 JCS byte-identity across 3 consumers

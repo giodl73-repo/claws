@@ -47,10 +47,13 @@ export {
   canonicalHash,
   computePolicyId,
   CANONICALIZER_VERSION,
+  canonicalizerAlgorithmVersion,
+  CanonicalizerVersionMismatchError,
   parseWorkspaceFile,
   extractTools,
   extractDenyRules,
   buildGovernanceAst,
+  computeEffectiveSensitivity,
 } from './compile/index.js';
 export type {
   ParsedFile,
@@ -83,12 +86,26 @@ export type {
 // ── Operational helpers (P52) ────────────────────────────────────────────
 export {
   evaluateCompliance,
+  loadPolicyIRFromSnapshot,
   renderReport,
   verifyAudit,
   runScenarios,
+  runScenariosInMemory,
   startMockGateway,
   parseScenarioYaml,
 } from './ops/index.js';
+export type { LoadPolicyIRFromSnapshotOptions } from './ops/evaluate-compliance.js';
+export type { RunScenariosInMemoryOptions } from './ops/run-scenarios.js';
+
+// ── Migration (pulse 47.5.5) ─────────────────────────────────────────────
+export {
+  migratePolicyArtifacts,
+  CURRENT_POLICY_SCHEMA_VERSION,
+  type MigrationArtifactStatus,
+  type MigrationArtifactResult,
+  type MigratePolicyArtifactsOptions,
+  type MigratePolicyArtifactsResult,
+} from './migrate.js';
 export type {
   ComplianceReport,
   ComplianceRequirementResult,
@@ -134,3 +151,22 @@ export {
   type GovernanceViolation,
   type ProvenanceTrace,
 } from './governance/index.js';
+
+// ── Seq-counter store (pulse 58 / P-12) ─────────────────────────────────
+export { SeqCounterStore } from './seq-counter/index.js';
+export type {
+  IncrementResult as SeqCounterIncrementResult,
+  SeqCounterStoreOptions,
+} from './seq-counter/index.js';
+
+// ── Trust-set loader (pulse 50 / P-04) ──────────────────────────────────
+export { createTrustSetLoader } from './trust-set/index.js';
+export type {
+  Clock as TrustSetClock,
+  CreateTrustSetLoaderOptions,
+  Disposable as TrustSetDisposable,
+  FsWatcherFactory,
+  TrustSetEntry,
+  TrustSetLoader,
+  TrustSetSnapshot,
+} from './trust-set/index.js';

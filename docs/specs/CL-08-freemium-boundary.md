@@ -1,6 +1,11 @@
 # CL-08: Package Architecture and Graduation Model
 
-**Status**: Draft
+> **Status: Retired** — Succeeded by the per-package spec scheme in
+> `c:\src\claws\docs\`. Successor: `sdk/specs/SK-sdk.md` (see pulse
+> 74.6) + per-package primary specs. Graduation model lives in
+> `upstream/specs/UG-upstream.md`. Content preserved for historical
+> reference. Do not amend.
+
 **Version**: 1.2
 **Source**: claws-sdk-graduation plan, R1 review (5 roles, 46 findings), package-extraction plan R2 review (10+7 model locked)
 **Reviewers**: claws:founder, claws:ciso, craft:architect

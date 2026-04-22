@@ -1,0 +1,17 @@
+{
+  "name": "@bic/repo-ops",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Internal repo-ops validators: doc-structure, atom-coverage, readme-reachability. Run via `tsx devtools/repo-ops/src/check.ts --docs-dir docs/`.",
+  "scripts": {
+    "check": "tsx src/check.ts --docs-dir ../../docs/",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "*",
+    "tsx": "*",
+    "typescript": "*",
+    "vitest": "*"
+  }
+}

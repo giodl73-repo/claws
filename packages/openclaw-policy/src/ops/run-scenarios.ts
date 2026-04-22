@@ -9,12 +9,15 @@
  * @module @bic/openclaw-policy/ops/run-scenarios
  */
 
+import { startMockGateway } from './mock-gateway.js';
 import type {
+  MockGatewayHandle,
   ScenarioCase,
   ScenarioCaseResult,
   ScenarioRunOptions,
   ScenarioRunResult,
 } from './types.js';
+import type { PolicyIR } from '../types/index.js';
 
 interface DecisionResponse {
   readonly decision: 'allow' | 'deny' | 'review' | 'modify';
@@ -75,6 +78,43 @@ function evaluateExpectation(
     }
   }
   return failures;
+}
+
+export interface RunScenariosInMemoryOptions {
+  readonly policyIR: PolicyIR;
+  readonly cases: readonly ScenarioCase[];
+  readonly host?: string;
+  readonly port?: number;
+  readonly fetchImpl?: typeof fetch;
+}
+
+/**
+ * Run scenarios against an ephemeral mock-gateway spun up in-process.
+ * This is the gateway-less surface — callers pass a PolicyIR and cases,
+ * we bind a local gateway on an ephemeral port, dispatch, and tear down.
+ *
+ * Used by `claws policy test` when no external `--gateway <url>` is
+ * provided.
+ */
+export async function runScenariosInMemory(
+  options: RunScenariosInMemoryOptions,
+): Promise<ScenarioRunResult> {
+  const gatewayOptions: Parameters<typeof startMockGateway>[0] = {
+    policyIR: options.policyIR,
+    port: options.port ?? 0,
+  };
+  if (options.host !== undefined) {
+    (gatewayOptions as { host?: string }).host = options.host;
+  }
+  const gateway: MockGatewayHandle = await startMockGateway(gatewayOptions);
+  try {
+    const runOptions: ScenarioRunOptions = options.fetchImpl !== undefined
+      ? { gatewayUrl: gateway.url, cases: options.cases, fetchImpl: options.fetchImpl }
+      : { gatewayUrl: gateway.url, cases: options.cases };
+    return await runScenarios(runOptions);
+  } finally {
+    await gateway.close();
+  }
 }
 
 export async function runScenarios(options: ScenarioRunOptions): Promise<ScenarioRunResult> {

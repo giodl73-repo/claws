@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "revision": "v1",
+  "allowedTiers": ["R0", "R1", "R2"],
+  "notes": "Seed v1 — R2 allowed. Scenario expects the first call to succeed."
+}

@@ -129,7 +129,7 @@ describe('check pipeline e2e — reference workspace', () => {
 
     // Import the JSON formatter
     const { renderCheckJson } = await import(
-      /* @vite-ignore */ resolve(__dirname, '../../../claws-cli/src/output/format-json.ts')
+      /* @vite-ignore */ resolve(__dirname, '../../../claws/src/output/format-json.ts')
     );
 
     const jsonOutput = renderCheckJson(result);
@@ -170,7 +170,7 @@ describe('check pipeline e2e — reference workspace', () => {
     const result = { violations: renderableViolations, durationMs: 0 };
 
     const { renderCheckSarif } = await import(
-      /* @vite-ignore */ resolve(__dirname, '../../../claws-cli/src/format/sarif.ts')
+      /* @vite-ignore */ resolve(__dirname, '../../../claws/src/format/sarif.ts')
     );
 
     const sarifOutput = renderCheckSarif(result, REFERENCE_WORKSPACE);
@@ -257,7 +257,7 @@ describe('check pipeline e2e — reference workspace', () => {
 
     // Also verify JSON formatter renders 'pass' for an empty violation set
     const { renderCheckJson } = await import(
-      /* @vite-ignore */ resolve(__dirname, '../../../claws-cli/src/output/format-json.ts')
+      /* @vite-ignore */ resolve(__dirname, '../../../claws/src/output/format-json.ts')
     );
     const cleanResult = { violations: [] as ReturnType<typeof toRenderable>[], durationMs: 0 };
     const jsonOutput = renderCheckJson(cleanResult);

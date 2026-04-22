@@ -1,0 +1,35 @@
+# CODEOWNERS — bic/claws
+#
+# Per-path ownership. GHE auto-requests review from listed owners on any PR
+# touching the path. First match wins; order specific→general.
+#
+# Format: <path-glob> <@owner1> [@owner2 ...]
+
+# ── Default fallback ──
+*                                   @giodl
+
+# ── BIC-internal enterprise packages ──
+/packages/claws/                    @giodl
+/packages/claws-action/             @giodl
+/packages/claws-sdk/                @giodl
+/packages/claws-serve/              @giodl
+/packages/claws-skill-kit/          @giodl
+/packages/claws-test/               @giodl
+
+# ── Upstream-shape packages (future @openclaw/*; extra scrutiny on
+#    anything crossing scope purity) ──
+/packages/openclaw-workspace/       @giodl
+/packages/openclaw-guardrails/      @giodl
+/packages/openclaw-policy/          @giodl
+/packages/openclaw-snap/            @giodl
+/packages/openclaw-lsp/             @giodl
+
+# ── Infrastructure (CI, workspaces, workflow config) ──
+/.github/                           @giodl
+/package.json                       @giodl
+/package-lock.json                  @giodl
+
+# ── Migration tooling + guardrails ──
+/scripts/                           @giodl
+/.no-craftworks-allowlist.yaml      @giodl
+/CODEOWNERS                         @giodl

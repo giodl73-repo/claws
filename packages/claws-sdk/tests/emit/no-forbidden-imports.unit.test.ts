@@ -34,7 +34,7 @@ describe('no-forbidden-imports', () => {
   });
 
   it('verifyNoForbiddenImports catches @craftworks/ references', () => {
-    const source = `import { foo } from '@bic/claws-sdk';`;
+    const source = `import { foo } from '@craftworks/compiler-sdk';`;
     const forbidden = verifyNoForbiddenImports(source);
     expect(forbidden).toContain('@craftworks/');
   });

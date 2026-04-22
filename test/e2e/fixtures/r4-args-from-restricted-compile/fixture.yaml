@@ -1,0 +1,13 @@
+series: tools-at-risk
+scenarioCode: SC-05
+fixtureId: r4-args-from-restricted-compile
+expected:
+  declaredTier: R4
+  effectiveTier: R5
+  effectiveSensitivity: RESTRICTED
+  escalationSource: generator-compile-time
+  verb: review
+  chainOk: true
+  auditShape:
+    decisions: 1
+    approvals: 1

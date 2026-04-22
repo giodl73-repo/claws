@@ -1,0 +1,8 @@
+series: harness-pitfall
+scenarioCode: SC-07
+fixtureId: p04-trust-set-reload
+pitfall: P-04
+mode: smoke
+expected:
+  claws:
+    boots: true

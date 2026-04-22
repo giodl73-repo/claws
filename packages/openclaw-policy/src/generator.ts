@@ -9,11 +9,15 @@
  * discovery wiring.
  */
 
+import { watchWorkspace } from '@bic/openclaw-workspace/staging';
+import type { WorkspaceWatcherFactory } from '@bic/openclaw-workspace/staging';
+
 import { canonicalize, computePolicyId, CANONICALIZER_VERSION } from './compile/canonicalize.js';
 import { analyze } from './compile/analyze.js';
 import { emitPolicyIR } from './emit/emit-policy-ir.js';
 import { emitPluginCode, DEFAULT_SCOPE_PREFIX } from './emit/emit-plugin.js';
 import { emitAuditManifest } from './emit/emit-audit-manifest.js';
+import { fsGenerate, type FsGenerateDeps } from './fs-pipeline.js';
 import type {
   CheckResult,
   DiffResult,
@@ -63,19 +67,11 @@ export function generateInMemory(input: InMemoryGenerateInput): InMemoryArtifact
   };
 }
 
-export async function generate(opts: GenerateOptions): Promise<GenerateResult> {
-  return {
-    workspaceRoot: opts.workspaceRoot,
-    writtenFiles: [],
-    diagnostics: [
-      {
-        code: 'OC-POLICY-I001',
-        severity: 'info',
-        message:
-          'generate(): filesystem pipeline is scaffolded; use generateInMemory for draft IR',
-      },
-    ],
-  };
+export async function generate(
+  opts: GenerateOptions,
+  deps: FsGenerateDeps = {},
+): Promise<GenerateResult> {
+  return fsGenerate(opts, deps);
 }
 
 export function check(ir: PolicyIR): CheckResult {
@@ -83,8 +79,63 @@ export function check(ir: PolicyIR): CheckResult {
   return { ok, diagnostics };
 }
 
-export function watch(_opts: GenerateOptions): WatchHandle {
-  return { async close() {} };
+export interface WatchOptions extends GenerateOptions {
+  /** Debounce between filesystem events, milliseconds. Default 300ms. */
+  readonly debounceMs?: number;
+  /** Called on each triggered re-generate with the fresh result. */
+  readonly onChange?: (result: GenerateResult) => void | Promise<void>;
+  /**
+   * Optional fs-watcher factory for tests. Defaults to the workspace
+   * package's `node:fs.watch`-backed default.
+   */
+  readonly watcherFactory?: WatcherFactory;
+}
+
+/**
+ * Policy-side alias of the workspace-owned factory type. Consumers get
+ * a stable name without importing `@bic/openclaw-workspace` directly.
+ */
+export type WatcherFactory = WorkspaceWatcherFactory;
+
+/**
+ * Arm a continuous re-generate against a workspace.
+ *
+ * Filesystem watching itself lives in `@bic/openclaw-workspace/staging`
+ * (`watchWorkspace`). Policy only owns the generate-after-change
+ * semantics: when the workspace emits a debounced change event, run
+ * `fsGenerate` and invoke `onChange` with the result.
+ *
+ * Tests can inject a synthetic `watcherFactory` to fire events
+ * deterministically without relying on real fs notifications.
+ */
+export function watch(opts: WatchOptions): WatchHandle {
+  let closed = false;
+
+  const workspaceOptions: Parameters<typeof watchWorkspace>[1] = {
+    onChange: async () => {
+      if (closed) return;
+      const result = await fsGenerate(opts);
+      if (closed) return;
+      if (opts.onChange !== undefined) {
+        await opts.onChange(result);
+      }
+    },
+  };
+  if (opts.debounceMs !== undefined) {
+    (workspaceOptions as { debounceMs?: number }).debounceMs = opts.debounceMs;
+  }
+  if (opts.watcherFactory !== undefined) {
+    (workspaceOptions as { watcherFactory?: WatcherFactory }).watcherFactory = opts.watcherFactory;
+  }
+
+  const handle = watchWorkspace(opts.workspaceRoot, workspaceOptions);
+
+  return {
+    async close() {
+      closed = true;
+      await handle.close();
+    },
+  };
 }
 
 export function diff(a: PolicyIR, b: PolicyIR): DiffResult {

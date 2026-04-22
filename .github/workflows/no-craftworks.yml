@@ -1,0 +1,57 @@
+name: no-craftworks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  residue-grep:
+    name: 3-pass residue grep (CL-13 v1.7)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Make residue-grep.sh executable
+        run: chmod +x scripts/residue-grep.sh
+
+      - name: Run residue grep in CI mode
+        id: residue
+        run: |
+          set +e
+          OUTPUT=$(./scripts/residue-grep.sh --mode=ci 2>&1)
+          EXIT=$?
+          echo "$OUTPUT"
+          echo "exit_code=$EXIT" >> "$GITHUB_OUTPUT"
+          {
+            echo 'output<<EOF_OUT'
+            echo "$OUTPUT"
+            echo 'EOF_OUT'
+          } >> "$GITHUB_OUTPUT"
+          exit $EXIT
+
+      - name: Post PR comment on violation
+        if: ${{ failure() && github.event_name == 'pull_request' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = [
+              '## residue-grep: violations found',
+              '',
+              'The 3-pass residue scanner (CL-13 v1.7 §Validation) rejected this PR.',
+              '',
+              '```',
+              `${{ steps.residue.outputs.output }}`,
+              '```',
+              '',
+              'Fix the imports or add a justified exemption to `.no-craftworks-allowlist.yaml`.',
+              'See `docs/operations/residue-grep.md` for guidance.',
+            ].join('\n');
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });

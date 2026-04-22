@@ -7,7 +7,7 @@
  * @module claws-cli/commands/cache/stats
  */
 
-import { CompilationCache, resolveCacheDir } from '@bic/claws-sdk/cache';
+import { CompilationCache, resolveCacheDir } from '@bic/claws-sdk/compiler/cache';
 
 /** Fixed wire shape of `claws cache stats` stdout (CL-01 v1.2, AC-2). */
 export interface CacheStatsOutput {

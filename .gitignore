@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+*.log
+
+# test/e2e transient output — never committed
+test/e2e/.failures/
+test/e2e/.teardown-reports/
+test/e2e/coverage/
+
+# CI-local artifacts (.github/workflows/repo-ops.yml writes here)
+.ci/
+
+# Policy generator fs outputs under any workspace root — never committed.
+# Live workspaces (fixtures, user projects) regenerate these from SOUL/TOOLS/AGENTS.
+.openclaw/policy/

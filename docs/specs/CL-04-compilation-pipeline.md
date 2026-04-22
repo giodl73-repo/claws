@@ -1,6 +1,10 @@
 # CL-04: Compilation Pipeline
 
-**Status**: Draft v1.1
+> **Status: Retired** — Succeeded by the per-package spec scheme in
+> `c:\src\claws\docs\`. Successor: `policy/specs/PO-policy.md` +
+> `POI-policy-ir.md` + `POC-compiler.md`. Content preserved for
+> historical reference. Do not amend.
+
 **Source**: Q12j, Q12m, claws-compile-dx plan (Ra)
 **Reviewers**: compiler-architect, platform-engineer, security-architect
 

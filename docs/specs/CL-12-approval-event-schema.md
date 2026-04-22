@@ -1,6 +1,8 @@
 # Approval Event Schema -- OpenClaw Community Standard (Proposal)
 
-**Status**: Draft -- proposed alongside GuardrailProvider spec (Pulse 49)
+> **Status: Retired** — Succeeded by the per-package spec scheme in
+> `c:\src\claws\docs\`. Successor: `guardrails/specs/GRA-audit-chain.md`.
+> Content preserved for historical reference. Do not amend.
 
 **Canonical spec**: `design/claws/specs/CL-11-upstream-governance.md` section 2
 

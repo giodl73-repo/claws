@@ -7,20 +7,16 @@ const sharedResolve = {
     { find: /^#src\/(.+)$/, replacement: resolve(__dirname, 'src/$1') },
     { find: /^#fixtures\/(.+)$/, replacement: resolve(__dirname, 'tests/fixtures/$1') },
     // ── Sub-path exports (must come before bare specifiers) ─────────────
-    { find: /^@craftworks\/claws-sdk\/(.+)$/, replacement: resolve(__dirname, 'src/$1') },
-    { find: /^@craftworks\/compiler-sdk\/(.+)$/, replacement: resolve(__dirname, '../compiler-sdk/src/$1') },
-    { find: /^@craftworks\/agent-sdk\/(.+)$/, replacement: resolve(__dirname, '../agent-sdk/src/$1') },
-    { find: /^@claws\/test\/(.+)$/, replacement: resolve(__dirname, '../claws-test/src/$1') },
-    { find: /^@craftworks\/claws-serve\/(.+)$/, replacement: resolve(__dirname, '../claws-serve/src/$1') },
+    { find: /^@bic\/claws-sdk\/(.+)$/, replacement: resolve(__dirname, 'src/$1') },
+    { find: /^@bic\/claws-test\/(.+)$/, replacement: resolve(__dirname, '../claws-test/src/$1') },
+    { find: /^@bic\/claws-serve\/(.+)$/, replacement: resolve(__dirname, '../claws-serve/src/$1') },
     // ── Bare specifiers ─────────────────────────────────────────────────
     { find: '@bic/claws-sdk', replacement: resolve(__dirname, 'src') },
-    { find: '@craftworks/compiler-sdk', replacement: resolve(__dirname, '../compiler-sdk/src') },
-    { find: '@craftworks/agent-sdk', replacement: resolve(__dirname, '../agent-sdk/src') },
     { find: '@bic/claws-test', replacement: resolve(__dirname, '../claws-test/src') },
     { find: '@bic/claws-serve', replacement: resolve(__dirname, '../claws-serve/src') },
     // ── LSP package (for acceptance tests) ─────────────────────────────
-    { find: /^@bic\/openclaw-lsp\/(.+)$/, replacement: resolve(__dirname, '../claws-lsp/src/$1') },
-    { find: '@bic/openclaw-lsp', replacement: resolve(__dirname, '../claws-lsp/src') },
+    { find: /^@bic\/openclaw-lsp\/(.+)$/, replacement: resolve(__dirname, '../openclaw-lsp/src/$1') },
+    { find: '@bic/openclaw-lsp', replacement: resolve(__dirname, '../openclaw-lsp/src') },
   ],
   dedupe: [
     'yaml',

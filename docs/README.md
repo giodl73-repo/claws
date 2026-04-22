@@ -1,37 +1,98 @@
-# claws — The Governance Compiler
+# bic/claws — Documentation Index
 
-claws reads OpenClaw workspace files and compiles governance rules into executable enforcement code. Unlike linters that report violations, claws generates the runtime — a TypeScript Gateway plugin that intercepts every tool call and enforces risk classification, elicitation gates, delegation boundaries, injection defense, and bounded reasoning limits.
+Top-level navigation for the per-package doc tree. Each package and
+domain directory follows the same layout: `README.md`, `ATOMS.md`,
+`CHANGELOG.md` at root; content in typed subdirectories (`specs/`,
+`guides/`, `tutorials/`, `how-tos/`, `pitfalls/`, `scenarios/`).
 
-**The moat is code generation.** Any tool can check policy. claws emits the code that enforces it.
+## Package directory map
 
----
+### Incubating openclaw-* (upstream-bound)
 
-## Understand It
+| Code | Package | Description | README |
+|------|---------|-------------|--------|
+| **WS** | `@bic/openclaw-workspace` | Typed AST, `oc://` URIs, canonicalizer, lossless emitter | [./workspace/README.md](./workspace/README.md) |
+| **GR** | `@bic/openclaw-guardrails` | GuardrailProvider, audit chain, approval handle, host adapters | [./guardrails/README.md](./guardrails/README.md) |
+| **PO** | `@bic/openclaw-policy` | Workspace → PolicyIR compilation pipeline | [./policy/README.md](./policy/README.md) |
+| **SN** | `@bic/openclaw-snap` | Snapshot lifecycle daemon, HTTP API, non-uplift rules | [./snap/README.md](./snap/README.md) |
+| **LS** | `@bic/openclaw-lsp` | LSP server: diagnostics, hover, governance badge | [./lsp/README.md](./lsp/README.md) |
 
-The [concept guides](concepts/README.md) cover the full product: architecture (three-engine model for parse→analyze→emit, three-ring security for inner/middle/outer boundaries, lossless round-trip guarantee), governance (tool classification with R1-R5 risk levels, OBO boundary for agent delegation, fail modes, elicitation gates), platforms (7 compilation targets from OpenClaw to CrewAI), and operations (fleet compliance, snapshots, kill switch, incident response).
+### Internal claws-* (never upstream)
 
-Start with [claws-init](how-to/initialize-workspace.md) to see it in action, then read the architecture concepts.
+| Code | Package | Description | README |
+|------|---------|-------------|--------|
+| **CX** | `@bic/claws` | CLI binary (`init`, `doctor`, `snap`, `policy` groups) | [./cli/README.md](./cli/README.md) |
+| **AC** | `@bic/claws-action` | GitHub Action: SARIF pipeline + severity gate | [./action/README.md](./action/README.md) |
+| **SK** | `@bic/claws-sdk` | Enterprise SDK + compiler internals (29 G-rules) | [./sdk/README.md](./sdk/README.md) |
+| **SV** | `@bic/claws-serve` | 43-route HTTP + SSE daemon, Cap-surface integration | [./serve/README.md](./serve/README.md) |
+| **KT** | `@bic/claws-skill-kit` | Skill authoring SDK, three-rings adoption model | [./skill-kit/README.md](./skill-kit/README.md) |
+| **TX** | `@bic/claws-test` | Accept-runner, 17-code doc gate, no-craftworks gate | [./test/README.md](./test/README.md) |
 
-## Do It
+## Domain dirs
 
-The [how-to guides](how-to/) walk through the complete developer journey: initialize a workspace, run your first build, write governance rules, publish a skill via the skill-kit, and set up three-ring security. Imperative voice, code blocks, no theory.
+| Code | Domain | Description | README |
+|------|--------|-------------|--------|
+| **SM** | security | Threat model, R1-R5 tiers, injection defences, compliance | [./security/README.md](./security/README.md) |
+| **UG** | upstream | Contribution roadmap, R5 pre-merge guard, scope-flip | [./upstream/README.md](./upstream/README.md) |
+| **RB** | repo | Package location rules, dependency DAG, oracle invariants | [./repo/README.md](./repo/README.md) |
 
-## Learn It Step by Step
+## How to navigate
 
-The [tutorials](tutorials/) are the guided path — a multi-part series from init through three-ring security to governance plugins and lossless round-trip. Each lesson builds on the previous one.
+- **Looking for a spec**: start in `{package}/specs/` — every spec has
+  a 2- or 3-letter code you can cite
+- **Looking for how-to guidance**: start in `{package}/guides/` or
+  `{package}/how-tos/` — guides are conceptual, how-tos are task-oriented
+- **Adding a new atom**: see [upstream/guides/contribution-workflow.md](./upstream/guides/contribution-workflow.md)
+  + the package's own `ATOMS.md`
 
-## Trace It
+## Structure rules
 
-The [traces](traces/) follow governance compilation end-to-end. See how 9 workspace files become a typed GovernanceIR, how rules compose through the three rings, how the gateway plugin gets emitted, and how fleet compliance rolls out across a workspace fleet.
+Every package and domain directory is validated against four oracle
+invariants by `devtools/repo-ops/src/check.ts` (see
+[repo/specs/RB-repo-boundary.md § 4 oracle invariants](./repo/specs/RB-repo-boundary.md)):
 
-## See It
+1. **atoms registry authority** — every atom has its `Needs` met
+2. **doc-validation authority** — top-level files are exactly
+   `README.md + ATOMS.md + CHANGELOG.md`; no extras; required subdirs
+   present
+3. **accept-test authority** — every `scenarios/{CODE}/` has a
+   manifest entry + meets min-count
+4. **no-craftworks gate** — no references to craftworks-internal paths
 
-[Examples](examples/) show claws configurations, governance rules, and compiled output. See what the compiler reads and what it produces.
+Violations block CI. Run `tsx devtools/repo-ops/src/check.ts --docs-dir
+docs/` locally before pushing.
 
-## Present It
+## Code registry
 
-The [why-claws presentation](presentations/why-claws.md) is the product pitch — the problem, the approach, the three-tier adoption funnel. The visual story for anyone evaluating governance tooling.
+Two-letter codes (packages + domains):
 
-## Hear How We Built It
+| Code | Meaning | Upstream target |
+|------|---------|-----------------|
+| WS | workspace package | `@openclaw/workspace` |
+| GR | guardrails package | `@openclaw/guardrails` |
+| PO | policy package | `@openclaw/policy` |
+| SN | snap package | `@openclaw/snap` |
+| LS | lsp package | none (internal) |
+| CX | cli binary | none (internal) |
+| AC | claws-action | none (internal) |
+| SK | claws-sdk | none (internal) |
+| SV | claws-serve | none (internal) |
+| KT | claws-skill-kit | none (internal) |
+| TX | claws-test | none (internal) |
+| SM | security model | (internal reference, absorbs CL-02) |
+| UG | upstream governance | (internal reference, extends CL-11) |
+| RB | repo boundary | (internal reference, absorbs CL-13) |
 
-The [build stories](stories/) tell the claws origin story — why code generation matters, how the three rings emerged, the design decisions that shaped the product.
+Three-letter sub-spec codes use the package's two-letter code as
+prefix (e.g., WSP, WSC, WSA, WSE under WS).
+
+## Legacy
+
+Legacy narrative guides from the Horus wave live at
+`docs/{concepts,governance,testing,host-presets,contributing}/`.
+These are retained verbatim as reference; the per-package docs
+above are canonical for implementation guidance.
+
+Retired CL-NN specs in `docs/specs/` carry explicit
+`Status: Retired` headers pointing at their successor in the
+per-package tree. See [repo/specs/RB-repo-boundary.md](./repo/specs/RB-repo-boundary.md).

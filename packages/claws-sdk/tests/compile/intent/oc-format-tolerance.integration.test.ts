@@ -19,7 +19,7 @@ import { extractSoulIntents } from '../../../src/compile/intent/soul-intent.js';
 import { extractAgentsIntents } from '../../../src/compile/intent/agents-intent.js';
 import type { FileEntryPresent } from '../../../src/compile/types.js';
 
-const EXAMPLES_DIR = resolve(__dirname, '../../../../design/claws/examples/community');
+const EXAMPLES_DIR = resolve(__dirname, '../../../../../docs/examples/community');
 
 function loadExample(filename: string, source: string): FileEntryPresent {
   const content = readFileSync(resolve(EXAMPLES_DIR, filename), 'utf-8');

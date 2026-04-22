@@ -24,11 +24,28 @@ export type Capability =
   | 'FLEET_PRIVILEGED'
   | 'IDENTITY';
 
+/**
+ * Where a tool argument's value originates. Consumers of `argsFrom` use this
+ * to reason about compile-time escalation:
+ *
+ *  - `user_prompt`           — free-form user input, unclassified.
+ *  - `{ tool_output: id }`   — another tool's output; `classification`
+ *                              may mark the upstream output's sensitivity
+ *                              so the generator can escalate the consuming
+ *                              tool's effective tier.
+ *  - `{ memory: Sensitivity }` — memory store tagged with its sensitivity.
+ *  - `agent_literal`         — literal embedded in the agent authoring.
+ *  - `RESTRICTED-classifier` — a compile-time provenance tag asserting the
+ *                              value came from a RESTRICTED classifier /
+ *                              data source. Triggers the SC-05 generator
+ *                              escalation path directly.
+ */
 export type ProvenanceSource =
   | 'user_prompt'
-  | { tool_output: string; optional?: boolean }
+  | { tool_output: string; optional?: boolean; classification?: Sensitivity }
   | { memory: Sensitivity }
-  | 'agent_literal';
+  | 'agent_literal'
+  | 'RESTRICTED-classifier';
 
 export interface DenyRule {
   id: string;
@@ -61,11 +78,49 @@ export interface Edge {
   sensitivity: Sensitivity;
 }
 
+export interface SourceLocation {
+  path: string;
+  line: number;
+  column: number;
+}
+
+/**
+ * Tier label used in `policy-ir.json` for cross-plane audit alignment.
+ * Mirrors the `Tier` union in `test/e2e/harness/audit-types.ts` so a
+ * `DecisionEntry.effectiveTier` read from an audit log can be compared
+ * directly against `ToolSpec.effectiveTier` from the generated IR.
+ */
+export type PolicyTier = 'R0' | 'R1' | 'R2' | 'R3' | 'R4' | 'R5';
+
 export interface ToolSpec {
   name: string;
   riskLevel: RiskLevel;
   capabilities: Capability[];
   argsFrom?: Record<string, ProvenanceSource[]>;
+  failOpen?: boolean;
+  sourceLocation?: SourceLocation;
+  /**
+   * Declared baseline sensitivity from the tool's TOOLS.md entry. Absent
+   * when no declaration is present; G-CHAIN callers treat absence as
+   * `'PUBLIC'` and may elevate the effective value via `args_from`
+   * propagation (CL-07 §1a G-CHAIN, SC-15).
+   */
+  sensitivity?: Sensitivity;
+  /**
+   * Tier the tool author declared in TOOLS.md. Emitted to `policy-ir.json`
+   * by the generator. Absent means the generator has not populated the
+   * field; consumers should fall back to mapping `riskLevel` →
+   * `R${riskLevel}`.
+   */
+  declaredTier?: PolicyTier;
+  /**
+   * Tier after compile-time escalation rules fire. When the generator
+   * observes a `RESTRICTED-classifier` provenance on any `argsFrom` entry
+   * it sets `effectiveTier: 'R5'` even if `declaredTier` was lower
+   * (SC-05 axis). Absent means the generator has not populated the
+   * field; consumers fall back to `declaredTier`.
+   */
+  effectiveTier?: PolicyTier;
 }
 
 export interface SkillSpec {
@@ -127,6 +182,23 @@ export interface GenerateResult {
   workspaceRoot: string;
   writtenFiles: string[];
   diagnostics: Diagnostic[];
+  /**
+   * Structured generator-level diagnostics (pulse 53, CP-6). Populated when
+   * a declaration-lowering validator (e.g. r5-fail-open) rejects a tool.
+   * The plain `diagnostics` array mirrors these as `severity: 'error'`
+   * entries so existing consumers (strict flag, CLI handler) keep working.
+   */
+  generatorDiagnostics?: GeneratorDiagnosticEntry[];
+}
+
+export interface GeneratorDiagnosticEntry {
+  kind: 'r5-fail-open';
+  toolName: string;
+  sourcePath: string;
+  line: number;
+  column: number;
+  invalidReason: 'r5-fail-open-declared';
+  message: string;
 }
 
 export interface CheckResult {

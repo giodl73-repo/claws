@@ -3,7 +3,7 @@
  *
  * Reuses the discover algorithm from compiler-sdk but overrides:
  * - marker: scenario.yaml (not 20+program.yaml)
- * - basePath: design/claws/scenarios/ (not design/astro/scenarios/)
+ * - basePath: docs/scenarios/ (not design/astro/scenarios/)
  *
  * Validates scenario.yaml with Zod against the claws ScenarioYaml shape.
  *
@@ -14,6 +14,16 @@ import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join, resolve } from 'path';
 import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
+
+/**
+ * Claws-repo-root docs/scenarios/ — the authoritative location for all
+ * 331 scenarios across 30 series. Shared by harness.accept.test.ts and
+ * manifest-runner.ts so a future docs/ reorg (e.g. per-package doc trees
+ * in pulses 73.7/73.8 / 74.5/74.6) is a one-line change here.
+ */
+export const SCENARIOS_BASE_DIR = resolve(
+  __dirname, '../../../../..', 'docs', 'scenarios',
+);
 
 // ---------------------------------------------------------------------------
 // Zod schemas for scenario.yaml validation

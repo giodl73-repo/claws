@@ -18,7 +18,8 @@ import { mkdtempSync, writeFileSync, rmSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const repoRoot = resolve(here, '..', '..', '..', '..');
+// tests/compiler/util -> tests/compiler -> tests -> claws-sdk -> packages -> repoRoot
+const repoRoot = resolve(here, '..', '..', '..', '..', '..');
 const guard = resolve(repoRoot, 'scripts', 'ci', 'no-craftworks-runtime-imports.sh');
 
 describe('P54 @craftworks sweep — claws-sdk/src', () => {

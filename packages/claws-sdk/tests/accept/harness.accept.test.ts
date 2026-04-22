@@ -2,7 +2,7 @@
  * Acceptance harness infrastructure self-tests.
  *
  * Validates that the harness itself works correctly:
- * - Scenario loader discovers scenarios from design/claws/scenarios/
+ * - Scenario loader discovers scenarios from docs/scenarios/
  * - Manifest runner dispatches to the correct runner type
  * - Workspace builder loads minimal fixtures
  * - IR assertion helpers correctly validate/reject GovernanceIR
@@ -14,7 +14,11 @@
 import { describe, it, expect } from 'vitest';
 import { resolve } from 'path';
 
-import { discoverClawsScenarios, loadScenarioYaml } from './utils/scenario-loader.js';
+import {
+  discoverClawsScenarios,
+  loadScenarioYaml,
+  SCENARIOS_BASE_DIR,
+} from './utils/scenario-loader.js';
 import { getRunnerForType, CLAWS_RUNNER_TYPES } from './utils/manifest-runner.js';
 import { buildWorkspace, type WorkspaceResult } from './utils/workspace-builder.js';
 import {
@@ -29,7 +33,7 @@ import {
 // ---------------------------------------------------------------------------
 
 describe('Scenario Loader', () => {
-  const basePath = resolve(__dirname, '../../..', 'design', 'claws', 'scenarios');
+  const basePath = SCENARIOS_BASE_DIR;
 
   it('discovers 331 scenarios across 30 series', () => {
     const scenarios = discoverClawsScenarios({ basePath });

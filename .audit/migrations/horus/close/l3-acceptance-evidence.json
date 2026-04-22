@@ -1,0 +1,64 @@
+{
+  "pulse": 77,
+  "wave": "horus",
+  "wave_number": "XCVI",
+  "generated_at": "2026-04-22T00:00:00Z",
+  "scope": "Horus-new tooling L3 gate (full workspace L3 acceptance deferred to CI matrix — this evidence captures the local pulse-77 run)",
+  "commands": [
+    {
+      "cmd": "npm run build",
+      "exit_code": 0,
+      "outcome": "clean — all 11 packages build cleanly via tsc -p tsconfig.build.json"
+    },
+    {
+      "cmd": "cd devtools/repo-ops && vitest run",
+      "exit_code": 0,
+      "tests_passed": 27,
+      "outcome": "clean — doc-structure / atom-coverage / readme-reachability / accept-runner validators all green"
+    },
+    {
+      "cmd": "vitest run tools/atoms-oracle/",
+      "exit_code": 0,
+      "tests_passed": 9,
+      "outcome": "clean — load-registry + bidirectional-sweep unit + integration tests green"
+    },
+    {
+      "cmd": "vitest run tools/doc-sync/",
+      "exit_code": 0,
+      "tests_passed": 6,
+      "outcome": "clean — spec index + package index drift detection green"
+    },
+    {
+      "cmd": "vitest run tools/guide-deploy/",
+      "exit_code": 0,
+      "tests_passed": 18,
+      "outcome": "clean — deploy-guides + verify-links + idempotency + all rewrite rules green"
+    },
+    {
+      "cmd": "tsx devtools/repo-ops/src/check.ts --docs-dir docs/",
+      "exit_code": 1,
+      "outcome": "BLOCK findings against legacy pre-Horus content (docs/concepts/fleet-*, docs/traces/*, docs/getting-started/tutorial.md, docs/proposals/openclaw-upstream/*); zero findings in the 14 new Horus-seeded package+domain dirs (workspace, guardrails, policy, snap, lsp, cli, action, sdk, serve, skill-kit, test, security, upstream, repo)",
+      "scope_note": "Pre-existing content is out of scope per pulse 74 Key Constraints; future waves (not Horus) reconcile those"
+    },
+    {
+      "cmd": "tsx tools/atoms-oracle/bidirectional-sweep.ts --docs-dir docs/",
+      "exit_code": 0,
+      "atoms_count": 94,
+      "orphans_count": 0,
+      "outcome": "clean — all 4 oracle invariants green"
+    },
+    {
+      "cmd": "tsx tools/doc-sync/verify-indexes.ts --docs-dir docs/",
+      "exit_code": 0,
+      "drift_findings": 0,
+      "outcome": "clean — docs/specs/README.md matches CL-*.md on disk; docs/README.md lists every package dir with ATOMS.md"
+    }
+  ],
+  "tests_total_passed": 60,
+  "horus_new_tooling_status": "all green",
+  "ci_matrix": {
+    "note": "Cross-platform matrix (ubuntu-latest / windows-latest / macos-latest) executes on PR push to gim-home/claws. This sidecar captures local-run evidence from the Windows workstation; CI job URLs will be appended by the merge commit."
+  },
+  "wave_close_decision": "approved for local-run Horus-new tooling gate; full workspace L3 gate (full vitest --coverage + claws doctor + npm run accept) deferred to CI on companion gim-home/claws PR",
+  "blockers": []
+}

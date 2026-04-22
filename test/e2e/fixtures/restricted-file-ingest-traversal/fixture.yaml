@@ -1,0 +1,15 @@
+series: approval-flows-file-ingest-traversal
+scenarioCodes: [SC-14]
+fixtureId: restricted-file-ingest-traversal
+expected:
+  peer: FileIngestProvider
+  verbs: [deny]
+  classification: RESTRICTED
+  invalidReasons:
+    - redirect-path-escape
+    - redirect-path-short-name
+    - redirect-path-ads
+    - redirect-path-symlink-escape
+  auditShape:
+    decisions: 4
+    approvals: 0

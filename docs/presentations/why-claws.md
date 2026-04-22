@@ -8,11 +8,11 @@ paginate: true
 
 # Why Claws
 
-**End of the claws era. Two halves now: `claws` (local product) + `openclaw` (upstream standard).**
+**End of the clawc era. Two halves now: `claws` (local product) + `openclaw` (upstream standard).**
 
 The rename isn't cosmetic — it marks the line between what we ship and what we contribute.
 
-Companion to `openclaw-upstream-brief.md` · `openclaw-upstream-spec.md` · Ra wave (XCIII).
+Companion to `openclaw-upstream-brief.md` · `openclaw-upstream-spec.md`.
 
 ---
 
@@ -22,12 +22,10 @@ Companion to `openclaw-upstream-brief.md` · `openclaw-upstream-spec.md` · Ra w
 
 ## The Split
 
-**`claws` was one thing that did two jobs.** The BIC-internal product *and* the would-be upstream standard, sharing a name and an import surface.
+**`clawc` was one name for two things.** The upstream-shape library set *and* the OC-file services sitting on top. One import surface, no seam.
 
-Ra drew the line:
-
-- **`claws`** — our local product. BIC-internal. Ships the daemon, session model, fleet compile, CAP integration, Lobster collaboration, VS Code LSP, enterprise SIEM/PRESS/RELAX. Stays in `bic/claws`.
-- **`openclaw`** — the upstream contribution. Four packages. Governance interfaces, workspace primitives, the policy generator, the snapshot protocol. Same code today, `@bic/openclaw-*` namespace; `@openclaw/*` once Peter greenlights.
+- **`openclaw`** — the libraries. Four packages. Governance interfaces, workspace primitives, the policy generator, the snapshot protocol. `@bic/openclaw-*` today; `@openclaw/*` once Peter greenlights.
+- **`claws`** — the services repo. Daemon, LSP, SDK, CLI. Depends on `@openclaw/*`; holds the pieces that don't generalize upstream (fleet, CAP, Lobster).
 
 Same codebase. Same tests. Different names, different destinations. The `--scope` flag mechanizes the flip.
 
@@ -35,15 +33,6 @@ Same codebase. Same tests. Different names, different destinations. The `--scope
 <div>
 
 ```
-  claws (local product)
-  ├── claws-serve (43 routes)
-  ├── claws-lsp → @bic/openclaw-lsp
-  ├── @bic/claws-sdk (fleet, compliance,
-  │     SIEM, PRESS, RELAX, snapshot, context)
-  ├── CAP chunks · Lobster loops
-  │     sessions · trust · violation state
-  └── the claws binary (20 verbs)
-
   openclaw (upstream)
   ├── @bic/openclaw-workspace
   │     (path · ast · canonicalize)
@@ -54,6 +43,15 @@ Same codebase. Same tests. Different names, different destinations. The `--scope
   │     (generator · runtime ABI)
   └── @bic/openclaw-snap
         (registry · HTTP server)
+
+  claws (services)
+  ├── claws-serve (43 routes)
+  ├── claws-lsp  (→ @bic/openclaw-lsp)
+  ├── @bic/claws-sdk (fleet · compliance ·
+  │     siem · snapshot · context)
+  ├── CAP chunks · Lobster loops
+  │     sessions · trust · violation state
+  └── the claws binary (20 verbs)
 
   0   @craftworks/* runtime imports
 ```
@@ -68,29 +66,28 @@ Same codebase. Same tests. Different names, different destinations. The `--scope
 
 ## Why Rename Now
 
-**`claws` tried to be one thing and failed gracefully.** The import surface didn't tell you which parts were upstream-shape and which were bic/claws-internal. The name told you nothing about the boundary.
+**`clawc` tried to be one thing and failed gracefully.** The import surface didn't tell you which parts were upstream-shape and which were service-layer. The name told you nothing about the boundary.
 
-Ra carved the 4 upstream-shape packages out of the enterprise grab-bag. Once those landed, the single name started lying: `claws-sdk` held both upstream-adjacent code (now lifted out) *and* pure-BIC machinery (fleet, CAP, Lobster). Calling all of it `claws` hid the seam.
+We carved the 4 upstream-shape packages out. Once they landed, the single name started lying: `clawc-sdk` held both upstream-adjacent code (now lifted out) *and* service-layer machinery (fleet, CAP, Lobster). Calling all of it `clawc` hid the seam.
 
-**`claws`** is the BIC product. **`openclaw`** is the standard. The `claws` name retires.
+**`claws`** names the services. **`openclaw`** names the libraries. The `clawc` name retires.
 
 </div>
 <div>
 
 ```
-  BEFORE RA                  AFTER RA
+  BEFORE                     AFTER
   ─────────                  ────────
-  claws                      claws (local)
-    ├ core                     ├ product code
-    ├ serve                    ├ BIC integrations
-    ├ LSP                      └ everything not
-    ├ governance                   upstream-shape
-    ├ fleet
-    ├ compliance             openclaw (upstream)
-    ├ SIEM                     ├ workspace
-    ├ snapshot                 ├ guardrails
-    └ … (one grab-bag)         ├ policy
-                               └ snap
+  clawc                      claws (services)
+    ├ core                     ├ serve · lsp · sdk · cli
+    ├ serve                    └ depends on @openclaw/*
+    ├ LSP
+    ├ governance             openclaw (libraries)
+    ├ fleet                    ├ workspace
+    ├ compliance               ├ guardrails
+    ├ SIEM                     ├ policy
+    ├ snapshot                 └ snap
+    └ … (one grab-bag)
 
   One name, two audiences,   Two names, two scopes,
   no seam.                   seam drawn cleanly.
@@ -369,7 +366,7 @@ const markdown = emit('TOOLS', ast);                     // byte-identical round
 
 ```
   ┌── @openclaw/policy  ────────── generator's Parse + Extract walk typed AST into PolicyIR
-  ┌── Editor integrations  ─────── claws-lsp, VS Code: diagnostics, autocomplete, cycle detection
+  ┌── Editor integrations  ─────── @bic/openclaw-lsp, VS Code: diagnostics, autocomplete, cycle detection
   ┌── Migration + authoring ────── supervisor companion round-trips via emit() — user-sees = user-promotes
   ┌── Third-party adopters ──────── linters, CI gates, docs generators — no parallel parser forks
 ```
@@ -793,6 +790,196 @@ If helpful — timing driven by your availability, not ours.
 ```
 
 **Scope + naming are yours**: single `@openclaw/policy` package; the subcommand group becomes `openclaw policy`. Prefer a different name (`govern`, `guard`, something else)? We rename cleanly.
+
+---
+
+<!-- _class: title -->
+
+# The Other Half
+## `claws` — OC-file services
+
+Daemon · LSP · SDK · CLI · plus `HostAdapter`
+
+---
+
+<!-- _class: small -->
+
+## What Lives in `claws`
+
+Four pieces. Each depends on `@openclaw/*`; nothing flows the other way.
+
+```
+  ┌── claws-serve ─────────────────────────────────────────────────────────────┐
+  │   Long-running daemon · 43 routes · session / trust / violation state       │
+  │   CAP chunk dispatch · Lobster collaboration loops                          │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+  ┌── claws-lsp   (→ @bic/openclaw-lsp) ───────────────────────────────────────┐
+  │   VS Code LSP · diagnostics · autocomplete · cycle detection · hover docs  │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+  ┌── @bic/claws-sdk ──────────────────────────────────────────────────────────┐
+  │   fleet · compliance · siem · snapshot · context                            │
+  │   Each sits on the matching @openclaw/* primitive and adds what upstream   │
+  │   doesn't prescribe.                                                        │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+  ┌── the claws binary · 20 verbs ─────────────────────────────────────────────┐
+  │   Wraps @openclaw/* subcommand groups · adds the service verbs (fleet,     │
+  │   compliance, CAP, Lobster) that live here.                                 │
+  └────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+<!-- _class: small -->
+
+## `claws-serve` · The Daemon
+
+Long-running. HTTP to agents, WebSocket to the companion app.
+
+```
+  ┌── HTTP surface (agent-facing) ─────────────────────────────────────────────┐
+  │   43 routes · tool dispatch · workspace file ingest · approval handles     │
+  │   token introspection · OBO · snapshot resolve · policy evaluation         │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+  ┌── Session model ───────────────────────────────────────────────────────────┐
+  │   sessionId binds { tenant, agent-principal, workspace-snapshot, budget }   │
+  │   Trust state (per-session tier ladder) · violation state (R5 fail-closed) │
+  │   Session survives crash + resume via the snapshot registry.                │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+  ┌── CAP chunk dispatch + Lobster loops ──────────────────────────────────────┐
+  │   Capability-scoped fragments routed to subordinate agents under the       │
+  │   current trust envelope. Lobster: reviewer + agent + gateway loop.         │
+  └────────────────────────────────────────────────────────────────────────────┘
+```
+
+Holds the pieces upstream doesn't prescribe: tenant-scope-as-top-level, CAP, Lobster.
+
+---
+
+<!-- _class: small -->
+
+## `claws-lsp` · VS Code
+
+Already upstream-shape. Published as `@bic/openclaw-lsp`; moves to the OC org when the scope is hosted.
+
+```
+  ┌── Diagnostics ─────────────────────────────────────────────────────────────┐
+  │   oc-policy errors (args_from cycle, unknown capability, deny-rule shadow) │
+  │   oc-workspace errors (unknown file kind, duplicate section, bad oc:// URI)│
+  │   Same codes as `openclaw policy check`.                                    │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+  ┌── Autocomplete ────────────────────────────────────────────────────────────┐
+  │   Capability names · risk tiers · data-sensitivity tags · tool names        │
+  │   oc:// URI completion (file, section, item, field walk)                    │
+  │   Sourced from the active workspace's AST.                                  │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+  ┌── Cycle detection + hover docs ────────────────────────────────────────────┐
+  │   Live cycle graph over args_from. Hover shows the compiled PolicyIR node  │
+  │   for the construct under cursor.                                           │
+  └────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+<!-- _class: small -->
+
+## `@bic/claws-sdk` · Five Subpaths
+
+Each sits on a matching `@openclaw/*` primitive or covers a scope upstream doesn't.
+
+```
+  ┌── fleet ───────────────────────────────────────────────────────────────────┐
+  │   Multi-agent compile · roll-out orchestration · cohort promotion           │
+  │   N workspaces × M agents → one coordinated rollout.                        │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+  ┌── compliance ──────────────────────────────────────────────────────────────┐
+  │   PRESS · RELAX · SOC2 rubrics · signing flow                               │
+  │   Composes `@openclaw/policy/comply`.                                        │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+  ┌── siem / snapshot / context ───────────────────────────────────────────────┐
+  │   siem      · sink adapters on top of @openclaw/guardrails/siem             │
+  │   snapshot  · snapshot lifecycle on top of @openclaw/snap                   │
+  │   context   · session model · trust ladder · CAP chunks · Lobster state    │
+  └────────────────────────────────────────────────────────────────────────────┘
+```
+
+Imports flow one way: `@openclaw/*` → `@bic/claws-sdk`. Never the reverse.
+
+---
+
+<!-- _class: small -->
+
+## The `claws` Binary · 20 Verbs
+
+```
+  # Wraps @openclaw/* flat subcommand groups — one-to-one
+  claws policy check | generate | watch | comply | …     (→ @openclaw/policy)
+  claws snap status | upload | promote | rollback | …    (→ @openclaw/snap)
+  claws workspace path | ast | canonicalize              (→ @openclaw/workspace)
+
+  # Service verbs — no upstream equivalent
+  claws serve                  start claws-serve daemon (tenant-scoped)
+  claws fleet compile          multi-agent policy compile across N workspaces
+  claws fleet rollout          staged promotion across cohorts
+  claws compliance eval        PRESS / RELAX / SOC2 rubric suite
+  claws cap inspect            CAP chunk routing + trust ladder state
+  claws lobster join           attach to a Lobster collaboration loop
+  claws session                open / inspect / revoke a session
+  claws trust                  session trust tier + violation history
+  claws context                dump the current operator's tenant-scope context
+```
+
+Every verb dispatches to either an `@openclaw/*` package or a `@bic/claws-sdk` module.
+
+---
+
+<!-- _class: small -->
+
+## HostAdapter · One Contract, Every Host
+
+**The plugin doesn't know where it's running. The host implements the adapter. Plugins stay portable.**
+
+`claws-serve` is one host among several. Formalizes what every host does ad-hoc. Lands upstream in `@openclaw/guardrails` once real adapters validate against real hosts.
+
+```
+  TODAY · EVERY HOST WIRES DIFFERENTLY              THE CONTRACT (proposed upstream)
+  ────────────────────────────────────              ──────────────────────────────────
+  Aether            openclaw_adapter.py             interface HostAdapter {
+  Lobster pod       sidecar-snap + supervisor         extractIdentity(req)
+  Vanilla OC        CLI-stdin + local policy          routePolicy(ctx)
+  Claws-as-service  no path — would require rewrite   getApprovalSink(ctx)
+                                                      shapeResponse(decision, ctx)
+  Plugins entangle with the host.                   }
+  Moving a plugin between hosts means regenerating.   ~100 lines. Pure contract, zero runtime.
+
+  FOUR ADAPTERS — validated end-to-end in sim
+  ─────────────────────────────────────────────────────────────────────────────
+  ┌───────────────────────────────────────────────────────────────────────────┐
+  │  AetherAdapter             formalizes aether's openclaw_adapter.py        │
+  │  (the regular aether path) TenantIsolation + ApprovalPolicyRegistry       │
+  │                            + /v1/tool-approval sink                       │
+  │                                                                           │
+  │  ClawsServiceAdapter       the "aether claws server" — bic-hosted runtime │
+  │  (aether-compatible,       claws-serve daemon + tenant-scoped policy      │
+  │   claws-operated)          drop-in for direct-customer deployments        │
+  │                                                                           │
+  │  LobsterAdapter            sidecar-snap + supervisor-HTTP approval        │
+  │                            single-tenant pod pattern                      │
+  │                                                                           │
+  │  OpenClawVanillaAdapter    CLI-stdin prompt + local `.openclaw/policy/`   │
+  │                            the baseline every host can fall back to      │
+  └───────────────────────────────────────────────────────────────────────────┘
+```
+
+Generated plugin calls the interface. Host ships the adapter. **No plugin rewrite when the host changes.** Sim proves the contract (`test/e2e/adapters/`); real adapters land next.
 
 ---
 

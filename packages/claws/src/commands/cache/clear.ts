@@ -9,7 +9,7 @@
  */
 
 import { createInterface } from 'node:readline';
-import { CompilationCache, resolveCacheDir } from '@bic/claws-sdk/cache';
+import { CompilationCache, resolveCacheDir } from '@bic/claws-sdk/compiler/cache';
 
 /** Options accepted by `claws cache clear`. */
 export interface CacheClearOptions {

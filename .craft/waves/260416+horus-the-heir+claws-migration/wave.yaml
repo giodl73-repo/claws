@@ -1,0 +1,137 @@
+name: "Horus the Heir"
+number: XCVI
+deity: horus
+epithet: the-heir
+branch: feature/horus-the-heir
+description: "Extract clawc out of the craftworks monorepo into a standalone repo at microsoft.ghe.com/bic/claws (clawc → claws binary rename post-filter-repo), stand up long-term repo operations (CI, CODEOWNERS, release playbook), and prove the openclaw-upstream proposal's decide/track/enforce+review model runs E2E via a hybrid-fidelity sim under three host shapes (openclaw / lobster / aether). Packages ship as @bic/openclaw-* throughout; scope flip to @openclaw/* happens in a later upstream wave when Peter greenlights. Wepwawet (next wave) consumes this E2E sim contract to wire real aether / lobster / openclaw integrations using @bic/openclaw-*."
+status: completed
+completedAt: "2026-04-22T00:00:00Z"
+completedBy: [clawc-repo-steward, clawc-release-eng, architect, compliance, testing]
+dependsOn: [ra]
+
+plans:
+  - clawc-pre-extraction-packaging
+  - clawc-repo-migration
+  - clawc-repo-ops                    # NEW: ports doc-validation + accept-runner; atoms registry; no-craftworks gate
+  - clawc-bic-operations
+  - claws-e2e-sim-harness
+  - claws-sim-approval-flows
+  # claws-sim-host-presets moved to Wepwawet 2026-04-22
+  - clawc-spec-reboot              # CP-8: repo-ops validators (73.7+73.8) + package-first specs (74.5+74.6)
+
+# plans_on_hold removed 2026-04-19 — 3 held plans archived to .craft/plans/_archive/
+# with status: Archived. Intent re-expressed in claws-sim-* plans (Horus) and
+# deferred to Wepwawet's real-integration plans. See REPLAN.md.
+
+stageOrder:
+  - kickoff
+  - setup
+  - scenarios
+  - planning
+  - implementation
+  - review
+  - close
+
+stages:
+  kickoff:
+    status: completed
+    completedAt: "2026-04-16T00:00:00Z"
+    reviewDecision: approved
+    notes: "Re-kicked 2026-04-19 via REPLAN.md — wave shifts from extract-only (2 plans) to extract+simulate (7 plans, 8 CPs). Three old plans archived; three new sim plans added + clawc-repo-ops inserted as CP-3. The 3 new sim plans (harness + approval-flows + host-presets) land as CP-5..CP-7 after CP-1..CP-4 stand up bic/claws + repo-ops + CI."
+  setup:
+    status: completed
+    completedAt: "2026-04-19T00:00:00Z"
+    reviewDecision: approved
+    notes: "Three setup plans (clawc-pre-extraction-packaging, clawc-repo-migration, clawc-bic-operations) stood up bic/claws as CP-1..CP-3. Ra confirmed unblocked 2026-04-19."
+  scenarios:
+    status: completed
+    completedAt: "2026-04-19T00:00:00Z"
+    reviewDecision: approved
+    notes: "Harness (CP-5) + approval-flows (CP-6) + host-presets (CP-7) form the sim scenario cluster. 62 scenarios total across 4 phases (8 repo-ops + 8 harness + 27 approval-flows + 19 presets), ~637 findings. Completed via stage5 commits."
+  planning:
+    status: completed
+    completedAt: "2026-04-19T00:00:00Z"
+    reviewDecision: approved
+    notes: "All 77 pulse plans + 7 checkpoint plans on disk via stage7. R1 reviews applied in stage8/stage9. PR-DRAFT.md + TARGET-STRUCTURE.md committed."
+  implementation:
+    status: completed
+    completedAt: "2026-04-22T00:00:00Z"
+    reviewDecision: approved
+    notes: "CP-1 through CP-6 + CP-8 landed (CP-7 moved to Wepwawet 2026-04-22). 77 pulses committed across the wave. 97 → 94 atoms seeded in per-package ATOMS.md files (3 compiler sub-atoms consolidated into atom:SKC during 74.5 reboot)."
+  review:
+    status: completed
+    completedAt: "2026-04-22T00:00:00Z"
+    reviewDecision: approved
+    notes: "Per-CP review panels signed off at each gate (panels/cp-1..cp-6, cp-8). CP-8 review panel ran against pulses 73 / 73.7 / 73.8 / 74 / 74.5 / 74.6 / 75 / 76 / 77."
+  close:
+    status: completed
+    completedAt: "2026-04-22T00:00:00Z"
+    reviewDecision: approved
+    notes: "FLAIR.md authored, PR-DRAFT.md drafted, wave.yaml flipped to completed, index reconciliation complete across both repos (pulse 76), atoms oracle 0 orphans, per-package doc reboot clean (pulse 74.5 + 74.6)."
+
+checkpoints:
+  # Canonical checkpoint inventory — one plan per CP per per-checkpoint-plans
+  # memory feedback; /craft-wave produces one plan file per CP so /craft-start
+  # can run one CP at a time with reviews in between.
+  CP-1:
+    plan: clawc-pre-extraction-packaging
+    purpose: "Final monorepo-side polish; 4-package tree ready for filter-repo lift (Ra CP-8..CP-12 outputs validated)"
+  CP-2:
+    plan: clawc-repo-migration
+    purpose: "Filter-repo lift into microsoft.ghe.com/bic/claws; clawc → claws binary rename; zero craftworks refs in new repo, zero clawc refs in craftworks"
+  CP-3:
+    plan: clawc-repo-ops
+    purpose: "Port doc-validation + accept-runner from craftworks; publish atoms registry as oracle; ship no-craftworks CI gate; scrubbing protocol"
+  CP-4:
+    plan: clawc-bic-operations
+    purpose: "CI matrix, CODEOWNERS, branch protection, release playbook — activates CP-3 gates going forward"
+  CP-5:
+    plan: claws-e2e-sim-harness
+    purpose: "Hybrid-fidelity test harness: real snap serve + real generated plugin + real CLI; in-process host + companion mocks"
+  CP-6:
+    plan: claws-sim-approval-flows
+    purpose: "External approval symmetric across tools-at-risk (R5/RESTRICTED) and file-ingest (RESTRICTED); approvalHandle binding properties stress-tested"
+  # CP-7 moved to Wepwawet 2026-04-22 — host-preset adapters straddle sim/real
+  # boundary; Wepwawet's charter is real-integration, so CP-7 belongs there
+  # starting with AetherAdapter + ClawsServiceAdapter (reduced from 4 adapters
+  # to 2; OpenClawVanilla + Lobster deferred indefinitely — no real integration
+  # target today). See Wepwawet wave.yaml; pulse files 63-72 + cp-7.md moved.
+  CP-8:
+    plan: clawc-spec-reboot
+    purpose: "Close — repo-ops validators (73.7: doc-structure+atom-coverage+readme-reachability; 73.8: accept-runner manifest+count+pluggable-runners); spec reboot (74.5+74.6: package-first docs in c:\\src\\clawc\\docs\\; 8 CL-NN specs retired); then flair, doc-sync, index reconciliation"
+
+roles:
+  # Roles relevant to repo extraction + long-term maintenance + sim work
+  - founder
+  - clawc-repo-steward
+  - clawc-release-eng
+  - ciso
+  - platform-eng
+  - compliance
+  - power-user
+  - gateway-eng         # re-added for sim plans (generated plugin + hook semantics)
+  - skill-author        # re-added for sim plans (fixture authoring)
+
+roles_on_hold:
+  # Previously assigned for the real-integration plans; resume in Wepwawet.
+  - new-hire
+  - aether-runtime-eng
+  - aether-adapter-eng
+  - lobster-container-eng
+  - cowork-ux-eng
+  - m365-connector-eng
+  - clawpilot-product
+
+blocks:
+  - "Ra wave must close clean with @bic/clawc-compiler achieving zero @craftworks/ runtime deps and GHE Packages publish flow validated"
+  - "Ra's --scope flag must produce byte-identical artifacts across @bic/openclaw-* and @openclaw/* (openclaw preset's scope-flip-byte-identical scenario depends on this)"
+
+out_of_scope:
+  - "Real aether / lobster / openclaw integration (next wave: Wepwawet XCVII — rescoped from upstream-PR-only to real integration)"
+  - "openclaw-core upstream PRs (separate later wave, triggered on Peter greenlight; openclaw-upstream-extraction plan stays authoritative, moves to that wave)"
+  - "ClawPilot device-mode preset (deferred; treat as openclaw-preset variant if added)"
+  - "Real companion app UI (sim uses in-process callback; Wepwawet aether / lobster plans wire to Cowork)"
+  - "Production-fidelity fault taxonomy (credential rotation, circuit breakers, correlation tables — those live in Wepwawet's aether-real-integration plan)"
+  - "Public distribution of clawc (separate future decision; Horus scope is bic/claws on GHE Packages only)"
+  - "Freemium packaging — not applicable during Horus (clawc stays Microsoft-internal on GHE Packages)"
+  - "compiler-sdk dialect decomposition (separate wave)"

@@ -36,6 +36,10 @@
       "types": "./dist/secrets/index.d.ts",
       "import": "./dist/secrets/index.js"
     },
+    "./handle-binding": {
+      "types": "./dist/handle-binding/index.d.ts",
+      "import": "./dist/handle-binding/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

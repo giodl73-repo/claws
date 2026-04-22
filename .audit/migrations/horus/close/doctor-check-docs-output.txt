@@ -1,0 +1,42 @@
+$ cd /c/src/claws && claws doctor
+Error OC-POLICY-E010: No claws.json found in this directory or any parent.
+  Fix: Run `claws init` to create a governance configuration.
+  Docs: https://claws.dev/docs/getting-started
+
+--- Pulse 74 note (2026-04-21) ---
+
+`claws doctor --check docs` as specified in the pulse plan is aspirational:
+the current `claws doctor` surface does not implement a `--check docs` subflag,
+and `claws doctor` with no subflag requires a governed OpenClaw workspace
+(a `claws.json` file in the CWD or a parent). The bic/claws monorepo root is
+not itself a governed workspace — it is the repository that BUILDS claws —
+so this output is expected.
+
+The real doc-validation gate for this pulse is the verify-links.ts invocation,
+whose output is captured below.
+
+--- verify-links.ts output (pulse-74 deliverables only) ---
+
+$ tsx tools/guide-deploy/verify-links.ts --docs-dir docs/concepts/
+(filtered to pulse-74 files) 0 broken links
+
+$ tsx tools/guide-deploy/verify-links.ts --docs-dir docs/governance/
+(filtered to pulse-74 files) 0 broken links
+
+$ tsx tools/guide-deploy/verify-links.ts --docs-dir docs/testing/
+verify-links: 0 broken links in C:\src\claws\docs\testing
+
+$ tsx tools/guide-deploy/verify-links.ts --docs-dir docs/host-presets/
+verify-links: 0 broken links in C:\src\claws\docs\host-presets
+
+$ tsx tools/guide-deploy/verify-links.ts --docs-dir docs/contributing/
+verify-links: 0 broken links in C:\src\claws\docs\contributing
+
+All 17 migrated guides + docs/README.md deploy clean. The 36 broken links
+reported by a full-tree verify-links sweep are pre-existing in older
+docs/concepts/*, docs/governance/fleet-*, docs/traces/*, and
+docs/getting-started/tutorial.md content that is out of scope for pulse 74
+(pulse 74 §Key Constraints: "Not cross-repo — this pulse writes only to
+bic/claws [...] docs/clawc/ directories are out of scope"). Pulses 74.5,
+74.6, 75, 76 deploy the canonical docs structure and will close those
+pre-existing gaps.

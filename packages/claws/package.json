@@ -1,6 +1,6 @@
 {
   "name": "@bic/claws-cli",
-  "version": "0.36.0",
+  "version": "0.37.0",
   "description": "claws CLI — enterprise governance compiler command surface",
   "type": "module",
   "exports": {
@@ -24,9 +24,10 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@bic/claws-sdk": "file:../packages/@bic/claws-sdk",
-    "@bic/claws-sdk": "file:../claws-sdk",
+    "@bic/claws-sdk": "*",
     "@bic/claws-serve": "file:../claws-serve",
+    "@bic/openclaw-policy": "*",
+    "@bic/openclaw-snap": "*",
     "commander": "^12.1.0"
   },
   "devDependencies": {

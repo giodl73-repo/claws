@@ -8,7 +8,16 @@
  */
 
 import { join } from 'node:path';
+import { statSync } from 'node:fs';
 import { Command } from 'commander';
+
+function isPolicyWorkspace(cwd: string): boolean {
+  try {
+    return statSync(join(cwd, '.openclaw', 'policy', 'policy-ir.json')).isFile();
+  } catch {
+    return false;
+  }
+}
 import { preCommand } from './hooks/pre-command.js';
 import { createTimer, postCommand } from './hooks/post-command.js';
 import { runCompile } from './commands/compile.js';
@@ -26,6 +35,20 @@ import {
   runSnapList,
   runSnapDelete,
 } from './commands/snap.js';
+import { runSnapServe } from './commands/snap-serve.js';
+import { runRouter as runPolicyRouter } from '@bic/openclaw-policy/cli-handlers';
+import {
+  stage as snapStage,
+  status as snapStatus,
+  upload as snapUpload,
+  list as snapListHttp,
+  diff as snapDiffIds,
+  diffStaged as snapDiffStaged,
+  checkout as snapCheckout,
+  promote as snapPromote,
+  rollback as snapRollback,
+  discardStage as snapDiscardStage,
+} from '@bic/openclaw-snap/cli-handlers';
 import { runScan } from './commands/scan.js';
 import { runKeysGenerate, runKeysList, runKeysRotate, runKeysRevoke, runKeysCeremonyInit, runKeysCeremonyReconstruct } from './commands/keys.js';
 import { runInitSkill } from './commands/init.js';
@@ -285,6 +308,13 @@ export function createProgram(): Command {
     });
 
   // ── doctor ──────────────────────────────────────────────────────────
+  // Two-mode dispatch:
+  //   - workspaces with `.openclaw/policy/policy-ir.json` → policy router
+  //     doctor (realPolicyProbe: stat policy-ir + verify audit chain).
+  //   - everything else → legacy claws-sdk doctor (needs claws.json).
+  // The policy-workspace check is a cheap statSync; it lets the governed-
+  // agent surface use `claws doctor` as documented in openclaw-upstream
+  // without colliding with the legacy check-suite path.
   program
     .command('doctor')
     .description('Run workspace health diagnostics')
@@ -292,6 +322,19 @@ export function createProgram(): Command {
     .option('--fix', 'Apply automatic fixes where possible', false)
     .action(async (cmdOpts: { postUpgrade: boolean; fix: boolean }) => {
       const opts = program.opts<GlobalOpts>();
+      const cwd = process.cwd();
+      if (isPolicyWorkspace(cwd)) {
+        const result = await runPolicyRouter({
+          binaryName: 'claws',
+          argv: ['doctor'],
+          cwd,
+          env: process.env,
+        });
+        if (result.stdout !== '') process.stdout.write(result.stdout);
+        if (result.stderr !== '') process.stderr.write(result.stderr);
+        process.exitCode = result.exitCode;
+        return;
+      }
       const ctx = await preCommand();
       const exitCode = await runDoctorCmd(ctx, {
         json: opts.json,
@@ -300,6 +343,30 @@ export function createProgram(): Command {
         fix: cmdOpts.fix,
       });
       process.exitCode = exitCode;
+    });
+
+  // ── upgrade ─────────────────────────────────────────────────────────
+  // Policy-artifact migrator. `--check` is the openclaw-upstream spelling
+  // for "inspect without writing"; internally it maps to `--dry-run` on
+  // the policy upgrade handler.
+  program
+    .command('upgrade')
+    .description('Migrate policy artifacts to current schema version')
+    .option('--check', 'Inspect without writing (dry run)', false)
+    .option('--dry-run', 'Alias for --check', false)
+    .action(async (cmdOpts: { check: boolean; dryRun: boolean }) => {
+      const cwd = process.cwd();
+      const flags: string[] = [];
+      if (cmdOpts.check || cmdOpts.dryRun) flags.push('--dry-run');
+      const result = await runPolicyRouter({
+        binaryName: 'claws',
+        argv: ['upgrade', ...flags],
+        cwd,
+        env: process.env,
+      });
+      if (result.stdout !== '') process.stdout.write(result.stdout);
+      if (result.stderr !== '') process.stderr.write(result.stderr);
+      process.exitCode = result.exitCode;
     });
 
   // ── snap ────────────────────────────────────────────────────────────
@@ -345,6 +412,183 @@ export function createProgram(): Command {
       const workspaceRoot = process.cwd();
       const exitCode = await runSnapDelete(workspaceRoot, name, { json: opts.json });
       process.exitCode = exitCode;
+    });
+
+  snap
+    .command('serve')
+    .description('Start the snapshot registry HTTP server')
+    .option('--port <port>', 'Bind port (0 = ephemeral, default 0)', (v) => parseInt(v, 10), 0)
+    .option('--host <host>', 'Bind address (default 127.0.0.1)')
+    .action(async (cmdOpts: { port: number; host?: string }) => {
+      const opts = program.opts<GlobalOpts>();
+      const exitCode = await runSnapServe({
+        port: cmdOpts.port,
+        host: cmdOpts.host,
+        json: opts.json,
+      });
+      process.exitCode = exitCode;
+    });
+
+  // ── snap (openclaw-upstream verbs via @bic/openclaw-snap/cli-handlers) ───
+  // upload / status / list / diff / diff --staged / checkout / promote /
+  // rollback / stage on|off / discard --stage — each delegates to the shared
+  // snap cli handler which hits the snap HTTP surface (endpoint configurable
+  // via --endpoint or OPENCLAW_SNAP_STORE env).
+  const snapEndpoint = (cmdOpts: { endpoint?: string } | undefined): string =>
+    cmdOpts?.endpoint
+      ?? process.env.OPENCLAW_SNAP_STORE
+      ?? 'http://127.0.0.1:8443';
+  const snapCtx = (argv: readonly string[], cmdOpts: { endpoint?: string } | undefined) => ({
+    argv,
+    endpoint: snapEndpoint(cmdOpts),
+    stdout: (l: string) => process.stdout.write(l + '\n'),
+    stderr: (l: string) => process.stderr.write(l + '\n'),
+  });
+
+  snap
+    .command('upload')
+    .description('Commit staged content as a new draft snapshot')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapUpload(snapCtx(cmd.args, cmdOpts));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('status')
+    .description('Show working tree + stage + drafts + current')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapStatus(snapCtx(cmd.args, cmdOpts));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('list-http')
+    .description('List snapshots via HTTP (store-backed)')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapListHttp(snapCtx(cmd.args, cmdOpts));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('diff [id1] [id2]')
+    .description('Semantic diff: --staged (working tree) or <id1> <id2> (two snapshots)')
+    .option('--staged', 'Compare staged vs canonical', false)
+    .option('--level <level>', 'Diff level (file|semantic)')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (
+      _id1,
+      _id2,
+      cmdOpts: { staged: boolean; endpoint?: string; level?: string },
+      cmd: { args: readonly string[] },
+    ) => {
+      // Commander consumes `--level <v>` and `--staged` before dispatch,
+      // so the raw handler never sees them. Re-inject so the underlying
+      // diff handler takes the right branch (file vs semantic / staged
+      // vs two-snapshot).
+      const extras: string[] = [];
+      if (cmdOpts.staged) extras.push('--staged');
+      if (typeof cmdOpts.level === 'string') extras.push('--level', cmdOpts.level);
+      const handler = cmdOpts.staged ? snapDiffStaged : snapDiffIds;
+      const { exitCode } = await handler(snapCtx([...extras, ...cmd.args], cmdOpts));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('checkout <id>')
+    .description('Reset working tree to a snapshot')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (_id, cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapCheckout(snapCtx(cmd.args, cmdOpts));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('promote <id>')
+    .description('Promote a draft snapshot to current')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (_id, cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapPromote(snapCtx(cmd.args, cmdOpts));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('rollback <id>')
+    .description('Revert to a prior snapshot')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (_id, cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapRollback(snapCtx(cmd.args, cmdOpts));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('stage <mode>')
+    .description('Toggle auto-staging: snap stage on | off')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (_mode, cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      const { exitCode } = await snapStage(snapCtx(cmd.args, cmdOpts));
+      process.exitCode = exitCode;
+    });
+
+  snap
+    .command('discard-stage')
+    .description('Clear .stage/ without uploading')
+    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
+      // `discard-stage` is the hyphenated CLI verb; the underlying handler
+      // dispatches on an explicit `--stage` flag to distinguish stage-clear
+      // from the `snap discard <id>` shape. Inject the flag so the handler
+      // takes the stage-clear branch without the user having to repeat
+      // `--stage` after `discard-stage`.
+      const { exitCode } = await snapDiscardStage(snapCtx(['--stage', ...cmd.args], cmdOpts));
+      process.exitCode = exitCode;
+    });
+
+  // ── policy (openclaw-upstream verbs via @bic/openclaw-policy/cli-handlers) ──
+  // Delegates the entire `claws policy <verb> [args...]` surface to the
+  // shared router, which dispatches to check / generate / watch / comply /
+  // test / sim / report / verify / diff. Also routes `claws doctor` and
+  // `claws upgrade` through the same top-level handlers.
+  program
+    .command('policy [verb] [args...]')
+    .description('Policy surface: check / generate / watch / comply / test / sim / report / verify / diff')
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(async (verb: string | undefined, args: string[] = []) => {
+      // Commander consumes `--json` at the program level, so the policy
+      // router never sees it in `args`. Re-inject when set so verbs that
+      // honour --json (comply, test) can emit machine-readable output.
+      const opts = program.opts<GlobalOpts>();
+      const verbArgs = opts.json ? ['--json', ...args] : args;
+      const result = await runPolicyRouter({
+        binaryName: 'claws',
+        argv: ['policy', ...(verb !== undefined ? [verb] : []), ...verbArgs],
+        cwd: process.cwd(),
+        env: process.env,
+      });
+      if (result.stdout !== '') process.stdout.write(result.stdout);
+      if (result.stderr !== '') process.stderr.write(result.stderr);
+      process.exitCode = result.exitCode;
     });
 
   // ── scan ────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 {
   "name": "@bic/openclaw-snap",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "OpenClaw snapshot registry — SnapshotStore interface + in-memory/filesystem reference impls + HTTP server (9 endpoints).",
   "license": "MIT",
   "type": "module",
@@ -11,6 +11,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./cli-handlers": {
+      "types": "./dist/cli-handlers/index.d.ts",
+      "import": "./dist/cli-handlers/index.js"
     },
     "./package.json": "./package.json"
   },

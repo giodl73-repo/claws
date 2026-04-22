@@ -1,0 +1,11 @@
+series: harness-verb-tier
+scenarioCode: SC-04
+fixtureId: modify-arg-redaction
+expected:
+  verb: modify
+  declaredTier: R2
+  effectiveTier: R2
+  chainOk: true
+  auditShape:
+    decisions: 1
+    approvals: 0

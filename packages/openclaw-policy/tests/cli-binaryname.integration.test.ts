@@ -52,12 +52,16 @@ describe('binaryName parameterization — 6 L1 checks', () => {
   });
 
   it('L1.5 doctor renders branded header for both claws and openclaw', async () => {
+    // The canonical OC fixture has no `.openclaw/policy/` tree, so the real fs
+    // probe (pulse 47.5) correctly reports checks as FAIL and exits 1. This
+    // test only cares that the branded header lands — doctor health against
+    // a policy-less fixture is covered by doctor.unit.test.ts.
     const resA = await runRouter({ binaryName: 'claws', argv: ['doctor'], cwd: CWD });
-    expect(resA.exitCode).toBe(0);
+    expect([0, 1]).toContain(resA.exitCode);
     expect(resA.stdout).toContain('claws doctor:');
 
     const resB = await runRouter({ binaryName: 'openclaw', argv: ['doctor'], cwd: CWD });
-    expect(resB.exitCode).toBe(0);
+    expect([0, 1]).toContain(resB.exitCode);
     expect(resB.stdout).toContain('openclaw doctor:');
     expect(resB.stdout).not.toContain('claws doctor:');
   });
