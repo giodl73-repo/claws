@@ -7,12 +7,26 @@ domain directory follows the same layout: `README.md`, `ATOMS.md`,
 
 ## Package directory map
 
+### Incubating openclaw-* (upstream-bound)
+
 | Code | Package | Description | README |
 |------|---------|-------------|--------|
 | **WS** | `@bic/openclaw-workspace` | Typed AST, `oc://` URIs, canonicalizer, lossless emitter | [./workspace/README.md](./workspace/README.md) |
 | **GR** | `@bic/openclaw-guardrails` | GuardrailProvider, audit chain, approval handle, host adapters | [./guardrails/README.md](./guardrails/README.md) |
 | **PO** | `@bic/openclaw-policy` | Workspace → PolicyIR compilation pipeline | [./policy/README.md](./policy/README.md) |
 | **SN** | `@bic/openclaw-snap` | Snapshot lifecycle daemon, HTTP API, non-uplift rules | [./snap/README.md](./snap/README.md) |
+| **LS** | `@bic/openclaw-lsp` | LSP server: diagnostics, hover, governance badge | [./lsp/README.md](./lsp/README.md) |
+
+### Internal claws-* (never upstream)
+
+| Code | Package | Description | README |
+|------|---------|-------------|--------|
+| **CX** | `@bic/claws` | CLI binary (`init`, `doctor`, `snap`, `policy` groups) | [./cli/README.md](./cli/README.md) |
+| **AC** | `@bic/claws-action` | GitHub Action: SARIF pipeline + severity gate | [./action/README.md](./action/README.md) |
+| **SK** | `@bic/claws-sdk` | Enterprise SDK + compiler internals (29 G-rules) | [./sdk/README.md](./sdk/README.md) |
+| **SV** | `@bic/claws-serve` | 43-route HTTP + SSE daemon, Cap-surface integration | [./serve/README.md](./serve/README.md) |
+| **KT** | `@bic/claws-skill-kit` | Skill authoring SDK, three-rings adoption model | [./skill-kit/README.md](./skill-kit/README.md) |
+| **TX** | `@bic/claws-test` | Accept-runner, 17-code doc gate, no-craftworks gate | [./test/README.md](./test/README.md) |
 
 ## Domain dirs
 
@@ -58,6 +72,13 @@ Two-letter codes (packages + domains):
 | GR | guardrails package | `@openclaw/guardrails` |
 | PO | policy package | `@openclaw/policy` |
 | SN | snap package | `@openclaw/snap` |
+| LS | lsp package | none (internal) |
+| CX | cli binary | none (internal) |
+| AC | claws-action | none (internal) |
+| SK | claws-sdk | none (internal) |
+| SV | claws-serve | none (internal) |
+| KT | claws-skill-kit | none (internal) |
+| TX | claws-test | none (internal) |
 | SM | security model | (internal reference, absorbs CL-02) |
 | UG | upstream governance | (internal reference, extends CL-11) |
 | RB | repo boundary | (internal reference, absorbs CL-13) |
