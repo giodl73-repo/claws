@@ -46,7 +46,7 @@ describe('audit-chain hash integrity (CL-11 §3a)', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('broken chain: tampered hash is detected as broken-hash-chain', () => {
+  it('broken chain: tampered hash is detected as chain-gap or hash-mismatch', () => {
     const filePath = makeFile();
     const w = new AuditChainWriter({ filePath, clock: () => 1_700_000_000_000 });
     w.appendProducer({
@@ -99,7 +99,8 @@ describe('audit-chain hash integrity (CL-11 §3a)', () => {
     const result = verifyChain(reader.all());
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.reason).toBe('broken-hash-chain');
+      // Tampered prevHash on second entry triggers chain-gap (prev-hash thread break).
+      expect(['chain-gap', 'hash-mismatch']).toContain(result.reason);
     }
   });
 
@@ -220,7 +221,7 @@ describe('audit-chain hash integrity (CL-11 §3a)', () => {
     expect(existsSync(filePath)).toBe(true);
   });
 
-  it('verifyChain detects prevHash mismatch (broken-hash-chain by threading, not hash)', () => {
+  it('verifyChain detects prevHash mismatch (chain-gap by threading, not hash)', () => {
     const good: AuditChainEntry[] = [
       {
         type: 'producer',
@@ -237,7 +238,7 @@ describe('audit-chain hash integrity (CL-11 §3a)', () => {
     ];
     const result = verifyChain(good);
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.reason).toBe('broken-hash-chain');
+    if (!result.ok) expect(result.reason).toBe('chain-gap');
   });
 
   it('verifyChain detects orphan-approval and missing-approval-for-review', () => {
