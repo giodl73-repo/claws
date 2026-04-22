@@ -31,6 +31,11 @@
       "import": "./dist/staging/index.js",
       "require": "./dist/staging/index.cjs"
     },
+    "./path-canonical": {
+      "types": "./dist/path-canonical/index.d.ts",
+      "import": "./dist/path-canonical/index.js",
+      "require": "./dist/path-canonical/index.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": ["dist"],

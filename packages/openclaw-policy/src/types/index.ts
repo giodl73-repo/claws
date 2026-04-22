@@ -61,11 +61,26 @@ export interface Edge {
   sensitivity: Sensitivity;
 }
 
+export interface SourceLocation {
+  path: string;
+  line: number;
+  column: number;
+}
+
 export interface ToolSpec {
   name: string;
   riskLevel: RiskLevel;
   capabilities: Capability[];
   argsFrom?: Record<string, ProvenanceSource[]>;
+  failOpen?: boolean;
+  sourceLocation?: SourceLocation;
+  /**
+   * Declared baseline sensitivity from the tool's TOOLS.md entry. Absent
+   * when no declaration is present; G-CHAIN callers treat absence as
+   * `'PUBLIC'` and may elevate the effective value via `args_from`
+   * propagation (CL-07 §1a G-CHAIN, SC-15).
+   */
+  sensitivity?: Sensitivity;
 }
 
 export interface SkillSpec {
@@ -127,6 +142,23 @@ export interface GenerateResult {
   workspaceRoot: string;
   writtenFiles: string[];
   diagnostics: Diagnostic[];
+  /**
+   * Structured generator-level diagnostics (pulse 53, CP-6). Populated when
+   * a declaration-lowering validator (e.g. r5-fail-open) rejects a tool.
+   * The plain `diagnostics` array mirrors these as `severity: 'error'`
+   * entries so existing consumers (strict flag, CLI handler) keep working.
+   */
+  generatorDiagnostics?: GeneratorDiagnosticEntry[];
+}
+
+export interface GeneratorDiagnosticEntry {
+  kind: 'r5-fail-open';
+  toolName: string;
+  sourcePath: string;
+  line: number;
+  column: number;
+  invalidReason: 'r5-fail-open-declared';
+  message: string;
 }
 
 export interface CheckResult {
