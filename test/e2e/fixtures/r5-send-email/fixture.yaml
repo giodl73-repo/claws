@@ -1,0 +1,11 @@
+series: handle-binding
+scenarioCode: SC-16
+fixtureId: r5-send-email
+expected:
+  verb: review
+  declaredTier: R5
+  effectiveTier: R5
+  chainOk: true
+  auditShape:
+    decisions: 1
+    approvals: 1
