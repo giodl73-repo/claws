@@ -1,0 +1,71 @@
+{
+  "pulse": "73",
+  "wave": "260416+horus-the-heir+clawc-migration",
+  "deploy_date": "2026-04-22",
+  "deploy_mode": "pragmatic-append",
+  "cl_numbers_allocated": {
+    "CL-15": {
+      "slug": "canonicalizer",
+      "source_draft": "CL-NEW-canonicalizer-byte-identical.md",
+      "was_free_before_deploy": true
+    },
+    "CL-16": {
+      "slug": "oc-uri-canonical",
+      "source_draft": "CL-NEW-oc-uri-canonical.md",
+      "was_free_before_deploy": true
+    }
+  },
+  "drafts_deployed": [
+    {
+      "draft_path": "specs/drafts/CL-07-amendment-file-ingest-provider.md",
+      "canonical_path": "docs/specs/CL-07-deep-integration.md",
+      "sections_modified": ["Amendments — Amendment A (§1a peer interfaces)"],
+      "version_bump": { "from": "v1.2", "to": "v1.3" },
+      "consolidated_with": ["CL-07-amendment-snapshot-switch-semantics.md"]
+    },
+    {
+      "draft_path": "specs/drafts/CL-07-amendment-snapshot-switch-semantics.md",
+      "canonical_path": "docs/specs/CL-07-deep-integration.md",
+      "sections_modified": ["Amendments — Amendment B (§1a Rules 1-4)"],
+      "version_bump": { "from": "v1.2", "to": "v1.3" },
+      "consolidated_with": ["CL-07-amendment-file-ingest-provider.md"]
+    },
+    {
+      "draft_path": "specs/drafts/CL-11-amendment-audit-cross-linking.md",
+      "canonical_path": "docs/specs/CL-11-upstream-governance.md",
+      "sections_modified": ["Amendments — Amendment (§3a)"],
+      "version_bump": { "from": "v1.2", "to": "v1.3" }
+    },
+    {
+      "draft_path": "specs/drafts/CL-13-amendment-rename-to-claws.md",
+      "canonical_path": "docs/specs/CL-13-repo-boundary.md",
+      "sections_modified": ["Amendments — Amendment A (rename)"],
+      "version_bump": { "from": "v1.6", "to": "v1.7" },
+      "consolidated_with": ["CL-13-amendment-repo-ops-oracle.md"]
+    },
+    {
+      "draft_path": "specs/drafts/CL-13-amendment-repo-ops-oracle.md",
+      "canonical_path": "docs/specs/CL-13-repo-boundary.md",
+      "sections_modified": ["Amendments — Amendment B (repo-ops oracle)"],
+      "version_bump": { "from": "v1.7", "to": "v1.8" },
+      "consolidated_with": ["CL-13-amendment-rename-to-claws.md"]
+    },
+    {
+      "draft_path": "specs/drafts/CL-NEW-canonicalizer-byte-identical.md",
+      "canonical_path": "docs/specs/CL-15-canonicalizer.md",
+      "sections_modified": ["NEW — full spec"],
+      "version_bump": { "from": null, "to": "v1.0" }
+    },
+    {
+      "draft_path": "specs/drafts/CL-NEW-oc-uri-canonical.md",
+      "canonical_path": "docs/specs/CL-16-oc-uri-canonical.md",
+      "sections_modified": ["NEW — full spec"],
+      "version_bump": { "from": null, "to": "v1.0" }
+    }
+  ],
+  "total_drafts": 7,
+  "total_canonical_targets": 5,
+  "draft_archival": "in-place at craftworks wave tree per /craft-wave §11; draft files NOT deleted",
+  "harness_citation_flip": "pending — handled by pulse 74 (guides-deploy) rewrite pass",
+  "cl_number_collisions": "clear"
+}

@@ -416,3 +416,17 @@ The following R1 finding is NOT deferred but is covered structurally elsewhere:
 - `CL-08-freemium-boundary.md` — freemium packaging (effectively paused per CL-08 v1.2 bic-pivot amendment)
 - `CL-10-cap-integration.md` — consumer contract for `claws-serve`
 - `CL-11-upstream-governance.md` — consumer contract for governance artifacts
+
+---
+
+## Amendments (Horus wave, 2026-04-22 deploy)
+
+### Amendment A — Rename to claws (v1.6 → v1.7)
+
+*Source: `.craft/waves/260416+horus-the-heir+clawc-migration/specs/drafts/CL-13-amendment-rename-to-claws.md`. Records the post-Ra rename: binary name `clawc` → `claws`; repo name `bic/clawc` → `bic/claws`; npm scope/package names unchanged during Horus (`@bic/claws-cli`, `@bic/openclaw-*`). Any references to "clawc" in docs or code written during Horus that still read "clawc" are historical/provenance; new writers use "claws" exclusively. Phantom packages (`@bic/clawc-compiler`, `@bic/clawc-sim`, `@bic/clawc-rubric`) do NOT exist and were never shipped — compiler content nests inside `@bic/claws-sdk`, sim inside `test/e2e/`, rubric inside `@bic/openclaw-guardrails`.*
+
+### Amendment B — Repo-Ops Oracle (v1.7 → v1.8)
+
+*Source: `.craft/waves/260416+horus-the-heir+clawc-migration/specs/drafts/CL-13-amendment-repo-ops-oracle.md`. Declares `devtools/repo-ops/` as the in-repo validator for package-doc structure. Three validators: doc-structure (per-package README + ATOMS + CHANGELOG + typed subdirectories), atom-coverage (ATOMS.md vs `covers:` frontmatter on doc files), readme-reachability (every `.md` in `docs/` reachable from a package README). Declares 97-atom registry as bidirectional oracle: every atom is declared in `docs/concepts/atoms-registry.md`, every declared atom has a surface-contract YAML under `docs/specs/contracts/`, every scenario series has a manifest entry. Implemented in pulses 73.7 (validators), 73.8 (accept-runner), 75 (atoms seed).*
+
+Version: CL-13 bumps to v1.8 at deploy.

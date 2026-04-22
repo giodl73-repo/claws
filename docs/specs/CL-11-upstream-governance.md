@@ -1298,3 +1298,13 @@ npm run build                    # -> all compile
 
 7. **Telemetry**: Anonymous, opt-in install + daily active workspace counts.
    *The community should weigh*: Is telemetry in governance packages acceptable, or does it conflict with the security-first positioning?
+
+---
+
+## Amendments (Horus wave, 2026-04-22 deploy)
+
+### Amendment — Audit Cross-Linking (§3a)
+
+*Source: `.craft/waves/260416+horus-the-heir+clawc-migration/specs/drafts/CL-11-amendment-audit-cross-linking.md`. Adds explicit audit-entry types: `ProducerEntry` (emitted at generation time by `@bic/openclaw-policy`), `DecisionEntry` (authorization decision with `declaredTier`/`effectiveTier`/`escalationSource`/`failOpenOverridden`), `ApprovalEntry` (companion approval outcome with 8-value `ApprovalInvalidReason` enum). Defines cross-link fields `policyArtifactSha256` + `correlationId` that thread ProducerEntry → DecisionEntry → ApprovalEntry. Defines sequence-counter persistence (`seq-counter.json` append-only, per-providerId/per-snapshotId, resets on snapshotId change). Defines audit-chain corruption invariants with 3 granular invalidReasons: `correlation-mismatch`, `chain-gap`, `hash-mismatch` (see CL-11 §3a and harness `verifyChain` oracle). Defines `ApprovalSink` interface per-adapter (`emit`/`read`/optional `close`) + conformance suite (`defineApprovalSinkConformance` — 6 obligations). Implemented across pulses 41 (snapshot-switch), 43 (audit chain + corruption detection), 61 (conformance suite), 60 (corruption scenarios).*
+
+Version: CL-11 bumps to v1.3 at deploy.
