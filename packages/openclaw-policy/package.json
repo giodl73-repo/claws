@@ -24,6 +24,18 @@
       "types": "./dist/cli-handlers/index.d.ts",
       "import": "./dist/cli-handlers/index.js"
     },
+    "./nonce-store": {
+      "types": "./dist/nonce-store/index.d.ts",
+      "import": "./dist/nonce-store/index.js"
+    },
+    "./seq-counter": {
+      "types": "./dist/seq-counter/index.d.ts",
+      "import": "./dist/seq-counter/index.js"
+    },
+    "./trust-set": {
+      "types": "./dist/trust-set/index.d.ts",
+      "import": "./dist/trust-set/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

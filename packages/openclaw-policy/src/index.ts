@@ -53,6 +53,7 @@ export {
   extractTools,
   extractDenyRules,
   buildGovernanceAst,
+  computeEffectiveSensitivity,
 } from './compile/index.js';
 export type {
   ParsedFile,
@@ -150,6 +151,13 @@ export {
   type GovernanceViolation,
   type ProvenanceTrace,
 } from './governance/index.js';
+
+// ── Seq-counter store (pulse 58 / P-12) ─────────────────────────────────
+export { SeqCounterStore } from './seq-counter/index.js';
+export type {
+  IncrementResult as SeqCounterIncrementResult,
+  SeqCounterStoreOptions,
+} from './seq-counter/index.js';
 
 // ── Trust-set loader (pulse 50 / P-04) ──────────────────────────────────
 export { createTrustSetLoader } from './trust-set/index.js';
