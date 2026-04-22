@@ -1,0 +1,10 @@
+series: approval-flows-file-ingest
+scenarioCodes: [SC-11, SC-12, SC-13]
+fixtureId: restricted-file-ingest
+expected:
+  peer: FileIngestProvider
+  verbs: [review, deny, modify]
+  classification: RESTRICTED
+  auditShape:
+    decisions: 1
+    approvals: 0..1
