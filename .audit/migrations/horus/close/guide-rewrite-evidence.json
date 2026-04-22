@@ -1,0 +1,414 @@
+{
+  "pulse": 74,
+  "wave": "horus",
+  "generated_at": "2026-04-22T16:15:06.319Z",
+  "entries": [
+    {
+      "source_path": "guides/concepts--atoms-registry.md",
+      "source_sha256": "0f474d2924026f1f25a66049666de0467824642dd1fce1f91494baf20546ceaa",
+      "dest_path": "docs/concepts/atoms-registry.md",
+      "dest_sha256": "612dd5fc871c983ee0bf95b8b63b2068d4c4f2b9c386421b45cc5299c426d25a",
+      "link_rewrites": [
+        {
+          "from": "./concepts--doc-validation.md",
+          "to": "./doc-validation.md"
+        },
+        {
+          "from": "./concepts--accept-test-system.md",
+          "to": "./accept-test-system.md"
+        },
+        {
+          "from": "specs/drafts/CL-13-amendment-rename-to-claws.md",
+          "to": "specs/CL-13-repo-boundary.md"
+        },
+        {
+          "from": "specs/drafts/CL-13-amendment-repo-ops-oracle.md",
+          "to": "specs/CL-13-repo-boundary.md"
+        }
+      ]
+    },
+    {
+      "source_path": "guides/concepts--accept-test-system.md",
+      "source_sha256": "e02a6c5361898de767a3b5c8e11265fdbda9bc06ede8e0e78afbc3ff4df431e0",
+      "dest_path": "docs/concepts/accept-test-system.md",
+      "dest_sha256": "ee2d0da082b829d3b24cbb400df41d6ea55935d1f29495855159279adbae0af7",
+      "link_rewrites": [
+        {
+          "from": "./concepts--atoms-registry.md",
+          "to": "./atoms-registry.md"
+        },
+        {
+          "from": "./testing--e2e-harness.md",
+          "to": "../testing/e2e-harness.md"
+        },
+        {
+          "from": "./governance--approval-flow.md",
+          "to": "../governance/approval-flow.md"
+        },
+        {
+          "from": "specs/drafts/CL-13-amendment-repo-ops-oracle.md",
+          "to": "specs/CL-13-repo-boundary.md"
+        }
+      ]
+    },
+    {
+      "source_path": "guides/concepts--doc-validation.md",
+      "source_sha256": "0cce33cdcf1aa1f59dee93e2f379e9ac97300d1a1257addf1625f61a021f8ac7",
+      "dest_path": "docs/concepts/doc-validation.md",
+      "dest_sha256": "2ca5f41de228534e3daeef2f22208461ec211ba0510fe4f88a629f4766ed270d",
+      "link_rewrites": [
+        {
+          "from": "./contributing--doc-scrub-checklist.md",
+          "to": "../contributing/doc-scrub-checklist.md"
+        },
+        {
+          "from": "./concepts--atoms-registry.md",
+          "to": "./atoms-registry.md"
+        },
+        {
+          "from": "./concepts--no-craftworks-gate.md",
+          "to": "./no-craftworks-gate.md"
+        },
+        {
+          "from": "specs/drafts/CL-13-amendment-repo-ops-oracle.md",
+          "to": "specs/CL-13-repo-boundary.md"
+        }
+      ]
+    },
+    {
+      "source_path": "guides/concepts--no-craftworks-gate.md",
+      "source_sha256": "adb2fbf5e60b91e7ce699776aae3668cbbec59caf02de992ee043f2eb8cd5738",
+      "dest_path": "docs/concepts/no-craftworks-gate.md",
+      "dest_sha256": "59f1f3764fd1813fd0f100acb61bdf9f715101a63afd51692c27c1a041921359",
+      "link_rewrites": [
+        {
+          "from": "./concepts--doc-validation.md",
+          "to": "./doc-validation.md"
+        },
+        {
+          "from": "./concepts--atoms-registry.md",
+          "to": "./atoms-registry.md"
+        },
+        {
+          "from": "specs/drafts/CL-13-amendment-rename-to-claws.md",
+          "to": "specs/CL-13-repo-boundary.md"
+        },
+        {
+          "from": "specs/drafts/CL-13-amendment-repo-ops-oracle.md",
+          "to": "specs/CL-13-repo-boundary.md"
+        }
+      ]
+    },
+    {
+      "source_path": "guides/host-adapter-contract.md",
+      "source_sha256": "b4ace632e6fde06b4fd59a60479623ed7e5077e18bd95729ac960427eec98de9",
+      "dest_path": "docs/concepts/host-adapter-contract.md",
+      "dest_sha256": "b4ace632e6fde06b4fd59a60479623ed7e5077e18bd95729ac960427eec98de9",
+      "link_rewrites": []
+    },
+    {
+      "source_path": "guides/governance--approval-flow.md",
+      "source_sha256": "410653e5316c8515e132361c1363ef17ce1c2df7a9617fef3ac46adcc2edd1df",
+      "dest_path": "docs/governance/approval-flow.md",
+      "dest_sha256": "a1f33bdf3e66d6c011b304c516c78eca7b938e4124b0aefc2a9a255c8b51506e",
+      "link_rewrites": [
+        {
+          "from": "./governance--file-ingest-review.md",
+          "to": "./file-ingest-review.md"
+        },
+        {
+          "from": "./governance--decision-vocabulary.md",
+          "to": "./decision-vocabulary.md"
+        },
+        {
+          "from": "./testing--e2e-harness.md",
+          "to": "../testing/e2e-harness.md"
+        },
+        {
+          "from": "./governance--file-ingest-review.md",
+          "to": "./file-ingest-review.md"
+        },
+        {
+          "from": "specs/drafts/CL-07-amendment-file-ingest-provider.md",
+          "to": "specs/CL-07-deep-integration.md"
+        },
+        {
+          "from": "specs/drafts/CL-11-amendment-audit-cross-linking.md",
+          "to": "specs/CL-11-upstream-governance.md"
+        }
+      ]
+    },
+    {
+      "source_path": "guides/governance--decision-vocabulary.md",
+      "source_sha256": "420d596c53ae1367f0336e299ef82d9354c23fffd6e84ff9f227a27ae702fc7e",
+      "dest_path": "docs/governance/decision-vocabulary.md",
+      "dest_sha256": "4703ac5d1092046168a41f166d1527b224d8c2e5b741ea360c4cb7d92b561b15",
+      "link_rewrites": [
+        {
+          "from": "./governance--approval-flow.md",
+          "to": "./approval-flow.md"
+        },
+        {
+          "from": "./governance--approval-flow.md",
+          "to": "./approval-flow.md"
+        },
+        {
+          "from": "./governance--approval-flow.md",
+          "to": "./approval-flow.md"
+        },
+        {
+          "from": "./governance--file-ingest-review.md",
+          "to": "./file-ingest-review.md"
+        },
+        {
+          "from": "./host-presets--openclaw.md",
+          "to": "../host-presets/openclaw.md"
+        },
+        {
+          "from": "./host-presets--lobster.md",
+          "to": "../host-presets/lobster.md"
+        },
+        {
+          "from": "./host-presets--aether.md",
+          "to": "../host-presets/aether.md"
+        },
+        {
+          "from": "specs/drafts/CL-07-amendment-file-ingest-provider.md",
+          "to": "specs/CL-07-deep-integration.md"
+        }
+      ]
+    },
+    {
+      "source_path": "guides/governance--file-ingest-review.md",
+      "source_sha256": "1840c079a62e75fc50fdd7fc5530042a5e48d0f8ce14d77c2de6193fa913a072",
+      "dest_path": "docs/governance/file-ingest-review.md",
+      "dest_sha256": "1d15fd9f3726509c7fbc8025bea6d9319ce7fc836442c6ec868d5ec3191b4a86",
+      "link_rewrites": [
+        {
+          "from": "./governance--approval-flow.md",
+          "to": "./approval-flow.md"
+        },
+        {
+          "from": "./testing--e2e-harness.md",
+          "to": "../testing/e2e-harness.md"
+        },
+        {
+          "from": "specs/drafts/CL-07-amendment-file-ingest-provider.md",
+          "to": "specs/CL-07-deep-integration.md"
+        },
+        {
+          "from": "specs/drafts/CL-11-amendment-audit-cross-linking.md",
+          "to": "specs/CL-11-upstream-governance.md"
+        }
+      ]
+    },
+    {
+      "source_path": "guides/testing--e2e-harness.md",
+      "source_sha256": "d552cfdada2b6fe3fd7bd13554aeb83ba2ed74ac9ee015571f5ebc2a6bd1498f",
+      "dest_path": "docs/testing/e2e-harness.md",
+      "dest_sha256": "24f63454e3bfaa8af103038034af715e146e0fa45033d54569517f315b5b8ea9",
+      "link_rewrites": [
+        {
+          "from": "./testing--host-presets.md",
+          "to": "./host-presets.md"
+        },
+        {
+          "from": "./governance--approval-flow.md",
+          "to": "../governance/approval-flow.md"
+        },
+        {
+          "from": "./governance--file-ingest-review.md",
+          "to": "../governance/file-ingest-review.md"
+        },
+        {
+          "from": "specs/drafts/CL-07-amendment-file-ingest-provider.md",
+          "to": "specs/CL-07-deep-integration.md"
+        },
+        {
+          "from": "specs/drafts/CL-11-amendment-audit-cross-linking.md",
+          "to": "specs/CL-11-upstream-governance.md"
+        }
+      ]
+    },
+    {
+      "source_path": "guides/testing--host-presets.md",
+      "source_sha256": "556d7aec6166cd98951945f14df336b1a892b71da6023ad60dfcdfcba6630b3e",
+      "dest_path": "docs/testing/host-presets.md",
+      "dest_sha256": "556d7aec6166cd98951945f14df336b1a892b71da6023ad60dfcdfcba6630b3e",
+      "link_rewrites": []
+    },
+    {
+      "source_path": "guides/host-presets--openclaw.md",
+      "source_sha256": "5cc657c1d354c64615998b380ae1174c83f0cb42d29844286e49055c0873d708",
+      "dest_path": "docs/host-presets/openclaw.md",
+      "dest_sha256": "5cc657c1d354c64615998b380ae1174c83f0cb42d29844286e49055c0873d708",
+      "link_rewrites": []
+    },
+    {
+      "source_path": "guides/host-presets--lobster.md",
+      "source_sha256": "458a85168bd0145f5d8afefb608f989fc6074a293f42a58bb8eb11025fd9a082",
+      "dest_path": "docs/host-presets/lobster.md",
+      "dest_sha256": "458a85168bd0145f5d8afefb608f989fc6074a293f42a58bb8eb11025fd9a082",
+      "link_rewrites": []
+    },
+    {
+      "source_path": "guides/host-presets--aether.md",
+      "source_sha256": "17be9a4ba8bb07f740b6a7e7f34ec1d892e4798cf9f7cbab586b275795c8c9a7",
+      "dest_path": "docs/host-presets/aether.md",
+      "dest_sha256": "07d8e77534faefcc4d44bca54e0d1e6118e9bf2a9e68c53816c1ef2e7a37378f",
+      "link_rewrites": [
+        {
+          "from": "specs/drafts/CL-07-amendment-snapshot-switch-semantics.md",
+          "to": "specs/CL-07-deep-integration.md"
+        }
+      ]
+    },
+    {
+      "source_path": "guides/host-presets--claws-service.md",
+      "source_sha256": "e7dd3dfbe18e7c90f414439d3560ba8d6dbc22a821871d2437bb214cf34d5da5",
+      "dest_path": "docs/host-presets/claws-service.md",
+      "dest_sha256": "e7dd3dfbe18e7c90f414439d3560ba8d6dbc22a821871d2437bb214cf34d5da5",
+      "link_rewrites": []
+    },
+    {
+      "source_path": "guides/contributing--adding-an-atom.md",
+      "source_sha256": "22ad67cb674015041fb71c4677f817ca9205a5c48cc142f246ae6fc230ff3ef2",
+      "dest_path": "docs/contributing/adding-an-atom.md",
+      "dest_sha256": "8abcac873367b512512a2a325994b53e1b18303b58cac68e3f18e11318317abb",
+      "link_rewrites": [
+        {
+          "from": "../../../docs/concepts/atoms-registry.md",
+          "to": "../concepts/atoms-registry.md"
+        },
+        {
+          "from": "../../../docs/concepts/accept-test-system.md",
+          "to": "../concepts/accept-test-system.md"
+        },
+        {
+          "from": "specs/drafts/CL-13-amendment-rename-to-claws.md",
+          "to": "specs/CL-13-repo-boundary.md"
+        },
+        {
+          "from": "specs/drafts/CL-13-amendment-repo-ops-oracle.md",
+          "to": "specs/CL-13-repo-boundary.md"
+        }
+      ]
+    },
+    {
+      "source_path": "guides/contributing--doc-scrub-checklist.md",
+      "source_sha256": "e509059fbb39924323729f97c89d00c102938d1314d99c3de0e3a7fd1a4ea146",
+      "dest_path": "docs/contributing/doc-scrub-checklist.md",
+      "dest_sha256": "f13e73b0c862b95122a3cf6d23f510fa8c77bf999e165dc9774f0c81b3584acc",
+      "link_rewrites": [
+        {
+          "from": "../../../docs/concepts/no-craftworks-gate.md",
+          "to": "../concepts/no-craftworks-gate.md"
+        },
+        {
+          "from": "specs/drafts/CL-13-amendment-rename-to-claws.md",
+          "to": "specs/CL-13-repo-boundary.md"
+        }
+      ]
+    },
+    {
+      "source_path": "guides/contributing--windows-setup.md",
+      "source_sha256": "c8344ca9f3917ea39f130ee412fcdbcf027854b2f572be254da96620bb3e61ae",
+      "dest_path": "docs/contributing/windows-setup.md",
+      "dest_sha256": "145615b31bf676869f6905b1a55e26b85a45e925212482b4546ce1a53873f293",
+      "link_rewrites": [
+        {
+          "from": "contributing--adding-an-atom.md",
+          "to": "./adding-an-atom.md"
+        },
+        {
+          "from": "../../../docs/concepts/no-craftworks-gate.md",
+          "to": "../concepts/no-craftworks-gate.md"
+        }
+      ]
+    },
+    {
+      "source_path": "guides/README.md",
+      "source_sha256": "c170e3d88c8be37e3306a3a28b3b62e4c10d528999a3a4e348e8f15df259ab2f",
+      "dest_path": "docs/README.md",
+      "dest_sha256": "a92f9890f4bf8c0b8937b070a1d5b7a49217984d8cfd954241805d61908e7c1e",
+      "link_rewrites": [
+        {
+          "from": "./concepts--atoms-registry.md",
+          "to": "./concepts/atoms-registry.md"
+        },
+        {
+          "from": "./governance--approval-flow.md",
+          "to": "./governance/approval-flow.md"
+        },
+        {
+          "from": "./testing--e2e-harness.md",
+          "to": "./testing/e2e-harness.md"
+        },
+        {
+          "from": "./contributing--adding-an-atom.md",
+          "to": "./contributing/adding-an-atom.md"
+        },
+        {
+          "from": "./concepts--atoms-registry.md",
+          "to": "./concepts/atoms-registry.md"
+        },
+        {
+          "from": "./concepts--doc-validation.md",
+          "to": "./concepts/doc-validation.md"
+        },
+        {
+          "from": "./concepts--accept-test-system.md",
+          "to": "./concepts/accept-test-system.md"
+        },
+        {
+          "from": "./concepts--no-craftworks-gate.md",
+          "to": "./concepts/no-craftworks-gate.md"
+        },
+        {
+          "from": "./governance--approval-flow.md",
+          "to": "./governance/approval-flow.md"
+        },
+        {
+          "from": "./governance--decision-vocabulary.md",
+          "to": "./governance/decision-vocabulary.md"
+        },
+        {
+          "from": "./governance--file-ingest-review.md",
+          "to": "./governance/file-ingest-review.md"
+        },
+        {
+          "from": "./testing--e2e-harness.md",
+          "to": "./testing/e2e-harness.md"
+        },
+        {
+          "from": "./testing--host-presets.md",
+          "to": "./testing/host-presets.md"
+        },
+        {
+          "from": "./host-presets--openclaw.md",
+          "to": "./host-presets/openclaw.md"
+        },
+        {
+          "from": "./host-presets--lobster.md",
+          "to": "./host-presets/lobster.md"
+        },
+        {
+          "from": "./host-presets--aether.md",
+          "to": "./host-presets/aether.md"
+        },
+        {
+          "from": "./contributing--adding-an-atom.md",
+          "to": "./contributing/adding-an-atom.md"
+        },
+        {
+          "from": "./contributing--doc-scrub-checklist.md",
+          "to": "./contributing/doc-scrub-checklist.md"
+        },
+        {
+          "from": "./contributing--windows-setup.md",
+          "to": "./contributing/windows-setup.md"
+        }
+      ]
+    }
+  ]
+}

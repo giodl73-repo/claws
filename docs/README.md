@@ -1,37 +1,92 @@
-# claws — The Governance Compiler
+# Guides — reader entry point
 
-claws reads OpenClaw workspace files and compiles governance rules into executable enforcement code. Unlike linters that report violations, claws generates the runtime — a TypeScript Gateway plugin that intercepts every tool call and enforces risk classification, elicitation gates, delegation boundaries, injection defense, and bounded reasoning limits.
+This directory holds the 15 narrative guides that document the bic/claws
+governance model: what atoms are, how decisions flow through providers, how
+the E2E sim harness proves it, and how a contributor adds a new atom or
+scrubs migrated content. These guides are authored in-wave and migrate to
+`docs/clawc/{concepts,governance,testing,contributing,host-presets}/` at
+CP-5. See **Cross-reference conventions** below for what that migration
+means for links you find in the guides.
 
-**The moat is code generation.** Any tool can check policy. claws emits the code that enforces it.
+## Reader path for a new engineer
 
----
+If you are joining bic/claws and want the shortest route to end-to-end
+understanding, read these four in order:
 
-## Understand It
+1. **[concepts--atoms-registry.md](./concepts/atoms-registry.md)** — the
+   13-field schema and the oracle invariant that every other gate consults.
+2. **[governance--approval-flow.md](./governance/approval-flow.md)** — the
+   canonical walkthrough: agent → provider → supervisor → companion,
+   including the 8-field `ApprovalHandle` and the audit cross-links.
+3. **[testing--e2e-harness.md](./testing/e2e-harness.md)** — how the sim
+   stands the loop up with real `snap serve`, real generated plugin, real
+   CLI, mocked host + companion.
+4. **[contributing--adding-an-atom.md](./contributing/adding-an-atom.md)** —
+   the 3-file PR shape and `claws make atom` scaffolder.
 
-The [concept guides](concepts/README.md) cover the full product: architecture (three-engine model for parse→analyze→emit, three-ring security for inner/middle/outer boundaries, lossless round-trip guarantee), governance (tool classification with R1-R5 risk levels, OBO boundary for agent delegation, fail modes, elicitation gates), platforms (7 compilation targets from OpenClaw to CrewAI), and operations (fleet compliance, snapshots, kill switch, incident response).
+After those four, the rest of the guides are depth on specific surfaces.
 
-Start with [claws-init](how-to/initialize-workspace.md) to see it in action, then read the architecture concepts.
+## Concepts
 
-## Do It
+The invariants the oracle enforces and the test system that proves them.
 
-The [how-to guides](how-to/) walk through the complete developer journey: initialize a workspace, run your first build, write governance rules, publish a skill via the skill-kit, and set up three-ring security. Imperative voice, code blocks, no theory.
+- **[concepts--atoms-registry.md](./concepts/atoms-registry.md)** — the
+  oracle both gates validate against.
+- **[concepts--doc-validation.md](./concepts/doc-validation.md)** — 11
+  surfaces, 17 gap types, the gap detector, and `--fix` modes.
 
-## Learn It Step by Step
+- **[concepts--accept-test-system.md](./concepts/accept-test-system.md)** —
+  manifest + scenario + 7 runners + orphan sweep.
+- **[concepts--no-craftworks-gate.md](./concepts/no-craftworks-gate.md)** —
+  scope, allowlist, CODEOWNERS, exit code 2.
 
-The [tutorials](tutorials/) are the guided path — a multi-part series from init through three-ring security to governance plugins and lossless round-trip. Each lesson builds on the previous one.
+## Governance
 
-## Trace It
+How a decision is made, routed, and cross-linked in the audit chain.
 
-The [traces](traces/) follow governance compilation end-to-end. See how 9 workspace files become a typed GovernanceIR, how rules compose through the three rings, how the gateway plugin gets emitted, and how fleet compliance rolls out across a workspace fleet.
+- **[governance--approval-flow.md](./governance/approval-flow.md)** —
+  authority on **OC-7 envelope stickiness**, **G-CHAIN propagation**, and
+  the **audit cross-link** schema.
+- **[governance--decision-vocabulary.md](./governance/decision-vocabulary.md)** —
+  authority on the **4 verbs**, the **composition rule**, and the **risk
+  tier × sensitivity** interaction.
+- **[governance--file-ingest-review.md](./governance/file-ingest-review.md)** —
+  `FileIngestProvider` peer path, `modify.redirectPath` safety, and the
+  stage → promote lifecycle.
 
-## See It
+## Testing + presets
 
-[Examples](examples/) show claws configurations, governance rules, and compiled output. See what the compiler reads and what it produces.
+The sim harness and the three host presets that parameterize it.
 
-## Present It
+- **[testing--e2e-harness.md](./testing/e2e-harness.md)** — hybrid-fidelity
+  harness, fixtures, teardown, debug dumps.
+- **[testing--host-presets.md](./testing/host-presets.md)** — authority on
+  the **three-layer composition**; matrix dispatcher and why there are
+  three presets.
+- **[host-presets--openclaw.md](./host-presets/openclaw.md)** — Layer 1+3;
+  zero-Microsoft-infra adopter shape.
+- **[host-presets--lobster.md](./host-presets/lobster.md)** — Layer 1+2+3;
+  sidecar snap + HTTP supervisor.
+- **[host-presets--aether.md](./host-presets/aether.md)** — Layer 1+2+3;
+  multi-tenant host-proxy; tenancy at host layer, not at snap.
 
-The [why-claws presentation](presentations/why-claws.md) is the product pitch — the problem, the approach, the three-tier adoption funnel. The visual story for anyone evaluating governance tooling.
+## Contributing
 
-## Hear How We Built It
+How to add an atom, scrub migrated content, and get a Windows box green.
 
-The [build stories](stories/) tell the claws origin story — why code generation matters, how the three rings emerged, the design decisions that shaped the product.
+- **[contributing--adding-an-atom.md](./contributing/adding-an-atom.md)** —
+  the 3-file PR shape + `claws make atom` scaffolder.
+- **[contributing--doc-scrub-checklist.md](./contributing/doc-scrub-checklist.md)** —
+  5-step protocol for migrated content.
+- **[contributing--windows-setup.md](./contributing/windows-setup.md)** —
+  LongPaths, `core.autocrlf`, Node, pnpm, common gotchas.
+
+## Migration footnote
+
+The double-dash filename convention (`concepts--atoms-registry.md`,
+`host-presets--aether.md`) is a wave-only artifact. At migration, the
+`{prefix}--{name}.md` shape becomes `docs/clawc/{prefix}/{name}.md`. If
+you see a guide with a sibling cross-reference that uses the flat
+`./sibling.md` form, that's the form that will survive the migration
+after the path rewrite — don't rewrite them to the post-migration shape
+by hand.

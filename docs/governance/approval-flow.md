@@ -1,100 +1,147 @@
-# Approval Flow — handle-binding Validation
+# Governance Approval Flow
 
-<!-- atom:handle-binding -->
-<!-- spec:CL-07 -->
-<!-- spec:CL-11 -->
+**What this guide is**: how a governance decision (tool call or file ingest) moves from the agent through the gateway, a `GuardrailProvider`, the supervisor, and the companion app — with the 8-field `approvalHandle` that binds the request to the response, and the audit cross-links that let a verifier trace one call from compile time through approval.
 
-The claws governance boundary issues an `approvalHandle` per high-risk
-tool call (R3+ per CL-02 §3) and requires the host to present it back on
-redemption. The handle binds the decision to a specific caller, invocation,
-and time window, and is signed HMAC-SHA256 by the companion. This document
-is the canonical description of the redemption-side validator — the pure
-library at `packages/openclaw-guardrails/src/handle-binding/` — and the
-first-failing order it enforces.
+## The decision moment
 
-## Surface
+Every tool call hits OC-core's `before_tool_call` hook. The policy plugin's `GuardrailProvider.preAuthorize` runs; the plugin returns a hook-result; OC-core merges hook-results across all registered plugins (OC-7 envelope stickiness); if any returned `review`, the call stalls until the supervisor and companion app respond.
+
+```
+  Agent          Gateway         Provider        Supervisor      Companion
+    │                │               │                │               │
+    │──tool call────▶│               │                │               │
+    │                │─before_tool──▶│                │               │
+    │                │               │ preAuthorize   │               │
+    │                │               │ → review +     │               │
+    │                │               │   handle       │               │
+    │                │               │─ApprovalReq───▶│               │
+    │                │◀──requireApp──│                │──render──────▶│
+    │◀──(stall)──────│               │                │               │ user reviews
+    │                │               │                │               │ signs response
+    │                │               │                │◀──response────│
+    │                │               │◀─ApprovalResp──│               │
+    │                │◀──resume──────│                │               │
+    │◀──result───────│               │                │               │
+    │                │               │─postAudit────────────▶ audit chain
+```
+
+File ingest is the same flow with `before_workspace_file_ingest` and `beforeIngest` — see [governance--file-ingest-review.md](./file-ingest-review.md).
+
+## Decision vocabulary
+
+| Verb | Meaning |
+|------|---------|
+| `allow` | Proceed as-is. Optional `requiresExternalApproval: true` still escalates. |
+| `deny` | Reject with `reason`. No further processing; audited. |
+| `review` | Route to supervisor with a signed `approvalHandle`. Call stalls. |
+| `modify` | Rewrite `args` (tool call) or `redirectPath` (file ingest) before proceeding. |
+
+Composition rule: `deny > review > modify > allow`. OC-7 merger makes `requireApproval` non-downgradable — once any provider sets it, it stays set for the decision lifetime, and the companion receives every `ApprovalDescriptor` the plugins emitted (conjunctive — all must be approved).
+
+## The 8-field `approvalHandle`
+
+Per proposal §1.5 Threading:
 
 ```ts
-import {
-  validateHandle,
-  EVALUATION_ORDER,
-  type ApprovalHandle,
-  type ValidationContext,
-  type ValidationDeps,
-  type ValidationResult,
-  type InvalidReason,
-} from '@bic/openclaw-guardrails/handle-binding';
+interface ApprovalHandle {
+  providerId: string;        // which provider emitted the handle
+  contentHash: string;       // sha256 of file bytes or tool args
+  sequenceNumber: bigint;    // per-providerId, per-snapshot; closes replay-across-handles
+  approverPrincipal: string; // expected approver identity
+  keyId: string;             // HMAC key identifier from the trust set
+  ttl: number;               // epoch-ms expiration
+  nonce: string;             // random 128-bit, unique within (keyId, snapshotId)
+  signature: string;         // HMAC over the canonicalized handle body
+}
 ```
 
-`validateHandle(handle, ctx, deps) -> { ok: true } | { ok: false, invalidReason }`
-is a pure function. All effects are injected via `deps`:
+Verifier MUST check fields in this exact order: `providerId → contentHash → sequenceNumber → approverPrincipal → keyId → ttl → nonce`. First failure yields the `invalidReason` recorded on the `ApprovalEntry`.
 
-- `clock: () => number` — host supplies epoch-ms (`Date.now` only in production wiring; tests inject a fake)
-- `trustSet: ReadonlySet<string>` — currently trusted companion keyIds (pulse 50 drives live reloads)
-- `keyLookup: (keyId) => Buffer | undefined` — HMAC key material by id
-- `validateNonce: (nonce, scope) => boolean` — nonce-log freshness check (pulse 59 owns the persistent store)
+Each field binds against a specific class of replay. `contentHash` prevents argument substitution between request and response. `sequenceNumber` prevents replay across handles. `keyId` supports rotation — old and new keys both accepted inside the overlap window, old one rejected after `notAfter`. `nonce` prevents replay within a scope.
 
-## First-failing evaluation order
+## `ApprovalEntry.outcome` + `invalidReason`
 
-The validator evaluates the HMAC signature pre-check first, then **7 bound
-fields** in deterministic order. On any single-field failure the
-first-failing `invalidReason` is returned — never a composite, never an
-array. This is the **canonical evaluation order**, duplicated verbatim in
-CL-11 §3a, in `validator.ts::EVALUATION_ORDER`, and here:
+Per the CL-11 amendment:
+
+```ts
+interface ApprovalEntry {
+  type: 'approval';
+  correlationId: string;     // matches DecisionEntry.correlationId
+  handleId: string;
+  approverPrincipal: string;
+  outcome: 'approve' | 'deny' | 'timeout' | 'rejected';
+  invalidReason?:            // present when outcome === 'rejected'
+    | 'provider-id-mismatch'
+    | 'content-hash-mismatch'
+    | 'sequence-rollback'
+    | 'principal-mismatch'
+    | 'unknown-keyId'
+    | 'ttl-expired'
+    | 'nonce-reuse'
+    | 'redirect-path-escape';
+}
+```
+
+`approve` / `deny` are companion-driven outcomes. `timeout` fires when TTL passes with no response (R5 fail-closed invariant — always denies). `rejected` fires when the handle itself fails validation; `invalidReason` names the first-failing field.
+
+## Cross-linking: compile → runtime → approval
+
+Three audit entry types, two cross-link fields, one continuous chain per call.
 
 ```
-signature → providerId → contentHash → sequenceNumber → approverPrincipal → keyId → ttl → nonce
+  ProducerEntry              DecisionEntry              ApprovalEntry
+  (compile time)             (runtime decide)           (supervisor response)
+  ─────────────              ─────────────              ─────────────
+  policyArtifactSha256 ──────policyArtifactSha256
+  artifactName: 'policy-    │  correlationId: 'u-001' ─┐
+    ir.json'               │  decision: 'review'       │
+  snapshotId: 'snap-xyz'    │  effectiveTier: 'R5'     │
+                            │                           └─▶ correlationId: 'u-001'
+                                                           outcome: 'approve'
 ```
 
-| # | Step            | Failure `invalidReason`     | What it checks                                                            |
-|---|-----------------|-----------------------------|---------------------------------------------------------------------------|
-| 1 | signature       | `signature-mismatch`        | HMAC-SHA256 over `payload` with the trusted key for `keyId`               |
-|   | (pre-check)     | `unknown-keyId`             | `keyId` in `trustSet` and registered in the lookup                        |
-| 2 | providerId      | `provider-id-mismatch`      | `handle.providerId === ctx.expectedProviderId`                            |
-| 3 | contentHash     | `content-hash-mismatch`     | `handle.contentHash === ctx.canonicalInvocationHash` (P-02, host-supplied) |
-| 4 | sequenceNumber  | `sequence-rollback`         | `handle.sequenceNumber > ctx.sequenceHighWaterMark`                       |
-| 5 | approverPrincipal | `principal-mismatch`      | `handle.approverPrincipal === ctx.expectedApproverPrincipal`              |
-| 6 | keyId           | `unknown-keyId`             | `deps.trustSet.has(handle.keyId)`                                         |
-| 7 | ttl             | `ttl-expired`               | `deps.clock() < handle.ttl` (absolute expiry in epoch-ms)                 |
-| 8 | nonce           | `nonce-reuse`               | `deps.validateNonce(handle.nonce, ctx.nonceScope)` returns `true`         |
+`policyArtifactSha256` joins a `DecisionEntry` to the `ProducerEntry` that emitted the compiled policy artifact under which the decision was made. A substituted plugin fails this link. `correlationId` joins `DecisionEntry` → `ApprovalEntry` 1:1 — no orphan approvals, no double-approved decisions.
 
-### Wording convention
+`claws policy verify` asserts both links plus the hash chain.
 
-"7 bound fields + signature pre-check" is the canonical phrasing. The
-combined count is 8 *evaluation steps*, but the validator has **7 bound
-fields** — the signature is a pre-check, not a bound field. This framing
-applies across pulses 38, 49, 57-59 and CP-6 Q#1 (R1 type-system
-F-03/F-09).
+## OC-7 envelope stickiness
 
-## Why the order is fixed
+Why it matters: without OC-7, a later plugin returning `allow` could override an earlier plugin's `review`. Every governance invariant would then depend on "our plugin is in the chain."
 
-The order is load-bearing, not cosmetic. Pulse 59 SC-24 asserts a
-property: for the 21 pairs (`C(7, 2)`) of wrong bound fields, the
-`invalidReason` returned is always the one at the lower index. This
-lets callers treat `invalidReason` as a stable signal — the same input
-always produces the same reason. Changing the order without updating
-pulse 59's property test and the three synchronized documentation sites
-is a breaking change.
+What OC-7 does: widens the hook-result `requireApproval` field from `boolean` to `boolean | ApprovalDescriptor | ApprovalDescriptor[]` and makes the merger non-downgradable. Once any plugin sets it, the flag sticks; the companion receives every `ApprovalDescriptor` emitted; every descriptor must be approved (conjunctive).
 
-## Approval vs decision invalid reasons
+Harness coverage: `host-mock.ts` implements the same merger semantics OC-core will implement after OC-7 lands. Three L1 scenarios exercise it — single-provider latch, two-provider conjunctive, partial-approval stay-blocked.
 
-`ApprovalInvalidReason` (this validator) is a separate enumeration from
-`DecisionInvalidReason` (7-value union set by the merger + path-ingest
-checks in pulses 37 and 56). Approval reasons are emitted by the
-redemption-side validator; decision reasons are emitted upstream by the
-OC-7 merger when authorizing the tool call itself.
+OC-7 latches the **flag**, not the sensitivity label. Full "RESTRICTED never laundered" stickiness requires OC-9 (proposal §6.1, NOT shipping).
 
-## Doc-sync invariant
+## Risk tier × sensitivity interaction
 
-Any change to the evaluation order must land in all three places in the
-same commit:
+Effective tier is `max(declared tier, provenance-derived tier)`. RESTRICTED × any tier forces `requiresExternalApproval`; R5 never fail-open (generator rejects `failOpen: true` at compile time, plugin refuses `allow` at runtime); `IRREVERSIBLE_EXTERNAL` clamps to R5.
 
-1. `packages/openclaw-guardrails/src/handle-binding/validator.ts`
-   (`EVALUATION_ORDER` export + ordered `if`-ladder)
-2. `docs/specs/CL-11-upstream-governance.md` §3a (the spec amendment
-   this pulse codifies)
-3. `docs/governance/approval-flow.md` (this file)
+See [governance--decision-vocabulary.md § Risk tier × sensitivity interaction](./decision-vocabulary.md) for the authoritative two-path split (generator vs runtime), the R5-fail-open backstop, and the `IRREVERSIBLE_EXTERNAL` capability semantics.
 
-Pulse 49 commits all three in lockstep. The wave-scope spec amendment in
-item 2 lands when CL-11 §3a is merged into the canonical spec during
-CP-5 wave deployment.
+## G-CHAIN propagation — generator-compiled
+
+Proposal §5 property 1 row 2: sensitivity propagates through tool chains (G-CHAIN). clawc ships the **generator-compiled** form:
+
+```
+  TOOLS.md declares:
+    summarize-secrets { args_from: [{ source: 'RESTRICTED-classifier' }] }
+
+  claws policy generate compiles:
+    policy-ir.json entry with effectiveSensitivity: 'RESTRICTED'
+
+  Runtime enforces:
+    preAuthorize → DecisionEntry.effectiveSensitivity === 'RESTRICTED'
+    → requiresExternalApproval = true
+```
+
+This is distinct from OC-9 (hook-result envelope stickiness, proposal §6.1, first-class alternative). OC-9 makes the sensitivity label ride on hook-results and non-downgradable across plugin chains — that's **not shipping** in Horus. G-CHAIN gives us RESTRICTED-propagates-through-args-from within the compiled plugin; OC-9 gives us RESTRICTED-never-laundered across heterogeneous plugin chains. Only the former is ours to deliver.
+
+## Cross-references
+
+- [testing--e2e-harness.md](../testing/e2e-harness.md) — harness interface that exercises this flow
+- [governance--file-ingest-review.md](./file-ingest-review.md) — symmetric peer path
+- `docs/specs/CL-07-deep-integration.md` — `GuardrailProvider` + peer interfaces
+- `docs/specs/CL-11-upstream-governance.md` — entry types, cross-link schema, trust set, sequence counter, nonce scope
+- Proposal `openclaw-upstream-spec.md` §1.5 (async review), §1.6 (risk × sensitivity), §5 (security properties)
