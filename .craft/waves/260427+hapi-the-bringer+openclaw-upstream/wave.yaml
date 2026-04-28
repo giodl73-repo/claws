@@ -1,0 +1,390 @@
+name: "Hapi the Bringer"
+deity: hapi
+epithet: the-bringer
+branch: feature/isis-the-weaver
+branch_note: |
+  Working on the existing isis-the-weaver branch by explicit user direction.
+  No new feature branch was cut for this wave. Hapi's commits sit alongside
+  Isis's lobster-foundation work on the same branch; merge ordering will be
+  decided at delivery time.
+description: |
+  Land four @bic/openclaw-* packages upstream as @openclaw/* + two surgical
+  OC-core PRs (OC-4 stripFrontMatter raw-preserve, OC-7 requireApproval
+  conjunctive merger). Adapts the OneDrive 2026-04-18 contribution proposal
+  to upstream openclaw-core HEAD 5e8cc1d9c after ~4785 commits of drift.
+  Replaces the original OC-1..OC-7 plan: OC-1/2/6 dropped (workspace-file
+  hooks won't land — workaround in plugin), OC-3 moved to snap-layer,
+  OC-5 narrowed (custom_approval enum extension), OC-8/9/10 stay in our
+  domain. Six PRs paced two-open-at-a-time across three sub-waves to
+  respect upstream's 10-PR-per-author cap.
+status: active
+startedAt: "2026-04-27T18:30:00Z"
+
+plans:
+  - claws-openclaw-upstream
+
+preset: claws
+preset_note: |
+  Standard claws preset (8 stages). Note that "implementation" for this wave
+  means OPENING PRS AT github.com/openclaw/openclaw, not building features
+  in this monorepo. The "deploy" target is upstream merges, not a release of
+  this repo. Stage semantics adapt accordingly:
+  - scenarios: per-PR behavior + bot-reviewer pre-empt patterns
+  - planning: pulse-per-PR plus prep-artifact pulses (specs/guides/audits)
+  - implementation: each pulse opens or shepherds one upstream PR
+  - delivery: post-merge verification at openclaw/openclaw
+
+stageOrder:
+  - kickoff
+  - setup
+  - scenarios
+  - planning
+  - implementation
+  - testing
+  - record
+  - delivery
+
+stages_in_progress: implementation
+
+planning:
+  status: completed
+  completedAt: "2026-04-27T22:30:00Z"
+  reviewDecision: approved-with-warnings
+  pulse_review_round: 1
+  pulse_review_status: accept-with-warnings
+  total_pulses: 12
+  total_checkpoints: 5
+  total_upstream_prs: 7
+  l0_unit_target: 24
+  l1_integration_target: 18
+  l2_e2e_target: 8
+  l3_acceptance_target: 8
+  acceptance_series: [bot-preempt, governance, adapter, oc4, pkg-invariants, compliance]
+  acceptance_fixtures_target: 41
+  hc_block_findings_resolved: 4   # F-17, F-22, F-26, F-38 — all routed to specific PRs
+  notes: |
+    12 pulses written, 5 checkpoint plans generated.
+
+    Restructured 2026-04-27 in response to user direction "lets make B PR 2":
+    PR-1 absorbed the replaceConfigFile lossless conversion + diagnostic-
+    shape oc:// extension (workspace earns its keep three ways in one PR);
+    a NEW PR-2 ships the oc:// URI scheme extension to runtime config so
+    the URI vocabulary covers both workspace files and runtime config; OC-4
+    + OC-7 + guardrails + policy + snap all renumbered downstream.
+
+    cp-1 (3 pulses, parallel): adapter-audits-guide, bot-preempt-checklist,
+      post-merge-verification-runbook. NO upstream PRs.
+    cp-2 (2 pulses, parallel): PR-1 @openclaw/workspace + replaceConfigFile
+      lossless conversion + PR-2 oc:// URI scheme extension to config.
+      Wave A — workspace foothold.
+    cp-3 (2 pulses, parallel): PR-3 OC-4 stripFrontMatter + PR-4 @openclaw/
+      guardrails. Wave B — small surgical + governance. F-38 hard dep on
+      cp-1 adapter-audits.md § 3.
+    cp-4 (2 pulses, parallel): PR-5 OC-7 conjunctive merger + PR-6
+      @openclaw/policy. Wave C — merger + generator. Codemod gate validates
+      internal consumers compile against widened requireApproval field.
+    cp-5 (3 pulses, three batches): PR-7 @openclaw/snap → pulse 11 scope-
+      flip → pulse 12 acceptance fixtures. Wave D — registry + closeout.
+
+    Pulse review (4 roles per skill: architect, type-system, dragon,
+    testing) is the next activity within planning stage. After review,
+    wave advances to implementation stage where pulses dispatch via
+    /claws-pulse.
+
+stages:
+  scenarios:
+    status: completed
+    reviewDecision: approved
+    completedAt: "2026-04-27T20:55:00Z"
+    notes: |
+      24 scenarios catalogued across 4 phases at scenarios/scenarios.md:
+      - Phase 1 bot-preempt (5): pluginid-scoping, input-validation,
+        auto-close-avoidance, baseline-hash-refresh, swift-models-regen
+      - Phase 2 governance correctness (8): OC-7 conjunctive, OC-7
+        crash-safety (W7), policy R5 fail-closed, policy RESTRICTED
+        stickiness, emitted-plugin registration adapter audit, audit-
+        stream adapter audit (B3), hostile-write-then-read (W9), OC-4
+        stripFrontMatter round-trip
+      - Phase 3 package invariants + e-discovery (8): canonicalize
+        cross-OS, AST round-trip, audit append-verify, approval handle
+        replay-resistance, generate determinism, snapshot-id stability,
+        promote audited, policy historical query (W4), HTTP resolve
+      - Phase 4 compliance rubric coverage (2): SOC 2 (CC6.1, CC7.2,
+        CC7.3) + HIPAA (§164.312 a/b/c/d/e) control→predicate mapping
+        (N4)
+
+      75 findings tagged at scenarios/FINDINGS.md:
+      - 4 HC-BLOCK (F-17 OC-7 conjunctive merger; F-22 OC-7 crash-
+        safety; F-26 R5 fail-open generator-side rejection;
+        F-38 audit-stream adapter mapping)
+      - 14 HC-WARN
+      - 17 HC-NOTE
+      - Remainder are explicit cross-references between findings
+
+      HC-BLOCK applications:
+      - F-17 + F-22 → PR-4 (OC-7) scope; both addressed by array-
+        accumulation merger + try/catch wrapper at plugin invocation
+      - F-26 → PR-5 (policy) generator validation rule
+        (packages/openclaw-policy/src/generate/validate.ts); not
+        upstream-spec change
+      - F-38 → adapter-audits.md is now a HARD dependency for PR-3
+        opening; field-by-field mapping must be published first
+
+      Test tier deltas applied to plan Coverage Contract:
+      - L1 integration: 12 → 18 (+audit-stream wire-shape (4),
+        +OC-7 crash-safety (2), -1 overlap dedup)
+      - L3 acceptance: 6 → 8 (+SOC 2 rubric mapping, +HIPAA rubric
+        mapping)
+
+      No spec amendments required this stage; UG-upstream.amend.md v0.2
+      already covers the substantive findings. No plan amendments
+      required beyond the test tier delta numbers.
+
+      Wave advances to planning stage.
+
+  setup:
+    status: completed
+    reviewDecision: approved-with-warnings
+    completedAt: "2026-04-27T20:30:00Z"
+    review_round: 1
+    notes: |
+      Baseline build green (`npm run build` workspace-wide, exit 0,
+      2026-04-27T19:50:00Z). All packages compile clean against
+      feature/isis-the-weaver: claws-sdk, claws-test, claws (CLI),
+      claws-serve, claws-skill-kit, lobster-web, openclaw-{workspace,
+      guardrails,policy,snap,lsp}.
+
+      UG-upstream v0.2 amendment drafted at
+      specs/drafts/UG-upstream.amend.md — 11 sections covering:
+      §1 revised OC-PR roadmap (drop OC-1/2/6, move OC-3, narrow OC-5,
+        surgical OC-4 + OC-7, drop OC-8/9/10)
+      §2 bot-reviewer operating constraints (NEW)
+      §3 enforcement model: runtime-gated not write-blocked (W9 fix)
+      §4 trust-set lifecycle: key registry, rotation, revocation,
+        verification (B2 fix)
+      §5 approval lifecycle audit events: issued/resolved/expired (W3 fix)
+      §6 audit attribution: mandatory sourcePluginId on AuditEntrySummary
+        (W6 fix)
+      §7 temporal query semantics: snap resolvePolicy --at <timestamp>
+        (W4 fix)
+      §8 amended PR sequencing (2-PR concurrency)
+      §9 amended scope-flip mechanics (in-scope, cp-4 closing)
+      §10 diff vs v0.1 summary
+      §11 open items deferred to scenarios stage
+
+      Amendment NOT yet applied to docs/upstream/specs/UG-upstream.md —
+      that deployment happens at the record/delivery stage per pipeline
+      convention. Wave-dir draft is the source of truth during the
+      wave.
+
+      No diagnostic registries updated (this wave introduces no new
+      diagnostic codes — all governance diagnostics live in @openclaw/
+      policy and emit at compile time).
+
+      ROUND 1 SETUP REVIEW PASS COMPLETE.
+      Reviewer: claws:claws-repo-steward.
+      Initial verdict: REQUEST-CHANGES (3 HC-BLOCK + 3 HC-WARN + 2 HC-NOTE).
+      All findings actioned in this stage:
+      - HC-BLOCK 1 (missing bot-preempt-checklist): inlined operating
+        constraints in amendment §2.1; companion guide stays as H6
+        deliverable
+      - HC-BLOCK 2 (missing frontmatter): YAML frontmatter added
+      - HC-BLOCK 3 (ATOMS.md out of sync): ATOMS.amend.md companion draft
+        written; 6 new atoms registered
+      - HC-WARN 1 (CHANGELOG): CHANGELOG.amend.md companion draft written
+      - HC-WARN 2 (section-renumber reader's guide): added preamble
+      - HC-WARN 3 (OC-7 scenario brief): rewrote §11 entry concretely
+      - HC-NOTE 1 + 2: applied
+      Post-fix verdict: APPROVE-WITH-WARNINGS (the open H6-deliverable
+      dependencies remain — bot-preempt-checklist + adapter-audits
+      guides — but no longer block this amendment from being
+      apply-ready at deploy time).
+
+      Wave advances to scenarios stage.
+
+  kickoff:
+    status: completed
+    reviewDecision: approved-with-warnings
+    completedAt: "2026-04-27T19:30:00Z"
+    review_round: 1
+    review_round_status: accept-with-warnings
+    notes: |
+      Wave skeleton agreed interactively with user. No branch cut — staying
+      on feature/isis-the-weaver per user direction. Plan claws-openclaw-
+      upstream linked, status flipped Draft → Active. Checkpoint schedule
+      provisionally drafted around the three sub-waves (Wave A foundations,
+      Wave B governance, Wave C generator+registry) but final boundaries
+      deferred to planning stage per house convention.
+
+      Pre-kickoff research already complete (recorded in plan H6):
+      - openclaw-core pulled to HEAD 5e8cc1d9c
+      - All four @bic/openclaw-* packages compile clean against trunk
+      - Zero type-level coupling — rename to @openclaw/* is textual
+      - Bot-reviewer trio identified (Greptile + Copilot + chatgpt-codex)
+      - Two adapter audits flagged as residual risk: emitted-plugin
+        registration vs current PluginHookRegistration, audit-stream
+        wire shape vs current OC audit envelope
+
+      ROUND 1 PLAN REVIEW PASS COMPLETE.
+      4 reviewers, 4 verdicts of APPROVE-WITH-WARNINGS:
+      - claws-release-eng: 1 HC-BLOCK + 2 HC-WARN + 3 HC-NOTE
+      - claws-compliance:  2 HC-BLOCK + 3 HC-WARN + 2 HC-NOTE
+      - claws-ciso:        0 HC-BLOCK + 2 HC-WARN + 3 HC-NOTE
+      - claws-gateway-eng: 0 HC-BLOCK + 3 HC-WARN + 2 HC-NOTE
+      Total: 3 HC-BLOCK / 10 HC-WARN / 10 HC-NOTE.
+
+      All 5 plan-amendment findings applied this stage (B1, W1, W2, N3,
+      W8, W9). Remaining 18 findings deferred to their target stages per
+      the apply-back table in panels/plan-claws-openclaw-upstream/R1-
+      consolidated.md.
+
+      KEY FINDINGS APPLIED:
+      - B1 (HC-BLOCK release-eng): Scope-flip moved from Out-of-Scope into
+        cp-4 closeout deliverable. Lands AFTER 4 upstream package PRs merge
+        but BEFORE any @openclaw/* npm publish.
+      - W1 (release-eng): OC-7 codemod validation gate added to plan
+        deliverables; testing-stage gate confirms internal consumers
+        (policy + snap) compile against widened ApprovalDescriptor[].
+      - W2 (release-eng): Post-merge verification runbook added as new
+        deliverable (docs/upstream/guides/post-merge-verification.md).
+      - N3 (release-eng): Branch cohabitation merge order recorded in this
+        wave.yaml — Isis lobster-foundation merges first; Hapi rebases.
+      - W8 (gateway-eng): Plan H5 wording corrected. requireApproval is
+        already object-only at hook-types.ts:402-410. The OC-7 fix is
+        conjunctive merging at hooks.ts:889-893 (replace ?? with array
+        accumulation), NOT field-widening from boolean. Plan H5, validation
+        criterion, and PR-4 scope all corrected.
+      - W9 (gateway-eng): OC-1/2/6 workaround governs runtime not
+        write-time. before_agent_start fires AFTER files load. Residual
+        gap added as plan note; scenarios stage to write hostile-write-
+        then-read flow.
+
+      Wave advances to setup stage.
+
+# Checkpoint structure — 5 checkpoints, 12 pulses, 7 upstream PRs + scope-flip + acceptance.
+# (Restructured 2026-04-27 from "yes lets do it" → "lets make B PR 2" sign-off,
+# adding PR-2 oc:// URI scheme extension + reshaping checkpoints to pair small
+# surgical PRs with heavy package PRs at every wave.)
+checkpoints:
+  cp-1:
+    slug: prep-artifacts
+    description: |
+      Spec amendment (UG-upstream v0.2 + URI scheme extension §X), bot-
+      preempt-checklist guide, adapter-audits guide, post-merge-verification
+      runbook. Adapter audits resolved to "OK to land" verdict. Dependency
+      gate for every subsequent checkpoint — no PR opens until cp-1 closes.
+    plans: [claws-openclaw-upstream]
+    pulses: [01, 02, 03]
+    addresses_headlines: [H6]
+  cp-2:
+    slug: wave-a-workspace-foothold
+    description: |
+      PR-1 (@openclaw/workspace + replaceConfigFile lossless conversion +
+      diagnostic shape extended to accept oc:// URIs) + PR-2 (oc:// scheme
+      extended to address runtime config oc://config/...). Two PRs open
+      simultaneously, conceptually independent. Workspace earns its keep
+      THREE ways in this wave: /ast replaces JSON.stringify; /path becomes
+      the diagnostic vocabulary; /canonicalize underwrites cross-OS hashing.
+    plans: [claws-openclaw-upstream]
+    pulses: [04, 05]
+    addresses_headlines: [H1]
+    depends_on: [cp-1]
+  cp-3:
+    slug: wave-b-small-surgical-and-governance
+    description: |
+      PR-3 (OC-4 stripFrontMatter raw-preserve, ~1 line) + PR-4
+      (@openclaw/guardrails). Surgical small + heavy big paired for parallel
+      review. Guardrails carries the audit-stream adapter audit; audit
+      entries cite oc:// URIs natively.
+    plans: [claws-openclaw-upstream]
+    pulses: [06, 07]
+    addresses_headlines: [H2, H5-partial]
+    depends_on: [cp-2]
+  cp-4:
+    slug: wave-c-merger-and-generator
+    description: |
+      PR-5 (OC-7 requireApproval conjunctive merger, ~5 lines + try/catch +
+      Swift model regen) + PR-6 (@openclaw/policy + openclaw policy 9-verb
+      subcommand group). Same small-paired-with-big pattern. Codemod gate
+      validates internal consumers compile against trunk's widened field.
+    plans: [claws-openclaw-upstream]
+    pulses: [08, 09]
+    addresses_headlines: [H3, H5]
+    depends_on: [cp-3]
+  cp-5:
+    slug: wave-d-registry-and-closeout
+    description: |
+      PR-7 (@openclaw/snap + openclaw snap 11-verb subcommand group + HTTP
+      server with /v1/resolve?uri=oc://... accepting both workspace and config
+      URIs) + scope-flip internal rename + acceptance fixtures materialization.
+      Final checkpoint. Closeout follows.
+    plans: [claws-openclaw-upstream]
+    pulses: [10, 11, 12]
+    addresses_headlines: [H4]
+    depends_on: [cp-4]
+    final: true
+
+# Operating constraints — bake into every PR and every review.
+constraints:
+  upstream_repo: github.com/openclaw/openclaw
+  upstream_head_pinned: 5e8cc1d9c
+  upstream_pr_cap: 10  # auto-close if exceeded by author
+  pr_open_concurrency: 2  # match upstream's two-open-at-a-time culture
+  reviewer_trio: [greptile-apps[bot], copilot-pull-request-reviewer[bot], chatgpt-codex-connector[bot]]
+  baseline_hash_file: docs/.generated/plugin-sdk-api-baseline.sha256
+  sdk_overview_table: docs/sdk-overview.md
+  swift_models_files:
+    - apps/macos/Sources/OpenClawProtocol/GatewayModels.swift
+    - apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift
+  changelog_rule: "new entries appended to END of target section, not mid-section"
+  authority_doc: CLAUDE.md
+  auto_close_risks:
+    - "r:third-party-extension"
+    - "r:skill"
+  auto_close_mitigation: "Every PR description leads with WHY governance must be core, not ClawHub extension"
+
+# Source materials (read-only references)
+references:
+  proposal_dir: "C:\\Users\\giodl\\OneDrive - Microsoft\\lobster\\openclaw-upstream"
+  proposal_files:
+    - openclaw-upstream-brief.md
+    - openclaw-upstream-spec.md
+    - openclaw-upstream-deck.md
+    - guardrails.md
+    - workspace.md
+    - policy.md
+    - policy-commands.md
+    - snap.md
+    - snap-commands.md
+  upstream_clone: "C:\\src\\openclaw-core"
+  internal_spec: docs/upstream/specs/UG-upstream.md
+  predecessor_plan: claws-upstream-contrib  # Implemented; this wave is its contribute-upstream successor
+
+related:
+  predecessor_plan: claws-upstream-contrib
+  cohabits_branch_with_wave: 260424+isis-the-weaver+lobster-foundation
+
+# Branch cohabitation merge strategy (R1-consolidated finding N3).
+# Hapi shares feature/isis-the-weaver with the in-flight Isis lobster-foundation
+# wave. To prevent late delivery-stage rebase conflicts, the provisional plan is:
+branch_cohabitation:
+  provisional_merge_order:
+    1: "Isis lobster-foundation (active, ahead in implementation, expected to merge first)"
+    2: "Hapi openclaw-upstream (this wave; will rebase if Isis merges first)"
+  rationale: |
+    Isis is several checkpoints into implementation with 43 pulses already
+    decomposed; Hapi is at kickoff with 4 provisional checkpoints. Isis likely
+    completes first. Hapi commits will rebase on top of post-Isis-merge main.
+  rebase_strategy: |
+    - Hapi's spec/guide/scenario writes are wave-directory-scoped and won't
+      conflict with Isis's implementation (different package trees).
+    - Real conflict risk is only in shared root files: PLANS.md, WAVES.md,
+      CODEBASE.md, ATOMS.md, and the docs/upstream/* tree.
+    - Hapi will use git ours/theirs strategy on those at rebase time, then
+      manually re-apply Hapi's wave/plan entries.
+  pre_delivery_checkpoint:
+    description: |
+      Before Hapi advances to delivery stage, verify rebase order is still
+      sound (run `git log feature/isis-the-weaver..main --oneline` to see
+      what's already on main; if Isis already merged, rebase Hapi onto main).
+    blocking: true

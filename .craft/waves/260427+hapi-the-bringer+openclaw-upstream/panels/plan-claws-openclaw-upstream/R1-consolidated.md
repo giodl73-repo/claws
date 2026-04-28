@@ -1,0 +1,91 @@
+# Plan Review · claws-openclaw-upstream · R1 Consolidated
+
+**Date**: 2026-04-27
+**Reviewers**: claws:claws-release-eng, claws:ciso, claws:compliance, claws:gateway-eng
+**Status**: All 4 reviewers complete (gateway-eng landed late with upstream `file:line` citations into HEAD `5e8cc1d9c`).
+
+## Verdict roll-up
+
+| Reviewer | Verdict | HC-BLOCK | HC-WARN | HC-NOTE |
+|---|---|---|---|---|
+| claws-release-eng | APPROVE-WITH-WARNINGS | 1 | 2 | 3 |
+| claws-compliance | APPROVE-WITH-WARNINGS | 2 | 3 | 2 |
+| claws-ciso | APPROVE-WITH-WARNINGS | 0 | 2 | 3 |
+| claws-gateway-eng | APPROVE-WITH-WARNINGS | 0 | 3 | 2 |
+| **Total (4/4)** | **APPROVE-WITH-WARNINGS** | **3** | **10** | **10** |
+
+No reviewer recommends REJECT or REQUEST-CHANGES. All findings are addressable in the spec/guides/scenarios stages without re-architecting the plan.
+
+## Consolidated HC-BLOCK (3)
+
+| # | Title | Source | Domain | Apply where |
+|---|---|---|---|---|
+| B1 | **Scope-flip trigger point undefined** — when does `@bic/openclaw-*` → `@openclaw/*` rename across our monorepo land relative to upstream merges + publish? Risk: transient publish-time versioning gap | release-eng | release-engineering | Plan amendment (Out-of-Scope → Scope: cp-4 closeout dependency) |
+| B2 | **ComplianceReport signature scheme lifecycle unspecified** — `comply` emits signed reports but key rotation, versioning, revocation are not documented; compromised keys break historical-report verifiability | compliance | governance / compliance | Spec amendment (UG-upstream § Trust-set lifecycle, drafted in setup stage) + scenarios coverage |
+| B3 | **Audit-stream adapter envelope field mapping incomplete** — guardrails/siem CEF/NDJSON/syslog formatters lack defined timestamp granularity, actor identity collision rules, correlation field semantics; SIEM parsers may truncate or mismap evidence | compliance | adapter / governance | `docs/upstream/guides/adapter-audits.md` (H6 deliverable) — must publish with field-by-field mapping BEFORE PR-3 opens |
+
+## Consolidated HC-WARN (7)
+
+| # | Title | Source | Domain | Apply where |
+|---|---|---|---|---|
+| W1 | OC-7 codemod migration artifact under-specified — landing location, machine-runnability, validator ownership unclear | release-eng | release-engineering | Plan amendment + cp-4 testing-stage gate |
+| W2 | Post-merge verification workflow for H1–H4 not documented (webhook? polling? manual?) | release-eng | testing infrastructure | Plan amendment (testing stage runbook) |
+| W3 | Approval-handle TTL tracking incomplete — no audit event when handle issued / expired unused; e-discovery cannot answer "which handles never executed?" | compliance | audit / HIPAA | Spec amendment (UG-upstream § Approval lifecycle audit events) + L1 integration scenario |
+| W4 | Snapshot-based evidence chain lacks temporal query semantics — no `snap resolvePolicy --at <timestamp>` interface | compliance | snap / e-discovery | Spec amendment + new scenario `upstream/snap-policy-historical-query` + plan H4 validation criterion |
+| W5 | SIEM export truncation/duplication not guarded — pure transformers assume input is integrity-verified | compliance | guardrails/siem | L1 integration test (round-trip through each format and re-parse) + adapter-audits.md |
+| W6 | Approval-handle binding lacks plugin-source audit attribution — `AuditEntrySummary.actor` has no `sourcePluginId`; chain of custody breaks | ciso | audit / forensics | Spec amendment (mandatory `sourcePluginId` on `AuditEntrySummary`) + ProviderRegistry verification at `postAudit()` |
+| W7 | OC-7 merger conjunctive invariant vulnerable to plugin crash mid-emission — if plugin-A emits `requireApproval` then throws, plugin-B's allow can win | ciso | gateway / hooks | OC-7 PR scope must include try/catch wrapper that propagates errors or forces deny/review (never allow) — apply during scenarios stage as HC-BLOCK pulse-level finding |
+| W8 | **OC-7 plan wording wrong: field is already object-only** — Plan H5 said `boolean → boolean \| ApprovalDescriptor \| …` widening, but `hook-types.ts:402-410` shows field is already object. Real bug at `hooks.ts:889-893` is `??` (nullish coalesce) absorbing downstream approvals. Fix is array adoption (`ApprovalDescriptor → ApprovalDescriptor \| ApprovalDescriptor[]`), not boolean-deprecation | gateway-eng | gateway / hooks | **Plan amendment** (now applied — H5 wording, validation criterion, PR-4 scope corrected with file:line citations) |
+| W9 | **OC-1/2/6 workaround governs runtime, not write-time** — Plan claims `before_agent_start` workaround for dropped file-ingest hooks. But `before_agent_start` fires AFTER files load (`hook-before-agent-start.types.ts:59-68`); can audit/block agent exec but cannot prevent the write itself. Original spec assumption (write-time prevention) is broken | gateway-eng | gateway / governance | **Plan note added** (residual-gap callout) + scenario stage to write hostile-write-then-read flow + adapter-audits.md to document "enforcement model: runtime-gated, not write-blocked" |
+| W10 | **CLI subcommand registration precedent missing** — Plan H3+H4 add `openclaw policy` (9 verbs) + `openclaw snap` (11 verbs) but cite no upstream CLI entry-point, handler convention, or precedent. Risk of yargs/oclif/Commander/custom-dispatcher mismatch breaking CI | gateway-eng | CLI / adapter | adapter-audits.md (H6) — must include sample handler registration, file:line into upstream CLI entry point, precedent example from existing OpenClaw subcommand |
+
+## Consolidated HC-NOTE (8)
+
+| # | Title | Source | Domain | Apply where |
+|---|---|---|---|---|
+| N1 | Adapter audit citation format unclear — internal `docs/upstream/guides/adapter-audits.md` link won't resolve from upstream PR comments | release-eng | PR mechanics | Bot-preempt-checklist (H6) — embed audit findings inline in PR description, don't rely on internal links |
+| N2 | Baseline hash + SDK overview table refresh ownership under-specified — who runs the regen script, when, validation criteria | release-eng | release-engineering | Bot-preempt-checklist (H6) section "Per-PR refresh checklist" |
+| N3 | Branch cohabitation rebase/merge strategy deferred — Hapi + Isis on same branch; merge-order risks late delivery-stage conflict | release-eng | release-engineering | wave.yaml (record provisional merge order) + pre-delivery checkpoint |
+| N4 | SOC 2 / HIPAA rubric coverage not mapped to specific controls (CC6.1, CC7.2, §164.312(b), §164.312(d)) | compliance | governance / compliance | L2 e2e scenario coverage + `compliance/README.md` per-framework gaps doc |
+| N5 | External-export integrity relies on caller-side validation — `--verify` flag for `snap export` would enforce chain re-verify | compliance | snap / siem | adapter-audits.md (H6) |
+| N6 | R5 fail-closed enforcement is generation-time only — emitted artifacts have no runtime tamper defense; signed-artifact / sealed-envelope design not in plan | ciso | governance / generator | adapter-audits.md (H6) — cite signed-artifact design or document the limitation |
+| N7 | Audit chain rotation breaks tamper-evidence across rotation boundaries — known limitation, no cross-rotation link | ciso | guardrails/audit | adapter-audits.md (H6) — document as known limitation |
+| N8 | Trust-set key rotation policy deferred — `keyId` field exists, rotation policy doesn't | ciso | trust-set | OC-7 PR description "follow-up: trust-set rotation policy" note |
+| N9 | OC-7 merger semantics confirmed surgical (~5 lines at `hooks.ts:889-893`) — existing tests asserting "single approval survives" will break, new tests verify conjunctive merging | gateway-eng | gateway / tests | OC-7 PR scope; expected test churn documented |
+| N10 | Upstream HEAD `5e8cc1d9c` baseline stable — `hook-types.ts`, `hooks.ts`, `workspace.ts`, registry APIs show no API drift since 2026-04-27 pull | gateway-eng | drift / baseline | wave.yaml constraints (already pinned); re-check before each PR opens |
+
+## Apply-back table
+
+Where each finding lands in subsequent wave stages:
+
+| Apply target | Findings |
+|---|---|
+| **Plan amendment** (this stage, before kickoff closes) | B1, W1, W2, W8, W9 (W8 + W9 applied 2026-04-27 after gateway-eng landed) |
+| **UG-upstream spec amendment** (setup stage) | B2, W3, W4, W6 |
+| **Adapter-audits guide** (H6 deliverable, before PR-3 opens) | B3, W5, W9 (write-time vs runtime enforcement model), W10 (CLI registration precedent), N1, N5, N6, N7 |
+| **Bot-preempt-checklist** (H6 deliverable) | N1, N2 |
+| **wave.yaml updates** (now) | N3 |
+| **OC-7 PR scope** (cp-3 implementation) | W7, N8 |
+| **Scenario coverage** (scenarios stage) | W3 (audit events), W4 (historical query), W5 (export round-trip), W6 (sourcePluginId verification), N4 (rubric→control mapping) |
+| **Test tier targets** (already in coverage contract) | All HC-WARN findings push L1 integration target up by ~3–4 tests |
+
+## Strengths consolidated
+
+Things every reviewer wants preserved as-is:
+
+- **Bot pre-empt checklist design** (release-eng) — Greptile + Copilot + chatgpt-codex categories well-anticipated; mitigates <4h merge-time pressure.
+- **Adapter audits as pre-flight gating** (release-eng) — H6 → H2/H3 dependency is sound discipline.
+- **PR sequencing** (release-eng) — Wave A → B → C respects dep graph; 2-open-at-a-time matches upstream culture.
+- **Hash-chained HMAC-SHA256 audit integrity is cryptographically sound** (compliance) — RFC 8785 JCS canonicalization, timing-safe comparison; SOC 2 / HIPAA tamper-evidence table stakes met.
+- **Approval-handle binding is cryptographically sound** (ciso, compliance) — 8-field canonical evaluation order blocks replay and handle-swap by design.
+- **Compliance report structure is auditor-friendly** (compliance) — Markdown/SARIF/JSON/HTML with requirement IDs and evidence references; ready to hand to Big 4 auditors.
+- **R5 fail-closed at generation time is non-negotiable** (ciso) — generator refuses to emit R5+failOpen.
+- **Two-adapter-audit approach front-loads validation** (gateway-eng) — emitted-plugin registration + audit-stream wire shape audited BEFORE dependent PRs open, reducing upstream review friction on critical-path governance.
+- **Upstream HEAD baseline stable** (gateway-eng) — `hook-types.ts`, `hooks.ts`, `workspace.ts`, registry APIs at HEAD `5e8cc1d9c` show no drift; adapter audits valid from this snapshot.
+
+## Round-2 plan
+
+1. ~~Patch this consolidated doc with gateway-eng findings~~ — **DONE 2026-04-27**
+2. Apply the **Plan amendment** items (B1, W1, W2, N3, W8, W9) — **DONE 2026-04-27**
+3. Defer remaining findings to their target stages (setup spec amendment, scenarios, H6 deliverables, OC-7 PR scope) per apply-back table above
+4. Advance kickoff stage status to `completed` with `reviewDecision: approved-with-warnings`
