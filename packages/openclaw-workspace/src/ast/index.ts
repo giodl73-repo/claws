@@ -11,7 +11,8 @@
 
 export { parse } from './parse.js';
 export { emit } from './emit.js';
-export { classify } from './classify.js';
+export { classify, classifyDetail, suggestBasename } from './classify.js';
+export type { ClassificationDetail, ClassificationFlavor } from './classify.js';
 export { grammars, WORKSPACE_FILE_KINDS } from './grammars.generated.js';
 export type { WorkspaceFileKind } from './grammars.generated.js';
 export type {
@@ -21,7 +22,9 @@ export type {
   Diagnostic,
   FrontmatterEntry,
   GenericAst,
+  MemoryAst,
   ParseResult,
+  SkillsAst,
   SoulAst,
   ToolsAst,
   WorkspaceAst,

@@ -46,7 +46,9 @@ describe('ast parse + emit edge cases', () => {
     const content = '## Drafter\nplain prose line\n- description: x\n';
     const { ast } = parse('agents', content);
     if (ast.kind === 'agents') {
-      expect(ast.agents[0]!.fields).toEqual([{ key: 'description', value: 'x' }]);
+      expect(ast.agents[0]!.fields.map((f) => ({ key: f.key, value: f.value }))).toEqual([
+        { key: 'description', value: 'x' },
+      ]);
     }
   });
 
@@ -74,6 +76,8 @@ describe('ast parse + emit edge cases', () => {
       frontmatter: [{ key: 'name', value: 'x' }],
       preamble: 'Prose',
       blocks: [{ heading: 'Boundaries', bodyLines: ['- do x'], line: 1 }],
+      boundaries: [{ text: 'do x', line: 2 }],
+      personaText: 'Prose',
     });
     expect(out).toContain('---');
     expect(out).toContain('name: x');
@@ -99,8 +103,12 @@ describe('classify — more paths', () => {
     expect(classify('/abs/governance/policy.md')).toBe('governance');
   });
 
-  it('handles Windows-style backslashes', () => {
-    expect(classify('C:\\src\\SOUL.md')).toBe('soul');
+  it('handles Windows-style backslashes for anywhere-matched basenames', () => {
+    // Root-anchored basenames (SOUL.md etc.) don't match deeply-nested
+    // paths even on Windows — that's by design (no node_modules false
+    // positives). But anywhere-matched basenames like SKILL.md should
+    // still classify regardless of separator style.
+    expect(classify('skills\\email\\SKILL.md')).toBe('skills');
   });
 
   it('workflows dir maps to workflows', () => {
@@ -133,7 +141,9 @@ describe('parse branch coverage', () => {
   it('agents: body line starting with bullet but no colon is skipped', () => {
     const { ast } = parse('agents', '## Drafter\n- no-colon-here\n- description: x\n');
     if (ast.kind === 'agents') {
-      expect(ast.agents[0]!.fields).toEqual([{ key: 'description', value: 'x' }]);
+      expect(ast.agents[0]!.fields.map((f) => ({ key: f.key, value: f.value }))).toEqual([
+        { key: 'description', value: 'x' },
+      ]);
     }
   });
 

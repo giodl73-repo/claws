@@ -55,7 +55,7 @@ describe('ast parse + emit lossless round-trip', () => {
     if (ast.kind === 'agents') {
       expect(ast.agents).toHaveLength(1);
       expect(ast.agents[0]!.name).toBe('Drafter');
-      expect(ast.agents[0]!.fields).toEqual([
+      expect(ast.agents[0]!.fields.map((f) => ({ key: f.key, value: f.value }))).toEqual([
         { key: 'description', value: 'drafts responses' },
         { key: 'model', value: 'claude-4' },
       ]);
@@ -65,8 +65,8 @@ describe('ast parse + emit lossless round-trip', () => {
 });
 
 describe('ast grammar registry', () => {
-  it('exports 11 WorkspaceFileKind grammars', () => {
-    expect(WORKSPACE_FILE_KINDS.length).toBe(11);
+  it('exports 14 WorkspaceFileKind grammars (11 PEG + bootstrap/hook/dreams stubs)', () => {
+    expect(WORKSPACE_FILE_KINDS.length).toBe(14);
     for (const kind of WORKSPACE_FILE_KINDS) {
       expect(grammars[kind]).toBeTypeOf('string');
       expect(grammars[kind].length).toBeGreaterThan(0);
@@ -79,15 +79,21 @@ describe('classify', () => {
     expect(classify('SOUL.md')).toBe('soul');
     expect(classify('TOOLS.md')).toBe('tools');
     expect(classify('AGENTS.md')).toBe('agents');
-    expect(classify('lobster.yaml')).toBe('config');
+    expect(classify('BOOTSTRAP.md')).toBe('bootstrap');
+    expect(classify('SKILL.md')).toBe('skills');
+    expect(classify('openclaw.json')).toBe('config');
   });
 
   it('maps directory-qualified paths to kinds', () => {
-    expect(classify('skills/email-drafter/skill.md')).toBe('skills');
+    expect(classify('skills/email-drafter/SKILL.md')).toBe('skills');
     expect(classify('workflows/onboarding.md')).toBe('workflows');
   });
 
   it('returns null for unknown paths', () => {
     expect(classify('README.md')).toBe(null);
+  });
+
+  it('classifies lobster.yaml as config (claws-internal; dropped at upstream extraction)', () => {
+    expect(classify('lobster.yaml')).toBe('config');
   });
 });
