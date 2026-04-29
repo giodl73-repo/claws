@@ -1,106 +1,157 @@
 /**
- * @bic/openclaw-snap/store/inMemoryStore — reference SnapshotStore backend
- * for tests and single-process deploys.
+ * @bic/openclaw-snap/store/inMemoryStore — in-process v2 SnapshotStore.
  *
- * All state lives in two Maps: `byId` and `currentId`. Promote/rollback
- * swap the `current` pointer atomically; the prior `current` is moved to
- * `superseded` in the same tick. Nothing is ever deleted.
+ * Backed by two Maps:
+ *   - `workspaces`  WorkspaceId → live content (mutated by tests/callers)
+ *   - `bundles`     SnapshotId  → immutable captured bytes
+ *
+ * `capture(ws)` snapshots the current `workspaces[ws]` content, computes
+ * a deterministic id via `@bic/openclaw-workspace/canonicalize`, and
+ * stashes the byte-identical bundle in `bundles`. Capture is idempotent
+ * by id — capturing the same content twice returns the same id and does
+ * not duplicate storage.
  *
  * @module @bic/openclaw-snap/store/inMemoryStore
  */
 
-import { parseOcPath, type OcPath } from '@bic/openclaw-workspace/path';
 import type {
   ListOpts,
-  PromoteContext,
-  ResolveResult,
   Snapshot,
-  SnapshotMeta,
+  SnapshotId,
+  SnapshotInternalPath,
   SnapshotStore,
+  WorkspaceId,
 } from '../types.js';
+import { SnapshotErrorImpl } from '../types.js';
+import { computeSnapshotId } from '../canonical.js';
 
-interface InMemoryState {
-  byId: Map<string, Snapshot>;
-  currentId: string | null;
+const TEXT_DECODER = new TextDecoder('utf-8');
+const TEXT_ENCODER = new TextEncoder();
+
+interface BundleEntry {
+  readonly id: SnapshotId;
+  readonly workspace: WorkspaceId;
+  readonly capturedAt: string;
+  readonly files: ReadonlyMap<SnapshotInternalPath, Uint8Array>;
 }
 
-function cloneSnapshot(snap: Snapshot, patch: Partial<Snapshot>): Snapshot {
-  return { ...snap, ...patch } as Snapshot;
+export interface InMemoryStoreOptions {
+  /**
+   * Initial workspace content. Subsequent edits via `setWorkspace` /
+   * `mutateFile` mutate this in place.
+   */
+  readonly workspaces?: Readonly<Record<WorkspaceId, Readonly<Record<SnapshotInternalPath, string | Uint8Array>>>>;
+  /** Override `Date.now()` for deterministic tests. */
+  readonly now?: () => Date;
 }
 
-export type ResolveChunk = NonNullable<ResolveResult['chunk']>;
-
-export function buildChunk(parsed: OcPath): ResolveChunk {
-  const chunk: { file: string; section?: string; item?: string; field?: string } = { file: parsed.file };
-  if (parsed.section !== undefined) chunk.section = parsed.section;
-  if (parsed.item !== undefined) chunk.item = parsed.item;
-  if (parsed.field !== undefined) chunk.field = parsed.field;
-  return chunk;
+/**
+ * In-memory `SnapshotStore` impl. Test ergonomics:
+ *
+ *   const store = inMemoryStore({ workspaces: { ws: { 'a.txt': 'hi' } } });
+ *   const id = await store.capture('ws');
+ *   await store.read(id, 'a.txt'); // → bytes of 'hi'
+ *
+ * The returned object is the `SnapshotStore` interface plus a `setWorkspace`
+ * extension method for evolving content between captures.
+ */
+export interface InMemorySnapshotStore extends SnapshotStore {
+  /** Replace workspace content wholesale. */
+  setWorkspace(ws: WorkspaceId, files: Readonly<Record<SnapshotInternalPath, string | Uint8Array>>): void;
+  /** Set or overwrite a single file inside a workspace. */
+  setFile(ws: WorkspaceId, path: SnapshotInternalPath, content: string | Uint8Array): void;
+  /** Remove a file from a workspace. */
+  removeFile(ws: WorkspaceId, path: SnapshotInternalPath): void;
 }
 
-export function inMemoryStore(): SnapshotStore {
-  const state: InMemoryState = { byId: new Map(), currentId: null };
+function asBytes(content: string | Uint8Array): Uint8Array {
+  return typeof content === 'string' ? TEXT_ENCODER.encode(content) : content;
+}
+
+export function inMemoryStore(opts: InMemoryStoreOptions = {}): InMemorySnapshotStore {
+  const workspaces = new Map<WorkspaceId, Map<SnapshotInternalPath, Uint8Array>>();
+  const bundles = new Map<SnapshotId, BundleEntry>();
+  const byWorkspace = new Map<WorkspaceId, SnapshotId[]>();
+  const now = opts.now ?? (() => new Date());
+
+  if (opts.workspaces !== undefined) {
+    for (const [ws, files] of Object.entries(opts.workspaces)) {
+      const m = new Map<SnapshotInternalPath, Uint8Array>();
+      for (const [p, c] of Object.entries(files)) m.set(p, asBytes(c));
+      workspaces.set(ws, m);
+    }
+  }
 
   return {
-    async put(snapshot: Snapshot): Promise<void> {
-      state.byId.set(snapshot.id, snapshot);
+    setWorkspace(ws, files) {
+      const m = new Map<SnapshotInternalPath, Uint8Array>();
+      for (const [p, c] of Object.entries(files)) m.set(p, asBytes(c));
+      workspaces.set(ws, m);
+    },
+    setFile(ws, path, content) {
+      let m = workspaces.get(ws);
+      if (m === undefined) {
+        m = new Map();
+        workspaces.set(ws, m);
+      }
+      m.set(path, asBytes(content));
+    },
+    removeFile(ws, path) {
+      workspaces.get(ws)?.delete(path);
     },
 
-    async get(id: string): Promise<Snapshot | null> {
-      return state.byId.get(id) ?? null;
-    },
-
-    async list(opts: ListOpts = {}): Promise<readonly SnapshotMeta[]> {
-      const all: SnapshotMeta[] = [];
-      for (const snap of state.byId.values()) {
-        if (opts.status !== undefined && snap.status !== opts.status) continue;
-        all.push({
-          id: snap.id,
-          createdAt: snap.createdAt,
-          author: snap.author,
-          status: snap.status,
+    async capture(workspace) {
+      const live = workspaces.get(workspace);
+      if (live === undefined) {
+        throw new SnapshotErrorImpl(
+          'SNAP_CAPTURE_FAILED',
+          `No content registered for workspace ${workspace}`,
+        );
+      }
+      const fileMap: Record<string, string> = {};
+      for (const [p, bytes] of live) fileMap[p] = TEXT_DECODER.decode(bytes);
+      const id = computeSnapshotId(fileMap);
+      if (!bundles.has(id)) {
+        const frozen = new Map<SnapshotInternalPath, Uint8Array>();
+        for (const [p, b] of live) frozen.set(p, new Uint8Array(b));
+        bundles.set(id, {
+          id,
+          workspace,
+          capturedAt: now().toISOString(),
+          files: frozen,
         });
+        const arr = byWorkspace.get(workspace) ?? [];
+        arr.unshift(id);
+        byWorkspace.set(workspace, arr);
       }
-      all.sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0));
-      const limit = opts.limit ?? all.length;
-      return all.slice(0, limit);
+      return id;
     },
 
-    async promote(id: string, _ctx: PromoteContext): Promise<{ readonly promotedAt: string }> {
-      const snap = state.byId.get(id);
-      if (snap === undefined) {
-        throw new Error(`Snapshot not found: ${id}`);
+    async read(snap, path) {
+      const bundle = bundles.get(snap);
+      if (bundle === undefined) {
+        throw new SnapshotErrorImpl('SNAP_NOT_FOUND', `Snapshot not found: ${snap}`);
       }
-      const promotedAt = new Date().toISOString();
-      const priorCurrent = state.currentId;
-      if (priorCurrent !== null && priorCurrent !== id) {
-        const prior = state.byId.get(priorCurrent) as Snapshot;
-        state.byId.set(priorCurrent, cloneSnapshot(prior, { status: 'superseded' }));
+      const bytes = bundle.files.get(path);
+      if (bytes === undefined) {
+        throw new SnapshotErrorImpl(
+          'SNAP_INVALID_PATH',
+          `Path not in snapshot: ${path} (snap=${snap})`,
+        );
       }
-      state.byId.set(id, cloneSnapshot(snap, { status: 'current' }));
-      state.currentId = id;
-      return { promotedAt };
+      return new Uint8Array(bytes);
     },
 
-    async rollback(toId: string, ctx: PromoteContext): Promise<{ readonly restoredAt: string }> {
-      const { promotedAt } = await this.promote(toId, ctx);
-      return { restoredAt: promotedAt };
-    },
-
-    async current(): Promise<Snapshot | null> {
-      if (state.currentId === null) return null;
-      return state.byId.get(state.currentId) as Snapshot;
-    },
-
-    async resolveOcPath(uri: string, id?: string): Promise<ResolveResult | null> {
-      const parsed = parseOcPath(uri);
-      const targetId = id ?? state.currentId;
-      if (targetId === null) return null;
-      const snap = state.byId.get(targetId);
-      if (snap === undefined) return null;
-      const content = snap.files[parsed.file];
-      if (content === undefined) return null;
-      return { snapshotId: snap.id, content, chunk: buildChunk(parsed) };
+    async list(workspace, opts = {}) {
+      const ids = byWorkspace.get(workspace) ?? [];
+      const limit = opts.limit ?? ids.length;
+      const out: Snapshot[] = [];
+      for (const id of ids.slice(0, limit)) {
+        const b = bundles.get(id);
+        if (b === undefined) continue;
+        out.push({ id: b.id, workspace: b.workspace, capturedAt: b.capturedAt });
+      }
+      return out;
     },
   };
 }

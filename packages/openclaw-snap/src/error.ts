@@ -9,7 +9,7 @@
  * @module @bic/openclaw-snap/error
  */
 
-import type { SnapError, SnapErrorCode } from './types.js';
+import type { SnapshotError, SnapshotErrorCode } from './types.js';
 
 const MAX_MESSAGE = 200;
 const ABSOLUTE_PATH = /(?:^|\s)(?:\/[^\s]+|[A-Z]:\\[^\s]+)/g;
@@ -52,13 +52,13 @@ export interface ErrContext {
  * through one path.
  */
 export function toSnapError(
-  code: SnapErrorCode,
+  code: SnapshotErrorCode,
   err: unknown,
   ctx: ErrContext = {},
-): SnapError {
+): SnapshotError & { details?: Record<string, unknown>; snapshotId?: string } {
   const rawMessage = err instanceof Error ? err.message : String(err);
   const envelope: {
-    code: SnapErrorCode;
+    code: SnapshotErrorCode;
     message: string;
     details?: Record<string, unknown>;
     snapshotId?: string;

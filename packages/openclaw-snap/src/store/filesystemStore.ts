@@ -1,186 +1,216 @@
 /**
- * @bic/openclaw-snap/store/filesystemStore — reference SnapshotStore backend
- * for single-node deployments.
+ * @bic/openclaw-snap/store/filesystemStore — disk-backed v2 SnapshotStore.
  *
- * Layout:
- *   {root}/snapshots/{id}/files.json     — serialized file map
- *   {root}/snapshots/{id}/meta.json      — createdAt/author/status/parentId
- *   {root}/current.json                  — { currentId: string | null }
+ * Layout under `root`:
+ *   {root}/bundles/{id}/manifest.json
+ *   {root}/bundles/{id}/files/<snapshot-internal-path>
  *
- * All writes are through `writeFile` + `rename` to an intermediate temp to
- * avoid torn writes under concurrent readers. Promote/rollback update
- * `current.json` atomically after the new-current meta has been written.
+ * `manifest.json` contains `{ id, workspace, capturedAt }` plus an
+ * ordered file inventory used to reconstruct `list()` and validate
+ * bundle integrity. Files are written byte-identical — no canonicalization
+ * inside the bundle (canonicalization is applied to the manifest input
+ * to compute the id, not to the stored bytes).
+ *
+ * The workspace passed to `capture()` is interpreted as a directory path:
+ * the impl reads it recursively, applies the optional `ignore` filter,
+ * and bundles the result.
  *
  * @module @bic/openclaw-snap/store/filesystemStore
  */
 
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { parseOcPath } from '@bic/openclaw-workspace/path';
 import type {
   ListOpts,
-  PromoteContext,
-  ResolveResult,
   Snapshot,
-  SnapshotMeta,
-  SnapshotStatus,
+  SnapshotId,
+  SnapshotInternalPath,
   SnapshotStore,
+  WorkspaceId,
 } from '../types.js';
-import { buildChunk } from './inMemoryStore.js';
+import { SnapshotErrorImpl } from '../types.js';
+import { computeSnapshotId } from '../canonical.js';
 
-interface FsOpts {
+const TEXT_DECODER = new TextDecoder('utf-8');
+
+export interface FilesystemStoreOptions {
+  /** Root dir for bundle storage. Created if missing. */
   readonly root: string;
+  /**
+   * Predicate applied to each candidate path during `capture`. Return
+   * `true` to skip. Paths are relative POSIX-style, e.g. `'src/a.ts'`.
+   * Defaults to skipping `node_modules/`, `.git/`, `dist/`, and anything
+   * inside the snap's own bundle dir if the workspace and store happen
+   * to nest.
+   */
+  readonly ignore?: (relPath: SnapshotInternalPath) => boolean;
+  /** Override `Date.now()` for deterministic tests. */
+  readonly now?: () => Date;
 }
 
-interface MetaJson {
-  readonly createdAt: string;
-  readonly author: string;
-  readonly status: SnapshotStatus;
-  readonly parentId?: string;
+interface ManifestJson {
+  readonly id: SnapshotId;
+  readonly workspace: WorkspaceId;
+  readonly capturedAt: string;
+  readonly files: readonly string[];
 }
 
-interface CurrentJson {
-  readonly currentId: string | null;
-}
+const DEFAULT_IGNORE = (rel: string): boolean =>
+  rel === '' ||
+  rel.startsWith('node_modules/') ||
+  rel.startsWith('.git/') ||
+  rel.startsWith('dist/') ||
+  rel === 'node_modules' ||
+  rel === '.git' ||
+  rel === 'dist';
 
-async function writeAtomic(target: string, data: string): Promise<void> {
+async function writeAtomic(target: string, data: string | Uint8Array): Promise<void> {
   const tmp = `${target}.tmp-${String(process.pid)}-${String(Date.now())}`;
-  await fs.writeFile(tmp, data, 'utf8');
+  await fs.writeFile(tmp, data);
   await fs.rename(tmp, target);
 }
 
-async function readJson<T>(p: string): Promise<T | null> {
-  try {
-    const text = await fs.readFile(p, 'utf8');
-    return JSON.parse(text) as T;
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null;
-    throw err;
+async function* walk(
+  root: string,
+  base: string,
+  ignore: (rel: SnapshotInternalPath) => boolean,
+): AsyncIterable<{ rel: string; abs: string }> {
+  const entries = await fs.readdir(path.join(root, base), { withFileTypes: true });
+  for (const ent of entries) {
+    const rel = base === '' ? ent.name : `${base}/${ent.name}`;
+    if (ignore(rel)) continue;
+    const abs = path.join(root, rel);
+    if (ent.isDirectory()) {
+      yield* walk(root, rel, ignore);
+    } else if (ent.isFile()) {
+      yield { rel, abs };
+    }
   }
 }
 
-export function filesystemStore(opts: FsOpts): SnapshotStore {
-  const snapshotsDir = path.join(opts.root, 'snapshots');
-  const currentPath = path.join(opts.root, 'current.json');
+export function filesystemStore(opts: FilesystemStoreOptions): SnapshotStore {
+  const bundlesDir = path.join(opts.root, 'bundles');
+  const ignore = opts.ignore ?? DEFAULT_IGNORE;
+  const now = opts.now ?? (() => new Date());
 
-  async function ensureDirs(): Promise<void> {
-    await fs.mkdir(snapshotsDir, { recursive: true });
+  function bundleDir(id: SnapshotId): string {
+    return path.join(bundlesDir, id);
   }
 
-  function snapDir(id: string): string {
-    return path.join(snapshotsDir, id);
-  }
-
-  async function readSnapshot(id: string): Promise<Snapshot | null> {
-    const dir = snapDir(id);
-    const meta = await readJson<MetaJson>(path.join(dir, 'meta.json'));
-    if (meta === null) return null;
-    const files = await readJson<Record<string, string>>(path.join(dir, 'files.json'));
-    if (files === null) return null;
-    return {
-      id,
-      files,
-      createdAt: meta.createdAt,
-      author: meta.author,
-      status: meta.status,
-      ...(meta.parentId !== undefined ? { parentId: meta.parentId } : {}),
-    };
-  }
-
-  async function writeSnapshot(snap: Snapshot): Promise<void> {
-    const dir = snapDir(snap.id);
-    await fs.mkdir(dir, { recursive: true });
-    await writeAtomic(path.join(dir, 'files.json'), JSON.stringify(snap.files));
-    const meta: MetaJson = {
-      createdAt: snap.createdAt,
-      author: snap.author,
-      status: snap.status,
-      ...(snap.parentId !== undefined ? { parentId: snap.parentId } : {}),
-    };
-    await writeAtomic(path.join(dir, 'meta.json'), JSON.stringify(meta));
-  }
-
-  async function updateStatus(id: string, status: SnapshotStatus): Promise<void> {
-    const snap = await readSnapshot(id);
-    if (snap === null) return;
-    await writeSnapshot({ ...snap, status });
-  }
-
-  async function readCurrentId(): Promise<string | null> {
-    const data = await readJson<CurrentJson>(currentPath);
-    return data?.currentId ?? null;
-  }
-
-  async function writeCurrentId(currentId: string | null): Promise<void> {
-    await writeAtomic(currentPath, JSON.stringify({ currentId }));
+  async function ensureRoot(): Promise<void> {
+    await fs.mkdir(bundlesDir, { recursive: true });
   }
 
   return {
-    async put(snapshot: Snapshot): Promise<void> {
-      await ensureDirs();
-      await writeSnapshot(snapshot);
-    },
-
-    async get(id: string): Promise<Snapshot | null> {
-      return readSnapshot(id);
-    },
-
-    async list(opts: ListOpts = {}): Promise<readonly SnapshotMeta[]> {
-      await ensureDirs();
-      const entries = await fs.readdir(snapshotsDir, { withFileTypes: true });
-      const metas: SnapshotMeta[] = [];
-      for (const entry of entries) {
-        if (!entry.isDirectory()) continue;
-        const meta = await readJson<MetaJson>(path.join(snapshotsDir, entry.name, 'meta.json'));
-        if (meta === null) continue;
-        if (opts.status !== undefined && meta.status !== opts.status) continue;
-        metas.push({
-          id: entry.name,
-          createdAt: meta.createdAt,
-          author: meta.author,
-          status: meta.status,
-        });
+    async capture(workspace) {
+      try {
+        await fs.access(workspace);
+      } catch (err) {
+        throw new SnapshotErrorImpl(
+          'SNAP_CAPTURE_FAILED',
+          `Workspace dir not accessible: ${workspace}`,
+          err,
+        );
       }
-      metas.sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0));
-      const limit = opts.limit ?? metas.length;
-      return metas.slice(0, limit);
-    },
-
-    async promote(id: string, _ctx: PromoteContext): Promise<{ readonly promotedAt: string }> {
-      await ensureDirs();
-      const snap = await readSnapshot(id);
-      if (snap === null) {
-        throw new Error(`Snapshot not found: ${id}`);
+      const fileMap: Record<string, string> = {};
+      const fileBytes = new Map<string, Uint8Array>();
+      for await (const { rel, abs } of walk(workspace, '', ignore)) {
+        const bytes = await fs.readFile(abs);
+        const u8 = new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        fileBytes.set(rel, u8);
+        fileMap[rel] = TEXT_DECODER.decode(u8);
       }
-      const priorId = await readCurrentId();
-      if (priorId !== null && priorId !== id) {
-        await updateStatus(priorId, 'superseded');
+      const id = computeSnapshotId(fileMap);
+      const dir = bundleDir(id);
+      try {
+        await fs.access(path.join(dir, 'manifest.json'));
+        return id;
+      } catch {
+        // bundle does not yet exist; write it.
       }
-      await writeSnapshot({ ...snap, status: 'current' });
-      await writeCurrentId(id);
-      return { promotedAt: new Date().toISOString() };
+      await ensureRoot();
+      await fs.mkdir(path.join(dir, 'files'), { recursive: true });
+      const sortedFiles = [...fileBytes.keys()].sort();
+      for (const rel of sortedFiles) {
+        const target = path.join(dir, 'files', rel);
+        await fs.mkdir(path.dirname(target), { recursive: true });
+        await writeAtomic(target, fileBytes.get(rel) as Uint8Array);
+      }
+      const manifest: ManifestJson = {
+        id,
+        workspace,
+        capturedAt: now().toISOString(),
+        files: sortedFiles,
+      };
+      await writeAtomic(
+        path.join(dir, 'manifest.json'),
+        JSON.stringify(manifest, null, 2) + '\n',
+      );
+      return id;
     },
 
-    async rollback(toId: string, ctx: PromoteContext): Promise<{ readonly restoredAt: string }> {
-      const { promotedAt } = await this.promote(toId, ctx);
-      return { restoredAt: promotedAt };
+    async read(snap, internalPath) {
+      const target = path.join(bundleDir(snap), 'files', internalPath);
+      try {
+        const buf = await fs.readFile(target);
+        return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+      } catch (err) {
+        const code = (err as NodeJS.ErrnoException).code;
+        if (code === 'ENOENT') {
+          // Distinguish missing snapshot from missing file inside a snapshot.
+          try {
+            await fs.access(path.join(bundleDir(snap), 'manifest.json'));
+            throw new SnapshotErrorImpl(
+              'SNAP_INVALID_PATH',
+              `Path not in snapshot: ${internalPath} (snap=${snap})`,
+            );
+          } catch (manifestErr) {
+            if (manifestErr instanceof SnapshotErrorImpl) throw manifestErr;
+            throw new SnapshotErrorImpl(
+              'SNAP_NOT_FOUND',
+              `Snapshot not found: ${snap}`,
+              err,
+            );
+          }
+        }
+        throw new SnapshotErrorImpl(
+          'SNAP_STORE_UNAVAILABLE',
+          `Failed to read ${internalPath} from ${snap}`,
+          err,
+        );
+      }
     },
 
-    async current(): Promise<Snapshot | null> {
-      const id = await readCurrentId();
-      if (id === null) return null;
-      return readSnapshot(id);
-    },
-
-    async resolveOcPath(uri: string, id?: string): Promise<ResolveResult | null> {
-      const parsed = parseOcPath(uri);
-      const targetId = id ?? (await readCurrentId());
-      if (targetId === null) return null;
-      const snap = await readSnapshot(targetId);
-      if (snap === null) return null;
-      const content = snap.files[parsed.file];
-      if (content === undefined) return null;
-      return { snapshotId: snap.id, content, chunk: buildChunk(parsed) };
+    async list(workspace, listOpts: ListOpts = {}) {
+      let entries: readonly string[];
+      try {
+        entries = await fs.readdir(bundlesDir);
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException).code === 'ENOENT') return [];
+        throw new SnapshotErrorImpl(
+          'SNAP_STORE_UNAVAILABLE',
+          `Failed to list bundles dir`,
+          err,
+        );
+      }
+      const out: Snapshot[] = [];
+      for (const id of entries) {
+        try {
+          const text = await fs.readFile(
+            path.join(bundleDir(id), 'manifest.json'),
+            'utf8',
+          );
+          const m = JSON.parse(text) as ManifestJson;
+          if (m.workspace === workspace) {
+            out.push({ id: m.id, workspace: m.workspace, capturedAt: m.capturedAt });
+          }
+        } catch {
+          // Skip malformed bundles.
+        }
+      }
+      out.sort((a, b) => (a.capturedAt < b.capturedAt ? 1 : a.capturedAt > b.capturedAt ? -1 : 0));
+      const limit = listOpts.limit ?? out.length;
+      return out.slice(0, limit);
     },
   };
 }

@@ -1,32 +1,46 @@
 /**
- * @bic/openclaw-snap — OpenClaw snapshot registry.
+ * @bic/openclaw-snap — content-addressable snapshot store + ref/pointer layer.
  *
- * HTTP-only surface per snap.md §Interface: a `SnapshotStore` interface
- * with two reference implementations (in-memory, filesystem) and a
- * `startServer` entry point that serves nine endpoints.
+ * **Two layers** (see `types.ts`):
  *
- * No library-first working-tree API — `readWorkingTree` / `computeDraft`
- * / `applyCheckout` / `clearStage` were reverted from the spec (see
- * claws-pre-extraction-packaging plan §4). Consumers interact over HTTP.
+ *   Layer 1 — `SnapshotStore`  immutable bundles. capture/read/list.
+ *                              The v2 contract being proposed upstream.
+ *
+ *   Layer 2 — `RefStore`        mutable per-workspace pointers (HEAD,
+ *                              STAGE, history). Downstream-only; not
+ *                              part of the upstream PR.
+ *
+ * Lifecycle verbs (promote, rollback, stage, discard) compose these two
+ * primitives in the claws CLI — see `packages/claws/src/commands/snap-*.ts`.
  *
  * @module @bic/openclaw-snap
  */
 
 export type {
   ListOpts,
-  PromoteContext,
-  ResolveResult,
+  RefStore,
   Snapshot,
-  SnapshotMeta,
-  SnapshotStatus,
+  SnapshotError,
+  SnapshotErrorCode,
+  SnapshotId,
+  SnapshotInternalPath,
   SnapshotStore,
-  SnapError,
-  SnapErrorCode,
+  WorkspaceId,
 } from './types.js';
+export { SnapshotErrorImpl } from './types.js';
 
 export { inMemoryStore, filesystemStore } from './store/index.js';
-export { startServer } from './server/index.js';
-export type { ServerHandle, StartServerOptions } from './server/startServer.js';
+export type {
+  InMemorySnapshotStore,
+  InMemoryStoreOptions,
+} from './store/inMemoryStore.js';
+export type { FilesystemStoreOptions } from './store/filesystemStore.js';
+
+export { workspaceRefStore, inMemoryRefStore } from './refs/index.js';
+export type {
+  WorkspaceRefStoreOptions,
+  InMemoryRefStoreOptions,
+} from './refs/index.js';
 
 export {
   canonicalize,
@@ -36,4 +50,8 @@ export {
   CanonicalizeError,
   CanonicalizerVersionMismatchError,
 } from '@bic/openclaw-workspace/canonicalize';
-export { computeSnapshotId, computePolicyId } from './canonical.js';
+export {
+  computeSnapshotId,
+  computePolicyId,
+  POLICY_IR_PATH,
+} from './canonical.js';

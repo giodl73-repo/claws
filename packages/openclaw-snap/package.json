@@ -1,7 +1,7 @@
 {
   "name": "@bic/openclaw-snap",
-  "version": "0.2.0",
-  "description": "OpenClaw snapshot registry — SnapshotStore interface + in-memory/filesystem reference impls + HTTP server (9 endpoints).",
+  "version": "0.3.0",
+  "description": "OpenClaw snapshot store — v2 SnapshotStore (capture/read/list) + downstream RefStore pointer layer (HEAD/STAGE/history).",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -12,9 +12,13 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./cli-handlers": {
-      "types": "./dist/cli-handlers/index.d.ts",
-      "import": "./dist/cli-handlers/index.js"
+    "./refs": {
+      "types": "./dist/refs/index.d.ts",
+      "import": "./dist/refs/index.js"
+    },
+    "./store": {
+      "types": "./dist/store/index.d.ts",
+      "import": "./dist/store/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -34,13 +38,12 @@
     "node": ">=20.0.0"
   },
   "peerDependencies": {
-    "@bic/openclaw-guardrails": "^0.1.0",
-    "@bic/openclaw-workspace": "^0.1.0"
+    "@bic/openclaw-workspace": "^0.1.0",
+    "@bic/v2-prototype": "*"
   },
   "devDependencies": {
-    "@bic/openclaw-guardrails": "*",
-    "@bic/openclaw-policy": "*",
     "@bic/openclaw-workspace": "*",
+    "@bic/v2-prototype": "*",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^3.1.1",
     "typescript": "^5.7.0",
@@ -50,8 +53,8 @@
     "openclaw",
     "snap",
     "snapshot",
-    "registry",
-    "http",
+    "ref-store",
+    "content-addressable",
     "bic"
   ],
   "repository": {

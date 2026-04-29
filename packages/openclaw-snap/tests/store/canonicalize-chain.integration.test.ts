@@ -1,9 +1,9 @@
 /**
- * L1 integration — SnapshotStore paired with @bic/openclaw-workspace/canonicalize.
+ * L1 integration — v2 SnapshotStore paired with @bic/openclaw-workspace/canonicalize.
  *
- * Asserts that the snapshotId computed by canonicalize is stable across
- * key-order permutations (round-trip through inMemoryStore) and that the
- * filesystem backend reproduces the same bytes across restart cycles.
+ * Asserts that two captures of byte-identical content produce identical
+ * `SnapshotId`s (RFC 8785 JCS over the file map) and that the filesystem
+ * backend's bundles survive a restart of the store instance.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -13,28 +13,36 @@ import * as path from 'node:path';
 import { inMemoryStore, filesystemStore } from '../../src/store/index.js';
 import { computeSnapshotId } from '../../src/canonical.js';
 
+const TEXT_DECODER = new TextDecoder('utf-8');
+
 describe('store ↔ workspace/canonicalize', () => {
   it('snapshotId is stable under key-order permutations (canonicalize sort)', async () => {
-    const a = { 'SOUL.md': '# soul', 'TOOLS.md': '# tools' };
-    const b = { 'TOOLS.md': '# tools', 'SOUL.md': '# soul' };
-    const idA = computeSnapshotId(a);
-    const idB = computeSnapshotId(b);
+    const fileMapA = { 'SOUL.md': '# soul', 'TOOLS.md': '# tools' };
+    const fileMapB = { 'TOOLS.md': '# tools', 'SOUL.md': '# soul' };
+    const idA = computeSnapshotId(fileMapA);
+    const idB = computeSnapshotId(fileMapB);
     expect(idA).toBe(idB);
-    const store = inMemoryStore();
-    await store.put({ id: idA, files: a, createdAt: '2026-04-18T00:00:00.000Z', author: 'alice', status: 'draft' });
-    expect((await store.get(idB))?.id).toBe(idA);
+
+    const store = inMemoryStore({ workspaces: { ws: fileMapA } });
+    const captured = await store.capture('ws');
+    expect(captured).toBe(idA);
   });
 
   it('filesystem backend survives restart (two store instances, same root)', async () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'snap-fs-reboot-'));
-    const files = { 'SOUL.md': '# soul' };
-    const id = computeSnapshotId(files);
-    const first = filesystemStore({ root });
-    await first.put({ id, files, createdAt: '2026-04-18T00:00:00.000Z', author: 'alice', status: 'draft' });
-    await first.promote(id, { principal: 'alice', idempotencyKey: 'k1' });
-    const second = filesystemStore({ root });
-    const current = await second.current();
-    expect(current?.id).toBe(id);
-    expect(current?.status).toBe('current');
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'snap-fs-reboot-'));
+    const wsRoot = path.join(tmpRoot, 'ws');
+    const storeRoot = path.join(tmpRoot, 'store');
+    fs.mkdirSync(wsRoot, { recursive: true });
+    fs.mkdirSync(storeRoot, { recursive: true });
+    fs.writeFileSync(path.join(wsRoot, 'SOUL.md'), '# soul');
+
+    const first = filesystemStore({ root: storeRoot });
+    const id = await first.capture(wsRoot);
+
+    const second = filesystemStore({ root: storeRoot });
+    const bytes = await second.read(id, 'SOUL.md');
+    expect(TEXT_DECODER.decode(bytes)).toBe('# soul');
+    const listed = await second.list(wsRoot);
+    expect(listed.map((s) => s.id)).toContain(id);
   });
 });

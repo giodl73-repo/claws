@@ -35,20 +35,18 @@ import {
   runSnapList,
   runSnapDelete,
 } from './commands/snap.js';
-import { runSnapServe } from './commands/snap-serve.js';
 import { runRouter as runPolicyRouter } from '@bic/openclaw-policy/cli-handlers';
 import {
-  stage as snapStage,
-  status as snapStatus,
-  upload as snapUpload,
-  list as snapListHttp,
-  diff as snapDiffIds,
-  diffStaged as snapDiffStaged,
-  checkout as snapCheckout,
-  promote as snapPromote,
-  rollback as snapRollback,
-  discardStage as snapDiscardStage,
-} from '@bic/openclaw-snap/cli-handlers';
+  runSnapCapture,
+  runSnapPromote as runSnapStorePromote,
+  runSnapRollback as runSnapStoreRollback,
+  runSnapDiscard,
+  runSnapStatus,
+  runSnapRegistry,
+  runSnapCheckout,
+  runSnapRead,
+  runSnapDiff as runSnapStoreDiff,
+} from './commands/snap-store.js';
 import { runScan } from './commands/scan.js';
 import { runKeysGenerate, runKeysList, runKeysRotate, runKeysRevoke, runKeysCeremonyInit, runKeysCeremonyReconstruct } from './commands/keys.js';
 import { runInitSkill } from './commands/init.js';
@@ -414,154 +412,84 @@ export function createProgram(): Command {
       process.exitCode = exitCode;
     });
 
+  // ── snap v2 (in-process SnapshotStore + RefStore via @bic/openclaw-snap) ───
+  // capture / promote / rollback / discard / status / registry / diff /
+  // checkout / read — each binds a filesystemStore + workspaceRefStore
+  // rooted at <workspace>/.openclaw/snapshots/. No HTTP transport.
+
   snap
-    .command('serve')
-    .description('Start the snapshot registry HTTP server')
-    .option('--port <port>', 'Bind port (0 = ephemeral, default 0)', (v) => parseInt(v, 10), 0)
-    .option('--host <host>', 'Bind address (default 127.0.0.1)')
-    .action(async (cmdOpts: { port: number; host?: string }) => {
+    .command('capture')
+    .description('Capture the workspace into a new snapshot bundle (sets STAGE)')
+    .action(async () => {
       const opts = program.opts<GlobalOpts>();
-      const exitCode = await runSnapServe({
-        port: cmdOpts.port,
-        host: cmdOpts.host,
-        json: opts.json,
-      });
-      process.exitCode = exitCode;
+      process.exitCode = await runSnapCapture(process.cwd(), { json: opts.json });
     });
 
-  // ── snap (openclaw-upstream verbs via @bic/openclaw-snap/cli-handlers) ───
-  // upload / status / list / diff / diff --staged / checkout / promote /
-  // rollback / stage on|off / discard --stage — each delegates to the shared
-  // snap cli handler which hits the snap HTTP surface (endpoint configurable
-  // via --endpoint or OPENCLAW_SNAP_STORE env).
-  const snapEndpoint = (cmdOpts: { endpoint?: string } | undefined): string =>
-    cmdOpts?.endpoint
-      ?? process.env.OPENCLAW_SNAP_STORE
-      ?? 'http://127.0.0.1:8443';
-  const snapCtx = (argv: readonly string[], cmdOpts: { endpoint?: string } | undefined) => ({
-    argv,
-    endpoint: snapEndpoint(cmdOpts),
-    stdout: (l: string) => process.stdout.write(l + '\n'),
-    stderr: (l: string) => process.stderr.write(l + '\n'),
-  });
+  snap
+    .command('promote')
+    .description('Promote STAGE to HEAD')
+    .action(async () => {
+      const opts = program.opts<GlobalOpts>();
+      process.exitCode = await runSnapStorePromote(process.cwd(), { json: opts.json });
+    });
 
   snap
-    .command('upload')
-    .description('Commit staged content as a new draft snapshot')
-    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
-    .allowUnknownOption()
-    .helpOption(false)
-    .action(async (cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapUpload(snapCtx(cmd.args, cmdOpts));
-      process.exitCode = exitCode;
+    .command('rollback [id]')
+    .description('Set HEAD to a prior snapshot id (or the latest history entry)')
+    .action(async (id: string | undefined) => {
+      const opts = program.opts<GlobalOpts>();
+      process.exitCode = await runSnapStoreRollback(process.cwd(), id, { json: opts.json });
+    });
+
+  snap
+    .command('discard')
+    .description('Clear STAGE pointer (bytes stay in store for GC)')
+    .action(async () => {
+      const opts = program.opts<GlobalOpts>();
+      process.exitCode = await runSnapDiscard(process.cwd(), { json: opts.json });
     });
 
   snap
     .command('status')
-    .description('Show working tree + stage + drafts + current')
-    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
-    .allowUnknownOption()
-    .helpOption(false)
-    .action(async (cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapStatus(snapCtx(cmd.args, cmdOpts));
-      process.exitCode = exitCode;
+    .description('Show HEAD, STAGE, and history depth for this workspace')
+    .action(async () => {
+      const opts = program.opts<GlobalOpts>();
+      process.exitCode = await runSnapStatus(process.cwd(), { json: opts.json });
     });
 
   snap
-    .command('list-http')
-    .description('List snapshots via HTTP (store-backed)')
-    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
-    .allowUnknownOption()
-    .helpOption(false)
-    .action(async (cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapListHttp(snapCtx(cmd.args, cmdOpts));
-      process.exitCode = exitCode;
-    });
-
-  snap
-    .command('diff [id1] [id2]')
-    .description('Semantic diff: --staged (working tree) or <id1> <id2> (two snapshots)')
-    .option('--staged', 'Compare staged vs canonical', false)
-    .option('--level <level>', 'Diff level (file|semantic)')
-    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
-    .allowUnknownOption()
-    .helpOption(false)
-    .action(async (
-      _id1,
-      _id2,
-      cmdOpts: { staged: boolean; endpoint?: string; level?: string },
-      cmd: { args: readonly string[] },
-    ) => {
-      // Commander consumes `--level <v>` and `--staged` before dispatch,
-      // so the raw handler never sees them. Re-inject so the underlying
-      // diff handler takes the right branch (file vs semantic / staged
-      // vs two-snapshot).
-      const extras: string[] = [];
-      if (cmdOpts.staged) extras.push('--staged');
-      if (typeof cmdOpts.level === 'string') extras.push('--level', cmdOpts.level);
-      const handler = cmdOpts.staged ? snapDiffStaged : snapDiffIds;
-      const { exitCode } = await handler(snapCtx([...extras, ...cmd.args], cmdOpts));
-      process.exitCode = exitCode;
+    .command('registry')
+    .description('List snapshots in the store (newest first)')
+    .option('--limit <n>', 'Cap on entries returned', (v) => parseInt(v, 10))
+    .action(async (cmdOpts: { limit?: number }) => {
+      const opts = program.opts<GlobalOpts>();
+      const callOpts: { json: boolean; limit?: number } = { json: opts.json };
+      if (cmdOpts.limit !== undefined) callOpts.limit = cmdOpts.limit;
+      process.exitCode = await runSnapRegistry(process.cwd(), callOpts);
     });
 
   snap
     .command('checkout <id>')
-    .description('Reset working tree to a snapshot')
-    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
-    .allowUnknownOption()
-    .helpOption(false)
-    .action(async (_id, cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapCheckout(snapCtx(cmd.args, cmdOpts));
-      process.exitCode = exitCode;
+    .description('Restore workspace files from a snapshot')
+    .action(async (id: string) => {
+      const opts = program.opts<GlobalOpts>();
+      process.exitCode = await runSnapCheckout(process.cwd(), id, { json: opts.json });
     });
 
   snap
-    .command('promote <id>')
-    .description('Promote a draft snapshot to current')
-    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
-    .allowUnknownOption()
-    .helpOption(false)
-    .action(async (_id, cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapPromote(snapCtx(cmd.args, cmdOpts));
-      process.exitCode = exitCode;
+    .command('read <id> <path>')
+    .description('Print bytes of a path inside a snapshot')
+    .action(async (id: string, internalPath: string) => {
+      const opts = program.opts<GlobalOpts>();
+      process.exitCode = await runSnapRead(process.cwd(), id, internalPath, { json: opts.json });
     });
 
   snap
-    .command('rollback <id>')
-    .description('Revert to a prior snapshot')
-    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
-    .allowUnknownOption()
-    .helpOption(false)
-    .action(async (_id, cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapRollback(snapCtx(cmd.args, cmdOpts));
-      process.exitCode = exitCode;
-    });
-
-  snap
-    .command('stage <mode>')
-    .description('Toggle auto-staging: snap stage on | off')
-    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
-    .allowUnknownOption()
-    .helpOption(false)
-    .action(async (_mode, cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
-      const { exitCode } = await snapStage(snapCtx(cmd.args, cmdOpts));
-      process.exitCode = exitCode;
-    });
-
-  snap
-    .command('discard-stage')
-    .description('Clear .stage/ without uploading')
-    .option('--endpoint <url>', 'Snap HTTP surface URL (overrides OPENCLAW_SNAP_STORE)')
-    .allowUnknownOption()
-    .helpOption(false)
-    .action(async (cmdOpts: { endpoint?: string }, cmd: { args: readonly string[] }) => {
-      // `discard-stage` is the hyphenated CLI verb; the underlying handler
-      // dispatches on an explicit `--stage` flag to distinguish stage-clear
-      // from the `snap discard <id>` shape. Inject the flag so the handler
-      // takes the stage-clear branch without the user having to repeat
-      // `--stage` after `discard-stage`.
-      const { exitCode } = await snapDiscardStage(snapCtx(['--stage', ...cmd.args], cmdOpts));
-      process.exitCode = exitCode;
+    .command('store-diff [id1] [id2]')
+    .description('Path-level diff between two snapshots (or HEAD vs STAGE if omitted)')
+    .action(async (id1: string | undefined, id2: string | undefined) => {
+      const opts = program.opts<GlobalOpts>();
+      process.exitCode = await runSnapStoreDiff(process.cwd(), id1, id2, { json: opts.json });
     });
 
   // ── policy (openclaw-upstream verbs via @bic/openclaw-policy/cli-handlers) ──
