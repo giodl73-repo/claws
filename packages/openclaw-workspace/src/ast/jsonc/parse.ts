@@ -223,8 +223,22 @@ function parseValue(state: ParserState): JsoncValue {
   const code = state.source.charCodeAt(state.offset);
   if (code === 0x7b /* { */) return parseObject(state);
   if (code === 0x5b /* [ */) return parseArray(state);
-  if (code === 0x22 /* " */) return parseString(state);
-  if (code === 0x2d /* - */ || (code >= 0x30 && code <= 0x39) /* 0-9 */) return parseNumber(state);
+  // JSON5: strings may be double- or single-quoted.
+  if (code === 0x22 /* " */ || code === 0x27 /* ' */) return parseString(state, code);
+  // JSON5: numbers may have a leading +, leading decimal (.5),
+  // hex literals (0xFF), Infinity/-Infinity, NaN. parseNumber owns
+  // disambiguation; this dispatch routes anything that could plausibly
+  // start a number.
+  if (
+    code === 0x2d /* - */ ||
+    code === 0x2b /* + */ ||
+    code === 0x2e /* . */ ||
+    code === 0x49 /* I (Infinity) */ ||
+    code === 0x4e /* N (NaN) */ ||
+    (code >= 0x30 && code <= 0x39) /* 0-9 */
+  ) {
+    return parseNumber(state);
+  }
   if (code === 0x74 /* t */ || code === 0x66 /* f */) return parseBoolean(state);
   if (code === 0x6e /* n */) return parseNull(state);
   pushDiag(state, 'OC_CFG_PARSE_EXPECTED_VALUE', `expected value at offset ${state.offset}`, state.offset, state.offset + 1);
@@ -292,8 +306,13 @@ function parseMember(state: ParserState): JsoncMember {
   const memberStart = state.offset;
   const src = state.source;
   let key: JsoncStringNode;
-  if (src.charCodeAt(state.offset) === 0x22 /* " */) {
-    key = parseString(state);
+  const c = src.charCodeAt(state.offset);
+  if (c === 0x22 /* " */ || c === 0x27 /* ' */) {
+    // JSON / JSONC accept "; JSON5 also accepts '. Both work the same.
+    key = parseString(state, c);
+  } else if (isIdentifierStart(c)) {
+    // JSON5 unquoted-identifier key.
+    key = parseUnquotedKey(state);
   } else {
     pushDiag(state, 'OC_CFG_PARSE_EXPECTED_KEY', 'expected string key', state.offset, state.offset + 1);
     key = { kind: 'string', value: '', raw: '""', range: { start: state.offset, end: state.offset } };
@@ -362,20 +381,64 @@ function parseArray(state: ParserState): JsoncArrayNode {
 
 // -- String -----------------------------------------------------------------
 
-function parseString(state: ParserState): JsoncStringNode {
+/**
+ * JSON5 unquoted-identifier key. Accepts `[A-Za-z_$][A-Za-z0-9_$]*`.
+ * The grammar allows full ECMAScript IdentifierName (including
+ * Unicode), but we constrain to ASCII identifiers — config keys are
+ * ASCII in every real-world `openclaw.json` we've seen, and this
+ * keeps the parser hot loop simple. If a Unicode-keyed config ever
+ * arrives, extend `isIdentifierContinue` to include the Unicode
+ * categories.
+ *
+ * The returned `JsoncStringNode` carries the identifier as both
+ * `raw` and `value` (no quoting in either; the emit path knows to
+ * re-quote when normalizing to JSONC).
+ */
+function parseUnquotedKey(state: ParserState): JsoncStringNode {
   const start = state.offset;
-  state.offset++; // "
+  const src = state.source;
+  const len = state.sourceLen;
+  let i = start;
+  while (i < len && isIdentifierContinue(src.charCodeAt(i))) i++;
+  const raw = src.slice(start, i);
+  state.offset = i;
+  return { kind: 'string', value: raw, raw, range: { start, end: i } };
+}
+
+function isIdentifierStart(code: number): boolean {
+  return (
+    (code >= 0x41 && code <= 0x5a) /* A-Z */ ||
+    (code >= 0x61 && code <= 0x7a) /* a-z */ ||
+    code === 0x5f /* _ */ ||
+    code === 0x24 /* $ */
+  );
+}
+
+function isIdentifierContinue(code: number): boolean {
+  return (
+    isIdentifierStart(code) ||
+    (code >= 0x30 && code <= 0x39) /* 0-9 */
+  );
+}
+
+/**
+ * Parse a quoted string. The opener is either 0x22 `"` (JSON / JSONC)
+ * or 0x27 `'` (JSON5). Caller passes the opener code so we know which
+ * char closes the literal.
+ */
+function parseString(state: ParserState, opener: number = 0x22): JsoncStringNode {
+  const start = state.offset;
+  state.offset++; // skip opener
   const src = state.source;
   const len = state.sourceLen;
   // Fast path: scan for end quote without allocating per char. If no
-  // escapes detected, slice the raw string and decode lazily via
-  // JSON.parse-style trick (cheap on V8). Falls through to char-by-char
-  // builder only when an escape is present.
+  // escapes detected, slice the raw string and decode lazily. Falls
+  // through to char-by-char builder only when an escape is present.
   let scan = state.offset;
   let hasEscape = false;
   while (scan < len) {
     const code = src.charCodeAt(scan);
-    if (code === 0x22 /* " */) {
+    if (code === opener) {
       const raw = src.slice(start, scan + 1);
       state.offset = scan + 1;
       const value = hasEscape ? decodeStringValue(state, start + 1, scan) : src.slice(start + 1, scan);
@@ -383,7 +446,19 @@ function parseString(state: ParserState): JsoncStringNode {
     }
     if (code === 0x5c /* \ */) {
       hasEscape = true;
-      scan += 2; // skip escape sequence (rough; \uXXXX still works because we don't need to land exactly)
+      // JSON5 line-continuation: \ followed by LF or CRLF means the
+      // string continues on the next line and the line-terminator is
+      // discarded. Advance the scan past the line-terminator so it
+      // doesn't count as an unterminated-string boundary.
+      const next = src.charCodeAt(scan + 1);
+      if (next === 0x0a /* \n */) {
+        scan += 2;
+      } else if (next === 0x0d /* \r */) {
+        // skip \r and optional following \n
+        scan += src.charCodeAt(scan + 2) === 0x0a ? 3 : 2;
+      } else {
+        scan += 2; // skip escape sequence
+      }
       continue;
     }
     if (code === 0x0a /* \n */) {
@@ -415,6 +490,7 @@ function decodeStringValue(state: ParserState, contentStart: number, contentEnd:
       const esc = src.charCodeAt(i);
       switch (esc) {
         case 0x22 /* " */: value += '"'; i++; break;
+        case 0x27 /* ' */: value += "'"; i++; break; // JSON5: escape single quote
         case 0x5c /* \ */: value += '\\'; i++; break;
         case 0x2f /* / */: value += '/'; i++; break;
         case 0x62 /* b */: value += '\b'; i++; break;
@@ -422,6 +498,20 @@ function decodeStringValue(state: ParserState, contentStart: number, contentEnd:
         case 0x6e /* n */: value += '\n'; i++; break;
         case 0x72 /* r */: value += '\r'; i++; break;
         case 0x74 /* t */: value += '\t'; i++; break;
+        case 0x76 /* v */: value += '\v'; i++; break; // JSON5
+        case 0x30 /* 0 */: value += '\0'; i++; break; // JSON5 (only when not followed by digit)
+        case 0x78 /* x */: {
+          // JSON5: \xHH — 2 hex digits.
+          const hex = src.slice(i + 1, i + 3);
+          if (hex.length === 2 && /^[0-9a-fA-F]{2}$/.test(hex)) {
+            value += String.fromCharCode(parseInt(hex, 16));
+            i += 3;
+          } else {
+            pushDiag(state, 'OC_CFG_PARSE_INVALID_ESCAPE', '\\x escape requires 2 hex digits', i, i + 1);
+            i++;
+          }
+          break;
+        }
         case 0x75 /* u */: {
           const hex = src.slice(i + 1, i + 5);
           if (hex.length === 4 && /^[0-9a-fA-F]{4}$/.test(hex)) {
@@ -431,6 +521,17 @@ function decodeStringValue(state: ParserState, contentStart: number, contentEnd:
             pushDiag(state, 'OC_CFG_PARSE_INVALID_ESCAPE', '\\u escape requires 4 hex digits', i, i + 1);
             i++;
           }
+          break;
+        }
+        case 0x0a /* \n */: {
+          // JSON5 line-continuation — discard the line-terminator.
+          i++;
+          break;
+        }
+        case 0x0d /* \r */: {
+          // JSON5 line-continuation — discard \r and optional \n.
+          i++;
+          if (src.charCodeAt(i) === 0x0a) i++;
           break;
         }
         default:
@@ -453,7 +554,64 @@ function parseNumber(state: ParserState): JsoncNumberNode {
   const src = state.source;
   const len = state.sourceLen;
   let i = state.offset;
-  if (src.charCodeAt(i) === 0x2d /* - */) i++;
+
+  // Optional sign — JSON allows only '-'; JSON5 also allows '+'.
+  let signMul = 1;
+  if (src.charCodeAt(i) === 0x2d /* - */) {
+    signMul = -1;
+    i++;
+  } else if (src.charCodeAt(i) === 0x2b /* + */) {
+    i++;
+  }
+
+  // JSON5 keyword: Infinity (with optional preceding sign).
+  if (src.slice(i, i + 8) === 'Infinity') {
+    i += 8;
+    state.offset = i;
+    const raw = src.slice(start, i);
+    return { kind: 'number', value: signMul * Infinity, raw, range: { start, end: i } };
+  }
+  // JSON5 keyword: NaN (sign is meaningless but tolerated).
+  if (src.slice(i, i + 3) === 'NaN') {
+    i += 3;
+    state.offset = i;
+    const raw = src.slice(start, i);
+    return { kind: 'number', value: NaN, raw, range: { start, end: i } };
+  }
+
+  // JSON5 hex literal: 0xHH... (no fractional / exponent allowed).
+  if (
+    src.charCodeAt(i) === 0x30 /* 0 */ &&
+    (src.charCodeAt(i + 1) === 0x78 /* x */ || src.charCodeAt(i + 1) === 0x58) /* X */
+  ) {
+    i += 2;
+    const hexStart = i;
+    while (i < len && isHexDigit(src.charCodeAt(i))) i++;
+    if (i === hexStart) {
+      pushDiag(state, 'OC_CFG_PARSE_INVALID_NUMBER', 'expected hex digit after "0x"', i, i + 1);
+    }
+    state.offset = i;
+    const raw = src.slice(start, i);
+    const hexVal = parseInt(src.slice(hexStart, i), 16);
+    return { kind: 'number', value: signMul * hexVal, raw, range: { start, end: i } };
+  }
+
+  // JSON5 leading-decimal: .5 (no integer part).
+  if (src.charCodeAt(i) === 0x2e /* . */) {
+    // i still points at '.'; consume fractional + optional exponent.
+    i++;
+    if (!(src.charCodeAt(i) >= 0x30 && src.charCodeAt(i) <= 0x39)) {
+      pushDiag(state, 'OC_CFG_PARSE_INVALID_NUMBER', 'expected digit after leading "."', i, i + 1);
+    }
+    while (i < len && src.charCodeAt(i) >= 0x30 && src.charCodeAt(i) <= 0x39) i++;
+    state.offset = i; // sync before consumeExponent reads state.offset
+    consumeExponent(state, src, len);
+    i = state.offset; // consumeExponent updates state; sync local back
+    const raw = src.slice(start, i);
+    return { kind: 'number', value: Number(raw.replace(/^\+/, '')), raw, range: { start, end: i } };
+  }
+
+  // Standard integer part.
   if (src.charCodeAt(i) === 0x30 /* 0 */) {
     i++;
   } else if (src.charCodeAt(i) >= 0x31 && src.charCodeAt(i) <= 0x39) {
@@ -462,13 +620,27 @@ function parseNumber(state: ParserState): JsoncNumberNode {
   } else {
     pushDiag(state, 'OC_CFG_PARSE_INVALID_NUMBER', 'expected digit', i, i + 1);
   }
+  // Fractional part. JSON5 allows trailing '.' with no following digit
+  // (e.g. "5."); strict JSON requires at least one digit after the
+  // dot. We accept the looser shape because Number("5.") === 5.
   if (src.charCodeAt(i) === 0x2e /* . */) {
     i++;
-    if (!(src.charCodeAt(i) >= 0x30 && src.charCodeAt(i) <= 0x39)) {
-      pushDiag(state, 'OC_CFG_PARSE_INVALID_NUMBER', 'expected digit after "."', i, i + 1);
-    }
     while (i < len && src.charCodeAt(i) >= 0x30 && src.charCodeAt(i) <= 0x39) i++;
   }
+  state.offset = i;
+  consumeExponent(state, src, len);
+  i = state.offset;
+  state.offset = i;
+  const raw = src.slice(start, i);
+  // Number('+5') === 5, Number('-5') === -5, Number('.5') === 0.5,
+  // Number('5.') === 5. Strip a leading '+' so Number doesn't see it
+  // as an unsupported prefix in any edge case (it actually handles
+  // '+5' fine, but the strip is defensive).
+  return { kind: 'number', value: Number(raw.replace(/^\+/, '')), raw, range: { start, end: i } };
+}
+
+function consumeExponent(state: ParserState, src: string, len: number): void {
+  let i = state.offset;
   const c = src.charCodeAt(i);
   if (c === 0x65 || c === 0x45 /* e/E */) {
     i++;
@@ -480,8 +652,14 @@ function parseNumber(state: ParserState): JsoncNumberNode {
     while (i < len && src.charCodeAt(i) >= 0x30 && src.charCodeAt(i) <= 0x39) i++;
   }
   state.offset = i;
-  const raw = src.slice(start, i);
-  return { kind: 'number', value: Number(raw), raw, range: { start, end: i } };
+}
+
+function isHexDigit(code: number): boolean {
+  return (
+    (code >= 0x30 && code <= 0x39) /* 0-9 */ ||
+    (code >= 0x41 && code <= 0x46) /* A-F */ ||
+    (code >= 0x61 && code <= 0x66) /* a-f */
+  );
 }
 
 // -- Boolean / Null ---------------------------------------------------------
