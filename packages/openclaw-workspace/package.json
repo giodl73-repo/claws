@@ -21,6 +21,16 @@
       "import": "./dist/ast/index.js",
       "require": "./dist/ast/index.cjs"
     },
+    "./ast/jsonc": {
+      "types": "./dist/ast/jsonc/index.d.ts",
+      "import": "./dist/ast/jsonc/index.js",
+      "require": "./dist/ast/jsonc/index.cjs"
+    },
+    "./lint": {
+      "types": "./dist/lint/index.d.ts",
+      "import": "./dist/lint/index.js",
+      "require": "./dist/lint/index.cjs"
+    },
     "./canonicalize": {
       "types": "./dist/canonicalize/index.d.ts",
       "import": "./dist/canonicalize/index.js",
