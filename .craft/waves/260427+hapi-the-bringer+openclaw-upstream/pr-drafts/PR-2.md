@@ -2,9 +2,9 @@
 
 `src/agents/workspace.ts:91` `stripFrontMatter()` discards the original input bytes after extracting frontmatter. Round-trip is lossy: code that parses a templated SOUL.md / TOOLS.md and re-emits it cannot reconstruct the original file byte-for-byte.
 
-Governance contributions in the same wave (`@openclaw/policy` PR-5, `@openclaw/snap` PR-6) need byte-identical round-trip for content-addressable hashing — `snapshotId = sha256(canonical(workspaceFiles))` requires the originals, not the stripped-frontmatter representation.
+Any contribution that needs byte-identical round-trip needs the originals — content-addressable hashing schemes (e.g. `snapshotId = sha256(jcs(canonical-manifest))` in the v2 snap contract — see `.craft/out/proposals/snap-pre-rfc.md`) require the bytes the user wrote, not the stripped-frontmatter representation. Without `raw` preservation, any consumer wanting the original input has to re-read the file, doubling I/O and racing against fs writes.
 
-This PR preserves the original bytes under a sibling `raw` key. Non-breaking. ~1 line of source change + 1 regression test.
+This PR preserves the original bytes under a sibling `raw` key on the existing return type. Non-breaking. ~1 line of source change + 1 regression test.
 
 ## Why this is core (not extension)
 
@@ -64,4 +64,4 @@ Strictly additive. No callers affected unless they explicitly typecheck against 
 
 ---
 
-🤖 This PR was prepared with [Claude Code](https://claude.com/claude-code) as part of the `claws-openclaw-upstream` contribution wave (Hapi the Bringer · cp-3). Companion: PR-3 `feat: add @openclaw/guardrails`.
+🤖 This PR was prepared with [Claude Code](https://claude.com/claude-code) as part of the `claws-openclaw-upstream` contribution wave (Hapi the Bringer · cp-3). Surgical core fix; orthogonal to the v2 contract chain (`oc-path`, `snap`, `PolicyIR`, `ctx.snapshotId`).

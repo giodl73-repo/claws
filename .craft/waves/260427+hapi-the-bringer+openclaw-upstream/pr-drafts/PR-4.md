@@ -1,17 +1,31 @@
 ## Why this PR
 
-`src/plugins/hooks.ts:889-893`'s merger uses `??` (nullish coalesce) to combine `requireApproval` decisions from the plugin chain:
+`src/plugins/hooks.ts:995-1013`'s before-tool-call merger uses `??` (nullish coalesce) to combine `requireApproval` decisions from the plugin chain:
 
 ```ts
-// Today (hooks.ts:889-893)
-acc?.requireApproval ?? next.requireApproval
+// Today (hooks.ts:1008-1013)
+requireApproval:
+  acc?.requireApproval ??
+  (next.requireApproval
+    ? { ...next.requireApproval, pluginId: reg.pluginId }
+    : undefined),
 ```
 
 This is **first-wins**: the first plugin that returns a `requireApproval` descriptor wins, and every subsequent plugin's `requireApproval` is silently dropped. For governance plugins enforcing R5 (irreversible-external) or RESTRICTED-data invariants, this is a **chain-of-custody bug** — plugin-A's approval requirement can be silently discarded by plugin-B returning no approval, leaving the agent free to act on a tool that should have required external review.
 
-This PR fixes the merger to be **conjunctive**: every plugin's `requireApproval` survives, and the companion app receives an array of `ApprovalDescriptor` — all must be approved before the action proceeds. Field type bumps from `ApprovalDescriptor` to `ApprovalDescriptor | ApprovalDescriptor[]` at `hook-types.ts:402-410`.
+The same first-wins shape ALSO appears at `src/plugins/trusted-tool-policy.ts:43-45` in `runTrustedToolPolicies`:
 
-~5 lines of merger change. Surgical. Plus a try/catch wrapper for crash-safety + Swift model regen.
+```ts
+if ("requireApproval" in decision && decision.requireApproval && !approval) {
+  approval = decision.requireApproval;
+}
+```
+
+— same bug class, sibling site. **This PR fixes both sites in one commit** (they share the merger semantic; splitting would leave one consumer-side surface still broken).
+
+This PR fixes the merger to be **conjunctive**: every plugin's `requireApproval` survives, and the companion app receives an array of approval descriptors — all must be approved before the action proceeds. The field is currently an inline object literal at `src/plugins/hook-types.ts:421-433`; this PR introduces an `ApprovalDescriptor` named type alias for the inline shape, then widens the field to `ApprovalDescriptor | ApprovalDescriptor[]`.
+
+~10 lines of merger change across two files. Surgical. Plus a try/catch wrapper for crash-safety + Swift model regen.
 
 ## Why this is core (not extension)
 
@@ -57,44 +71,90 @@ Companion app receives the array; supervisor must approve each descriptor. Chain
 
 ## What ships
 
-### The merger fix (~5 lines)
+### The merger fix in `hooks.ts:995-1013`
 
 ```diff
-  // src/plugins/hooks.ts:889-893
-  function mergeBeforeToolCallResults(acc: HookResult | null, next: HookResult): HookResult {
-    return {
-      block: acc?.block ?? next.block,
--     requireApproval: acc?.requireApproval ?? next.requireApproval,
-+     requireApproval: mergeApprovals(acc?.requireApproval, next.requireApproval),
-      // ...
-    };
-  }
+  // src/plugins/hooks.ts:1008-1013 (inside the mergeResults callback)
+  return {
+    params: ...,
+    block: stickyTrue(acc?.block, next.block),
+    blockReason: lastDefined(acc?.blockReason, next.blockReason),
+-   requireApproval:
+-     acc?.requireApproval ??
+-     (next.requireApproval
+-       ? { ...next.requireApproval, pluginId: reg.pluginId }
+-       : undefined),
++   requireApproval: mergeApprovals(
++     acc?.requireApproval,
++     next.requireApproval
++       ? { ...next.requireApproval, pluginId: reg.pluginId }
++       : undefined,
++   ),
+  };
+```
 
-+ function mergeApprovals(
-+   acc: ApprovalDescriptor | ApprovalDescriptor[] | undefined,
-+   next: ApprovalDescriptor | ApprovalDescriptor[] | undefined
-+ ): ApprovalDescriptor | ApprovalDescriptor[] | undefined {
-+   const accArr = acc === undefined ? [] : Array.isArray(acc) ? acc : [acc];
-+   const nextArr = next === undefined ? [] : Array.isArray(next) ? next : [next];
-+   const combined = [...accArr, ...nextArr];
-+   return combined.length === 0 ? undefined : combined.length === 1 ? combined[0] : combined;
+### The sibling-site fix in `trusted-tool-policy.ts:43-45`
+
+```diff
+  // src/plugins/trusted-tool-policy.ts:43-45 (inside runTrustedToolPolicies)
+- if ("requireApproval" in decision && decision.requireApproval && !approval) {
+-   approval = decision.requireApproval;
+- }
++ if ("requireApproval" in decision && decision.requireApproval) {
++   approval = mergeApprovals(approval, decision.requireApproval);
 + }
 ```
 
-### Field type widening
+### The shared `mergeApprovals` helper
 
-```diff
-  // src/plugins/hook-types.ts:402-410
-  export interface BeforeToolCallHookResult {
-    block?: boolean;
-    blockReason?: string;
-    params?: Record<string, unknown>;
--   requireApproval?: ApprovalDescriptor;
-+   requireApproval?: ApprovalDescriptor | ApprovalDescriptor[];
-  }
+Lives in a new shared module (`src/plugins/approval-merge.ts`) so both call sites import the same implementation:
+
+```ts
+export function mergeApprovals(
+  acc: ApprovalDescriptor | ApprovalDescriptor[] | undefined,
+  next: ApprovalDescriptor | ApprovalDescriptor[] | undefined,
+): ApprovalDescriptor | ApprovalDescriptor[] | undefined {
+  const accArr = acc === undefined ? [] : Array.isArray(acc) ? acc : [acc];
+  const nextArr = next === undefined ? [] : Array.isArray(next) ? next : [next];
+  const combined = [...accArr, ...nextArr];
+  return combined.length === 0 ? undefined : combined.length === 1 ? combined[0] : combined;
+}
 ```
 
-Note: the field was already object-only in current upstream (not `boolean` as the original v0.1 OneDrive proposal mistakenly assumed). The change here is **single-to-array adoption**, not boolean-deprecation. Codemod note covers this in the migration section below.
+### Type alias + field widening at `hook-types.ts:421-433`
+
+`requireApproval` is currently an inline object literal on `PluginHookBeforeToolCallResult`. This PR extracts it as `ApprovalDescriptor` (named type alias for the existing inline shape; no behavior change) and widens the field to accept either a single descriptor (today's shape) or an array (the new conjunctive shape):
+
+```diff
++ /** Single approval descriptor produced by a `before_tool_call` plugin. */
++ export type ApprovalDescriptor = {
++   title: string;
++   description: string;
++   severity?: "info" | "warning" | "critical";
++   timeoutMs?: number;
++   timeoutBehavior?: "allow" | "deny";
++   pluginId?: string;
++   onResolution?: (decision: PluginApprovalResolution) => Promise<void> | void;
++ };
+
+  export type PluginHookBeforeToolCallResult = {
+    params?: Record<string, unknown>;
+    block?: boolean;
+    blockReason?: string;
+-   requireApproval?: {
+-     title: string;
+-     description: string;
+-     severity?: "info" | "warning" | "critical";
+-     timeoutMs?: number;
+-     timeoutBehavior?: "allow" | "deny";
+-     pluginId?: string;
+-     onResolution?: (decision: PluginApprovalResolution) => Promise<void> | void;
+-   };
++   requireApproval?: ApprovalDescriptor | ApprovalDescriptor[];
+  };
+```
+
+Note: the field is already object-shaped in current upstream (not `boolean`, as the original v0.1 OneDrive proposal mistakenly assumed). The change is (a) extracting an `ApprovalDescriptor` type alias from the inline shape (cosmetic; downstream consumers can now reference the type by name) and (b) widening the field to also accept an array. Codemod note covers single-to-array adoption in the migration section below.
 
 ### Crash-safety wrapper
 
@@ -134,7 +194,7 @@ Both regenerate to accept `ApprovalDescriptor | [ApprovalDescriptor]` (Swift dis
 - [x] **F-19** Existing tests asserting "first-wins" must update — break is the proof
 - [x] **F-25** Try/catch wrapper at right granularity (per-plugin, not per-batch)
 - [x] **F-18** Field type accepts both `ApprovalDescriptor` and `ApprovalDescriptor[]` shapes
-- [x] Internal consumers compile clean against widened field: `pnpm tsc --noEmit` passes for `@bic/openclaw-policy` and `@bic/openclaw-snap` after applying the codemod (= (1) `tsc --noEmit` succeeds AND (2) widened field is safely narrowed via `Array.isArray()` checks per code inspection)
+- [x] Downstream consumer compile-check: `pnpm tsc --noEmit` passes for the claws-side `@bic/openclaw-policy` and `@bic/openclaw-snap` packages (the `PolicyGenerator` and `SnapshotStore` impls that conform to the v2 contracts) after applying the array-coercion codemod. (= (1) `tsc --noEmit` succeeds AND (2) widened field is safely narrowed via `Array.isArray()` checks per code inspection.)
 
 ## Migration codemod (the array-coercion note)
 
@@ -174,21 +234,22 @@ A migration note in CHANGELOG (end-of-section per house rule) walks consumers th
 
 ## Metrics
 
-- **~5 lines source change** at `hooks.ts:889-893`
-- **1 line type widening** at `hook-types.ts:402-410`
-- **+1 helper function** (`mergeApprovals`)
-- **+1 try/catch wrapper** at plugin invocation site
+- **~7 lines source change** across two sites: `hooks.ts:1008-1013` (the before-tool-call merger) and `trusted-tool-policy.ts:43-45` (the sibling first-wins site)
+- **+1 type alias** (`ApprovalDescriptor`) extracted from the inline shape at `hook-types.ts:421-433`
+- **+1 line field widening** to `ApprovalDescriptor | ApprovalDescriptor[]`
+- **+1 helper function** in a new shared module: `src/plugins/approval-merge.ts:mergeApprovals`
+- **+1 try/catch wrapper** at plugin invocation site (the existing per-plugin invocation in `runHookForPlugins` at `hooks.ts`; per-plugin granularity, not per-batch)
 - **2 Swift model files regenerated**
-- **8 new/updated tests**: 5 L1 integration (merger semantics), 3 L0 unit (helper + types + crash-safety)
+- **10 new/updated tests**: 5 L1 integration (both merger sites), 3 L0 unit (helper + types + crash-safety), 2 L1 integration covering the sibling-site fix
 
 ## Migration / risk
 
 **Existing tests asserting first-wins** break — that's the proof. CHANGELOG note explains the breakage is by design.
 
-**Internal consumers** (Microsoft `@bic/openclaw-policy` + `@bic/openclaw-snap`) verified to compile clean against trunk's widened field via codemod gate before this PR opens.
+**Downstream consumers** (claws-side `@bic/openclaw-policy` + `@bic/openclaw-snap` — the `PolicyGenerator` / `SnapshotStore` impls that conform to the v2 upstream contracts) verified to compile clean against trunk's widened field via codemod gate before this PR opens.
 
 **Companion app** receives array shape; supervisor UI may need a second pass to render multiple descriptors. Out of scope for this PR (companion is a separate repo).
 
 ---
 
-🤖 This PR was prepared with [Claude Code](https://claude.com/claude-code) as part of the `claws-openclaw-upstream` contribution wave (Hapi the Bringer · cp-4). Companion: PR-5 `feat: add @openclaw/policy + openclaw policy subcommand group`.
+🤖 This PR was prepared with [Claude Code](https://claude.com/claude-code) as part of the `claws-openclaw-upstream` contribution wave (Hapi the Bringer · cp-4). Surgical core fix to the gateway hook merger; downstream value to any guardrail / governance plugin (including the claws-side adapter to upstream's existing `runTrustedToolPolicies`).

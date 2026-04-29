@@ -1,3 +1,27 @@
+> **⚠️ SUPERSEDED 2026-04-29 — DO NOT FILE. Reshaped, not retired.**
+>
+> This draft proposes a new `@openclaw/snap` upstream package: a content-addressable snapshot registry, an 11-verb `openclaw snap` subcommand group, and an HTTP server with `/v1/resolve?uri=oc://...` running as a top-level daemon package. **The v2 proposal package retired the daemon-shape** because upstream's existing precedent is plugin-mounted on the gateway HTTP listener (e.g. `extensions/diagnostics-prometheus`, `extensions/webhooks`), not new top-level daemon packages.
+>
+> **Replacement**: see `pr-drafts/v2-snap-contract.md` — three thin layers totalling ~280 LoC:
+>
+> 1. `SnapshotStore` contract types (~30 LoC in `src/plugin-sdk/snapshot.ts`): `Snapshot`, `SnapshotId`, `WorkspaceId`, `SnapshotInternalPath`, `SnapshotStore { capture, read, list }`.
+> 2. Reference plugin under `extensions/snapshot/` (~100 LoC): `registerService` + `registerHttpRoute` per upstream's plugin pattern.
+> 3. `openclaw snap` CLI verb (~150 LoC): wraps the reference plugin for local dev.
+>
+> Daemon-shape lives downstream as `packages/claws-snap-server/` (post-rename from `openclaw-snap`) — a `SnapshotStore` impl, not an upstream package. Same code body; different home.
+>
+> See:
+>
+> - `.craft/out/proposals/realigned-story.md` § "2. snap (proposed, see snap-pre-rfc.md)"
+> - `.craft/out/proposals/snap-pre-rfc.md` (full design + Asks)
+> - `.craft/plans/hapi-amendment-to-contract-first.md` (amendment plan)
+>
+> Useful contributions from this draft (FsSnapshotStore implementation, content-addressable hashing scheme, signed-handle audit envelope, `resolvePolicy --at <timestamp>` e-discovery temporal query) are absorbed into the v2 design as downstream concerns; the snap registry code in `packages/openclaw-snap/` is cherry-pick territory for the post-trim `claws-snap-server/` rename.
+>
+> ---
+>
+> **Original draft below (for reference / cherry-pick).**
+
 ## Why this PR
 
 `@openclaw/snap` ships the snapshot registry that anchors content-addressable evidence chains for every governance decision OpenClaw makes. A snapshot is `sha256(canonical(workspaceFiles))` — same files, same id, across hosts and OSes. Promote a snapshot and OC has byte-identical evidence that workspace-state-X was in force at time-T. Roll back a snapshot and OC has byte-identical evidence of the prior state. Every `policy comply` rubric eval cites a snapshotId; every audit entry can point at the policy-in-force-at-time-T via the audit chain.

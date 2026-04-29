@@ -1,3 +1,21 @@
+> **⚠️ SUPERSEDED 2026-04-29 — DO NOT FILE. Reshaped, not retired.**
+>
+> This draft proposes a new `@openclaw/policy` upstream package: a generator that reads SOUL.md / TOOLS.md / AGENTS.md and emits a runtime gateway plugin into `.openclaw/policy/`, plus a 9-verb `openclaw policy` subcommand group, plus runtime invariants. **The v2 proposal package retired this shape** because the generator implementation is convention-bound to claws-specific file formats (R0–R5 sensitivity tiers, claws-style TOOLS.md provenance declarations); upstream wants types-only.
+>
+> **Replacement**: see `pr-drafts/v2-policy-ir.md` — types-only `PolicyIR` contract (~80–150 LoC) in `src/plugin-sdk/policy-ir.ts` plus optional companion `policy-ir-runtime.ts` (~50 LoC) for lock-point ABI helpers, plus the small `ctx.snapshotId` extension to `PluginHookToolContext`. The generator implementation stays downstream — claws ships the SOUL/TOOLS/AGENTS compilation as `claws-policy-generator/`; OPA users ship a `.rego → PolicyIR` shim; ecosystem authors implement their own.
+>
+> See:
+>
+> - `.craft/out/proposals/realigned-story.md` § "3. PolicyIR (proposed, see policy-pre-rfc.md)" + § "4. ctx.snapshotId extension"
+> - `.craft/out/proposals/policy-pre-rfc.md` (full design + Asks)
+> - `.craft/plans/hapi-amendment-to-contract-first.md` (amendment plan)
+>
+> Useful contributions from this draft (R5 / RESTRICTED runtime invariants, generation-time invariant rejection, deny-rule ordering, the emitted-plugin lock-points) are absorbed by `policy-pre-rfc.md` as downstream concerns; the generator code in `packages/openclaw-policy/` is cherry-pick territory for the post-trim `claws-policy-generator/` rename.
+>
+> ---
+>
+> **Original draft below (for reference / cherry-pick).**
+
 ## Why this PR
 
 Today, a host that wants to enforce "R5 (irreversible-external) tools always require external approval" or "RESTRICTED data never leaks through public-broadcast tools" has to hand-write provider code per tool, per workspace, per host. The provider code is full of conditionals, drifts as TOOLS.md changes, and silently gets out of sync with the workspace's authoritative declarations.

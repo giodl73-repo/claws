@@ -1,3 +1,19 @@
+> **⚠️ SUPERSEDED 2026-04-29 — DO NOT FILE.**
+>
+> This draft proposes a new `@openclaw/guardrails` upstream package with `GuardrailProvider` + `FileIngestProvider` peer interfaces and six runtime subpaths. **The v2 proposal package retired this approach** because upstream openclaw already ships the equivalent slot at `src/plugins/host-hooks.ts:65-72` (`PluginTrustedToolPolicyRegistration`) and the runner at `src/plugins/trusted-tool-policy.ts:8-54` (`runTrustedToolPolicies`). A new upstream package would duplicate the existing shape and force a migration.
+>
+> **Replacement plan**: 0 LoC upstream. ~50 LoC downstream-only adapter at `packages/claws-guardrails/src/openclaw-adapter.ts` exporting `toTrustedToolPolicy(provider: GuardrailProvider): PluginTrustedToolPolicyRegistration`. Decision-vocabulary translation (`allow|deny|review|modify` → `block|allow|params|requireApproval`) lives there. See:
+>
+> - `.craft/out/proposals/realigned-story.md` § "5. claws-guardrails (no upstream PR)"
+> - `.craft/out/proposals/guardrails-adapter.md` (full design)
+> - `.craft/plans/hapi-amendment-to-contract-first.md` (amendment plan)
+>
+> Useful contributions from this draft (`sourcePluginId` adversarial-defense, hash-chained audit format, RFC 8785 JCS canonicalization) are absorbed by the v2 design docs and the downstream `claws-guardrails` package; nothing of value is lost.
+>
+> ---
+>
+> **Original draft below (for reference / cherry-pick).**
+
 ## Why this PR
 
 Three interfaces every enterprise host re-implements today: pre-tool-call governance, file-ingest governance, hash-chained tamper-evident audit. This PR adds `@openclaw/guardrails` — a single package shipping the two peer interfaces (`GuardrailProvider`, `FileIngestProvider`) plus six runtime subpaths covering the primitives every adopter needs.
