@@ -166,7 +166,7 @@ describe('watchWorkspace', () => {
 
   it('default watcher factory binds node:fs.watch and closes cleanly', async () => {
     // Exercises the default factory path (no watcherFactory injection).
-    // Behaviour-tolerant: we do not assert onChange fires, because real
+    // Behavior-tolerant: we do not assert onChange fires, because real
     // fs events are timing-dependent on Windows. The contract this test
     // pins is: "default factory binds without throwing and close()
     // releases it."
