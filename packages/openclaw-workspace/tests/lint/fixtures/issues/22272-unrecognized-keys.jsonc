@@ -1,0 +1,10 @@
+{
+  "version": "2026.4.7",
+  "gateway": { "dmPolicy": {} },
+  "channels": {
+    "matrix": {
+      "homserver": "https://matrix.example.com",
+      "acessToken": "syt_..."
+    }
+  }
+}
