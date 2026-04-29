@@ -12,7 +12,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { parseJsonc } from '../../src/ast/jsonc/parse.js';
-import { emitJsoncWithObject, OcEmitSentinelError } from '../../src/ast/jsonc/emit.js';
+import { emitJsoncWithMutation, emitJsoncWithObject, OcEmitSentinelError } from '../../src/ast/jsonc/emit.js';
 
 describe('emitJsoncWithObject — pristine no-op', () => {
   it('newRoot deep-equals doc.value: returns input verbatim for plain JSON', () => {
@@ -266,5 +266,104 @@ describe('emitJsoncWithObject — empty/edge inputs', () => {
     const out = emitJsoncWithObject(doc, { a: 2 });
     expect(out.endsWith('\n')).toBe(false);
     expect(out).toBe(JSON.stringify({ a: 2 }, null, 2));
+  });
+});
+
+describe('emitJsoncWithObject — JSON5 input normalization', () => {
+  // JSON5 input parses cleanly (per parser tolerance). On structural
+  // emit, object keys are normalized to "double-quoted" by JSON.stringify
+  // because `emitJsoncWithObject` uses `JSON.stringify(key)` per member
+  // (line 270). Persisted unchanged leaf VALUES keep their source slice,
+  // so single-quoted strings on unchanged leaves survive the round-trip
+  // — but mutated leaves get JSON-shaped via `serializeLeaf`. This
+  // gives users a deterministic one-time path to JSONC over mutation
+  // cycles. Lock the behavior in here so a future emit refactor
+  // doesn't silently change it.
+
+  it('normalizes unquoted keys to double-quoted on structural mutation', () => {
+    const src = `{
+  unquoted: 1,
+  "alreadyQuoted": 2
+}
+`;
+    const doc = parseJsonc(src);
+    expect(doc.diagnostics).toEqual([]);
+    // Add a new key (forces structural mutation path).
+    const out = emitJsoncWithObject(doc, {
+      unquoted: 1,
+      alreadyQuoted: 2,
+      added: 3,
+    });
+    expect(out).toContain('"unquoted": 1');
+    expect(out).toContain('"alreadyQuoted": 2');
+    expect(out).toContain('"added": 3');
+    expect(out).not.toMatch(/\bunquoted: 1/); // bare keyword shouldn't survive
+  });
+
+  it('preserves single-quoted string in unchanged leaf via source slice', () => {
+    // emitJsoncWithObject uses emitValue which slices the original
+    // source for unchanged leaves. So a single-quoted string value
+    // at an unchanged path survives byte-for-byte (mixed dialect).
+    const src = `{"name": 'value', "other": 1}`;
+    const doc = parseJsonc(src);
+    expect(doc.diagnostics).toEqual([]);
+    const out = emitJsoncWithObject(doc, { name: 'value', other: 2 });
+    // 'name' is unchanged → source slice survives → single-quoted preserved.
+    expect(out).toContain("'value'");
+    // 'other' is mutated 1→2 → re-serialized via stringify.
+    expect(out).toContain('"other": 2');
+  });
+});
+
+describe('emitJsoncWithObject — BOM round-trip', () => {
+  // BOM (U+FEFF) is preserved through the parse → emit cycle. Without
+  // explicit re-prepend, structural mutation would silently strip the
+  // BOM — directly contradicting PR-1's "format-loss class" claim.
+  const BOM = '﻿';
+
+  it('preserves BOM through structural mutation (no-op)', () => {
+    const onDisk = `${BOM}${JSON.stringify({ a: 1 }, null, 2)}\n`;
+    const doc = parseJsonc(onDisk);
+    expect(doc.hadBom).toBe(true);
+    const out = emitJsoncWithObject(doc, { a: 1 });
+    expect(out.charCodeAt(0)).toBe(0xfeff);
+    expect(out).toBe(onDisk);
+  });
+
+  it('preserves BOM through structural mutation (leaf change)', () => {
+    const onDisk = `${BOM}${JSON.stringify({ a: 1 }, null, 2)}\n`;
+    const expected = `${BOM}${JSON.stringify({ a: 2 }, null, 2)}\n`;
+    const doc = parseJsonc(onDisk);
+    const out = emitJsoncWithObject(doc, { a: 2 });
+    expect(out).toBe(expected);
+  });
+
+  it('preserves BOM through structural mutation (added key)', () => {
+    const onDisk = `${BOM}{}\n`;
+    const doc = parseJsonc(onDisk);
+    const out = emitJsoncWithObject(doc, { a: 1 });
+    expect(out.charCodeAt(0)).toBe(0xfeff);
+    expect(out).toBe(`${BOM}${JSON.stringify({ a: 1 }, null, 2)}\n`);
+  });
+
+  it('does NOT prepend BOM to non-BOM input', () => {
+    const onDisk = `${JSON.stringify({ a: 1 }, null, 2)}\n`;
+    const doc = parseJsonc(onDisk);
+    expect(doc.hadBom).toBe(false);
+    const out = emitJsoncWithObject(doc, { a: 2 });
+    expect(out.charCodeAt(0)).not.toBe(0xfeff);
+  });
+
+  it('preserves BOM when emitJsoncWithMutation is the path (already worked, regression-locked)', () => {
+    // emitJsoncWithMutation preserves BOM via source slicing — but
+    // lock that behavior in alongside the new emitJsoncWithObject
+    // fix so a future refactor doesn't silently regress either path.
+    const onDisk = `${BOM}{ "port": 18789 }\n`;
+    const doc = parseJsonc(onDisk);
+    expect(doc.hadBom).toBe(true);
+    // Use a no-op mutator just to exercise the path.
+    const out = emitJsoncWithMutation(doc, () => undefined);
+    expect(out.charCodeAt(0)).toBe(0xfeff);
+    expect(out).toBe(onDisk);
   });
 });

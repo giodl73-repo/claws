@@ -16,6 +16,8 @@ export { writeAtomic, writeSnapshotFiles, clearStage } from './writeAtomic.js';
 export { discoverWorkspaceFiles } from './discover.js';
 export type {
   DiscoveredWorkspaceFile,
+  DiscoveryDiagnostic,
+  DiscoveryDiagnosticCode,
   DiscoveryResult,
 } from './discover.js';
 export { watchWorkspace } from './watch.js';

@@ -33,6 +33,31 @@
  * against the redaction-corruption pattern (#62281, #44357, #13495,
  * #21573, #13210, #12078).
  *
+ * **JSON5 input → JSONC output (mixed-dialect normalization)**: parsed
+ * JSON5-only constructs (single-quoted strings, unquoted keys, hex
+ * literals, `Infinity` / `NaN`, etc.) round-trip through emit with
+ * deterministic but partial normalization:
+ *
+ *   - `emitJsonc(doc)` returns `doc.source` verbatim — JSON5 dialect
+ *     preserved exactly.
+ *   - `emitJsoncWithMutation(doc, mutator)` preserves JSON5 source
+ *     bytes for unchanged leaves (single-quoted stays single-quoted,
+ *     unquoted keys stay unquoted, hex stays hex). MUTATED leaves
+ *     are re-serialized via `JSON.stringify(value)` → JSONC dialect
+ *     (double-quoted, decimal). Mixed-dialect output is possible.
+ *   - `emitJsoncWithObject(doc, newRoot)` re-emits each object
+ *     container with normalized stringify-shape — keys become
+ *     `"double-quoted"`. Persisted unchanged leaves keep their
+ *     original source slice (so single-quoted strings can survive
+ *     in unchanged-subtree slices), but the surrounding object
+ *     scaffolding is JSONC.
+ *
+ * Net effect for a JSON5 user file going through the chokepoint:
+ * the file shape moves toward JSONC on every mutation. Pure JSONC /
+ * JSON inputs are completely unaffected. JSON5-only inputs see a
+ * one-time normalization that converges to stable JSONC over a few
+ * config-mutating cycles.
+ *
  * @module @bic/openclaw-workspace/ast/jsonc/emit
  */
 
@@ -172,9 +197,15 @@ export function emitJsoncWithObject(doc: JsoncDocument, newRoot: unknown): strin
   // Sentinel-rejection sweep.
   rejectSentinel(newRoot, []);
 
+  // BOM round-trip: structural emit rebuilds the output from the AST,
+  // so a BOM at offset 0 of the input would be lost without explicit
+  // re-prepend. Both other emit paths (`emitJsonc`, `emitJsoncWithMutation`)
+  // preserve BOM via source slicing already.
+  const bomPrefix = doc.hadBom ? '﻿' : '';
+
   // No prior AST to merge against — write fresh stringify.
   if (!doc.root) {
-    return JSON.stringify(newRoot, null, 2) + '\n';
+    return bomPrefix + JSON.stringify(newRoot, null, 2) + '\n';
   }
 
   const out = emitValue(doc.source, doc.root, newRoot, 0);
@@ -182,9 +213,9 @@ export function emitJsoncWithObject(doc: JsoncDocument, newRoot: unknown): strin
   // byte-compare tests against `${JSON.stringify(_, null, 2)}\n` pass.
   // We only force a trailing newline if the input was newline-terminated
   // (which it is for stringify-shaped inputs).
-  if (doc.source.endsWith('\n') && !out.endsWith('\n')) return out + '\n';
-  if (!doc.source.endsWith('\n') && out.endsWith('\n')) return out.replace(/\n+$/, '');
-  return out;
+  if (doc.source.endsWith('\n') && !out.endsWith('\n')) return bomPrefix + out + '\n';
+  if (!doc.source.endsWith('\n') && out.endsWith('\n')) return bomPrefix + out.replace(/\n+$/, '');
+  return bomPrefix + out;
 }
 
 function rejectSentinel(value: unknown, path: ReadonlyArray<string | number>): void {
