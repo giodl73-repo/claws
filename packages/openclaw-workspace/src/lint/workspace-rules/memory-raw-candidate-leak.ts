@@ -16,9 +16,13 @@
  *   - `[dream:` prefix — dreaming-internal trace leak
  *   - `<promotion-raw>` literal — explicit "did not distill" sentinel
  *
- * Severity 'warn' — the entry is still readable but signals an upstream
- * pipeline bug. Catching it at lint time gives operators a way to
- * surface the issue before MEMORY.md grows unbounded.
+ * Severity 'note' (initial PR — conservative). The cited issues frame
+ * this as an upstream-pipeline bug, not a user-authoring bug — the
+ * lint surface fires on the *symptoms*, which means it would flood
+ * lint output until the pipeline is fixed. Surfacing as 'note'
+ * lets operators see the pattern without overwhelming the output;
+ * upgrade to 'warn' once the upstream pipeline issues close so the
+ * rule transitions from "noise" to "regression alarm".
  *
  * @evidence #67580 #67363 #68774
  * @module @bic/openclaw-workspace/lint/workspace-rules/memory-raw-candidate-leak
@@ -40,7 +44,7 @@ const LEAK_MARKERS: ReadonlyArray<{ pattern: RegExp; description: string }> = [
 
 export const memoryRawCandidateLeakRule: WorkspaceLintRule = {
   code: 'OC_MEMORY_RAW_CANDIDATE_LEAK',
-  severity: 'warn',
+  severity: 'note',
   evidenceIssues: [67580, 67363, 68774],
   run(ctx: WorkspaceContext): readonly MarkdownLintFindingDraft[] {
     const drafts: MarkdownLintFindingDraft[] = [];
@@ -56,7 +60,7 @@ export const memoryRawCandidateLeakRule: WorkspaceLintRule = {
               drafts.push({
                 source: 'markdown',
                 code: 'OC_MEMORY_RAW_CANDIDATE_LEAK',
-                severity: 'warn',
+                severity: 'note',
                 message: `entry '${entry.name}' contains ${description} on body line ${i + 1} — looks like undistilled dreaming-pipeline output (#67580, #67363, #68774)`,
                 relPath: file.relPath,
                 // entry.line is the heading; first body line is +1; `i` is

@@ -27,7 +27,8 @@ describe('OC_MEMORY_HOOK_TOO_LONG (#73691, #45415)', () => {
     const findings = lintWorkspace(ctx([memoryFile(raw)]));
     const f = findings.find((x) => x.code === 'OC_MEMORY_HOOK_TOO_LONG');
     expect(f).toBeDefined();
-    expect(f!.severity).toBe('warn');
+    // Initial PR ships at 'note' severity — see rule docstring.
+    expect(f!.severity).toBe('note');
     expect(f!.message).toContain('Long entry');
     expect(f!.relPath).toBe('MEMORY.md');
   });
@@ -126,7 +127,8 @@ describe('OC_MEMORY_RAW_CANDIDATE_LEAK (#67580, #67363, #68774)', () => {
     const findings = lintWorkspace(ctx([memoryFile(raw)]));
     const f = findings.find((x) => x.code === 'OC_MEMORY_RAW_CANDIDATE_LEAK');
     expect(f).toBeDefined();
-    expect(f!.severity).toBe('warn');
+    // Initial PR ships at 'note' severity — see rule docstring.
+    expect(f!.severity).toBe('note');
   });
 
   it('fires on a daily-log/ path leak', () => {

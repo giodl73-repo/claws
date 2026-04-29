@@ -12,9 +12,16 @@
  * a concrete, defensible default. Future schema-DI'd override is left
  * to a follow-up if upstream wants to tune.
  *
- * Severity 'warn': not a hard error (entries can legitimately be longer
- * for complex topics) but flagged so reviewers see the size growth
- * before bootstrap overflow becomes a startup-block.
+ * Severity 'note' (initial PR — conservative). Upstream MEMORY.md is
+ * the dreaming-pipeline's free-form distilled prose target (per
+ * `design/openclaw/extension-pattern-memory.md:138-148`), not the
+ * claws-style H2-with-`scope:` index this rule's 150-char hook
+ * threshold was tuned against. Without a "looks like claws-style
+ * memory" detector, this rule will likely false-positive on real
+ * upstream MEMORY.md files. Bumping to 'warn' is defensible once
+ * either (a) we add a format-detector gate, or (b) upstream signals
+ * adopting the claws-style format. Until then: surface the
+ * observation, don't cry wolf.
  *
  * @evidence #73691 #45415
  * @module @bic/openclaw-workspace/lint/workspace-rules/memory-hook-too-long
@@ -29,7 +36,7 @@ const HOOK_MAX_CHARS = 150;
 
 export const memoryHookTooLongRule: WorkspaceLintRule = {
   code: 'OC_MEMORY_HOOK_TOO_LONG',
-  severity: 'warn',
+  severity: 'note',
   evidenceIssues: [73691, 45415],
   run(ctx: WorkspaceContext): readonly MarkdownLintFindingDraft[] {
     const drafts: MarkdownLintFindingDraft[] = [];
@@ -43,7 +50,7 @@ export const memoryHookTooLongRule: WorkspaceLintRule = {
           drafts.push({
             source: 'markdown',
             code: 'OC_MEMORY_HOOK_TOO_LONG',
-            severity: 'warn',
+            severity: 'note',
             message: `entry '${entry.name}' has a ${hook.text.length}-char hook line; recommend ≤${HOOK_MAX_CHARS} chars to keep MEMORY.md scannable and avoid bootstrap overflow (#73691, #45415)`,
             relPath: file.relPath,
             // entry.line is the heading (1-based); first body line is +1;
