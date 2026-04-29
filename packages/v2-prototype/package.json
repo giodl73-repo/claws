@@ -1,0 +1,49 @@
+{
+  "name": "@bic/v2-prototype",
+  "version": "0.1.0",
+  "description": "Temporary local-fork of v2 upstream openclaw contract types — replace with @openclaw/plugin-sdk subpaths once upstream lands. See .craft/out/proposals/{snap-pre-rfc,policy-pre-rfc}.md.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./snapshot": {
+      "types": "./dist/snapshot.d.ts",
+      "import": "./dist/snapshot.js"
+    },
+    "./policy-ir": {
+      "types": "./dist/policy-ir.d.ts",
+      "import": "./dist/policy-ir.js"
+    },
+    "./policy-ir-runtime": {
+      "types": "./dist/policy-ir-runtime.d.ts",
+      "import": "./dist/policy-ir-runtime.js"
+    },
+    "./hook-types-extension": {
+      "types": "./dist/hook-types-extension.d.ts",
+      "import": "./dist/hook-types-extension.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc -b"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^2.0.0"
+  }
+}

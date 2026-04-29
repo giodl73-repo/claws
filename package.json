@@ -16,6 +16,7 @@
     "packages/openclaw-policy",
     "packages/openclaw-snap",
     "packages/openclaw-workspace",
+    "packages/v2-prototype",
     "test/e2e"
   ],
   "scripts": {
