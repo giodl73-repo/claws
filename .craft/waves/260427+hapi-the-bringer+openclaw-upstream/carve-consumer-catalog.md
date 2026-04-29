@@ -141,3 +141,51 @@ Per `guardrails-adapter.md` (R2 amendment), the carve is mostly ADDITIVE:
 ## Open question to resolve before step 3 (snap carve)
 
 `packages/claws/src/commands/snap-serve.ts` — is this command kept (as a thin wrapper over the upcoming upstream `openclaw snap serve` verb) or removed? Removal is cleaner (one source of truth — upstream); keeping it preserves backward compat for anyone scripted against `claws snap-serve`. Leaning toward **remove**, but worth confirming before the carve.
+
+**Resolved 2026-04-29**: removed. The snap carve landed as the two-layer
+`SnapshotStore` (immutable bundles) + `RefStore` (per-workspace pointers).
+`claws snap *` binds an in-process `filesystemStore` + `workspaceRefStore`
+rooted at `<workspace>/.openclaw/snapshots/`; no daemon, no HTTP transport.
+See commit `c6f73697`.
+
+## Deferred — remote `SnapshotStore` impl + binding resolver
+
+The carve that just landed is **local-only**. `commands/snap-store.ts:bind()`
+unconditionally constructs `filesystemStore` + `workspaceRefStore` from the
+workspace root. This is the right default but does NOT cover the production
+gateway story.
+
+What's needed in a future wave:
+
+1. **Remote `SnapshotStore` impl(s)** — at least one of:
+   - `@bic/openclaw-snap-http` — talks to a deployed `openclaw snap serve`
+     instance (the upstream reference plugin, once that PR lands). Restores
+     a thin HTTP transport, but as an SDK-conformant client, not the
+     daemon-shaped surface we just removed.
+   - `@bic/openclaw-snap-s3` (or similar) — writes bundles directly to a
+     blob store with conditional-PUT atomicity. Needs a paired
+     `StoreColocatedRefStore` (option 2 from the lifecycle discussion).
+2. **Binding resolver** — ~30 LoC in `commands/snap-store.ts`:
+   ```ts
+   function resolveBindings(workspaceRoot: string): Bindings {
+     // 1. Env override:    OPENCLAW_SNAP_STORE=<url>
+     // 2. Config file:     <workspace>/.openclaw/config.json → snapStore
+     // 3. Default:         local filesystemStore + workspaceRefStore
+     ...
+   }
+   ```
+   Picks an impl by URL scheme (`http://`, `s3://`, etc.) when overridden;
+   otherwise falls through to the local default that ships today.
+3. **Gateway-side wiring guidance** — the gateway's policy plugin already
+   takes `{ store }` in `PolicyPluginOptions`; the deployment-time choice is
+   "which `SnapshotStore` impl do I pass?" Document the local-vs-prod split
+   in the gateway integration guide once a remote impl exists.
+
+**Why deferred**: no remote impl exists yet, and adding the resolver scaffold
+without a concrete remote to wire it to is yak shaving. The seam is small
+(~30 LoC) and lands cleanly with the first remote impl.
+
+**Track this in**: a follow-on wave after the v2 contract chain (PR-1..PR-5)
+is upstreamed. Likely candidate: a "snap deployment models" wave that
+introduces `@bic/openclaw-snap-http` as the first remote impl alongside the
+gateway integration story.
