@@ -40,6 +40,14 @@
       "types": "./dist/handle-binding/index.d.ts",
       "import": "./dist/handle-binding/index.js"
     },
+    "./openclaw-adapter": {
+      "types": "./dist/openclaw-adapter.d.ts",
+      "import": "./dist/openclaw-adapter.js"
+    },
+    "./policy-runtime": {
+      "types": "./dist/policy-runtime/index.d.ts",
+      "import": "./dist/policy-runtime/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -57,7 +65,8 @@
     "node": ">=20.0.0"
   },
   "peerDependencies": {
-    "@bic/openclaw-workspace": "^0.1.0"
+    "@bic/openclaw-workspace": "^0.1.0",
+    "@bic/v2-prototype": "*"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
