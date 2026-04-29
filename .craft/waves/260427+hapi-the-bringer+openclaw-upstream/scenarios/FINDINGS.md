@@ -14,12 +14,23 @@ Findings classification:
 
 | Severity | Count |
 |---|---|
-| HC-BLOCK | 5 |
-| HC-WARN | 19 |
-| HC-NOTE | 27 |
-| **Total** | **51** |
+| HC-BLOCK | 6 |
+| HC-WARN | 39 |
+| HC-NOTE | 72 |
+| **Total** | **117** |
 
-(Phase 5 added 2026-04-27 in response to the wave restructure: `replaceConfigFile` lossless conversion + oc:// URI scheme extension. +1 HC-BLOCK, +5 HC-WARN, +10 HC-NOTE.)
+**Counting methodology**: each row in a finding table (one with a severity column) counts once. The HC-BLOCK applications tables in Phases 2/5/6 cross-reference each HC-BLOCK finding back to its target PR — those reference rows don't add to the count (6 such cross-refs exist for F-17, F-22, F-26, F-38, F-76, F-113). Verifiable via `grep -cE '^\| F-[0-9]+ \| HC-' scenarios/FINDINGS.md` (returns 117).
+
+Per-phase deltas (best-effort narrative; cumulative tally above is the source of truth):
+
+- Phase 1 (bot-preempt): F-01..F-16 → 4 HC-WARN, 12 HC-NOTE
+- Phase 2 (governance correctness): F-17..F-51 → 4 HC-BLOCK, 7 HC-WARN, 22 HC-NOTE — added 2026-04-27 with the scenarios stage
+- Phase 3 (package invariants): F-52..F-70 → 1 HC-WARN, 18 HC-NOTE
+- Phase 4 (compliance rubrics): F-71..F-75 → 0 HC-BLOCK, 0 HC-WARN, 5 HC-NOTE
+- Phase 5 (workspace foothold, added 2026-04-27): F-76..F-101 → 1 HC-BLOCK, 7 HC-WARN, 18 HC-NOTE
+- Phase 6 (workspace lint surface, added 2026-04-28): F-102..F-117 → 1 HC-BLOCK, 9 HC-WARN, 6 HC-NOTE
+
+(Where the cumulative differs from earlier per-phase claims, the cumulative wins. Earlier per-phase increment notes ("Phase 5 added +1/+5/+10"; "Phase 6 added +1/+9/+6") tracked deltas at the time of authoring without reconciling with the full row count.)
 
 Per scenarios stage classification rules: HC-BLOCK requires a "what breaks at runtime if unfixed" consequence. HC-NOTE is the right class for "planned artifact doesn't exist yet" — many of the bot-preempt findings are guide-content, not defects.
 
@@ -110,9 +121,9 @@ Per scenarios stage classification rules: HC-BLOCK requires a "what breaks at ru
 
 | ID | Severity | Code | Finding | File:Line | Consequence | Tier | Runner | Fixture | Assert |
 |---|---|---|---|---|---|---|---|---|---|
-| F-33 | HC-WARN | ADP-PR-001 | Generated plugin registration shape must match current `PluginHookRegistration` | `openclaw-core: src/plugins/hook-types.ts:1-150` | If shape drifts, PR-5 CI fails on type errors | L2 e2e | simulation | `adapter/scenarios/01+plugin-registration/` | Generated `gateway-plugin.ts` loads + registers cleanly |
+| F-33 | HC-WARN | ADP-PR-001 | Generated plugin registration shape must match current `PluginHookRegistration` | `openclaw-core: src/plugins/hook-types.ts:1-150` | If shape drifts, PR-4 CI fails on type errors | L2 e2e | simulation | `adapter/scenarios/01+plugin-registration/` | Generated `gateway-plugin.ts` loads + registers cleanly |
 | F-34 | HC-WARN | ADP-PR-002 | Sequential modifying mode (not claim mode) for `runBeforeToolCall` | `openclaw-core: src/plugins/hooks.ts` | Claim-mode assumption breaks merger | L2 e2e | simulation | (covered by F-33) | Plugin honors sequential semantics |
-| F-35 | HC-WARN | ADP-PR-003 | CLI subcommand registration shape unknown (no precedent cited in plan) | `openclaw-core: <CLI entry point TBD>` | PR-5 CLI handler may not match upstream's dispatcher (yargs / oclif / Commander / custom) | L2 e2e | simulation | `adapter/scenarios/02+cli-subcommand/` | `openclaw policy <verb>` dispatches to handler |
+| F-35 | HC-WARN | ADP-PR-003 | CLI subcommand registration shape unknown (no precedent cited in plan) | `openclaw-core: <CLI entry point TBD>` | PR-4 CLI handler may not match upstream's dispatcher (yargs / oclif / Commander / custom) | L2 e2e | simulation | `adapter/scenarios/02+cli-subcommand/` | `openclaw policy <verb>` dispatches to handler |
 | F-36 | HC-NOTE | ADP-PR-004 | Adapter audit must record exact upstream file:line for registration site | `docs/upstream/guides/adapter-audits.md` (NEW) | Future audits compare against frozen baseline | (doc) | (doc) | (in adapter-audits.md content) | Doc contains citation |
 | F-37 | HC-NOTE | ADP-PR-005 | Sample registration code in audit doc, not hand-waved | `docs/upstream/guides/adapter-audits.md` (NEW) | Implementer doesn't have to spelunk | (doc) | (doc) | (in adapter-audits.md content) | Doc contains code block |
 
@@ -236,10 +247,10 @@ The 4 HC-BLOCK findings are NOT plan-amendment-shaped — they're scoped to spec
 
 | ID | PR | Application |
 |---|---|---|
-| F-17 | PR-4 (OC-7) | The OC-7 PR scope fully addresses this — array accumulation replaces `??`. Scenario fixture `governance/scenarios/01+oc7-conjunctive/` is the proof. |
-| F-22 | PR-4 (OC-7) | Crash-safety case must be added to PR-4 scope explicitly — try/catch wrapper + spec-declared resolution path (per F-23). UG-upstream.amend.md §11 already lists this for PR-4. **Action**: confirm PR-4 author writes the test fixture before the merger change lands. |
-| F-26 | PR-5 (policy) | Generator-side validation — refuse R5 + failOpen at generate time. This is a generator-internals change in our package, not an upstream-spec change. **Action**: confirm `packages/openclaw-policy/src/generate/validate.ts` has the rejection rule. |
-| F-38 | PR-3 (guardrails) | Audit-stream wire mapping must be in `docs/upstream/guides/adapter-audits.md` BEFORE PR-3 opens. **Action**: H6 deliverable now has a hard dependency: PR-3 cannot open until adapter-audits.md is published with the field-by-field mapping. |
+| F-17 | PR-3 (OC-7) | The OC-7 PR scope fully addresses this — array accumulation replaces `??`. Scenario fixture `governance/scenarios/01+oc7-conjunctive/` is the proof. |
+| F-22 | PR-3 (OC-7) | Crash-safety case must be added to PR-3 scope explicitly — try/catch wrapper + spec-declared resolution path (per F-23). UG-upstream.amend.md §11 already lists this for PR-3. **Action**: confirm PR-3 author writes the test fixture before the merger change lands. |
+| F-26 | PR-4 (policy) | Generator-side validation — refuse R5 + failOpen at generate time. This is a generator-internals change in our package, not an upstream-spec change. **Action**: confirm `packages/openclaw-policy/src/generate/validate.ts` has the rejection rule. |
+| F-38 | PR-2 (guardrails) | Audit-stream wire mapping must be in `docs/upstream/guides/adapter-audits.md` BEFORE PR-2 opens. **Action**: H6 deliverable now has a hard dependency: PR-2 cannot open until adapter-audits.md is published with the field-by-field mapping. |
 
 No HC-BLOCK requires a plan or spec amendment. All four are scoped within their target PRs + the H6 deliverables.
 
@@ -343,17 +354,65 @@ No HC-BLOCK requires a plan or spec amendment. All four are scoped within their 
 
 ---
 
+## Phase 6 · Workspace lint surface (added 2026-04-28)
+
+Findings driven by `claws-workspace-lint` plan H1–H4. All 16 findings already validated claws-side: 43 lint tests passing in `packages/openclaw-workspace/tests/lint/` (5 smoke + 26 per-rule + 12 issue-replay). PR-1 carries the same surface upstream.
+
+### SC-37 — Lint engine schema-DI
+
+| ID | Severity | Code | Finding | File:Line | Consequence | Tier | Runner | Fixture | Assert |
+|---|---|---|---|---|---|---|---|---|---|
+| F-102 | HC-WARN | LINT-DI-001 | AST-only rules MUST fire when no schema is injected | `packages/openclaw-workspace/src/lint/index.ts` | Engine forces schema requirement → undermines library shape | L0 unit | forward | `tests/lint/rules-coverage.test.ts` | All 5 AST-only rule tests pass without schema |
+| F-103 | HC-NOTE | LINT-DI-002 | Schema-aware rules MUST silently skip without schema (no thrown errors) | (same) | False errors when consumers haven't wired schema yet | L0 unit | forward | `tests/lint/smoke.test.ts` "schema-aware rules are silent without a schema" | Findings array contains zero schema-aware codes when no schema |
+
+### SC-38 — oc:// URI on every finding
+
+| ID | Severity | Code | Finding | File:Line | Consequence | Tier | Runner | Fixture | Assert |
+|---|---|---|---|---|---|---|---|---|---|
+| F-104 | HC-WARN | LINT-URI-001 | Every `LintFinding` carries `ocUri` populated by engine; URI also woven into `message` for non-empty path | `packages/openclaw-workspace/src/lint/index.ts:lint()` post-processing | Renderer fragmentation if rules compute URI ad-hoc | L0 unit + L1 integration | forward | `tests/lint/issue-replay.test.ts` (per-finding ocUri assertion) + `tests/lint/smoke.test.ts` redaction case | All 43 lint tests' findings start with `oc://config` |
+
+### SC-39..SC-50 — Issue replays (one finding per cited issue)
+
+| ID | Severity | Code | Finding | File:Line | Consequence | Tier | Runner | Fixture | Assert |
+|---|---|---|---|---|---|---|---|---|---|
+| F-105 | HC-NOTE | LINT-EVID-14998 | `$schema` editor convention must NOT trigger `OC_CFG_UNKNOWN_FIELD` | `tests/lint/fixtures/issues/14998-schema-key.jsonc` | Reproducing upstream's #14998 false-positive blocks adoption by any editor user | L1 integration | forward (issue replay) | (same) | Finding set excludes `OC_CFG_UNKNOWN_FIELD` |
+| F-106 | HC-WARN | LINT-EVID-20478 | `OC_CFG_PLUGIN_ID_COLLISION` fires when same id at `channels.<x>` AND `plugins.entries.<x>` | `tests/lint/fixtures/issues/20478-plugin-id-collision.jsonc` | Duplicate-plugin warning loop on every reload (per #20478) | L1 integration | forward | (same) | Finding set includes `OC_CFG_PLUGIN_ID_COLLISION` |
+| F-107 | HC-WARN | LINT-EVID-22272 | `OC_CFG_UNKNOWN_FIELD` with did-you-mean catches typo'd channel-config keys | `tests/lint/fixtures/issues/22272-unrecognized-keys.jsonc` | doctor's --fix today doesn't actually remove unrecognized keys (#22272) | L1 integration | forward | (same) | Finding includes `OC_CFG_UNKNOWN_FIELD` with `suggestion` populated |
+| F-108 | HC-WARN | LINT-EVID-31251 | `OC_CFG_MISSING_REQUIRED_FIELD` catches post-clobber state where required `dmPolicy` is gone | `tests/lint/fixtures/issues/31251-clobbered-dmpolicy.jsonc` | Plugin install/uninstall clobber loses `dmPolicy` silently (#31251) | L1 integration | forward | (same) | Finding includes `OC_CFG_MISSING_REQUIRED_FIELD` with path `['gateway', 'dmPolicy']` |
+| F-109 | HC-NOTE | LINT-EVID-48415 | `OC_CFG_TRAILING_COMMA_INCONSISTENT` flags minority style when file mixes | `tests/lint/fixtures/issues/48415-trailing-comma-mix.jsonc` | Control UI saves invalid JSON5 in this state (#48415) | L1 integration | forward | (same) | Finding includes `OC_CFG_TRAILING_COMMA_INCONSISTENT` |
+| F-110 | HC-WARN | LINT-EVID-59070 | `OC_CFG_UNKNOWN_FIELD` catches root-level `defaultId` typo with did-you-mean → `defaultAgent` | `tests/lint/fixtures/issues/59070-defaultId-typo.jsonc` | Gateway rejects + permanent unsaved-changes state (#59070) | L1 integration | forward | (same) | Finding has `suggestion: 'defaultAgent'` |
+| F-111 | HC-WARN | LINT-EVID-60334 | `OC_CFG_LEGACY_FIELD` recognizes `mediaLocalRoots`, `bootstrapMaxCharsPerFile` as removed-in-2026.4.2 | `tests/lint/fixtures/issues/60334-legacy-root-keys.jsonc` | 2026.4.2 update outright rejects legacy keys (#60334) | L1 integration | forward | (same) | Finding set includes `OC_CFG_LEGACY_FIELD` |
+| F-112 | HC-WARN | LINT-EVID-61683 | `OC_CFG_MISSING_REQUIRED_FIELD` catches gateway config missing `dmPolicy` | `tests/lint/fixtures/issues/61683-missing-required.jsonc` | Plugin-scoped config aborts gateway startup (#61683) | L1 integration | forward | (same) | Finding includes `OC_CFG_MISSING_REQUIRED_FIELD` |
+| F-113 | HC-BLOCK | LINT-EVID-62281 | `OC_CFG_REDACTED_PLACEHOLDER` (severity ERROR) fires on `__OPENCLAW_REDACTED__` literal | `tests/lint/fixtures/issues/62281-redacted-corruption.jsonc` | Data-corruption class — closed historicals #13495, #44357, #62281, #21573, #13210, #12078 + open #60917, #68423, #66832, #59945. Lossless write path prevents recurrence; lint is fail-safe | L1 integration | forward | (same) | Finding has `severity: 'error'` and `code: 'OC_CFG_REDACTED_PLACEHOLDER'` |
+| F-114 | HC-NOTE | LINT-EVID-62438 | Clean `${VAR}` references must NOT trigger `OC_CFG_SECRET_REF_AMBIGUOUS` (negative test) | `tests/lint/fixtures/issues/62438-secret-ref-clean.jsonc` | Reproducing upstream's #62438 false-positive (audit fires for clean refs) | L1 integration | forward | (same) | Finding set excludes `OC_CFG_SECRET_REF_AMBIGUOUS` |
+| F-115 | HC-WARN | LINT-EVID-65565 | `OC_CFG_UNKNOWN_FIELD` catches `defaultId` typo at nested `agents.defaults.<x>` location | `tests/lint/fixtures/issues/65565-default-agent-typo.jsonc` | Same root cause as #59070 at different depth (#65565) | L1 integration | forward | (same) | Finding at path `['agents', 'defaults', 'defaultId']` |
+| F-116 | HC-WARN | LINT-EVID-72872 | `OC_CFG_LEGACY_FIELD` catches `agents.defaults.agentRuntime` with auto-migration to `runtimeVersion` | `tests/lint/fixtures/issues/72872-agentRuntime-legacy.jsonc` | 2026.4.24 schema rejects field from prior 4.x configs (#72872) | L1 integration | forward | (same) | Finding has `suggestion: 'runtimeVersion'` |
+
+### SC-51 — Fixer roadmap contract
+
+| ID | Severity | Code | Finding | File:Line | Consequence | Tier | Runner | Fixture | Assert |
+|---|---|---|---|---|---|---|---|---|---|
+| F-117 | HC-NOTE | LINT-FIX-001 | PR-1 ships detection-only; per-code fixers ship in follow-up PRs per UG-upstream § 13 | `UG-upstream.amend.md §13` table | Without contract, follow-up fixer-PRs drift in scope | L3 acceptance | contract (per future fixer-PR) | (per fixer-PR contract) | Fixer-PR title prefix matches; ≤200 LOC fix + ≤100 LOC tests; fix-then-re-lint produces zero target-code findings |
+
+## Phase 6 HC-BLOCK applications
+
+| ID | PR | Application |
+|---|---|---|
+| F-113 | PR-1 (workspace + lint) | The redaction-corruption class motivates the package itself. Without F-113 detection, the substrate change (`JSON.stringify` → lossless emit) reads as plumbing; with it, reviewers see a concrete data-corruption fail-safe that closes 6 historical issues. **Action**: PR-1 description leads with the issue-citation table (data pulled 2026-04-28), `OC_CFG_REDACTED_PLACEHOLDER` rule has explicit ERROR severity in the catalog table. |
+
+---
+
 ## Test tier delta vs Coverage Contract
 
 | Tier | Plan target | Scenarios target | Delta | Reason |
 |---|---|---|---|---|
-| L0 unit | 24 | **30** | +6 | Phase 5 Workspace foothold: JSONC roundtrip (5), config-URI parser (3), resolve-config-uri (3) → -5 overlap consolidation |
-| L1 integration | 12 | **24** | +12 | Audit-stream adapter (4) + approval-handle (3) + merger crash-safety (2) + Phase 5: backcompat (3), idempotency (2), migration-config-uri (2), concurrent-safety (1), large-config-perf (1), malformed-graceful (1) → -3 overlap |
+| L0 unit | 24 | **34** | +10 | Phase 5 (+6 net) + Phase 6 (+4: schema-DI, oc-uri-on-finding, parser unit, emit unit) |
+| L1 integration | 12 | **36** | +24 | Phase 5 (+12 net) + Phase 6 (+12: 12 issue replays validated by `tests/lint/issue-replay.test.ts`) |
 | L2 e2e | 8 | 8 | 0 | Aligned |
-| L3 acceptance | 6 | 8 | +2 | SOC 2 + HIPAA rubric coverage (1 each) added |
-| **Total** | **50** | **70** | **+20** | (Phase 5 added +12 tests for the workspace foothold's risk surface) |
+| L3 acceptance | 6 | 9 | +3 | Phase 5 (+2 SOC2/HIPAA) + Phase 6 (+1 fixer-roadmap contract) |
+| **Total** | **50** | **87** | **+37** | (Phase 5 +20, Phase 6 +17) |
 
-These deltas update the plan's Coverage Contract; pulse decomposition (planning stage) must reflect the new totals.
+These deltas update the plan's Coverage Contract; pulse 04 (PR-1 / workspace + lint) reflects the new totals.
 
 ## Series-level fixture targets (planned for pulses stage)
 
@@ -365,5 +424,6 @@ These deltas update the plan's Coverage Contract; pulse decomposition (planning 
 | `oc4` | 1 | forward |
 | `pkg-invariants` | 10 | forward |
 | `compliance` | 2 | contract |
+| `lint-issue-replay` | 12 | forward (already shipped at `packages/openclaw-workspace/tests/lint/fixtures/issues/`) |
 
-Total: 41 fixtures planned; created during acceptance test pulses, not now.
+Total: 53 fixtures planned (+12 lint replays already shipped); rest created during acceptance test pulses.

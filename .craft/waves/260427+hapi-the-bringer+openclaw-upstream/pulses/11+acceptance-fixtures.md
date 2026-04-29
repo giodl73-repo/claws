@@ -1,15 +1,15 @@
 ---
-pulse: 12
+pulse: 11
 slug: acceptance-fixtures
 plan: claws-openclaw-upstream
 checkpoint: cp-5
-depends_on: [04, 05, 06, 07, 08, 09, 10, 11]
+depends_on: [04, 05, 06, 07, 08, 09, 10]
 governing_roles: [claws:claws-release-eng, claws:claws-repo-steward, claws:compliance]
 addresses_findings: [all SC-01..SC-24 fixture-level — series-level summary in scenarios/FINDINGS.md]
 addresses_headlines: [H1, H2, H3, H4, H5, H6]
 ---
 
-# Pulse 12 · Acceptance Test Fixtures
+# Pulse 11 · Acceptance Test Fixtures
 
 ## Objective
 
@@ -126,7 +126,7 @@ This pulse is INTERNAL to our monorepo; runs after all upstream PRs merge so fix
 cd /c/src/claws
 
 # Pre-flight: confirm all upstream PRs merged + scope-flip done
-for pr in <PR-1> <PR-2> <PR-4> <PR-6> <PR-7>; do
+for pr in <PR-1> <PR-2> <PR-3> <PR-5> <PR-6>; do
   gh api repos/openclaw/openclaw/pulls/$pr --jq '.merged' | grep -q true \
     || (echo "BLOCKING: PR-$pr not merged"; exit 1)
 done

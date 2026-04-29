@@ -31,13 +31,13 @@ Write `docs/upstream/guides/post-merge-verification.md` — runbook for confirmi
     - **H3** (`@openclaw/policy`): deterministic-generation test green; emitted plugin loads + registers via `@openclaw/plugin-sdk` HEAD without modification
     - **H4** (`@openclaw/snap`): cross-host snapshotId stability matrix green; promote-audited test green; HTTP smoke (curl `/v1/healthz`)
     - **H5** (OC-4 + OC-7): regression test on `stripFrontMatter` round-trip; merger conjunctive test on three-plugin fixture
-  - **§4 Codemod validation gate (W1 from R1-consolidated)** — after PR-4 merges, before declaring H5 done:
+  - **§4 Codemod validation gate (W1 from R1-consolidated)** — after PR-3 merges, before declaring H5 done:
     - Pull trunk
     - Run our internal `@bic/openclaw-policy` + `@bic/openclaw-snap` build against trunk's widened `requireApproval` field
     - Confirm both compile clean; record verdict in CHANGELOG
   - **§5 Failure modes**
     - Trunk verification red: file an issue at openclaw/openclaw, halt the wave, do not open subsequent PRs in the chain
-    - Codemod verification red: roll back internal consumers' adoption pending fix; subsequent PR-5 / PR-6 still openable since they don't use the OC-7 surface yet
+    - Codemod verification red: roll back internal consumers' adoption pending fix; subsequent PR-4 / PR-5 still openable since they don't use the OC-7 surface yet
   - **§6 CHANGELOG record format** — one line per PR:
     ```markdown
     - PR-1 @openclaw/workspace MERGED 2026-MM-DD at SHA `xxxxxxx`. H1 trunk-side validators GREEN. baseline-hash post: `sha256:...`.
@@ -59,7 +59,7 @@ grep -q "Codemod validation gate" "docs/upstream/guides/post-merge-verification.
 ## Key Constraints
 
 - Verification runs IMMEDIATELY after merge, not batched. The next PR in the chain depends on the previous landing clean on trunk.
-- Codemod gate (per W1) must pass BEFORE Wave C opens; PR-5 + PR-6 build against trunk's widened field.
+- Codemod gate (per W1) must pass BEFORE Wave C opens; PR-4 + PR-5 build against trunk's widened field.
 
 ## Scenario codes addressed
 

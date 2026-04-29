@@ -18,7 +18,7 @@ The Greptile + Copilot + chatgpt-codex trio reviews every PR. These scenarios pr
 
 **Test tier**: L0 unit (per-API)
 **Runner**: simulation
-**Apply**: Bot-preempt-checklist (H6) gets a "every register*() takes pluginId from caller, validates against payload-supplied claim" rule. PR-3 + PR-5 + PR-6 must each include this defense.
+**Apply**: Bot-preempt-checklist (H6) gets a "every register*() takes pluginId from caller, validates against payload-supplied claim" rule. PR-2 + PR-4 + PR-5 must each include this defense.
 **Findings**: F-01..F-04 (see FINDINGS.md).
 
 ### SC-02 · `upstream/bot-preempt-input-validation`
@@ -27,7 +27,7 @@ The Greptile + Copilot + chatgpt-codex trio reviews every PR. These scenarios pr
 
 **Test tier**: L0 unit + L1 boundary
 **Runner**: simulation
-**Apply**: Bot-preempt-checklist gets "every host-boundary entry validates with Zod schema, rejects with structured error code, no fallthrough to internals." PR-3 audit-event API + PR-5 policy-generate input + PR-6 snap upload payload all need this.
+**Apply**: Bot-preempt-checklist gets "every host-boundary entry validates with Zod schema, rejects with structured error code, no fallthrough to internals." PR-2 audit-event API + PR-4 policy-generate input + PR-5 snap upload payload all need this.
 **Findings**: F-05..F-08.
 
 ### SC-03 · `upstream/auto-close-avoidance`
@@ -50,11 +50,11 @@ The Greptile + Copilot + chatgpt-codex trio reviews every PR. These scenarios pr
 
 ### SC-05 · `upstream/bot-preempt-swift-models-regen`
 
-**Walk**: PR-5 adds new gateway protocol shapes (e.g., for `openclaw policy comply` HTTP). Swift protocol model files at `apps/macos/Sources/OpenClawProtocol/GatewayModels.swift` and `apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift` not regenerated. Bot-reviewer flags.
+**Walk**: PR-4 adds new gateway protocol shapes (e.g., for `openclaw policy comply` HTTP). Swift protocol model files at `apps/macos/Sources/OpenClawProtocol/GatewayModels.swift` and `apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift` not regenerated. Bot-reviewer flags.
 
 **Test tier**: L3 acceptance
 **Runner**: contract
-**Apply**: Bot-preempt-checklist gets "for every gateway protocol change: regen Swift models, commit in same PR." PR-5 + PR-6 affected; PR-1 + PR-3 likely not (no gateway protocol surface).
+**Apply**: Bot-preempt-checklist gets "for every gateway protocol change: regen Swift models, commit in same PR." PR-4 + PR-5 affected; PR-1 + PR-2 likely not (no gateway protocol surface).
 **Findings**: F-15..F-16.
 
 ## Phase 2 · Governance correctness (8 scenarios)
@@ -67,7 +67,7 @@ The semantic invariants the generator + plugin must hold. Real risk lives here.
 
 **Test tier**: L1 integration (vs current upstream merger fixture)
 **Runner**: simulation
-**Apply**: PR-4 (OC-7) scope; tests at `openclaw-core/src/plugins/__tests__/hooks-merger.test.ts` (or wherever upstream tests live). Existing tests asserting "first-wins" will break — those break is the proof.
+**Apply**: PR-3 (OC-7) scope; tests at `openclaw-core/src/plugins/__tests__/hooks-merger.test.ts` (or wherever upstream tests live). Existing tests asserting "first-wins" will break — those break is the proof.
 **Findings**: F-17..F-21.
 
 ### SC-07 · `upstream/oc7-merger-crash-safety` (W7 deferred)
@@ -78,7 +78,7 @@ The semantic invariants the generator + plugin must hold. Real risk lives here.
 
 **Test tier**: L1 integration
 **Runner**: simulation
-**Apply**: PR-4 (OC-7) scope; test must be ADDED, not just modified. Current `??` merger has undefined behavior under throw.
+**Apply**: PR-3 (OC-7) scope; test must be ADDED, not just modified. Current `??` merger has undefined behavior under throw.
 **Findings**: F-22..F-25.
 
 ### SC-08 · `upstream/policy-r5-fail-closed`
@@ -87,7 +87,7 @@ The semantic invariants the generator + plugin must hold. Real risk lives here.
 
 **Test tier**: L0 unit (generator) + L1 integration (emitted plugin)
 **Runner**: forward + simulation
-**Apply**: PR-5 scope. Generator-side test asserts diagnostic; runtime-side test asserts that even if the JSON IR is hand-edited to add `failOpen: true`, the plugin treats R5 as fail-closed (defense in depth per ciso N6).
+**Apply**: PR-4 scope. Generator-side test asserts diagnostic; runtime-side test asserts that even if the JSON IR is hand-edited to add `failOpen: true`, the plugin treats R5 as fail-closed (defense in depth per ciso N6).
 **Findings**: F-26..F-29.
 
 ### SC-09 · `upstream/policy-restricted-stickiness`
@@ -96,7 +96,7 @@ The semantic invariants the generator + plugin must hold. Real risk lives here.
 
 **Test tier**: L1 integration
 **Runner**: simulation
-**Apply**: PR-5 scope. Tests against PolicyIR with `args_from` chains; assert `effectiveSensitivity` propagates and laundering is rejected.
+**Apply**: PR-4 scope. Tests against PolicyIR with `args_from` chains; assert `effectiveSensitivity` propagates and laundering is rejected.
 **Findings**: F-30..F-32.
 
 ### SC-10 · `upstream/policy-emitted-plugin-registration` (the H6 adapter audit)
@@ -105,7 +105,7 @@ The semantic invariants the generator + plugin must hold. Real risk lives here.
 
 **Test tier**: L2 e2e
 **Runner**: simulation (with mock OC gateway)
-**Apply**: H6 adapter-audits.md must record the verdict. PR-5 scope. If audit reveals shape drift, generator must be updated BEFORE PR-5 opens.
+**Apply**: H6 adapter-audits.md must record the verdict. PR-4 scope. If audit reveals shape drift, generator must be updated BEFORE PR-4 opens.
 **Findings**: F-33..F-37.
 
 ### SC-11 · `upstream/guardrails-audit-stream-adapter` (the OTHER H6 adapter audit; B3)
@@ -114,7 +114,7 @@ The semantic invariants the generator + plugin must hold. Real risk lives here.
 
 **Test tier**: L1 integration + L2 e2e
 **Runner**: contract (round-trip)
-**Apply**: H6 adapter-audits.md must record verdict + field-by-field mapping. PR-3 scope. If mapping reveals collision, guardrails/siem formatters need update before PR-3.
+**Apply**: H6 adapter-audits.md must record verdict + field-by-field mapping. PR-2 scope. If mapping reveals collision, guardrails/siem formatters need update before PR-2.
 **Findings**: F-38..F-43.
 
 ### SC-12 · `upstream/hostile-write-then-read` (W9 deferred — runtime-gated enforcement)
@@ -125,7 +125,7 @@ The semantic invariants the generator + plugin must hold. Real risk lives here.
 
 **Test tier**: L2 e2e
 **Runner**: simulation (agent + filesystem write + plugin response)
-**Apply**: PR-3 (guardrails) + PR-5 (policy) + amendment §3 documents the model. Adapter-audits.md must call out the runtime-gated enforcement model (not write-blocked) explicitly so consumers' threat models are clear.
+**Apply**: PR-2 (guardrails) + PR-4 (policy) + amendment §3 documents the model. Adapter-audits.md must call out the runtime-gated enforcement model (not write-blocked) explicitly so consumers' threat models are clear.
 **Findings**: F-44..F-49.
 
 ### SC-13 · `upstream/oc4-stripfrontmatter-roundtrip`
@@ -165,7 +165,7 @@ The contract-level promises each package must keep.
 
 **Test tier**: L0 unit + L1 integration
 **Runner**: forward
-**Apply**: PR-3 (guardrails) scope.
+**Apply**: PR-2 (guardrails) scope.
 **Findings**: F-57..F-58.
 
 ### SC-17 · `upstream/guardrails-approval-handle-replay-resistance`
@@ -174,7 +174,7 @@ The contract-level promises each package must keep.
 
 **Test tier**: L1 integration
 **Runner**: forward
-**Apply**: PR-3 (guardrails) scope.
+**Apply**: PR-2 (guardrails) scope.
 **Findings**: F-59..F-61.
 
 ### SC-18 · `upstream/policy-generate-deterministic`
@@ -183,7 +183,7 @@ The contract-level promises each package must keep.
 
 **Test tier**: L0 unit + L1 integration
 **Runner**: forward
-**Apply**: PR-5 (policy) scope.
+**Apply**: PR-4 (policy) scope.
 **Findings**: F-62.
 
 ### SC-19 · `upstream/snap-snapshot-id-stable`
@@ -192,7 +192,7 @@ The contract-level promises each package must keep.
 
 **Test tier**: L1 integration (cross-OS matrix)
 **Runner**: forward
-**Apply**: PR-6 (snap) scope.
+**Apply**: PR-5 (snap) scope.
 **Findings**: F-63.
 
 ### SC-20 · `upstream/snap-promote-audited`
@@ -201,7 +201,7 @@ The contract-level promises each package must keep.
 
 **Test tier**: L1 integration
 **Runner**: forward
-**Apply**: PR-6 (snap) scope. Per amendment §7.2 synchronization invariant.
+**Apply**: PR-5 (snap) scope. Per amendment §7.2 synchronization invariant.
 **Findings**: F-64..F-65.
 
 ### SC-21 · `upstream/snap-policy-historical-query` (W4 deferred — temporal queries)
@@ -210,7 +210,7 @@ The contract-level promises each package must keep.
 
 **Test tier**: L2 e2e
 **Runner**: simulation (with audit chain replay)
-**Apply**: PR-6 (snap) scope. Per amendment §7.
+**Apply**: PR-5 (snap) scope. Per amendment §7.
 **Findings**: F-66..F-68.
 
 ### SC-22 · `upstream/snap-http-resolve` (covers oc:// resolution)
@@ -219,7 +219,7 @@ The contract-level promises each package must keep.
 
 **Test tier**: L1 integration
 **Runner**: contract (HTTP)
-**Apply**: PR-6 (snap) scope.
+**Apply**: PR-5 (snap) scope.
 **Findings**: F-69..F-70.
 
 ## Phase 5 · Workspace foothold (PR-1 + PR-2 — added 2026-04-27 after restructure)
@@ -356,6 +356,145 @@ Today's `JSON.parse` rejects MORE inputs than JSONC parse. So the conversion is 
 **Apply**: PR-1 scope. Documentation point, not new code.
 **Findings**: F-101.
 
+## Phase 6 · Workspace lint surface (PR-1, added 2026-04-28 per `claws-workspace-lint` plan)
+
+These scenarios validate the 13-code JSONC config lint surface. Built claws-side first in `@bic/openclaw-workspace/lint`; upstream as `@openclaw/workspace/lint` via PR-1. Detection-only at PR-1; class-by-class fixers ship in follow-up PRs per UG-upstream § 13.
+
+### SC-37 · `upstream/lint-engine-schema-DI`
+
+**Walk**: Caller passes a `JsoncDocument` to `lint()` without a `LintSchema`. AST-only rules (5: duplicate-key, trailing-whitespace, mixed-indent, trailing-comma, redacted-placeholder) fire on relevant fixtures. Schema-aware rules (8: dead-comment, unknown-field, deprecated-field, legacy-field, type-mismatch, missing-required, plugin-id-collision, secret-ref-ambiguous) silently skip. With a schema injected, all 13 rules participate.
+
+**Test tier**: L0 unit
+**Runner**: forward
+**Apply**: PR-1 scope. Engine is schema-agnostic; schema is dependency-injected.
+**Findings**: F-102, F-103.
+
+### SC-38 · `upstream/lint-oc-uri-on-every-finding`
+
+**Walk**: Every `LintFinding` carries `ocUri: 'oc://config/<encoded-path>'`. For findings with a non-empty `path`, the `ocUri` is also appended to `message` text in parens so plain-log surfaces (CI, stderr, audit chain) carry the deep-linkable form. File-level findings (empty path) use `oc://config` without trailing slash.
+
+**Test tier**: L0 unit + L1 integration
+**Runner**: forward
+**Apply**: PR-1 scope. Per UG-upstream § 12.4. Round-trip contract: `formatOcConfigUri(parseOcConfigUri(uri).path) === uri`.
+**Findings**: F-104.
+
+### SC-39 · `upstream/lint-issue-14998-schema-key-allowed`
+
+**Walk**: Config file has `"$schema": "https://docs.openclaw.ai/..."` — a legitimate JSON Schema convention added by editors for autocomplete. Schema's `knownChildKeys` includes `$schema` at root. Lint must NOT fire `OC_CFG_UNKNOWN_FIELD` on this key. Negative test — confirms the false-positive class is closed.
+
+**Test tier**: L1 integration
+**Runner**: forward (issue replay)
+**Apply**: PR-1 scope. Closes false-positive for #14998.
+**Findings**: F-105.
+
+### SC-40 · `upstream/lint-issue-20478-plugin-id-collision`
+
+**Walk**: Same plugin id appears at `channels.bluebubbles` AND `plugins.entries.bluebubbles`. Schema's `pluginIdSources(doc)` returns both. Lint fires `OC_CFG_PLUGIN_ID_COLLISION` on the second occurrence with a message citing the first occurrence's path.
+
+**Test tier**: L1 integration
+**Runner**: forward (issue replay)
+**Apply**: PR-1 scope. Closes #20478.
+**Findings**: F-106.
+
+### SC-41 · `upstream/lint-issue-22272-unrecognized-keys-with-did-you-mean`
+
+**Walk**: Config has typo'd channel-config keys: `homserver` (should be `homeserver`), `acessToken` (should be `accessToken`). Lint fires `OC_CFG_UNKNOWN_FIELD` for each, with `suggestion` populated by edit-distance match within ≤ 3.
+
+**Test tier**: L1 integration
+**Runner**: forward (issue replay)
+**Apply**: PR-1 scope. Closes #22272 (catches typos pre-startup, where doctor's --fix today doesn't actually remove them).
+**Findings**: F-107.
+
+### SC-42 · `upstream/lint-issue-31251-missing-after-clobber`
+
+**Walk**: Plugin install/uninstall flow has stripped the required `gateway.dmPolicy` key from the file. Lint fires `OC_CFG_MISSING_REQUIRED_FIELD` on the post-clobber state. (The lossless write path eliminates the clobber root cause; this lint is the fail-safe if a non-AST consumer corrupts the file.)
+
+**Test tier**: L1 integration
+**Runner**: forward (issue replay)
+**Apply**: PR-1 scope. Closes #31251 (recurrence prevention via lossless emit; lint detects already-clobbered state).
+**Findings**: F-108.
+
+### SC-43 · `upstream/lint-issue-48415-trailing-comma-mix`
+
+**Walk**: Config file has trailing comma in one container (`channels.matrix`) but not others. Today: Control UI saves invalid JSON5 in this state. Lint fires `OC_CFG_TRAILING_COMMA_INCONSISTENT` flagging the minority style so user can normalize.
+
+**Test tier**: L1 integration
+**Runner**: forward (issue replay)
+**Apply**: PR-1 scope. Closes #48415.
+**Findings**: F-109.
+
+### SC-44 · `upstream/lint-issue-59070-defaultId-typo`
+
+**Walk**: Config has root key `defaultId` — a typo for `defaultAgent`. Lint fires `OC_CFG_UNKNOWN_FIELD` with `suggestion: 'defaultAgent'`.
+
+**Test tier**: L1 integration
+**Runner**: forward (issue replay)
+**Apply**: PR-1 scope. Closes #59070 (catches before gateway rejects + permanent unsaved-changes state).
+**Findings**: F-110.
+
+### SC-45 · `upstream/lint-issue-60334-legacy-root-keys`
+
+**Walk**: Config has legacy root keys `mediaLocalRoots`, `bootstrapMaxCharsPerFile` rejected by 2026.4.2+. Schema's `legacyKeys` recognizes both with replacement `null` (no auto-migration target — these must be removed). Lint fires `OC_CFG_LEGACY_FIELD` for each.
+
+**Test tier**: L1 integration
+**Runner**: forward (issue replay)
+**Apply**: PR-1 scope. Closes #60334.
+**Findings**: F-111.
+
+### SC-46 · `upstream/lint-issue-61683-missing-gateway-required`
+
+**Walk**: Config has `gateway` object missing the required `dmPolicy` child. Lint fires `OC_CFG_MISSING_REQUIRED_FIELD` with path `['gateway', 'dmPolicy']`.
+
+**Test tier**: L1 integration
+**Runner**: forward (issue replay)
+**Apply**: PR-1 scope. Closes #61683 (catches before plugin-scoped error aborts gateway startup).
+**Findings**: F-112.
+
+### SC-47 · `upstream/lint-issue-62281-redacted-corruption`
+
+**Walk**: Config has `accessToken: "__OPENCLAW_REDACTED__"` — corruption introduced by a stringify-over-redacted-view path. Lint fires `OC_CFG_REDACTED_PLACEHOLDER` at severity `error`. The lossless write path *prevents recurrence*; lint catches any residual instances.
+
+**Test tier**: L1 integration
+**Runner**: forward (issue replay)
+**Apply**: PR-1 scope. Closes recurrence vector for the corruption class — closed historicals #13495, #44357, #62281, #21573, #13210, #12078 plus open #60917, #68423, #66832, #59945.
+**Findings**: F-113.
+
+### SC-48 · `upstream/lint-issue-62438-secret-ref-clean`
+
+**Walk**: Config has `accessToken: "${MATRIX_ACCESS_TOKEN}"` — a clean env reference. Lint must NOT fire `OC_CFG_SECRET_REF_AMBIGUOUS`. Negative test — confirms the upstream false-positive (resolved-vs-unresolved confusion) is closed.
+
+**Test tier**: L1 integration
+**Runner**: forward (issue replay)
+**Apply**: PR-1 scope. Closes #62438 false-positive.
+**Findings**: F-114.
+
+### SC-49 · `upstream/lint-issue-65565-default-agent-typo-nested`
+
+**Walk**: Config has `agents.defaults.defaultId` — typo'd at a non-root path. Lint fires `OC_CFG_UNKNOWN_FIELD` at the nested location.
+
+**Test tier**: L1 integration
+**Runner**: forward (issue replay)
+**Apply**: PR-1 scope. Closes #65565 (related to #59070 but at a different config depth).
+**Findings**: F-115.
+
+### SC-50 · `upstream/lint-issue-72872-agentRuntime-legacy`
+
+**Walk**: Config has `agents.defaults.agentRuntime: "v3"` — rejected by 2026.4.24 schema validator. Schema's `legacyKeys` at `['agents', 'defaults']` maps `agentRuntime → runtimeVersion`. Lint fires `OC_CFG_LEGACY_FIELD` with auto-migration suggestion `runtimeVersion`.
+
+**Test tier**: L1 integration
+**Runner**: forward (issue replay)
+**Apply**: PR-1 scope. Closes #72872.
+**Findings**: F-116.
+
+### SC-51 · `upstream/lint-fixer-roadmap-contract`
+
+**Walk**: PR-1 ships detection-only. Each lint code's auto-fixer ships in a separate follow-up PR per UG-upstream § 13. Contract: every fixer-PR title prefix `feat(workspace-lint): auto-fix for <CODE>`, scope ≤ 200 LOC of fix logic + ≤ 100 LOC of tests, fix-then-re-lint produces zero findings of the target code on same input.
+
+**Test tier**: L3 acceptance (per future fixer-PR)
+**Runner**: contract
+**Apply**: Future fixer-PRs scope. PR-1 only documents the contract.
+**Findings**: F-117.
+
 ---
 
 ## Phase 4 · Compliance rubric coverage (deferred from N4)
@@ -366,7 +505,7 @@ Today's `JSON.parse` rejects MORE inputs than JSONC parse. So the conversion is 
 
 **Test tier**: L3 acceptance (per-rubric coverage audit)
 **Runner**: contract
-**Apply**: H6 deliverable; lives in `compliance/README.md` per-framework gaps doc. PR-3 scope.
+**Apply**: H6 deliverable; lives in `compliance/README.md` per-framework gaps doc. PR-2 scope.
 **Findings**: F-71..F-73.
 
 ### SC-24 · `upstream/comply-rubric-hipaa-control-mapping`
@@ -375,7 +514,7 @@ Today's `JSON.parse` rejects MORE inputs than JSONC parse. So the conversion is 
 
 **Test tier**: L3 acceptance
 **Runner**: contract
-**Apply**: H6 deliverable; PR-3 scope.
+**Apply**: H6 deliverable; PR-2 scope.
 **Findings**: F-74..F-75.
 
 ---
@@ -403,8 +542,8 @@ Findings route to (per FINDINGS.md classification):
 - **Bot-preempt-checklist guide** (H6 deliverable) — F-01..F-16 (15 findings shape the checklist content)
 - **Adapter-audits guide** (H6 deliverable) — F-33..F-43 (11 findings shape the audit content)
 - **PR-2 (OC-4) scope** — F-50..F-51
-- **PR-3 (guardrails) scope** — F-38..F-49, F-57..F-61, F-71..F-75
-- **PR-4 (OC-7) scope** — F-17..F-25
-- **PR-5 (policy) scope** — F-26..F-37, F-62
-- **PR-6 (snap) scope** — F-63..F-70
+- **PR-2 (guardrails) scope** — F-38..F-49, F-57..F-61, F-71..F-75
+- **PR-3 (OC-7) scope** — F-17..F-25
+- **PR-4 (policy) scope** — F-26..F-37, F-62
+- **PR-5 (snap) scope** — F-63..F-70
 - **Pulse decomposition** — Coverage Contract Test Tier targets bumped per above table; pulse plans must reflect new targets

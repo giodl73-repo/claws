@@ -1,24 +1,24 @@
 ---
-pulse: 07
-slug: pr4-openclaw-guardrails
+pulse: 06
+slug: pr3-openclaw-guardrails
 plan: claws-openclaw-upstream
 checkpoint: cp-3
-depends_on: [01, 04, 05, 06]
+depends_on: [01, 04, 05]
 governing_roles: [claws:ciso, claws:compliance, claws:gateway-eng, claws:claws-release-eng]
 addresses_findings: [F-38, F-39, F-40, F-41, F-42, F-44, F-45, F-46, F-47, F-48, F-49, F-57, F-58, F-59, F-60, F-61, B3, W6]
 addresses_headlines: [H2]
 ---
 
-# Pulse 07 · PR-4 — `@openclaw/guardrails` Upstream PR
+# Pulse 06 · PR-2 — `@openclaw/guardrails` Upstream PR
 
 ## Objective
 
-Open PR-3 against `github.com/openclaw/openclaw` adding `@openclaw/guardrails` (GuardrailProvider + FileIngestProvider peer interfaces + 6 runtime subpaths: `/audit`, `/approvals`, `/budget`, `/identity`, `/siem`, `/secrets`). HARD DEPENDENCY: pulse 01 (adapter-audits.md) must publish the audit-stream wire-shape mapping FIRST per HC-BLOCK F-38.
+Open PR-2 against `github.com/openclaw/openclaw` adding `@openclaw/guardrails` (GuardrailProvider + FileIngestProvider peer interfaces + 6 runtime subpaths: `/audit`, `/approvals`, `/budget`, `/identity`, `/siem`, `/secrets`). HARD DEPENDENCY: pulse 01 (adapter-audits.md) must publish the audit-stream wire-shape mapping FIRST per HC-BLOCK F-38.
 
 ## Deliverables
 
 ### Upstream PR
-- [ ] PR-3 opened at `github.com/openclaw/openclaw` with title: `feat: add @openclaw/guardrails (GuardrailProvider + FileIngestProvider + 6 runtime subpaths)`
+- [ ] PR-2 opened at `github.com/openclaw/openclaw` with title: `feat: add @openclaw/guardrails (GuardrailProvider + FileIngestProvider + 6 runtime subpaths)`
 - [ ] PR description leads with core-not-extension justification: "governance must be core because adversarial-plugin defense requires gateway-level enforcement"
 - [ ] PR description embeds bot-preempt checklist + CITES `docs/upstream/guides/adapter-audits.md` § 3 (audit-stream wire-shape) verdict
 - [ ] `packages/openclaw-guardrails/` content copied + renamed from our `@bic/openclaw-guardrails`
@@ -71,7 +71,7 @@ Open PR-3 against `github.com/openclaw/openclaw` adding `@openclaw/guardrails` (
 # HARD DEPENDENCY: confirm adapter-audits.md is published with audit-stream § 3
 test -s "docs/upstream/guides/adapter-audits.md" && \
   grep -q "audit-stream wire-shape audit" "docs/upstream/guides/adapter-audits.md" && \
-  grep -q "PR-3 hard dependency" "docs/upstream/guides/adapter-audits.md" \
+  grep -q "PR-2 hard dependency" "docs/upstream/guides/adapter-audits.md" \
   || (echo "BLOCKING: adapter-audits.md § 3 missing or incomplete"; exit 1)
 
 # HARD DEPENDENCY: confirm Wave A merged
@@ -84,18 +84,18 @@ pnpm --filter @openclaw/guardrails test
 pnpm --filter @openclaw/guardrails tsc --noEmit
 
 # Bot-preempt pre-flight
-grep -iE "(third.?party|extension|skill|clawhub)" PR-3-DESCRIPTION.md \
+grep -iE "(third.?party|extension|skill|clawhub)" PR-2-DESCRIPTION.md \
   && (echo "AUTO-CLOSE RISK"; exit 1) || echo "PR description clear"
 
 # Open the PR
 gh pr create --repo openclaw/openclaw \
   --title "feat: add @openclaw/guardrails (GuardrailProvider + FileIngestProvider + 6 runtime subpaths)" \
-  --body-file PR-3-DESCRIPTION.md
+  --body-file PR-2-DESCRIPTION.md
 ```
 
 ## Post-merge
 
-Pulse 03 verification. Confirm hash-chain integrity test + approval-handle replay-resistance test + zero-`@microsoft/*` gate all green on trunk before pulse 07 (PR-4) opens.
+Pulse 03 verification. Confirm hash-chain integrity test + approval-handle replay-resistance test + zero-`@microsoft/*` gate all green on trunk before pulse 07 (PR-3) opens.
 
 ## Key Constraints
 
@@ -105,4 +105,4 @@ Pulse 03 verification. Confirm hash-chain integrity test + approval-handle repla
 
 ## Scenario codes addressed
 
-SC-11 (audit-stream adapter), SC-16 (audit append-verify), SC-17 (approval handle replay-resistance), partial SC-12 (runtime-gated enforcement requires PR-5's policy plugin too).
+SC-11 (audit-stream adapter), SC-16 (audit append-verify), SC-17 (approval handle replay-resistance), partial SC-12 (runtime-gated enforcement requires PR-4's policy plugin too).

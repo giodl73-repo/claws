@@ -1,12 +1,13 @@
 name: "Hapi the Bringer"
 deity: hapi
 epithet: the-bringer
-branch: feature/isis-the-weaver
+branch: feature/hapi-the-bringer
+worktree: "C:\\src\\claws-hapi"
 branch_note: |
-  Working on the existing isis-the-weaver branch by explicit user direction.
-  No new feature branch was cut for this wave. Hapi's commits sit alongside
-  Isis's lobster-foundation work on the same branch; merge ordering will be
-  decided at delivery time.
+  Reversed 2026-04-28: Hapi now runs in its own worktree at
+  C:\src\claws-hapi on feature/hapi-the-bringer. Earlier cohabitation
+  with feature/isis-the-weaver was unwound at user direction; the two
+  waves merge independently.
 description: |
   Land four @bic/openclaw-* packages upstream as @openclaw/* + two surgical
   OC-core PRs (OC-4 stripFrontMatter raw-preserve, OC-7 requireApproval
@@ -15,13 +16,18 @@ description: |
   Replaces the original OC-1..OC-7 plan: OC-1/2/6 dropped (workspace-file
   hooks won't land — workaround in plugin), OC-3 moved to snap-layer,
   OC-5 narrowed (custom_approval enum extension), OC-8/9/10 stay in our
-  domain. Six PRs paced two-open-at-a-time across three sub-waves to
-  respect upstream's 10-PR-per-author cap.
+  domain. SEVEN PRs paced two-open-at-a-time across four sub-waves to
+  respect upstream's 10-PR-per-author cap (restructured 2026-04-27 from
+  the original 6-PR plan when PR-2 oc://config URI scheme was added).
+  PR-1 also ships a 13-code JSONC config lint surface in @openclaw/
+  workspace/lint added 2026-04-28 per the claws-workspace-lint sister
+  plan — closes 27+ real openclaw config-failure issues.
 status: active
 startedAt: "2026-04-27T18:30:00Z"
 
 plans:
   - claws-openclaw-upstream
+  - claws-workspace-lint  # sister plan added 2026-04-28; ships JSONC lint surface in @openclaw/workspace/lint as part of PR-1
 
 preset: claws
 preset_note: |
@@ -77,13 +83,13 @@ planning:
     cp-2 (2 pulses, parallel): PR-1 @openclaw/workspace + replaceConfigFile
       lossless conversion + PR-2 oc:// URI scheme extension to config.
       Wave A — workspace foothold.
-    cp-3 (2 pulses, parallel): PR-3 OC-4 stripFrontMatter + PR-4 @openclaw/
+    cp-3 (2 pulses, parallel): PR-2 OC-4 stripFrontMatter + PR-3 @openclaw/
       guardrails. Wave B — small surgical + governance. F-38 hard dep on
       cp-1 adapter-audits.md § 3.
-    cp-4 (2 pulses, parallel): PR-5 OC-7 conjunctive merger + PR-6
+    cp-4 (2 pulses, parallel): PR-4 OC-7 conjunctive merger + PR-5
       @openclaw/policy. Wave C — merger + generator. Codemod gate validates
       internal consumers compile against widened requireApproval field.
-    cp-5 (3 pulses, three batches): PR-7 @openclaw/snap → pulse 11 scope-
+    cp-5 (3 pulses, three batches): PR-6 @openclaw/snap → pulse 11 scope-
       flip → pulse 12 acceptance fixtures. Wave D — registry + closeout.
 
     Pulse review (4 roles per skill: architect, type-system, dragon,
@@ -122,12 +128,12 @@ stages:
       - Remainder are explicit cross-references between findings
 
       HC-BLOCK applications:
-      - F-17 + F-22 → PR-4 (OC-7) scope; both addressed by array-
+      - F-17 + F-22 → PR-3 (OC-7) scope; both addressed by array-
         accumulation merger + try/catch wrapper at plugin invocation
-      - F-26 → PR-5 (policy) generator validation rule
+      - F-26 → PR-4 (policy) generator validation rule
         (packages/openclaw-policy/src/generate/validate.ts); not
         upstream-spec change
-      - F-38 → adapter-audits.md is now a HARD dependency for PR-3
+      - F-38 → adapter-audits.md is now a HARD dependency for PR-2
         opening; field-by-field mapping must be published first
 
       Test tier deltas applied to plan Coverage Contract:
@@ -253,7 +259,7 @@ stages:
         already object-only at hook-types.ts:402-410. The OC-7 fix is
         conjunctive merging at hooks.ts:889-893 (replace ?? with array
         accumulation), NOT field-widening from boolean. Plan H5, validation
-        criterion, and PR-4 scope all corrected.
+        criterion, and PR-3 scope all corrected.
       - W9 (gateway-eng): OC-1/2/6 workaround governs runtime not
         write-time. before_agent_start fires AFTER files load. Residual
         gap added as plan note; scenarios stage to write hostile-write-
@@ -268,6 +274,8 @@ stages:
 checkpoints:
   cp-1:
     slug: prep-artifacts
+    status: completed
+    completedAt: "2026-04-28T13:30:00Z"
     description: |
       Spec amendment (UG-upstream v0.2 + URI scheme extension §X), bot-
       preempt-checklist guide, adapter-audits guide, post-merge-verification
@@ -276,23 +284,116 @@ checkpoints:
     plans: [claws-openclaw-upstream]
     pulses: [01, 02, 03]
     addresses_headlines: [H6]
+    review:
+      r1:
+        date: "2026-04-28"
+        reviewers: [claws:gateway-eng, claws:compliance, claws:claws-release-eng, claws:claws-repo-steward, architect, testing]
+        verdict: REQUEST-CHANGES
+        gated_by: claws:claws-repo-steward
+        block_count: 7
+        warn_count: 30
+        note_count: 30
+        consolidated: panels/cp-1/R1-consolidated.md
+      r2:
+        date: "2026-04-28"
+        reviewers: [claws:claws-release-eng, claws:claws-repo-steward, testing]  # 3 with R1 BLOCKers re-spawned
+        verdict: APPROVE-WITH-WARNINGS  # consolidated; release-eng still APPROVE-WITH-WARNINGS due to 4 housekeeping notes (since fixed)
+        block_count: 0
+        warn_count: 0  # 4 housekeeping notes from R2 immediately addressed in same session
+        consolidated: panels/cp-1/R2-consolidated.md
+    deliverables:
+      - docs/upstream/guides/adapter-audits.md (20.3KB; closes F-38 HC-BLOCK + F-45 HC-WARN)
+      - docs/upstream/guides/bot-preempt-checklist.md (11.5KB)
+      - docs/upstream/guides/post-merge-verification.md (14.8KB)
+      - specs/drafts/UG-upstream.amend.md v0.3 (added §12 lint catalog + §13 fixer roadmap)
+      - specs/drafts/ATOMS.amend.md (16 atoms total; +7 v0.3 atoms)
+      - scenarios/scenarios.md Phase 6 (15 scenarios SC-37..SC-51)
+      - scenarios/FINDINGS.md F-102..F-117 (Phase 6 lint surface)
+      - packages/openclaw-workspace/src/{ast/jsonc,lint,path/oc-config-uri.ts}/ (~20 source files)
+      - packages/openclaw-workspace/tests/lint/ (47/47 tests green)
+      - packages/openclaw-workspace/scripts/{regen-lint-evidence.ts,scan-pr-body.sh}
+      - .craft/plans/claws-workspace-lint.md (sister plan)
   cp-2:
     slug: wave-a-workspace-foothold
+    status: ready  # cp-1 closed; cp-2 dispatch unblocked 2026-04-28
     description: |
-      PR-1 (@openclaw/workspace + replaceConfigFile lossless conversion +
-      diagnostic shape extended to accept oc:// URIs) + PR-2 (oc:// scheme
-      extended to address runtime config oc://config/...). Two PRs open
-      simultaneously, conceptually independent. Workspace earns its keep
-      THREE ways in this wave: /ast replaces JSON.stringify; /path becomes
-      the diagnostic vocabulary; /canonicalize underwrites cross-OS hashing.
-    plans: [claws-openclaw-upstream]
-    pulses: [04, 05]
+      Single upstream PR after the 2026-04-28 merge of former PR-2 into
+      PR-1: PR-1 ships @openclaw/workspace + replaceConfigFile lossless
+      conversion + dual oc:// URI scheme (workspace + config) + doctor
+      migration emit + 13-code JSONC lint surface. Workspace earns its
+      keep FOUR ways: /ast/jsonc replaces JSON.stringify; /lint closes
+      27+ real config-failure issues; /path becomes the dual diagnostic
+      vocabulary (workspace + config); /canonicalize underwrites cross-OS
+      hashing.
+    plans: [claws-openclaw-upstream, claws-workspace-lint]
+    pulses: [04]
     addresses_headlines: [H1]
     depends_on: [cp-1]
+    dispatch_plan:
+      ordering: single  # one upstream PR; following sub-waves pair-up
+      sequence:
+        - step: 0a
+          action: |
+            Integration: ensure GitHub fork exists at github.com/giodl73-repo/openclaw
+            (`gh repo fork openclaw/openclaw --clone=false --org=`, or skip if
+            already forked); add as `fork` remote in C:\src\openclaw-core
+            (`git remote add fork https://github.com/giodl73-repo/openclaw.git`,
+            or update if already set); cut feature branch
+            `feat/openclaw-workspace-lossless-config` from current trunk; apply
+            PR-1 patches (config/io.ts:1381+2082, DiagnosticLocation
+            discriminated union, doctor migration emit at
+            doctor-legacy-config.migrations.ts + doctor-config-flow.ts, copy
+            packages/openclaw-workspace from claws-hapi); commit; push to fork
+            (`git push fork feat/openclaw-workspace-lossless-config`).
+            Note: user is a maintainer of openclaw/openclaw and could push
+            directly, but is using the standard fork-and-PR flow for review
+            discipline + bot-trio scrutiny + dogfooding the wave's tooling.
+          gate: "pnpm install + build clean against trunk; existing src/config/io.test.ts + src/commands/doctor-legacy-config.migrations.test.ts + src/commands/doctor-config-flow.test.ts pass UNCHANGED; new tests added per pulse 04 TDD section pass; branch pushed to fork (not upstream)"
+        - step: 0b
+          action: "Perf bench: write tests/perf/bench.test.ts with 8 fixtures (10K/100K/1MB plain JSON + 10K/100K/1MB JSONC + lint-pass-on-100K with/without schema); 100 iterations after warmup; capture p50/p95/p99"
+          gate: "plain JSON parity-or-faster vs JSON.stringify (short-circuit verified); JSONC ≤2× stringify; 50ms ceiling on 1MB; record in tests/perf/RESULTS.md and embed in PR-1 description"
+        - step: 1
+          action: "Refresh openclaw-core to latest trunk; verify HEAD past dd643c82b doesn't break our citations"
+          gate: "git -C C:\\src\\openclaw-core fetch && verify hook-types.ts:936-942 still defines PluginHookRegistration with same shape (citation rot check per adapter-audits §5)"
+        - step: 2
+          action: "Run regen-lint-evidence.ts; print live counts; manually update EVIDENCE.md + PR-1 description if material drift"
+          gate: "advisory only — author judgment"
+        - step: 3
+          action: "Run scan-pr-body.sh against pr-drafts/PR-1.md"
+          gate: "exit 0 — NEVER-SAFE phrases absent"
+        - step: 4
+          action: |
+            Pulse 04: open PR-1 at github.com/openclaw/openclaw via
+            `gh pr create --repo openclaw/openclaw
+              --head giodl73-repo:feat/openclaw-workspace-lossless-config
+              --base main
+              --title "feat: add @openclaw/workspace + lossless replaceConfigFile + lint surface + oc://config URI vocabulary"
+              --body-file pr-drafts/PR-1.md`.
+            User has maintainer access but is following standard fork-and-PR
+            flow (head = fork, base = upstream main).
+          gate: "PR opens; CLA bot (if any) green; greptile + copilot + chatgpt-codex bot trio assigned automatically"
+        - step: 5
+          action: "Watch reviewer comments; respond per bot-preempt-checklist §5 patterns"
+          gate: "median <4h merge per upstream culture; 1 round of changes acceptable"
+        - step: 6
+          action: "Once PR-1 merges: run post-merge-verification §3.1 (H1 validators) against trunk"
+          gate: "all H1 validators GREEN; record merge SHA + baseline-hash post in docs/upstream/CHANGELOG.md per §6"
+      caveats:
+        - "If openclaw-core trunk has drifted significantly (e.g., new fields on PluginHookRegistration), STOP and re-run cp-1 adapter-audits.md before opening PR-1 (per §5 re-audit cadence)"
+        - "If scan-pr-body.sh exits non-zero, fix the NEVER-SAFE phrase before push"
+        - "If perf bench exceeds 50ms on 1MB or fails parity on plain JSON, STOP and redesign before pushing — Greptile auto-rejects unverified perf claims"
+        - "If first reviewer comment within 30 min flags r:third-party-extension, IMMEDIATELY edit PR description and reply citing the carve-out paragraph"
+      hard_gates:
+        - "F-38 HC-BLOCK closed (adapter-audits §3 audit-stream wire-shape complete) — VERIFIED at cp-1 close"
+        - "F-45 HC-WARN closed (adapter-audits §4 runtime-gated enforcement documented) — VERIFIED at cp-1 close"
+        - "lint test suite green (47/47) — VERIFIED at cp-1 close"
+        - "Integration patches build + existing upstream tests pass — VERIFIED at step 0a"
+        - "Perf bench within budget — VERIFIED at step 0b"
+        - "scan-pr-body.sh exit 0 on PR-1 description — VERIFIED IMMEDIATELY before push"
   cp-3:
     slug: wave-b-small-surgical-and-governance
     description: |
-      PR-3 (OC-4 stripFrontMatter raw-preserve, ~1 line) + PR-4
+      PR-2 (OC-4 stripFrontMatter raw-preserve, ~1 line) + PR-3
       (@openclaw/guardrails). Surgical small + heavy big paired for parallel
       review. Guardrails carries the audit-stream adapter audit; audit
       entries cite oc:// URIs natively.
@@ -303,8 +404,8 @@ checkpoints:
   cp-4:
     slug: wave-c-merger-and-generator
     description: |
-      PR-5 (OC-7 requireApproval conjunctive merger, ~5 lines + try/catch +
-      Swift model regen) + PR-6 (@openclaw/policy + openclaw policy 9-verb
+      PR-4 (OC-7 requireApproval conjunctive merger, ~5 lines + try/catch +
+      Swift model regen) + PR-5 (@openclaw/policy + openclaw policy 9-verb
       subcommand group). Same small-paired-with-big pattern. Codemod gate
       validates internal consumers compile against trunk's widened field.
     plans: [claws-openclaw-upstream]
@@ -314,7 +415,7 @@ checkpoints:
   cp-5:
     slug: wave-d-registry-and-closeout
     description: |
-      PR-7 (@openclaw/snap + openclaw snap 11-verb subcommand group + HTTP
+      PR-6 (@openclaw/snap + openclaw snap 11-verb subcommand group + HTTP
       server with /v1/resolve?uri=oc://... accepting both workspace and config
       URIs) + scope-flip internal rename + acceptance fixtures materialization.
       Final checkpoint. Closeout follows.
@@ -330,7 +431,10 @@ constraints:
   upstream_head_pinned: 5e8cc1d9c
   upstream_pr_cap: 10  # auto-close if exceeded by author
   pr_open_concurrency: 2  # match upstream's two-open-at-a-time culture
-  reviewer_trio: [greptile-apps[bot], copilot-pull-request-reviewer[bot], chatgpt-codex-connector[bot]]
+  reviewer_trio:
+    - "greptile-apps[bot]"
+    - "copilot-pull-request-reviewer[bot]"
+    - "chatgpt-codex-connector[bot]"
   baseline_hash_file: docs/.generated/plugin-sdk-api-baseline.sha256
   sdk_overview_table: docs/sdk-overview.md
   swift_models_files:
@@ -364,27 +468,18 @@ related:
   predecessor_plan: claws-upstream-contrib
   cohabits_branch_with_wave: 260424+isis-the-weaver+lobster-foundation
 
-# Branch cohabitation merge strategy (R1-consolidated finding N3).
-# Hapi shares feature/isis-the-weaver with the in-flight Isis lobster-foundation
-# wave. To prevent late delivery-stage rebase conflicts, the provisional plan is:
+# Branch cohabitation reversed 2026-04-28: Hapi runs on its own worktree at
+# C:\src\claws-hapi on feature/hapi-the-bringer. The two waves merge
+# independently; no rebase coordination required.
 branch_cohabitation:
-  provisional_merge_order:
-    1: "Isis lobster-foundation (active, ahead in implementation, expected to merge first)"
-    2: "Hapi openclaw-upstream (this wave; will rebase if Isis merges first)"
-  rationale: |
-    Isis is several checkpoints into implementation with 43 pulses already
-    decomposed; Hapi is at kickoff with 4 provisional checkpoints. Isis likely
-    completes first. Hapi commits will rebase on top of post-Isis-merge main.
-  rebase_strategy: |
-    - Hapi's spec/guide/scenario writes are wave-directory-scoped and won't
-      conflict with Isis's implementation (different package trees).
-    - Real conflict risk is only in shared root files: PLANS.md, WAVES.md,
-      CODEBASE.md, ATOMS.md, and the docs/upstream/* tree.
-    - Hapi will use git ours/theirs strategy on those at rebase time, then
-      manually re-apply Hapi's wave/plan entries.
-  pre_delivery_checkpoint:
-    description: |
-      Before Hapi advances to delivery stage, verify rebase order is still
-      sound (run `git log feature/isis-the-weaver..main --oneline` to see
-      what's already on main; if Isis already merged, rebase Hapi onto main).
-    blocking: true
+  status: reversed-2026-04-28
+  current_state: |
+    Hapi has its own worktree at C:\src\claws-hapi on
+    feature/hapi-the-bringer. Isis lobster-foundation continues on
+    feature/isis-the-weaver in C:\src\claws. The two branches share git
+    state but not working trees; merges are independent.
+  legacy_plan_archived: |
+    Earlier cohabitation plan kept here for audit. Was: Isis merges first,
+    Hapi rebases on top. New plan: each wave merges to main when ready;
+    last-merger does any conflict resolution on shared docs (PLANS.md,
+    WAVES.md, ATOMS.md, docs/upstream/*).

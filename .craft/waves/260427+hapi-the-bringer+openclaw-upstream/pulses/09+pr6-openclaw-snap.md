@@ -1,24 +1,24 @@
 ---
-pulse: 10
-slug: pr7-openclaw-snap
+pulse: 09
+slug: pr6-openclaw-snap
 plan: claws-openclaw-upstream
 checkpoint: cp-5
-depends_on: [01, 07, 08, 09]
+depends_on: [01, 06, 07, 08]
 governing_roles: [claws:gateway-eng, claws:compliance, claws:claws-release-eng]
 addresses_findings: [F-63, F-64, F-65, F-66, F-67, F-68, F-69, F-70, F-71..F-75, SS-001, SP-001..002, SHQ-001..003, SHR-001..002]
 addresses_headlines: [H4]
 ---
 
-# Pulse 10 · PR-7 — `@openclaw/snap` + `openclaw snap` Subcommand Group
+# Pulse 09 · PR-5 — `@openclaw/snap` + `openclaw snap` Subcommand Group
 
 ## Objective
 
-Open PR-6 against `github.com/openclaw/openclaw` adding `@openclaw/snap` (content-addressable snapshot registry + HTTP server) AND extending the existing `openclaw` CLI with an 11-verb `openclaw snap` subcommand group. Includes `openclaw snap resolvePolicy --at <timestamp>` for e-discovery temporal queries (per amendment §7).
+Open PR-5 against `github.com/openclaw/openclaw` adding `@openclaw/snap` (content-addressable snapshot registry + HTTP server) AND extending the existing `openclaw` CLI with an 11-verb `openclaw snap` subcommand group. Includes `openclaw snap resolvePolicy --at <timestamp>` for e-discovery temporal queries (per amendment §7).
 
 ## Deliverables
 
 ### Upstream PR
-- [ ] PR-6 opened at `github.com/openclaw/openclaw` with title: `feat: add @openclaw/snap + openclaw snap subcommand group (11 verbs + HTTP server + resolvePolicy temporal query)`
+- [ ] PR-5 opened at `github.com/openclaw/openclaw` with title: `feat: add @openclaw/snap + openclaw snap subcommand group (11 verbs + HTTP server + resolvePolicy temporal query)`
 - [ ] PR description leads with core-not-extension justification: "snapshot registry is the source of truth for which workspace bytes are in force at any moment; cannot be a third-party extension because the audit chain anchors evidence to snapshot identity"
 - [ ] PR description embeds bot-preempt checklist
 - [ ] `packages/openclaw-snap/` content copied + renamed
@@ -102,8 +102,8 @@ Open PR-6 against `github.com/openclaw/openclaw` adding `@openclaw/snap` (conten
 
 ```bash
 # HARD DEPENDENCY: Wave B merged
-gh api repos/openclaw/openclaw/pulls/<PR-3-NUMBER> --jq '.merged' | grep -q true \
-  && gh api repos/openclaw/openclaw/pulls/<PR-4-NUMBER> --jq '.merged' | grep -q true \
+gh api repos/openclaw/openclaw/pulls/<PR-2-NUMBER> --jq '.merged' | grep -q true \
+  && gh api repos/openclaw/openclaw/pulls/<PR-3-NUMBER> --jq '.merged' | grep -q true \
   || (echo "BLOCKING: Wave B not merged"; exit 1)
 
 # Local validation against trunk
@@ -120,13 +120,13 @@ curl -fsS http://localhost:8443/v1/healthz | grep -q '"status":"ok"' \
 kill $SERVE_PID
 
 # Bot-preempt pre-flight
-grep -iE "(third.?party|extension|skill|clawhub)" PR-6-DESCRIPTION.md \
+grep -iE "(third.?party|extension|skill|clawhub)" PR-5-DESCRIPTION.md \
   && (echo "AUTO-CLOSE RISK"; exit 1) || echo "PR description clear"
 
 # Open the PR
 gh pr create --repo openclaw/openclaw \
   --title "feat: add @openclaw/snap + openclaw snap subcommand group (11 verbs + HTTP + resolvePolicy)" \
-  --body-file PR-6-DESCRIPTION.md
+  --body-file PR-5-DESCRIPTION.md
 ```
 
 ## Post-merge
@@ -135,7 +135,7 @@ Pulse 03 verification. Cross-OS snapshotId matrix green; promote-audited test gr
 
 ## Key Constraints
 
-- PR-5 + PR-6 may open simultaneously (Wave C); they're runtime-independent.
+- PR-4 + PR-5 may open simultaneously (Wave C); they're runtime-independent.
 - HTTP surface is broad; reviewer may suggest split. If they do, accept; PR-6a (registry + CLI verbs) + PR-6b (HTTP server) is acceptable.
 - Compliance rubric files location upstream is TBD — confirm in PR review or co-locate in `packages/openclaw-snap/compliance/`.
 

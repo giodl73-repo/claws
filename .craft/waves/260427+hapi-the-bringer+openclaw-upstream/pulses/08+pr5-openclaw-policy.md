@@ -1,29 +1,29 @@
 ---
-pulse: 09
-slug: pr6-openclaw-policy
+pulse: 08
+slug: pr5-openclaw-policy
 plan: claws-openclaw-upstream
 checkpoint: cp-4
-depends_on: [01, 07, 08]
+depends_on: [01, 06, 07]
 governing_roles: [claws:gateway-eng, claws:compliance, claws:ciso, claws:claws-release-eng]
 addresses_findings: [F-26, F-27, F-28, F-29, F-30, F-31, F-32, F-33, F-34, F-35, F-36, F-37, F-44, F-47, F-48, F-49, F-62, POL-R5-001..004, POL-RS-001..003, ADP-PR-001..005]
 addresses_headlines: [H3]
 ---
 
-# Pulse 09 · PR-6 — `@openclaw/policy` + `openclaw policy` Subcommand Group
+# Pulse 08 · PR-4 — `@openclaw/policy` + `openclaw policy` Subcommand Group
 
 ## Objective
 
-Open PR-5 against `github.com/openclaw/openclaw` adding `@openclaw/policy` (generator: emits `policy-ir.json` + `gateway-plugin.ts` + `audit-manifest.json` into `.openclaw/policy/`) AND extending the existing `openclaw` CLI with a 9-verb `openclaw policy` subcommand group (`check`, `generate`, `watch`, `comply`, `test`, `sim`, `report`, `verify`, `diff`). Carries the emitted-plugin registration adapter audit verdict.
+Open PR-4 against `github.com/openclaw/openclaw` adding `@openclaw/policy` (generator: emits `policy-ir.json` + `gateway-plugin.ts` + `audit-manifest.json` into `.openclaw/policy/`) AND extending the existing `openclaw` CLI with a 9-verb `openclaw policy` subcommand group (`check`, `generate`, `watch`, `comply`, `test`, `sim`, `report`, `verify`, `diff`). Carries the emitted-plugin registration adapter audit verdict.
 
 ## Deliverables
 
 ### Upstream PR
-- [ ] PR-5 opened at `github.com/openclaw/openclaw` with title: `feat: add @openclaw/policy + openclaw policy subcommand group (9 verbs)`
+- [ ] PR-4 opened at `github.com/openclaw/openclaw` with title: `feat: add @openclaw/policy + openclaw policy subcommand group (9 verbs)`
 - [ ] PR description leads with core-not-extension justification: "policy generation produces the gateway plugin that enforces governance at runtime; cannot be a third-party extension because the generated plugin's registration shape must match upstream's contract"
 - [ ] PR description embeds bot-preempt checklist + CITES `docs/upstream/guides/adapter-audits.md` § 2 (emitted-plugin registration audit) verdict
 - [ ] `packages/openclaw-policy/` content copied + renamed
 - [ ] Subpath exports preserved: `/runtime`, `/types`, `/cli-handlers`, `/nonce-store`, `/seq-counter`, `/trust-set`
-- [ ] `peerDependencies`: `@openclaw/workspace`, `@openclaw/guardrails` (versions pinned to PR-1 + PR-3 merge SHAs)
+- [ ] `peerDependencies`: `@openclaw/workspace`, `@openclaw/guardrails` (versions pinned to PR-1 + PR-2 merge SHAs)
 - [ ] `package.json` `name` flipped to `@openclaw/policy`; license `MIT`
 
 ### Generator-side invariants (per F-26 HC-BLOCK + F-30)
@@ -94,8 +94,8 @@ test -s "docs/upstream/guides/adapter-audits.md" \
   || (echo "BLOCKING: adapter-audits.md § 2 missing"; exit 1)
 
 # HARD DEPENDENCY: Wave B merged + codemod gate green on trunk
-gh api repos/openclaw/openclaw/pulls/<PR-3-NUMBER> --jq '.merged' | grep -q true \
-  && gh api repos/openclaw/openclaw/pulls/<PR-4-NUMBER> --jq '.merged' | grep -q true \
+gh api repos/openclaw/openclaw/pulls/<PR-2-NUMBER> --jq '.merged' | grep -q true \
+  && gh api repos/openclaw/openclaw/pulls/<PR-3-NUMBER> --jq '.merged' | grep -q true \
   || (echo "BLOCKING: Wave B not merged"; exit 1)
 
 # Local validation against trunk
@@ -111,13 +111,13 @@ openclaw policy generate && diff -r .openclaw/policy/ /tmp/run-1/ \
   || (echo "DETERMINISM FAIL"; exit 1)
 
 # Bot-preempt pre-flight
-grep -iE "(third.?party|extension|skill|clawhub)" PR-5-DESCRIPTION.md \
+grep -iE "(third.?party|extension|skill|clawhub)" PR-4-DESCRIPTION.md \
   && (echo "AUTO-CLOSE RISK"; exit 1) || echo "PR description clear"
 
 # Open the PR
 gh pr create --repo openclaw/openclaw \
   --title "feat: add @openclaw/policy + openclaw policy subcommand group (9 verbs)" \
-  --body-file PR-5-DESCRIPTION.md
+  --body-file PR-4-DESCRIPTION.md
 ```
 
 ## Post-merge
@@ -126,7 +126,7 @@ Pulse 03 verification. Confirm deterministic-generation, R5 fail-closed, RESTRIC
 
 ## Key Constraints
 
-- 2-PRs-open culture: PR-5 + PR-6 open simultaneously (Wave C). Both runtime-independent, so order doesn't matter beyond CI.
+- 2-PRs-open culture: PR-4 + PR-5 open simultaneously (Wave C). Both runtime-independent, so order doesn't matter beyond CI.
 - Generator scope is large (9 CLI verbs, runtime defense, PolicyIR shape) — reviewers may suggest split. If they do, accept; PR-5a (generator only) + PR-5b (CLI subcommands) are an acceptable subdivision.
 - Adapter-audits.md § 2 must include CLI subcommand precedent (F-35) before this PR opens — without that citation, registration shape risk is unmitigated.
 

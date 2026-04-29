@@ -1,0 +1,48 @@
+# cp-1 Review · claws-compliance · R1
+
+**Date**: 2026-04-28
+**Verdict**: APPROVE-WITH-WARNINGS
+
+## HC-BLOCK findings (regulatory blockers — must fix before cp-2 opens)
+
+*(none)*
+
+The four scenarios-stage HC-BLOCKs that intersect compliance (F-17, F-22, F-26, F-38) are all closed at the cp-1 artifact level: the F-38 SIEM mapping table is published in `adapter-audits.md §3.3` with field-by-field coverage of all four formats; F-17/F-22 are scoped into PR-4; F-26 into PR-5. F-113 (REDACTED_PLACEHOLDER, ERROR severity) is implemented at `redacted-placeholder.ts:19-44` with frozen evidence at `tests/lint/fixtures/EVIDENCE.md`. None of the blockers below rise to HC-BLOCK *for compliance*; they would need a regulatory-failure consequence with no documented mitigation, and every gap I found has at least a documented mitigation.
+
+## HC-WARN findings (should address)
+
+| # | Title | Where | Action |
+|---|---|---|---|
+| C-W1 | `--verify` is opt-in, not default, on `snap export` | `adapter-audits.md §3.9` | An auditor who runs `snap export` without `--verify` ships a potentially-tampered chain to their SIEM with no warning beyond CLI help text. For SOC 2 CC7.2 / HIPAA §164.312(b), the tamper-evidence check should be **default-on**, with `--no-verify` as the explicit testing escape hatch. At minimum, `--verify`-absent runs should emit a warning banner and stamp `chain.unverified: true` into the export envelope so downstream SIEMs flag it. |
+| C-W2 | §4.5 forensic detail omits `actor.principalId` for unauthorized-mutation entries | `adapter-audits.md §4.5` | Listed forensic fields are oc:// URI, prev/cur hash, detection timestamp, runId. Missing: who held the workspace at the time of drift (the previous turn's actor). Without that, e-discovery can answer *what* was mutated but not *who* was the last legitimate principal — a chain-of-custody gap. Add `actor.principalId` of the prior-turn actor (best-effort; null if first turn) and `detectorPluginId` (always populated) to the §4.5 list. |
+| C-W3 | §4.3 — write-time gap is acknowledged but no audit entry records the gap-window | `adapter-audits.md §4.3, §4.4` | The model openly states "filesystem write succeeds; cron job that read the mutated file already" is not caught. For HIPAA §164.312(b) audit-controls, the gap-window itself is auditable evidence — the entry should record *the time elapsed between estimated write and detection* (where "estimated write" = file mtime at detection), so auditors can assess blast radius. Field already half-present (detection timestamp); add `mutationDetectionLagMs` derived from on-disk mtime. |
+| C-W4 | OC-5 narrowing to `custom_approval` extensible enum loses categorical SIEM filterability | `UG-upstream.amend.md §1 (OC-5 row)` | Originally five new categories (`file_ingest`, `policy_generate`, `snapshot_promote`, `snapshot_rollback`, `provider_quarantine`) were proposed; narrowed to one extensible value with the discriminator in `metadata`. SIEM ingesters that filter by top-level `eventType` (CEF `cat`) can no longer cleanly separate a `snapshot_rollback` from a `provider_quarantine` without parsing payload — exactly the class of work §3.7 says is lossy under CEF. Document the metadata-key contract (`metadata.subcategory`) and add it to the §3.3 mapping table so downstream filtering survives the narrowing. |
+| C-W5 | Bot-preempt §2 rule #1 (pluginId scoping) defends *registration* but the residual gap in `sourcePluginId` spoofing depends on `postAudit()` override (F-02 is HC-NOTE) | `bot-preempt-checklist.md §2 rule 1`, `UG-upstream.amend.md §6.3` | The spec §6.3 says `postAudit()` overrides plugin-supplied `sourcePluginId` with authenticated caller. F-02 in scenarios is HC-NOTE-level. From the compliance lens, this *is* the chain-of-custody invariant — without the override, plugin-A can stamp plugin-B's id on its own audit entry, breaking attribution for SOC 2 CC6.1. Recommend promoting F-02 to HC-WARN with an explicit L1 integration test asserting the override fires *and* the override is logged (audit-entry meta records "id-rewritten-by-postAudit") so forensic replays can detect attempted spoofs. |
+
+## HC-NOTE findings (capture for follow-up)
+
+| # | Title | Where |
+|---|---|---|
+| C-N1 | RFC 3339 ms standardization is good, but no explicit timezone-handling clause for non-UTC SIEMs | `adapter-audits.md §3.4` |
+| C-N2 | `payload.truncated: true` marker is mentioned for CEF (§3.7) but not echoed in NDJSON when long-payload + CEF co-emission strips fields downstream | `adapter-audits.md §3.7` |
+| C-N3 | Trust-set §4.3 says rotated-key grace = 24 months "regulatory retention floor" — cite which regulation (HIPAA 6yr? SOC 2 1yr?) so the floor is defensible at audit | `UG-upstream.amend.md §4.3` |
+| C-N4 | §11 N4 (rubric → control mapping) is deferred — that mapping is the *primary* compliance artifact; flag it as a cp-2 entry condition | `UG-upstream.amend.md §11 N4` |
+| C-N5 | `EVIDENCE.md` cites issues twice (#62281 listed open and closed) — minor data-quality nit but auditors notice double-counting | `tests/lint/fixtures/EVIDENCE.md` aggregate counts table |
+
+## Strengths
+
+- **§3.3 field-by-field SIEM mapping table** is the right artifact at the right depth. Every `AuditEntry` field has a destination in all four formats; the `cs3 = eventId` correlation convention (§3.6) gives downstream SIEMs clean event-grouping with zero configuration. This closes F-38.
+- **§3.7 lossy-format tradeoffs table** is honest about CEF custom-string slot limit (cs1-cs8) and the 30KB / 16KB caps. Auditors prefer documented loss with a recovery path (NDJSON canonical) over ambiguous "rich format" claims.
+- **§3.8 round-trip integrity contract** with named guaranteed-recoverable fields under lossy formats (`eventId`, `timestamp`, `eventType`, `actor.principalId`, `sourcePluginId`, both hashes) is exactly what an SOC 2 auditor wants to see — explicit fail-safe set.
+- **Approval lifecycle audit events** (§5 of UG-upstream.amend) — issued / resolved / expired — is the e-discovery substrate. The line "the audit chain is the registry" (no separate unused-handle tracker) is the right architectural call.
+- **`OC_CFG_REDACTED_PLACEHOLDER` rule** at ERROR severity, intentionally fixerless (UG-upstream §13 row 13), with 10 cited issues in `redacted-placeholder.ts:23` and frozen evidence — this is data-corruption defense done right.
+- **Hash-chained audit substrate** with `chain.previousHash` + `chain.entryHash` as mandatory non-optional fields, plus `--verify` flag (modulo C-W1) and `OC_AUDIT_CHAIN_TAMPERED <position>` exit code — tamper-evidence is real, not aspirational.
+- **Post-merge §3.2 H2 validators** explicitly run `audit-chain.test.ts` (append + verify + tamper-detect mid-stream), which is the SOC 2 CC7.2 evidence demonstrator.
+
+## Verdict reasoning
+
+From a SOC 2 lens, the wave holds up. CC7.2 (audit log coverage) has clear surface — the lint catalog (`UG-upstream §12`, 13 codes) plus the audit substrate (`adapter-audits §3`) plus the post-merge tamper-detect validator (`post-merge-verification §3.2` running `audit-chain.test.ts`) form a defensible coverage chain. CC6.1 (logical access) is partially answered via §6 mandatory `sourcePluginId` and the `postAudit()` override; my C-W5 recommendation tightens the residual spoofing gap. CC7.3 (incident response) flows through the approval-lifecycle events (§5) and `workspace.mutation.unauthorized` entries (§4.5).
+
+From a HIPAA §164.312 lens, the answer is *yes-with-caveats*. (b) audit controls are well-served by the hash-chained log + RFC 3339 ms timestamps + `--verify`. (d) information access management benefits from the `actor.principalId` mandatory mapping to CEF `suser`. The gap is §164.312(c)(1) integrity — the runtime-gated model (§4 of adapter-audits) explicitly admits files briefly exist on disk before detection, and §4.3 lists side effects as not-caught. The mitigation is documented (`snap stage on` posture for write-blocking, scenarios L1 test per W9), but auditors will want C-W3's lag-window field to quantify exposure.
+
+For e-discovery, the wave is strong: §7 temporal queries (`snap resolvePolicy --at`) directly answers "what policy was in force at T?", §5 approval-lifecycle answers "which approvals timed out unused?", and the `oc://` URIs on lint findings + audit entries give deep-linkable forensic evidence. The data-corruption defense (F-113 / REDACTED_PLACEHOLDER at ERROR) closes a class of historical issues that would otherwise produce unrecoverable evidence loss. Approve with warnings — the warnings are surface-level tightening of an already-defensible substrate, not foundational gaps.

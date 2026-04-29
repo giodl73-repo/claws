@@ -1,24 +1,24 @@
 ---
-pulse: 08
-slug: pr5-oc7-conjunctive-merger
+pulse: 07
+slug: pr4-oc7-conjunctive-merger
 plan: claws-openclaw-upstream
 checkpoint: cp-4
-depends_on: [01, 04, 05, 06, 07]
+depends_on: [01, 04, 05, 06]
 governing_roles: [claws:gateway-eng, claws:ciso, claws:claws-release-eng]
 addresses_findings: [F-17, F-18, F-19, F-20, F-21, F-22, F-23, F-24, F-25, OC7-001..005, OC7-CR-001..004]
 addresses_headlines: [H5]
 ---
 
-# Pulse 08 · PR-5 — OC-7 `requireApproval` Conjunctive Merger
+# Pulse 07 · PR-3 — OC-7 `requireApproval` Conjunctive Merger
 
 ## Objective
 
-Open PR-4 against `github.com/openclaw/openclaw` modifying `src/plugins/hooks.ts:889-893`: replace `??` (nullish coalesce, drops downstream approvals) with array accumulation. Field type at `src/plugins/hook-types.ts:402-410` bumps from `ApprovalDescriptor` to `ApprovalDescriptor | ApprovalDescriptor[]`. Conjunctive (AND) semantics across the plugin chain. Includes try/catch wrapper at plugin invocation site for crash-safety per F-22.
+Open PR-3 against `github.com/openclaw/openclaw` modifying `src/plugins/hooks.ts:889-893`: replace `??` (nullish coalesce, drops downstream approvals) with array accumulation. Field type at `src/plugins/hook-types.ts:402-410` bumps from `ApprovalDescriptor` to `ApprovalDescriptor | ApprovalDescriptor[]`. Conjunctive (AND) semantics across the plugin chain. Includes try/catch wrapper at plugin invocation site for crash-safety per F-22.
 
 ## Deliverables
 
 ### Upstream PR
-- [ ] PR-4 opened at `github.com/openclaw/openclaw` with title: `fix(plugins): make requireApproval conjunctive across plugin chain (replace ?? with array accumulation)`
+- [ ] PR-3 opened at `github.com/openclaw/openclaw` with title: `fix(plugins): make requireApproval conjunctive across plugin chain (replace ?? with array accumulation)`
 - [ ] PR description leads with core-not-extension justification: "approval merger semantics are core gateway behavior; cannot be moved to extension without breaking the chain-of-custody invariant for R5 + RESTRICTED tools"
 - [ ] PR description embeds bot-preempt checklist
 - [ ] PR description includes upgrade note for downstream consumers (the codemod migration)
@@ -94,13 +94,13 @@ pnpm tsc --noEmit
 # ... command per upstream's regen script
 
 # Bot-preempt pre-flight
-grep -iE "(third.?party|extension|skill|clawhub)" PR-4-DESCRIPTION.md \
+grep -iE "(third.?party|extension|skill|clawhub)" PR-3-DESCRIPTION.md \
   && (echo "AUTO-CLOSE RISK"; exit 1) || echo "PR description clear"
 
 # Open the PR
 gh pr create --repo openclaw/openclaw \
   --title "fix(plugins): make requireApproval conjunctive across plugin chain (replace ?? with array accumulation)" \
-  --body-file PR-4-DESCRIPTION.md
+  --body-file PR-3-DESCRIPTION.md
 ```
 
 ## Post-merge
@@ -109,9 +109,9 @@ Pulse 03 verification. Confirm merger conjunctive test green on trunk; codemod g
 
 ## Key Constraints
 
-- 2-PRs-open culture: PR-3 + PR-4 open simultaneously (Wave B). PR-5 / PR-6 cannot open until both merge.
+- 2-PRs-open culture: PR-2 + PR-3 open simultaneously (Wave B). PR-4 / PR-5 cannot open until both merge.
 - Surgical scope: ~5 lines source + try/catch + tests + Swift models + codemod note. Anything wider triggers reviewer pushback.
-- Codemod gate (W1) is mandatory: PR-5 / PR-6 build against trunk's widened field; if our internal consumers don't compile, halt before opening Wave C.
+- Codemod gate (W1) is mandatory: PR-4 / PR-5 build against trunk's widened field; if our internal consumers don't compile, halt before opening Wave C.
 
 ## Scenario codes addressed
 

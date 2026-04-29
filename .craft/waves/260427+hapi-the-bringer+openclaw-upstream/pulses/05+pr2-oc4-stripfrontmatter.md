@@ -1,24 +1,24 @@
 ---
-pulse: 06
-slug: pr3-oc4-stripfrontmatter
+pulse: 05
+slug: pr2-oc4-stripfrontmatter
 plan: claws-openclaw-upstream
 checkpoint: cp-3
-depends_on: [01, 04, 05]
+depends_on: [01, 04]
 governing_roles: [claws:gateway-eng, claws:claws-release-eng]
 addresses_findings: [F-50, F-51, OC4-001, OC4-002]
 addresses_headlines: [H5]
 ---
 
-# Pulse 06 · PR-3 — OC-4 stripFrontMatter Raw-Preserve
+# Pulse 05 · PR-2 — OC-4 stripFrontMatter Raw-Preserve
 
 ## Objective
 
-Open PR-3 against `github.com/openclaw/openclaw` modifying `src/agents/workspace.ts:91` `stripFrontMatter()` to preserve original bytes under a sibling `raw` key. Surgical change (~1 line). Non-breaking. Required for governance round-trip on templated SOUL.md / TOOLS.md.
+Open PR-2 against `github.com/openclaw/openclaw` modifying `src/agents/workspace.ts:91` `stripFrontMatter()` to preserve original bytes under a sibling `raw` key. Surgical change (~1 line). Non-breaking. Required for governance round-trip on templated SOUL.md / TOOLS.md.
 
 ## Deliverables
 
 ### Upstream PR
-- [ ] PR-3 opened at `github.com/openclaw/openclaw` with title: `fix(workspace): preserve original bytes in stripFrontMatter for round-trip`
+- [ ] PR-2 opened at `github.com/openclaw/openclaw` with title: `fix(workspace): preserve original bytes in stripFrontMatter for round-trip`
 - [ ] PR description leads with core-not-extension justification (governance round-trip is core; alternative would be a third-party fork)
 - [ ] PR description includes filled-out bot-preempt checklist
 - [ ] `src/agents/workspace.ts:91` modified: returned object gains `raw: string` field with original input bytes (sibling to `content` and `frontMatter`)
@@ -56,14 +56,14 @@ pnpm test src/agents/__tests__/workspace.test.ts
 pnpm tsc --noEmit
 
 # Bot-preempt pre-flight
-grep -iE "(third.?party|extension|skill|clawhub)" PR-3-DESCRIPTION.md \
+grep -iE "(third.?party|extension|skill|clawhub)" PR-2-DESCRIPTION.md \
   && (echo "AUTO-CLOSE RISK"; exit 1) || echo "PR description clear"
 
 # Open the PR
 git push -u origin fix/oc4-strip-frontmatter-raw
 gh pr create --repo openclaw/openclaw \
   --title "fix(workspace): preserve original bytes in stripFrontMatter for round-trip" \
-  --body-file PR-3-DESCRIPTION.md
+  --body-file PR-2-DESCRIPTION.md
 ```
 
 ## Post-merge
@@ -72,7 +72,7 @@ Run pulse 03's post-merge verification runbook. Capture merge SHA. Confirm OC-4 
 
 ## Key Constraints
 
-- 2-PRs-open culture: PR-1 + PR-3 open simultaneously (Wave A). PR-3 / PR-4 cannot open until both Wave A PRs MERGE.
+- PR-2 + PR-3 open simultaneously (Wave B / cp-3 — small surgical paired with @openclaw/guardrails). Wave A (cp-2) closes first; PR-1 must MERGE before this PR opens.
 - Surgical scope: ~1 line of source + 1 test + CHANGELOG. Anything larger triggers reviewer pushback.
 - Field name `raw` is the proposed convention; if reviewers prefer alternative (e.g., `original`, `bytes`), accept and update internal consumers.
 

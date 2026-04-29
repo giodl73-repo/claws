@@ -1,19 +1,19 @@
 ---
-pulse: 11
+pulse: 10
 slug: scope-flip-internal
 plan: claws-openclaw-upstream
 checkpoint: cp-5
-depends_on: [04, 05, 06, 07, 08, 09, 10]
+depends_on: [04, 05, 06, 07, 08, 09]
 governing_roles: [claws:claws-release-eng, claws:claws-repo-steward]
 addresses_findings: [B1 from R1-consolidated]
 addresses_headlines: [H1, H2, H3, H4]
 ---
 
-# Pulse 11 · Internal Scope-Flip — `@bic/openclaw-*` → `@openclaw/*`
+# Pulse 10 · Internal Scope-Flip — `@bic/openclaw-*` → `@openclaw/*`
 
 ## Objective
 
-Rename `@bic/openclaw-{workspace,guardrails,policy,snap}` → `@openclaw/{workspace,guardrails,policy,snap}` across this monorepo. Lands AFTER all four upstream package PRs merge (PR-1, PR-3, PR-5, PR-6) and BEFORE any `@openclaw/*` npm publish — closes the transient versioning gap per HC-BLOCK B1 from R1-consolidated.
+Rename `@bic/openclaw-{workspace,guardrails,policy,snap}` → `@openclaw/{workspace,guardrails,policy,snap}` across this monorepo. Lands AFTER all four upstream package PRs merge (PR-1, PR-2, PR-4, PR-5) and BEFORE any `@openclaw/*` npm publish — closes the transient versioning gap per HC-BLOCK B1 from R1-consolidated.
 
 This pulse is INTERNAL to our monorepo; not an upstream PR.
 
@@ -64,7 +64,7 @@ No new tests — this is a textual refactor. Verification = full workspace test 
 
 ```bash
 # HARD DEPENDENCY: all four upstream package PRs merged
-for pr in <PR-1> <PR-3> <PR-5> <PR-6>; do
+for pr in <PR-1> <PR-2> <PR-4> <PR-5>; do
   gh api repos/openclaw/openclaw/pulls/$pr --jq '.merged' | grep -q true \
     || (echo "BLOCKING: PR-$pr not merged"; exit 1)
 done
@@ -111,10 +111,10 @@ The implicit contract is "all 7 upstream PRs merge → scope-flip happens." Real
 
 | State | Action |
 |---|---|
-| All 4 package PRs (PR-1, PR-4, PR-6, PR-7) merged | Run scope-flip (all 4 packages renamed in one commit) |
+| All 4 package PRs (PR-1, PR-3, PR-5, PR-6) merged | Run scope-flip (all 4 packages renamed in one commit) |
 | 3 of 4 package PRs merged, 1 deferred upstream (e.g., needed split per maintainer) | Run scope-flip on the 3 merged packages; record deferred package in `docs/upstream/CHANGELOG.md` as "scope-flip skipped: package not yet upstream" |
 | 2 or fewer package PRs merged | DO NOT run scope-flip. Defer the entire pulse to the next wave. Record state in `docs/upstream/CHANGELOG.md`. |
-| OC-4 (PR-3) or OC-7 (PR-5) deferred | No effect on scope-flip — these are upstream-internal patches, not package renames |
+| OC-4 (PR-2) or OC-7 (PR-4) deferred | No effect on scope-flip — these are upstream-internal patches, not package renames |
 
 **Recording**: every scope-flip attempt (whether full, partial, or deferred) appends an entry to `docs/upstream/CHANGELOG.md` with the date, the four package PR merge SHAs (or "(deferred)"), and the scope-flip commit SHA (or "(deferred)"). This gives the next wave's planner a clean state to resume from.
 

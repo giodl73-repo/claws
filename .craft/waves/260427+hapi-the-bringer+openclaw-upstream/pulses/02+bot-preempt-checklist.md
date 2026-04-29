@@ -49,7 +49,7 @@ Write `docs/upstream/guides/bot-preempt-checklist.md` — operational playbook f
 
 ## TDD Tests
 
-Documentation only. Verification is human review + downstream PR-1 / PR-3 / PR-5 / PR-6 consumption.
+Documentation only. Verification is human review + downstream PR-1 / PR-2 / PR-4 / PR-5 consumption.
 
 ## Verification Gate
 

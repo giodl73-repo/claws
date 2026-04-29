@@ -13,7 +13,7 @@ addresses_headlines: [H6]
 
 ## Objective
 
-Write `docs/upstream/guides/adapter-audits.md` covering both adapter audits the wave depends on: (1) emitted-plugin registration vs current `PluginHookRegistration` shape at `openclaw-core: src/plugins/hook-types.ts:1-150`, and (2) audit-stream wire-shape mapping vs current OC audit envelope. The audit-stream mapping is a HARD dependency for PR-3 (guardrails) per HC-BLOCK F-38 — guardrails cannot open until this guide publishes the field-by-field mapping.
+Write `docs/upstream/guides/adapter-audits.md` covering both adapter audits the wave depends on: (1) emitted-plugin registration vs current `PluginHookRegistration` shape at `openclaw-core: src/plugins/hook-types.ts:1-150`, and (2) audit-stream wire-shape mapping vs current OC audit envelope. The audit-stream mapping is a HARD dependency for PR-2 (guardrails) per HC-BLOCK F-38 — guardrails cannot open until this guide publishes the field-by-field mapping.
 
 ## Deliverables
 
@@ -25,7 +25,7 @@ Write `docs/upstream/guides/adapter-audits.md` covering both adapter audits the 
     - Verdict: OK to land / shape drift detected (with required adjustments)
     - Sequential-modifying-mode vs claim-mode note (F-34)
     - CLI subcommand registration shape (F-35) — find the upstream CLI dispatcher (yargs / oclif / Commander / custom), cite entry-point file:line, sample `openclaw policy <verb>` handler registration
-  - **§3 Audit-stream wire-shape audit (PR-3 hard dependency)**
+  - **§3 Audit-stream wire-shape audit (PR-2 hard dependency)**
     - Field-by-field mapping table: our `AuditEntry` → CEF / NDJSON / syslog / SARIF
     - Timestamp granularity: RFC 3339 with milliseconds across all formats (F-39)
     - Actor identity: CEF `suser` mapping rule (F-40)
@@ -42,7 +42,7 @@ Write `docs/upstream/guides/adapter-audits.md` covering both adapter audits the 
 
 ## TDD Tests
 
-This pulse delivers documentation, not code. Verification is human review + downstream consumption (PR-3 + PR-5 both cite this guide). No automated tests.
+This pulse delivers documentation, not code. Verification is human review + downstream consumption (PR-2 + PR-4 both cite this guide). No automated tests.
 
 ## Verification Gate
 
@@ -81,7 +81,7 @@ grep -qE "re.audit|cadence" "$GUIDE" \
 
 ## Key Constraints
 
-- This guide is a HARD dependency for PR-3 opening (F-38 HC-BLOCK).
+- This guide is a HARD dependency for PR-2 opening (F-38 HC-BLOCK).
 - Cite real file:line into `C:\src\openclaw-core` HEAD `5e8cc1d9c`. Don't hand-wave.
 - The runtime-gated enforcement-model section (F-45) must say explicitly "NOT write-blocked" so consumers' threat models don't drift.
 

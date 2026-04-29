@@ -1,179 +1,194 @@
 ## Why this PR
 
-Three interfaces every enterprise host re-implements today: pre-tool-call governance, file-ingest governance, hash-chained tamper-evident audit. This PR adds `@openclaw/guardrails` — a single package shipping the two peer interfaces (`GuardrailProvider`, `FileIngestProvider`) plus six runtime subpaths covering the primitives every adopter needs.
+`src/plugins/hooks.ts:889-893`'s merger uses `??` (nullish coalesce) to combine `requireApproval` decisions from the plugin chain:
 
-The interfaces and runtime primitives are the same shapes Microsoft has been running internally for the last quarter; we're contributing them upstream so every OpenClaw host gets them, with or without us in the picture.
+```ts
+// Today (hooks.ts:889-893)
+acc?.requireApproval ?? next.requireApproval
+```
 
-## Why governance must live in core (not extension)
+This is **first-wins**: the first plugin that returns a `requireApproval` descriptor wins, and every subsequent plugin's `requireApproval` is silently dropped. For governance plugins enforcing R5 (irreversible-external) or RESTRICTED-data invariants, this is a **chain-of-custody bug** — plugin-A's approval requirement can be silently discarded by plugin-B returning no approval, leaving the agent free to act on a tool that should have required external review.
 
-Plugin-tenancy and adversarial-plugin defense require gateway-level enforcement, not extension-level. An extension-shipped guardrails package leaves the audit attribution invariant unenforceable: any plugin can claim it issued any other plugin's audit entry, and the gateway has no authoritative truth to override the claim with. Audit chain-of-custody breaks the moment a plugin can spoof another plugin's identity. Core-level guardrails fix this by overriding plugin-supplied `sourcePluginId` at the registry's `postAudit()` boundary using the authenticated caller's identity.
+This PR fixes the merger to be **conjunctive**: every plugin's `requireApproval` survives, and the companion app receives an array of `ApprovalDescriptor` — all must be approved before the action proceeds. Field type bumps from `ApprovalDescriptor` to `ApprovalDescriptor | ApprovalDescriptor[]` at `hook-types.ts:402-410`.
 
-The hash-chained audit (`/audit` subpath) layers on top of OpenClaw's existing audit stream — it doesn't replace anything. Builder-side plugins gain tamper-evidence; existing audit consumers gain integrity verification; the wire shape is preserved.
+~5 lines of merger change. Surgical. Plus a try/catch wrapper for crash-safety + Swift model regen.
+
+## Why this is core (not extension)
+
+Plugin-merger semantics belong to the gateway. An extension cannot fix the merger from outside — it would have to wrap every plugin and intercept their decisions, which doesn't compose with arbitrary other plugins. Core-side fix is the only correct fix.
 
 ## Before / after
 
-**Before** — plugin emits an audit entry:
-```ts
-auditSink.append({
-  event: 'tool_call',
-  sourcePluginId: 'plugin-A',  // any plugin can claim this
-  // ...
-});
+**Before** — three plugins, plugin-B returns approval, plugin-C returns allow:
+
+```text
+plugin-A: { decision: 'allow' }
+plugin-B: { decision: 'review', requireApproval: { title: 'R5 send-email' } }
+plugin-C: { decision: 'allow' }
+
+merger output: { decision: 'review', requireApproval: { title: 'R5 send-email' } }  // OK so far
+
+// Different ordering:
+plugin-A: { decision: 'review', requireApproval: { title: 'R5 send-email' } }
+plugin-B: { decision: 'review', requireApproval: { title: 'RESTRICTED data' } }
+plugin-C: { decision: 'allow' }
+
+merger output: { decision: 'review', requireApproval: { title: 'R5 send-email' } }
+// plugin-B's RESTRICTED-data approval requirement is LOST.
 ```
 
-Plugin-X can claim `sourcePluginId: 'plugin-Y'` in its audit emission — chain of custody breaks.
-
 **After this PR**:
-```ts
-// In ProviderRegistryImpl.postAudit() — runs at gateway, not at plugin
-postAudit(entry: AuditEntrySummary, ctx: { authenticatedPluginId: string }) {
-  const verified: AuditEntrySummary = {
-    ...entry,
-    sourcePluginId: ctx.authenticatedPluginId,  // override; plugin-supplied is hint, not truth
-  };
-  return appendToHashChain(verified);
+
+```text
+plugin-A: { decision: 'review', requireApproval: { title: 'R5 send-email' } }
+plugin-B: { decision: 'review', requireApproval: { title: 'RESTRICTED data' } }
+plugin-C: { decision: 'allow' }
+
+merger output: {
+  decision: 'review',
+  requireApproval: [
+    { title: 'R5 send-email' },
+    { title: 'RESTRICTED data' }
+  ]  // BOTH must be approved (conjunctive AND)
 }
 ```
 
-Plugin-supplied `sourcePluginId` is a hint, not ground truth. The gateway always has authoritative identity.
+Companion app receives the array; supervisor must approve each descriptor. Chain of custody preserved.
 
 ## What ships
 
-### Two peer interfaces
-
-```ts
-export interface GuardrailProvider {
-  preAuthorize(call: ToolCallEvent): Promise<Decision>;
-  postAudit(call: ToolCallEvent, result: ToolCallResult): Promise<void>;
-  getCapabilities(): ProviderCapabilities;
-}
-
-export interface FileIngestProvider {
-  beforeIngest(event: FileIngestEvent): Promise<Decision>;
-  afterIngest(event: FileIngestEvent, decision: Decision): Promise<void>;
-  getCapabilities(): ProviderCapabilities;
-}
-```
-
-Same decision vocabulary (`allow | deny | review | modify`), same composition rules (`deny > review > modify > allow`), so providers, audit, and review work uniformly across surfaces.
-
-### Six runtime subpaths
-
-| Subpath | What |
-|---|---|
-| `/audit` | Hash-chained integrity layer over OC's existing audit stream. Tamper-evident. RFC 8785 JCS canonicalization (byte-identical across platforms). |
-| `/approvals` | HITL schema. Extends OC's `requireApproval` with governance metadata (signed handles, content hash, sequence number, key id, TTL, nonce). |
-| `/budget` | Token / cost controls with 80/95/100% threshold alerts. Tenant-scoped. |
-| `/identity` | OIDC / SAML agent identity bridge. OBO token issuance. |
-| `/siem` | CEF / NDJSON / syslog / SARIF formatters. Pipe OC audit to external SIEM. |
-| `/secrets` | Pattern + entropy leak detection. `registerPattern()` for custom rules. |
-
-Each subpath is independently tree-shakable. Consumers tree-shake what they don't use.
-
-### Mandatory `sourcePluginId` on audit entries
+### The merger fix (~5 lines)
 
 ```diff
-  export interface AuditEntrySummary {
-    event: AuditEventKind;
-    timestamp: string;
-+   /** REQUIRED: plugin id of the entry's authoritative source.
-+    * Plugin-supplied is a hint; ProviderRegistryImpl.postAudit() overrides
-+    * with the authenticated caller's id for adversarial-plugin defense. */
-+   sourcePluginId: string;
-    actor?: { principal: string; identitySource: string };
-    // ... rest unchanged ...
+  // src/plugins/hooks.ts:889-893
+  function mergeBeforeToolCallResults(acc: HookResult | null, next: HookResult): HookResult {
+    return {
+      block: acc?.block ?? next.block,
+-     requireApproval: acc?.requireApproval ?? next.requireApproval,
++     requireApproval: mergeApprovals(acc?.requireApproval, next.requireApproval),
+      // ...
+    };
+  }
+
++ function mergeApprovals(
++   acc: ApprovalDescriptor | ApprovalDescriptor[] | undefined,
++   next: ApprovalDescriptor | ApprovalDescriptor[] | undefined
++ ): ApprovalDescriptor | ApprovalDescriptor[] | undefined {
++   const accArr = acc === undefined ? [] : Array.isArray(acc) ? acc : [acc];
++   const nextArr = next === undefined ? [] : Array.isArray(next) ? next : [next];
++   const combined = [...accArr, ...nextArr];
++   return combined.length === 0 ? undefined : combined.length === 1 ? combined[0] : combined;
++ }
+```
+
+### Field type widening
+
+```diff
+  // src/plugins/hook-types.ts:402-410
+  export interface BeforeToolCallHookResult {
+    block?: boolean;
+    blockReason?: string;
+    params?: Record<string, unknown>;
+-   requireApproval?: ApprovalDescriptor;
++   requireApproval?: ApprovalDescriptor | ApprovalDescriptor[];
   }
 ```
 
-Lenient mode (`--lenient`) accepts entries timestamped before this PR's adoption date without `sourcePluginId` — runtime-only flag, not a type union. Strict mode (default) rejects them.
+Note: the field was already object-only in current upstream (not `boolean` as the original v0.1 OneDrive proposal mistakenly assumed). The change here is **single-to-array adoption**, not boolean-deprecation. Codemod note covers this in the migration section below.
 
-A runtime-safe accessor is provided for code that iterates mixed audit streams:
+### Crash-safety wrapper
 
-```ts
-export function getSourcePluginId(entry: AuditEntrySummary | LegacyAuditEntry): string | undefined {
-  return 'sourcePluginId' in entry ? entry.sourcePluginId : undefined;
-}
+Per scenarios HC-BLOCK F-22 (plugin-B throws after emitting `requireApproval`):
+
+```diff
++ try {
++   const next = await plugin.beforeToolCall(event);
++   acc = mergeBeforeToolCallResults(acc, next);
++ } catch (err) {
++   auditSink.append({
++     event: 'plugin_invocation_failed',
++     sourcePluginId: plugin.id,
++     error: serializeError(err),
++   });
++   // Continue with surviving acc; don't downgrade plugin-A's approval.
++ }
 ```
 
-### Approval lifecycle audit events
+**Spec-declared resolution path** (per finding F-23): plugin-B's exception isolates that plugin. Plugin-A's `requireApproval` survives in `acc`. Downstream plugins still run. Final hook-result is the conjunctive AND of all surviving descriptors. The plugin's failure is recorded in the audit chain with `plugin_invocation_failed` for forensics. Documented in `hooks.ts` docstring.
 
-Per spec amendment §5, every approval handle now emits THREE audit events over its lifetime:
+### Swift protocol model regen
 
-- `approval_issued` at handle issue time
-- `approval_resolved` at supervisor approval / denial / modify
-- `approval_expired` at TTL expiry without resolution
+The hook-result envelope shape changes (`requireApproval` field type), so the gateway protocol Swift models regenerate:
+- `apps/macos/Sources/OpenClawProtocol/GatewayModels.swift`
+- `apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift`
 
-E-discovery query "which handles timed out unused on date X?" becomes answerable from the audit chain alone — no separate registry needed.
-
-### URI vocabulary consumed
-
-Audit entries emit `oc://...` URIs as actor / source / location fields where the URI vocabulary applies (per PR-1 + PR-2):
-
-```ts
-{
-  event: 'tool_call_reviewed',
-  location: { kind: 'uri', uri: 'oc://TOOLS.md/Tools/post-to-channel' },
-  actor: { principal: 'oc://config/channels/slack/bot-account', ... },
-  ...
-}
-```
-
-Same vocabulary editor LSPs and `snap resolve` will consume in PR-7. One vocabulary, every surface.
-
-## Adapter audit cited
-
-This PR opens with `docs/upstream/guides/adapter-audits.md § 3` (audit-stream wire-shape audit) attached. The audit documents the field-by-field mapping from our `AuditEntrySummary` to CEF / NDJSON / syslog / SARIF formatters, including:
-- Timestamp granularity: RFC 3339 with milliseconds (uniform across formats)
-- CEF `suser` mapping rule for actor identity
-- `cs3` correlation field convention for `eventId`
-- Round-trip integrity proven for every format
-- Lossy-format tradeoffs documented (CEF / syslog truncate long fields)
-
-Without this audit, the audit-stream contract is undefined and SIEM evidence chain breaks. The audit lands BEFORE this PR opens.
+Both regenerate to accept `ApprovalDescriptor | [ApprovalDescriptor]` (Swift discriminated representation).
 
 ## Test plan
 
-- [x] **F-57** Hash-chain append + verify on N=1, 10, 1000 events
-- [x] **F-58** Tamper-detection at exact tampered index
-- [x] **F-59** Replay rejected: same bytes, different `contentHash`, past TTL
-- [x] **F-60** Handle-swap rejected: modified `contentHash` rejected
-- [x] **F-61** Rotated `keyId` accepted in grace window, rejected outside
-- [x] **W6** `sourcePluginId` rejected when missing in strict mode (1 test)
-- [x] **W6** `sourcePluginId` overridden at `postAudit()` boundary (adversarial defense test)
-- [x] **§5** Approval lifecycle: issued → resolved emits both events
-- [x] **§5** Approval lifecycle: issued → TTL expires → expired event emitted
-- [x] **F-38** Audit-stream round-trip through CEF / NDJSON / syslog / SARIF; re-parse identical to original (cited from adapter-audits.md § 3)
-- [x] **F-42** `--verify` flag re-verifies chain before formatting
+- [x] **F-17** Three-plugin merger collects all `requireApproval` descriptors (HC-BLOCK)
+- [x] **F-22** Plugin-A appends approval, plugin-B throws, plugin-A's approval survives (HC-BLOCK)
+- [x] **F-24** Plugin-B throw emits `plugin_invocation_failed` audit entry with `sourcePluginId`
+- [x] **F-21** Conjunctive AND: supervisor must approve every descriptor in the array
+- [x] **F-20** Companion app receives array of `ApprovalDescriptor` not single
+- [x] **F-19** Existing tests asserting "first-wins" must update — break is the proof
+- [x] **F-25** Try/catch wrapper at right granularity (per-plugin, not per-batch)
+- [x] **F-18** Field type accepts both `ApprovalDescriptor` and `ApprovalDescriptor[]` shapes
+- [x] Internal consumers compile clean against widened field: `pnpm tsc --noEmit` passes for `@bic/openclaw-policy` and `@bic/openclaw-snap` after applying the codemod (= (1) `tsc --noEmit` succeeds AND (2) widened field is safely narrowed via `Array.isArray()` checks per code inspection)
+
+## Migration codemod (the array-coercion note)
+
+Consumers reading `hookResult.requireApproval` as a single object should now coerce:
+
+```ts
+// Before (assumes single object):
+const approval = result.requireApproval;
+if (approval) {
+  renderApproval(approval);
+}
+
+// After (handles both shapes):
+const approvals = result.requireApproval === undefined ? []
+  : Array.isArray(result.requireApproval) ? result.requireApproval
+  : [result.requireApproval];
+for (const approval of approvals) {
+  renderApproval(approval);
+}
+```
+
+**No boolean was ever in scope** — current upstream's `requireApproval` is already object-only at `hook-types.ts:402-410`. The migration is single-to-array, not boolean-to-object. This corrects the original v0.1 OneDrive proposal which mistakenly described the change as widening from `boolean`.
+
+A migration note in CHANGELOG (end-of-section per house rule) walks consumers through the codemod.
 
 ## Bot pre-empt checklist
 
 - [x] PR description leads with core-not-extension justification (above)
 - [x] No keywords trigger `r:third-party-extension` / `r:skill`
-- [x] `docs/.generated/plugin-sdk-api-baseline.sha256` refreshed
-- [x] `docs/sdk-overview.md` table updated with `@openclaw/guardrails` row
-- [x] No Swift protocol model changes (no gateway protocol surface added)
-- [x] **`sourcePluginId` is host-overridden at `postAudit()` boundary** (NEVER trusted from plugin-supplied claim — adversarial-plugin defense, see above)
-- [x] All host-boundary entries validated with Zod schema
-- [x] No generic `try/catch` in hot path; failure modes distinguished (chain-integrity vs IO vs validation)
-- [x] No duplicate helpers; intra-package shared utilities live in `src/shared/`
-- [x] Zero `@microsoft/*` imports verified by CI gate (the dedicated workflow runs on every PR)
-- [x] CHANGELOG entry appended at END of target section
+- [x] `docs/.generated/plugin-sdk-api-baseline.sha256` refreshed (hook-types.ts is public surface)
+- [x] `docs/sdk-overview.md` table NOT changed (existing entry; only field shape changed)
+- [x] **Swift protocol models regenerated** — GatewayModels.swift in both `apps/macos/...` and `apps/shared/...`
+- [x] No `pluginId`-spoofing risk introduced
+- [x] Try/catch wrapper at the right granularity (per-plugin, not per-batch); failure modes distinguished (parse / merge / IO)
+- [x] No duplicate helpers; `mergeApprovals()` is the single canonical merger
+- [x] CHANGELOG entry appended at END of target section, includes migration codemod note
 
 ## Metrics
 
-- **1 new package**: `@openclaw/guardrails` (2 interfaces + 6 subpaths + 1 runtime helper)
-- **1 mandatory field added**: `sourcePluginId` on `AuditEntrySummary`
-- **3 new audit event kinds**: `approval_issued`, `approval_resolved`, `approval_expired`
-- **15 new tests**: 8 L0 unit (subpath coverage), 5 L1 integration (audit + approval + adapter), 2 L2 e2e
+- **~5 lines source change** at `hooks.ts:889-893`
+- **1 line type widening** at `hook-types.ts:402-410`
+- **+1 helper function** (`mergeApprovals`)
+- **+1 try/catch wrapper** at plugin invocation site
+- **2 Swift model files regenerated**
+- **8 new/updated tests**: 5 L1 integration (merger semantics), 3 L0 unit (helper + types + crash-safety)
 
 ## Migration / risk
 
-**For audit-log consumers**: pre-v0.2 entries lack `sourcePluginId`. Lenient mode (default for re-verification of historical chains) accepts them. Strict mode (default for new chains) rejects them. The runtime-safe accessor `getSourcePluginId()` is provided for code that iterates mixed streams.
+**Existing tests asserting first-wins** break — that's the proof. CHANGELOG note explains the breakage is by design.
 
-**For plugin authors**: providers that rely on plugin-supplied `sourcePluginId` for self-attribution stop working — by design. The gateway always overrides at `postAudit()` boundary. Plugins that need to identify themselves in their own audit entries should use `ctx.authenticatedPluginId` from the `HostContext` (the gateway-owned ground truth).
+**Internal consumers** (Microsoft `@bic/openclaw-policy` + `@bic/openclaw-snap`) verified to compile clean against trunk's widened field via codemod gate before this PR opens.
 
-**For SIEM operators**: CEF / NDJSON / syslog / SARIF wire shapes documented in `adapter-audits.md § 3`. No surprises.
+**Companion app** receives array shape; supervisor UI may need a second pass to render multiple descriptors. Out of scope for this PR (companion is a separate repo).
 
 ---
 
-🤖 This PR was prepared with [Claude Code](https://claude.com/claude-code) as part of the `claws-openclaw-upstream` contribution wave (Hapi the Bringer · cp-3). Companion: PR-3 `fix(workspace): preserve original bytes in stripFrontMatter for round-trip`.
+🤖 This PR was prepared with [Claude Code](https://claude.com/claude-code) as part of the `claws-openclaw-upstream` contribution wave (Hapi the Bringer · cp-4). Companion: PR-5 `feat: add @openclaw/policy + openclaw policy subcommand group`.

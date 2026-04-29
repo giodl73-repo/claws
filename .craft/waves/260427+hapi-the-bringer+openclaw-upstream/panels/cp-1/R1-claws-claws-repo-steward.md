@@ -1,0 +1,50 @@
+# cp-1 Review · claws-repo-steward · R1
+
+**Date**: 2026-04-28
+**Verdict**: REQUEST-CHANGES
+
+## HC-BLOCK findings (repo-discipline blockers — must fix before cp-2 opens)
+
+| # | Title | Where | Why blocking | Action |
+|---|---|---|---|---|
+| B1 | PR-number scheme contradicts itself across spec, guides, and PROGRESS | `UG-upstream.amend.md §8`, `§9`, `PROGRESS.md` lines 56-59 vs `pr-drafts/PR-1..7.md`, `bot-preempt-checklist.md` `applies_to`, `post-merge-verification.md` `applies_to` | pr-drafts say PR-2=oc:// URI, PR-6=OC-4, PR-7=snap. `UG-upstream §8` says PR-2=OC-4. `UG-upstream §9` says "PR-1, PR-3, PR-5, PR-6 all merged at openclaw" (must be PR-1, PR-3, PR-5, PR-7 — package PRs). `PROGRESS.md` cp-2 says "PR-2 (OC-4)" and cp-4 says "PR-6 (snap)". `bot-preempt-checklist.md` says PR-6=snap, PR-7=OC-4 (inverted). Reviewers landing PRs upstream will cite the wrong number. | Pick the pr-drafts numbering as ground truth and patch UG-upstream §8/§9, PROGRESS.md cp-2..cp-4 stage list, and the two guides' `applies_to` blocks. |
+| B2 | FINDINGS.md headline tally is wrong by 50 entries | `scenarios/FINDINGS.md` lines 13-20 and `PROGRESS.md` line 167 | Headline says 67 (6 BLOCK / 28 WARN / 33 NOTE). Actual table rows: 117 (6 BLOCK / 39 WARN / 72 NOTE). HC-BLOCK is right; HC-WARN/HC-NOTE are off by 11 / 39. PROGRESS.md echoes the wrong "67 findings" headline. The wave's own narrative ("51 → 67") misrepresents the catalog. | Recount per-phase, fix tally, fix PROGRESS.md line 167. If the intent was unique-findings minus "covered by" rollups, document the methodology in the headline. |
+| B3 | UG-upstream.amend.md v0.3 frontmatter does not extend v0.2 cleanly | `specs/drafts/UG-upstream.amend.md` lines 1-15 + line 17 + lines 24-43 | `version: 0.3` but title still reads "Amendment v0.2 (DRAFT)". Reader's guide is still titled "what changed in v0.2" and lists only v0.2 sections — does NOT explain §12 (lint catalog) or §13 (fixer roadmap). User-facing reader cannot find the new sections from the Reader's guide. The single-line `v0_3_added_2026_04_28:` frontmatter key is descriptive prose stuffed into a YAML field, not a structured extension. | Update title to "v0.3 (DRAFT)", add a "What changed in v0.3" subsection to the Reader's guide listing §12 + §13 with a one-line summary each. Keep the v0.2 reader-guide content intact below it. |
+
+## HC-WARN findings (should address)
+
+| # | Title | Where | Action |
+|---|---|---|---|
+| W1 | Hook-name count drift | `docs/upstream/guides/adapter-audits.md` line 65 | Says "36 hook names total" but `hook-types.ts:70-105` enumerates 35 (`PluginHookName` union has 35 entries; `PLUGIN_HOOK_NAMES` runtime array has 35). Citation rot. Fix to 35. |
+| W2 | ATOMS.amend.md prose is stale vs its own table | `specs/drafts/ATOMS.amend.md` line 10 | Says "atoms introduced by `UG-upstream.amend.md` v0.2" but the table now adds v0.3 atoms too. Update to "v0.2 + v0.3". |
+| W3 | ATOMS.amend.md frontmatter lacks version pin | `specs/drafts/ATOMS.amend.md` lines 1-6 | UG-upstream.amend.md is v0.3; the companion atoms file has no `version` or `tracks_ug_version` field. Add a version pin so future amendments can sequence cleanly. |
+| W4 | `index.ts` namespace doc is out-of-sync with exports | `packages/openclaw-workspace/src/index.ts` lines 4-9 | JSDoc lists `/path /ast /canonicalize /staging /path-canonical` (5 subpaths) but actually exports `path, ast, jsonc, lint, canonicalize, staging, pathCanonical` (7 namespaces). Sibling guidance ("Import from the subpath you need") doesn't list `/lint` or `/ast/jsonc`. |
+| W5 | UG-upstream §13 doesn't anchor-cite §12 | `specs/drafts/UG-upstream.amend.md` lines 423-452 | §12 cites "see §13" cleanly. §13 references "the catalog entry from this section" without an explicit `§12` anchor. Reciprocal anchors are the spec convention; tighten. |
+| W6 | UG-upstream §10a numbering is anomalous | `specs/drafts/UG-upstream.amend.md` line 298 | Section is `§10a` slotted between §10 (diff summary) and §11 (open items). v0.2 added it; in v0.3 it sits awkwardly when followed by §12/§13. Either renumber linearly (§11 was open-items, §12 lint, §13 fixer) or document the suffix-letter convention in the Reader's guide. |
+| W7 | `lint/index.ts` shape mostly mirrors `path/` but skips the `Error` export | `packages/openclaw-workspace/src/lint/index.ts` lines 35-36 | Sibling `path/oc-config-uri.ts` exports `OcConfigUriError` + sibling `path/oc-path.ts` exports `OcPathError`. `lint/index.ts` re-exports types only — no `LintError` class even though rule failures (e.g., schema-aware rule with malformed schema) could surface a typed error. Either confirm intentional (lint rules return findings, never throw) and document in JSDoc, or add a `LintError` for parity with the `path/` convention. |
+
+## HC-NOTE findings (capture for follow-up)
+
+| # | Title | Where |
+|---|---|---|
+| N1 | `atom:UG/parse-emit-short-circuit` parent is `atom:UG`, not `atom:UG/lint-catalog` | `specs/drafts/ATOMS.amend.md` line 39 — short-circuit atom describes a parser/emitter behaviour that materializes inside the lint pipeline; consider re-parenting under `atom:UG/lint-catalog` or a new `atom:UG/workspace-package` for shape parity with siblings. |
+| N2 | `oc-config-uri.ts` proto vs `oc-path.ts` mature: kind/discriminator absent | `packages/openclaw-workspace/src/path/oc-config-uri.ts` line 26 — `ParsedOcConfigUri` is a single-shape interface. `oc-path.ts`'s `OcPath` is structural with optional fields. PR-DRAFT 2 promises a `ParsedOcUri` discriminated kind; the proto here doesn't yet carry one. Acceptable for proto, but flag for PR-2 alignment. |
+| N3 | Stage-rewind notes timestamp at day-grain only | `PROGRESS.md` lines 91, 161, 173 — three "Stage rewind 2026-04-28" / "landed 2026-04-28" entries within the same day; finer ordering relies on read-order. Consider HH:MM stamps when multiple rewinds land same day. |
+| N4 | `bot-preempt-checklist.md` `applies_to` PR-2 caption ("oc:// URI scheme extension to runtime config") is good — keep this convention through the renumber fix in B1. |
+| N5 | `cp-1.md` review_panel does not include `claws-repo-steward` matching the role-id used in panel filename | `checkpoints/cp-1.md` line 5 — uses `claws:claws-repo-steward` (correct), good consistency check; this passes. |
+
+## Strengths
+
+- **Citation accuracy on the load-bearing one**: `adapter-audits.md §2.1` cite `hook-types.ts:936-942` (HEAD `dd643c82b`, 2026-04-28) verified against `C:\src\openclaw-core\src\plugins\hook-types.ts` lines 936-942 — exact match, 5 fields, optional `priority`, string `source`. The most-cited line range in the wave is correct.
+- **Atom parent-link resolution**: `atom:UG/lint-severity` → `atom:UG/lint-catalog` resolves correctly inside `ATOMS.amend.md`. All seven new v0.3 atoms have parents that resolve to either `atom:UG` or `atom:UG/lint-catalog`.
+- **`oc-config-uri.ts` mirrors `oc-path.ts` style cleanly**: `OcConfigUriError extends Error` with `code` + `input` fields, identical constructor shape to `OcPathError`. Stable error codes (`OC_CFG_URI_BAD_SCHEME` etc.). Round-trip contract documented in JSDoc identical to the `oc-path.ts` pattern.
+- **EVIDENCE.md ⇆ FINDINGS.md ⇆ scenarios SC-39..SC-50 ⇆ fixture files**: cross-document consistency holds: 12 issue numbers (#14998, #20478, #22272, #31251, #48415, #59070, #60334, #61683, #62281, #62438, #65565, #72872) match across EVIDENCE.md, FINDINGS rows F-105..F-116, and `tests/lint/fixtures/issues/*.jsonc` directory listing. PR-DRAFT 1 cites the same issue table.
+- **Subpath exports in `package.json` exhaustively cover `src/` shape**: every `src/<dir>/index.ts` has a matching `./dir` export with full types/import/require triple. Convention is consistent with sibling-package patterns.
+
+## Verdict reasoning
+
+The repo-discipline picture has two sides. On the **structural** axis, the wave is in good shape: per-package conventions hold (subpath exports complete, error-class style mirrored, atom registry parent links resolve, the headline citation `hook-types.ts:936-942` is verified line-accurate against HEAD `dd643c82b`). The lint-surface artifacts (EVIDENCE.md, fixture files, scenario rows, PR-DRAFT 1 issue tables) cross-reference cleanly. The 13-rule lint engine and proto config-URI module both match sibling-package shape closely enough to land. From a "convention" lens, this wave does not erode the codebase.
+
+On the **citation-accuracy and tally-discipline** axis, the wave has slipped. The PR-numbering conflict (B1) is the most damaging: spec, PROGRESS, and the two new guides all use slightly different PR-N → artefact mappings, and the bot-preempt-checklist's `applies_to` block has PR-6 and PR-7 reversed vs the actual pr-drafts. PR descriptions opening upstream will cite whichever doc the author last read; if that lottery hits, reviewers see contradictory cross-refs and the wave loses time. The FINDINGS.md tally mismatch (B2 — 67 claimed, 117 actual rows) directly violates the "atom registries are load-bearing, citations rot the whole wave" rule from the role lens. The v0.3 frontmatter half-extension (B3) is the smaller of the three but compounds: a reader landing on `UG-upstream.amend.md` reads the title as v0.2, finds a Reader's guide that doesn't mention §12/§13, and has to scroll to §11.1 to find a single forward-pointer. Frontmatter is the contract; this contract leaks.
+
+Recommendation: **REQUEST-CHANGES**. None of these are deep architectural issues — they are mechanical disciplines (renumber, recount, retitle the Reader's guide). Fix B1/B2/B3 plus the W1 hook-name count and W4 index.ts JSDoc, and this wave clears the repo-steward bar with room to spare. Without those fixes, cp-2 opens with stale numbering threading into upstream PR descriptions and we'll be running rewrites in the implementation stage instead.

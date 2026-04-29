@@ -1,6 +1,6 @@
 ---
 spec: UG
-version: 0.2
+version: 0.3
 status: draft-amendment
 extends: CL-11
 applies_to: docs/upstream/specs/UG-upstream.md
@@ -8,18 +8,20 @@ applies_at: deploy stage of wave 260427+hapi-the-bringer+openclaw-upstream
 source_version: 0.1
 wave: 260427+hapi-the-bringer+openclaw-upstream
 drives_r1_findings: [B2, W3, W4, W6, W8, W9]
+drives_lint_plan: claws-workspace-lint
 companion_atoms_update: specs/drafts/ATOMS.amend.md
 companion_changelog_update: specs/drafts/CHANGELOG.amend.md
+v0_3_added_2026_04_28: §12 (lint catalog) + §13 (fixer roadmap) per claws-workspace-lint plan; companion-atoms update follows.
 ---
 
-# UG-upstream — Amendment v0.2 (DRAFT)
+# UG-upstream — Amendment v0.3 (DRAFT)
 
 **Extends**: CL-11
 **Source spec**: `docs/upstream/specs/UG-upstream.md` v0.1
 **Wave**: `260427+hapi-the-bringer+openclaw-upstream`
 **Status**: Draft amendment, pending review at scenarios stage
 
-## Reader's guide — what changed in v0.2
+## Reader's guide — what changed in v0.2 + v0.3
 
 v0.1 had five sections: Contribution roadmap, Decide/track/enforce+review, R5 pre-merge guard, PR sequencing, Scope-flip at publish.
 
@@ -29,15 +31,22 @@ v0.2 **reorganizes** v0.1 as follows:
 - §9 supersedes v0.1's "Scope-flip at publish"
 - v0.1's "Decide / track / enforce+review" and "R5 pre-merge guard" sections **remain in force unchanged**
 
-v0.2 **adds** §2–§7 and §10–§11 as entirely new sections covering: bot-reviewer operating constraints (§2), enforcement-model shift to runtime-gated (§3), trust-set lifecycle (§4), approval lifecycle audit events (§5), audit attribution (§6), temporal queries (§7), the diff-vs-v0.1 summary (§10), and open items deferred to scenarios stage (§11).
+v0.2 **adds** §2–§7, §10, §10a, and §11 as entirely new sections covering: bot-reviewer operating constraints (§2), enforcement-model shift to runtime-gated (§3), trust-set lifecycle (§4), approval lifecycle audit events (§5), audit attribution (§6), temporal queries (§7), the diff-vs-v0.1 summary (§10), URI scheme extension to runtime config (§10a), and open items deferred to scenarios stage (§11).
 
-The five material changes:
+v0.3 **adds** §12 and §13 covering the workspace lint diagnostic surface:
+- **§12 Workspace lint diagnostic catalog** — 13-code normative table for `@openclaw/workspace/lint`. Severity tiers (error/warn/note), AST-only vs schema-aware sources, engine semantics (schema-DI, dedup rules, sort by offset), evidence base citing 27 distinct `openclaw/openclaw` issues, `oc://config/<path>` URI weaving rules.
+- **§13 Class-by-class fixer roadmap** — 13-row table ordered by risk; PR-1 ships detection-only, each fixer ships in a separate follow-up PR. `OC_CFG_REDACTED_PLACEHOLDER` intentionally has no fixer (in-place fix would discard real secrets).
+- §11 (open items) and §11.1 (companion-guide flag) **remain in force**, with the v0.3 sections appended below.
 
-1. **Revised OC-PR roadmap** — adapts to upstream HEAD `5e8cc1d9c` after ~4785 commits of drift since the OneDrive proposal was written 2026-04-18. Six of seven original PRs are dropped, moved, or narrowed; only OC-4 and OC-7 land as surgical upstream PRs.
-2. **Bot-reviewer operating constraints** — surfaces upstream's actual review trio (Greptile + Copilot + chatgpt-codex) and the operational rules they enforce.
-3. **Enforcement-model shift** — without OC-1/OC-2 hooks, file governance is runtime-gated (via `before_agent_start`), not write-blocked. Hosts requiring write-blocking deploy `@openclaw/snap` in `stage on` posture.
-4. **Trust-set lifecycle** — addresses HC-BLOCK B2: ComplianceReport signature key rotation, versioning, and revocation policy.
-5. **Approval lifecycle audit events + audit attribution + temporal queries** — addresses HC-WARN W3, W4, W6.
+The seven material changes (across v0.2 + v0.3):
+
+1. **Revised OC-PR roadmap** — adapts to upstream HEAD `5e8cc1d9c` after ~4785 commits of drift since the OneDrive proposal was written 2026-04-18. Six of seven original PRs are dropped, moved, or narrowed; only OC-4 and OC-7 land as surgical upstream PRs. (See §1, §8, §9.)
+2. **Bot-reviewer operating constraints** — surfaces upstream's actual review trio (Greptile + Copilot + chatgpt-codex) and the operational rules they enforce. (See §2.)
+3. **Enforcement-model shift** — without OC-1/OC-2 hooks, file governance is runtime-gated (via `before_agent_start`), not write-blocked. Hosts requiring write-blocking deploy `@openclaw/snap` in `stage on` posture. (See §3.)
+4. **Trust-set lifecycle** — addresses HC-BLOCK B2: ComplianceReport signature key rotation, versioning, and revocation policy. (See §4.)
+5. **Approval lifecycle audit events + audit attribution + temporal queries** — addresses HC-WARN W3, W4, W6. (See §5–§7.)
+6. **Workspace lint diagnostic catalog** (v0.3) — 13-code surface in `@openclaw/workspace/lint`, validated against 27 real openclaw issues; data-driven justification for `@openclaw/workspace` landing in core not as extension. (See §12.)
+7. **Class-by-class fixer roadmap** (v0.3) — PR-1 ships detection-only; per-code fixer-PR contract documented for follow-up work. (See §13.)
 
 ---
 
@@ -251,21 +260,22 @@ The query walks the audit log for `snapshot_promote` / `snapshot_rollback` / `sn
 
 ## §8. Amended PR sequencing (replaces v0.1 § "PR sequencing")
 
-Cross-package changes still land in dependency order: workspace → guardrails → policy/snap → claws-sdk → consumers. The change in v0.2: pacing is **2 PRs open at a time at upstream**, which translates to three sub-waves:
+Cross-package changes still land in dependency order: workspace → guardrails → policy → snap → claws-sdk → consumers. The change in v0.2 (refined post-2026-04-27 restructure to **7 upstream PRs**): pacing is **2 PRs open at a time at upstream**, which translates to four sub-waves:
 
-1. **Wave A** (PR-1 workspace + PR-2 OC-4) — open simultaneously
-2. **Wave B** (PR-3 guardrails + PR-4 OC-7) — opens after Wave A merges
-3. **Wave C** (PR-5 policy + PR-6 snap) — opens after Wave B merges; PR-5 and PR-6 open simultaneously since runtime-independent
+1. **Wave A** (cp-2): PR-1 `@openclaw/workspace` + lint + PR-2 `oc://config/...` URI scheme extension — open simultaneously; conceptually independent so reviewers can chew on both without dependency interlock.
+2. **Wave B** (cp-3): PR-2 OC-4 stripFrontMatter raw-preserve (surgical) + PR-3 `@openclaw/guardrails` — opens after Wave A merges.
+3. **Wave C** (cp-4): PR-4 OC-7 conjunctive merger (surgical) + PR-5 `@openclaw/policy` — opens after Wave B merges.
+4. **Wave D** (cp-5): PR-6 `@openclaw/snap` (only one upstream PR in this sub-wave; cp-5 also includes the internal scope-flip and acceptance-fixture pulses, which are not upstream PRs).
 
-Out-of-order commits within a sub-wave still fail the sequencing lint.
+Out-of-order commits within a sub-wave still fail the sequencing lint. The 7-PR total respects the 10-PR-per-author cap with headroom.
 
 ---
 
 ## §9. Amended scope-flip mechanics (replaces v0.1 § "Scope-flip at publish")
 
-Per R1-consolidated finding B1, scope-flip (`@bic/openclaw-*` → `@openclaw/*` rename across our monorepo) is now **inside scope** as the closing deliverable of cp-4. The ordering invariant:
+Per R1-consolidated finding B1, scope-flip (`@bic/openclaw-*` → `@openclaw/*` rename across our monorepo) is now **inside scope** as the closing deliverable of cp-5 (per the 2026-04-27 restructure to 7 upstream PRs across 4 sub-waves). The ordering invariant:
 
-1. Four upstream package PRs (PR-1, PR-3, PR-5, PR-6) all merged at openclaw/openclaw
+1. **Four upstream package PRs all merged at openclaw/openclaw**: PR-1 (`@openclaw/workspace` + lint + oc://config URI + doctor migration emit), PR-3 (`@openclaw/guardrails`), PR-5 (`@openclaw/policy`), PR-6 (`@openclaw/snap`). Plus two surgical PRs (PR-2 OC-4 stripFrontMatter, PR-4 OC-7 conjunctive merger) which are not packages but contribute to the canonical surface the packages depend on. (Pre-2026-04-28 plan had 7 PRs with a separate PR-2 for oc://config URI scheme; that work was folded into PR-1 once the lint surface absorbed there made the split vestigial.)
 2. Internal scope-flip PR lands on this monorepo
 3. `@openclaw/*` npm publish (gated on Microsoft public-release path)
 
@@ -329,7 +339,7 @@ Doctor's diagnostic emitter (extended in PR-1) accepts location as either `{file
 
 ### §10a.4 Snap HTTP resolution
 
-`@openclaw/snap`'s HTTP server (PR-7) exposes `GET /v1/resolve?uri=oc://...` accepting BOTH forms. Workspace-file URIs resolve against the current snapshot's workspace files; config URIs resolve against the snapshot's captured runtime config.
+`@openclaw/snap`'s HTTP server (PR-6) exposes `GET /v1/resolve?uri=oc://...` accepting BOTH forms. Workspace-file URIs resolve against the current snapshot's workspace files; config URIs resolve against the snapshot's captured runtime config.
 
 ### §10a.5 Backward compatibility
 
@@ -357,5 +367,94 @@ Items deferred to scenarios stage (listed here so the scenario writer doesn't lo
 - The bot-reviewer trio + 10-PR cap + 2-open concurrency (§2.1)
 - The new bot-preempt-checklist + adapter-audits companion guides
 - The corrected OC-7 disposition (array adoption, not field-widening)
+- The lint catalog (§12) and fixer roadmap (§13) added in v0.3
 
 This update is part of the H6 deliverable bundle; the contribution-workflow guide and the new bot-preempt-checklist guide land together.
+
+---
+
+## §12. Workspace lint diagnostic catalog (NEW v0.3 — drives `claws-workspace-lint` plan H1)
+
+`@openclaw/workspace/lint` ships a normative 13-code JSONC config lint surface. Detection-only at PR-1; class-by-class fixers ship in follow-up PRs per §13. The catalog is **stable**: codes do not get renamed across point releases; new codes append.
+
+Every `LintFinding` carries:
+
+- `code: LintCode` — one of the 13 entries below
+- `severity: 'error' | 'warn' | 'note'` — fixed per code in this catalog
+- `message: string` — human-readable, with `(${ocUri})` woven in when path is non-empty
+- `location` — byte range + 1-based line/column
+- `path` — segments into the config object (string keys + numeric indices)
+- `ocUri` — `oc://config/<path>` form of `path` (always populated)
+- `suggestion?` — did-you-mean / replacement (when applicable)
+
+### §12.1 Code table
+
+| Code | Severity | Source | Description |
+|---|---|---|---|
+| `OC_CFG_DUPLICATE_KEY` | warn | AST | Same key appears twice in same object; later occurrence silently overrides |
+| `OC_CFG_TRAILING_WHITESPACE` | note | AST | Lines with trailing whitespace |
+| `OC_CFG_MIXED_INDENT` | note | AST | File mixes tabs and spaces in indentation |
+| `OC_CFG_TRAILING_COMMA_INCONSISTENT` | note | AST | Some containers in file have trailing commas, others don't |
+| `OC_CFG_REDACTED_PLACEHOLDER` | error | AST | Value contains `__OPENCLAW_REDACTED__` sentinel — redacted view was serialized back to disk |
+| `OC_CFG_DEAD_COMMENT` | note | Schema + AST | Comment precedes a no-longer-recognized field (post-migration cleanup) |
+| `OC_CFG_UNKNOWN_FIELD` | warn | Schema + AST | Child key not in schema; emits did-you-mean suggestion when within edit-distance ≤ 3 |
+| `OC_CFG_DEPRECATED_FIELD` | warn | Schema | Key marked deprecated; replacement suggested when available |
+| `OC_CFG_LEGACY_FIELD` | warn | Schema | Key migrated away with auto-rewriter available; `doctor --fix` will rewrite |
+| `OC_CFG_TYPE_MISMATCH` | warn | Schema + AST | Value's runtime kind differs from schema kind (`null` always satisfies optional fields) |
+| `OC_CFG_MISSING_REQUIRED_FIELD` | warn | Schema | Schema-required key absent at this object; gateway will reject at startup |
+| `OC_CFG_PLUGIN_ID_COLLISION` | warn | Schema + AST | Same plugin id declared at two distinct sources (e.g. `channels.<x>` AND `plugins.entries.<x>`) |
+| `OC_CFG_SECRET_REF_AMBIGUOUS` | note | Schema + AST | Value at secret-bearing path looks like a partial env reference (`$VAR` without braces) |
+
+### §12.2 Engine semantics
+
+- **Schema is dependency-injected.** AST-only rules fire on every parse. Schema-aware rules consume a `LintSchema` interface (six accessors: `kindOf`, `knownChildKeys`, `requiredChildKeys`, `deprecatedKeys`, `legacyKeys`, `pluginIdSources`). Without a schema injected, schema-aware rules silently skip — the engine is not opinionated about schema source (Zod, JSON Schema, hand-authored).
+- **`OC_CFG_UNKNOWN_FIELD` deduplication.** Keys covered by `deprecatedKeys` or `legacyKeys` are skipped by the unknown-field rule, so a deprecated key fires `OC_CFG_DEPRECATED_FIELD` exclusively.
+- **`OC_CFG_TYPE_MISMATCH` and `null`.** A null value matches any expected kind, by design — null is the universal "absent / explicitly-unset" signal.
+- **`OC_CFG_TRAILING_COMMA_INCONSISTENT`** reports on the *minority* style only; reading "this container is the minority" gives the user a direct cleanup hint.
+- **`OC_CFG_PLUGIN_ID_COLLISION`** reports on every occurrence after the first so the user sees both sites; renderers may group on `code` for one-line summaries.
+- **Findings are sorted by source offset** so renderers walk linearly without resort.
+
+### §12.3 Evidence base
+
+Each evidence-backed code has at least one issue from `openclaw/openclaw` motivating it. Frozen snapshot lives at `tests/lint/fixtures/EVIDENCE.md` in the workspace package. The advisory script `scripts/regen-lint-evidence.ts` prints live open/closed counts to stdout for human comparison before push; the wave authors maintain `EVIDENCE.md` and PR-1 citations by hand based on the printed delta.
+
+Issues cited (2026-04-28 pull): #14998, #20478, #22272, #31251, #48415, #59070, #60334, #61683, #62281, #62438, #65565, #72872, plus closed-historical #13495, #44357, #62281, #21573, #13210, #12078, #44943, #62182. **27 distinct issue numbers across 7 evidence-backed bug classes.**
+
+### §12.4 `oc://config/<path>` URI weaving
+
+Every finding with a non-empty `path` produces an `ocUri` of form `oc://config/<encoded segments>` (numeric segments stay as numbers; string segments percent-encoded via `encodeURIComponent`). The URI is also appended to `message` text in parens so plain-log surfaces (CI logs, stderr, audit events) carry the deep-linkable form even when structured fields aren't rendered.
+
+The `oc://config/...` URI shape is the proto-canonicalization PR-2 formalizes. Until PR-2 lands, lint findings are the only first-party emitter; downstream consumers (LSP, doctor, audit chain) wire in via PR-2's surface.
+
+---
+
+## §13. Class-by-class fixer roadmap (NEW v0.3)
+
+PR-1 ships *detection only* for all 13 codes. Each fixer ships in a separate follow-up PR — small blast radius, easy to revert, easy to review. Roadmap order is rough cost order, not severity order.
+
+| Order | Code | Fixer scope | Risk |
+|---|---|---|---|
+| 1 | `OC_CFG_TRAILING_WHITESPACE` | Strip trailing whitespace per line | Low — bytes-only, no semantics |
+| 2 | `OC_CFG_LEGACY_FIELD` | Rename key at AST node; preserve all surrounding bytes | Low — well-defined per code |
+| 3 | `OC_CFG_TRAILING_COMMA_INCONSISTENT` | Normalize to majority style; user can override via `.editorconfig`-style hint | Low — opt-in via flag at first |
+| 4 | `OC_CFG_DEAD_COMMENT` | Remove or relocate comment with confirmation | Medium — comment intent ambiguous |
+| 5 | `OC_CFG_DEPRECATED_FIELD` | Rename key; behaviour-preserving for known one-to-one renames | Medium — multi-key renames need per-code logic |
+| 6 | `OC_CFG_UNKNOWN_FIELD` | Apply did-you-mean suggestion (under `--fix-typos` flag) | Medium — false positives at edit-distance 3 |
+| 7 | `OC_CFG_DUPLICATE_KEY` | Drop one occurrence (first or last, user-selectable) | Medium — semantic intent unclear without user input |
+| 8 | `OC_CFG_MIXED_INDENT` | Normalize to one style; full file rewrite | Higher — bytes-many; round-trip must hold |
+| 9 | `OC_CFG_PLUGIN_ID_COLLISION` | Suggest rename; user must decide which source wins | Higher — semantic; defers to user |
+| 10 | `OC_CFG_TYPE_MISMATCH` | Coerce when safe (`"42"` → `42`); error otherwise | Higher — coercion can change semantics |
+| 11 | `OC_CFG_MISSING_REQUIRED_FIELD` | Insert with schema-default; user reviews | Higher — defaults can mask intent |
+| 12 | `OC_CFG_SECRET_REF_AMBIGUOUS` | Wrap `$VAR` → `${VAR}` with confirmation | Higher — false-positive risk on intentional literals |
+| 13 | `OC_CFG_REDACTED_PLACEHOLDER` | **NO FIXER**. Restore from backup is the only safe response | N/A — fixing in-place would discard real secrets |
+
+### §13.1 Fixer-PR contract
+
+Every fixer-PR follows the same shape:
+
+- Title: `feat(workspace-lint): auto-fix for <CODE>`
+- Scope: one code; ≤ 200 LOC of fix logic; ≤ 100 LOC of tests
+- Tests: at minimum, fix-then-re-lint produces zero findings of the target code on the same input; every existing test in this PR's suite still passes
+- Description: cite the catalog entry from this section; cite the issue numbers the fix closes (if any)
+
+`OC_CFG_REDACTED_PLACEHOLDER` is intentionally left without a fixer — the data is already lost when the placeholder lands in the file. The lint *catches* the corruption; only `snap rollback` or backup restore fixes it.

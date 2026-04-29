@@ -1,194 +1,126 @@
 ## Why this PR
 
-`src/plugins/hooks.ts:889-893`'s merger uses `??` (nullish coalesce) to combine `requireApproval` decisions from the plugin chain:
+Today, a host that wants to enforce "R5 (irreversible-external) tools always require external approval" or "RESTRICTED data never leaks through public-broadcast tools" has to hand-write provider code per tool, per workspace, per host. The provider code is full of conditionals, drifts as TOOLS.md changes, and silently gets out of sync with the workspace's authoritative declarations.
 
-```ts
-// Today (hooks.ts:889-893)
-acc?.requireApproval ?? next.requireApproval
-```
+This PR adds `@openclaw/policy` — a generator that reads the workspace's authoritative files (SOUL.md, TOOLS.md, AGENTS.md, etc.) and emits a runtime gateway plugin into `.openclaw/policy/`. The plugin is a PolicyIR interpreter, not a pile of tool-specific `if`s. Lookups + invariants do most of the work. SOUL.md deny rules, TOOLS.md provenance declarations, and AGENTS.md boundaries become **enforceable**, not aspirational.
 
-This is **first-wins**: the first plugin that returns a `requireApproval` descriptor wins, and every subsequent plugin's `requireApproval` is silently dropped. For governance plugins enforcing R5 (irreversible-external) or RESTRICTED-data invariants, this is a **chain-of-custody bug** — plugin-A's approval requirement can be silently discarded by plugin-B returning no approval, leaving the agent free to act on a tool that should have required external review.
+Also adds a 9-verb `openclaw policy` subcommand group to the existing `openclaw` CLI.
 
-This PR fixes the merger to be **conjunctive**: every plugin's `requireApproval` survives, and the companion app receives an array of `ApprovalDescriptor` — all must be approved before the action proceeds. Field type bumps from `ApprovalDescriptor` to `ApprovalDescriptor | ApprovalDescriptor[]` at `hook-types.ts:402-410`.
+## Why governance must live in core (not extension)
 
-~5 lines of merger change. Surgical. Plus a try/catch wrapper for crash-safety + Swift model regen.
+The generator emits a gateway plugin that registers via `PluginHookRegistration` — the same registration shape every other gateway plugin uses. An extension-shipped generator would still emit a plugin that registers against core's hook surface, so the only question is "where does the generator code live?" Core is the right answer because:
 
-## Why this is core (not extension)
-
-Plugin-merger semantics belong to the gateway. An extension cannot fix the merger from outside — it would have to wrap every plugin and intercept their decisions, which doesn't compose with arbitrary other plugins. Core-side fix is the only correct fix.
-
-## Before / after
-
-**Before** — three plugins, plugin-B returns approval, plugin-C returns allow:
-
-```text
-plugin-A: { decision: 'allow' }
-plugin-B: { decision: 'review', requireApproval: { title: 'R5 send-email' } }
-plugin-C: { decision: 'allow' }
-
-merger output: { decision: 'review', requireApproval: { title: 'R5 send-email' } }  // OK so far
-
-// Different ordering:
-plugin-A: { decision: 'review', requireApproval: { title: 'R5 send-email' } }
-plugin-B: { decision: 'review', requireApproval: { title: 'RESTRICTED data' } }
-plugin-C: { decision: 'allow' }
-
-merger output: { decision: 'review', requireApproval: { title: 'R5 send-email' } }
-// plugin-B's RESTRICTED-data approval requirement is LOST.
-```
-
-**After this PR**:
-
-```text
-plugin-A: { decision: 'review', requireApproval: { title: 'R5 send-email' } }
-plugin-B: { decision: 'review', requireApproval: { title: 'RESTRICTED data' } }
-plugin-C: { decision: 'allow' }
-
-merger output: {
-  decision: 'review',
-  requireApproval: [
-    { title: 'R5 send-email' },
-    { title: 'RESTRICTED data' }
-  ]  // BOTH must be approved (conjunctive AND)
-}
-```
-
-Companion app receives the array; supervisor must approve each descriptor. Chain of custody preserved.
+1. The emitted plugin's registration shape must track core's `PluginHookRegistration` exactly. Core-side generator stays in lockstep automatically.
+2. Generation-time invariants (R5 never fail-open; RESTRICTED stickiness) are enforced at the same code-review boundary that owns the runtime invariants. Splitting them creates drift.
+3. The 9-verb `openclaw policy` subcommand group sits at top-level alongside `openclaw doctor` and `openclaw update` — extension subcommands can't share that namespace.
 
 ## What ships
 
-### The merger fix (~5 lines)
+### `@openclaw/policy` package
 
-```diff
-  // src/plugins/hooks.ts:889-893
-  function mergeBeforeToolCallResults(acc: HookResult | null, next: HookResult): HookResult {
-    return {
-      block: acc?.block ?? next.block,
--     requireApproval: acc?.requireApproval ?? next.requireApproval,
-+     requireApproval: mergeApprovals(acc?.requireApproval, next.requireApproval),
-      // ...
-    };
-  }
+Generator + runtime helpers + 9-verb CLI handlers.
 
-+ function mergeApprovals(
-+   acc: ApprovalDescriptor | ApprovalDescriptor[] | undefined,
-+   next: ApprovalDescriptor | ApprovalDescriptor[] | undefined
-+ ): ApprovalDescriptor | ApprovalDescriptor[] | undefined {
-+   const accArr = acc === undefined ? [] : Array.isArray(acc) ? acc : [acc];
-+   const nextArr = next === undefined ? [] : Array.isArray(next) ? next : [next];
-+   const combined = [...accArr, ...nextArr];
-+   return combined.length === 0 ? undefined : combined.length === 1 ? combined[0] : combined;
-+ }
+**Three artifacts emitted into `.openclaw/policy/` per `openclaw policy generate`:**
+1. `policy-ir.json` — declarative IR (content-addressable, versioned)
+2. `gateway-plugin.ts` — executable TypeScript that registers via `PluginHookRegistration` to enforce policy at runtime
+3. `audit-manifest.json` — declared event taxonomy mapped to OC's exec-approval categories
+
+Deterministic: same workspace inputs → byte-identical output. Three runs of `generate` produce three identical artifact sets.
+
+### Generation-time invariants enforced
+
+The generator refuses to produce artifacts that would break invariants:
+
+- **R5 never fail-open** — TOOLS.md declaring `riskLevel: R5` + `failOpen: true` is rejected at generate time with `oc://TOOLS.md/Tools/<name>` URI in the diagnostic
+- **RESTRICTED stickiness through `args_from`** — chains that would launder RESTRICTED data through a public-broadcast tool are rejected
+- **`IRREVERSIBLE_EXTERNAL` capability clamps to R5 minimum** — a tool declared R3 + IRREVERSIBLE_EXTERNAL becomes R5 effective
+
+If the workspace declares a tool that violates an invariant, `openclaw policy generate` exits non-zero with a diagnostic — does NOT emit a plugin that would.
+
+### Runtime defense-in-depth
+
+The emitted plugin treats R5 as fail-closed at runtime regardless of the IR's `failOpen` flag — defense against hand-edited JSON IR. Even if a downstream consumer modifies `policy-ir.json` to add `failOpen: true` on an R5 tool, the runtime plugin overrides.
+
+### CLI subcommand group (9 verbs)
+
+```
+openclaw policy check [--file SOUL.md]                   # parse + validate; diagnostics only
+openclaw policy generate                                 # write .openclaw/policy/{policy-ir.json, gateway-plugin.ts, audit-manifest.json}
+openclaw policy watch                                    # re-run check on save
+openclaw policy comply [--rubric soc2|hipaa]             # rubric eval → signed ComplianceReport
+openclaw policy test [--scenarios path/]                 # YAML scenarios against current workspace
+openclaw policy sim [--port 8443]                        # local mock OC gateway (agent-facing)
+openclaw policy report [--format md|html|pdf]            # render compliance / audit / snapshot-diff
+openclaw policy verify                                    # audit-chain integrity check
+openclaw policy diff <id1> <id2>                         # semantic diff of two PolicyIRs
 ```
 
-### Field type widening
+CLI handler shape matches upstream's existing dispatcher (per adapter-audits.md § 2 — see "Adapter audit cited" below).
 
-```diff
-  // src/plugins/hook-types.ts:402-410
-  export interface BeforeToolCallHookResult {
-    block?: boolean;
-    blockReason?: string;
-    params?: Record<string, unknown>;
--   requireApproval?: ApprovalDescriptor;
-+   requireApproval?: ApprovalDescriptor | ApprovalDescriptor[];
-  }
-```
+### Runtime-gated enforcement model
 
-Note: the field was already object-only in current upstream (not `boolean` as the original v0.1 OneDrive proposal mistakenly assumed). The change here is **single-to-array adoption**, not boolean-deprecation. Codemod note covers this in the migration section below.
+Per spec amendment §3, OC-1/OC-2 file-ingest hooks were dropped from the contribution wave. Workspace-file governance happens at agent runtime via `before_agent_start`, not at file-write time. The emitted plugin compares the workspace's current `snapshotId` against the last promoted snapshot's id; emits `requireApproval` when drift detected; agent stalls until reviewer approves.
 
-### Crash-safety wrapper
+This shifts enforcement from "write-time prevention" to "runtime gating." Hosts that need write-blocking deploy `@openclaw/snap` in `stage on` posture (see PR-6).
 
-Per scenarios HC-BLOCK F-22 (plugin-B throws after emitting `requireApproval`):
+### URI vocabulary consumed
 
-```diff
-+ try {
-+   const next = await plugin.beforeToolCall(event);
-+   acc = mergeBeforeToolCallResults(acc, next);
-+ } catch (err) {
-+   auditSink.append({
-+     event: 'plugin_invocation_failed',
-+     sourcePluginId: plugin.id,
-+     error: serializeError(err),
-+   });
-+   // Continue with surviving acc; don't downgrade plugin-A's approval.
-+ }
-```
+Policy diagnostics emit `oc://...` URIs as locations:
+- `oc://TOOLS.md/Tools/send-email/args_from` — workspace-file diagnostic
+- `oc://config/policy/key-registry` — runtime-config diagnostic (per PR-2)
 
-**Spec-declared resolution path** (per finding F-23): plugin-B's exception isolates that plugin. Plugin-A's `requireApproval` survives in `acc`. Downstream plugins still run. Final hook-result is the conjunctive AND of all surviving descriptors. The plugin's failure is recorded in the audit chain with `plugin_invocation_failed` for forensics. Documented in `hooks.ts` docstring.
+Same vocabulary editor LSPs and audit logs consume.
 
-### Swift protocol model regen
+## Adapter audit cited
 
-The hook-result envelope shape changes (`requireApproval` field type), so the gateway protocol Swift models regenerate:
-- `apps/macos/Sources/OpenClawProtocol/GatewayModels.swift`
-- `apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift`
-
-Both regenerate to accept `ApprovalDescriptor | [ApprovalDescriptor]` (Swift discriminated representation).
+This PR opens with `docs/upstream/guides/adapter-audits.md § 2` (emitted-plugin registration audit) attached. The audit verifies that the generated `gateway-plugin.ts` registers cleanly via current upstream's `PluginHookRegistration` shape (no claim-mode vs sequential-modifying-mode mismatches; CLI subcommand registration follows upstream's existing dispatcher precedent).
 
 ## Test plan
 
-- [x] **F-17** Three-plugin merger collects all `requireApproval` descriptors (HC-BLOCK)
-- [x] **F-22** Plugin-A appends approval, plugin-B throws, plugin-A's approval survives (HC-BLOCK)
-- [x] **F-24** Plugin-B throw emits `plugin_invocation_failed` audit entry with `sourcePluginId`
-- [x] **F-21** Conjunctive AND: supervisor must approve every descriptor in the array
-- [x] **F-20** Companion app receives array of `ApprovalDescriptor` not single
-- [x] **F-19** Existing tests asserting "first-wins" must update — break is the proof
-- [x] **F-25** Try/catch wrapper at right granularity (per-plugin, not per-batch)
-- [x] **F-18** Field type accepts both `ApprovalDescriptor` and `ApprovalDescriptor[]` shapes
-- [x] Internal consumers compile clean against widened field: `pnpm tsc --noEmit` passes for `@bic/openclaw-policy` and `@bic/openclaw-snap` after applying the codemod (= (1) `tsc --noEmit` succeeds AND (2) widened field is safely narrowed via `Array.isArray()` checks per code inspection)
-
-## Migration codemod (the array-coercion note)
-
-Consumers reading `hookResult.requireApproval` as a single object should now coerce:
-
-```ts
-// Before (assumes single object):
-const approval = result.requireApproval;
-if (approval) {
-  renderApproval(approval);
-}
-
-// After (handles both shapes):
-const approvals = result.requireApproval === undefined ? []
-  : Array.isArray(result.requireApproval) ? result.requireApproval
-  : [result.requireApproval];
-for (const approval of approvals) {
-  renderApproval(approval);
-}
-```
-
-**No boolean was ever in scope** — current upstream's `requireApproval` is already object-only at `hook-types.ts:402-410`. The migration is single-to-array, not boolean-to-object. This corrects the original v0.1 OneDrive proposal which mistakenly described the change as widening from `boolean`.
-
-A migration note in CHANGELOG (end-of-section per house rule) walks consumers through the codemod.
+- [x] **F-26** Generator rejects TOOLS.md declaring R5 + failOpen with `oc://...` URI in diagnostic (HC-BLOCK)
+- [x] **F-27** Emitted plugin treats R5 as fail-closed at runtime regardless of IR flag (defense-in-depth)
+- [x] **F-29** Capability clamp R5 floor (declared tier max with capability-floor)
+- [x] **F-30** G-CHAIN: chain `read-restricted → summarize → post-publicly` rejected
+- [x] **F-31** Generator refuses laundering chains at generate time (diagnostic)
+- [x] **F-32** PolicyIR has `effectiveSensitivity` field per tool
+- [x] **F-44** Hostile-write-then-read flow: drift detection before agent execution
+- [x] **F-47** Mutation report includes `oc://` URI per file
+- [x] **F-48** Multiple-mutation case: each file's drift reported separately
+- [x] **F-49** Comparison cost bounded — only files in policy-relevant set checked
+- [x] **F-62** Determinism: same workspace input → byte-identical output (3 runs)
+- [x] **F-33** Emitted plugin loads + registers via `@openclaw/plugin-sdk` HEAD without modification
+- [x] **F-34** Sequential modifying mode honored
+- [x] **F-35** CLI subcommand dispatches to handler
 
 ## Bot pre-empt checklist
 
 - [x] PR description leads with core-not-extension justification (above)
 - [x] No keywords trigger `r:third-party-extension` / `r:skill`
-- [x] `docs/.generated/plugin-sdk-api-baseline.sha256` refreshed (hook-types.ts is public surface)
-- [x] `docs/sdk-overview.md` table NOT changed (existing entry; only field shape changed)
-- [x] **Swift protocol models regenerated** — GatewayModels.swift in both `apps/macos/...` and `apps/shared/...`
-- [x] No `pluginId`-spoofing risk introduced
-- [x] Try/catch wrapper at the right granularity (per-plugin, not per-batch); failure modes distinguished (parse / merge / IO)
-- [x] No duplicate helpers; `mergeApprovals()` is the single canonical merger
-- [x] CHANGELOG entry appended at END of target section, includes migration codemod note
+- [x] `docs/.generated/plugin-sdk-api-baseline.sha256` refreshed
+- [x] `docs/sdk-overview.md` table updated with `@openclaw/policy` row
+- [x] Swift protocol models regenerated for new gateway HTTP surface from `policy comply` and `policy report`
+- [x] All host-boundary entries validated with Zod schema (TOOLS.md / SOUL.md parser inputs)
+- [x] No generic `try/catch` in hot path; failure modes distinguished (parse vs validate vs emit vs IO)
+- [x] No duplicate helpers; emitters live in `src/emit/{ir,plugin,audit-manifest}.ts`
+- [x] Zero `@microsoft/*` import gate green
+- [x] CHANGELOG entry appended at END of target section
 
 ## Metrics
 
-- **~5 lines source change** at `hooks.ts:889-893`
-- **1 line type widening** at `hook-types.ts:402-410`
-- **+1 helper function** (`mergeApprovals`)
-- **+1 try/catch wrapper** at plugin invocation site
-- **2 Swift model files regenerated**
-- **8 new/updated tests**: 5 L1 integration (merger semantics), 3 L0 unit (helper + types + crash-safety)
+- **1 new package**: `@openclaw/policy` (generator + 9-verb CLI handlers + 6 subpaths)
+- **3 emitted artifacts** per workspace: `policy-ir.json`, `gateway-plugin.ts`, `audit-manifest.json`
+- **9 CLI verbs** added to existing `openclaw` CLI
+- **18 new tests**: 6 L0 unit (generator + invariants), 6 L1 integration (emitted plugin + runtime defense), 4 L2 e2e (registration + dispatch + hostile-write), 2 L3 acceptance (rubric coverage)
+- **0 new top-level CLI binaries** — `openclaw policy` slots in alongside existing verbs
 
 ## Migration / risk
 
-**Existing tests asserting first-wins** break — that's the proof. CHANGELOG note explains the breakage is by design.
+**Existing custom-provider hosts**: continue to run unchanged. Adopting `@openclaw/policy` is opt-in per workspace via `openclaw policy generate`. Hosts can run a hand-written provider AND a generated provider simultaneously; merger semantics (PR-4) handle the conjunction.
 
-**Internal consumers** (Microsoft `@bic/openclaw-policy` + `@bic/openclaw-snap`) verified to compile clean against trunk's widened field via codemod gate before this PR opens.
+**For workspace authors**: `policy check` reports any TOOLS.md / SOUL.md violations of generation-time invariants before `generate` runs. Authors fix the workspace, not the generator output.
 
-**Companion app** receives array shape; supervisor UI may need a second pass to render multiple descriptors. Out of scope for this PR (companion is a separate repo).
+**For audit-log consumers**: `audit-manifest.json` declares the event taxonomy this policy emits. Pre-existing audit consumers continue to work; new event categories (`policy_generate`, `snapshot_promote`, etc.) are additive.
 
 ---
 
-🤖 This PR was prepared with [Claude Code](https://claude.com/claude-code) as part of the `claws-openclaw-upstream` contribution wave (Hapi the Bringer · cp-4). Companion: PR-6 `feat: add @openclaw/policy + openclaw policy subcommand group`.
+🤖 This PR was prepared with [Claude Code](https://claude.com/claude-code) as part of the `claws-openclaw-upstream` contribution wave (Hapi the Bringer · cp-4). Companion: PR-4 `fix(plugins): make requireApproval conjunctive across plugin chain`.

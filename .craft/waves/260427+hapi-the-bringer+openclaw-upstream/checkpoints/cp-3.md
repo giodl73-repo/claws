@@ -15,12 +15,12 @@ Pulses 06 + 07 (2 pulses).
 
 Pair a small surgical PR with the heavy governance package PR. Reviewers can fast-track the small one while the big one accumulates inline comments.
 
-- **Batch 1** (parallel, depend on cp-2 merge): pulse 06 (PR-3 OC-4 stripFrontMatter), pulse 07 (PR-4 @openclaw/guardrails)
+- **Batch 1** (parallel, depend on cp-2 merge): pulse 06 (PR-2 OC-4 stripFrontMatter), pulse 07 (PR-3 @openclaw/guardrails)
 
 ## Pulses
 
-- [ ] Pulse 06 · `pr3-oc4-stripfrontmatter` — Open PR-3 at openclaw/openclaw modifying `src/agents/workspace.ts:91`. ~1 line change + regression test. Surgical pair to PR-4.
-- [ ] Pulse 07 · `pr4-openclaw-guardrails` — Open PR-4 at openclaw/openclaw adding `@openclaw/guardrails`. HARD DEPENDENCY: pulse 01's adapter-audits.md § 3 must publish the audit-stream wire-shape mapping FIRST per HC-BLOCK F-38. Audit entries cite `oc://...` URIs natively (consumes vocabulary from PR-1+PR-2).
+- [ ] Pulse 06 · `pr3-oc4-stripfrontmatter` — Open PR-2 at openclaw/openclaw modifying `src/agents/workspace.ts:91`. ~1 line change + regression test. Surgical pair to PR-3.
+- [ ] Pulse 07 · `pr4-openclaw-guardrails` — Open PR-3 at openclaw/openclaw adding `@openclaw/guardrails`. HARD DEPENDENCY: pulse 01's adapter-audits.md § 3 must publish the audit-stream wire-shape mapping FIRST per HC-BLOCK F-38. Audit entries cite `oc://...` URIs natively (consumes vocabulary from PR-1+PR-2).
 
 ## Gate
 
@@ -33,7 +33,7 @@ cp-3 closes when BOTH PRs MERGE at openclaw/openclaw AND post-merge verification
 **Critical**:
 - adapter-audits.md § 3 must be complete BEFORE pulse 07 opens (F-38 hard dependency).
 - Both PRs must cite the bot-preempt checklist + Wave A merge SHAs in their descriptions.
-- Audit-attribution invariant (sourcePluginId mandatory) lands in PR-4 — first PR to ship that.
+- Audit-attribution invariant (sourcePluginId mandatory) lands in PR-3 — first PR to ship that.
 
 ## Review Panel
 
