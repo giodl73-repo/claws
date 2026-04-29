@@ -26,6 +26,21 @@ export {
 } from './oc-path.js';
 
 export {
+  formatOcConfigUri,
+  parseOcConfigUri,
+  resolveConfigUri,
+  OcConfigUriError,
+  type ParsedOcConfigUri,
+  type ResolveResult,
+} from './oc-config-uri.js';
+
+export {
+  parseOcUri,
+  formatOcUri,
+  type ParsedOcUri,
+} from './oc-uri.js';
+
+export {
   OC_WORKSPACE_FILES,
   type OcWorkspaceFile,
 } from './oc-files.js';
