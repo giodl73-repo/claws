@@ -4,7 +4,7 @@
 **Target audience**: claws + lobster team
 **Author**: giodl@microsoft.com
 **Date**: 2026-04-29
-**Revision**: R1-amended 2026-04-29 (gateway-as-signer + ctx.snapshotId + fail-closed alignment); R1-follow-on 2026-04-29 (`claws-guardrails` rename for naming consistency)
+**Revision**: R1-amended 2026-04-29 (gateway-as-signer + ctx.snapshotId + fail-closed alignment); R1-follow-on 2026-04-29 (`claws-guardrails` rename for naming consistency); R2 amendment 2026-04-29 (policy-plugin runtime: lazy cache replacing aspirational `onSnapshotPromoted`, fail-closed-on-missing-`ctx.snapshotId` with diagnostic shape, per-session bounded-LRU eviction; implementation order revised to surface the cache module as a separate work item)
 
 ## TL;DR
 
@@ -123,12 +123,89 @@ The adapter's `toTrustedToolPolicy` translation MUST preserve fail-closed semant
 
 Audit emission for policy decisions is **gateway-emitted**, not adapter-decorated. The gateway emits a hash-chained audit entry on every `evaluate(event, ctx)` invocation: block, allow, params, requires-approval. The adapter's job is only the decision-vocabulary translation; it does not own audit. This is the same posture as snap's audit emission (see `snap-pre-rfc.md` "Audit emission") — single audit-emitting layer (the gateway), no decorators that consumers can skip.
 
+### Policy plugin runtime — cache + fail-closed-on-missing-snap (R2 amendment 2026-04-29)
+
+Three runtime decisions for the policy plugin shell (the registered upstream `PluginTrustedToolPolicyRegistration` that wraps `composedProvider` via this adapter). These are downstream concerns — no contract change — but pinning them now keeps the carve work coherent.
+
+#### 1. Lazy cache (no `onSnapshotPromoted` dependency)
+
+PolicyIR is fetched on first `evaluate(event, ctx)` per snapshot ID, not pre-warmed via a lifecycle hook. **`onSnapshotPromoted` does NOT exist in upstream today** (verified 2026-04-29 by grep against `C:\src\openclaw-core\src\plugins/`, `src/plugin-sdk/`, `src/gateway/`); earlier draft references to it described aspiration, not existing surface. Lazy-load works fine because `claws-snap-server` is colocated in-process with the gateway in the v2 deployment shape — `snap.read(...)` is sub-millisecond hot-path.
+
+```ts
+const cache = new Map<SessionKey, Map<SnapshotId, PolicyIR>>();
+
+async function evaluate(event: PluginToolPolicyEvent, ctx: PluginHookToolContext)
+    : Promise<PluginToolPolicyDecision | undefined> {
+  if (ctx.snapshotId === undefined) {
+    return failClosedMissingSnap(); // see (2)
+  }
+  const sessionCache = cache.get(ctx.sessionKey) ?? new Map();
+  let ir = sessionCache.get(ctx.snapshotId);
+  if (ir === undefined) {
+    const bytes = await store.read(ctx.snapshotId, POLICY_IR_PATH);
+    ir = JSON.parse(new TextDecoder().decode(bytes)) as PolicyIR;
+    validatePolicyIR(ir); // throws on hash mismatch / generatedFrom mismatch
+    sessionCache.set(ctx.snapshotId, ir);
+    cache.set(ctx.sessionKey, sessionCache);
+  }
+  const decision = await composedProvider.preAuthorize(
+    eventToToolCallEvent(event, ctx, ir),
+  );
+  return mapDecision(decision);
+}
+```
+
+The cache is plugin-private state (per-process); it is NOT shared across plugin replicas. Consumers running multiple gateway instances accept that each instance pays one cold-cache `snap.read(...)` per `(sessionKey, snapshotId)` pair on first hit. This is intentional — shared cache would require a coordination layer that's out of scope.
+
+#### 2. Fail-closed on missing `ctx.snapshotId`
+
+When `ctx.snapshotId` is `undefined`, `evaluate()` returns:
+
+```ts
+function failClosedMissingSnap(): PluginToolPolicyDecision {
+  return {
+    block: true,
+    blockReason:
+      "policy plugin received evaluate() without ctx.snapshotId. " +
+      "Gateway must thread ctx.snapshotId at hook invocation time. " +
+      "See https://docs.openclaw.ai/plugin-sdk/policy-ir#ctx-snapshot-id",
+  };
+}
+```
+
+**Rationale**:
+
+- **The whole point of `ctx.snapshotId` is closing the TOCTOU window.** Falling back to plugin-private "last-seen-snapshot" reintroduces exactly the multi-tenant policy bleed and promotion-observation skew the field was added to prevent. Asking upstream for the field and then routing around it when absent makes the ask undefendable.
+- **Fail-closed is scoped, not catastrophic.** `runTrustedToolPolicies` runs ALL registered policies in the chain; this plugin's deny is one denial among them, not a global block. Other registered policies still contribute decisions and the chain merger (after PR-4's conjunctive fix) collects them.
+- **Sequencing is safe.** `ctx.snapshotId` ships in the same upstream PR as the PolicyIR types (`v2-policy-ir.md` bundles them). When `claws-guardrails` consumes the real `@openclaw/plugin-sdk` types, the gateway is already threading the field. There's no chicken-and-egg gap to bridge.
+
+**Two caveats** for downstream operators:
+
+- **Tests must mock `ctx.snapshotId`.** Any integration test exercising the policy plugin needs to thread a valid snapshot ID. Documented in the package README.
+- **Startup ordering**: register the policy plugin AFTER the first snapshot exists. If a tool call fires before any `snap.capture(...)` has run, the plugin denies (correctly — there is no policy in force yet). Wave plan should note "snap.capture-first" as part of the gateway boot order.
+
+The configurable-fallback escape hatch (`policy.allowMissingSnapshotAnchor: true`) is tempting but adds complexity for a vanishingly rare scenario. Skip it. If a downstream user wants legacy-compat behavior, they wire a different `PluginTrustedToolPolicyRegistration` that doesn't use PolicyIR — the existing per-domain `ssrf-policy.ts` / `channel-policy.ts` etc. continue to enforce per-domain rules without snapshot anchoring.
+
+#### 3. Cache eviction — per-session bounded LRU
+
+The cache is `Map<SessionKey, Map<SnapshotId, PolicyIR>>`. Eviction policy:
+
+- **Inner map (per session)**: bounded LRU at 8 snapshot IDs. Sessions cycle through snapshots faster than memory leaks become a concern; 8 covers a few rapid-edit cycles plus a recent baseline. On overflow, evict the least-recently-used `(snapshotId, PolicyIR)` entry.
+- **Outer map (session-scoped)**: evict on `onSessionEnded` if upstream provides such a lifecycle hook (verify before carving — same caveat as `onSnapshotPromoted`); else evict on a periodic sweep (every 60s, drop sessions whose last `evaluate()` was >15 min ago).
+- **Memory cap**: each PolicyIR is bounded by its size on disk (typically <100 KB; very large workspaces could push into the low-MB range). Worst-case unbounded sessions × 8 snapshots × 1 MB = a low-tens-of-MB ceiling that doesn't justify aggressive optimization. If a tenant pushes past that, they hit the per-session LRU cap and the periodic sweep cleans up idle sessions.
+- **Invalidation**: not required. PolicyIR is content-addressable via `policyId` (RFC 8785 JCS hash); a new snapshot promotion produces a different `SnapshotId` which produces a different cache key. Stale entries are naturally orphaned, never returned by mistake.
+
+These numbers (8, 60s, 15min) are starting defaults. Tunable via downstream config if a deployment shape demands it; not contract concerns.
+
 ## Implementation order
 
-1. Wire adapter at `packages/claws-guardrails/src/openclaw-adapter.ts`; export `toTrustedToolPolicy` from package root.
-2. Update claws-serve gateway-lifecycle wiring: alongside the existing `ProviderRegistryImpl`, call `api.registerTrustedToolPolicy(toTrustedToolPolicy(composedProvider))` when running embedded in an OpenClaw gateway.
-3. Delete `src/shell-exec-provider.ts` and its export from `src/index.ts`; update tests and stale consumers.
-4. Confirm lobster-web's audit + governance hooks consume PolicyIR via `snap.read(snap, POLICY_IR_PATH)` (plumb-through, same wave).
+1. Wire adapter at `packages/claws-guardrails/src/openclaw-adapter.ts`; export `toTrustedToolPolicy` from package root. Stateless translator; ~50 LoC.
+2. Build the policy plugin shell at `packages/claws-guardrails/src/policy-runtime/policy-plugin.ts`. This is the listening piece that registers via `api.registerTrustedToolPolicy` and owns the plugin-private cache + `evaluate(event, ctx)` lifecycle. ~120 LoC including the lazy-cache + fail-closed-on-missing-snap + LRU eviction logic from the runtime decisions section above.
+3. Build the cache module at `packages/claws-guardrails/src/policy-runtime/cache.ts`. Implements `Map<SessionKey, Map<SnapshotId, PolicyIR>>` with the bounded LRU eviction documented above. ~60 LoC.
+4. Update claws-serve gateway-lifecycle wiring: alongside the existing `ProviderRegistryImpl`, instantiate the policy plugin shell with `composedProvider` and call `api.registerTrustedToolPolicy(plugin)` when running embedded in an OpenClaw gateway.
+5. Delete `src/shell-exec-provider.ts` and its export from `src/index.ts`; update tests and stale consumers.
+6. Confirm lobster-web's audit + governance hooks consume PolicyIR via `snap.read(snap, POLICY_IR_PATH)` (plumb-through, same wave).
+7. Update package README with the test-side caveats: mocking `ctx.snapshotId`; "snap.capture-first" startup ordering; cache-eviction tuning knobs.
 
 ## What we'd ask Peter (FYI, not gating)
 
