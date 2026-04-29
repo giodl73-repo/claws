@@ -40,9 +40,14 @@ describe('classifier — new basenames added in PR-1 scope', () => {
     expect(classify('hooks/managed/install.ts')).toBe('hook');
   });
 
-  it('classifies DREAMS.md and any file inside .dreams/', () => {
-    expect(classify('DREAMS.md')).toBe('dreams');
-    expect(classify('.dreams/2026-04-28.md')).toBe('dreams');
+  it('does NOT classify DREAMS.md or .dreams/ — no upstream loader exists', () => {
+    // Earlier drafts speculatively classified DREAMS.md as 'dreams'
+    // based on a design-doc mention. Design-corpus review found NO
+    // upstream loader actually reads DREAMS.md or .dreams/, so the
+    // classifier should leave them as 'unknown'. Add back here if
+    // upstream lands a loader.
+    expect(classify('DREAMS.md')).toBe(null);
+    expect(classify('.dreams/2026-04-28.md')).toBe(null);
   });
 });
 
@@ -72,10 +77,10 @@ describe('classifyDetail — flavor distinction', () => {
   });
 
   it('directory-prefixed file (no canonical basename) gets directory-prefix flavor', () => {
-    expect(classifyDetail('workflows/onboarding.md')).toEqual({
-      kind: 'workflows',
+    expect(classifyDetail('skills/email-drafter/notes.md')).toEqual({
+      kind: 'skills',
       flavor: 'directory-prefix',
-      matched: 'workflows',
+      matched: 'skills',
     });
   });
 

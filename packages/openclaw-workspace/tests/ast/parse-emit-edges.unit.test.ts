@@ -98,11 +98,6 @@ describe('ast parse + emit edge cases', () => {
 });
 
 describe('classify — more paths', () => {
-  it('governance dir maps to governance kind', () => {
-    expect(classify('governance/policy.md')).toBe('governance');
-    expect(classify('/abs/governance/policy.md')).toBe('governance');
-  });
-
   it('handles Windows-style backslashes for anywhere-matched basenames', () => {
     // Root-anchored basenames (SOUL.md etc.) don't match deeply-nested
     // paths even on Windows — that's by design (no node_modules false
@@ -111,17 +106,18 @@ describe('classify — more paths', () => {
     expect(classify('skills\\email\\SKILL.md')).toBe('skills');
   });
 
-  it('workflows dir maps to workflows', () => {
-    expect(classify('/abs/workflows/onboarding.md')).toBe('workflows');
-  });
-
-  it('roles dir maps to roles', () => {
-    expect(classify('roles/manager.md')).toBe('roles');
-    expect(classify('/x/roles/y.md')).toBe('roles');
-  });
-
   it('skills dir as subpath variant', () => {
     expect(classify('/abs/skills/email-drafter/skill.md')).toBe('skills');
+  });
+
+  it('does NOT classify governance/ workflows/ roles/ — no upstream loader exists', () => {
+    // Earlier drafts speculatively classified these. Design-corpus
+    // review found NO upstream loader actually reads these directories
+    // (only skills/ and hooks/ are confirmed). Add back here if
+    // upstream lands a loader for them.
+    expect(classify('governance/policy.md')).toBe(null);
+    expect(classify('workflows/onboarding.md')).toBe(null);
+    expect(classify('roles/manager.md')).toBe(null);
   });
 });
 

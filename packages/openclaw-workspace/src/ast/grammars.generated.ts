@@ -13,7 +13,6 @@ export type WorkspaceFileKind =
   | 'agents'
   | 'bootstrap'
   | 'config'
-  | 'dreams'
   | 'entities'
   | 'governance'
   | 'hook'
@@ -29,7 +28,6 @@ export const WORKSPACE_FILE_KINDS: readonly WorkspaceFileKind[] = [
   'agents',
   'bootstrap',
   'config',
-  'dreams',
   'entities',
   'governance',
   'hook',
@@ -54,16 +52,6 @@ export const grammars: Record<WorkspaceFileKind, string> = {
 # to BaseAst — frontmatter is preserved as flat key:value entries.
 
 OCHook         <- .*
-`,
-  dreams: `# openclaw-dreams.stub — Memory-core dreaming-pipeline diary (DREAMS.md)
-#
-# NOTE: DREAMS.md has no Tier-3 PEG grammar. Per design/openclaw/extension-pattern-memory.md
-# (line 181), DREAMS.md is "an AI-written summary appended to … (human-readable
-# diary)" — append-only, free-form prose, written by memory-core's dreaming
-# phases. No structural validation; classifier exists so OC_WS_UNKNOWN_FILE
-# doesn't false-fire on a legitimate memory-core artifact.
-
-OCDreams       <- .*
 `,
   bootstrap: `# openclaw-bootstrap.stub — Freeform onboarding prose (BOOTSTRAP.md)
 #

@@ -135,7 +135,12 @@ export async function discoverWorkspaceFiles(
       diagnostics.push({
         code: 'OC_WS_LEGACY_BASENAME',
         relPath,
-        message: `'${detail.matched}' is a legacy basename; rename to '${canonical}' (still loaded for backward compatibility, but slated for removal).`,
+        // Upstream's bootstrap loader is case-sensitive Set-membership
+        // (see src/agents/workspace.ts:602-667 + VALID_BOOTSTRAP_NAMES
+        // at line 166-175). Lowercase basenames don't load — the file
+        // is invisible until renamed. Phrase the message so users
+        // understand the consequence, not just that it's "deprecated".
+        message: `'${detail.matched}' is invisible to upstream's bootstrap loader (case-sensitive name match); rename to '${canonical}' so the file actually loads.`,
         severity: 'warning',
         suggestion: canonical,
       });

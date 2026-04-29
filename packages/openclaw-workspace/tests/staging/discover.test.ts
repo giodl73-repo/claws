@@ -94,16 +94,16 @@ describe('discoverWorkspaceFiles', () => {
     }
   });
 
-  it('classifies nested directory-based kinds (skills/, workflows/, roles/)', async () => {
+  it('classifies nested directory-based kinds (skills/ + .hooks/)', async () => {
     const root = makeRoot();
     try {
       mkdirSync(join(root, 'skills'), { recursive: true });
       writeFileSync(join(root, 'skills', 'summarize.md'), '# skill\n', 'utf8');
-      mkdirSync(join(root, 'workflows'), { recursive: true });
-      writeFileSync(join(root, 'workflows', 'onboard.md'), '# workflow\n', 'utf8');
+      mkdirSync(join(root, 'hooks'), { recursive: true });
+      writeFileSync(join(root, 'hooks', 'pre-commit.md'), '# hook\n', 'utf8');
       const res = await discoverWorkspaceFiles(root);
       const kinds = res.files.map((f) => f.kind).sort();
-      expect(kinds).toEqual(['skills', 'workflows']);
+      expect(kinds).toEqual(['hook', 'skills']);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

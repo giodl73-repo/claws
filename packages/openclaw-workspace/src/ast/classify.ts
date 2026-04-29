@@ -50,7 +50,6 @@ const ROOT_BASENAME_MAP: Record<string, WorkspaceFileKind> = {
   'USER.md': 'entities',
   'HEARTBEAT.md': 'tasks',
   'BOOTSTRAP.md': 'bootstrap',
-  'DREAMS.md': 'dreams', // memory-core dreaming-pipeline diary (extension-pattern-memory.md:181)
   'openclaw.json': 'config',
   'lobster.yaml': 'config', // claws-internal — dropped at upstream extraction
 };
@@ -87,28 +86,43 @@ const ANYWHERE_CASING_VARIANT_MAP: Record<string, WorkspaceFileKind> = {
 };
 
 /**
- * Legacy basenames — root-anchored. `memory.md` is the only known
- * lowercase historical alias upstream still tolerates (#43462).
+ * Legacy basenames — root-anchored. These map to a kind so that this
+ * package can classify (and lint) the file, but **upstream's actual
+ * bootstrap loader is case-sensitive Set-membership** — see
+ * `loadWorkspaceBootstrapFiles` in upstream openclaw at
+ * `src/agents/workspace.ts:602-667` and the closed `VALID_BOOTSTRAP_NAMES`
+ * Set at line 166-175. Lowercase variants like `memory.md` are
+ * **invisible to upstream** until the user renames them. The legacy-
+ * basename diagnostic surfaces this so users see the rename ask
+ * before they wonder why the file isn't taking effect.
+ *
+ * `memory.md` is the only known historical alias users still write
+ * by hand (#43462).
  */
 const LEGACY_BASENAME_MAP: Record<string, WorkspaceFileKind> = {
   'memory.md': 'memory',
 };
 
-/** Directory prefixes that imply a kind for any contained file. */
+/**
+ * Directory prefixes that imply a kind for any contained file.
+ *
+ * Only kinds with confirmed upstream loaders are listed. Earlier drafts
+ * included `workflows/`, `roles/`, and `governance/` — design-corpus
+ * review found NO upstream loader reads those directories, so they
+ * were dropped to avoid false-positive classifications. If/when
+ * upstream lands consumers for those prefixes, add them back here.
+ */
 const DIRECTORY_PREFIX_MAP: Array<{
   readonly segment: string;
   readonly kind: WorkspaceFileKind;
 }> = [
+  // skills/<dir>/SKILL.md — workspace + managed tiers.
+  // Per src/agents/skills/local-loader.ts (loadSingleSkillDirectory).
   { segment: 'skills', kind: 'skills' },
-  { segment: 'workflows', kind: 'workflows' },
-  { segment: 'roles', kind: 'roles' },
-  { segment: 'governance', kind: 'governance' },
-  // Hook directories — workspace tier `.hooks/` and managed tier `hooks/`.
-  // Per design/openclaw/hook-engine-legacy.md:54.
+  // .hooks/<id>/HOOK.md — workspace tier; hooks/<id>/HOOK.md — managed tier.
+  // Per src/hooks/workspace.ts:54 + design/openclaw/hook-engine-legacy.md.
   { segment: '.hooks', kind: 'hook' },
   { segment: 'hooks', kind: 'hook' },
-  // Memory-core dreaming artifacts (extension-pattern-memory.md:253).
-  { segment: '.dreams', kind: 'dreams' },
 ];
 
 export type ClassificationFlavor =

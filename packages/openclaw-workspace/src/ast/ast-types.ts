@@ -136,7 +136,6 @@ export interface GenericAst extends BaseAst {
   readonly kind:
     | 'bootstrap'
     | 'config'
-    | 'dreams'
     | 'entities'
     | 'governance'
     | 'hook'

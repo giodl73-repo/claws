@@ -65,8 +65,8 @@ describe('ast parse + emit lossless round-trip', () => {
 });
 
 describe('ast grammar registry', () => {
-  it('exports 14 WorkspaceFileKind grammars (11 PEG + bootstrap/hook/dreams stubs)', () => {
-    expect(WORKSPACE_FILE_KINDS.length).toBe(14);
+  it('exports 13 WorkspaceFileKind grammars (11 PEG + bootstrap/hook stubs)', () => {
+    expect(WORKSPACE_FILE_KINDS.length).toBe(13);
     for (const kind of WORKSPACE_FILE_KINDS) {
       expect(grammars[kind]).toBeTypeOf('string');
       expect(grammars[kind].length).toBeGreaterThan(0);
@@ -86,7 +86,7 @@ describe('classify', () => {
 
   it('maps directory-qualified paths to kinds', () => {
     expect(classify('skills/email-drafter/SKILL.md')).toBe('skills');
-    expect(classify('workflows/onboarding.md')).toBe('workflows');
+    expect(classify('.hooks/my-hook/HOOK.md')).toBe('hook');
   });
 
   it('returns null for unknown paths', () => {
