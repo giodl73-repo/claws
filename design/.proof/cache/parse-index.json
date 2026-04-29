@@ -1,0 +1,62 @@
+{
+  "src/openclaw/00-test.source.md": {
+    "parse_key": "0c921fb5c1c802c8",
+    "mtime_ms": 1777435898889,
+    "size": 354,
+    "content_hash": "d4399e2869eec60d"
+  },
+  "src/openclaw\\06-manifest-activation.source.md": {
+    "parse_key": "f31a03af7fc951ab",
+    "mtime_ms": 1777437920291,
+    "size": 5409,
+    "content_hash": "ddd766231255ea42"
+  },
+  "src/openclaw\\04-turn-anatomy.source.md": {
+    "parse_key": "d687d5ea8b5ec27d",
+    "mtime_ms": 1777437917722,
+    "size": 5199,
+    "content_hash": "4d707f0ef5d7fee3"
+  },
+  "src/openclaw\\01-plugin-lifecycle.source.md": {
+    "parse_key": "519092a7c4525ae6",
+    "mtime_ms": 1777437914813,
+    "size": 5079,
+    "content_hash": "40423b9a2302d77f"
+  },
+  "src/openclaw\\02-three-channels.source.md": {
+    "parse_key": "a321f155a2555da9",
+    "mtime_ms": 1777437915907,
+    "size": 5199,
+    "content_hash": "70e7890e4be2a3d4"
+  },
+  "src/openclaw\\00-orientation.source.md": {
+    "parse_key": "d3d9b8b5819a1fa8",
+    "mtime_ms": 1777437913331,
+    "size": 3040,
+    "content_hash": "fb3c113caf0d0141"
+  },
+  "src/openclaw\\07-validate-with-proof.source.md": {
+    "parse_key": "c1472392271b9520",
+    "mtime_ms": 1777438238134,
+    "size": 7682,
+    "content_hash": "6dec38d03ace19dc"
+  },
+  "src/openclaw\\05-trust-boundary.source.md": {
+    "parse_key": "8f41a56fab6ff9da",
+    "mtime_ms": 1777437919259,
+    "size": 5605,
+    "content_hash": "af071f68363834e1"
+  },
+  "src/openclaw\\03-gateway-bus.source.md": {
+    "parse_key": "c7c42b4d31ac2f94",
+    "mtime_ms": 1777437916597,
+    "size": 5282,
+    "content_hash": "af99d2b8d72e68ab"
+  },
+  "src/openclaw\\00-test.source.md": {
+    "parse_key": "0c921fb5c1c802c8",
+    "mtime_ms": 1777435898889,
+    "size": 354,
+    "content_hash": "d4399e2869eec60d"
+  }
+}
