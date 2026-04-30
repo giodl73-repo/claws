@@ -247,10 +247,10 @@ export async function runSnapCheckout(
     // captured manifest by reading the bundles dir directly. This is
     // an impl-coupled escape hatch — fine for the local-mode CLI.
     const manifestPath = path.join(workspaceRoot, '.openclaw', 'snapshots', 'bundles', id, 'manifest.json');
-    let manifest: { files: readonly string[] };
+    let manifest: { files: readonly (string | { path: string })[] };
     try {
       const text = await fs.readFile(manifestPath, 'utf8');
-      manifest = JSON.parse(text) as { files: readonly string[] };
+      manifest = JSON.parse(text) as typeof manifest;
     } catch {
       const message = `snapshot ${id} not found in local store`;
       if (opts.json) emitErr(JSON.stringify({ status: 'error', op: 'checkout', message }));
@@ -258,7 +258,8 @@ export async function runSnapCheckout(
       return 3;
     }
     let restored = 0;
-    for (const rel of manifest.files) {
+    for (const entry of manifest.files) {
+      const rel = typeof entry === 'string' ? entry : entry.path;
       const bytes = await store.read(id, rel);
       const target = path.join(workspace, rel);
       await fs.mkdir(path.dirname(target), { recursive: true });
@@ -358,8 +359,8 @@ export async function runSnapDiff(
 async function readManifest(workspaceRoot: string, id: SnapshotId): Promise<readonly string[]> {
   const manifestPath = path.join(workspaceRoot, '.openclaw', 'snapshots', 'bundles', id, 'manifest.json');
   const text = await fs.readFile(manifestPath, 'utf8');
-  const m = JSON.parse(text) as { files: readonly string[] };
-  return m.files;
+  const m = JSON.parse(text) as { files: readonly (string | { path: string })[] };
+  return m.files.map((entry) => (typeof entry === 'string' ? entry : entry.path));
 }
 
 function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {

@@ -18,6 +18,7 @@
  * @module @bic/openclaw-snap/store/filesystemStore
  */
 
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import type {
@@ -30,6 +31,10 @@ import type {
 } from '../types.js';
 import { SnapshotErrorImpl } from '../types.js';
 import { computeSnapshotId } from '../canonical.js';
+
+function sha256Hex(bytes: Uint8Array): string {
+  return crypto.createHash('sha256').update(bytes).digest('hex');
+}
 
 const TEXT_DECODER = new TextDecoder('utf-8');
 
@@ -48,11 +53,40 @@ export interface FilesystemStoreOptions {
   readonly now?: () => Date;
 }
 
+interface ManifestFileEntry {
+  readonly path: string;
+  /** Lower-hex SHA-256 of the file bytes. Used by `read` to detect tamper. */
+  readonly sha256: string;
+}
+
 interface ManifestJson {
   readonly id: SnapshotId;
   readonly workspace: WorkspaceId;
   readonly capturedAt: string;
-  readonly files: readonly string[];
+  /**
+   * File inventory with per-file integrity hashes.
+   *
+   * **Format**: `readonly ManifestFileEntry[]` since v0.3.1 (this package).
+   * Older bundles wrote `readonly string[]` (paths only) — load logic
+   * tolerates both shapes; per-file integrity verification only applies
+   * when the new shape is detected.
+   */
+  readonly files: readonly ManifestFileEntry[] | readonly string[];
+}
+
+function parseManifestFiles(raw: ManifestJson['files']): {
+  paths: readonly string[];
+  hashes: ReadonlyMap<string, string> | null;
+} {
+  if (raw.length === 0) return { paths: [], hashes: new Map() };
+  if (typeof raw[0] === 'string') {
+    return { paths: raw as readonly string[], hashes: null };
+  }
+  const entries = raw as readonly ManifestFileEntry[];
+  return {
+    paths: entries.map((e) => e.path),
+    hashes: new Map(entries.map((e) => [e.path, e.sha256])),
+  };
 }
 
 const DEFAULT_IGNORE = (rel: string): boolean =>
@@ -131,16 +165,19 @@ export function filesystemStore(opts: FilesystemStoreOptions): SnapshotStore {
       await ensureRoot();
       await fs.mkdir(path.join(dir, 'files'), { recursive: true });
       const sortedFiles = [...fileBytes.keys()].sort();
+      const manifestEntries: ManifestFileEntry[] = [];
       for (const rel of sortedFiles) {
         const target = path.join(dir, 'files', rel);
         await fs.mkdir(path.dirname(target), { recursive: true });
-        await writeAtomic(target, fileBytes.get(rel) as Uint8Array);
+        const bytes = fileBytes.get(rel) as Uint8Array;
+        await writeAtomic(target, bytes);
+        manifestEntries.push({ path: rel, sha256: sha256Hex(bytes) });
       }
       const manifest: ManifestJson = {
         id,
         workspace,
         capturedAt: now().toISOString(),
-        files: sortedFiles,
+        files: manifestEntries,
       };
       await writeAtomic(
         path.join(dir, 'manifest.json'),
@@ -150,16 +187,30 @@ export function filesystemStore(opts: FilesystemStoreOptions): SnapshotStore {
     },
 
     async read(snap, internalPath) {
-      const target = path.join(bundleDir(snap), 'files', internalPath);
+      const dir = bundleDir(snap);
+      const target = path.join(dir, 'files', internalPath);
+
+      // Reject path-traversal attempts before they touch the FS. Resolve
+      // both the requested target and the bundle's files dir; if the
+      // resolved target escapes, fail closed.
+      const filesDir = path.resolve(dir, 'files');
+      const resolved = path.resolve(filesDir, internalPath);
+      if (resolved !== filesDir && !resolved.startsWith(filesDir + path.sep)) {
+        throw new SnapshotErrorImpl(
+          'SNAP_INVALID_PATH',
+          `Path escapes bundle: ${internalPath} (snap=${snap})`,
+        );
+      }
+
+      let buf: Buffer;
       try {
-        const buf = await fs.readFile(target);
-        return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+        buf = await fs.readFile(target);
       } catch (err) {
         const code = (err as NodeJS.ErrnoException).code;
         if (code === 'ENOENT') {
           // Distinguish missing snapshot from missing file inside a snapshot.
           try {
-            await fs.access(path.join(bundleDir(snap), 'manifest.json'));
+            await fs.access(path.join(dir, 'manifest.json'));
             throw new SnapshotErrorImpl(
               'SNAP_INVALID_PATH',
               `Path not in snapshot: ${internalPath} (snap=${snap})`,
@@ -179,6 +230,40 @@ export function filesystemStore(opts: FilesystemStoreOptions): SnapshotStore {
           err,
         );
       }
+      const bytes = new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+
+      // Per-file integrity check — re-hash the bytes and compare to the
+      // sha256 recorded in the manifest at capture time. Detects tamper /
+      // disk corruption / mid-flight modification of bundle files. Older
+      // bundles (pre-v0.3.1) wrote the manifest without per-file hashes;
+      // those skip verification (legacy compat — flagged via console once).
+      try {
+        const manifestText = await fs.readFile(path.join(dir, 'manifest.json'), 'utf8');
+        const manifest = JSON.parse(manifestText) as ManifestJson;
+        const { hashes } = parseManifestFiles(manifest.files);
+        if (hashes !== null) {
+          const expected = hashes.get(internalPath);
+          if (expected !== undefined) {
+            const actual = sha256Hex(bytes);
+            if (actual !== expected) {
+              throw new SnapshotErrorImpl(
+                'SNAP_CHECKSUM_MISMATCH',
+                `Content hash mismatch for ${internalPath} in ${snap}: ` +
+                  `expected sha256=${expected}, got sha256=${actual}`,
+              );
+            }
+          }
+        }
+      } catch (err) {
+        if (err instanceof SnapshotErrorImpl) throw err;
+        // Manifest read/parse failure during verify — fail closed.
+        throw new SnapshotErrorImpl(
+          'SNAP_STORE_UNAVAILABLE',
+          `Failed to verify integrity of ${internalPath} in ${snap}`,
+          err,
+        );
+      }
+      return bytes;
     },
 
     async list(workspace, listOpts: ListOpts = {}) {
