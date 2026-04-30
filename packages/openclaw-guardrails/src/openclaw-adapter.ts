@@ -134,6 +134,10 @@ function upstreamEventToClawsEvent(
   event: UpstreamPluginHookBeforeToolCallEvent,
   ctx: UpstreamPluginHookToolContext,
 ): ToolCallEvent {
+  // Read `snapshotId` off the upstream ctx (v2 PolicyIR contract Ask §4).
+  // Until upstream lands the type extension this is a structural read with
+  // a local cast; the wire shape is the same either way.
+  const ctxWithSnap = ctx as UpstreamPluginHookToolContext & { snapshotId?: string };
   return {
     server: 'gateway',
     tool: event.toolName,
@@ -141,6 +145,7 @@ function upstreamEventToClawsEvent(
     context: {
       conversationId: ctx.sessionId ?? ctx.sessionKey ?? '',
       ...(ctx.agentId !== undefined ? { agentId: ctx.agentId } : {}),
+      ...(ctxWithSnap.snapshotId !== undefined ? { snapshotId: ctxWithSnap.snapshotId } : {}),
     },
   };
 }

@@ -38,6 +38,14 @@ export interface ToolCallEvent {
     conversationId: string;
     agentId?: string;
     workspaceId?: string;
+    /**
+     * Snapshot anchor for policy evaluation. Threaded from upstream's
+     * `PluginHookToolContext.snapshotId` (v2 PolicyIR contract Ask §4)
+     * through the adapter so providers can locate the active PolicyIR
+     * for the turn. Absent in pre-v2 deployments; providers MUST treat
+     * absence as "no snapshot anchor" (typically fail-closed).
+     */
+    snapshotId?: string;
   };
   extensions?: Record<string, unknown>;
 }
