@@ -30,12 +30,29 @@ interface Bindings {
   readonly workspace: string;
 }
 
+/**
+ * Resolve the workspace root, honoring an env override for deployment
+ * scenarios where the workspace lives at a path different from cwd —
+ * e.g. inside an Aether container with a FUSE-mounted workspace at
+ * `/mnt/workspace/` (rclone → OneDrive/SharePoint/blob).
+ *
+ * In that mode plain `node:fs/promises` writes land in cloud storage
+ * transparently, so `filesystemStore` reaches OneDrive without any
+ * per-backend code. See `.craft/waves/260427+hapi-the-bringer+
+ * openclaw-upstream/carve-consumer-catalog.md` § "Backend storage —
+ * FUSE-via-rclone (default)".
+ */
+function resolveWorkspaceRoot(workspaceRoot: string): string {
+  return process.env['OPENCLAW_WORKSPACE_ROOT'] ?? workspaceRoot;
+}
+
 function bind(workspaceRoot: string): Bindings {
-  const root = path.join(workspaceRoot, '.openclaw', 'snapshots');
+  const ws = resolveWorkspaceRoot(workspaceRoot);
+  const root = path.join(ws, '.openclaw', 'snapshots');
   return {
     store: filesystemStore({ root }),
     refs: workspaceRefStore({ root }),
-    workspace: workspaceRoot,
+    workspace: ws,
   };
 }
 

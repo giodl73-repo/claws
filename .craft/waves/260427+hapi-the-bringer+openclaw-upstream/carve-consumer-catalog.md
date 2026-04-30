@@ -148,44 +148,74 @@ Per `guardrails-adapter.md` (R2 amendment), the carve is mostly ADDITIVE:
 rooted at `<workspace>/.openclaw/snapshots/`; no daemon, no HTTP transport.
 See commit `c6f73697`.
 
-## Deferred — remote `SnapshotStore` impl + binding resolver
+## Backend storage — FUSE-via-rclone (default)
 
-The carve that just landed is **local-only**. `commands/snap-store.ts:bind()`
-unconditionally constructs `filesystemStore` + `workspaceRefStore` from the
-workspace root. This is the right default but does NOT cover the production
-gateway story.
+**Resolved 2026-04-29** after surveying Aether's storage path and a
+diagram-driven discussion (lifecycle → FUSE topology). The chosen
+deployment shape: **Mode 1 — snap-in-process; storage backend is
+whatever the kernel sees at the workspace root.**
 
-What's needed in a future wave:
+Inside an Aether container, Ryan Gregg's rclone+FUSE work
+(`bic/aether#5377`, `#5437`, `#6922`) mounts the user's OneDrive /
+SharePoint / Azure Blob at a known path. Plain `node:fs/promises`
+writes land in cloud storage transparently — so `filesystemStore({ root })`
+reaches OneDrive **without any per-backend code, no Graph API
+integration, no auth, no atomicity worries.** The kernel + rclone
+handle all of it.
 
-1. **Remote `SnapshotStore` impl(s)** — at least one of:
-   - `@bic/openclaw-snap-http` — talks to a deployed `openclaw snap serve`
-     instance (the upstream reference plugin, once that PR lands). Restores
-     a thin HTTP transport, but as an SDK-conformant client, not the
-     daemon-shaped surface we just removed.
-   - `@bic/openclaw-snap-s3` (or similar) — writes bundles directly to a
-     blob store with conditional-PUT atomicity. Needs a paired
-     `StoreColocatedRefStore` (option 2 from the lifecycle discussion).
-2. **Binding resolver** — ~30 LoC in `commands/snap-store.ts`:
-   ```ts
-   function resolveBindings(workspaceRoot: string): Bindings {
-     // 1. Env override:    OPENCLAW_SNAP_STORE=<url>
-     // 2. Config file:     <workspace>/.openclaw/config.json → snapStore
-     // 3. Default:         local filesystemStore + workspaceRefStore
-     ...
-   }
-   ```
-   Picks an impl by URL scheme (`http://`, `s3://`, etc.) when overridden;
-   otherwise falls through to the local default that ships today.
-3. **Gateway-side wiring guidance** — the gateway's policy plugin already
-   takes `{ store }` in `PolicyPluginOptions`; the deployment-time choice is
-   "which `SnapshotStore` impl do I pass?" Document the local-vs-prod split
-   in the gateway integration guide once a remote impl exists.
+Concrete topology:
 
-**Why deferred**: no remote impl exists yet, and adding the resolver scaffold
-without a concrete remote to wire it to is yak shaving. The seam is small
-(~30 LoC) and lands cleanly with the first remote impl.
+```
+   filesystemStore({ root })        ← already shipped, untouched
+        │ node:fs syscalls
+        ▼
+   FUSE mount @ /mnt/workspace      ← Aether installs this
+        │
+        ▼
+   rclone daemon                    ← Aether installs this
+        │
+        ▼ HTTPS
+   OneDrive / SharePoint / Blob
+```
 
-**Track this in**: a follow-on wave after the v2 contract chain (PR-1..PR-5)
-is upstreamed. Likely candidate: a "snap deployment models" wave that
-introduces `@bic/openclaw-snap-http` as the first remote impl alongside the
-gateway integration story.
+What we ship: **one env-var resolver in `commands/snap-store.ts`**.
+`OPENCLAW_WORKSPACE_ROOT` overrides the workspace root path so the
+claws CLI inside an Aether container can target the FUSE mount instead
+of cwd. ~10 LoC. No new packages, no new contracts.
+
+**Pending input from Ryan Gregg** (message sent 2026-04-29):
+1. Canonical mount path inside the OpenClaw container (so we can
+   document `OPENCLAW_WORKSPACE_ROOT=<path>` for Aether deploys).
+2. Whether `.openclaw/snapshots/` under the FUSE root is safe (no
+   collision with Aether's own state).
+3. rclone cache mode — confirm `--vfs-cache-mode=full` so capture
+   walks aren't paying cloud round-trips per file read.
+4. Atomicity of `rename(tmp, target)` end-to-end through FUSE→rclone→cloud.
+5. Concurrent-writer behavior on `setHead` (rclone ETag conflicts vs.
+   last-write-wins).
+
+## Deferred — HTTP transport (Mode 2 — snap-as-sidecar)
+
+A separate `@bic/openclaw-snap-http` package with both server and client
+remains a useful future addition for the **multi-gateway-instance**
+deployment shape (sidecar pattern):
+
+```
+   ┌──────────┐  ┌────────────────┐
+   │ container│←─│ snap sidecar   │
+   │  gateway │  │ (HTTP server)  │
+   └──────────┘  │ FUSE mount→OD  │
+   ┌──────────┐  │  ↑ shared      │
+   │ container│←─│  ↑ across      │
+   │  gateway │  │  ↑ replicas    │
+   └──────────┘  └────────────────┘
+```
+
+Where it earns its keep: when multiple gateway instances must serve the
+same tenant and need a single coordination point for refs (rather than
+relying on rclone's eventual-consistency window). Not blocking today;
+single-container gateway with its own FUSE mount doesn't need it.
+
+**Track this in**: the wave that brings multi-instance gateway as a
+real deployment requirement. Likely after v2 contract chain (PR-1..PR-5)
+is upstreamed and we have concrete production-traffic gateway shapes.
