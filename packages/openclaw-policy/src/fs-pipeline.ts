@@ -179,6 +179,14 @@ export async function fsGenerate(
   }
 
   // 5. Emit the three artifacts and write atomically via workspace.
+  // NOTE: this filesystem path still emits the rich (claws-internal) shape
+  // to disk — `loadPolicyIRFromSnapshot` and the cli-handlers (check, diff,
+  // doctor) are coupled to the rich shape. Switching this to `emitV2PolicyIR`
+  // requires reshaping those readers in lockstep. See carve-consumer-catalog.md
+  // "Pending v2 cascade through ops/cli-handlers" for the followup. The
+  // `generateInMemory` path already emits v2 for tests + the e2e chain; the
+  // on-disk artifact at `<workspace>/.openclaw/policy/policy-ir.json` from
+  // `claws policy generate` is still rich until that cascade lands.
   const snapshotId = `sha256-${ir.policyId.replace(/^sha256-/, '')}`;
 
   const policyIrJson = emitPolicyIR(ir);

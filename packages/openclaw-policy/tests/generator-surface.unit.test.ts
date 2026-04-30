@@ -36,8 +36,9 @@ describe('generator top-level surface', () => {
     expect(out.policyIr).toContain('"tools"');
     expect(out.policyIr).toContain('"denyRules"');
     expect(out.policyIr).toContain('"generatedFrom"');
-    // The rich shape is preserved alongside for claws-side tooling.
-    expect(out.policyIrRich).toContain('"identity"');
+    // Rich shape lives on `out.ir` (the structured object) — claws-side
+    // tooling that needs SOUL/AGENTS/governance richness uses it directly.
+    expect(out.ir.identity.name).toBeTruthy();
     expect(out.gatewayPlugin).toContain('registration');
     expect(out.auditManifest).toContain('tool_call');
   });

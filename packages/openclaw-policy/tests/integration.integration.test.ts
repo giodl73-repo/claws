@@ -11,11 +11,10 @@ describe('Integration — end-to-end policy package behavior (4 tests)', () => {
   it('generateInMemory(workspace draft) → artifacts, all non-empty', () => {
     const out = generateInMemory({ workspaceRoot: '.', draft: draftFrom(waffles()) });
     expect(out.policyIr.length).toBeGreaterThan(0);
-    expect(out.policyIrRich.length).toBeGreaterThan(0);
     expect(out.gatewayPlugin.length).toBeGreaterThan(0);
     expect(out.auditManifest.length).toBeGreaterThan(0);
-    // Rich shape carries identity (claws-internal); v2 shape does not.
-    expect(JSON.parse(out.policyIrRich).identity.name).toBe('waffles');
+    // Rich shape via `out.ir` (structured); v2 disk artifact has no `identity`.
+    expect(out.ir.identity.name).toBe('waffles');
     expect(out.gatewayPlugin).toContain('export const registration');
   });
 

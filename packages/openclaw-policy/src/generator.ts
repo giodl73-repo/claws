@@ -14,7 +14,6 @@ import type { WorkspaceWatcherFactory } from '@bic/openclaw-workspace/staging';
 
 import { canonicalize, computePolicyId, CANONICALIZER_VERSION } from './compile/canonicalize.js';
 import { analyze } from './compile/analyze.js';
-import { emitPolicyIR } from './emit/emit-policy-ir.js';
 import { emitV2PolicyIR } from './emit/emit-v2-policy-ir.js';
 import { emitPluginCode, DEFAULT_SCOPE_PREFIX } from './emit/emit-plugin.js';
 import { emitAuditManifest } from './emit/emit-audit-manifest.js';
@@ -51,15 +50,11 @@ export interface InMemoryArtifacts {
    * `<snapshot>/.openclaw/policy/policy-ir.json`. R5-lowered: tier
    * semantics encoded as explicit `denyRules` so non-claws guardrails
    * enforce them without tier awareness. See `emit/lower.ts`.
+   *
+   * Claws-side tooling that needs the rich shape uses `ir` directly
+   * (the structured object) rather than re-serializing.
    */
   policyIr: string;
-  /**
-   * Rich claws-internal IR JSON — kept alongside the v2 form for
-   * claws-side tooling that needs the full SOUL/AGENTS/governance
-   * shape (e.g. `claws policy diff` semantic comparison, doctor
-   * inspection). Not part of the upstream contract.
-   */
-  policyIrRich: string;
   gatewayPlugin: string;
   auditManifest: string;
 }
@@ -89,7 +84,6 @@ export function generateInMemory(input: InMemoryGenerateInput): InMemoryArtifact
   return {
     ir,
     policyIr: emitV2PolicyIR(ir, placeholderSnap, emitOpts),
-    policyIrRich: emitPolicyIR(ir),
     gatewayPlugin: emitPluginCode({ ir, snapshotId: placeholderSnap, scopePrefix }),
     auditManifest: emitAuditManifest(ir, placeholderSnap),
   };
