@@ -1,7 +1,84 @@
 # Consumer catalog — pre-carve impact assessment
 
-**Date**: 2026-04-29
+**Date**: 2026-04-29 (pivot recorded 2026-04-30)
 **Purpose**: before carving `packages/openclaw-{snap,policy,guardrails}` to conform to the v2 contracts, inventory their consumers so each carve is a known-impact refactor, not a surprise.
+
+---
+
+## STRATEGIC PIVOT (2026-04-30) — read this first
+
+After surveying upstream demand (issue-tracker scan + reading the
+maintainers' shipped pattern at commit `af56926e2fc4`), the v2
+contract chain pivots from **"introduce a SnapshotStore + staging /
+rollback abstraction"** to **"factor out the existing config-LKG
+mechanism into a generalized LKGTracker that any plugin can register
+against."**
+
+Why the pivot:
+
+- Issue [#70528](https://github.com/openclaw/openclaw/issues/70528)
+  closed-as-implemented in `v2026.4.23`. The mechanism in
+  `src/config/io.observe-recovery.ts` is exactly our threat model
+  — preserve, validate, restore-on-invalid, audit, notify next agent
+  turn — but scoped to config files only.
+- "Introduce a parallel snapshot system" is Linux/RedHat-shaped. The
+  upstream maintainer culture (10-PR cap, small-focused-PR norm) and
+  community personas (Hobbyist, Self-Hoster) push back on parallel
+  abstractions. "Generalize what already works" is Chromium/Edge-shaped.
+- Direct upstream demand for our original framing: ~zero. Direct
+  demand for what already shipped: high (#70528 + multiple session-
+  checkpoint requests + #40245 shared workspace). The LKG framing
+  matches the latter.
+- The downstream code we built (`@bic/openclaw-snap`, e2e tests, R5-
+  lowering, content-addressing) all survives — it becomes a *consumer*
+  of the LKG primitive rather than a parallel system.
+
+Vocabulary changes:
+
+| Old (v2-snap-contract framing)        | New (v2-lkg-contract framing)              |
+|---------------------------------------|--------------------------------------------|
+| `SnapshotStore`                       | `LKGStore`                                 |
+| `Snapshot`                            | `LKGVersion` / `LKGFingerprint`            |
+| `capture(workspace)` (workspace-level) | per-file LKG promote on validate           |
+| `RefStore` (HEAD/STAGE/history)        | (gone — collapses into LKG state per file) |
+| `ctx.snapshotId`                      | `ctx.lkgFingerprint` (or just hash)        |
+| Workspace-shaped lifecycle (promote/rollback/discard CLI verbs) | per-file, validator-driven (no user-facing CLI surface upstream) |
+
+What stays:
+- All downstream code in `@bic/openclaw-snap` (vocabulary rename,
+  semantically unchanged)
+- Per-file sha256 verification (S01 fix), atomic write (S49 fix),
+  path-traversal guard (S30/S40)
+- The policy plugin shell (cache + fail-closed-on-load)
+- R5-lowering in PolicyIR (separate concern)
+- The 100+ adversarial test scenarios (rename, recontextualize)
+- The composability proof (e2e tests)
+
+What's dropped from upstream-PR scope (still kept downstream as
+enterprise tooling):
+- The 9-verb `claws snap *` CLI surface (capture/promote/rollback/
+  discard/etc.) — supervisor-facing, not upstream-shaped
+- "Workspace as one bundle" abstraction (LKG is per-file)
+- "Staging" as a first-class concept
+
+Future LKG consumers (each a separate follow-on PR or wave):
+- PolicyIR (`policy-ir.json`) — register an LKG tracker
+- Hook output files
+- Session checkpoints (#13700, #17211, #58028, #60864)
+- Shared workspace files (#40245)
+- Cross-agent concurrent writes (#29947) is a *separate* problem, not
+  LKG-shaped
+
+Documents driving the pivot:
+- `pr-drafts/v2-lkg-contract.md` — the new pre-RFC (replaces v2-snap-contract.md)
+- `pr-drafts/superseded/v2-snap-contract.md` — old draft preserved for history
+- `lobster-vault/Tech/OpenClaw/specs/architecture/last-known-good.md` — LKG architecture spec
+- `lobster-vault/Tech/OpenClaw/guides/internals/08-last-known-good.md` — at-a-glance guide
+
+The rest of this document is the *original* carve impact assessment
+from 2026-04-29 (pre-pivot). Most of it is still useful — the consumer
+DAG, the per-package risk assessment, and the test-shipping order — but
+the v2-shape mappings should be read with the LKG vocabulary.
 
 ## Public API surface (what each package exports today)
 

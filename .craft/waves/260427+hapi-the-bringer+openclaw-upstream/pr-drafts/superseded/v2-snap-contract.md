@@ -1,4 +1,20 @@
 <!--
+SUPERSEDED 2026-04-30 by `pr-drafts/v2-lkg-contract.md`.
+
+After surveying upstream demand (issue-tracker scan + maintainers'
+shipping pattern), the "introduce a SnapshotStore abstraction" framing
+of this draft was Linux/RedHat-shaped — a parallel system to what
+upstream had already partially solved. The right shape: factor out
+the existing config-LKG mechanism (`src/config/io.observe-recovery.ts`,
+shipped for issue #70528 in v2026.4.23 at commit `af56926e2fc4`) into
+a generalized contract that any plugin can register against. PolicyIR,
+hook outputs, session state, and shared workspace files all become
+consumers of the same substrate. See `pr-drafts/v2-lkg-contract.md`
+for the new framing and `carve-consumer-catalog.md` for the pivot
+rationale.
+
+ORIGINAL PRE-FLIGHT NOTES below.
+
 PRE-FLIGHT BLOCKERS (as of 2026-04-29):
 
 1. PR-0 (`@openclaw/workspace` / `oc-path`) must land first. This snap PR
