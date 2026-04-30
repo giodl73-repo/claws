@@ -99,9 +99,28 @@ const DEFAULT_IGNORE = (rel: string): boolean =>
   rel === 'dist';
 
 async function writeAtomic(target: string, data: string | Uint8Array): Promise<void> {
-  const tmp = `${target}.tmp-${String(process.pid)}-${String(Date.now())}`;
+  // Tmp suffix uses random hex (not pid+Date.now()) so parallel calls
+  // within the same process and ms can never collide on the tmp filename.
+  // S49 caught the prior collision class.
+  const tmp = `${target}.tmp-${crypto.randomBytes(8).toString('hex')}`;
   await fs.writeFile(tmp, data);
-  await fs.rename(tmp, target);
+  try {
+    await fs.rename(tmp, target);
+  } catch (err) {
+    // Concurrent capture race: another writer already produced the same
+    // file (content-addressed → bytes are identical). Clean up our tmp
+    // and accept the existing target as the canonical one.
+    //
+    // POSIX returns EEXIST or ENOENT (the tmp source got moved by the
+    // racing rename); Windows returns EPERM when renaming over an
+    // existing file. Cover all three.
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT' || code === 'EEXIST' || code === 'EPERM') {
+      try { await fs.unlink(tmp); } catch { /* ignore */ }
+      try { await fs.access(target); return; } catch { /* fall through */ }
+    }
+    throw err;
+  }
 }
 
 async function* walk(
