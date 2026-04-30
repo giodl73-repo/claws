@@ -1,3 +1,40 @@
+<!--
+PRE-FLIGHT BLOCKERS (as of 2026-04-29):
+
+1. PR-0 (`@openclaw/workspace` / `oc-path`) must land first. This snap PR
+   declares it as a sibling, not a hard dep, but the maintainer-side ramp
+   for the v2 contract chain expects PR-0 first.
+
+2. Umbrella issue not yet filed at openclaw/openclaw. Replace
+   `#UMBRELLA-ISSUE-NUMBER` placeholder after filing.
+
+3. Eduardo Piva has a parallel "OpenClaw Runtime Governance v1.0" design
+   (bic/aether#5408) that places governance evaluation on the Aether
+   runtime via a thin in-openclaw forwarder plugin. Reconciliation with
+   our PolicyIR + composed-providers approach is pending a 2026-04-30
+   discussion. That conversation may shape the policy-ir contract (sibling
+   to this PR) but should NOT change the snap contract — snap is
+   transport-and-engine-agnostic. Filing this PR can proceed even if
+   Eduardo's discussion shifts the policy-side story.
+
+4. Pacing: openclaw enforces a 10-PR-per-author cap with ~2 PRs open at a
+   time review culture. This is PR #2 of 5 in the v2 contract chain
+   (PR-0 = workspace, PR-1 = snap [this], PR-2 = policy-ir + ctx.snapshotId
+   extension, PR-3 = guardrails-adapter [downstream]). Pace accordingly.
+
+5. Naming open question: `Snapshot` vs `WorkspaceSnapshot` (see § Compat).
+   Could pre-empt by renaming before filing to avoid a maintainer round-trip.
+
+DOWNSTREAM EVIDENCE (for citation in PR conversations):
+- `@bic/openclaw-snap` ships the contract shape downstream — claws-side
+  proof that the contract composes with real production code.
+- Six e2e tests in `@bic/v2-prototype/tests/v2-chain.integration.test.ts`
+  prove the full chain (capture → bundle → policy-plugin reads → eval →
+  decision) composes without surprise integration glue.
+- All ~1100 tests across snap (18) + guardrails (177) + policy (429) +
+  claws (882) + v2-prototype (22) green at commit `a8930ed0`.
+-->
+
 ## Summary
 
 > **Filed in coordination with #UMBRELLA-ISSUE-NUMBER and the v2 contract chain after PR-1 (`@openclaw/workspace` / `oc-path`) lands.** Holding this PR open for maintainer guidance on shape (single PR vs splitting the three layers). Replace `#UMBRELLA-ISSUE-NUMBER` after the issue is filed.
@@ -139,6 +176,7 @@ N/A — this is feature delivery for a missing contract. The "root cause" of the
 - **Backward-compat proof**: the `Snapshot` type name does NOT collide with `src/gateway/protocol/schema/snapshot.ts` (presence/health snapshots for cross-device session coordination — completely unrelated). See "Naming" open question for the maintainer-decision on whether to rename to `WorkspaceSnapshot` for visual disambiguation.
 - **RFC 8785 JCS conformance**: `SnapshotId := lower-hex(sha256(jcs(canonical-manifest)))`. JCS handles object-key ordering deterministically; we additionally pin lexicographic ordering for the `files` array. Tested against fixed fixtures with byte-identical results across two independent runs.
 - **Wire-parity proof**: conformance test (`extensions/snapshot/conformance.test.ts`) runs the same client against both backends and asserts byte-identical responses for the equivalence-class fixture set.
+- **Downstream production-shape verification**: the contract has been implemented in claws's downstream `@bic/openclaw-snap` package and proven end-to-end across the full v2 chain — capture → bundle on disk → policy plugin reads via `store.read` → composed guardrail evaluator authorizes a tool call. Six integration tests (R5 deny via lowering, allow path, soul-rule fire-on-tag, fail-closed-on-missing-snapshotId, v2-shape on disk, content-addressing across captures) all green. See `claws/packages/v2-prototype/tests/v2-chain.integration.test.ts` (downstream code, not part of this PR) for the proof. The contract shape upstreamed here is byte-identical to what the downstream impl ships.
 
 ## Human Verification
 
@@ -170,6 +208,8 @@ N/A — this is feature delivery for a missing contract. The "root cause" of the
   - **Mitigation**: contract-level — gateway emits audit on every `Store.capture`/`read`/sign/verify operation, plus every policy decision. There is NO audit decorator the consumer can skip. Earlier drafts proposed "consumer decorator pattern" — that was a security regression caught in R1 review and removed.
 - **Risk**: `FsSnapshotStore` reference impl has performance issues at scale.
   - **Mitigation**: reference impl is fs-backed for portability + simplicity. Production deployments are expected to colocate a `SnapshotStore` impl in-process with the gateway for hot-path reads, with PolicyIR cached in plugin-private state at `onSnapshotPromoted` to bound read latency. See `realigned-story.md` "Hot-path cache discipline."
+- **Risk**: cloud-backed deployments (FUSE→OneDrive/SharePoint, S3, etc.) with eventual-consistency models could surprise consumers.
+  - **Mitigation**: the contract is transport-agnostic — `FsSnapshotStore` only assumes POSIX-shape filesystem semantics, which kernel-level FUSE mounts (e.g. `rclone mount`) preserve. `rename(tmp, target)` atomicity is preserved end-to-end through FUSE → cloud-API PATCH for OneDrive/SharePoint. Concurrent-writer semantics depend on the backend — local FS provides POSIX rename atomicity; rclone-fronted cloud is last-writer-wins (no ETag). Contract callers MUST treat all writes as eventually consistent unless their store impl documents stronger guarantees. Multi-instance deployments sharing a backend without coordination is out of scope for this PR (would need a separate `RefStore`-shaped contract for mutable refs — downstream concern in v2).
 - **Risk**: namespace collision with existing `src/gateway/protocol/schema/snapshot.ts`.
   - **Mitigation**: imports route through different modules; no symbol collision. Visual confusion is the actual risk; rename to `WorkspaceSnapshot` if maintainers prefer (open question).
 - **Risk**: rollback complexity if a regression surfaces post-merge.
