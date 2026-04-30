@@ -183,16 +183,30 @@ What we ship: **one env-var resolver in `commands/snap-store.ts`**.
 claws CLI inside an Aether container can target the FUSE mount instead
 of cwd. ~10 LoC. No new packages, no new contracts.
 
-**Pending input from Ryan Gregg** (message sent 2026-04-29):
-1. Canonical mount path inside the OpenClaw container (so we can
-   document `OPENCLAW_WORKSPACE_ROOT=<path>` for Aether deploys).
-2. Whether `.openclaw/snapshots/` under the FUSE root is safe (no
-   collision with Aether's own state).
-3. rclone cache mode — confirm `--vfs-cache-mode=full` so capture
-   walks aren't paying cloud round-trips per file read.
-4. Atomicity of `rename(tmp, target)` end-to-end through FUSE→rclone→cloud.
-5. Concurrent-writer behavior on `setHead` (rclone ETag conflicts vs.
-   last-write-wins).
+**Ryan Gregg's answers (received 2026-04-29):**
+
+| Question | Answer |
+|---|---|
+| Mount path | FUSE flights mount at `/home/node/.openclaw`. Set `OPENCLAW_WORKSPACE_ROOT=/home/node/.openclaw` for Aether-container deploys. |
+| `.openclaw/` subdir collision | Safe. "Nothing like that exists today" — no Aether state reserves `.openclaw/snapshots/`. |
+| `rename(tmp, target)` atomicity | Preserved. rclone translates rename → single PATCH on driveItem — atomic at the Graph API level. Our `writeAtomic` pattern works end-to-end through FUSE→rclone→OneDrive. |
+| Concurrent-writer semantics | **Last-writer-wins.** rclone has no ETag / conditional-PUT validation. Multi-instance gateway sharing refs through OneDrive is NOT safe without our own coordination layer. |
+| rclone cache mode | (not directly answered — derive from PR config; non-blocking for the carve.) |
+
+**Critical operational note from Ryan:** production today is **blob_sync**,
+not FUSE. blob_sync replicates `/home/node/.openclaw/workspace` and
+`/home/node/.openclaw` to separate blobs. FUSE is in flights/limited
+rollout. blob_sync is even-more-eventual than FUSE — durability lags
+wall clock by the blob_sync interval. Our `filesystemStore` works fine
+on either (writes go to local container fs; blob_sync replicates async).
+
+**LWW implication for our refs design:**
+- Local dev (single dev → single process touching refs at a time): ✓ fine
+- One openclaw container reading + claws CLI writing same workspace: ✓ usually fine (capture+promote is human-paced; stale read for seconds is acceptable)
+- Multi-instance gateway sharing refs through OneDrive: ✗ NOT safe — silent overwrite. Needs lock file, refs service, or DB-backed RefStore.
+
+This is exactly why HTTP transport / multi-gateway is deferred. The
+single-instance Mode 1 deployment (snap-in-process + FUSE) is unaffected.
 
 ## Deferred — HTTP transport (Mode 2 — snap-as-sidecar)
 
