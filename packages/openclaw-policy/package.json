@@ -54,7 +54,8 @@
   },
   "peerDependencies": {
     "@bic/openclaw-workspace": "^0.1.0",
-    "@bic/openclaw-guardrails": "^0.1.0"
+    "@bic/openclaw-guardrails": "^0.1.0",
+    "@bic/v2-prototype": "*"
   },
   "peerDependenciesMeta": {
     "@bic/openclaw-guardrails": {
@@ -62,6 +63,7 @@
     }
   },
   "devDependencies": {
+    "@bic/v2-prototype": "*",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^3.1.1",
     "typescript": "^5.7.0",

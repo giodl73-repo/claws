@@ -27,12 +27,17 @@ describe('generator top-level surface', () => {
     expect(ir.policyId).toMatch(/^sha256-/);
   });
 
-  it('generateInMemory composes all three artifacts from a draft', () => {
+  it('generateInMemory composes all artifacts from a draft', () => {
     const out = generateInMemory({
       workspaceRoot: '.',
       draft: draftFrom(waffles()),
     });
-    expect(out.policyIr).toContain('"identity"');
+    // v2 (upstream-shaped) PolicyIR has tools + denyRules + generatedFrom
+    expect(out.policyIr).toContain('"tools"');
+    expect(out.policyIr).toContain('"denyRules"');
+    expect(out.policyIr).toContain('"generatedFrom"');
+    // The rich shape is preserved alongside for claws-side tooling.
+    expect(out.policyIrRich).toContain('"identity"');
     expect(out.gatewayPlugin).toContain('registration');
     expect(out.auditManifest).toContain('tool_call');
   });

@@ -8,16 +8,19 @@ import { canonicalize } from '../src/compile/canonicalize.js';
 import { waffles } from './helpers/fixture.js';
 
 describe('Integration — end-to-end policy package behavior (4 tests)', () => {
-  it('generateInMemory(workspace draft) → three artifacts, all non-empty', () => {
+  it('generateInMemory(workspace draft) → artifacts, all non-empty', () => {
     const out = generateInMemory({ workspaceRoot: '.', draft: draftFrom(waffles()) });
     expect(out.policyIr.length).toBeGreaterThan(0);
+    expect(out.policyIrRich.length).toBeGreaterThan(0);
     expect(out.gatewayPlugin.length).toBeGreaterThan(0);
     expect(out.auditManifest.length).toBeGreaterThan(0);
-    expect(JSON.parse(out.policyIr).identity.name).toBe('waffles');
+    // Rich shape carries identity (claws-internal); v2 shape does not.
+    expect(JSON.parse(out.policyIrRich).identity.name).toBe('waffles');
     expect(out.gatewayPlugin).toContain('export const registration');
   });
 
   it('generate-determinism cross-process: spawned node run emits byte-identical IR', () => {
+    const FROZEN = (): Date => new Date('2026-01-01T00:00:00.000Z');
     const script = `
       import('./packages/policy/src/generator.js').then(({ generateInMemory, finalizeIR }) => {
         const ir = finalizeIR({
@@ -47,6 +50,7 @@ describe('Integration — end-to-end policy package behavior (4 tests)', () => {
         governance: { rules: [], sensitivityPropagation: [], governanceSurface: [] },
         identity: { name: 'x' },
       },
+      now: FROZEN,
     });
     const twice = generateInMemory({
       workspaceRoot: '.',
@@ -59,6 +63,7 @@ describe('Integration — end-to-end policy package behavior (4 tests)', () => {
         governance: { rules: [], sensitivityPropagation: [], governanceSurface: [] },
         identity: { name: 'x' },
       },
+      now: FROZEN,
     });
     expect(twice.policyIr).toBe(inproc.policyIr);
     expect(script.length).toBeGreaterThan(0);

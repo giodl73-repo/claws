@@ -66,8 +66,9 @@ describe('Emit — three artifacts (6 tests)', () => {
   });
 
   it('idempotency: generateInMemory twice produces byte-identical artifacts', () => {
-    const a = generateInMemory({ workspaceRoot: '.', draft: base() });
-    const b = generateInMemory({ workspaceRoot: '.', draft: base() });
+    const FROZEN = (): Date => new Date('2026-01-01T00:00:00.000Z');
+    const a = generateInMemory({ workspaceRoot: '.', draft: base(), now: FROZEN });
+    const b = generateInMemory({ workspaceRoot: '.', draft: base(), now: FROZEN });
     expect(a.policyIr).toBe(b.policyIr);
     expect(a.gatewayPlugin).toBe(b.gatewayPlugin);
     expect(a.auditManifest).toBe(b.auditManifest);

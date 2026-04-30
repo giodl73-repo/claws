@@ -72,16 +72,20 @@ describe('P57 scope-prefix substitution in import lines (L0 #3–#4)', () => {
 });
 
 describe('P57 byte-parity across scopes (L0 #5–#6)', () => {
+  const FROZEN = (): Date => new Date('2026-01-01T00:00:00.000Z');
+
   it('policy-ir.json is byte-identical across @bic/openclaw and @openclaw scopes', () => {
     const bic = generateInMemory({
       workspaceRoot: '.',
       draft: draftFromWaffles(),
       scopePrefix: '@bic/openclaw',
+      now: FROZEN,
     });
     const oc = generateInMemory({
       workspaceRoot: '.',
       draft: draftFromWaffles(),
       scopePrefix: '@openclaw',
+      now: FROZEN,
     });
     expect(bic.policyIr).toBe(oc.policyIr);
   });
@@ -91,11 +95,13 @@ describe('P57 byte-parity across scopes (L0 #5–#6)', () => {
       workspaceRoot: '.',
       draft: draftFromWaffles(),
       scopePrefix: '@bic/openclaw',
+      now: FROZEN,
     });
     const oc = generateInMemory({
       workspaceRoot: '.',
       draft: draftFromWaffles(),
       scopePrefix: '@openclaw',
+      now: FROZEN,
     });
     expect(bic.auditManifest).toBe(oc.auditManifest);
   });

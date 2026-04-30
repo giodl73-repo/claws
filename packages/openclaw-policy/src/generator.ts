@@ -15,6 +15,7 @@ import type { WorkspaceWatcherFactory } from '@bic/openclaw-workspace/staging';
 import { canonicalize, computePolicyId, CANONICALIZER_VERSION } from './compile/canonicalize.js';
 import { analyze } from './compile/analyze.js';
 import { emitPolicyIR } from './emit/emit-policy-ir.js';
+import { emitV2PolicyIR } from './emit/emit-v2-policy-ir.js';
 import { emitPluginCode, DEFAULT_SCOPE_PREFIX } from './emit/emit-plugin.js';
 import { emitAuditManifest } from './emit/emit-audit-manifest.js';
 import { fsGenerate, type FsGenerateDeps } from './fs-pipeline.js';
@@ -34,11 +35,31 @@ export interface InMemoryGenerateInput extends GenerateOptions {
     version?: string;
   };
   scopePrefix?: ScopePrefix;
+  /**
+   * Override clock for deterministic emit. Used by byte-parity / scope-
+   * parity tests and any caller that needs reproducible bytes from the
+   * same logical inputs. Defaults to `() => new Date()`.
+   */
+  now?: () => Date;
 }
 
 export interface InMemoryArtifacts {
+  /** Rich claws-internal IR (with R0–R5 tiers, soul/agents/governance richness). */
   ir: PolicyIR;
+  /**
+   * V2 (upstream-shaped) PolicyIR JSON — what gets written to
+   * `<snapshot>/.openclaw/policy/policy-ir.json`. R5-lowered: tier
+   * semantics encoded as explicit `denyRules` so non-claws guardrails
+   * enforce them without tier awareness. See `emit/lower.ts`.
+   */
   policyIr: string;
+  /**
+   * Rich claws-internal IR JSON — kept alongside the v2 form for
+   * claws-side tooling that needs the full SOUL/AGENTS/governance
+   * shape (e.g. `claws policy diff` semantic comparison, doctor
+   * inspection). Not part of the upstream contract.
+   */
+  policyIrRich: string;
   gatewayPlugin: string;
   auditManifest: string;
 }
@@ -59,11 +80,18 @@ export function finalizeIR(
 export function generateInMemory(input: InMemoryGenerateInput): InMemoryArtifacts {
   const ir = finalizeIR(input.draft);
   const scopePrefix = input.scopePrefix ?? DEFAULT_SCOPE_PREFIX;
+  // `sha256-deferred` is the carry-through placeholder snapshot id used
+  // until the gateway-side capture call binds the real snapshot. The
+  // emitted policy-ir.json carries this in `generatedFrom` and gets
+  // rewritten on actual capture. See policy-pre-rfc § "Snapshot anchor".
+  const placeholderSnap = 'sha256-deferred';
+  const emitOpts = input.now !== undefined ? { now: input.now } : {};
   return {
     ir,
-    policyIr: emitPolicyIR(ir),
-    gatewayPlugin: emitPluginCode({ ir, snapshotId: 'sha256-deferred', scopePrefix }),
-    auditManifest: emitAuditManifest(ir, 'sha256-deferred'),
+    policyIr: emitV2PolicyIR(ir, placeholderSnap, emitOpts),
+    policyIrRich: emitPolicyIR(ir),
+    gatewayPlugin: emitPluginCode({ ir, snapshotId: placeholderSnap, scopePrefix }),
+    auditManifest: emitAuditManifest(ir, placeholderSnap),
   };
 }
 
