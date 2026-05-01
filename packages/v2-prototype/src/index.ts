@@ -55,3 +55,16 @@ export {
 } from './policy-ir-runtime.js';
 
 export type { PluginHookToolContextExtension } from './hook-types-extension.js';
+
+export type {
+  LKGEntry,
+  LKGError,
+  LKGErrorCode,
+  LKGFingerprint,
+  LKGObservation,
+  LKGStore,
+  LKGTracker,
+  ValidationIssue,
+  ValidationResult,
+} from './lkg.js';
+export { LKGErrorImpl } from './lkg.js';

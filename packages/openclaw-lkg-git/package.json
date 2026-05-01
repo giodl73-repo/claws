@@ -1,0 +1,49 @@
+{
+  "name": "@bic/openclaw-lkg-git",
+  "version": "0.1.0",
+  "description": "Git-backed LKG store — implements @bic/openclaw-lkg's LKGStore contract using git for promote (commit) and recover (checkout HEAD). Designed for OneDrive-backed workspaces via FUSE; gives multi-agent merge semantics for free vs rclone last-writer-wins.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "peerDependencies": {
+    "@bic/openclaw-lkg": "*",
+    "@bic/v2-prototype": "*"
+  },
+  "devDependencies": {
+    "@bic/openclaw-lkg": "*",
+    "@bic/v2-prototype": "*",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.1.1"
+  },
+  "keywords": [
+    "openclaw",
+    "lkg",
+    "last-known-good",
+    "git",
+    "onedrive",
+    "bic"
+  ]
+}

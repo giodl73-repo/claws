@@ -1,7 +1,14 @@
 /**
- * v2 chain — adversarial scenarios (30 tests across 10 categories).
+ * v2 chain — snap-shape adversarial scenarios (30 tests across 10 categories).
  *
- * Stress-tests the v2 contract chain beyond happy-path. Each scenario
+ * **Scope (post-2026-04-30 pivot to LKG-as-carrier):** these tests cover
+ * the **downstream-only `@bic/openclaw-snap` package**, NOT the upstream
+ * chain. The upstream adversarial evidence is the 18-wave LKG suite in
+ * `v2-chain-lkg-adversarial-{,2..18}.integration.test.ts` (326 scenarios
+ * across 75 categories). These snap-shape tests are downstream
+ * regression coverage for `@bic/openclaw-snap`.
+ *
+ * Stress-tests the snap-shaped chain beyond happy-path. Each scenario
  * proves or exposes something architecturally meaningful:
  *
  *   1. Bundle integrity / tamper detection

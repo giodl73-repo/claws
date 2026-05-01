@@ -35,14 +35,14 @@ detail.
 ```org
 design/
 ├── src/openclaw/: proof source (.source.md)
-├── 00-orientation.source.md: this file
-├── 01-plugin-lifecycle.source.md: manifest pipeline
-├── 02-three-channels.source.md: observation channels
-├── 03-gateway-bus.source.md: gateway extensibility
-├── 04-turn-anatomy.source.md: request lifecycle
-├── 05-trust-boundary.source.md: trust plus redaction
-├── 06-manifest-activation.source.md: activation triggers
-├── 07-validate-with-proof.source.md: proof linting
+│   ├── 00-orientation.source.md: this file
+│   ├── 01-plugin-lifecycle.source.md: manifest pipeline
+│   ├── 02-three-channels.source.md: observation channels
+│   ├── 03-gateway-bus.source.md: gateway extensibility
+│   ├── 04-turn-anatomy.source.md: request lifecycle
+│   ├── 05-trust-boundary.source.md: trust plus redaction
+│   ├── 06-manifest-activation.source.md: activation triggers
+│   └── 07-validate-with-proof.source.md: proof linting
 ├── openclaw/: deep-dive specs (.md, hand-written)
 ├── openclaw/guides/: compiled output (.md, proof-generated)
 └── proof.toml: compile config

@@ -1,62 +1,50 @@
 {
-  "src/openclaw/00-test.source.md": {
-    "parse_key": "0c921fb5c1c802c8",
-    "mtime_ms": 1777435898889,
-    "size": 354,
-    "content_hash": "d4399e2869eec60d"
+  "src/openclaw\\01-plugin-lifecycle.source.md": {
+    "parse_key": "b58af7d39a58e04d",
+    "mtime_ms": 1777491536227,
+    "size": 5192,
+    "content_hash": "518a44ce8d00e2d6"
   },
   "src/openclaw\\06-manifest-activation.source.md": {
-    "parse_key": "f31a03af7fc951ab",
-    "mtime_ms": 1777437920291,
-    "size": 5409,
-    "content_hash": "ddd766231255ea42"
-  },
-  "src/openclaw\\04-turn-anatomy.source.md": {
-    "parse_key": "d687d5ea8b5ec27d",
-    "mtime_ms": 1777437917722,
-    "size": 5199,
-    "content_hash": "4d707f0ef5d7fee3"
-  },
-  "src/openclaw\\01-plugin-lifecycle.source.md": {
-    "parse_key": "519092a7c4525ae6",
-    "mtime_ms": 1777437914813,
-    "size": 5079,
-    "content_hash": "40423b9a2302d77f"
-  },
-  "src/openclaw\\02-three-channels.source.md": {
-    "parse_key": "a321f155a2555da9",
-    "mtime_ms": 1777437915907,
-    "size": 5199,
-    "content_hash": "70e7890e4be2a3d4"
+    "parse_key": "a69b2653c656d7b4",
+    "mtime_ms": 1777491536230,
+    "size": 5544,
+    "content_hash": "d0c03615bda03fab"
   },
   "src/openclaw\\00-orientation.source.md": {
-    "parse_key": "d3d9b8b5819a1fa8",
-    "mtime_ms": 1777437913331,
-    "size": 3040,
-    "content_hash": "fb3c113caf0d0141"
+    "parse_key": "9f0e982c62d5ed73",
+    "mtime_ms": 1777491536226,
+    "size": 3129,
+    "content_hash": "09c83013b0600597"
   },
-  "src/openclaw\\07-validate-with-proof.source.md": {
-    "parse_key": "c1472392271b9520",
-    "mtime_ms": 1777438238134,
-    "size": 7682,
-    "content_hash": "6dec38d03ace19dc"
+  "src/openclaw\\04-turn-anatomy.source.md": {
+    "parse_key": "0ea622c54b336f68",
+    "mtime_ms": 1777491536229,
+    "size": 5314,
+    "content_hash": "a8393b546198b36f"
   },
-  "src/openclaw\\05-trust-boundary.source.md": {
-    "parse_key": "8f41a56fab6ff9da",
-    "mtime_ms": 1777437919259,
-    "size": 5605,
-    "content_hash": "af071f68363834e1"
+  "src/openclaw\\02-three-channels.source.md": {
+    "parse_key": "83c6564fdd5e1010",
+    "mtime_ms": 1777491536227,
+    "size": 5320,
+    "content_hash": "e2e7b15a9b3e5901"
   },
   "src/openclaw\\03-gateway-bus.source.md": {
-    "parse_key": "c7c42b4d31ac2f94",
-    "mtime_ms": 1777437916597,
-    "size": 5282,
-    "content_hash": "af99d2b8d72e68ab"
+    "parse_key": "065cd3b85dbcafce",
+    "mtime_ms": 1777491536228,
+    "size": 5406,
+    "content_hash": "049ccfc62a2ba1ae"
   },
-  "src/openclaw\\00-test.source.md": {
-    "parse_key": "0c921fb5c1c802c8",
-    "mtime_ms": 1777435898889,
-    "size": 354,
-    "content_hash": "d4399e2869eec60d"
+  "src/openclaw\\05-trust-boundary.source.md": {
+    "parse_key": "80de86a973c87dcb",
+    "mtime_ms": 1777491536229,
+    "size": 5743,
+    "content_hash": "4870c8e96df158b5"
+  },
+  "src/openclaw\\07-validate-with-proof.source.md": {
+    "parse_key": "000892f43d7e6a0a",
+    "mtime_ms": 1777491536231,
+    "size": 7882,
+    "content_hash": "cb4fd702955d2b20"
   }
 }

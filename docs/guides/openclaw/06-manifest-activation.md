@@ -31,18 +31,18 @@ Plus the always-on case: `activation.onStartup: true`.
 ```taxonomy
 Activation field semantics
 ├── Owner declarations
-├── providers: ["openai"]
-├── channels: ["telegram"]
-├── commandAliases: [{name: dreaming}]
-├── kind: "memory"
+│   ├── providers: ["openai"]
+│   ├── channels: ["telegram"]
+│   ├── commandAliases: [{name: dreaming}]
+│   └── kind: "memory"
 ├── Activation hints
-├── activation.onProviders: ["openai"]
-├── activation.onChannels: ["telegram"]
-├── activation.onCommands: ["browser"]
-├── activation.onConfigPaths: ["browser"]
-├── Always
-├── activation.onStartup: true
-└── enabledByDefault: true
+│   ├── activation.onProviders: ["openai"]
+│   ├── activation.onChannels: ["telegram"]
+│   ├── activation.onCommands: ["browser"]
+│   └── activation.onConfigPaths: ["browser"]
+└── Always
+    ├── activation.onStartup: true
+    └── enabledByDefault: true
 ```
 <!-- /proof:compiled -->
 

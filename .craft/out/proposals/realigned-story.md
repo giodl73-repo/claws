@@ -1,14 +1,48 @@
-# Realigned story — snap + policy + guardrails as one contract chain
+# Realigned story — workspace + LKG + PolicyIR as the v2 contract chain
 
 **Status**: internal architectural narrative
 **Target audience**: claws + lobster team; potentially shareable to `#clawtributors` as the "why" behind the pre-RFCs (with scrubbing pass per repo-steward W3)
 **Author**: giodl@microsoft.com
 **Date**: 2026-04-29
-**Revision**: R1-amended 2026-04-29 (hapi state honest, gateway-as-signer, gateway-emitted audit, trim arithmetic reconciled, upstream cadence honest, ctx.snapshotId threaded, OcPath/SnapshotInternalPath split); R1-follow-on 2026-04-29 (audit stays downstream — no `@openclaw/audit` in v2; trim figure pinned at 6,200 LoC; `claws-guardrails` rename for naming consistency); R2 fix-pass 2026-04-29 (M11 trim-prose 1,689 reconciled; F21 per-tenant signing keys explicit; G-N1 KeyVault hot-path amortization; G-N2 per-session async audit chains; NEW-1 pre-day-0 hapi window in calendar; NEW-2 v3 audit trigger gates; NEW-3 trim-plan parallel-drafting timing)
+**Revision**: R1-amended 2026-04-29 (hapi state honest, gateway-as-signer, gateway-emitted audit, trim arithmetic reconciled, upstream cadence honest, ctx.snapshotId threaded, OcPath/SnapshotInternalPath split); R1-follow-on 2026-04-29 (audit stays downstream — no `@openclaw/audit` in v2; trim figure pinned at 6,200 LoC; `claws-guardrails` rename for naming consistency); R2 fix-pass 2026-04-29 (M11 trim-prose 1,689 reconciled; F21 per-tenant signing keys explicit; G-N1 KeyVault hot-path amortization; G-N2 per-session async audit chains; NEW-1 pre-day-0 hapi window in calendar; NEW-2 v3 audit trigger gates; NEW-3 trim-plan parallel-drafting timing); **R3 LKG-pivot 2026-04-30** (snap → LKG as the carrier; chain consolidates from 5 to 3 upstream PRs by folding stripFrontMatter raw-preserve into PR-1 and merger conjunctive AND into PR-3; ctx.snapshotId → ctx.lkgFingerprint; sister proof = 326 adversarial scenarios across 18 waves; sections 2-3 below rewritten to LKG framing, sections 4-6 amended with redirect notes — see "R3 amendment summary" immediately below).
+
+## R3 amendment summary (2026-04-30) — read this first
+
+The earlier R1/R2 framing had **snap as the carrier** (capture-the-workspace-as-bundle, JCS-canonical SnapshotId, gateway-signed at capture). Two things changed on 2026-04-30:
+
+**Pivot A (2026-04-29 — guardrails moved downstream).** Already in this doc: §5 "claws-guardrails (no upstream PR)". Recap: upstream already ships `PluginTrustedToolPolicyRegistration` + `runTrustedToolPolicies`, so the guardrails-package PR was redundant. Slot becomes a ~50-LoC downstream adapter.
+
+**Pivot B (2026-04-30 — snap → LKG as carrier).** New. After surveying upstream demand (`carve-consumer-catalog.md` strategic-pivot section), the carrier abstraction shifts from "introduce a SnapshotStore" to "factor out the existing config-LKG mechanism into a generalized `LKGTracker<T>` / `LKGStore` contract that any plugin can register against." This generalizes the pattern shipped at `src/config/io.observe-recovery.ts` (#70528, commit `af56926e2fc4`, `v2026.4.23`). The same load-bearing claim — *every policy decision is anchored to a known point-in-time fingerprint* — survives the pivot; the anchor is now `LKGFingerprint.hash` (sha256 of raw bytes) instead of `SnapshotId` (sha256 of JCS-canonical manifest).
+
+**Final chain shape (3 upstream PRs)**:
+
+| PR | What ships | Killer step |
+|---|---|---|
+| **PR-1: `@openclaw/workspace`** | package + lint + oc:// URIs + JSONC byte-identical chokepoint + `__OPENCLAW_REDACTED__` sentinel guard + **stripFrontMatter raw-preserve** (folded from former PR-2) | byte-stability foundation across the 9-file workspace surface |
+| **PR-2: LKG contract** | `LKGStore` types + reference impl + 326 adversarial scenarios across 75 categories | the carrier — proven backend-agnostic via dual-backend `describe.each([fs, git])`; abstraction boundary holds |
+| **PR-3: PolicyIR + `ctx.lkgFingerprint` + hook merger** | PolicyIR types + ctx extension + runtime helpers + **conjunctive AND merger fix** (folded from former PR-4) | end-to-end policy chain-of-custody — types contract + LKG anchor + enforcement merger |
+
+Plus one downstream-only: `claws-guardrails` adapter (no upstream PR by design).
+
+**What sections of this doc are still canonical post-R3**: §5 (claws-guardrails — unchanged); §6 (gateway-as-signer model, but signing is now over `(lkgFingerprint, capturedAt, gatewayKeyId)` instead of `(SnapshotId, ...)` — operator-territory either way); §"Why audit is not in v2 scope" (unchanged); calendar honesty (still applies, modulo PR count going from 6→3).
+
+**What sections are historical / pre-R3**: TL;DR (rewritten below to R3 framing); §1 oc-path (unchanged — still PR-1's primitive); §2 snap (rewritten to "LKG as carrier"); §3 PolicyIR (still applies, with snap → LKG sweep); §4 ctx.snapshotId (rewritten to ctx.lkgFingerprint); §"architectural flow" diagram (still describes the snap-shape; the LKG-shape is in `carve-consumer-catalog.md` and `pr-drafts/v2-lkg-contract.md`).
+
+This doc preserves the R1/R2 archaeology to maintain the audit trail of how the strategy evolved. The **canonical current strategy** is the 3-PR table above + `pr-drafts/v2-lkg-contract.md` (the LKG carrier proposal) + `pr-drafts/v2-policy-ir.md` (the PolicyIR + ctx + merger proposal) + `pr-drafts/PR-1.md` (the workspace + frontmatter proposal).
 
 ## TL;DR
 
-Two recent shifts collapse the upstream contribution surface from a chunky multi-PR daemon contribution into three small contract PRs totalling ~380–520 LoC. First: the user's "policy lives in snapshots" framing reframes PolicyIR as a generated artifact that rides inside snapshots, not a separate API surface. Second: bandit's audit found upstream already ships the guardrails contract — `registerTrustedToolPolicy` + `runTrustedToolPolicies` are in production at `src/plugins/{host-hooks,trusted-tool-policy}.ts`, so guardrails has zero LoC upstream and an adapter downstream. Combined with yankee's "contract not daemon" finding for snap, the chain composes naturally: snap is the carrier (gateway-signed at capture), PolicyIR is the payload (covered by snap's signature transitively), guardrails enforce via upstream's existing runner (with `ctx.snapshotId` threaded so decisions anchor to a known snapshot). Downstream we drop **~6,200 LoC** of parallel implementations after deduplicating snap×policy overlap (claws-sdk's snapshot + governance + compliance + audit-chain machinery; pinned to the conservative figure per R1-follow-on amendment because audit stays downstream — see "Why audit is not in v2 scope" and "What this replaces" below). Net: claws-sdk shrinks substantially, the Rust port target shrinks with it, and we gain three reusable upstream contracts instead of one rejected daemon. **Realistic upstream timeline: 6–10 weeks for the chain to land** (not "1–2 weeks") — see "Calendar honesty" below.
+**Three pivots collapse the upstream contribution surface to 3 PRs:**
+
+1. **The "policy lives at a content-addressed path" framing** reframes PolicyIR as a generated artifact whose decisions are anchored to a known content fingerprint, not a separate API surface.
+2. **Bandit's audit found upstream already ships the guardrails contract** — `registerTrustedToolPolicy` + `runTrustedToolPolicies` are in production at `src/plugins/{host-hooks,trusted-tool-policy}.ts`, so guardrails has zero LoC upstream and a ~50 LoC adapter downstream.
+3. **The snap → LKG pivot (R3)** factors out the existing `recoverConfigFromLastKnownGood` mechanism (#70528, `v2026.4.23`) into a generalized `LKGTracker<T>` / `LKGStore` contract any plugin can register against — instead of introducing a parallel `SnapshotStore` abstraction. Less new surface, broader reuse, free recovery, proven against 326 adversarial scenarios across 18 waves.
+
+**The chain composes naturally**: workspace files are byte-stable (PR-1 — JSONC byte-identity + frontmatter raw-preserve); LKG carries them as content-addressed per-file fingerprints (PR-2 — `LKGStore` contract with FS + git backends); PolicyIR is the payload that rides at an LKG-tracked path, with `ctx.lkgFingerprint` threaded into hook-time so decisions anchor to a specific PolicyIR version (PR-3 — types + ctx extension + conjunctive-AND merger fix); guardrails enforce via upstream's existing runner with the threaded anchor.
+
+**Downstream we drop ~6,200 LoC** of parallel implementations after dedup (claws-sdk's snapshot + governance + compliance + audit-chain machinery; pinned per R1-follow-on because audit stays downstream — see "Why audit is not in v2 scope" and "What this replaces" below). Net: claws-sdk shrinks substantially, the Rust port target shrinks with it, and we gain three reusable upstream contracts plus a free recovery primitive that closes #70528-class agent-corruption gaps for any plugin-registered file. **Realistic upstream timeline: 6–10 weeks for the chain to land** — see "Calendar honesty" below.
+
+**Strategic frame in one line**: every policy decision is anchored to the LKG-fingerprinted state of the workspace at a known point in time.
 
 ## Hapi wave coordination (R1 amendment 2026-04-29 addressing M-HAPI-COLLISION)
 
@@ -158,34 +192,48 @@ Currently bundled into Hapi PR-1 (`@openclaw/workspace` package per `wave.yaml`)
 
 **Important distinction from snapshot-internal paths**: `OcPath` addresses files in a LIVE workspace (the structured `oc://{file}/...` scheme). Snapshot-internal paths (where PolicyIR lives, where any file inside a captured bundle lives) are NOT `OcPath` — they are POSIX-style relative strings inside the snapshot, typed as `SnapshotInternalPath` (a string alias defined by the snap contract). The two addressing schemes are not interchangeable. See `snap-pre-rfc.md` "Related work / prior art" for the long form.
 
-### 2. snap (proposed, see snap-pre-rfc.md)
+### 2. LKG carrier (proposed — R3 replacement for snap, see `lkg-pre-rfc.md` and `pr-drafts/v2-lkg-contract.md`)
 
-A `SnapshotStore` contract in `src/plugin-sdk/snapshot.ts` (~30 LoC: `Snapshot`, `SnapshotId`, `WorkspaceId`, `SnapshotInternalPath`, `SnapshotStore { capture, read, list }`), a reference plugin under `extensions/snapshot/` using `registerService` + `registerHttpRoute` (~100 LoC), and an `openclaw snap` CLI verb (~150 LoC). **~280 LoC total** across three thin layers. Snapshot IDs are RFC 8785 JCS content-hashes; signing is gateway-side, not Store-side; audit is gateway-emitted; failure semantics are fail-closed; conformance test verifies that `extensions/snapshot/` and `openclaw snap serve` produce identical wire shapes. Daemon-shape lives downstream as a `SnapshotStore` impl, not as an upstream package.
+An `LKGTracker<T>` / `LKGStore` contract in `src/plugin-sdk/lkg.ts` (~80 LoC: `LKGFingerprint`, `LKGEntry`, `LKGObservation`, `ValidationIssue`, `LKGTracker<T> { path, parse, validate, suspiciousReasons?, shouldRecover? }`, `LKGStore { register, observe, readLastKnownGood, getEntry }`) plus a reference plugin at `extensions/lkg/` (~150 LoC) and a wire-parity conformance test (~80–100 LoC) that asserts the reference implementation matches the existing config-LKG behavior on a fixed fixture set.
 
-### 3. PolicyIR (proposed, see policy-pre-rfc.md)
+**~250–350 LoC upstream total.** Generalizes the pattern shipped at `src/config/io.observe-recovery.ts` (#70528, commit `af56926e2fc4`, `v2026.4.23`) so any plugin can register a per-file tracker. `LKGFingerprint.hash` is sha256 lower-hex over raw bytes (bytes-only content-addressing, simpler than JCS). Signing is operator-territory layered on top (gateway can sign `(lkgFingerprint, capturedAt, gatewayKeyId)` for chain-of-custody — not a contract concern). Failure semantics are fail-closed; the contract surface is exactly `{register, observe, readLastKnownGood, getEntry}` — proven backend-agnostic via dual-backend `describe.each([fs, git])` in 18 waves of adversarial scenarios.
 
-A types-only contract in `src/plugin-sdk/policy-ir.ts` (~80–150 LoC: `PolicyIR`, `ToolSpec`, `DenyRule`, `Decision`, `PolicyGenerator<TValidated>` interface, `POLICY_IR_PATH: SnapshotInternalPath = '.openclaw/policy/policy-ir.json'` constant). Optional companion `policy-ir-runtime.ts` (~50 LoC) for the four lock-point ABI helpers (`loadPolicyIR`, `readPolicyIR`, `validatePolicyIR`, `getCurrentPolicyIR`) so PolicyIR-aware plugins can compile against a stable surface. `policyId` uses the same RFC 8785 JCS canonicalization rule as snap's `SnapshotId`. The generator implementation stays downstream — claws ships SOUL.md/TOOLS.md/AGENTS.md compilation; OPA users ship a `.rego → PolicyIR` shim; ecosystem authors implement their own.
+The carrier is per-file (each tracked path has its own fingerprint); workspace-level state composes from the set of LKG fingerprints across the 9 `OC_WORKSPACE_FILES` plus PolicyIR. Recovery is a free byproduct of the contract — no separate API needed.
 
-### 4. `ctx.snapshotId` extension to `PluginHookToolContext` (proposed, see policy-pre-rfc.md Ask §4)
+Two reference backend implementations downstream: `@bic/openclaw-lkg` (FS-backed: `<path>.lkg` companion file) and `@bic/openclaw-lkg-git` (git-backed: `git commit` = promote, `git checkout HEAD --` = recover, multi-agent merge for free vs rclone last-writer-wins on OneDrive-backed workspaces). Both pass the 326 adversarial scenarios.
 
-A small (~5 LoC) extension to the existing `PluginHookToolContext` type at `src/plugins/hook-types.ts:393-401`, adding an optional `snapshotId?: SnapshotId` field. The gateway threads the active snapshot ID into the hook context at `before_tool_call` invocation time, so policy decisions are anchored to a known point in time. Without this, policy plugins must resolve "current snapshot" from plugin-private state via `onSnapshotPromoted`, which has known TOCTOU race conditions, multi-tenant policy bleed, and promotion-observation skew. **This is a contract change we're proposing as part of the policy contribution.** See policy-pre-rfc.md Ask §4 for the full rationale and the gateway-eng / ciso / platform-eng R1 reviews for the failure analysis.
+### 3. PolicyIR (proposed — see `policy-pre-rfc.md` and `pr-drafts/v2-policy-ir.md`)
+
+A types-only contract in `src/plugin-sdk/policy-ir.ts` (~80–150 LoC: `PolicyIR`, `ToolSpec`, `DenyRule`, `Decision`, `PolicyGenerator<TValidated>` interface, `POLICY_IR_PATH = '.openclaw/policy/policy-ir.json'` constant — the LKG-tracked path). Optional companion `policy-ir-runtime.ts` (~50 LoC) for the four lock-point ABI helpers (`loadPolicyIR`, `readPolicyIR`, `validatePolicyIR`, `getCurrentPolicyIR`). `policyId` uses RFC 8785 JCS canonicalization for content-canonical identity that survives re-serialization (this is **defense in depth alongside** `LKGFingerprint.hash` — `policyId` catches body tampering even if bytes look fresh; `LKGFingerprint.hash` catches bytes-on-disk tampering caught by the LKG store's hash check at observe time).
+
+The generator implementation stays downstream — claws ships SOUL.md/TOOLS.md/AGENTS.md compilation; OPA users ship a `.rego → PolicyIR` shim; ecosystem authors implement their own.
+
+### 4. `ctx.lkgFingerprint` extension to `PluginHookToolContext` (proposed, folded into PR-3)
+
+A small (~5 LoC) extension to `PluginHookToolContext` at `src/plugins/hook-types.ts:393-401`, adding an optional `lkgFingerprint?: LKGFingerprint` field. The gateway threads the active LKG fingerprint of the PolicyIR file into the hook context at `before_tool_call` invocation time, so policy decisions are anchored to a specific bytes-hash. Without this, policy plugins must resolve "current PolicyIR" from plugin-private state via observe-promote events, which has known TOCTOU race conditions, multi-tenant policy bleed, and promotion-observation skew. **This is the killer step of PR-3.**
+
+### 4b. Hook approval-merger conjunctive AND fix (folded into PR-3 from former PR-4)
+
+A behavioral fix at `src/plugins/hooks.ts:1008-1013` and `src/plugins/trusted-tool-policy.ts:43-45`: replace the existing first-wins `??` merger with a conjunctive-AND merger so plugin-A's `requireApproval` requirement isn't silently dropped by plugin-B returning no approval. Folded into PR-3 because it's the same chain-of-custody story at the enforcement layer that PolicyIR + `ctx.lkgFingerprint` deliver at the artifact layer. ~10 LoC across two call sites + a shared `mergeApprovals` helper in `src/plugins/approval-merge.ts` + a try/catch wrapper for crash-safety + Swift protocol model regen.
 
 ### 5. `claws-guardrails` (no upstream PR — see guardrails-adapter.md)
 
 **0 LoC upstream.** Upstream already has `PluginTrustedToolPolicyRegistration` at `src/plugins/host-hooks.ts:65-72` and `runTrustedToolPolicies` runner at `trusted-tool-policy.ts:8-54`. We adapt our `GuardrailProvider` via a ~50 LoC downstream adapter in `packages/claws-guardrails/src/openclaw-adapter.ts` (renamed from `openclaw-guardrails` per R1-follow-on for naming consistency with `claws-sdk`/`claws-serve`/`claws-snap-server`/`claws-policy-generator`). The adapter exports `toTrustedToolPolicy(provider)` that translates `allow|deny|review|modify` → `block|allow|params|requireApproval`. Adapter fail-closes on evaluator exceptions; reads PolicyIR via `snap.read(ctx.snapshotId, POLICY_IR_PATH)`. `ShellExecProvider` is deleted as a duplicate of upstream's native `~/.openclaw/exec-approvals.json` consumer.
 
-### Total upstream surface
+### Total upstream surface (R3 — 3 consolidated PRs)
 
-| Contract | Upstream LoC | Status |
-|---|---:|---|
-| oc-path (`@openclaw/workspace`) | ~25 | in-flight (Hapi PR-1) |
-| snap (contract + ref plugin + CLI) | ~280 | proposed (snap-pre-rfc) |
-| PolicyIR (types + optional runtime helpers) | ~80–200 | proposed (policy-pre-rfc) |
-| `ctx.snapshotId` extension | ~5 | proposed (policy-pre-rfc Ask §4) |
-| `claws-guardrails` (downstream adapter) | 0 | already shipped upstream |
-| **Total** | **~390–510 LoC** | small focused PRs (3 + small ctx extension) |
+| Contract | Upstream LoC | Status | Goes in PR |
+|---|---:|---|---|
+| `@openclaw/workspace` (oc-path + lint + JSONC chokepoint + sentinel guard) | ~3500 | in-flight | PR-1 |
+| stripFrontMatter raw-preserve | ~5 | folded into PR-1 (was former PR-2) | PR-1 |
+| LKG contract (`LKGStore` types + reference plugin + conformance test) | ~250–350 | proposed (lkg-pre-rfc) | PR-2 |
+| PolicyIR (types + optional runtime helpers) | ~80–200 | proposed (policy-pre-rfc) | PR-3 |
+| `ctx.lkgFingerprint` extension | ~5 | proposed (policy-pre-rfc Ask §4) | PR-3 |
+| Hook merger conjunctive AND fix | ~10 + Swift regen | folded into PR-3 (was former PR-4) | PR-3 |
+| `claws-guardrails` (downstream adapter) | 0 | already shipped upstream | (no upstream PR) |
+| **Total upstream** | **~3850–4070 LoC** | **3 PRs** | |
 
-For comparison: the original Hapi PR-6 alone was ~1665 LoC of daemon-shape code that yankee's audit predicted would be rejected on architectural grounds.
+For comparison: the original Hapi PR-6 alone was ~1665 LoC of daemon-shape code that yankee's audit predicted would be rejected on architectural grounds. The R3 chain is bigger in absolute LoC because PR-1's `@openclaw/workspace` package is substantial (lint engine, JSONC parser, etc.) — but it's split across coherent responsibilities, each PR has one strategic frame, and the LKG contract (PR-2) ships with 326 adversarial scenarios of evidence backing it.
 
 ## Why this works (the design payoff)
 

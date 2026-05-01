@@ -1,5 +1,9 @@
 /**
- * v2 chain — adversarial scenarios, pass 2 (S31..S60).
+ * v2 chain — snap-shape adversarial scenarios, pass 2 (S31..S60).
+ *
+ * **Scope (post-2026-04-30 pivot to LKG-as-carrier):** downstream-only
+ * coverage for `@bic/openclaw-snap`. Upstream adversarial evidence is
+ * the 18-wave LKG suite — see `v2-chain-lkg-adversarial-*.integration.test.ts`.
  *
  * Companion to v2-chain-adversarial.integration.test.ts. Covers axes
  * the first pass didn't:

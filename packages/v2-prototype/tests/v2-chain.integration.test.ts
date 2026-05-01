@@ -1,8 +1,21 @@
 /**
- * v2 chain — end-to-end integration test.
+ * v2 chain — end-to-end integration test (snap-shape, downstream-only).
  *
- * Wires every carved package together to prove the full v2 contract chain
- * composes:
+ * **Scope (post-2026-04-30 pivot to LKG-as-carrier):** these tests cover
+ * the **downstream-only `@bic/openclaw-snap` package**, NOT the upstream
+ * v2 contract chain. The upstream chain is LKG-shaped — see
+ * `v2-chain-lkg.integration.test.ts` and the 18-wave LKG adversarial
+ * suite (`v2-chain-lkg-adversarial-{,2..18}.integration.test.ts`) for
+ * the upstream evidence.
+ *
+ * Why these tests still exist: `@bic/openclaw-snap` is a real shipping
+ * package in Project Lobster's downstream code. These tests prove that
+ * package composes correctly with `@bic/openclaw-policy` and
+ * `@bic/openclaw-guardrails` end-to-end. They are downstream regression
+ * coverage, not upstream-PR evidence.
+ *
+ * Original purpose (historical): wires every carved package together to
+ * prove the full v2 contract chain composes —
  *
  *   1. claws-side policy generator           → emits v2 PolicyIR JSON
  *      (@bic/openclaw-policy)                  per the lower.ts projection

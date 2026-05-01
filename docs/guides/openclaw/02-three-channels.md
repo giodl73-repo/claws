@@ -30,20 +30,20 @@ so they survive bundle-chunk splitting. None of them speak to the others.
 ```taxonomy
 Plugin runtime channels
 ├── Typed plugin hooks
-├── File: src/plugins/hook-types.ts
-├── Style: pull, modify
-├── Examples: before_model_resolve, before_prompt_build, before_tool_call
-├── Failure: mostly fail-open, before_tool_call is fail-closed
+│   ├── File: src/plugins/hook-types.ts
+│   ├── Style: pull, modify
+│   ├── Examples: before_model_resolve, before_prompt_build, before_tool_call
+│   └── Failure: mostly fail-open, before_tool_call is fail-closed
 ├── Legacy internal hooks
-├── File: src/hooks/internal-hook-types.ts
-├── Style: pull, observe
-├── Examples: agent:bootstrap, gateway:startup, message:received
-├── Source tiers: bundled, plugin, managed, workspace
-├── Diagnostic event stream
-├── File: src/infra/diagnostic-events.ts
-├── Style: push, observe
-├── Examples: model.usage, run.completed, tool.execution.error
-└── Trust gate: metadata.trusted plus WeakSet anti-spoof
+│   ├── File: src/hooks/internal-hook-types.ts
+│   ├── Style: pull, observe
+│   ├── Examples: agent:bootstrap, gateway:startup, message:received
+│   └── Source tiers: bundled, plugin, managed, workspace
+└── Diagnostic event stream
+    ├── File: src/infra/diagnostic-events.ts
+    ├── Style: push, observe
+    ├── Examples: model.usage, run.completed, tool.execution.error
+    └── Trust gate: metadata.trusted plus WeakSet anti-spoof
 ```
 <!-- /proof:compiled -->
 

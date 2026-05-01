@@ -49,22 +49,22 @@ Run from the `design/` directory.
 ```taxonomy
 Diagnostic categories
 ├── ASCII art geometry
-├── ascii_box_width: top and bottom borders mismatch
-├── ascii_box_col: internal column drifts across rows
-├── ascii_flow_geometry: connector continuity broken
-├── char_wide: em dash or CJK glyph in monospace
+│   ├── ascii_box_width: top and bottom borders mismatch
+│   ├── ascii_box_col: internal column drifts across rows
+│   ├── ascii_flow_geometry: connector continuity broken
+│   └── char_wide: em dash or CJK glyph in monospace
 ├── Markdown structure
-├── md_missing_section: required H2 absent
-├── md_h1_count: zero or multiple H1
-├── md_heading_order: H3 before any H2
+│   ├── md_missing_section: required H2 absent
+│   ├── md_h1_count: zero or multiple H1
+│   └── md_heading_order: H3 before any H2
 ├── Tables
-├── table_missing_row: required row by key absent
-├── table_column_count: rows have different column counts
-├── table_separator_dashes: header separator malformed
-├── Links
-├── link_broken_target: prose link points at nonexistent file
-├── md_broken_uri: source-doc md:// reference not found
-└── md_broken_heading: heading anchor not found in target file
+│   ├── table_missing_row: required row by key absent
+│   ├── table_column_count: rows have different column counts
+│   └── table_separator_dashes: header separator malformed
+└── Links
+    ├── link_broken_target: prose link points at nonexistent file
+    ├── md_broken_uri: source-doc md:// reference not found
+    └── md_broken_heading: heading anchor not found in target file
 ```
 <!-- /proof:compiled -->
 

@@ -26,6 +26,10 @@
       "types": "./dist/hook-types-extension.d.ts",
       "import": "./dist/hook-types-extension.js"
     },
+    "./lkg": {
+      "types": "./dist/lkg.d.ts",
+      "import": "./dist/lkg.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -44,6 +48,8 @@
   },
   "devDependencies": {
     "@bic/openclaw-guardrails": "*",
+    "@bic/openclaw-lkg": "*",
+    "@bic/openclaw-lkg-git": "*",
     "@bic/openclaw-policy": "*",
     "@bic/openclaw-snap": "*",
     "typescript": "^5.7.0",

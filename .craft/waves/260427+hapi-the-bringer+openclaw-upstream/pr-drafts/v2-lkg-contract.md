@@ -34,11 +34,198 @@ DOWNSTREAM EVIDENCE (for citation in PR conversations):
   implements the mechanics (per-file sha256 verification, atomic
   write, content-addressed bundle storage). The contract shape
   upstreamed here matches the downstream impl byte-for-byte.
-- Six end-to-end integration tests + 130+ adversarial scenarios in
-  `@bic/v2-prototype/tests/` prove the chain composes (R5-lowering,
-  fail-closed-on-missing, content-addressing, concurrent capture,
-  cross-process determinism, etc.). All ~1100 tests across the
-  downstream chain green.
+- Two end-to-end integration suites in `@bic/v2-prototype/tests/`
+  prove the chain composes through both shapes:
+    - `v2-chain.integration.test.ts` — snap-shaped (6 tests).
+    - `v2-chain-lkg.integration.test.ts` — LKG-shaped, runs 5
+      scenarios twice via `describe.each([fs, git])` (10 tests).
+  Plus **326 LKG-specific adversarial scenarios across 18 waves** in
+  `v2-chain-lkg-adversarial-{,2..18}.integration.test.ts`, covering
+  75 categories spanning state tamper, recovery, validator
+  misbehavior, plugin-shell + cache, git-backend specifics, path
+  hygiene, concurrency, audit observability, I/O failures, boundary
+  inputs, multi-agent merge, no-LKG initial state, schema evolution,
+  PolicyIR shape, performance/scale, FS oddities, error injection,
+  crash recovery, git dedup parity, git worktree edges, security
+  (symlinks/TOCTOU), audit completeness, encoding edges
+  (CRLF/BOM/trailing-newline), advanced git states, PolicyIR↔LKG
+  bridge, fingerprint determinism, limits/quotas, time/clock,
+  multi-tracker independence, registration semantics, synthetic
+  failures, workspace-shape (multiple LKGs in same dir), multi-
+  process simulation (cross-process hand-off), determinism/replay,
+  non-serializable parse shapes (`Map`, `Date`, circular refs),
+  SDK extension boundary (`suspiciousReasons`, `shouldRecover`),
+  degenerate validator outputs, hook ordering semantics
+  (audit-once-per-observe, audit-after-disk-settle, recovery-notice
+  not double-fire), recovery edges (entry/file mismatch),
+  promote-time edges (idempotent valid, last-good-wins, no tmp
+  leftover), path normalization (Windows mixed slashes, git relPath
+  forward-slash invariant), stress / soak (1000-record audit
+  ordering, 500 unchanged-observes bounded time, 100 promote+
+  recover cycles), JSON-shape edges (NaN / Infinity rejection via
+  unparseable→recover, large-number precision, depth-1000 nested
+  arrays), failure isolation (parse / validate throws on tracker A
+  do not affect tracker B), initialization order (register-observe
+  interleaving, register-after-observe, observe-before-register
+  rejection), error message quality (LKGError messages contain
+  offending path; `LKG_VALIDATOR_THREW` preserves underlying
+  cause), outcome exhaustiveness (every `LKGObservation` outcome
+  has a reproducible scenario), API surface coverage (every
+  exported function tested), backwards-compatibility shape locks
+  (LKGObservation discriminated union, AuditRecord required
+  fields, LKGErrorCode documented enum), architectural invariants
+  (wave 11 runs every test against BOTH backends via
+  `describe.each` — proves the contract is backend-agnostic; no
+  work-tree-specific API leaks through; outcome SET identical
+  across backends; `LKGStore` surface is exactly `register /
+  observe / readLastKnownGood / getEntry`), upstream config-LKG
+  byte-format wire parity (`.lkg` suffix concatenated to FULL
+  target path; `clobbered.<ts>` ISO format with `:`/`.`→`-`;
+  sha256 lower-hex hash format; audit `source` literal `"lkg"`),
+  migration story (orphan `.lkg` from prior process; 1:N tracker
+  mapping; non-config files; no config-specific lifecycle hooks),
+  audit-log replay (final fingerprint reconstructible; ts
+  monotonic; identical observe-sequence → identical audit
+  sequence), diagnostics / introspection (getEntry returns shallow
+  copy not registry mutation; null-vs-empty signal; no `listTrackers /
+  unregister / clear` API — registry is append-only), multi-LKG
+  composition (50 trackers in one store with independent recovery
+  per-tracker; cross-store non-overlap; partial-chain failure
+  doesn't block other trackers), cross-tracker dependencies (a
+  tracker's validator can read another tracker's `getEntry()`
+  state for composed validation; observe ordering unlocks
+  validation; recover-of-A doesn't cascade-recover-B), promotion
+  ordering (strict serial, parallel via `Promise.all`, repeat-
+  parallel-on-same-target consistency), plugin-pool isolation
+  (each plugin gets its own LKGStore; cross-plugin path lookup
+  returns null; audit hooks are per-store; one plugin's crashing
+  audit hook doesn't affect another plugin), observability metrics
+  (audit-derived counters by outcome and by tracker; rate-per-
+  window from monotonic ts; byte-volume from fingerprint),
+  telemetry semantics (sha256 hash is non-reversible, safe for
+  correlation; validator-controlled fields are operator-territory
+  PII), health / readiness signals (composite-ready when all
+  trackers have `lastPromotedGood`; rising recovery-rate as
+  degraded-health signal), git-backend deeper edges (HEAD ref
+  movement between observes; branch switch; symbolic-ref;
+  packed-vs-loose objects after `git gc`; rebase / amend /
+  cherry-pick of LKG commits all preserve LKG bytes), upstream
+  config-LKG conformance (synthesized fixtures matching the
+  documented `recoverConfigFromLastKnownGood` behavior; canonical
+  hash fixtures; companion / clobbered-path naming parity), type-
+  shape exhaustiveness (every documented `LKGFingerprint` /
+  `LKGEntry` / `LKGObservation` / `AuditRecord` field reachable;
+  all 5 `LKGObservation` outcomes), generated random fuzzing
+  (random valid + invalid + size-distribution inputs), property-
+  based forall assertions (forall valid bytes B: hash=sha256(B);
+  forall good/bad pairs: recover restores good byte-for-byte;
+  forall observe orderings: audit FIFO; forall N trackers:
+  failure-isolation), replay corpus (fixed good/bad PolicyIR-shape
+  fixtures + 4×5 cross-pair coverage; deterministic hash across
+  re-runs), stability across runs (same inputs → identical
+  audit-record sequence by hash; LKG companion file content
+  byte-stable across re-runs), documented examples runnable
+  (README minimal usage; audit hook example; recovery-notice
+  example; readLastKnownGood example), TypeScript type-level
+  tests (LKGObservation discriminated-union exhaustive narrowing;
+  `LKGTracker<T>` generic flows through to `validate(parsed: T)`;
+  contract-type imports assignable; `LKGStore` is structurally-
+  typed with the four contract methods), public-export shape
+  lock (exact 7-key set documented and stable: `LKGErrorImpl,
+  clobberedPathFor, hashRaw, isCompanionPath, lkgPathFor,
+  lkgStore, makeFingerprint`; `LKGFingerprint` has exact 11-key
+  shape; pure-function semantics for path / hash helpers).
+  Plus 100+ snap-shaped adversarial
+  scenarios across `v2-chain-adversarial-{,2,3}` + `threat-model`.
+  The git-backed LKG store is exercised by 9 dedicated integration
+  tests in `@bic/openclaw-lkg-git/tests/`, including a multi-agent
+  three-way-merge scenario that demonstrates why `lkg-git` matters
+  on OneDrive-backed workspaces vs rclone last-writer-wins.
+  **All 457 v2-prototype tests + 29 LKG-package tests green
+  (2 POSIX-only symlink tests skipped on Windows hosts);
+  ~1100 tests across the full downstream chain green.**
+
+ADVERSARIAL FINDINGS (raised through wave 1-4 scenarios):
+- One real bug found and fixed in the git backend: the LKG promote
+  was running `git commit -m msg` (no path arg), which sweeps any
+  pre-staged unrelated paths into the LKG commit. Fixed to
+  `git commit -m msg -- <relPath>` so promote commits only the
+  tracked path regardless of index state. Important for shared-repo
+  / multi-agent setups. (Adversarial scenario `GW3`.)
+- Three known gaps locked in:
+    - FS LKG tamper detection happens only on the recovery path's
+      hash check (`io.observe-recovery.ts`-style semantics). An
+      attacker who hand-edits `<path>.lkg` while the working tree
+      stays valid is invisible until something forces a recover.
+      Mirrors upstream's existing config-LKG model — trust rooted
+      in filesystem ACLs, not crypto. Mitigation lives at
+      deployment level (chmod 0600, gateway-owned dir).
+      (Adversarial scenario `CR4 [GAP]`.)
+    - `clobbered.<ts>` sidecar uniqueness depends on the host
+      clock advancing — under a frozen clock (replay/test mode),
+      back-to-back recoveries write to the same path and the
+      second overwrites the first preserved bytes. Real systems
+      are unaffected (system clock advances on millisecond
+      granularity); replay-mode + LKG should bump `now()` between
+      observes. (Adversarial scenario `T2 [GAP]`.)
+    - `readLastKnownGood()` reads on-disk `<path>.lkg` directly
+      with no hash check — a fresh process can read an orphaned
+      or tampered `.lkg` through this API. The safety gate is at
+      the plugin shell (`policy-plugin-lkg.ts` uses
+      `getEntry().lastPromotedGood.hash` — empty entry on a fresh
+      store triggers fail-closed). Direct callers without that
+      gate are responsible for their own verification, OR for
+      calling `observe()` first to populate the in-memory entry.
+      (Adversarial scenario `MULT1 [GAP]`.)
+- Contract invariants the adversarial waves locked in:
+  validators MUST be exception-safe (a thrown validator surfaces
+  as an `LKGError`, never silently masked as recovery — V1, GD2);
+  audit and recovery-notice hooks MUST NOT crash the observe path
+  (try/catch wrapping at the await site — A1, A2, EI3, EI4); two
+  distinct `LKGStore` instances on the same file maintain
+  independent dedup state without cross-contamination (C4);
+  fingerprint hash is bytes-only — invariant under stat changes
+  (FP1) and cross-process clock differences (FP3); audit
+  `commitSha` is set only for `outcome=promoted` on the git
+  backend, null for `valid|recovered` (OBS5); recovery-notice
+  cross-links to its corresponding `recovered` audit record by
+  `(ts, trackerPath, clobberedPath, restoredFrom.hash)` (OBS3);
+  promote/recover preserve bytes byte-for-byte including CRLF
+  line endings, BOM, and trailing newlines — no normalization
+  (ENC1, ENC2, ENC3); the git backend produces a unique commit
+  per distinct content (no commit-reuse, GIT2-3); cache evicts
+  on fingerprint flip so re-promote with new content is
+  immediately effective (PV2); 1000 trackers register and
+  observe in parallel without cross-talk (LIM1); 5MB single-
+  file LKG promote+recover preserves bytes byte-for-byte (LIM2);
+  depth-100 nested JSON parses without stack overflow (LIM4);
+  per-tracker dedup state never leaks across trackers in the
+  same store (MT3); `path.normalize` collapses `./` segments at
+  register-time so equivalent paths COLLIDE (REG1, REG2);
+  exotic parse() return shapes (e.g., `__proto__: { tampered: true }`)
+  do not propagate prototype pollution into the LKG flow (FAULT1);
+  companion files (`.lkg`, `.clobbered.<ts>`) live next to their
+  target — sibling trackers in the same dir don't collide; same-
+  basename trackers in different dirs each get independent
+  companions (WK1, WK4); cross-process hand-off via byte-identical
+  re-promote is idempotent (MULT2); deterministic `now()` across
+  two stores produces byte-identical final on-disk state for the
+  same observe-script (DET3); LKG flow is shape-agnostic — parse()
+  returning a circular object, `Map`, or `Date` all work cleanly
+  because LKG stores raw bytes, never JSON.stringify-ing the parsed
+  value (CIR1, CIR2, CIR3); SDK extension hooks (`suspiciousReasons`,
+  `shouldRecover`) get the typed parsed value and validation
+  snapshot respectively, enabling per-tracker custom heuristics
+  (EXT1, EXT2); validator returning `{valid: false, issues: []}`
+  (empty issues) STILL triggers recovery — the gate is `valid`,
+  not `issues.length` (DEG1); audit fires exactly once per observe
+  call across all outcomes (HK1); audit fires AFTER on-disk state
+  settles — the `clobberedPath` field always points at a file that
+  exists by the time the hook runs (HK2); recovery-notice fires
+  exactly once per `recovered` outcome (HK3); promote produces no
+  `.tmp-*` leftover files after success (PROM3); git `relPath` in
+  commits always uses forward slashes regardless of platform
+  separator (NRM4).
 -->
 
 ## Summary

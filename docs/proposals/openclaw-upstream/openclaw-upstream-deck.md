@@ -8,9 +8,9 @@ paginate: true
 
 # OpenClaw Upstream
 
-**Contribute the foundations. Keep the ecosystem.**
+**Three PRs. One arc. Every policy decision anchored to a known point in time.**
 
-Interfaces · libraries · generator — same code, same intent, under the `openclaw/` org.
+PR-1 byte-stable workspace · PR-2 LKG carrier · PR-3 PolicyIR + chain-of-custody.
 
 Companion deck to `openclaw-upstream-brief.md` + `openclaw-upstream-spec.md`.
 
@@ -22,43 +22,45 @@ Companion deck to `openclaw-upstream-brief.md` + `openclaw-upstream-spec.md`.
 
 ## The Context
 
-**We've been building governance on top of OpenClaw.**
+**One strategic frame**: every policy decision is anchored to the LKG-fingerprinted state of the workspace at a known point in time.
 
-A credentials gateway. A file-ingest pipeline. A generator that turns SOUL.md deny rules and TOOLS.md provenance into enforceable code.
+Three small, focused upstream PRs deliver this. PR-1 makes workspace files byte-stable. PR-2 generalizes the existing config-LKG mechanism into a per-file content-addressed carrier any plugin can register against. PR-3 anchors decisions to a specific PolicyIR version and preserves chain-of-custody at enforcement.
 
-We'd like to contribute the foundations back — so they're part of OpenClaw, not adjacent to it. Any OC host gets them, with or without us in the picture.
+The original 4-package framing (guardrails / workspace / policy / snap) is preserved as supporting detail later in this deck.
 
-*This is the "what" — the brief is the "why"; the spec is the "how."*
+*Brief = "why"; spec = "how"; this deck = "what's actually shipping upstream."*
 
 </div>
 <div>
 
 ```
-  GOVERNANCE —
-    OBSERVABLE · BOUNDED · ENFORCEABLE
+  CHAIN —
+    BYTE-STABLE → CARRIED → ANCHORED
 
-  DECISIONS    @openclaw/guardrails
-               GuardrailProvider +
-               FileIngestProvider (peer
-               governance interfaces where
-               decisions get made)
+  PR-1   @openclaw/workspace
+         JSONC byte-identical writes;
+         sentinel guard against
+         secrets-corruption; lint surface;
+         frontmatter raw-preserve.
+         The byte-stability foundation.
 
-  OBSERVABLE   @openclaw/guardrails/audit + /siem
-               @openclaw/workspace/path (oc:// URI)
+  PR-2   LKG contract
+         Generalize the existing config-LKG
+         mechanism (#70528, v2026.4.23) into
+         LKGTracker<T> / LKGStore — any
+         plugin registers per-file recovery.
+         The carrier; recovery is free.
 
-  BOUNDED      @openclaw/guardrails/budget +
-               /secrets + /identity + /approvals
+  PR-3   PolicyIR + ctx.lkgFingerprint
+         + hook merger conjunctive AND
+         Types contract for the artifact;
+         ctx anchor at hook time (TOCTOU
+         defense); approval merger preserves
+         chain-of-custody.
+         End-to-end policy chain-of-custody.
 
-  ENFORCEABLE  @openclaw/policy — generator
-               that generates gateway plugin
-               + PolicyIR + audit manifest
-               into .openclaw/policy/
-
-  STORAGE +    @openclaw/snap — snapshot
-  SERVING      registry + HTTP server; pure
-               file storage, zero policy dep
-
-  0   @microsoft/* imports
+  +      claws-guardrails (downstream-only,
+         no upstream PR — slot already exists)
 ```
 
 </div>
@@ -67,28 +69,101 @@ We'd like to contribute the foundations back — so they're part of OpenClaw, no
 
 <!-- _class: small -->
 
-## The Shape · Four Packages
+## The Shape · Three Upstream PRs
 
 ```
-  ┌────────────────────┐ ┌────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
-  │ @openclaw/         │ │ @openclaw/         │ │ @openclaw/         │ │ @openclaw/         │
-  │   guardrails       │ │   workspace        │ │   policy           │ │   snap             │
-  │                    │ │                    │ │                    │ │                    │
-  │ GuardrailProvider  │ │ /path              │ │ generate →         │ │ snapshot registry  │
-  │ FileIngestProvider │ │   oc:// URIs       │ │  .openclaw/policy/ │ │  + HTTP server     │
-  │                    │ │                    │ │                    │ │                    │
-  │ /audit             │ │ /ast               │ │ check / watch /    │ │ list / diff /      │
-  │ /approvals         │ │   PEG + AST        │ │ comply / test /    │ │ promote / rollback │
-  │ /budget            │ │                    │ │ sim / report /     │ │ / serve / resolve  │
-  │ /identity          │ │ /canonicalize      │ │ verify / diff      │ │   oc:// URIs       │
-  │ /siem              │ │   RFC 8785 JCS     │ │                    │ │                    │
-  │ /secrets           │ │                    │ │                    │ │                    │
-  └────────────────────┘ └────────────────────┘ └────────────────────┘ └────────────────────┘
-     interfaces +         shared OC-file-format    the generator         snapshot storage
-     6 runtime subpaths   utilities (3 subpaths)   (default export)
+  ┌─────────────────────────────────┐ ┌─────────────────────────────────┐ ┌─────────────────────────────────┐
+  │ PR-1                            │ │ PR-2                            │ │ PR-3                            │
+  │ @openclaw/workspace             │ │ LKG contract                    │ │ PolicyIR + ctx.lkgFingerprint   │
+  │ + frontmatter raw-preserve      │ │ (LKGStore / LKGTracker<T>)      │ │ + hook merger conjunctive AND   │
+  │                                 │ │                                 │ │                                 │
+  │ Byte-stability foundation       │ │ Per-file content-addressed      │ │ End-to-end policy chain-of-     │
+  │ across 9-file workspace surface │ │ carrier; recovery is free       │ │ custody (artifact + anchor +    │
+  │                                 │ │                                 │ │ enforcement, one PR)            │
+  │ - JSONC byte-identical writes   │ │ - Generalizes #70528 mechanism  │ │ - PolicyIR types               │
+  │ - __OPENCLAW_REDACTED__ guard   │ │ - 326 adversarial scenarios     │ │ - ctx.lkgFingerprint thread     │
+  │ - 21-code lint surface          │ │ - dual-backend (FS + git)       │ │ - mergeApprovals helper         │
+  │ - oc:// URI scheme              │ │ - backend-agnostic abstraction  │ │ - Swift model regen             │
+  │ - stripFrontMatter raw-preserve │ │   (S3, IPFS, etc. tomorrow)     │ │                                 │
+  └─────────────────────────────────┘ └─────────────────────────────────┘ └─────────────────────────────────┘
+     ~3500 LoC + 5 LoC                 ~250-350 LoC                        ~95-220 LoC + 10 LoC + Swift regen
+     (was PR-1 + PR-2)                 (the carrier)                       (was PR-5 + PR-4)
+
+                                                    +
+                                       claws-guardrails (downstream-only adapter, no upstream PR)
 ```
 
-**Governance is observable, bounded, enforceable.** Policy generates the artifacts that make governance enforceable; snap stores and serves the workspaces those artifacts live in. `guardrails` and `workspace` hold the shared primitives as subpaths — one install each, consumers tree-shake what they use.
+**Total: ~3850-4070 LoC across 3 upstream PRs.** Each PR has one strategic frame. The arc is: workspace bytes are stable → LKG carries them as content-addressed fingerprints → PolicyIR rides at an LKG-tracked path with `ctx.lkgFingerprint` anchoring decisions to a specific bytes-hash.
+
+---
+
+<!-- _class: small -->
+
+## PR-1 · `@openclaw/workspace` + frontmatter raw-preserve
+
+**Killer step**: workspace files round-trip byte-identically — JSONC writes preserve comments, the emit boundary refuses `"__OPENCLAW_REDACTED__"` literals, frontmatter strip preserves original bytes. One PR, one strategic frame: the byte-stability foundation.
+
+**What ships**: `@openclaw/workspace` package (parser + emitter + 13-code lint engine + workspace classifier + 8 cross-file/markdown lint rules + workspace discovery substrate); chokepoint conversion at `mutate.ts:112` and `io.ts:1381,2082` from raw `JSON.stringify` to a leaf-vs-structural dispatcher; `OcEmitSentinelError` substrate-level guard against the redaction-corruption class; `oc://config/...` and `oc://<file>/...` URI scheme in lint-finding `location` payloads; `src/commands/doctor-config-lint.ts` plugged into `runDoctorHealthContributions`; one-line `raw` field added to `stripFrontMatter()`.
+
+**Issues addressed**:
+- **Closes**: #31251 (plugin-install path missed reject-rule), #22272 + #14998 + #62438 + #48415 ("Unrecognized key" startup-block class — pre-startup detection now covers this).
+- **Substrate-level fix for closed-historicals** (these were patched at the consumer with reject-rules; this PR removes the substrate that produced them): #62281, #44357, #13495, #21573, #13210, #12078 (`__OPENCLAW_REDACTED__` corruption).
+- **Lint catalog catches pre-startup**: #20478, #57567, #59070, #60334, #61683, #65565, #72872, #64946, #66988, #73691, #45415, #67580, #67363, #68774, #69475, #50972, #57143, #73715, #39811, #29387, #45760, #43462. Each rule has `evidenceIssues: number[]` field; full table at `packages/workspace/tests/lint/fixtures/EVIDENCE.md`.
+
+**Evidence**: 409 tests across 35 files inside the package; existing `src/config/io.write-config.test.ts` byte-compare assertions pass UNCHANGED (the load-bearing back-compat proof).
+
+---
+
+<!-- _class: small -->
+
+## PR-2 · LKG contract (the carrier)
+
+**Killer step**: 326 LKG-specific adversarial scenarios across 18 waves and 75 categories all green; abstraction proven backend-agnostic via `describe.each([fs, git])` (FS today, git tomorrow, S3/IPFS one day — same surface). One real bug found and fixed in-session; three known limits documented as `[GAP]`s with mitigation paths.
+
+**What ships**: `src/plugin-sdk/lkg.ts` (~80 LoC) — `LKGTracker<T>`, `LKGStore`, `LKGFingerprint`, `LKGEntry`, `ValidationIssue`, `LKGObservation` types + the public ABI any plugin can register against. `extensions/lkg/` (~150 LoC) — reference implementation. Wire-parity conformance test (~80-100 LoC) asserting the reference implementation matches the existing `recoverConfigFromLastKnownGood` behavior on a fixed fixture set.
+
+**Issues addressed**:
+- **Generalizes** [#70528](https://github.com/openclaw/openclaw/issues/70528) — auto-rollback when agent-generated config changes break the system. Closed-as-implemented in `v2026.4.23`, commit `af56926e2fc4`. **The exact pattern this PR factors out** so any plugin can register against it.
+- **Future consumers** (NOT in this PR — would land as separate consumer PRs once the substrate is in):
+  - [#13700](https://github.com/openclaw/openclaw/issues/13700) — session snapshots
+  - [#17211](https://github.com/openclaw/openclaw/issues/17211) — checkpoint engine
+  - [#40245](https://github.com/openclaw/openclaw/issues/40245) — shared workspace dir (multi-agent)
+  - hook-output recovery (cross-cutting, no specific issue yet)
+
+**Scope boundary**: existing `src/config/io.observe-recovery.ts` is **untouched**; migrating config code to the new abstraction is a follow-up. No daemon-shape package; no signing API on the tracker (signing is operator-territory layered on top).
+
+---
+
+<!-- _class: small -->
+
+## PR-3 · PolicyIR + `ctx.lkgFingerprint` + hook merger
+
+**Killer step**: `ctx.lkgFingerprint` thread-through closes the TOCTOU window between PolicyIR generation and PolicyIR evaluation. Without it, plugin replicas can disagree about which policy version is current, multi-tenant policy can bleed, promotion-observation skew leads to inconsistent decisions. With it, every evaluation is anchored to one specific bytes-hash. The merger fix preserves chain-of-custody at enforcement so plugin-A's approval requirement isn't silently dropped by plugin-B.
+
+**What ships**: `src/plugin-sdk/policy-ir.ts` (~80-150 LoC) — types-only contract. `src/plugin-sdk/policy-ir-runtime.ts` (~50 LoC, optional) — `loadPolicyIR / readPolicyIR / validatePolicyIR / getCurrentPolicyIR` helpers. `src/plugins/hook-types.ts:393-401` (~5 LoC) — adds optional `lkgFingerprint?: LKGFingerprint` field. `src/plugins/hooks.ts:1008-1013` + `src/plugins/trusted-tool-policy.ts:43-45` (~10 LoC across two sites + shared `mergeApprovals` helper) — first-wins → conjunctive AND. Swift protocol model regen for `apps/macos/` + `apps/shared/`.
+
+**Issues addressed**:
+- **No specific upstream issue closes** (PolicyIR is a new contract; the gap is the absence of a shared artifact-shape).
+- **The merger fix closes a chain-of-custody class**: today, three plugins each enforcing different invariants (R5 + RESTRICTED + budget) silently drop two of three approval requirements — only the first one in the chain survives. No specific upstream issue (this is latent; surfaces as "approvals randomly disappear depending on plugin order"). Conjunctive AND closes it.
+- **Cross-PR with PR-2**: PolicyIR is the first consumer of the LKG carrier; lands after PR-2.
+
+**Defense in depth — two anchors**: `policyId = sha256(jcs(body))` (content-canonical identity, survives re-serialization) AND `LKGFingerprint.hash = sha256(rawBytes)` (bytes-on-disk integrity at LKG observe time). A doctored PolicyIR either changes its `policyId` (caught by `validatePolicyIR`) or its bytes (caught by LKG hash mismatch).
+
+---
+
+<!-- _class: small -->
+
+## Detail material follows · The original 4-package framing
+
+The slides that follow are the **original ecosystem-level proposal** — guardrails interfaces, workspace utilities, the policy generator, snapshot storage. They contain detail (worked examples, oc:// URIs, AST grammar, R5 × Sensitivity, the verb taxonomies) that informs each upstream PR's scope without being upstream surface itself.
+
+**Mapping detail-section → upstream PR:**
+- "Piece 1 · Governance Interfaces" — informs **claws-guardrails downstream adapter** (no upstream PR; the slot already exists at `PluginTrustedToolPolicyRegistration`).
+- "Piece 2 · `@openclaw/workspace`" — **PR-1**, lightly extended.
+- "Piece 3 · `@openclaw/policy`" — informs **PR-3** (PolicyIR types contract). The full generator + nine flat verbs stay downstream.
+- "Piece 4 · `@openclaw/snap`" — **superseded by PR-2** (LKG carrier). Snapshot semantics live downstream-only as a `@bic/openclaw-snap` package; the upstream carrier is per-file LKG tracking, not workspace-bundle snapshots.
+
+Read these for context on what the contributing org has built. The actual upstream contribution is the 3 PRs above.
 
 ---
 
@@ -639,47 +714,60 @@ $ openclaw snap promote sha256:4c01
 
 # The Integration
 
-Seven small, additive PRs to `openclaw-core` · all backward-compatible
+Three upstream PRs · each small, focused, additive · all backward-compatible
 
 ---
 
 <!-- _class: small -->
 
-## Changes We'd Propose to `openclaw-core`
+## The 3 Upstream PRs · Consolidated Shape
 
-Each PR is small, focused, OC-conventional. Numbering, timing, and whether any of these happen at all are yours to shape.
+The 7-PR wishlist (OC-1..OC-7) from earlier drafts consolidates into 3 upstream PRs after two strategic pivots: (a) the original guardrails-package PR was redundant — `PluginTrustedToolPolicyRegistration` already ships at `src/plugins/host-hooks.ts:65-72`; (b) the snap-as-carrier framing pivoted to LKG-as-carrier, factoring out the existing config-LKG mechanism instead of introducing a parallel snapshot abstraction.
 
 ```
-  OC-1  Hook: before_workspace_file_ingest     src/agents/workspace.ts
-        Parallel to existing before_tool_call. Event: {path, operation,
-        author, sessionId, previousHash}. Handler returns existing hook-
-        result shape: {block, blockReason, params, requireApproval}.
+  PR-1   @openclaw/workspace + frontmatter raw-preserve
+         New package: parser + emitter + 13-code lint + workspace
+         classifier + oc:// URIs + workspace discovery. Plus chokepoint
+         conversion at mutate.ts:112 / io.ts:1381,2082 + sentinel guard
+         + stripFrontMatter `raw` field at workspace.ts:91.
+         (Replaces former OC-3, OC-4; absorbs former PR-2.)
 
-  OC-2  Hook: after_workspace_file_ingest       src/agents/workspace.ts
-        Mirrors the before/after pattern OC already uses for tools.
+         Closes: #31251, #22272, #14998, #62438, #48415
+         Substrate-fix for: #62281, #44357, #13495, #21573, #13210, #12078
+         Lint catalog catches 22 more pre-startup (full table in PR body).
 
-  OC-3  Content hash on workspace cache         src/agents/workspace.ts
-        Extend inode/dev/size/mtime identity with sha256. Computed lazily
-        on cache miss. Enables previousHash + stable snapshot identity.
+  PR-2   LKG contract (the carrier)
+         src/plugin-sdk/lkg.ts (~80 LoC) — LKGTracker<T> / LKGStore types.
+         extensions/lkg/ (~150 LoC) — reference plugin.
+         Generalizes #70528 (closed-as-implemented in v2026.4.23,
+         commit af56926e2fc4) — same pattern, parameterized over the
+         tracker so any plugin can register.
 
-  OC-4  Preserve originals in stripFrontMatter  workspace.ts:91
-        When stripping, retain original bytes under a sibling key (e.g.
-        `raw`). Non-breaking. Governance needs byte-for-byte originals.
+         Generalizes: #70528
+         Future consumers: #13700, #17211, #40245
+         Evidence: 326 adversarial scenarios across 18 waves; 1 real
+         bug fixed in-session; 3 [GAP]s documented; abstraction proven
+         backend-agnostic via dual-backend describe.each([fs, git]).
 
-  OC-5  Extend exec-approval audit taxonomy    src/plugin-sdk/approval-*
-        Add event categories: file_ingest, policy_generate,
-        snapshot_promote, snapshot_rollback, provider_quarantine.
-        Same envelope as ExecApprovalRequest. Single audit trail.
+  PR-3   PolicyIR + ctx.lkgFingerprint + hook merger conjunctive AND
+         src/plugin-sdk/policy-ir.ts (~80-150 LoC) — types contract.
+         src/plugin-sdk/policy-ir-runtime.ts (~50 LoC, optional helpers).
+         hook-types.ts:393-401 (~5 LoC) — adds optional lkgFingerprint
+         field on PluginHookToolContext.
+         hooks.ts:1008-1013 + trusted-tool-policy.ts:43-45 (~10 LoC) —
+         first-wins → conjunctive AND merger.
+         (Replaces former OC-7; absorbs former PR-4 and PR-5.)
 
-  OC-6  Optional: bootstrap deferral hook       bootstrap-files.ts
-        Let plugins defer bootstrap load until they've evaluated.
-        If no plugin defers, behavior unchanged.
-
-  OC-7  requireApproval envelope stickiness    src/plugins/hook-types.ts
-        Make requireApproval non-downgradable once set by any provider in
-        the chain. Widens field from boolean to boolean | ApprovalDescriptor
-        | ApprovalDescriptor[]. Minor-bump migration with a small codemod.
+         Closes a chain-of-custody class (no specific upstream issue
+         tracking it; surfaces as "approvals randomly disappear
+         depending on plugin order" — fix is the proof).
 ```
+
+**Dropped from the 7-PR wishlist** (out of scope post-pivots, kept for the audit trail):
+- OC-1 (`before_workspace_file_ingest` hook) — not needed; LKG observe-on-write covers the same ground without a new hook surface.
+- OC-2 (`after_workspace_file_ingest` hook) — same.
+- OC-5 (extend exec-approval audit taxonomy) — audit stays downstream in v2 (per `realigned-story.md` § "Why audit is not in v2 scope").
+- OC-6 (bootstrap deferral hook) — was optional; deferred indefinitely.
 
 **Not proposing**: no timing enforcement, no composition baked into OC-core, no new registration mechanism. We use `PluginHookRegistration` as-is.
 
@@ -687,28 +775,35 @@ Each PR is small, focused, OC-conventional. Numbering, timing, and whether any o
 
 <!-- _class: small -->
 
-## Proposed Sequencing
+## Proposed Sequencing · Three PRs in Order
 
-If helpful — timing driven by your availability, not ours.
+Timing driven by your availability, not ours. Two-PRs-open-at-a-time pacing per upstream culture.
 
 ```
-  ┌── PHASE 1 ──────────────────────────────────────────────────────────────┐
-  │  Governance spec PR (GuardrailProvider + FileIngestProvider as peer    │
-  │  interfaces). Land @openclaw/guardrails (interfaces + 6 subpaths:       │
-  │  /audit, /approvals, /budget, /identity, /siem, /secrets).              │
-  ├── PHASE 2 ──────────────────────────────────────────────────────────────┤
-  │  @openclaw/workspace (3 subpaths: /path for oc:// URIs, /ast for       │
-  │  grammars + AST + emitters, /canonicalize for RFC 8785 JCS).            │
-  ├── PHASE 3 ──────────────────────────────────────────────────────────────┤
-  │  @openclaw/policy (generator + helpers) and @openclaw/snap (snapshot    │
-  │  registry + HTTP server). Two flat subcommand groups contributed to     │
-  │  the existing `openclaw` CLI. No sibling binaries.                      │
-  ├── PHASE 4  (ongoing) ───────────────────────────────────────────────────┤
-  │  OC-core wiring PRs (OC-1..OC-7) + LTS alignment + maintenance.         │
+  ┌── PR-1  @openclaw/workspace + frontmatter raw-preserve ─────────────────┐
+  │  Lands first. Workspace primitive everything else uses. Self-contained  │
+  │  — closes a corruption class with 20 cited issues; substrate-level fix; │
+  │  byte-identical-back-compat proof via existing io.write-config.test.ts. │
+  │  Pre-flight: umbrella issue `[Feature]: Substrate-level fix for the    │
+  │  openclaw.json corruption class` filed first to confirm scope shape.    │
+  ├── PR-2  LKG contract ──────────────────────────────────────────────────┤
+  │  Lands after PR-1 (or in parallel — they don't import each other).     │
+  │  Generalizes the existing config-LKG mechanism (#70528). Types only;   │
+  │  reference plugin under extensions/lkg/. 326 adversarial scenarios     │
+  │  ride downstream as evidence.                                           │
+  │  Pre-flight: umbrella issue `[Feature]: Generalize config-LKG into     │
+  │  LKGTracker / LKGStore` filed first.                                    │
+  ├── PR-3  PolicyIR + ctx.lkgFingerprint + hook merger ───────────────────┤
+  │  Lands after PR-2 (depends on LKGFingerprint type). Types contract +   │
+  │  small ctx extension + behavioral fix to the merger. Closes the        │
+  │  TOCTOU window for policy decisions and the chain-of-custody gap at    │
+  │  the merger in one PR.                                                  │
+  │  Pre-flight: umbrella issue `[Feature]: PolicyIR types + ctx anchor   │
+  │  + conjunctive-AND hook merger` filed first.                            │
   └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Scope + naming are yours**: single `@openclaw/policy` package; the subcommand group becomes `openclaw policy`. Prefer a different name (`govern`, `guard`, something else)? We rename cleanly.
+**Scope + naming are yours**: prefer `LKGTracker` or `recoveryTracker`? Prefer types-only without the reference plugin? Prefer to split PR-3's behavior fix from the types contract? We rename / reshape cleanly.
 
 ---
 
@@ -718,12 +813,16 @@ If helpful — timing driven by your availability, not ours.
 
 Not asks — logistics. If this direction is welcome in principle:
 
-**Scope hosting** — `@openclaw/*` for libraries, or your preferred alternative.
-**Spec PR process** — how you like spec-level contributions reviewed.
-**OC core integration** — seven small additive PRs (above).
-**Generator repo placement** — standalone under `openclaw/` or `packages/policy/` in your monorepo.
-**LTS alignment** — which branches to target; backport preference.
+**Umbrella issue protocol** — three issues drafted (one per PR; templates in `wave/issue-drafts/`). File first, get scope guidance, then open PRs.
 
-Naming, scoping, and pace are yours; the code and intent are ours to give.
+**Scope hosting** — `@openclaw/*` for the workspace package (PR-1). LKG types live at `src/plugin-sdk/lkg.ts` (PR-2). PolicyIR types at `src/plugin-sdk/policy-ir.ts` (PR-3). All upstream-conventional locations.
+
+**LTS alignment** — which branches to target; backport preference for PR-1 (the corruption-class fix) given the long historical issue trail.
+
+**Naming preferences** — `LKGTracker / LKGStore` (current draft) vs `recoveryTracker / recoveryStore` (closer to the existing `recoverConfigFromLastKnownGood` function name)? We rename cleanly.
+
+**Folding preferences** — PR-3 combines types-additive (PolicyIR + ctx) with behavior-breaking (merger conjunctive AND). Acceptable as one PR, or prefer the split?
+
+Naming, scoping, pace, and the question of whether any of this happens at all are yours; the code, the 326-scenario evidence base, and the intent are ours to give.
 
 Happy to walk through any piece in depth — or adjust scope based on your priorities.

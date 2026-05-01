@@ -14,3 +14,12 @@ test/e2e/coverage/
 # Policy generator fs outputs under any workspace root — never committed.
 # Live workspaces (fixtures, user projects) regenerate these from SOUL/TOOLS/AGENTS.
 .openclaw/policy/
+
+# Per-package generator outputs (packages/*/.openclaw/) — same reason.
+**/.openclaw/
+
+# TypeScript incremental-build cache — per-machine, never committed.
+**/*.tsbuildinfo
+
+# Design proof compile-cache — local build artifact.
+design/.proof/

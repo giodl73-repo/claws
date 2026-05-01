@@ -12,6 +12,8 @@
     "packages/claws-skill-kit",
     "packages/claws-test",
     "packages/openclaw-guardrails",
+    "packages/openclaw-lkg",
+    "packages/openclaw-lkg-git",
     "packages/openclaw-lsp",
     "packages/openclaw-policy",
     "packages/openclaw-snap",
