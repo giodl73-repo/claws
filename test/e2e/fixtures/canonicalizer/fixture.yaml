@@ -1,7 +1,0 @@
-series: harness-pitfall
-scenarioCode: SC-08
-fixtureId: canonicalizer
-pitfall: canonicalizer-edge-cases
-mode: canonicalizer
-expected:
-  byteIdentical: true

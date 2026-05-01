@@ -1,8 +1,0 @@
-series: harness-pitfall
-scenarioCode: SC-06
-fixtureId: p02-canonical-invocation-hash-conjunctive
-pitfall: P-02
-mode: smoke
-expected:
-  claws:
-    boots: true

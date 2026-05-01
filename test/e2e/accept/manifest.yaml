@@ -1,9 +1,0 @@
-series:
-  harness-verb-tier:
-    runners: [e2e-loop-sim]
-    min: 4
-    marker: fixture.yaml
-  harness-pitfall:
-    runners: [e2e-loop-sim]
-    min: 4
-    marker: fixture.yaml

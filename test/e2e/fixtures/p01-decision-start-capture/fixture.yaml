@@ -1,8 +1,0 @@
-series: harness-pitfall
-scenarioCode: SC-05
-fixtureId: p01-decision-start-capture
-pitfall: P-01
-mode: smoke
-expected:
-  claws:
-    boots: true

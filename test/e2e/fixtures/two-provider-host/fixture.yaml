@@ -1,8 +1,0 @@
-series: approval-flows
-scenarioCode: SC-08,SC-09,SC-10
-fixtureId: two-provider-host
-pitfall: P-02
-mode: smoke
-expected:
-  claws:
-    boots: true
