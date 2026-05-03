@@ -22,11 +22,15 @@ export const configMissingPlugins: LintRule = {
   check(ctx) {
     const m = resolveOcPath(ctx.ast, parseOcPath(`oc://${ctx.fileName}/plugins`));
     if (m !== null) return [];
+    // Anchor at the root object's line — that's where the missing key
+    // would be inserted. Falls back to 1 for empty / non-object roots.
+    const rootLine =
+      ctx.ast.kind === 'jsonc' ? ctx.ast.root?.line ?? 1 : 1;
     return [
       {
         message: `${ctx.fileName}: missing top-level \`plugins\` key`,
         ocPath: `oc://${ctx.fileName}/plugins`,
-        line: 1,
+        line: rootLine,
         fixHint: 'add a top-level `"plugins": { "entries": {} }` block',
       },
     ];

@@ -21,6 +21,8 @@ export const memoryMissingScope: LintRule = {
   check(ctx) {
     if (ctx.ast.kind !== 'md') return [];
     if (resolveOcPath(ctx.ast, parseOcPath('oc://MEMORY.md/[frontmatter]/scope')) !== null) return [];
+    // line:1 is the file-head anchor — the frontmatter `scope:` key
+    // is absent, so there's no specific line to point at.
     return [
       {
         message: 'MEMORY.md has no `scope:` frontmatter entry',

@@ -15,6 +15,14 @@
  * existing `registerDoctorHealthContribution` slot — NO new SDK verb
  * introduced.
  *
+ * **Convention** (matches paired lint rules): every detect finding in
+ * this pack uses `line: 1` as the insertion-point anchor. The new
+ * section / frontmatter key is being inserted, so there's no specific
+ * line to point at — the file head is the conventional anchor for
+ * "missing structure" findings. The fix() body decides where the
+ * inserted bytes actually land (e.g., append-stub fixers append at
+ * file end regardless of the diagnostic line).
+ *
  * The four `starter-v0` rules WITHOUT paired auto-fixers
  * (agents/empty-tools-section, agents/duplicate-tool-key,
  * memory/invalid-scope-value, skill/invalid-tier-value) require human

@@ -21,6 +21,8 @@ export const userMissingPreferences: LintRule = {
   check(ctx) {
     if (ctx.ast.kind !== 'md') return [];
     if (resolveOcPath(ctx.ast, parseOcPath('oc://USER.md/preferences')) !== null) return [];
+    // line:1 is the file-head anchor — the section is absent, so
+    // there's no specific line to point at.
     return [
       {
         message: 'USER.md has no ## Preferences section',

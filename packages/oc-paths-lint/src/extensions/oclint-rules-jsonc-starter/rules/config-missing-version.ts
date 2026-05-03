@@ -18,11 +18,15 @@ export const configMissingVersion: LintRule = {
   check(ctx) {
     const m = resolveOcPath(ctx.ast, parseOcPath(`oc://${ctx.fileName}/version`));
     if (m !== null) return [];
+    // Anchor at the root object's line — where the missing key would
+    // be inserted. Falls back to 1 for empty / non-object roots.
+    const rootLine =
+      ctx.ast.kind === 'jsonc' ? ctx.ast.root?.line ?? 1 : 1;
     return [
       {
         message: `${ctx.fileName}: missing top-level \`version\` key`,
         ocPath: `oc://${ctx.fileName}/version`,
-        line: 1,
+        line: rootLine,
         fixHint: 'add `"version": "1.0"` (or current schema version)',
       },
     ];

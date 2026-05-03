@@ -44,7 +44,7 @@ function walkLeaves(
       out.push({
         message: `${fileName}: value looks like a literal secret/token`,
         ocPath,
-        line: 1,
+        line: value.line ?? 1,
         fixHint: 'replace with `${ENV_VAR}` reference; rotate the leaked secret',
       });
     }

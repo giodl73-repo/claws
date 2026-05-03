@@ -27,6 +27,8 @@ export const skillMissingRequiredFrontmatter: LintRule = {
     const findings: LintFinding[] = [];
     for (const key of REQUIRED) {
       if (resolveOcPath(ctx.ast, parseOcPath(`oc://SKILL.md/[frontmatter]/${key}`)) !== null) continue;
+      // line:1 is the file-head anchor — the required frontmatter
+      // key is absent, so there's no specific line to point at.
       findings.push({
         message: `SKILL.md missing required frontmatter key: ${key}`,
         ocPath: `oc://SKILL.md/[frontmatter]/${key}`,

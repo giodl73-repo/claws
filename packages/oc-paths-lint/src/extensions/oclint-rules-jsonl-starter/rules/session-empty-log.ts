@@ -24,6 +24,8 @@ export const sessionEmptyLog: LintRule = {
     if (ctx.ast.kind !== 'jsonl') return [];
     const valueLines = findOcPaths(ctx.ast, parseOcPath(`oc://${ctx.fileName}/*`));
     if (valueLines.length > 0) return [];
+    // Empty log has no value lines to anchor at — line 1 is the
+    // file head by convention.
     return [
       {
         message: `${ctx.fileName}: no value lines in session log`,

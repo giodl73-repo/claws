@@ -62,6 +62,8 @@ export function runLint(opts: LintRunOptions): LintRunResult {
       try {
         findings = rule.check({ fileName: file.name, ast: file.ast });
       } catch (err) {
+        // Rule threw — there's no per-finding line to attribute, so
+        // anchor the synthetic diagnostic at the file head.
         diagnostics.push({
           ruleId: rule.id,
           severity: rule.severity,
