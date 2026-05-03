@@ -22,7 +22,7 @@ function applyFix(
     fileName,
     ast,
     raw,
-    match: { ocPath: matches[0]!.ocPath },
+    match: matches[0]!.match,
   });
 }
 

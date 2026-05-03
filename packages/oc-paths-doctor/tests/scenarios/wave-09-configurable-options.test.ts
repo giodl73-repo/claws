@@ -25,6 +25,7 @@ import { configRedactSecretLiteral } from '../../src/extensions/ocdoctor-fixers-
 import type {
   DoctorContext,
 } from '../../src/plugin-sdk/oc-doctor/types.js';
+import { syntheticMatch } from '../test-match.js';
 
 function makeCtx(opts: Partial<DoctorContext> = {}): DoctorContext {
   return {
@@ -43,7 +44,7 @@ describe('wave-09 configurable options — agents/seed-tools-todo', () => {
       fileName: 'AGENTS.md',
       ast,
       raw,
-      match: { ocPath: 'oc://AGENTS.md/tools' },
+      match: syntheticMatch('oc://AGENTS.md/tools'),
     });
     expect(after).toContain('TODO: list a tool here');
   });
@@ -55,7 +56,7 @@ describe('wave-09 configurable options — agents/seed-tools-todo', () => {
       fileName: 'AGENTS.md',
       ast,
       raw,
-      match: { ocPath: 'oc://AGENTS.md/tools' },
+      match: syntheticMatch('oc://AGENTS.md/tools'),
       options: { placeholder: '- gh: GitHub CLI' },
     });
     expect(after).toContain('- gh: GitHub CLI');
@@ -76,7 +77,7 @@ describe('wave-09 configurable options — memory/snap-scope', () => {
       fileName: 'MEMORY.md',
       ast,
       raw,
-      match: { ocPath: 'oc://MEMORY.md/[frontmatter]/scope' },
+      match: syntheticMatch('oc://MEMORY.md/[frontmatter]/scope'),
     });
     expect(after).toContain('scope: default');
   });
@@ -88,7 +89,7 @@ describe('wave-09 configurable options — memory/snap-scope', () => {
       fileName: 'MEMORY.md',
       ast,
       raw,
-      match: { ocPath: 'oc://MEMORY.md/[frontmatter]/scope' },
+      match: syntheticMatch('oc://MEMORY.md/[frontmatter]/scope'),
       options: {
         targetScope: 'project',
         allowedScopes: ['default', 'global', 'project', 'session'],
@@ -104,7 +105,7 @@ describe('wave-09 configurable options — memory/snap-scope', () => {
       fileName: 'MEMORY.md',
       ast,
       raw,
-      match: { ocPath: 'oc://MEMORY.md/[frontmatter]/scope' },
+      match: syntheticMatch('oc://MEMORY.md/[frontmatter]/scope'),
     });
     expect(after).toContain('_auto_corrected: true');
   });
@@ -129,7 +130,7 @@ describe('wave-09 configurable options — skill/snap-tier', () => {
       fileName: 'SKILL.md',
       ast,
       raw,
-      match: { ocPath: 'oc://SKILL.md/[frontmatter]/tier' },
+      match: syntheticMatch('oc://SKILL.md/[frontmatter]/tier'),
     });
     expect(after).toContain('tier: 1');
   });
@@ -141,7 +142,7 @@ describe('wave-09 configurable options — skill/snap-tier', () => {
       fileName: 'SKILL.md',
       ast,
       raw,
-      match: { ocPath: 'oc://SKILL.md/[frontmatter]/tier' },
+      match: syntheticMatch('oc://SKILL.md/[frontmatter]/tier'),
       options: { targetTier: 3, allowedTiers: [1, 2, 3] },
     });
     expect(after).toContain('tier: 3');
@@ -163,7 +164,7 @@ describe('wave-09 configurable options — config/redact-secret-literal', () => 
       fileName: 'gateway.jsonc',
       ast,
       raw,
-      match: { ocPath: 'oc://gateway.jsonc' },
+      match: syntheticMatch('oc://gateway.jsonc'),
     });
     expect(after).toContain('${ENV_VAR_PLACEHOLDER}');
   });

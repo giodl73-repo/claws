@@ -18,7 +18,7 @@ function fix(spec: OcPathFixerSpec<unknown>, raw: string, fileName = 'wf.lobster
     fileName,
     ast,
     raw,
-    match: { ocPath: matches[0]!.ocPath },
+    match: matches[0]!.match,
   });
 }
 
@@ -99,7 +99,7 @@ describe('yaml-starter — step/dedupe-id (issues #76, #77)', () => {
       fileName: 'wf.lobster',
       ast,
       raw: before,
-      match: { ocPath: matches[0]!.ocPath },
+      match: matches[0]!.match,
       options: { strategy: 'rename-second' },
     });
     expect(after).toMatch(/id: a_dupe/);

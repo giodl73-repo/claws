@@ -5,16 +5,20 @@ import {
   sessionAppendTerminalEvent,
   sessionQuarantineMalformedLine,
 } from '../../../src/extensions/ocdoctor-fixers-jsonl-starter/index.js';
+import { syntheticMatch } from '../../test-match.js';
 
 function detect(spec: typeof sessionAppendTerminalEvent, raw: string, fileName = 'session.jsonl') {
   return spec.detect({ fileName, ast: parseJsonl(raw).ast, raw });
 }
 function fix(spec: typeof sessionAppendTerminalEvent, raw: string, fileName = 'session.jsonl') {
+  const ast = parseJsonl(raw).ast;
+  const matches = spec.detect({ fileName, ast, raw });
+  if (matches.length === 0) return raw;
   return spec.fix({
     fileName,
-    ast: parseJsonl(raw).ast,
+    ast,
     raw,
-    match: { ocPath: `oc://${fileName}` },
+    match: matches[0]!.match,
   });
 }
 
@@ -106,7 +110,7 @@ describe('jsonlStarterFixers — pack registration', () => {
   });
   it('all share the jsonl kind discriminator', () => {
     for (const f of jsonlStarterFixers) {
-      expect(f.kind).toBe('jsonl');
+      expect(f.appliesTo).toMatch(/jsonl/);
     }
   });
 });

@@ -27,7 +27,7 @@ function applyFix(spec: OcPathFixerSpec, raw: string): string {
     fileName: spec.appliesTo,
     ast,
     raw,
-    match: { ocPath: matches[0]!.ocPath },
+    match: matches[0]!.match,
   });
 }
 

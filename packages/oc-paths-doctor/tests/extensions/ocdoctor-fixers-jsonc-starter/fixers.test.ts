@@ -6,16 +6,20 @@ import {
   configRedactSecretLiteral,
   jsoncStarterFixers,
 } from '../../../src/extensions/ocdoctor-fixers-jsonc-starter/index.js';
+import { syntheticMatch } from '../../test-match.js';
 
 function detect(spec: typeof configAddPluginsStub, raw: string, fileName = 'gateway.jsonc') {
   return spec.detect({ fileName, ast: parseJsonc(raw).ast, raw });
 }
 function fix(spec: typeof configAddPluginsStub, raw: string, fileName = 'gateway.jsonc') {
+  const ast = parseJsonc(raw).ast;
+  const matches = spec.detect({ fileName, ast, raw });
+  if (matches.length === 0) return raw;
   return spec.fix({
     fileName,
-    ast: parseJsonc(raw).ast,
+    ast,
     raw,
-    match: { ocPath: `oc://${fileName}` },
+    match: matches[0]!.match,
   });
 }
 
@@ -117,9 +121,9 @@ describe('jsoncStarterFixers — pack registration', () => {
   it('exports 3 fixers', () => {
     expect(jsoncStarterFixers).toHaveLength(3);
   });
-  it('all share the jsonc kind discriminator', () => {
+  it('all apply to jsonc files', () => {
     for (const f of jsoncStarterFixers) {
-      expect(f.kind).toBe('jsonc');
+      expect(f.appliesTo).toMatch(/\.jsonc$|jsonc/);
     }
   });
   it('all ids share the starter-v0 namespace', () => {
