@@ -35,6 +35,22 @@ function applyFix(
   });
 }
 
+/** Fan-out helper: re-detect after each fix until no findings remain. */
+function fixAll(
+  spec: OcPathFixerSpec<unknown>,
+  raw: string,
+  fileName = 'gateway.jsonc',
+): string {
+  let next = raw;
+  for (let pass = 0; pass < 50; pass++) {
+    const ast = parseJsonc(next).ast;
+    const matches = spec.detect({ fileName, ast, raw: next });
+    if (matches.length === 0) return next;
+    next = spec.fix({ fileName, ast, raw: next, match: matches[0]!.match });
+  }
+  return next;
+}
+
 const HOSTILE_INPUTS: string[] = [
   '',
   '\n',
@@ -113,14 +129,14 @@ describe('wave-07 add-version-stub — sibling preservation', () => {
   });
 });
 
-describe('wave-07 redact-secret-literal — multiple secrets', () => {
+describe('wave-07 redact-secret-literal — multiple secrets (fan-out)', () => {
   it('replaces every distinct secret literal in the file', () => {
     const before = JSON.stringify({
       a: { token: 'ghp_abcdef0123456789ABCDEF0123456789abcdef' },
       b: { key: 'AKIAIOSFODNN7EXAMPLE' },
       c: { sk: 'sk-abcdef0123456789abcdef0123456789ABCDEF' },
     });
-    const after = applyFix(configRedactSecretLiteral, before);
+    const after = fixAll(configRedactSecretLiteral, before);
     expect(after).not.toContain('ghp_abcdef');
     expect(after).not.toContain('AKIAIOSFODNN7EXAMPLE');
     expect(after).not.toContain('sk-abcdef');
@@ -136,7 +152,7 @@ describe('wave-07 redact-secret-literal — multiple secrets', () => {
   it('handles same-secret-multiple-places consistently', () => {
     const secret = 'ghp_abcdef0123456789ABCDEF0123456789abcdef';
     const before = JSON.stringify({ a: secret, b: secret, c: { d: secret } });
-    const after = applyFix(configRedactSecretLiteral, before);
+    const after = fixAll(configRedactSecretLiteral, before);
     expect(after).not.toContain(secret);
     // All three slots have the placeholder.
     const placeholderCount = (after.match(/\$\{ENV_VAR_PLACEHOLDER\}/g) ?? []).length;

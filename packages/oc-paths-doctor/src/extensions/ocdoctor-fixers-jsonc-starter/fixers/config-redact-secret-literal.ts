@@ -15,7 +15,7 @@
  * (token-class label + length). 8-char prefix leaks via
  * `s.slice(0, 8)` are forbidden.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { emitJsonc, parseOcPath, setOcPath } from '@bic/oc-paths-substrate';
 import type { JsoncValue, OcPath, OcPathMatch } from '@bic/oc-paths-substrate';
 import type { DoctorDetectResult, OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
@@ -124,35 +124,19 @@ export const configRedactSecretLiteral: OcPathFixerSpec = {
     });
   },
 
-  fix({ ast, raw }) {
-    // NB: this fix path is queued for refactor under task A3 (#130) —
-    // current bytes-splice approach has known issues (clobbers any
-    // matching bytes including comments/keys). Tracking under
-    // synthesis-r1.md item B8.
+  fix({ ast, raw, match }) {
     if (ast.kind !== 'jsonc') return raw;
-    if (ast.root === null) return raw;
-    const secrets = new Set<string>();
-    const collect = (node: JsoncValue): void => {
-      if (node.kind === 'string' && classifySecret(node.value) !== null) {
-        secrets.add(node.value);
-        return;
-      }
-      if (node.kind === 'object') {
-        for (const e of node.entries) collect(e.value);
-        return;
-      }
-      if (node.kind === 'array') {
-        node.items.forEach(collect);
-      }
-    };
-    collect(ast.root);
-    if (secrets.size === 0) return raw;
-    let next = raw;
-    for (const s of secrets) {
-      const quoted = JSON.stringify(s);
-      const placeholder = '"${ENV_VAR_PLACEHOLDER}"';
-      next = next.split(quoted).join(placeholder);
-    }
-    return next;
+    if (match.match.kind !== 'leaf') return raw;
+    // Route through substrate `setOcPath` — writes the placeholder at
+    // exactly the leaf addressed by `match.path`. No more split/join on
+    // raw bytes (which clobbered any matching substring including
+    // comments and keys). The fan-out semantic from A6 means each
+    // secret gets its own `fix()` call; the runner re-detects and
+    // re-fixes until no findings remain.
+    const placeholder = '${ENV_VAR_PLACEHOLDER}';
+    const result = setOcPath(ast, match.path, placeholder);
+    if (!result.ok) return raw;
+    if (result.ast.kind !== 'jsonc') return raw;
+    return emitJsonc(result.ast);
   },
 };

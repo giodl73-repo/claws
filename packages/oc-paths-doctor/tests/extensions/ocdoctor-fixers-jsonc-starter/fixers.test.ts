@@ -23,6 +23,18 @@ function fix(spec: typeof configAddPluginsStub, raw: string, fileName = 'gateway
   });
 }
 
+/** Fan-out helper: re-detect after each fix until no findings remain. */
+function fixAll(spec: typeof configAddPluginsStub, raw: string, fileName = 'gateway.jsonc') {
+  let next = raw;
+  for (let pass = 0; pass < 20; pass++) {
+    const ast = parseJsonc(next).ast;
+    const matches = spec.detect({ fileName, ast, raw: next });
+    if (matches.length === 0) return next;
+    next = spec.fix({ fileName, ast, raw: next, match: matches[0]!.match });
+  }
+  return next;
+}
+
 describe('configAddPluginsStub', () => {
   it('detects missing plugins', () => {
     expect(detect(configAddPluginsStub, '{ "version": "1.0" }').length).toBe(1);
@@ -95,10 +107,10 @@ describe('configRedactSecretLiteral', () => {
     expect(after).not.toContain('ghp_abcdef');
     expect(after).toContain('${ENV_VAR_PLACEHOLDER}');
   });
-  it('handles multiple secrets in one file', () => {
+  it('handles multiple secrets in one file (fan-out)', () => {
     const before =
       '{ "a": "ghp_abcdef0123456789ABCDEF0123456789abcdef", "b": "AKIAIOSFODNN7EXAMPLE" }';
-    const after = fix(configRedactSecretLiteral, before);
+    const after = fixAll(configRedactSecretLiteral, before);
     expect(after).not.toContain('ghp_abcdef');
     expect(after).not.toContain('AKIAIOSFODNN7EXAMPLE');
   });

@@ -156,13 +156,21 @@ describe('wave-09 configurable options — skill/snap-tier', () => {
 
 describe('wave-09 configurable options — config/redact-secret-literal', () => {
   it('replaces with default placeholder when no override', () => {
+    // Use the real detect output so the match carries a writable
+    // leaf path (substrate `setOcPath` rejects root-replacement; the
+    // synthetic helper produced an unwritable shape).
     const raw = '{ "token": "ghp_abcdef0123456789ABCDEF0123456789abcdef" }';
     const ast = parseJsonc(raw).ast;
+    const matches = configRedactSecretLiteral.detect({
+      fileName: 'gateway.jsonc',
+      ast,
+      raw,
+    });
     const after = configRedactSecretLiteral.fix({
       fileName: 'gateway.jsonc',
       ast,
       raw,
-      match: syntheticMatch('oc://gateway.jsonc'),
+      match: matches[0]!.match,
     });
     expect(after).toContain('${ENV_VAR_PLACEHOLDER}');
   });
