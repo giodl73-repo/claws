@@ -22,7 +22,7 @@
  * renames exactly the one element addressed by `match.path`.
  */
 import { isMap, isScalar, isSeq } from 'yaml';
-import { parseOcPath, setOcPath } from '@bic/oc-paths-substrate';
+import { emitYaml, parseOcPath, setOcPath } from '@bic/oc-paths-substrate';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 export interface DedupeIdOptions {
@@ -99,6 +99,10 @@ export const stepDedupeId: OcPathFixerSpec<DedupeIdOptions> = {
     const result = setOcPath(ast, match.path, newId);
     if (!result.ok) return raw;
     if (result.ast.kind !== 'yaml') return raw;
-    return result.ast.doc.toString();
+    // Route through substrate `emitYaml` (B4) — applies sentinel
+    // guard at every leaf even though the yaml package's own
+    // `toString` would also produce valid bytes. Render mode
+    // because the AST has been mutated and `ast.raw` is stale.
+    return emitYaml(result.ast, { mode: 'render' });
   },
 };

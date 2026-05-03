@@ -18,7 +18,7 @@
  * still applies: one `fix()` call renames exactly one key.
  */
 import { isMap, isScalar, isSeq } from 'yaml';
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { emitYaml, parseOcPath } from '@bic/oc-paths-substrate';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 const IN_PROCESS_TOOLS: readonly string[] = [
@@ -108,8 +108,10 @@ export const stepSwapShellToPipeline: OcPathFixerSpec = {
     if (!isInProcessFirstToken(String(pair.value.value))) return raw;
 
     // Key rename via direct AST mutation — see file-level comment for
-    // why this can't route through `setOcPath`.
+    // why this can't route through `setOcPath`. Emit DOES route
+    // through substrate `emitYaml` so the sentinel guard still
+    // applies. Render mode because `ast.raw` is stale after mutation.
     (pair.key as { value: string }).value = 'pipeline';
-    return ast.doc.toString();
+    return emitYaml(ast, { mode: 'render' });
   },
 };

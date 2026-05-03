@@ -15,7 +15,7 @@
  * @module @openclaw/oc-doctor/adapter
  */
 
-import { formatOcPath } from '@bic/oc-paths-substrate';
+import { REDACTED_SENTINEL, formatOcPath } from '@bic/oc-paths-substrate';
 import type {
   DoctorContext,
   DoctorFinding,
@@ -133,6 +133,17 @@ export function ocPathFixerContribution<TOptions = unknown>(
       });
       if (after === file.raw) {
         return { outcome: 'skipped', reason: 'fix is a no-op (already correct)' };
+      }
+      // Belt-and-suspenders sentinel guard at the adapter boundary
+      // (B4). Substrate emitters already guard at every leaf, but
+      // fixers that return raw bytes (string concat, regex replace)
+      // bypass that path. Failing the fix here is fail-closed — the
+      // host writer never sees `__OPENCLAW_REDACTED__` bytes.
+      if (after.includes(REDACTED_SENTINEL)) {
+        return {
+          outcome: 'failed',
+          reason: `fix output contains redaction sentinel — refusing to write to ${file.path}`,
+        };
       }
       // Last chance to abort before the write — once writeFile starts,
       // we let the host's writer decide how to handle abort (atomic
