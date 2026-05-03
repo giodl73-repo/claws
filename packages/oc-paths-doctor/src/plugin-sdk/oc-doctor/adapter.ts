@@ -140,6 +140,24 @@ export function ocPathFixerContribution<TOptions = unknown>(
       if (ctx.signal?.aborted) {
         return { outcome: 'failed', reason: 'aborted via signal' };
       }
+      // Audit hook fires BEFORE write so the host records intent even
+      // if the write fails. Errors in onMutation are swallowed —
+      // audit MUST NOT fail the fix.
+      if (ctx.onMutation !== undefined) {
+        try {
+          await ctx.onMutation({
+            contributionId: spec.id,
+            fileName: file.name,
+            filePath: file.path,
+            beforeBytes: file.raw.length,
+            afterBytes: after.length,
+            ocPath: formatOcPath(finding.match.path),
+            at: new Date().toISOString(),
+          });
+        } catch {
+          // Audit failures are non-fatal.
+        }
+      }
       try {
         await ctx.writeFile(file.path, after);
       } catch (err) {

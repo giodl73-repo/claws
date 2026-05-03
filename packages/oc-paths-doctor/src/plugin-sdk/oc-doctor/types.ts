@@ -28,6 +28,25 @@ export interface DoctorFile {
 }
 
 /**
+ * One mutation event emitted by the doctor adapter just before
+ * `writeFile`. Audit-only — payload is small and bounded so log
+ * pipelines (LKG-git, fsevents, observability) can record it cheaply.
+ */
+export interface DoctorMutationEvent {
+  readonly contributionId: string;
+  readonly fileName: string;
+  readonly filePath: string;
+  /** Bytes count of the file BEFORE the fix is applied. */
+  readonly beforeBytes: number;
+  /** Bytes count of the file AFTER the fix. */
+  readonly afterBytes: number;
+  /** Concrete `oc://` path the fix targeted (formatted from the match). */
+  readonly ocPath: string;
+  /** ISO-8601 timestamp the adapter recorded just before write. */
+  readonly at: string;
+}
+
+/**
  * Context passed to detect/fix.
  */
 export interface DoctorContext {
@@ -44,6 +63,16 @@ export interface DoctorContext {
    * file write if aborted. Host-supplied; tests can omit.
    */
   readonly signal?: AbortSignal;
+  /**
+   * Optional audit hook. Fires once per successful mutation, just
+   * BEFORE `writeFile` runs (so the host can log intent even if the
+   * write subsequently fails). Errors thrown by `onMutation` are
+   * swallowed by the adapter — audit MUST NOT fail the fix.
+   *
+   * Use cases: LKG-git observation, fsevents emission, sentinel-tail
+   * observability, replay logs.
+   */
+  onMutation?(event: DoctorMutationEvent): void | Promise<void>;
   /**
    * Host-supplied async writer. Tests + non-FS hosts can stub this
    * without filesystem access. The host is responsible for atomic
