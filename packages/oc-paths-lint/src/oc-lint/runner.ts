@@ -26,6 +26,28 @@ export interface LintFile {
 export interface LintRunOptions {
   readonly rules: readonly LintRule[];
   readonly files: readonly LintFile[];
+  /**
+   * Optional cancellation signal. The runner checks `signal.aborted`
+   * between files and between rules; on abort it returns the partial
+   * results collected so far. The pure check() functions themselves
+   * are not interrupted mid-call (they're synchronous and short).
+   */
+  readonly signal?: AbortSignal;
+}
+
+/**
+ * Thrown when the lint run is aborted via the `signal`. Carries the
+ * partial result so callers can inspect what was collected before
+ * cancellation.
+ */
+export class LintAbortedError extends Error {
+  readonly code = 'OC_LINT_ABORTED';
+  readonly partial: LintRunResult;
+  constructor(partial: LintRunResult) {
+    super('lint run aborted via signal');
+    this.name = 'LintAbortedError';
+    this.partial = partial;
+  }
 }
 
 export interface LintRunResult {
@@ -54,7 +76,13 @@ export function runLint(opts: LintRunOptions): LintRunResult {
   }
 
   for (const file of opts.files) {
+    if (opts.signal?.aborted) {
+      throw new LintAbortedError({ diagnostics, stats });
+    }
     for (const rule of opts.rules) {
+      if (opts.signal?.aborted) {
+        throw new LintAbortedError({ diagnostics, stats });
+      }
       if (rule.appliesTo !== '*' && !matchGlob(rule.appliesTo, file.name)) {
         continue;
       }

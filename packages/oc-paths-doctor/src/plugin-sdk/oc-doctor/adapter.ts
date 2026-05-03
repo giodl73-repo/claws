@@ -88,6 +88,7 @@ export function ocPathFixerContribution<TOptions = unknown>(
     async detect(ctx: DoctorContext): Promise<readonly DoctorFinding[]> {
       const findings: DoctorFinding[] = [];
       for (const f of ctx.files) {
+        if (ctx.signal?.aborted) return findings;
         if (!matchGlob(spec.appliesTo, f.name)) continue;
         const detected = spec.detect({ fileName: f.name, ast: f.ast, raw: f.raw });
         for (const d of detected) {
@@ -112,6 +113,9 @@ export function ocPathFixerContribution<TOptions = unknown>(
       ctx: DoctorContext,
       finding: DoctorFinding,
     ): Promise<DoctorFixResult> {
+      if (ctx.signal?.aborted) {
+        return { outcome: 'failed', reason: 'aborted via signal' };
+      }
       const file = ctx.files.find((f) => f.path === finding.filePath);
       if (file === undefined) {
         return { outcome: 'failed', reason: 'file not in DoctorContext' };
@@ -129,6 +133,12 @@ export function ocPathFixerContribution<TOptions = unknown>(
       });
       if (after === file.raw) {
         return { outcome: 'skipped', reason: 'fix is a no-op (already correct)' };
+      }
+      // Last chance to abort before the write — once writeFile starts,
+      // we let the host's writer decide how to handle abort (atomic
+      // rename, etc.).
+      if (ctx.signal?.aborted) {
+        return { outcome: 'failed', reason: 'aborted via signal' };
       }
       try {
         await ctx.writeFile(file.path, after);

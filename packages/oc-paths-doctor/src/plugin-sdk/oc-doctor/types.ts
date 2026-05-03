@@ -39,6 +39,12 @@ export interface DoctorContext {
    */
   readonly fixerOptions?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
   /**
+   * Optional cancellation signal. Adapter checks `signal.aborted`
+   * between files in `detect()` and bails out of `fix()` before the
+   * file write if aborted. Host-supplied; tests can omit.
+   */
+  readonly signal?: AbortSignal;
+  /**
    * Host-supplied async writer. Tests + non-FS hosts can stub this
    * without filesystem access. The host is responsible for atomic
    * rename / sentinel-guard / LKG observe semantics around the write.

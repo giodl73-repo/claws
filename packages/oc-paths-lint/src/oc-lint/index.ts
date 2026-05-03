@@ -7,4 +7,4 @@
 
 export { LintRuleRegistry } from './registry.js';
 export type { LintFile, LintRunOptions, LintRunResult } from './runner.js';
-export { runLint } from './runner.js';
+export { LintAbortedError, runLint } from './runner.js';
