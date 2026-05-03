@@ -22,6 +22,18 @@ function fix(spec: OcPathFixerSpec<unknown>, raw: string, fileName = 'wf.lobster
   });
 }
 
+/** Fan-out helper: re-detect after each fix until no findings remain. */
+function fixAll(spec: OcPathFixerSpec<unknown>, raw: string, fileName = 'wf.lobster') {
+  let next = raw;
+  for (let pass = 0; pass < 20; pass++) {
+    const ast = parseYaml(next).ast;
+    const matches = spec.detect({ fileName, ast, raw: next });
+    if (matches.length === 0) return next;
+    next = spec.fix({ fileName, ast, raw: next, match: matches[0]!.match });
+  }
+  return next;
+}
+
 describe('yaml-starter — step/swap-shell-to-pipeline (issues #25, #26, #41)', () => {
   it('detects `command: openclaw.invoke ...`', () => {
     expect(
@@ -58,13 +70,14 @@ describe('yaml-starter — step/swap-shell-to-pipeline (issues #25, #26, #41)', 
     expect(twice).toBe(once);
   });
 
-  it('rewrites every offending step in a multi-step workflow', () => {
+  it('rewrites every offending step in a multi-step workflow (fan-out)', () => {
     const before =
       'steps:\n' +
       '  - id: a\n    command: openclaw.invoke ...\n' +
       '  - id: b\n    command: ls\n' +
       '  - id: c\n    command: llm.invoke ...\n';
-    const after = fix(stepSwapShellToPipeline, before);
+    // Fan-out semantic: detect returns 2 findings, fix runs once per finding.
+    const after = fixAll(stepSwapShellToPipeline, before);
     // step b's command stays (it's a real shell cmd)
     expect(after).toContain('command: ls');
     // both in-process steps rewritten

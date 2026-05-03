@@ -8,6 +8,14 @@
  *
  * **Idempotency**: a step that already uses `pipeline:` (or whose
  * `command:` doesn't reference an in-process tool) is left alone.
+ *
+ * **Why direct AST mutation, not `setOcPath`**: this fix renames a
+ * map key (`command:` → `pipeline:`) preserving the existing value.
+ * The substrate's `setOcPath` writes a value AT a path — it doesn't
+ * support key rename, which is a structural mutation. Adding a
+ * `renameKey` verb to the substrate would be a separate proposal;
+ * for now this is the documented exception. The fan-out contract
+ * still applies: one `fix()` call renames exactly one key.
  */
 import { isMap, isScalar, isSeq } from 'yaml';
 import { parseOcPath } from '@bic/oc-paths-substrate';
@@ -73,8 +81,17 @@ export const stepSwapShellToPipeline: OcPathFixerSpec = {
     return findings;
   },
 
-  fix({ ast, raw }) {
+  fix({ ast, raw, match }) {
     if (ast.kind !== 'yaml') return raw;
+    if (match.match.kind !== 'leaf') return raw;
+
+    // Extract idx + fieldName from the typed match path
+    // (`oc://${fileName}/steps/${idx}/${fieldName}`).
+    const idxRaw = match.path.item;
+    const fieldName = match.path.field;
+    const idx = idxRaw === undefined ? NaN : Number(idxRaw);
+    if (!Number.isFinite(idx) || fieldName === undefined) return raw;
+
     const root = ast.doc.contents;
     if (!isMap(root)) return raw;
     const stepsPair = root.items.find(
@@ -82,21 +99,17 @@ export const stepSwapShellToPipeline: OcPathFixerSpec = {
     );
     if (stepsPair === undefined || !isSeq(stepsPair.value)) return raw;
 
-    let needsRewrite = false;
-    stepsPair.value.items.forEach((step) => {
-      if (!isMap(step)) return;
-      for (const fieldName of ['command', 'run']) {
-        const pair = step.items.find(
-          (p) => isScalar(p.key) && p.key.value === fieldName,
-        );
-        if (pair === undefined || !isScalar(pair.value)) continue;
-        if (isInProcessFirstToken(String(pair.value.value))) {
-          (pair.key as { value: string }).value = 'pipeline';
-          needsRewrite = true;
-        }
-      }
-    });
-    if (!needsRewrite) return raw;
+    const step = stepsPair.value.items[idx];
+    if (!isMap(step)) return raw;
+    const pair = step.items.find(
+      (p) => isScalar(p.key) && p.key.value === fieldName,
+    );
+    if (pair === undefined || !isScalar(pair.value)) return raw;
+    if (!isInProcessFirstToken(String(pair.value.value))) return raw;
+
+    // Key rename via direct AST mutation — see file-level comment for
+    // why this can't route through `setOcPath`.
+    (pair.key as { value: string }).value = 'pipeline';
     return ast.doc.toString();
   },
 };

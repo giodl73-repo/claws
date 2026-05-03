@@ -14,9 +14,15 @@
  * Operators should run the partner lint rule (`undefined-stdin-ref`)
  * after this fix to catch any references to the renamed id. Severity
  * is `warning` to surface the trade-off.
+ *
+ * **Substrate routing**: mutation goes through `setOcPath` (the
+ * universal substrate verb) rather than direct yaml-package AST
+ * mutation. The fan-out semantic from A6 means each duplicate is a
+ * separate detect finding and a separate `fix()` call — `fix()`
+ * renames exactly the one element addressed by `match.path`.
  */
 import { isMap, isScalar, isSeq } from 'yaml';
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath, setOcPath } from '@bic/oc-paths-substrate';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 export interface DedupeIdOptions {
@@ -75,38 +81,24 @@ export const stepDedupeId: OcPathFixerSpec<DedupeIdOptions> = {
     return findings;
   },
 
-  fix({ ast, raw, options }) {
+  fix({ ast, raw, match, options }) {
     if (ast.kind !== 'yaml') return raw;
-    const root = ast.doc.contents;
-    if (!isMap(root)) return raw;
-    const stepsPair = root.items.find(
-      (p) => isScalar(p.key) && p.key.value === 'steps',
-    );
-    if (stepsPair === undefined || !isSeq(stepsPair.value)) return raw;
-
+    if (match.match.kind !== 'leaf') return raw;
     const opts = options ?? DEFAULTS;
-    const seen = new Map<string, number>();
-    let changed = false;
-    stepsPair.value.items.forEach((step, idx) => {
-      if (!isMap(step)) return;
-      const idPair = step.items.find(
-        (p) => isScalar(p.key) && p.key.value === 'id',
-      );
-      if (idPair === undefined || !isScalar(idPair.value)) return;
-      const id = String(idPair.value.value);
-      if (seen.has(id)) {
-        const newId =
-          opts.strategy === 'rename-second'
-            ? `${id}_dupe`
-            : `${id}_${idx}`;
-        (idPair.value as { value: string }).value = newId;
-        seen.set(newId, idx);
-        changed = true;
-      } else {
-        seen.set(id, idx);
-      }
-    });
-    if (!changed) return raw;
-    return ast.doc.toString();
+    const oldId = match.match.valueText;
+
+    // Extract idx from path.item (string form) — matches detect's path
+    // construction `oc://${fileName}/steps/${idx}/id`.
+    const idxRaw = match.path.item;
+    const idx = idxRaw === undefined ? NaN : Number(idxRaw);
+    if (!Number.isFinite(idx)) return raw;
+
+    const newId =
+      opts.strategy === 'rename-second' ? `${oldId}_dupe` : `${oldId}_${idx}`;
+
+    const result = setOcPath(ast, match.path, newId);
+    if (!result.ok) return raw;
+    if (result.ast.kind !== 'yaml') return raw;
+    return result.ast.doc.toString();
   },
 };
