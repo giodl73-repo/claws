@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "tests"],
+  "compilerOptions": {
+    "rootDir": "./src",
+    "paths": {
+      "@bic/lkg-recovery-substrate": ["../lkg-recovery-substrate/dist/index.d.ts"],
+      "@bic/lkg-recovery-substrate/*": ["../lkg-recovery-substrate/dist/*"]
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "@bic/oc-paths-lint",
+  "version": "0.1.0",
+  "description": "OpenClaw oc-paths PR-2 prototype: registerLintRule SDK verb + runner + starter-v0 starter pack at info severity.",
+  "type": "module",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./plugin-sdk": {
+      "types": "./dist/plugin-sdk/oc-lint/index.d.ts",
+      "import": "./dist/plugin-sdk/oc-lint/index.js"
+    },
+    "./runner": {
+      "types": "./dist/oc-lint/index.d.ts",
+      "import": "./dist/oc-lint/index.js"
+    },
+    "./rules-starter": {
+      "types": "./dist/extensions/oclint-rules-starter/index.d.ts",
+      "import": "./dist/extensions/oclint-rules-starter/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist"],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@bic/oc-paths-substrate": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit"
+  }
+}

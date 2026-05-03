@@ -1,0 +1,40 @@
+{
+  "name": "@bic/lkg-recovery-substrate",
+  "version": "0.1.0",
+  "description": "OpenClaw lkg-recovery PR-1 prototype: LKGStore / LKGTracker<TParsed, TIssue> contract types + reference filesystem-backed impl + config-LKG migration.",
+  "type": "module",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./plugin-sdk": {
+      "types": "./dist/plugin-sdk/lkg/index.d.ts",
+      "import": "./dist/plugin-sdk/lkg/index.js"
+    },
+    "./fs": {
+      "types": "./dist/extensions/lkg-fs/index.d.ts",
+      "import": "./dist/extensions/lkg-fs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist"],
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit"
+  }
+}

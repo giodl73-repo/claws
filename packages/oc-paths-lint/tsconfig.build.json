@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "tests"],
+  "compilerOptions": {
+    "rootDir": "./src",
+    "paths": {
+      "@bic/oc-paths-substrate": ["../oc-paths-substrate/dist/index.d.ts"],
+      "@bic/oc-paths-substrate/*": ["../oc-paths-substrate/dist/*"]
+    }
+  }
+}

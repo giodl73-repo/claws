@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh issue *)",
+      "Read(//c/src/claws/.craft/plans/**)",
+      "Read(//c/src/claws/.craft/**)",
+      "Bash(npx tsc *)",
+      "Bash(npx vitest *)",
+      "Bash(python -c ' *)",
+      "Bash(bash /c/src/claws-hapi/packages/openclaw-workspace/scripts/scan-pr-body.sh /c/src/claws-hapi/.craft/waves/260427+hapi-the-bringer+openclaw-upstream/pr-drafts/PR-1.md)",
+      "Bash(python *)",
+      "Bash(gh search *)",
+      "Bash(gh api *)",
+      "Read(//c/src/PROOF/**)",
+      "Read(//c/src/PROOF/docs/**)",
+      "Bash(GH_HOST=microsoft.ghe.com gh pr view 5408 --repo bic/aether --json body -q .body)",
+      "Bash(npm test *)",
+      "Bash(npm run *)",
+      "Read(//c/src/lobster/project-lobster-vault/Research/OpenClaw/**)",
+      "Read(//c/src/lobster/project-lobster-vault/Product/**)",
+      "Read(//c/src/lobster/project-lobster-vault/Tech/OpenClaw/Microsoft Internal Efforts/**)",
+      "Bash(npm install *)",
+      "Read(//c/src/lobster-docs/project-lobster-vault/Tech/lobster-oss/guides/internals/**)",
+      "Read(//c/src/lobster-docs/project-lobster-vault/Tech/lobster-oss/**)",
+      "Bash(gh --version)",
+      "Bash(gh repo *)",
+      "Bash(node *)"
+    ]
+  }
+}

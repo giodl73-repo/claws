@@ -1,0 +1,158 @@
+/**
+ * Fixer: `jsonc-starter-v0/config/redact-secret-literal`
+ * Pairs with: `jsonc-starter-v0/config/secret-as-literal` (lint warning)
+ *
+ * Replaces token-shaped string literals with `${ENV_VAR_PLACEHOLDER}`
+ * references. **Destructive in spirit but additive in effect**: the
+ * original literal is replaced (not deleted), and the operator must
+ * supply the actual env-var name.
+ *
+ * **Idempotency**: re-running on a file where all token literals have
+ * already been replaced is a no-op (no detect findings, no rewrite).
+ *
+ * **Diagnostic safety** (closes review finding A4 / B9): the diagnostic
+ * message NEVER includes secret bytes — only a shape fingerprint
+ * (token-class label + length). 8-char prefix leaks via
+ * `s.slice(0, 8)` are forbidden.
+ */
+import { parseOcPath } from '@bic/oc-paths-substrate';
+import type { JsoncValue, OcPath, OcPathMatch } from '@bic/oc-paths-substrate';
+import type { DoctorDetectResult, OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
+
+interface TokenPattern {
+  readonly label: string;
+  readonly re: RegExp;
+}
+
+const TOKEN_PATTERNS: readonly TokenPattern[] = [
+  { label: 'github-personal-token', re: /^ghp_[A-Za-z0-9]{36,}$/ },
+  { label: 'github-fine-grained-pat', re: /^github_pat_[A-Za-z0-9_]{40,}$/ },
+  { label: 'slack-token', re: /^xox[abp]-[A-Za-z0-9-]{10,}$/ },
+  { label: 'openai-api-key', re: /^sk-[A-Za-z0-9]{32,}$/ },
+  { label: 'aws-access-key', re: /^AKIA[0-9A-Z]{16}$/ },
+  { label: 'hex-secret', re: /^[a-fA-F0-9]{40,}$/ },
+];
+
+function classifySecret(s: string): TokenPattern | null {
+  return TOKEN_PATTERNS.find((p) => p.re.test(s)) ?? null;
+}
+
+/**
+ * Shape-only fingerprint for diagnostic messages. Never echoes the
+ * secret. Format: `<token-class>:<length>` (e.g. `github-personal-token:48`).
+ */
+function fingerprint(s: string, pattern: TokenPattern): string {
+  return `${pattern.label}:${s.length}`;
+}
+
+interface SecretHit {
+  readonly path: OcPath;
+  readonly value: string;
+  readonly pattern: TokenPattern;
+  readonly line: number;
+}
+
+function findSecretLeaves(
+  node: JsoncValue,
+  fileName: string,
+  segments: readonly string[],
+  out: SecretHit[],
+): void {
+  if (node.kind === 'string') {
+    const pattern = classifySecret(node.value);
+    if (pattern !== null) {
+      out.push({
+        path: makePath(fileName, segments),
+        value: node.value,
+        pattern,
+        line: node.line ?? 1,
+      });
+    }
+    return;
+  }
+  if (node.kind === 'object') {
+    for (const e of node.entries) {
+      findSecretLeaves(e.value, fileName, [...segments, e.key], out);
+    }
+    return;
+  }
+  if (node.kind === 'array') {
+    node.items.forEach((v, i) => {
+      findSecretLeaves(v, fileName, [...segments, String(i)], out);
+    });
+  }
+}
+
+function makePath(fileName: string, segments: readonly string[]): OcPath {
+  // Pack up to 3 sub-segments into section/item/field; deeper paths
+  // collapse the tail into dotted form on the field slot.
+  if (segments.length === 0) return parseOcPath(`oc://${fileName}`);
+  if (segments.length === 1) return parseOcPath(`oc://${fileName}/${segments[0]}`);
+  if (segments.length === 2) return parseOcPath(`oc://${fileName}/${segments[0]}/${segments[1]}`);
+  if (segments.length === 3) return parseOcPath(`oc://${fileName}/${segments[0]}/${segments[1]}/${segments[2]}`);
+  // 4+ segments: section/item/field-with-dotted-overflow.
+  return parseOcPath(`oc://${fileName}/${segments[0]}/${segments[1]}/${segments.slice(2).join('.')}`);
+}
+
+export const configRedactSecretLiteral: OcPathFixerSpec = {
+  id: 'jsonc-starter-v0/config/redact-secret-literal',
+  description:
+    'Replace token-shaped string literals with ${ENV_VAR_PLACEHOLDER} references',
+  severity: 'warning',
+  appliesTo: '*.jsonc',
+
+  detect({ ast, fileName }): readonly DoctorDetectResult[] {
+    if (ast.kind !== 'jsonc') return [];
+    if (ast.root === null) return [];
+    const hits: SecretHit[] = [];
+    findSecretLeaves(ast.root, fileName, [], hits);
+    return hits.map((hit): DoctorDetectResult => {
+      const ocPathMatch: OcPathMatch = {
+        path: hit.path,
+        match: {
+          kind: 'leaf',
+          valueText: hit.value,
+          leafType: 'string',
+          line: hit.line,
+        },
+      };
+      return {
+        match: ocPathMatch,
+        message: `${fileName}: literal secret \`${fingerprint(hit.value, hit.pattern)}\` found in config — rotate and replace with \${ENV_VAR}`,
+        fixHint: 'replace literal with `${ENV_VAR}`; rotate the leaked secret',
+      };
+    });
+  },
+
+  fix({ ast, raw }) {
+    // NB: this fix path is queued for refactor under task A3 (#130) —
+    // current bytes-splice approach has known issues (clobbers any
+    // matching bytes including comments/keys). Tracking under
+    // synthesis-r1.md item B8.
+    if (ast.kind !== 'jsonc') return raw;
+    if (ast.root === null) return raw;
+    const secrets = new Set<string>();
+    const collect = (node: JsoncValue): void => {
+      if (node.kind === 'string' && classifySecret(node.value) !== null) {
+        secrets.add(node.value);
+        return;
+      }
+      if (node.kind === 'object') {
+        for (const e of node.entries) collect(e.value);
+        return;
+      }
+      if (node.kind === 'array') {
+        node.items.forEach(collect);
+      }
+    };
+    collect(ast.root);
+    if (secrets.size === 0) return raw;
+    let next = raw;
+    for (const s of secrets) {
+      const quoted = JSON.stringify(s);
+      const placeholder = '"${ENV_VAR_PLACEHOLDER}"';
+      next = next.split(quoted).join(placeholder);
+    }
+    return next;
+  },
+};
