@@ -4,6 +4,19 @@
  * @module @openclaw/oc-doctor
  */
 
+/**
+ * SDK version this build of `@openclaw/oc-doctor` exposes. Plugins
+ * declare the version they were authored against via
+ * `OcPathFixerSpec.requires.sdkVersion`; the host warns on mismatch
+ * (semver-major bump = breaking change).
+ *
+ * Bumped on every breaking change to `OcPathFixerSpec` /
+ * `DoctorContext` / `DoctorFinding` / `DoctorDetectResult`. In-tree
+ * starter packs omit `requires` (they ship with the SDK, no
+ * version-skew possible).
+ */
+export const SDK_VERSION = '0.1.0';
+
 export type {
   DefaultFixerOptions,
   DoctorContext,
@@ -14,4 +27,4 @@ export type {
   OcPathFixerSpec,
 } from './types.js';
 
-export { ocPathFixerContribution } from './adapter.js';
+export { ocPathFixerContribution, checkSdkCompat } from './adapter.js';

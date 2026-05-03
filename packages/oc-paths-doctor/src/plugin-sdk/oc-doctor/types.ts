@@ -122,6 +122,15 @@ export interface OcPathFixerSpec<TOptions = DefaultFixerOptions> {
   /** Default options applied when caller doesn't override at invocation. */
   readonly defaultOptions?: TOptions;
   /**
+   * SDK-version compatibility hint. Plugins authored against a known
+   * SDK version declare it here; the registrar warns on mismatch with
+   * the host's `SDK_VERSION`. Optional — omitting it means "trust the
+   * host," which is the right default for in-tree starter packs.
+   */
+  readonly requires?: {
+    readonly sdkVersion: string;
+  };
+  /**
    * Inspect an AST + raw bytes; for each issue, return a typed
    * `OcPathMatch` (path + match-with-line/leafType) along with a
    * human-readable message and optional fix hint.

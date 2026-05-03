@@ -148,6 +148,16 @@ export interface LintRule {
   readonly appliesTo: string;
 
   /**
+   * SDK-version compatibility hint. Plugins authored against a known
+   * SDK version declare it here; the registrar warns on mismatch with
+   * the host's `SDK_VERSION`. Optional — omitting it means "trust the
+   * host," which is the right default for in-tree starter packs.
+   */
+  readonly requires?: {
+    readonly sdkVersion: string;
+  };
+
+  /**
    * Pure check function. Receives the universal AST + filename;
    * returns 0+ findings. Use `resolveOcPath` from the substrate to
    * inspect; narrow on `ctx.ast.kind` for kind-specific logic.

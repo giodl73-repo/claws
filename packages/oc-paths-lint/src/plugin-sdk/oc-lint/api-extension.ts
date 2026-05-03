@@ -42,3 +42,23 @@ export class LintRuleRegistrationError extends Error {
     this.ruleId = ruleId;
   }
 }
+
+/**
+ * Compare a plugin-declared SDK version against the host's version.
+ * Major mismatch is a hard incompatibility; minor/patch is fine
+ * (additive changes by semver convention).
+ *
+ * Returns `null` if compatible, or a human-readable warning string
+ * if not. The host decides whether to refuse or merely log.
+ */
+export function checkSdkCompat(
+  hostVersion: string,
+  pluginRequires: string,
+): string | null {
+  const hostMajor = hostVersion.split('.')[0];
+  const pluginMajor = pluginRequires.split('.')[0];
+  if (hostMajor !== pluginMajor) {
+    return `SDK major version mismatch: host=${hostVersion}, plugin requires=${pluginRequires}`;
+  }
+  return null;
+}

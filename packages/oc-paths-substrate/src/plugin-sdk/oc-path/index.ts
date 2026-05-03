@@ -23,6 +23,15 @@
  * @module @openclaw/oc-path
  */
 
+/**
+ * SDK version this build of `@openclaw/oc-path` exposes. Bumped on
+ * every breaking change to AST shape, OcPath syntax, or universal
+ * verbs (`resolveOcPath`, `setOcPath`, `findOcPaths`, `parseXxx`,
+ * `emitXxx`). Plugin packs that depend on the substrate declare the
+ * version they were authored against and the host warns on mismatch.
+ */
+export const SDK_VERSION = '0.1.0';
+
 // AST types
 export type {
   AstBlock,
