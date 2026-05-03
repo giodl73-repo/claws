@@ -1,6 +1,6 @@
 /**
  * Rule: `jsonc-starter-v0/config/secret-as-literal`
- * Severity: warning
+ * Severity: error
  * Applies to: *.jsonc
  *
  * Flag: any string value matching common token shapes (GitHub PAT,
@@ -8,10 +8,11 @@
  * in config tracked by LKG-git would write tokens to git history; the
  * rule surfaces this so operators can replace with `${ENV_VAR}` references.
  *
- * Walks every leaf string under the AST. Conservative: false positives
- * are tolerable at info, but this rule earns warning because the
- * downstream consequence (token in git) is recoverable only via
- * history rewrite.
+ * Walks every leaf string under the AST. **Severity is error** (was
+ * warning at landing): a secret in config is irreversible once
+ * committed to git history, so failing CI is the right default. Token
+ * shapes are conservative — false positives are rare enough that the
+ * cost of `# lint:disable` for an exception is acceptable.
  */
 import type {
   LintRule,
@@ -64,7 +65,7 @@ function walkLeaves(
 
 export const configSecretAsLiteral: LintRule = {
   id: 'jsonc-starter-v0/config/secret-as-literal',
-  severity: 'warning',
+  severity: 'error',
   description: 'config string values matching common secret/token shapes',
   appliesTo: '*.jsonc',
   check(ctx) {

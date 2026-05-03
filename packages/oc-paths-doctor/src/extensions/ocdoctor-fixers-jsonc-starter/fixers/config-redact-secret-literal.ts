@@ -98,7 +98,11 @@ export const configRedactSecretLiteral: OcPathFixerSpec = {
   id: 'jsonc-starter-v0/config/redact-secret-literal',
   description:
     'Replace token-shaped string literals with ${ENV_VAR_PLACEHOLDER} references',
-  severity: 'warning',
+  // Pairs with `jsonc-starter-v0/config/secret-as-literal` (error).
+  // Fixer severity matches the rule — a leaked secret in config is
+  // irreversible once committed to git history, so fail-closed at
+  // detect is the right default.
+  severity: 'error',
   appliesTo: '*.jsonc',
 
   detect({ ast, fileName }): readonly DoctorDetectResult[] {
