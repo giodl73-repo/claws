@@ -47,11 +47,17 @@ export class OcEmitSentinelError extends Error {
 }
 
 /**
- * Throw `OcEmitSentinelError` if `value` equals the redaction sentinel.
- * No-op for any other input. Used by emitMd() at every leaf write.
+ * Throw `OcEmitSentinelError` if `value` contains the redaction
+ * sentinel anywhere. Substring match (not equality) — a hostile caller
+ * embedding `prefix__OPENCLAW_REDACTED__suffix` in a leaf must be
+ * rejected just as forcefully as the bare sentinel; the substring form
+ * still leaks the marker bytes to disk where downstream scanners flag
+ * the file as corrupted.
+ *
+ * No-op for any non-string input. Used by every leaf-write boundary.
  */
 export function guardSentinel(value: unknown, ocPath: string): void {
-  if (typeof value === 'string' && value === REDACTED_SENTINEL) {
+  if (typeof value === 'string' && value.includes(REDACTED_SENTINEL)) {
     throw new OcEmitSentinelError(ocPath);
   }
 }

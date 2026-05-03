@@ -34,13 +34,14 @@ describe('wave-09 sentinel-guard', () => {
     expect(() => guardSentinel(REDACTED_SENTINEL, 'oc://X.md')).toThrow(OcEmitSentinelError);
   });
 
-  it('S-05 guardSentinel passes substring matches (sentinel embedded in larger string)', () => {
-    // Important: only EXACT match is rejected. A larger string that
-    // CONTAINS the sentinel is allowed to pass guardSentinel — but
-    // the round-trip and render modes scan with `.includes()` on the
-    // larger context, so this is the leaf-level guard for individual
-    // values, not a full string-search policy.
-    expect(() => guardSentinel(`prefix${REDACTED_SENTINEL}suffix`, 'oc://X.md')).not.toThrow();
+  it('S-05 guardSentinel throws on substring matches (sentinel embedded in larger string)', () => {
+    // Substring scan — the sentinel anywhere in the value is a leak,
+    // not just exact equality. A hostile caller smuggling
+    // `prefix__OPENCLAW_REDACTED__suffix` would have bypassed the old
+    // equality check; substring scan closes the gap.
+    expect(() => guardSentinel(`prefix${REDACTED_SENTINEL}suffix`, 'oc://X.md')).toThrow(
+      OcEmitSentinelError,
+    );
   });
 
   it('S-06 error attaches the OcPath context', () => {
