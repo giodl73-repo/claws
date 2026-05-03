@@ -19,19 +19,12 @@
  */
 import { isMap, isScalar, isSeq } from 'yaml';
 import { emitYaml, parseOcPath } from '@bic/oc-paths-substrate';
+import { STARTER_IN_PROCESS_TOOLS } from '@bic/oc-paths-lint';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
-
-const IN_PROCESS_TOOLS: readonly string[] = [
-  'openclaw.invoke',
-  'llm_task.invoke',
-  'llm.invoke',
-  'clawd.invoke',
-  'lobster',
-];
 
 function isInProcessFirstToken(cmd: string): boolean {
   const first = cmd.trim().split(/\s+/)[0] ?? '';
-  return IN_PROCESS_TOOLS.includes(first);
+  return STARTER_IN_PROCESS_TOOLS.includes(first);
 }
 
 export const stepSwapShellToPipeline: OcPathFixerSpec = {

@@ -10,8 +10,7 @@
  */
 import { parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
 import type { LintRule } from '../../../plugin-sdk/oc-lint/types.js';
-
-const TERMINAL_VALUES = new Set(['end', 'complete', 'finalized', 'done']);
+import { STARTER_TERMINAL_EVENT_VALUES } from '../../../shared/starter-values.js';
 
 export const sessionNoTerminalEvent: LintRule = {
   id: 'jsonl-starter-v0/session/no-terminal-event',
@@ -22,7 +21,7 @@ export const sessionNoTerminalEvent: LintRule = {
     if (ctx.ast.kind !== 'jsonl') return [];
     const m = resolveOcPath(ctx.ast, parseOcPath(`oc://${ctx.fileName}/$last/event`));
     if (m === null || m.kind !== 'leaf' || m.leafType !== 'string') return [];
-    if (TERMINAL_VALUES.has(m.valueText)) return [];
+    if (STARTER_TERMINAL_EVENT_VALUES.has(m.valueText)) return [];
     return [
       {
         message: `${ctx.fileName}: last event is \`${m.valueText}\` — session may still be in flight`,

@@ -20,14 +20,7 @@
  */
 import { findOcPaths, parseOcPath } from '@bic/oc-paths-substrate';
 import type { LintFinding, LintRule } from '../../../plugin-sdk/oc-lint/types.js';
-
-const IN_PROCESS_TOOLS: readonly string[] = [
-  'openclaw.invoke',
-  'llm_task.invoke',
-  'llm.invoke',
-  'clawd.invoke',
-  'lobster',
-];
+import { STARTER_IN_PROCESS_TOOLS } from '../../../shared/starter-values.js';
 
 export const stepShellToolCollision: LintRule = {
   id: 'lobster-yaml-starter-v0/step/shell-tool-collision',
@@ -46,7 +39,7 @@ export const stepShellToolCollision: LintRule = {
       if (match.kind !== 'leaf') continue;
       const cmd = match.valueText.trim();
       const firstToken = cmd.split(/\s+/)[0] ?? '';
-      if (!IN_PROCESS_TOOLS.includes(firstToken)) continue;
+      if (!STARTER_IN_PROCESS_TOOLS.includes(firstToken)) continue;
       const fieldName = path.field ?? '';
       out.push({
         message: `${ctx.fileName}: step[${path.item}].${fieldName} references in-process tool \`${firstToken}\` — will fail with "127: not found" at shell exec`,

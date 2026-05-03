@@ -17,24 +17,12 @@
  */
 import { emitJsonc, parseOcPath, setOcPath } from '@bic/oc-paths-substrate';
 import type { JsoncValue, OcPath, OcPathMatch } from '@bic/oc-paths-substrate';
+import { STARTER_TOKEN_PATTERNS } from '@bic/oc-paths-lint';
+import type { TokenPattern } from '@bic/oc-paths-lint';
 import type { DoctorDetectResult, OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
-interface TokenPattern {
-  readonly label: string;
-  readonly re: RegExp;
-}
-
-const TOKEN_PATTERNS: readonly TokenPattern[] = [
-  { label: 'github-personal-token', re: /^ghp_[A-Za-z0-9]{36,}$/ },
-  { label: 'github-fine-grained-pat', re: /^github_pat_[A-Za-z0-9_]{40,}$/ },
-  { label: 'slack-token', re: /^xox[abp]-[A-Za-z0-9-]{10,}$/ },
-  { label: 'openai-api-key', re: /^sk-[A-Za-z0-9]{32,}$/ },
-  { label: 'aws-access-key', re: /^AKIA[0-9A-Z]{16}$/ },
-  { label: 'hex-secret', re: /^[a-fA-F0-9]{40,}$/ },
-];
-
 function classifySecret(s: string): TokenPattern | null {
-  return TOKEN_PATTERNS.find((p) => p.re.test(s)) ?? null;
+  return STARTER_TOKEN_PATTERNS.find((p) => p.re.test(s)) ?? null;
 }
 
 /**

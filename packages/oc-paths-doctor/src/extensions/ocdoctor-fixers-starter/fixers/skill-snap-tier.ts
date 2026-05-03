@@ -6,6 +6,7 @@
  * Same pattern + risk profile as memory/snap-scope.
  */
 import { parseOcPath } from '@bic/oc-paths-substrate';
+import { STARTER_ALLOWED_SKILL_TIERS } from '@bic/oc-paths-lint';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 export interface SnapTierOptions {
@@ -15,7 +16,7 @@ export interface SnapTierOptions {
 
 const DEFAULTS: SnapTierOptions = {
   targetTier: 1,
-  allowedTiers: [1, 2, 3],
+  allowedTiers: STARTER_ALLOWED_SKILL_TIERS,
 };
 
 export const skillSnapTier: OcPathFixerSpec<SnapTierOptions> = {

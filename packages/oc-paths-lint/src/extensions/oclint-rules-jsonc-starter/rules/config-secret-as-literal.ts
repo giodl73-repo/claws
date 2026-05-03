@@ -18,19 +18,11 @@ import type {
   LintRule,
   LintFinding,
 } from '../../../plugin-sdk/oc-lint/types.js';
+import { STARTER_TOKEN_PATTERNS } from '../../../shared/starter-values.js';
 import type { JsoncValue } from '@bic/oc-paths-substrate';
 
-const TOKEN_PATTERNS: readonly RegExp[] = [
-  /^ghp_[A-Za-z0-9]{36,}$/, // GitHub personal access token
-  /^github_pat_[A-Za-z0-9_]{40,}$/, // GitHub fine-grained PAT
-  /^xox[abp]-[A-Za-z0-9-]{10,}$/, // Slack tokens
-  /^sk-[A-Za-z0-9]{32,}$/, // OpenAI / Anthropic style keys
-  /^AKIA[0-9A-Z]{16}$/, // AWS access key ID
-  /^[a-fA-F0-9]{40,}$/, // generic 40+ hex (PAT-like)
-];
-
 function looksLikeSecret(s: string): boolean {
-  return TOKEN_PATTERNS.some((re) => re.test(s));
+  return STARTER_TOKEN_PATTERNS.some((p) => p.re.test(s));
 }
 
 function walkLeaves(

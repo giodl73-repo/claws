@@ -11,9 +11,8 @@
  * `event: end|complete|finalized|done` is a no-op.
  */
 import { parseOcPath } from '@bic/oc-paths-substrate';
+import { STARTER_TERMINAL_EVENT_VALUES } from '@bic/oc-paths-lint';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
-
-const TERMINAL_VALUES = new Set(['end', 'complete', 'finalized', 'done']);
 
 export const sessionAppendTerminalEvent: OcPathFixerSpec = {
   id: 'jsonl-starter-v0/session/append-terminal-event',
@@ -37,7 +36,7 @@ export const sessionAppendTerminalEvent: OcPathFixerSpec = {
     const evt = last.value.entries.find((e) => e.key === 'event');
     if (evt === undefined) return [];
     if (evt.value.kind !== 'string') return [];
-    if (TERMINAL_VALUES.has(evt.value.value)) return [];
+    if (STARTER_TERMINAL_EVENT_VALUES.has(evt.value.value)) return [];
     return [
       {
         match: {
@@ -70,7 +69,7 @@ export const sessionAppendTerminalEvent: OcPathFixerSpec = {
     const evt = last.value.entries.find((e) => e.key === 'event');
     if (evt === undefined) return raw;
     if (evt.value.kind !== 'string') return raw;
-    if (TERMINAL_VALUES.has(evt.value.value)) return raw;
+    if (STARTER_TERMINAL_EVENT_VALUES.has(evt.value.value)) return raw;
 
     const terminator = '{"event":"end","_auto":true}';
     const sep = raw.endsWith('\n') ? '' : '\n';

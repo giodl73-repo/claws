@@ -14,6 +14,7 @@
  * trail.
  */
 import { parseOcPath } from '@bic/oc-paths-substrate';
+import { STARTER_ALLOWED_MEMORY_SCOPES } from '@bic/oc-paths-lint';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 export interface SnapScopeOptions {
@@ -23,7 +24,7 @@ export interface SnapScopeOptions {
 
 const DEFAULTS: SnapScopeOptions = {
   targetScope: 'default',
-  allowedScopes: ['default', 'global', 'project', 'session'],
+  allowedScopes: STARTER_ALLOWED_MEMORY_SCOPES,
 };
 
 export const memorySnapScope: OcPathFixerSpec<SnapScopeOptions> = {
