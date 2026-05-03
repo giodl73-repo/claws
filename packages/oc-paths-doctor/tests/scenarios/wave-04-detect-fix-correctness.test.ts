@@ -5,7 +5,7 @@
  * partial, and edge-case inputs. Goes deeper than the smoke tests in
  * `tests/extensions/ocdoctor-fixers-starter/fixers.test.ts`.
  */
-import { parseWorkspaceMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@bic/oc-paths-substrate';
 import { describe, expect, it } from 'vitest';
 import {
   agentsAddBoundariesStub,
@@ -15,14 +15,14 @@ import {
 import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
 
 function detectMatches(spec: OcPathFixerSpec, raw: string) {
-  const { ast } = parseWorkspaceMd(raw);
+  const { ast } = parseMd(raw);
   return spec.detect({ fileName: spec.appliesTo, ast, raw });
 }
 
 function applyFix(spec: OcPathFixerSpec, raw: string): string {
   const matches = detectMatches(spec, raw);
   if (matches.length === 0) return raw;
-  const { ast } = parseWorkspaceMd(raw);
+  const { ast } = parseMd(raw);
   return spec.fix({
     fileName: spec.appliesTo,
     ast,

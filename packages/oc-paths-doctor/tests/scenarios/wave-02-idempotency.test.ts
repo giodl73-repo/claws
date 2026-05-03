@@ -6,13 +6,13 @@
  * inputs that are already correct, malformed, or partially fixed must
  * stabilize after one application.
  */
-import { parseWorkspaceMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@bic/oc-paths-substrate';
 import { describe, expect, it } from 'vitest';
 import { STARTER_FIXERS_V0 } from '../../src/extensions/ocdoctor-fixers-starter/index.js';
 import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
 
-function applyFix(spec: OcPathFixerSpec, raw: string): string {
-  const { ast } = parseWorkspaceMd(raw);
+function applyFix(spec: OcPathFixerSpec<unknown>, raw: string): string {
+  const { ast } = parseMd(raw);
   const matches = spec.detect({ fileName: spec.appliesTo, ast, raw });
   if (matches.length === 0) return raw;
   return spec.fix({
@@ -84,7 +84,10 @@ describe('wave-02 idempotency', () => {
       // should detect zero findings.
       const probe: Record<string, string> = {
         'starter-v0/agents/add-boundaries-stub': '## Tools\n',
+        'starter-v0/tools/add-guidance-table-stub': '## Header\n',
         'starter-v0/memory/add-scope-default': '## Entry\n',
+        'starter-v0/skill/add-required-frontmatter-stub': '## Body\n',
+        'starter-v0/identity/add-trust-level-stub': '## Section\n',
         'starter-v0/user/add-preferences-stub': '## Role\n',
       };
       const raw = probe[fixer.id];
@@ -92,7 +95,7 @@ describe('wave-02 idempotency', () => {
         throw new Error(`no probe input for fixer ${fixer.id}`);
       }
       const fixed = applyFix(fixer, raw);
-      const reAst = parseWorkspaceMd(fixed).ast;
+      const reAst = parseMd(fixed).ast;
       const matches = fixer.detect({ fileName: fixer.appliesTo, ast: reAst, raw: fixed });
       expect(matches).toEqual([]);
     }

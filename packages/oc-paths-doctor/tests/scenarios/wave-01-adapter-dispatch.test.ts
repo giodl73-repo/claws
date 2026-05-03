@@ -13,6 +13,7 @@ import type {
   OcPathFixerSpec,
 } from '../../src/plugin-sdk/oc-doctor/types.js';
 import { makeDoctorFile } from '../test-helpers.js';
+import { syntheticFinding, syntheticMatch } from '../test-match.js';
 
 const flagSpec: OcPathFixerSpec = {
   id: 'test/flag',
@@ -23,7 +24,7 @@ const flagSpec: OcPathFixerSpec = {
     if (ast.kind !== 'md') return [];
     return ast.blocks.some((b) => b.slug === 'done')
       ? []
-      : [{ ocPath: 'oc://AGENTS.md', message: 'no done', line: 1 }];
+      : [{ match: syntheticMatch('oc://AGENTS.md'), message: 'no done' }];
   },
   fix: ({ raw, ast }) => {
     if (ast.kind !== 'md') return raw;
@@ -104,15 +105,13 @@ describe('wave-01 adapter-dispatch', () => {
   it('AD-06 fix on already-correct file returns "skipped"', async () => {
     const c = ocPathFixerContribution(flagSpec);
     const m = ctxOf([{ name: 'AGENTS.md', raw: '## H\n## Done\n' }]);
-    const synth: DoctorFinding = {
+    const synth: DoctorFinding = syntheticFinding({
       contributionId: 'test/flag',
-      severity: 'info',
       fileName: 'AGENTS.md',
       filePath: '/ws/AGENTS.md',
-      message: 'x',
       ocPath: 'oc://AGENTS.md',
-      line: 1,
-    };
+      message: 'x',
+    });
     const result = await c.fix(m.ctx, synth);
     expect(result.outcome).toBe('skipped');
   });
@@ -120,15 +119,13 @@ describe('wave-01 adapter-dispatch', () => {
   it('AD-07 fix on missing file returns "failed"', async () => {
     const c = ocPathFixerContribution(flagSpec);
     const m = ctxOf([]);
-    const synth: DoctorFinding = {
+    const synth: DoctorFinding = syntheticFinding({
       contributionId: 'test/flag',
-      severity: 'info',
       fileName: 'AGENTS.md',
       filePath: '/ws/AGENTS.md',
-      message: 'x',
       ocPath: 'oc://AGENTS.md',
-      line: 1,
-    };
+      message: 'x',
+    });
     const result = await c.fix(m.ctx, synth);
     expect(result.outcome).toBe('failed');
   });
@@ -154,15 +151,13 @@ describe('wave-01 adapter-dispatch', () => {
       appliesTo: 'MEMORY.md',
     };
     const c = ocPathFixerContribution(wrongFileSpec);
-    const synth: DoctorFinding = {
+    const synth: DoctorFinding = syntheticFinding({
       contributionId: 'test/flag',
-      severity: 'info',
       fileName: 'AGENTS.md', // intentionally mismatched with the spec
       filePath: '/ws/AGENTS.md',
-      message: 'x',
       ocPath: 'oc://AGENTS.md',
-      line: 1,
-    };
+      message: 'x',
+    });
     const m = ctxOf([{ name: 'AGENTS.md', raw: '## H\n' }]);
     const result = await c.fix(m.ctx, synth);
     expect(result.outcome).toBe('skipped');

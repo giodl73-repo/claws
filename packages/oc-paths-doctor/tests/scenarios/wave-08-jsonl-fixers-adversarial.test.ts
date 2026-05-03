@@ -8,10 +8,10 @@ import {
   sessionAppendTerminalEvent,
   sessionQuarantineMalformedLine,
 } from '../../src/extensions/ocdoctor-fixers-jsonl-starter/index.js';
-import type { JsonlOcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
+import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
 
 function applyFix(
-  spec: JsonlOcPathFixerSpec<unknown>,
+  spec: OcPathFixerSpec<unknown>,
   raw: string,
   fileName = 'session.jsonl',
 ): string {
@@ -147,8 +147,8 @@ describe('wave-08 jsonl fixers — pack invariants', () => {
   it('exports 2 fixers', () => {
     expect(jsonlStarterFixers).toHaveLength(2);
   });
-  it('all share kind discriminator', () => {
-    for (const f of jsonlStarterFixers) expect(f.kind).toBe('jsonl');
+  it('all apply to jsonl files', () => {
+    for (const f of jsonlStarterFixers) expect(f.appliesTo).toMatch(/jsonl/);
   });
   it('all ids unique', () => {
     const ids = jsonlStarterFixers.map((f) => f.id);

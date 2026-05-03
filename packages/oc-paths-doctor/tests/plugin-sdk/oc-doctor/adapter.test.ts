@@ -5,6 +5,7 @@ import type {
   OcPathFixerSpec,
 } from '../../../src/plugin-sdk/oc-doctor/types.js';
 import { makeDoctorFile } from '../../test-helpers.js';
+import { syntheticFinding, syntheticMatch } from '../../test-match.js';
 
 const noopSpec: OcPathFixerSpec = {
   id: 'test/noop',
@@ -25,9 +26,8 @@ const flagSpec: OcPathFixerSpec = {
     if (ast.blocks.some((b) => b.slug === 'fixed')) return [];
     return [
       {
-        ocPath: 'oc://AGENTS.md',
+        match: syntheticMatch('oc://AGENTS.md'),
         message: 'needs Fixed section',
-        line: 1,
         fixHint: 'append `## Fixed`',
       },
     ];
@@ -105,15 +105,13 @@ describe('ocPathFixerContribution adapter', () => {
     const c = ocPathFixerContribution(flagSpec);
     const alreadyFixed = '## H\n\n## Fixed\n';
     const m = mockCtx([{ name: 'AGENTS.md', raw: alreadyFixed }]);
-    const synthFinding = {
+    const synthFinding = syntheticFinding({
       contributionId: 'test/flag',
-      severity: 'info' as const,
-      fileName: 'AGENTS.md' as const,
+      fileName: 'AGENTS.md',
       filePath: '/ws/AGENTS.md',
-      message: 'x',
       ocPath: 'oc://AGENTS.md',
-      line: 1,
-    };
+      message: 'x',
+    });
     const result = await c.fix(m.ctx, synthFinding);
     expect(result.outcome).toBe('skipped');
   });
@@ -121,15 +119,13 @@ describe('ocPathFixerContribution adapter', () => {
   it('A-07 fix returns "failed" when the file is not in the context', async () => {
     const c = ocPathFixerContribution(flagSpec);
     const m = mockCtx([]);
-    const synthFinding = {
+    const synthFinding = syntheticFinding({
       contributionId: 'test/flag',
-      severity: 'info' as const,
-      fileName: 'AGENTS.md' as const,
+      fileName: 'AGENTS.md',
       filePath: '/ws/AGENTS.md',
-      message: 'x',
       ocPath: 'oc://AGENTS.md',
-      line: 1,
-    };
+      message: 'x',
+    });
     const result = await c.fix(m.ctx, synthFinding);
     expect(result.outcome).toBe('failed');
   });
@@ -153,7 +149,11 @@ describe('ocPathFixerContribution adapter', () => {
     const spec: OcPathFixerSpec = {
       ...flagSpec,
       detect: () => [
-        { ocPath: 'oc://AGENTS.md/specific/path', message: 'x', line: 42, fixHint: 'h' },
+        {
+          match: syntheticMatch('oc://AGENTS.md/specific/path', 42),
+          message: 'x',
+          fixHint: 'h',
+        },
       ],
     };
     const c = ocPathFixerContribution(spec);

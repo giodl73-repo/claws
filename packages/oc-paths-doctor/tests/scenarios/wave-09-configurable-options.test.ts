@@ -10,12 +10,9 @@
  *   - adapter wiring through DoctorContext
  *   - the 3 optional md fixers (seed-tools-todo, snap-scope, snap-tier)
  */
-import { parseJsonc, parseWorkspaceMd } from '@bic/oc-paths-substrate';
+import { parseJsonc, parseMd } from '@bic/oc-paths-substrate';
 import { describe, expect, it, vi } from 'vitest';
-import {
-  ocPathFixerContribution,
-  ocPathJsoncFixerContribution,
-} from '../../src/plugin-sdk/oc-doctor/adapter.js';
+import { ocPathFixerContribution } from '../../src/plugin-sdk/oc-doctor/adapter.js';
 import {
   agentsSeedToolsTodo,
   memorySnapScope,
@@ -25,6 +22,7 @@ import { configRedactSecretLiteral } from '../../src/extensions/ocdoctor-fixers-
 import type {
   DoctorContext,
 } from '../../src/plugin-sdk/oc-doctor/types.js';
+import { makeDoctorFile } from '../test-helpers.js';
 import { syntheticMatch } from '../test-match.js';
 
 function makeCtx(opts: Partial<DoctorContext> = {}): DoctorContext {
@@ -39,7 +37,7 @@ function makeCtx(opts: Partial<DoctorContext> = {}): DoctorContext {
 describe('wave-09 configurable options — agents/seed-tools-todo', () => {
   it('uses default placeholder when no override', () => {
     const raw = '## Tools\n';
-    const ast = parseWorkspaceMd(raw).ast;
+    const ast = parseMd(raw).ast;
     const after = agentsSeedToolsTodo.fix({
       fileName: 'AGENTS.md',
       ast,
@@ -51,7 +49,7 @@ describe('wave-09 configurable options — agents/seed-tools-todo', () => {
 
   it('uses operator-supplied placeholder when override given', () => {
     const raw = '## Tools\n';
-    const ast = parseWorkspaceMd(raw).ast;
+    const ast = parseMd(raw).ast;
     const after = agentsSeedToolsTodo.fix({
       fileName: 'AGENTS.md',
       ast,
@@ -72,7 +70,7 @@ describe('wave-09 configurable options — agents/seed-tools-todo', () => {
 describe('wave-09 configurable options — memory/snap-scope', () => {
   it('snaps invalid scope to default target by default', () => {
     const raw = '---\nscope: foobar\n---\n';
-    const ast = parseWorkspaceMd(raw).ast;
+    const ast = parseMd(raw).ast;
     const after = memorySnapScope.fix({
       fileName: 'MEMORY.md',
       ast,
@@ -84,7 +82,7 @@ describe('wave-09 configurable options — memory/snap-scope', () => {
 
   it('honors operator-supplied targetScope', () => {
     const raw = '---\nscope: foobar\n---\n';
-    const ast = parseWorkspaceMd(raw).ast;
+    const ast = parseMd(raw).ast;
     const after = memorySnapScope.fix({
       fileName: 'MEMORY.md',
       ast,
@@ -100,7 +98,7 @@ describe('wave-09 configurable options — memory/snap-scope', () => {
 
   it('adds _auto_corrected marker on snap', () => {
     const raw = '---\nscope: foobar\n---\n';
-    const ast = parseWorkspaceMd(raw).ast;
+    const ast = parseMd(raw).ast;
     const after = memorySnapScope.fix({
       fileName: 'MEMORY.md',
       ast,
@@ -111,8 +109,8 @@ describe('wave-09 configurable options — memory/snap-scope', () => {
   });
 
   it('detects on invalid scope, passes on valid scope', () => {
-    const invalid = parseWorkspaceMd('---\nscope: foobar\n---\n').ast;
-    const valid = parseWorkspaceMd('---\nscope: default\n---\n').ast;
+    const invalid = parseMd('---\nscope: foobar\n---\n').ast;
+    const valid = parseMd('---\nscope: default\n---\n').ast;
     expect(
       memorySnapScope.detect({ fileName: 'MEMORY.md', ast: invalid, raw: '' }).length,
     ).toBe(1);
@@ -125,7 +123,7 @@ describe('wave-09 configurable options — memory/snap-scope', () => {
 describe('wave-09 configurable options — skill/snap-tier', () => {
   it('snaps invalid tier to default target', () => {
     const raw = '---\ntier: 99\n---\n';
-    const ast = parseWorkspaceMd(raw).ast;
+    const ast = parseMd(raw).ast;
     const after = skillSnapTier.fix({
       fileName: 'SKILL.md',
       ast,
@@ -137,7 +135,7 @@ describe('wave-09 configurable options — skill/snap-tier', () => {
 
   it('honors operator-supplied targetTier', () => {
     const raw = '---\ntier: 99\n---\n';
-    const ast = parseWorkspaceMd(raw).ast;
+    const ast = parseMd(raw).ast;
     const after = skillSnapTier.fix({
       fileName: 'SKILL.md',
       ast,
@@ -149,7 +147,7 @@ describe('wave-09 configurable options — skill/snap-tier', () => {
   });
 
   it('passes on valid tier in default allowed set', () => {
-    const ast = parseWorkspaceMd('---\ntier: 2\n---\n').ast;
+    const ast = parseMd('---\ntier: 2\n---\n').ast;
     expect(
       skillSnapTier.detect({ fileName: 'SKILL.md', ast, raw: '' }).length,
     ).toBe(0);
@@ -175,13 +173,7 @@ describe('wave-09 adapter — fixerOptions threading via DoctorContext', () => {
     const writeFile = vi.fn(async () => undefined);
     const contrib = ocPathFixerContribution(memorySnapScope);
     const ctx = makeCtx({
-      files: [
-        {
-          name: 'MEMORY.md',
-          path: '/ws/MEMORY.md',
-          raw: '---\nscope: foobar\n---\n',
-        },
-      ],
+      files: [makeDoctorFile('MEMORY.md', '/ws/MEMORY.md', '---\nscope: foobar\n---\n')],
       writeFile,
       fixerOptions: {
         [memorySnapScope.id]: {
@@ -199,14 +191,14 @@ describe('wave-09 adapter — fixerOptions threading via DoctorContext', () => {
 
   it('jsonc adapter merges fixerOptions partials over defaults', async () => {
     const writeFile = vi.fn(async () => undefined);
-    const contrib = ocPathJsoncFixerContribution(configRedactSecretLiteral);
+    const contrib = ocPathFixerContribution(configRedactSecretLiteral);
     const ctx = makeCtx({
-      jsoncFiles: [
-        {
-          name: 'gateway.jsonc',
-          path: '/ws/gateway.jsonc',
-          raw: '{ "token": "ghp_abcdef0123456789ABCDEF0123456789abcdef" }',
-        },
+      files: [
+        makeDoctorFile(
+          'gateway.jsonc',
+          '/ws/gateway.jsonc',
+          '{ "token": "ghp_abcdef0123456789ABCDEF0123456789abcdef" }',
+        ),
       ],
       writeFile,
     });
@@ -221,13 +213,7 @@ describe('wave-09 adapter — fixerOptions threading via DoctorContext', () => {
     const writeFile = vi.fn(async () => undefined);
     const contrib = ocPathFixerContribution(memorySnapScope);
     const ctx = makeCtx({
-      files: [
-        {
-          name: 'MEMORY.md',
-          path: '/ws/MEMORY.md',
-          raw: '---\nscope: foobar\n---\n',
-        },
-      ],
+      files: [makeDoctorFile('MEMORY.md', '/ws/MEMORY.md', '---\nscope: foobar\n---\n')],
       writeFile,
       // no fixerOptions
     });

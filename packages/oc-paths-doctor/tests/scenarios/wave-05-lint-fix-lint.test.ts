@@ -5,14 +5,14 @@
  * fires, apply the fix, run lint again, confirm the paired rule no
  * longer fires. End-to-end proof of the fix→cleared contract.
  */
-import { parseWorkspaceMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@bic/oc-paths-substrate';
 import { runLint, STARTER_RULES_V0, type LintFile, type WorkspaceFileName } from '@bic/oc-paths-lint';
 import { describe, expect, it } from 'vitest';
 import { STARTER_FIXERS_V0 } from '../../src/extensions/ocdoctor-fixers-starter/index.js';
 import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
 
-function applyFix(spec: OcPathFixerSpec, raw: string): string {
-  const { ast } = parseWorkspaceMd(raw);
+function applyFix(spec: OcPathFixerSpec<unknown>, raw: string): string {
+  const { ast } = parseMd(raw);
   const matches = spec.detect({ fileName: spec.appliesTo, ast, raw });
   if (matches.length === 0) return raw;
   return spec.fix({
@@ -23,31 +23,40 @@ function applyFix(spec: OcPathFixerSpec, raw: string): string {
   });
 }
 
-function lintIds(name: WorkspaceFileName, raw: string): readonly string[] {
-  const ast = parseWorkspaceMd(raw).ast;
-  const f: LintFile = { name, ast };
+function lintIds(name: string, raw: string): readonly string[] {
+  const ast = parseMd(raw).ast;
+  const f: LintFile = { name: name as WorkspaceFileName, ast };
   const r = runLint({ rules: STARTER_RULES_V0, files: [f] });
   return r.diagnostics.map((d) => d.ruleId);
 }
 
-// Map each fixer to the rule it pairs with.
+// Map each fixer to the rule it pairs with on the SAME trigger input.
+// `tools/add-guidance-table-stub` is intentionally absent: its paired rule
+// (`tools/empty-guidance-table`) only fires when `## Tool Guidance` exists
+// with an empty table, while the fixer fires when the section is missing.
+// The pair is asymmetric by design — auto-adding table rows would be
+// destructive — so it can't be sweep-tested here.
 const PAIRINGS: Record<string, string> = {
   'starter-v0/agents/add-boundaries-stub': 'starter-v0/agents/missing-boundaries',
   'starter-v0/memory/add-scope-default': 'starter-v0/memory/missing-frontmatter-scope',
+  'starter-v0/skill/add-required-frontmatter-stub':
+    'starter-v0/skill/missing-required-frontmatter',
+  'starter-v0/identity/add-trust-level-stub': 'starter-v0/identity/missing-trust-level',
   'starter-v0/user/add-preferences-stub': 'starter-v0/user/missing-preferences-section',
 };
 
 describe('wave-05 lint→fix→lint sweep', () => {
   for (const fixer of STARTER_FIXERS_V0) {
     const pairedRuleId = PAIRINGS[fixer.id];
-    if (pairedRuleId === undefined) {
-      throw new Error(`fixer ${fixer.id} has no paired rule registered in test`);
-    }
+    if (pairedRuleId === undefined) continue;
 
     describe(fixer.id, () => {
       const probeInput: Record<string, string> = {
         'starter-v0/agents/add-boundaries-stub': '## Tools\n- gh\n',
+        'starter-v0/tools/add-guidance-table-stub': '## Header\n',
         'starter-v0/memory/add-scope-default': '## Entry\nbody\n',
+        'starter-v0/skill/add-required-frontmatter-stub': '## Body\n',
+        'starter-v0/identity/add-trust-level-stub': '## Section\n',
         'starter-v0/user/add-preferences-stub': '## Role\nPM\n',
       };
       const raw = probeInput[fixer.id]!;

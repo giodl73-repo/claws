@@ -16,10 +16,11 @@ import {
   configRedactSecretLiteral,
   jsoncStarterFixers,
 } from '../../src/extensions/ocdoctor-fixers-jsonc-starter/index.js';
-import type { JsoncOcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
+import { formatOcPath } from '@bic/oc-paths-substrate';
+import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
 
 function applyFix(
-  spec: JsoncOcPathFixerSpec<unknown>,
+  spec: OcPathFixerSpec<unknown>,
   raw: string,
   fileName = 'gateway.jsonc',
 ): string {
@@ -81,9 +82,9 @@ describe('wave-07 jsonc fixers — detect findings have valid shape', () => {
       const ast = parseJsonc('{ "version": "1.0" }').ast;
       const findings = fixer.detect({ fileName: 'config.jsonc', ast, raw: '{ "version": "1.0" }' });
       for (const f of findings) {
-        expect(f.ocPath.startsWith('oc://')).toBe(true);
+        expect(formatOcPath(f.match.path).startsWith('oc://')).toBe(true);
         expect(typeof f.message).toBe('string');
-        expect(typeof f.line).toBe('number');
+        expect(typeof f.match.match.line).toBe('number');
       }
     });
   }
@@ -147,8 +148,8 @@ describe('wave-07 jsonc fixers — pack invariants', () => {
   it('exports 3 fixers', () => {
     expect(jsoncStarterFixers).toHaveLength(3);
   });
-  it('all share kind discriminator', () => {
-    for (const f of jsoncStarterFixers) expect(f.kind).toBe('jsonc');
+  it('all apply to jsonc files', () => {
+    for (const f of jsoncStarterFixers) expect(f.appliesTo).toMatch(/\.jsonc$|jsonc/);
   });
   it('all ids unique', () => {
     const ids = jsoncStarterFixers.map((f) => f.id);

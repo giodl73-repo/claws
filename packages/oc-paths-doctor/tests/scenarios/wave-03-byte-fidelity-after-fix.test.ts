@@ -8,13 +8,13 @@
  * confirms downstream consumers (LKG fingerprint, audit hash) get
  * stable bytes after fix.
  */
-import { emit, parseWorkspaceMd } from '@bic/oc-paths-substrate';
+import { emitMd, parseMd } from '@bic/oc-paths-substrate';
 import { describe, expect, it } from 'vitest';
 import { STARTER_FIXERS_V0 } from '../../src/extensions/ocdoctor-fixers-starter/index.js';
 import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
 
-function applyFix(spec: OcPathFixerSpec, raw: string): string {
-  const { ast } = parseWorkspaceMd(raw);
+function applyFix(spec: OcPathFixerSpec<unknown>, raw: string): string {
+  const { ast } = parseMd(raw);
   const matches = spec.detect({ fileName: spec.appliesTo, ast, raw });
   if (matches.length === 0) return raw;
   return spec.fix({
@@ -32,11 +32,29 @@ const triggerInputs: Record<string, readonly string[]> = {
     '',
     '\n\n## Tools\n',
   ],
+  'starter-v0/tools/add-guidance-table-stub': [
+    '## Header\n',
+    '## Header\nbody\n',
+    '',
+    'preamble\n',
+  ],
   'starter-v0/memory/add-scope-default': [
     '## Entry\nbody\n',
     '---\nother: value\n---\n## Entry\n',
     '',
     '## Entry\n## Another\n',
+  ],
+  'starter-v0/skill/add-required-frontmatter-stub': [
+    '## Body\n',
+    '---\nname: foo\n---\n## Body\n',
+    '',
+    'preamble\n## Body\n',
+  ],
+  'starter-v0/identity/add-trust-level-stub': [
+    '## Section\n',
+    '## Section\nbody\n',
+    '',
+    'preamble\n',
   ],
   'starter-v0/user/add-preferences-stub': [
     '## Role\n',
@@ -54,8 +72,9 @@ describe('wave-03 byte-fidelity-after-fix', () => {
         const label = JSON.stringify(raw.slice(0, 30));
         it(`emit(parse(fix(${label}))) === fix(${label})`, () => {
           const fixed = applyFix(fixer, raw);
-          const reAst = parseWorkspaceMd(fixed).ast;
-          expect(emit(reAst)).toBe(fixed);
+          const reAst = parseMd(fixed).ast;
+          if (reAst.kind !== 'md') throw new Error('expected md ast');
+          expect(emitMd(reAst)).toBe(fixed);
         });
       }
     });
@@ -66,7 +85,7 @@ describe('wave-03 byte-fidelity-after-fix', () => {
       const inputs = triggerInputs[fixer.id] ?? [];
       for (const raw of inputs) {
         const fixed = applyFix(fixer, raw);
-        const { diagnostics } = parseWorkspaceMd(fixed);
+        const { diagnostics } = parseMd(fixed);
         const errors = diagnostics.filter((d) => d.severity === 'error');
         expect(errors, `${fixer.id} on ${JSON.stringify(raw.slice(0, 30))}`).toEqual([]);
       }
