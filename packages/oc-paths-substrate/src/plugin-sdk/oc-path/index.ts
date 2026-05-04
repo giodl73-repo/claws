@@ -121,6 +121,7 @@ export { findOcPaths } from './find.js';
 
 // Cross-kind utility — filename → kind hint.
 export { inferKind } from './dispatch.js';
+export type { OcKind } from './dispatch.js';
 
 // Sentinel guard
 export { OcEmitSentinelError, REDACTED_SENTINEL, guardSentinel } from './sentinel.js';

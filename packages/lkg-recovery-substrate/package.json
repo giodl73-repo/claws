@@ -23,6 +23,10 @@
       "types": "./dist/test-harness/index.d.ts",
       "import": "./dist/test-harness/index.js"
     },
+    "./trackers": {
+      "types": "./dist/trackers/index.d.ts",
+      "import": "./dist/trackers/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": ["dist"],
