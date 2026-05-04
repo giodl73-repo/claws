@@ -1,10 +1,18 @@
 /**
  * Wave-23 — Pitfall scenarios.
  *
- * One test per pitfall ID from `pitfalls.md`. Tests are grouped by
- * category so a regression in any one defense is visible at a glance.
- * Every MITIGATED / REJECTED pitfall has a positive validation here;
- * DEFERRED ones are covered as documented limits with a `.skip` note.
+ * One test per pitfall ID enumerated in
+ * `packages/oc-paths-substrate/PITFALLS.md` (the substrate-local
+ * pitfall taxonomy). Tests are grouped by category so a regression in
+ * any one defense is visible at a glance. Every MITIGATED / REJECTED
+ * pitfall has a positive validation here; DEFERRED ones are covered
+ * as documented limits with a `.skip` note.
+ *
+ * **Namespace note**: substrate pitfall IDs (P-001 … P-040) are a
+ * separate namespace from the claws-side `docs/PITFALLS.md`
+ * governance taxonomy (which uses P-NNN for completely different
+ * pitfalls — e.g., P-033 there is "Memory poisoning"). The package
+ * boundary disambiguates.
  */
 import { describe, expect, it } from 'vitest';
 import {

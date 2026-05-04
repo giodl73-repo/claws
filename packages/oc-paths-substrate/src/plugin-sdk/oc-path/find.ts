@@ -194,10 +194,12 @@ function walkYaml(
   walked: readonly SlotSub[],
   onMatch: (subs: readonly SlotSub[]) => void,
 ): void {
-  // P-031 / P-033 — depth cap kills runaway recursion from `**` over
-  // deeply nested ASTs and from yaml-anchor cycles (a cycle just makes
-  // recursion unbounded). Cap is liberal (256) — real workspaces top
-  // out around 50 — and covers both pitfalls with one defense.
+  // P-031 / P-033 (substrate pitfall taxonomy — see
+  // `oc-paths-substrate/PITFALLS.md`) — depth cap kills runaway
+  // recursion from `**` over deeply nested ASTs and from yaml-anchor
+  // cycles (a cycle just makes recursion unbounded). Cap is liberal
+  // (256) — real workspaces top out around 50 — and covers both
+  // pitfalls with one defense.
   if (walked.length > MAX_TRAVERSAL_DEPTH) {
     throw new OcPathError(
       `findOcPaths exceeded MAX_TRAVERSAL_DEPTH (${MAX_TRAVERSAL_DEPTH}) — likely a cycle or pathological pattern`,
