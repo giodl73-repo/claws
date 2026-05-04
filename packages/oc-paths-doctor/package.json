@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@bic/oc-paths-substrate": "*",
-    "@bic/oc-paths-lint": "*"
+    "@bic/pinch": "*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

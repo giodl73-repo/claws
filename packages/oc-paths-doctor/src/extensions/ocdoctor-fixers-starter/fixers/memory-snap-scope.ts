@@ -14,7 +14,7 @@
  * trail.
  */
 import { parseOcPath } from '@bic/oc-paths-substrate';
-import { STARTER_ALLOWED_MEMORY_SCOPES } from '@bic/oc-paths-lint';
+import { STARTER_ALLOWED_MEMORY_SCOPES } from '@bic/pinch';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 export interface SnapScopeOptions {

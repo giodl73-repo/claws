@@ -19,8 +19,8 @@
     "paths": {
       "@bic/oc-paths-substrate": ["../oc-paths-substrate/src/index.ts"],
       "@bic/oc-paths-substrate/*": ["../oc-paths-substrate/src/*"],
-      "@bic/oc-paths-lint": ["../oc-paths-lint/src/index.ts"],
-      "@bic/oc-paths-lint/*": ["../oc-paths-lint/src/*"]
+      "@bic/pinch": ["../pinch/src/index.ts"],
+      "@bic/pinch/*": ["../pinch/src/*"]
     }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts"],

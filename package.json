@@ -19,10 +19,11 @@
     "packages/openclaw-snap",
     "packages/openclaw-workspace",
     "packages/oc-paths-substrate",
-    "packages/oc-paths-lint",
+    "packages/pinch",
     "packages/oc-paths-doctor",
     "packages/lkg-recovery-substrate",
     "packages/lkg-recovery-git",
+    "packages/policy-substrate",
     "packages/v2-prototype",
     "test/e2e"
   ],

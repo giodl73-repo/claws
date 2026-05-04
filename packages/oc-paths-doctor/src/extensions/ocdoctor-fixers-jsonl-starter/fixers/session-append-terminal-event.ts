@@ -11,7 +11,7 @@
  * `event: end|complete|finalized|done` is a no-op.
  */
 import { parseOcPath } from '@bic/oc-paths-substrate';
-import { STARTER_TERMINAL_EVENT_VALUES } from '@bic/oc-paths-lint';
+import { STARTER_TERMINAL_EVENT_VALUES } from '@bic/pinch';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 export const sessionAppendTerminalEvent: OcPathFixerSpec = {

@@ -17,8 +17,8 @@
  */
 import { emitJsonc, parseOcPath, setOcPath } from '@bic/oc-paths-substrate';
 import type { JsoncValue, OcPath, OcPathMatch } from '@bic/oc-paths-substrate';
-import { STARTER_TOKEN_PATTERNS } from '@bic/oc-paths-lint';
-import type { TokenPattern } from '@bic/oc-paths-lint';
+import { STARTER_TOKEN_PATTERNS } from '@bic/pinch';
+import type { TokenPattern } from '@bic/pinch';
 import type { DoctorDetectResult, OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 function classifySecret(s: string): TokenPattern | null {

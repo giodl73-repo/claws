@@ -19,7 +19,7 @@
  */
 import { isMap, isScalar, isSeq } from 'yaml';
 import { emitYaml, parseOcPath } from '@bic/oc-paths-substrate';
-import { STARTER_IN_PROCESS_TOOLS } from '@bic/oc-paths-lint';
+import { STARTER_IN_PROCESS_TOOLS } from '@bic/pinch';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 function isInProcessFirstToken(cmd: string): boolean {

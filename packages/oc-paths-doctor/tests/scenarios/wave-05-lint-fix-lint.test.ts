@@ -6,7 +6,7 @@
  * longer fires. End-to-end proof of the fix→cleared contract.
  */
 import { parseMd } from '@bic/oc-paths-substrate';
-import { runLint, STARTER_RULES_V0, type LintFile } from '@bic/oc-paths-lint';
+import { runLint, STARTER_RULES_V0, type LintFile } from '@bic/pinch';
 import { describe, expect, it } from 'vitest';
 import { STARTER_FIXERS_V0 } from '../../src/extensions/ocdoctor-fixers-starter/index.js';
 import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';

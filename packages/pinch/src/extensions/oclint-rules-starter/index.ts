@@ -10,7 +10,7 @@
  *
  * Upstream destination: `openclaw-core/extensions/oclint-rules-starter/`.
  *
- * @module @bic/oc-paths-lint/rules-starter
+ * @module @bic/pinch/rules-starter
  */
 
 import type { LintRule } from '../../plugin-sdk/oc-lint/types.js';

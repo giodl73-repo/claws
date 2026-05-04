@@ -2,7 +2,7 @@
  * `ocdoctor-fixers-jsonc-starter` — starter fixer pack for jsonc files.
  *
  * Each fixer pairs with a lint rule from
- * `@bic/oc-paths-lint/extensions/oclint-rules-jsonc-starter`. The pack
+ * `@bic/pinch/extensions/oclint-rules-jsonc-starter`. The pack
  * is additive-by-default; redaction is the only quasi-destructive
  * fixer and it preserves the operator's ability to recover the
  * original via env-var assignment.

@@ -1,7 +1,7 @@
 {
-  "name": "@bic/oc-paths-lint",
+  "name": "@bic/pinch",
   "version": "0.1.0",
-  "description": "OpenClaw oc-paths PR-2 prototype: registerLintRule SDK verb + runner + starter-v0 starter pack at info severity.",
+  "description": "OpenClaw lint framework — `openclaw pinch` CLI brand. Universal LintRule shape across md/jsonc/jsonl/yaml; rules consume oc-paths-substrate's universal verbs. Cargo:Clippy ↔ OpenClaw:Pinch (we're crab-themed).",
   "type": "module",
   "private": true,
   "main": "./dist/index.js",

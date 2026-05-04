@@ -8,7 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@bic/oc-paths-substrate': resolve(HERE, '../oc-paths-substrate/src/index.ts'),
-      '@bic/oc-paths-lint': resolve(HERE, '../oc-paths-lint/src/index.ts'),
+      '@bic/pinch': resolve(HERE, '../pinch/src/index.ts'),
     },
   },
   test: {

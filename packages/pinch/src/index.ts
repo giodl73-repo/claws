@@ -1,8 +1,8 @@
 /**
- * `@bic/oc-paths-lint` — claws-hapi prototype of the upstream
+ * `@bic/pinch` — claws-hapi prototype of the upstream
  * `@openclaw/oc-lint` package.
  *
- * @module @bic/oc-paths-lint
+ * @module @bic/pinch
  */
 
 export * from './plugin-sdk/oc-lint/index.js';
