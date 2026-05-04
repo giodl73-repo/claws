@@ -158,4 +158,51 @@ Tracked under #62281 and the closed historicals. The new emit boundary throws `O
 
 ---
 
-**AI-assisted disclosure**: this PR was prepared with Claude Opus 4.7 (1M context) over multiple sessions. Fully tested (409/409 passing across 35 test files). Implementation reviewed across 4 phases with 3 separate code-review passes; review-feedback iteration history available on request. I understand what every line of the substrate code does and have verified the runtime behavior against the upstream issue tracker.
+## AI-assisted authorship disclosure
+
+This PR was prepared with Claude Opus 4.7 (1M context) over multiple
+sessions, in line with openclaw's `PR_WORKFLOW.md` AI-assistance
+guidance. The disclosure here is deliberately specific so reviewers
+can calibrate trust appropriately.
+
+**Scope of AI assistance**:
+- *Design*: I (the human author) fixed the strategic frame —
+  universal `oc://` addressing, four substrate kinds (md / jsonc /
+  jsonl / yaml), one set of universal verbs. AI proposed the
+  underlying syntax (positional sentinels, predicates, unions) and
+  sub-segment grammar; I reviewed, accepted, or sent back each.
+- *Implementation*: AI wrote the parser, resolver, finder, emitter,
+  and per-kind dispatchers under my direction, working file-by-file
+  against the design and the test corpus.
+- *Review*: a multi-persona panel review (architecture / security /
+  testing / repo stewardship / gateway-eng / release-eng / claws
+  compliance) ran across two rounds before this submission. The
+  consolidated R1 → R2 findings → resolution log is available on
+  request. Every B-level finding from the panel review is closed in
+  a separate commit on this branch — see commits prefixed with
+  `A1` … `A7` (panel A: critical), `B1` … `B5` (panel B: blockers
+  / improvements), `C1` … `C13` (panel C: care-and-feeding),
+  `D1` … (panel D: nits).
+
+**Test posture**: oc-paths-substrate ships 666 passing tests across
+41 test files (9 skipped, all documented as DEFERRED in the
+package's `PITFALLS.md`). Sister packages oc-paths-lint (412 tests,
+18 files) and oc-paths-doctor (528 tests, 14 files) are at 100%.
+Total: 1,606 passing tests across the three packages.
+
+**Author accountability**: I have read every diff, can explain every
+non-trivial design decision, and have run the full test suite
+locally on every commit on this branch. CI on this PR will surface
+any platform-divergent failures; the substrate is platform-agnostic
+TypeScript with no native dependencies.
+
+**Iteration history**: this is the result of ~3 working sessions
+totaling ~30 hours of focused work. The branch is a linear history
+of ~50 small commits — each one passes typecheck and the full test
+suite. No `--no-verify`, no force-pushes, no skipped CI.
+
+**What to review most carefully**: the universal-verb dispatch in
+`universal.ts`, the OcPath grammar in `oc-path.ts`, and the sentinel
+guard at every emitter boundary. The starter rule + fixer packs are
+deliberately conservative (mostly `info` severity); the load-bearing
+contract is the substrate.
