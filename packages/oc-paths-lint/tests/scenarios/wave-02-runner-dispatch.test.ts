@@ -148,3 +148,45 @@ describe('wave-02 runner-dispatch', () => {
     expect(r.stats.get('a')).toBe(1);
   });
 });
+
+describe('wave-02 runner-dispatch — err.message scrub (C10)', () => {
+  const throwingRule = (id: string, msg: string): LintRule => ({
+    id,
+    severity: 'warning',
+    description: 'rule that throws to test scrubber',
+    appliesTo: '*',
+    check: () => {
+      throw new Error(msg);
+    },
+  });
+
+  it('SCR-01 truncates long messages', () => {
+    const longMsg = 'x'.repeat(500);
+    const r = runLint({
+      rules: [throwingRule('long', longMsg)],
+      files: [file('AGENTS.md')],
+    });
+    expect(r.diagnostics).toHaveLength(1);
+    // 256 cap, includes the "lint rule threw: " prefix.
+    const m = r.diagnostics[0]!.message;
+    expect(m.length).toBeLessThanOrEqual('lint rule threw: '.length + 256);
+    expect(m.endsWith('...')).toBe(true);
+  });
+
+  it('SCR-02 strips ASCII control characters', () => {
+    const r = runLint({
+      rules: [throwingRule('ctrl', 'safe\x00\x01\x07text\x1F\x7Fmore')],
+      files: [file('AGENTS.md')],
+    });
+    expect(r.diagnostics[0]!.message).toBe('lint rule threw: safetextmore');
+  });
+
+  it('SCR-03 refuses to echo the redaction sentinel', () => {
+    const r = runLint({
+      rules: [throwingRule('sentinel', 'leaked __OPENCLAW_REDACTED__ here')],
+      files: [file('AGENTS.md')],
+    });
+    expect(r.diagnostics[0]!.message).not.toContain('__OPENCLAW_REDACTED__');
+    expect(r.diagnostics[0]!.message).toContain('[scrubbed:');
+  });
+});

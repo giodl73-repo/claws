@@ -134,11 +134,16 @@ export function runLint(opts: LintRunOptions): LintRunResult {
         // anchor the synthetic diagnostic at the file head. Apply
         // the same severity override the rule's regular findings
         // would have received.
+        //
+        // Scrub the err.message: a rule that crashed on a secret-bearing
+        // value could otherwise leak the secret through the error. Cap
+        // length and strip control characters to keep diagnostic
+        // pipelines clean.
         diagnostics.push({
           ruleId: rule.id,
           severity: opts.severityOverrides?.[rule.id] ?? rule.severity,
           fileName: file.name,
-          message: `lint rule threw: ${err instanceof Error ? err.message : String(err)}`,
+          message: `lint rule threw: ${scrubErrorMessage(err)}`,
           ocPath: `oc://${file.name}`,
           line: 1,
         });
@@ -163,6 +168,34 @@ export function runLint(opts: LintRunOptions): LintRunResult {
   }
 
   return { diagnostics, stats };
+}
+
+/**
+ * Maximum bytes of a rule-thrown err.message we surface in
+ * diagnostics. Long messages can carry context that includes
+ * secret-shaped values; capping limits leak surface area.
+ */
+const ERR_MESSAGE_MAX_LEN = 256;
+
+/**
+ * Scrub a thrown error's message before placing it in a diagnostic:
+ *   - normalize non-Error throws to a stable shape
+ *   - strip ASCII control characters (keep \t and the literal char,
+ *     drop the rest)
+ *   - truncate at `ERR_MESSAGE_MAX_LEN` to bound leak surface
+ *   - reject any string carrying the redaction sentinel — refuse to
+ *     echo it (substrate-level guarantee mirrored at the lint boundary)
+ */
+function scrubErrorMessage(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err);
+  // Substrate sentinel must never be echoed in diagnostics.
+  if (raw.includes('__OPENCLAW_REDACTED__')) {
+    return '[scrubbed: rule message contained redaction sentinel]';
+  }
+  const CONTROL_CHARS = new RegExp('[\\x00-\\x08\\x0B-\\x1F\\x7F]', 'g');
+  const stripped = raw.replace(CONTROL_CHARS, '');
+  if (stripped.length <= ERR_MESSAGE_MAX_LEN) return stripped;
+  return stripped.slice(0, ERR_MESSAGE_MAX_LEN - 3) + '...';
 }
 
 /**
