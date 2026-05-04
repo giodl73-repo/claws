@@ -42,6 +42,17 @@ export interface LintRunOptions {
    * fire" — same shape as no-applicable-files.
    */
   readonly disabledRuleIds?: ReadonlySet<string> | readonly string[];
+  /**
+   * Per-rule severity override map. The runner replaces the rule's
+   * declared severity with the operator-supplied one before pushing
+   * findings. Lets operators bump a rule from `info` to `warning` for
+   * a sensitive deployment, or downgrade `error` to `warning` for a
+   * staged migration, without forking the rule pack.
+   *
+   * Unmapped rule ids keep their declared severity. Unknown ids in
+   * the map are silently ignored.
+   */
+  readonly severityOverrides?: Readonly<Record<string, 'info' | 'warning' | 'error'>>;
 }
 
 /**
@@ -111,10 +122,12 @@ export function runLint(opts: LintRunOptions): LintRunResult {
         findings = rule.check({ fileName: file.name, ast: file.ast });
       } catch (err) {
         // Rule threw — there's no per-finding line to attribute, so
-        // anchor the synthetic diagnostic at the file head.
+        // anchor the synthetic diagnostic at the file head. Apply
+        // the same severity override the rule's regular findings
+        // would have received.
         diagnostics.push({
           ruleId: rule.id,
-          severity: rule.severity,
+          severity: opts.severityOverrides?.[rule.id] ?? rule.severity,
           fileName: file.name,
           message: `lint rule threw: ${err instanceof Error ? err.message : String(err)}`,
           ocPath: `oc://${file.name}`,
@@ -124,10 +137,12 @@ export function runLint(opts: LintRunOptions): LintRunResult {
         continue;
       }
       stats.set(rule.id, (stats.get(rule.id) ?? 0) + 1);
+      const effectiveSeverity =
+        opts.severityOverrides?.[rule.id] ?? rule.severity;
       for (const f of findings) {
         diagnostics.push({
           ruleId: rule.id,
-          severity: rule.severity,
+          severity: effectiveSeverity,
           fileName: file.name,
           message: f.message,
           ocPath: f.ocPath,
