@@ -19,6 +19,10 @@
       "types": "./dist/extensions/lkg-fs/index.d.ts",
       "import": "./dist/extensions/lkg-fs/index.js"
     },
+    "./test-harness": {
+      "types": "./dist/test-harness/index.d.ts",
+      "import": "./dist/test-harness/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": ["dist"],
