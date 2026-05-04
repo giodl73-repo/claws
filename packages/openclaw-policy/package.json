@@ -52,6 +52,9 @@
   "engines": {
     "node": ">=20.0.0"
   },
+  "dependencies": {
+    "@bic/oc-paths-substrate": "*"
+  },
   "peerDependencies": {
     "@bic/openclaw-workspace": "^0.1.0",
     "@bic/openclaw-guardrails": "^0.1.0",
