@@ -6,6 +6,9 @@
   "private": true,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "openclaw-lkg": "./bin/openclaw-lkg.mjs"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -27,9 +30,13 @@
       "types": "./dist/trackers/index.d.ts",
       "import": "./dist/trackers/index.js"
     },
+    "./cli": {
+      "types": "./dist/cli/index.d.ts",
+      "import": "./dist/cli/index.js"
+    },
     "./package.json": "./package.json"
   },
-  "files": ["dist"],
+  "files": ["dist", "bin"],
   "engines": {
     "node": ">=20"
   },
