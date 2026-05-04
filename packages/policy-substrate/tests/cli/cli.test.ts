@@ -271,4 +271,91 @@ describe('openclaw-policy CLI', () => {
     expect(json.ok).toBe(true);
     expect(json.policyPath).toBe(customPath);
   });
+
+  it('CLI-18 diff (no --detail) reports modified IDs only', async () => {
+    const ws = makeFixtureWorkspace();
+    const aPath = join(ws, 'a.json');
+    const bPath = join(ws, 'b.json');
+    await captureCli(['generate', ws, '--out', aPath]);
+    // Modify the read-doc tool's risk by editing TOOLS.md.
+    writeFileSync(
+      join(ws, 'TOOLS.md'),
+      '## Tools\n### post-channel # R5, COMMUNICATE, IRREVERSIBLE_EXTERNAL\n### read-doc # R3, READ\n',
+      'utf-8',
+    );
+    await captureCli(['generate', ws, '--out', bPath]);
+    const r = await captureCli(['diff', aPath, bPath]);
+    expect(r.exitCode).toBe(0);
+    const json = JSON.parse(r.out.join(''));
+    expect(json.changed).toBe(true);
+    const modIds = json.tools.modified.map((m: { id: string }) => m.id);
+    expect(modIds).toContain('read-doc');
+    // Without --detail, the fields array is empty.
+    const readDocMod = json.tools.modified.find((m: { id: string }) => m.id === 'read-doc');
+    expect(readDocMod.fields).toEqual([]);
+  });
+
+  it('CLI-19 diff --detail surfaces per-field changes for modified entries', async () => {
+    const ws = makeFixtureWorkspace();
+    const aPath = join(ws, 'a.json');
+    const bPath = join(ws, 'b.json');
+    await captureCli(['generate', ws, '--out', aPath]);
+    writeFileSync(
+      join(ws, 'TOOLS.md'),
+      '## Tools\n### post-channel # R5, COMMUNICATE, IRREVERSIBLE_EXTERNAL\n### read-doc # R3, READ\n',
+      'utf-8',
+    );
+    await captureCli(['generate', ws, '--out', bPath]);
+    const r = await captureCli(['diff', aPath, bPath, '--detail']);
+    expect(r.exitCode).toBe(0);
+    const json = JSON.parse(r.out.join(''));
+    const readDocMod = json.tools.modified.find((m: { id: string }) => m.id === 'read-doc');
+    expect(readDocMod).toBeDefined();
+    expect(readDocMod.fields.length).toBeGreaterThan(0);
+    const riskField = readDocMod.fields.find((f: { field: string }) => f.field === 'risk');
+    expect(riskField).toBeDefined();
+    expect(riskField.before).toBe('low'); // R1
+    expect(riskField.after).toBe('medium'); // R3
+  });
+
+  it('CLI-20 diff --detail field changes exclude the id field itself', async () => {
+    const ws = makeFixtureWorkspace();
+    const aPath = join(ws, 'a.json');
+    const bPath = join(ws, 'b.json');
+    await captureCli(['generate', ws, '--out', aPath]);
+    writeFileSync(
+      join(ws, 'TOOLS.md'),
+      '## Tools\n### post-channel # R5, COMMUNICATE, IRREVERSIBLE_EXTERNAL\n### read-doc # R3, READ\n',
+      'utf-8',
+    );
+    await captureCli(['generate', ws, '--out', bPath]);
+    const r = await captureCli(['diff', aPath, bPath, '--detail']);
+    const json = JSON.parse(r.out.join(''));
+    const readDocMod = json.tools.modified.find((m: { id: string }) => m.id === 'read-doc');
+    const idField = readDocMod.fields.find((f: { field: string }) => f.field === 'id');
+    expect(idField).toBeUndefined();
+  });
+
+  it('CLI-21 closed-pipe writes (sync EPIPE) do not throw and exit gracefully', async () => {
+    // Replace stdout.write with one that throws EPIPE on first call,
+    // simulating `openclaw-policy ... | head -1` after head exits.
+    const orig = process.stdout.write.bind(process.stdout);
+    let calls = 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    process.stdout.write = ((_chunk: any) => {
+      calls++;
+      const err = new Error('write EPIPE') as NodeJS.ErrnoException;
+      err.code = 'EPIPE';
+      throw err;
+    }) as typeof process.stdout.write;
+    let exitCode = -99;
+    try {
+      // help → safeWrite path; runs through printHelp's stdout.write.
+      exitCode = await runCli(['help', '--json']);
+    } finally {
+      process.stdout.write = orig;
+    }
+    expect(calls).toBeGreaterThan(0);
+    expect(exitCode).toBe(0); // graceful — no throw, return 0
+  });
 });

@@ -100,6 +100,67 @@ describe('toolsFromToolsMd — extracts ToolSpec entries from TOOLS.md ## Tools'
     const tools = toolsFromToolsMd.extract({ file });
     expect(tools).toEqual([]);
   });
+
+  it('PE-TL-04 explicit `sensitivity:<level>` overrides capability-derived default', () => {
+    const file = makeFile(
+      'TOOLS.md',
+      '## Tools\n### t # R5, COMMUNICATE, IRREVERSIBLE_EXTERNAL, sensitivity:public\n',
+    );
+    const tools = toolsFromToolsMd.extract({ file });
+    // IRREVERSIBLE_EXTERNAL would default to `restricted`; explicit
+    // `sensitivity:public` wins.
+    expect(tools[0]?.sensitivity).toBe('public');
+  });
+
+  it('PE-TL-05 each known sensitivity level is supported via the explicit form', () => {
+    const file = makeFile(
+      'TOOLS.md',
+      [
+        '## Tools',
+        '### a # R1, READ, sensitivity:public',
+        '### b # R1, READ, sensitivity:internal',
+        '### c # R1, READ, sensitivity:confidential',
+        '### d # R1, READ, sensitivity:restricted',
+      ].join('\n') + '\n',
+    );
+    const tools = toolsFromToolsMd.extract({ file });
+    const byId = new Map(tools.map((t) => [t.id, t.sensitivity]));
+    expect(byId.get('a')).toBe('public');
+    expect(byId.get('b')).toBe('internal');
+    expect(byId.get('c')).toBe('confidential');
+    expect(byId.get('d')).toBe('restricted');
+  });
+
+  it('PE-TL-06 unknown explicit sensitivity falls through to capability default', () => {
+    const file = makeFile(
+      'TOOLS.md',
+      '## Tools\n### t # R5, COMMUNICATE, IRREVERSIBLE_EXTERNAL, sensitivity:bogus\n',
+    );
+    const tools = toolsFromToolsMd.extract({ file });
+    // Unknown token ignored; IRREVERSIBLE_EXTERNAL → restricted.
+    expect(tools[0]?.sensitivity).toBe('restricted');
+  });
+
+  it('PE-TL-07 legacy bare-word sensitivity (`R3, READ, public`) still works', () => {
+    const file = makeFile(
+      'TOOLS.md',
+      '## Tools\n### t # R3, READ, public\n',
+    );
+    const tools = toolsFromToolsMd.extract({ file });
+    expect(tools[0]?.sensitivity).toBe('public');
+  });
+
+  it('PE-TL-08 substring-only matches (`public-api` in tool id) do NOT trigger sensitivity', () => {
+    // The tool id contains "public" as a substring, but no token-level
+    // match. Without IRREVERSIBLE_EXTERNAL/etc, default is `internal`.
+    const file = makeFile(
+      'TOOLS.md',
+      '## Tools\n### public-api-call # R1, READ\n',
+    );
+    const tools = toolsFromToolsMd.extract({ file });
+    // The meta line is `R1, READ` — no sensitivity tokens there.
+    expect(tools[0]?.sensitivity).toBe('internal');
+  });
 });
 
 describe('runExtractors — orchestrates specs over files (parallel to runLint / DoctorContext.detect)', () => {

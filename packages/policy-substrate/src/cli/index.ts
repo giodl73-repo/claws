@@ -93,20 +93,53 @@ export function scrubSentinel(s: string): string {
   return s.split(REDACTED_SENTINEL).join(SCRUB_PLACEHOLDER);
 }
 
+/**
+ * Detect EPIPE on a write that targets a closed downstream (e.g.,
+ * `openclaw-policy ... | head -1` after `head` exits). On Windows,
+ * Node sometimes surfaces this as `EOF` or `ECONNRESET`; treat all
+ * three as the same "downstream closed" signal so the CLI can exit
+ * gracefully rather than throwing.
+ */
+export function isClosedPipeError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  const code = (err as NodeJS.ErrnoException).code;
+  return code === 'EPIPE' || code === 'EOF' || code === 'ECONNRESET';
+}
+
+/**
+ * Wrap a stream write in EPIPE-tolerant error handling. Returns
+ * `false` if the pipe is closed (caller can short-circuit further
+ * writes); returns `true` on success or non-EPIPE errors that
+ * propagate up. Sync EPIPE on `stream.write` is rare but possible
+ * on Windows; async EPIPE arrives via the stream's `'error'` event
+ * and is handled by `installPipeGuard` at dispatcher entry.
+ */
+function safeWrite(stream: NodeJS.WritableStream, text: string): boolean {
+  try {
+    stream.write(text);
+    return true;
+  } catch (err) {
+    if (isClosedPipeError(err)) return false;
+    throw err;
+  }
+}
+
 function emit(out: OutputContext, payload: Record<string, unknown>, humanLines: readonly string[]): void {
   if (out.mode === 'json') {
-    out.stdout.write(scrubSentinel(JSON.stringify(payload, null, 2)) + '\n');
+    safeWrite(out.stdout, scrubSentinel(JSON.stringify(payload, null, 2)) + '\n');
   } else {
-    for (const line of humanLines) out.stdout.write(scrubSentinel(line) + '\n');
+    for (const line of humanLines) {
+      if (!safeWrite(out.stdout, scrubSentinel(line) + '\n')) return;
+    }
   }
 }
 
 function emitError(out: OutputContext, msg: string, code = 'ERR'): void {
   const scrubbed = scrubSentinel(msg);
   if (out.mode === 'json') {
-    out.stderr.write(JSON.stringify({ error: { code, message: scrubbed } }) + '\n');
+    safeWrite(out.stderr, JSON.stringify({ error: { code, message: scrubbed } }) + '\n');
   } else {
-    out.stderr.write(`${code}: ${scrubbed}\n`);
+    safeWrite(out.stderr, `${code}: ${scrubbed}\n`);
   }
 }
 
@@ -452,9 +485,10 @@ async function runCmdDiff(
     emitError(out, 'diff: <a.json> <b.json> required', 'ERR_USAGE');
     return 2;
   }
+  const detail = argv.includes('--detail');
   const a = JSON.parse(await fs.readFile(resolvePath(positional[0]!), 'utf-8')) as PolicyIR;
   const b = JSON.parse(await fs.readFile(resolvePath(positional[1]!), 'utf-8')) as PolicyIR;
-  const diff = computePolicyDiff(a, b);
+  const diff = computePolicyDiff(a, b, detail);
   emit(
     out,
     {
@@ -470,37 +504,60 @@ async function runCmdDiff(
       `  a: ${a.policyId} (${a.generatedAt})`,
       `  b: ${b.policyId} (${b.generatedAt})`,
       diff.changed ? '  changes:' : '  no changes',
-      ...(diff.tools.added.length > 0 ? [`    + tools: ${diff.tools.added.join(', ')}`] : []),
-      ...(diff.tools.removed.length > 0 ? [`    - tools: ${diff.tools.removed.join(', ')}`] : []),
-      ...(diff.tools.modified.length > 0 ? [`    ~ tools: ${diff.tools.modified.join(', ')}`] : []),
-      ...(diff.denyRules.added.length > 0 ? [`    + deny: ${diff.denyRules.added.join(', ')}`] : []),
-      ...(diff.denyRules.removed.length > 0 ? [`    - deny: ${diff.denyRules.removed.join(', ')}`] : []),
-      ...(diff.denyRules.modified.length > 0 ? [`    ~ deny: ${diff.denyRules.modified.join(', ')}`] : []),
+      ...renderEntityDiffLines('tools', diff.tools, detail),
+      ...renderEntityDiffLines('deny', diff.denyRules, detail),
     ],
   );
   return 0;
 }
 
-interface PolicyDiff {
-  readonly changed: boolean;
-  readonly tools: { added: string[]; removed: string[]; modified: string[] };
-  readonly denyRules: { added: string[]; removed: string[]; modified: string[] };
+interface FieldChange {
+  readonly field: string;
+  readonly before: unknown;
+  readonly after: unknown;
 }
 
-function computePolicyDiff(a: PolicyIR, b: PolicyIR): PolicyDiff {
+interface ModifiedEntry {
+  readonly id: string;
+  readonly fields: readonly FieldChange[];
+}
+
+interface EntityDiff {
+  readonly added: string[];
+  readonly removed: string[];
+  /**
+   * When `--detail` is on, each entry carries a `fields` array;
+   * otherwise the entry is `{id, fields: []}` so the JSON shape stays
+   * stable. Consumers that only want IDs read `.modified.map(m => m.id)`.
+   */
+  readonly modified: ModifiedEntry[];
+}
+
+interface PolicyDiff {
+  readonly changed: boolean;
+  readonly tools: EntityDiff;
+  readonly denyRules: EntityDiff;
+}
+
+function computePolicyDiff(a: PolicyIR, b: PolicyIR, detail: boolean): PolicyDiff {
   const diff = (
     arr1: readonly { id: string }[],
     arr2: readonly { id: string }[],
-  ): { added: string[]; removed: string[]; modified: string[] } => {
+  ): EntityDiff => {
     const m1 = new Map(arr1.map((x) => [x.id, x]));
     const m2 = new Map(arr2.map((x) => [x.id, x]));
     const added: string[] = [];
     const removed: string[] = [];
-    const modified: string[] = [];
+    const modified: ModifiedEntry[] = [];
     for (const id of m2.keys()) {
       const before = m1.get(id);
-      if (before === undefined) added.push(id);
-      else if (JSON.stringify(before) !== JSON.stringify(m2.get(id))) modified.push(id);
+      const after = m2.get(id);
+      if (before === undefined) {
+        added.push(id);
+      } else if (JSON.stringify(before) !== JSON.stringify(after)) {
+        const fields = detail ? diffFields(before, after as Record<string, unknown>) : [];
+        modified.push({ id, fields });
+      }
     }
     for (const id of m1.keys()) {
       if (!m2.has(id)) removed.push(id);
@@ -513,6 +570,54 @@ function computePolicyDiff(a: PolicyIR, b: PolicyIR): PolicyDiff {
     tools.added.length + tools.removed.length + tools.modified.length +
     denyRules.added.length + denyRules.removed.length + denyRules.modified.length > 0;
   return { changed, tools, denyRules };
+}
+
+/**
+ * Field-level diff for two objects with the same id. Reports every
+ * key whose JSON-canonical value differs. Excludes the `id` field
+ * (already used to align the entries).
+ */
+function diffFields(
+  before: Record<string, unknown>,
+  after: Record<string, unknown>,
+): FieldChange[] {
+  const fields: FieldChange[] = [];
+  const keys = new Set([...Object.keys(before), ...Object.keys(after)]);
+  keys.delete('id');
+  for (const key of [...keys].sort()) {
+    const b = before[key];
+    const a = after[key];
+    if (JSON.stringify(b) !== JSON.stringify(a)) {
+      fields.push({ field: key, before: b, after: a });
+    }
+  }
+  return fields;
+}
+
+function renderEntityDiffLines(
+  label: string,
+  d: EntityDiff,
+  detail: boolean,
+): string[] {
+  const lines: string[] = [];
+  if (d.added.length > 0) lines.push(`    + ${label}: ${d.added.join(', ')}`);
+  if (d.removed.length > 0) lines.push(`    - ${label}: ${d.removed.join(', ')}`);
+  if (d.modified.length > 0) {
+    if (detail) {
+      lines.push(`    ~ ${label}:`);
+      for (const m of d.modified) {
+        lines.push(`        ${m.id}`);
+        for (const f of m.fields) {
+          lines.push(
+            `          ${f.field}: ${JSON.stringify(f.before)} → ${JSON.stringify(f.after)}`,
+          );
+        }
+      }
+    } else {
+      lines.push(`    ~ ${label}: ${d.modified.map((m) => m.id).join(', ')}`);
+    }
+  }
+  return lines;
 }
 
 // ── Subcommand: evaluate ────────────────────────────────────────────────
@@ -597,7 +702,8 @@ function printHelp(out: OutputContext): void {
     );
     return;
   }
-  out.stdout.write(
+  safeWrite(
+    out.stdout,
     [
       'openclaw-policy — generate + verify + evaluate PolicyIR',
       '',
@@ -608,8 +714,9 @@ function printHelp(out: OutputContext): void {
       '      File mode (path → file): integrity only — verify policyId hash matches body.',
       '      Workspace mode (path → dir): integrity AND drift — regenerate from sources,',
       '      compare shape hash against on-disk policy.jsonc. Exit 1 on tamper or drift.',
-      '  openclaw-policy diff <a.json> <b.json>',
+      '  openclaw-policy diff <a.json> <b.json> [--detail]',
       '      Semantic diff: added/removed/changed tools and deny rules.',
+      '      With --detail: per-field changes for modified entries.',
       '  openclaw-policy evaluate <policy-ir.json> <tool-id> [--args <json>]',
       '      Compute Decision (allow / deny / requires-approval / params).',
       '  openclaw-policy list-generators',
@@ -635,8 +742,41 @@ function pickFlag(argv: readonly string[], name: string): string | undefined {
 
 // ── Dispatch ────────────────────────────────────────────────────────────
 
+/**
+ * Install an `'error'` handler on stdout so async EPIPE (the typical
+ * `openclaw-policy ... | head -1` shape) is swallowed instead of
+ * crashing the process. Idempotent: if a handler is already present,
+ * leave it alone — test harnesses that swap stdout are responsible
+ * for their own teardown. Returns a teardown function.
+ */
+function installPipeGuard(stream: NodeJS.WritableStream): () => void {
+  // Some streams (test mocks) don't have an on() method; skip safely.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const s = stream as any;
+  if (typeof s.on !== 'function' || typeof s.off !== 'function') {
+    return () => {};
+  }
+  const handler = (err: NodeJS.ErrnoException): void => {
+    if (isClosedPipeError(err)) return; // swallow
+    // Re-throw via emit to default error handling — but since we're
+    // already in an 'error' event, the safest thing is to exit non-zero.
+    // Caller's outer try/catch in runCli won't see this; surface it
+    // via stderr and exit.
+    try {
+      process.stderr.write(`ERR_INTERNAL: ${err.message}\n`);
+    } catch {
+      // stderr also closed; nothing we can do.
+    }
+    process.exitCode = 2;
+  };
+  s.on('error', handler);
+  return () => s.off('error', handler);
+}
+
 export async function runCli(argv: readonly string[]): Promise<number> {
   const out = makeOutput(argv);
+  const teardownStdout = installPipeGuard(out.stdout);
+  const teardownStderr = installPipeGuard(out.stderr);
   // Strip global flags before subcommand dispatch.
   const filtered = argv.filter((a) => a !== '--json' && a !== '--human');
   const subcmd = filtered[0];
@@ -664,7 +804,11 @@ export async function runCli(argv: readonly string[]): Promise<number> {
         return 2;
     }
   } catch (err) {
+    if (isClosedPipeError(err)) return 0; // graceful exit on closed pipe
     emitError(out, err instanceof Error ? err.message : String(err), 'ERR_INTERNAL');
     return 2;
+  } finally {
+    teardownStdout();
+    teardownStderr();
   }
 }

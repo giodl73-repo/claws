@@ -65,7 +65,7 @@ Status legend:
 | --- | --- | --- |
 | CLI-POLICY-040 | MITIGATED | `diff <a.json> <b.json>` requires two positional args. Missing one → exit 2 with `ERR_USAGE`. |
 | CLI-POLICY-041 | MITIGATED | The diff is **semantic** (added / removed / modified by `id`), not byte. Two IRs with reordered tool arrays produce no diff (since order isn't compared); two IRs with the same tool ids but different capabilities produce a `modified` entry. (`CLI-10`) |
-| CLI-POLICY-042 | DEFERRED | The diff doesn't currently surface **per-field** detail for modified entries (just the id). Operators reviewing changes have to read both files. Add a `--detail` flag when a real consumer hits this. |
+| CLI-POLICY-042 | MITIGATED | `diff <a> <b> --detail` surfaces per-field changes for modified entries (`{field, before, after}` triples in JSON; indented lines in human mode). Without `--detail`, modified entries carry an empty `fields` array — JSON shape is stable across both modes. The `id` field is excluded from per-field output (used to align entries). (`CLI-18`, `CLI-19`, `CLI-20`) |
 
 ## I/O / output
 
@@ -82,7 +82,7 @@ Status legend:
 | ID | Status | Pitfall |
 | --- | --- | --- |
 | CLI-POLICY-060 | MITIGATED | `--json` forces JSON output regardless of TTY detection; `--human` forces human-readable. Both flags are stripped before subcommand dispatch (CLI-POLICY-003). |
-| CLI-POLICY-061 | DEFERRED | Broken-pipe handling (closed stdout mid-write, e.g., `openclaw-policy generate large-ws | head -1`) is not currently special-cased; Node's default EPIPE behavior surfaces and the dispatcher catches at the outer try and exits 2. Wire graceful handling when a real consumer hits it. Same gap as CLI-PINCH-035. |
+| CLI-POLICY-061 | MITIGATED | Broken-pipe writes (closed stdout mid-write, e.g., `openclaw-policy generate large-ws \| head -1`) are handled gracefully: every write goes through `safeWrite`, which catches sync EPIPE / EOF / ECONNRESET; the dispatcher installs an async `'error'` handler on stdout/stderr that swallows the same codes; the outer try/catch in `runCli` returns 0 on EPIPE rather than 2. `isClosedPipeError` is exported so plugin authors writing custom subcommands can re-use it. (`CLI-21`) |
 
 ## Caller obligations
 

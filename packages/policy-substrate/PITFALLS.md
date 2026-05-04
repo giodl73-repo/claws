@@ -72,7 +72,7 @@ Each pitfall is locked by at least one test. Status legend:
 | --- | --- | --- |
 | POL-050 | MITIGATED | `denyRulesFromSoulMd` lifts each `## Boundaries` bullet into a `DenyRule` with id `SOUL-N` (1-indexed). Reordering bullets renames their ids — operators editing `SOUL.md` should be aware that bullet position is load-bearing for cross-version diffs. (`PE-DR-01`, `PE-DR-02`) |
 | POL-051 | MITIGATED | `toolsFromToolsMd` parses lines of the form `### <id> # <RISK>, <CAP>, ...` from the `## Tools` section. The risk token is normalized (`R5` → `critical`); unknown risk tokens default to `medium` rather than throwing — a lint rule SHOULD flag unrecognized tokens upstream. |
-| POL-052 | DEFERRED | The starter generator does not currently support **per-tool sensitivity overrides** in `TOOLS.md` syntax — sensitivity defaults to `internal`. A future schema extension (e.g., `### <id> # R5, COMMUNICATE, sensitivity:restricted`) is planned; track via the upstream PR-1 issue list. |
+| POL-052 | MITIGATED | The starter generator supports per-tool **sensitivity overrides** via two forms: explicit `sensitivity:<level>` (canonical, lint-rule rewriteable) and legacy bare-word (`### t # R3, READ, public`). Explicit form wins; unknown explicit tokens fall through to capability-derived defaults rather than throwing. Bare-word matching is **token-level** (split on `,\s+`) — substrings like `public-api` in tool ids do NOT trigger. (`PE-TL-04`, `PE-TL-05`, `PE-TL-06`, `PE-TL-07`, `PE-TL-08`) |
 
 ## Workspace conventions
 

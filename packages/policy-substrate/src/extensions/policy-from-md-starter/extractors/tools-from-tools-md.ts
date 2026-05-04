@@ -53,19 +53,50 @@ function capabilitiesFrom(meta: string): readonly string[] {
   return [...KNOWN_CAPABILITIES].filter((c) => tokens.includes(c));
 }
 
+const KNOWN_SENSITIVITIES: ReadonlySet<Sensitivity> = new Set([
+  'public',
+  'internal',
+  'confidential',
+  'restricted',
+]);
+
 /**
- * Sensitivity follows the capability story: any tool carrying
- * `IRREVERSIBLE_EXTERNAL` defaults to `restricted`; any
- * `FLEET_PRIVILEGED` or `IDENTITY` to `confidential`. Otherwise
- * `internal`. Operators override per-tool by declaring an explicit
- * sensitivity in the meta line (`### t # R3, READ, public`).
+ * Resolve the per-tool sensitivity level. Precedence:
+ *
+ *   1. Explicit `sensitivity:<level>` token in the meta line —
+ *      the canonical form. Wins over everything else and is what
+ *      lint rules / doctor fixers can rewrite.
+ *      e.g., `### t # R5, COMMUNICATE, sensitivity:restricted`
+ *
+ *   2. Bare-word sensitivity token (legacy short-form). Recognized
+ *      for ergonomic authoring; lint rule MAY normalize to (1).
+ *      e.g., `### t # R3, READ, public`
+ *
+ *   3. Capability-derived default: `IRREVERSIBLE_EXTERNAL` →
+ *      `restricted`; `FLEET_PRIVILEGED` / `IDENTITY` →
+ *      `confidential`; everything else → `internal`.
+ *
+ * Unknown sensitivity tokens (e.g., `sensitivity:bogus`) are
+ * silently ignored at this layer — they fall through to (2) or
+ * (3). A lint rule SHOULD flag them upstream rather than the
+ * extractor throwing; the extractor's job is to produce a valid
+ * IR from whatever input it gets.
  */
 function sensitivityFor(meta: string, capabilities: readonly string[]): Sensitivity {
-  const lower = meta.toLowerCase();
-  if (lower.includes('restricted')) return 'restricted';
-  if (lower.includes('confidential')) return 'confidential';
-  if (lower.includes('public')) return 'public';
-  if (lower.includes('internal')) return 'internal';
+  // 1. Canonical `sensitivity:<level>` syntax.
+  const explicit = /\bsensitivity\s*:\s*(\w+)/i.exec(meta);
+  if (explicit !== null && explicit[1] !== undefined) {
+    const level = explicit[1].toLowerCase() as Sensitivity;
+    if (KNOWN_SENSITIVITIES.has(level)) return level;
+    // Unknown explicit token — fall through (lint rule's job).
+  }
+  // 2. Legacy bare-word token — match as a standalone token, not
+  // a substring, so `### t # public-api` doesn't accidentally hit.
+  const tokens = meta.toLowerCase().split(/[,\s]+/).map((t) => t.trim());
+  for (const t of tokens) {
+    if (KNOWN_SENSITIVITIES.has(t as Sensitivity)) return t as Sensitivity;
+  }
+  // 3. Capability-derived defaults.
   if (capabilities.includes('IRREVERSIBLE_EXTERNAL')) return 'restricted';
   if (capabilities.includes('FLEET_PRIVILEGED')) return 'confidential';
   if (capabilities.includes('IDENTITY')) return 'confidential';
