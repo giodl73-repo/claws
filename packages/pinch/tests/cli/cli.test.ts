@@ -202,4 +202,114 @@ describe('pinch CLI', () => {
     expect(ids).not.toContain('starter-v0/agents/missing-boundaries');
     expect(ids).not.toContain('starter-v0/agents/empty-tools-section');
   });
+
+  it('CLI-13 workspace.json `lint.skip` disables a rule durably', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pinch-ws-skip-'));
+    writeFileSync(join(dir, 'AGENTS.md'), '## Tools\n- gh\n', 'utf-8');
+    writeFileSync(
+      join(dir, 'workspace.json'),
+      JSON.stringify({
+        lint: { skip: ['starter-v0/agents/missing-boundaries'] },
+      }),
+      'utf-8',
+    );
+    const r = await runCliCapture(['run', dir]);
+    const json = JSON.parse(r.stdoutLines[0]!);
+    const ids = (json.diagnostics as Array<{ ruleId: string }>).map(
+      (d) => d.ruleId,
+    );
+    expect(ids).not.toContain('starter-v0/agents/missing-boundaries');
+  });
+
+  it('CLI-14 workspace.json `lint.skip` glob disables a whole namespace', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pinch-ws-glob-skip-'));
+    writeFileSync(join(dir, 'AGENTS.md'), '## Tools\n', 'utf-8');
+    writeFileSync(
+      join(dir, 'workspace.json'),
+      JSON.stringify({ lint: { skip: ['starter-v0/agents/*'] } }),
+      'utf-8',
+    );
+    const r = await runCliCapture(['run', dir]);
+    const json = JSON.parse(r.stdoutLines[0]!);
+    const ids = (json.diagnostics as Array<{ ruleId: string }>).map(
+      (d) => d.ruleId,
+    );
+    // Every starter-v0/agents/* rule is disabled — no diagnostic id
+    // should match that prefix.
+    expect(ids.every((id) => !id.startsWith('starter-v0/agents/'))).toBe(true);
+  });
+
+  it('CLI-15 workspace.json `lint.severity` overrides default severity', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pinch-ws-sev-'));
+    writeFileSync(join(dir, 'AGENTS.md'), '## Tools\n- gh\n', 'utf-8');
+    writeFileSync(
+      join(dir, 'workspace.json'),
+      JSON.stringify({
+        lint: {
+          severity: { 'starter-v0/agents/missing-boundaries': 'error' },
+        },
+      }),
+      'utf-8',
+    );
+    const r = await runCliCapture(['run', dir]);
+    expect(r.exitCode).toBe(1); // error severity → exit 1
+    const json = JSON.parse(r.stdoutLines[0]!);
+    const fired = (
+      json.diagnostics as Array<{ ruleId: string; severity: string }>
+    ).find((d) => d.ruleId === 'starter-v0/agents/missing-boundaries');
+    expect(fired?.severity).toBe('error');
+  });
+
+  it('CLI-16 workspace.json `lint.only` allowlist limits which rules run', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pinch-ws-only-'));
+    writeFileSync(join(dir, 'AGENTS.md'), '## Tools\n', 'utf-8');
+    writeFileSync(
+      join(dir, 'workspace.json'),
+      JSON.stringify({ lint: { only: ['starter-v0/agents/missing-*'] } }),
+      'utf-8',
+    );
+    const r = await runCliCapture(['run', dir]);
+    const json = JSON.parse(r.stdoutLines[0]!);
+    const ids = (json.diagnostics as Array<{ ruleId: string }>).map(
+      (d) => d.ruleId,
+    );
+    for (const id of ids) {
+      expect(id.startsWith('starter-v0/agents/missing-')).toBe(true);
+    }
+  });
+
+  it('CLI-17 CLI --skip wins over workspace.json severity (precedence)', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pinch-ws-precedence-'));
+    writeFileSync(join(dir, 'AGENTS.md'), '## Tools\n- gh\n', 'utf-8');
+    writeFileSync(
+      join(dir, 'workspace.json'),
+      JSON.stringify({
+        lint: {
+          severity: { 'starter-v0/agents/missing-boundaries': 'error' },
+        },
+      }),
+      'utf-8',
+    );
+    // CLI --skip removes the rule entirely; severity override is moot.
+    const r = await runCliCapture([
+      'run',
+      dir,
+      '--skip',
+      'starter-v0/agents/missing-boundaries',
+    ]);
+    expect(r.exitCode).toBe(0); // rule skipped → no error → 0
+    const json = JSON.parse(r.stdoutLines[0]!);
+    const ids = (json.diagnostics as Array<{ ruleId: string }>).map(
+      (d) => d.ruleId,
+    );
+    expect(ids).not.toContain('starter-v0/agents/missing-boundaries');
+  });
+
+  it('CLI-18 missing workspace.json is not an error', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pinch-ws-missing-'));
+    writeFileSync(join(dir, 'AGENTS.md'), '## Tools\n', 'utf-8');
+    // No workspace.json at all — should still work.
+    const r = await runCliCapture(['run', dir]);
+    expect(r.exitCode).toBe(0);
+  });
 });

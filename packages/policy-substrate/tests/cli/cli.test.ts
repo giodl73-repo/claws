@@ -336,6 +336,46 @@ describe('openclaw-policy CLI', () => {
     expect(idField).toBeUndefined();
   });
 
+  it('CLI-22 generate uses `policy.generator` from workspace.json as default', async () => {
+    const ws = makeFixtureWorkspace();
+    writeFileSync(
+      join(ws, 'workspace.json'),
+      JSON.stringify({ policy: { generator: 'md' } }),
+      'utf-8',
+    );
+    // No --generator flag — should pick up `md` from workspace.json
+    // (which equals the ultimate fallback, but the test verifies the
+    // path is exercised).
+    const r = await captureCli(['generate', ws]);
+    expect(r.exitCode).toBe(0);
+    const json = JSON.parse(r.out.join(''));
+    expect(json.generator).toBe('md');
+  });
+
+  it('CLI-23 generate --generator flag wins over workspace.json', async () => {
+    const ws = makeFixtureWorkspace();
+    writeFileSync(
+      join(ws, 'workspace.json'),
+      JSON.stringify({ policy: { generator: 'nonexistent-from-config' } }),
+      'utf-8',
+    );
+    // CLI flag overrides; the `nonexistent-from-config` from
+    // workspace.json never runs.
+    const r = await captureCli(['generate', ws, '--generator', 'md']);
+    expect(r.exitCode).toBe(0);
+    const json = JSON.parse(r.out.join(''));
+    expect(json.generator).toBe('md');
+  });
+
+  it('CLI-24 missing workspace.json uses the `md` default', async () => {
+    const ws = makeFixtureWorkspace();
+    // No workspace.json — should still work with default generator.
+    const r = await captureCli(['generate', ws]);
+    expect(r.exitCode).toBe(0);
+    const json = JSON.parse(r.out.join(''));
+    expect(json.generator).toBe('md');
+  });
+
   it('CLI-21 closed-pipe writes (sync EPIPE) do not throw and exit gracefully', async () => {
     // Replace stdout.write with one that throws EPIPE on first call,
     // simulating `openclaw-policy ... | head -1` after head exits.

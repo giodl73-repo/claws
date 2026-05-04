@@ -37,6 +37,9 @@ import { resolve as resolvePath } from 'node:path';
 import {
   REDACTED_SENTINEL,
   buildWorkspaceManifest,
+  filterByOnlyGlobs,
+  loadWorkspaceConfig,
+  resolveLintOverrides,
   parseJsonc,
   parseJsonl,
   parseMd,
@@ -137,18 +140,27 @@ async function runCmdRun(
   const positional = argv.filter((a) => !a.startsWith('-'));
   const dir = resolvePath(positional[0] ?? process.cwd());
   const severityMin = parseSeverityMin(argv);
-  const skipIds = parseSkippedRuleIds(argv);
-  const severityOverrides = parseSeverityOverrides(argv);
+  const cliSkipIds = [...parseSkippedRuleIds(argv)];
+  const cliSeverity = parseSeverityOverrides(argv);
+  const cliOnlyGlobs = parseOnlyGlobs(argv);
+
+  // Workspace config (durable defaults) — overlaid by CLI flags below.
+  const workspaceConfig = await loadWorkspaceConfig(dir);
   const allRules = listLintRules();
-  const rules = applyOnlyFilter(allRules, argv);
+  const overrides = resolveLintOverrides(
+    workspaceConfig,
+    { skip: cliSkipIds, severity: cliSeverity, only: cliOnlyGlobs },
+    allRules.map((r) => r.id),
+  );
+  const rules = filterByOnlyGlobs(allRules, overrides.onlyGlobs);
 
   const manifest = await buildWorkspaceManifest(dir);
   const files = await Promise.all(manifest.entries.map(entryToLintFile));
   const result = runLint({
     rules,
     files,
-    disabledRuleIds: skipIds,
-    severityOverrides,
+    disabledRuleIds: overrides.disabledRuleIds,
+    severityOverrides: overrides.severityOverrides,
   });
 
   const filtered = result.diagnostics.filter(
@@ -242,19 +254,49 @@ function applyOnlyFilter<T extends { id: string }>(
   rules: readonly T[],
   argv: readonly string[],
 ): readonly T[] {
-  const patterns: string[] = [];
+  const patterns = parseOnlyGlobs(argv);
+  return filterByOnlyGlobs(rules, patterns);
+}
+
+/**
+ * Collect every `--only <pattern>` flag occurrence into an array.
+ * Repeatable: `pinch run --only foo --only bar` → ['foo', 'bar'].
+ */
+function parseOnlyGlobs(argv: readonly string[]): readonly string[] {
+  const out: string[] = [];
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--only' && argv[i + 1] !== undefined) {
-      patterns.push(argv[i + 1]!);
+      out.push(argv[i + 1]!);
       i++;
     }
   }
-  if (patterns.length === 0) return rules;
-  const matchers = patterns.map((p) => {
-    const escaped = p.replace(/[.+^$()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-    return new RegExp(`^${escaped}$`);
-  });
-  return rules.filter((r) => matchers.some((m) => m.test(r.id)));
+  return out;
+}
+
+/**
+ * Locate a workspace directory by walking up from a starting file/dir
+ * looking for `workspace.json`. Returns the nearest containing dir
+ * if found, otherwise the starting dir's parent (or cwd as last
+ * resort). Used by `pinch lint <files>` so that workspace config
+ * applies even when no positional dir is given.
+ */
+async function findWorkspaceDir(startPath: string): Promise<string> {
+  const abs = resolvePath(startPath);
+  let cur = abs;
+  // Walk up until root or workspace.json is found.
+  for (let i = 0; i < 64; i++) {
+    const parent = resolvePath(cur, '..');
+    if (parent === cur) break; // hit filesystem root
+    cur = parent;
+    try {
+      await fs.access(resolvePath(cur, 'workspace.json'));
+      return cur;
+    } catch {
+      // not here; keep walking
+    }
+  }
+  // Fall back to cwd.
+  return process.cwd();
 }
 
 // ── Subcommand: lint (specific files) ───────────────────────────────────
@@ -270,9 +312,21 @@ async function runCmdLint(
     ]);
     return 2;
   }
-  const skipIds = parseSkippedRuleIds(argv);
-  const severityOverrides = parseSeverityOverrides(argv);
-  const rules = applyOnlyFilter(listLintRules(), argv);
+  const cliSkipIds = [...parseSkippedRuleIds(argv)];
+  const cliSeverity = parseSeverityOverrides(argv);
+  const cliOnlyGlobs = parseOnlyGlobs(argv);
+  // For `lint <files>` we don't have a workspace dir; scan up from
+  // the first file to find the nearest workspace.json. Falls back
+  // to cwd when nothing is found.
+  const workspaceDir = await findWorkspaceDir(filePaths[0]!);
+  const workspaceConfig = await loadWorkspaceConfig(workspaceDir);
+  const allRules = listLintRules();
+  const overrides = resolveLintOverrides(
+    workspaceConfig,
+    { skip: cliSkipIds, severity: cliSeverity, only: cliOnlyGlobs },
+    allRules.map((r) => r.id),
+  );
+  const rules = filterByOnlyGlobs(allRules, overrides.onlyGlobs);
   const files: LintFile[] = [];
   for (const p of filePaths) {
     const raw = await fs.readFile(p, 'utf-8');
@@ -289,8 +343,8 @@ async function runCmdLint(
   const result = runLint({
     rules,
     files,
-    disabledRuleIds: skipIds,
-    severityOverrides,
+    disabledRuleIds: overrides.disabledRuleIds,
+    severityOverrides: overrides.severityOverrides,
   });
   emit(
     out,

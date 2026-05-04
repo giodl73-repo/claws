@@ -46,6 +46,7 @@ import { resolve as resolvePath } from 'node:path';
 import {
   REDACTED_SENTINEL,
   buildWorkspaceManifest,
+  loadWorkspaceConfig,
   parseJsonc,
   parseJsonl,
   parseMd,
@@ -179,7 +180,11 @@ async function runCmdGenerate(
 ): Promise<number> {
   const positional = argv.filter((a) => !a.startsWith('-'));
   const dir = resolvePath(positional[0] ?? process.cwd());
-  const generatorId = pickFlag(argv, '--generator') ?? 'md';
+  // CLI flag wins; workspace.json `policy.generator` is the durable
+  // default; `'md'` is the ultimate fallback.
+  const wsConfig = await loadWorkspaceConfig(dir);
+  const generatorId =
+    pickFlag(argv, '--generator') ?? wsConfig?.policy?.generator ?? 'md';
   const outPath = pickFlag(argv, '--out');
 
   const spec = getPolicyGenerator(generatorId);
@@ -299,12 +304,15 @@ async function runCmdCheck(
     return 2;
   }
 
-  const policyOverride = pickFlag(argv, '--policy');
   const skipDrift = argv.includes('--no-drift');
-  const generatorId = pickFlag(argv, '--generator') ?? 'md';
 
   // Workspace mode: positional is a directory.
   if (stat.isDirectory()) {
+    const wsConfig = await loadWorkspaceConfig(resolved);
+    const policyOverride =
+      pickFlag(argv, '--policy') ?? wsConfig?.policy?.policyPath;
+    const generatorId =
+      pickFlag(argv, '--generator') ?? wsConfig?.policy?.generator ?? 'md';
     return await runCheckWorkspace(resolved, {
       policyOverride,
       skipDrift,

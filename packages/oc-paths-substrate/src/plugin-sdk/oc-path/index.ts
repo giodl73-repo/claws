@@ -132,10 +132,22 @@ export { slugify } from './slug.js';
 // Workspace manifest — oc-path applied to the filesystem.
 export {
   OPENCLAW_WORKSPACE_ROLES,
+  WORKSPACE_CONFIG_PATH,
   buildWorkspaceManifest,
+  filterByOnlyGlobs,
+  loadWorkspaceConfig,
+  matchRuleIdGlob,
+  resolveDoctorOverrides,
+  resolveLintOverrides,
   roleForBasename,
   type BuildWorkspaceManifestOptions,
   type OpenClawWorkspaceRole,
+  type ResolvedLintOverrides,
+  type WorkspaceConfig,
+  type WorkspaceDoctorConfig,
+  type WorkspaceLintConfig,
+  type WorkspaceLintSeverity,
   type WorkspaceManifest,
   type WorkspaceManifestEntry,
+  type WorkspacePolicyConfig,
 } from './workspace/index.js';

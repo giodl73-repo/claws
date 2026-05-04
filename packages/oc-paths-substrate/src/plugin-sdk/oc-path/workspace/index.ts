@@ -28,3 +28,17 @@ export {
   type WorkspaceManifest,
   type WorkspaceManifestEntry,
 } from './manifest.js';
+export {
+  WORKSPACE_CONFIG_PATH,
+  filterByOnlyGlobs,
+  loadWorkspaceConfig,
+  matchRuleIdGlob,
+  resolveDoctorOverrides,
+  resolveLintOverrides,
+  type ResolvedLintOverrides,
+  type WorkspaceConfig,
+  type WorkspaceDoctorConfig,
+  type WorkspaceLintConfig,
+  type WorkspaceLintSeverity,
+  type WorkspacePolicyConfig,
+} from './config.js';
