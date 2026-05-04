@@ -239,19 +239,47 @@ async function cmdSet(args: ParsedArgs, ctx: OutputContext): Promise<number> {
     return 1;
   }
   const newBytes = emitForKind(result.ast);
+  // Warn if the kind's edit-then-emit path is lossy on formatting.
+  // The substrate's setOcPath rebuilds raw via render mode, which
+  // drops jsonc comments and yaml formatting. Self-hosters running
+  // `openclaw-path set` on a commented file should know.
+  const lossyKinds: ReadonlySet<OcAst['kind']> = new Set(['jsonc', 'yaml']);
+  const formatLossWarning = lossyKinds.has(result.ast.kind)
+    ? `note: ${result.ast.kind} edit-then-emit drops comments / original formatting (render mode)`
+    : null;
   if (args.flags.get('dry-run') === true) {
     emit(
       ctx,
-      { ok: true, dryRun: true, bytes: newBytes },
-      () => `--dry-run: would write ${newBytes.length} bytes to ${fsPath}\n${newBytes}`,
+      {
+        ok: true,
+        dryRun: true,
+        bytes: newBytes,
+        ...(formatLossWarning !== null ? { warning: formatLossWarning } : {}),
+      },
+      () => {
+        const lines = [`--dry-run: would write ${newBytes.length} bytes to ${fsPath}`];
+        if (formatLossWarning !== null) lines.push(formatLossWarning);
+        lines.push(newBytes);
+        return lines.join('\n');
+      },
     );
     return 0;
   }
   await fs.writeFile(fsPath, newBytes, 'utf-8');
   emit(
     ctx,
-    { ok: true, dryRun: false, bytesWritten: newBytes.length, fsPath },
-    () => `wrote ${newBytes.length} bytes to ${fsPath}`,
+    {
+      ok: true,
+      dryRun: false,
+      bytesWritten: newBytes.length,
+      fsPath,
+      ...(formatLossWarning !== null ? { warning: formatLossWarning } : {}),
+    },
+    () => {
+      const lines = [`wrote ${newBytes.length} bytes to ${fsPath}`];
+      if (formatLossWarning !== null) lines.push(formatLossWarning);
+      return lines.join('\n');
+    },
   );
   return 0;
 }
