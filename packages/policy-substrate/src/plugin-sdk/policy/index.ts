@@ -42,3 +42,10 @@ export {
   type ApprovalRequirement,
   type ToolCallInput,
 } from './runtime.js';
+
+export {
+  getPolicyGenerator,
+  listPolicyGenerators,
+  registerPolicyGenerator,
+  type PolicyGeneratorSpec,
+} from './registry.js';

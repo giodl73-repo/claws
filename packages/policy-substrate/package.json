@@ -6,6 +6,9 @@
   "private": true,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "openclaw-policy": "./bin/openclaw-policy.mjs"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -19,9 +22,13 @@
       "types": "./dist/extensions/policy-from-md-starter/index.d.ts",
       "import": "./dist/extensions/policy-from-md-starter/index.js"
     },
+    "./cli": {
+      "types": "./dist/cli/index.d.ts",
+      "import": "./dist/cli/index.js"
+    },
     "./package.json": "./package.json"
   },
-  "files": ["dist"],
+  "files": ["dist", "bin"],
   "engines": {
     "node": ">=20"
   },
