@@ -8,9 +8,9 @@ import { parseMd } from '@bic/oc-paths-substrate';
 import { describe, expect, it } from 'vitest';
 import { LintRuleRegistry } from '../../src/oc-lint/index.js';
 import { runLint, type LintFile } from '../../src/oc-lint/runner.js';
-import type { LintRule, WorkspaceFileName } from '../../src/plugin-sdk/oc-lint/types.js';
+import type { LintRule } from '../../src/plugin-sdk/oc-lint/types.js';
 
-const file = (name: WorkspaceFileName, raw = '## H\n- item\n'): LintFile => ({
+const file = (name: string, raw = '## H\n- item\n'): LintFile => ({
   name,
   ast: parseMd(raw).ast,
 });
@@ -52,7 +52,7 @@ describe('wave-08 stress + scale', () => {
   it('SC-03 100 rules × 100 files (10k invocations): under 500 ms', () => {
     const rules = Array.from({ length: 100 }, (_, i) => noopRule(`rule-${i}`));
     const files: LintFile[] = Array.from({ length: 100 }, (_, i) =>
-      file((i % 2 === 0 ? 'AGENTS.md' : 'SOUL.md') as WorkspaceFileName),
+      file(i % 2 === 0 ? 'AGENTS.md' : 'SOUL.md'),
     );
     const start = performance.now();
     runLint({ rules, files });

@@ -6,7 +6,7 @@
  * longer fires. End-to-end proof of the fix→cleared contract.
  */
 import { parseMd } from '@bic/oc-paths-substrate';
-import { runLint, STARTER_RULES_V0, type LintFile, type WorkspaceFileName } from '@bic/oc-paths-lint';
+import { runLint, STARTER_RULES_V0, type LintFile } from '@bic/oc-paths-lint';
 import { describe, expect, it } from 'vitest';
 import { STARTER_FIXERS_V0 } from '../../src/extensions/ocdoctor-fixers-starter/index.js';
 import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
@@ -25,7 +25,7 @@ function applyFix(spec: OcPathFixerSpec<unknown>, raw: string): string {
 
 function lintIds(name: string, raw: string): readonly string[] {
   const ast = parseMd(raw).ast;
-  const f: LintFile = { name: name as WorkspaceFileName, ast };
+  const f: LintFile = { name, ast };
   const r = runLint({ rules: STARTER_RULES_V0, files: [f] });
   return r.diagnostics.map((d) => d.ruleId);
 }
@@ -88,7 +88,7 @@ describe('wave-05 lint→fix→lint sweep', () => {
   }
 
   it('LFL-05 full pack: 3 malformed files → apply pack → all paired rules clear', () => {
-    const files: { name: WorkspaceFileName; raw: string }[] = [
+    const files: { name: string; raw: string }[] = [
       { name: 'AGENTS.md', raw: '## Tools\n- gh\n' },
       { name: 'MEMORY.md', raw: '## Entry\nbody\n' },
       { name: 'USER.md', raw: '## Role\nPM\n' },

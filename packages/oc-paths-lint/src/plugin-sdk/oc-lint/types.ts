@@ -20,36 +20,14 @@
 import type { OcAst } from '@bic/oc-paths-substrate';
 
 /**
- * The 8 + 1 workspace md files openclaw recognizes. `BOOTSTRAP.md` is a
- * transient setup file; rules typically don't apply to it. `SKILL.md`
- * is per-skill-directory rather than workspace-root, but lint rules
- * about its frontmatter shape can target it.
- *
- * For non-md kinds (jsonc / jsonl / yaml), filenames are open — rules
- * use glob patterns in `appliesTo` (`*.jsonc`, `gateway.*`).
+ * Filenames are open across all kinds (md, jsonc, jsonl, yaml). Rules
+ * filter via `appliesTo` glob — exact filename (`AGENTS.md`),
+ * extension wildcard (`*.jsonc`), or brace alternation
+ * (`{gateway,openclaw}*.jsonc`). The SDK doesn't impose a closed
+ * vocabulary on filenames; lobster-specific or workspace-specific
+ * conventions live in the rule packs themselves, not in the
+ * universal SDK surface.
  */
-export type WorkspaceFileName =
-  | 'AGENTS.md'
-  | 'SOUL.md'
-  | 'TOOLS.md'
-  | 'IDENTITY.md'
-  | 'USER.md'
-  | 'HEARTBEAT.md'
-  | 'BOOTSTRAP.md'
-  | 'MEMORY.md'
-  | 'SKILL.md';
-
-export const WORKSPACE_FILE_NAMES: readonly WorkspaceFileName[] = [
-  'AGENTS.md',
-  'SOUL.md',
-  'TOOLS.md',
-  'IDENTITY.md',
-  'USER.md',
-  'HEARTBEAT.md',
-  'BOOTSTRAP.md',
-  'MEMORY.md',
-  'SKILL.md',
-];
 
 /**
  * Diagnostic severity.
@@ -71,8 +49,8 @@ export interface Diagnostic {
   readonly ruleId: string;
   readonly severity: LintSeverity;
   /**
-   * Filename of the linted artifact. For md it'll be a `WorkspaceFileName`
-   * (the 9 enumerated files); for other kinds an arbitrary string.
+   * Filename of the linted artifact — open string across all kinds.
+   * Rules use the `appliesTo` glob to filter what they fire on.
    */
   readonly fileName: string;
   readonly message: string;

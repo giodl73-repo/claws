@@ -8,15 +8,14 @@ import { parseMd } from '@bic/oc-paths-substrate';
 import { describe, expect, it } from 'vitest';
 import { STARTER_RULES_V0 } from '../../src/extensions/oclint-rules-starter/index.js';
 import { runLint, type LintFile } from '../../src/oc-lint/runner.js';
-import type { WorkspaceFileName } from '../../src/plugin-sdk/oc-lint/types.js';
 
-const file = (name: WorkspaceFileName, raw: string): LintFile => ({
+const file = (name: string, raw: string): LintFile => ({
   name,
   ast: parseMd(raw).ast,
 });
 
 const idsFromRun = (
-  fileName: WorkspaceFileName,
+  fileName: string,
   raw: string,
 ): readonly string[] => {
   const r = runLint({ rules: STARTER_RULES_V0, files: [file(fileName, raw)] });

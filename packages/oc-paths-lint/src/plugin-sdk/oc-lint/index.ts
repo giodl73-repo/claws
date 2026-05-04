@@ -21,9 +21,7 @@ export type {
   LintRule,
   LintRuleContext,
   LintSeverity,
-  WorkspaceFileName,
 } from './types.js';
-export { WORKSPACE_FILE_NAMES } from './types.js';
 
 export type { RegisterLintRule } from './api-extension.js';
 export { LintRuleRegistrationError, checkSdkCompat } from './api-extension.js';

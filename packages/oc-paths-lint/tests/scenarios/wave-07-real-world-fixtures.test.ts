@@ -11,7 +11,6 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { STARTER_RULES_V0 } from '../../src/extensions/oclint-rules-starter/index.js';
 import { runLint, type LintFile } from '../../src/oc-lint/runner.js';
-import type { WorkspaceFileName } from '../../src/plugin-sdk/oc-lint/types.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SUBSTRATE_FIXTURES = join(
@@ -25,7 +24,7 @@ const SUBSTRATE_FIXTURES = join(
   'real',
 );
 
-function loadFile(name: WorkspaceFileName): LintFile {
+function loadFile(name: string): LintFile {
   const raw = readFileSync(join(SUBSTRATE_FIXTURES, name), 'utf-8');
   return { name, ast: parseMd(raw).ast };
 }

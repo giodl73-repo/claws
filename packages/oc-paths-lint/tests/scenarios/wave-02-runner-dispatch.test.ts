@@ -7,14 +7,14 @@
 import { parseMd } from '@bic/oc-paths-substrate';
 import { describe, expect, it } from 'vitest';
 import { runLint, type LintFile } from '../../src/oc-lint/runner.js';
-import type { LintRule, WorkspaceFileName } from '../../src/plugin-sdk/oc-lint/types.js';
+import type { LintRule } from '../../src/plugin-sdk/oc-lint/types.js';
 
-const file = (name: WorkspaceFileName, raw: string = '## H\n'): LintFile => ({
+const file = (name: string, raw: string = '## H\n'): LintFile => ({
   name,
   ast: parseMd(raw).ast,
 });
 
-const flagRule = (id: string, appliesTo: WorkspaceFileName | '*'): LintRule => ({
+const flagRule = (id: string, appliesTo: string): LintRule => ({
   id,
   severity: 'info',
   description: 'flags every applicable file',
