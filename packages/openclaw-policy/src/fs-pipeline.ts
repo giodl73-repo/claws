@@ -35,7 +35,8 @@ import type { DiscoveredWorkspaceFile } from '@bic/openclaw-workspace/staging';
 import { analyze } from './compile/analyze.js';
 import { CANONICALIZER_VERSION, computePolicyId } from './compile/canonicalize.js';
 import { extractDenyRules, extractTools } from './compile/extract.js';
-import type { ParsedFile } from './compile/parse.js';
+import { parseWorkspaceFile } from './compile/parse.js';
+import type { ParsedFile, WorkspaceFileKind } from './compile/parse.js';
 import {
   emitAuditChain,
   serializeAuditChain,
@@ -76,7 +77,9 @@ export async function fsGenerate(
 
   // Adapt workspace's DiscoveredWorkspaceFile into policy's ParsedFile
   // so the existing extract functions keep their typed contract.
-  const parsed: ParsedFile[] = files.map(adaptDiscovered);
+  const parsed: ParsedFile[] = files
+    .map(adaptDiscovered)
+    .filter((f): f is ParsedFile => f !== null);
 
   for (const p of parsed) {
     for (const d of p.diagnostics) diagnostics.push(d);
@@ -226,20 +229,45 @@ export async function fsGenerate(
   return { workspaceRoot: opts.workspaceRoot, writtenFiles, diagnostics };
 }
 
-function adaptDiscovered(file: DiscoveredWorkspaceFile): ParsedFile {
-  const diagnostics: Diagnostic[] = file.diagnostics.map((d) => ({
-    code: 'OC-POLICY-W-PARSE',
-    severity: d.severity,
-    message: d.message,
-    path: file.relPath,
-    line: d.line,
-  }));
-  return {
-    kind: file.kind,
-    path: file.relPath,
-    ast: file.ast,
-    diagnostics,
-  };
+/**
+ * Map openclaw-workspace's discovery kind (`WorkspaceFileKind` from
+ * the OLD substrate, which uses plural / generic names like 'skills',
+ * 'config', 'workflows') to policy's singular role discriminator
+ * (`'soul' | 'tools' | …`). Returns `null` for kinds policy doesn't
+ * extract from (config / workflows / etc. — those flow through
+ * separate downstream pipelines).
+ */
+function mapDiscoveryKind(
+  kind: DiscoveredWorkspaceFile['kind'],
+): WorkspaceFileKind | null {
+  switch (kind) {
+    case 'soul':
+      return 'soul';
+    case 'tools':
+      return 'tools';
+    case 'agents':
+      return 'agents';
+    case 'memory':
+      return 'memory';
+    case 'skills':
+      return 'skill';
+    case 'bootstrap':
+      return 'bootstrap';
+    default:
+      return null;
+  }
+}
+
+function adaptDiscovered(file: DiscoveredWorkspaceFile): ParsedFile | null {
+  const role = mapDiscoveryKind(file.kind);
+  if (role === null) return null;
+  // Re-parse through oc-paths so the resulting AST is the universal
+  // `MdAst` shape the new compile pipeline expects. The old
+  // discovery layer's parser-output is discarded during the migration
+  // window; once `discoverWorkspaceFiles` itself moves to the
+  // workspace manifest, this re-parse goes away.
+  const reparsed = parseWorkspaceFile(role, file.relPath, file.raw);
+  return reparsed;
 }
 
 function sha256Hex(s: string): string {

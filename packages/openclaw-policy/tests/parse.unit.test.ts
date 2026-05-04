@@ -3,7 +3,7 @@ import { parseWorkspaceFile } from '../src/compile/parse.js';
 
 function blockBody(parsed: ReturnType<typeof parseWorkspaceFile>, heading: string): string {
   const block = parsed.ast.blocks.find((b) => b.heading === heading);
-  return block ? block.bodyLines.join('\n').trim() : '';
+  return block ? block.bodyText.trim() : '';
 }
 
 describe('parseWorkspaceFile — per workspace-file kind (8 tests)', () => {
@@ -42,8 +42,8 @@ describe('parseWorkspaceFile — per workspace-file kind (8 tests)', () => {
     expect(blockBody(parsed, 'OBO')).toBe('- team:waffles');
   });
 
-  it('skills: returns diagnostics array (empty on success)', () => {
-    const parsed = parseWorkspaceFile('skills', 'skills/x/SKILL.md', '## Meta\nr: 1\n');
+  it('skill: returns diagnostics array (empty on success)', () => {
+    const parsed = parseWorkspaceFile('skill', 'skills/x/SKILL.md', '## Meta\nr: 1\n');
     expect(parsed.diagnostics).toEqual([]);
   });
 
@@ -54,33 +54,36 @@ describe('parseWorkspaceFile — per workspace-file kind (8 tests)', () => {
     expect(blockBody(parsed, 'Memory')).toContain('key: value');
   });
 
-  it('config: preserves path field on ParsedFile', () => {
+  it('heartbeat: preserves path field on ParsedFile', () => {
     const parsed = parseWorkspaceFile(
-      'config',
+      'heartbeat',
       'HEARTBEAT.md',
       '## Cadence\nevery 10m\n',
     );
     expect(parsed.path).toBe('HEARTBEAT.md');
   });
 
-  it('workflows: empty body yields empty block list', () => {
-    const parsed = parseWorkspaceFile('workflows', 'WORKFLOW.md', '');
+  it('bootstrap: empty body yields empty block list', () => {
+    const parsed = parseWorkspaceFile('bootstrap', 'BOOTSTRAP.md', '');
     expect(parsed.ast.blocks).toEqual([]);
   });
 
-  it('maps workspace warning diagnostics to policy Diagnostic shape', () => {
-    // Malformed TOOLS table (header row but no separator row) triggers a
-    // workspace parser warning; verify it surfaces with an OC-POLICY code.
+  it('parser is kind-generic — table-shape validation belongs to lint, not parse', () => {
+    // Post oc-paths-substrate migration: `parseMd` is kind-agnostic and
+    // does NOT enforce kind-specific shape (e.g., "TOOLS.md tables must
+    // have a separator row"). That validation moves to oc-paths-lint
+    // rule packs, where it belongs. The parse phase produces only
+    // structural diagnostics for genuinely malformed markdown.
+    //
+    // This test locks the new boundary: a malformed TOOLS-table input
+    // parses cleanly through the substrate; the lint layer is what
+    // surfaces the table-shape problem.
     const parsed = parseWorkspaceFile(
       'tools',
       'TOOLS.md',
       '## Tool Guidance\n| Tool | Guidance |\n| tool-a | do stuff |\n',
     );
-    expect(parsed.diagnostics.length).toBeGreaterThan(0);
-    const first = parsed.diagnostics[0]!;
-    expect(first.code).toBe('OC-POLICY-W-PARSE');
-    expect(first.severity).toBe('warning');
-    expect(first.path).toBe('TOOLS.md');
-    expect(typeof first.line).toBe('number');
+    expect(parsed.diagnostics).toEqual([]);
+    expect(parsed.path).toBe('TOOLS.md');
   });
 });

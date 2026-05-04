@@ -4,7 +4,7 @@
  * governance-fatal invariants.
  */
 
-import type { AstBlock, WorkspaceAst } from '@bic/openclaw-workspace/ast';
+import type { AstBlock, MdAst } from '@bic/oc-paths-substrate';
 
 import type {
   Capability,
@@ -16,6 +16,21 @@ import type {
   ToolSpec,
 } from '../types/index.js';
 import type { ParsedFile } from './parse.js';
+
+/**
+ * Bridge helper — oc-paths' `AstBlock` carries `bodyText: string`,
+ * whereas the old policy code walked `bodyLines: readonly string[]`.
+ * Splitting on `\n` (and dropping a trailing empty line if the
+ * `bodyText` ends with a newline) produces the same logical sequence
+ * the legacy walker consumed.
+ */
+function blockBodyLines(block: AstBlock): readonly string[] {
+  if (block.bodyText.length === 0) return [];
+  const trimmed = block.bodyText.endsWith('\n')
+    ? block.bodyText.slice(0, -1)
+    : block.bodyText;
+  return trimmed.split('\n');
+}
 
 export interface ExtractedDraft {
   soul: PolicyIR['soul'];
@@ -52,7 +67,7 @@ export function extractDenyRules(parsed: ParsedFile): DenyRule[] {
   if (!block) return [];
   const rules: DenyRule[] = [];
   let idx = 0;
-  for (const line of block.bodyLines) {
+  for (const line of blockBodyLines(block)) {
     // Match `[-*] + 1+ tab/space + content` deterministically:
     // identify prefix, then slice + trim. No regex backtracking.
     const leadCh = line[0];
@@ -117,7 +132,7 @@ export function extractTools(parsed: ParsedFile): ToolSpec[] {
   // Each tool starts at a `### name` line inside bodyLines. Track the
   // 1-based absolute line number (block heading is at `block.line`; body
   // lines begin at `block.line + 1`).
-  const bodyLines = block.bodyLines;
+  const bodyLines = blockBodyLines(block);
   let sectionStart = -1;
   for (let li = 0; li <= bodyLines.length; li++) {
     const line = li < bodyLines.length ? bodyLines[li]! : null;
@@ -229,7 +244,7 @@ export function extractCapabilities(meta: string): Capability[] {
   return known.filter((c) => tokens.includes(c));
 }
 
-function findBlock(ast: WorkspaceAst, heading: string): AstBlock | undefined {
+function findBlock(ast: MdAst, heading: string): AstBlock | undefined {
   return ast.blocks.find((b) => b.heading === heading);
 }
 
