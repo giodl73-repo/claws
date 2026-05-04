@@ -27,3 +27,18 @@ export {
   type PolicyExtractorSpec,
   type RunExtractorsOptions,
 } from './api.js';
+
+export { canonicalize, computePolicyId } from './canonicalize.js';
+
+export {
+  POLICY_IR_VERSION,
+  buildPolicyIR,
+  type BuildPolicyIROptions,
+} from './build.js';
+
+export {
+  approvalListFor,
+  evaluateDecision,
+  type ApprovalRequirement,
+  type ToolCallInput,
+} from './runtime.js';
