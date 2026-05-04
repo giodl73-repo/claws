@@ -118,12 +118,49 @@ export type DoctorFixResult =
   | { readonly outcome: 'failed'; readonly reason: string };
 
 /**
- * The contract upstream's `registerDoctorHealthContribution` accepts.
+ * The contract that upstream `registerDoctorHealthContribution`
+ * accepts — this PR does NOT introduce a new SDK verb. The doctor
+ * adapter (`ocPathFixerContribution`) wraps an `OcPathFixerSpec`
+ * into this shape so it slots into the host's existing registration
+ * call:
+ *
+ *   api.registerDoctorHealthContribution(ocPathFixerContribution(spec));
+ *
+ * The contract surface is intentionally narrow: a stable id, a
+ * human-readable description, and the two async verbs the host
+ * runner invokes. Everything else (typed match handoff, options
+ * merge, sentinel guard, audit hook, abort signal) lives inside the
+ * adapter — invisible to the host but available to the spec.
+ *
+ * **Why this shape, not a richer one**: the upstream `doctor` flow
+ * already iterates contributions and calls `detect` + `fix` per
+ * file. Wrapping that contract preserves the host's mental model
+ * (one contribution = one health check) and keeps the universal-AST
+ * machinery as an opt-in adapter rather than a new orthogonal SDK
+ * verb. Plugin authors who don't need OcPath addressing can still
+ * implement `DoctorHealthContribution` directly.
+ *
+ * The fields here mirror the upstream contract verbatim. If upstream
+ * extends `DoctorHealthContribution` (e.g., adds a `priority` field
+ * or a `requires` SDK-version gate), the matching field lands here
+ * too and the adapter passes it through.
  */
 export interface DoctorHealthContribution {
+  /** Stable contribution id. Surfaces in audit logs and the doctor flow's CLI output. */
   readonly id: string;
+  /** Human-readable description shown in `openclaw doctor` output. */
   readonly description: string;
+  /**
+   * Inspect the workspace; return zero or more findings. The host
+   * collects findings across contributions before invoking any fix.
+   * Findings are pure data (no host-mutation side effects).
+   */
   detect(ctx: DoctorContext): Promise<readonly DoctorFinding[]>;
+  /**
+   * Resolve a single finding. The host invokes once per finding (the
+   * fan-out semantic). Returns a structured outcome so the host's
+   * CLI can summarize without parsing free-form messages.
+   */
   fix(ctx: DoctorContext, finding: DoctorFinding): Promise<DoctorFixResult>;
 }
 
