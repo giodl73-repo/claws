@@ -253,6 +253,108 @@ describe('LKG bounding box — yaml kind (.lobster workflows)', () => {
   });
 });
 
+describe('LKG bounding box — workspace-relative ocPath threading (L-OcPathIntegration)', () => {
+  let ctx: Ctx;
+  beforeEach(() => {
+    ctx = makeCtx();
+  });
+
+  // The store synthesizes `ocPath: 'oc://...'` on observations and
+  // audit events when the tracker declares an `ocPath` field. SIEM /
+  // observability pipelines correlate LKG events with oc-lint /
+  // oc-doctor diagnostics through this URI vocabulary.
+
+  it('OCPATH-01 observation carries ocPath when tracker declares it', async () => {
+    const filePath = join(ctx.workspaceDir, 'AGENTS.md');
+    writeFileSync(filePath, '## Tools\n- gh\n', 'utf-8');
+    const { parseOcPath } = await import('@bic/oc-paths-substrate');
+    ctx.store.register({
+      path: filePath,
+      ocPath: parseOcPath('oc://AGENTS.md'),
+      parse: () => ({ valid: true }),
+      validate: () => ({ valid: true, issues: [] }),
+    });
+    const obs = await ctx.store.observe(filePath);
+    expect(obs.outcome).toBe('promoted');
+    if (obs.outcome === 'promoted') {
+      expect(obs.ocPath).toBe('oc://AGENTS.md');
+    }
+  });
+
+  it('OCPATH-02 observation omits ocPath when tracker does not declare it', async () => {
+    const filePath = join(ctx.workspaceDir, 'plain.md');
+    writeFileSync(filePath, '## H\n', 'utf-8');
+    ctx.store.register({
+      path: filePath,
+      parse: () => ({ valid: true }),
+      validate: () => ({ valid: true, issues: [] }),
+    });
+    const obs = await ctx.store.observe(filePath);
+    if (obs.outcome === 'promoted') {
+      expect(obs.ocPath).toBeUndefined();
+    }
+  });
+
+  it('OCPATH-03 audit event includes ocPath in the envelope', async () => {
+    const filePath = join(ctx.workspaceDir, 'gateway.jsonc');
+    writeFileSync(filePath, '{ "version": 1 }\n', 'utf-8');
+    const { parseOcPath } = await import('@bic/oc-paths-substrate');
+    ctx.store.register({
+      path: filePath,
+      ocPath: parseOcPath('oc://gateway.jsonc'),
+      parse: () => ({ version: 1 }),
+      validate: () => ({ valid: true, issues: [] }),
+    });
+    await ctx.store.observe(filePath);
+    const events = ctx.audit.list();
+    expect(events.length).toBeGreaterThan(0);
+    const ev = events[events.length - 1]!;
+    expect(ev.ocPath).toBe('oc://gateway.jsonc');
+  });
+
+  it('OCPATH-04 ocPath flows through recovery outcome too', async () => {
+    const filePath = join(ctx.workspaceDir, 'session.jsonl');
+    const goodBytes = '{"event":"start"}\n{"event":"end"}\n';
+    writeFileSync(filePath, goodBytes, 'utf-8');
+    const { parseOcPath } = await import('@bic/oc-paths-substrate');
+    ctx.store.register({
+      path: filePath,
+      ocPath: parseOcPath('oc://session.jsonl'),
+      parse: (raw) => ({
+        last: raw.split('\n').filter((l) => l).slice(-1)[0] ?? '',
+      }),
+      validate: (parsed) =>
+        parsed.last.includes('"event":"end"')
+          ? { valid: true, issues: [] }
+          : { valid: false, issues: [{ path: '$last', message: 'no terminal' }] },
+    });
+    await ctx.store.observe(filePath);
+    writeFileSync(filePath, '{"event":"start"}\n', 'utf-8');
+    const obs = await ctx.store.observe(filePath);
+    expect(obs.outcome).toBe('recovered');
+    if (obs.outcome === 'recovered') {
+      expect(obs.ocPath).toBe('oc://session.jsonl');
+    }
+  });
+
+  it('OCPATH-05 shouldRecover receives parsed AST for richer queries (item 5)', async () => {
+    const filePath = join(ctx.workspaceDir, 'AGENTS.md');
+    writeFileSync(filePath, '## H\n', 'utf-8');
+    let observedParsed: unknown = undefined;
+    ctx.store.register({
+      path: filePath,
+      parse: (raw) => ({ headings: (raw.match(/^## /gm) ?? []).length }),
+      validate: () => ({ valid: false, issues: [{ path: '', message: 'forced' }] }),
+      shouldRecover: (snapshot) => {
+        observedParsed = snapshot.parsed;
+        return false; // skip; we just want to capture parsed
+      },
+    });
+    await ctx.store.observe(filePath);
+    expect(observedParsed).toEqual({ headings: 1 });
+  });
+});
+
 describe('LKG bounding box — companion-path conventions across kinds', () => {
   let ctx: Ctx;
   beforeEach(() => {

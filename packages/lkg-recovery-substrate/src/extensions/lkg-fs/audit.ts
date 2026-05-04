@@ -18,6 +18,14 @@ import type { LKGActor, LKGObservation } from '../../plugin-sdk/lkg/types.js';
 export interface LKGAuditRecord {
   readonly event: 'lkg.observe';
   readonly path: string;
+  /**
+   * Workspace-relative `oc://` URI for the tracked file. Synthesized
+   * from `LKGTracker.ocPath` at observe time. Absent when the
+   * tracker didn't declare an ocPath. Lets SIEM / observability
+   * pipelines correlate LKG events with oc-lint / oc-doctor
+   * diagnostics that already use the same vocabulary.
+   */
+  readonly ocPath?: string;
   readonly outcome: LKGObservation['outcome'];
   readonly fingerprintHash?: string;
   readonly clobberedPath?: string;

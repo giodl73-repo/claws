@@ -26,7 +26,7 @@
 
 import { promises as fs } from 'node:fs';
 import { dirname, isAbsolute, normalize, relative, resolve, sep } from 'node:path';
-import { REDACTED_SENTINEL } from '@bic/oc-paths-substrate';
+import { REDACTED_SENTINEL, formatOcPath } from '@bic/oc-paths-substrate';
 import type {
   LKGEntry,
   LKGFingerprint,
@@ -101,6 +101,10 @@ export class FsLKGStore implements LKGStore {
       );
     }
 
+    // Workspace-relative URI for audit-event correlation. Synthesized
+    // once per observe; passed into outcome shapes via `withOcPath`.
+    const ocPath = trackerOcPathString(tracker);
+
     let raw: Buffer;
     let stat;
     try {
@@ -108,28 +112,23 @@ export class FsLKGStore implements LKGStore {
       stat = await fs.stat(normalized);
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
-      const obs: LKGObservation = {
+      const obs: LKGObservation = withOcPath({
         outcome: 'failed',
         reason: `read failed: ${reason}`,
         issues: [],
-      };
+      }, ocPath);
       await this.audit(normalized, obs);
       return obs;
     }
 
     // Sentinel guard (mirrors @bic/oc-paths-substrate's emit-time
-    // guard, applied at the LKG observe boundary). If the active
-    // file's bytes contain `__OPENCLAW_REDACTED__`, refuse to
-    // proceed: parse/validate could pass, the bytes would get
-    // promoted as known-good, and a future recovery would restore
-    // the redacted view as authoritative — pinning the corruption.
-    // Fail-closed instead.
+    // guard, applied at the LKG observe boundary). See L-A2/B4.
     if (containsSentinel(raw)) {
-      const obs: LKGObservation = {
+      const obs: LKGObservation = withOcPath({
         outcome: 'failed',
         reason: 'sentinel-detected: refusing to LKG-track redacted-view bytes',
         issues: [],
-      };
+      }, ocPath);
       await this.audit(normalized, obs);
       return obs;
     }
@@ -142,11 +141,11 @@ export class FsLKGStore implements LKGStore {
       parsed = tracker.parse(raw.toString('utf-8'));
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
-      const obs: LKGObservation = {
+      const obs: LKGObservation = withOcPath({
         outcome: 'failed',
         reason: `parse threw: ${reason}`,
         issues: [],
-      };
+      }, ocPath);
       await this.audit(normalized, obs);
       return obs;
     }
@@ -156,20 +155,20 @@ export class FsLKGStore implements LKGStore {
       result = tracker.validate(parsed);
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
-      const obs: LKGObservation = {
+      const obs: LKGObservation = withOcPath({
         outcome: 'failed',
         reason: `validate threw: ${reason}`,
         issues: [],
-      };
+      }, ocPath);
       await this.audit(normalized, obs);
       return obs;
     }
 
     if (result.valid) {
-      return await this.promote(normalized, current, raw);
+      return await this.promote(normalized, current, raw, ocPath);
     }
 
-    return await this.recover(normalized, current, raw, result.issues, tracker, opts ?? {});
+    return await this.recover(normalized, current, raw, result.issues, tracker, parsed, opts ?? {}, ocPath);
   }
 
   async readLastKnownGood(path: string): Promise<Uint8Array> {
@@ -214,12 +213,13 @@ export class FsLKGStore implements LKGStore {
     path: string,
     current: LKGFingerprint,
     raw: Buffer,
+    ocPath: string | undefined,
   ): Promise<LKGObservation> {
     const entry = this.entries.get(path);
     const lastPromotedHash = entry?.lastPromotedGood?.hash;
     if (lastPromotedHash === current.hash) {
       // No change — pure observe outcome.
-      const obs: LKGObservation = { outcome: 'valid', fingerprint: current };
+      const obs: LKGObservation = withOcPath({ outcome: 'valid', fingerprint: current }, ocPath);
       await this.audit(path, obs);
       return obs;
     }
@@ -237,7 +237,7 @@ export class FsLKGStore implements LKGStore {
       lastPromotedGood: current,
     });
 
-    const obs: LKGObservation = { outcome: 'promoted', fingerprint: current };
+    const obs: LKGObservation = withOcPath({ outcome: 'promoted', fingerprint: current }, ocPath);
     await this.audit(path, obs);
     return obs;
   }
@@ -248,14 +248,18 @@ export class FsLKGStore implements LKGStore {
     badRaw: Buffer,
     issues: readonly ValidationIssue[],
     tracker: LKGTracker<unknown, ValidationIssue>,
+    parsed: unknown,
     opts: LKGObserveOptions,
+    ocPath: string | undefined,
   ): Promise<LKGObservation> {
-    if (tracker.shouldRecover && tracker.shouldRecover({ valid: false, issues }) === false) {
-      const obs: LKGObservation = {
+    // shouldRecover now receives the tracker's parsed AST so it can
+    // run kind-specific or oc-paths queries inside the heuristic.
+    if (tracker.shouldRecover && tracker.shouldRecover({ valid: false, issues, parsed }) === false) {
+      const obs: LKGObservation = withOcPath({
         outcome: 'skipped',
         reason: 'plugin-local-invalidity',
         issues,
-      };
+      }, ocPath);
       await this.audit(path, obs);
       return obs;
     }
@@ -263,11 +267,11 @@ export class FsLKGStore implements LKGStore {
     const entry = this.entries.get(path);
     const lkg = entry?.lastPromotedGood;
     if (!lkg) {
-      const obs: LKGObservation = {
+      const obs: LKGObservation = withOcPath({
         outcome: 'skipped',
         reason: 'no-lkg-available',
         issues,
-      };
+      }, ocPath);
       await this.audit(path, obs);
       return obs;
     }
@@ -279,21 +283,21 @@ export class FsLKGStore implements LKGStore {
     try {
       lkgRaw = await fs.readFile(lkgPath);
     } catch (err) {
-      const obs: LKGObservation = {
+      const obs: LKGObservation = withOcPath({
         outcome: 'failed',
         reason: `read .lkg failed: ${err instanceof Error ? err.message : String(err)}`,
         issues,
-      };
+      }, ocPath);
       await this.audit(path, obs);
       return obs;
     }
     const companionHash = hashRaw(lkgRaw);
     if (companionHash !== lkg.hash) {
-      const obs: LKGObservation = {
+      const obs: LKGObservation = withOcPath({
         outcome: 'failed',
         reason: 'lkg-companion-tampered: hash mismatch',
         issues,
-      };
+      }, ocPath);
       await this.audit(path, obs);
       return obs;
     }
@@ -303,11 +307,11 @@ export class FsLKGStore implements LKGStore {
     // pathological case where a hash-stable .lkg companion was
     // poisoned at promote time before this guard existed.
     if (containsSentinel(lkgRaw)) {
-      const obs: LKGObservation = {
+      const obs: LKGObservation = withOcPath({
         outcome: 'failed',
         reason: 'lkg-companion-poisoned: contains redaction sentinel',
         issues,
-      };
+      }, ocPath);
       await this.audit(path, obs);
       return obs;
     }
@@ -322,7 +326,7 @@ export class FsLKGStore implements LKGStore {
     await fs.writeFile(tmpPath, lkgRaw);
     await fs.rename(tmpPath, path);
 
-    const obs: LKGObservation = {
+    const obs: LKGObservation = withOcPath({
       outcome: 'recovered',
       reason: issues[0]?.message ?? 'validation failed',
       clobberedPath,
@@ -333,7 +337,7 @@ export class FsLKGStore implements LKGStore {
       ...(opts.correlationEventId !== undefined
         ? { correlationEventId: opts.correlationEventId }
         : {}),
-    };
+    }, ocPath);
     await this.audit(path, obs);
     await this.noticeSink.enqueue({
       path,
@@ -358,6 +362,9 @@ export class FsLKGStore implements LKGStore {
       path,
       outcome: obs.outcome,
       observedAt,
+      // Workspace-relative URI for cross-substrate audit correlation.
+      // Absent if the tracker didn't declare an ocPath.
+      ...(obs.ocPath !== undefined ? { ocPath: obs.ocPath } : {}),
     };
     if (obs.outcome === 'recovered') {
       await this.auditSink.append({
@@ -387,4 +394,26 @@ export class FsLKGStore implements LKGStore {
 function containsSentinel(buf: Buffer | string): boolean {
   if (typeof buf === 'string') return buf.includes(REDACTED_SENTINEL);
   return buf.includes(REDACTED_SENTINEL);
+}
+
+/**
+ * Synthesize the workspace-relative `oc://` URI string for a tracker.
+ * Returns `undefined` if the tracker didn't declare an `ocPath` —
+ * audit events fall back to filesystem path only.
+ */
+function trackerOcPathString(
+  tracker: LKGTracker<unknown, ValidationIssue>,
+): string | undefined {
+  if (tracker.ocPath === undefined) return undefined;
+  return formatOcPath(tracker.ocPath);
+}
+
+/**
+ * Attach `ocPath` to an observation outcome only if defined. Avoids
+ * `ocPath: undefined` appearing in audit envelopes (which downstream
+ * JSON serializers handle differently than absent keys).
+ */
+function withOcPath<T extends LKGObservation>(obs: T, ocPath: string | undefined): T {
+  if (ocPath === undefined) return obs;
+  return { ...obs, ocPath };
 }

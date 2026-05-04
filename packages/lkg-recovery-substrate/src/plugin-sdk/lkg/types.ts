@@ -1,3 +1,5 @@
+import type { OcPath } from '@bic/oc-paths-substrate';
+
 /**
  * `@openclaw/plugin-sdk/lkg` — type contract for the generalized
  * Last-Known-Good substrate.
@@ -119,6 +121,17 @@ export interface LKGTracker<TParsed = unknown, TIssue = ValidationIssue> {
   /** Absolute filesystem path the tracker protects. */
   readonly path: string;
   /**
+   * Optional workspace-relative `oc://` address for the tracked file.
+   * Decouples tracker identity from deployment-specific filesystem
+   * paths: audit events synthesize a portable `ocPath` field from
+   * this; consumers can correlate LKG events with oc-lint / oc-doctor
+   * diagnostics that already use the same vocabulary.
+   *
+   * When omitted, audit events carry only the filesystem `path`.
+   * In-tree trackers SHOULD declare this; external plugins MAY.
+   */
+  readonly ocPath?: OcPath;
+  /**
    * SDK-version compatibility hint. Plugins authored against a known
    * SDK version declare it here; the host warns on major-version
    * mismatch with `SDK_VERSION`. Optional — omitting it means "trust
@@ -145,10 +158,17 @@ export interface LKGTracker<TParsed = unknown, TIssue = ValidationIssue> {
    * Mirrors upstream's `recovery-policy.ts:isPluginLocalInvalidConfigSnapshot`.
    * Returning `false` short-circuits recovery; the runtime degrades
    * around the broken portion instead.
+   *
+   * The `parsed` field carries the tracker's own parse output —
+   * trackers using oc-paths AST as `TParsed` can run `findOcPaths`
+   * inside the heuristic for richer queries (e.g., "the broken
+   * field is under `oc://config/plugins.entries.*`, treat as
+   * plugin-local").
    */
   shouldRecover?(snapshot: {
     valid: boolean;
     issues: readonly TIssue[];
+    parsed: TParsed;
   }): boolean;
 }
 
@@ -172,9 +192,17 @@ export interface LKGObserveOptions {
 
 // --- Observation: forensics on every recovery -------------------------------
 
+/**
+ * Every observation outcome carries an optional `ocPath` field —
+ * the formatted `oc://` URI for the tracked file, synthesized by
+ * the store from `LKGTracker.ocPath`. Absent if the tracker didn't
+ * declare an ocPath. Lets SIEM / observability pipelines correlate
+ * LKG events with oc-lint / oc-doctor diagnostics that already use
+ * the same vocabulary.
+ */
 export type LKGObservation<TIssue = ValidationIssue> =
-  | { readonly outcome: 'valid'; readonly fingerprint: LKGFingerprint }
-  | { readonly outcome: 'promoted'; readonly fingerprint: LKGFingerprint }
+  | { readonly outcome: 'valid'; readonly fingerprint: LKGFingerprint; readonly ocPath?: string }
+  | { readonly outcome: 'promoted'; readonly fingerprint: LKGFingerprint; readonly ocPath?: string }
   | {
       readonly outcome: 'recovered';
       readonly reason: string;
@@ -186,16 +214,19 @@ export type LKGObservation<TIssue = ValidationIssue> =
       readonly replacedFingerprint: LKGFingerprint | null;
       readonly actor?: LKGActor | null;
       readonly correlationEventId?: string | null;
+      readonly ocPath?: string;
     }
   | {
       readonly outcome: 'skipped';
       readonly reason: 'plugin-local-invalidity' | 'no-lkg-available' | 'tracker-shouldRecover-false';
       readonly issues: readonly TIssue[];
+      readonly ocPath?: string;
     }
   | {
       readonly outcome: 'failed';
       readonly reason: string;
       readonly issues: readonly TIssue[];
+      readonly ocPath?: string;
     };
 
 // --- Errors -----------------------------------------------------------------
