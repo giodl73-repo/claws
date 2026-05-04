@@ -295,8 +295,12 @@ function resolveJsonlToUniversal(ast: JsonlAst, path: OcPath): OcMatch | null {
   if (m === null) return null;
   if (m.kind === 'root') return { kind: 'root', ast, line: 1 };
   if (m.kind === 'line') return { kind: 'node', descriptor: 'jsonl-line', line: m.node.line };
-  if (m.kind === 'object-entry') return jsoncValueToMatch(m.node.value, m.node.line ?? m.line);
-  return jsoncValueToMatch(m.node, m.node.line ?? m.line);
+  // Inside-line jsonc parser starts numbering at 1 for each jsonl
+  // line, so `m.node.line` would always be 1 for any jsonl-resolved
+  // match. Use `m.line` (the JsonlLine's file-level line) — by
+  // construction every inside-line node sits on the same file line.
+  if (m.kind === 'object-entry') return jsoncValueToMatch(m.node.value, m.line);
+  return jsoncValueToMatch(m.node, m.line);
 }
 
 function resolveInsertion(ast: OcAst, info: InsertionInfo): OcMatch | null {
