@@ -188,7 +188,20 @@ export interface OcPathFixerSpec<TOptions = DefaultFixerOptions> {
    * Empty result = no fix needed. Each entry becomes one
    * `DoctorFinding` and one `fix()` invocation.
    */
-  detect(input: { fileName: string; ast: OcAst; raw: string }): readonly DoctorDetectResult[];
+  detect(input: {
+    fileName: string;
+    ast: OcAst;
+    raw: string;
+    /**
+     * Same merged options the adapter passes to `fix()` — `defaultOptions`
+     * overlaid with any caller override from `ctx.fixerOptions[spec.id]`.
+     * Optional; detect implementations that don't need options can
+     * ignore. Symmetry with `fix()` lets a rule's allowed-value set
+     * (e.g., scopes, tiers) be operator-overridable at detect time
+     * too, not just at fix time.
+     */
+    options?: TOptions;
+  }): readonly DoctorDetectResult[];
   /**
    * Given the current bytes and the typed `OcPathMatch` produced by
    * `detect()`, produce new bytes that resolve the issue. MUST be
@@ -196,7 +209,7 @@ export interface OcPathFixerSpec<TOptions = DefaultFixerOptions> {
    * kind / leaf text / line — `fix()` doesn't need to re-resolve.
    *
    * `options` is `defaultOptions` merged with any caller override
-   * supplied via `ctx.fixerOptions[spec.id]`.
+   * supplied via `ctx.fixerOptions[spec.id]` — same value detect saw.
    *
    * **Fan-out semantic**: one `fix()` call per match. The runner
    * iterates over every detect result and invokes `fix()` once each.

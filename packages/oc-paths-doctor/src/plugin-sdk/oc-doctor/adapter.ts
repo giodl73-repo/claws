@@ -107,11 +107,12 @@ export function ocPathFixerContribution<TOptions = unknown>(
 
     async detect(ctx: DoctorContext): Promise<readonly DoctorFinding[]> {
       if (isDisabled(ctx, spec.id)) return [];
+      const options = resolveOptions(spec.defaultOptions, ctx.fixerOptions?.[spec.id]);
       const findings: DoctorFinding[] = [];
       for (const f of ctx.files) {
         if (ctx.signal?.aborted) return findings;
         if (!matchGlob(spec.appliesTo, f.name)) continue;
-        const detected = spec.detect({ fileName: f.name, ast: f.ast, raw: f.raw });
+        const detected = spec.detect({ fileName: f.name, ast: f.ast, raw: f.raw, options });
         for (const d of detected) {
           findings.push({
             contributionId: spec.id,
