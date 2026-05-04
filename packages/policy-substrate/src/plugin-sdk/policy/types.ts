@@ -125,9 +125,18 @@ export interface PolicyGenerator<TValidated> {
 }
 
 /**
- * Conventional path under the LKG-tracked workspace where the
- * active PolicyIR is written. Consumers of the upstream contract
- * use this constant rather than hard-coding the string.
+ * Conventional path under the workspace root where the policy
+ * file lives. Treated as config (the same way `gateway.jsonc` is
+ * config) — the gateway / generator manages it, but it's a
+ * first-class workspace artifact like any other `.jsonc` config.
+ *
+ * Matches the manifest's existing `policy.jsonc` role; LKG-tracked
+ * under that role; lint rules, doctor fixers, audit events all
+ * address it via `oc://policy.jsonc/...` paths.
+ *
+ * Consumers of the upstream contract use this constant rather than
+ * hard-coding the string. The "PolicyIR" name remains an internal
+ * description of the in-memory shape; the file itself is just
+ * `policy.jsonc` — no separate IR file.
  */
-export const POLICY_IR_PATH: '.openclaw/policy/policy-ir.json' =
-  '.openclaw/policy/policy-ir.json';
+export const POLICY_PATH: 'policy.jsonc' = 'policy.jsonc';

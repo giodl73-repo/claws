@@ -16,7 +16,7 @@ export type {
   Sensitivity,
   ToolSpec,
 } from './types.js';
-export { POLICY_IR_PATH } from './types.js';
+export { POLICY_PATH } from './types.js';
 
 export {
   SDK_VERSION,
@@ -49,3 +49,14 @@ export {
   registerPolicyGenerator,
   type PolicyGeneratorSpec,
 } from './registry.js';
+
+export {
+  loadPolicyIRFromFile,
+  makePolicyEvaluator,
+  mapDecisionToHostShape,
+  policyTrustedToolPolicy,
+  type PluginToolPolicyDecision,
+  type PolicyToolEvent,
+  type PolicyTrustedToolPolicyOptions,
+  type PolicyTrustedToolRegistration,
+} from './adapter.js';
