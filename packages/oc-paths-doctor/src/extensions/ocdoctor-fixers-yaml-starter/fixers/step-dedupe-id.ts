@@ -10,10 +10,24 @@
  *   - `strategy: 'index-suffix'` (default) — `<id>` → `<id>_<n>`
  *   - `strategy: 'rename-second'` — `<id>` → `<id>_dupe`
  *
- * **Risk**: renaming an id breaks downstream `$id.stdout` references.
- * Operators should run the partner lint rule (`undefined-stdin-ref`)
- * after this fix to catch any references to the renamed id. Severity
- * is `warning` to surface the trade-off.
+ * **Severity is `info` (not warning/error)** — the fix is intentionally
+ * partial. Renaming an id can break downstream `$id.stdout` references
+ * in `stdin:` fields, and walking those refs to update them is a
+ * non-trivial scope decision (do we update all matches blindly? what
+ * if the operator wanted the second `a` to be the receiver?). The
+ * partner lint rule
+ * `lobster-yaml-starter-v0/step/undefined-stdin-ref` (severity `error`)
+ * catches the resulting dangling refs at the next lint pass — that's
+ * the follow-through. Operators run lint→fix→lint and the `error`
+ * dangling-ref rule surfaces what the dedupe fix didn't repair.
+ *
+ * Considered alternative: extend this fixer to rewrite `$<oldId>.stdout`
+ * in subsequent steps. Rejected because the rename is semantically
+ * ambiguous — if step[3] referenced `$a.stdout`, the operator's
+ * intent (was that the first `a` or the renamed second?) is not
+ * recoverable from the AST. Auto-rewriting would silently change
+ * behavior; failing-loud via the paired error rule preserves operator
+ * agency. (Closes review item W2.)
  *
  * **Substrate routing**: mutation goes through `setOcPath` (the
  * universal substrate verb) rather than direct yaml-package AST
@@ -34,7 +48,10 @@ const DEFAULTS: DedupeIdOptions = { strategy: 'index-suffix' };
 export const stepDedupeId: OcPathFixerSpec<DedupeIdOptions> = {
   id: 'yaml-starter-v0/step/dedupe-id',
   description: 'rename duplicate step ids to make them unique',
-  severity: 'warning',
+  // Info severity acknowledges the partial fix — see file-level JSDoc.
+  // The paired error rule `step/undefined-stdin-ref` catches what this
+  // fix doesn't repair (dangling `$<oldId>.stdout` references).
+  severity: 'info',
   appliesTo: '*.lobster',
   defaultOptions: DEFAULTS,
 
