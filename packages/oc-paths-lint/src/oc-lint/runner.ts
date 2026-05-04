@@ -24,7 +24,7 @@ export interface LintFile {
 }
 
 export interface LintRunOptions {
-  readonly rules: readonly LintRule[];
+  readonly rules: readonly LintRule<unknown>[];
   readonly files: readonly LintFile[];
   /**
    * Optional cancellation signal. The runner checks `signal.aborted`
@@ -53,6 +53,14 @@ export interface LintRunOptions {
    * the map are silently ignored.
    */
   readonly severityOverrides?: Readonly<Record<string, 'info' | 'warning' | 'error'>>;
+  /**
+   * Per-rule options override map. The runner merges
+   * `rule.defaultOptions` with `ruleOptions[rule.id]` and passes the
+   * merged value via `ctx.options` to `check()`. Lets operators tune
+   * configurable rules (e.g., per-pipeline allowed-value sets) without
+   * forking the rule pack.
+   */
+  readonly ruleOptions?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
 }
 
 /**
@@ -119,7 +127,8 @@ export function runLint(opts: LintRunOptions): LintRunResult {
       }
       let findings;
       try {
-        findings = rule.check({ fileName: file.name, ast: file.ast });
+        const mergedOptions = mergeOptions(rule.defaultOptions, opts.ruleOptions?.[rule.id]);
+        findings = rule.check({ fileName: file.name, ast: file.ast, options: mergedOptions });
       } catch (err) {
         // Rule threw — there's no per-finding line to attribute, so
         // anchor the synthetic diagnostic at the file head. Apply
@@ -154,6 +163,20 @@ export function runLint(opts: LintRunOptions): LintRunResult {
   }
 
   return { diagnostics, stats };
+}
+
+/**
+ * Merge a rule's `defaultOptions` with operator-supplied overrides.
+ * Operator wins on conflict. Returns `undefined` if neither side
+ * supplies anything (so rules see `ctx.options === undefined`).
+ */
+function mergeOptions(
+  defaults: unknown,
+  override: Readonly<Record<string, unknown>> | undefined,
+): unknown {
+  if (override === undefined) return defaults;
+  if (defaults === undefined) return override;
+  return { ...(defaults as Record<string, unknown>), ...override };
 }
 
 /**

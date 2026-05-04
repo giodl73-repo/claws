@@ -78,25 +78,44 @@ export interface LintFinding {
 }
 
 /**
+ * Default options shape for rules that don't declare their own.
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export type DefaultRuleOptions = Record<string, never>;
+
+/**
  * Context passed to `LintRule.check`. Pure data: filename + universal
- * AST. Rules use `resolveOcPath` from the substrate to inspect; rules
- * with kind-specific logic narrow on `ast.kind` inside `check()`.
+ * AST + merged options. Rules use `resolveOcPath` from the substrate
+ * to inspect; rules with kind-specific logic narrow on `ast.kind`
+ * inside `check()`.
  *
  * `check()` MUST be a pure function: no I/O, no AST mutation, no
  * filesystem/network. The runner may invoke it many times per file;
  * deterministic output is required.
  */
-export interface LintRuleContext {
+export interface LintRuleContext<TOptions = DefaultRuleOptions> {
   readonly fileName: string;
   readonly ast: OcAst;
+  /**
+   * Effective options for this rule invocation: `defaultOptions`
+   * overlaid with any caller override from
+   * `LintRunOptions.ruleOptions[rule.id]`. Optional — rules without
+   * configurable behavior can ignore.
+   */
+  readonly options?: TOptions;
 }
 
 /**
  * A lint rule. ONE shape across all kinds — rules consume `OcAst` and
  * inspect via `resolveOcPath`. Kind-bound rules narrow on `ast.kind`
  * inside `check()`.
+ *
+ * `TOptions` typed: rules with operator-overridable behavior declare
+ * their option shape and `defaultOptions`. The runner merges
+ * `defaultOptions` with `LintRunOptions.ruleOptions[rule.id]` and
+ * passes the merged value via `ctx.options`.
  */
-export interface LintRule {
+export interface LintRule<TOptions = DefaultRuleOptions> {
   /**
    * Stable rule identifier, prefixed with the rule pack namespace.
    * Convention: `<rule-pack>/<area>/<short-name>`. Examples:
@@ -145,9 +164,16 @@ export interface LintRule {
   readonly status?: 'stable' | 'speculative';
 
   /**
-   * Pure check function. Receives the universal AST + filename;
-   * returns 0+ findings. Use `resolveOcPath` from the substrate to
-   * inspect; narrow on `ctx.ast.kind` for kind-specific logic.
+   * Default options applied when caller doesn't override at invocation
+   * time via `LintRunOptions.ruleOptions[rule.id]`. Optional — rules
+   * without configurable behavior omit this.
    */
-  check(ctx: LintRuleContext): readonly LintFinding[];
+  readonly defaultOptions?: TOptions;
+
+  /**
+   * Pure check function. Receives the universal AST + filename + merged
+   * options; returns 0+ findings. Use `resolveOcPath` from the substrate
+   * to inspect; narrow on `ctx.ast.kind` for kind-specific logic.
+   */
+  check(ctx: LintRuleContext<TOptions>): readonly LintFinding[];
 }
