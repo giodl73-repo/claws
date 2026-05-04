@@ -34,6 +34,14 @@
       "types": "./dist/cli/index.d.ts",
       "import": "./dist/cli/index.js"
     },
+    "./lint-rules-starter": {
+      "types": "./dist/extensions/lkg-lint-rules-starter/index.d.ts",
+      "import": "./dist/extensions/lkg-lint-rules-starter/index.js"
+    },
+    "./doctor-fixers-starter": {
+      "types": "./dist/extensions/lkg-doctor-fixers-starter/index.d.ts",
+      "import": "./dist/extensions/lkg-doctor-fixers-starter/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": ["dist", "bin"],
@@ -41,7 +49,9 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@bic/oc-paths-substrate": "*"
+    "@bic/oc-paths-substrate": "*",
+    "@bic/pinch": "*",
+    "@bic/oc-paths-doctor": "*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
