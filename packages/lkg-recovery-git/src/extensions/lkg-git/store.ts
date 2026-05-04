@@ -42,6 +42,7 @@ import {
   type LKGAuditSink,
   type LKGRecoveryNoticeSink,
 } from '@bic/lkg-recovery-substrate';
+import { REDACTED_SENTINEL, formatOcPath } from '@bic/oc-paths-substrate';
 
 import { git, gitBinary } from './git-cmd.js';
 
@@ -127,16 +128,48 @@ export class GitLKGStore implements LKGStore {
       );
     }
 
+    // Workspace-relative URI for audit-event correlation. Synthesized
+    // once per observe (L-OcPathIntegration items 1, 2, 3).
+    const ocPath = trackerOcPathString(reg.tracker);
+
+    // Abort-check helper (L-B2). Records an audit-recorded
+    // failed-aborted outcome at every I/O boundary.
+    const checkAbort = async (): Promise<LKGObservation | null> => {
+      if (opts?.signal?.aborted !== true) return null;
+      const obs: LKGObservation = withOcPath({
+        outcome: 'failed',
+        reason: 'aborted: observe cancelled via signal',
+        issues: [],
+      }, ocPath);
+      await this.audit(normalized, obs);
+      return obs;
+    };
+
+    const aborted0 = await checkAbort();
+    if (aborted0 !== null) return aborted0;
+
     let raw: Buffer;
     try {
       raw = await fs.readFile(normalized);
     } catch (err) {
-      const reason = err instanceof Error ? err.message : String(err);
-      const obs: LKGObservation = {
+      const obs: LKGObservation = withOcPath({
         outcome: 'failed',
-        reason: `read failed: ${reason}`,
+        reason: `read failed: ${scrubErrorMessage(err)}`,
         issues: [],
-      };
+      }, ocPath);
+      await this.audit(normalized, obs);
+      return obs;
+    }
+
+    // Sentinel guard (L-A2/B4). Symmetric with the FS-backed store —
+    // refuse to git-commit bytes containing the redaction sentinel
+    // as known-good.
+    if (containsSentinel(raw)) {
+      const obs: LKGObservation = withOcPath({
+        outcome: 'failed',
+        reason: 'sentinel-detected: refusing to LKG-track redacted-view bytes',
+        issues: [],
+      }, ocPath);
       await this.audit(normalized, obs);
       return obs;
     }
@@ -148,11 +181,11 @@ export class GitLKGStore implements LKGStore {
     try {
       parsed = reg.tracker.parse(raw.toString('utf-8'));
     } catch (err) {
-      const obs: LKGObservation = {
+      const obs: LKGObservation = withOcPath({
         outcome: 'failed',
-        reason: `parse threw: ${err instanceof Error ? err.message : String(err)}`,
+        reason: `parse threw: ${scrubErrorMessage(err)}`,
         issues: [],
-      };
+      }, ocPath);
       await this.audit(normalized, obs);
       return obs;
     }
@@ -161,22 +194,32 @@ export class GitLKGStore implements LKGStore {
     try {
       result = reg.tracker.validate(parsed);
     } catch (err) {
-      const obs: LKGObservation = {
+      const obs: LKGObservation = withOcPath({
         outcome: 'failed',
-        reason: `validate threw: ${err instanceof Error ? err.message : String(err)}`,
+        reason: `validate threw: ${scrubErrorMessage(err)}`,
         issues: [],
-      };
+      }, ocPath);
       await this.audit(normalized, obs);
       return obs;
     }
 
+    const aborted1 = await checkAbort();
+    if (aborted1 !== null) return aborted1;
+
     if (result.valid) {
-      return await this.promote(reg, normalized, current, observedAt);
+      return await this.promote(reg, normalized, current, observedAt, ocPath);
     }
-    return await this.recover(reg, normalized, current, raw, result.issues, observedAt, opts ?? {});
+    return await this.recover(reg, normalized, current, raw, result.issues, parsed, observedAt, opts ?? {}, ocPath);
   }
 
-  async readLastKnownGood(path: string): Promise<Uint8Array> {
+  async readLastKnownGood(path: string, opts?: LKGObserveOptions): Promise<Uint8Array> {
+    if (opts?.signal?.aborted === true) {
+      throw new LKGError(
+        'LKG_ABORTED',
+        `readLastKnownGood aborted via signal: ${path}`,
+        path,
+      );
+    }
     const normalized = this.normalizePath(path);
     const reg = this.trackers.get(normalized);
     if (reg === undefined) {
@@ -279,6 +322,7 @@ export class GitLKGStore implements LKGStore {
     absPath: string,
     current: LKGFingerprint,
     observedAt: string,
+    ocPath: string | undefined,
   ): Promise<LKGObservation> {
     const headFp = await this.fingerprintFromHead(reg.relPath, observedAt);
     if (headFp !== null && headFp.hash === current.hash) {
@@ -288,7 +332,7 @@ export class GitLKGStore implements LKGStore {
         lastKnownGood: current,
         lastPromotedGood: current,
       };
-      const obs: LKGObservation = { outcome: 'valid', fingerprint: current };
+      const obs: LKGObservation = withOcPath({ outcome: 'valid', fingerprint: current }, ocPath);
       await this.audit(absPath, obs);
       return obs;
     }
@@ -312,7 +356,7 @@ export class GitLKGStore implements LKGStore {
       lastPromotedGood: current,
     };
 
-    const obs: LKGObservation = { outcome: 'promoted', fingerprint: current };
+    const obs: LKGObservation = withOcPath({ outcome: 'promoted', fingerprint: current }, ocPath);
     await this.audit(absPath, obs);
     return obs;
   }
@@ -323,27 +367,48 @@ export class GitLKGStore implements LKGStore {
     current: LKGFingerprint,
     badRaw: Buffer,
     issues: readonly ValidationIssue[],
+    parsed: unknown,
     observedAt: string,
     opts: LKGObserveOptions,
+    ocPath: string | undefined,
   ): Promise<LKGObservation> {
     const tracker = reg.tracker;
-    if (tracker.shouldRecover && tracker.shouldRecover({ valid: false, issues }) === false) {
-      const obs: LKGObservation = {
+    // shouldRecover now receives the tracker's parsed AST (item 5) so
+    // it can run kind-specific or oc-paths queries.
+    if (tracker.shouldRecover && tracker.shouldRecover({ valid: false, issues, parsed }) === false) {
+      const obs: LKGObservation = withOcPath({
         outcome: 'skipped',
         reason: 'plugin-local-invalidity',
         issues,
-      };
+      }, ocPath);
       await this.audit(absPath, obs);
       return obs;
     }
 
     const headFp = await this.fingerprintFromHead(reg.relPath, observedAt);
     if (headFp === null) {
-      const obs: LKGObservation = {
+      const obs: LKGObservation = withOcPath({
         outcome: 'skipped',
         reason: 'no-lkg-available',
         issues,
-      };
+      }, ocPath);
+      await this.audit(absPath, obs);
+      return obs;
+    }
+
+    // Defense-in-depth: even when HEAD has the tracker's path, refuse
+    // to restore bytes carrying the redaction sentinel. Mirrors the
+    // FS-backed store's check (L-A2/B4 defense-in-depth path).
+    const headBytesResult = await gitBinary(['show', `HEAD:${reg.relPath}`], {
+      cwd: this.repoRoot,
+      tolerateNonZero: true,
+    });
+    if (headBytesResult.exitCode === 0 && containsSentinel(headBytesResult.stdout)) {
+      const obs: LKGObservation = withOcPath({
+        outcome: 'failed',
+        reason: 'lkg-companion-poisoned: HEAD bytes contain redaction sentinel',
+        issues,
+      }, ocPath);
       await this.audit(absPath, obs);
       return obs;
     }
@@ -359,7 +424,7 @@ export class GitLKGStore implements LKGStore {
     reg.cachedEntry = { ...reg.cachedEntry, lastKnownGood: headFp, lastPromotedGood: headFp };
 
     const clobberedRel = clobberedRelPath(reg.relPath, observedAt);
-    const obs: LKGObservation = {
+    const obs: LKGObservation = withOcPath({
       outcome: 'recovered',
       reason: issues[0]?.message ?? 'validation failed',
       clobberedPath: clobberedAbsPath,
@@ -370,7 +435,7 @@ export class GitLKGStore implements LKGStore {
       ...(opts.correlationEventId !== undefined
         ? { correlationEventId: opts.correlationEventId }
         : {}),
-    };
+    }, ocPath);
     await this.audit(absPath, obs);
     await this.noticeSink.enqueue({
       path: absPath,
@@ -397,6 +462,7 @@ export class GitLKGStore implements LKGStore {
       path: absPath,
       outcome: obs.outcome,
       observedAt,
+      ...(obs.ocPath !== undefined ? { ocPath: obs.ocPath } : {}),
     };
     if (obs.outcome === 'recovered') {
       await this.auditSink.append({
@@ -416,4 +482,54 @@ export class GitLKGStore implements LKGStore {
     }
     await this.auditSink.append({ ...base, reason: obs.reason });
   }
+}
+
+// ---------- helpers (mirrored from FsLKGStore for parity) -------------------
+
+/**
+ * Substring scan for the redaction sentinel — same threat as the
+ * substrate's emit-time guard. Bytes-or-string input.
+ */
+function containsSentinel(buf: Buffer | Uint8Array | string): boolean {
+  if (typeof buf === 'string') return buf.includes(REDACTED_SENTINEL);
+  // Buffer.includes works on string; Uint8Array doesn't, so funnel both
+  // through Buffer.from for uniform treatment.
+  const b = Buffer.isBuffer(buf) ? buf : Buffer.from(buf);
+  return b.includes(REDACTED_SENTINEL);
+}
+
+/**
+ * Scrub thrown error messages before audit-recording (L-C10).
+ * Refuse sentinel passthrough; strip control chars; cap 256 bytes.
+ */
+const ERR_MESSAGE_MAX_LEN = 256;
+function scrubErrorMessage(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err);
+  if (raw.includes(REDACTED_SENTINEL)) {
+    return '[scrubbed: validator/parser message contained redaction sentinel]';
+  }
+  const CONTROL_CHARS = new RegExp('[\\x00-\\x08\\x0B-\\x1F\\x7F]', 'g');
+  const stripped = raw.replace(CONTROL_CHARS, '');
+  if (stripped.length <= ERR_MESSAGE_MAX_LEN) return stripped;
+  return stripped.slice(0, ERR_MESSAGE_MAX_LEN - 3) + '...';
+}
+
+/**
+ * Synthesize the workspace-relative `oc://` URI for a tracker that
+ * declared one. Returns `undefined` for trackers without `ocPath`.
+ */
+function trackerOcPathString(
+  tracker: LKGTracker<unknown, ValidationIssue>,
+): string | undefined {
+  if (tracker.ocPath === undefined) return undefined;
+  return formatOcPath(tracker.ocPath);
+}
+
+/**
+ * Attach `ocPath` to an observation only if defined; avoids
+ * `ocPath: undefined` in audit envelopes.
+ */
+function withOcPath<T extends LKGObservation>(obs: T, ocPath: string | undefined): T {
+  if (ocPath === undefined) return obs;
+  return { ...obs, ocPath };
 }

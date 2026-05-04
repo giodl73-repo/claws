@@ -18,7 +18,8 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@bic/lkg-recovery-substrate": "*"
+    "@bic/lkg-recovery-substrate": "*",
+    "@bic/oc-paths-substrate": "*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
