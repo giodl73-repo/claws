@@ -18,6 +18,10 @@ export const sessionMissingEventKey: LintRule = {
   severity: 'info',
   description: 'session log line lacks canonical `event` key',
   appliesTo: '{session,audit,events}*.jsonl',
+  // Speculative: the `event` discriminator is openclaw's convention,
+  // but third-party JSONL session formats may legitimately use a
+  // different field name. Re-evaluate after community feedback.
+  status: 'speculative',
   check(ctx) {
     if (ctx.ast.kind !== 'jsonl') return [];
     const out: LintFinding[] = [];

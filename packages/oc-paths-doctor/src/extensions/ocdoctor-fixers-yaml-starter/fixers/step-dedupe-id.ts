@@ -52,6 +52,9 @@ export const stepDedupeId: OcPathFixerSpec<DedupeIdOptions> = {
   // The paired error rule `step/undefined-stdin-ref` catches what this
   // fix doesn't repair (dangling `$<oldId>.stdout` references).
   severity: 'info',
+  // Speculative — the partial-fix design (rename without ref-rewrite)
+  // is a deliberate trade-off we want to validate before stabilizing.
+  status: 'speculative',
   appliesTo: '*.lobster',
   defaultOptions: DEFAULTS,
 

@@ -15,6 +15,11 @@ export const skillInvalidTier: LintRule = {
   severity: 'info',
   description: 'SKILL.md `tier:` is not one of T1/T2/T3',
   appliesTo: 'SKILL.md',
+  // Speculative: the T1/T2/T3 vocabulary (vs the numeric 1/2/3 used
+  // by the snap-tier fixer's defaults) is a known representation
+  // mismatch — resolving requires picking one or accepting both.
+  // Tag pending design decision.
+  status: 'speculative',
   check(ctx) {
     if (ctx.ast.kind !== 'md') return [];
     const m = resolveOcPath(ctx.ast, parseOcPath('oc://SKILL.md/[frontmatter]/tier'));

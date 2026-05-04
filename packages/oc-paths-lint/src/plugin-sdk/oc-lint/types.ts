@@ -156,6 +156,15 @@ export interface LintRule {
   readonly requires?: {
     readonly sdkVersion: string;
   };
+  /**
+   * Stability tag. `'stable'` (default) means community-validated and
+   * subject to the usual deprecation process before removal.
+   * `'speculative'` means best-guess design — the rule may be culled
+   * outright in a future minor version if it doesn't earn its keep.
+   * Surfaces in `openclaw lint --list` so operators can see which
+   * rules are load-bearing vs in-evaluation.
+   */
+  readonly status?: 'stable' | 'speculative';
 
   /**
    * Pure check function. Receives the universal AST + filename;

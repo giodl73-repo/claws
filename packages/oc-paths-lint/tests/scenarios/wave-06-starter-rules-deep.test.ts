@@ -133,8 +133,10 @@ describe('wave-06 starter-rules deep dive', () => {
     );
   });
 
-  it('CR-15 invalid-scope: NOT detected for project/wave/role/task/ephemeral', () => {
-    for (const v of ['project', 'wave', 'role', 'task', 'ephemeral']) {
+  it('CR-15 invalid-scope: NOT detected for default/global/project/session', () => {
+    // Vocabulary aligned with `STARTER_ALLOWED_MEMORY_SCOPES` (the
+    // shared starter-pack value set, see C1).
+    for (const v of ['default', 'global', 'project', 'session']) {
       expect(
         idsFromRun('MEMORY.md', `---\nscope: ${v}\n---\n## Entry\n`),
       ).not.toContain('starter-v0/memory/invalid-scope-value');

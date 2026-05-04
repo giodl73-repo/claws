@@ -15,6 +15,11 @@ export const configEmptyPluginsEntries: LintRule = {
   severity: 'info',
   description: '`plugins.entries` is an empty object',
   appliesTo: '{gateway,openclaw,config}*.jsonc',
+  // Speculative: an empty entries object may be intentional (operator
+  // setting up a config skeleton, or running with no plugins). Tag
+  // pending community signal — could be info-only context, not a
+  // diagnostic.
+  status: 'speculative',
   check(ctx) {
     if (ctx.ast.kind !== 'jsonc') return [];
     const target = parseOcPath(`oc://${ctx.fileName}/plugins.entries`);

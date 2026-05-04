@@ -174,6 +174,13 @@ export interface OcPathFixerSpec<TOptions = DefaultFixerOptions> {
     readonly sdkVersion: string;
   };
   /**
+   * Stability tag. `'stable'` (default) means community-validated and
+   * subject to the usual deprecation process before removal.
+   * `'speculative'` means best-guess design — the fixer may be culled
+   * outright in a future minor version if it doesn't earn its keep.
+   */
+  readonly status?: 'stable' | 'speculative';
+  /**
    * Inspect an AST + raw bytes; for each issue, return a typed
    * `OcPathMatch` (path + match-with-line/leafType) along with a
    * human-readable message and optional fix hint.
