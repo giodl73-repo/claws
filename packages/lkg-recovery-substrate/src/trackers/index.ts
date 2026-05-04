@@ -27,3 +27,14 @@ export {
   type TrackerFactory,
   type TrackerFactoryOptions,
 } from './registry.js';
+export {
+  buildWorkspaceManifest,
+  registerOpenClawWorkspace,
+  registerOpenClawWorkspaceFromDir,
+  type OpenClawRegisteredEntry,
+  type OpenClawSkippedEntry,
+  type OpenClawWorkspaceRole,
+  type RegisterOpenClawWorkspaceResult,
+  type WorkspaceManifest,
+  type WorkspaceManifestEntry,
+} from './openclaw-workspace.js';

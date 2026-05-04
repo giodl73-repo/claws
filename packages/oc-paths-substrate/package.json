@@ -22,6 +22,10 @@
       "types": "./dist/cli/index.d.ts",
       "import": "./dist/cli/index.js"
     },
+    "./workspace": {
+      "types": "./dist/plugin-sdk/oc-path/workspace/index.d.ts",
+      "import": "./dist/plugin-sdk/oc-path/workspace/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

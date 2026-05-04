@@ -128,3 +128,14 @@ export { OcEmitSentinelError, REDACTED_SENTINEL, guardSentinel } from './sentine
 
 // Slug helper
 export { slugify } from './slug.js';
+
+// Workspace manifest — oc-path applied to the filesystem.
+export {
+  OPENCLAW_WORKSPACE_ROLES,
+  buildWorkspaceManifest,
+  roleForBasename,
+  type BuildWorkspaceManifestOptions,
+  type OpenClawWorkspaceRole,
+  type WorkspaceManifest,
+  type WorkspaceManifestEntry,
+} from './workspace/index.js';
