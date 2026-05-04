@@ -25,6 +25,9 @@
   "engines": {
     "node": ">=20"
   },
+  "dependencies": {
+    "@bic/oc-paths-substrate": "*"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^4.0.0",

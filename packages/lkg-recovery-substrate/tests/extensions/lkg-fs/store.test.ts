@@ -239,3 +239,77 @@ describe('FsLKGStore — lifecycle', () => {
     }
   });
 });
+
+describe('FsLKGStore — sentinel guard (L-A2/B4)', () => {
+  let ctx: ReturnType<typeof makeStore>;
+  beforeEach(() => {
+    ctx = makeStore();
+  });
+
+  it('SG-01 observe refuses to LKG-track bytes containing the redaction sentinel', async () => {
+    // A redacted-view file leaks through to disk via some bug path.
+    // LKG must NOT promote it as known-good — that would pin the
+    // corruption.
+    writeFileSync(
+      ctx.filePath,
+      JSON.stringify({ version: 1, entries: { token: '__OPENCLAW_REDACTED__' } }) + '\n',
+      'utf-8',
+    );
+    ctx.store.register(jsonTracker(ctx.filePath));
+    const obs = await ctx.store.observe(ctx.filePath);
+    expect(obs.outcome).toBe('failed');
+    if (obs.outcome === 'failed') {
+      expect(obs.reason).toContain('sentinel-detected');
+    }
+  });
+
+  it('SG-02 sentinel substring (not just exact-match) triggers refusal', async () => {
+    // Hostile caller smuggling `prefix__OPENCLAW_REDACTED__suffix`
+    // must not slip past — same posture as the substrate's
+    // sentinel guard (oc-paths A2 finding).
+    writeFileSync(
+      ctx.filePath,
+      JSON.stringify({ version: 1, msg: 'pre__OPENCLAW_REDACTED__post' }) + '\n',
+      'utf-8',
+    );
+    ctx.store.register(jsonTracker(ctx.filePath));
+    const obs = await ctx.store.observe(ctx.filePath);
+    expect(obs.outcome).toBe('failed');
+  });
+
+  it('SG-03 recover refuses to restore from a sentinel-poisoned .lkg companion', async () => {
+    // Promote a clean LKG, then poison the .lkg companion with the
+    // sentinel without touching its sha (impossible in practice, but
+    // the defense-in-depth check fires anyway).
+    writeJson(ctx.filePath, { version: 1, entries: {} });
+    ctx.store.register(jsonTracker(ctx.filePath));
+    await ctx.store.observe(ctx.filePath); // first promote
+
+    // Manually poison the .lkg companion AND update the entry's
+    // recorded hash to match (simulating a writer-side bug that
+    // coordinated bad bytes with stored fingerprint).
+    const poisoned =
+      JSON.stringify({ version: 1, entries: { x: '__OPENCLAW_REDACTED__' } }) + '\n';
+    writeFileSync(ctx.filePath + '.lkg', poisoned, 'utf-8');
+    // Force the recorded hash to match the poisoned companion via
+    // private-state poke (we don't expose this in production).
+    const entry = ctx.store.getEntry(ctx.filePath);
+    if (entry?.lastPromotedGood) {
+      const { createHash } = await import('node:crypto');
+      const newHash = createHash('sha256').update(poisoned).digest('hex');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (ctx.store as any).entries.set(ctx.filePath, {
+        ...entry,
+        lastPromotedGood: { ...entry.lastPromotedGood, hash: newHash },
+      });
+    }
+
+    // Now write invalid bytes to the active path to trigger recovery.
+    writeJson(ctx.filePath, { version: 99 });
+    const obs = await ctx.store.observe(ctx.filePath);
+    expect(obs.outcome).toBe('failed');
+    if (obs.outcome === 'failed') {
+      expect(obs.reason).toContain('lkg-companion-poisoned');
+    }
+  });
+});

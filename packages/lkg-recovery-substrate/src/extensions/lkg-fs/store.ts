@@ -26,6 +26,7 @@
 
 import { promises as fs } from 'node:fs';
 import { dirname, isAbsolute, normalize, relative, resolve, sep } from 'node:path';
+import { REDACTED_SENTINEL } from '@bic/oc-paths-substrate';
 import type {
   LKGEntry,
   LKGFingerprint,
@@ -110,6 +111,23 @@ export class FsLKGStore implements LKGStore {
       const obs: LKGObservation = {
         outcome: 'failed',
         reason: `read failed: ${reason}`,
+        issues: [],
+      };
+      await this.audit(normalized, obs);
+      return obs;
+    }
+
+    // Sentinel guard (mirrors @bic/oc-paths-substrate's emit-time
+    // guard, applied at the LKG observe boundary). If the active
+    // file's bytes contain `__OPENCLAW_REDACTED__`, refuse to
+    // proceed: parse/validate could pass, the bytes would get
+    // promoted as known-good, and a future recovery would restore
+    // the redacted view as authoritative — pinning the corruption.
+    // Fail-closed instead.
+    if (containsSentinel(raw)) {
+      const obs: LKGObservation = {
+        outcome: 'failed',
+        reason: 'sentinel-detected: refusing to LKG-track redacted-view bytes',
         issues: [],
       };
       await this.audit(normalized, obs);
@@ -280,6 +298,20 @@ export class FsLKGStore implements LKGStore {
       return obs;
     }
 
+    // Defense-in-depth: even if the .lkg hash matches, refuse to
+    // restore bytes carrying the redaction sentinel. Catches a
+    // pathological case where a hash-stable .lkg companion was
+    // poisoned at promote time before this guard existed.
+    if (containsSentinel(lkgRaw)) {
+      const obs: LKGObservation = {
+        outcome: 'failed',
+        reason: 'lkg-companion-poisoned: contains redaction sentinel',
+        issues,
+      };
+      await this.audit(path, obs);
+      return obs;
+    }
+
     // Preserve bad bytes; restore from .lkg.
     const observedAt = this.nowIso();
     const clobberedPath = clobberedPathFor(path, observedAt);
@@ -345,4 +377,14 @@ export class FsLKGStore implements LKGStore {
     }
     await this.auditSink.append({ ...base, reason: obs.reason });
   }
+}
+
+/**
+ * Substring scan for the redaction sentinel. Bytes-or-string input;
+ * we use the same literal as the substrate's `REDACTED_SENTINEL` so
+ * no copy-paste drift is possible.
+ */
+function containsSentinel(buf: Buffer | string): boolean {
+  if (typeof buf === 'string') return buf.includes(REDACTED_SENTINEL);
+  return buf.includes(REDACTED_SENTINEL);
 }
