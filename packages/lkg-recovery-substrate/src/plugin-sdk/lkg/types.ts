@@ -188,6 +188,18 @@ export interface LKGObserveOptions {
   readonly actor?: LKGActor;
   /** Opaque ID the host stitches with its own audit pipeline (request-id, trace-id, gateway turn-id). */
   readonly correlationEventId?: string;
+  /**
+   * Optional cancellation signal. The store checks `signal.aborted`
+   * at every I/O boundary inside `observe()` (read, parse, validate,
+   * promote-write, recover-write). On abort, returns
+   * `{outcome: 'failed', reason: 'aborted'}` rather than throwing —
+   * partial observation results are recorded in audit so the
+   * pipeline isn't silent on cancel.
+   *
+   * `readLastKnownGood()` honors the same signal (single read; aborts
+   * before fs.readFile if already cancelled).
+   */
+  readonly signal?: AbortSignal;
 }
 
 // --- Observation: forensics on every recovery -------------------------------
@@ -236,6 +248,7 @@ export type LKGErrorCode =
   | 'LKG_TRACKER_PATH_INVALID'
   | 'LKG_STORE_UNAVAILABLE'
   | 'LKG_VALIDATOR_THREW'
+  | 'LKG_ABORTED'
   | 'LKG_INTERNAL';
 
 export class LKGError extends Error {

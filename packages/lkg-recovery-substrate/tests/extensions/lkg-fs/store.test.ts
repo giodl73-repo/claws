@@ -240,6 +240,105 @@ describe('FsLKGStore — lifecycle', () => {
   });
 });
 
+describe('FsLKGStore — AbortSignal threading (L-B2)', () => {
+  let ctx: ReturnType<typeof makeStore>;
+  beforeEach(() => {
+    ctx = makeStore();
+  });
+
+  it('AB-01 already-aborted signal returns failed-aborted before reading', async () => {
+    writeJson(ctx.filePath, { version: 1 });
+    ctx.store.register(jsonTracker(ctx.filePath));
+    const ac = new AbortController();
+    ac.abort();
+    const obs = await ctx.store.observe(ctx.filePath, { signal: ac.signal });
+    expect(obs.outcome).toBe('failed');
+    if (obs.outcome === 'failed') {
+      expect(obs.reason).toContain('aborted');
+    }
+  });
+
+  it('AB-02 aborted readLastKnownGood throws LKG_ABORTED', async () => {
+    writeJson(ctx.filePath, { version: 1 });
+    ctx.store.register(jsonTracker(ctx.filePath));
+    await ctx.store.observe(ctx.filePath); // promote first
+    const ac = new AbortController();
+    ac.abort();
+    await expect(
+      ctx.store.readLastKnownGood(ctx.filePath, { signal: ac.signal }),
+    ).rejects.toMatchObject({ code: 'LKG_ABORTED' });
+  });
+
+  it('AB-03 unaborted signal observe runs to completion', async () => {
+    writeJson(ctx.filePath, { version: 1 });
+    ctx.store.register(jsonTracker(ctx.filePath));
+    const ac = new AbortController();
+    const obs = await ctx.store.observe(ctx.filePath, { signal: ac.signal });
+    expect(obs.outcome).toBe('promoted');
+  });
+});
+
+describe('FsLKGStore — err.message scrub (L-C10)', () => {
+  let ctx: ReturnType<typeof makeStore>;
+  beforeEach(() => {
+    ctx = makeStore();
+  });
+
+  const trackerWithThrowingValidator = (
+    path: string,
+    msg: string,
+  ): LKGTracker<{ version: number }> => ({
+    path,
+    parse: (raw) => JSON.parse(raw) as { version: number },
+    validate: () => {
+      throw new Error(msg);
+    },
+  });
+
+  it('SCR-01 sentinel-bearing thrown message is wholesale scrubbed', async () => {
+    writeJson(ctx.filePath, { version: 1 });
+    ctx.store.register(
+      trackerWithThrowingValidator(
+        ctx.filePath,
+        'leaked __OPENCLAW_REDACTED__ in error',
+      ),
+    );
+    const obs = await ctx.store.observe(ctx.filePath);
+    expect(obs.outcome).toBe('failed');
+    if (obs.outcome === 'failed') {
+      expect(obs.reason).not.toContain('__OPENCLAW_REDACTED__');
+      expect(obs.reason).toContain('[scrubbed:');
+    }
+  });
+
+  it('SCR-02 control characters stripped from thrown message', async () => {
+    writeJson(ctx.filePath, { version: 1 });
+    ctx.store.register(
+      trackerWithThrowingValidator(
+        ctx.filePath,
+        'safe\x00\x07text\x1F\x7Fmore',
+      ),
+    );
+    const obs = await ctx.store.observe(ctx.filePath);
+    if (obs.outcome === 'failed') {
+      expect(obs.reason).toContain('safetextmore');
+    }
+  });
+
+  it('SCR-03 long message truncated at 256 bytes', async () => {
+    writeJson(ctx.filePath, { version: 1 });
+    const longMsg = 'x'.repeat(500);
+    ctx.store.register(trackerWithThrowingValidator(ctx.filePath, longMsg));
+    const obs = await ctx.store.observe(ctx.filePath);
+    if (obs.outcome === 'failed') {
+      // 256 cap on the scrubbed substring; full message has the
+      // "validate threw: " prefix so total can be slightly longer.
+      expect(obs.reason.length).toBeLessThanOrEqual('validate threw: '.length + 256);
+      expect(obs.reason.endsWith('...')).toBe(true);
+    }
+  });
+});
+
 describe('FsLKGStore — sentinel guard (L-A2/B4)', () => {
   let ctx: ReturnType<typeof makeStore>;
   beforeEach(() => {

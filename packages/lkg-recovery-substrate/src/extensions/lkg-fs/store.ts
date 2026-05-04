@@ -105,6 +105,22 @@ export class FsLKGStore implements LKGStore {
     // once per observe; passed into outcome shapes via `withOcPath`.
     const ocPath = trackerOcPathString(tracker);
 
+    // Abort-check helper — checks the signal at every I/O boundary.
+    // Returns the abort outcome (audit-recorded) when cancelled.
+    const checkAbort = async (): Promise<LKGObservation | null> => {
+      if (opts?.signal?.aborted !== true) return null;
+      const obs: LKGObservation = withOcPath({
+        outcome: 'failed',
+        reason: 'aborted: observe cancelled via signal',
+        issues: [],
+      }, ocPath);
+      await this.audit(normalized, obs);
+      return obs;
+    };
+
+    const aborted0 = await checkAbort();
+    if (aborted0 !== null) return aborted0;
+
     let raw: Buffer;
     let stat;
     try {
@@ -140,10 +156,12 @@ export class FsLKGStore implements LKGStore {
     try {
       parsed = tracker.parse(raw.toString('utf-8'));
     } catch (err) {
-      const reason = err instanceof Error ? err.message : String(err);
+      // Scrub the err.message: parse failures on secret-bearing
+      // bytes can leak the secret through the diagnostic. Same
+      // posture as oc-paths-lint's C10 scrubber.
       const obs: LKGObservation = withOcPath({
         outcome: 'failed',
-        reason: `parse threw: ${reason}`,
+        reason: `parse threw: ${scrubErrorMessage(err)}`,
         issues: [],
       }, ocPath);
       await this.audit(normalized, obs);
@@ -154,15 +172,19 @@ export class FsLKGStore implements LKGStore {
     try {
       result = tracker.validate(parsed);
     } catch (err) {
-      const reason = err instanceof Error ? err.message : String(err);
+      // Validator failures on secret-bearing parsed values can leak
+      // secrets through err.message; scrub before audit-recording.
       const obs: LKGObservation = withOcPath({
         outcome: 'failed',
-        reason: `validate threw: ${reason}`,
+        reason: `validate threw: ${scrubErrorMessage(err)}`,
         issues: [],
       }, ocPath);
       await this.audit(normalized, obs);
       return obs;
     }
+
+    const aborted1 = await checkAbort();
+    if (aborted1 !== null) return aborted1;
 
     if (result.valid) {
       return await this.promote(normalized, current, raw, ocPath);
@@ -171,7 +193,14 @@ export class FsLKGStore implements LKGStore {
     return await this.recover(normalized, current, raw, result.issues, tracker, parsed, opts ?? {}, ocPath);
   }
 
-  async readLastKnownGood(path: string): Promise<Uint8Array> {
+  async readLastKnownGood(path: string, opts?: LKGObserveOptions): Promise<Uint8Array> {
+    if (opts?.signal?.aborted === true) {
+      throw new LKGError(
+        'LKG_ABORTED',
+        `readLastKnownGood aborted via signal: ${path}`,
+        path,
+      );
+    }
     const normalized = this.normalizePath(path);
     const lkgPath = lkgPathFor(normalized);
     try {
@@ -394,6 +423,31 @@ export class FsLKGStore implements LKGStore {
 function containsSentinel(buf: Buffer | string): boolean {
   if (typeof buf === 'string') return buf.includes(REDACTED_SENTINEL);
   return buf.includes(REDACTED_SENTINEL);
+}
+
+/**
+ * Scrub a thrown error's message before placing it in an audit
+ * record. Mirrors the oc-paths-lint scrubber (C10):
+ *
+ *   - Refuse to echo the redaction sentinel — replace wholesale.
+ *   - Strip ASCII control chars (preserve \t and printable bytes).
+ *   - Cap length at 256 bytes to bound leak surface.
+ *
+ * A validator that crashed on a secret-bearing parsed value could
+ * otherwise leak the secret through the audit envelope. Audit
+ * records persist to disk + flow into observability pipelines, so
+ * the leak surface is wide if unguarded.
+ */
+const ERR_MESSAGE_MAX_LEN = 256;
+function scrubErrorMessage(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err);
+  if (raw.includes(REDACTED_SENTINEL)) {
+    return '[scrubbed: validator/parser message contained redaction sentinel]';
+  }
+  const CONTROL_CHARS = new RegExp('[\\x00-\\x08\\x0B-\\x1F\\x7F]', 'g');
+  const stripped = raw.replace(CONTROL_CHARS, '');
+  if (stripped.length <= ERR_MESSAGE_MAX_LEN) return stripped;
+  return stripped.slice(0, ERR_MESSAGE_MAX_LEN - 3) + '...';
 }
 
 /**

@@ -49,9 +49,10 @@ export interface LKGStore {
    * after a recovery event without re-walking the recovery flow.
    *
    * Throws `LKGError(LKG_STORE_UNAVAILABLE)` if no LKG has been
-   * promoted yet for `path`.
+   * promoted yet for `path`. Throws `LKGError(LKG_ABORTED)` if the
+   * caller's signal is already aborted.
    */
-  readLastKnownGood(path: string): Promise<Uint8Array>;
+  readLastKnownGood(path: string, opts?: LKGObserveOptions): Promise<Uint8Array>;
 
   /**
    * Look up the entry record for a tracked path. Returns `null` if
