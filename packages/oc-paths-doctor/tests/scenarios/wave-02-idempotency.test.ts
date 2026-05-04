@@ -11,11 +11,11 @@ import { describe, expect, it } from 'vitest';
 import { STARTER_FIXERS_V0 } from '../../src/extensions/ocdoctor-fixers-starter/index.js';
 import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
 
-function applyFix(spec: OcPathFixerSpec<unknown>, raw: string): string {
+async function applyFix(spec: OcPathFixerSpec<unknown>, raw: string): Promise<string> {
   const { ast } = parseMd(raw);
-  const matches = spec.detect({ fileName: spec.appliesTo, ast, raw });
+  const matches = await spec.detect({ fileName: spec.appliesTo, ast, raw });
   if (matches.length === 0) return raw;
-  return spec.fix({
+  return await spec.fix({
     fileName: spec.appliesTo,
     ast,
     raw,
@@ -48,16 +48,16 @@ describe('wave-02 idempotency', () => {
     describe(fixer.id, () => {
       for (const raw of corpus) {
         const label = JSON.stringify(raw.slice(0, 30));
-        it(`is idempotent on input ${label}`, () => {
-          const once = applyFix(fixer, raw);
-          const twice = applyFix(fixer, once);
+        it(`is idempotent on input ${label}`, async () => {
+          const once = await applyFix(fixer, raw);
+          const twice = await applyFix(fixer, once);
           expect(twice).toBe(once);
         });
       }
     });
   }
 
-  it('cross-fixer: applying every fixer in pack order is idempotent', () => {
+  it('cross-fixer: applying every fixer in pack order is idempotent', async () => {
     const inputs = [
       '## Tools\n- gh\n', // AGENTS.md scope (will trigger boundaries fixer)
       '## Entry\nbody\n', // MEMORY.md scope
@@ -66,19 +66,19 @@ describe('wave-02 idempotency', () => {
     for (const raw of inputs) {
       let next = raw;
       for (const fixer of STARTER_FIXERS_V0) {
-        next = applyFix(fixer, next);
+        next = await applyFix(fixer, next);
       }
       // Apply pack again — should not change anything since each fixer
       // only acts on its own appliesTo, and each is idempotent.
       let again = next;
       for (const fixer of STARTER_FIXERS_V0) {
-        again = applyFix(fixer, again);
+        again = await applyFix(fixer, again);
       }
       expect(again).toBe(next);
     }
   });
 
-  it('every fixer detects nothing on an already-fixed input', () => {
+  it('every fixer detects nothing on an already-fixed input', async () => {
     for (const fixer of STARTER_FIXERS_V0) {
       // Build a minimal input then run fixer once — the fixed result
       // should detect zero findings.
@@ -94,9 +94,9 @@ describe('wave-02 idempotency', () => {
       if (raw === undefined) {
         throw new Error(`no probe input for fixer ${fixer.id}`);
       }
-      const fixed = applyFix(fixer, raw);
+      const fixed = await applyFix(fixer, raw);
       const reAst = parseMd(fixed).ast;
-      const matches = fixer.detect({ fileName: fixer.appliesTo, ast: reAst, raw: fixed });
+      const matches = await fixer.detect({ fileName: fixer.appliesTo, ast: reAst, raw: fixed });
       expect(matches).toEqual([]);
     }
   });

@@ -15,34 +15,34 @@ import {
 } from '../../../src/extensions/ocdoctor-fixers-starter/index.js';
 import type { OcPathFixerSpec } from '../../../src/plugin-sdk/oc-doctor/types.js';
 
-function detect(spec: OcPathFixerSpec<unknown>, raw: string, fileName = spec.appliesTo) {
-  return spec.detect({ fileName, ast: parseMd(raw).ast, raw });
+async function detect(spec: OcPathFixerSpec<unknown>, raw: string, fileName = spec.appliesTo) {
+  return await spec.detect({ fileName, ast: parseMd(raw).ast, raw });
 }
 
-function fix(spec: OcPathFixerSpec<unknown>, raw: string, fileName = spec.appliesTo): string {
+async function fix(spec: OcPathFixerSpec<unknown>, raw: string, fileName = spec.appliesTo): Promise<string> {
   const ast = parseMd(raw).ast;
-  const matches = spec.detect({ fileName, ast, raw });
+  const matches = await spec.detect({ fileName, ast, raw });
   if (matches.length === 0) return raw;
-  return spec.fix({ fileName, ast, raw, match: matches[0]!.match });
+  return await spec.fix({ fileName, ast, raw, match: matches[0]!.match });
 }
 
 describe('agentsAddBoundariesStub', () => {
-  it('detects missing boundaries section', () => {
-    expect(detect(agentsAddBoundariesStub, '## Tools\n- gh\n').length).toBe(1);
+  it('detects missing boundaries section', async () => {
+    expect((await detect(agentsAddBoundariesStub, '## Tools\n- gh\n')).length).toBe(1);
   });
-  it('does not detect when boundaries section exists', () => {
+  it('does not detect when boundaries section exists', async () => {
     expect(
-      detect(agentsAddBoundariesStub, '## Tools\n## Boundaries\n- never rm -rf\n').length,
+      (await detect(agentsAddBoundariesStub, '## Tools\n## Boundaries\n- never rm -rf\n')).length,
     ).toBe(0);
   });
-  it('appends a Boundaries stub', () => {
-    const after = fix(agentsAddBoundariesStub, '## Tools\n- gh\n');
+  it('appends a Boundaries stub', async () => {
+    const after = await fix(agentsAddBoundariesStub, '## Tools\n- gh\n');
     expect(after).toContain('## Boundaries');
     expect(after).toContain('## Tools');
   });
-  it('is idempotent', () => {
-    const once = fix(agentsAddBoundariesStub, '## Tools\n- gh\n');
-    const twice = fix(agentsAddBoundariesStub, once);
+  it('is idempotent', async () => {
+    const once = await fix(agentsAddBoundariesStub, '## Tools\n- gh\n');
+    const twice = await fix(agentsAddBoundariesStub, once);
     expect(twice).toBe(once);
   });
   it('skips non-md ast (defensive)', () => {
@@ -51,84 +51,84 @@ describe('agentsAddBoundariesStub', () => {
 });
 
 describe('toolsAddGuidanceTableStub', () => {
-  it('detects missing guidance section', () => {
-    expect(detect(toolsAddGuidanceTableStub, '## Header\n').length).toBe(1);
+  it('detects missing guidance section', async () => {
+    expect((await detect(toolsAddGuidanceTableStub, '## Header\n')).length).toBe(1);
   });
-  it('appends a Tool Guidance section with a table', () => {
-    const after = fix(toolsAddGuidanceTableStub, '## Header\n');
+  it('appends a Tool Guidance section with a table', async () => {
+    const after = await fix(toolsAddGuidanceTableStub, '## Header\n');
     expect(after).toContain('## Tool Guidance');
     expect(after).toMatch(/\|\s*tool\s*\|\s*guidance\s*\|/);
   });
-  it('is idempotent', () => {
-    const once = fix(toolsAddGuidanceTableStub, '## Header\n');
-    const twice = fix(toolsAddGuidanceTableStub, once);
+  it('is idempotent', async () => {
+    const once = await fix(toolsAddGuidanceTableStub, '## Header\n');
+    const twice = await fix(toolsAddGuidanceTableStub, once);
     expect(twice).toBe(once);
   });
 });
 
 describe('memoryAddScopeDefault', () => {
-  it('detects missing scope frontmatter', () => {
-    expect(detect(memoryAddScopeDefault, '## Entry\nbody\n').length).toBe(1);
+  it('detects missing scope frontmatter', async () => {
+    expect((await detect(memoryAddScopeDefault, '## Entry\nbody\n')).length).toBe(1);
   });
-  it('does not detect when scope present', () => {
+  it('does not detect when scope present', async () => {
     expect(
-      detect(memoryAddScopeDefault, '---\nscope: default\n---\n## Entry\n').length,
+      (await detect(memoryAddScopeDefault, '---\nscope: default\n---\n## Entry\n')).length,
     ).toBe(0);
   });
-  it('inserts scope: default into frontmatter', () => {
-    const after = fix(memoryAddScopeDefault, '## Entry\nbody\n');
+  it('inserts scope: default into frontmatter', async () => {
+    const after = await fix(memoryAddScopeDefault, '## Entry\nbody\n');
     expect(after).toContain('scope:');
   });
-  it('is idempotent', () => {
-    const once = fix(memoryAddScopeDefault, '## Entry\nbody\n');
-    const twice = fix(memoryAddScopeDefault, once);
+  it('is idempotent', async () => {
+    const once = await fix(memoryAddScopeDefault, '## Entry\nbody\n');
+    const twice = await fix(memoryAddScopeDefault, once);
     expect(twice).toBe(once);
   });
 });
 
 describe('skillAddRequiredFrontmatterStub', () => {
-  it('detects missing required frontmatter', () => {
-    expect(detect(skillAddRequiredFrontmatterStub, '## Body\n').length).toBeGreaterThan(0);
+  it('detects missing required frontmatter', async () => {
+    expect((await detect(skillAddRequiredFrontmatterStub, '## Body\n')).length).toBeGreaterThan(0);
   });
-  it('appends required frontmatter on the empty case', () => {
-    const after = fix(skillAddRequiredFrontmatterStub, '## Body\n');
+  it('appends required frontmatter on the empty case', async () => {
+    const after = await fix(skillAddRequiredFrontmatterStub, '## Body\n');
     // The stub touches frontmatter — we don't lock the exact string,
     // just that it differs and is idempotent.
     expect(after).not.toBe('## Body\n');
   });
-  it('is idempotent', () => {
-    const once = fix(skillAddRequiredFrontmatterStub, '## Body\n');
-    const twice = fix(skillAddRequiredFrontmatterStub, once);
+  it('is idempotent', async () => {
+    const once = await fix(skillAddRequiredFrontmatterStub, '## Body\n');
+    const twice = await fix(skillAddRequiredFrontmatterStub, once);
     expect(twice).toBe(once);
   });
 });
 
 describe('identityAddTrustLevelStub', () => {
-  it('detects missing trust-level section', () => {
-    expect(detect(identityAddTrustLevelStub, '## Section\n').length).toBe(1);
+  it('detects missing trust-level section', async () => {
+    expect((await detect(identityAddTrustLevelStub, '## Section\n')).length).toBe(1);
   });
-  it('appends a Trust Level section', () => {
-    const after = fix(identityAddTrustLevelStub, '## Section\n');
+  it('appends a Trust Level section', async () => {
+    const after = await fix(identityAddTrustLevelStub, '## Section\n');
     expect(after.toLowerCase()).toContain('trust');
   });
-  it('is idempotent', () => {
-    const once = fix(identityAddTrustLevelStub, '## Section\n');
-    const twice = fix(identityAddTrustLevelStub, once);
+  it('is idempotent', async () => {
+    const once = await fix(identityAddTrustLevelStub, '## Section\n');
+    const twice = await fix(identityAddTrustLevelStub, once);
     expect(twice).toBe(once);
   });
 });
 
 describe('userAddPreferencesStub', () => {
-  it('detects missing preferences section', () => {
-    expect(detect(userAddPreferencesStub, '## Role\n').length).toBe(1);
+  it('detects missing preferences section', async () => {
+    expect((await detect(userAddPreferencesStub, '## Role\n')).length).toBe(1);
   });
-  it('appends a Preferences section', () => {
-    const after = fix(userAddPreferencesStub, '## Role\n');
+  it('appends a Preferences section', async () => {
+    const after = await fix(userAddPreferencesStub, '## Role\n');
     expect(after).toContain('## Preferences');
   });
-  it('is idempotent', () => {
-    const once = fix(userAddPreferencesStub, '## Role\n');
-    const twice = fix(userAddPreferencesStub, once);
+  it('is idempotent', async () => {
+    const once = await fix(userAddPreferencesStub, '## Role\n');
+    const twice = await fix(userAddPreferencesStub, once);
     expect(twice).toBe(once);
   });
 });

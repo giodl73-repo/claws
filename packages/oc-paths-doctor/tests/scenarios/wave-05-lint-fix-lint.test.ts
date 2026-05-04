@@ -11,11 +11,11 @@ import { describe, expect, it } from 'vitest';
 import { STARTER_FIXERS_V0 } from '../../src/extensions/ocdoctor-fixers-starter/index.js';
 import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
 
-function applyFix(spec: OcPathFixerSpec<unknown>, raw: string): string {
+async function applyFix(spec: OcPathFixerSpec<unknown>, raw: string): Promise<string> {
   const { ast } = parseMd(raw);
-  const matches = spec.detect({ fileName: spec.appliesTo, ast, raw });
+  const matches = await spec.detect({ fileName: spec.appliesTo, ast, raw });
   if (matches.length === 0) return raw;
-  return spec.fix({
+  return await spec.fix({
     fileName: spec.appliesTo,
     ast,
     raw,
@@ -65,29 +65,29 @@ describe('wave-05 lint→fix→lint sweep', () => {
         expect(lintIds(fixer.appliesTo, raw)).toContain(pairedRuleId);
       });
 
-      it('LFL-02 fix produces non-equal output when applicable', () => {
-        const after = applyFix(fixer, raw);
+      it('LFL-02 fix produces non-equal output when applicable', async () => {
+        const after = await applyFix(fixer, raw);
         expect(after).not.toBe(raw);
       });
 
-      it('LFL-03 lint after fix no longer reports the paired rule', () => {
-        const after = applyFix(fixer, raw);
+      it('LFL-03 lint after fix no longer reports the paired rule', async () => {
+        const after = await applyFix(fixer, raw);
         expect(lintIds(fixer.appliesTo, after)).not.toContain(pairedRuleId);
       });
 
-      it('LFL-04 lint after fix produces zero diagnostics from this rule pack', () => {
+      it('LFL-04 lint after fix produces zero diagnostics from this rule pack', async () => {
         // Some inputs may still trigger OTHER rules, but specifically the
         // paired one must clear. This test asserts the strongest case:
         // when the input is minimal, only the paired rule fires, so
         // post-fix should be clean.
-        const after = applyFix(fixer, raw);
+        const after = await applyFix(fixer, raw);
         const remaining = lintIds(fixer.appliesTo, after).filter((id) => id === pairedRuleId);
         expect(remaining).toEqual([]);
       });
     });
   }
 
-  it('LFL-05 full pack: 3 malformed files → apply pack → all paired rules clear', () => {
+  it('LFL-05 full pack: 3 malformed files → apply pack → all paired rules clear', async () => {
     const files: { name: string; raw: string }[] = [
       { name: 'AGENTS.md', raw: '## Tools\n- gh\n' },
       { name: 'MEMORY.md', raw: '## Entry\nbody\n' },
@@ -99,13 +99,15 @@ describe('wave-05 lint→fix→lint sweep', () => {
     for (const f of files) for (const id of lintIds(f.name, f.raw)) beforeIds.add(id);
 
     // Apply each fixer to its paired file.
-    const after = files.map((f) => {
-      let raw = f.raw;
-      for (const fixer of STARTER_FIXERS_V0) {
-        if (fixer.appliesTo === f.name) raw = applyFix(fixer, raw);
-      }
-      return { name: f.name, raw };
-    });
+    const after = await Promise.all(
+      files.map(async (f) => {
+        let raw = f.raw;
+        for (const fixer of STARTER_FIXERS_V0) {
+          if (fixer.appliesTo === f.name) raw = await applyFix(fixer, raw);
+        }
+        return { name: f.name, raw };
+      }),
+    );
 
     // Snapshot post-fix diagnostics.
     const afterIds = new Set<string>();

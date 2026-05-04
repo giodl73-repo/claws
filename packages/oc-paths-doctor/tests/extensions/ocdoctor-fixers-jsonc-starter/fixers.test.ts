@@ -8,14 +8,14 @@ import {
 } from '../../../src/extensions/ocdoctor-fixers-jsonc-starter/index.js';
 import { syntheticMatch } from '../../test-match.js';
 
-function detect(spec: typeof configAddPluginsStub, raw: string, fileName = 'gateway.jsonc') {
-  return spec.detect({ fileName, ast: parseJsonc(raw).ast, raw });
+async function detect(spec: typeof configAddPluginsStub, raw: string, fileName = 'gateway.jsonc') {
+  return await spec.detect({ fileName, ast: parseJsonc(raw).ast, raw });
 }
-function fix(spec: typeof configAddPluginsStub, raw: string, fileName = 'gateway.jsonc') {
+async function fix(spec: typeof configAddPluginsStub, raw: string, fileName = 'gateway.jsonc') {
   const ast = parseJsonc(raw).ast;
-  const matches = spec.detect({ fileName, ast, raw });
+  const matches = await spec.detect({ fileName, ast, raw });
   if (matches.length === 0) return raw;
-  return spec.fix({
+  return await spec.fix({
     fileName,
     ast,
     raw,
@@ -24,29 +24,29 @@ function fix(spec: typeof configAddPluginsStub, raw: string, fileName = 'gateway
 }
 
 /** Fan-out helper: re-detect after each fix until no findings remain. */
-function fixAll(spec: typeof configAddPluginsStub, raw: string, fileName = 'gateway.jsonc') {
+async function fixAll(spec: typeof configAddPluginsStub, raw: string, fileName = 'gateway.jsonc') {
   let next = raw;
   for (let pass = 0; pass < 20; pass++) {
     const ast = parseJsonc(next).ast;
-    const matches = spec.detect({ fileName, ast, raw: next });
+    const matches = await spec.detect({ fileName, ast, raw: next });
     if (matches.length === 0) return next;
-    next = spec.fix({ fileName, ast, raw: next, match: matches[0]!.match });
+    next = await spec.fix({ fileName, ast, raw: next, match: matches[0]!.match });
   }
   return next;
 }
 
 describe('configAddPluginsStub', () => {
-  it('detects missing plugins', () => {
-    expect(detect(configAddPluginsStub, '{ "version": "1.0" }').length).toBe(1);
+  it('detects missing plugins', async () => {
+    expect((await detect(configAddPluginsStub, '{ "version": "1.0" }')).length).toBe(1);
   });
-  it('does not detect when plugins is present', () => {
+  it('does not detect when plugins is present', async () => {
     expect(
-      detect(configAddPluginsStub, '{ "plugins": { "entries": {} } }').length,
+      (await detect(configAddPluginsStub, '{ "plugins": { "entries": {} } }')).length,
     ).toBe(0);
   });
-  it('inserts plugins stub into a file with other keys', () => {
+  it('inserts plugins stub into a file with other keys', async () => {
     const before = '{ "version": "1.0" }';
-    const after = fix(configAddPluginsStub, before);
+    const after = await fix(configAddPluginsStub, before);
     expect(after).toContain('"plugins"');
     expect(after).toContain('"entries"');
     expect(JSON.parse(after)).toEqual({
@@ -54,77 +54,77 @@ describe('configAddPluginsStub', () => {
       plugins: { entries: {} },
     });
   });
-  it('inserts plugins stub into an empty object', () => {
-    const after = fix(configAddPluginsStub, '{}');
+  it('inserts plugins stub into an empty object', async () => {
+    const after = await fix(configAddPluginsStub, '{}');
     expect(JSON.parse(after)).toEqual({ plugins: { entries: {} } });
   });
-  it('is idempotent — second fix is a no-op', () => {
-    const once = fix(configAddPluginsStub, '{ "version": "1.0" }');
-    const twice = fix(configAddPluginsStub, once);
+  it('is idempotent — second fix is a no-op', async () => {
+    const once = await fix(configAddPluginsStub, '{ "version": "1.0" }');
+    const twice = await fix(configAddPluginsStub, once);
     expect(twice).toBe(once);
   });
-  it('no-ops on non-object root', () => {
-    expect(fix(configAddPluginsStub, '[]')).toBe('[]');
+  it('no-ops on non-object root', async () => {
+    expect(await fix(configAddPluginsStub, '[]')).toBe('[]');
   });
 });
 
 describe('configAddVersionStub', () => {
-  it('detects missing version', () => {
-    expect(detect(configAddVersionStub, '{ "plugins": {} }').length).toBe(1);
+  it('detects missing version', async () => {
+    expect((await detect(configAddVersionStub, '{ "plugins": {} }')).length).toBe(1);
   });
-  it('does not detect when version is present', () => {
+  it('does not detect when version is present', async () => {
     expect(
-      detect(configAddVersionStub, '{ "version": "1.0", "plugins": {} }').length,
+      (await detect(configAddVersionStub, '{ "version": "1.0", "plugins": {} }')).length,
     ).toBe(0);
   });
-  it('inserts version stub at the head of the object', () => {
-    const after = fix(configAddVersionStub, '{ "plugins": {} }');
+  it('inserts version stub at the head of the object', async () => {
+    const after = await fix(configAddVersionStub, '{ "plugins": {} }');
     expect(JSON.parse(after)).toEqual({ version: '0.0.0', plugins: {} });
   });
-  it('inserts version into empty object', () => {
-    const after = fix(configAddVersionStub, '{}');
+  it('inserts version into empty object', async () => {
+    const after = await fix(configAddVersionStub, '{}');
     expect(JSON.parse(after)).toEqual({ version: '0.0.0' });
   });
-  it('is idempotent', () => {
-    const once = fix(configAddVersionStub, '{ "plugins": {} }');
-    const twice = fix(configAddVersionStub, once);
+  it('is idempotent', async () => {
+    const once = await fix(configAddVersionStub, '{ "plugins": {} }');
+    const twice = await fix(configAddVersionStub, once);
     expect(twice).toBe(once);
   });
 });
 
 describe('configRedactSecretLiteral', () => {
-  it('detects GitHub PAT', () => {
-    const findings = detect(
+  it('detects GitHub PAT', async () => {
+    const findings = await detect(
       configRedactSecretLiteral,
       '{ "github": { "token": "ghp_abcdef0123456789ABCDEF0123456789abcdef" } }',
     );
     expect(findings.length).toBeGreaterThan(0);
   });
-  it('replaces literal with placeholder', () => {
+  it('replaces literal with placeholder', async () => {
     const before =
       '{ "github": { "token": "ghp_abcdef0123456789ABCDEF0123456789abcdef" } }';
-    const after = fix(configRedactSecretLiteral, before);
+    const after = await fix(configRedactSecretLiteral, before);
     expect(after).not.toContain('ghp_abcdef');
     expect(after).toContain('${ENV_VAR_PLACEHOLDER}');
   });
-  it('handles multiple secrets in one file (fan-out)', () => {
+  it('handles multiple secrets in one file (fan-out)', async () => {
     const before =
       '{ "a": "ghp_abcdef0123456789ABCDEF0123456789abcdef", "b": "AKIAIOSFODNN7EXAMPLE" }';
-    const after = fixAll(configRedactSecretLiteral, before);
+    const after = await fixAll(configRedactSecretLiteral, before);
     expect(after).not.toContain('ghp_abcdef');
     expect(after).not.toContain('AKIAIOSFODNN7EXAMPLE');
   });
-  it('is idempotent — re-running on redacted file is a no-op', () => {
-    const once = fix(
+  it('is idempotent — re-running on redacted file is a no-op', async () => {
+    const once = await fix(
       configRedactSecretLiteral,
       '{ "k": "ghp_abcdef0123456789ABCDEF0123456789abcdef" }',
     );
-    const twice = fix(configRedactSecretLiteral, once);
+    const twice = await fix(configRedactSecretLiteral, once);
     expect(twice).toBe(once);
   });
-  it('passes on `${ENV_VAR}` placeholders (not detected as secrets)', () => {
+  it('passes on `${ENV_VAR}` placeholders (not detected as secrets)', async () => {
     expect(
-      detect(configRedactSecretLiteral, '{ "k": "${GH_TOKEN}" }').length,
+      (await detect(configRedactSecretLiteral, '{ "k": "${GH_TOKEN}" }')).length,
     ).toBe(0);
   });
 });

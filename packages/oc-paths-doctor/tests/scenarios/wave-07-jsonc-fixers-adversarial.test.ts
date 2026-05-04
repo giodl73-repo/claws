@@ -19,15 +19,15 @@ import {
 import { formatOcPath } from '@bic/oc-paths-substrate';
 import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
 
-function applyFix(
+async function applyFix(
   spec: OcPathFixerSpec<unknown>,
   raw: string,
   fileName = 'gateway.jsonc',
-): string {
+): Promise<string> {
   const ast = parseJsonc(raw).ast;
-  const matches = spec.detect({ fileName, ast, raw });
+  const matches = await spec.detect({ fileName, ast, raw });
   if (matches.length === 0) return raw;
-  return spec.fix({
+  return await spec.fix({
     fileName,
     ast,
     raw,
@@ -36,17 +36,17 @@ function applyFix(
 }
 
 /** Fan-out helper: re-detect after each fix until no findings remain. */
-function fixAll(
+async function fixAll(
   spec: OcPathFixerSpec<unknown>,
   raw: string,
   fileName = 'gateway.jsonc',
-): string {
+): Promise<string> {
   let next = raw;
   for (let pass = 0; pass < 50; pass++) {
     const ast = parseJsonc(next).ast;
-    const matches = spec.detect({ fileName, ast, raw: next });
+    const matches = await spec.detect({ fileName, ast, raw: next });
     if (matches.length === 0) return next;
-    next = spec.fix({ fileName, ast, raw: next, match: matches[0]!.match });
+    next = await spec.fix({ fileName, ast, raw: next, match: matches[0]!.match });
   }
   return next;
 }
@@ -72,9 +72,9 @@ describe('wave-07 jsonc fixers — idempotency', () => {
     describe(fixer.id, () => {
       for (const raw of HOSTILE_INPUTS) {
         const label = JSON.stringify(raw.slice(0, 30));
-        it(`is idempotent on ${label}`, () => {
-          const once = applyFix(fixer, raw);
-          const twice = applyFix(fixer, once);
+        it(`is idempotent on ${label}`, async () => {
+          const once = await applyFix(fixer, raw);
+          const twice = await applyFix(fixer, once);
           expect(twice).toBe(once);
         });
       }
@@ -94,9 +94,9 @@ describe('wave-07 jsonc fixers — hostile inputs do not throw', () => {
 
 describe('wave-07 jsonc fixers — detect findings have valid shape', () => {
   for (const fixer of jsoncStarterFixers) {
-    it(`${fixer.id} produces ocPath strings starting with oc://`, () => {
+    it(`${fixer.id} produces ocPath strings starting with oc://`, async () => {
       const ast = parseJsonc('{ "version": "1.0" }').ast;
-      const findings = fixer.detect({ fileName: 'config.jsonc', ast, raw: '{ "version": "1.0" }' });
+      const findings = await fixer.detect({ fileName: 'config.jsonc', ast, raw: '{ "version": "1.0" }' });
       for (const f of findings) {
         expect(formatOcPath(f.match.path).startsWith('oc://')).toBe(true);
         expect(typeof f.message).toBe('string');
@@ -107,9 +107,9 @@ describe('wave-07 jsonc fixers — detect findings have valid shape', () => {
 });
 
 describe('wave-07 add-plugins-stub — sibling preservation', () => {
-  it('preserves untouched keys when inserting plugins', () => {
+  it('preserves untouched keys when inserting plugins', async () => {
     const before = '{ "version": "2.0", "extra": "keep me" }';
-    const after = applyFix(configAddPluginsStub, before);
+    const after = await applyFix(configAddPluginsStub, before);
     expect(JSON.parse(after)).toEqual({
       version: '2.0',
       extra: 'keep me',
@@ -119,9 +119,9 @@ describe('wave-07 add-plugins-stub — sibling preservation', () => {
 });
 
 describe('wave-07 add-version-stub — sibling preservation', () => {
-  it('preserves untouched keys when inserting version', () => {
+  it('preserves untouched keys when inserting version', async () => {
     const before = '{ "plugins": { "entries": { "a": 1 } } }';
-    const after = applyFix(configAddVersionStub, before);
+    const after = await applyFix(configAddVersionStub, before);
     expect(JSON.parse(after)).toEqual({
       version: '0.0.0',
       plugins: { entries: { a: 1 } },
@@ -130,29 +130,29 @@ describe('wave-07 add-version-stub — sibling preservation', () => {
 });
 
 describe('wave-07 redact-secret-literal — multiple secrets (fan-out)', () => {
-  it('replaces every distinct secret literal in the file', () => {
+  it('replaces every distinct secret literal in the file', async () => {
     const before = JSON.stringify({
       a: { token: 'ghp_abcdef0123456789ABCDEF0123456789abcdef' },
       b: { key: 'AKIAIOSFODNN7EXAMPLE' },
       c: { sk: 'sk-abcdef0123456789abcdef0123456789ABCDEF' },
     });
-    const after = fixAll(configRedactSecretLiteral, before);
+    const after = await fixAll(configRedactSecretLiteral, before);
     expect(after).not.toContain('ghp_abcdef');
     expect(after).not.toContain('AKIAIOSFODNN7EXAMPLE');
     expect(after).not.toContain('sk-abcdef');
     expect(after).toContain('${ENV_VAR_PLACEHOLDER}');
   });
 
-  it('preserves env-var placeholders unchanged', () => {
+  it('preserves env-var placeholders unchanged', async () => {
     const before = '{ "k": "${GH_TOKEN}" }';
-    const after = applyFix(configRedactSecretLiteral, before);
+    const after = await applyFix(configRedactSecretLiteral, before);
     expect(after).toBe(before);
   });
 
-  it('handles same-secret-multiple-places consistently', () => {
+  it('handles same-secret-multiple-places consistently', async () => {
     const secret = 'ghp_abcdef0123456789ABCDEF0123456789abcdef';
     const before = JSON.stringify({ a: secret, b: secret, c: { d: secret } });
-    const after = fixAll(configRedactSecretLiteral, before);
+    const after = await fixAll(configRedactSecretLiteral, before);
     expect(after).not.toContain(secret);
     // All three slots have the placeholder.
     const placeholderCount = (after.match(/\$\{ENV_VAR_PLACEHOLDER\}/g) ?? []).length;

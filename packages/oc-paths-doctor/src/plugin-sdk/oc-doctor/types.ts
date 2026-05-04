@@ -224,6 +224,14 @@ export interface OcPathFixerSpec<TOptions = DefaultFixerOptions> {
    *
    * Empty result = no fix needed. Each entry becomes one
    * `DoctorFinding` and one `fix()` invocation.
+   *
+   * **Cross-file fixers**: `siblingFiles` carries the rest of the
+   * workspace alongside the file being inspected. Most fixers
+   * ignore it; multi-file fixers (e.g., a policy.jsonc-vs-sources
+   * drift check) read it to compute findings that depend on related
+   * files. The fixer's own `appliesTo` glob still narrows which
+   * file `ast/raw` is bound to — sibling access is additive, not
+   * a replacement for the per-file dispatch.
    */
   detect(input: {
     fileName: string;
@@ -238,7 +246,16 @@ export interface OcPathFixerSpec<TOptions = DefaultFixerOptions> {
      * too, not just at fix time.
      */
     options?: TOptions;
-  }): readonly DoctorDetectResult[];
+    /**
+     * Read-only access to other files in the workspace. Single-file
+     * fixers ignore this; cross-file fixers (e.g., policy drift)
+     * use it to compute findings that depend on sibling state.
+     * The current file is excluded from this list.
+     */
+    siblingFiles?: readonly DoctorFile[];
+    /** Absolute workspace directory — useful for cross-file fixers writing to a non-current path. */
+    workspaceDir?: string;
+  }): readonly DoctorDetectResult[] | Promise<readonly DoctorDetectResult[]>;
   /**
    * Given the current bytes and the typed `OcPathMatch` produced by
    * `detect()`, produce new bytes that resolve the issue. MUST be
@@ -251,6 +268,8 @@ export interface OcPathFixerSpec<TOptions = DefaultFixerOptions> {
    * **Fan-out semantic**: one `fix()` call per match. The runner
    * iterates over every detect result and invokes `fix()` once each.
    * Fixers MUST handle a single match — not the whole match list.
+   *
+   * **Cross-file fixers**: `siblingFiles` matches detect's surface.
    */
   fix(input: {
     fileName: string;
@@ -258,7 +277,9 @@ export interface OcPathFixerSpec<TOptions = DefaultFixerOptions> {
     raw: string;
     match: OcPathMatch;
     options?: TOptions;
-  }): string;
+    siblingFiles?: readonly DoctorFile[];
+    workspaceDir?: string;
+  }): string | Promise<string>;
 }
 
 /**

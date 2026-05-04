@@ -44,57 +44,57 @@ const appendDone: OcPathFixerSpec = {
 };
 
 describe('doctor test-harness', () => {
-  it('runDetect returns findings on a malformed input', () => {
-    const findings = runDetect(appendDone, 'AGENTS.md', '## H\n');
+  it('runDetect returns findings on a malformed input', async () => {
+    const findings = await runDetect(appendDone, 'AGENTS.md', '## H\n');
     expect(findings).toHaveLength(1);
   });
 
-  it('runDetect returns empty on a clean input', () => {
-    expect(runDetect(appendDone, 'AGENTS.md', '## H\n## Done\n')).toEqual([]);
+  it('runDetect returns empty on a clean input', async () => {
+    expect(await runDetect(appendDone, 'AGENTS.md', '## H\n## Done\n')).toEqual([]);
   });
 
-  it('runFixer applies the first match', () => {
-    const after = runFixer(appendDone, 'AGENTS.md', '## H\n');
+  it('runFixer applies the first match', async () => {
+    const after = await runFixer(appendDone, 'AGENTS.md', '## H\n');
     expect(after).toContain('## Done');
   });
 
-  it('runFixer no-ops on already-fixed input', () => {
+  it('runFixer no-ops on already-fixed input', async () => {
     const before = '## H\n## Done\n';
-    expect(runFixer(appendDone, 'AGENTS.md', before)).toBe(before);
+    expect(await runFixer(appendDone, 'AGENTS.md', before)).toBe(before);
   });
 
-  it('runFixerAll converges to a stable result', () => {
-    const after = runFixerAll(appendDone, 'AGENTS.md', '## H\n');
+  it('runFixerAll converges to a stable result', async () => {
+    const after = await runFixerAll(appendDone, 'AGENTS.md', '## H\n');
     expect(after).toContain('## Done');
     // Re-running should be a no-op.
-    expect(runFixerAll(appendDone, 'AGENTS.md', after)).toBe(after);
+    expect(await runFixerAll(appendDone, 'AGENTS.md', after)).toBe(after);
   });
 
-  it('assertDetects passes when fixer flags', () => {
-    expect(() => assertDetects(appendDone, 'AGENTS.md', '## H\n')).not.toThrow();
+  it('assertDetects passes when fixer flags', async () => {
+    await expect(assertDetects(appendDone, 'AGENTS.md', '## H\n')).resolves.toBeUndefined();
   });
 
-  it('assertDetects throws when fixer is silent', () => {
-    expect(() => assertDetects(appendDone, 'AGENTS.md', '## H\n## Done\n')).toThrow(
+  it('assertDetects throws when fixer is silent', async () => {
+    await expect(assertDetects(appendDone, 'AGENTS.md', '## H\n## Done\n')).rejects.toThrow(
       /detect/,
     );
   });
 
-  it('assertNoDetects passes on a clean input', () => {
-    expect(() => assertNoDetects(appendDone, 'AGENTS.md', '## H\n## Done\n')).not.toThrow();
+  it('assertNoDetects passes on a clean input', async () => {
+    await expect(assertNoDetects(appendDone, 'AGENTS.md', '## H\n## Done\n')).resolves.toBeUndefined();
   });
 
-  it('assertNoDetects throws with a useful summary on a flagged input', () => {
-    expect(() => assertNoDetects(appendDone, 'AGENTS.md', '## H\n')).toThrow(
+  it('assertNoDetects throws with a useful summary on a flagged input', async () => {
+    await expect(assertNoDetects(appendDone, 'AGENTS.md', '## H\n')).rejects.toThrow(
       /no done section/,
     );
   });
 
-  it('assertIdempotent passes for an idempotent fixer', () => {
-    expect(() => assertIdempotent(appendDone, 'AGENTS.md', '## H\n')).not.toThrow();
+  it('assertIdempotent passes for an idempotent fixer', async () => {
+    await expect(assertIdempotent(appendDone, 'AGENTS.md', '## H\n')).resolves.toBeUndefined();
   });
 
-  it('assertIdempotent surfaces non-idempotent fixers', () => {
+  it('assertIdempotent surfaces non-idempotent fixers', async () => {
     let counter = 0;
     const broken: OcPathFixerSpec = {
       id: 'demo/broken',
@@ -115,6 +115,6 @@ describe('doctor test-harness', () => {
         return raw + `\nCOUNTER=${counter}\n`;
       },
     };
-    expect(() => assertIdempotent(broken, 'AGENTS.md', '## H\n')).toThrow();
+    await expect(assertIdempotent(broken, 'AGENTS.md', '## H\n')).rejects.toThrow();
   });
 });

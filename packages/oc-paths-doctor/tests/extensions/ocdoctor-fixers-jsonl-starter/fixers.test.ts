@@ -7,14 +7,14 @@ import {
 } from '../../../src/extensions/ocdoctor-fixers-jsonl-starter/index.js';
 import { syntheticMatch } from '../../test-match.js';
 
-function detect(spec: typeof sessionAppendTerminalEvent, raw: string, fileName = 'session.jsonl') {
-  return spec.detect({ fileName, ast: parseJsonl(raw).ast, raw });
+async function detect(spec: typeof sessionAppendTerminalEvent, raw: string, fileName = 'session.jsonl') {
+  return await spec.detect({ fileName, ast: parseJsonl(raw).ast, raw });
 }
-function fix(spec: typeof sessionAppendTerminalEvent, raw: string, fileName = 'session.jsonl') {
+async function fix(spec: typeof sessionAppendTerminalEvent, raw: string, fileName = 'session.jsonl') {
   const ast = parseJsonl(raw).ast;
-  const matches = spec.detect({ fileName, ast, raw });
+  const matches = await spec.detect({ fileName, ast, raw });
   if (matches.length === 0) return raw;
-  return spec.fix({
+  return await spec.fix({
     fileName,
     ast,
     raw,
@@ -23,57 +23,57 @@ function fix(spec: typeof sessionAppendTerminalEvent, raw: string, fileName = 's
 }
 
 describe('sessionAppendTerminalEvent', () => {
-  it('detects non-terminal final event', () => {
+  it('detects non-terminal final event', async () => {
     expect(
-      detect(sessionAppendTerminalEvent, '{"event":"start"}\n{"event":"step"}\n').length,
+      (await detect(sessionAppendTerminalEvent, '{"event":"start"}\n{"event":"step"}\n')).length,
     ).toBe(1);
   });
-  it('does not detect when last event is end', () => {
+  it('does not detect when last event is end', async () => {
     expect(
-      detect(sessionAppendTerminalEvent, '{"event":"start"}\n{"event":"end"}\n').length,
+      (await detect(sessionAppendTerminalEvent, '{"event":"start"}\n{"event":"end"}\n')).length,
     ).toBe(0);
   });
-  it('appends terminal event with _auto marker', () => {
-    const after = fix(sessionAppendTerminalEvent, '{"event":"step"}\n');
+  it('appends terminal event with _auto marker', async () => {
+    const after = await fix(sessionAppendTerminalEvent, '{"event":"step"}\n');
     expect(after).toContain('"event":"end"');
     expect(after).toContain('"_auto":true');
   });
-  it('preserves prior lines verbatim', () => {
+  it('preserves prior lines verbatim', async () => {
     const before = '{"event":"start"}\n{"event":"step","n":42}\n';
-    const after = fix(sessionAppendTerminalEvent, before);
+    const after = await fix(sessionAppendTerminalEvent, before);
     expect(after.startsWith(before)).toBe(true);
   });
-  it('is idempotent', () => {
-    const once = fix(sessionAppendTerminalEvent, '{"event":"step"}\n');
-    const twice = fix(sessionAppendTerminalEvent, once);
+  it('is idempotent', async () => {
+    const once = await fix(sessionAppendTerminalEvent, '{"event":"step"}\n');
+    const twice = await fix(sessionAppendTerminalEvent, once);
     expect(twice).toBe(once);
   });
-  it('no-ops on empty file', () => {
-    expect(fix(sessionAppendTerminalEvent, '')).toBe('');
+  it('no-ops on empty file', async () => {
+    expect(await fix(sessionAppendTerminalEvent, '')).toBe('');
   });
-  it('no-ops on file ending with already-terminal event', () => {
+  it('no-ops on file ending with already-terminal event', async () => {
     const before = '{"event":"start"}\n{"event":"complete"}\n';
-    expect(fix(sessionAppendTerminalEvent, before)).toBe(before);
+    expect(await fix(sessionAppendTerminalEvent, before)).toBe(before);
   });
 });
 
 describe('sessionQuarantineMalformedLine', () => {
-  it('detects malformed lines individually', () => {
+  it('detects malformed lines individually', async () => {
     expect(
-      detect(
+      (await detect(
         sessionQuarantineMalformedLine,
         '{"event":"start"}\nbroken1\n{"event":"end"}\nbroken2\n',
-      ).length,
+      )).length,
     ).toBe(2);
   });
-  it('passes a clean log', () => {
+  it('passes a clean log', async () => {
     expect(
-      detect(sessionQuarantineMalformedLine, '{"event":"start"}\n{"event":"end"}\n')
+      (await detect(sessionQuarantineMalformedLine, '{"event":"start"}\n{"event":"end"}\n'))
         .length,
     ).toBe(0);
   });
-  it('replaces malformed lines with quarantine events preserving original', () => {
-    const after = fix(
+  it('replaces malformed lines with quarantine events preserving original', async () => {
+    const after = await fix(
       sessionQuarantineMalformedLine,
       '{"event":"start"}\nbroken1\n{"event":"end"}\n',
     );
@@ -84,17 +84,17 @@ describe('sessionQuarantineMalformedLine', () => {
     expect(quarantine.original).toBe('broken1');
     expect(quarantine._auto).toBe(true);
   });
-  it('is idempotent — re-running on quarantined file is a no-op', () => {
-    const once = fix(
+  it('is idempotent — re-running on quarantined file is a no-op', async () => {
+    const once = await fix(
       sessionQuarantineMalformedLine,
       '{"event":"start"}\nbroken\n{"event":"end"}\n',
     );
-    const twice = fix(sessionQuarantineMalformedLine, once);
+    const twice = await fix(sessionQuarantineMalformedLine, once);
     expect(twice).toBe(once);
   });
-  it('preserves blank lines and value lines', () => {
+  it('preserves blank lines and value lines', async () => {
     const before = '{"event":"a"}\n\nbroken\n\n{"event":"b"}\n';
-    const after = fix(sessionQuarantineMalformedLine, before);
+    const after = await fix(sessionQuarantineMalformedLine, before);
     const lines = after.split('\n');
     expect(lines[0]).toBe('{"event":"a"}');
     expect(lines[1]).toBe(''); // blank preserved

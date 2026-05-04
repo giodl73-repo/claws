@@ -112,7 +112,15 @@ export function ocPathFixerContribution<TOptions = unknown>(
       for (const f of ctx.files) {
         if (ctx.signal?.aborted) return findings;
         if (!matchGlob(spec.appliesTo, f.name)) continue;
-        const detected = spec.detect({ fileName: f.name, ast: f.ast, raw: f.raw, options });
+        const siblingFiles = ctx.files.filter((other) => other.path !== f.path);
+        const detected = await spec.detect({
+          fileName: f.name,
+          ast: f.ast,
+          raw: f.raw,
+          options,
+          siblingFiles,
+          workspaceDir: ctx.workspaceDir,
+        });
         for (const d of detected) {
           findings.push({
             contributionId: spec.id,
@@ -149,12 +157,15 @@ export function ocPathFixerContribution<TOptions = unknown>(
         return { outcome: 'skipped', reason: 'fixer does not apply to this file' };
       }
       const options = resolveOptions(spec.defaultOptions, ctx.fixerOptions?.[spec.id]);
-      const after = spec.fix({
+      const siblingFiles = ctx.files.filter((other) => other.path !== file.path);
+      const after = await spec.fix({
         fileName: file.name,
         ast: file.ast,
         raw: file.raw,
         match: finding.match,
         options,
+        siblingFiles,
+        workspaceDir: ctx.workspaceDir,
       });
       if (after === file.raw) {
         return { outcome: 'skipped', reason: 'fix is a no-op (already correct)' };

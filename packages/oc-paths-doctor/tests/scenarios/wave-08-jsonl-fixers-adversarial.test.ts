@@ -10,15 +10,15 @@ import {
 } from '../../src/extensions/ocdoctor-fixers-jsonl-starter/index.js';
 import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
 
-function applyFix(
+async function applyFix(
   spec: OcPathFixerSpec<unknown>,
   raw: string,
   fileName = 'session.jsonl',
-): string {
+): Promise<string> {
   const ast = parseJsonl(raw).ast;
-  const matches = spec.detect({ fileName, ast, raw });
+  const matches = await spec.detect({ fileName, ast, raw });
   if (matches.length === 0) return raw;
-  return spec.fix({
+  return await spec.fix({
     fileName,
     ast,
     raw,
@@ -48,9 +48,9 @@ describe('wave-08 jsonl fixers — idempotency', () => {
     describe(fixer.id, () => {
       for (const raw of HOSTILE_INPUTS) {
         const label = JSON.stringify(raw.slice(0, 30));
-        it(`is idempotent on ${label}`, () => {
-          const once = applyFix(fixer, raw);
-          const twice = applyFix(fixer, once);
+        it(`is idempotent on ${label}`, async () => {
+          const once = await applyFix(fixer, raw);
+          const twice = await applyFix(fixer, once);
           expect(twice).toBe(once);
         });
       }
@@ -69,43 +69,43 @@ describe('wave-08 jsonl fixers — hostile inputs do not throw', () => {
 });
 
 describe('wave-08 append-terminal-event — semantic correctness', () => {
-  it('appends only when last event is non-terminal', () => {
+  it('appends only when last event is non-terminal', async () => {
     const before = '{"event":"step"}\n';
-    const after = applyFix(sessionAppendTerminalEvent, before);
+    const after = await applyFix(sessionAppendTerminalEvent, before);
     expect(after).toContain('"event":"end"');
     expect(after).toContain('"_auto":true');
   });
 
-  it('preserves prior lines verbatim', () => {
+  it('preserves prior lines verbatim', async () => {
     const before = '{"event":"start"}\n{"event":"step","n":42}\n';
-    const after = applyFix(sessionAppendTerminalEvent, before);
+    const after = await applyFix(sessionAppendTerminalEvent, before);
     expect(after.startsWith(before)).toBe(true);
   });
 
-  it('trailing-newline shape is preserved (file ends with \\n)', () => {
+  it('trailing-newline shape is preserved (file ends with \\n)', async () => {
     const before = '{"event":"step"}\n';
-    const after = applyFix(sessionAppendTerminalEvent, before);
+    const after = await applyFix(sessionAppendTerminalEvent, before);
     expect(after.endsWith('\n')).toBe(true);
   });
 
-  it('handles file without trailing newline', () => {
+  it('handles file without trailing newline', async () => {
     const before = '{"event":"step"}';
-    const after = applyFix(sessionAppendTerminalEvent, before);
+    const after = await applyFix(sessionAppendTerminalEvent, before);
     expect(after).toContain('"event":"end"');
   });
 
-  it('no-op when last event is already terminal', () => {
+  it('no-op when last event is already terminal', async () => {
     for (const term of ['end', 'complete', 'finalized', 'done']) {
       const before = `{"event":"${term}"}\n`;
-      expect(applyFix(sessionAppendTerminalEvent, before)).toBe(before);
+      expect(await applyFix(sessionAppendTerminalEvent, before)).toBe(before);
     }
   });
 });
 
 describe('wave-08 quarantine-malformed-line — semantic correctness', () => {
-  it('replaces only malformed lines, preserves value lines', () => {
+  it('replaces only malformed lines, preserves value lines', async () => {
     const before = '{"event":"start"}\nbroken\n{"event":"end"}\n';
-    const after = applyFix(sessionQuarantineMalformedLine, before);
+    const after = await applyFix(sessionQuarantineMalformedLine, before);
     const lines = after.split('\n').filter((l) => l.length > 0);
     expect(lines).toHaveLength(3);
     expect(JSON.parse(lines[0] ?? '')).toEqual({ event: 'start' });
@@ -114,17 +114,17 @@ describe('wave-08 quarantine-malformed-line — semantic correctness', () => {
     expect(JSON.parse(lines[2] ?? '')).toEqual({ event: 'end' });
   });
 
-  it('preserves blank lines verbatim', () => {
+  it('preserves blank lines verbatim', async () => {
     const before = '{"a":1}\n\nbroken\n\n{"b":2}\n';
-    const after = applyFix(sessionQuarantineMalformedLine, before);
+    const after = await applyFix(sessionQuarantineMalformedLine, before);
     const lines = after.split('\n');
     expect(lines[1]).toBe('');
     expect(lines[3]).toBe('');
   });
 
-  it('handles all-malformed file', () => {
+  it('handles all-malformed file', async () => {
     const before = 'a\nb\nc\n';
-    const after = applyFix(sessionQuarantineMalformedLine, before);
+    const after = await applyFix(sessionQuarantineMalformedLine, before);
     const lines = after.split('\n').filter((l) => l.length > 0);
     expect(lines).toHaveLength(3);
     for (let i = 0; i < 3; i++) {
@@ -133,10 +133,10 @@ describe('wave-08 quarantine-malformed-line — semantic correctness', () => {
     }
   });
 
-  it('preserves original content character-for-character', () => {
+  it('preserves original content character-for-character', async () => {
     const malformed = '!@#$%^&*()  custom <text>';
     const before = `{"a":1}\n${malformed}\n`;
-    const after = applyFix(sessionQuarantineMalformedLine, before);
+    const after = await applyFix(sessionQuarantineMalformedLine, before);
     const lines = after.split('\n').filter((l) => l.length > 0);
     const quarantine = JSON.parse(lines[1] ?? '');
     expect(quarantine.original).toBe(malformed);
