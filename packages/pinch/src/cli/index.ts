@@ -39,7 +39,6 @@ import {
   buildWorkspaceManifest,
   filterByOnlyGlobs,
   loadWorkspaceConfig,
-  resolveLintOverrides,
   parseJsonc,
   parseJsonl,
   parseMd,
@@ -48,6 +47,10 @@ import {
   type OcKind,
   type WorkspaceManifestEntry,
 } from '@bic/oc-paths-substrate';
+import {
+  resolveLintOverrides,
+  type WorkspaceLintConfig,
+} from '../plugin-sdk/oc-lint/workspace-config.js';
 import { runLint, type LintFile } from '../oc-lint/runner.js';
 // Importing the starter pack triggers its self-registration with
 // the global lint-rule registry; we then read everything via
@@ -146,9 +149,10 @@ async function runCmdRun(
 
   // Workspace config (durable defaults) — overlaid by CLI flags below.
   const workspaceConfig = await loadWorkspaceConfig(dir);
+  const lintSection = workspaceConfig?.['lint'] as WorkspaceLintConfig | undefined;
   const allRules = listLintRules();
   const overrides = resolveLintOverrides(
-    workspaceConfig,
+    lintSection,
     { skip: cliSkipIds, severity: cliSeverity, only: cliOnlyGlobs },
     allRules.map((r) => r.id),
   );
@@ -320,9 +324,10 @@ async function runCmdLint(
   // to cwd when nothing is found.
   const workspaceDir = await findWorkspaceDir(filePaths[0]!);
   const workspaceConfig = await loadWorkspaceConfig(workspaceDir);
+  const lintSection = workspaceConfig?.['lint'] as WorkspaceLintConfig | undefined;
   const allRules = listLintRules();
   const overrides = resolveLintOverrides(
-    workspaceConfig,
+    lintSection,
     { skip: cliSkipIds, severity: cliSeverity, only: cliOnlyGlobs },
     allRules.map((r) => r.id),
   );

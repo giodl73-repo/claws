@@ -48,8 +48,13 @@ import { resolve as resolvePath } from 'node:path';
 import {
   REDACTED_SENTINEL,
   buildWorkspaceManifest,
+  loadWorkspaceConfig,
   type WorkspaceManifest,
 } from '@bic/oc-paths-substrate';
+import {
+  resolveLkgOverrides,
+  type WorkspaceLkgConfig,
+} from '../plugin-sdk/lkg/workspace-config.js';
 import { FsLKGStore } from '../extensions/lkg-fs/index.js';
 import {
   registerOpenClawWorkspace,
@@ -161,11 +166,17 @@ function summarizeObservation(obs: LKGObservation): {
 
 async function runCmdStatus(argv: readonly string[], out: OutputContext): Promise<number> {
   const dir = workspaceDirFrom(argv);
+  const cliSkip = parseSkipFlags(argv);
+  const wsConfig = await loadWorkspaceConfig(dir);
+  const lkgSection = wsConfig?.['lkg'] as WorkspaceLkgConfig | undefined;
+  const overrides = resolveLkgOverrides(lkgSection, { skip: cliSkip });
+
   const store = new FsLKGStore({ root: dir });
   const manifest = await buildWorkspaceManifest(dir);
   const registration = registerOpenClawWorkspace(store, manifest);
 
-  // Observe each registered tracker once.
+  // Observe each registered tracker once, filtering by workspace.json
+  // and CLI --skip rules.
   const observations: Array<{
     relPath: string;
     role: string;
@@ -174,8 +185,19 @@ async function runCmdStatus(argv: readonly string[], out: OutputContext): Promis
     fingerprint: string | null;
     reason: string | null;
   }> = [];
+  const skipped: Array<{ relPath: string; role: string; reason: string }> = [];
   let failedCount = 0;
   for (const entry of registration.registered) {
+    if (overrides.shouldSkip({ roleId: entry.role.id, relPath: entry.relPath })) {
+      skipped.push({
+        relPath: entry.relPath,
+        role: entry.role.id,
+        reason: overrides.skipRoleIds.has(entry.role.id)
+          ? `role-id matched skip list`
+          : `relPath matched skip glob`,
+      });
+      continue;
+    }
     const obs = await store.observe(entry.path);
     const summary = summarizeObservation(obs);
     observations.push({
@@ -194,13 +216,19 @@ async function runCmdStatus(argv: readonly string[], out: OutputContext): Promis
       workspaceDir: dir,
       walkedFiles: manifest.walkedFiles,
       tracked: registration.registered.length,
+      observed: observations.length,
+      skippedByConfig: skipped.length,
       observations,
+      skipped,
       byOutcome: countByOutcome(observations.map((o) => o.outcome)),
     },
     [
       `openclaw-lkg status: ${dir}`,
       `  walked: ${manifest.walkedFiles} file(s)`,
       `  tracked: ${registration.registered.length} canonical artifact(s)`,
+      ...(skipped.length > 0
+        ? [`  skipped (config): ${skipped.length}`, ...skipped.map((s) => `    [skipped] ${s.relPath}  role=${s.role}  (${s.reason})`)]
+        : []),
       ...observations.map(
         (o) =>
           `    [${o.outcome}] ${o.relPath}  role=${o.role}` +
@@ -210,6 +238,22 @@ async function runCmdStatus(argv: readonly string[], out: OutputContext): Promis
     ],
   );
   return failedCount === 0 ? 0 : 1;
+}
+
+/**
+ * Collect every `--skip <token>` flag occurrence. Tokens are
+ * disambiguated by `resolveLkgOverrides`: containing `*` or `/`
+ * means path glob; otherwise role ID.
+ */
+function parseSkipFlags(argv: readonly string[]): readonly string[] {
+  const out: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === '--skip' && argv[i + 1] !== undefined) {
+      out.push(argv[i + 1]!);
+      i++;
+    }
+  }
+  return out;
 }
 
 function countByOutcome(
@@ -363,8 +407,12 @@ function printHelp(out: OutputContext): void {
       'openclaw-lkg — operator-facing access to the LKG store',
       '',
       'Usage:',
-      '  openclaw-lkg status [<workspace-dir>]',
+      '  openclaw-lkg status [<workspace-dir>] [--skip <role-or-glob>...]',
       '      Walk the workspace, observe each tracked file, report outcomes.',
+      '      --skip <role>     skip a canonical role (e.g., "session.jsonl")',
+      '      --skip <glob>     skip relPaths matching a glob (e.g., "sessions/*")',
+      '      Workspace-level defaults live under `lkg.skip` / `lkg.skipPaths`',
+      '      in workspace.json; CLI flags add to (do not replace) those.',
       '  openclaw-lkg observe <file> [--root <workspace-dir>]',
       '      One-shot observe of a specific path.',
       '  openclaw-lkg list-trackers [<workspace-dir>]',

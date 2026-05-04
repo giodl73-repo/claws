@@ -33,3 +33,9 @@ export {
   listLintRules,
   registerLintRule,
 } from './registry.js';
+
+export {
+  resolveLintOverrides,
+  type ResolvedLintOverrides,
+  type WorkspaceLintConfig,
+} from './workspace-config.js';

@@ -33,12 +33,5 @@ export {
   filterByOnlyGlobs,
   loadWorkspaceConfig,
   matchRuleIdGlob,
-  resolveDoctorOverrides,
-  resolveLintOverrides,
-  type ResolvedLintOverrides,
   type WorkspaceConfig,
-  type WorkspaceDoctorConfig,
-  type WorkspaceLintConfig,
-  type WorkspaceLintSeverity,
-  type WorkspacePolicyConfig,
 } from './config.js';

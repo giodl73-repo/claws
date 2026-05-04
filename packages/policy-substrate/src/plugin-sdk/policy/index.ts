@@ -64,3 +64,5 @@ export {
   type PolicyTrustedToolPolicyOptions,
   type PolicyTrustedToolRegistration,
 } from './adapter.js';
+
+export type { WorkspacePolicyConfig } from './workspace-config.js';

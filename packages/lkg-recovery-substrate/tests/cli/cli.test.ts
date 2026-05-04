@@ -153,6 +153,50 @@ describe('openclaw-lkg CLI', () => {
     expect(r.exitCode).toBe(0);
   });
 
+  it('CLI-LKG-12 status honors workspace.json `lkg.skip` (skip by role id)', async () => {
+    const dir = makeFixtureWorkspace();
+    writeFileSync(
+      join(dir, 'workspace.json'),
+      JSON.stringify({ lkg: { skip: ['agents.md'] } }),
+      'utf-8',
+    );
+    const r = await captureCli(['status', dir]);
+    expect(r.exitCode).toBe(0);
+    const json = JSON.parse(r.out.join(''));
+    expect(json.skippedByConfig).toBeGreaterThan(0);
+    const skippedRoles = (json.skipped as Array<{ role: string }>).map((s) => s.role);
+    expect(skippedRoles).toContain('agents.md');
+    // The observed list should NOT include agents.md.
+    const observedRoles = (json.observations as Array<{ role: string }>).map((o) => o.role);
+    expect(observedRoles).not.toContain('agents.md');
+  });
+
+  it('CLI-LKG-13 status honors --skip CLI flag (combined with workspace.json)', async () => {
+    const dir = makeFixtureWorkspace();
+    writeFileSync(
+      join(dir, 'workspace.json'),
+      JSON.stringify({ lkg: { skip: ['agents.md'] } }),
+      'utf-8',
+    );
+    const r = await captureCli(['status', dir, '--skip', 'tools.md']);
+    expect(r.exitCode).toBe(0);
+    const json = JSON.parse(r.out.join(''));
+    const skippedRoles = (json.skipped as Array<{ role: string }>).map((s) => s.role);
+    // Both the workspace.json skip AND the CLI --skip apply.
+    expect(skippedRoles).toContain('agents.md');
+    expect(skippedRoles).toContain('tools.md');
+  });
+
+  it('CLI-LKG-14 --skip with `*` is treated as a path glob', async () => {
+    const dir = makeFixtureWorkspace();
+    // Skip everything by glob — observations array should be empty.
+    const r = await captureCli(['status', dir, '--skip', '*.md']);
+    expect(r.exitCode).toBe(0);
+    const json = JSON.parse(r.out.join(''));
+    expect(json.observed).toBe(0);
+    expect(json.skippedByConfig).toBeGreaterThan(0);
+  });
+
   it('CLI-LKG-11 closed-pipe writes (sync EPIPE) exit gracefully', async () => {
     const orig = process.stdout.write.bind(process.stdout);
     let calls = 0;

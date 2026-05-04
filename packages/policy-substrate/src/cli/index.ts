@@ -66,6 +66,7 @@ import {
   type PolicyExtractFile,
   type PolicyIR,
   type ToolCallInput,
+  type WorkspacePolicyConfig,
 } from '../plugin-sdk/policy/index.js';
 
 // Importing the starter pack registers the `md` generator.
@@ -183,8 +184,9 @@ async function runCmdGenerate(
   // CLI flag wins; workspace.json `policy.generator` is the durable
   // default; `'md'` is the ultimate fallback.
   const wsConfig = await loadWorkspaceConfig(dir);
+  const policySection = wsConfig?.['policy'] as WorkspacePolicyConfig | undefined;
   const generatorId =
-    pickFlag(argv, '--generator') ?? wsConfig?.policy?.generator ?? 'md';
+    pickFlag(argv, '--generator') ?? policySection?.generator ?? 'md';
   const outPath = pickFlag(argv, '--out');
 
   const spec = getPolicyGenerator(generatorId);
@@ -309,10 +311,11 @@ async function runCmdCheck(
   // Workspace mode: positional is a directory.
   if (stat.isDirectory()) {
     const wsConfig = await loadWorkspaceConfig(resolved);
+    const policySection = wsConfig?.['policy'] as WorkspacePolicyConfig | undefined;
     const policyOverride =
-      pickFlag(argv, '--policy') ?? wsConfig?.policy?.policyPath;
+      pickFlag(argv, '--policy') ?? policySection?.policyPath;
     const generatorId =
-      pickFlag(argv, '--generator') ?? wsConfig?.policy?.generator ?? 'md';
+      pickFlag(argv, '--generator') ?? policySection?.generator ?? 'md';
     return await runCheckWorkspace(resolved, {
       policyOverride,
       skipDrift,

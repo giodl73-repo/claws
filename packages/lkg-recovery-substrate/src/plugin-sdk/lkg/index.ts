@@ -32,3 +32,9 @@ export { LKGError, type LKGErrorCode } from './types.js';
 export { checkSdkCompat } from './compat.js';
 
 export type { LKGStore } from './api.js';
+
+export {
+  resolveLkgOverrides,
+  type ResolvedLkgOverrides,
+  type WorkspaceLkgConfig,
+} from './workspace-config.js';
