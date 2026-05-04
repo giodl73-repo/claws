@@ -31,6 +31,7 @@ import { promises as fs } from 'node:fs';
 import { resolve as resolvePath } from 'node:path';
 import {
   OcPathError,
+  REDACTED_SENTINEL,
   emitJsonc,
   emitJsonl,
   emitMd,
@@ -51,6 +52,21 @@ import {
   type SetResult,
 } from '../plugin-sdk/oc-path/index.js';
 
+/**
+ * Output-boundary sentinel scrub. Replaces every occurrence of
+ * `__OPENCLAW_REDACTED__` with `[REDACTED]` before writing to the
+ * output stream. Defense-in-depth (CLI-OCPATH-030): even if a
+ * future subcommand surfaces raw file content containing the
+ * sentinel (e.g., a `cat`-like dump verb), the CLI MUST NOT echo
+ * it verbatim. Pinch's CLI uses the same primitive — the function
+ * is exported here so other openclaw-CLI authors can re-use it.
+ */
+const SCRUB_PLACEHOLDER = '[REDACTED]';
+export function scrubSentinel(s: string): string {
+  if (!s.includes(REDACTED_SENTINEL)) return s;
+  return s.split(REDACTED_SENTINEL).join(SCRUB_PLACEHOLDER);
+}
+
 // --- Output mode --------------------------------------------------------
 
 interface OutputContext {
@@ -66,22 +82,25 @@ function detectMode(args: ReadonlyMap<string, string | boolean>): 'human' | 'jso
 
 function emit(ctx: OutputContext, value: unknown, humanFallback?: () => string): void {
   if (ctx.mode === 'json') {
-    ctx.stream.write(JSON.stringify(value, null, 2) + '\n');
+    ctx.stream.write(scrubSentinel(JSON.stringify(value, null, 2)) + '\n');
     return;
   }
   if (humanFallback !== undefined) {
-    ctx.stream.write(humanFallback() + '\n');
+    ctx.stream.write(scrubSentinel(humanFallback()) + '\n');
     return;
   }
   // Human mode but no formatter — fall back to JSON.
-  ctx.stream.write(JSON.stringify(value, null, 2) + '\n');
+  ctx.stream.write(scrubSentinel(JSON.stringify(value, null, 2)) + '\n');
 }
 
 function emitError(message: string, json: boolean, code = 'ERR'): void {
+  const scrubbedMessage = scrubSentinel(message);
   if (json) {
-    process.stderr.write(JSON.stringify({ error: { code, message } }) + '\n');
+    process.stderr.write(
+      JSON.stringify({ error: { code, message: scrubbedMessage } }) + '\n',
+    );
   } else {
-    process.stderr.write(`${code}: ${message}\n`);
+    process.stderr.write(`${code}: ${scrubbedMessage}\n`);
   }
 }
 
