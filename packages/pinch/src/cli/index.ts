@@ -46,7 +46,13 @@ import {
   type WorkspaceManifestEntry,
 } from '@bic/oc-paths-substrate';
 import { runLint, type LintFile } from '../oc-lint/runner.js';
-import { STARTER_RULES_V0 } from '../extensions/oclint-rules-starter/index.js';
+// Importing the starter pack triggers its self-registration with
+// the global lint-rule registry; we then read everything via
+// `listLintRules()`. Plugin authors who register additional rules
+// at module-init time (e.g., `policy-substrate/extensions/policy-lint-rules`)
+// are picked up automatically — `pinch run` grows as plugins land.
+import '../extensions/oclint-rules-starter/index.js';
+import { listLintRules } from '../plugin-sdk/oc-lint/registry.js';
 import type { Diagnostic, LintRule, LintSeverity } from '../plugin-sdk/oc-lint/types.js';
 
 // ── Output mode ─────────────────────────────────────────────────────────
@@ -131,11 +137,19 @@ async function runCmdRun(
   const positional = argv.filter((a) => !a.startsWith('-'));
   const dir = resolvePath(positional[0] ?? process.cwd());
   const severityMin = parseSeverityMin(argv);
-  const rules = STARTER_RULES_V0;
+  const skipIds = parseSkippedRuleIds(argv);
+  const severityOverrides = parseSeverityOverrides(argv);
+  const allRules = listLintRules();
+  const rules = applyOnlyFilter(allRules, argv);
 
   const manifest = await buildWorkspaceManifest(dir);
   const files = await Promise.all(manifest.entries.map(entryToLintFile));
-  const result = runLint({ rules, files });
+  const result = runLint({
+    rules,
+    files,
+    disabledRuleIds: skipIds,
+    severityOverrides,
+  });
 
   const filtered = result.diagnostics.filter(
     (d) => SEVERITY_RANK[d.severity] >= severityMin,
@@ -179,6 +193,70 @@ function parseSeverityMin(argv: readonly string[]): number {
   return r ?? 0;
 }
 
+/**
+ * Collect every `--skip <rule-id>` flag occurrence into a Set.
+ * Repeatable: `pinch run --skip a --skip b` → {a, b}.
+ */
+function parseSkippedRuleIds(argv: readonly string[]): ReadonlySet<string> {
+  const out = new Set<string>();
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === '--skip' && argv[i + 1] !== undefined) {
+      out.add(argv[i + 1]!);
+      i++;
+    }
+  }
+  return out;
+}
+
+/**
+ * Collect every `--severity <rule-id>=<level>` override.
+ * Repeatable: `pinch run --severity foo=warning --severity bar=error`.
+ * Invalid level values are silently dropped (rule keeps declared severity).
+ */
+function parseSeverityOverrides(
+  argv: readonly string[],
+): Readonly<Record<string, LintSeverity>> {
+  const out: Record<string, LintSeverity> = {};
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === '--severity' && argv[i + 1] !== undefined) {
+      const [ruleId, level] = argv[i + 1]!.split('=', 2);
+      if (
+        ruleId !== undefined &&
+        level !== undefined &&
+        (level === 'info' || level === 'warning' || level === 'error')
+      ) {
+        out[ruleId] = level;
+      }
+      i++;
+    }
+  }
+  return out;
+}
+
+/**
+ * Filter the registered rule list down to ids matching any
+ * `--only <pattern>` glob (repeatable). Pattern uses `*` wildcards.
+ * If no `--only` is given, all rules pass.
+ */
+function applyOnlyFilter<T extends { id: string }>(
+  rules: readonly T[],
+  argv: readonly string[],
+): readonly T[] {
+  const patterns: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === '--only' && argv[i + 1] !== undefined) {
+      patterns.push(argv[i + 1]!);
+      i++;
+    }
+  }
+  if (patterns.length === 0) return rules;
+  const matchers = patterns.map((p) => {
+    const escaped = p.replace(/[.+^$()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+    return new RegExp(`^${escaped}$`);
+  });
+  return rules.filter((r) => matchers.some((m) => m.test(r.id)));
+}
+
 // ── Subcommand: lint (specific files) ───────────────────────────────────
 
 async function runCmdLint(
@@ -192,7 +270,9 @@ async function runCmdLint(
     ]);
     return 2;
   }
-  const rules = STARTER_RULES_V0;
+  const skipIds = parseSkippedRuleIds(argv);
+  const severityOverrides = parseSeverityOverrides(argv);
+  const rules = applyOnlyFilter(listLintRules(), argv);
   const files: LintFile[] = [];
   for (const p of filePaths) {
     const raw = await fs.readFile(p, 'utf-8');
@@ -206,7 +286,12 @@ async function runCmdLint(
     }
     files.push({ name, ast: parseForKind(kind, raw) });
   }
-  const result = runLint({ rules, files });
+  const result = runLint({
+    rules,
+    files,
+    disabledRuleIds: skipIds,
+    severityOverrides,
+  });
   emit(
     out,
     {
@@ -250,7 +335,7 @@ async function runCmdListRules(
   _argv: readonly string[],
   out: OutputContext,
 ): Promise<number> {
-  const rules: readonly LintRule[] = STARTER_RULES_V0;
+  const rules: readonly LintRule[] = listLintRules() as readonly LintRule[];
   emit(
     out,
     {
@@ -289,14 +374,22 @@ function printHelp(out: OutputContext): void {
       'pinch — OpenClaw lint runner (Cargo:Clippy ↔ OpenClaw:Pinch)',
       '',
       'Usage:',
-      '  pinch run [--severity-min <level>] [<workspace-dir>]',
+      '  pinch run [--severity-min <level>] [--skip <id>]... [--only <pat>]... [--severity <id>=<level>]... [<workspace-dir>]',
       '      Walk the workspace manifest and lint every canonical artifact.',
-      '  pinch lint <file...>',
+      '  pinch lint <file...> [--skip <id>]... [--only <pat>]... [--severity <id>=<level>]...',
       '      Lint specific files; kind inferred from extension.',
       '  pinch list-rules',
       '      Print the registered rule pack.',
       '  pinch help',
       '      Print this message.',
+      '',
+      'Rule selection:',
+      '  --skip <rule-id>          Disable a rule (repeatable).',
+      '  --only <pattern>          Allowlist by glob match against rule id (repeatable).',
+      '  --severity <id>=<level>   Override a rule\'s severity at runtime',
+      '                            (level: info | warning | error). Repeatable.',
+      '  --severity-min <level>    Filter findings below this severity from output',
+      '                            (level: info | warning | error).',
       '',
       'Output:',
       '  TTY-aware. Defaults to human-readable when stdout is a TTY;',

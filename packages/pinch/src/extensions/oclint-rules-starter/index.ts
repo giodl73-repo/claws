@@ -15,6 +15,7 @@
 
 import type { LintRule } from '../../plugin-sdk/oc-lint/types.js';
 import type { RegisterLintRule } from '../../plugin-sdk/oc-lint/api-extension.js';
+import { registerLintRule } from '../../plugin-sdk/oc-lint/registry.js';
 
 import { agentsDuplicateToolKey } from './rules/agents-duplicate-tool-key.js';
 import { agentsEmptyToolsSection } from './rules/agents-empty-tools-section.js';
@@ -43,6 +44,15 @@ export const STARTER_RULES_V0: readonly LintRule[] = [
   identityMissingTrustLevel,
   userMissingPreferences,
 ];
+
+// Self-register on import. Mirrors the policy-substrate pattern:
+// importing the starter pack module registers its rules with the
+// global registry. Consumers who want every starter rule available
+// to their CLI / runner just `import '@openclaw/oc-lint/rules-starter'`
+// and the registration fires automatically.
+for (const rule of STARTER_RULES_V0) {
+  registerLintRule(rule);
+}
 
 /**
  * Register every rule in `STARTER_RULES_V0` against the host's API.

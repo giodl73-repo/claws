@@ -77,6 +77,17 @@ export const STARTER_FIXERS_V0_OPTIONAL: readonly OcPathFixerSpec<unknown>[] = [
 export const STARTER_FIXERS_V0_CONTRIBUTIONS: readonly DoctorHealthContribution[] =
   STARTER_FIXERS_V0.map(ocPathFixerContribution);
 
+// Self-register on import. Mirrors the policy-substrate + pinch
+// pattern: importing the starter pack module registers its
+// contributions with the global registry. Consumers who want every
+// starter fixer available to their CLI / runner just `import
+// '@openclaw/oc-doctor/fixers-starter'` and the registration fires
+// automatically.
+import { registerDoctorHealthContribution } from '../../plugin-sdk/oc-doctor/registry.js';
+for (const c of STARTER_FIXERS_V0_CONTRIBUTIONS) {
+  registerDoctorHealthContribution(c);
+}
+
 /**
  * Register every fixer in `starter-v0` against the host's API.
  *

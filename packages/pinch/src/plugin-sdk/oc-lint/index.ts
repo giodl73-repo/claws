@@ -26,3 +26,10 @@ export type {
 
 export type { RegisterLintRule } from './api-extension.js';
 export { LintRuleRegistrationError, checkSdkCompat } from './api-extension.js';
+
+export {
+  _clearLintRuleRegistry,
+  getLintRule,
+  listLintRules,
+  registerLintRule,
+} from './registry.js';

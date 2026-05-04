@@ -17,6 +17,8 @@
  */
 
 import type { OcPathFixerSpec } from '../../plugin-sdk/oc-doctor/types.js';
+import { ocPathFixerContribution } from '../../plugin-sdk/oc-doctor/adapter.js';
+import { registerDoctorHealthContribution } from '../../plugin-sdk/oc-doctor/registry.js';
 import { stepDedupeId } from './fixers/step-dedupe-id.js';
 import { stepSwapShellToPipeline } from './fixers/step-swap-shell-to-pipeline.js';
 
@@ -24,5 +26,9 @@ export const yamlStarterFixers: readonly OcPathFixerSpec<unknown>[] = [
   stepSwapShellToPipeline,
   stepDedupeId,
 ];
+
+for (const spec of yamlStarterFixers) {
+  registerDoctorHealthContribution(ocPathFixerContribution(spec));
+}
 
 export { stepDedupeId, stepSwapShellToPipeline };

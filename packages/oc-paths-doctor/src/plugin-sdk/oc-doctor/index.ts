@@ -29,3 +29,10 @@ export type {
 } from './types.js';
 
 export { ocPathFixerContribution, checkSdkCompat } from './adapter.js';
+
+export {
+  _clearDoctorHealthContributionRegistry,
+  getDoctorHealthContribution,
+  listDoctorHealthContributions,
+  registerDoctorHealthContribution,
+} from './registry.js';

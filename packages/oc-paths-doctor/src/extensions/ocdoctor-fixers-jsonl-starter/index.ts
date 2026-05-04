@@ -9,6 +9,8 @@
  */
 
 import type { OcPathFixerSpec } from '../../plugin-sdk/oc-doctor/types.js';
+import { ocPathFixerContribution } from '../../plugin-sdk/oc-doctor/adapter.js';
+import { registerDoctorHealthContribution } from '../../plugin-sdk/oc-doctor/registry.js';
 import { sessionAppendTerminalEvent } from './fixers/session-append-terminal-event.js';
 import { sessionQuarantineMalformedLine } from './fixers/session-quarantine-malformed-line.js';
 
@@ -16,6 +18,10 @@ export const jsonlStarterFixers: readonly OcPathFixerSpec[] = [
   sessionAppendTerminalEvent,
   sessionQuarantineMalformedLine,
 ];
+
+for (const spec of jsonlStarterFixers) {
+  registerDoctorHealthContribution(ocPathFixerContribution(spec));
+}
 
 export {
   sessionAppendTerminalEvent,

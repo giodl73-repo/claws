@@ -118,4 +118,88 @@ describe('pinch CLI', () => {
     const r = await runCliCapture(['no-such-cmd']);
     expect(r.exitCode).toBe(2);
   });
+
+  it('CLI-09 --skip <id> disables a rule', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pinch-skip-'));
+    writeFileSync(join(dir, 'AGENTS.md'), '## Tools\n- gh\n', 'utf-8');
+    // Without --skip: missing-boundaries finding fires.
+    const baseline = await runCliCapture(['run', dir]);
+    const baselineJson = JSON.parse(baseline.stdoutLines[0]!);
+    expect(
+      baselineJson.diagnostics.some(
+        (d: { ruleId: string }) =>
+          d.ruleId === 'starter-v0/agents/missing-boundaries',
+      ),
+    ).toBe(true);
+    // With --skip: it's gone.
+    const skipped = await runCliCapture([
+      'run',
+      dir,
+      '--skip',
+      'starter-v0/agents/missing-boundaries',
+    ]);
+    const skippedJson = JSON.parse(skipped.stdoutLines[0]!);
+    expect(
+      skippedJson.diagnostics.some(
+        (d: { ruleId: string }) =>
+          d.ruleId === 'starter-v0/agents/missing-boundaries',
+      ),
+    ).toBe(false);
+  });
+
+  it('CLI-10 --severity <id>=<level> overrides severity', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pinch-sev-'));
+    writeFileSync(join(dir, 'AGENTS.md'), '## Tools\n- gh\n', 'utf-8');
+    // Bump missing-boundaries from info → error; exit code becomes 1.
+    const r = await runCliCapture([
+      'run',
+      dir,
+      '--severity',
+      'starter-v0/agents/missing-boundaries=error',
+    ]);
+    expect(r.exitCode).toBe(1);
+    const json = JSON.parse(r.stdoutLines[0]!);
+    const fired = json.diagnostics.find(
+      (d: { ruleId: string; severity: string }) =>
+        d.ruleId === 'starter-v0/agents/missing-boundaries',
+    );
+    expect(fired?.severity).toBe('error');
+  });
+
+  it('CLI-11 --only <pattern> allowlists by rule-id glob', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pinch-only-'));
+    writeFileSync(join(dir, 'AGENTS.md'), '## Tools\n', 'utf-8');
+    // Allowlist only the agents-missing rules; nothing
+    // else can fire even if it would have.
+    const r = await runCliCapture([
+      'run',
+      dir,
+      '--only',
+      'starter-v0/agents/missing-*',
+    ]);
+    expect(r.exitCode).toBe(0); // info-only
+    const json = JSON.parse(r.stdoutLines[0]!);
+    for (const d of json.diagnostics as Array<{ ruleId: string }>) {
+      expect(d.ruleId.startsWith('starter-v0/agents/missing-')).toBe(true);
+    }
+  });
+
+  it('CLI-12 multiple --skip flags are cumulative', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pinch-multi-skip-'));
+    writeFileSync(join(dir, 'AGENTS.md'), '## Tools\n', 'utf-8');
+    const r = await runCliCapture([
+      'run',
+      dir,
+      '--skip',
+      'starter-v0/agents/missing-boundaries',
+      '--skip',
+      'starter-v0/agents/empty-tools-section',
+    ]);
+    const json = JSON.parse(r.stdoutLines[0]!);
+    const ids = (json.diagnostics as Array<{ ruleId: string }>).map(
+      (d) => d.ruleId,
+    );
+    expect(ids).not.toContain('starter-v0/agents/missing-boundaries');
+    expect(ids).not.toContain('starter-v0/agents/empty-tools-section');
+  });
 });

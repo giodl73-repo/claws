@@ -11,6 +11,8 @@
  */
 
 import type { OcPathFixerSpec } from '../../plugin-sdk/oc-doctor/types.js';
+import { ocPathFixerContribution } from '../../plugin-sdk/oc-doctor/adapter.js';
+import { registerDoctorHealthContribution } from '../../plugin-sdk/oc-doctor/registry.js';
 import { configAddPluginsStub } from './fixers/config-add-plugins-stub.js';
 import { configAddVersionStub } from './fixers/config-add-version-stub.js';
 import { configRedactSecretLiteral } from './fixers/config-redact-secret-literal.js';
@@ -20,6 +22,11 @@ export const jsoncStarterFixers: readonly OcPathFixerSpec[] = [
   configAddVersionStub,
   configRedactSecretLiteral,
 ];
+
+// Self-register on import.
+for (const spec of jsoncStarterFixers) {
+  registerDoctorHealthContribution(ocPathFixerContribution(spec));
+}
 
 export {
   configAddPluginsStub,
