@@ -23,6 +23,10 @@
       "types": "./dist/extensions/oclint-rules-starter/index.d.ts",
       "import": "./dist/extensions/oclint-rules-starter/index.js"
     },
+    "./test-harness": {
+      "types": "./dist/test-harness/index.d.ts",
+      "import": "./dist/test-harness/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": ["dist"],

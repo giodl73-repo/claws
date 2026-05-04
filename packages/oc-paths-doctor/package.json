@@ -19,6 +19,10 @@
       "types": "./dist/extensions/ocdoctor-fixers-starter/index.d.ts",
       "import": "./dist/extensions/ocdoctor-fixers-starter/index.js"
     },
+    "./test-harness": {
+      "types": "./dist/test-harness/index.d.ts",
+      "import": "./dist/test-harness/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": ["dist"],
