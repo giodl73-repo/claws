@@ -64,6 +64,14 @@ export interface DoctorContext {
    */
   readonly signal?: AbortSignal;
   /**
+   * Runtime kill switch — fixer contributionIds in this set are
+   * skipped at the adapter boundary (detect returns no findings,
+   * fix returns `{outcome: 'skipped', reason: 'disabled'}`). Lets
+   * operators silence a fixer without unregistering it; useful for
+   * per-CI-pipeline opt-out or per-PR exception.
+   */
+  readonly disabledContributionIds?: ReadonlySet<string> | readonly string[];
+  /**
    * Optional audit hook. Fires once per successful mutation, just
    * BEFORE `writeFile` runs (so the host can log intent even if the
    * write subsequently fails). Errors thrown by `onMutation` are

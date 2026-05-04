@@ -41,6 +41,18 @@ function matchGlob(glob: string, name: string): boolean {
 }
 
 /**
+ * Check whether a contribution id is disabled via the host's
+ * `DoctorContext.disabledContributionIds`. Normalizes both array and
+ * Set forms.
+ */
+function isDisabled(ctx: DoctorContext, id: string): boolean {
+  const d = ctx.disabledContributionIds;
+  if (d === undefined) return false;
+  if (Array.isArray(d)) return d.includes(id);
+  return (d as ReadonlySet<string>).has(id);
+}
+
+/**
  * Compare a plugin-declared SDK version against the host's version.
  * Major mismatch is a hard incompatibility; minor/patch is fine
  * (additive changes by semver convention).
@@ -94,6 +106,7 @@ export function ocPathFixerContribution<TOptions = unknown>(
     description: spec.description,
 
     async detect(ctx: DoctorContext): Promise<readonly DoctorFinding[]> {
+      if (isDisabled(ctx, spec.id)) return [];
       const findings: DoctorFinding[] = [];
       for (const f of ctx.files) {
         if (ctx.signal?.aborted) return findings;
@@ -121,6 +134,9 @@ export function ocPathFixerContribution<TOptions = unknown>(
       ctx: DoctorContext,
       finding: DoctorFinding,
     ): Promise<DoctorFixResult> {
+      if (isDisabled(ctx, spec.id)) {
+        return { outcome: 'skipped', reason: 'fixer is disabled via DoctorContext.disabledContributionIds' };
+      }
       if (ctx.signal?.aborted) {
         return { outcome: 'failed', reason: 'aborted via signal' };
       }

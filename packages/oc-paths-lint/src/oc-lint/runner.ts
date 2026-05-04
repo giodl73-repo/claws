@@ -33,6 +33,15 @@ export interface LintRunOptions {
    * are not interrupted mid-call (they're synchronous and short).
    */
   readonly signal?: AbortSignal;
+  /**
+   * Runtime kill switch — rule ids in this set are skipped even if
+   * registered. Lets operators silence noisy rules without unregistering
+   * (e.g., per-CI-pipeline opt-out, per-PR exception). The skip is
+   * silent: stats still report 0 invocations rather than recording a
+   * "disabled" state, so downstream tooling sees the rule "didn't
+   * fire" — same shape as no-applicable-files.
+   */
+  readonly disabledRuleIds?: ReadonlySet<string> | readonly string[];
 }
 
 /**
@@ -75,6 +84,14 @@ export function runLint(opts: LintRunOptions): LintRunResult {
     stats.set(rule.id, 0);
   }
 
+  // Normalize disabledRuleIds to a Set for O(1) lookup.
+  const disabled =
+    opts.disabledRuleIds instanceof Set
+      ? opts.disabledRuleIds
+      : opts.disabledRuleIds !== undefined
+        ? new Set<string>(opts.disabledRuleIds)
+        : null;
+
   for (const file of opts.files) {
     if (opts.signal?.aborted) {
       throw new LintAbortedError({ diagnostics, stats });
@@ -82,6 +99,9 @@ export function runLint(opts: LintRunOptions): LintRunResult {
     for (const rule of opts.rules) {
       if (opts.signal?.aborted) {
         throw new LintAbortedError({ diagnostics, stats });
+      }
+      if (disabled !== null && disabled.has(rule.id)) {
+        continue;
       }
       if (rule.appliesTo !== '*' && !matchGlob(rule.appliesTo, file.name)) {
         continue;
