@@ -35,6 +35,7 @@
 import { promises as fs } from 'node:fs';
 import { resolve as resolvePath } from 'node:path';
 import {
+  REDACTED_SENTINEL,
   buildWorkspaceManifest,
   parseJsonc,
   parseJsonl,
@@ -64,11 +65,27 @@ function makeOutput(argv: readonly string[]): OutputContext {
   return { mode, stdout: process.stdout, stderr: process.stderr };
 }
 
+/**
+ * Output-boundary sentinel scrub. Replaces any occurrence of the
+ * redaction sentinel (`__OPENCLAW_REDACTED__`) with a fixed
+ * placeholder before writing to stdout. Defense-in-depth: even if
+ * a future rule's diagnostic message echoes raw file content
+ * containing the sentinel, the CLI MUST NOT print it verbatim.
+ *
+ * The substrate's emit-time guard catches sentinels during file
+ * writes; this is the read-side equivalent for CLI output.
+ */
+const SCRUB_PLACEHOLDER = '[REDACTED]';
+export function scrubSentinel(s: string): string {
+  if (!s.includes(REDACTED_SENTINEL)) return s;
+  return s.split(REDACTED_SENTINEL).join(SCRUB_PLACEHOLDER);
+}
+
 function emit(out: OutputContext, payload: Record<string, unknown>, humanLines: readonly string[]): void {
   if (out.mode === 'json') {
-    out.stdout.write(JSON.stringify(payload) + '\n');
+    out.stdout.write(scrubSentinel(JSON.stringify(payload)) + '\n');
   } else {
-    for (const line of humanLines) out.stdout.write(line + '\n');
+    for (const line of humanLines) out.stdout.write(scrubSentinel(line) + '\n');
   }
 }
 
@@ -298,8 +315,11 @@ function printHelp(out: OutputContext): void {
 
 export async function runCli(argv: readonly string[]): Promise<number> {
   const out = makeOutput(argv);
-  const subcmd = argv[0];
-  const rest = argv.slice(1);
+  // Strip global flags (--json / --human) before subcommand dispatch
+  // so `pinch --json help` and `pinch help --json` are equivalent.
+  const filtered = argv.filter((a) => a !== '--json' && a !== '--human');
+  const subcmd = filtered[0];
+  const rest = filtered.slice(1);
   try {
     switch (subcmd) {
       case undefined:
