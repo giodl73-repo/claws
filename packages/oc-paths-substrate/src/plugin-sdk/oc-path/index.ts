@@ -54,6 +54,7 @@ export type {
   PositionalContainer,
   PredicateSpec,
 } from './oc-path.js';
+// Public OcPath surface — what plugin authors and callers use.
 export {
   MAX_PATH_LENGTH,
   MAX_SUB_SEGMENTS_PER_SLOT,
@@ -63,9 +64,7 @@ export {
   POS_LAST,
   WILDCARD_RECURSIVE,
   WILDCARD_SINGLE,
-  evaluatePredicate,
   formatOcPath,
-  getPathLayout,
   hasWildcard,
   isOrdinalSeg,
   isPattern,
@@ -75,15 +74,16 @@ export {
   isUnionSeg,
   isValidOcPath,
   parseOcPath,
-  parseOrdinalSeg,
-  parsePredicateSeg,
-  parseUnionSeg,
-  quoteSeg,
-  repackPath,
-  resolvePositionalSeg,
-  splitRespectingBrackets,
-  unquoteSeg,
 } from './oc-path.js';
+
+// `evaluatePredicate`, `getPathLayout`, `parseOrdinalSeg`,
+// `parsePredicateSeg`, `parseUnionSeg`, `quoteSeg`, `unquoteSeg`,
+// `repackPath`, `resolvePositionalSeg`, `splitRespectingBrackets`
+// were exported from earlier prototypes. They're substrate-internal
+// helpers — used by `find.ts`, the per-kind resolvers, and the parser
+// itself, but not part of the upstream-portable public surface.
+// Callers that need their behavior should round-trip through
+// `parseOcPath` / `formatOcPath` / `findOcPaths`.
 
 // Per-kind parse / emit (encoding is genuinely per-kind)
 export { parseMd } from './parse.js';
