@@ -196,4 +196,79 @@ describe('openclaw-policy CLI', () => {
     const r = await captureCli([]);
     expect(r.exitCode).toBe(0);
   });
+
+  it('CLI-13 check workspace-dir with in-sync policy.jsonc passes integrity AND drift', async () => {
+    const ws = makeFixtureWorkspace();
+    const policyPath = join(ws, 'policy.jsonc');
+    await captureCli(['generate', ws, '--out', policyPath]);
+    const r = await captureCli(['check', ws]);
+    expect(r.exitCode).toBe(0);
+    const json = JSON.parse(r.out.join(''));
+    expect(json.ok).toBe(true);
+    expect(json.mode).toBe('workspace');
+    expect(json.integrity.ok).toBe(true);
+    expect(json.drift.checked).toBe(true);
+    expect(json.drift.drifted).toBe(false);
+  });
+
+  it('CLI-14 check workspace-dir detects drift when sources change', async () => {
+    const ws = makeFixtureWorkspace();
+    const policyPath = join(ws, 'policy.jsonc');
+    await captureCli(['generate', ws, '--out', policyPath]);
+    // Add a new tool to TOOLS.md without regenerating policy.jsonc.
+    writeFileSync(
+      join(ws, 'TOOLS.md'),
+      '## Tools\n### post-channel # R5, COMMUNICATE, IRREVERSIBLE_EXTERNAL\n### read-doc # R1, READ\n### added-after # R2, READ\n',
+      'utf-8',
+    );
+    const r = await captureCli(['check', ws]);
+    expect(r.exitCode).toBe(1);
+    const json = JSON.parse(r.out.join(''));
+    expect(json.ok).toBe(false);
+    expect(json.integrity.ok).toBe(true); // bytes on disk are still self-consistent
+    expect(json.drift.drifted).toBe(true);
+    expect(json.drift.onDiskShape).not.toBe(json.drift.regeneratedShape);
+  });
+
+  it('CLI-15 check --no-drift skips regeneration', async () => {
+    const ws = makeFixtureWorkspace();
+    const policyPath = join(ws, 'policy.jsonc');
+    await captureCli(['generate', ws, '--out', policyPath]);
+    writeFileSync(
+      join(ws, 'TOOLS.md'),
+      '## Tools\n### post-channel # R5, COMMUNICATE, IRREVERSIBLE_EXTERNAL\n### read-doc # R1, READ\n### would-be-drift # R2, READ\n',
+      'utf-8',
+    );
+    const r = await captureCli(['check', ws, '--no-drift']);
+    expect(r.exitCode).toBe(0); // integrity passes, drift skipped
+    const json = JSON.parse(r.out.join(''));
+    expect(json.ok).toBe(true);
+    expect(json.drift.checked).toBe(false);
+  });
+
+  it('CLI-16 check workspace-dir with tampered policy fails integrity', async () => {
+    const ws = makeFixtureWorkspace();
+    const policyPath = join(ws, 'policy.jsonc');
+    await captureCli(['generate', ws, '--out', policyPath]);
+    const ir = JSON.parse(readFileSync(policyPath, 'utf-8'));
+    ir.tools.push({ id: 'sneaky', capabilities: [], risk: 'low', sensitivity: 'public' });
+    writeFileSync(policyPath, JSON.stringify(ir, null, 2), 'utf-8');
+    const r = await captureCli(['check', ws]);
+    expect(r.exitCode).toBe(1);
+    const json = JSON.parse(r.out.join(''));
+    expect(json.integrity.ok).toBe(false);
+    expect(json.integrity.tampered).toBe(true);
+  });
+
+  it('CLI-17 check --policy <path> overrides default policy.jsonc location', async () => {
+    const ws = makeFixtureWorkspace();
+    const customPath = join(ws, 'custom-policy.json');
+    await captureCli(['generate', ws, '--out', customPath]);
+    // No policy.jsonc at conventional path; --policy points elsewhere.
+    const r = await captureCli(['check', ws, '--policy', customPath]);
+    expect(r.exitCode).toBe(0);
+    const json = JSON.parse(r.out.join(''));
+    expect(json.ok).toBe(true);
+    expect(json.policyPath).toBe(customPath);
+  });
 });

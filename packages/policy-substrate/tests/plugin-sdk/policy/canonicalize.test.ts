@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 import {
   canonicalize,
   computePolicyId,
+  computePolicyShapeHash,
 } from '../../../src/plugin-sdk/policy/canonicalize.js';
 import type { PolicyIR } from '../../../src/plugin-sdk/policy/types.js';
 
@@ -109,6 +110,78 @@ describe('computePolicyId', () => {
       ...mutated,
       tools: [...mutated.tools, { id: 't2', capabilities: [], risk: 'low', sensitivity: 'public' }],
     });
+    expect(a).not.toBe(b);
+  });
+});
+
+describe('computePolicyShapeHash', () => {
+  function makeIR(overrides: Partial<PolicyIR> = {}): PolicyIR {
+    return {
+      version: '0.1.0',
+      policyId: 'b'.repeat(64),
+      generatedAt: '2026-05-04T12:00:00.000Z',
+      generatedFrom: {
+        hash: 'a'.repeat(64),
+        bytes: 100,
+        observedAt: '2026-05-04T12:00:00.000Z',
+      },
+      tools: [
+        { id: 't1', capabilities: ['READ'], risk: 'low', sensitivity: 'public' },
+      ],
+      denyRules: [
+        { id: 'SOUL-1', when: { tool: 't1' }, reason: 'no' },
+      ],
+      ...overrides,
+    };
+  }
+
+  it('CSH-01 produces a stable lowercase hex sha256', () => {
+    const h = computePolicyShapeHash(makeIR());
+    expect(h).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it('CSH-02 same shape with different generatedAt → same hash (drift-resilient)', () => {
+    const a = computePolicyShapeHash(makeIR({ generatedAt: '2026-05-04T12:00:00.000Z' }));
+    const b = computePolicyShapeHash(makeIR({ generatedAt: '2026-06-15T08:30:00.000Z' }));
+    expect(a).toBe(b);
+  });
+
+  it('CSH-03 same shape with different generatedFrom anchor → same hash', () => {
+    const a = computePolicyShapeHash(
+      makeIR({
+        generatedFrom: { hash: 'a'.repeat(64), bytes: 100, observedAt: '2026-05-04T12:00:00.000Z' },
+      }),
+    );
+    const b = computePolicyShapeHash(
+      makeIR({
+        generatedFrom: { hash: 'd'.repeat(64), bytes: 999, observedAt: '2026-06-15T08:30:00.000Z' },
+      }),
+    );
+    expect(a).toBe(b);
+  });
+
+  it('CSH-04 same shape with different policyId → same hash (excluded)', () => {
+    const a = computePolicyShapeHash(makeIR({ policyId: '0'.repeat(64) }));
+    const b = computePolicyShapeHash(makeIR({ policyId: '1'.repeat(64) }));
+    expect(a).toBe(b);
+  });
+
+  it('CSH-05 changing tools changes the hash (real drift)', () => {
+    const a = computePolicyShapeHash(makeIR());
+    const b = computePolicyShapeHash(
+      makeIR({
+        tools: [
+          { id: 't1', capabilities: ['READ'], risk: 'low', sensitivity: 'public' },
+          { id: 't2', capabilities: [], risk: 'low', sensitivity: 'public' },
+        ],
+      }),
+    );
+    expect(a).not.toBe(b);
+  });
+
+  it('CSH-06 changing version changes the hash (schema drift counts)', () => {
+    const a = computePolicyShapeHash(makeIR({ version: '0.1.0' }));
+    const b = computePolicyShapeHash(makeIR({ version: '0.2.0' }));
     expect(a).not.toBe(b);
   });
 });

@@ -74,3 +74,27 @@ export function computePolicyId(ir: Omit<PolicyIR, 'policyId'>): string {
   const canonical = canonicalize(ir);
   return createHash('sha256').update(canonical, 'utf-8').digest('hex');
 }
+
+/**
+ * Compute a SHAPE hash that excludes volatile generation metadata
+ * (`policyId`, `generatedAt`, `generatedFrom`). Two PolicyIRs sharing
+ * the same shape hash describe the same policy semantics even if
+ * they were generated at different times against different LKG
+ * fingerprints.
+ *
+ * Drift detection: regenerate from sources, compare shape hashes.
+ * If they differ, the on-disk policy.jsonc has drifted from what the
+ * sources would produce — operator must regenerate or accept the
+ * drift explicitly. Hash equality across regeneration cycles is the
+ * load-bearing property; `policyId` cannot be used because it
+ * incorporates `generatedAt` and `generatedFrom`, which always change.
+ */
+export function computePolicyShapeHash(ir: PolicyIR): string {
+  const shape = {
+    version: ir.version,
+    tools: ir.tools,
+    denyRules: ir.denyRules,
+  };
+  const canonical = canonicalize(shape);
+  return createHash('sha256').update(canonical, 'utf-8').digest('hex');
+}

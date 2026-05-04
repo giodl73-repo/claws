@@ -56,7 +56,9 @@ import {
 } from '@bic/oc-paths-substrate';
 import type { LKGFingerprint } from '@bic/lkg-recovery-substrate';
 import {
+  POLICY_PATH,
   computePolicyId,
+  computePolicyShapeHash,
   evaluateDecision,
   getPolicyGenerator,
   listPolicyGenerators,
@@ -223,19 +225,69 @@ async function computeWorkspaceAnchor(
 
 // ── Subcommand: check ───────────────────────────────────────────────────
 
+/**
+ * `check` runs in two modes depending on the positional arg:
+ *
+ *   - **File mode**: positional is a file → integrity check only
+ *     (recompute policyId, verify it matches the claimed value).
+ *
+ *   - **Workspace mode**: positional is a directory → integrity AND
+ *     drift check. Regenerates a PolicyIR from the workspace sources
+ *     and compares the SHAPE hash (excludes `generatedAt` /
+ *     `generatedFrom`) against the on-disk policy. Drift means the
+ *     workspace sources have changed but `policy.jsonc` hasn't been
+ *     regenerated — operator must regenerate or accept the drift.
+ *
+ * Flags:
+ *   `--policy <path>`  override default `<workspace>/policy.jsonc`
+ *   `--no-drift`       integrity only; skip regeneration
+ *   `--generator <id>` generator id for drift comparison (default `md`)
+ *
+ * Exit codes: 0 ok, 1 integrity OR drift violation, 2 usage / I/O.
+ */
 async function runCmdCheck(
   argv: readonly string[],
   out: OutputContext,
 ): Promise<number> {
   const positional = argv.filter((a) => !a.startsWith('-'));
-  const path = positional[0];
-  if (path === undefined) {
-    emitError(out, 'check: <policy-ir-path> required', 'ERR_USAGE');
+  const target = positional[0];
+  if (target === undefined) {
+    emitError(out, 'check: <policy-path-or-workspace-dir> required', 'ERR_USAGE');
     return 2;
   }
+  const resolved = resolvePath(target);
+
+  // Detect file-vs-workspace mode by stat'ing the positional arg.
+  let stat: import('node:fs').Stats;
+  try {
+    stat = await fs.stat(resolved);
+  } catch (err) {
+    emitError(out, `stat failed: ${err instanceof Error ? err.message : String(err)}`, 'ERR_IO');
+    return 2;
+  }
+
+  const policyOverride = pickFlag(argv, '--policy');
+  const skipDrift = argv.includes('--no-drift');
+  const generatorId = pickFlag(argv, '--generator') ?? 'md';
+
+  // Workspace mode: positional is a directory.
+  if (stat.isDirectory()) {
+    return await runCheckWorkspace(resolved, {
+      policyOverride,
+      skipDrift,
+      generatorId,
+      out,
+    });
+  }
+
+  // File mode: existing integrity-only path.
+  return await runCheckFile(resolved, out);
+}
+
+async function runCheckFile(path: string, out: OutputContext): Promise<number> {
   let raw: string;
   try {
-    raw = await fs.readFile(resolvePath(path), 'utf-8');
+    raw = await fs.readFile(path, 'utf-8');
   } catch (err) {
     emitError(out, `read failed: ${err instanceof Error ? err.message : String(err)}`, 'ERR_IO');
     return 2;
@@ -254,7 +306,8 @@ async function runCmdCheck(
     out,
     {
       ok,
-      path: resolvePath(path),
+      mode: 'file',
+      path,
       claimedPolicyId: claimed,
       recomputedPolicyId: recomputed,
       ...(ok ? {} : { tampered: true }),
@@ -267,6 +320,124 @@ async function runCmdCheck(
           `  recomputed: ${recomputed}`,
         ],
   );
+  return ok ? 0 : 1;
+}
+
+interface WorkspaceCheckOptions {
+  readonly policyOverride: string | undefined;
+  readonly skipDrift: boolean;
+  readonly generatorId: string;
+  readonly out: OutputContext;
+}
+
+async function runCheckWorkspace(
+  workspaceDir: string,
+  opts: WorkspaceCheckOptions,
+): Promise<number> {
+  const { out, generatorId, skipDrift, policyOverride } = opts;
+  const policyPath = policyOverride !== undefined
+    ? resolvePath(policyOverride)
+    : resolvePath(workspaceDir, POLICY_PATH);
+
+  // Read on-disk policy.
+  let raw: string;
+  try {
+    raw = await fs.readFile(policyPath, 'utf-8');
+  } catch (err) {
+    emitError(out, `policy read failed at ${policyPath}: ${err instanceof Error ? err.message : String(err)}`, 'ERR_IO');
+    return 2;
+  }
+  let onDisk: PolicyIR;
+  try {
+    onDisk = JSON.parse(raw) as PolicyIR;
+  } catch (err) {
+    emitError(out, `policy parse failed at ${policyPath}: ${err instanceof Error ? err.message : String(err)}`, 'ERR_PARSE');
+    return 2;
+  }
+
+  // Integrity (always).
+  const { policyId: claimedId, ...onDiskBody } = onDisk;
+  const recomputedId = computePolicyId(onDiskBody);
+  const integrityOk = claimedId === recomputedId;
+
+  // Drift detection (default; skipped with --no-drift).
+  let driftReport: {
+    drifted: boolean;
+    onDiskShape: string;
+    regeneratedShape: string;
+  } | null = null;
+
+  if (!skipDrift) {
+    const spec = getPolicyGenerator(generatorId);
+    if (spec === null) {
+      emitError(out, `unknown generator: ${generatorId}`, 'ERR_UNKNOWN_GENERATOR');
+      return 2;
+    }
+    const manifest = await buildWorkspaceManifest(workspaceDir);
+    const files = await Promise.all(manifest.entries.map(entryToExtractFile));
+    const anchor = await computeWorkspaceAnchor(files);
+    const input: MdGeneratorInput = { files };
+    const regenerated = await spec.generator.generate(
+      input as unknown as Parameters<typeof spec.generator.generate>[0],
+      anchor,
+    );
+    const onDiskShape = computePolicyShapeHash(onDisk);
+    const regeneratedShape = computePolicyShapeHash(regenerated);
+    driftReport = {
+      drifted: onDiskShape !== regeneratedShape,
+      onDiskShape,
+      regeneratedShape,
+    };
+  }
+
+  const ok = integrityOk && (driftReport === null || !driftReport.drifted);
+
+  const humanLines: string[] = [
+    `openclaw-policy check: ${policyPath}`,
+    `  integrity: ${integrityOk ? '✓' : 'TAMPERED'}`,
+    `    claimed:    ${claimedId}`,
+    `    recomputed: ${recomputedId}`,
+  ];
+  if (driftReport !== null) {
+    humanLines.push(
+      `  drift:     ${driftReport.drifted ? 'DRIFTED' : '✓'}`,
+      `    on-disk shape:     ${driftReport.onDiskShape}`,
+      `    regenerated shape: ${driftReport.regeneratedShape}`,
+    );
+  } else {
+    humanLines.push(`  drift:     skipped (--no-drift)`);
+  }
+
+  emit(
+    out,
+    {
+      ok,
+      mode: 'workspace',
+      workspaceDir,
+      policyPath,
+      integrity: {
+        ok: integrityOk,
+        claimedPolicyId: claimedId,
+        recomputedPolicyId: recomputedId,
+        ...(integrityOk ? {} : { tampered: true }),
+      },
+      ...(driftReport !== null
+        ? {
+            drift: {
+              checked: true,
+              drifted: driftReport.drifted,
+              onDiskShape: driftReport.onDiskShape,
+              regeneratedShape: driftReport.regeneratedShape,
+              generator: generatorId,
+            },
+          }
+        : {
+            drift: { checked: false },
+          }),
+    },
+    humanLines,
+  );
+
   return ok ? 0 : 1;
 }
 
@@ -433,8 +604,10 @@ function printHelp(out: OutputContext): void {
       'Usage:',
       '  openclaw-policy generate <workspace-dir> [--generator <id>] [--out <path>]',
       '      Walk the workspace, dispatch to the registered generator, emit PolicyIR.',
-      '  openclaw-policy check <policy-ir.json>',
-      '      Verify policyId hash matches the IR body. Exit 1 on tamper.',
+      '  openclaw-policy check <policy-path-or-workspace-dir> [--policy <path>] [--no-drift] [--generator <id>]',
+      '      File mode (path → file): integrity only — verify policyId hash matches body.',
+      '      Workspace mode (path → dir): integrity AND drift — regenerate from sources,',
+      '      compare shape hash against on-disk policy.jsonc. Exit 1 on tamper or drift.',
       '  openclaw-policy diff <a.json> <b.json>',
       '      Semantic diff: added/removed/changed tools and deny rules.',
       '  openclaw-policy evaluate <policy-ir.json> <tool-id> [--args <json>]',

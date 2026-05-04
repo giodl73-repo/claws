@@ -28,7 +28,11 @@ export {
   type RunExtractorsOptions,
 } from './api.js';
 
-export { canonicalize, computePolicyId } from './canonicalize.js';
+export {
+  canonicalize,
+  computePolicyId,
+  computePolicyShapeHash,
+} from './canonicalize.js';
 
 export {
   POLICY_IR_VERSION,
