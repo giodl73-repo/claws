@@ -16,7 +16,7 @@ export const sessionMalformedLine: LintRule = {
   id: 'jsonl-starter-v0/session/malformed-line',
   severity: 'warning',
   description: 'session log contains malformed (non-JSON-parseable) lines',
-  appliesTo: '*.jsonl',
+  appliesTo: '{session,audit,events}*.jsonl',
   check(ctx) {
     if (ctx.ast.kind !== 'jsonl') return [];
     const out: LintFinding[] = [];

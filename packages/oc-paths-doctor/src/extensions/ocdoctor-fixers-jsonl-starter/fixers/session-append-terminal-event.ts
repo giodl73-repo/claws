@@ -19,7 +19,7 @@ export const sessionAppendTerminalEvent: OcPathFixerSpec = {
   description:
     'Append `{"event":"end","_auto":true}` to a session log lacking a terminal event',
   severity: 'info',
-  appliesTo: '*.jsonl',
+  appliesTo: '{session,audit,events}*.jsonl',
 
   detect({ ast, fileName }) {
     if (ast.kind !== 'jsonl') return [];

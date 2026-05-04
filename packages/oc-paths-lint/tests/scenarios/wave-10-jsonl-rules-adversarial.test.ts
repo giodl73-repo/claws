@@ -181,17 +181,20 @@ describe('wave-10 jsonl — multi-file batch', () => {
   it('reports per-file findings without cross-contamination', () => {
     const result = runLint({
       rules: [...jsonlStarterRules],
+      // Use filenames that match the tightened session globs
+      // (`{session,audit,events}*.jsonl`) — unrelated `.jsonl` files
+      // are now correctly skipped.
       files: [
-        { name: 'a.jsonl', ast: parseJsonl('').ast },
-        { name: 'b.jsonl', ast: parseJsonl('{"event":"step"}\n').ast },
+        { name: 'session-a.jsonl', ast: parseJsonl('').ast },
+        { name: 'session-b.jsonl', ast: parseJsonl('{"event":"step"}\n').ast },
       ],
     });
-    const aFindings = result.diagnostics.filter((d) => d.fileName === 'a.jsonl');
-    const bFindings = result.diagnostics.filter((d) => d.fileName === 'b.jsonl');
+    const aFindings = result.diagnostics.filter((d) => d.fileName === 'session-a.jsonl');
+    const bFindings = result.diagnostics.filter((d) => d.fileName === 'session-b.jsonl');
     expect(aFindings.length).toBeGreaterThan(0);
     expect(bFindings.length).toBeGreaterThan(0);
-    for (const d of aFindings) expect(d.fileName).toBe('a.jsonl');
-    for (const d of bFindings) expect(d.fileName).toBe('b.jsonl');
+    for (const d of aFindings) expect(d.fileName).toBe('session-a.jsonl');
+    for (const d of bFindings) expect(d.fileName).toBe('session-b.jsonl');
   });
 });
 

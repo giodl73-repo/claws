@@ -18,7 +18,7 @@ export const sessionQuarantineMalformedLine: OcPathFixerSpec = {
   description:
     'Replace malformed lines with `{"event":"malformed","original":"…"}` quarantine events',
   severity: 'warning',
-  appliesTo: '*.jsonl',
+  appliesTo: '{session,audit,events}*.jsonl',
 
   detect({ ast, fileName }) {
     if (ast.kind !== 'jsonl') return [];

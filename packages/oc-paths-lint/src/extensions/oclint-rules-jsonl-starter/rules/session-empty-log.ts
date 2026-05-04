@@ -19,7 +19,7 @@ export const sessionEmptyLog: LintRule = {
   id: 'jsonl-starter-v0/session/empty-log',
   severity: 'info',
   description: 'session log file has no value lines',
-  appliesTo: '*.jsonl',
+  appliesTo: '{session,audit,events}*.jsonl',
   check(ctx) {
     if (ctx.ast.kind !== 'jsonl') return [];
     const valueLines = findOcPaths(ctx.ast, parseOcPath(`oc://${ctx.fileName}/*`));

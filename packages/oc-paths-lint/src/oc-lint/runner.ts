@@ -122,13 +122,21 @@ export function runLint(opts: LintRunOptions): LintRunResult {
 }
 
 /**
- * Minimal filename glob: `*` matches any chars, plain literals match
- * exact. Sufficient for `*.jsonc`, `gateway.*`, `AGENTS.md`, etc.
+ * Filename glob with `*` (any chars) and `{a,b,c}` (alternation)
+ * support. Sufficient for `*.jsonc`, `gateway.*`, `AGENTS.md`,
+ * `{gateway,openclaw}*.jsonc`, etc. No `?`, no character classes —
+ * the upstream OcPath addressing layer already covers that scope.
  */
 function matchGlob(glob: string, name: string): boolean {
   if (glob === name) return true;
-  const re = new RegExp(
-    '^' + glob.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$',
-  );
+  // Order matters: escape regex specials EXCEPT `*` and `{}` first,
+  // then expand `{a,b,c}` → `(?:a|b|c)`, then `*` → `.*`.
+  let pattern = glob.replace(/[.+^$()|[\]\\]/g, '\\$&');
+  pattern = pattern.replace(/\{([^{}]+)\}/g, (_m, body: string) => {
+    const alts = body.split(',').map((s) => s.trim());
+    return `(?:${alts.join('|')})`;
+  });
+  pattern = pattern.replace(/\*/g, '.*');
+  const re = new RegExp('^' + pattern + '$');
   return re.test(name);
 }

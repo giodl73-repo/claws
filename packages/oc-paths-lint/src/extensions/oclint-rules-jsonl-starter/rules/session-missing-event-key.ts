@@ -17,7 +17,7 @@ export const sessionMissingEventKey: LintRule = {
   id: 'jsonl-starter-v0/session/missing-event-key',
   severity: 'info',
   description: 'session log line lacks canonical `event` key',
-  appliesTo: '*.jsonl',
+  appliesTo: '{session,audit,events}*.jsonl',
   check(ctx) {
     if (ctx.ast.kind !== 'jsonl') return [];
     const out: LintFinding[] = [];

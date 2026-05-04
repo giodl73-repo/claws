@@ -16,7 +16,7 @@ export const sessionNoTerminalEvent: LintRule = {
   id: 'jsonl-starter-v0/session/no-terminal-event',
   severity: 'info',
   description: 'session log final value line is not a terminal event',
-  appliesTo: '*.jsonl',
+  appliesTo: '{session,audit,events}*.jsonl',
   check(ctx) {
     if (ctx.ast.kind !== 'jsonl') return [];
     const m = resolveOcPath(ctx.ast, parseOcPath(`oc://${ctx.fileName}/$last/event`));

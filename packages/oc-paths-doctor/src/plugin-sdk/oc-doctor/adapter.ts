@@ -24,11 +24,19 @@ import type {
   OcPathFixerSpec,
 } from './types.js';
 
+/**
+ * Filename glob with `*` (any chars) and `{a,b,c}` (alternation)
+ * support. Mirrors the lint runner's matcher.
+ */
 function matchGlob(glob: string, name: string): boolean {
   if (glob === name || glob === '*') return true;
-  const re = new RegExp(
-    '^' + glob.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$',
-  );
+  let pattern = glob.replace(/[.+^$()|[\]\\]/g, '\\$&');
+  pattern = pattern.replace(/\{([^{}]+)\}/g, (_m, body: string) => {
+    const alts = body.split(',').map((s) => s.trim());
+    return `(?:${alts.join('|')})`;
+  });
+  pattern = pattern.replace(/\*/g, '.*');
+  const re = new RegExp('^' + pattern + '$');
   return re.test(name);
 }
 

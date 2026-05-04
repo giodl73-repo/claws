@@ -149,18 +149,21 @@ describe('wave-09 jsonc — multi-file batch', () => {
   it('reports per-file findings without cross-contamination', () => {
     const result = runLint({
       rules: [...jsoncStarterRules],
+      // Use filenames that match the tightened openclaw-config globs
+      // (`{gateway,openclaw,config}*.jsonc`) — unrelated `.jsonc`
+      // files are now correctly skipped.
       files: [
-        { name: 'a.jsonc', ast: parseJsonc('{}').ast }, // missing plugins + version
-        { name: 'b.jsonc', ast: parseJsonc('{ "version": "1.0", "plugins": { "entries": {} } }').ast }, // empty entries
+        { name: 'gateway.jsonc', ast: parseJsonc('{}').ast }, // missing plugins + version
+        { name: 'config.jsonc', ast: parseJsonc('{ "version": "1.0", "plugins": { "entries": {} } }').ast }, // empty entries
       ],
     });
-    const aFindings = result.diagnostics.filter((d) => d.fileName === 'a.jsonc');
-    const bFindings = result.diagnostics.filter((d) => d.fileName === 'b.jsonc');
+    const aFindings = result.diagnostics.filter((d) => d.fileName === 'gateway.jsonc');
+    const bFindings = result.diagnostics.filter((d) => d.fileName === 'config.jsonc');
     expect(aFindings.length).toBeGreaterThan(0);
     expect(bFindings.length).toBeGreaterThan(0);
     // Each finding's filename matches its source.
-    for (const d of aFindings) expect(d.fileName).toBe('a.jsonc');
-    for (const d of bFindings) expect(d.fileName).toBe('b.jsonc');
+    for (const d of aFindings) expect(d.fileName).toBe('gateway.jsonc');
+    for (const d of bFindings) expect(d.fileName).toBe('config.jsonc');
   });
 });
 

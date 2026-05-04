@@ -14,7 +14,8 @@ export const configMissingVersion: LintRule = {
   id: 'jsonc-starter-v0/config/missing-version',
   severity: 'info',
   description: 'config file lacks a top-level `version` key',
-  appliesTo: '*.jsonc',
+  // Narrow to openclaw-named configs (see config-missing-plugins).
+  appliesTo: '{gateway,openclaw,config}*.jsonc',
   check(ctx) {
     const m = resolveOcPath(ctx.ast, parseOcPath(`oc://${ctx.fileName}/version`));
     if (m !== null) return [];

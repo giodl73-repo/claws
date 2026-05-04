@@ -18,7 +18,10 @@ export const configMissingPlugins: LintRule = {
   id: 'jsonc-starter-v0/config/missing-plugins',
   severity: 'info',
   description: 'config file lacks a top-level `plugins` key',
-  appliesTo: '*.jsonc',
+  // Narrow to openclaw-named configs so we don't flag tsconfig.jsonc or
+  // similar non-openclaw .jsonc files. Operators with a custom config
+  // filename can register the rule directly with their own appliesTo.
+  appliesTo: '{gateway,openclaw,config}*.jsonc',
   check(ctx) {
     const m = resolveOcPath(ctx.ast, parseOcPath(`oc://${ctx.fileName}/plugins`));
     if (m !== null) return [];
