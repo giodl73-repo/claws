@@ -168,8 +168,8 @@ describe('wave-09 jsonc — multi-file batch', () => {
 });
 
 describe('wave-09 jsonc — pack invariants', () => {
-  it('exports 4 rules', () => {
-    expect(jsoncStarterRules).toHaveLength(4);
+  it('exports 5 rules', () => {
+    expect(jsoncStarterRules).toHaveLength(5);
   });
   it('all rules use jsonc-starter-v0 namespace (shared discriminator dropped)', () => {
     for (const r of jsoncStarterRules) {

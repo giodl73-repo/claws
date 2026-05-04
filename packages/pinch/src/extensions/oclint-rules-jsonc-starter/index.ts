@@ -9,9 +9,11 @@
  */
 
 import type { LintRule } from '../../plugin-sdk/oc-lint/types.js';
+import { registerLintRule } from '../../plugin-sdk/oc-lint/registry.js';
 import { configEmptyPluginsEntries } from './rules/config-empty-plugins-entries.js';
 import { configMissingPlugins } from './rules/config-missing-plugins.js';
 import { configMissingVersion } from './rules/config-missing-version.js';
+import { configNoDuplicateTopLevelKeys } from './rules/config-no-duplicate-top-level-keys.js';
 import { configSecretAsLiteral } from './rules/config-secret-as-literal.js';
 
 export const jsoncStarterRules: readonly LintRule[] = [
@@ -19,11 +21,18 @@ export const jsoncStarterRules: readonly LintRule[] = [
   configEmptyPluginsEntries,
   configMissingVersion,
   configSecretAsLiteral,
+  configNoDuplicateTopLevelKeys,
 ];
+
+// Self-register on import.
+for (const rule of jsoncStarterRules) {
+  registerLintRule(rule);
+}
 
 export {
   configEmptyPluginsEntries,
   configMissingPlugins,
   configMissingVersion,
+  configNoDuplicateTopLevelKeys,
   configSecretAsLiteral,
 };

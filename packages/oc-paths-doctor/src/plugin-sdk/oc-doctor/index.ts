@@ -36,3 +36,8 @@ export {
   listDoctorHealthContributions,
   registerDoctorHealthContribution,
 } from './registry.js';
+
+export {
+  resolveDoctorOverrides,
+  type WorkspaceDoctorConfig,
+} from './workspace-config.js';

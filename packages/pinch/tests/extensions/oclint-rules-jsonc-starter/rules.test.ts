@@ -5,6 +5,7 @@ import {
   configEmptyPluginsEntries,
   configMissingPlugins,
   configMissingVersion,
+  configNoDuplicateTopLevelKeys,
   configSecretAsLiteral,
 } from '../../../src/extensions/oclint-rules-jsonc-starter/index.js';
 
@@ -98,9 +99,43 @@ describe('jsonc-starter — config-secret-as-literal', () => {
   });
 });
 
+describe('jsonc-starter — config-no-duplicate-top-level-keys', () => {
+  it('CFG-NDK-01 flags duplicate top-level key', () => {
+    const raw = '{\n  "version": "1.0",\n  "plugins": {},\n  "version": "2.0"\n}';
+    const findings = configNoDuplicateTopLevelKeys.check(ctx(raw));
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.message).toMatch(/version.*2 times/);
+  });
+
+  it('CFG-NDK-02 passes when all top-level keys are unique', () => {
+    const raw = '{ "version": "1.0", "plugins": {}, "name": "x" }';
+    expect(configNoDuplicateTopLevelKeys.check(ctx(raw))).toHaveLength(0);
+  });
+
+  it('CFG-NDK-03 reports n-1 findings for n duplicates of the same key', () => {
+    const raw = '{\n  "k": 1,\n  "k": 2,\n  "k": 3\n}';
+    const findings = configNoDuplicateTopLevelKeys.check(ctx(raw));
+    expect(findings).toHaveLength(2);
+  });
+
+  it('CFG-NDK-04 no-ops on non-object root', () => {
+    expect(configNoDuplicateTopLevelKeys.check(ctx('[1, 2, 3]'))).toHaveLength(0);
+  });
+
+  it('CFG-NDK-05 no-ops on empty / unparseable input', () => {
+    expect(configNoDuplicateTopLevelKeys.check(ctx(''))).toHaveLength(0);
+  });
+
+  it('CFG-NDK-06 anchors diagnostic at second occurrence (the line that "won")', () => {
+    const raw = '{\n  "a": 1,\n  "b": 2,\n  "a": 9\n}';
+    const findings = configNoDuplicateTopLevelKeys.check(ctx(raw));
+    expect(findings[0]?.line).toBe(4);
+  });
+});
+
 describe('jsoncStarterRules — pack registration', () => {
-  it('exports 4 rules', () => {
-    expect(jsoncStarterRules).toHaveLength(4);
+  it('exports 5 rules', () => {
+    expect(jsoncStarterRules).toHaveLength(5);
   });
   it('all rules share the jsonc kind discriminator', () => {
     for (const r of jsoncStarterRules) {
