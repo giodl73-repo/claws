@@ -311,6 +311,123 @@ describe('wave-23 pitfalls — deferred (v0 limits)', () => {
   it.skip('P-028 percent-encoded segments — v1: rfc3986 layer', () => {});
   it.skip('P-034 ast mutation between resolve & consume — caller invariant', () => {});
   it.skip('P-035 stale paths from prior find — caller invariant', () => {});
-  it.skip('P-037 path injection (caller responsibility)', () => {});
-  it.skip('P-038 predicate value injection (caller responsibility)', () => {});
+});
+
+// ---------- Injection pitfalls (C12 / W12) -------------------------------
+
+describe('wave-23 pitfalls — injection (caller-supplied hostile input)', () => {
+  // P-037: a hostile path string. The substrate's job is to either
+  // parse safely or reject with `OcPathError` — never let undefined
+  // behavior leak. These cases lock the rejection-or-safe contract.
+
+  it('P-037a control characters in path body are rejected', () => {
+    expect(() => parseOcPath('oc://a\x00b')).toThrow(OcPathError);
+    expect(() => parseOcPath('oc://a\x01b/c')).toThrow(OcPathError);
+    expect(() => parseOcPath('oc://a/b\x1Fc')).toThrow(OcPathError);
+  });
+
+  it('P-037b NUL byte anywhere in path is rejected', () => {
+    expect(() => parseOcPath('oc://X.md/sec\x00tion')).toThrow(OcPathError);
+  });
+
+  it('P-037c BOM at start of path is stripped, not interpreted', () => {
+    // BOM is unicode U+FEFF (0xFEFF). The substrate strips it before
+    // scheme check; without stripping, the BOM-prefixed string would
+    // fail the `oc://` scheme test.
+    const path = parseOcPath('﻿oc://X.md/section');
+    expect(path.file).toBe('X.md');
+    expect(path.section).toBe('section');
+  });
+
+  it('P-037d session query is parsed only via the documented `?session=...` form', () => {
+    // Legal session form parses cleanly.
+    const ok = parseOcPath('oc://X.md/sec?session=cron:daily');
+    expect(ok.section).toBe('sec');
+    expect(ok.session).toBe('cron:daily');
+    // Substrate is lenient about loose `?garbage` — caller's
+    // responsibility to construct paths from `formatOcPath`. Confirm
+    // the loose form does NOT silently invent a session value.
+    const loose = parseOcPath('oc://X.md/sec?garbage');
+    expect(loose.session).toBeUndefined();
+  });
+
+  it('P-037e unescaped `&` in segments is rejected', () => {
+    expect(() => parseOcPath('oc://X.md/a&b')).toThrow(OcPathError);
+  });
+
+  it('P-037f unescaped `%` in segments is rejected', () => {
+    expect(() => parseOcPath('oc://X.md/a%b')).toThrow(OcPathError);
+  });
+
+  it('P-037g empty file slot is rejected', () => {
+    expect(() => parseOcPath('oc:///section')).toThrow(OcPathError);
+  });
+
+  it('P-037h backslash-escape attempts are not treated as path traversal', () => {
+    // No special meaning — the literal backslash is just a regular
+    // character. Doesn't allow escaping forward slashes.
+    expect(() => parseOcPath('oc://X.md/a\\../b')).toThrow(OcPathError);
+  });
+
+  // P-038: predicate-value injection. `[k=v]` predicates filter
+  // matches; a hostile `v` containing regex metachars, brackets, or
+  // operators must NOT escape the predicate scope or be interpreted
+  // as a regex.
+
+  it('P-038a regex metacharacters in predicate value match literally', () => {
+    const ast = parseJsonc('{ "items": [ {"name": "a.*"}, {"name": "abc"} ] }').ast;
+    // Looking for the literal string "a.*" — should match only the
+    // first item, not "abc" (which would match if `.*` were treated
+    // as a regex).
+    const matches = findOcPaths(ast, parseOcPath('oc://X.jsonc/items/[name=a.*]'));
+    expect(matches).toHaveLength(1);
+  });
+
+  it('P-038b nested-bracket attempts in predicate value are kept literal', () => {
+    // The substrate is permissive on nested brackets — they're part
+    // of the literal predicate value, not interpreted as path syntax.
+    // The match would be against the literal string "a[b]"; a
+    // resolver that finds zero matches fails closed.
+    const path = parseOcPath('oc://X.jsonc/items/[name=a[b]]');
+    expect(path.item).toBe('[name=a[b]]');
+    // No data has the literal value `a[b]` here, so finding empty.
+    const ast = parseJsonc('{ "items": [ {"name": "abc"} ] }').ast;
+    expect(findOcPaths(ast, path)).toHaveLength(0);
+  });
+
+  it('P-038c equals-sign in predicate value is treated as part of the value', () => {
+    // The FIRST `=` separates key from value; subsequent `=`s belong
+    // to the value. The rule keeps the predicate parser simple —
+    // operators that prefix-match (`!=`, `<=`, `>=`) are tried
+    // before `=`, then `=` consumes the rest.
+    const ast = parseJsonc('{ "items": [ {"k": "a=b"}, {"k": "c"} ] }').ast;
+    const matches = findOcPaths(ast, parseOcPath('oc://X.jsonc/items/[k=a=b]'));
+    expect(matches).toHaveLength(1);
+  });
+
+  it('P-038d control characters in predicate value are rejected', () => {
+    expect(() => parseOcPath('oc://X.jsonc/items/[k=a\x00b]')).toThrow(OcPathError);
+  });
+
+  it('P-038e empty predicate body is rejected', () => {
+    expect(() => parseOcPath('oc://X.jsonc/items/[]')).toThrow(OcPathError);
+  });
+
+  it('P-038f predicate-shaped bracket without operator is treated as literal sentinel', () => {
+    // `[name]` without `=` is parsed as a literal-bracket sentinel
+    // (e.g. `[frontmatter]`-style). The substrate accepts it as a
+    // literal path segment — predicate parsing only kicks in when an
+    // operator is present. Document this to lock the behavior.
+    const path = parseOcPath('oc://X.jsonc/items/[name]');
+    expect(path.item).toBe('[name]');
+  });
+
+  it('P-038g predicate-shaped bracket with unsupported operator parses as literal', () => {
+    // `~` isn't in the supported-operator set; the parser doesn't
+    // recognize it as a predicate, so it's accepted as a literal
+    // bracket segment. This is the documented v1.1 behavior — a
+    // future version may add `~` (regex) and bump SDK_VERSION.
+    const path = parseOcPath('oc://X.jsonc/items/[k~v]');
+    expect(path.item).toBe('[k~v]');
+  });
 });
