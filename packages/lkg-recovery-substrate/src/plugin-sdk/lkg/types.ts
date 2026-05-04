@@ -118,6 +118,16 @@ export interface ValidationResult<TIssue = ValidationIssue> {
 export interface LKGTracker<TParsed = unknown, TIssue = ValidationIssue> {
   /** Absolute filesystem path the tracker protects. */
   readonly path: string;
+  /**
+   * SDK-version compatibility hint. Plugins authored against a known
+   * SDK version declare it here; the host warns on major-version
+   * mismatch with `SDK_VERSION`. Optional — omitting it means "trust
+   * the host," which is the right default for in-tree trackers that
+   * ship with the SDK.
+   */
+  readonly requires?: {
+    readonly sdkVersion: string;
+  };
   parse(raw: string): TParsed;
   validate(parsed: TParsed): ValidationResult<TIssue>;
   /**

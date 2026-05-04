@@ -4,6 +4,18 @@
  * @module @openclaw/plugin-sdk/lkg
  */
 
+/**
+ * SDK version this build of `@openclaw/plugin-sdk/lkg` exposes.
+ * Trackers declare the version they were authored against via
+ * `LKGTracker.requires.sdkVersion`; the host warns on mismatch
+ * (semver-major bump = breaking change).
+ *
+ * Bumped on every breaking change to `LKGTracker` / `LKGStore` /
+ * `LKGObservation` / `LKGObserveOptions`. In-tree reference trackers
+ * omit `requires` (they ship with the SDK; no version-skew possible).
+ */
+export const SDK_VERSION = '0.1.0';
+
 export type {
   LKGActor,
   LKGEntry,
@@ -16,5 +28,7 @@ export type {
   ValidationResult,
 } from './types.js';
 export { LKGError, type LKGErrorCode } from './types.js';
+
+export { checkSdkCompat } from './compat.js';
 
 export type { LKGStore } from './api.js';
