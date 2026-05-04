@@ -22,6 +22,14 @@
       "types": "./dist/extensions/policy-from-md-starter/index.d.ts",
       "import": "./dist/extensions/policy-from-md-starter/index.js"
     },
+    "./lint-rules-starter": {
+      "types": "./dist/extensions/policy-lint-rules-starter/index.d.ts",
+      "import": "./dist/extensions/policy-lint-rules-starter/index.js"
+    },
+    "./doctor-fixers-starter": {
+      "types": "./dist/extensions/policy-doctor-fixers-starter/index.d.ts",
+      "import": "./dist/extensions/policy-doctor-fixers-starter/index.js"
+    },
     "./cli": {
       "types": "./dist/cli/index.d.ts",
       "import": "./dist/cli/index.js"
@@ -34,7 +42,9 @@
   },
   "dependencies": {
     "@bic/oc-paths-substrate": "*",
-    "@bic/lkg-recovery-substrate": "*"
+    "@bic/lkg-recovery-substrate": "*",
+    "@bic/pinch": "*",
+    "@bic/oc-paths-doctor": "*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
