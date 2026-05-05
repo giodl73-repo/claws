@@ -30,8 +30,8 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@openclaw/oc-path": "*",
-    "@openclaw/oc-lint": "*"
+    "@openclaw/oc-path": "^0.1.0",
+    "@openclaw/oc-lint": "^0.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -43,6 +43,7 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm run test"
   }
 }

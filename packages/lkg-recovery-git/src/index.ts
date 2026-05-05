@@ -1,5 +1,5 @@
 /**
- * `@bic/lkg-recovery-git` — claws-hapi prototype of the upstream
+ * `@openclaw/lkg-git` — claws-hapi prototype of the upstream
  * `lkg-recovery` PR-2 surface (git-backed second-backend LKGStore
  * impl). Same `LKGStore` contract as `@openclaw/lkg`'s
  * filesystem-backed impl; consumers swap backend via configured store
@@ -9,7 +9,7 @@
  * multi-agent shared workspace via git's three-way merge — replaces
  * last-writer-wins for shared state.
  *
- * @module @bic/lkg-recovery-git
+ * @module @openclaw/lkg-git
  */
 
 export * from './extensions/lkg-git/index.js';

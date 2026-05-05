@@ -7,8 +7,8 @@
  * wrote `command: openclaw.invoke ...` and got
  * `/bin/sh: 1: openclaw.invoke: not found`. The `command:` field
  * shells out; in-process tool names like `openclaw.invoke`,
- * `llm_task.invoke`, `clawd.invoke`, `lobster`, `llm.invoke` only
- * resolve via `pipeline:`.
+ * `llm_task.invoke`, `lobster`, `llm.invoke` only resolve via
+ * `pipeline:`.
  *
  * **What it flags**: a step's `command:` (or `run:`) whose first
  * whitespace-delimited token matches a known in-process tool name.

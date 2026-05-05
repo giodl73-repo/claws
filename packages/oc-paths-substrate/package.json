@@ -45,7 +45,8 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm run test"
   },
   "dependencies": {
     "yaml": "^2.8.4"

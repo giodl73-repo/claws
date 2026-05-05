@@ -1,6 +1,6 @@
 # DEPRECATED — `@bic/openclaw-workspace/ast` subpath
 
-**Superseded by**: [`@bic/oc-paths-substrate`](../../../oc-paths-substrate/)
+**Superseded by**: [`@openclaw/oc-path`](../../../oc-paths-substrate/)
 **Status**: deprecating; do NOT import in new code
 **Scope**: ONLY the `/ast` subpath (PEG grammars + typed AST). Other
 `@bic/openclaw-workspace` subpaths (`/path`, `/canonicalize`,
@@ -10,7 +10,7 @@
 
 The PEG-grammars-based `WorkspaceAst` / `WorkspaceFileKind` shape in
 this subpath predates the universal-AST reshape. The new
-`@bic/oc-paths-substrate` package ships:
+`@openclaw/oc-path` package ships:
 
 - Per-kind ASTs with a unified discriminator: `MdAst`, `JsoncAst`,
   `JsonlAst`, `YamlAst` (all carry `kind: 'md' | 'jsonc' | 'jsonl' | 'yaml'`)
@@ -39,8 +39,8 @@ const result = workspaceParse(kind, raw);
 // result.ast: WorkspaceAst (PEG-based shape)
 
 // after
-import { parseMd, parseJsonc, parseJsonl, parseYaml, inferKind } from '@bic/oc-paths-substrate';
-import type { OcAst, OcKind } from '@bic/oc-paths-substrate';
+import { parseMd, parseJsonc, parseJsonl, parseYaml, inferKind } from '@openclaw/oc-path';
+import type { OcAst, OcKind } from '@openclaw/oc-path';
 
 const kind = inferKind(filename);  // 'md' | 'jsonc' | 'jsonl' | 'yaml' | null
 const result = kind === 'md'    ? parseMd(raw)
@@ -59,7 +59,7 @@ prefer `findOcPaths` over manual AST traversal:
 const block = parsed.ast.blocks.find((b) => b.heading === 'Tools');
 
 // after — query by oc-path pattern
-import { findOcPaths, parseOcPath } from '@bic/oc-paths-substrate';
+import { findOcPaths, parseOcPath } from '@openclaw/oc-path';
 const matches = findOcPaths(ast, parseOcPath('oc://TOOLS.md/Tools/*'));
 ```
 

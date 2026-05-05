@@ -66,7 +66,6 @@ export const STARTER_IN_PROCESS_TOOLS: readonly string[] = [
   'openclaw.invoke',
   'llm_task.invoke',
   'llm.invoke',
-  'clawd.invoke',
   'lobster',
 ];
 

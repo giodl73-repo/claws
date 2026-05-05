@@ -1,6 +1,6 @@
 ## Organization
 
-Microsoft / claws monorepo team
+Example Org / Platform Team
 
 ## Team
 
@@ -12,7 +12,7 @@ internal-trusted
 
 ## Region
 
-WEST-US
+us-west
 
 ## Compliance scope
 

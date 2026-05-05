@@ -1,12 +1,12 @@
 # DEPRECATED — `@bic/openclaw-lkg-git`
 
-**Superseded by**: [`@bic/lkg-recovery-git`](../lkg-recovery-git/)
+**Superseded by**: [`@openclaw/lkg-git`](../lkg-recovery-git/)
 **Status**: deprecating; do NOT import in new code
 **Removal target**: after `v2-prototype` migrates
 
 ## Why
 
-`@bic/lkg-recovery-git` is the upstream-shaped prototype for the
+`@openclaw/lkg-git` is the upstream-shaped prototype for the
 git-backed LKG impl that lands at `openclaw/openclaw` per
 `lobster-docs/Tech/OpenClaw/specs/proposals/upstream/lkg-recovery/upstream-pr2-lkg-git.md`.
 It implements the same `LKGStore` contract as the FS-backed reference,
@@ -31,7 +31,7 @@ Replace imports:
 import { GitLKGStore } from '@bic/openclaw-lkg-git';
 
 // after
-import { GitLKGStore } from '@bic/lkg-recovery-git';
+import { GitLKGStore } from '@openclaw/lkg-git';
 ```
 
 The contract types are byte-compatible at the shape level; the new

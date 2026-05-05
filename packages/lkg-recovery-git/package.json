@@ -1,5 +1,5 @@
 {
-  "name": "@bic/lkg-recovery-git",
+  "name": "@openclaw/lkg-git",
   "version": "0.1.0",
   "description": "OpenClaw lkg-recovery PR-2 prototype: git-backed second-backend LKGStore impl. Same contract as @openclaw/lkg's FS impl; closes #40245 multi-agent shared workspace via git three-way merge.",
   "type": "module",
@@ -18,8 +18,8 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@openclaw/lkg": "*",
-    "@openclaw/oc-path": "*"
+    "@openclaw/lkg": "^0.1.0",
+    "@openclaw/oc-path": "^0.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -31,6 +31,7 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm run test"
   }
 }

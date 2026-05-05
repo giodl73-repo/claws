@@ -1,12 +1,12 @@
 # DEPRECATED — `@bic/openclaw-lkg`
 
-**Superseded by**: [`@bic/lkg-recovery-substrate`](../lkg-recovery-substrate/)
+**Superseded by**: [`@openclaw/lkg`](../lkg-recovery-substrate/)
 **Status**: deprecating; do NOT import in new code
 **Removal target**: after `v2-prototype` and `openclaw-lkg-git` migrate
 
 ## Why
 
-The new `@bic/lkg-recovery-substrate` package is the upstream-shaped
+The new `@openclaw/lkg` package is the upstream-shaped
 prototype for the LKG contract that lands at `openclaw/openclaw` per
 `lobster-docs/Tech/OpenClaw/specs/proposals/upstream/lkg-recovery/upstream-pr1-lkg.md`.
 It carries:
@@ -25,7 +25,7 @@ It carries:
 remains in the tree only because two consumers still import from it:
 
 - `@bic/openclaw-lkg-git` (also deprecating; migrating to
-  `@bic/lkg-recovery-git`)
+  `@openclaw/lkg-git`)
 - `@bic/v2-prototype` (dev/exploration sandbox; will migrate as part of
   the v2-prototype consolidation)
 
@@ -38,8 +38,8 @@ Replace imports:
 import { FsLKGStore, type LKGTracker } from '@bic/openclaw-lkg';
 
 // after
-import { FsLKGStore } from '@bic/lkg-recovery-substrate/fs';
-import type { LKGTracker } from '@bic/lkg-recovery-substrate';
+import { FsLKGStore } from '@openclaw/lkg/fs';
+import type { LKGTracker } from '@openclaw/lkg';
 ```
 
 The contract types are byte-compatible at the shape level; the new

@@ -1,12 +1,12 @@
 # DEPRECATED — `@bic/openclaw-policy`
 
-**Superseded by**: [`@bic/policy-substrate`](../policy-substrate/)
+**Superseded by**: [`@openclaw/policy`](../policy-substrate/)
 **Status**: deprecating; do NOT import in new code
 **Removal target**: after consumers migrate (claws-sdk, v2-prototype)
 
 ## Why
 
-The new `@bic/policy-substrate` package is the upstream-shaped
+The new `@openclaw/policy` package is the upstream-shaped
 prototype for the policy contract that lands at `openclaw/openclaw`
 per
 `lobster-docs/Tech/OpenClaw/specs/proposals/upstream/policy-anchoring/upstream-pr1-policyir.md`.
@@ -44,7 +44,7 @@ For the upstream `PolicyIR` types contract:
 import type { PolicyIR, ToolSpec, DenyRule, Decision } from '@bic/openclaw-policy';
 
 // after — types from the upstream-shaped substrate
-import type { PolicyIR, ToolSpec, DenyRule, Decision } from '@bic/policy-substrate';
+import type { PolicyIR, ToolSpec, DenyRule, Decision } from '@openclaw/policy';
 ```
 
 For the reference markdown generator (claws-shaped):
@@ -57,7 +57,7 @@ import { extractDenyRules, extractTools } from '@bic/openclaw-policy';
 import {
   STARTER_EXTRACTORS_V0,
   runExtractors,
-} from '@bic/policy-substrate/extractors-starter';
+} from '@openclaw/policy/extractors-starter';
 ```
 
 The runtime ABI (`/runtime`), operational helpers (`/ops`),
