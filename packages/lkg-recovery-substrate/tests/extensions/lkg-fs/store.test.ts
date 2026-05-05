@@ -412,3 +412,79 @@ describe('FsLKGStore — sentinel guard (L-A2/B4)', () => {
     }
   });
 });
+
+describe('FsLKGStore — state-file persistence', () => {
+  it('SP-01 writes lkg-health.json after a promote', async () => {
+    const ctx = makeStore();
+    ctx.store.register(jsonTracker(ctx.filePath));
+    writeJson(ctx.filePath, { version: 1, entries: { ok: 'yes' } });
+    await ctx.store.observe(ctx.filePath);
+    const stateFile = join(ctx.workspaceDir, '.openclaw', 'lkg-health.json');
+    const body = JSON.parse(readFileSync(stateFile, 'utf-8'));
+    expect(body.version).toBe('0.1.0');
+    expect(body.entries).toBeDefined();
+    expect(Object.keys(body.entries)).toContain(ctx.filePath);
+  });
+
+  it('SP-02 a fresh store loads the prior process\'s entries on first observe', async () => {
+    // Process 1: promote a file, save state.
+    const ctx = makeStore();
+    ctx.store.register(jsonTracker(ctx.filePath));
+    writeJson(ctx.filePath, { version: 1, entries: { ok: 'yes' } });
+    await ctx.store.observe(ctx.filePath);
+
+    // Process 2: brand-new store instance pointed at the same root.
+    // It should load the prior entries and recognize the .lkg companion.
+    const audit2 = new InMemoryAuditSink();
+    const notices2 = new InMemoryRecoveryNoticeSink();
+    const store2 = new FsLKGStore({
+      root: ctx.workspaceDir,
+      auditSink: audit2,
+      recoveryNoticeSink: notices2,
+    });
+    store2.register(jsonTracker(ctx.filePath));
+
+    // Same content — should be 'valid' (no re-promote), proving the
+    // store recognized the prior LKG fingerprint without re-promoting.
+    const obs = await store2.observe(ctx.filePath);
+    expect(obs.outcome).toBe('valid');
+  });
+
+  it('SP-03 stateFile: null disables persistence (no .openclaw/ created)', async () => {
+    const workspaceDir = mkdtempSync(join(tmpdir(), 'lkg-no-state-'));
+    const filePath = join(workspaceDir, 'config.json');
+    const audit = new InMemoryAuditSink();
+    const notices = new InMemoryRecoveryNoticeSink();
+    const store = new FsLKGStore({
+      root: workspaceDir,
+      auditSink: audit,
+      recoveryNoticeSink: notices,
+      stateFile: null,
+    });
+    store.register(jsonTracker(filePath));
+    writeJson(filePath, { version: 1, entries: { ok: 'yes' } });
+    const obs = await store.observe(filePath);
+    expect(obs.outcome).toBe('promoted');
+    // No state file written.
+    const stateFile = join(workspaceDir, '.openclaw', 'lkg-health.json');
+    expect(() => readFileSync(stateFile, 'utf-8')).toThrow(/ENOENT/);
+  });
+
+  it('SP-04 corrupt state file throws on next observe', async () => {
+    const workspaceDir = mkdtempSync(join(tmpdir(), 'lkg-corrupt-state-'));
+    const filePath = join(workspaceDir, 'config.json');
+    // Pre-poison the state file before constructing the store.
+    const stateFile = join(workspaceDir, '.openclaw', 'lkg-health.json');
+    writeFileSync(join(workspaceDir, '.openclaw'), '', 'utf-8');
+    // Recreate as a directory (workaround for the above test create).
+    require('node:fs').rmSync(join(workspaceDir, '.openclaw'));
+    require('node:fs').mkdirSync(join(workspaceDir, '.openclaw'), { recursive: true });
+    writeFileSync(stateFile, '{ this is not valid json', 'utf-8');
+
+    const store = new FsLKGStore({ root: workspaceDir });
+    store.register(jsonTracker(filePath));
+    writeJson(filePath, { version: 1, entries: { ok: 'yes' } });
+
+    await expect(store.observe(filePath)).rejects.toThrow(/state file parse failed/);
+  });
+});

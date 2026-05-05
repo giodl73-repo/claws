@@ -57,6 +57,23 @@ export interface FsLKGStoreOptions {
    * Production passes `() => new Date().toISOString()` (the default).
    */
   readonly nowIso?: () => string;
+  /**
+   * Absolute path to the state file that persists `entries` across
+   * process restarts. Default: `<root>/.openclaw/lkg-health.json`.
+   * Mirrors upstream's existing `<root>/.openclaw/config-health.json`
+   * convention.
+   *
+   * `null` disables persistence entirely (in-memory only). Tests
+   * use `null` for the deterministic surface; production hosts
+   * leave the default so observations survive restarts.
+   */
+  readonly stateFile?: string | null;
+}
+
+/** On-disk shape of the state file. Bumped on breaking changes. */
+interface PersistedState {
+  readonly version: '0.1.0';
+  readonly entries: Readonly<Record<string, LKGEntry>>;
 }
 
 export class FsLKGStore implements LKGStore {
@@ -67,6 +84,9 @@ export class FsLKGStore implements LKGStore {
   private readonly auditSink: LKGAuditSink;
   private readonly noticeSink: LKGRecoveryNoticeSink;
   private readonly nowIso: () => string;
+  private readonly stateFile: string | null;
+  /** Lazily loaded on first observe; null after explicit `disable`. */
+  private stateLoaded = false;
 
   constructor(opts: FsLKGStoreOptions) {
     this.root = resolve(opts.root);
@@ -74,6 +94,82 @@ export class FsLKGStore implements LKGStore {
     this.auditSink = opts.auditSink ?? new InMemoryAuditSink();
     this.noticeSink = opts.recoveryNoticeSink ?? new InMemoryRecoveryNoticeSink();
     this.nowIso = opts.nowIso ?? (() => new Date().toISOString());
+    // Default state file at <root>/.openclaw/lkg-health.json — mirrors
+    // upstream's config-health.json convention. Tests pass `null` to
+    // disable persistence and stay deterministic-in-memory.
+    if (opts.stateFile === null) {
+      this.stateFile = null;
+    } else if (opts.stateFile !== undefined) {
+      this.stateFile = opts.stateFile;
+    } else {
+      this.stateFile = resolve(this.root, '.openclaw', 'lkg-health.json');
+    }
+  }
+
+  /**
+   * Load persisted entries from `stateFile` into the in-memory map
+   * (idempotent — does nothing on repeat calls). Called lazily on
+   * first observe() so the store cost is zero for callers that
+   * never use it.
+   *
+   * Missing state file is not an error — fresh deployments start
+   * with an empty `entries` map. Malformed state file throws
+   * `LKG_STATE_FILE_CORRUPT`.
+   */
+  private async loadStateOnce(): Promise<void> {
+    if (this.stateLoaded) return;
+    this.stateLoaded = true;
+    if (this.stateFile === null) return;
+    let raw: string;
+    try {
+      raw = await fs.readFile(this.stateFile, 'utf-8');
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code === 'ENOENT') return; // fresh deployment
+      throw new LKGError(
+        'LKG_STATE_FILE_READ_FAILED',
+        `state file read failed at ${this.stateFile}: ${(err as Error).message}`,
+        this.stateFile,
+      );
+    }
+    let parsed: PersistedState;
+    try {
+      parsed = JSON.parse(raw) as PersistedState;
+    } catch (err) {
+      throw new LKGError(
+        'LKG_STATE_FILE_CORRUPT',
+        `state file parse failed at ${this.stateFile}: ${(err as Error).message}`,
+        this.stateFile,
+      );
+    }
+    if (parsed.version !== '0.1.0') {
+      throw new LKGError(
+        'LKG_STATE_FILE_VERSION_MISMATCH',
+        `state file version ${parsed.version} unsupported by this build (expected 0.1.0)`,
+        this.stateFile,
+      );
+    }
+    for (const [path, entry] of Object.entries(parsed.entries)) {
+      this.entries.set(path, entry);
+    }
+  }
+
+  /**
+   * Persist current `entries` to `stateFile`. Atomic-ish: write to
+   * `.tmp` then rename. Called after every promote/recover that
+   * mutates the entries map.
+   */
+  private async saveState(): Promise<void> {
+    if (this.stateFile === null) return;
+    const body: PersistedState = {
+      version: '0.1.0',
+      entries: Object.fromEntries(this.entries),
+    };
+    const json = JSON.stringify(body, null, 2);
+    await fs.mkdir(dirname(this.stateFile), { recursive: true });
+    const tmp = `${this.stateFile}.tmp-${process.pid}-${Date.now().toString(36)}`;
+    await fs.writeFile(tmp, json, 'utf-8');
+    await fs.rename(tmp, this.stateFile);
   }
 
   register<TParsed, TIssue = ValidationIssue>(
@@ -91,6 +187,11 @@ export class FsLKGStore implements LKGStore {
   }
 
   async observe(path: string, opts?: LKGObserveOptions): Promise<LKGObservation> {
+    // Load persisted entries once before the first observation so
+    // post-restart `recover` can find the LKG fingerprint that was
+    // promoted in a prior process. No-op on fresh deployments / when
+    // stateFile is null (test mode).
+    await this.loadStateOnce();
     const normalized = this.normalizePath(path);
     const tracker = this.trackers.get(normalized);
     if (tracker === undefined) {
@@ -265,6 +366,9 @@ export class FsLKGStore implements LKGStore {
       lastKnownGood: current,
       lastPromotedGood: current,
     });
+    // Persist the entries map so a subsequent process knows this
+    // path's last-promoted-good without re-promoting from scratch.
+    await this.saveState();
 
     const obs: LKGObservation = withOcPath({ outcome: 'promoted', fingerprint: current }, ocPath);
     await this.audit(path, obs);

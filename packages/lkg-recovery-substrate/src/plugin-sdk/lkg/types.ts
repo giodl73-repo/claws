@@ -249,7 +249,13 @@ export type LKGErrorCode =
   | 'LKG_STORE_UNAVAILABLE'
   | 'LKG_VALIDATOR_THREW'
   | 'LKG_ABORTED'
-  | 'LKG_INTERNAL';
+  | 'LKG_INTERNAL'
+  // State-file persistence errors — emitted by `FsLKGStore` when the
+  // on-disk `lkg-health.json` is unreadable, malformed, or written
+  // by a future schema version.
+  | 'LKG_STATE_FILE_READ_FAILED'
+  | 'LKG_STATE_FILE_CORRUPT'
+  | 'LKG_STATE_FILE_VERSION_MISMATCH';
 
 export class LKGError extends Error {
   readonly code: LKGErrorCode;
