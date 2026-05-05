@@ -75,6 +75,12 @@ export interface RollbackResult {
   readonly restored: readonly { readonly path: string; readonly fingerprint: LKGFingerprint }[];
 }
 
+export interface DeleteLabelResult {
+  readonly label: string;
+  /** Per-tracker outcome of the delete: companion file path + whether the file was actually removed (it may have already been gone). */
+  readonly removed: readonly { readonly path: string; readonly companionPath: string; readonly fileExisted: boolean }[];
+}
+
 export interface LKGStore {
   /**
    * Register a tracker. Backend rejects path collisions with
@@ -157,4 +163,24 @@ export interface LKGStore {
    * this label.
    */
   rollbackToLabel(label: string, opts?: LKGObserveOptions): Promise<RollbackResult>;
+
+  /**
+   * Delete a label. The escape hatch for immutable labels: operators
+   * who are confident an upgrade stuck (or who want to reuse a label
+   * name) call this to free disk space and unblock re-pinning.
+   *
+   * Backend behavior:
+   * - FS impl: removes every `<path>.lkg.label.<name>` companion and
+   *   the `entry.labels[name]` metadata. State file is rewritten.
+   * - Git impl: `git tag -d lkg/<name>`. The tagged commit's blobs
+   *   are still in the repo's object store (eligible for `git gc`
+   *   after the tag is gone).
+   *
+   * Throws `LKGError(LKG_LABEL_NOT_FOUND)` if no tracker carries
+   * this label. Idempotent against partial state: if some companions
+   * are already gone, reports `fileExisted: false` for those rows
+   * and continues — the goal is "after this returns, the label is
+   * cleanly gone."
+   */
+  deleteLabel(label: string): Promise<DeleteLabelResult>;
 }

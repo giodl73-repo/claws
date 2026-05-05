@@ -525,6 +525,59 @@ async function runCmdRollback(argv: readonly string[], out: OutputContext): Prom
   return 0;
 }
 
+// ── Subcommand: delete-label ────────────────────────────────────────────
+//
+// The escape hatch for immutable labels. Operators who are confident
+// the upgrade stuck — or who want to reuse a label name — call this
+// to free disk space. Removes companion files + state metadata for
+// every tracker that had this label pinned.
+
+async function runCmdDeleteLabel(argv: readonly string[], out: OutputContext): Promise<number> {
+  const positional = positionalArgs(argv);
+  const label = positional[0];
+  if (label === undefined) {
+    emitError(out, 'delete-label: <label> required (positional)', 'ERR_USAGE');
+    return 2;
+  }
+  // Workspace-dir is the SECOND positional, since first is the label.
+  const dir = positional[1] !== undefined ? resolvePath(positional[1]) : process.cwd();
+  const store = new FsLKGStore({ root: dir });
+  const manifest = await buildWorkspaceManifest(dir);
+  registerOpenClawWorkspace(store, manifest);
+
+  let result;
+  try {
+    result = await store.deleteLabel(label);
+  } catch (err) {
+    if (err instanceof LKGError) {
+      emitError(out, err.message, err.code);
+      return 1;
+    }
+    emitError(out, err instanceof Error ? err.message : String(err), 'ERR_INTERNAL');
+    return 2;
+  }
+
+  emit(
+    out,
+    {
+      ok: true,
+      workspaceDir: dir,
+      label: result.label,
+      removedCount: result.removed.length,
+      removed: result.removed,
+    },
+    [
+      `openclaw-cage delete-label: ${dir}`,
+      `  label: ${result.label}`,
+      `  removed ${result.removed.length} companion(s):`,
+      ...result.removed.map(
+        (r) => `    ${r.path}${r.fileExisted ? '' : ' (companion was already gone)'}`,
+      ),
+    ],
+  );
+  return 0;
+}
+
 // ── Subcommand: fingerprint ─────────────────────────────────────────────
 
 async function runCmdFingerprint(argv: readonly string[], out: OutputContext): Promise<number> {
@@ -564,7 +617,7 @@ function printHelp(out: OutputContext): void {
       JSON.stringify({
         bin: 'openclaw-cage',
         usage: 'openclaw-cage <subcommand> [args]',
-        subcommands: ['status', 'observe', 'promote', 'labels', 'rollback', 'list-trackers', 'fingerprint', 'help'],
+        subcommands: ['status', 'observe', 'promote', 'labels', 'rollback', 'delete-label', 'list-trackers', 'fingerprint', 'help'],
       }) + '\n',
     );
     return;
@@ -594,6 +647,10 @@ function printHelp(out: OutputContext): void {
       '      Restore every tracked file back to the bytes pinned under <name>.',
       '      Two-phase: verifies all companions match recorded hash before any',
       '      write happens; either every tracker rolls back or none do.',
+      '  openclaw-cage delete-label <name> [<workspace-dir>]',
+      '      Remove a labeled pin (companion files + state metadata). The',
+      '      escape hatch for immutable labels — frees disk space and unblocks',
+      '      re-pinning the same name.',
       '  openclaw-cage list-trackers [<workspace-dir>]',
       '      Print canonical openclaw artifacts the manifest would track.',
       '  openclaw-cage fingerprint <file>',
@@ -664,6 +721,8 @@ export async function runCli(argv: readonly string[]): Promise<number> {
         return await runCmdLabels(rest, out);
       case 'rollback':
         return await runCmdRollback(rest, out);
+      case 'delete-label':
+        return await runCmdDeleteLabel(rest, out);
       case 'list-trackers':
         return await runCmdListTrackers(rest, out);
       case 'fingerprint':

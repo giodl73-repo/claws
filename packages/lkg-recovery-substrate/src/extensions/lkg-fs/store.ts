@@ -37,6 +37,7 @@ import type {
 } from '../../plugin-sdk/lkg/types.js';
 import { LKGError } from '../../plugin-sdk/lkg/types.js';
 import type {
+  DeleteLabelResult,
   LKGStore,
   LabelEntry,
   PromoteAllOptions,
@@ -489,6 +490,68 @@ export class FsLKGStore implements LKGStore {
     }
 
     return { label, restored };
+  }
+
+  async deleteLabel(label: string): Promise<DeleteLabelResult> {
+    await this.loadStateOnce();
+    if (!isValidLabelName(label)) {
+      throw new LKGError(
+        'LKG_LABEL_INVALID_NAME',
+        `label must match [A-Za-z0-9._-]+ and be 1-64 chars: "${label}"`,
+      );
+    }
+
+    // Walk entries, find pinned trackers, capture their companion paths.
+    const targets: { path: string; companionPath: string }[] = [];
+    for (const [path, entry] of this.entries) {
+      if (entry.labels?.[label] !== undefined) {
+        targets.push({ path, companionPath: labeledPinPathFor(path, label) });
+      }
+    }
+    if (targets.length === 0) {
+      throw new LKGError(
+        'LKG_LABEL_NOT_FOUND',
+        `no tracker has a pin under label "${label}"`,
+      );
+    }
+
+    // Best-effort delete each companion; report whether it actually
+    // existed. Idempotent: a partial-prior-state is recoverable.
+    const removed: { path: string; companionPath: string; fileExisted: boolean }[] = [];
+    for (const t of targets) {
+      let fileExisted = true;
+      try {
+        await fs.unlink(t.companionPath);
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+          fileExisted = false;
+        } else {
+          throw err;
+        }
+      }
+      removed.push({ ...t, fileExisted });
+    }
+
+    // Strip the label from every entry's metadata + persist. When the
+    // entry has no other labels left, drop the `labels` key entirely
+    // (rather than leaving it as an empty object) — keeps the state
+    // file tidy.
+    for (const t of targets) {
+      const entry = this.entries.get(t.path);
+      if (entry?.labels === undefined) continue;
+      const { [label]: _dropped, ...remainingLabels } = entry.labels;
+      void _dropped;
+      const { labels: _existing, ...withoutLabels } = entry;
+      void _existing;
+      const next: LKGEntry =
+        Object.keys(remainingLabels).length === 0
+          ? withoutLabels
+          : { ...withoutLabels, labels: remainingLabels };
+      this.entries.set(t.path, next);
+    }
+    await this.saveState();
+
+    return { label, removed };
   }
 
   // ---------- internal -----------------------------------------------------

@@ -27,6 +27,7 @@ import { createHash } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import { isAbsolute, normalize, relative, resolve, sep } from 'node:path';
 import type {
+  DeleteLabelResult,
   LKGEntry,
   LKGFingerprint,
   LKGObservation,
@@ -420,6 +421,43 @@ export class GitLKGStore implements LKGStore {
     }
 
     return { label, restored };
+  }
+
+  async deleteLabel(label: string): Promise<DeleteLabelResult> {
+    if (!isValidLabelName(label)) {
+      throw new LKGError(
+        'LKG_LABEL_INVALID_NAME',
+        `label must match [A-Za-z0-9._-]+ and be 1-64 chars: "${label}"`,
+      );
+    }
+    const tagName = `${TAG_PREFIX}${label}`;
+    const tagCheck = await git(['tag', '-l', tagName], {
+      cwd: this.repoRoot,
+      tolerateNonZero: true,
+    });
+    if (tagCheck.stdout.trim() !== tagName) {
+      throw new LKGError(
+        'LKG_LABEL_NOT_FOUND',
+        `git tag "${tagName}" does not exist`,
+      );
+    }
+
+    // Capture which trackers this tag pinned BEFORE deleting the tag,
+    // so we can report the same shape as the FS impl.
+    const observedAt = this.nowIso();
+    const removed: { path: string; companionPath: string; fileExisted: boolean }[] = [];
+    for (const [path, reg] of this.trackers) {
+      const fp = await this.fingerprintFromRef(reg.relPath, tagName, observedAt);
+      if (fp === null) continue;
+      // For the git backend, "companionPath" is the conceptual git ref.
+      // The blob is content-addressable in `.git/objects/`, eligible for
+      // `git gc` once the tag is removed.
+      removed.push({ path, companionPath: `git:${tagName}:${reg.relPath}`, fileExisted: true });
+    }
+
+    await git(['tag', '-d', tagName], { cwd: this.repoRoot });
+
+    return { label, removed };
   }
 
   /**

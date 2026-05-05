@@ -257,6 +257,81 @@ describe('FsLKGStore — rollbackToLabel', () => {
   });
 });
 
+describe('FsLKGStore — deleteLabel', () => {
+  let ctx: Ctx;
+  beforeEach(() => {
+    ctx = makeCtx();
+    writeJson(ctx.fileA, { version: 1 });
+    writeJson(ctx.fileB, { version: 1 });
+    writeJson(ctx.fileC, { version: 1 });
+    registerThree(ctx);
+  });
+
+  it('LBL-40 deletes companion files + state metadata', async () => {
+    await ctx.store.promoteAll({ label: 'transient' });
+    expect(existsSync(`${ctx.fileA}.lkg.label.transient`)).toBe(true);
+
+    const result = await ctx.store.deleteLabel('transient');
+    expect(result.label).toBe('transient');
+    expect(result.removed).toHaveLength(3);
+    expect(result.removed.every((r) => r.fileExisted)).toBe(true);
+
+    expect(existsSync(`${ctx.fileA}.lkg.label.transient`)).toBe(false);
+    expect(existsSync(`${ctx.fileB}.lkg.label.transient`)).toBe(false);
+    expect(existsSync(`${ctx.fileC}.lkg.label.transient`)).toBe(false);
+
+    const labels = await ctx.store.listLabels();
+    expect(labels.filter((l) => l.label === 'transient')).toHaveLength(0);
+  });
+
+  it('LBL-41 unblocks re-pinning the same label name', async () => {
+    await ctx.store.promoteAll({ label: 'reusable' });
+    await ctx.store.deleteLabel('reusable');
+    // Re-pin the same name — would have thrown LKG_LABEL_DUPLICATE before delete.
+    const result = await ctx.store.promoteAll({ label: 'reusable' });
+    expect(result.label).toBe('reusable');
+    expect(result.allValid).toBe(true);
+  });
+
+  it('LBL-42 unknown label → throws LKG_LABEL_NOT_FOUND', async () => {
+    await expect(ctx.store.deleteLabel('never-existed')).rejects.toMatchObject({
+      code: 'LKG_LABEL_NOT_FOUND',
+    });
+  });
+
+  it('LBL-43 invalid label name → throws LKG_LABEL_INVALID_NAME', async () => {
+    await expect(ctx.store.deleteLabel('has space')).rejects.toMatchObject({
+      code: 'LKG_LABEL_INVALID_NAME',
+    });
+  });
+
+  it('LBL-44 idempotent against partial state — companion already gone', async () => {
+    await ctx.store.promoteAll({ label: 'partial' });
+    // Operator manually deletes one companion outside the store's awareness.
+    const fs = await import('node:fs/promises');
+    await fs.unlink(`${ctx.fileB}.lkg.label.partial`);
+
+    const result = await ctx.store.deleteLabel('partial');
+    expect(result.removed).toHaveLength(3);
+    const fileExistedById = new Map(result.removed.map((r) => [r.path, r.fileExisted]));
+    expect(fileExistedById.get(ctx.fileA)).toBe(true);
+    expect(fileExistedById.get(ctx.fileB)).toBe(false); // already gone
+    expect(fileExistedById.get(ctx.fileC)).toBe(true);
+    // State metadata still cleaned for all three.
+    const labels = await ctx.store.listLabels();
+    expect(labels.filter((l) => l.label === 'partial')).toHaveLength(0);
+  });
+
+  it('LBL-45 deleting one label leaves other labels intact', async () => {
+    await ctx.store.promoteAll({ label: 'keep' });
+    await ctx.store.promoteAll({ label: 'drop' });
+    await ctx.store.deleteLabel('drop');
+    const labels = await ctx.store.listLabels();
+    expect(labels.every((l) => l.label === 'keep')).toBe(true);
+    expect(labels).toHaveLength(3);
+  });
+});
+
 describe('FsLKGStore — listLabels', () => {
   let ctx: Ctx;
   beforeEach(() => {

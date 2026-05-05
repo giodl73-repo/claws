@@ -32,6 +32,7 @@ export { LKGError, type LKGErrorCode } from './types.js';
 export { checkSdkCompat } from './compat.js';
 
 export type {
+  DeleteLabelResult,
   LKGStore,
   LabelEntry,
   PromoteAllOptions,
