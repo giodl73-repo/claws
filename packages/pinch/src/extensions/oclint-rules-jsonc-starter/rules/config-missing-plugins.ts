@@ -11,7 +11,7 @@
  * to check existence of the address. No direct AST traversal needed
  * for a simple presence check.
  */
-import { parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import type { LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 export const configMissingPlugins: LintRule = {

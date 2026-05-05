@@ -5,11 +5,11 @@
  * for session logs — a half-flushed JSON-encoded turn ends up here as
  * an error-severity diagnostic, triggering recovery.
  *
- * @module @bic/lkg-recovery-substrate/trackers/jsonl
+ * @module @openclaw/lkg/trackers/jsonl
  */
 
-import type { Diagnostic, JsonlAst, OcPath } from '@bic/oc-paths-substrate';
-import { parseJsonl } from '@bic/oc-paths-substrate';
+import type { Diagnostic, JsonlAst, OcPath } from '@openclaw/oc-path';
+import { parseJsonl } from '@openclaw/oc-path';
 import type { LKGTracker, ValidationResult } from '../plugin-sdk/lkg/types.js';
 
 export interface JsonlTrackerSnapshot {

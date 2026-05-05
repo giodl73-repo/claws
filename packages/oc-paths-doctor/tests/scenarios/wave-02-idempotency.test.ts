@@ -6,7 +6,7 @@
  * inputs that are already correct, malformed, or partially fixed must
  * stabilize after one application.
  */
-import { parseMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import { STARTER_FIXERS_V0 } from '../../src/extensions/ocdoctor-fixers-starter/index.js';
 import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';

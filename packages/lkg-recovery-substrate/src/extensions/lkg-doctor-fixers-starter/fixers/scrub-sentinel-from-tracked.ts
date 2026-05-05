@@ -11,8 +11,8 @@
  * a well-known scrub. Idempotent (re-running on already-scrubbed
  * content is a no-op).
  */
-import { REDACTED_SENTINEL, parseOcPath } from '@bic/oc-paths-substrate';
-import type { OcPathFixerSpec } from '@bic/oc-paths-doctor/plugin-sdk';
+import { REDACTED_SENTINEL, parseOcPath } from '@openclaw/oc-path';
+import type { OcPathFixerSpec } from '@openclaw/oc-doctor/plugin-sdk';
 
 const SCRUB_PLACEHOLDER = '[REDACTED]';
 

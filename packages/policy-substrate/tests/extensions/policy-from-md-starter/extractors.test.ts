@@ -5,7 +5,7 @@
  * shape) the legacy generator did.
  */
 import { describe, expect, it } from 'vitest';
-import { parseMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@openclaw/oc-path';
 import {
   runExtractors,
   type PolicyExtractFile,

@@ -13,7 +13,7 @@
  *
  * Self-registers on import.
  *
- * @module @bic/lkg-recovery-substrate/doctor-fixers-starter
+ * @module @openclaw/lkg/doctor-fixers-starter
  */
 
 import {
@@ -21,7 +21,7 @@ import {
   registerDoctorHealthContribution,
   type DoctorHealthContribution,
   type OcPathFixerSpec,
-} from '@bic/oc-paths-doctor/plugin-sdk';
+} from '@openclaw/oc-doctor/plugin-sdk';
 
 import { scrubSentinelFromTracked } from './fixers/scrub-sentinel-from-tracked.js';
 import { stripUtf8Bom } from './fixers/strip-utf8-bom.js';

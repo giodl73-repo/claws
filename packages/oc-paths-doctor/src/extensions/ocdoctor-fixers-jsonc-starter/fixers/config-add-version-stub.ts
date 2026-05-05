@@ -5,7 +5,7 @@
  * Adds a stub `"version": "0.0.0"` to a config file that lacks one.
  * Operator should bump the version to a real value before shipping.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath } from '@openclaw/oc-path';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 export const configAddVersionStub: OcPathFixerSpec = {

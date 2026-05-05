@@ -5,10 +5,10 @@
   "compilerOptions": {
     "rootDir": "./src",
     "paths": {
-      "@bic/oc-paths-substrate": ["../oc-paths-substrate/dist/index.d.ts"],
-      "@bic/oc-paths-substrate/*": ["../oc-paths-substrate/dist/*"],
-      "@bic/pinch": ["../pinch/dist/index.d.ts"],
-      "@bic/pinch/*": ["../pinch/dist/*"]
+      "@openclaw/oc-path": ["../oc-paths-substrate/dist/index.d.ts"],
+      "@openclaw/oc-path/*": ["../oc-paths-substrate/dist/*"],
+      "@openclaw/oc-lint": ["../pinch/dist/index.d.ts"],
+      "@openclaw/oc-lint/*": ["../pinch/dist/*"]
     }
   }
 }

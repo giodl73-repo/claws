@@ -1,5 +1,5 @@
 /**
- * Adversarial / pitfall tests for the pinch CLI.
+ * Adversarial / pitfall tests for the openclaw-lint CLI.
  *
  * Each test locks one mitigation against the threat it defends —
  * argument parsing edge cases, I/O failures, output-boundary
@@ -38,10 +38,10 @@ async function captureCli(argv: string[]): Promise<Captured> {
   return { out, exitCode };
 }
 
-describe('pinch CLI — argument parsing (CLI-PINCH-001..009)', () => {
+describe('openclaw-lint CLI — argument parsing (CLI-PINCH-001..009)', () => {
   it('CLI-PINCH-001 first arg is a flag → unknown subcommand → exit 2', async () => {
-    // `pinch --json help` is fine (--json is a global flag), but
-    // `pinch --bogus` (no subcommand) treats --bogus as the
+    // `openclaw-lint --json help` is fine (--json is a global flag), but
+    // `openclaw-lint --bogus` (no subcommand) treats --bogus as the
     // subcommand and rejects.
     const r = await captureCli(['--bogus']);
     expect(r.exitCode).toBe(2);
@@ -51,7 +51,7 @@ describe('pinch CLI — argument parsing (CLI-PINCH-001..009)', () => {
     const r = await captureCli([]);
     expect(r.exitCode).toBe(0);
     const json = JSON.parse(r.out[0]!);
-    expect(json.bin).toBe('pinch');
+    expect(json.bin).toBe('openclaw-lint');
   });
 
   it('CLI-PINCH-003 unknown subcommand → exit 2 with structured error', async () => {
@@ -63,7 +63,7 @@ describe('pinch CLI — argument parsing (CLI-PINCH-001..009)', () => {
   });
 });
 
-describe('pinch CLI — I/O failures (CLI-PINCH-010..019)', () => {
+describe('openclaw-lint CLI — I/O failures (CLI-PINCH-010..019)', () => {
   it('CLI-PINCH-010 lint of a missing file → exit 2', async () => {
     const r = await captureCli(['lint', '/abs/path/that/does/not/exist.md']);
     expect(r.exitCode).toBe(2);
@@ -90,7 +90,7 @@ describe('pinch CLI — I/O failures (CLI-PINCH-010..019)', () => {
   });
 });
 
-describe('pinch CLI — exit code semantics (CLI-PINCH-020..029)', () => {
+describe('openclaw-lint CLI — exit code semantics (CLI-PINCH-020..029)', () => {
   it('CLI-PINCH-020 only info-severity findings → exit 0', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'pinch-info-'));
     // Triggers `starter-v0/agents/missing-boundaries` at info.
@@ -119,7 +119,7 @@ describe('pinch CLI — exit code semantics (CLI-PINCH-020..029)', () => {
   });
 });
 
-describe('pinch CLI — output / TTY (CLI-PINCH-030..039)', () => {
+describe('openclaw-lint CLI — output / TTY (CLI-PINCH-030..039)', () => {
   it('CLI-PINCH-030 --json forces JSON regardless of TTY detection', async () => {
     const r = await captureCli(['list-rules', '--json']);
     expect(r.exitCode).toBe(0);
@@ -140,7 +140,7 @@ describe('pinch CLI — output / TTY (CLI-PINCH-030..039)', () => {
     // (or any payload field) contains the redaction sentinel, the
     // CLI must scrub it before writing. We exercise the scrub by
     // putting the sentinel directly in a fixture and confirming
-    // pinch's output never echoes it verbatim.
+    // openclaw-lint's output never echoes it verbatim.
     const dir = mkdtempSync(join(tmpdir(), 'pinch-sentinel-'));
     // The sentinel-bearing string lands inside the file content
     // (a bullet line). The CLI's output layer scrubs all writes
@@ -191,7 +191,7 @@ describe('pinch CLI — output / TTY (CLI-PINCH-030..039)', () => {
   });
 });
 
-describe('pinch CLI — workspace conventions (CLI-PINCH-040..049)', () => {
+describe('openclaw-lint CLI — workspace conventions (CLI-PINCH-040..049)', () => {
   it('CLI-PINCH-040 lint <file> on a markdown file in a non-canonical name still parses', async () => {
     // `lint` accepts arbitrary file paths and infers kind by
     // extension. The runner's appliesTo glob is what filters which

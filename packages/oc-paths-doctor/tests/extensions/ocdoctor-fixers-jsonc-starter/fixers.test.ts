@@ -1,4 +1,4 @@
-import { parseJsonc } from '@bic/oc-paths-substrate';
+import { parseJsonc } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import {
   configAddPluginsStub,

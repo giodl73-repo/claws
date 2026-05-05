@@ -14,7 +14,7 @@
  * @module @openclaw/oc-doctor
  */
 
-import type { OcAst, OcPath, OcPathMatch } from '@bic/oc-paths-substrate';
+import type { OcAst, OcPath, OcPathMatch } from '@openclaw/oc-path';
 
 /**
  * A file the doctor flow has loaded — universal shape regardless of

@@ -11,10 +11,10 @@
  * section is located, its `items: AstItem[]` carry each bullet's
  * `text` and 1-based source `line`.
  *
- * @module @bic/policy-substrate/extractors/deny-rules-from-soul-md
+ * @module @openclaw/policy/extractors/deny-rules-from-soul-md
  */
 
-import { parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import type { DenyRule } from '../../../plugin-sdk/policy/types.js';
 import type { PolicyExtractorSpec } from '../../../plugin-sdk/policy/api.js';
 

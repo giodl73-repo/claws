@@ -18,7 +18,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildWorkspaceManifest } from '@bic/oc-paths-substrate';
+import { buildWorkspaceManifest } from '@openclaw/oc-path';
 import {
   FsLKGStore,
   InMemoryAuditSink,

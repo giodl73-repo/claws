@@ -1,7 +1,7 @@
 {
   "name": "@bic/lkg-recovery-git",
   "version": "0.1.0",
-  "description": "OpenClaw lkg-recovery PR-2 prototype: git-backed second-backend LKGStore impl. Same contract as @bic/lkg-recovery-substrate's FS impl; closes #40245 multi-agent shared workspace via git three-way merge.",
+  "description": "OpenClaw lkg-recovery PR-2 prototype: git-backed second-backend LKGStore impl. Same contract as @openclaw/lkg's FS impl; closes #40245 multi-agent shared workspace via git three-way merge.",
   "type": "module",
   "private": true,
   "main": "./dist/index.js",
@@ -18,8 +18,8 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@bic/lkg-recovery-substrate": "*",
-    "@bic/oc-paths-substrate": "*"
+    "@openclaw/lkg": "*",
+    "@openclaw/oc-path": "*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

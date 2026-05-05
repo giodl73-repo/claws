@@ -6,7 +6,7 @@
  *
  * Read pattern (in pinch CLI):
  *
- *   import { loadWorkspaceConfig } from '@bic/oc-paths-substrate';
+ *   import { loadWorkspaceConfig } from '@openclaw/oc-path';
  *   import { resolveLintOverrides } from './workspace-config.js';
  *
  *   const cfg = await loadWorkspaceConfig(workspaceDir);
@@ -16,7 +16,7 @@
  * @module @openclaw/oc-lint/workspace-config
  */
 
-import { matchRuleIdGlob } from '@bic/oc-paths-substrate';
+import { matchRuleIdGlob } from '@openclaw/oc-path';
 import type { LintSeverity } from './types.js';
 
 export interface WorkspaceLintConfig {

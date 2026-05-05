@@ -1,4 +1,4 @@
-# `@bic/oc-paths-substrate`
+# `@openclaw/oc-path`
 
 claws-hapi prototype of the upstream `oc-paths` package's PR-1 substrate.
 

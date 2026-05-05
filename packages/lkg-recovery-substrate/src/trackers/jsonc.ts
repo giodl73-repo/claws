@@ -3,11 +3,11 @@
  * oc-paths substrate; valid iff no error-severity diagnostics. Comments
  * and trailing commas are tolerated (that's what makes it JSONC).
  *
- * @module @bic/lkg-recovery-substrate/trackers/jsonc
+ * @module @openclaw/lkg/trackers/jsonc
  */
 
-import type { Diagnostic, JsoncAst, OcPath } from '@bic/oc-paths-substrate';
-import { parseJsonc } from '@bic/oc-paths-substrate';
+import type { Diagnostic, JsoncAst, OcPath } from '@openclaw/oc-path';
+import { parseJsonc } from '@openclaw/oc-path';
 import type { LKGTracker, ValidationResult } from '../plugin-sdk/lkg/types.js';
 
 export interface JsoncTrackerSnapshot {

@@ -11,8 +11,8 @@
  * preserving by design — the whole point is to normalize away the
  * BOM. Operators who want the BOM preserved disable this fixer.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
-import type { OcPathFixerSpec } from '@bic/oc-paths-doctor/plugin-sdk';
+import { parseOcPath } from '@openclaw/oc-path';
+import type { OcPathFixerSpec } from '@openclaw/oc-doctor/plugin-sdk';
 
 const BOM = '﻿';
 

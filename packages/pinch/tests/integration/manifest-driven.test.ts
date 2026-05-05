@@ -24,7 +24,7 @@ import {
   type OcAst,
   type OcKind,
   type WorkspaceManifestEntry,
-} from '@bic/oc-paths-substrate';
+} from '@openclaw/oc-path';
 import { runLint } from '../../src/oc-lint/runner.js';
 import { STARTER_RULES_V0 } from '../../src/extensions/oclint-rules-starter/index.js';
 import type { LintFile } from '../../src/oc-lint/runner.js';

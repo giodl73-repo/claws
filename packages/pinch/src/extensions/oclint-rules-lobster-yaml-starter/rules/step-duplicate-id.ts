@@ -8,7 +8,7 @@
  * including branch IDs in `parallel.branches`. Duplicates cause
  * runtime ambiguity in `$stepId.stdout` references.
  */
-import { findOcPaths, parseOcPath } from '@bic/oc-paths-substrate';
+import { findOcPaths, parseOcPath } from '@openclaw/oc-path';
 import type { LintFinding, LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 export const stepDuplicateId: LintRule = {

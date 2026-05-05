@@ -10,7 +10,7 @@
  *
  * **Teaching pattern**: `resolveOcPath` on a frontmatter address.
  */
-import { parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import type { LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 export const memoryMissingScope: LintRule = {

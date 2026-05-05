@@ -7,7 +7,7 @@
  * block is usually authoring-in-progress; flagging surfaces the gap
  * before the gateway runs against an unconfigured plugin set.
  */
-import { findOcPaths, parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { findOcPaths, parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import type { LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 export const configEmptyPluginsEntries: LintRule = {

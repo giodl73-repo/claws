@@ -6,7 +6,7 @@
  * either is missing. Creates frontmatter if absent. Additive +
  * idempotent: only adds the keys that aren't already present.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath } from '@openclaw/oc-path';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 const FENCE = '---';

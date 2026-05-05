@@ -6,7 +6,7 @@
  *
  * Read pattern (in a doctor CLI / host runner):
  *
- *   import { loadWorkspaceConfig } from '@bic/oc-paths-substrate';
+ *   import { loadWorkspaceConfig } from '@openclaw/oc-path';
  *   import { resolveDoctorOverrides } from './workspace-config.js';
  *
  *   const cfg = await loadWorkspaceConfig(workspaceDir);
@@ -17,7 +17,7 @@
  * @module @openclaw/oc-doctor/workspace-config
  */
 
-import { matchRuleIdGlob } from '@bic/oc-paths-substrate';
+import { matchRuleIdGlob } from '@openclaw/oc-path';
 
 export interface WorkspaceDoctorConfig {
   /**

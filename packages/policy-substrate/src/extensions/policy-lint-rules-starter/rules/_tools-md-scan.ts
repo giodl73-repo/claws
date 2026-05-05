@@ -6,7 +6,7 @@
  *
  * NOT exported from the lint pack's index — internal helper only.
  */
-import type { OcAst } from '@bic/oc-paths-substrate';
+import type { OcAst } from '@openclaw/oc-path';
 
 export interface ToolHeaderHit {
   /** Tool name as authored, e.g., `post-channel`. Empty if malformed. */

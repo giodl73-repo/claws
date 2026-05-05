@@ -5,7 +5,7 @@
  * wraps each `check()` in try/catch, surfaces the failure as a
  * diagnostic, and continues with surviving rules.
  */
-import { parseMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import { runLint, type LintFile } from '../../src/oc-lint/runner.js';
 import type { LintRule } from '../../src/plugin-sdk/oc-lint/types.js';

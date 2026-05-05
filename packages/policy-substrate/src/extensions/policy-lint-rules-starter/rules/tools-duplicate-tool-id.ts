@@ -14,7 +14,7 @@
  * extractor's last-writer-wins) so the IR doesn't change shape;
  * operators who disagree edit the file by hand.
  */
-import type { LintRule, LintFinding } from '@bic/pinch/plugin-sdk';
+import type { LintRule, LintFinding } from '@openclaw/oc-lint/plugin-sdk';
 import { scanToolHeaders } from './_tools-md-scan.js';
 
 export const toolsDuplicateToolId: LintRule = {

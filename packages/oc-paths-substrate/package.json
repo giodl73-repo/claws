@@ -1,5 +1,5 @@
 {
-  "name": "@bic/oc-paths-substrate",
+  "name": "@openclaw/oc-path",
   "version": "0.1.0",
   "description": "OpenClaw oc-paths substrate (PR-1 prototype): generic-MD AST + OcPath resolver + emit + sentinel guard. Lands at openclaw-core/src/plugin-sdk/oc-path/.",
   "type": "module",

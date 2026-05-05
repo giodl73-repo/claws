@@ -8,7 +8,7 @@
  *   - detect findings have valid shape
  *   - fix preserves keys outside the touched region
  */
-import { parseJsonc } from '@bic/oc-paths-substrate';
+import { parseJsonc } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import {
   configAddPluginsStub,
@@ -16,7 +16,7 @@ import {
   configRedactSecretLiteral,
   jsoncStarterFixers,
 } from '../../src/extensions/ocdoctor-fixers-jsonc-starter/index.js';
-import { formatOcPath } from '@bic/oc-paths-substrate';
+import { formatOcPath } from '@openclaw/oc-path';
 import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';
 
 async function applyFix(

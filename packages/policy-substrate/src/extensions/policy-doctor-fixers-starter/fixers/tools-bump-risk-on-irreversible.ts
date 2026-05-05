@@ -9,8 +9,8 @@
  * Auto-safe: additive bump (only raises, never lowers), idempotent
  * (re-running finds R4+ and skips).
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
-import type { OcPathFixerSpec } from '@bic/oc-paths-doctor/plugin-sdk';
+import { parseOcPath } from '@openclaw/oc-path';
+import type { OcPathFixerSpec } from '@openclaw/oc-doctor/plugin-sdk';
 import { replaceLine, scanToolHeaders } from './_tools-md-scan.js';
 
 export const toolsBumpRiskOnIrreversible: OcPathFixerSpec = {

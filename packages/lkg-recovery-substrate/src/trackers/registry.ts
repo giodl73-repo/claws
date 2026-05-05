@@ -4,7 +4,7 @@
  * (the references in this directory). Callers override entries to plug
  * in domain-specific schema validators while keeping kind detection.
  *
- *   import { registerDefaultTracker } from '@bic/lkg-recovery-substrate/trackers';
+ *   import { registerDefaultTracker } from '@openclaw/lkg/trackers';
  *   const store = new FsLKGStore({ root });
  *   registerDefaultTracker(store, '/abs/path/AGENTS.md');
  *   registerDefaultTracker(store, '/abs/path/gateway.jsonc');
@@ -13,12 +13,12 @@
  * → `store.register(tracker)`. The host doesn't have to teach the LKG
  * store about per-kind validation.
  *
- * @module @bic/lkg-recovery-substrate/trackers/registry
+ * @module @openclaw/lkg/trackers/registry
  */
 
 import { basename } from 'node:path';
-import type { OcKind, OcPath } from '@bic/oc-paths-substrate';
-import { inferKind } from '@bic/oc-paths-substrate';
+import type { OcKind, OcPath } from '@openclaw/oc-path';
+import { inferKind } from '@openclaw/oc-path';
 import type { LKGStore } from '../plugin-sdk/lkg/api.js';
 import type { LKGTracker, ValidationResult } from '../plugin-sdk/lkg/types.js';
 import { mdTracker, type MdTrackerSnapshot } from './md.js';

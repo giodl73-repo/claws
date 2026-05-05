@@ -1,4 +1,4 @@
-import { parseYaml } from '@bic/oc-paths-substrate';
+import { parseYaml } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import {
   stepDedupeId,

@@ -4,7 +4,7 @@
  *
  * NOT exported from the fixer pack's index — internal helper only.
  */
-import type { OcAst } from '@bic/oc-paths-substrate';
+import type { OcAst } from '@openclaw/oc-path';
 
 export interface ToolHeaderHit {
   readonly name: string;

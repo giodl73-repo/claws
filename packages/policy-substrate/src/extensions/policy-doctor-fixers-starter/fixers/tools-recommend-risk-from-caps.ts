@@ -19,8 +19,8 @@
  * over-classifying is recoverable (operator can lower); under-
  * classifying isn't (an unknown tool gets routed past requires-approval).
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
-import type { OcPathFixerSpec } from '@bic/oc-paths-doctor/plugin-sdk';
+import { parseOcPath } from '@openclaw/oc-path';
+import type { OcPathFixerSpec } from '@openclaw/oc-doctor/plugin-sdk';
 import { replaceLine, scanToolHeaders } from './_tools-md-scan.js';
 
 function recommendRiskFor(meta: string): string {

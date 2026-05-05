@@ -1,5 +1,5 @@
 {
-  "name": "@bic/oc-paths-doctor",
+  "name": "@openclaw/oc-doctor",
   "version": "0.1.0",
   "description": "OpenClaw oc-paths PR-3 prototype: ocPathFixerContribution adapter wrapping OcPath-aware fixers into existing registerDoctorHealthContribution; ships starter-v0 starter pack.",
   "type": "module",
@@ -30,8 +30,8 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@bic/oc-paths-substrate": "*",
-    "@bic/pinch": "*"
+    "@openclaw/oc-path": "*",
+    "@openclaw/oc-lint": "*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

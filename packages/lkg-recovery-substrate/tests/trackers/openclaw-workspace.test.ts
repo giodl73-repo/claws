@@ -14,7 +14,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   OPENCLAW_WORKSPACE_ROLES,
   buildWorkspaceManifest,
-} from '@bic/oc-paths-substrate';
+} from '@openclaw/oc-path';
 import {
   FsLKGStore,
   InMemoryAuditSink,

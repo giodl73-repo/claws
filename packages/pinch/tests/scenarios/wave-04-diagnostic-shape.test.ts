@@ -5,7 +5,7 @@
  * `LintFinding` from `check()`, producing a `Diagnostic`. This wave
  * verifies the shape contract.
  */
-import { parseMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import { runLint, type LintFile } from '../../src/oc-lint/runner.js';
 import type { LintRule } from '../../src/plugin-sdk/oc-lint/types.js';

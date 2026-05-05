@@ -2,7 +2,7 @@
  * `@openclaw/oc-path/yaml` — YAML kind public surface (subpath).
  *
  * Most consumers should use the universal `setOcPath` /
- * `resolveOcPath` from `@bic/oc-paths-substrate` and let the substrate
+ * `resolveOcPath` from `@openclaw/oc-path` and let the substrate
  * dispatch via `ast.kind`. These per-kind functions exist for advanced
  * consumers and internal substrate dispatch.
  *

@@ -9,7 +9,7 @@
  * **Idempotency**: a section with at least one item (including the
  * TODO bullet) is left alone on subsequent runs.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath } from '@openclaw/oc-path';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 export interface SeedToolsTodoOptions {

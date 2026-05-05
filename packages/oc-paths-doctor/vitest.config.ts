@@ -7,8 +7,8 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
-      '@bic/oc-paths-substrate': resolve(HERE, '../oc-paths-substrate/src/index.ts'),
-      '@bic/pinch': resolve(HERE, '../pinch/src/index.ts'),
+      '@openclaw/oc-path': resolve(HERE, '../oc-paths-substrate/src/index.ts'),
+      '@openclaw/oc-lint': resolve(HERE, '../pinch/src/index.ts'),
     },
   },
   test: {

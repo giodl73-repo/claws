@@ -4,7 +4,7 @@
  * Run starter-v0 against the substrate's 8-file fixture set and
  * verify expected diagnostic profile.
  */
-import { parseMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@openclaw/oc-path';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

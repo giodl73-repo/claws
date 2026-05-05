@@ -5,7 +5,7 @@
  * partial, and edge-case inputs. Goes deeper than the smoke tests in
  * `tests/extensions/ocdoctor-fixers-starter/fixers.test.ts`.
  */
-import { parseMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import {
   agentsAddBoundariesStub,

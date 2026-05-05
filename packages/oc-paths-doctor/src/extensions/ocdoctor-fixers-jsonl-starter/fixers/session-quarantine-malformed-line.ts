@@ -10,7 +10,7 @@
  * **Idempotency**: a quarantine event is itself valid JSON, so
  * re-running on a quarantined file produces no further detections.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath } from '@openclaw/oc-path';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 export const sessionQuarantineMalformedLine: OcPathFixerSpec = {

@@ -1,7 +1,7 @@
 /**
  * Smoke tests for the doctor test harness.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import {
   assertDetects,

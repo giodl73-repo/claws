@@ -1,4 +1,4 @@
-import { parseJsonl } from '@bic/oc-paths-substrate';
+import { parseJsonl } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import {
   jsonlStarterFixers,

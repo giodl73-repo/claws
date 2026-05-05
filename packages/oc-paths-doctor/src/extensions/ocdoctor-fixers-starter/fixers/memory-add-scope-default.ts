@@ -5,7 +5,7 @@
  * Adds `scope: project` to MEMORY.md frontmatter if scope is missing.
  * If frontmatter is absent, creates it. Additive + idempotent.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath } from '@openclaw/oc-path';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 const FENCE = '---';

@@ -13,8 +13,8 @@
  * Paired fixer: `lkg/scrub-sentinel-from-tracked` replaces every
  * occurrence with `[REDACTED]`.
  */
-import { REDACTED_SENTINEL } from '@bic/oc-paths-substrate';
-import type { LintRule, LintFinding } from '@bic/pinch/plugin-sdk';
+import { REDACTED_SENTINEL } from '@openclaw/oc-path';
+import type { LintRule, LintFinding } from '@openclaw/oc-lint/plugin-sdk';
 
 const CANONICAL_GLOB = '*';
 

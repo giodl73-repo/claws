@@ -8,8 +8,8 @@
  * starter packs don't currently consume those fields beyond `path`, so
  * an `insertion-point` placeholder is sufficient for round-trip.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
-import type { OcPathMatch } from '@bic/oc-paths-substrate';
+import { parseOcPath } from '@openclaw/oc-path';
+import type { OcPathMatch } from '@openclaw/oc-path';
 
 export function syntheticMatch(ocPath: string, line = 1): OcPathMatch {
   return {

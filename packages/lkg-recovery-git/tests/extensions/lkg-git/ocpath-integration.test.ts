@@ -13,8 +13,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   InMemoryAuditSink,
   InMemoryRecoveryNoticeSink,
-} from '@bic/lkg-recovery-substrate';
-import { parseOcPath } from '@bic/oc-paths-substrate';
+} from '@openclaw/lkg';
+import { parseOcPath } from '@openclaw/oc-path';
 import { GitLKGStore } from '../../../src/extensions/lkg-git/store.js';
 
 function gitInit(repoRoot: string): void {

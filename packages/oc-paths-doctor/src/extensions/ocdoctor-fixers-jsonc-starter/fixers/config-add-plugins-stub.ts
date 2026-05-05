@@ -12,7 +12,7 @@
  * which would lose comments; for additive fixes the surgical text
  * insertion is friendlier.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath } from '@openclaw/oc-path';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 export const configAddPluginsStub: OcPathFixerSpec = {

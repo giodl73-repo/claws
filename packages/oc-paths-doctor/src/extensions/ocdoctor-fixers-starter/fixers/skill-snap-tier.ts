@@ -5,8 +5,8 @@
  * Snaps an invalid `tier:` frontmatter value to a configured target.
  * Same pattern + risk profile as memory/snap-scope.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
-import { STARTER_ALLOWED_SKILL_TIERS } from '@bic/pinch';
+import { parseOcPath } from '@openclaw/oc-path';
+import { STARTER_ALLOWED_SKILL_TIERS } from '@openclaw/oc-lint';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 export interface SnapTierOptions {

@@ -2,7 +2,7 @@
  * Tests for `lkg-doctor-fixers-starter` — paired auto-fixers for
  * the LKG lint rules.
  */
-import { parseMd, REDACTED_SENTINEL } from '@bic/oc-paths-substrate';
+import { parseMd, REDACTED_SENTINEL } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import {
   scrubSentinelFromTracked,

@@ -13,7 +13,7 @@
  * Advisory-only: no auto-fix. Operators must decide which level
  * they meant.
  */
-import type { LintRule, LintFinding } from '@bic/pinch/plugin-sdk';
+import type { LintRule, LintFinding } from '@openclaw/oc-lint/plugin-sdk';
 import { scanToolHeaders } from './_tools-md-scan.js';
 
 const KNOWN_LEVELS = ['public', 'internal', 'confidential', 'restricted'];

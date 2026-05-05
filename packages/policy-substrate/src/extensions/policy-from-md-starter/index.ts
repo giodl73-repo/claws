@@ -1,5 +1,5 @@
 /**
- * `@bic/policy-substrate/extractors-starter` — claws-shaped reference
+ * `@openclaw/policy/extractors-starter` — claws-shaped reference
  * generator pack. Each extractor is sourced from a real openclaw
  * canonical artifact (SOUL.md, TOOLS.md, etc.) and uses
  * `findOcPaths` / `resolveOcPath` from oc-paths-substrate to
@@ -11,7 +11,7 @@
  * authors its own `PolicyExtractorSpec` and concatenates it with
  * `STARTER_EXTRACTORS_V0`.
  *
- * @module @bic/policy-substrate/extensions/policy-from-md-starter
+ * @module @openclaw/policy/extensions/policy-from-md-starter
  */
 
 import type {

@@ -1,5 +1,5 @@
 /**
- * `@bic/lkg-recovery-substrate/trackers` — reference tracker pack.
+ * `@openclaw/lkg/trackers` — reference tracker pack.
  *
  * Per-kind tracker factories that wire the oc-paths substrate's
  * `parseMd` / `parseJsonc` / `parseJsonl` / `parseYaml` into the
@@ -12,7 +12,7 @@
  * caller concern; layer it via `additionalCheck` (per-kind factory)
  * or via a custom factory plugged into the registry.
  *
- * @module @bic/lkg-recovery-substrate/trackers
+ * @module @openclaw/lkg/trackers
  */
 
 export { mdTracker, type MdTrackerOptions, type MdTrackerSnapshot } from './md.js';

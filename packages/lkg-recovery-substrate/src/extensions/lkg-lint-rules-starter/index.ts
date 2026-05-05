@@ -15,11 +15,11 @@
  *
  * Self-registers on import.
  *
- * @module @bic/lkg-recovery-substrate/lint-rules-starter
+ * @module @openclaw/lkg/lint-rules-starter
  */
 
-import type { LintRule } from '@bic/pinch/plugin-sdk';
-import { registerLintRule } from '@bic/pinch/plugin-sdk';
+import type { LintRule } from '@openclaw/oc-lint/plugin-sdk';
+import { registerLintRule } from '@openclaw/oc-lint/plugin-sdk';
 
 import { emptyTrackedFile } from './rules/empty-tracked-file.js';
 import { sentinelInContent } from './rules/sentinel-in-content.js';

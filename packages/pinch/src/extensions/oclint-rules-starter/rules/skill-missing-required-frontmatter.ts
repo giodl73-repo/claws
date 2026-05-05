@@ -12,7 +12,7 @@
  * **Teaching pattern**: frontmatter keys are addressable as
  * `oc://X/[frontmatter]/key`; per-key existence via `resolveOcPath`.
  */
-import { parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import type { LintFinding, LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 const REQUIRED = ['name', 'description'] as const;

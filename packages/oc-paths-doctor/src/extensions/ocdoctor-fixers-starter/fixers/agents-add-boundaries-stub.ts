@@ -5,7 +5,7 @@
  * Adds a stub `## Boundaries` section to AGENTS.md if absent.
  * Additive (never deletes) + idempotent (re-running is no-op).
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath } from '@openclaw/oc-path';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 const STUB = `\n## Boundaries\n\n- TODO: list deny-rules here (e.g., "never write to /etc")\n`;

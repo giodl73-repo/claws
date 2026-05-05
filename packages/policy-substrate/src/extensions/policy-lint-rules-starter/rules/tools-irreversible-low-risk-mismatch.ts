@@ -14,7 +14,7 @@
  * to R4 (high). Doesn't push to R5 — true critical-vs-high is an
  * operator decision based on blast radius.
  */
-import type { LintRule, LintFinding } from '@bic/pinch/plugin-sdk';
+import type { LintRule, LintFinding } from '@openclaw/oc-lint/plugin-sdk';
 import { scanToolHeaders } from './_tools-md-scan.js';
 
 export const toolsIrreversibleLowRiskMismatch: LintRule = {

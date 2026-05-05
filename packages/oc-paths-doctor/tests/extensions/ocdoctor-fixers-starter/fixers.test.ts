@@ -1,4 +1,4 @@
-import { parseMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import {
   STARTER_FIXERS_V0,

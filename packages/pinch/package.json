@@ -1,5 +1,5 @@
 {
-  "name": "@bic/pinch",
+  "name": "@openclaw/oc-lint",
   "version": "0.1.0",
   "description": "OpenClaw lint framework — `openclaw pinch` CLI brand. Universal LintRule shape across md/jsonc/jsonl/yaml; rules consume oc-paths-substrate's universal verbs. Cargo:Clippy ↔ OpenClaw:Pinch (we're crab-themed).",
   "type": "module",
@@ -7,7 +7,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "pinch": "./bin/pinch.mjs"
+    "openclaw-lint": "./bin/openclaw-lint.mjs"
   },
   "exports": {
     ".": {
@@ -41,7 +41,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@bic/oc-paths-substrate": "*"
+    "@openclaw/oc-path": "*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

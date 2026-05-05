@@ -1,6 +1,6 @@
 # policy-substrate Pitfalls
 
-Substrate / SDK-level pitfalls for `@bic/policy-substrate` — by
+Substrate / SDK-level pitfalls for `@openclaw/policy` — by
 tests across `tests/plugin-sdk/policy/*`, inline `// POL-NNN`
 comments, and consumer error messages.
 

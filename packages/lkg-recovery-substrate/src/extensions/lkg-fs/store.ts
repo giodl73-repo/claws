@@ -26,7 +26,7 @@
 
 import { promises as fs } from 'node:fs';
 import { dirname, isAbsolute, normalize, relative, resolve, sep } from 'node:path';
-import { REDACTED_SENTINEL, formatOcPath } from '@bic/oc-paths-substrate';
+import { REDACTED_SENTINEL, formatOcPath } from '@openclaw/oc-path';
 import type {
   LKGEntry,
   LKGFingerprint,
@@ -137,7 +137,7 @@ export class FsLKGStore implements LKGStore {
       return obs;
     }
 
-    // Sentinel guard (mirrors @bic/oc-paths-substrate's emit-time
+    // Sentinel guard (mirrors @openclaw/oc-path's emit-time
     // guard, applied at the LKG observe boundary). See L-A2/B4.
     if (containsSentinel(raw)) {
       const obs: LKGObservation = withOcPath({

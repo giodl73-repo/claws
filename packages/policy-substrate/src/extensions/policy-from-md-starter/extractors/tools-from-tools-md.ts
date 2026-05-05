@@ -13,10 +13,10 @@
  * declaration. Other shapes (e.g., a `## Tool Guidance` table) are
  * narrative; tools come from this section.
  *
- * @module @bic/policy-substrate/extractors/tools-from-tools-md
+ * @module @openclaw/policy/extractors/tools-from-tools-md
  */
 
-import { parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import type {
   RiskLevel,
   Sensitivity,

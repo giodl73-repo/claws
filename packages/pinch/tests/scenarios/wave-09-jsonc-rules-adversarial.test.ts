@@ -6,7 +6,7 @@
  * The contract: every rule is pure, deterministic, returns 0+ findings,
  * never throws on parser-tolerated input.
  */
-import { parseJsonc } from '@bic/oc-paths-substrate';
+import { parseJsonc } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import {
   configEmptyPluginsEntries,

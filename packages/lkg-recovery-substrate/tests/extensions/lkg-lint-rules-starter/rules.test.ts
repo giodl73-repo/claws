@@ -2,7 +2,7 @@
  * Tests for `lkg-lint-rules-starter` — three rules covering pre-
  * observe failure surfaces.
  */
-import { parseMd, REDACTED_SENTINEL } from '@bic/oc-paths-substrate';
+import { parseMd, REDACTED_SENTINEL } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import {
   emptyTrackedFile,

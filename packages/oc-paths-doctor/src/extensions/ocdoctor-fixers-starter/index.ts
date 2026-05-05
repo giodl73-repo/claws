@@ -31,7 +31,7 @@
  *
  * Upstream destination: `openclaw-core/extensions/ocdoctor-fixers-starter/`.
  *
- * @module @bic/oc-paths-doctor/fixers-starter
+ * @module @openclaw/oc-doctor/fixers-starter
  */
 
 import { ocPathFixerContribution } from '../../plugin-sdk/oc-doctor/adapter.js';

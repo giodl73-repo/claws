@@ -15,10 +15,10 @@
  * (token-class label + length). 8-char prefix leaks via
  * `s.slice(0, 8)` are forbidden.
  */
-import { emitJsonc, parseOcPath, setOcPath } from '@bic/oc-paths-substrate';
-import type { JsoncValue, OcPath, OcPathMatch } from '@bic/oc-paths-substrate';
-import { STARTER_TOKEN_PATTERNS } from '@bic/pinch';
-import type { TokenPattern } from '@bic/pinch';
+import { emitJsonc, parseOcPath, setOcPath } from '@openclaw/oc-path';
+import type { JsoncValue, OcPath, OcPathMatch } from '@openclaw/oc-path';
+import { STARTER_TOKEN_PATTERNS } from '@openclaw/oc-lint';
+import type { TokenPattern } from '@openclaw/oc-lint';
 import type { DoctorDetectResult, OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 function classifySecret(s: string): TokenPattern | null {

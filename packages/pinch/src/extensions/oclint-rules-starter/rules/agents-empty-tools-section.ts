@@ -8,7 +8,7 @@
  * surfaces the gap before the agent runs against an unconfigured
  * workspace.
  */
-import { findOcPaths, parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { findOcPaths, parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import type { LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 export const agentsEmptyToolsSection: LintRule = {

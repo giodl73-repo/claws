@@ -267,7 +267,7 @@ describe('LKG bounding box — workspace-relative ocPath threading (L-OcPathInte
   it('OCPATH-01 observation carries ocPath when tracker declares it', async () => {
     const filePath = join(ctx.workspaceDir, 'AGENTS.md');
     writeFileSync(filePath, '## Tools\n- gh\n', 'utf-8');
-    const { parseOcPath } = await import('@bic/oc-paths-substrate');
+    const { parseOcPath } = await import('@openclaw/oc-path');
     ctx.store.register({
       path: filePath,
       ocPath: parseOcPath('oc://AGENTS.md'),
@@ -298,7 +298,7 @@ describe('LKG bounding box — workspace-relative ocPath threading (L-OcPathInte
   it('OCPATH-03 audit event includes ocPath in the envelope', async () => {
     const filePath = join(ctx.workspaceDir, 'gateway.jsonc');
     writeFileSync(filePath, '{ "version": 1 }\n', 'utf-8');
-    const { parseOcPath } = await import('@bic/oc-paths-substrate');
+    const { parseOcPath } = await import('@openclaw/oc-path');
     ctx.store.register({
       path: filePath,
       ocPath: parseOcPath('oc://gateway.jsonc'),
@@ -316,7 +316,7 @@ describe('LKG bounding box — workspace-relative ocPath threading (L-OcPathInte
     const filePath = join(ctx.workspaceDir, 'session.jsonl');
     const goodBytes = '{"event":"start"}\n{"event":"end"}\n';
     writeFileSync(filePath, goodBytes, 'utf-8');
-    const { parseOcPath } = await import('@bic/oc-paths-substrate');
+    const { parseOcPath } = await import('@openclaw/oc-path');
     ctx.store.register({
       path: filePath,
       ocPath: parseOcPath('oc://session.jsonl'),

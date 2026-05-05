@@ -7,7 +7,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
-      '@bic/lkg-recovery-substrate': resolve(HERE, '../lkg-recovery-substrate/src/index.ts'),
+      '@openclaw/lkg': resolve(HERE, '../lkg-recovery-substrate/src/index.ts'),
     },
   },
   test: {

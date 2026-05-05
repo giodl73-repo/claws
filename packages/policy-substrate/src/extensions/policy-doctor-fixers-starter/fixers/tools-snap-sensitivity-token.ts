@@ -11,8 +11,8 @@
  * `sensitivity:bogus`?) — not auto-safe in the same way as
  * migrate-sensitivity-syntax. Configurable via `targetLevel` option.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
-import type { OcPathFixerSpec } from '@bic/oc-paths-doctor/plugin-sdk';
+import { parseOcPath } from '@openclaw/oc-path';
+import type { OcPathFixerSpec } from '@openclaw/oc-doctor/plugin-sdk';
 import { replaceLine, scanToolHeaders } from './_tools-md-scan.js';
 
 export interface SnapSensitivityOptions {

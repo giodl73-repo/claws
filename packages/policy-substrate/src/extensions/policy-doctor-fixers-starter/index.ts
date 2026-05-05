@@ -27,7 +27,7 @@
  *
  * Self-registers on import.
  *
- * @module @bic/policy-substrate/doctor-fixers-starter
+ * @module @openclaw/policy/doctor-fixers-starter
  */
 
 import {
@@ -35,7 +35,7 @@ import {
   registerDoctorHealthContribution,
   type DoctorHealthContribution,
   type OcPathFixerSpec,
-} from '@bic/oc-paths-doctor/plugin-sdk';
+} from '@openclaw/oc-doctor/plugin-sdk';
 
 import { policyRegenerateOnDrift } from './fixers/policy-regenerate-on-drift.js';
 import { toolsBumpRiskOnIrreversible } from './fixers/tools-bump-risk-on-irreversible.js';

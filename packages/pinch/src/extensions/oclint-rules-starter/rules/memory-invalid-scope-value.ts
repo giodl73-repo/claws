@@ -6,7 +6,7 @@
  * Flag: MEMORY.md has a `scope:` frontmatter entry, but its value
  * isn't one of the recognized scopes.
  */
-import { parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import { STARTER_ALLOWED_MEMORY_SCOPES } from '../../../shared/starter-values.js';
 import type { LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 

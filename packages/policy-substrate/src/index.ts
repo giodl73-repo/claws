@@ -1,5 +1,5 @@
 /**
- * `@bic/policy-substrate` — claws-hapi prototype of the upstream
+ * `@openclaw/policy` — claws-hapi prototype of the upstream
  * `policy-anchoring` PR-1 surface (PolicyIR types contract +
  * reference markdown extractor pack).
  *
@@ -16,7 +16,7 @@
  * `lkg-recovery-substrate` — the third consumer of the universal
  * substrate, parallel to lint and doctor.
  *
- * @module @bic/policy-substrate
+ * @module @openclaw/policy
  */
 
 export * from './plugin-sdk/policy/index.js';

@@ -18,8 +18,8 @@
  * still applies: one `fix()` call renames exactly one key.
  */
 import { isMap, isScalar, isSeq } from 'yaml';
-import { emitYaml, parseOcPath } from '@bic/oc-paths-substrate';
-import { STARTER_IN_PROCESS_TOOLS } from '@bic/pinch';
+import { emitYaml, parseOcPath } from '@openclaw/oc-path';
+import { STARTER_IN_PROCESS_TOOLS } from '@openclaw/oc-lint';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 function isInProcessFirstToken(cmd: string): boolean {

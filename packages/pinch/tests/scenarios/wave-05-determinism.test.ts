@@ -4,7 +4,7 @@
  * Same inputs → same outputs. Runner does not mutate inputs. Stats
  * accuracy across multiple invocations.
  */
-import { parseMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import { LintRuleRegistry } from '../../src/oc-lint/index.js';
 import { runLint, type LintFile } from '../../src/oc-lint/runner.js';

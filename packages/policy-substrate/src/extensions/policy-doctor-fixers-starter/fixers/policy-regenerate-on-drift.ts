@@ -29,8 +29,8 @@ import {
   parseYaml,
   type OcAst,
   type OcKind,
-} from '@bic/oc-paths-substrate';
-import type { OcPathFixerSpec } from '@bic/oc-paths-doctor/plugin-sdk';
+} from '@openclaw/oc-path';
+import type { OcPathFixerSpec } from '@openclaw/oc-doctor/plugin-sdk';
 import {
   computePolicyShapeHash,
   getPolicyGenerator,

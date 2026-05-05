@@ -17,7 +17,7 @@
  * @module @openclaw/oc-lint
  */
 
-import type { OcAst } from '@bic/oc-paths-substrate';
+import type { OcAst } from '@openclaw/oc-path';
 
 /**
  * Filenames are open across all kinds (md, jsonc, jsonl, yaml). Rules

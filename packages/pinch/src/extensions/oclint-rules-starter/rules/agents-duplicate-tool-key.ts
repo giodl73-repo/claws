@@ -14,8 +14,8 @@
  * the same slug means a duplicate, and `match.line` carries the line
  * for the diagnostic.
  */
-import { findOcPaths, parseOcPath } from '@bic/oc-paths-substrate';
-import type { MdAst } from '@bic/oc-paths-substrate';
+import { findOcPaths, parseOcPath } from '@openclaw/oc-path';
+import type { MdAst } from '@openclaw/oc-path';
 import type { LintFinding, LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 export const agentsDuplicateToolKey: LintRule = {

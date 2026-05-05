@@ -10,7 +10,7 @@
  *   - adapter wiring through DoctorContext
  *   - the 3 optional md fixers (seed-tools-todo, snap-scope, snap-tier)
  */
-import { parseJsonc, parseMd } from '@bic/oc-paths-substrate';
+import { parseJsonc, parseMd } from '@openclaw/oc-path';
 import { describe, expect, it, vi } from 'vitest';
 import { ocPathFixerContribution } from '../../src/plugin-sdk/oc-doctor/adapter.js';
 import {

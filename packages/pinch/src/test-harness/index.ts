@@ -24,7 +24,7 @@ import {
   parseMd,
   parseYaml,
   type OcAst,
-} from '@bic/oc-paths-substrate';
+} from '@openclaw/oc-path';
 import type { LintFinding, LintRule } from '../plugin-sdk/oc-lint/types.js';
 
 /**

@@ -36,7 +36,7 @@
  * renames exactly the one element addressed by `match.path`.
  */
 import { isMap, isScalar, isSeq } from 'yaml';
-import { emitYaml, parseOcPath, setOcPath } from '@bic/oc-paths-substrate';
+import { emitYaml, parseOcPath, setOcPath } from '@openclaw/oc-path';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 export interface DedupeIdOptions {

@@ -6,7 +6,7 @@
  *
  * Read pattern (in openclaw-lkg CLI):
  *
- *   import { loadWorkspaceConfig } from '@bic/oc-paths-substrate';
+ *   import { loadWorkspaceConfig } from '@openclaw/oc-path';
  *   import { resolveLkgOverrides } from './workspace-config.js';
  *
  *   const cfg = await loadWorkspaceConfig(workspaceDir);
@@ -16,7 +16,7 @@
  * @module @openclaw/lkg/workspace-config
  */
 
-import { matchRuleIdGlob } from '@bic/oc-paths-substrate';
+import { matchRuleIdGlob } from '@openclaw/oc-path';
 
 export interface WorkspaceLkgConfig {
   /**

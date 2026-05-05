@@ -1,7 +1,7 @@
 /**
  * `@bic/lkg-recovery-git` — claws-hapi prototype of the upstream
  * `lkg-recovery` PR-2 surface (git-backed second-backend LKGStore
- * impl). Same `LKGStore` contract as `@bic/lkg-recovery-substrate`'s
+ * impl). Same `LKGStore` contract as `@openclaw/lkg`'s
  * filesystem-backed impl; consumers swap backend via configured store
  * choice.
  *

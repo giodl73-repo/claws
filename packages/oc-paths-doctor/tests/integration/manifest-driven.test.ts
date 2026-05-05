@@ -23,7 +23,7 @@ import {
   type OcAst,
   type OcKind,
   type WorkspaceManifestEntry,
-} from '@bic/oc-paths-substrate';
+} from '@openclaw/oc-path';
 import {
   STARTER_FIXERS_V0_CONTRIBUTIONS,
 } from '../../src/extensions/ocdoctor-fixers-starter/index.js';

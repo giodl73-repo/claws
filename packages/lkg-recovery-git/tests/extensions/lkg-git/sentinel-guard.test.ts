@@ -16,7 +16,7 @@ import {
   InMemoryAuditSink,
   InMemoryRecoveryNoticeSink,
   type LKGTracker,
-} from '@bic/lkg-recovery-substrate';
+} from '@openclaw/lkg';
 import { GitLKGStore } from '../../../src/extensions/lkg-git/store.js';
 
 interface JsonContent {

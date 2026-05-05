@@ -1,5 +1,5 @@
 {
-  "name": "@bic/lkg-recovery-substrate",
+  "name": "@openclaw/lkg",
   "version": "0.1.0",
   "description": "OpenClaw lkg-recovery PR-1 prototype: LKGStore / LKGTracker<TParsed, TIssue> contract types + reference filesystem-backed impl + config-LKG migration.",
   "type": "module",
@@ -49,9 +49,9 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@bic/oc-paths-substrate": "*",
-    "@bic/pinch": "*",
-    "@bic/oc-paths-doctor": "*"
+    "@openclaw/oc-path": "*",
+    "@openclaw/oc-lint": "*",
+    "@openclaw/oc-doctor": "*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

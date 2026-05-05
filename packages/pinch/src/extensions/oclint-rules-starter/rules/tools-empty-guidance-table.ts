@@ -13,8 +13,8 @@
  * addressable via OcPath). Resolve gates entry; the per-kind walk
  * inspects the table.
  */
-import { parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
-import type { MdAst } from '@bic/oc-paths-substrate';
+import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
+import type { MdAst } from '@openclaw/oc-path';
 import type { LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 export const toolsEmptyGuidanceTable: LintRule = {

@@ -10,7 +10,7 @@
  * Paired fixer: `tools/recommend-risk-from-caps` proposes a level
  * based on capabilities present.
  */
-import type { LintRule, LintFinding } from '@bic/pinch/plugin-sdk';
+import type { LintRule, LintFinding } from '@openclaw/oc-lint/plugin-sdk';
 import { scanToolHeaders } from './_tools-md-scan.js';
 
 export const toolsMissingRiskLevel: LintRule = {

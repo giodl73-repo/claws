@@ -4,8 +4,8 @@
  *
  * **Strategic frame**: policy is the canonical plugin shape — it
  * ships its own lint rules + doctor fixers from inside the plugin's
- * own package. Operators who add `@bic/policy-substrate` to their
- * workspace and import `@bic/policy-substrate/lint-rules-starter`
+ * own package. Operators who add `@openclaw/policy` to their
+ * workspace and import `@openclaw/policy/lint-rules-starter`
  * automatically gain authoring guardrails for the TOOLS.md surface
  * the policy generator consumes.
  *
@@ -20,11 +20,11 @@
  *
  * Self-registers on import (matches pinch / oc-doctor pattern).
  *
- * @module @bic/policy-substrate/lint-rules-starter
+ * @module @openclaw/policy/lint-rules-starter
  */
 
-import type { LintRule } from '@bic/pinch/plugin-sdk';
-import { registerLintRule } from '@bic/pinch/plugin-sdk';
+import type { LintRule } from '@openclaw/oc-lint/plugin-sdk';
+import { registerLintRule } from '@openclaw/oc-lint/plugin-sdk';
 
 import { toolsDuplicateToolId } from './rules/tools-duplicate-tool-id.js';
 import { toolsIrreversibleLowRiskMismatch } from './rules/tools-irreversible-low-risk-mismatch.js';

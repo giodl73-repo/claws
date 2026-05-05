@@ -9,7 +9,7 @@
  * @module oc-lint/runner
  */
 
-import type { OcAst } from '@bic/oc-paths-substrate';
+import type { OcAst } from '@openclaw/oc-path';
 import type {
   Diagnostic,
   LintRule,

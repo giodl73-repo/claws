@@ -4,11 +4,11 @@
  * who want stricter schema validation (e.g., AGENTS.md must have a
  * `## Boundaries` section) layer it via `additionalCheck`.
  *
- * @module @bic/lkg-recovery-substrate/trackers/md
+ * @module @openclaw/lkg/trackers/md
  */
 
-import type { Diagnostic, MdAst, OcPath } from '@bic/oc-paths-substrate';
-import { parseMd } from '@bic/oc-paths-substrate';
+import type { Diagnostic, MdAst, OcPath } from '@openclaw/oc-path';
+import { parseMd } from '@openclaw/oc-path';
 import type { LKGTracker, ValidationResult } from '../plugin-sdk/lkg/types.js';
 
 export interface MdTrackerSnapshot {

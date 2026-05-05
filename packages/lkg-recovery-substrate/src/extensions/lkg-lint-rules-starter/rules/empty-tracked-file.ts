@@ -14,7 +14,7 @@
  * file is intentional (placeholder for future authoring) or a
  * mistake (failed save).
  */
-import type { LintRule, LintFinding } from '@bic/pinch/plugin-sdk';
+import type { LintRule, LintFinding } from '@openclaw/oc-lint/plugin-sdk';
 
 export const emptyTrackedFile: LintRule = {
   id: 'lkg-starter-v0/lkg/empty-tracked-file',

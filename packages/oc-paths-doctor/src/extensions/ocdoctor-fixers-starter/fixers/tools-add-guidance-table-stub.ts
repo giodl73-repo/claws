@@ -7,7 +7,7 @@
  * empty table, the paired lint rule fires but a fix is destructive —
  * we don't auto-add rows there.)
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath } from '@openclaw/oc-path';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 const STUB =

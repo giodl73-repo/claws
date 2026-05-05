@@ -5,7 +5,7 @@
  * Adds a stub `## Trust Level` section to IDENTITY.md if absent.
  * Additive + idempotent.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath } from '@openclaw/oc-path';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 const STUB =

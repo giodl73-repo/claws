@@ -15,7 +15,7 @@
  * @module @openclaw/oc-doctor/adapter
  */
 
-import { REDACTED_SENTINEL, formatOcPath } from '@bic/oc-paths-substrate';
+import { REDACTED_SENTINEL, formatOcPath } from '@openclaw/oc-path';
 import type {
   DoctorContext,
   DoctorFinding,

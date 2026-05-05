@@ -2,7 +2,7 @@
  * Tests for `policy-lint-rules-starter` — the 6 TOOLS.md rules
  * shipping in the canonical policy plugin pack.
  */
-import { parseMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import {
   toolsDuplicateToolId,

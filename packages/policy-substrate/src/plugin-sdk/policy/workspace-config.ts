@@ -6,7 +6,7 @@
  *
  * Read pattern (in openclaw-policy CLI):
  *
- *   import { loadWorkspaceConfig } from '@bic/oc-paths-substrate';
+ *   import { loadWorkspaceConfig } from '@openclaw/oc-path';
  *   import type { WorkspacePolicyConfig } from './workspace-config.js';
  *
  *   const cfg = await loadWorkspaceConfig(workspaceDir);

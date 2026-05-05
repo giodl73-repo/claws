@@ -12,8 +12,8 @@
  * edit by hand; this fixer is for the common case where the duplicate
  * is leftover from a copy-paste.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
-import type { OcPathFixerSpec } from '@bic/oc-paths-doctor/plugin-sdk';
+import { parseOcPath } from '@openclaw/oc-path';
+import type { OcPathFixerSpec } from '@openclaw/oc-doctor/plugin-sdk';
 import { scanToolHeaders } from './_tools-md-scan.js';
 
 export const toolsDedupeToolId: OcPathFixerSpec = {

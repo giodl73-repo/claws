@@ -12,15 +12,15 @@
  * read the SAME manifest for their own purposes — one walk, four
  * happy consumers.
  *
- *   import { buildWorkspaceManifest } from '@bic/oc-paths-substrate';
- *   import { FsLKGStore } from '@bic/lkg-recovery-substrate/fs';
- *   import { registerOpenClawWorkspace } from '@bic/lkg-recovery-substrate/trackers';
+ *   import { buildWorkspaceManifest } from '@openclaw/oc-path';
+ *   import { FsLKGStore } from '@openclaw/lkg/fs';
+ *   import { registerOpenClawWorkspace } from '@openclaw/lkg/trackers';
  *
  *   const manifest = await buildWorkspaceManifest(workspaceDir);
  *   const store = new FsLKGStore({ root: workspaceDir });
  *   const result = registerOpenClawWorkspace(store, manifest);
  *
- * @module @bic/lkg-recovery-substrate/trackers/openclaw-workspace
+ * @module @openclaw/lkg/trackers/openclaw-workspace
  */
 
 import type {
@@ -30,8 +30,8 @@ import type {
   OpenClawWorkspaceRole,
   WorkspaceManifest,
   WorkspaceManifestEntry,
-} from '@bic/oc-paths-substrate';
-import { buildWorkspaceManifest } from '@bic/oc-paths-substrate';
+} from '@openclaw/oc-path';
+import { buildWorkspaceManifest } from '@openclaw/oc-path';
 import type { LKGStore } from '../plugin-sdk/lkg/api.js';
 import { LKGError, type LKGTracker } from '../plugin-sdk/lkg/types.js';
 import { jsoncTracker } from './jsonc.js';

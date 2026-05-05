@@ -12,7 +12,7 @@
  * (`tools/migrate-sensitivity-syntax`) drive workspaces toward the
  * canonical form over time.
  */
-import type { LintRule, LintFinding } from '@bic/pinch/plugin-sdk';
+import type { LintRule, LintFinding } from '@openclaw/oc-lint/plugin-sdk';
 import { scanToolHeaders } from './_tools-md-scan.js';
 
 const KNOWN_BARE_WORDS = ['public', 'internal', 'confidential', 'restricted'];

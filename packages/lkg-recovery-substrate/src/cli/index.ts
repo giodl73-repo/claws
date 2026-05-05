@@ -39,7 +39,7 @@
  * **Sentinel scrub**: every output goes through `scrubSentinel(...)`.
  * Same primitive as openclaw-path + pinch + openclaw-policy CLIs.
  *
- * @module @bic/lkg-recovery-substrate/cli
+ * @module @openclaw/lkg/cli
  */
 
 import { createHash } from 'node:crypto';
@@ -50,7 +50,7 @@ import {
   buildWorkspaceManifest,
   loadWorkspaceConfig,
   type WorkspaceManifest,
-} from '@bic/oc-paths-substrate';
+} from '@openclaw/oc-path';
 import {
   resolveLkgOverrides,
   type WorkspaceLkgConfig,

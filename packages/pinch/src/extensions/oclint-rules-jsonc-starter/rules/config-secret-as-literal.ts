@@ -19,7 +19,7 @@ import type {
   LintFinding,
 } from '../../../plugin-sdk/oc-lint/types.js';
 import { STARTER_TOKEN_PATTERNS } from '../../../shared/starter-values.js';
-import type { JsoncValue } from '@bic/oc-paths-substrate';
+import type { JsoncValue } from '@openclaw/oc-path';
 
 function looksLikeSecret(s: string): boolean {
   return STARTER_TOKEN_PATTERNS.some((p) => p.re.test(s));

@@ -8,7 +8,7 @@
  * suggests the session is still in flight — relevant for LKG recovery
  * decisions (do we replay? do we mark this as the in-progress session?).
  */
-import { parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import type { LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 import { STARTER_TERMINAL_EVENT_VALUES } from '../../../shared/starter-values.js';
 

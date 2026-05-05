@@ -34,15 +34,15 @@ import type {
   LKGStore,
   LKGTracker,
   ValidationIssue,
-} from '@bic/lkg-recovery-substrate';
-import { LKGError } from '@bic/lkg-recovery-substrate';
+} from '@openclaw/lkg';
+import { LKGError } from '@openclaw/lkg';
 import {
   InMemoryAuditSink,
   InMemoryRecoveryNoticeSink,
   type LKGAuditSink,
   type LKGRecoveryNoticeSink,
-} from '@bic/lkg-recovery-substrate';
-import { REDACTED_SENTINEL, formatOcPath } from '@bic/oc-paths-substrate';
+} from '@openclaw/lkg';
+import { REDACTED_SENTINEL, formatOcPath } from '@openclaw/oc-path';
 
 import { git, gitBinary } from './git-cmd.js';
 

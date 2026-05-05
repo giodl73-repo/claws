@@ -4,7 +4,7 @@
  * Per-rule positive + negative cases beyond the smoke tests in
  * `tests/extensions/oclint-rules-starter/rules.test.ts`.
  */
-import { parseMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import { STARTER_RULES_V0 } from '../../src/extensions/oclint-rules-starter/index.js';
 import { runLint, type LintFile } from '../../src/oc-lint/runner.js';

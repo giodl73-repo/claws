@@ -8,7 +8,7 @@
  * confirms downstream consumers (LKG fingerprint, audit hash) get
  * stable bytes after fix.
  */
-import { emitMd, parseMd } from '@bic/oc-paths-substrate';
+import { emitMd, parseMd } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import { STARTER_FIXERS_V0 } from '../../src/extensions/ocdoctor-fixers-starter/index.js';
 import type { OcPathFixerSpec } from '../../src/plugin-sdk/oc-doctor/types.js';

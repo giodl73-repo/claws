@@ -16,7 +16,7 @@
  * @module @openclaw/plugin-sdk/policy
  */
 
-import type { LKGFingerprint } from '@bic/lkg-recovery-substrate';
+import type { LKGFingerprint } from '@openclaw/lkg';
 
 /**
  * Tier label used in `policy-ir.json` for cross-plane audit

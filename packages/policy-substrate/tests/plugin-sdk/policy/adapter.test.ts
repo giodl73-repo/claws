@@ -6,7 +6,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { LKGFingerprint } from '@bic/lkg-recovery-substrate';
+import type { LKGFingerprint } from '@openclaw/lkg';
 import {
   loadPolicyIRFromFile,
   makePolicyEvaluator,

@@ -7,7 +7,7 @@
  * config makes future migrations safer and supports the LKG-config
  * migration story.
  */
-import { parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import type { LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 export const configMissingVersion: LintRule = {

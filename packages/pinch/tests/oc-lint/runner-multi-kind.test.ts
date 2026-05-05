@@ -2,7 +2,7 @@
  * Multi-kind runner — verifies that runLint dispatches md / jsonc /
  * jsonl rules to their respective file lists without cross-contamination.
  */
-import { parseJsonc, parseJsonl, parseMd } from '@bic/oc-paths-substrate';
+import { parseJsonc, parseJsonl, parseMd } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import { jsoncStarterRules } from '../../src/extensions/oclint-rules-jsonc-starter/index.js';
 import { jsonlStarterRules } from '../../src/extensions/oclint-rules-jsonl-starter/index.js';

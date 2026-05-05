@@ -10,7 +10,7 @@
  * **Teaching pattern**: section existence is exactly what
  * `resolveOcPath` answers — null means "no such address".
  */
-import { parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import type { LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 export const agentsMissingBoundaries: LintRule = {

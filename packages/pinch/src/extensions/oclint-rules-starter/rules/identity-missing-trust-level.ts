@@ -11,7 +11,7 @@
  * **Teaching pattern**: same as missing-boundaries — `resolveOcPath`
  * is the section-existence answer.
  */
-import { parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import type { LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 export const identityMissingTrustLevel: LintRule = {

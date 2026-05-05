@@ -6,7 +6,7 @@
  * `OcPathFixerSpec.detect → fix` cycle. The drift fixer also
  * exercises the new `siblingFiles` cross-file surface.
  */
-import { parseMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import {
   policyRegenerateOnDrift,

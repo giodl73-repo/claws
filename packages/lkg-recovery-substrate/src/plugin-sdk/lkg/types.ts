@@ -1,4 +1,4 @@
-import type { OcPath } from '@bic/oc-paths-substrate';
+import type { OcPath } from '@openclaw/oc-path';
 
 /**
  * `@openclaw/plugin-sdk/lkg` — type contract for the generalized

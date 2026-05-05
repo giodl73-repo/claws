@@ -3,7 +3,7 @@
  * session logs.
  *
  * Each fixer pairs with a lint rule from
- * `@bic/pinch/extensions/oclint-rules-jsonl-starter`.
+ * `@openclaw/oc-lint/extensions/oclint-rules-jsonl-starter`.
  *
  * @module ocdoctor-fixers-jsonl-starter
  */

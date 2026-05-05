@@ -11,7 +11,7 @@
  * @module @openclaw/plugin-sdk/policy/build
  */
 
-import type { LKGFingerprint } from '@bic/lkg-recovery-substrate';
+import type { LKGFingerprint } from '@openclaw/lkg';
 import type {
   DenyRule,
   PolicyIR,

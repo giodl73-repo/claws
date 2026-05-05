@@ -4,7 +4,7 @@
  * Verify the framework handles realistically-sized rule packs and
  * workspaces without quadratic blowup or memory issues.
  */
-import { parseMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import { LintRuleRegistry } from '../../src/oc-lint/index.js';
 import { runLint, type LintFile } from '../../src/oc-lint/runner.js';

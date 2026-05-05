@@ -5,7 +5,7 @@
  * Adds a stub `## Preferences` section to USER.md if absent.
  * Additive + idempotent.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath } from '@openclaw/oc-path';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 const STUB = `\n## Preferences\n\n- TODO: list working preferences (e.g., async-first, terse responses)\n`;

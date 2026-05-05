@@ -4,11 +4,11 @@
  * `yaml.parseDocument` so comments and structure are preserved (see
  * the bounding-box test for round-trip claims).
  *
- * @module @bic/lkg-recovery-substrate/trackers/yaml
+ * @module @openclaw/lkg/trackers/yaml
  */
 
-import type { Diagnostic, OcPath, YamlAst } from '@bic/oc-paths-substrate';
-import { parseYaml } from '@bic/oc-paths-substrate';
+import type { Diagnostic, OcPath, YamlAst } from '@openclaw/oc-path';
+import { parseYaml } from '@openclaw/oc-path';
 import type { LKGTracker, ValidationResult } from '../plugin-sdk/lkg/types.js';
 
 export interface YamlTrackerSnapshot {

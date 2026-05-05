@@ -3,8 +3,8 @@
  * E2E: workspace files → PolicyIR with stable policyId.
  */
 import { describe, expect, it } from 'vitest';
-import { parseMd } from '@bic/oc-paths-substrate';
-import type { LKGFingerprint } from '@bic/lkg-recovery-substrate';
+import { parseMd } from '@openclaw/oc-path';
+import type { LKGFingerprint } from '@openclaw/lkg';
 import {
   buildPolicyIR,
   type PolicyExtractFile,

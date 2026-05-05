@@ -14,7 +14,7 @@
  * @module @openclaw/plugin-sdk/policy/api
  */
 
-import type { OcAst } from '@bic/oc-paths-substrate';
+import type { OcAst } from '@openclaw/oc-path';
 
 /**
  * Stable SDK version. Plugins authored against a known SDK declare

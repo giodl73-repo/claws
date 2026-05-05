@@ -5,7 +5,7 @@
  *
  * Flag: SKILL.md `tier:` is set but isn't one of T1/T2/T3.
  */
-import { parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import type { LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 const VALID_TIERS = new Set(['T1', 'T2', 'T3']);

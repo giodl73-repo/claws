@@ -9,7 +9,7 @@ import {
   approvalListFor,
   evaluateDecision,
 } from '../../../src/plugin-sdk/policy/runtime.js';
-import type { LKGFingerprint } from '@bic/lkg-recovery-substrate';
+import type { LKGFingerprint } from '@openclaw/lkg';
 import type { PolicyIR } from '../../../src/plugin-sdk/policy/types.js';
 
 const DUMMY_ANCHOR: LKGFingerprint = {

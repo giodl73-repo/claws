@@ -8,7 +8,7 @@
  * deleted step). Runtime fails with cryptic missing-stream error;
  * static lint catches it before runtime.
  */
-import { findOcPaths, parseOcPath, resolveOcPath } from '@bic/oc-paths-substrate';
+import { findOcPaths, parseOcPath, resolveOcPath } from '@openclaw/oc-path';
 import type { LintFinding, LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 const STEPID_REF = /^\$([a-zA-Z_][a-zA-Z0-9_-]*)\.(?:stdout|json|stderr)/;

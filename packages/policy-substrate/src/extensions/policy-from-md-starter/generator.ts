@@ -9,10 +9,10 @@
  *
  * Output: `PolicyIR` with `policyId` stamped (RFC 8785 JCS hash).
  *
- * @module @bic/policy-substrate/extensions/policy-from-md-starter/generator
+ * @module @openclaw/policy/extensions/policy-from-md-starter/generator
  */
 
-import type { LKGFingerprint } from '@bic/lkg-recovery-substrate';
+import type { LKGFingerprint } from '@openclaw/lkg';
 import type {
   PolicyGenerator,
   PolicyIR,

@@ -24,7 +24,7 @@ import {
   parseMd,
   parseYaml,
   type OcAst,
-} from '@bic/oc-paths-substrate';
+} from '@openclaw/oc-path';
 import type {
   DoctorDetectResult,
   OcPathFixerSpec,

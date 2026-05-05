@@ -18,7 +18,7 @@
  * in one pass. Each match carries `line` directly — the rule never
  * touches the per-kind AST.
  */
-import { findOcPaths, parseOcPath } from '@bic/oc-paths-substrate';
+import { findOcPaths, parseOcPath } from '@openclaw/oc-path';
 import type { LintFinding, LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 import { STARTER_IN_PROCESS_TOOLS } from '../../../shared/starter-values.js';
 

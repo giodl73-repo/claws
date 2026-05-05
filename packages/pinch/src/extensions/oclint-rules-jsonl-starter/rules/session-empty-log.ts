@@ -12,7 +12,7 @@
  * value lines (blank/malformed lines aren't addressable). Empty
  * findings means no value lines, regardless of how the file failed.
  */
-import { findOcPaths, parseOcPath } from '@bic/oc-paths-substrate';
+import { findOcPaths, parseOcPath } from '@openclaw/oc-path';
 import type { LintRule } from '../../../plugin-sdk/oc-lint/types.js';
 
 export const sessionEmptyLog: LintRule = {

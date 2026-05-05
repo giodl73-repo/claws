@@ -11,7 +11,7 @@
  *
  * Paired fixer: `lkg/strip-utf8-bom` removes the leading BOM bytes.
  */
-import type { LintRule, LintFinding } from '@bic/pinch/plugin-sdk';
+import type { LintRule, LintFinding } from '@openclaw/oc-lint/plugin-sdk';
 
 const BOM = '﻿';
 

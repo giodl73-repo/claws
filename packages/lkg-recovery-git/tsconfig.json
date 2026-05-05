@@ -17,8 +17,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "@bic/lkg-recovery-substrate": ["../lkg-recovery-substrate/src/index.ts"],
-      "@bic/lkg-recovery-substrate/*": ["../lkg-recovery-substrate/src/*"]
+      "@openclaw/lkg": ["../lkg-recovery-substrate/src/index.ts"],
+      "@openclaw/lkg/*": ["../lkg-recovery-substrate/src/*"]
     }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts"],

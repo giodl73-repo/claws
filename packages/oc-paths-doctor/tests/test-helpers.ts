@@ -8,7 +8,7 @@ import {
   parseJsonl,
   parseMd,
   type OcAst,
-} from '@bic/oc-paths-substrate';
+} from '@openclaw/oc-path';
 import type { DoctorFile } from '../src/plugin-sdk/oc-doctor/types.js';
 
 export function makeDoctorFile(name: string, path: string, raw: string): DoctorFile {

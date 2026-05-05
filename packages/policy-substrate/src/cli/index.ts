@@ -38,7 +38,7 @@
  * **Sentinel scrub**: every output goes through `scrubSentinel(...)`.
  * Mirrors the openclaw-path + pinch CLI guards.
  *
- * @module @bic/policy-substrate/cli
+ * @module @openclaw/policy/cli
  */
 
 import { promises as fs } from 'node:fs';
@@ -54,8 +54,8 @@ import {
   type OcAst,
   type OcKind,
   type WorkspaceManifestEntry,
-} from '@bic/oc-paths-substrate';
-import type { LKGFingerprint } from '@bic/lkg-recovery-substrate';
+} from '@openclaw/oc-path';
+import type { LKGFingerprint } from '@openclaw/lkg';
 import {
   POLICY_PATH,
   computePolicyId,

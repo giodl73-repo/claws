@@ -13,8 +13,8 @@
  * `warning` to surface; the `_auto_corrected` marker preserves audit
  * trail.
  */
-import { parseOcPath } from '@bic/oc-paths-substrate';
-import { STARTER_ALLOWED_MEMORY_SCOPES } from '@bic/pinch';
+import { parseOcPath } from '@openclaw/oc-path';
+import { STARTER_ALLOWED_MEMORY_SCOPES } from '@openclaw/oc-lint';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
 export interface SnapScopeOptions {

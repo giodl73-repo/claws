@@ -3,7 +3,7 @@
  * test that runs the full pack against the substrate fixtures and
  * verifies expected diagnostic shape.
  */
-import { parseMd } from '@bic/oc-paths-substrate';
+import { parseMd } from '@openclaw/oc-path';
 import { describe, expect, it } from 'vitest';
 import {
   STARTER_RULES_V0,

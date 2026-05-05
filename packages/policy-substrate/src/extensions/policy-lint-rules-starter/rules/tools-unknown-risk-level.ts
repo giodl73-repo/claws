@@ -12,7 +12,7 @@
  * Paired fixer (optional): `tools/snap-risk-level` snaps R6+ → R5
  * and negative → R0.
  */
-import type { LintRule, LintFinding } from '@bic/pinch/plugin-sdk';
+import type { LintRule, LintFinding } from '@openclaw/oc-lint/plugin-sdk';
 import { scanToolHeaders } from './_tools-md-scan.js';
 
 export const toolsUnknownRiskLevel: LintRule = {
