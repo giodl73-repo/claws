@@ -57,6 +57,34 @@ node scripts/run-suite.mjs --all
 node scripts/report.mjs
 ```
 
+## Daily-use loop (via openclaw fork CLI)
+
+The fork at `giodl73-repo/openclaw` carries the substrate train. Run the suite through `openclaw <verb>` to dogfood the actual upstream-shape CLI:
+
+```sh
+# stage + run all fixtures through the fork's openclaw bin
+node scripts/run-suite-openclaw.mjs --all
+
+# regenerate REPORT-OPENCLAW.md from results-openclaw/
+node scripts/report-openclaw.mjs
+
+# diff against last accepted baseline (catches drift WITHOUT a strict-snapshot framework)
+node scripts/diff-runs.mjs
+
+# accept current run as the new baseline
+node scripts/diff-runs.mjs --save-snapshot
+```
+
+When real use surfaces something interesting, add a finding to `findings.md` and (if it's worth pinning permanently) scaffold a fixture:
+
+```sh
+node scripts/new-fixture.mjs <slug> --notes "what this probes"
+# now author content into fixtures/synthetic/<slug>/
+node scripts/run-suite-openclaw.mjs <slug>
+```
+
+`findings.md` is the running log of bugs / coverage gaps / surprises — the actual learning artifact. Synthetic fixtures get added only when a finding is worth pinning.
+
 ## Manifest schema
 
 See `manifest.json`. Each entry has:

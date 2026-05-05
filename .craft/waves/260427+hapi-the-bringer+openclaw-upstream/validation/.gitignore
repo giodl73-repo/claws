@@ -2,3 +2,5 @@
 # results/ holds per-fixture tool outputs — regenerated each run; not source-of-truth.
 scratch/
 results/
+
+.snapshots/
