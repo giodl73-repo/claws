@@ -1,12 +1,12 @@
 /**
- * `openclaw-lkg` CLI — operator-facing access to the LKG store.
+ * `openclaw-cage` CLI — operator-facing access to the LKG store.
  * Self-hosters debugging recovery events use it to see which files
  * are tracked, what their last-known-good fingerprints look like,
  * and what happens when a file is observed.
  *
  * **Subcommands**:
  *
- *   `openclaw-lkg status [<workspace-dir>]`
+ *   `openclaw-cage status [<workspace-dir>]`
  *     Walk the workspace manifest, register the default per-kind
  *     trackers, observe each tracked file once, and report the
  *     outcome (promoted / valid / recovered / skipped / failed)
@@ -15,23 +15,23 @@
  *     observation failed (parse-throw / sentinel-detected /
  *     validate-throw).
  *
- *   `openclaw-lkg observe <file>`
+ *   `openclaw-cage observe <file>`
  *     One-shot observe of a specific path. Useful for debugging
  *     why a file isn't promoting (wrong validator, sentinel in
  *     content, parse error, etc.). Returns the full LKGObservation
  *     payload.
  *
- *   `openclaw-lkg list-trackers [<workspace-dir>]`
+ *   `openclaw-cage list-trackers [<workspace-dir>]`
  *     Print the canonical openclaw artifacts the manifest would
  *     register trackers for, without actually observing them. Same
  *     output as `policy list-generators` in spirit.
  *
- *   `openclaw-lkg fingerprint <file>`
+ *   `openclaw-cage fingerprint <file>`
  *     Compute the sha256 fingerprint of a file's bytes. Doesn't
  *     touch any LKG state — just a raw hash, useful for verifying
  *     that two copies of a file match.
  *
- *   `openclaw-lkg help`
+ *   `openclaw-cage help`
  *
  * **Output**: TTY-aware (human / JSON), exit code semantics
  * (0/1/2 — same family convention).
@@ -86,7 +86,7 @@ export function scrubSentinel(s: string): string {
 
 /**
  * Detect EPIPE on a write that targets a closed downstream (e.g.,
- * `openclaw-lkg ... | head -1` after `head` exits). On Windows
+ * `openclaw-cage ... | head -1` after `head` exits). On Windows
  * Node sometimes surfaces this as `EOF` or `ECONNRESET`; treat all
  * three as the same "downstream closed" signal so the CLI can exit
  * gracefully rather than throwing. Mirrors the `openclaw-policy`
@@ -223,7 +223,7 @@ async function runCmdStatus(argv: readonly string[], out: OutputContext): Promis
       byOutcome: countByOutcome(observations.map((o) => o.outcome)),
     },
     [
-      `openclaw-lkg status: ${dir}`,
+      `openclaw-cage status: ${dir}`,
       `  walked: ${manifest.walkedFiles} file(s)`,
       `  tracked: ${registration.registered.length} canonical artifact(s)`,
       ...(skipped.length > 0
@@ -311,7 +311,7 @@ async function runCmdObserve(argv: readonly string[], out: OutputContext): Promi
       observation: obs,
     },
     [
-      `openclaw-lkg observe ${target.relPath}`,
+      `openclaw-cage observe ${target.relPath}`,
       `  role: ${target.role.id}`,
       `  outcome: ${summary.outcome}` +
         (summary.fingerprint !== null
@@ -344,7 +344,7 @@ async function runCmdListTrackers(argv: readonly string[], out: OutputContext): 
       })),
     },
     [
-      `openclaw-lkg list-trackers: ${dir}`,
+      `openclaw-cage list-trackers: ${dir}`,
       `  walked: ${manifest.walkedFiles} file(s)`,
       `  tracked roles: ${Object.entries(manifest.byRole)
         .map(([k, v]) => `${k}=${v}`)
@@ -394,8 +394,8 @@ function printHelp(out: OutputContext): void {
   if (out.mode === 'json') {
     out.stdout.write(
       JSON.stringify({
-        bin: 'openclaw-lkg',
-        usage: 'openclaw-lkg <subcommand> [args]',
+        bin: 'openclaw-cage',
+        usage: 'openclaw-cage <subcommand> [args]',
         subcommands: ['status', 'observe', 'list-trackers', 'fingerprint', 'help'],
       }) + '\n',
     );
@@ -404,22 +404,22 @@ function printHelp(out: OutputContext): void {
   safeWrite(
     out.stdout,
     [
-      'openclaw-lkg — operator-facing access to the LKG store',
+      'openclaw-cage — operator-facing access to the LKG store',
       '',
       'Usage:',
-      '  openclaw-lkg status [<workspace-dir>] [--skip <role-or-glob>...]',
+      '  openclaw-cage status [<workspace-dir>] [--skip <role-or-glob>...]',
       '      Walk the workspace, observe each tracked file, report outcomes.',
       '      --skip <role>     skip a canonical role (e.g., "session.jsonl")',
       '      --skip <glob>     skip relPaths matching a glob (e.g., "sessions/*")',
       '      Workspace-level defaults live under `lkg.skip` / `lkg.skipPaths`',
       '      in workspace.json; CLI flags add to (do not replace) those.',
-      '  openclaw-lkg observe <file> [--root <workspace-dir>]',
+      '  openclaw-cage observe <file> [--root <workspace-dir>]',
       '      One-shot observe of a specific path.',
-      '  openclaw-lkg list-trackers [<workspace-dir>]',
+      '  openclaw-cage list-trackers [<workspace-dir>]',
       '      Print canonical openclaw artifacts the manifest would track.',
-      '  openclaw-lkg fingerprint <file>',
+      '  openclaw-cage fingerprint <file>',
       '      Compute sha256 over file bytes; no LKG state touched.',
-      '  openclaw-lkg help',
+      '  openclaw-cage help',
       '',
       'Output:',
       '  TTY-aware. Defaults to human-readable when stdout is a TTY;',
@@ -438,7 +438,7 @@ function printHelp(out: OutputContext): void {
 
 /**
  * Install an `'error'` handler on stdout/stderr so async EPIPE
- * (`openclaw-lkg ... | head -1`) is swallowed instead of crashing.
+ * (`openclaw-cage ... | head -1`) is swallowed instead of crashing.
  * Mirrors the openclaw-policy helper of the same name.
  */
 function installPipeGuard(stream: NodeJS.WritableStream): () => void {
@@ -484,7 +484,7 @@ export async function runCli(argv: readonly string[]): Promise<number> {
       case 'fingerprint':
         return await runCmdFingerprint(rest, out);
       default:
-        emitError(out, `unknown subcommand: ${subcmd}. Try "openclaw-lkg help".`, 'ERR_UNKNOWN_SUBCOMMAND');
+        emitError(out, `unknown subcommand: ${subcmd}. Try "openclaw-cage help".`, 'ERR_UNKNOWN_SUBCOMMAND');
         return 2;
     }
   } catch (err) {

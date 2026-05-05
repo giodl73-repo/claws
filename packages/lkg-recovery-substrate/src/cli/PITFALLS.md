@@ -1,10 +1,10 @@
-# openclaw-lkg CLI Pitfalls
+# openclaw-cage CLI Pitfalls
 
-Pitfall IDs used inside the `openclaw-lkg` CLI module — by tests
+Pitfall IDs used inside the `openclaw-cage` CLI module — by tests
 (`tests/cli/cli.test.ts`), inline `// CLI-LKG-NNN` comments, and
 consumer error messages.
 
-**Scope**: ONLY the `openclaw-lkg` CLI surface (argument parsing,
+**Scope**: ONLY the `openclaw-cage` CLI surface (argument parsing,
 subcommand dispatch, I/O, output emit). This is a **separate
 namespace** from:
   - `lkg-recovery-substrate/PITFALLS.md` (LKG-NNN — recovery semantics, observe contract)
@@ -27,7 +27,7 @@ Status legend:
 
 | ID | Status | Pitfall |
 | --- | --- | --- |
-| CLI-LKG-001 | MITIGATED | Empty argv (`openclaw-lkg`) → prints help, exits 0. (`CLI-LKG-10`) |
+| CLI-LKG-001 | MITIGATED | Empty argv (`openclaw-cage`) → prints help, exits 0. (`CLI-LKG-10`) |
 | CLI-LKG-002 | MITIGATED | Unknown subcommand → exit 2 with structured error on stderr identifying the offending token. (`CLI-LKG-09`) |
 | CLI-LKG-003 | MITIGATED | Global `--json` / `--human` flags are stripped from argv **before** subcommand dispatch — they don't pollute positional parsing. |
 

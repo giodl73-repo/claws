@@ -1,13 +1,13 @@
 {
   "name": "@openclaw/lkg",
   "version": "0.1.0",
-  "description": "OpenClaw lkg-recovery PR-1 prototype: LKGStore / LKGTracker<TParsed, TIssue> contract types + reference filesystem-backed impl + config-LKG migration.",
+  "description": "OpenClaw lkg-recovery PR-1 prototype: LKGStore / LKGTracker<TParsed, TIssue> contract types + reference filesystem-backed impl + config-LKG migration. Bin: `openclaw-cage` (lobster-themed; the cage holds your good states until you need to fall back).",
   "type": "module",
   "private": true,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "openclaw-lkg": "./bin/openclaw-lkg.mjs"
+    "openclaw-cage": "./bin/openclaw-cage.mjs"
   },
   "exports": {
     ".": {

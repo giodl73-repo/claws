@@ -29,6 +29,6 @@ Move items to fixed/ once the underlying issue is resolved.
 |----|---------|---------|--------|
 | F-001 | `policy-jsonc-rich-syntax` | `openclaw-policy check` parses `.jsonc` with `JSON.parse` instead of `parseJsonc`; chokes on comments + trailing commas. | open |
 | F-002 | `lobster-shell-collision` | Three of four lint starter packs (jsonc, jsonl, lobster-yaml) were unreachable: jsonl + lobster-yaml lacked self-registration loops, and the CLI bootstrap only imported the md pack. | **fixed** (added imports + self-register loops; 23/23 rules now register) |
-| F-003 | `only-claude-md` | `openclaw-lint run` ignores `CLAUDE.md` — not in canonical roles. AGENTS.md-equivalent format is the broadly-adopted public norm; coverage gap. | open |
+| F-003 | `only-claude-md` | `openclaw-pinch run` ignores `CLAUDE.md` — not in canonical roles. AGENTS.md-equivalent format is the broadly-adopted public norm; coverage gap. | open |
 | F-004 | `kitchen-sink` | `openclaw-policy generate` extracts 0 tools from a `## Tools` table (markdown). Extractor expects `### name # R<n>, CAPS` headings — the table is treated as narrative. Either fixture should match the convention or the extractor should also recognize tables. | open |
 | F-005 | `policy-jsonc-rich-syntax` | `jsonc-starter-v0/config/secret-as-literal` false-positives on zero-filled placeholder hashes (`"0000...0000"` matches `/^[a-fA-F0-9]{40,}$/`). Should exclude all-zero / single-digit-repeat sequences from the hex-secret detection. | open |

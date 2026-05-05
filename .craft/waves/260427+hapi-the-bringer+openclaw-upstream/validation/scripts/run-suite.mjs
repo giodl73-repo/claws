@@ -19,8 +19,8 @@ const root = dirname(here);
 const repoRoot = join(root, '..', '..', '..', '..');
 
 const BIN_PATH = join(repoRoot, 'packages', 'oc-paths-substrate', 'bin', 'openclaw-path.mjs');
-const BIN_LINT = join(repoRoot, 'packages', 'pinch', 'bin', 'openclaw-lint.mjs');
-const BIN_LKG = join(repoRoot, 'packages', 'lkg-recovery-substrate', 'bin', 'openclaw-lkg.mjs');
+const BIN_LINT = join(repoRoot, 'packages', 'pinch', 'bin', 'openclaw-pinch.mjs');
+const BIN_LKG = join(repoRoot, 'packages', 'lkg-recovery-substrate', 'bin', 'openclaw-cage.mjs');
 const BIN_POLICY = join(repoRoot, 'packages', 'policy-substrate', 'bin', 'openclaw-policy.mjs');
 
 async function loadManifest() {

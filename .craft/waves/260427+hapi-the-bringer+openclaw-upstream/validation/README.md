@@ -35,11 +35,11 @@ validation/
 
 1. **Stage**: rsync `fixtures/<kind>/<slug>/` → `scratch/<slug>/`. Idempotent.
 2. **Path**: `openclaw-path workspace --cwd <scratch>` — manifest detection.
-3. **Lint**: `openclaw-lint run <scratch>` — all registered rule packs.
+3. **Lint**: `openclaw-pinch run <scratch>` — all registered rule packs.
 4. **Doctor**: oc-doctor adapter detect (no fix) — list findings, classify by tier.
 5. **Policy generate** (if MD source files present): `openclaw-policy generate <scratch>` → emit policy.jsonc, observe shape.
 6. **Policy check** (if policy.jsonc present): `openclaw-policy check <scratch>` → drift detect.
-7. **LKG fault simulation**: pick one tracked file, clobber with garbage bytes, run `openclaw-lkg observe`, verify recovery.
+7. **LKG fault simulation**: pick one tracked file, clobber with garbage bytes, run `openclaw-cage observe`, verify recovery.
 
 ## Running
 

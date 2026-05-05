@@ -1,6 +1,6 @@
 /**
- * `openclaw-lint` CLI — shell-level access to the lint runner.
- * Self-hosters invoke it as a standalone bin (`openclaw-lint ...`)
+ * `openclaw-pinch` CLI — shell-level access to the lint runner.
+ * Self-hosters invoke it as a standalone bin (`openclaw-pinch ...`)
  * or as `openclaw pinch ...` once the umbrella dispatcher lands.
  *
  * Cargo:Clippy ↔ OpenClaw:Pinch — same precedent (a branded CLI
@@ -8,19 +8,19 @@
  *
  * **Subcommands**:
  *
- *   `openclaw-lint run [--rules <pack>] [--severity-min <level>] [<workspace-dir>]`
+ *   `openclaw-pinch run [--rules <pack>] [--severity-min <level>] [<workspace-dir>]`
  *     Walk the workspace via `buildWorkspaceManifest`, parse each
  *     canonical file, run the starter rule pack (or `<pack>`), print
  *     diagnostics. Default `<workspace-dir>` = cwd.
  *
- *   `openclaw-lint lint <file...> [--rules <pack>]`
+ *   `openclaw-pinch lint <file...> [--rules <pack>]`
  *     Lint specific files (no manifest walk). For one-off use.
  *
- *   `openclaw-lint list-rules [--pack <name>]`
+ *   `openclaw-pinch list-rules [--pack <name>]`
  *     Print the registered rule pack with id, severity, description,
  *     and `appliesTo` glob.
  *
- *   `openclaw-lint help`
+ *   `openclaw-pinch help`
  *     Print usage and exit.
  *
  * **Output**: TTY-aware. Human-readable by default; `--json` switches
@@ -190,7 +190,7 @@ async function runCmdRun(
       })),
     },
     [
-      `openclaw-lint: ran ${rules.length} rule(s) over ${files.length} file(s) in ${dir}`,
+      `openclaw-pinch: ran ${rules.length} rule(s) over ${files.length} file(s) in ${dir}`,
       ...(filtered.length === 0
         ? ['  no findings ✓']
         : filtered.map(
@@ -284,7 +284,7 @@ function parseOnlyGlobs(argv: readonly string[]): readonly string[] {
  * Locate a workspace directory by walking up from a starting file/dir
  * looking for `workspace.json`. Returns the nearest containing dir
  * if found, otherwise the starting dir's parent (or cwd as last
- * resort). Used by `openclaw-lint lint <files>` so that workspace config
+ * resort). Used by `openclaw-pinch lint <files>` so that workspace config
  * applies even when no positional dir is given.
  */
 async function findWorkspaceDir(startPath: string): Promise<string> {
@@ -315,7 +315,7 @@ async function runCmdLint(
   const filePaths = argv.filter((a) => !a.startsWith('-'));
   if (filePaths.length === 0) {
     emit(out, { ok: false, error: 'no files specified' }, [
-      'openclaw-lint lint: at least one file required',
+      'openclaw-pinch lint: at least one file required',
     ]);
     return 2;
   }
@@ -342,7 +342,7 @@ async function runCmdLint(
     const kind = inferKindFromName(name);
     if (kind === null) {
       emit(out, { ok: false, error: `unknown kind: ${name}` }, [
-        `openclaw-lint lint: ${name}: cannot infer kind from extension`,
+        `openclaw-pinch lint: ${name}: cannot infer kind from extension`,
       ]);
       return 2;
     }
@@ -369,7 +369,7 @@ async function runCmdLint(
       })),
     },
     [
-      `openclaw-lint: ran ${rules.length} rule(s) over ${files.length} file(s)`,
+      `openclaw-pinch: ran ${rules.length} rule(s) over ${files.length} file(s)`,
       ...(result.diagnostics.length === 0
         ? ['  no findings ✓']
         : result.diagnostics.map(
@@ -411,7 +411,7 @@ async function runCmdListRules(
       })),
     },
     [
-      `openclaw-lint starter-v0: ${rules.length} rule(s)`,
+      `openclaw-pinch starter-v0: ${rules.length} rule(s)`,
       ...rules.map((r) => `  [${r.severity}] ${r.id}  appliesTo=${r.appliesTo}`),
     ],
   );
@@ -424,8 +424,8 @@ function printHelp(out: OutputContext): void {
   if (out.mode === 'json') {
     out.stdout.write(
       JSON.stringify({
-        bin: 'openclaw-lint',
-        usage: 'openclaw-lint <subcommand> [args]',
+        bin: 'openclaw-pinch',
+        usage: 'openclaw-pinch <subcommand> [args]',
         subcommands: ['run', 'lint', 'list-rules', 'help'],
       }) + '\n',
     );
@@ -433,16 +433,16 @@ function printHelp(out: OutputContext): void {
   }
   out.stdout.write(
     [
-      'openclaw-lint — OpenClaw lint runner (Cargo:Clippy ↔ OpenClaw:Pinch)',
+      'openclaw-pinch — OpenClaw lint runner (Cargo:Clippy ↔ OpenClaw:Pinch)',
       '',
       'Usage:',
-      '  openclaw-lint run [--severity-min <level>] [--skip <id>]... [--only <pat>]... [--severity <id>=<level>]... [<workspace-dir>]',
+      '  openclaw-pinch run [--severity-min <level>] [--skip <id>]... [--only <pat>]... [--severity <id>=<level>]... [<workspace-dir>]',
       '      Walk the workspace manifest and lint every canonical artifact.',
-      '  openclaw-lint lint <file...> [--skip <id>]... [--only <pat>]... [--severity <id>=<level>]...',
+      '  openclaw-pinch lint <file...> [--skip <id>]... [--only <pat>]... [--severity <id>=<level>]...',
       '      Lint specific files; kind inferred from extension.',
-      '  openclaw-lint list-rules',
+      '  openclaw-pinch list-rules',
       '      Print the registered rule pack.',
-      '  openclaw-lint help',
+      '  openclaw-pinch help',
       '      Print this message.',
       '',
       'Rule selection:',
@@ -471,7 +471,7 @@ function printHelp(out: OutputContext): void {
 export async function runCli(argv: readonly string[]): Promise<number> {
   const out = makeOutput(argv);
   // Strip global flags (--json / --human) before subcommand dispatch
-  // so `openclaw-lint --json help` and `openclaw-lint help --json` are equivalent.
+  // so `openclaw-pinch --json help` and `openclaw-pinch help --json` are equivalent.
   const filtered = argv.filter((a) => a !== '--json' && a !== '--human');
   const subcmd = filtered[0];
   const rest = filtered.slice(1);
@@ -493,13 +493,13 @@ export async function runCli(argv: readonly string[]): Promise<number> {
         emit(
           out,
           { ok: false, error: `unknown subcommand: ${subcmd}` },
-          [`openclaw-lint: unknown subcommand "${subcmd}". Try "openclaw-lint help".`],
+          [`openclaw-pinch: unknown subcommand "${subcmd}". Try "openclaw-pinch help".`],
         );
         return 2;
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    emit(out, { ok: false, error: msg }, [`openclaw-lint: error: ${msg}`]);
+    emit(out, { ok: false, error: msg }, [`openclaw-pinch: error: ${msg}`]);
     return 2;
   }
 }

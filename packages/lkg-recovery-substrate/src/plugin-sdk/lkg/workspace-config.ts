@@ -4,7 +4,7 @@
  * package; oc-paths-substrate has no upfront declaration of which
  * sections exist.
  *
- * Read pattern (in openclaw-lkg CLI):
+ * Read pattern (in openclaw-cage CLI):
  *
  *   import { loadWorkspaceConfig } from '@openclaw/oc-path';
  *   import { resolveLkgOverrides } from './workspace-config.js';

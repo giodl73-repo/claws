@@ -1,5 +1,5 @@
 /**
- * openclaw-lint CLI smoke tests — verify the runCli dispatcher works for
+ * openclaw-pinch CLI smoke tests — verify the runCli dispatcher works for
  * each subcommand and produces the expected JSON shape on pipe.
  */
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
@@ -44,12 +44,12 @@ function makeFixtureWorkspace(): string {
   return dir;
 }
 
-describe('openclaw-lint CLI', () => {
+describe('openclaw-pinch CLI', () => {
   it('CLI-01 help prints usage', async () => {
     const r = await runCliCapture(['help']);
     expect(r.exitCode).toBe(0);
     const json = JSON.parse(r.stdoutLines[0]!);
-    expect(json.bin).toBe('openclaw-lint');
+    expect(json.bin).toBe('openclaw-pinch');
     expect(json.subcommands).toContain('run');
     expect(json.subcommands).toContain('lint');
     expect(json.subcommands).toContain('list-rules');

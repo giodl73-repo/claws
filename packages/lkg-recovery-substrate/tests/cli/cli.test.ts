@@ -1,5 +1,5 @@
 /**
- * openclaw-lkg CLI smoke tests — exercise status / observe /
+ * openclaw-cage CLI smoke tests — exercise status / observe /
  * list-trackers / fingerprint / help end-to-end against a real
  * temp-directory workspace.
  */
@@ -56,12 +56,12 @@ function makeFixtureWorkspace(): string {
   return dir;
 }
 
-describe('openclaw-lkg CLI', () => {
+describe('openclaw-cage CLI', () => {
   it('CLI-LKG-01 help exits 0 with subcommand list', async () => {
     const r = await captureCli(['help']);
     expect(r.exitCode).toBe(0);
     const json = JSON.parse(r.out.join(''));
-    expect(json.bin).toBe('openclaw-lkg');
+    expect(json.bin).toBe('openclaw-cage');
     expect(json.subcommands).toContain('status');
     expect(json.subcommands).toContain('observe');
     expect(json.subcommands).toContain('list-trackers');
