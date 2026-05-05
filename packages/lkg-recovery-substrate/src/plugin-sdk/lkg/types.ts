@@ -81,11 +81,20 @@ export interface LKGFsStat {
  * known-good fingerprint, the most-recent promoted-good fingerprint,
  * and a hash of the most-recent suspicious-but-not-corrupt observation
  * (used to dedupe repeated suspicious notifications).
+ *
+ * `labels`: operator-named pins for upgrade-recovery. Set via
+ * `promoteAll({ label })`; the bytes are preserved in a companion file
+ * adjacent to the tracked path (FS impl: `<path>.lkg.label.<name>`).
+ * Labels are IMMUTABLE — re-promoting with the same label throws
+ * `LKG_LABEL_DUPLICATE`. Operator must explicitly delete a label
+ * before rebinding it. Listed via `listLabels()`, restored via
+ * `rollbackToLabel(name)`.
  */
 export interface LKGEntry {
   readonly lastKnownGood?: LKGFingerprint;
   readonly lastPromotedGood?: LKGFingerprint;
   readonly lastObservedSuspiciousSignature?: string | null;
+  readonly labels?: Readonly<Record<string, LKGFingerprint>>;
 }
 
 // --- Validation: tracker-typed parsed value AND tracker-typed issues --------
@@ -255,7 +264,13 @@ export type LKGErrorCode =
   // by a future schema version.
   | 'LKG_STATE_FILE_READ_FAILED'
   | 'LKG_STATE_FILE_CORRUPT'
-  | 'LKG_STATE_FILE_VERSION_MISMATCH';
+  | 'LKG_STATE_FILE_VERSION_MISMATCH'
+  // Label / rollback errors (upgrade-recovery feature).
+  | 'LKG_LABEL_INVALID_NAME'      // label name has forbidden chars; only [A-Za-z0-9._-] allowed
+  | 'LKG_LABEL_DUPLICATE'         // promoting with a label that already exists; immutable
+  | 'LKG_LABEL_NOT_FOUND'         // rollback to a label that no tracker has pinned
+  | 'LKG_PROMOTE_TRACKER_INVALID' // promoteAll refused: at least one tracker not currently valid
+  | 'LKG_ROLLBACK_VERIFY_FAILED'; // rollback aborted in phase-1: companion missing or hash mismatch
 
 export class LKGError extends Error {
   readonly code: LKGErrorCode;

@@ -61,6 +61,7 @@ import {
   type OpenClawRegisteredEntry,
 } from '../trackers/index.js';
 import type { LKGObservation } from '../plugin-sdk/lkg/types.js';
+import { LKGError } from '../plugin-sdk/lkg/types.js';
 
 // ── Output ──────────────────────────────────────────────────────────────
 
@@ -135,8 +136,34 @@ function pickFlag(argv: readonly string[], name: string): string | undefined {
   return argv[idx + 1];
 }
 
+/**
+ * Flag names that consume a value (the next argv slot). When walking
+ * positionals, both the flag name AND its value must be skipped — else
+ * `--label foo bar` makes "foo" appear positional and steals the slot
+ * from `bar`.
+ */
+const FLAGS_WITH_VALUES: readonly string[] = ['--label', '--root', '--skip'];
+
+/**
+ * Strip flags + their values, return positional args in order.
+ * Tolerates repeated flags (`--skip a --skip b`).
+ */
+function positionalArgs(argv: readonly string[]): readonly string[] {
+  const out: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === undefined) continue;
+    if (a.startsWith('-')) {
+      if (FLAGS_WITH_VALUES.includes(a)) i++; // skip the value too
+      continue;
+    }
+    out.push(a);
+  }
+  return out;
+}
+
 function workspaceDirFrom(argv: readonly string[]): string {
-  const positional = argv.filter((a) => !a.startsWith('-'));
+  const positional = positionalArgs(argv);
   return resolvePath(positional[0] ?? process.cwd());
 }
 
@@ -357,6 +384,147 @@ async function runCmdListTrackers(argv: readonly string[], out: OutputContext): 
   return 0;
 }
 
+// ── Subcommand: promote ─────────────────────────────────────────────────
+//
+// Workspace-wide promote. Operator-driven; runs validate over every
+// registered tracker and (with `--label X`) atomically pins the
+// validated cohort under that name. The label is the operator saying
+// "this state works" — used as a fallback target for `rollback`.
+//
+// Exit codes: 0 if every tracker promoted (and label, if any, was
+// pinned); 1 if any tracker failed validate (no labeling happens
+// when --label was passed); 2 on argument / I/O error.
+
+async function runCmdPromote(argv: readonly string[], out: OutputContext): Promise<number> {
+  const dir = workspaceDirFrom(argv);
+  const label = pickFlag(argv, '--label');
+  const store = new FsLKGStore({ root: dir });
+  const manifest = await buildWorkspaceManifest(dir);
+  registerOpenClawWorkspace(store, manifest);
+
+  let result;
+  try {
+    result = await store.promoteAll(label !== undefined ? { label } : undefined);
+  } catch (err) {
+    if (err instanceof LKGError) {
+      emitError(out, err.message, err.code);
+      return 1;
+    }
+    emitError(out, err instanceof Error ? err.message : String(err), 'ERR_INTERNAL');
+    return 2;
+  }
+
+  const failed = result.trackers.filter((t) => t.outcome !== 'promoted');
+  emit(
+    out,
+    {
+      ok: result.allValid,
+      workspaceDir: dir,
+      ...(result.label !== undefined ? { label: result.label } : {}),
+      trackers: result.trackers,
+      promoted: result.trackers.filter((t) => t.outcome === 'promoted').length,
+      failed: failed.length,
+    },
+    [
+      `openclaw-cage promote: ${dir}`,
+      ...(label !== undefined
+        ? [`  label: ${label}${result.allValid ? ' (pinned)' : ' (NOT pinned — some trackers failed)'}`]
+        : []),
+      ...result.trackers.map((t) => {
+        const fp = t.outcome === 'promoted' ? `  fingerprint=${t.fingerprint.hash.slice(0, 12)}…` : '';
+        const reason = t.outcome !== 'promoted' ? `  reason=${t.reason}` : '';
+        return `    [${t.outcome}] ${t.path}${fp}${reason}`;
+      }),
+    ],
+  );
+  return result.allValid ? 0 : 1;
+}
+
+// ── Subcommand: labels ──────────────────────────────────────────────────
+
+async function runCmdLabels(argv: readonly string[], out: OutputContext): Promise<number> {
+  const dir = workspaceDirFrom(argv);
+  const store = new FsLKGStore({ root: dir });
+  const manifest = await buildWorkspaceManifest(dir);
+  registerOpenClawWorkspace(store, manifest);
+
+  const labels = await store.listLabels();
+  const byLabel = new Map<string, { path: string; hash: string }[]>();
+  for (const { label, path, fingerprint } of labels) {
+    const arr = byLabel.get(label) ?? [];
+    arr.push({ path, hash: fingerprint.hash });
+    byLabel.set(label, arr);
+  }
+  const summary = [...byLabel.entries()].map(([label, pins]) => ({
+    label,
+    trackerCount: pins.length,
+    pins,
+  }));
+
+  emit(
+    out,
+    {
+      ok: true,
+      workspaceDir: dir,
+      labelCount: byLabel.size,
+      labels: summary,
+    },
+    [
+      `openclaw-cage labels: ${dir}`,
+      `  ${byLabel.size} label(s)`,
+      ...summary.flatMap((s) => [
+        `  ${s.label}  (${s.trackerCount} tracker(s) pinned)`,
+        ...s.pins.map((p) => `    ${p.path}  hash=${p.hash.slice(0, 12)}…`),
+      ]),
+    ],
+  );
+  return 0;
+}
+
+// ── Subcommand: rollback ────────────────────────────────────────────────
+
+async function runCmdRollback(argv: readonly string[], out: OutputContext): Promise<number> {
+  const dir = workspaceDirFrom(argv);
+  const label = pickFlag(argv, '--label');
+  if (label === undefined) {
+    emitError(out, 'rollback: --label <name> required', 'ERR_USAGE');
+    return 2;
+  }
+  const store = new FsLKGStore({ root: dir });
+  const manifest = await buildWorkspaceManifest(dir);
+  registerOpenClawWorkspace(store, manifest);
+
+  let result;
+  try {
+    result = await store.rollbackToLabel(label);
+  } catch (err) {
+    if (err instanceof LKGError) {
+      emitError(out, err.message, err.code);
+      return 1;
+    }
+    emitError(out, err instanceof Error ? err.message : String(err), 'ERR_INTERNAL');
+    return 2;
+  }
+
+  emit(
+    out,
+    {
+      ok: true,
+      workspaceDir: dir,
+      label: result.label,
+      restoredCount: result.restored.length,
+      restored: result.restored.map((r) => ({ path: r.path, hash: r.fingerprint.hash })),
+    },
+    [
+      `openclaw-cage rollback: ${dir}`,
+      `  label: ${result.label}`,
+      `  restored ${result.restored.length} tracker(s):`,
+      ...result.restored.map((r) => `    ${r.path}  hash=${r.fingerprint.hash.slice(0, 12)}…`),
+    ],
+  );
+  return 0;
+}
+
 // ── Subcommand: fingerprint ─────────────────────────────────────────────
 
 async function runCmdFingerprint(argv: readonly string[], out: OutputContext): Promise<number> {
@@ -396,7 +564,7 @@ function printHelp(out: OutputContext): void {
       JSON.stringify({
         bin: 'openclaw-cage',
         usage: 'openclaw-cage <subcommand> [args]',
-        subcommands: ['status', 'observe', 'list-trackers', 'fingerprint', 'help'],
+        subcommands: ['status', 'observe', 'promote', 'labels', 'rollback', 'list-trackers', 'fingerprint', 'help'],
       }) + '\n',
     );
     return;
@@ -415,6 +583,17 @@ function printHelp(out: OutputContext): void {
       '      in workspace.json; CLI flags add to (do not replace) those.',
       '  openclaw-cage observe <file> [--root <workspace-dir>]',
       '      One-shot observe of a specific path.',
+      '  openclaw-cage promote [<workspace-dir>] [--label <name>]',
+      '      Workspace-wide promote. With --label <name>, atomically pin every',
+      '      currently-valid tracker under that name. Operator says "this works".',
+      '      Fails closed: if any tracker is invalid, no label is created.',
+      '  openclaw-cage labels [<workspace-dir>]',
+      '      List every labeled pin across every tracker — what labels exist',
+      '      and which fingerprints they pin.',
+      '  openclaw-cage rollback --label <name> [<workspace-dir>]',
+      '      Restore every tracked file back to the bytes pinned under <name>.',
+      '      Two-phase: verifies all companions match recorded hash before any',
+      '      write happens; either every tracker rolls back or none do.',
       '  openclaw-cage list-trackers [<workspace-dir>]',
       '      Print canonical openclaw artifacts the manifest would track.',
       '  openclaw-cage fingerprint <file>',
@@ -479,6 +658,12 @@ export async function runCli(argv: readonly string[]): Promise<number> {
         return await runCmdStatus(rest, out);
       case 'observe':
         return await runCmdObserve(rest, out);
+      case 'promote':
+        return await runCmdPromote(rest, out);
+      case 'labels':
+        return await runCmdLabels(rest, out);
+      case 'rollback':
+        return await runCmdRollback(rest, out);
       case 'list-trackers':
         return await runCmdListTrackers(rest, out);
       case 'fingerprint':

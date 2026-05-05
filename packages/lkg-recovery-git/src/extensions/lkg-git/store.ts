@@ -33,6 +33,11 @@ import type {
   LKGObserveOptions,
   LKGStore,
   LKGTracker,
+  LabelEntry,
+  PromoteAllOptions,
+  PromoteAllResult,
+  PromoteAllTrackerOutcome,
+  RollbackResult,
   ValidationIssue,
 } from '@openclaw/lkg';
 import { LKGError } from '@openclaw/lkg';
@@ -45,6 +50,22 @@ import {
 import { REDACTED_SENTINEL, formatOcPath } from '@openclaw/oc-path';
 
 import { git, gitBinary } from './git-cmd.js';
+
+/**
+ * Operator-facing label-name validator. Mirrors the FS-backed impl;
+ * names map 1:1 to git tag names under the `lkg/` namespace, so
+ * keeping the rules identical means an FS-staged label can later
+ * migrate to a git-backed store without renaming.
+ */
+const LABEL_NAME_RE = /^[A-Za-z0-9._-]+$/;
+function isValidLabelName(name: string): boolean {
+  if (typeof name !== 'string') return false;
+  if (name.length < 1 || name.length > 64) return false;
+  return LABEL_NAME_RE.test(name);
+}
+
+/** Tag-prefix that namespaces LKG-managed tags away from operator tags. */
+const TAG_PREFIX = 'lkg/';
 
 export interface GitAuthorship {
   readonly name: string;
@@ -248,6 +269,189 @@ export class GitLKGStore implements LKGStore {
     const reg = this.trackers.get(this.normalizePath(path));
     if (reg === undefined) return null;
     return reg.cachedEntry;
+  }
+
+  // ---------- Labeled pins (upgrade-recovery) -----------------------------
+  // Mapping: label `<name>` ⇔ git tag `lkg/<name>` at HEAD. Rollback
+  // restores tracked paths from `git checkout lkg/<name> -- <relPath>`.
+  // The `lkg/` namespace keeps LKG-managed tags clearly separated from
+  // operator-authored tags so `git tag --list 'lkg/*'` enumerates them
+  // and operators don't worry about colliding with our reserved set.
+
+  async promoteAll(opts?: PromoteAllOptions): Promise<PromoteAllResult> {
+    if (opts?.label !== undefined) {
+      if (!isValidLabelName(opts.label)) {
+        throw new LKGError(
+          'LKG_LABEL_INVALID_NAME',
+          `label must match [A-Za-z0-9._-]+ and be 1-64 chars: "${opts.label}"`,
+        );
+      }
+      const tagName = `${TAG_PREFIX}${opts.label}`;
+      const existing = await git(['tag', '-l', tagName], { cwd: this.repoRoot });
+      if (existing.stdout.trim() !== '') {
+        throw new LKGError(
+          'LKG_LABEL_DUPLICATE',
+          `git tag "${tagName}" already exists; labels are immutable, delete the tag first`,
+        );
+      }
+    }
+
+    // Observe every tracker; observe() promotes (git commit) on its own.
+    const outcomes: PromoteAllTrackerOutcome[] = [];
+    for (const [path, _reg] of this.trackers) {
+      try {
+        const obs = await this.observe(path);
+        if (obs.outcome === 'promoted' || obs.outcome === 'valid') {
+          outcomes.push({ path, outcome: 'promoted', fingerprint: obs.fingerprint });
+        } else if (obs.outcome === 'failed') {
+          outcomes.push({ path, outcome: 'failed', reason: obs.reason });
+        } else {
+          const reason =
+            obs.outcome === 'recovered'
+              ? `recovered (was invalid; bytes restored from prior LKG)`
+              : `skipped: ${obs.reason}`;
+          outcomes.push({ path, outcome: 'invalid', reason });
+        }
+      } catch (err) {
+        outcomes.push({
+          path,
+          outcome: 'failed',
+          reason: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+
+    const allValid = outcomes.every((o) => o.outcome === 'promoted');
+
+    if (opts?.label !== undefined) {
+      if (!allValid) {
+        throw new LKGError(
+          'LKG_PROMOTE_TRACKER_INVALID',
+          `cannot tag "${TAG_PREFIX}${opts.label}" — ${outcomes.filter((o) => o.outcome !== 'promoted').length} tracker(s) failed validate`,
+        );
+      }
+      // Tag HEAD which now carries all the per-tracker promote commits.
+      const tagName = `${TAG_PREFIX}${opts.label}`;
+      await git(['tag', tagName, 'HEAD'], { cwd: this.repoRoot });
+    }
+
+    return {
+      trackers: outcomes,
+      ...(opts?.label !== undefined && allValid ? { label: opts.label } : {}),
+      allValid,
+    };
+  }
+
+  async listLabels(): Promise<readonly LabelEntry[]> {
+    const tagsResult = await git(['tag', '-l', `${TAG_PREFIX}*`], {
+      cwd: this.repoRoot,
+      tolerateNonZero: true,
+    });
+    const tagNames = tagsResult.stdout
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.startsWith(TAG_PREFIX));
+
+    const out: LabelEntry[] = [];
+    const observedAt = this.nowIso();
+    for (const tag of tagNames) {
+      const label = tag.slice(TAG_PREFIX.length);
+      for (const [path, reg] of this.trackers) {
+        const fp = await this.fingerprintFromRef(reg.relPath, tag, observedAt);
+        if (fp === null) continue; // tag predates this tracker, skip
+        out.push({ label, path, fingerprint: fp });
+      }
+    }
+    return out;
+  }
+
+  async rollbackToLabel(label: string, _opts?: LKGObserveOptions): Promise<RollbackResult> {
+    if (!isValidLabelName(label)) {
+      throw new LKGError(
+        'LKG_LABEL_INVALID_NAME',
+        `label must match [A-Za-z0-9._-]+ and be 1-64 chars: "${label}"`,
+      );
+    }
+    const tagName = `${TAG_PREFIX}${label}`;
+
+    // Phase 1: verify tag exists AND every tracker has a blob under it.
+    const tagCheck = await git(['tag', '-l', tagName], {
+      cwd: this.repoRoot,
+      tolerateNonZero: true,
+    });
+    if (tagCheck.stdout.trim() !== tagName) {
+      throw new LKGError(
+        'LKG_LABEL_NOT_FOUND',
+        `git tag "${tagName}" does not exist`,
+      );
+    }
+
+    const observedAt = this.nowIso();
+    const verified: { path: string; relPath: string; fingerprint: LKGFingerprint }[] = [];
+    for (const [path, reg] of this.trackers) {
+      const fp = await this.fingerprintFromRef(reg.relPath, tagName, observedAt);
+      if (fp === null) {
+        throw new LKGError(
+          'LKG_ROLLBACK_VERIFY_FAILED',
+          `tag "${tagName}" has no blob for tracked path "${reg.relPath}"`,
+          path,
+        );
+      }
+      verified.push({ path, relPath: reg.relPath, fingerprint: fp });
+    }
+
+    // Phase 2: checkout each tracked file from the tag. Each `git
+    // checkout <tag> -- <path>` is atomic; the SET of writes is not
+    // crash-atomic across files.
+    const restored: { path: string; fingerprint: LKGFingerprint }[] = [];
+    for (const v of verified) {
+      const checkoutResult = await git(['checkout', tagName, '--', v.relPath], {
+        cwd: this.repoRoot,
+        tolerateNonZero: true,
+      });
+      if (checkoutResult.exitCode !== 0) {
+        throw new LKGError(
+          'LKG_ROLLBACK_VERIFY_FAILED',
+          `git checkout failed mid-rollback at ${v.relPath}: ${checkoutResult.stderr.trim()}`,
+          v.path,
+        );
+      }
+      restored.push({ path: v.path, fingerprint: v.fingerprint });
+    }
+
+    return { label, restored };
+  }
+
+  /**
+   * Lookup helper: blob sha + size for a relPath at a given git ref
+   * (tag, branch, or commit). Returns null if the ref doesn't carry a
+   * blob for that path.
+   */
+  private async fingerprintFromRef(
+    relPath: string,
+    ref: string,
+    observedAt: string,
+  ): Promise<LKGFingerprint | null> {
+    const result = await git(['ls-tree', '-r', ref, '--', relPath], {
+      cwd: this.repoRoot,
+      tolerateNonZero: true,
+    });
+    if (result.exitCode !== 0) return null;
+    const line = result.stdout.split('\n').find((l) => l.trim().length > 0);
+    if (line === undefined) return null;
+    const parts = line.split('\t')[0]?.split(/\s+/);
+    const sha = parts?.[2];
+    if (sha === undefined) return null;
+    const sizeResult = await git(['cat-file', '-s', sha], {
+      cwd: this.repoRoot,
+      tolerateNonZero: true,
+    });
+    const bytes = parseInt(sizeResult.stdout.trim(), 10);
+    return {
+      hash: sha,
+      bytes: Number.isFinite(bytes) ? bytes : 0,
+      observedAt,
+    };
   }
 
   // ---------- internal -----------------------------------------------------

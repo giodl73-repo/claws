@@ -16,11 +16,64 @@
 
 import type {
   LKGEntry,
+  LKGFingerprint,
   LKGObservation,
   LKGObserveOptions,
   LKGTracker,
   ValidationIssue,
 } from './types.js';
+
+/**
+ * Per-tracker outcome inside a `promoteAll` result.
+ *
+ * - `outcome: 'promoted'` — bytes were valid and the entry now
+ *   carries this fingerprint as `lastPromotedGood`. If the call
+ *   carried a label, the same fingerprint is also pinned under
+ *   that label.
+ * - `outcome: 'invalid'` — bytes did not validate. When `label`
+ *   was set on the call, NO tracker is labeled (atomicity).
+ * - `outcome: 'failed'` — read/parse/validate threw. Same all-or-
+ *   nothing rule applies.
+ */
+export type PromoteAllTrackerOutcome =
+  | { readonly path: string; readonly outcome: 'promoted'; readonly fingerprint: LKGFingerprint }
+  | { readonly path: string; readonly outcome: 'invalid'; readonly reason: string }
+  | { readonly path: string; readonly outcome: 'failed'; readonly reason: string };
+
+export interface PromoteAllOptions {
+  /**
+   * Optional label to pin the promoted cohort under. If set, EVERY
+   * tracker must be currently valid; otherwise `LKG_PROMOTE_TRACKER_INVALID`
+   * is thrown and no labeling happens. The label itself must be
+   * unused: re-pinning under an existing label throws
+   * `LKG_LABEL_DUPLICATE`. Names must match `[A-Za-z0-9._-]+`.
+   */
+  readonly label?: string;
+}
+
+export interface PromoteAllResult {
+  readonly trackers: readonly PromoteAllTrackerOutcome[];
+  /** Same as `opts.label` if all trackers promoted; absent otherwise. */
+  readonly label?: string;
+  /** True iff every tracker outcome is 'promoted'. */
+  readonly allValid: boolean;
+}
+
+/**
+ * One row from `listLabels()` — describes a labeled pin from a
+ * single tracker's perspective. A label that pinned 5 trackers
+ * appears here as 5 rows.
+ */
+export interface LabelEntry {
+  readonly label: string;
+  readonly path: string;
+  readonly fingerprint: LKGFingerprint;
+}
+
+export interface RollbackResult {
+  readonly label: string;
+  readonly restored: readonly { readonly path: string; readonly fingerprint: LKGFingerprint }[];
+}
 
 export interface LKGStore {
   /**
@@ -60,4 +113,48 @@ export interface LKGStore {
    * yet (initial state).
    */
   getEntry(path: string): LKGEntry | null;
+
+  /**
+   * Workspace-wide promote. Observes every registered tracker,
+   * promotes each that validates, and (if a label was passed) pins
+   * the cohort atomically: ALL trackers must be valid, else NOTHING
+   * is labeled. Operator's "this state is good" verb — backs the
+   * pre-upgrade-snapshot use case described in upstream issue #14526.
+   *
+   * Backend behavior:
+   * - FS impl: writes a `<path>.lkg.label.<name>` companion per
+   *   tracker; persists the label inside the entry record.
+   * - Git impl: creates a `lkg/<name>` git tag at HEAD after the
+   *   labeled cohort is committed.
+   *
+   * Throws `LKGError(LKG_LABEL_INVALID_NAME)` if the label has
+   * forbidden characters; `LKG_LABEL_DUPLICATE` if it's already used
+   * by any tracker; `LKG_PROMOTE_TRACKER_INVALID` if any tracker
+   * fails validate (no labeling happens).
+   */
+  promoteAll(opts?: PromoteAllOptions): Promise<PromoteAllResult>;
+
+  /**
+   * List every labeled pin across every registered tracker.
+   * Operator-facing inventory: "what labels have I created and what
+   * do they pin?"
+   *
+   * Async because some backends (git) query the underlying VCS;
+   * FS-backed impls return synchronously from in-memory state.
+   */
+  listLabels(): Promise<readonly LabelEntry[]>;
+
+  /**
+   * Atomically restore every tracked path back to the bytes pinned
+   * under `label`. Two-phase:
+   *   1. Verify every tracker has this label and the companion
+   *      bytes still match the recorded hash. If any tracker is
+   *      missing the label or the companion is tampered, throws
+   *      `LKG_ROLLBACK_VERIFY_FAILED` and no writes happen.
+   *   2. Write each tracker's labeled bytes to its active path.
+   *
+   * Throws `LKGError(LKG_LABEL_NOT_FOUND)` if no tracker carries
+   * this label.
+   */
+  rollbackToLabel(label: string, opts?: LKGObserveOptions): Promise<RollbackResult>;
 }

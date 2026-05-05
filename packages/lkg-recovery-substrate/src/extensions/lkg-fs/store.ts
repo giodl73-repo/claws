@@ -36,10 +36,22 @@ import type {
   ValidationIssue,
 } from '../../plugin-sdk/lkg/types.js';
 import { LKGError } from '../../plugin-sdk/lkg/types.js';
-import type { LKGStore } from '../../plugin-sdk/lkg/api.js';
+import type {
+  LKGStore,
+  LabelEntry,
+  PromoteAllOptions,
+  PromoteAllResult,
+  PromoteAllTrackerOutcome,
+  RollbackResult,
+} from '../../plugin-sdk/lkg/api.js';
 import { InMemoryAuditSink, type LKGAuditSink } from './audit.js';
 import { makeFingerprint, hashRaw } from './fingerprint.js';
-import { clobberedPathFor, lkgPathFor } from './paths.js';
+import {
+  clobberedPathFor,
+  isValidLabelName,
+  labeledPinPathFor,
+  lkgPathFor,
+} from './paths.js';
 import {
   InMemoryRecoveryNoticeSink,
   type LKGRecoveryNoticeSink,
@@ -317,6 +329,166 @@ export class FsLKGStore implements LKGStore {
 
   getEntry(path: string): LKGEntry | null {
     return this.entries.get(this.normalizePath(path)) ?? null;
+  }
+
+  // ---------- Labeled pins (upgrade-recovery) -----------------------------
+
+  async promoteAll(opts?: PromoteAllOptions): Promise<PromoteAllResult> {
+    await this.loadStateOnce();
+
+    if (opts?.label !== undefined) {
+      if (!isValidLabelName(opts.label)) {
+        throw new LKGError(
+          'LKG_LABEL_INVALID_NAME',
+          `label must match [A-Za-z0-9._-]+ and be 1-64 chars: "${opts.label}"`,
+        );
+      }
+      // Reject duplicates BEFORE any I/O — labels are immutable.
+      for (const [path, entry] of this.entries) {
+        if (entry.labels?.[opts.label] !== undefined) {
+          throw new LKGError(
+            'LKG_LABEL_DUPLICATE',
+            `label "${opts.label}" already pinned on ${path}; labels are immutable, delete the existing pin first`,
+            path,
+          );
+        }
+      }
+    }
+
+    // Phase 1: observe every tracker, accumulate outcomes. Don't write
+    // labeled pins yet — we only commit if every tracker validated.
+    const outcomes: PromoteAllTrackerOutcome[] = [];
+    const successfulPaths: { path: string; raw: Buffer; fingerprint: LKGFingerprint }[] = [];
+
+    for (const [path, _tracker] of this.trackers) {
+      try {
+        const obs = await this.observe(path);
+        if (obs.outcome === 'promoted' || obs.outcome === 'valid') {
+          const raw = await fs.readFile(path);
+          outcomes.push({ path, outcome: 'promoted', fingerprint: obs.fingerprint });
+          successfulPaths.push({ path, raw, fingerprint: obs.fingerprint });
+        } else if (obs.outcome === 'failed') {
+          outcomes.push({ path, outcome: 'failed', reason: obs.reason });
+        } else {
+          // 'recovered' or 'skipped' — neither counts as "currently valid"
+          // for label-pin purposes.
+          const reason =
+            obs.outcome === 'recovered'
+              ? `recovered (was invalid; bytes restored from prior LKG)`
+              : `skipped: ${obs.reason}`;
+          outcomes.push({ path, outcome: 'invalid', reason });
+        }
+      } catch (err) {
+        outcomes.push({
+          path,
+          outcome: 'failed',
+          reason: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+
+    const allValid = outcomes.every((o) => o.outcome === 'promoted');
+
+    // Phase 2: if a label was requested, refuse to label unless all valid.
+    if (opts?.label !== undefined) {
+      if (!allValid) {
+        throw new LKGError(
+          'LKG_PROMOTE_TRACKER_INVALID',
+          `cannot pin label "${opts.label}" — ${outcomes.filter((o) => o.outcome !== 'promoted').length} tracker(s) failed validate`,
+        );
+      }
+      for (const { path, raw, fingerprint } of successfulPaths) {
+        const labelPath = labeledPinPathFor(path, opts.label);
+        const tmp = `${labelPath}.tmp-${process.pid}-${Date.now().toString(36)}`;
+        await fs.writeFile(tmp, raw);
+        await fs.rename(tmp, labelPath);
+        const entry = this.entries.get(path) ?? {};
+        const nextLabels = { ...(entry.labels ?? {}), [opts.label]: fingerprint };
+        this.entries.set(path, { ...entry, labels: nextLabels });
+      }
+      await this.saveState();
+    }
+
+    return {
+      trackers: outcomes,
+      ...(opts?.label !== undefined && allValid ? { label: opts.label } : {}),
+      allValid,
+    };
+  }
+
+  async listLabels(): Promise<readonly LabelEntry[]> {
+    await this.loadStateOnce();
+    const out: LabelEntry[] = [];
+    for (const [path, entry] of this.entries) {
+      if (entry.labels === undefined) continue;
+      for (const [label, fingerprint] of Object.entries(entry.labels)) {
+        out.push({ label, path, fingerprint });
+      }
+    }
+    return out;
+  }
+
+  async rollbackToLabel(label: string, _opts?: LKGObserveOptions): Promise<RollbackResult> {
+    await this.loadStateOnce();
+    if (!isValidLabelName(label)) {
+      throw new LKGError(
+        'LKG_LABEL_INVALID_NAME',
+        `label must match [A-Za-z0-9._-]+ and be 1-64 chars: "${label}"`,
+      );
+    }
+
+    // Collect every (path, fingerprint) pinned under this label.
+    const pinned: { path: string; fingerprint: LKGFingerprint }[] = [];
+    for (const [path, entry] of this.entries) {
+      const fp = entry.labels?.[label];
+      if (fp !== undefined) pinned.push({ path, fingerprint: fp });
+    }
+    if (pinned.length === 0) {
+      throw new LKGError(
+        'LKG_LABEL_NOT_FOUND',
+        `no tracker has a pin under label "${label}"`,
+      );
+    }
+
+    // Phase 1: VERIFY every companion exists and matches recorded hash.
+    // No active-path writes happen until this whole loop succeeds —
+    // a half-baked rollback is worse than a no-op rollback.
+    const verified: { path: string; fingerprint: LKGFingerprint; bytes: Buffer }[] = [];
+    for (const { path, fingerprint } of pinned) {
+      const labelPath = labeledPinPathFor(path, label);
+      let bytes: Buffer;
+      try {
+        bytes = await fs.readFile(labelPath);
+      } catch (err) {
+        throw new LKGError(
+          'LKG_ROLLBACK_VERIFY_FAILED',
+          `companion missing for label "${label}" at ${labelPath}: ${err instanceof Error ? err.message : String(err)}`,
+          path,
+        );
+      }
+      const observedHash = hashRaw(bytes);
+      if (observedHash !== fingerprint.hash) {
+        throw new LKGError(
+          'LKG_ROLLBACK_VERIFY_FAILED',
+          `companion hash mismatch for label "${label}" at ${labelPath}: expected ${fingerprint.hash}, got ${observedHash}`,
+          path,
+        );
+      }
+      verified.push({ path, fingerprint, bytes });
+    }
+
+    // Phase 2: COMMIT — atomic-ish swap each active path. We use
+    // tmp+rename per file; the SET is not crash-atomic across files,
+    // but each individual write is durable on rename.
+    const restored: { path: string; fingerprint: LKGFingerprint }[] = [];
+    for (const { path, fingerprint, bytes } of verified) {
+      const tmp = `${path}.rollback-${process.pid}-${Date.now().toString(36)}`;
+      await fs.writeFile(tmp, bytes);
+      await fs.rename(tmp, path);
+      restored.push({ path, fingerprint });
+    }
+
+    return { label, restored };
   }
 
   // ---------- internal -----------------------------------------------------

@@ -31,7 +31,14 @@ export { LKGError, type LKGErrorCode } from './types.js';
 
 export { checkSdkCompat } from './compat.js';
 
-export type { LKGStore } from './api.js';
+export type {
+  LKGStore,
+  LabelEntry,
+  PromoteAllOptions,
+  PromoteAllResult,
+  PromoteAllTrackerOutcome,
+  RollbackResult,
+} from './api.js';
 
 export {
   resolveLkgOverrides,
