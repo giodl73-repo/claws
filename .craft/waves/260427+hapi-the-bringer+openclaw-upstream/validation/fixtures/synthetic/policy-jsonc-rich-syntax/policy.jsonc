@@ -1,0 +1,30 @@
+{
+  // Synthetic: exercises JSONC parser fidelity through the policy stack.
+  // The check command must round-trip this file without losing comments
+  // or trailing commas.
+  "version": "0.1.0",
+  "generatedAt": "2026-05-01T00:00:00.000Z",
+  "policyId": "0000000000000000000000000000000000000000000000000000000000000000",
+
+  /* Tools: deliberate redundancy in the comments — verifying the
+     parser handles both line and block comments at multiple positions. */
+  "tools": [
+    { "id": "read-file", "risk": "R1" },     // safe, no-op-ish
+    { "id": "write-file", "risk": "R3" },    // mutating
+    { "id": "send-email", "risk": "R5" },    // operator-gated
+  ],
+
+  "denyRules": [
+    {
+      "id": "no-rm-rf",
+      "match": { "tool": "shell", "argPattern": "rm\\s+-rf" },
+      "reason": "destructive recursive delete",
+    },
+  ],
+
+  "generatedFrom": {
+    "hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "bytes": 0,
+    "observedAt": "2026-05-01T00:00:00.000Z",
+  },
+}

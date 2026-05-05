@@ -1,0 +1,4 @@
+# scratch/ holds working copies regenerated from fixtures/ on every run-suite invocation.
+# results/ holds per-fixture tool outputs — regenerated each run; not source-of-truth.
+scratch/
+results/

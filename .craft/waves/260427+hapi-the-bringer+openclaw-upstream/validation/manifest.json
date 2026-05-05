@@ -1,0 +1,35 @@
+{
+  "version": "0.1.0",
+  "fixtures": [
+    {
+      "slug": "kitchen-sink",
+      "kind": "synthetic",
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "SOUL.md", "IDENTITY.md", "MEMORY.md", "sessions/"],
+      "notes": "Golden path. Every OpenClaw-shape file present and valid; the toolchain baseline."
+    },
+    {
+      "slug": "empty-workspace",
+      "kind": "synthetic",
+      "shapeFiles": [],
+      "notes": "Empty directory. Tools must not panic on zero artifacts."
+    },
+    {
+      "slug": "only-claude-md",
+      "kind": "synthetic",
+      "shapeFiles": ["CLAUDE.md"],
+      "notes": "Realistic minimum: many public repos ship CLAUDE.md and nothing else."
+    },
+    {
+      "slug": "lobster-shell-collision",
+      "kind": "synthetic",
+      "shapeFiles": ["lobster.yaml"],
+      "notes": "Triggers oclint-rules-lobster-yaml-starter/step/shell-tool-collision. Two of three steps reference in-process tool names via `command:`."
+    },
+    {
+      "slug": "policy-jsonc-rich-syntax",
+      "kind": "synthetic",
+      "shapeFiles": ["policy.jsonc"],
+      "notes": "Exercises JSONC parser fidelity through the policy stack: line + block comments, trailing commas, structured comment positions."
+    }
+  ]
+}

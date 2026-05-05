@@ -1,0 +1,4 @@
+{"event":"start","ts":"2026-05-04T18:00:00.000Z","sessionId":"abc123"}
+{"event":"tool-call","ts":"2026-05-04T18:00:01.234Z","tool":"read-file","args":{"path":"AGENTS.md"}}
+{"event":"tool-result","ts":"2026-05-04T18:00:01.456Z","tool":"read-file","ok":true}
+{"event":"end","ts":"2026-05-04T18:00:05.000Z"}
