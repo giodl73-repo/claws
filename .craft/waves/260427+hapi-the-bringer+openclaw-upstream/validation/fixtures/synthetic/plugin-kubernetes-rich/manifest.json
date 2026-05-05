@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "kubernetes",
+  "version": "0.1.0",
+  "description": "kubernetes plugin (developer)",
+  "contributes": {
+    "tools": [
+      "kubernetes/list-pods",
+      "kubernetes/apply-manifest"
+    ],
+    "skills": [
+      "kubernetes/list-pods",
+      "kubernetes/apply-manifest"
+    ],
+    "workflows": [
+      "kubernetes-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

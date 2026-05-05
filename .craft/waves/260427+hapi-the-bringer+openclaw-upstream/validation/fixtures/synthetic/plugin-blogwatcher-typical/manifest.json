@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "blogwatcher",
+  "version": "0.1.0",
+  "description": "blogwatcher plugin (search)",
+  "contributes": {
+    "tools": [
+      "blogwatcher/list-feeds",
+      "blogwatcher/fetch"
+    ],
+    "skills": [
+      "blogwatcher/list-feeds",
+      "blogwatcher/fetch"
+    ]
+  }
+}

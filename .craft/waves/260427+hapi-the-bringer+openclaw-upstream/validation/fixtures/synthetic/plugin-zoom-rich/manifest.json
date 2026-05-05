@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "zoom",
+  "version": "0.1.0",
+  "description": "zoom plugin (work)",
+  "contributes": {
+    "tools": [
+      "zoom/create-meeting"
+    ],
+    "skills": [
+      "zoom/create-meeting"
+    ],
+    "workflows": [
+      "zoom-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

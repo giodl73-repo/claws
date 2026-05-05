@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "spotify",
+  "version": "0.1.0",
+  "description": "spotify plugin (media)",
+  "contributes": {
+    "tools": [
+      "spotify/play-track",
+      "spotify/search",
+      "spotify/queue"
+    ],
+    "skills": [
+      "spotify/play-track",
+      "spotify/search"
+    ],
+    "workflows": [
+      "spotify-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "sonos",
+  "version": "0.1.0",
+  "description": "sonos plugin (media)",
+  "contributes": {
+    "tools": [
+      "sonos/play",
+      "sonos/list-rooms"
+    ],
+    "skills": [
+      "sonos/play",
+      "sonos/list-rooms"
+    ]
+  }
+}

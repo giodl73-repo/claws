@@ -1,0 +1,5 @@
+{
+  "lint": { "skip": ["*"], "skipPaths": ["**"] },
+  "lkg": { "skip": ["*"] },
+  "policy": { "generators": [] }
+}

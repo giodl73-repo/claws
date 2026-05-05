@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "youtube",
+  "version": "0.1.0",
+  "description": "youtube plugin (media)",
+  "contributes": {
+    "tools": [
+      "youtube/search",
+      "youtube/get-transcript"
+    ],
+    "skills": [
+      "youtube/search",
+      "youtube/get-transcript"
+    ],
+    "workflows": [
+      "youtube-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

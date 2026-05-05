@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "todoist",
+  "version": "0.1.0",
+  "description": "todoist plugin (productivity)",
+  "contributes": {
+    "tools": [
+      "todoist/create-task",
+      "todoist/list-tasks"
+    ],
+    "skills": [
+      "todoist/create-task",
+      "todoist/list-tasks"
+    ]
+  }
+}

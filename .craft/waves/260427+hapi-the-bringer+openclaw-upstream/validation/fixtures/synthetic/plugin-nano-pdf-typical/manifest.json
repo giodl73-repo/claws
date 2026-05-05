@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "nano-pdf",
+  "version": "0.1.0",
+  "description": "nano-pdf plugin (media)",
+  "contributes": {
+    "tools": [
+      "nano-pdf/extract-text",
+      "nano-pdf/split-pages"
+    ],
+    "skills": [
+      "nano-pdf/extract-text",
+      "nano-pdf/split-pages"
+    ]
+  }
+}

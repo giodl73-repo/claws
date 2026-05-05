@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "homekit",
+  "version": "0.1.0",
+  "description": "homekit plugin (home)",
+  "contributes": {
+    "tools": [
+      "homekit/set-state",
+      "homekit/list-accessories"
+    ],
+    "skills": [
+      "homekit/set-state",
+      "homekit/list-accessories"
+    ],
+    "workflows": [
+      "homekit-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "openhue",
+  "version": "0.1.0",
+  "description": "openhue plugin (home)",
+  "contributes": {
+    "tools": [
+      "openhue/set-light",
+      "openhue/list-lights"
+    ],
+    "skills": [
+      "openhue/set-light",
+      "openhue/list-lights"
+    ],
+    "workflows": [
+      "openhue-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

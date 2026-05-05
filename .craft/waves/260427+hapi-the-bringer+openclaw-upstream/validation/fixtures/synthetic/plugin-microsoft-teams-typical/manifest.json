@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "microsoft-teams",
+  "version": "0.1.0",
+  "description": "microsoft-teams plugin (work)",
+  "contributes": {
+    "tools": [
+      "microsoft-teams/send-message",
+      "microsoft-teams/create-meeting"
+    ],
+    "skills": [
+      "microsoft-teams/send-message",
+      "microsoft-teams/create-meeting"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "tts",
+  "version": "0.1.0",
+  "description": "tts plugin (media)",
+  "contributes": {
+    "tools": [
+      "tts/synthesize",
+      "tts/list-voices"
+    ],
+    "skills": [
+      "tts/synthesize",
+      "tts/list-voices"
+    ],
+    "workflows": [
+      "tts-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

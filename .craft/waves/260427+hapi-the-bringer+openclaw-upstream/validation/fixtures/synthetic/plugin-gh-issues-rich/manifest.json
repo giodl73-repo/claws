@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "gh-issues",
+  "version": "0.1.0",
+  "description": "gh-issues plugin (developer)",
+  "contributes": {
+    "tools": [
+      "gh-issues/create-issue",
+      "gh-issues/comment"
+    ],
+    "skills": [
+      "gh-issues/create-issue",
+      "gh-issues/comment"
+    ],
+    "workflows": [
+      "gh-issues-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

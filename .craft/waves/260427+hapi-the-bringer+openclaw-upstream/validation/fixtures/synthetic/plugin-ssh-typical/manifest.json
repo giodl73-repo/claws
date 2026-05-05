@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "ssh",
+  "version": "0.1.0",
+  "description": "ssh plugin (system)",
+  "contributes": {
+    "tools": [
+      "ssh/exec-remote",
+      "ssh/copy-file"
+    ],
+    "skills": [
+      "ssh/exec-remote",
+      "ssh/copy-file"
+    ]
+  }
+}

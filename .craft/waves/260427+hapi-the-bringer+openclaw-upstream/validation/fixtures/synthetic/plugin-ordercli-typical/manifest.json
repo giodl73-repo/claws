@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "ordercli",
+  "version": "0.1.0",
+  "description": "ordercli plugin (finance)",
+  "contributes": {
+    "tools": [
+      "ordercli/place-order",
+      "ordercli/list-orders"
+    ],
+    "skills": [
+      "ordercli/place-order",
+      "ordercli/list-orders"
+    ]
+  }
+}

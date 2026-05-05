@@ -391,6 +391,1618 @@
       "kind": "synthetic",
       "shapeFiles": [],
       "notes": "synthetic openclaw workspace: workspace-enterprise"
+    },
+    {
+      "slug": "plugin-discord-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: discord (communication, maturity:typical, 3 tools)"
+    },
+    {
+      "slug": "plugin-discord-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "discord-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: discord (communication, maturity:rich, 3 tools)"
+    },
+    {
+      "slug": "plugin-slack-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: slack (communication, maturity:typical, 3 tools)"
+    },
+    {
+      "slug": "plugin-slack-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "slack-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: slack (communication, maturity:rich, 3 tools)"
+    },
+    {
+      "slug": "plugin-telegram-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: telegram (communication, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-telegram-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "telegram-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: telegram (communication, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-signal-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: signal (communication, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-signal-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "signal-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: signal (communication, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-whatsapp-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: whatsapp (communication, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-whatsapp-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "whatsapp-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: whatsapp (communication, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-sms-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: sms (communication, maturity:typical, 1 tools)"
+    },
+    {
+      "slug": "plugin-sms-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "sms-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: sms (communication, maturity:rich, 1 tools)"
+    },
+    {
+      "slug": "plugin-voice-call-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: voice-call (communication, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-voice-call-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "voice-call-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: voice-call (communication, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-email-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: email (communication, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-email-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "email-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: email (communication, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-matrix-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: matrix (communication, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-matrix-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "matrix-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: matrix (communication, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-notion-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: notion (productivity, maturity:typical, 3 tools)"
+    },
+    {
+      "slug": "plugin-notion-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "notion-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: notion (productivity, maturity:rich, 3 tools)"
+    },
+    {
+      "slug": "plugin-obsidian-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: obsidian (productivity, maturity:typical, 3 tools)"
+    },
+    {
+      "slug": "plugin-obsidian-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "obsidian-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: obsidian (productivity, maturity:rich, 3 tools)"
+    },
+    {
+      "slug": "plugin-things-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: things (productivity, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-things-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "things-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: things (productivity, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-trello-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: trello (productivity, maturity:typical, 3 tools)"
+    },
+    {
+      "slug": "plugin-trello-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "trello-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: trello (productivity, maturity:rich, 3 tools)"
+    },
+    {
+      "slug": "plugin-todoist-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: todoist (productivity, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-todoist-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "todoist-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: todoist (productivity, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-clickup-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: clickup (productivity, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-clickup-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "clickup-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: clickup (productivity, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-asana-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: asana (productivity, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-asana-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "asana-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: asana (productivity, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-linear-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: linear (productivity, maturity:typical, 3 tools)"
+    },
+    {
+      "slug": "plugin-linear-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "linear-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: linear (productivity, maturity:rich, 3 tools)"
+    },
+    {
+      "slug": "plugin-apple-notes-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: apple-notes (productivity, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-apple-notes-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "apple-notes-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: apple-notes (productivity, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-apple-reminders-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: apple-reminders (productivity, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-apple-reminders-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "apple-reminders-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: apple-reminders (productivity, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-github-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: github (developer, maturity:typical, 3 tools)"
+    },
+    {
+      "slug": "plugin-github-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "github-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: github (developer, maturity:rich, 3 tools)"
+    },
+    {
+      "slug": "plugin-gitlab-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: gitlab (developer, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-gitlab-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "gitlab-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: gitlab (developer, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-npm-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: npm (developer, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-npm-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "npm-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: npm (developer, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-docker-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: docker (developer, maturity:typical, 3 tools)"
+    },
+    {
+      "slug": "plugin-docker-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "docker-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: docker (developer, maturity:rich, 3 tools)"
+    },
+    {
+      "slug": "plugin-kubernetes-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: kubernetes (developer, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-kubernetes-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "kubernetes-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: kubernetes (developer, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-gh-issues-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: gh-issues (developer, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-gh-issues-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "gh-issues-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: gh-issues (developer, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-mcporter-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: mcporter (developer, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-mcporter-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "mcporter-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: mcporter (developer, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-spotify-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: spotify (media, maturity:typical, 3 tools)"
+    },
+    {
+      "slug": "plugin-spotify-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "spotify-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: spotify (media, maturity:rich, 3 tools)"
+    },
+    {
+      "slug": "plugin-youtube-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: youtube (media, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-youtube-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "youtube-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: youtube (media, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-sonos-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: sonos (media, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-sonos-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "sonos-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: sonos (media, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-tts-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: tts (media, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-tts-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "tts-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: tts (media, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-whisper-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: whisper (media, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-whisper-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "whisper-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: whisper (media, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-video-frames-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: video-frames (media, maturity:typical, 1 tools)"
+    },
+    {
+      "slug": "plugin-video-frames-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "video-frames-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: video-frames (media, maturity:rich, 1 tools)"
+    },
+    {
+      "slug": "plugin-nano-pdf-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: nano-pdf (media, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-nano-pdf-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "nano-pdf-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: nano-pdf (media, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-shell-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: shell (system, maturity:typical, 1 tools)"
+    },
+    {
+      "slug": "plugin-shell-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "shell-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: shell (system, maturity:rich, 1 tools)"
+    },
+    {
+      "slug": "plugin-ssh-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: ssh (system, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-ssh-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "ssh-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: ssh (system, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-filesystem-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: filesystem (system, maturity:typical, 4 tools)"
+    },
+    {
+      "slug": "plugin-filesystem-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "filesystem-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: filesystem (system, maturity:rich, 4 tools)"
+    },
+    {
+      "slug": "plugin-screenshot-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: screenshot (system, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-screenshot-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "screenshot-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: screenshot (system, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-camsnap-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: camsnap (system, maturity:typical, 1 tools)"
+    },
+    {
+      "slug": "plugin-camsnap-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "camsnap-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: camsnap (system, maturity:rich, 1 tools)"
+    },
+    {
+      "slug": "plugin-system-info-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: system-info (system, maturity:typical, 3 tools)"
+    },
+    {
+      "slug": "plugin-system-info-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "system-info-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: system-info (system, maturity:rich, 3 tools)"
+    },
+    {
+      "slug": "plugin-brave-search-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: brave-search (search, maturity:typical, 1 tools)"
+    },
+    {
+      "slug": "plugin-brave-search-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "brave-search-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: brave-search (search, maturity:rich, 1 tools)"
+    },
+    {
+      "slug": "plugin-google-search-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: google-search (search, maturity:typical, 1 tools)"
+    },
+    {
+      "slug": "plugin-google-search-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "google-search-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: google-search (search, maturity:rich, 1 tools)"
+    },
+    {
+      "slug": "plugin-semantic-search-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: semantic-search (search, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-semantic-search-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "semantic-search-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: semantic-search (search, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-blogwatcher-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: blogwatcher (search, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-blogwatcher-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "blogwatcher-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: blogwatcher (search, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-openai-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: openai (ai_ml, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-openai-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "openai-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: openai (ai_ml, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-anthropic-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: anthropic (ai_ml, maturity:typical, 1 tools)"
+    },
+    {
+      "slug": "plugin-anthropic-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "anthropic-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: anthropic (ai_ml, maturity:rich, 1 tools)"
+    },
+    {
+      "slug": "plugin-gemini-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: gemini (ai_ml, maturity:typical, 1 tools)"
+    },
+    {
+      "slug": "plugin-gemini-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "gemini-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: gemini (ai_ml, maturity:rich, 1 tools)"
+    },
+    {
+      "slug": "plugin-ollama-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: ollama (ai_ml, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-ollama-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "ollama-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: ollama (ai_ml, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-vllm-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: vllm (ai_ml, maturity:typical, 1 tools)"
+    },
+    {
+      "slug": "plugin-vllm-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "vllm-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: vllm (ai_ml, maturity:rich, 1 tools)"
+    },
+    {
+      "slug": "plugin-stripe-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: stripe (finance, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-stripe-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "stripe-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: stripe (finance, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-ordercli-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: ordercli (finance, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-ordercli-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "ordercli-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: ordercli (finance, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-openhue-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: openhue (home, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-openhue-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "openhue-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: openhue (home, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-homekit-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: homekit (home, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-homekit-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "homekit-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: homekit (home, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-jira-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: jira (work, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-jira-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "jira-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: jira (work, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-confluence-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: confluence (work, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-confluence-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "confluence-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: confluence (work, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-sharepoint-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: sharepoint (work, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-sharepoint-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "sharepoint-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: sharepoint (work, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-microsoft-teams-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: microsoft-teams (work, maturity:typical, 2 tools)"
+    },
+    {
+      "slug": "plugin-microsoft-teams-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "microsoft-teams-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: microsoft-teams (work, maturity:rich, 2 tools)"
+    },
+    {
+      "slug": "plugin-zoom-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: zoom (work, maturity:typical, 1 tools)"
+    },
+    {
+      "slug": "plugin-zoom-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "zoom-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: zoom (work, maturity:rich, 1 tools)"
+    },
+    {
+      "slug": "plugin-1password-typical",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: 1password (work, maturity:typical, 1 tools)"
+    },
+    {
+      "slug": "plugin-1password-rich",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "manifest.json",
+        "skills/",
+        "1password-flow.lobster",
+        "doctor-contract-api.ts"
+      ],
+      "notes": "synthetic 3rd-party openclaw plugin: 1password (work, maturity:rich, 1 tools)"
+    },
+    {
+      "slug": "adversarial-manifest-malformed-json",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "manifest.json"
+      ],
+      "notes": "adversarial: Manifest JSON is intentionally malformed; substrate should not crash on parse."
+    },
+    {
+      "slug": "adversarial-manifest-references-missing-skill",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "manifest.json",
+        "TOOLS.md"
+      ],
+      "notes": "adversarial: Manifest references a skills/<name>/SKILL.md path that does not exist; cross-reference check should flag."
+    },
+    {
+      "slug": "adversarial-tools-sentinel-injection",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md"
+      ],
+      "notes": "adversarial: Bytes contain __OPENCLAW_REDACTED__ literal; emit-time guard should refuse to write back / round-trip should fail."
+    },
+    {
+      "slug": "adversarial-tools-shell-metacharacter-id",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md"
+      ],
+      "notes": "adversarial: Tool ID has `; rm -rf /` — anything that pipes the ID into a shell pipeline is at risk. Substrate should reject the ID."
+    },
+    {
+      "slug": "adversarial-tools-emoji-id",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md"
+      ],
+      "notes": "adversarial: Tool ID contains emoji codepoint; round-trip should preserve UTF-8."
+    },
+    {
+      "slug": "adversarial-tools-very-long-id",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md"
+      ],
+      "notes": "adversarial: Tool ID is 512 characters; should not crash parser or hang regex matching."
+    },
+    {
+      "slug": "adversarial-tools-duplicate-id",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md"
+      ],
+      "notes": "adversarial: Same tool id declared twice with different risk — second silently overrides; lint should flag."
+    },
+    {
+      "slug": "adversarial-tools-r1-with-irreversible",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md"
+      ],
+      "notes": "adversarial: R1 risk + IRREVERSIBLE_EXTERNAL cap is semantically inconsistent; policy lint should catch."
+    },
+    {
+      "slug": "adversarial-tools-bogus-sensitivity",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md"
+      ],
+      "notes": "adversarial: sensitivity:bogus-tier-7 is not in the allowed set (public/internal/confidential/restricted)."
+    },
+    {
+      "slug": "adversarial-frontmatter-malformed-yaml",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md"
+      ],
+      "notes": "adversarial: YAML frontmatter is malformed; AGENTS.md parse should produce a graceful error not crash the manifest walker."
+    },
+    {
+      "slug": "adversarial-skill-tier-out-of-range",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "skills/bad-skill/SKILL.md"
+      ],
+      "notes": "adversarial: SKILL.md frontmatter has tier:T99 — outside allowed T1/T2/T3 range."
+    },
+    {
+      "slug": "adversarial-memory-bogus-scope",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "MEMORY.md"
+      ],
+      "notes": "adversarial: Already covered by memory-invalid-scope but pinned in adversarial set as a baseline."
+    },
+    {
+      "slug": "adversarial-jsonc-utf8-bom",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "gateway.jsonc"
+      ],
+      "notes": "adversarial: gateway.jsonc starts with UTF-8 BOM (\\uFEFF); parser should handle gracefully."
+    },
+    {
+      "slug": "adversarial-jsonc-circular-deep",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "gateway.jsonc"
+      ],
+      "notes": "adversarial: Deep nesting; should not blow stack or hang."
+    },
+    {
+      "slug": "adversarial-jsonc-secret-zero-hash",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "policy.jsonc"
+      ],
+      "notes": "adversarial: F-005: secret-as-literal rule false-positives on all-zero hashes. Pin it."
+    },
+    {
+      "slug": "adversarial-session-malformed-line",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "sessions/session-broken.jsonl"
+      ],
+      "notes": "adversarial: Session log has a non-JSON line; jsonl-starter rule should flag malformed-line."
+    },
+    {
+      "slug": "adversarial-session-empty",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "sessions/session-empty.jsonl"
+      ],
+      "notes": "adversarial: Session log is empty (0 bytes); jsonl-starter empty-log rule should flag."
+    },
+    {
+      "slug": "adversarial-lobster-mutually-exclusive-body",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "pipeline.lobster"
+      ],
+      "notes": "adversarial: Step has both `command:` and `pipeline:` — mutually exclusive; lint should flag."
+    },
+    {
+      "slug": "adversarial-lobster-undefined-stdin-ref",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "pipeline.lobster"
+      ],
+      "notes": "adversarial: `in:` references a step or output that does not exist in this workflow."
+    },
+    {
+      "slug": "adversarial-empty-canonical-files",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "SOUL.md",
+        "IDENTITY.md",
+        "MEMORY.md"
+      ],
+      "notes": "adversarial: All canonical files are 0 bytes; substrate should not crash on empty inputs."
+    },
+    {
+      "slug": "adversarial-lkg-state-malformed",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        ".openclaw/lkg-health.json"
+      ],
+      "notes": "adversarial: lkg-health.json is invalid JSON; cage should produce LKG_STATE_FILE_CORRUPT error not crash."
+    },
+    {
+      "slug": "adversarial-lkg-state-future-version",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        ".openclaw/lkg-health.json"
+      ],
+      "notes": "adversarial: lkg-health.json declares a future schema version; cage should produce LKG_STATE_FILE_VERSION_MISMATCH."
+    },
+    {
+      "slug": "adversarial-workspace-json-malformed",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "workspace.json"
+      ],
+      "notes": "adversarial: workspace.json is invalid; substrate should fall back to defaults rather than crash."
+    },
+    {
+      "slug": "adversarial-workspace-json-skip-everything",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "workspace.json"
+      ],
+      "notes": "adversarial: workspace.json skips literally everything via wildcards; substrate behavior should be observable (zero work) not silent."
     }
   ]
 }

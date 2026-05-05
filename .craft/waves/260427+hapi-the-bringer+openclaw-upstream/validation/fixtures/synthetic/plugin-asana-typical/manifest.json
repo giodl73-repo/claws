@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "asana",
+  "version": "0.1.0",
+  "description": "asana plugin (productivity)",
+  "contributes": {
+    "tools": [
+      "asana/create-task",
+      "asana/list-projects"
+    ],
+    "skills": [
+      "asana/create-task",
+      "asana/list-projects"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "apple-reminders",
+  "version": "0.1.0",
+  "description": "apple-reminders plugin (productivity)",
+  "contributes": {
+    "tools": [
+      "apple-reminders/create-reminder",
+      "apple-reminders/list-reminders"
+    ],
+    "skills": [
+      "apple-reminders/create-reminder",
+      "apple-reminders/list-reminders"
+    ],
+    "workflows": [
+      "apple-reminders-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

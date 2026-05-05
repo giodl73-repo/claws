@@ -1,0 +1,7 @@
+{
+  "name": "ghost-plugin",
+  "version": "0.1.0",
+  "contributes": {
+    "skills": ["ghost-plugin/this-skill-doesnt-exist"]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "github",
+  "version": "0.1.0",
+  "description": "github plugin (developer)",
+  "contributes": {
+    "tools": [
+      "github/create-issue",
+      "github/list-prs",
+      "github/merge-pr"
+    ],
+    "skills": [
+      "github/create-issue",
+      "github/list-prs"
+    ],
+    "workflows": [
+      "github-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "sms",
+  "version": "0.1.0",
+  "description": "sms plugin (communication)",
+  "contributes": {
+    "tools": [
+      "sms/send-sms"
+    ],
+    "skills": [
+      "sms/send-sms"
+    ],
+    "workflows": [
+      "sms-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

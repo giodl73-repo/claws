@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "1password",
+  "version": "0.1.0",
+  "description": "1password plugin (work)",
+  "contributes": {
+    "tools": [
+      "1password/get-secret"
+    ],
+    "skills": [
+      "1password/get-secret"
+    ]
+  }
+}

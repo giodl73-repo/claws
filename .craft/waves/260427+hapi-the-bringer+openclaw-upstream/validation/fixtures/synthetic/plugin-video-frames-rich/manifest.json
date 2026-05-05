@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "video-frames",
+  "version": "0.1.0",
+  "description": "video-frames plugin (media)",
+  "contributes": {
+    "tools": [
+      "video-frames/extract"
+    ],
+    "skills": [
+      "video-frames/extract"
+    ],
+    "workflows": [
+      "video-frames-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "camsnap",
+  "version": "0.1.0",
+  "description": "camsnap plugin (system)",
+  "contributes": {
+    "tools": [
+      "camsnap/take-photo"
+    ],
+    "skills": [
+      "camsnap/take-photo"
+    ],
+    "workflows": [
+      "camsnap-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

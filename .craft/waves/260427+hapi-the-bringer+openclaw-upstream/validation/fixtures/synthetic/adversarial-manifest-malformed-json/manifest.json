@@ -1,0 +1,1 @@
+{ "name": "broken-plugin", "version": "0.1.0", "contributes": { tools: [unquoted, missing-quotes }

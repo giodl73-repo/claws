@@ -135,6 +135,63 @@ End-to-end behavior on realistic openclaw workspaces:
 
 Improvements to make the daily loop richer: add `cage labels` + `cage promote --label X` invocations to the suite for fixtures with `.openclaw/lkg-health.json`. Add `policy check` invocation when both TOOLS.md and policy.jsonc are present.
 
+### F-011 — `openclaw cage status` returns generic `ERR_INTERNAL` on lkg-state version mismatch  [open]
+
+**Date**: 2026-05-05
+**Fixture**: `adversarial-lkg-state-future-version`
+**Tool**: `openclaw cage status`
+
+`.openclaw/lkg-health.json` declaring `"version": "9.9.9"` produces:
+
+```
+{ "error": { "code": "ERR_INTERNAL", "message": "state file version 9.9.9 unsupported by this build (expected 0.1.0)" } }
+```
+
+The message is informative but the code is a catch-all. Operators reading exit codes / wiring up alerts can't distinguish a legitimate version-mismatch (operator should upgrade or downgrade openclaw) from a true internal bug. Should be `LKG_STATE_FILE_VERSION_MISMATCH`.
+
+### F-012 — `openclaw cage status` returns generic `ERR_INTERNAL` on lkg-state corruption  [open]
+
+**Date**: 2026-05-05
+**Fixture**: `adversarial-lkg-state-malformed`
+**Tool**: `openclaw cage status`
+
+Malformed JSON in `.openclaw/lkg-health.json` produces `ERR_INTERNAL: state file parse failed at <path>`. Should be `LKG_STATE_FILE_CORRUPT` (already a documented code in the lkg substrate; just not wired through here).
+
+### F-013 — `openclaw policy generate` and `cage status` exit non-zero on malformed `workspace.json`  [open]
+
+**Date**: 2026-05-05
+**Fixture**: `adversarial-workspace-json-malformed`
+**Tool**: `openclaw policy generate` and `openclaw cage status`
+
+Both substrates exit 2 with `ERR_INTERNAL: workspace.json parse failed at <path>`. This is a borderline call:
+
+- **Argument for current behavior**: workspace.json declares overrides for substrate behavior; a corrupt file means the operator's intent is unknowable, so refusing to run is safer than guessing.
+- **Argument against**: workspace.json is **optional**; a corrupt file should degrade to defaults with a warning on stderr, not bring the whole substrate down. Most CLIs treat optional config that way.
+
+Compromise: parse-error should still exit non-zero but with a specific code (`WORKSPACE_CONFIG_PARSE_FAILED`) so operators can decide policy. Generic `ERR_INTERNAL` is the worst outcome — looks like a substrate bug.
+
+`pinch run` on the same fixture handles this differently — exits clean-error with what looks like a more specific code; behavior between substrates is inconsistent.
+
+### F-014 — `pinch run` on `workspace.json: skip:["*"]` produces zero observable signal  [open]
+
+**Date**: 2026-05-05
+**Fixture**: `adversarial-workspace-json-skip-everything`
+**Tool**: `openclaw pinch run`
+
+A workspace.json that wildcards `lint.skip:["*"]` and `lint.skipPaths:["**"]` causes pinch to run cleanly with `filesLinted: 0, diagnostics: []`. From the operator's view this is identical to "no findings" — they have to read workspace.json themselves to understand that everything was skipped.
+
+Should emit a metadata field (e.g. `summary.pathsSkippedByConfig: <n>`) or print "X files skipped by workspace.json" so the silence is observable.
+
+### F-015 — 24 adversarial fixtures, zero crashes  [confirmed-working]
+
+**Date**: 2026-05-05
+**Fixtures**: all `adversarial-*` (24 fixtures)
+**Tool**: full substrate train
+
+Adversarial sweep covering shell-metacharacter tool IDs, sentinel-injection, emoji/unicode in IDs, 512-char IDs, malformed YAML frontmatter, deep JSON nesting, UTF-8 BOM, malformed jsonl session logs, lobster step-shape attacks, future-version LKG state, malformed workspace.json — **none of the 24 caused a crash**. Every failure mode emitted a structured JSON error on stderr with a usable exit code.
+
+Two genuine fixes worth shipping (F-011/F-012/F-013 specific error codes; F-014 silent-skip observability), but nothing was a denial-of-service against the substrate train. This is a real strength worth highlighting in upstream review.
+
 ---
 
 Add new findings BELOW this line as they surface from real use.

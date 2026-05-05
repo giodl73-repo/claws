@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "jira",
+  "version": "0.1.0",
+  "description": "jira plugin (work)",
+  "contributes": {
+    "tools": [
+      "jira/create-ticket",
+      "jira/search"
+    ],
+    "skills": [
+      "jira/create-ticket",
+      "jira/search"
+    ]
+  }
+}

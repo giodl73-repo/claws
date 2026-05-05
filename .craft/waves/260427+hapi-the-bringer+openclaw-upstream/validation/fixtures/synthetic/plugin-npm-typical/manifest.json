@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "npm",
+  "version": "0.1.0",
+  "description": "npm plugin (developer)",
+  "contributes": {
+    "tools": [
+      "npm/publish",
+      "npm/search"
+    ],
+    "skills": [
+      "npm/publish",
+      "npm/search"
+    ]
+  }
+}

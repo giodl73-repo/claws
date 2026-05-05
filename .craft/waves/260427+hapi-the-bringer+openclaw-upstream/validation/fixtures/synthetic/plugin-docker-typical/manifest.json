@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "docker",
+  "version": "0.1.0",
+  "description": "docker plugin (developer)",
+  "contributes": {
+    "tools": [
+      "docker/build-image",
+      "docker/list-containers",
+      "docker/push-image"
+    ],
+    "skills": [
+      "docker/build-image",
+      "docker/list-containers"
+    ]
+  }
+}

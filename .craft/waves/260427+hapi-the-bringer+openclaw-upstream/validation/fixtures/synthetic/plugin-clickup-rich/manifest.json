@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "clickup",
+  "version": "0.1.0",
+  "description": "clickup plugin (productivity)",
+  "contributes": {
+    "tools": [
+      "clickup/create-task",
+      "clickup/list-spaces"
+    ],
+    "skills": [
+      "clickup/create-task",
+      "clickup/list-spaces"
+    ],
+    "workflows": [
+      "clickup-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

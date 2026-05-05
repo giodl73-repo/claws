@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "screenshot",
+  "version": "0.1.0",
+  "description": "screenshot plugin (system)",
+  "contributes": {
+    "tools": [
+      "screenshot/capture",
+      "screenshot/capture-window"
+    ],
+    "skills": [
+      "screenshot/capture",
+      "screenshot/capture-window"
+    ]
+  }
+}

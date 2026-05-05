@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "trello",
+  "version": "0.1.0",
+  "description": "trello plugin (productivity)",
+  "contributes": {
+    "tools": [
+      "trello/create-card",
+      "trello/list-boards",
+      "trello/move-card"
+    ],
+    "skills": [
+      "trello/create-card",
+      "trello/list-boards"
+    ]
+  }
+}

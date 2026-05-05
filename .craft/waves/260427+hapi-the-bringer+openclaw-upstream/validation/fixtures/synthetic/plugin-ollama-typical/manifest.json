@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "ollama",
+  "version": "0.1.0",
+  "description": "ollama plugin (ai_ml)",
+  "contributes": {
+    "tools": [
+      "ollama/generate",
+      "ollama/list-models"
+    ],
+    "skills": [
+      "ollama/generate",
+      "ollama/list-models"
+    ]
+  }
+}

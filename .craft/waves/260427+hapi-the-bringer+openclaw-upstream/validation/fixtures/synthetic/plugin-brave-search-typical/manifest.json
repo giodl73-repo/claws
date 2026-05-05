@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "brave-search",
+  "version": "0.1.0",
+  "description": "brave-search plugin (search)",
+  "contributes": {
+    "tools": [
+      "brave-search/web-search"
+    ],
+    "skills": [
+      "brave-search/web-search"
+    ]
+  }
+}

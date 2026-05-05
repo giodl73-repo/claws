@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "system-info",
+  "version": "0.1.0",
+  "description": "system-info plugin (system)",
+  "contributes": {
+    "tools": [
+      "system-info/get-cpu",
+      "system-info/get-memory",
+      "system-info/get-uptime"
+    ],
+    "skills": [
+      "system-info/get-cpu",
+      "system-info/get-memory"
+    ],
+    "workflows": [
+      "system-info-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

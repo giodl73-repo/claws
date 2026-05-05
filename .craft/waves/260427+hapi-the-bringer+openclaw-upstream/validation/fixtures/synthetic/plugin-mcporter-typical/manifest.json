@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "mcporter",
+  "version": "0.1.0",
+  "description": "mcporter plugin (developer)",
+  "contributes": {
+    "tools": [
+      "mcporter/list-mcp-servers",
+      "mcporter/register-server"
+    ],
+    "skills": [
+      "mcporter/list-mcp-servers",
+      "mcporter/register-server"
+    ]
+  }
+}

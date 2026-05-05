@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "discord",
+  "version": "0.1.0",
+  "description": "discord plugin (communication)",
+  "contributes": {
+    "tools": [
+      "discord/post-message",
+      "discord/list-channels",
+      "discord/react"
+    ],
+    "skills": [
+      "discord/post-message",
+      "discord/list-channels"
+    ]
+  }
+}

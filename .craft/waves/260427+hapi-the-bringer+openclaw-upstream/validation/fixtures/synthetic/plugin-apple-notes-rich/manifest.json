@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "apple-notes",
+  "version": "0.1.0",
+  "description": "apple-notes plugin (productivity)",
+  "contributes": {
+    "tools": [
+      "apple-notes/read-note",
+      "apple-notes/create-note"
+    ],
+    "skills": [
+      "apple-notes/read-note",
+      "apple-notes/create-note"
+    ],
+    "workflows": [
+      "apple-notes-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}
