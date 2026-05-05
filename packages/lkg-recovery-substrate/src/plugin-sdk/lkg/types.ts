@@ -10,7 +10,7 @@ import type { OcPath } from '@openclaw/oc-path';
  * shape, the same `.clobbered.<ts>` preservation, the same audit
  * envelope — just parameterized over a tracker any plugin can register.
  *
- * **Type-shape decisions** (post-R2-panel review):
+ * **Type-shape decisions**:
  *
  *   1. `LKGFingerprint` is BACKEND-AGNOSTIC. POSIX stat fields move
  *      into the optional `fsStat?` appendix; non-FS backends (git,

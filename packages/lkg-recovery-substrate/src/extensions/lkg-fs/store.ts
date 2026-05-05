@@ -138,7 +138,7 @@ export class FsLKGStore implements LKGStore {
     }
 
     // Sentinel guard (mirrors @openclaw/oc-path's emit-time
-    // guard, applied at the LKG observe boundary). See L-A2/B4.
+    // guard, applied at the LKG observe boundary).
     if (containsSentinel(raw)) {
       const obs: LKGObservation = withOcPath({
         outcome: 'failed',
@@ -158,7 +158,7 @@ export class FsLKGStore implements LKGStore {
     } catch (err) {
       // Scrub the err.message: parse failures on secret-bearing
       // bytes can leak the secret through the diagnostic. Same
-      // posture as oc-paths-lint's C10 scrubber.
+      // posture as oc-paths-lint's error-message scrubber.
       const obs: LKGObservation = withOcPath({
         outcome: 'failed',
         reason: `parse threw: ${scrubErrorMessage(err)}`,
@@ -427,7 +427,7 @@ function containsSentinel(buf: Buffer | string): boolean {
 
 /**
  * Scrub a thrown error's message before placing it in an audit
- * record. Mirrors the oc-paths-lint scrubber (C10):
+ * record. Mirrors the oc-paths-lint error-message scrubber:
  *
  *   - Refuse to echo the redaction sentinel — replace wholesale.
  *   - Strip ASCII control chars (preserve \t and printable bytes).

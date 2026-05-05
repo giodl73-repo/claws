@@ -65,7 +65,7 @@ export async function runDetect<TOptions = unknown>(
  * bytes. Returns `raw` unchanged if detect produces no findings.
  *
  * This is the basic per-call shape used by the doctor adapter
- * (one fix invocation per match — the fan-out semantic from A6).
+ * (one fix invocation per match — the detect/fix fan-out semantic).
  */
 export async function runFixer<TOptions = unknown>(
   spec: OcPathFixerSpec<TOptions>,

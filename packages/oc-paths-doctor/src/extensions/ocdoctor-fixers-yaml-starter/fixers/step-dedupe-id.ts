@@ -27,11 +27,11 @@
  * intent (was that the first `a` or the renamed second?) is not
  * recoverable from the AST. Auto-rewriting would silently change
  * behavior; failing-loud via the paired error rule preserves operator
- * agency. (Closes review item W2.)
+ * agency.
  *
  * **Substrate routing**: mutation goes through `setOcPath` (the
  * universal substrate verb) rather than direct yaml-package AST
- * mutation. The fan-out semantic from A6 means each duplicate is a
+ * mutation. The detect/fix fan-out semantic means each duplicate is a
  * separate detect finding and a separate `fix()` call — `fix()`
  * renames exactly the one element addressed by `match.path`.
  */
@@ -119,10 +119,10 @@ export const stepDedupeId: OcPathFixerSpec<DedupeIdOptions> = {
     const result = setOcPath(ast, match.path, newId);
     if (!result.ok) return raw;
     if (result.ast.kind !== 'yaml') return raw;
-    // Route through substrate `emitYaml` (B4) — applies sentinel
-    // guard at every leaf even though the yaml package's own
-    // `toString` would also produce valid bytes. Render mode
-    // because the AST has been mutated and `ast.raw` is stale.
+    // Route through substrate `emitYaml` — applies sentinel guard at
+    // every leaf even though the yaml package's own `toString` would
+    // also produce valid bytes. Render mode because the AST has been
+    // mutated and `ast.raw` is stale.
     return emitYaml(result.ast, { mode: 'render' });
   },
 };

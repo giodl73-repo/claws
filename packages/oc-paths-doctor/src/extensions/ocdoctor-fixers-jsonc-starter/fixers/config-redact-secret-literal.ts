@@ -10,10 +10,9 @@
  * **Idempotency**: re-running on a file where all token literals have
  * already been replaced is a no-op (no detect findings, no rewrite).
  *
- * **Diagnostic safety** (closes review finding A4 / B9): the diagnostic
- * message NEVER includes secret bytes — only a shape fingerprint
- * (token-class label + length). 8-char prefix leaks via
- * `s.slice(0, 8)` are forbidden.
+ * **Diagnostic safety**: the diagnostic message NEVER includes secret
+ * bytes — only a shape fingerprint (token-class label + length).
+ * 8-char prefix leaks via `s.slice(0, 8)` are forbidden.
  */
 import { emitJsonc, parseOcPath, setOcPath } from '@openclaw/oc-path';
 import type { JsoncValue, OcPath, OcPathMatch } from '@openclaw/oc-path';
@@ -122,7 +121,7 @@ export const configRedactSecretLiteral: OcPathFixerSpec = {
     // Route through substrate `setOcPath` — writes the placeholder at
     // exactly the leaf addressed by `match.path`. No more split/join on
     // raw bytes (which clobbered any matching substring including
-    // comments and keys). The fan-out semantic from A6 means each
+    // comments and keys). The detect/fix fan-out semantic means each
     // secret gets its own `fix()` call; the runner re-detects and
     // re-fixes until no findings remain.
     const placeholder = '${ENV_VAR_PLACEHOLDER}';

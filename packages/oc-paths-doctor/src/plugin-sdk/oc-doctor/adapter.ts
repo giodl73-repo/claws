@@ -170,11 +170,11 @@ export function ocPathFixerContribution<TOptions = unknown>(
       if (after === file.raw) {
         return { outcome: 'skipped', reason: 'fix is a no-op (already correct)' };
       }
-      // Belt-and-suspenders sentinel guard at the adapter boundary
-      // (B4). Substrate emitters already guard at every leaf, but
-      // fixers that return raw bytes (string concat, regex replace)
-      // bypass that path. Failing the fix here is fail-closed — the
-      // host writer never sees `__OPENCLAW_REDACTED__` bytes.
+      // Belt-and-suspenders sentinel guard at the adapter boundary.
+      // Substrate emitters already guard at every leaf, but fixers
+      // that return raw bytes (string concat, regex replace) bypass
+      // that path. Failing the fix here is fail-closed — the host
+      // writer never sees `__OPENCLAW_REDACTED__` bytes.
       if (after.includes(REDACTED_SENTINEL)) {
         return {
           outcome: 'failed',
