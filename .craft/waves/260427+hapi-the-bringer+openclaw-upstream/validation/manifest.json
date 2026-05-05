@@ -349,6 +349,48 @@
         "TOOLS.md"
       ],
       "notes": "Fixture for the LKG labels workflow. Stage, then exercise promote --label / rollback --label manually."
+    },
+    {
+      "slug": "workspace-minimal",
+      "kind": "synthetic",
+      "shapeFiles": [],
+      "notes": "synthetic openclaw workspace: workspace-minimal"
+    },
+    {
+      "slug": "workspace-typical",
+      "kind": "synthetic",
+      "shapeFiles": [],
+      "notes": "synthetic openclaw workspace: workspace-typical"
+    },
+    {
+      "slug": "workspace-with-sessions",
+      "kind": "synthetic",
+      "shapeFiles": [],
+      "notes": "synthetic openclaw workspace: workspace-with-sessions"
+    },
+    {
+      "slug": "workspace-with-workflows",
+      "kind": "synthetic",
+      "shapeFiles": [],
+      "notes": "synthetic openclaw workspace: workspace-with-workflows"
+    },
+    {
+      "slug": "workspace-policy-managed",
+      "kind": "synthetic",
+      "shapeFiles": [],
+      "notes": "synthetic openclaw workspace: workspace-policy-managed"
+    },
+    {
+      "slug": "workspace-upgrade-recovery",
+      "kind": "synthetic",
+      "shapeFiles": [],
+      "notes": "synthetic openclaw workspace: workspace-upgrade-recovery"
+    },
+    {
+      "slug": "workspace-enterprise",
+      "kind": "synthetic",
+      "shapeFiles": [],
+      "notes": "synthetic openclaw workspace: workspace-enterprise"
     }
   ]
 }

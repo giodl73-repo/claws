@@ -1,0 +1,3 @@
+{"event":"start","ts":"2026-05-05T09:30:00.000Z","sessionId":"def-456"}
+{"event":"tool-call","ts":"2026-05-05T09:30:01.234Z","tool":"list-dir","args":{"path":"."}}
+{"event":"tool-result","ts":"2026-05-05T09:30:01.456Z","tool":"list-dir","ok":true,"entries":12}

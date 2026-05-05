@@ -1,7 +1,7 @@
 # Validation suite — cross-fixture rollup (via openclaw fork CLI)
 
-Generated: 2026-05-05T20:55:39.618Z
-Fixtures: 25 (13 real, 12 synthetic)
+Generated: 2026-05-05T22:13:57.962Z
+Fixtures: 32 (13 real, 19 synthetic)
 
 | slug | kind | path | lint | doctor | policy-gen | policy-check | lkg |
 |------|------|------|------|--------|-----------|--------------|-----|
@@ -30,6 +30,13 @@ Fixtures: 25 (13 real, 12 synthetic)
 | `policy-drifted` | synthetic | valid | 3 files / 4 findings | skipped(extends-existing-openclaw-doctor) | 3 files → 0 tools / 0 deny | DRIFT 0ae0a0f6…→5dcda9b3… | 3 tracked / 3 promoted / 0 recovered / 0 failed |
 | `memory-invalid-scope` | synthetic | valid | 1 files / 1 findings | skipped(extends-existing-openclaw-doctor) | skipped(no-md-sources) | skipped(no-policy-jsonc) | 1 tracked / 1 promoted / 0 recovered / 0 failed |
 | `lkg-pre-populated-labels` | synthetic | valid | 2 files / 0 findings | skipped(extends-existing-openclaw-doctor) | 2 files → 0 tools / 0 deny | skipped(no-policy-jsonc) | 2 tracked / 2 promoted / 0 recovered / 0 failed |
+| `workspace-minimal` | synthetic | valid | 1 files / 0 findings | skipped(extends-existing-openclaw-doctor) | 1 files → 0 tools / 0 deny | skipped(no-policy-jsonc) | 1 tracked / 1 promoted / 0 recovered / 0 failed |
+| `workspace-typical` | synthetic | valid | 9 files / 0 findings | skipped(extends-existing-openclaw-doctor) | 9 files → 5 tools / 0 deny | skipped(no-policy-jsonc) | 9 tracked / 9 promoted / 0 recovered / 0 failed |
+| `workspace-with-sessions` | synthetic | valid | 11 files / 2 findings | skipped(extends-existing-openclaw-doctor) | 11 files → 5 tools / 0 deny | skipped(no-policy-jsonc) | 11 tracked / 11 promoted / 0 recovered / 0 failed |
+| `workspace-with-workflows` | synthetic | valid | 11 files / 3 findings | skipped(extends-existing-openclaw-doctor) | 11 files → 5 tools / 0 deny | skipped(no-policy-jsonc) | 11 tracked / 11 promoted / 0 recovered / 0 failed |
+| `workspace-policy-managed` | synthetic | valid | 10 files / 1 findings | skipped(extends-existing-openclaw-doctor) | 10 files → 5 tools / 0 deny | exit=2, no-json | 10 tracked / 10 promoted / 0 recovered / 0 failed |
+| `workspace-upgrade-recovery` | synthetic | valid | 9 files / 1 findings | skipped(extends-existing-openclaw-doctor) | 9 files → 5 tools / 0 deny | skipped(no-policy-jsonc) | 9 tracked / 9 promoted / 0 recovered / 0 failed |
+| `workspace-enterprise` | synthetic | valid | 9 files / 1 findings | skipped(extends-existing-openclaw-doctor) | 9 files → 5 tools / 0 deny | skipped(no-policy-jsonc) | 9 tracked / 9 promoted / 0 recovered / 0 failed |
 
 ## Findings of interest
 

@@ -1,0 +1,13 @@
+{
+  // Gateway config for the typical workspace.
+  // JSONC: comments + trailing commas survive round-trip via parseJsonc/emitJsonc.
+  "version": "0.1.0",
+  "plugins": {
+    "entries": {
+      "core-tools": {
+        "kind": "extension",
+        "enabled": true,
+      },
+    },
+  },
+}

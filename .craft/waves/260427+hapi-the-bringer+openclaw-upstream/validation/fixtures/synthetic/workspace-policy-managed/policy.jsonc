@@ -1,0 +1,28 @@
+{
+  // policy.jsonc generated 2026-04-15 from TOOLS.md.
+  // Drifted: the source TOOLS.md adds new-tool-not-in-policy, but this
+  // file still reflects the older shape. `openclaw policy check` should
+  // detect drift via shape-hash divergence.
+  "version": "0.1.0",
+  "generatedAt": "2026-04-15T12:00:00.000Z",
+  "policyId": "drift-placeholder-policy-id-needs-regeneration-XX",
+  "tools": [
+    { "id": "read-file", "risk": "low" },
+    { "id": "list-dir", "risk": "low" },
+    { "id": "write-file", "risk": "medium" },
+    { "id": "http-get", "risk": "medium" },
+    { "id": "send-email", "risk": "critical" },
+  ],
+  "denyRules": [
+    {
+      "id": "no-rm-rf",
+      "match": { "tool": "shell", "argPattern": "rm\\s+-rf" },
+      "reason": "destructive recursive delete",
+    },
+  ],
+  "generatedFrom": {
+    "hash": "stale-source-hash-XX",
+    "bytes": 0,
+    "observedAt": "2026-04-15T12:00:00.000Z",
+  },
+}

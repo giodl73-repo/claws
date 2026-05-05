@@ -1,0 +1,6 @@
+{"event":"start","ts":"2026-05-04T18:00:00.000Z","sessionId":"abc-123","user":"example-user@example.org"}
+{"event":"tool-call","ts":"2026-05-04T18:00:01.234Z","tool":"read-file","args":{"path":"AGENTS.md"}}
+{"event":"tool-result","ts":"2026-05-04T18:00:01.456Z","tool":"read-file","ok":true,"bytes":462}
+{"event":"tool-call","ts":"2026-05-04T18:00:05.000Z","tool":"http-get","args":{"url":"https://example.com/data"}}
+{"event":"tool-result","ts":"2026-05-04T18:00:05.789Z","tool":"http-get","ok":true,"status":200}
+{"event":"end","ts":"2026-05-04T18:00:10.000Z","durationMs":10000}

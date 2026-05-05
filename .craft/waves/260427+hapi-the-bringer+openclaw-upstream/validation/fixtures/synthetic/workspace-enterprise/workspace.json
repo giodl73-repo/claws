@@ -1,0 +1,17 @@
+{
+  "version": "0.1.0",
+  "lint": {
+    "skip": [],
+    "skipPaths": ["sessions/*"],
+    "severity": {
+      "starter-v0/agents/missing-boundaries": "error",
+      "lobster-yaml-starter-v0/step/shell-tool-collision": "error"
+    }
+  },
+  "lkg": {
+    "skip": ["session.jsonl"]
+  },
+  "policy": {
+    "generators": ["md"]
+  }
+}
