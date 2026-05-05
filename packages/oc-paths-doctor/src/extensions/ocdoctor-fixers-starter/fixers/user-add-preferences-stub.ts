@@ -14,6 +14,7 @@ export const userAddPreferencesStub: OcPathFixerSpec = {
   id: 'starter-v0/user/add-preferences-stub',
   description: 'Add a stub ## Preferences section to USER.md if missing',
   severity: 'info',
+  tier: 'additive',
   appliesTo: 'USER.md',
 
   detect({ ast }) {

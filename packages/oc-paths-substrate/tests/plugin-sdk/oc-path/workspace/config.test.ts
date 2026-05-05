@@ -42,10 +42,43 @@ describe('loadWorkspaceConfig', () => {
     expect((cfg?.['futureSection'] as { foo?: string } | undefined)?.foo).toBe('bar');
   });
 
-  it('LWC-04 throws on malformed JSON with a useful message', async () => {
+  it('LWC-04 throws on malformed input with a useful message', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'wsc-bad-'));
-    writeFileSync(join(dir, 'workspace.json'), '{ this is not json', 'utf-8');
+    writeFileSync(join(dir, 'workspace.json'), '{ this is not valid', 'utf-8');
     await expect(loadWorkspaceConfig(dir)).rejects.toThrow(/parse failed/);
+  });
+
+  it('LWC-05 accepts JSONC syntax (comments + trailing commas)', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'wsc-jsonc-'));
+    const body = `// pinch lint config — operator notes
+{
+  "lint": {
+    "skip": [
+      "starter-v0/agents/missing-boundaries", // noisy in this repo
+      /* will revisit when we pick a severity story */
+      "lkg-starter-v0/lkg/empty-tracked-file",
+    ],
+  },
+}`;
+    writeFileSync(join(dir, 'workspace.json'), body, 'utf-8');
+    const cfg = await loadWorkspaceConfig(dir);
+    expect((cfg?.['lint'] as { skip?: string[] } | undefined)?.skip).toEqual([
+      'starter-v0/agents/missing-boundaries',
+      'lkg-starter-v0/lkg/empty-tracked-file',
+    ]);
+  });
+
+  it('LWC-06 returns {} on empty / whitespace-only file', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'wsc-empty-bytes-'));
+    writeFileSync(join(dir, 'workspace.json'), '   \n\n   ', 'utf-8');
+    const cfg = await loadWorkspaceConfig(dir);
+    expect(cfg).toEqual({});
+  });
+
+  it('LWC-07 throws when root is not an object (e.g., array)', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'wsc-array-'));
+    writeFileSync(join(dir, 'workspace.json'), '[1, 2, 3]', 'utf-8');
+    await expect(loadWorkspaceConfig(dir)).rejects.toThrow(/object at the root/);
   });
 });
 

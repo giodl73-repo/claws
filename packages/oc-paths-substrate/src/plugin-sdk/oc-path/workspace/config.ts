@@ -25,9 +25,16 @@
 
 import { promises as fs } from 'node:fs';
 import { resolve as resolvePath } from 'node:path';
+import { parseJsonc } from '../jsonc/parse.js';
+import type { JsoncValue } from '../jsonc/ast.js';
 
 /**
  * Conventional path under the workspace root where the config lives.
+ *
+ * Note: the file is named `workspace.json` for consumer ergonomics,
+ * but the loader parses with the JSONC parser — comments and trailing
+ * commas are accepted. Authors who want strict JSON can use either
+ * extension; the loader is forgiving.
  */
 export const WORKSPACE_CONFIG_PATH: 'workspace.json' = 'workspace.json';
 
@@ -38,10 +45,43 @@ export const WORKSPACE_CONFIG_PATH: 'workspace.json' = 'workspace.json';
 export type WorkspaceConfig = Readonly<Record<string, unknown>>;
 
 /**
+ * Convert a typed `JsoncValue` tree to the plain JS shape consumers
+ * expect (Record / array / scalar). Strips `line` metadata on the
+ * way through — consumers reading `cfg.lint.skip` shouldn't see the
+ * AST internals.
+ */
+function jsoncValueToJs(value: JsoncValue): unknown {
+  switch (value.kind) {
+    case 'object':
+      return Object.fromEntries(
+        value.entries.map((e) => [e.key, jsoncValueToJs(e.value)]),
+      );
+    case 'array':
+      return value.items.map(jsoncValueToJs);
+    case 'string':
+    case 'number':
+    case 'boolean':
+      return value.value;
+    case 'null':
+      return null;
+  }
+}
+
+/**
  * Read `workspace.json` from a workspace directory. Returns `null`
  * if the file doesn't exist (not an error — the config is optional).
+ *
+ * Uses the **JSONC parser** so the loader accepts comments + trailing
+ * commas + other operator-friendly formatting that strict `JSON.parse`
+ * would reject. Operators editing `workspace.json` shouldn't have to
+ * re-learn JSON's narrow rules; jsonc is the substrate's universal
+ * config dialect already (`gateway.jsonc`, `policy.jsonc`, etc.).
+ *
  * Parse failures throw with a useful message; unknown sections pass
- * through transparently (additive schema).
+ * through transparently (additive schema). Hosts that want soft-fallback
+ * (don't block lint/doctor/policy on a single typo) wrap the call in
+ * try/catch — the library is unopinionated about whether a parse failure
+ * should be fatal.
  */
 export async function loadWorkspaceConfig(
   workspaceDir: string,
@@ -55,13 +95,25 @@ export async function loadWorkspaceConfig(
     if (code === 'ENOENT') return null;
     throw err;
   }
-  try {
-    return JSON.parse(raw) as WorkspaceConfig;
-  } catch (err) {
+  const result = parseJsonc(raw);
+  // jsonc parser produces diagnostics for malformed bytes. If the
+  // root failed to parse OR diagnostics are non-empty, surface as an
+  // error — better to be loud than to silently fall back to {} and
+  // hide a typo until something downstream fails.
+  const fatal = result.diagnostics.find((d) => d.severity === 'error');
+  if (fatal !== undefined) {
+    throw new Error(`workspace.json parse failed at ${path}: ${fatal.message}`);
+  }
+  if (result.ast.root === null) {
+    // Empty / whitespace-only file — treat as empty config.
+    return {};
+  }
+  if (result.ast.root.kind !== 'object') {
     throw new Error(
-      `workspace.json parse failed at ${path}: ${err instanceof Error ? err.message : String(err)}`,
+      `workspace.json at ${path} must be a JSON object at the root (got ${result.ast.root.kind})`,
     );
   }
+  return jsoncValueToJs(result.ast.root) as WorkspaceConfig;
 }
 
 /**

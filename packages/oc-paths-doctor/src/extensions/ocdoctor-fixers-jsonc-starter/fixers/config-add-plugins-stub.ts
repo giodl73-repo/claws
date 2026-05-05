@@ -20,6 +20,7 @@ export const configAddPluginsStub: OcPathFixerSpec = {
   description:
     'Add stub `"plugins": { "entries": {} }` to a jsonc config that lacks one',
   severity: 'info',
+  tier: 'additive',
   appliesTo: '*.jsonc',
 
   detect({ ast, fileName }) {

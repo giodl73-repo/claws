@@ -9,16 +9,22 @@
  * **Idempotency**: a step that already uses `pipeline:` (or whose
  * `command:` doesn't reference an in-process tool) is left alone.
  *
- * **Why direct AST mutation, not `setOcPath`**: this fix renames a
- * map key (`command:` → `pipeline:`) preserving the existing value.
- * The substrate's `setOcPath` writes a value AT a path — it doesn't
- * support key rename, which is a structural mutation. Adding a
- * `renameKey` verb to the substrate would be a separate proposal;
- * for now this is the documented exception. The fan-out contract
- * still applies: one `fix()` call renames exactly one key.
+ * **Implementation**: byte-level splice on `raw` using the yaml
+ * parser's per-token byte range — no AST mutation. The substrate's
+ * `setOcPath` is value-AT-path, not key-rename, so this fix bypasses
+ * setOcPath rather than violating the substrate's frozen-AST
+ * contract. Adding a `renameKey` verb to the substrate is a separate
+ * proposal; this byte-splice is correct without it. The fan-out
+ * contract still applies: one `fix()` call rewrites exactly one key.
+ *
+ * The byte splice doesn't go through `emitYaml`, so the substrate's
+ * emit-time sentinel guard doesn't fire on this path. The adapter's
+ * post-fix sentinel scan (in `ocPathFixerContribution`) catches any
+ * sentinel bytes before the host writer runs — defense-in-depth still
+ * covers this fixer.
  */
 import { isMap, isScalar, isSeq } from 'yaml';
-import { emitYaml, parseOcPath } from '@openclaw/oc-path';
+import { parseOcPath } from '@openclaw/oc-path';
 import { STARTER_IN_PROCESS_TOOLS } from '@openclaw/oc-lint';
 import type { OcPathFixerSpec } from '../../../plugin-sdk/oc-doctor/types.js';
 
@@ -100,11 +106,16 @@ export const stepSwapShellToPipeline: OcPathFixerSpec = {
     if (pair === undefined || !isScalar(pair.value)) return raw;
     if (!isInProcessFirstToken(String(pair.value.value))) return raw;
 
-    // Key rename via direct AST mutation — see file-level comment for
-    // why this can't route through `setOcPath`. Emit DOES route
-    // through substrate `emitYaml` so the sentinel guard still
-    // applies. Render mode because `ast.raw` is stale after mutation.
-    (pair.key as { value: string }).value = 'pipeline';
-    return emitYaml(ast, { mode: 'render' });
+    // Byte-level splice: replace the key token in `raw` directly. The
+    // yaml parser annotates each Scalar with a `range: [start, end, ...]`
+    // tuple of byte offsets. The key's range is just the key token
+    // ('command' or 'run'), exclusive of the trailing colon — slicing
+    // raw and replacing the segment preserves all surrounding bytes
+    // (whitespace, comments, value, indentation).
+    const keyRange = (pair.key as { range?: readonly [number, number, number] }).range;
+    if (keyRange === undefined) return raw;
+    const [keyStart, keyEnd] = keyRange;
+    if (typeof keyStart !== 'number' || typeof keyEnd !== 'number') return raw;
+    return raw.slice(0, keyStart) + 'pipeline' + raw.slice(keyEnd);
   },
 };

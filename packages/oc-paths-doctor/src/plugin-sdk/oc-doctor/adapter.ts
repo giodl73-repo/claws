@@ -53,6 +53,20 @@ function isDisabled(ctx: DoctorContext, id: string): boolean {
 }
 
 /**
+ * Check whether a fixer's tier is enabled via the host's
+ * `DoctorContext.enabledTiers` gate. Default (gate undefined) is
+ * "all tiers enabled" — preserves backwards compat with hosts that
+ * predate the tier classification.
+ */
+function isTierEnabled(
+  ctx: DoctorContext,
+  tier: 'additive' | 'mutating' | 'regenerative',
+): boolean {
+  if (ctx.enabledTiers === undefined) return true;
+  return ctx.enabledTiers.has(tier);
+}
+
+/**
  * Compare a plugin-declared SDK version against the host's version.
  * Major mismatch is a hard incompatibility; minor/patch is fine
  * (additive changes by semver convention).
@@ -107,6 +121,12 @@ export function ocPathFixerContribution<TOptions = unknown>(
 
     async detect(ctx: DoctorContext): Promise<readonly DoctorFinding[]> {
       if (isDisabled(ctx, spec.id)) return [];
+      // Tier defaults to 'mutating' if unset — the most common case;
+      // additive fixers explicitly declare 'additive' and regenerative
+      // fixers explicitly declare 'regenerative'. Hosts that don't
+      // gate by tier (`enabledTiers` undefined) see all fixers.
+      const tier = spec.tier ?? 'mutating';
+      if (!isTierEnabled(ctx, tier)) return [];
       const options = resolveOptions(spec.defaultOptions, ctx.fixerOptions?.[spec.id]);
       const findings: DoctorFinding[] = [];
       for (const f of ctx.files) {
@@ -145,6 +165,10 @@ export function ocPathFixerContribution<TOptions = unknown>(
     ): Promise<DoctorFixResult> {
       if (isDisabled(ctx, spec.id)) {
         return { outcome: 'skipped', reason: 'fixer is disabled via DoctorContext.disabledContributionIds' };
+      }
+      const tier = spec.tier ?? 'mutating';
+      if (!isTierEnabled(ctx, tier)) {
+        return { outcome: 'skipped', reason: `fixer tier '${tier}' not in enabledTiers` };
       }
       if (ctx.signal?.aborted) {
         return { outcome: 'failed', reason: 'aborted via signal' };

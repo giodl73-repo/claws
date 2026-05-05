@@ -15,6 +15,7 @@ export const skillAddRequiredFrontmatterStub: OcPathFixerSpec = {
   id: 'starter-v0/skill/add-required-frontmatter-stub',
   description: 'Add stub `name:` / `description:` to SKILL.md frontmatter if missing',
   severity: 'info',
+  tier: 'additive',
   appliesTo: 'SKILL.md',
 
   detect({ ast }) {

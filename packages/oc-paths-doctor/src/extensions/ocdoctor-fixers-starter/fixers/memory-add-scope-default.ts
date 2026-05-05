@@ -15,6 +15,7 @@ export const memoryAddScopeDefault: OcPathFixerSpec = {
   id: 'starter-v0/memory/add-scope-default',
   description: 'Add `scope: project` to MEMORY.md frontmatter if missing',
   severity: 'info',
+  tier: 'additive',
   appliesTo: 'MEMORY.md',
 
   detect({ ast }) {

@@ -108,6 +108,11 @@ export const policyRegenerateOnDrift: OcPathFixerSpec = {
   description:
     'Regenerate policy.jsonc from sources when its shape hash drifts from what the generator would produce',
   severity: 'error',
+  // Regenerative — wrong regen on a security-sensitive artifact can
+  // produce a fail-closed policy that locks out tools across the
+  // fleet. Hosts MUST gate this behind explicit operator opt-in
+  // (e.g., `--fix-regenerative`).
+  tier: 'regenerative',
   appliesTo: 'policy.jsonc',
 
   async detect({ raw, siblingFiles }) {

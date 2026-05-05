@@ -58,6 +58,17 @@ export interface DoctorContext {
    */
   readonly fixerOptions?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
   /**
+   * If present, ONLY fixers whose `tier` falls in this set run.
+   * Default behavior (when `enabledTiers` is undefined): all tiers
+   * run — preserves existing host integrations that don't specify.
+   *
+   * Hosts use this to expose tier-graduated fix flags to operators
+   * (`--fix` enables additive only; `--fix-mutating` adds mutating;
+   * `--fix-regenerative` adds the rest). The contract surface is
+   * the same — only the gate moves.
+   */
+  readonly enabledTiers?: ReadonlySet<FixerTier>;
+  /**
    * Optional cancellation signal. Adapter checks `signal.aborted`
    * between files in `detect()` and bails out of `fix()` before the
    * file write if aborted. Host-supplied; tests can omit.
@@ -173,6 +184,34 @@ export interface DoctorHealthContribution {
 export type DefaultFixerOptions = Record<string, never>;
 
 /**
+ * Risk classification for a fixer's mutation. Surfaces in
+ * `OcPathFixerSpec.tier` and `DoctorContext.enabledTiers`. Each tier
+ * is a strict superset of the previous one — `additive` is the
+ * always-safe baseline; `mutating` includes anything that replaces
+ * or rewrites existing content (still well-defined and reversible
+ * via LKG); `regenerative` includes anything that fully rewrites
+ * a security-sensitive artifact (e.g., regenerating `policy.jsonc`
+ * from sources, which can produce a fail-closed policy on a wrong
+ * regen).
+ *
+ *   `additive`     — adds missing structure; never deletes or replaces.
+ *                    Examples: stub-section append, default-value insert.
+ *                    Safe to run unattended.
+ *
+ *   `mutating`     — replaces or rewrites existing content. Still
+ *                    well-defined; LKG preserves the prior version.
+ *                    Examples: secret-literal redaction, key rename,
+ *                    BOM strip. Should run with operator awareness
+ *                    but not necessarily per-invocation confirmation.
+ *
+ *   `regenerative` — fully regenerates a security-sensitive artifact.
+ *                    Wrong regen → fail-closed deny / lockout.
+ *                    Example: policy/regenerate-on-drift. Should
+ *                    require explicit per-invocation opt-in.
+ */
+export type FixerTier = 'additive' | 'mutating' | 'regenerative';
+
+/**
  * What a plugin author writes to introduce a new OcPath-aware fixer.
  * Adapter wraps this into a `DoctorHealthContribution`.
  *
@@ -199,6 +238,13 @@ export interface OcPathFixerSpec<TOptions = DefaultFixerOptions> {
    * (`AGENTS.md`) or `'*'`.
    */
   readonly appliesTo: string;
+  /**
+   * Risk-tier classification (see `FixerTier`). Defaults to `'mutating'`
+   * if unset — the most common case. Hosts gate `--fix` behavior by
+   * tier; the contract field lets the gate be deterministic per-fixer
+   * rather than guessed from the description.
+   */
+  readonly tier?: FixerTier;
   /** Default options applied when caller doesn't override at invocation. */
   readonly defaultOptions?: TOptions;
   /**

@@ -15,6 +15,7 @@ export const identityAddTrustLevelStub: OcPathFixerSpec = {
   id: 'starter-v0/identity/add-trust-level-stub',
   description: 'Add a stub ## Trust Level section to IDENTITY.md if missing',
   severity: 'info',
+  tier: 'additive',
   appliesTo: 'IDENTITY.md',
 
   detect({ ast }) {

@@ -14,6 +14,7 @@ export const agentsAddBoundariesStub: OcPathFixerSpec = {
   id: 'starter-v0/agents/add-boundaries-stub',
   description: 'Add a stub ## Boundaries section to AGENTS.md if missing',
   severity: 'info',
+  tier: 'additive',
   appliesTo: 'AGENTS.md',
 
   detect({ ast }) {

@@ -25,6 +25,7 @@ export type {
   DoctorFixResult,
   DoctorHealthContribution,
   DoctorMutationEvent,
+  FixerTier,
   OcPathFixerSpec,
 } from './types.js';
 

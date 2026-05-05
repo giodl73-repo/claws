@@ -12,6 +12,7 @@ export const configAddVersionStub: OcPathFixerSpec = {
   id: 'jsonc-starter-v0/config/add-version-stub',
   description: 'Add stub `"version": "0.0.0"` to a jsonc config that lacks one',
   severity: 'info',
+  tier: 'additive',
   appliesTo: '*.jsonc',
 
   detect({ ast, fileName }) {

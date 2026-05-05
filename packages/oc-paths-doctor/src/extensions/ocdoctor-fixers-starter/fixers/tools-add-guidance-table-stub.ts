@@ -17,6 +17,7 @@ export const toolsAddGuidanceTableStub: OcPathFixerSpec = {
   id: 'starter-v0/tools/add-guidance-table-stub',
   description: 'Add a stub ## Tool Guidance section to TOOLS.md if missing',
   severity: 'info',
+  tier: 'additive',
   appliesTo: 'TOOLS.md',
 
   detect({ ast }) {
