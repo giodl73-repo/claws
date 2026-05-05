@@ -52,12 +52,15 @@ import {
   type WorkspaceLintConfig,
 } from '../plugin-sdk/oc-lint/workspace-config.js';
 import { runLint, type LintFile } from '../oc-lint/runner.js';
-// Importing the starter pack triggers its self-registration with
+// Importing each in-tree starter pack triggers self-registration with
 // the global lint-rule registry; we then read everything via
 // `listLintRules()`. Plugin authors who register additional rules
 // at module-init time (e.g., `policy-substrate/extensions/policy-lint-rules`)
 // are picked up automatically — `pinch run` grows as plugins land.
 import '../extensions/oclint-rules-starter/index.js';
+import '../extensions/oclint-rules-jsonc-starter/index.js';
+import '../extensions/oclint-rules-jsonl-starter/index.js';
+import '../extensions/oclint-rules-lobster-yaml-starter/index.js';
 import { listLintRules } from '../plugin-sdk/oc-lint/registry.js';
 import type { Diagnostic, LintRule, LintSeverity } from '../plugin-sdk/oc-lint/types.js';
 

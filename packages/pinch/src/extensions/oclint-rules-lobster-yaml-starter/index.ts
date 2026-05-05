@@ -16,6 +16,7 @@
  */
 
 import type { LintRule } from '../../plugin-sdk/oc-lint/types.js';
+import { registerLintRule } from '../../plugin-sdk/oc-lint/registry.js';
 import { stepDuplicateId } from './rules/step-duplicate-id.js';
 import { stepMutuallyExclusiveBody } from './rules/step-mutually-exclusive-body.js';
 import { stepShellToolCollision } from './rules/step-shell-tool-collision.js';
@@ -27,6 +28,11 @@ export const lobsterYamlStarterRules: readonly LintRule[] = [
   stepDuplicateId,
   stepUndefinedStdinRef,
 ];
+
+// Self-register on import.
+for (const rule of lobsterYamlStarterRules) {
+  registerLintRule(rule);
+}
 
 export {
   stepDuplicateId,

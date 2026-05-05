@@ -9,6 +9,7 @@
  */
 
 import type { LintRule } from '../../plugin-sdk/oc-lint/types.js';
+import { registerLintRule } from '../../plugin-sdk/oc-lint/registry.js';
 import { sessionEmptyLog } from './rules/session-empty-log.js';
 import { sessionMalformedLine } from './rules/session-malformed-line.js';
 import { sessionMissingEventKey } from './rules/session-missing-event-key.js';
@@ -20,6 +21,11 @@ export const jsonlStarterRules: readonly LintRule[] = [
   sessionMalformedLine,
   sessionNoTerminalEvent,
 ];
+
+// Self-register on import.
+for (const rule of jsonlStarterRules) {
+  registerLintRule(rule);
+}
 
 export {
   sessionEmptyLog,
