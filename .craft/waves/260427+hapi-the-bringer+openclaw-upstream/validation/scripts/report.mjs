@@ -43,7 +43,11 @@ function summarizePolicyCheck(r) {
   if (!r || r.skipped) return r?.skipped ? `skipped(${r.skipped})` : 'missing';
   const p = r.parsed;
   if (!p) return `exit=${r.exitCode}, no-json`;
-  return p.drift ? `DRIFT (${p.drift})` : 'in sync';
+  // `drift` is an object: { checked, drifted, onDiskShape, regeneratedShape, generator }
+  if (p.drift?.drifted === true) {
+    return `DRIFT ${p.drift.onDiskShape?.slice(0, 8) ?? '?'}…→${p.drift.regeneratedShape?.slice(0, 8) ?? '?'}…`;
+  }
+  return 'in sync';
 }
 
 function summarizeLkg(r) {
@@ -136,6 +140,8 @@ lines.push('| F-002 | `lobster-shell-collision` | Three of four lint starter pac
 lines.push('| F-003 | `only-claude-md` | `openclaw-pinch run` ignores `CLAUDE.md` — not in canonical roles. AGENTS.md-equivalent format is the broadly-adopted public norm; coverage gap. | open |');
 lines.push('| F-004 | `kitchen-sink` | `openclaw-policy generate` extracts 0 tools from a `## Tools` table (markdown). Extractor expects `### name # R<n>, CAPS` headings — the table is treated as narrative. Either fixture should match the convention or the extractor should also recognize tables. | open |');
 lines.push('| F-005 | `policy-jsonc-rich-syntax` | `jsonc-starter-v0/config/secret-as-literal` false-positives on zero-filled placeholder hashes (`"0000...0000"` matches `/^[a-fA-F0-9]{40,}$/`). Should exclude all-zero / single-digit-repeat sequences from the hex-secret detection. | open |');
+lines.push('| F-006 | `session-no-terminal-event` | `sessions/X.jsonl` files only get tracked when the basename matches `^(?:session|audit|events)`. claude-code-style session logs are uuid-named without prefix and won\'t be linted. The canonical-role regex `SESSION_PREFIX_RE` is too restrictive for in-the-wild session log shapes. | open |');
+lines.push('| F-007 | (multiple real fixtures) | Stub-CLAUDE.md (9 bytes, mostly empty) is common in the wild (zod, kitcn, banjo, aztec-editor-android). The current canonical-role registry doesn\'t recognize CLAUDE.md (F-003), so this is partially upstream of F-003: even if we add CLAUDE.md as a role, stub-content shouldn\'t produce noisy findings. Decision needed: lint stub-CLAUDE.md as a separate "stub-CLAUDE-instead-of-AGENTS" rule, or treat as noise. | open |');
 
 await writeFile(join(root, 'REPORT.md'), lines.join('\n') + '\n');
 console.log(`wrote REPORT.md (${rows.length} fixtures)`);

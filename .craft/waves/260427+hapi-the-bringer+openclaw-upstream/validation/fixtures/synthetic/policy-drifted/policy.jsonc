@@ -1,0 +1,15 @@
+{
+  "version": "0.1.0",
+  "generatedAt": "2026-04-01T00:00:00.000Z",
+  "policyId": "deadbeef000000000000000000000000000000000000000000000000deadbeef",
+  "tools": [
+    { "id": "read-file", "risk": "low" },
+    { "id": "write-file", "risk": "medium" }
+  ],
+  "denyRules": [],
+  "generatedFrom": {
+    "hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "bytes": 200,
+    "observedAt": "2026-04-01T00:00:00.000Z"
+  }
+}

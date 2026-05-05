@@ -13,7 +13,7 @@
  *   node scripts/fetch.mjs --anchors       # everything in catalog.anchors
  *   node scripts/fetch.mjs --dry-run <slug>
  */
-import { readFile, mkdir, rm, cp, readdir, stat } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rm, cp, readdir, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -24,6 +24,36 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = dirname(here);
 const FIXTURES_REAL = join(root, 'fixtures', 'real');
 const CATALOG = join(root, 'catalog.json');
+const MANIFEST = join(root, 'manifest.json');
+
+/**
+ * Add or update the manifest entry for a successfully-fetched
+ * catalog row. Idempotent: if the slug is already present, we
+ * overwrite the entry (which is correct — fetch always replaces
+ * the fixture content).
+ */
+async function upsertManifestEntry(catalogEntry, kind /* 'real' */) {
+  const raw = await readFile(MANIFEST, 'utf8');
+  const manifest = JSON.parse(raw);
+  const existingIdx = manifest.fixtures.findIndex((f) => f.slug === catalogEntry.slug);
+  const entry = {
+    slug: catalogEntry.slug,
+    kind,
+    source: { type: 'git', url: catalogEntry.url, ref: catalogEntry.ref },
+    license: catalogEntry.license ?? 'unknown',
+    domain: catalogEntry.domain ?? null,
+    lang: catalogEntry.lang ?? null,
+    stars: catalogEntry.stars ?? null,
+    shapeFiles: catalogEntry.shape ?? [],
+    notes: catalogEntry.notes ?? '',
+  };
+  if (existingIdx >= 0) {
+    manifest.fixtures[existingIdx] = entry;
+  } else {
+    manifest.fixtures.push(entry);
+  }
+  await writeFile(MANIFEST, JSON.stringify(manifest, null, 2) + '\n');
+}
 
 // Files / directories to retain from each cloned repo. Anything not
 // matching these stays out of the fixture; the goal is a hermetic
@@ -134,7 +164,10 @@ async function fetchOne(entry, dryRun = false) {
     `- Fetched: ${new Date().toISOString()}`,
     `- Pruned to OpenClaw-shape files only (see scripts/fetch.mjs).`,
   ].join('\n') + '\n';
-  await import('node:fs/promises').then((fs) => fs.writeFile(join(fixtureDir, 'PROVENANCE.md'), provenance));
+  await writeFile(join(fixtureDir, 'PROVENANCE.md'), provenance);
+
+  // Add/update manifest entry so run-suite.mjs sees this fixture.
+  await upsertManifestEntry(entry, 'real');
 
   return { slug: entry.slug, copied, fixtureDir };
 }

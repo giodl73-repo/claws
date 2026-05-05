@@ -1,0 +1,11 @@
+{
+  "name": "kitcn",
+  "version": "0.6.2",
+  "description": "kitcn development skill",
+  "author": {
+    "name": "zbeyens"
+  },
+  "repository": "https://github.com/udecode/kitcn",
+  "license": "MIT",
+  "keywords": ["convex", "crpc", "orm", "kitcn", "auth", "triggers"]
+}

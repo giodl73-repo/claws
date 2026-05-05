@@ -4,7 +4,14 @@
     {
       "slug": "kitchen-sink",
       "kind": "synthetic",
-      "shapeFiles": ["AGENTS.md", "TOOLS.md", "SOUL.md", "IDENTITY.md", "MEMORY.md", "sessions/"],
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "SOUL.md",
+        "IDENTITY.md",
+        "MEMORY.md",
+        "sessions/"
+      ],
       "notes": "Golden path. Every OpenClaw-shape file present and valid; the toolchain baseline."
     },
     {
@@ -16,20 +23,332 @@
     {
       "slug": "only-claude-md",
       "kind": "synthetic",
-      "shapeFiles": ["CLAUDE.md"],
+      "shapeFiles": [
+        "CLAUDE.md"
+      ],
       "notes": "Realistic minimum: many public repos ship CLAUDE.md and nothing else."
     },
     {
       "slug": "lobster-shell-collision",
       "kind": "synthetic",
-      "shapeFiles": ["lobster.yaml"],
+      "shapeFiles": [
+        "lobster.yaml"
+      ],
       "notes": "Triggers oclint-rules-lobster-yaml-starter/step/shell-tool-collision. Two of three steps reference in-process tool names via `command:`."
     },
     {
       "slug": "policy-jsonc-rich-syntax",
       "kind": "synthetic",
-      "shapeFiles": ["policy.jsonc"],
+      "shapeFiles": [
+        "policy.jsonc"
+      ],
       "notes": "Exercises JSONC parser fidelity through the policy stack: line + block comments, trailing commas, structured comment positions."
+    },
+    {
+      "slug": "dyad",
+      "kind": "real",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/dyad-sh/dyad",
+        "ref": "main"
+      },
+      "license": "Apache-2.0",
+      "domain": "web/AI-app",
+      "lang": "TS",
+      "stars": 20243,
+      "shapeFiles": [
+        "AGENTS.md",
+        "CLAUDE.md(symlink)",
+        ".agents/",
+        ".claude/"
+      ],
+      "notes": "CLAUDE.md is a symlink â€” real path-resolver edge case"
+    },
+    {
+      "slug": "kitcn",
+      "kind": "real",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/udecode/kitcn",
+        "ref": "main"
+      },
+      "license": "MIT",
+      "domain": "web/registry",
+      "lang": "TS",
+      "stars": 410,
+      "shapeFiles": [
+        "AGENTS.md",
+        "CLAUDE.md(stub)",
+        ".agents/",
+        ".claude/",
+        ".claude-plugin/"
+      ],
+      "notes": "19.5KB AGENTS.md + .claude-plugin/ packaging"
+    },
+    {
+      "slug": "hexis",
+      "kind": "real",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/QuixiAI/Hexis",
+        "ref": "main"
+      },
+      "license": "unknown",
+      "domain": "ML/RL",
+      "lang": "Python",
+      "stars": 576,
+      "shapeFiles": [
+        "AGENTS.md",
+        "CLAUDE.md(stub)",
+        ".agents/",
+        ".claude/",
+        ".claude-plugin/"
+      ],
+      "notes": "Full substrate, RL training environment"
+    },
+    {
+      "slug": "spec-to-agents",
+      "kind": "real",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/microsoft/spec-to-agents",
+        "ref": "main"
+      },
+      "license": "MIT",
+      "domain": "ML/agents",
+      "lang": "Python",
+      "stars": 103,
+      "shapeFiles": [
+        "AGENTS.md",
+        "CLAUDE.md"
+      ],
+      "notes": "Both files large; Microsoft-public OSS"
+    },
+    {
+      "slug": "zod",
+      "kind": "real",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/colinhacks/zod",
+        "ref": "main"
+      },
+      "license": "MIT",
+      "domain": "web/lib",
+      "lang": "TS",
+      "stars": 42576,
+      "shapeFiles": [
+        "AGENTS.md",
+        "CLAUDE.md(stub)"
+      ],
+      "notes": "Massive-star OSS lib; stub-CLAUDE pattern"
+    },
+    {
+      "slug": "stackflow",
+      "kind": "real",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/daangn/stackflow",
+        "ref": "main"
+      },
+      "license": "MIT",
+      "domain": "mobile/lib",
+      "lang": "TS",
+      "stars": 1011,
+      "shapeFiles": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".agents/",
+        ".claude/"
+      ],
+      "notes": "Korean OSS mobile navigation"
+    },
+    {
+      "slug": "alkem-io-server",
+      "kind": "real",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/alkem-io/server",
+        "ref": "develop"
+      },
+      "license": "Apache-2.0",
+      "domain": "backend/NestJS",
+      "lang": "TS",
+      "stars": 29,
+      "shapeFiles": [
+        "CLAUDE.md",
+        ".claude/"
+      ],
+      "notes": ".claude/skills/gql.md GraphQL skill"
+    },
+    {
+      "slug": "chordsheetjs",
+      "kind": "real",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/martijnversluis/ChordSheetJS",
+        "ref": "master"
+      },
+      "license": "GPL-3.0",
+      "domain": "music",
+      "lang": "TS",
+      "stars": 419,
+      "shapeFiles": [
+        "agents.md"
+      ],
+      "notes": "Music-software domain; lowercase agents.md only"
+    },
+    {
+      "slug": "codebattle",
+      "kind": "real",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/hexlet-codebattle/codebattle",
+        "ref": "master"
+      },
+      "license": "MIT",
+      "domain": "game",
+      "lang": "Elixir",
+      "stars": 833,
+      "shapeFiles": [
+        "AGENTS.md",
+        "CLAUDE.md"
+      ],
+      "notes": "Multiplayer game; Elixir host"
+    },
+    {
+      "slug": "immich-discord-bot",
+      "kind": "real",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/immich-app/discord-bot",
+        "ref": "main"
+      },
+      "license": "AGPL-3.0",
+      "domain": "infra/bot",
+      "lang": "TS",
+      "stars": 16,
+      "shapeFiles": [
+        "claude.md"
+      ],
+      "notes": "lowercase claude.md only"
+    },
+    {
+      "slug": "aztec-editor-android",
+      "kind": "real",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/wordpress-mobile/AztecEditor-Android",
+        "ref": "trunk"
+      },
+      "license": "MPL-2.0",
+      "domain": "mobile/editor",
+      "lang": "Kotlin",
+      "stars": 731,
+      "shapeFiles": [
+        "AGENTS.md",
+        "CLAUDE.md(stub)",
+        ".agents/",
+        ".claude/"
+      ],
+      "notes": "Android domain; stub-CLAUDE"
+    },
+    {
+      "slug": "dialtone",
+      "kind": "real",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/dialpad/dialtone",
+        "ref": "staging"
+      },
+      "license": "MIT",
+      "domain": "design-system",
+      "lang": "JS",
+      "stars": 14,
+      "shapeFiles": [
+        "agents.md",
+        "CLAUDE.md",
+        ".claude/"
+      ],
+      "notes": "lowercase agents.md; .claude/skills/icon.md real skill"
+    },
+    {
+      "slug": "banjo",
+      "kind": "real",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/joelreymont/banjo",
+        "ref": "master"
+      },
+      "license": "MIT",
+      "domain": "ACP-adapter",
+      "lang": "Zig",
+      "stars": 41,
+      "shapeFiles": [
+        "AGENTS.md",
+        "CLAUDE.md(stub)",
+        ".claude/"
+      ],
+      "notes": "Zig language; tests parser against unusual host"
+    },
+    {
+      "slug": "tools-canonical-headings",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md"
+      ],
+      "notes": "TOOLS.md uses the canonical \"### name # R<n>, CAPS\" heading shape; exercises policy-generate end-to-end (golden-path counterpart to F-004)."
+    },
+    {
+      "slug": "session-no-terminal-event",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "sessions/"
+      ],
+      "notes": "session.jsonl with no terminal event. Triggers jsonl-starter-v0/session/no-terminal-event."
+    },
+    {
+      "slug": "agents-secret-literal",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "gateway.jsonc"
+      ],
+      "notes": "gateway.jsonc with literal-shaped (fake) tokens. Triggers jsonc-starter-v0/config/secret-as-literal on github-pat + slack-token shapes."
+    },
+    {
+      "slug": "lobster-duplicate-step-id",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "*.lobster"
+      ],
+      "notes": "pipeline.lobster with two steps sharing . Triggers lobster-yaml-starter-v0/step/duplicate-id."
+    },
+    {
+      "slug": "policy-drifted",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md",
+        "policy.jsonc"
+      ],
+      "notes": "TOOLS.md has a tool not in policy.jsonc. policy check should detect drift."
+    },
+    {
+      "slug": "memory-invalid-scope",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "MEMORY.md"
+      ],
+      "notes": "MEMORY.md frontmatter has scope: bogus (not in allowed set). Triggers starter-v0/memory/invalid-scope-value."
+    },
+    {
+      "slug": "lkg-pre-populated-labels",
+      "kind": "synthetic",
+      "shapeFiles": [
+        "AGENTS.md",
+        "TOOLS.md"
+      ],
+      "notes": "Fixture for the LKG labels workflow. Stage, then exercise promote --label / rollback --label manually."
     }
   ]
 }

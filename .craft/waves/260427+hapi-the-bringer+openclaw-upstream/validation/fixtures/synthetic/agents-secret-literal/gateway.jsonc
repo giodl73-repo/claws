@@ -1,0 +1,23 @@
+{
+  // Synthetic: triggers jsonc-starter-v0/config/secret-as-literal.
+  // The token shapes here match the patterns in pinch's
+  // STARTER_TOKEN_PATTERNS (github-personal-token, slack-token, etc.).
+  // No real secrets — these are well-known "AAAAA..." dummy strings.
+  "version": "0.1.0",
+  "plugins": {
+    "entries": {
+      "github-bot": {
+        "kind": "extension",
+        "auth": {
+          "token": "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        }
+      },
+      "slack-notifier": {
+        "kind": "extension",
+        "auth": {
+          "token": "xoxb-AAAAAAAAAAAAAAAA"
+        }
+      }
+    }
+  }
+}
