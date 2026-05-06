@@ -1,19 +1,18 @@
 /**
  * lkg-deleted-file-recover — confirm two pieces of substrate behavior:
  *
- * (a) `cage status` does NOT recover deleted files. The manifest walker
- *     only sees what's on disk; deleted paths simply drop out of the
- *     observation set. This is by design — status is read-only.
+ * (a) `cage status` FLAGS deleted files as ORPHANS. The manifest walker
+ *     only sees what's on disk, but cage now diffs the LKG state map
+ *     against the walk and reports orphans with their last promoted
+ *     fingerprint. Exit code 1 (ok=false) when orphans exist.
  *
  * (b) `cage rollback --label <name>` DOES restore a deleted file from the
  *     pinned label. This is the operator-explicit recovery path.
  *
- * Logged as a finding (F-019) — operators may expect status to detect
- * the missing file and either flag it or recover it. Currently it does
- * neither; the file just vanishes silently from the report.
+ * F-019 (open: behavior question) → fixed in substrate/lkg-cage 405198aadc.
  */
 export const slug = 'lkg-deleted-file-recover';
-export const description = 'status ignores deleted files; rollback restores them';
+export const description = 'status flags deleted file as orphan; rollback restores it';
 
 const BASELINE = `{
   "version": "0.1.0",
@@ -39,11 +38,17 @@ export const steps = [
     edit: { 'gateway.jsonc': { delete: true } },
   },
   {
-    name: 'status does NOT recover (file missing from manifest walk)',
+    name: 'status flags deleted gateway.jsonc as orphan (exit 1, ok false)',
     run: ['cage', 'status', '.'],
     expect: {
-      exitCode: 0,
-      parsed: { 'byOutcome.recovered': 0 },
+      exitCode: 1,
+      ok: false,
+      parsed: {
+        'orphanCount': 1,
+        'orphans[0].relPath': 'gateway.jsonc',
+        'byOutcome.orphan': 1,
+        'byOutcome.recovered': 0,
+      },
     },
   },
   {

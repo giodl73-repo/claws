@@ -235,7 +235,7 @@ Notable individual results:
 
 The substrate train is genuinely robust under adversarial input. The remaining open findings (F-001/F-003/F-004/F-005/F-006/F-007/F-008/F-016) are coverage gaps and convention questions, not crashes.
 
-### F-019 — `cage status` ignores files deleted since last promote  [open: behavior question]
+### F-019 — `cage status` ignores files deleted since last promote  [fixed: substrate/lkg-cage 405198aadc]
 
 **Date**: 2026-05-05
 **Scenario**: `lkg-deleted-file-recover`
