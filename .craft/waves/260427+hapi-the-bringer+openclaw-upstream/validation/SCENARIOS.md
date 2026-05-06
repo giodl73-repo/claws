@@ -1,7 +1,7 @@
 # Scenario rollup
 
-Generated: 2026-05-06T05:02:10.324Z
-Total: 17, ok: 17, failed: 0
+Generated: 2026-05-06T12:54:06.364Z
+Total: 22, ok: 22, failed: 0
 
 | slug | description | steps | failed | result |
 |------|-------------|------:|-------:|--------|
@@ -16,6 +16,11 @@ Total: 17, ok: 17, failed: 0
 | `lkg-rollback-no-such-label` | rollback --label <unknown> emits LKG_LABEL_NOT_FOUND | 3 | 0 | ok |
 | `lkg-skip-config-promote` | F-021: cage promote ignores lkg.skipPaths (status honors it) | 4 | 0 | ok |
 | `lkg-stale-tmp-cleanup` | stale .lkg.tmp file from prior crash does not break promote | 3 | 0 | ok |
+| `plugin-add-skill-cage-tracks` | add new skill mid-flight → cage status picks it up automatically | 4 | 0 | ok |
+| `plugin-bare-then-mature` | bare AGENTS.md → diagnose → operator iterates → clean run | 8 | 0 | ok |
+| `plugin-evolve-then-pin-each-step` | pin LKG at each plugin milestone; labels list grows; rollback restores any prior state | 9 | 0 | ok |
+| `plugin-iterative-policy-build` | TOOLS.md grows; policy generate/check loop catches drift | 6 | 0 | ok |
+| `plugin-pre-promote-rejects-invalid` | promote --label is atomic — all-or-nothing across the cohort | 5 | 0 | ok |
 | `upgrade-lkg-state-future-version` | future-version state → LKG_STATE_FILE_VERSION_MISMATCH; recovery via delete+repromote | 4 | 0 | ok |
 | `upgrade-lkg-state-no-version-field` | pre-versioning state file → LKG_STATE_FILE_VERSION_MISMATCH | 1 | 0 | ok |
 | `upgrade-plugin-uninstalled-refs` | AGENTS.md mentions removed plugin's tools; pinch silent (rule opportunity) | 2 | 0 | ok |

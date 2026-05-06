@@ -76,9 +76,11 @@ Running in approximate priority order within each category.
 
 | Slug | Status | Notes |
 |------|--------|-------|
-| `plugin-bare-then-add-boundaries` | pending | start with `# Agent` only; pinch flags missing-boundaries; operator adds; clean run |
-| `plugin-tools-md-empty-then-populate` | pending | `## Tools` heading with no items → operator adds → clean |
-| `plugin-iterative-policy-build` | pending | build TOOLS.md → policy generate → check → mutate TOOLS.md → drift detected |
+| `plugin-bare-then-mature` | green | bare AGENTS.md → operator iterates → clean run; covers F-008 delegation |
+| `plugin-iterative-policy-build` | green | TOOLS.md grows; policy generate/check loop catches drift |
+| `plugin-add-skill-cage-tracks` | green | new skill mid-flight; cage picks it up |
+| `plugin-pre-promote-rejects-invalid` | green | promote --label is atomic; no label pinned if any tracker invalid |
+| `plugin-evolve-then-pin-each-step` | green | pin LKG at each milestone; rollback restores any prior state |
 | `plugin-add-own-lint-rule-pack` | pending | plugin ships its own rule pack via manifest |
 | `plugin-add-doctor-contract` | pending | plugin contributes doctor rule via doctor-contract-api.ts |
 
@@ -92,7 +94,7 @@ Running in approximate priority order within each category.
 
 ---
 
-Total: 14 green / 3 green-locking / 27 pending / 3 deferred = **47 scenarios** in flight.
+Total: 19 green / 3 green-locking / 22 pending / 3 deferred = **47 scenarios** in flight.
 
 **Findings surfaced via scenarios**:
 - F-019 (cage status ignores deleted files) → fixed
