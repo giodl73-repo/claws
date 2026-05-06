@@ -235,6 +235,39 @@ Notable individual results:
 
 The substrate train is genuinely robust under adversarial input. The remaining open findings (F-001/F-003/F-004/F-005/F-006/F-007/F-008/F-016) are coverage gaps and convention questions, not crashes.
 
+### F-019 — `cage status` ignores files deleted since last promote  [open: behavior question]
+
+**Date**: 2026-05-05
+**Scenario**: `lkg-deleted-file-recover`
+**Tool**: `openclaw cage status`
+
+When a tracked file is deleted between `cage promote` and the next `cage status`, the file simply drops out of the observation set with no diagnostic. The manifest walker only sees what's currently on disk, so a missing path produces no entry at all in `observations[]` or `byOutcome`.
+
+The LKG itself still has the bytes — `cage rollback --label <name>` correctly restores them. But operators expecting `status` to flag missing files will be surprised.
+
+Three reasonable interpretations:
+- **Wontfix-by-design**: status is read-only and operates on the manifest walk; missing files are out of scope. Operators who need that should use `cage rollback` or a separate verb.
+- **Add a warning**: status should diff `entries` (LKG state file) against the walk and flag entries that no longer exist on disk.
+- **Auto-recover on status**: contradicts the read-only stance, probably wrong.
+
+Decision: leave as-is, document the convention, surface as a candidate addition for upstream review (a `cage check-orphans` verb perhaps).
+
+### F-020 — Multi-step scenario harness landed; 5 scenarios green  [confirmed-working]
+
+**Date**: 2026-05-05
+**Tool**: full LKG state machine
+
+Built `scripts/run-scenario.mjs` + `scenario-lib.mjs`: declarative per-step `.scenario.mjs` files that walk a workspace through promote / mutate / status / rollback / corrupt cycles, asserting on substrate behavior at each step.
+
+Five LKG scenarios green:
+- `lkg-fresh-deployment` — first status on empty workspace; lkg-health.json gets created during walk.
+- `lkg-promote-corrupt-recover` — promote → corrupt jsonc → status auto-recovers bytes from LKG.
+- `lkg-label-rollback` — promote-v1 → edit-valid → promote-v2 → rollback-to-v1 restores v1 bytes.
+- `lkg-label-immutability` — second promote --label v1 produces LKG_LABEL_DUPLICATE (exit 1).
+- `lkg-deleted-file-recover` — confirms F-019 behavior; rollback recovers, status doesn't.
+
+Harness supports `run` (CLI invocation), `edit` (file mutation), `file` (post-state assertion), `expect` (parsed/exit/stderr), with operator matchers (`atLeast`, `oneOf`, `matches`). Scenarios drive lifecycle bugs that snapshot fixtures couldn't surface.
+
 ---
 
 Add new findings BELOW this line as they surface from real use.
