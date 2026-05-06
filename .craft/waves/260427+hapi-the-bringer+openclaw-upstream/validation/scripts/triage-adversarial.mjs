@@ -59,6 +59,12 @@ function classify(r, toolLabel) {
   if (toolLabel === 'lint') {
     const n = p?.diagnostics?.length ?? 0;
     if (n > 0) return { class: 'flagged', detail: `${n} finding(s)` };
+    // F-014 fix: substrate now reports rulesRun=0 + rulesDisabledByConfig
+    // when workspace.json wildcards-skipped everything. That's the
+    // visible-silence we wanted, not a substrate bug.
+    if (p?.rulesRun === 0 && (p?.rulesDisabledByConfig ?? 0) > 0) {
+      return { class: 'flagged', detail: `0 rules ran (${p.rulesDisabledByConfig} disabled by config)` };
+    }
     return { class: 'silent-accept', detail: 'lint=0 findings' };
   }
   if (toolLabel === 'policy-generate') {

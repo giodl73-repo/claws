@@ -192,6 +192,49 @@ Adversarial sweep covering shell-metacharacter tool IDs, sentinel-injection, emo
 
 Two genuine fixes worth shipping (F-011/F-012/F-013 specific error codes; F-014 silent-skip observability), but nothing was a denial-of-service against the substrate train. This is a real strength worth highlighting in upstream review.
 
+### F-016 — No lint rule for mixed line endings in canonical files  [open: low-priority]
+
+**Date**: 2026-05-05
+**Fixture**: `adversarial-md-mixed-line-endings`
+**Tool**: `openclaw pinch run`
+
+AGENTS.md / TOOLS.md containing a deliberate mix of CRLF / LF / CR-only line endings within the same file produces zero lint findings (`rulesRun=23, diagnostics=0`). 23 rules ran but none of them check line-ending consistency.
+
+Whether this is a **bug** or **wontfix-by-design** is a judgment call: cross-platform repos legitimately mix line endings (git's `core.autocrlf` rewrites them), and tooling like Prettier explicitly tolerates mixed endings. A rule for this would produce a lot of false positives.
+
+Decision: leave open as a coverage observation; not adding the rule unless a real workspace surfaces a problem.
+
+### F-017 — 27 composition fixtures pass cleanly; cross-plugin namespacing works  [confirmed-working]
+
+**Date**: 2026-05-05
+**Fixtures**: all `compo-*` (27 fixtures)
+**Tool**: full substrate train
+
+Composition fixtures (multi-plugin workspaces with 2-3 plugins side-by-side) pass cleanly through the train:
+- `compo-tool-id-collision`: two plugins each contribute "exec" — substrate correctly produces 2 distinct tools (`plug-a/exec` + `plug-b/exec`), not a collision.
+- `compo-conflicting-risk-same-name`: two plugins contribute "run" with R1 vs R5 — substrate keeps them as 2 namespaced tools.
+- `compo-skill-name-collision`: similar story for skills.
+- `compo-cross-plugin-skill-ref`: substrate doesn't validate cross-plugin manifest references (open question — should it?).
+- `compo-one-plugin-half-installed`: 2 plugins, only 1 has tools — substrate reports 1 tool correctly, doesn't crash on the empty-contributing plugin.
+
+Cross-plugin tool/skill ID namespacing works as designed. The substrate doesn't (yet) provide aggregate-risk reporting (e.g. "this workspace has 3 R5 IRREVERSIBLE_EXTERNAL tools across plugins"), which would be useful operator feedback. Tracking as a future feature, not a bug.
+
+### F-018 — 54 adversarial fixtures, still 0 crashes after deeper sweep  [confirmed-working]
+
+**Date**: 2026-05-05
+**Fixtures**: all `adversarial-*` (54 fixtures, +30 since F-015)
+**Tool**: full substrate train
+
+Second adversarial sweep (encoding, unicode confusables, path traversal, gateway URL edges, template-rot markers, LKG lifecycle states, deeper jsonl edges, deeper workspace.json edges, manifest cross-refs) produced **zero crashes**. 198 cells flagged the issue, 18 emitted structured `clean-error` codes, 1 silent-accept (F-016 mixed line endings — known coverage gap, not a bug).
+
+Notable individual results:
+- UTF-16 LE BOM file (`adversarial-md-utf16-le-bom`): substrate read but produced no findings (parsed as raw bytes — no mojibake, no crash). Defensible.
+- 100-deep nested JSON (`adversarial-workspace-json-deeply-nested-skip`): parser handled cleanly, no stack overflow.
+- 64KB single jsonl line (`adversarial-session-very-large-line`): no truncation observed.
+- RTL-override / zero-width-space / Cyrillic homoglyph in tool IDs: substrate accepted as valid IDs (no spoofing-detection rule yet — different judgment call than F-016).
+
+The substrate train is genuinely robust under adversarial input. The remaining open findings (F-001/F-003/F-004/F-005/F-006/F-007/F-008/F-016) are coverage gaps and convention questions, not crashes.
+
 ---
 
 Add new findings BELOW this line as they surface from real use.
