@@ -1,7 +1,7 @@
 # Scenario rollup
 
-Generated: 2026-05-06T04:45:18.771Z
-Total: 11, ok: 11, failed: 0
+Generated: 2026-05-06T05:02:10.324Z
+Total: 17, ok: 17, failed: 0
 
 | slug | description | steps | failed | result |
 |------|-------------|------:|-------:|--------|
@@ -16,3 +16,9 @@ Total: 11, ok: 11, failed: 0
 | `lkg-rollback-no-such-label` | rollback --label <unknown> emits LKG_LABEL_NOT_FOUND | 3 | 0 | ok |
 | `lkg-skip-config-promote` | F-021: cage promote ignores lkg.skipPaths (status honors it) | 4 | 0 | ok |
 | `lkg-stale-tmp-cleanup` | stale .lkg.tmp file from prior crash does not break promote | 3 | 0 | ok |
+| `upgrade-lkg-state-future-version` | future-version state → LKG_STATE_FILE_VERSION_MISMATCH; recovery via delete+repromote | 4 | 0 | ok |
+| `upgrade-lkg-state-no-version-field` | pre-versioning state file → LKG_STATE_FILE_VERSION_MISMATCH | 1 | 0 | ok |
+| `upgrade-plugin-uninstalled-refs` | AGENTS.md mentions removed plugin's tools; pinch silent (rule opportunity) | 2 | 0 | ok |
+| `upgrade-policy-jsonc-old-shape` | older policy.jsonc shape (missing newer fields) → check runs gracefully | 1 | 0 | ok |
+| `upgrade-pre-upgrade-rollback` | pin pre-upgrade label → simulate upgrade → rollback restores known-good | 7 | 0 | ok |
+| `upgrade-stale-rule-skip` | F-022: pinch silently ignores skip entries that match no registered rule | 2 | 0 | ok |

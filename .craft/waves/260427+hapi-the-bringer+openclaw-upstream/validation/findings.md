@@ -302,6 +302,55 @@ Second batch of LKG lifecycle scenarios:
 
 11/11 scenarios pass; one of them locks the F-021 asymmetric behavior. Once F-021 lands, that scenario flips to assert the corrected behavior.
 
+### F-022 — pinch silently ignores `lint.skip` entries that match no registered rule  [open: UX]
+
+**Date**: 2026-05-05
+**Scenario**: `upgrade-stale-rule-skip`
+**Tool**: `openclaw pinch run`
+
+`workspace.json` `lint.skip` entries are matched against currently-registered rule IDs. If an entry matches NOTHING, it's silently ignored — `rulesDisabledByConfig` reflects only the matched ones. Operators don't see a warning.
+
+Realistic upgrade pain: a rule pack renames `pack-v0/foo-rule` → `pack-v1/foo-rule`. The operator's workspace.json still references the old ID. After upgrade:
+- Operator believes the rule is still skipped.
+- It's actually re-enabled (no rule with that name to skip; new-name rule isn't excluded).
+- Findings reappear unexpectedly.
+
+**Fix scope** (small, ergonomic): in pinch's run summary, add `staleSkipPatterns: [<glob>]` for skip entries that matched zero rule IDs. Operator can grep for it after every run.
+
+### F-023 — `workspace.json` is not a canonical LKG tracker  [open: design question]
+
+**Date**: 2026-05-05
+**Scenario**: `upgrade-pre-upgrade-rollback`
+**Tool**: `openclaw cage promote/rollback`
+
+The substrate reads `workspace.json` to apply lint/doctor/policy config overrides, but it's NOT in the canonical-role registry — so `cage promote` doesn't track it, and `cage rollback --label v1` doesn't restore it.
+
+Practical implication: a labeled "pre-upgrade" rollback restores AGENTS.md, TOOLS.md, gateway.jsonc, policy.jsonc — but NOT workspace.json. If the operator's workspace.json changed during the upgrade (rule renames, new skip patterns), they're stuck with the post-upgrade workspace.json after rollback. Their LKG label captures only part of the upgrade-recovery state.
+
+**Decision needed** (upstream): is this by design (workspace.json is operator-authored intent, not generated artifact) or a coverage gap?
+
+If by-design: the substrate documentation should call this out so operators don't assume rollback restores everything.
+If a gap: add `workspace.json` to the canonical-role registry under role `workspace-config`.
+
+### F-024 — 17/17 LKG + upgrade scenarios green  [confirmed-working]
+
+**Date**: 2026-05-05
+**Scenarios**: 17 .scenario.mjs files
+**Tool**: full LKG / pinch / policy substrate train
+
+Full multi-step scenario suite green:
+- 11 LKG rhythm + state-machine scenarios (F-019 fixed; F-021 locked)
+- 5 upgrade scenarios (state-version migrations, pre-upgrade rollback, stale rules, plugin uninstall, old policy.jsonc shape)
+- 1 cross-pinch scenario (mixed valid/stale skip refs — F-022)
+
+Surfaced findings:
+- F-019 (orphan detection in cage status) → fixed in substrate/lkg-cage
+- F-021 (cage promote ignores lkg.skipPaths) → tracked, scenario locks
+- F-022 (pinch silently ignores stale skip refs) → tracked, scenario locks
+- F-023 (workspace.json not in LKG canonical roles) → tracked, design question
+
+The substrate train passes its lifecycle tests. Each open finding is a UX/coverage gap for upstream review, not a crash or correctness bug.
+
 ---
 
 Add new findings BELOW this line as they surface from real use.
