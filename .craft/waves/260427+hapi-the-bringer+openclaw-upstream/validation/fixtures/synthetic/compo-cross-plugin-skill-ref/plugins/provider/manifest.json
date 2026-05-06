@@ -1,0 +1,13 @@
+{
+  "name": "provider",
+  "version": "0.1.0",
+  "description": "provider plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "provider/fetch"
+    ],
+    "skills": [
+      "provider/fetch"
+    ]
+  }
+}

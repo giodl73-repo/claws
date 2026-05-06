@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "bigquery",
+  "version": "0.1.0",
+  "description": "bigquery plugin (data)",
+  "contributes": {
+    "tools": [
+      "bigquery/query",
+      "bigquery/load-table"
+    ],
+    "skills": [
+      "bigquery/query",
+      "bigquery/load-table"
+    ],
+    "workflows": [
+      "bigquery-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

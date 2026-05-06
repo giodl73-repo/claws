@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "percy",
+  "version": "0.1.0",
+  "description": "percy plugin (testing)",
+  "contributes": {
+    "tools": [
+      "percy/snapshot"
+    ],
+    "skills": [
+      "percy/snapshot"
+    ]
+  }
+}

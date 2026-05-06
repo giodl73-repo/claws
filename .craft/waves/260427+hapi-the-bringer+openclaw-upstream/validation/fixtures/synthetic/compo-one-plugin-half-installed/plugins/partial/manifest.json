@@ -1,0 +1,8 @@
+{
+  "name": "partial",
+  "version": "0.1.0",
+  "description": "partial plugin (composition fixture)",
+  "contributes": {
+    "tools": []
+  }
+}

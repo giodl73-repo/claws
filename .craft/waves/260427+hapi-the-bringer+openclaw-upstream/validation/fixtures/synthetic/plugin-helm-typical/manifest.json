@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "helm",
+  "version": "0.1.0",
+  "description": "helm plugin (infra)",
+  "contributes": {
+    "tools": [
+      "helm/list",
+      "helm/install"
+    ],
+    "skills": [
+      "helm/list",
+      "helm/install"
+    ]
+  }
+}

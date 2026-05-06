@@ -1,0 +1,10 @@
+{
+  "name": "screenshot",
+  "version": "0.1.0",
+  "description": "screenshot plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "screenshot/capture"
+    ]
+  }
+}

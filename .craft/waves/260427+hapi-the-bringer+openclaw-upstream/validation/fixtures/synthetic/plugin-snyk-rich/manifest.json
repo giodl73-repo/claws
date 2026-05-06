@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "snyk",
+  "version": "0.1.0",
+  "description": "snyk plugin (security)",
+  "contributes": {
+    "tools": [
+      "snyk/scan",
+      "snyk/monitor"
+    ],
+    "skills": [
+      "snyk/scan",
+      "snyk/monitor"
+    ],
+    "workflows": [
+      "snyk-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

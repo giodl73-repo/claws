@@ -1,0 +1,10 @@
+{
+  "name": "github",
+  "version": "0.1.0",
+  "description": "github plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "github/create-issue"
+    ]
+  }
+}

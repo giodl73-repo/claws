@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "airflow",
+  "version": "0.1.0",
+  "description": "airflow plugin (data)",
+  "contributes": {
+    "tools": [
+      "airflow/trigger-dag",
+      "airflow/list-dags"
+    ],
+    "skills": [
+      "airflow/trigger-dag",
+      "airflow/list-dags"
+    ],
+    "workflows": [
+      "airflow-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

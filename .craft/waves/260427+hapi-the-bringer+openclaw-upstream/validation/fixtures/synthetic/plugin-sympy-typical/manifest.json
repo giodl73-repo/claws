@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "sympy",
+  "version": "0.1.0",
+  "description": "sympy plugin (science)",
+  "contributes": {
+    "tools": [
+      "sympy/solve",
+      "sympy/simplify"
+    ],
+    "skills": [
+      "sympy/solve",
+      "sympy/simplify"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "fastlane",
+  "version": "0.1.0",
+  "description": "fastlane plugin (mobile)",
+  "contributes": {
+    "tools": [
+      "fastlane/screenshot",
+      "fastlane/deploy-ios"
+    ],
+    "skills": [
+      "fastlane/screenshot",
+      "fastlane/deploy-ios"
+    ]
+  }
+}

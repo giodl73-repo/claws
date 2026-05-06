@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "rstudio",
+  "version": "0.1.0",
+  "description": "rstudio plugin (science)",
+  "contributes": {
+    "tools": [
+      "rstudio/run-script"
+    ],
+    "skills": [
+      "rstudio/run-script"
+    ],
+    "workflows": [
+      "rstudio-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

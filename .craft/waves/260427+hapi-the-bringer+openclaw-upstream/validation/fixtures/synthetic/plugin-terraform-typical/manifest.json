@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "terraform",
+  "version": "0.1.0",
+  "description": "terraform plugin (infra)",
+  "contributes": {
+    "tools": [
+      "terraform/plan",
+      "terraform/apply",
+      "terraform/destroy"
+    ],
+    "skills": [
+      "terraform/plan",
+      "terraform/apply"
+    ]
+  }
+}

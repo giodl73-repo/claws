@@ -1,0 +1,11 @@
+{
+  "name": "postgres",
+  "version": "0.1.0",
+  "description": "postgres plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "postgres/query",
+      "postgres/exec"
+    ]
+  }
+}

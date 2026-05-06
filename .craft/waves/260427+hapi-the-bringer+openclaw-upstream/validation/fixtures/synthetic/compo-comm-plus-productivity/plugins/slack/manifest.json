@@ -1,0 +1,13 @@
+{
+  "name": "slack",
+  "version": "0.1.0",
+  "description": "slack plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "slack/post"
+    ],
+    "skills": [
+      "slack/post"
+    ]
+  }
+}

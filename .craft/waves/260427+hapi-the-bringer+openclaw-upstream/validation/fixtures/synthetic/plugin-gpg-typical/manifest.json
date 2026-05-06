@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "gpg",
+  "version": "0.1.0",
+  "description": "gpg plugin (security)",
+  "contributes": {
+    "tools": [
+      "gpg/encrypt",
+      "gpg/decrypt",
+      "gpg/sign"
+    ],
+    "skills": [
+      "gpg/encrypt",
+      "gpg/decrypt"
+    ]
+  }
+}

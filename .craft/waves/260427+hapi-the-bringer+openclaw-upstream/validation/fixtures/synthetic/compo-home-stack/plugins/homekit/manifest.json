@@ -1,0 +1,10 @@
+{
+  "name": "homekit",
+  "version": "0.1.0",
+  "description": "homekit plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "homekit/set-state"
+    ]
+  }
+}

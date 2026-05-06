@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "gcloud",
+  "version": "0.1.0",
+  "description": "gcloud plugin (infra)",
+  "contributes": {
+    "tools": [
+      "gcloud/list-projects",
+      "gcloud/create-vm"
+    ],
+    "skills": [
+      "gcloud/list-projects",
+      "gcloud/create-vm"
+    ],
+    "workflows": [
+      "gcloud-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

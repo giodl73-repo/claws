@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "playwright",
+  "version": "0.1.0",
+  "description": "playwright plugin (testing)",
+  "contributes": {
+    "tools": [
+      "playwright/screenshot",
+      "playwright/run-test"
+    ],
+    "skills": [
+      "playwright/screenshot",
+      "playwright/run-test"
+    ]
+  }
+}

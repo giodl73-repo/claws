@@ -1,0 +1,6 @@
+{
+  "version": "{{VERSION}}",
+  "tools": [],
+  "denyRules": [],
+  "policyId": "{{HASH_PLACEHOLDER}}"
+}

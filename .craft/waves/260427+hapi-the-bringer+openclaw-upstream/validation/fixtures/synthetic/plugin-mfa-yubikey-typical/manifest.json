@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "mfa-yubikey",
+  "version": "0.1.0",
+  "description": "mfa-yubikey plugin (security)",
+  "contributes": {
+    "tools": [
+      "mfa-yubikey/challenge",
+      "mfa-yubikey/verify"
+    ],
+    "skills": [
+      "mfa-yubikey/challenge",
+      "mfa-yubikey/verify"
+    ]
+  }
+}

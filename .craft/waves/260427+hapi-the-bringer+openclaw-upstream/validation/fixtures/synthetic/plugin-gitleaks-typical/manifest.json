@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "gitleaks",
+  "version": "0.1.0",
+  "description": "gitleaks plugin (security)",
+  "contributes": {
+    "tools": [
+      "gitleaks/scan",
+      "gitleaks/detect"
+    ],
+    "skills": [
+      "gitleaks/scan",
+      "gitleaks/detect"
+    ]
+  }
+}

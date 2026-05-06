@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "locust",
+  "version": "0.1.0",
+  "description": "locust plugin (testing)",
+  "contributes": {
+    "tools": [
+      "locust/start-load"
+    ],
+    "skills": [
+      "locust/start-load"
+    ]
+  }
+}

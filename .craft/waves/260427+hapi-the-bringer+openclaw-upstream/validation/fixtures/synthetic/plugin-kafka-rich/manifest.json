@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "kafka",
+  "version": "0.1.0",
+  "description": "kafka plugin (data)",
+  "contributes": {
+    "tools": [
+      "kafka/produce",
+      "kafka/consume"
+    ],
+    "skills": [
+      "kafka/produce",
+      "kafka/consume"
+    ],
+    "workflows": [
+      "kafka-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "plug-b",
+  "version": "0.1.0",
+  "description": "plug-b plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "plug-b/exec"
+    ]
+  }
+}

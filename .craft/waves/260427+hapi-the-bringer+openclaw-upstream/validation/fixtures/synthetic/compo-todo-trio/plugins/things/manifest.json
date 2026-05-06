@@ -1,0 +1,10 @@
+{
+  "name": "things",
+  "version": "0.1.0",
+  "description": "things plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "things/create-todo"
+    ]
+  }
+}

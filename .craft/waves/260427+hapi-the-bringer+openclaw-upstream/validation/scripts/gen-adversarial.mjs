@@ -237,6 +237,266 @@ const RECIPES = [
     },
     'workspace.json skips literally everything via wildcards; substrate behavior should be observable (zero work) not silent.',
   ],
+
+  // -- encoding & line-ending edges --------------------------------------
+  [
+    'adversarial-md-utf16-le-bom',
+    {
+      // UTF-16 LE BOM = FF FE, then 'A' = 41 00, '\n' = 0A 00, ...
+      'AGENTS.md': Buffer.from([0xff, 0xfe, 0x23, 0x00, 0x20, 0x00, 0x41, 0x00, 0x67, 0x00, 0x65, 0x00, 0x6e, 0x00, 0x74, 0x00, 0x0a, 0x00]),
+    },
+    'AGENTS.md saved in UTF-16 LE with BOM; parser should detect or fail gracefully (most expect UTF-8).',
+  ],
+  [
+    'adversarial-md-mixed-line-endings',
+    {
+      'AGENTS.md': '# Agent\r\n\n## Tools\r\n- foo\n- bar\r\n## Boundaries\n\r\n',
+      'TOOLS.md': '# Tools\r\n\n## Tools\n\n### foo # R1, READ\r\n\n### bar # R1, READ\n',
+    },
+    'Mixed CRLF / LF / CR-only line endings within one file; line-counting + parsing should not desync.',
+  ],
+  [
+    'adversarial-md-trailing-crs',
+    {
+      'AGENTS.md': '# Agent\r\r\r\r\n\r## Boundaries\r\r\r\n',
+    },
+    'Lone-CR runs as fake newlines (legacy macOS); md parser should treat consistently.',
+  ],
+  [
+    'adversarial-tools-nfc-vs-nfd-collision',
+    {
+      'AGENTS.md': '# Agent\n\nTwo tools that look identical but use different unicode normalization.\n',
+      // First "café" = NFC: c-a-f-é (single composed char)
+      // Second "café" = NFD: c-a-f-e + combining acute accent
+      'TOOLS.md': '# Tools\n\n## Tools\n\n### café-tool # R1, READ\nNFC composed form.\n\n### café-tool # R1, READ\nNFD decomposed form — visually identical, byte-different.\n',
+    },
+    'Unicode NFC vs NFD collision: two visually-identical IDs that the substrate may treat as duplicates or distinct depending on normalization policy.',
+  ],
+  [
+    'adversarial-tools-rtl-override',
+    {
+      'AGENTS.md': '# Agent\n\nTool ID with right-to-left override (security: visual spoofing).\n',
+      // U+202E = RIGHT-TO-LEFT OVERRIDE — common in spoofing attacks
+      'TOOLS.md': '# Tools\n\n## Tools\n\n### evil‮gpj.tool # R3, WRITE\nID contains RLO; UI rendering will show "eviltool.jpg" but it is in fact "evilgpj.tool".\n',
+    },
+    'Tool ID contains U+202E (right-to-left override); spoofing-class issue. Substrate should flag or strip.',
+  ],
+  [
+    'adversarial-tools-zero-width-space',
+    {
+      'AGENTS.md': '# Agent\n\nTool ID contains zero-width space — looks like one ID but is two.\n',
+      'TOOLS.md': '# Tools\n\n## Tools\n\n### foo # R1, READ\nFirst.\n\n### foo​tool # R1, READ\nSecond — visually "footool" but contains a zero-width space breaking it.\n',
+    },
+    'ZWSP in tool ID; visually identical but distinct from another tool id; collision-class issue.',
+  ],
+  [
+    'adversarial-tools-homoglyph-cyrillic',
+    {
+      'AGENTS.md': '# Agent\n\nLatin "a" vs Cyrillic "а" homoglyph.\n',
+      'TOOLS.md': '# Tools\n\n## Tools\n\n### apple-tool # R1, READ\nLatin a.\n\n### аpple-tool # R1, READ\nCyrillic а — visually identical, distinct codepoint.\n',
+    },
+    'Cyrillic а (U+0430) vs Latin a homoglyph; classic phishing/impersonation pattern.',
+  ],
+
+  // -- path traversal in IDs / refs ---------------------------------------
+  [
+    'adversarial-tools-path-traversal-id',
+    {
+      'AGENTS.md': '# Agent\n',
+      'TOOLS.md': '# Tools\n\n## Tools\n\n### ../../../etc/passwd # R5, READ\nID is a path-traversal pattern; if any code uses the ID as a filename it leaks.\n',
+    },
+    'Tool ID is a path-traversal pattern. Substrate must not concatenate raw IDs into FS paths.',
+  ],
+  [
+    'adversarial-skill-name-path-traversal',
+    {
+      'AGENTS.md': '# Agent\n',
+      'manifest.json': '{\n  "name": "trav",\n  "version": "0.1.0",\n  "contributes": {\n    "skills": ["trav/../../../escape"]\n  }\n}\n',
+    },
+    'manifest.json skill name contains parent-directory traversal in the namespace separator.',
+  ],
+  [
+    'adversarial-workflow-absolute-path-ref',
+    {
+      'AGENTS.md': '# Agent\n',
+      'pipeline.lobster': 'name: bad-flow\nsteps:\n  - id: leak\n    command: cat\n    in: /etc/passwd\n    out: stolen\n',
+    },
+    'lobster step references absolute system path. Sandbox boundaries should reject.',
+  ],
+
+  // -- gateway / URL edges ------------------------------------------------
+  [
+    'adversarial-gateway-localhost-url',
+    {
+      'AGENTS.md': '# Agent\n',
+      'gateway.jsonc': '{\n  "version": "0.1.0",\n  "plugins": {\n    "entries": {\n      "rogue": { "endpoint": "http://localhost:31337/admin" }\n    }\n  }\n}\n',
+    },
+    'gateway endpoint points at localhost — common SSRF / misconfiguration pattern.',
+  ],
+  [
+    'adversarial-gateway-file-uri',
+    {
+      'AGENTS.md': '# Agent\n',
+      'gateway.jsonc': '{\n  "version": "0.1.0",\n  "plugins": {\n    "entries": {\n      "leak": { "endpoint": "file:///etc/shadow" }\n    }\n  }\n}\n',
+    },
+    'gateway endpoint is a file:// URI — protocol smuggling.',
+  ],
+  [
+    'adversarial-gateway-data-uri',
+    {
+      'AGENTS.md': '# Agent\n',
+      'gateway.jsonc': '{\n  "version": "0.1.0",\n  "plugins": {\n    "entries": {\n      "weird": { "endpoint": "data:text/plain;base64,SGVsbG8=" }\n    }\n  }\n}\n',
+    },
+    'gateway endpoint is a data: URI — should not be accepted as a network endpoint.',
+  ],
+
+  // -- unfilled placeholders / template rot -------------------------------
+  [
+    'adversarial-tools-template-todo',
+    {
+      'AGENTS.md': '# Agent\n\n<TODO: fill in agent description before shipping>\n',
+      'TOOLS.md': '# Tools\n\n## Tools\n\n### <TODO> # R<N>, <CAPS>\n<TODO: fill in tool description>\n',
+    },
+    'AGENTS.md/TOOLS.md scaffolded from template but never customized. Lint should flag <TODO> placeholders.',
+  ],
+  [
+    'adversarial-tools-xxx-marker',
+    {
+      'AGENTS.md': '# Agent\n\nXXX needs review\n',
+      'TOOLS.md': '# Tools\n\n## Tools\n\n### XXX-tool # R3, WRITE\nXXX placeholder description.\n',
+    },
+    'XXX/FIXME markers leaked into shipped artifact.',
+  ],
+  [
+    'adversarial-policy-unfilled-version',
+    {
+      'AGENTS.md': '# Agent\n',
+      'policy.jsonc': '{\n  "version": "{{VERSION}}",\n  "tools": [],\n  "denyRules": [],\n  "policyId": "{{HASH_PLACEHOLDER}}"\n}\n',
+    },
+    'policy.jsonc has unfilled mustache template placeholders.',
+  ],
+
+  // -- LKG edge cases beyond malformed ------------------------------------
+  [
+    'adversarial-lkg-state-future-timestamp',
+    {
+      'AGENTS.md': '# Agent\n',
+      '.openclaw/lkg-health.json': '{\n  "version": "0.1.0",\n  "entries": {\n    "AGENTS.md": {\n      "fingerprint": "abc",\n      "promotedAt": "2099-01-01T00:00:00.000Z",\n      "outcome": "promoted"\n    }\n  }\n}\n',
+    },
+    'lkg-health.json entry has a far-future promotedAt timestamp; clock-skew handling.',
+  ],
+  [
+    'adversarial-lkg-state-empty-entries',
+    {
+      'AGENTS.md': '# Agent\n',
+      '.openclaw/lkg-health.json': '{ "version": "0.1.0", "entries": {} }\n',
+    },
+    'Valid but empty lkg-health.json — should report tracked=0, no error.',
+  ],
+  [
+    'adversarial-lkg-state-stale-fingerprint',
+    {
+      'AGENTS.md': '# Agent\n\nThis content has changed since LKG was promoted.\n',
+      '.openclaw/lkg-health.json': '{\n  "version": "0.1.0",\n  "entries": {\n    "AGENTS.md": {\n      "fingerprint": "0000000000000000000000000000000000000000000000000000000000000000",\n      "promotedAt": "2026-01-01T00:00:00.000Z",\n      "outcome": "promoted"\n    }\n  }\n}\n',
+    },
+    'Stale fingerprint mismatch — typical post-edit recovery scenario; cage status should report drift.',
+  ],
+  [
+    'adversarial-lkg-state-missing-tracker',
+    {
+      'AGENTS.md': '# Agent\n',
+      '.openclaw/lkg-health.json': '{\n  "version": "0.1.0",\n  "entries": {\n    "FILE_THAT_DOES_NOT_EXIST.md": {\n      "fingerprint": "abc",\n      "promotedAt": "2026-01-01T00:00:00.000Z",\n      "outcome": "promoted"\n    }\n  }\n}\n',
+    },
+    'lkg state references a path that no longer exists on disk; should not crash, should report orphan.',
+  ],
+
+  // -- session.jsonl deeper edges -----------------------------------------
+  [
+    'adversarial-session-very-large-line',
+    {
+      'AGENTS.md': '# Agent\n',
+      // 64KB single line
+      'sessions/session-huge.jsonl': '{"event":"start","data":"' + 'x'.repeat(64 * 1024) + '"}\n',
+    },
+    'A single jsonl line exceeds 64KB; parsers using line-buffered scanners may truncate.',
+  ],
+  [
+    'adversarial-session-only-newlines',
+    {
+      'AGENTS.md': '# Agent\n',
+      'sessions/session-blank.jsonl': '\n\n\n\n\n',
+    },
+    'Session log is only newlines; should not be flagged as malformed-line N times.',
+  ],
+  [
+    'adversarial-session-trailing-data',
+    {
+      'AGENTS.md': '# Agent\n',
+      // last line has no trailing newline
+      'sessions/session-untermdata.jsonl': '{"event":"start"}\n{"event":"middle"}\n{"event":"end-but-no-newline"}',
+    },
+    'Last line has no trailing newline (POSIX-imperfect); jsonl reader should still emit it.',
+  ],
+
+  // -- workspace.json deeper edges ----------------------------------------
+  [
+    'adversarial-workspace-json-empty-file',
+    {
+      'AGENTS.md': '# Agent\n',
+      'workspace.json': '',
+    },
+    'workspace.json is 0 bytes; loader treats as empty config (per LWC-06) — verify substrate plumbing.',
+  ],
+  [
+    'adversarial-workspace-json-array-root',
+    {
+      'AGENTS.md': '# Agent\n',
+      'workspace.json': '[1, 2, 3]',
+    },
+    'workspace.json root is an array, not object; should produce WORKSPACE_CONFIG_NOT_OBJECT (LWC-09).',
+  ],
+  [
+    'adversarial-workspace-json-string-root',
+    {
+      'AGENTS.md': '# Agent\n',
+      'workspace.json': '"just a string"',
+    },
+    'workspace.json root is a bare string; same WORKSPACE_CONFIG_NOT_OBJECT path.',
+  ],
+  [
+    'adversarial-workspace-json-deeply-nested-skip',
+    {
+      'AGENTS.md': '# Agent\n',
+      'workspace.json': '{ "lint": { "skip": ' + '['.repeat(100) + '"x"' + ']'.repeat(100) + ' } }',
+    },
+    'workspace.json has 100-deep array nesting in lint.skip; jsonc parser should not blow stack.',
+  ],
+
+  // -- manifest cross-references ------------------------------------------
+  [
+    'adversarial-manifest-empty-contributes',
+    {
+      'AGENTS.md': '# Agent\n',
+      'manifest.json': '{ "name": "empty", "version": "0.1.0", "contributes": {} }\n',
+    },
+    'Plugin with empty contributes — degenerate but valid; should not crash.',
+  ],
+  [
+    'adversarial-manifest-circular-skill-tool-ref',
+    {
+      'AGENTS.md': '# Agent\n',
+      'manifest.json': '{\n  "name": "circ",\n  "version": "0.1.0",\n  "contributes": {\n    "tools": ["circ/skill-a"],\n    "skills": ["circ/tool-a"]\n  }\n}\n',
+    },
+    'Manifest swaps tool/skill IDs — they reference each other under the wrong category.',
+  ],
+  [
+    'adversarial-manifest-leading-junk',
+    {
+      'AGENTS.md': '# Agent\n',
+      'manifest.json': '   {\n  "name": "junk",\n  "version": "0.1.0"\n}\n',
+    },
+    'Leading non-breaking-space whitespace before the JSON document; some parsers reject.',
+  ],
 ];
 
 async function generateAll() {

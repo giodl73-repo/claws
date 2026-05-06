@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "azure-cli",
+  "version": "0.1.0",
+  "description": "azure-cli plugin (infra)",
+  "contributes": {
+    "tools": [
+      "azure-cli/list-resources",
+      "azure-cli/create-rg"
+    ],
+    "skills": [
+      "azure-cli/list-resources",
+      "azure-cli/create-rg"
+    ]
+  }
+}

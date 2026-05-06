@@ -1,0 +1,8 @@
+{
+  "version": "0.1.0",
+  "plugins": {
+    "entries": {
+      "leak": { "endpoint": "file:///etc/shadow" }
+    }
+  }
+}

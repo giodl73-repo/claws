@@ -1,0 +1,10 @@
+{
+  "name": "minimal",
+  "version": "0.1.0",
+  "description": "minimal plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "minimal/ping"
+    ]
+  }
+}

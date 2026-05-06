@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "postgres",
+  "version": "0.1.0",
+  "description": "postgres plugin (data)",
+  "contributes": {
+    "tools": [
+      "postgres/query",
+      "postgres/exec",
+      "postgres/migrate"
+    ],
+    "skills": [
+      "postgres/query",
+      "postgres/exec"
+    ]
+  }
+}

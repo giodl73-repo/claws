@@ -1,0 +1,10 @@
+{
+  "name": "1password",
+  "version": "0.1.0",
+  "description": "1password plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "1password/get-secret"
+    ]
+  }
+}

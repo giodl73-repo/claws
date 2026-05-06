@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "expo",
+  "version": "0.1.0",
+  "description": "expo plugin (mobile)",
+  "contributes": {
+    "tools": [
+      "expo/build",
+      "expo/publish"
+    ],
+    "skills": [
+      "expo/build",
+      "expo/publish"
+    ],
+    "workflows": [
+      "expo-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

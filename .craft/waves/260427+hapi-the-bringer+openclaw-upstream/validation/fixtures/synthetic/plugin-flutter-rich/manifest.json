@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "flutter",
+  "version": "0.1.0",
+  "description": "flutter plugin (mobile)",
+  "contributes": {
+    "tools": [
+      "flutter/run",
+      "flutter/build-apk"
+    ],
+    "skills": [
+      "flutter/run",
+      "flutter/build-apk"
+    ],
+    "workflows": [
+      "flutter-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

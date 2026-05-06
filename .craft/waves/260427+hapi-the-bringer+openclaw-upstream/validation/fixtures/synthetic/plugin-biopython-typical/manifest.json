@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "biopython",
+  "version": "0.1.0",
+  "description": "biopython plugin (science)",
+  "contributes": {
+    "tools": [
+      "biopython/fetch-gene",
+      "biopython/blast"
+    ],
+    "skills": [
+      "biopython/fetch-gene",
+      "biopython/blast"
+    ]
+  }
+}

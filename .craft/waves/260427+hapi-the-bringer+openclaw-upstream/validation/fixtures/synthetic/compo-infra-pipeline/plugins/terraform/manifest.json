@@ -1,0 +1,11 @@
+{
+  "name": "terraform",
+  "version": "0.1.0",
+  "description": "terraform plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "terraform/plan",
+      "terraform/apply"
+    ]
+  }
+}

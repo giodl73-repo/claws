@@ -1,0 +1,13 @@
+{
+  "name": "typical",
+  "version": "0.1.0",
+  "description": "typical plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "typical/act"
+    ],
+    "skills": [
+      "typical/act"
+    ]
+  }
+}

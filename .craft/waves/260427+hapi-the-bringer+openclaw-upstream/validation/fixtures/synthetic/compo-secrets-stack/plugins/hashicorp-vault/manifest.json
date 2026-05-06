@@ -1,0 +1,10 @@
+{
+  "name": "hashicorp-vault",
+  "version": "0.1.0",
+  "description": "hashicorp-vault plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "hashicorp-vault/read-secret"
+    ]
+  }
+}

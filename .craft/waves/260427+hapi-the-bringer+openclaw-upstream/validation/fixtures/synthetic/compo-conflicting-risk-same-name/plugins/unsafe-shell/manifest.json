@@ -1,0 +1,10 @@
+{
+  "name": "unsafe-shell",
+  "version": "0.1.0",
+  "description": "unsafe-shell plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "unsafe-shell/run"
+    ]
+  }
+}

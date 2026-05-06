@@ -1,0 +1,10 @@
+{
+  "name": "snyk",
+  "version": "0.1.0",
+  "description": "snyk plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "snyk/scan"
+    ]
+  }
+}

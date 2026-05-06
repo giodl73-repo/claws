@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "jest",
+  "version": "0.1.0",
+  "description": "jest plugin (testing)",
+  "contributes": {
+    "tools": [
+      "jest/run",
+      "jest/list-tests"
+    ],
+    "skills": [
+      "jest/run",
+      "jest/list-tests"
+    ],
+    "workflows": [
+      "jest-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

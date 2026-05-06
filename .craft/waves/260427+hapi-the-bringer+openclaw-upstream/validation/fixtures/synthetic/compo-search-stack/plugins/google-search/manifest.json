@@ -1,0 +1,10 @@
+{
+  "name": "google-search",
+  "version": "0.1.0",
+  "description": "google-search plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "google-search/web-search"
+    ]
+  }
+}

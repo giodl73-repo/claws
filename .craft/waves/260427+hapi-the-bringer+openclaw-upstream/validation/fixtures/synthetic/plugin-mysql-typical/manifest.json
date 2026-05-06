@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "mysql",
+  "version": "0.1.0",
+  "description": "mysql plugin (data)",
+  "contributes": {
+    "tools": [
+      "mysql/query",
+      "mysql/exec"
+    ],
+    "skills": [
+      "mysql/query",
+      "mysql/exec"
+    ]
+  }
+}

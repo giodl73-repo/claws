@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "gradle-android",
+  "version": "0.1.0",
+  "description": "gradle-android plugin (mobile)",
+  "contributes": {
+    "tools": [
+      "gradle-android/build",
+      "gradle-android/install-apk"
+    ],
+    "skills": [
+      "gradle-android/build",
+      "gradle-android/install-apk"
+    ]
+  }
+}

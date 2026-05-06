@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "hashicorp-vault",
+  "version": "0.1.0",
+  "description": "hashicorp-vault plugin (security)",
+  "contributes": {
+    "tools": [
+      "hashicorp-vault/read-secret",
+      "hashicorp-vault/write-secret",
+      "hashicorp-vault/list-paths"
+    ],
+    "skills": [
+      "hashicorp-vault/read-secret",
+      "hashicorp-vault/write-secret"
+    ],
+    "workflows": [
+      "hashicorp-vault-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "snowflake",
+  "version": "0.1.0",
+  "description": "snowflake plugin (data)",
+  "contributes": {
+    "tools": [
+      "snowflake/query",
+      "snowflake/create-warehouse"
+    ],
+    "skills": [
+      "snowflake/query",
+      "snowflake/create-warehouse"
+    ]
+  }
+}

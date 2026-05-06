@@ -1,0 +1,10 @@
+{
+  "name": "ollama",
+  "version": "0.1.0",
+  "description": "ollama plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "ollama/generate"
+    ]
+  }
+}

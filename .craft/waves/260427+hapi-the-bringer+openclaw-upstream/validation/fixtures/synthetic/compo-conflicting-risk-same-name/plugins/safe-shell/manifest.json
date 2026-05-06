@@ -1,0 +1,10 @@
+{
+  "name": "safe-shell",
+  "version": "0.1.0",
+  "description": "safe-shell plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "safe-shell/run"
+    ]
+  }
+}

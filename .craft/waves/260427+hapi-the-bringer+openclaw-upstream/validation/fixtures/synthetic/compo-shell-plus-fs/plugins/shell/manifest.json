@@ -1,0 +1,10 @@
+{
+  "name": "shell",
+  "version": "0.1.0",
+  "description": "shell plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "shell/exec"
+    ]
+  }
+}

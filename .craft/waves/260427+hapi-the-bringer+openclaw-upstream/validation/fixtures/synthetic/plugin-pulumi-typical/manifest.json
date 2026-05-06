@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "pulumi",
+  "version": "0.1.0",
+  "description": "pulumi plugin (infra)",
+  "contributes": {
+    "tools": [
+      "pulumi/preview",
+      "pulumi/up"
+    ],
+    "skills": [
+      "pulumi/preview",
+      "pulumi/up"
+    ]
+  }
+}

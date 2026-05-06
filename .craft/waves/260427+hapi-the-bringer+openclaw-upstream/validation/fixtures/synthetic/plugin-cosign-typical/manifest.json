@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "cosign",
+  "version": "0.1.0",
+  "description": "cosign plugin (security)",
+  "contributes": {
+    "tools": [
+      "cosign/sign-image",
+      "cosign/verify"
+    ],
+    "skills": [
+      "cosign/sign-image",
+      "cosign/verify"
+    ]
+  }
+}

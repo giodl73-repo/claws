@@ -1,0 +1,10 @@
+{
+  "name": "sms",
+  "version": "0.1.0",
+  "description": "sms plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "sms/send-sms"
+    ]
+  }
+}

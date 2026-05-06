@@ -1,0 +1,10 @@
+{
+  "name": "brave-search",
+  "version": "0.1.0",
+  "description": "brave-search plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "brave-search/web-search"
+    ]
+  }
+}

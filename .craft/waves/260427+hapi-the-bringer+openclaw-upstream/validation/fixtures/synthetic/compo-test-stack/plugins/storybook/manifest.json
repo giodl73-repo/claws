@@ -1,0 +1,10 @@
+{
+  "name": "storybook",
+  "version": "0.1.0",
+  "description": "storybook plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "storybook/build"
+    ]
+  }
+}

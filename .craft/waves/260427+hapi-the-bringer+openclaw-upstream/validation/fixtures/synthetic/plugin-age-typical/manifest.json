@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "age",
+  "version": "0.1.0",
+  "description": "age plugin (security)",
+  "contributes": {
+    "tools": [
+      "age/encrypt",
+      "age/decrypt"
+    ],
+    "skills": [
+      "age/encrypt",
+      "age/decrypt"
+    ]
+  }
+}

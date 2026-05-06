@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "oauth2-token",
+  "version": "0.1.0",
+  "description": "oauth2-token plugin (security)",
+  "contributes": {
+    "tools": [
+      "oauth2-token/exchange-code",
+      "oauth2-token/refresh"
+    ],
+    "skills": [
+      "oauth2-token/exchange-code",
+      "oauth2-token/refresh"
+    ]
+  }
+}

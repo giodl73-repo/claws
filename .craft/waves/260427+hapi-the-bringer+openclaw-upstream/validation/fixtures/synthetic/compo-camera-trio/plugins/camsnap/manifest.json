@@ -1,0 +1,10 @@
+{
+  "name": "camsnap",
+  "version": "0.1.0",
+  "description": "camsnap plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "camsnap/take-photo"
+    ]
+  }
+}

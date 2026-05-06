@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "argocd",
+  "version": "0.1.0",
+  "description": "argocd plugin (infra)",
+  "contributes": {
+    "tools": [
+      "argocd/sync",
+      "argocd/list-apps"
+    ],
+    "skills": [
+      "argocd/sync",
+      "argocd/list-apps"
+    ]
+  }
+}

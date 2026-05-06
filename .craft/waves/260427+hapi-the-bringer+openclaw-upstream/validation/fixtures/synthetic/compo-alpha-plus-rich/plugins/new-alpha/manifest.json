@@ -1,0 +1,10 @@
+{
+  "name": "new-alpha",
+  "version": "0.1.0",
+  "description": "new-alpha plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "new-alpha/try"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "video-frames",
+  "version": "0.1.0",
+  "description": "video-frames plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "video-frames/extract"
+    ]
+  }
+}

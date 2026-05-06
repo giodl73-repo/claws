@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "cypress",
+  "version": "0.1.0",
+  "description": "cypress plugin (testing)",
+  "contributes": {
+    "tools": [
+      "cypress/run-test",
+      "cypress/list-specs"
+    ],
+    "skills": [
+      "cypress/run-test",
+      "cypress/list-specs"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "svc-v1",
+  "version": "0.1.0",
+  "description": "svc-v1 plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "svc-v1/call"
+    ]
+  }
+}

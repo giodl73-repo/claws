@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "sqlite",
+  "version": "0.1.0",
+  "description": "sqlite plugin (data)",
+  "contributes": {
+    "tools": [
+      "sqlite/query",
+      "sqlite/exec"
+    ],
+    "skills": [
+      "sqlite/query",
+      "sqlite/exec"
+    ]
+  }
+}

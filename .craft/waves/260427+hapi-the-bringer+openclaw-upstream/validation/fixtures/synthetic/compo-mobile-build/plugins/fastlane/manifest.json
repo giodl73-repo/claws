@@ -1,0 +1,10 @@
+{
+  "name": "fastlane",
+  "version": "0.1.0",
+  "description": "fastlane plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "fastlane/screenshot"
+    ]
+  }
+}

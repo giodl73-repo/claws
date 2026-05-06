@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "trivy",
+  "version": "0.1.0",
+  "description": "trivy plugin (security)",
+  "contributes": {
+    "tools": [
+      "trivy/scan-image",
+      "trivy/scan-fs"
+    ],
+    "skills": [
+      "trivy/scan-image",
+      "trivy/scan-fs"
+    ]
+  }
+}

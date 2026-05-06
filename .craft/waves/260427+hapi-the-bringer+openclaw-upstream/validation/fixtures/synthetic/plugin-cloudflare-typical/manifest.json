@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "cloudflare",
+  "version": "0.1.0",
+  "description": "cloudflare plugin (infra)",
+  "contributes": {
+    "tools": [
+      "cloudflare/list-zones",
+      "cloudflare/purge-cache"
+    ],
+    "skills": [
+      "cloudflare/list-zones",
+      "cloudflare/purge-cache"
+    ]
+  }
+}

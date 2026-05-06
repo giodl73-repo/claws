@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "ansible",
+  "version": "0.1.0",
+  "description": "ansible plugin (infra)",
+  "contributes": {
+    "tools": [
+      "ansible/ping",
+      "ansible/playbook"
+    ],
+    "skills": [
+      "ansible/ping",
+      "ansible/playbook"
+    ],
+    "workflows": [
+      "ansible-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

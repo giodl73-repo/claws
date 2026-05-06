@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "k6",
+  "version": "0.1.0",
+  "description": "k6 plugin (testing)",
+  "contributes": {
+    "tools": [
+      "k6/run-load-test"
+    ],
+    "skills": [
+      "k6/run-load-test"
+    ],
+    "workflows": [
+      "k6-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

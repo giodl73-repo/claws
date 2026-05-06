@@ -1,0 +1,10 @@
+{
+  "name": "helm",
+  "version": "0.1.0",
+  "description": "helm plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "helm/list"
+    ]
+  }
+}

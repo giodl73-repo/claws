@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "detox",
+  "version": "0.1.0",
+  "description": "detox plugin (mobile)",
+  "contributes": {
+    "tools": [
+      "detox/run-test"
+    ],
+    "skills": [
+      "detox/run-test"
+    ],
+    "workflows": [
+      "detox-flow.lobster"
+    ],
+    "doctorContract": "./doctor-contract-api.ts"
+  }
+}

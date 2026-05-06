@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.openclaw.dev/plugin-manifest-v0.json",
+  "name": "vitest",
+  "version": "0.1.0",
+  "description": "vitest plugin (testing)",
+  "contributes": {
+    "tools": [
+      "vitest/run",
+      "vitest/list-tests"
+    ],
+    "skills": [
+      "vitest/run",
+      "vitest/list-tests"
+    ]
+  }
+}

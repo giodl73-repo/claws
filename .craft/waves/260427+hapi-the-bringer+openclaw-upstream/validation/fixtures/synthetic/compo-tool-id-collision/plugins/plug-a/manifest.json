@@ -1,0 +1,10 @@
+{
+  "name": "plug-a",
+  "version": "0.1.0",
+  "description": "plug-a plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "plug-a/exec"
+    ]
+  }
+}

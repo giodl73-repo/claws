@@ -1,0 +1,10 @@
+{
+  "name": "stripe",
+  "version": "0.1.0",
+  "description": "stripe plugin (composition fixture)",
+  "contributes": {
+    "tools": [
+      "stripe/create-charge"
+    ]
+  }
+}
