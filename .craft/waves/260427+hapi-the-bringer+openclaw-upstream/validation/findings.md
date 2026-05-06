@@ -37,7 +37,7 @@ Statuses:
 
 ## Findings log
 
-### F-001 — `openclaw policy check` fails on .jsonc with comments  [open]
+### F-001 — `openclaw policy check` fails on .jsonc with comments  [fixed: substrate/policy f492a6e60e (uses oc-paths' new parseJsoncToPlain)]
 
 **Date**: 2026-05-04
 **Fixture**: `policy-jsonc-rich-syntax`
@@ -74,7 +74,7 @@ CLAUDE.md is not in the canonical-roles registry (`OPENCLAW_WORKSPACE_ROLES` rec
 
 Generator expects `### name # R<n>, CAPS` heading shape; ignores Markdown tables. Either fixture should match the convention or the extractor should also recognize tables. Confirmed against `tools-canonical-headings` (extracts 5 tools cleanly) — fixture-shape, not extractor bug. But documenting the convention more visibly would help plugin authors.
 
-### F-005 — `secret-as-literal` false-positives on zero-filled placeholder hashes  [open]
+### F-005 — `secret-as-literal` false-positives on zero-filled placeholder hashes  [fixed: substrate/pinch eec7eba5e4]
 
 **Date**: 2026-05-04
 **Fixture**: `policy-jsonc-rich-syntax`
@@ -82,7 +82,7 @@ Generator expects `### name # R<n>, CAPS` heading shape; ignores Markdown tables
 
 `jsonc-starter-v0/config/secret-as-literal` rule's hex-secret regex `/^[a-fA-F0-9]{40,}$/` matches `"0000...0000"` placeholder hashes. Should exclude all-zero / single-digit-repeat sequences from the hex-secret detection.
 
-### F-006 — `SESSION_PREFIX_RE` too narrow for in-the-wild session log naming  [open]
+### F-006 — `SESSION_PREFIX_RE` too narrow for in-the-wild session log naming  [fixed: substrate/oc-paths 7c2f429963]
 
 **Date**: 2026-05-05
 **Fixture**: `session-no-terminal-event`
@@ -192,7 +192,7 @@ Adversarial sweep covering shell-metacharacter tool IDs, sentinel-injection, emo
 
 Two genuine fixes worth shipping (F-011/F-012/F-013 specific error codes; F-014 silent-skip observability), but nothing was a denial-of-service against the substrate train. This is a real strength worth highlighting in upstream review.
 
-### F-016 — No lint rule for mixed line endings in canonical files  [open: low-priority]
+### F-016 — No lint rule for mixed line endings in canonical files  [wontfix-by-design: matches git's tolerate-but-encourage-convergence stance; substrate parsers normalize internally; no operator pain in fixtures]
 
 **Date**: 2026-05-05
 **Fixture**: `adversarial-md-mixed-line-endings`
@@ -302,7 +302,7 @@ Second batch of LKG lifecycle scenarios:
 
 11/11 scenarios pass; one of them locks the F-021 asymmetric behavior. Once F-021 lands, that scenario flips to assert the corrected behavior.
 
-### F-022 — pinch silently ignores `lint.skip` entries that match no registered rule  [open: UX]
+### F-022 — pinch silently ignores `lint.skip` entries that match no registered rule  [fixed: substrate/pinch eec7eba5e4]
 
 **Date**: 2026-05-05
 **Scenario**: `upgrade-stale-rule-skip`

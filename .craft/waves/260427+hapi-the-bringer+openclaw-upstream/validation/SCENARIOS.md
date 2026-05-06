@@ -1,6 +1,6 @@
 # Scenario rollup
 
-Generated: 2026-05-06T12:54:06.364Z
+Generated: 2026-05-06T14:25:28.543Z
 Total: 22, ok: 22, failed: 0
 
 | slug | description | steps | failed | result |
