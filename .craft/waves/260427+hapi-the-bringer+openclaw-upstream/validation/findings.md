@@ -135,7 +135,7 @@ End-to-end behavior on realistic openclaw workspaces:
 
 Improvements to make the daily loop richer: add `cage labels` + `cage promote --label X` invocations to the suite for fixtures with `.openclaw/lkg-health.json`. Add `policy check` invocation when both TOOLS.md and policy.jsonc are present.
 
-### F-011 — `openclaw cage status` returns generic `ERR_INTERNAL` on lkg-state version mismatch  [open]
+### F-011 — `openclaw cage status` returns generic `ERR_INTERNAL` on lkg-state version mismatch  [fixed: substrate/lkg-cage 9e54eb5fbc]
 
 **Date**: 2026-05-05
 **Fixture**: `adversarial-lkg-state-future-version`
@@ -149,7 +149,7 @@ Improvements to make the daily loop richer: add `cage labels` + `cage promote --
 
 The message is informative but the code is a catch-all. Operators reading exit codes / wiring up alerts can't distinguish a legitimate version-mismatch (operator should upgrade or downgrade openclaw) from a true internal bug. Should be `LKG_STATE_FILE_VERSION_MISMATCH`.
 
-### F-012 — `openclaw cage status` returns generic `ERR_INTERNAL` on lkg-state corruption  [open]
+### F-012 — `openclaw cage status` returns generic `ERR_INTERNAL` on lkg-state corruption  [fixed: substrate/lkg-cage 9e54eb5fbc]
 
 **Date**: 2026-05-05
 **Fixture**: `adversarial-lkg-state-malformed`
@@ -157,7 +157,7 @@ The message is informative but the code is a catch-all. Operators reading exit c
 
 Malformed JSON in `.openclaw/lkg-health.json` produces `ERR_INTERNAL: state file parse failed at <path>`. Should be `LKG_STATE_FILE_CORRUPT` (already a documented code in the lkg substrate; just not wired through here).
 
-### F-013 — `openclaw policy generate` and `cage status` exit non-zero on malformed `workspace.json`  [open]
+### F-013 — `openclaw policy generate` and `cage status` exit non-zero on malformed `workspace.json`  [fixed: substrate/oc-paths b32c78a893 + pinch 71060d08f4 + lkg-cage 9e54eb5fbc + policy 1204e6c978]
 
 **Date**: 2026-05-05
 **Fixture**: `adversarial-workspace-json-malformed`
@@ -172,7 +172,7 @@ Compromise: parse-error should still exit non-zero but with a specific code (`WO
 
 `pinch run` on the same fixture handles this differently — exits clean-error with what looks like a more specific code; behavior between substrates is inconsistent.
 
-### F-014 — `pinch run` on `workspace.json: skip:["*"]` produces zero observable signal  [open]
+### F-014 — `pinch run` on `workspace.json: skip:["*"]` produces zero observable signal  [fixed: substrate/pinch 71060d08f4]
 
 **Date**: 2026-05-05
 **Fixture**: `adversarial-workspace-json-skip-everything`
