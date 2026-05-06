@@ -268,6 +268,40 @@ Five LKG scenarios green:
 
 Harness supports `run` (CLI invocation), `edit` (file mutation), `file` (post-state assertion), `expect` (parsed/exit/stderr), with operator matchers (`atLeast`, `oneOf`, `matches`). Scenarios drive lifecycle bugs that snapshot fixtures couldn't surface.
 
+### F-021 — `cage promote` ignores `lkg.skipPaths` (asymmetric vs `cage status`)  [open]
+
+**Date**: 2026-05-05
+**Scenario**: `lkg-skip-config-promote`
+**Tool**: `openclaw cage promote`
+
+`cage status` honors `workspace.json` `lkg.skipPaths` (see `runCmdStatus` calling `resolveLkgOverrides` and `overrides.shouldSkip(...)` per tracker). `cage promote` does NOT — it builds a fresh manifest, registers every entry, and calls `promoteAll()` with no filter.
+
+Result: a workspace.json declaring `lkg.skipPaths: ["sessions/*"]` to keep high-churn session logs out of the LKG observation walk has its config silently violated by promote. Every session log gets a `.lkg` companion + state-file entry, polluting the LKG with one snapshot per ephemeral interaction.
+
+**Fix scope** (non-trivial):
+- Add `skip?: readonly string[]` (path globs) to `PromoteAllOptions`.
+- `FsLKGStore.promoteAll` and `GitLKGStore.promoteAll` filter `this.trackers` before iterating.
+- Preserve label-cohort atomicity: the cohort is the FILTERED set (skipped paths aren't part of any label).
+- CLI passes `skip: overrides.skipPathGlobs` (and converts roleIds to per-tracker check too).
+
+For now, scenario `lkg-skip-config-promote` documents the asymmetry. Tracked as an upstream-review item.
+
+### F-022 — 11 LKG lifecycle scenarios green (10 confirm-working, 1 captures F-021)  [confirmed-working]
+
+**Date**: 2026-05-05
+**Tool**: full LKG state machine
+**Fixtures**: 11 `*.scenario.mjs` files
+
+Second batch of LKG lifecycle scenarios:
+- `lkg-rollback-no-such-label` — typo'd / unknown label gets `LKG_LABEL_NOT_FOUND`.
+- `lkg-delete-label-then-rollback` — delete-label is the immutability escape hatch; subsequent rollback fails cleanly; re-promote with same name works (no zombie state).
+- `lkg-stale-tmp-cleanup` — pre-staged `.lkg.tmp-12345-*` from a hypothetical prior crash doesn't break promote/status. Substrate ignores stale tmp files; doesn't actively clean them up but doesn't trip on them either.
+- `lkg-corrupted-companion` — both active + .lkg corrupt → no crash (substrate emits clean-error / failed observation).
+- `lkg-empty-promote-noop` — second promote with same bytes is `valid`, not `promoted`. Labels can still be added without byte changes (atomic pinning across unchanged cohort).
+- `lkg-skip-config-promote` — F-021 captured in scenario form.
+
+11/11 scenarios pass; one of them locks the F-021 asymmetric behavior. Once F-021 lands, that scenario flips to assert the corrected behavior.
+
 ---
 
 Add new findings BELOW this line as they surface from real use.

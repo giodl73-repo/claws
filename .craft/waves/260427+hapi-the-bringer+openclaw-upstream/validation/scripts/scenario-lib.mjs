@@ -85,8 +85,10 @@ function pluck(obj, path) {
 
 function assertExpect(stepName, result, expect) {
   const failures = [];
-  if (expect.exitCode !== undefined && result.exitCode !== expect.exitCode) {
-    failures.push(`exitCode: expected ${expect.exitCode}, got ${result.exitCode}`);
+  if (expect.exitCode !== undefined) {
+    if (!matchValue(expect.exitCode, result.exitCode)) {
+      failures.push(`exitCode: expected ${JSON.stringify(expect.exitCode)}, got ${result.exitCode}`);
+    }
   }
   if (expect.ok !== undefined) {
     const got = result.parsed?.ok;
