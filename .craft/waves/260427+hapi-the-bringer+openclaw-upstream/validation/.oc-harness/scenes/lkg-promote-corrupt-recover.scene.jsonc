@@ -1,0 +1,65 @@
+// Migrated from lkg-promote-corrupt-recover.scenario.mjs. Regenerate via:
+// node tools/oc-harness/scripts/migrate-mjs-scenarios.mjs <in> <out>
+{
+  "slug": "lkg-promote-corrupt-recover",
+  "description": "promote → corrupt gateway.jsonc → status recovers from LKG",
+  "extensions": [
+    "substrate-beats"
+  ],
+  "setup": {
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "content": "# Agent\n\n## Boundaries\n\n- baseline-only\n"
+      },
+      {
+        "path": "gateway.jsonc",
+        "content": "{\n  \"version\": \"0.1.0\",\n  \"plugins\": {\n    \"entries\": {\n      \"baseline-plugin\": { \"endpoint\": \"https://example.com\" }\n    }\n  }\n}\n"
+      }
+    ]
+  },
+  "beats": [
+    {
+      "type": "run-cage",
+      "name": "initial promote captures LKG",
+      "verb": "promote",
+      "expect": {
+        "exitCode": 0,
+        "ok": true,
+        "parsed": {
+          "promoted": {
+            "atLeast": 1
+          }
+        }
+      }
+    },
+    {
+      "type": "edit-file",
+      "name": "corrupt gateway.jsonc with malformed JSON",
+      "path": "gateway.jsonc",
+      "op": "set",
+      "content": "{ \"this is not\": valid json ["
+    },
+    {
+      "type": "run-cage",
+      "name": "status recovers gateway.jsonc from LKG",
+      "verb": "status",
+      "expect": {
+        "exitCode": 0,
+        "parsed": {
+          "byOutcome.recovered": {
+            "atLeast": 1
+          }
+        }
+      }
+    },
+    {
+      "type": "assert-file",
+      "name": "gateway.jsonc bytes restored to baseline",
+      "path": "gateway.jsonc",
+      "check": {
+        "contains": "baseline-plugin"
+      }
+    }
+  ]
+}

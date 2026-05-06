@@ -1,0 +1,112 @@
+// Migrated from plugin-evolve-then-pin-each-step.scenario.mjs. Regenerate via:
+// node tools/oc-harness/scripts/migrate-mjs-scenarios.mjs <in> <out>
+{
+  "slug": "plugin-evolve-then-pin-each-step",
+  "description": "pin LKG at each plugin milestone; labels list grows; rollback restores any prior state",
+  "extensions": [
+    "substrate-beats"
+  ],
+  "setup": {
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "content": "# Agent\n"
+      },
+      {
+        "path": "TOOLS.md",
+        "content": "# Tools\n## Tools\n### tool-a # R1, READ\nFirst tool.\n"
+      }
+    ]
+  },
+  "beats": [
+    {
+      "type": "run-cage",
+      "name": "pin v0.1 (bare scaffold)",
+      "verb": "promote",
+      "label": "v0.1",
+      "expect": {
+        "exitCode": 0,
+        "parsed": {
+          "label": "v0.1"
+        }
+      }
+    },
+    {
+      "type": "edit-file",
+      "name": "evolve to v0.2 — add Boundaries",
+      "path": "AGENTS.md",
+      "op": "set",
+      "content": "# Agent\n\n## Boundaries\n- read-only by default\n"
+    },
+    {
+      "type": "run-cage",
+      "name": "pin v0.2",
+      "verb": "promote",
+      "label": "v0.2",
+      "expect": {
+        "exitCode": 0,
+        "parsed": {
+          "label": "v0.2"
+        }
+      }
+    },
+    {
+      "type": "edit-file",
+      "name": "evolve to v0.3 — add second tool",
+      "path": "TOOLS.md",
+      "op": "set",
+      "content": "# Tools\n## Tools\n### tool-a # R1, READ\nFirst tool.\n\n### tool-b # R2, COMMUNICATE\nSecond tool.\n"
+    },
+    {
+      "type": "run-cage",
+      "name": "pin v0.3",
+      "verb": "promote",
+      "label": "v0.3",
+      "expect": {
+        "exitCode": 0,
+        "parsed": {
+          "label": "v0.3"
+        }
+      }
+    },
+    {
+      "type": "run-cage",
+      "name": "cage labels reports all three",
+      "verb": "labels",
+      "expect": {
+        "exitCode": 0,
+        "parsed": {
+          "labelCount": 3
+        }
+      }
+    },
+    {
+      "type": "run-cage",
+      "name": "rollback to v0.1",
+      "verb": "rollback",
+      "label": "v0.1",
+      "expect": {
+        "exitCode": 0,
+        "ok": true
+      }
+    },
+    {
+      "type": "assert-file",
+      "name": "AGENTS.md back to bare scaffold",
+      "path": "AGENTS.md",
+      "check": {
+        "equals": "# Agent\n",
+        "notContains": "Boundaries"
+      }
+    },
+    {
+      "type": "assert-file",
+      "name": "TOOLS.md back to single tool",
+      "path": "TOOLS.md",
+      "check": {
+        "contains": "tool-a",
+        "notContains": "tool-b"
+      }
+    }
+  ]
+}

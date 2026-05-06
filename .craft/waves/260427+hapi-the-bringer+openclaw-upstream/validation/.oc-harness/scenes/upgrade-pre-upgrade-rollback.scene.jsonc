@@ -1,0 +1,104 @@
+// Migrated from upgrade-pre-upgrade-rollback.scenario.mjs. Regenerate via:
+// node tools/oc-harness/scripts/migrate-mjs-scenarios.mjs <in> <out>
+{
+  "slug": "upgrade-pre-upgrade-rollback",
+  "description": "pin pre-upgrade label → simulate upgrade → rollback restores known-good",
+  "extensions": [
+    "substrate-beats"
+  ],
+  "setup": {
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "content": "# Agent\n## Boundaries\n- pre-upgrade-only\n"
+      },
+      {
+        "path": "gateway.jsonc",
+        "content": "{\n  \"version\": \"0.1.0\",\n  \"plugins\": {\n    \"entries\": {\n      \"old-plugin\": { \"endpoint\": \"https://example.com/v1\" }\n    }\n  }\n}\n"
+      },
+      {
+        "path": "workspace.json",
+        "content": "{ \"lint\": { \"skip\": [\"old-pack/some-rule\"] } }\n"
+      }
+    ]
+  },
+  "beats": [
+    {
+      "type": "run-cage",
+      "name": "pre-upgrade promote --label pre-upgrade-2026-05-05",
+      "verb": "promote",
+      "label": "pre-upgrade-2026-05-05",
+      "expect": {
+        "exitCode": 0,
+        "ok": true,
+        "parsed": {
+          "label": "pre-upgrade-2026-05-05"
+        }
+      }
+    },
+    {
+      "type": "edit-file",
+      "name": "simulate upgrade: new gateway entries + renamed skip",
+      "path": "gateway.jsonc",
+      "op": "set",
+      "content": "{\n  \"version\": \"0.1.0\",\n  \"plugins\": {\n    \"entries\": {\n      \"new-plugin-name\": { \"endpoint\": \"https://example.com/v2\" }\n    }\n  }\n}\n"
+    },
+    {
+      "type": "edit-file",
+      "name": "simulate upgrade: new gateway entries + renamed skip",
+      "path": "workspace.json",
+      "op": "set",
+      "content": "{ \"lint\": { \"skip\": [\"new-pack/renamed-rule\"] } }\n"
+    },
+    {
+      "type": "edit-file",
+      "name": "simulate upgrade: new gateway entries + renamed skip",
+      "path": "AGENTS.md",
+      "op": "append",
+      "content": "\n\n(post-upgrade content)\n"
+    },
+    {
+      "type": "assert-file",
+      "name": "sanity: post-upgrade bytes are on disk",
+      "path": "gateway.jsonc",
+      "check": {
+        "contains": "new-plugin-name"
+      }
+    },
+    {
+      "type": "run-cage",
+      "name": "upgrade was bad; operator rolls back",
+      "verb": "rollback",
+      "label": "pre-upgrade-2026-05-05",
+      "expect": {
+        "exitCode": 0,
+        "ok": true
+      }
+    },
+    {
+      "type": "assert-file",
+      "name": "gateway.jsonc restored to pre-upgrade state",
+      "path": "gateway.jsonc",
+      "check": {
+        "contains": "old-plugin",
+        "notContains": "new-plugin-name"
+      }
+    },
+    {
+      "type": "assert-file",
+      "name": "F-023: workspace.json NOT restored (not a canonical tracker)",
+      "path": "workspace.json",
+      "check": {
+        "contains": "new-pack"
+      }
+    },
+    {
+      "type": "assert-file",
+      "name": "AGENTS.md restored (no post-upgrade append)",
+      "path": "AGENTS.md",
+      "check": {
+        "notContains": "post-upgrade content"
+      }
+    }
+  ]
+}

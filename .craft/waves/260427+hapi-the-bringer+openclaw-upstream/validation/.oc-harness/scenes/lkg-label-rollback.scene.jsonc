@@ -1,0 +1,82 @@
+// Migrated from lkg-label-rollback.scenario.mjs. Regenerate via:
+// node tools/oc-harness/scripts/migrate-mjs-scenarios.mjs <in> <out>
+{
+  "slug": "lkg-label-rollback",
+  "description": "promote v1 → edit valid → promote v2 → rollback to v1",
+  "extensions": [
+    "substrate-beats"
+  ],
+  "setup": {
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "content": "# Agent\n## Boundaries\n- none\n"
+      },
+      {
+        "path": "gateway.jsonc",
+        "content": "{\n  \"version\": \"0.1.0\",\n  \"plugins\": { \"entries\": { \"v1-plugin\": { \"endpoint\": \"https://v1.example.com\" } } }\n}\n"
+      }
+    ]
+  },
+  "beats": [
+    {
+      "type": "run-cage",
+      "name": "promote v1 baseline",
+      "verb": "promote",
+      "label": "v1",
+      "expect": {
+        "exitCode": 0,
+        "ok": true,
+        "parsed": {
+          "label": "v1"
+        }
+      }
+    },
+    {
+      "type": "edit-file",
+      "name": "edit gateway.jsonc to v2 (still valid)",
+      "path": "gateway.jsonc",
+      "op": "set",
+      "content": "{\n  \"version\": \"0.1.0\",\n  \"plugins\": { \"entries\": { \"v2-plugin\": { \"endpoint\": \"https://v2.example.com\" } } }\n}\n"
+    },
+    {
+      "type": "run-cage",
+      "name": "promote v2 baseline",
+      "verb": "promote",
+      "label": "v2",
+      "expect": {
+        "exitCode": 0,
+        "ok": true,
+        "parsed": {
+          "label": "v2"
+        }
+      }
+    },
+    {
+      "type": "run-cage",
+      "name": "rollback to v1 label",
+      "verb": "rollback",
+      "label": "v1",
+      "expect": {
+        "exitCode": 0,
+        "ok": true
+      }
+    },
+    {
+      "type": "assert-file",
+      "name": "gateway.jsonc bytes restored to v1",
+      "path": "gateway.jsonc",
+      "check": {
+        "contains": "v1-plugin"
+      }
+    },
+    {
+      "type": "assert-file",
+      "name": "gateway.jsonc no longer contains v2",
+      "path": "gateway.jsonc",
+      "check": {
+        "notContains": "v2-plugin"
+      }
+    }
+  ]
+}

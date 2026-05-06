@@ -1,0 +1,90 @@
+// Migrated from plugin-bare-then-mature.scenario.mjs. Regenerate via:
+// node tools/oc-harness/scripts/migrate-mjs-scenarios.mjs <in> <out>
+{
+  "slug": "plugin-bare-then-mature",
+  "description": "bare AGENTS.md → diagnose → operator iterates → clean run",
+  "extensions": [
+    "substrate-beats"
+  ],
+  "setup": {
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "content": "# Agent\n"
+      }
+    ]
+  },
+  "beats": [
+    {
+      "type": "run-pinch",
+      "name": "bare AGENTS.md → pinch flags missing-boundaries",
+      "expect": {
+        "exitCode": 0,
+        "parsed": {
+          "diagnostics[0].ruleId": "starter-v0/agents/missing-boundaries"
+        }
+      }
+    },
+    {
+      "type": "edit-file",
+      "name": "operator adds Boundaries section",
+      "path": "AGENTS.md",
+      "op": "set",
+      "content": "# Agent\n\n## Boundaries\n\n- read-only access to the workspace\n- defer R5 tools to operator approval\n"
+    },
+    {
+      "type": "run-pinch",
+      "name": "pinch run clean (no findings)",
+      "expect": {
+        "exitCode": 0,
+        "parsed": {
+          "diagnostics.length": 0,
+          "rulesRun": {
+            "atLeast": 20
+          }
+        }
+      }
+    },
+    {
+      "type": "edit-file",
+      "name": "operator adds a Tools section heading but no items yet (premature)",
+      "path": "AGENTS.md",
+      "op": "append",
+      "content": "\n## Tools\n\n(coming soon)\n"
+    },
+    {
+      "type": "run-pinch",
+      "name": "pinch flags empty-tools-section",
+      "expect": {
+        "exitCode": 0,
+        "parsed": {
+          "diagnostics[0].ruleId": "starter-v0/agents/empty-tools-section"
+        }
+      }
+    },
+    {
+      "type": "edit-file",
+      "name": "operator removes the premature section (delegation pattern)",
+      "path": "AGENTS.md",
+      "op": "set",
+      "content": "# Agent\n\n## Boundaries\n\n- read-only access to the workspace\n- defer R5 tools to operator approval\n"
+    },
+    {
+      "type": "edit-file",
+      "name": "TOOLS.md added separately — canonical declaration lives there",
+      "path": "TOOLS.md",
+      "op": "set",
+      "content": "# Tools\n\n## Tools\n\n### get-info # R1, READ\nReads workspace metadata.\n"
+    },
+    {
+      "type": "run-pinch",
+      "name": "pinch clean — TOOLS.md is independently linted",
+      "expect": {
+        "exitCode": 0,
+        "parsed": {
+          "diagnostics.length": 0
+        }
+      }
+    }
+  ]
+}

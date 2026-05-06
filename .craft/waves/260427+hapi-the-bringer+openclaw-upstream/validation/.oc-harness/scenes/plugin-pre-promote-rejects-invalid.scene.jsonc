@@ -1,0 +1,74 @@
+// Migrated from plugin-pre-promote-rejects-invalid.scenario.mjs. Regenerate via:
+// node tools/oc-harness/scripts/migrate-mjs-scenarios.mjs <in> <out>
+{
+  "slug": "plugin-pre-promote-rejects-invalid",
+  "description": "promote --label is atomic — all-or-nothing across the cohort",
+  "extensions": [
+    "substrate-beats"
+  ],
+  "setup": {
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "content": "# Agent\n## Boundaries\n- none\n"
+      },
+      {
+        "path": "gateway.jsonc",
+        "content": "{ \"this is not\": valid json ["
+      }
+    ]
+  },
+  "beats": [
+    {
+      "type": "run-cage",
+      "name": "promote --label v1 fails on broken gateway.jsonc",
+      "verb": "promote",
+      "label": "v1",
+      "expect": {
+        "exitCode": 1
+      }
+    },
+    {
+      "type": "run-cage",
+      "name": "no label was pinned (atomicity)",
+      "verb": "labels",
+      "expect": {
+        "exitCode": 0,
+        "parsed": {
+          "labelCount": 0
+        }
+      }
+    },
+    {
+      "type": "edit-file",
+      "name": "operator fixes gateway.jsonc",
+      "path": "gateway.jsonc",
+      "op": "set",
+      "content": "{ \"version\": \"0.1.0\", \"plugins\": { \"entries\": {} } }\n"
+    },
+    {
+      "type": "run-cage",
+      "name": "promote --label v1 now succeeds",
+      "verb": "promote",
+      "label": "v1",
+      "expect": {
+        "exitCode": 0,
+        "ok": true,
+        "parsed": {
+          "label": "v1"
+        }
+      }
+    },
+    {
+      "type": "run-cage",
+      "name": "cage labels reflects the pin",
+      "verb": "labels",
+      "expect": {
+        "exitCode": 0,
+        "parsed": {
+          "labelCount": 1
+        }
+      }
+    }
+  ]
+}

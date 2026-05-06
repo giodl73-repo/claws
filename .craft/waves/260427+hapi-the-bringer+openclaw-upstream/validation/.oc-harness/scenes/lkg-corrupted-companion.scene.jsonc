@@ -1,0 +1,59 @@
+// Migrated from lkg-corrupted-companion.scenario.mjs. Regenerate via:
+// node tools/oc-harness/scripts/migrate-mjs-scenarios.mjs <in> <out>
+{
+  "slug": "lkg-corrupted-companion",
+  "description": "active corrupt + .lkg corrupt → clean failure (no good bytes)",
+  "extensions": [
+    "substrate-beats"
+  ],
+  "setup": {
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "content": "# Agent\n## Boundaries\n- none\n"
+      },
+      {
+        "path": "gateway.jsonc",
+        "content": "{ \"version\": \"0.1.0\" }\n"
+      }
+    ]
+  },
+  "beats": [
+    {
+      "type": "run-cage",
+      "name": "promote captures baseline",
+      "verb": "promote",
+      "expect": {
+        "exitCode": 0,
+        "ok": true
+      }
+    },
+    {
+      "type": "edit-file",
+      "name": "corrupt the .lkg companion",
+      "path": "gateway.jsonc.lkg",
+      "op": "set",
+      "content": "{ this is not valid json ["
+    },
+    {
+      "type": "edit-file",
+      "name": "corrupt the active file too",
+      "path": "gateway.jsonc",
+      "op": "set",
+      "content": "{ also broken"
+    },
+    {
+      "type": "run-cage",
+      "name": "status reports an outcome (no crash)",
+      "verb": "status",
+      "expect": {
+        "exitCode": {
+          "oneOf": [
+            0,
+            1
+          ]
+        }
+      }
+    }
+  ]
+}

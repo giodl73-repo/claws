@@ -1,0 +1,53 @@
+// Migrated from lkg-rollback-no-such-label.scenario.mjs. Regenerate via:
+// node tools/oc-harness/scripts/migrate-mjs-scenarios.mjs <in> <out>
+{
+  "slug": "lkg-rollback-no-such-label",
+  "description": "rollback --label <unknown> emits LKG_LABEL_NOT_FOUND",
+  "extensions": [
+    "substrate-beats"
+  ],
+  "setup": {
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "content": "# Agent\n## Boundaries\n- none\n"
+      },
+      {
+        "path": "gateway.jsonc",
+        "content": "{ \"version\": \"0.1.0\" }\n"
+      }
+    ]
+  },
+  "beats": [
+    {
+      "type": "run-cage",
+      "name": "fresh workspace, no promote yet",
+      "verb": "rollback",
+      "label": "v1",
+      "expect": {
+        "exitCode": 1,
+        "errCode": "LKG_LABEL_NOT_FOUND"
+      }
+    },
+    {
+      "type": "run-cage",
+      "name": "promote --label v1",
+      "verb": "promote",
+      "label": "v1",
+      "expect": {
+        "exitCode": 0,
+        "ok": true
+      }
+    },
+    {
+      "type": "run-cage",
+      "name": "rollback --label v99 (typo) still fails LKG_LABEL_NOT_FOUND",
+      "verb": "rollback",
+      "label": "v99",
+      "expect": {
+        "exitCode": 1,
+        "errCode": "LKG_LABEL_NOT_FOUND"
+      }
+    }
+  ]
+}

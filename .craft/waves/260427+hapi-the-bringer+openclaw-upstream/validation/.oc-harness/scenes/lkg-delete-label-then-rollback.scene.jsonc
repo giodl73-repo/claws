@@ -1,0 +1,77 @@
+// Migrated from lkg-delete-label-then-rollback.scenario.mjs. Regenerate via:
+// node tools/oc-harness/scripts/migrate-mjs-scenarios.mjs <in> <out>
+{
+  "slug": "lkg-delete-label-then-rollback",
+  "description": "delete-label v1 → rollback v1 fails; re-promote v1 succeeds",
+  "extensions": [
+    "substrate-beats"
+  ],
+  "setup": {
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "content": "# Agent\n## Boundaries\n- none\n"
+      },
+      {
+        "path": "gateway.jsonc",
+        "content": "{ \"version\": \"0.1.0\", \"tag\": \"v1\" }\n"
+      }
+    ]
+  },
+  "beats": [
+    {
+      "type": "run-cage",
+      "name": "promote --label v1",
+      "verb": "promote",
+      "label": "v1",
+      "expect": {
+        "exitCode": 0,
+        "ok": true
+      }
+    },
+    {
+      "type": "edit-file",
+      "name": "edit gateway.jsonc to v2",
+      "path": "gateway.jsonc",
+      "op": "set",
+      "content": "{ \"version\": \"0.1.0\", \"tag\": \"v2\" }\n"
+    },
+    {
+      "type": "run-cage",
+      "name": "delete-label v1",
+      "verb": "delete-label",
+      "label": "v1",
+      "expect": {
+        "exitCode": 0
+      }
+    },
+    {
+      "type": "run-cage",
+      "name": "rollback --label v1 now fails (label gone)",
+      "verb": "rollback",
+      "label": "v1",
+      "expect": {
+        "exitCode": 1,
+        "errCode": "LKG_LABEL_NOT_FOUND"
+      }
+    },
+    {
+      "type": "assert-file",
+      "name": "gateway.jsonc still has v2 bytes (rollback was a no-op)",
+      "path": "gateway.jsonc",
+      "check": {
+        "contains": "\"v2\""
+      }
+    },
+    {
+      "type": "run-cage",
+      "name": "re-promote --label v1 succeeds (no zombie state)",
+      "verb": "promote",
+      "label": "v1",
+      "expect": {
+        "exitCode": 0,
+        "ok": true
+      }
+    }
+  ]
+}
