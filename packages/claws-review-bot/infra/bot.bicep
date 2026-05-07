@@ -29,8 +29,11 @@ param aoaiDeploymentName string = 'reviewer-gpt5'
 @description('AOAI API version')
 param aoaiApiVersion string = '2025-01-01-preview'
 
-@description('Container image (built and pushed separately)')
-param containerImage string = 'ghcr.io/giodl-ms/claws-review-bot:latest'
+@description('Container image (full ref with tag, e.g. clawsreviewbotacr.azurecr.io/claws-review-bot:abc123)')
+param containerImage string = 'clawsreviewbotacr.azurecr.io/claws-review-bot:latest'
+
+@description('ACR account name (must be in this same resource group; image must match)')
+param acrAccountName string = 'clawsreviewbotacr'
 
 @description('Repos to poll, comma-separated (e.g. "bic/lobster")')
 param watchRepos string = 'bic/lobster'
@@ -46,6 +49,12 @@ param postComments bool = false
 resource aoaiAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' existing = {
   name: aoaiAccountName
   scope: resourceGroup(aoaiResourceGroup)
+}
+
+// ---- Reference ACR (same RG as this deployment) ----
+
+resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
+  name: acrAccountName
 }
 
 // ---- Storage account for verdict archive ----
@@ -159,6 +168,22 @@ resource kvSecretsUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' 
   }
 }
 
+// ---- AcrPull role for the managed identity ----
+// Same-RG: simple role assignment scoped to the ACR resource.
+
+resource acrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: acr
+  name: guid(acr.id, identity.id, '7f951dda-4ed3-4680-a7ca-43fe172d538d')
+  properties: {
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '7f951dda-4ed3-4680-a7ca-43fe172d538d'  // AcrPull
+    )
+    principalId: identity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // ---- Container Apps Job ----
 
 resource job 'Microsoft.App/jobs@2024-03-01' = {
@@ -179,6 +204,12 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
         parallelism: 1
         replicaCompletionCount: 1
       }
+      registries: [
+        {
+          server: acr.properties.loginServer
+          identity: identity.id
+        }
+      ]
       secrets: [
         {
           name: 'ghe-pat'
