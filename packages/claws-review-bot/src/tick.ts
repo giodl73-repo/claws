@@ -1,0 +1,86 @@
+import {
+  getPull,
+  getPullDiff,
+  getIssueComments,
+  findPriorVerdict,
+  postIssueComment,
+} from "./gh.js";
+import { invokeClaude } from "./claude.js";
+import { loadVoice } from "./voice.js";
+
+export interface TickOptions {
+  repo: string;
+  num: number;
+  dryRun?: boolean;
+  postComment?: boolean;
+}
+
+export interface TickResult {
+  skipped: boolean;
+  reason?: string;
+  verdictBody?: string;
+  postedCommentId?: number;
+}
+
+export async function runTick(opts: TickOptions): Promise<TickResult> {
+  const pull = getPull(opts.repo, opts.num);
+  const headSha = pull.head.sha;
+  const shortSha = headSha.slice(0, 9);
+
+  const comments = getIssueComments(opts.repo, opts.num);
+  const prior = findPriorVerdict(comments);
+
+  if (prior && prior.shaInMarker && headSha.startsWith(prior.shaInMarker)) {
+    const newAuthorComments = comments.filter(
+      (c) =>
+        c.user.login === pull.user.login &&
+        new Date(c.created_at) > new Date(prior.comment.created_at)
+    );
+    if (newAuthorComments.length === 0) {
+      return {
+        skipped: true,
+        reason: `head SHA ${shortSha} unchanged since last review and no new author comments`,
+      };
+    }
+  }
+
+  const diff = getPullDiff(opts.repo, opts.num);
+  const systemPrompt = loadVoice("reviewer");
+
+  const userPromptParts = [
+    `## PR\n\nrepo: ${opts.repo}\nnumber: ${opts.num}\ntitle: ${pull.title}\nhead SHA: ${headSha}\nbase: ${pull.base.ref}\nauthor: @${pull.user.login}\ndraft: ${pull.draft}`,
+    prior
+      ? `## Prior verdict (in-band ledger)\n\n${prior.comment.body}`
+      : `## Prior verdict\n\n(none — this is the initial review)`,
+    `## Diff\n\n\`\`\`diff\n${diff}\n\`\`\``,
+    `## Author comments since prior verdict\n\n${comments
+      .filter(
+        (c) =>
+          c.user.login === pull.user.login &&
+          (!prior || new Date(c.created_at) > new Date(prior.comment.created_at))
+      )
+      .map((c) => `@${c.user.login} ${c.created_at}:\n${c.body}`)
+      .join("\n\n---\n\n") || "(none)"}`,
+    `## Instructions\n\nFollow R0-R5 protocol per voice.md. Output the verdict comment body only — start with the marker line, end with the footer per grammar.md. No commentary outside the comment body.`,
+  ];
+
+  const verdictBody = await invokeClaude({
+    systemPrompt,
+    userPrompt: userPromptParts.join("\n\n"),
+  });
+
+  if (opts.dryRun) {
+    return { skipped: false, verdictBody };
+  }
+
+  if (!opts.postComment) {
+    return { skipped: false, verdictBody };
+  }
+
+  const posted = postIssueComment(opts.repo, opts.num, verdictBody);
+  return {
+    skipped: false,
+    verdictBody,
+    postedCommentId: posted.id,
+  };
+}

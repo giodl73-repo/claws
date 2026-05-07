@@ -25,6 +25,7 @@
     "packages/lkg-recovery-git",
     "packages/policy-substrate",
     "packages/v2-prototype",
+    "packages/claws-review-bot",
     "test/e2e"
   ],
   "scripts": {

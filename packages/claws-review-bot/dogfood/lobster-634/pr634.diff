@@ -1,0 +1,1416 @@
+diff --git a/docs/authentication-redirect-uris.md b/docs/authentication-redirect-uris.md
+index 3ee3f8e7..afb62bf0 100644
+--- a/docs/authentication-redirect-uris.md
++++ b/docs/authentication-redirect-uris.md
+@@ -19,15 +19,15 @@ Source: `bic/lobster` → `docs/authentication-1p-apps.md`. Production registrat
+ 
+ ---
+ 
+-## Redirect-URI placeholder path
++## Redirect-URI path
+ 
+-`<TBD-CALLBACK-PATH>` — **needs to be confirmed before registering.** The Lobster runtime is a Rust binary and does not yet expose a documented OAuth callback. Likely candidates depending on the framework Lobster ends up using:
++**`/auth/callback`** — confirmed.
+ 
+-- `/signin-oidc` (OWIN/ASP.NET-style)
+-- `/.auth/login/aad/callback` (App Service Auth)
+-- `/auth/callback` (custom)
++The Lobster Rust runtime exposes a thin HTML bouncer at `/auth/callback` (see `src/lobster_runtime/src/routes/web.rs::auth_callback`). AAD redirects there with the auth response in the URL fragment; the bouncer runs `window.location.replace('/web/' + window.location.hash)` so the lobster_web bundle's MSAL `handleRedirectPromise()` can consume the fragment and complete sign-in.
+ 
+-**Action:** confirm with the runtime owner before submitting these to the 1P Apps repo.
++The path was kept distinct from `/web/` (rather than redirecting back to the same page) so the AAD app registration's redirect-URI list maps cleanly to one canonical URL per environment, independent of where the SPA's hash router happens to point at the moment of sign-in.
++
++The redirect-URI list below uses `/auth/callback` (no leading `<…>` placeholder) ready to be submitted to the AAD-FirstPartyApps repo.
+ 
+ ---
+ 
+@@ -36,7 +36,7 @@ Source: `bic/lobster` → `docs/authentication-1p-apps.md`. Production registrat
+ Verified in `src/lobster_runtime.ev2packaging/Deployment/chart/values.yaml:80` and `Deployment/DeploymentDefinition.json:85`:
+ 
+ ```
+-https://lobster.{cs_geo}-ia{cs_islandNumber}.gateway.{cs_env}.island.powerapps.com/<TBD-CALLBACK-PATH>
++https://lobster.{cs_geo}-ia{cs_islandNumber}.gateway.{cs_env}.island.powerapps.com/auth/callback
+ ```
+ 
+ CSC supplies `#cs_geo#` (lowercase 2-letter geo) and `#cs_islandNumber#` (3-digit cluster number) per (env, clusterCategory, geo) tuple. CSC owns the wildcard TLS cert for `*.{geo}-iaN.gateway.{env}.island.powerapps.com`.
+@@ -50,76 +50,76 @@ The list below intersects Lobster's `ApplicationParameters.json` geo set with th
+ ### Prod environment — FirstRelease cluster category (6 hostnames)
+ 
+ ```
+-https://lobster.au-ia301.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.ca-ia301.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.eu-ia301.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia301.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia302.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia351.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
++https://lobster.au-ia301.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.ca-ia301.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.eu-ia301.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia301.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia302.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia351.gateway.prod.island.powerapps.com/auth/callback
+ ```
+ 
+ ### Prod environment — Prod cluster category (59 hostnames)
+ 
+ ```
+-https://lobster.ae-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.as-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.as-ia102.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.as-ia103.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.as-ia401.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.au-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.au-ia102.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.au-ia402.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.br-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.br-ia102.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.br-ia401.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.ca-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.ca-ia102.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.ca-ia401.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.ch-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.de-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.eu-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.eu-ia102.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.eu-ia103.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.eu-ia104.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.eu-ia105.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.eu-ia106.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.eu-ia107.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.eu-ia108.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.eu-ia109.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.eu-ia110.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.eu-ia401.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.eu-ia402.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.fr-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.in-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.in-ia401.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.it-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.jp-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.kr-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.no-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.pl-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.se-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.sg-ia151.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.uk-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.uk-ia102.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia102.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia103.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia104.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia105.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia106.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia107.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia108.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia109.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia110.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia201.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia202.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia203.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia204.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia205.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia401.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia402.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.us-ia403.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
+-https://lobster.za-ia101.gateway.prod.island.powerapps.com/<TBD-CALLBACK-PATH>
++https://lobster.ae-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.as-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.as-ia102.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.as-ia103.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.as-ia401.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.au-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.au-ia102.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.au-ia402.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.br-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.br-ia102.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.br-ia401.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.ca-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.ca-ia102.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.ca-ia401.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.ch-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.de-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.eu-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.eu-ia102.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.eu-ia103.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.eu-ia104.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.eu-ia105.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.eu-ia106.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.eu-ia107.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.eu-ia108.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.eu-ia109.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.eu-ia110.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.eu-ia401.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.eu-ia402.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.fr-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.in-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.in-ia401.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.it-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.jp-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.kr-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.no-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.pl-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.se-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.sg-ia151.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.uk-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.uk-ia102.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia101.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia102.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia103.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia104.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia105.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia106.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia107.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia108.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia109.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia110.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia201.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia202.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia203.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia204.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia205.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia401.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia402.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.us-ia403.gateway.prod.island.powerapps.com/auth/callback
++https://lobster.za-ia101.gateway.prod.island.powerapps.com/auth/callback
+ ```
+ 
+ **Prod-environment total: 65 hostnames** (6 FRE + 59 Prod).
+@@ -133,17 +133,35 @@ For completeness — register on the **TEST-Lobster** app, not the Prod Lobster
+ ### Test environment (US geo only — Dev/Test/Preprod cluster categories, 7 hostnames)
+ 
+ ```
+-https://lobster.us-ia100.gateway.test.island.powerapps.com/<TBD-CALLBACK-PATH>   (Dev)
+-https://lobster.us-ia002.gateway.test.island.powerapps.com/<TBD-CALLBACK-PATH>   (Test)
+-https://lobster.us-ia003.gateway.test.island.powerapps.com/<TBD-CALLBACK-PATH>   (Test)
+-https://lobster.us-ia201.gateway.test.island.powerapps.com/<TBD-CALLBACK-PATH>   (Preprod)
+-https://lobster.us-ia202.gateway.test.island.powerapps.com/<TBD-CALLBACK-PATH>   (Preprod)
+-https://lobster.us-ia204.gateway.test.island.powerapps.com/<TBD-CALLBACK-PATH>   (Preprod)
+-https://lobster.us-ia211.gateway.test.island.powerapps.com/<TBD-CALLBACK-PATH>   (Preprod)
++https://lobster.us-ia100.gateway.test.island.powerapps.com/auth/callback   (Dev)
++https://lobster.us-ia002.gateway.test.island.powerapps.com/auth/callback   (Test)
++https://lobster.us-ia003.gateway.test.island.powerapps.com/auth/callback   (Test)
++https://lobster.us-ia201.gateway.test.island.powerapps.com/auth/callback   (Preprod)
++https://lobster.us-ia202.gateway.test.island.powerapps.com/auth/callback   (Preprod)
++https://lobster.us-ia204.gateway.test.island.powerapps.com/auth/callback   (Preprod)
++https://lobster.us-ia211.gateway.test.island.powerapps.com/auth/callback   (Preprod)
+ ```
+ 
+ > **Discrepancy note:** runbook line 919 documented `lobster.us-ia001.gateway.test.island.powerapps.com` for TEST_Test, but the actual provisioned Test/us clusters in CAP Kusto are **ia002 and ia003**, not ia001. Use the Kusto values above.
+ 
++### Local dev (TEST-Lobster only)
++
++To opt into MSAL on a local `dev-start.sh` run, register this redirect URI on the **TEST-Lobster** app reg:
++
++```
++http://localhost:8443/auth/callback
++```
++
++`http://` (not `https://`) is allowed by AAD only for `localhost`; the local dev server uses self-signed TLS but AAD treats the redirect as exempt from TLS-only enforcement when the host is localhost.
++
++`dev-start.sh` reads `LOBSTER_MSAL_CLIENT_ID` / `LOBSTER_MSAL_AUTHORITY` from the env -- both unset by default so MSAL stays off. To enable:
++
++```bash
++export LOBSTER_MSAL_CLIENT_ID=044097e5-1695-46a7-9a77-433a4c507c8c
++export LOBSTER_MSAL_AUTHORITY=https://login.microsoftonline.com/organizations
++./dev-start.sh
++```
++
+ ---
+ 
+ ## Deploying changes
+@@ -152,7 +170,7 @@ After merging redirect-URI updates in the AAD-FirstPartyApps repo, deploy to pro
+ 
+ ## Caveats — read before submitting
+ 
+-1. **`<TBD-CALLBACK-PATH>` must be replaced with the actual auth callback path** the Lobster runtime exposes. The runtime is currently a Rust binary with only `/health/live` and `/health/ready` documented. Confirm with the runtime owner before submission.
++1. **`/auth/callback` is the confirmed path** -- the Lobster Rust runtime exposes a thin HTML bouncer at that route (see `src/lobster_runtime/src/routes/web.rs::auth_callback`). The bouncer hands AAD's URL fragment to `/web/` so the lobster_web bundle's MSAL `handleRedirectPromise()` can consume it.
+ 
+ 2. **Geos in `ApplicationParameters.json` are the source of truth for what gets deployed.** Lobster's Prod env covers 4 geos in FirstRelease (`US, EU, AU, CA`) and 20 geos in Prod (`AE, AS, AU, BR, CA, CH, DE, EU, FR, IN, IT, JP, KR, NO, PL, SE, SG, UK, US, ZA`). NZ has CSC clusters but is NOT in Lobster's geo set — excluded above.
+ 
+diff --git a/src/lobster_runtime.ev2packaging/ApplicationParameters/ApplicationParameters.json b/src/lobster_runtime.ev2packaging/ApplicationParameters/ApplicationParameters.json
+index 4fd3ee67..6799df43 100644
+--- a/src/lobster_runtime.ev2packaging/ApplicationParameters/ApplicationParameters.json
++++ b/src/lobster_runtime.ev2packaging/ApplicationParameters/ApplicationParameters.json
+@@ -53,7 +53,9 @@
+               "RuntimeParameters": {},
+               "CustomizedTokens": {
+                 "#sourceACRRegistryUri#": "csbuildartifactsacr.azurecr.io",
+-                "#sourceACRTenantId#": "975f013f-7f24-47e8-a7d3-abc4752bf346"
++                "#sourceACRTenantId#": "975f013f-7f24-47e8-a7d3-abc4752bf346",
++                "#msalClientId#": "044097e5-1695-46a7-9a77-433a4c507c8c",
++                "#msalAuthority#": "https://login.microsoftonline.com/organizations"
+               },
+               "Geos": [
+                 {
+@@ -85,7 +87,10 @@
+               "ClusterCategoryName": "Test",
+               "AzureSubscriptionId": "0da110f3-e126-4a0e-b934-c1a3f4724de3",
+               "RuntimeParameters": {},
+-              "CustomizedTokens": {},
++              "CustomizedTokens": {
++                "#msalClientId#": "044097e5-1695-46a7-9a77-433a4c507c8c",
++                "#msalAuthority#": "https://login.microsoftonline.com/organizations"
++              },
+               "Geos": [
+                 {
+                   "GeoShortName": "US",
+@@ -116,7 +121,10 @@
+               "ClusterCategoryName": "Preprod",
+               "AzureSubscriptionId": "00000000-0000-0000-0000-000000000000",
+               "RuntimeParameters": {},
+-              "CustomizedTokens": {},
++              "CustomizedTokens": {
++                "#msalClientId#": "044097e5-1695-46a7-9a77-433a4c507c8c",
++                "#msalAuthority#": "https://login.microsoftonline.com/organizations"
++              },
+               "Geos": [
+                 {
+                   "GeoShortName": "US",
+@@ -174,6 +182,8 @@
+               "AzureSubscriptionId": "e74f07d4-638c-4791-b90f-1d869333c11b",
+               "RuntimeParameters": {},
+               "CustomizedTokens": {
++                "#msalClientId#": "f1217e17-d0fc-4a9e-a8a1-e1fc64868032",
++                "#msalAuthority#": "https://login.microsoftonline.com/organizations",
+                 "#skipRedisDeployment#": "false"
+               },
+               "Geos": [
+@@ -283,7 +293,10 @@
+               "ClusterCategoryName": "Prod",
+               "AzureSubscriptionId": "00000000-0000-0000-0000-000000000000",
+               "RuntimeParameters": {},
+-              "CustomizedTokens": {},
++              "CustomizedTokens": {
++                "#msalClientId#": "f1217e17-d0fc-4a9e-a8a1-e1fc64868032",
++                "#msalAuthority#": "https://login.microsoftonline.com/organizations"
++              },
+               "Geos": [
+                 {
+                   "GeoShortName": "AE",
+diff --git a/src/lobster_runtime.ev2packaging/Deployment/chart/values.yaml b/src/lobster_runtime.ev2packaging/Deployment/chart/values.yaml
+index 93805406..af6974de 100644
+--- a/src/lobster_runtime.ev2packaging/Deployment/chart/values.yaml
++++ b/src/lobster_runtime.ev2packaging/Deployment/chart/values.yaml
+@@ -57,6 +57,16 @@ platformEnvVariables:
+   TLS_KEY_PATH: "/mnt/secrets-store/intracomm-tls.key"
+   SERVICE_PORT: "8443"
+ 
++  # MSAL — runtime substitutes these into index.html at request time so the
++  # lobster_web bundle can call loginRedirect against the right Entra app
++  # registration. CustomizedTokens in ApplicationParameters.json supply per-
++  # environment values: TEST-Lobster app for Dev+Test, Lobster app for Prod.
++  # When the placeholder isn't replaced (e.g. local dev with the env var
++  # unset) the runtime leaves index.html's __LOBSTER_MSAL_*__ placeholders
++  # intact and the bundle's IIFE skips MSAL init -- intended behavior.
++  LOBSTER_MSAL_CLIENT_ID: "#msalClientId#"
++  LOBSTER_MSAL_AUTHORITY: "#msalAuthority#"
++
+   # Redis — Premium P1 cluster mode, AAD-only (access keys disabled).
+   # Auth via WorkloadIdentityCredential (federated through UAMI).
+   #
+diff --git a/src/lobster_runtime/Cargo.lock b/src/lobster_runtime/Cargo.lock
+index c82d218c..baa4e080 100644
+--- a/src/lobster_runtime/Cargo.lock
++++ b/src/lobster_runtime/Cargo.lock
+@@ -524,6 +524,12 @@ dependencies = [
+  "pin-project-lite",
+ ]
+ 
++[[package]]
++name = "fastrand"
++version = "2.4.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "9f1f227452a390804cdb637b74a86990f2a7d7ba4b7d5693aac9b4dd6defd8d6"
++
+ [[package]]
+ name = "fiat-crypto"
+ version = "0.2.9"
+@@ -713,9 +719,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "h2"
+-version = "0.4.13"
++version = "0.4.14"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "2f44da3a8150a6703ed5d34e164b875fd14c2cdab9af1252a9a1020bde2bdc54"
++checksum = "171fefbc92fe4a4de27e0698d6a5b392d6a0e333506bc49133760b3bcf948733"
+ dependencies = [
+  "atomic-waker",
+  "bytes",
+@@ -999,16 +1005,6 @@ version = "2.12.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "d98f6fed1fde3f8c21bc40a1abb88dd75e67924f9cffc3ef95607bad8017f8e2"
+ 
+-[[package]]
+-name = "iri-string"
+-version = "0.7.12"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "25e659a4bb38e810ebc252e53b5814ff908a8c58c2a9ce2fae1bbec24cbf4e20"
+-dependencies = [
+- "memchr",
+- "serde",
+-]
+-
+ [[package]]
+ name = "itoa"
+ version = "1.0.18"
+@@ -1079,6 +1075,12 @@ version = "0.2.16"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981"
+ 
++[[package]]
++name = "linux-raw-sys"
++version = "0.12.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
++
+ [[package]]
+ name = "litemap"
+ version = "0.8.2"
+@@ -1116,6 +1118,7 @@ dependencies = [
+  "serde_json",
+  "sha2",
+  "subtle",
++ "tempfile",
+  "test-tag",
+  "thiserror",
+  "tokio",
+@@ -1482,7 +1485,7 @@ dependencies = [
+  "once_cell",
+  "socket2",
+  "tracing",
+- "windows-sys 0.52.0",
++ "windows-sys 0.60.2",
+ ]
+ 
+ [[package]]
+@@ -1717,6 +1720,19 @@ dependencies = [
+  "semver",
+ ]
+ 
++[[package]]
++name = "rustix"
++version = "1.1.4"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b6fe4565b9518b83ef4f91bb47ce29620ca828bd32cb7e408f0062e9930ba190"
++dependencies = [
++ "bitflags",
++ "errno",
++ "libc",
++ "linux-raw-sys",
++ "windows-sys 0.61.2",
++]
++
+ [[package]]
+ name = "rustls"
+ version = "0.23.40"
+@@ -2054,6 +2070,19 @@ dependencies = [
+  "syn",
+ ]
+ 
++[[package]]
++name = "tempfile"
++version = "3.27.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
++dependencies = [
++ "fastrand",
++ "getrandom 0.4.2",
++ "once_cell",
++ "rustix",
++ "windows-sys 0.61.2",
++]
++
+ [[package]]
+ name = "test-tag"
+ version = "0.1.6"
+@@ -2153,9 +2182,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
+ 
+ [[package]]
+ name = "tokio"
+-version = "1.52.1"
++version = "1.52.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b67dee974fe86fd92cc45b7a95fdd2f99a36a6d7b0d431a231178d3d670bbcc6"
++checksum = "110a78583f19d5cdb2c5ccf321d1290344e71313c6c37d43520d386027d18386"
+ dependencies = [
+  "bytes",
+  "libc",
+@@ -2232,9 +2261,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "tower-http"
+-version = "0.6.8"
++version = "0.6.9"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d4e6559d53cc268e5031cd8429d05415bc4cb4aefc4aa5d6cc35fbf5b924a1f8"
++checksum = "a28f0d049ccfaa566e14e9663d304d8577427b368cb4710a20528690287a738b"
+ dependencies = [
+  "bitflags",
+  "bytes",
+@@ -2245,7 +2274,6 @@ dependencies = [
+  "http-body-util",
+  "http-range-header",
+  "httpdate",
+- "iri-string",
+  "mime",
+  "mime_guess",
+  "percent-encoding",
+@@ -2256,6 +2284,7 @@ dependencies = [
+  "tower-layer",
+  "tower-service",
+  "tracing",
++ "url",
+ ]
+ 
+ [[package]]
+@@ -2652,7 +2681,16 @@ version = "0.52.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "282be5f36a8ce781fad8c8ae18fa3f9beff57ec1b52cb3de0789201425d9a33d"
+ dependencies = [
+- "windows-targets",
++ "windows-targets 0.52.6",
++]
++
++[[package]]
++name = "windows-sys"
++version = "0.60.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "f2f500e4d28234f72040990ec9d39e3a6b950f9f22d3dba18416c35882612bcb"
++dependencies = [
++ "windows-targets 0.53.5",
+ ]
+ 
+ [[package]]
+@@ -2670,14 +2708,31 @@ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "9b724f72796e036ab90c1021d4780d4d3d648aca59e491e6b98e725b84e99973"
+ dependencies = [
+- "windows_aarch64_gnullvm",
+- "windows_aarch64_msvc",
+- "windows_i686_gnu",
+- "windows_i686_gnullvm",
+- "windows_i686_msvc",
+- "windows_x86_64_gnu",
+- "windows_x86_64_gnullvm",
+- "windows_x86_64_msvc",
++ "windows_aarch64_gnullvm 0.52.6",
++ "windows_aarch64_msvc 0.52.6",
++ "windows_i686_gnu 0.52.6",
++ "windows_i686_gnullvm 0.52.6",
++ "windows_i686_msvc 0.52.6",
++ "windows_x86_64_gnu 0.52.6",
++ "windows_x86_64_gnullvm 0.52.6",
++ "windows_x86_64_msvc 0.52.6",
++]
++
++[[package]]
++name = "windows-targets"
++version = "0.53.5"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "4945f9f551b88e0d65f3db0bc25c33b8acea4d9e41163edf90dcd0b19f9069f3"
++dependencies = [
++ "windows-link",
++ "windows_aarch64_gnullvm 0.53.1",
++ "windows_aarch64_msvc 0.53.1",
++ "windows_i686_gnu 0.53.1",
++ "windows_i686_gnullvm 0.53.1",
++ "windows_i686_msvc 0.53.1",
++ "windows_x86_64_gnu 0.53.1",
++ "windows_x86_64_gnullvm 0.53.1",
++ "windows_x86_64_msvc 0.53.1",
+ ]
+ 
+ [[package]]
+@@ -2686,48 +2741,96 @@ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "32a4622180e7a0ec044bb555404c800bc9fd9ec262ec147edd5989ccd0c02cd3"
+ 
++[[package]]
++name = "windows_aarch64_gnullvm"
++version = "0.53.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "a9d8416fa8b42f5c947f8482c43e7d89e73a173cead56d044f6a56104a6d1b53"
++
+ [[package]]
+ name = "windows_aarch64_msvc"
+ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "09ec2a7bb152e2252b53fa7803150007879548bc709c039df7627cabbd05d469"
+ 
++[[package]]
++name = "windows_aarch64_msvc"
++version = "0.53.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b9d782e804c2f632e395708e99a94275910eb9100b2114651e04744e9b125006"
++
+ [[package]]
+ name = "windows_i686_gnu"
+ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "8e9b5ad5ab802e97eb8e295ac6720e509ee4c243f69d781394014ebfe8bbfa0b"
+ 
++[[package]]
++name = "windows_i686_gnu"
++version = "0.53.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "960e6da069d81e09becb0ca57a65220ddff016ff2d6af6a223cf372a506593a3"
++
+ [[package]]
+ name = "windows_i686_gnullvm"
+ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "0eee52d38c090b3caa76c563b86c3a4bd71ef1a819287c19d586d7334ae8ed66"
+ 
++[[package]]
++name = "windows_i686_gnullvm"
++version = "0.53.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "fa7359d10048f68ab8b09fa71c3daccfb0e9b559aed648a8f95469c27057180c"
++
+ [[package]]
+ name = "windows_i686_msvc"
+ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "240948bc05c5e7c6dabba28bf89d89ffce3e303022809e73deaefe4f6ec56c66"
+ 
++[[package]]
++name = "windows_i686_msvc"
++version = "0.53.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "1e7ac75179f18232fe9c285163565a57ef8d3c89254a30685b57d83a38d326c2"
++
+ [[package]]
+ name = "windows_x86_64_gnu"
+ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "147a5c80aabfbf0c7d901cb5895d1de30ef2907eb21fbbab29ca94c5b08b1a78"
+ 
++[[package]]
++name = "windows_x86_64_gnu"
++version = "0.53.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "9c3842cdd74a865a8066ab39c8a7a473c0778a3f29370b5fd6b4b9aa7df4a499"
++
+ [[package]]
+ name = "windows_x86_64_gnullvm"
+ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "24d5b23dc417412679681396f2b49f3de8c1473deb516bd34410872eff51ed0d"
+ 
++[[package]]
++name = "windows_x86_64_gnullvm"
++version = "0.53.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "0ffa179e2d07eee8ad8f57493436566c7cc30ac536a3379fdf008f47f6bb7ae1"
++
+ [[package]]
+ name = "windows_x86_64_msvc"
+ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
+ 
++[[package]]
++name = "windows_x86_64_msvc"
++version = "0.53.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "d6bbff5f0aada427a1e5a6da5f1f98158182f26556f345ac9e04d36d0ebed650"
++
+ [[package]]
+ name = "wit-bindgen"
+ version = "0.51.0"
+diff --git a/src/lobster_runtime/Cargo.toml b/src/lobster_runtime/Cargo.toml
+index 5cccc1d2..69801b70 100644
+--- a/src/lobster_runtime/Cargo.toml
++++ b/src/lobster_runtime/Cargo.toml
+@@ -28,6 +28,11 @@ tracing = "0.1"
+ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+ thiserror = "2"
+ tower-http = { version = "0.6", features = ["fs", "trace"] }
++# `ServiceExt::oneshot` for invoking ServeDir as a one-shot service from
++# the /web catch-all handler (substitution-vs-static dispatch). Already
++# transitively present via tower-http; declared explicitly here so the
++# `oneshot` method is reachable from the lib crate.
++tower = { version = "0.5", features = ["util"] }
+ 
+ # JWT auth (auth/ module).
+ # `jsonwebtoken` is the de-facto Rust JWT crate; pinning Algorithm::RS256
+@@ -99,6 +104,10 @@ azure_core = { version = "0.31", default-features = false, features = ["reqwest"
+ tower = { version = "0.5", features = ["util"] }
+ http-body-util = "0.1"
+ hyper = "1"
++# Throwaway directories for the /web substitution + auth-callback tests.
++# Tests write a synthetic index.html into a tempdir, point the router at
++# it, then assert on the served HTML.
++tempfile = "3"
+ # Ephemeral RSA-2048 keypair generation for auth/ test fixtures.
+ # Avoids checking in static PEM / JWK files (SDL concern).
+ rsa = { version = "0.9", features = ["pem"] }
+diff --git a/src/lobster_runtime/dev-start.sh b/src/lobster_runtime/dev-start.sh
+index 83602c49..139ad5fc 100755
+--- a/src/lobster_runtime/dev-start.sh
++++ b/src/lobster_runtime/dev-start.sh
+@@ -81,11 +81,29 @@ export STATIC_DIR="$DIST_DIR"
+ export TLS_CERT_PATH="$CERT_DIR/tls.crt"
+ export TLS_KEY_PATH="$CERT_DIR/tls.key"
+ 
++# MSAL auth is OFF by default for local dev -- the runtime leaves the
++# index.html placeholders untouched and the bundle's IIFE skips MSAL
++# init. To opt in, export both vars before running this script:
++#
++#   export LOBSTER_MSAL_CLIENT_ID=044097e5-1695-46a7-9a77-433a4c507c8c
++#   export LOBSTER_MSAL_AUTHORITY=https://login.microsoftonline.com/organizations
++#   ./dev-start.sh
++#
++# The TEST-Lobster app registration must have https://localhost:8443/auth/callback
++# in its redirect-URI list (registered via the AAD-FirstPartyApps repo
++# or via the Portal for non-prod app regs).
++if [[ -n "${LOBSTER_MSAL_CLIENT_ID:-}" ]]; then
++    echo -e "\033[36mMSAL auth: ENABLED (clientId=$LOBSTER_MSAL_CLIENT_ID)\033[0m"
++else
++    echo -e "\033[33mMSAL auth: OFF (set LOBSTER_MSAL_CLIENT_ID to opt in)\033[0m"
++fi
++
+ echo ""
+ echo -e "\033[32mApplication available at: https://localhost:8443\033[0m"
+ echo "Liveness:                 https://localhost:8443/health/live"
+ echo "Readiness:                https://localhost:8443/health/ready"
+ echo "Web UI:                   https://localhost:8443/web"
++echo "Auth callback:            https://localhost:8443/auth/callback"
+ echo "Security:                 HTTPS enforced (self-signed cert for dev)"
+ echo ""
+ echo -e "\033[33mPress Ctrl+C to stop.\033[0m"
+diff --git a/src/lobster_runtime/src/config.rs b/src/lobster_runtime/src/config.rs
+index c95bfb22..0bb338f1 100644
+--- a/src/lobster_runtime/src/config.rs
++++ b/src/lobster_runtime/src/config.rs
+@@ -2,6 +2,11 @@ use crate::error::LobsterError;
+ 
+ const DEFAULT_PORT: u16 = 8443;
+ 
++/// Default authority for MSAL when `LOBSTER_MSAL_AUTHORITY` is unset.
++/// `/organizations` accepts any AAD-backed work or school account; the user
++/// chose this in the auth-redirect feature design.
++const DEFAULT_MSAL_AUTHORITY: &str = "https://login.microsoftonline.com/organizations";
++
+ /// Server configuration parsed from environment variables.
+ ///
+ /// - `TLS_CERT_PATH` / `TLS_KEY_PATH`: when both are set the server starts
+@@ -9,6 +14,11 @@ const DEFAULT_PORT: u16 = 8443;
+ /// - `PORT`: listening port (defaults to 8443).
+ /// - `STATIC_DIR`: directory containing the `lobster_web` bundle (defaults to
+ ///   `"static"`).
++/// - `LOBSTER_MSAL_CLIENT_ID` / `LOBSTER_MSAL_AUTHORITY`: when client ID is
++///   set, the runtime substitutes these into `index.html` placeholders so the
++///   bundle can initialize MSAL. When unset, placeholders pass through
++///   verbatim and the bundle's IIFE detects them and skips MSAL init -- the
++///   intended local-dev default.
+ #[derive(Debug, Clone)]
+ pub struct Config {
+     /// TCP port the server listens on.
+@@ -17,6 +27,8 @@ pub struct Config {
+     pub tls: Option<TlsConfig>,
+     /// Path to the directory containing static web assets.
+     pub static_dir: String,
++    /// Optional MSAL configuration injected into the served `index.html`.
++    pub msal: Option<MsalConfig>,
+ }
+ 
+ /// TLS certificate + key paths.
+@@ -28,6 +40,17 @@ pub struct TlsConfig {
+     pub key_path: String,
+ }
+ 
++/// MSAL configuration injected into `index.html` at request time so the
++/// `lobster_web` bundle can call `loginRedirect` against the right tenant /
++/// app registration.
++#[derive(Debug, Clone)]
++pub struct MsalConfig {
++    /// AAD app registration client ID (the "1P app" entry).
++    pub client_id: String,
++    /// AAD authority URL, e.g. `https://login.microsoftonline.com/organizations`.
++    pub authority: String,
++}
++
+ impl Config {
+     /// Build a [`Config`] from the current process environment.
+     ///
+@@ -66,10 +89,48 @@ impl Config {
+ 
+         let static_dir = std::env::var("STATIC_DIR").unwrap_or_else(|_| "static".to_string());
+ 
++        // MSAL is opt-in via LOBSTER_MSAL_CLIENT_ID. When unset the
++        // index.html placeholders survive untouched and the bundle's IIFE
++        // detects them ('clientId.indexOf("__LOBSTER_") === 0') and bails
++        // -- intended local-dev default.
++        let msal = match std::env::var("LOBSTER_MSAL_CLIENT_ID") {
++            Ok(client_id) if !client_id.is_empty() => {
++                // Validate that neither value contains HTML-special characters.
++                // Both are substituted into index.html at request time; rejecting
++                // `<`, `>`, `"`, and `'` at parse time prevents any injection
++                // from a misconfigured environment variable.
++                fn reject_html_chars(name: &str, val: &str) -> Result<(), LobsterError> {
++                    if val.contains('<')
++                        || val.contains('>')
++                        || val.contains('"')
++                        || val.contains('\'')
++                    {
++                        return Err(LobsterError::Config(format!(
++                            "{name} contains HTML-special characters: cannot safely substitute into index.html ({val:?})"
++                        )));
++                    }
++                    Ok(())
++                }
++
++                let authority = std::env::var("LOBSTER_MSAL_AUTHORITY")
++                    .ok()
++                    .filter(|s| !s.is_empty())
++                    .unwrap_or_else(|| DEFAULT_MSAL_AUTHORITY.to_string());
++                reject_html_chars("LOBSTER_MSAL_CLIENT_ID", &client_id)?;
++                reject_html_chars("LOBSTER_MSAL_AUTHORITY", &authority)?;
++                Some(MsalConfig {
++                    client_id,
++                    authority,
++                })
++            }
++            _ => None,
++        };
++
+         Ok(Self {
+             port,
+             tls,
+             static_dir,
++            msal,
+         })
+     }
+ 
+@@ -101,6 +162,8 @@ mod tests {
+         std::env::remove_var("TLS_CERT_PATH");
+         std::env::remove_var("TLS_KEY_PATH");
+         std::env::remove_var("STATIC_DIR");
++        std::env::remove_var("LOBSTER_MSAL_CLIENT_ID");
++        std::env::remove_var("LOBSTER_MSAL_AUTHORITY");
+     }
+ 
+     #[test]
+@@ -180,4 +243,98 @@ mod tests {
+         assert_eq!(cfg.static_dir, "/app/web");
+         clear_env();
+     }
++
++    #[test]
++    fn msal_unset_when_client_id_missing() {
++        let _guard = ENV_LOCK.lock().unwrap();
++        clear_env();
++        let cfg = Config::from_env().unwrap();
++        assert!(cfg.msal.is_none());
++        clear_env();
++    }
++
++    #[test]
++    fn msal_uses_default_authority_when_only_client_id_set() {
++        let _guard = ENV_LOCK.lock().unwrap();
++        clear_env();
++        std::env::set_var(
++            "LOBSTER_MSAL_CLIENT_ID",
++            "044097e5-1695-46a7-9a77-433a4c507c8c",
++        );
++        let cfg = Config::from_env().unwrap();
++        let msal = cfg.msal.expect("msal should be Some");
++        assert_eq!(msal.client_id, "044097e5-1695-46a7-9a77-433a4c507c8c");
++        assert_eq!(msal.authority, DEFAULT_MSAL_AUTHORITY);
++        clear_env();
++    }
++
++    #[test]
++    fn msal_uses_explicit_authority_when_set() {
++        let _guard = ENV_LOCK.lock().unwrap();
++        clear_env();
++        std::env::set_var(
++            "LOBSTER_MSAL_CLIENT_ID",
++            "f1217e17-d0fc-4a9e-a8a1-e1fc64868032",
++        );
++        std::env::set_var(
++            "LOBSTER_MSAL_AUTHORITY",
++            "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47",
++        );
++        let cfg = Config::from_env().unwrap();
++        let msal = cfg.msal.expect("msal should be Some");
++        assert_eq!(msal.client_id, "f1217e17-d0fc-4a9e-a8a1-e1fc64868032");
++        assert!(msal
++            .authority
++            .ends_with("/72f988bf-86f1-41af-91ab-2d7cd011db47"));
++        clear_env();
++    }
++
++    #[test]
++    fn msal_unset_when_client_id_empty_string() {
++        let _guard = ENV_LOCK.lock().unwrap();
++        clear_env();
++        // Empty value is the same as unset -- e.g. when a Helm chart
++        // emits `LOBSTER_MSAL_CLIENT_ID=""` from an unfilled token.
++        std::env::set_var("LOBSTER_MSAL_CLIENT_ID", "");
++        let cfg = Config::from_env().unwrap();
++        assert!(cfg.msal.is_none());
++        clear_env();
++    }
++
++    #[test]
++    fn msal_rejects_html_special_chars_in_client_id() {
++        let _guard = ENV_LOCK.lock().unwrap();
++        clear_env();
++        std::env::set_var("LOBSTER_MSAL_CLIENT_ID", "<script>alert(1)</script>");
++        let result = Config::from_env();
++        assert!(result.is_err());
++        let msg = result.unwrap_err().to_string();
++        assert!(
++            msg.contains("HTML-special characters"),
++            "expected HTML-special chars error, got: {msg}"
++        );
++        clear_env();
++    }
++
++    #[test]
++    fn msal_rejects_html_special_chars_in_authority() {
++        let _guard = ENV_LOCK.lock().unwrap();
++        clear_env();
++        std::env::set_var(
++            "LOBSTER_MSAL_CLIENT_ID",
++            "044097e5-1695-46a7-9a77-433a4c507c8c",
++        );
++        std::env::set_var(
++            "LOBSTER_MSAL_AUTHORITY",
++            "https://evil.com/\"onload=\"alert(1)",
++        );
++        let result = Config::from_env();
++        assert!(result.is_err());
++        let msg = result.unwrap_err().to_string();
++        assert!(
++            msg.contains("HTML-special characters"),
++            "expected HTML-special chars error, got: {msg}"
++        );
++        clear_env();
++    }
+ }
+diff --git a/src/lobster_runtime/src/main.rs b/src/lobster_runtime/src/main.rs
+index 2ee2fff6..9d1662a7 100644
+--- a/src/lobster_runtime/src/main.rs
++++ b/src/lobster_runtime/src/main.rs
+@@ -37,7 +37,7 @@ async fn main() -> Result<(), LobsterError> {
+     // Validate STATIC_DIR at startup — fail fast instead of silent 404s.
+     validate_static_dir(&config.static_dir)?;
+ 
+-    let mut app = routes::build_router(&config.static_dir);
++    let mut app = routes::build_router(&config.static_dir, config.msal.clone());
+ 
+     // Optionally wire the OpenClaw gateway-proxy + container-proxy
+     // routers.  Returns None when LOBSTER_GATEWAY_PROXY_ENABLED is
+diff --git a/src/lobster_runtime/src/routes/mod.rs b/src/lobster_runtime/src/routes/mod.rs
+index 0f1af6e2..2c2c2a68 100644
+--- a/src/lobster_runtime/src/routes/mod.rs
++++ b/src/lobster_runtime/src/routes/mod.rs
+@@ -1,11 +1,17 @@
+ /// Health-check and liveness/readiness probe handlers.
+ pub mod health;
+ 
++/// Web SPA root + OAuth callback handlers.
++pub mod web;
++
++use std::sync::Arc;
++
+ use axum::routing::get;
+ use axum::Router;
+-use tower_http::services::ServeDir;
+ use tower_http::trace::TraceLayer;
+ 
++use crate::config::MsalConfig;
++
+ /// Route prefix for the web UI.  Kept in one place so the router and the
+ /// pipelines (which set `PUBLIC_PATH`) stay in sync.
+ pub const WEB_ROUTE_PREFIX: &str = "/web";
+@@ -14,7 +20,27 @@ pub const WEB_ROUTE_PREFIX: &str = "/web";
+ ///
+ /// `static_dir` is the path to the directory containing the `lobster_web`
+ /// bundle (HTML, CSS, JS). It is served under [`WEB_ROUTE_PREFIX`].
+-pub fn build_router(static_dir: &str) -> Router {
++///
++/// `msal` injects the MSAL client ID + authority into `index.html` at
++/// request time so the bundle can call `loginRedirect`. `None` leaves the
++/// placeholders untouched (local-dev default).
++pub fn build_router(static_dir: &str, msal: Option<MsalConfig>) -> Router {
++    let web_state = web::WebState {
++        static_dir: Arc::from(static_dir),
++        msal,
++    };
++    web::warn_if_msal_template_missing(&web_state);
++
++    // Two routes cover the /web prefix:
++    //   * /web (and /web/) -> serve_web_root: substituted index.html
++    //   * /web/{*rest}     -> serve_web_path: dispatches index.html
++    //                         vs static asset based on `rest`
++    //
++    // axum 0.8 panics if we register both `route("/web")` and
++    // `nest_service("/web", ServeDir)` ("Insertion failed due to
++    // conflict"), and a nested-router `route("/") + fallback_service(...)`
++    // 404s on the bare prefix root. Owning the dispatch in the handler is
++    // the path that avoids both.
+     Router::new()
+         .route("/health/live", get(health::health_live))
+         .route("/health/ready", get(health::health_ready))
+@@ -22,7 +48,18 @@ pub fn build_router(static_dir: &str) -> Router {
+         .route("/health/redis", get(health::health_redis))
+         .route("/health/network", get(health::health_network))
+         .route("/", get(health::root))
+-        .nest_service(WEB_ROUTE_PREFIX, ServeDir::new(static_dir))
++        // AAD redirect URI. Browsers strip URL fragments before sending
++        // requests, so this handler can't read MSAL's response from the
++        // server side -- it serves a tiny HTML bouncer that hands the
++        // fragment to /web/ where the lobster_web bundle consumes it.
++        .route("/auth/callback", get(web::auth_callback))
++        .route(WEB_ROUTE_PREFIX, get(web::serve_web_root))
++        .route(&format!("{WEB_ROUTE_PREFIX}/"), get(web::serve_web_root))
++        .route(
++            &format!("{WEB_ROUTE_PREFIX}/{{*rest}}"),
++            get(web::serve_web_path),
++        )
++        .with_state(web_state)
+         .layer(TraceLayer::new_for_http())
+ }
+ 
+@@ -190,7 +227,7 @@ mod tests {
+         // Use a temp dir so ServeDir has a valid path, even though we are
+         // only exercising the API routes through the full stack.
+         let tmp = std::env::temp_dir();
+-        let app = super::build_router(tmp.to_str().unwrap());
++        let app = super::build_router(tmp.to_str().unwrap(), None);
+         let req = Request::get("/health/live").body(Body::empty()).unwrap();
+ 
+         let resp = app.oneshot(req).await.unwrap();
+@@ -201,4 +238,119 @@ mod tests {
+         let json: Value = serde_json::from_slice(&body).unwrap();
+         assert_eq!(json, json!({ "ok": true }));
+     }
++
++    // -----------------------------------------------------------------------
++    // /auth/callback + /web/ substitution
++    // -----------------------------------------------------------------------
++
++    use crate::config::MsalConfig;
++
++    /// Build a router rooted at a fresh tempdir that has an `index.html`
++    /// containing the MSAL placeholders. Returns the dir guard and the
++    /// router so the dir lives as long as the test.
++    fn router_with_index(msal: Option<MsalConfig>) -> (tempfile::TempDir, Router) {
++        let dir = tempfile::tempdir().unwrap();
++        let index = "<!doctype html><html><head><script>\
++                     var clientId='__LOBSTER_MSAL_CLIENT_ID__';\
++                     var authority='__LOBSTER_MSAL_AUTHORITY__';\
++                     </script></head><body><div id='root'></div></body></html>";
++        std::fs::write(dir.path().join("index.html"), index).unwrap();
++        let app = super::build_router(dir.path().to_str().unwrap(), msal);
++        (dir, app)
++    }
++
++    #[tokio::test]
++    async fn auth_callback_returns_html_bouncer() {
++        let tmp = std::env::temp_dir();
++        let app = super::build_router(tmp.to_str().unwrap(), None);
++        let req = Request::get("/auth/callback").body(Body::empty()).unwrap();
++        let resp = app.oneshot(req).await.unwrap();
++
++        assert_eq!(resp.status(), StatusCode::OK);
++        let body = resp.into_body().collect().await.unwrap().to_bytes();
++        let html = std::str::from_utf8(&body).unwrap();
++        // The browser-side replace must carry both fragment and query
++        // through to /web/ so MSAL can consume whichever AAD used.
++        assert!(html.contains("window.location.replace('/web/'"));
++        assert!(html.contains("window.location.hash"));
++    }
++
++    #[tokio::test]
++    async fn web_root_passes_placeholders_through_when_msal_unset() {
++        let (_dir, app) = router_with_index(None);
++        let req = Request::get("/web/").body(Body::empty()).unwrap();
++        let resp = app.oneshot(req).await.unwrap();
++
++        assert_eq!(resp.status(), StatusCode::OK);
++        let body = resp.into_body().collect().await.unwrap().to_bytes();
++        let html = std::str::from_utf8(&body).unwrap();
++        // Bundle's IIFE relies on placeholders surviving when MSAL is off.
++        assert!(html.contains("__LOBSTER_MSAL_CLIENT_ID__"));
++        assert!(html.contains("__LOBSTER_MSAL_AUTHORITY__"));
++    }
++
++    #[tokio::test]
++    async fn web_root_substitutes_placeholders_when_msal_set() {
++        let (_dir, app) = router_with_index(Some(MsalConfig {
++            client_id: "044097e5-1695-46a7-9a77-433a4c507c8c".into(),
++            authority: "https://login.microsoftonline.com/organizations".into(),
++        }));
++        let req = Request::get("/web/").body(Body::empty()).unwrap();
++        let resp = app.oneshot(req).await.unwrap();
++
++        assert_eq!(resp.status(), StatusCode::OK);
++        let body = resp.into_body().collect().await.unwrap().to_bytes();
++        let html = std::str::from_utf8(&body).unwrap();
++        assert!(!html.contains("__LOBSTER_MSAL_CLIENT_ID__"));
++        assert!(!html.contains("__LOBSTER_MSAL_AUTHORITY__"));
++        assert!(html.contains("044097e5-1695-46a7-9a77-433a4c507c8c"));
++        assert!(html.contains("https://login.microsoftonline.com/organizations"));
++    }
++
++    #[tokio::test]
++    async fn web_index_html_substitutes_when_msal_set() {
++        let (_dir, app) = router_with_index(Some(MsalConfig {
++            client_id: "client-xyz".into(),
++            authority: "https://login.microsoftonline.com/organizations".into(),
++        }));
++        let req = Request::get("/web/index.html").body(Body::empty()).unwrap();
++        let resp = app.oneshot(req).await.unwrap();
++
++        assert_eq!(resp.status(), StatusCode::OK);
++        let body = resp.into_body().collect().await.unwrap().to_bytes();
++        let html = std::str::from_utf8(&body).unwrap();
++        assert!(html.contains("client-xyz"));
++    }
++
++    #[tokio::test]
++    async fn web_static_asset_falls_back_to_serve_dir_unchanged() {
++        let dir = tempfile::tempdir().unwrap();
++        let css_path = dir.path().join("static");
++        std::fs::create_dir_all(&css_path).unwrap();
++        // A static asset that contains the MSAL placeholder by accident
++        // -- it MUST NOT be substituted, only /web/ + /web/index.html
++        // pass through the substitution handler.
++        std::fs::write(
++            css_path.join("style.css"),
++            "/* __LOBSTER_MSAL_CLIENT_ID__ */ body { color: red; }",
++        )
++        .unwrap();
++        let app = super::build_router(
++            dir.path().to_str().unwrap(),
++            Some(MsalConfig {
++                client_id: "should-not-leak".into(),
++                authority: "should-not-leak".into(),
++            }),
++        );
++        let req = Request::get("/web/static/style.css")
++            .body(Body::empty())
++            .unwrap();
++        let resp = app.oneshot(req).await.unwrap();
++
++        assert_eq!(resp.status(), StatusCode::OK);
++        let body = resp.into_body().collect().await.unwrap().to_bytes();
++        let css = std::str::from_utf8(&body).unwrap();
++        assert!(css.contains("__LOBSTER_MSAL_CLIENT_ID__"));
++        assert!(!css.contains("should-not-leak"));
++    }
+ }
+diff --git a/src/lobster_runtime/src/routes/web.rs b/src/lobster_runtime/src/routes/web.rs
+new file mode 100644
+index 00000000..6c9e2cf9
+--- /dev/null
++++ b/src/lobster_runtime/src/routes/web.rs
+@@ -0,0 +1,190 @@
++//! Handlers for the `/web` SPA root and the `/auth/callback` OAuth bouncer.
++//!
++//! `/web/` and `/web/index.html` are served by [`serve_index`], which reads
++//! `index.html` off disk per request and substitutes the MSAL placeholders
++//! (`__LOBSTER_MSAL_CLIENT_ID__`, `__LOBSTER_MSAL_AUTHORITY__`) when the
++//! runtime is configured with an MSAL client ID. Substitution at request
++//! time means the same Docker image promotes Dev -> Test -> Prod with
++//! different env values, instead of baking auth identifiers into the image.
++//!
++//! `/auth/callback` is the AAD redirect URI registered against the Lobster
++//! 1P apps. AAD's response (auth code + state) lands in the URL fragment,
++//! which the browser keeps client-side; we serve a minimal HTML bouncer
++//! that calls `window.location.replace('/web/' + window.location.hash)` so
++//! the lobster_web bundle's `handleRedirectPromise()` can consume the
++//! fragment and complete sign-in.
++
++use axum::body::Body;
++use axum::extract::{Request, State};
++use axum::http::{header, StatusCode};
++use axum::response::{Html, IntoResponse, Response};
++use std::sync::Arc;
++use tower::ServiceExt;
++use tower_http::services::ServeDir;
++use tracing::{error, warn};
++
++use crate::config::MsalConfig;
++
++/// Shared state passed to the `/web` and `/auth/callback` handlers.
++#[derive(Clone)]
++pub struct WebState {
++    /// Filesystem path to the directory holding `index.html` + assets.
++    pub static_dir: Arc<str>,
++    /// MSAL configuration to inject into `index.html`. `None` = leave the
++    /// placeholders untouched (local-dev default).
++    pub msal: Option<MsalConfig>,
++}
++
++/// Serve `index.html` with MSAL placeholders substituted in when configured.
++///
++/// `__LOBSTER_MSAL_CLIENT_ID__` and `__LOBSTER_MSAL_AUTHORITY__` are the two
++/// placeholders the bundle's pre-bundle script looks for (see
++/// `src/lobster_web/index.html`). When `state.msal` is `None`, the
++/// placeholders pass through verbatim and the bundle's IIFE detects them
++/// (`clientId.indexOf("__LOBSTER_") === 0`) and skips MSAL init.
++pub async fn serve_index(State(state): State<WebState>) -> Response {
++    let path = format!("{}/index.html", state.static_dir);
++    match tokio::fs::read_to_string(&path).await {
++        Ok(html) => {
++            let html = match &state.msal {
++                Some(cfg) => html
++                    .replace("__LOBSTER_MSAL_CLIENT_ID__", &cfg.client_id)
++                    .replace("__LOBSTER_MSAL_AUTHORITY__", &cfg.authority),
++                None => html,
++            };
++            Html(html).into_response()
++        }
++        Err(e) => {
++            error!(path = %path, error = %e, "Failed to read index.html for /web/");
++            (StatusCode::INTERNAL_SERVER_ERROR, "Unable to serve page").into_response()
++        }
++    }
++}
++
++/// Catch-all handler for `/web/{*rest}` -- dispatches to [`serve_index`]
++/// when `rest` is empty or `index.html`, otherwise delegates to `ServeDir`
++/// for the static asset.
++///
++/// Mixing `route("/web")` and `nest_service("/web", ServeDir)` panics in
++/// axum 0.8 ("Insertion failed due to conflict"), and a nested router
++/// with `route("/") + fallback_service(ServeDir)` 404s on the prefix root
++/// ("/web/" hits the fallback rather than the route). A single catch-all
++/// handler avoids both pitfalls -- we own the dispatch.
++pub async fn serve_web_path(
++    State(state): State<WebState>,
++    axum::extract::Path(rest): axum::extract::Path<String>,
++    req: Request<Body>,
++) -> Response {
++    if rest.is_empty() || rest == "index.html" {
++        return serve_index(State(state)).await;
++    }
++    serve_static_asset(&state.static_dir, rest, req).await
++}
++
++/// Handler for `GET /web/` and `GET /web` -- the catch-all glob doesn't
++/// match the bare prefix root in axum, so we register this separately.
++pub async fn serve_web_root(State(state): State<WebState>) -> Response {
++    serve_index(State(state)).await
++}
++
++/// Forward `/web/{rest}` to `ServeDir` rooted at `static_dir`. Building the
++/// service inline per request keeps the type plumbing simple -- the dir
++/// path is small and `ServeDir` construction is cheap.
++async fn serve_static_asset(static_dir: &str, rest: String, req: Request<Body>) -> Response {
++    // Rewrite the request path: `ServeDir` maps the request URI directly to
++    // a file under its root, so it needs `/rest`, not `/web/rest`.
++    let mut parts = req.into_parts().0;
++    let new_uri = match format!("/{rest}").parse() {
++        Ok(uri) => uri,
++        Err(e) => {
++            warn!(rest = %rest, error = %e, "Invalid /web/ asset path");
++            return (StatusCode::BAD_REQUEST, "invalid path").into_response();
++        }
++    };
++    parts.uri = new_uri;
++    let inner_req = Request::from_parts(parts, Body::empty());
++    let svc = ServeDir::new(static_dir);
++    match svc.oneshot(inner_req).await {
++        Ok(asset_resp) => asset_resp.map(Body::new),
++        Err(_unreachable) => {
++            // `tower_http::services::ServeDir`'s error type is `std::convert::Infallible`.
++            (StatusCode::INTERNAL_SERVER_ERROR, "Unable to serve page").into_response()
++        }
++    }
++}
++
++/// AAD OAuth callback bouncer.
++///
++/// AAD redirects here with the response in the URL fragment
++/// (`#code=...&state=...`). Browsers don't send fragments to the server, so
++/// the Rust runtime can't read them -- we serve a minimal HTML page that
++/// redirects to `/web/`, and the browser carries the fragment across to the
++/// new URL where the `lobster_web` bundle's MSAL `handleRedirectPromise()`
++/// reads and consumes it.
++///
++/// Uses `window.location.replace` rather than `assign` so the callback URL
++/// doesn't end up in the browser's back-button history.
++pub async fn auth_callback() -> impl IntoResponse {
++    // Restrictive CSP: default-src 'none' blocks everything; script-src
++    // 'unsafe-inline' allows only the inline redirect script (no external
++    // scripts). style-src 'unsafe-inline' allows the <noscript> fallback
++    // link styling. No connect-src, img-src, etc. -- the page loads
++    // nothing external.
++    let csp = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'";
++    (
++        [(header::CONTENT_SECURITY_POLICY, csp)],
++        Html(
++        "<!doctype html>\n\
++         <html lang=\"en\">\n\
++         <head>\n\
++         <meta charset=\"utf-8\">\n\
++         <title>Signing in...</title>\n\
++         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n\
++         </head>\n\
++         <body>\n\
++         <p>Signing in -- one moment.</p>\n\
++         <script>\n\
++         (function () {\n\
++           var hash = window.location.hash || '';\n\
++           var search = window.location.search || '';\n\
++           // Carry both fragment (response_mode=fragment, MSAL default) and\n\
++           // query (response_mode=query) variants across to /web/ so MSAL\n\
++           // can pick whichever one AAD used. handleRedirectPromise reads\n\
++           // location.hash; query params are preserved for diagnostics.\n\
++           window.location.replace('/web/' + search + hash);\n\
++         })();\n\
++         </script>\n\
++         <noscript>JavaScript is required to complete sign-in. <a href=\"/web/\">Continue</a>.</noscript>\n\
++         </body>\n\
++         </html>\n"),
++    )
++}
++
++/// Diagnostic helper: warn at startup when MSAL is configured but the
++/// `index.html` file is missing or doesn't contain the expected
++/// placeholders. Catches the common misconfiguration where the env vars
++/// got set but `build-static.sh` wasn't run.
++pub fn warn_if_msal_template_missing(state: &WebState) {
++    let Some(_msal) = &state.msal else {
++        return;
++    };
++    let path = format!("{}/index.html", state.static_dir);
++    match std::fs::read_to_string(&path) {
++        Ok(html) => {
++            if !html.contains("__LOBSTER_MSAL_CLIENT_ID__") {
++                warn!(
++                    path = %path,
++                    "MSAL configured but index.html has no __LOBSTER_MSAL_CLIENT_ID__ placeholder \
++                     -- substitution will silently no-op and the bundle won't initialize MSAL"
++                );
++            }
++        }
++        Err(e) => {
++            warn!(
++                path = %path,
++                error = %e,
++                "MSAL configured but index.html could not be read at startup"
++            );
++        }
++    }
++}
+diff --git a/src/lobster_runtime/tests/integration_test.rs b/src/lobster_runtime/tests/integration_test.rs
+index d3245842..bf6b6b90 100644
+--- a/src/lobster_runtime/tests/integration_test.rs
++++ b/src/lobster_runtime/tests/integration_test.rs
+@@ -70,7 +70,7 @@ fn test_app() -> (axum::Router, TempDir) {
+     std::fs::create_dir_all(&dir).expect("failed to create temp static dir");
+     // Write a minimal index.html so /web serves something real.
+     std::fs::write(dir.join("index.html"), "<html></html>").expect("failed to write index.html");
+-    let app = build_router(dir.to_str().unwrap());
++    let app = build_router(dir.to_str().unwrap(), None);
+     (app, TempDir(dir))
+ }
+ 
+diff --git a/src/lobster_web/src/App.tsx b/src/lobster_web/src/App.tsx
+index 01b0c402..4db5a61a 100644
+--- a/src/lobster_web/src/App.tsx
++++ b/src/lobster_web/src/App.tsx
+@@ -43,6 +43,7 @@ import { buildAetherChatHistoryClient } from './services/aetherChatHistoryFactor
+ import { buildAetherTeamsPairingClient } from './services/aetherTeamsPairingFactory.js';
+ import { buildAetherWorkspaceClient } from './services/aetherWorkspaceFactory.js';
+ import { type CapabilityStatus, probeCapabilities } from './services/capabilitiesProbe.js';
++import { _getMsalInstance, type MsalAccountInfo } from './services/msalAuth.js';
+ import {
+   type FirstTimeDetectionResult,
+   detectFirstTime,
+@@ -164,10 +165,86 @@ function TopNav(): ReactNode {
+       >
+         Sandbox
+       </Link>
++      <SignInWidget />
+     </nav>
+   );
+ }
+ 
++/**
++ * Right-aligned signed-in identity indicator in the TopNav.
++ *
++ * MSAL is initialized at boot from `__LOBSTER_RUNTIME_CONFIG__.msal` (set
++ * by the runtime when LOBSTER_MSAL_CLIENT_ID is configured).  After init,
++ * the MSAL instance is reachable via `_getMsalInstance()`.  We read it to
++ * decide what to render:
++ *
++ *   - MSAL not wired (local dev default) => render nothing.
++ *   - MSAL wired, no account             => render nothing.  The pre-sign-in
++ *     "Sign in" affordance is already handled by the `CapabilityBanner`
++ *     (yellow strip with "Sign in to use Lobster" on all non-landing routes)
++ *     and the landing page's inline "Sign in to use Lobster" button.
++ *     Duplicating a second "Sign in" button in the TopNav would be
++ *     confusing and redundant.
++ *   - MSAL wired, account present        => show the account's display name
++ *     (read-only for now; sign-out is a follow-up).
++ *
++ * MSAL's `handleRedirectPromise` resolves asynchronously at boot, so the
++ * account snapshot taken at first paint may be empty even when AAD just
++ * sent the user back signed-in.  A short polling effect catches that
++ * transition without dragging in MSAL's full event-callback API.
++ */
++function SignInWidget(): ReactNode {
++  const styles = useNavStyles();
++  const [account, setAccount] = useState<MsalAccountInfo | null>(() => {
++    const app = _getMsalInstance();
++    return app?.getActiveAccount() ?? app?.getAllAccounts()[0] ?? null;
++  });
++
++  useEffect(() => {
++    // Poll briefly so the widget catches the post-redirect account
++    // appearing once handleRedirectPromise resolves.  Polling stops
++    // after 5s -- handleRedirectPromise typically resolves within
++    // hundreds of ms; if it hasn't by then, MSAL hit a transient
++    // failure that needs a manual sign-in click anyway.
++    const start = Date.now();
++    const id = window.setInterval(() => {
++      const app = _getMsalInstance();
++      const next = app?.getActiveAccount() ?? app?.getAllAccounts()[0] ?? null;
++      // Only update state when the account actually changes to avoid
++      // unnecessary re-renders while polling.  Compare by localAccountId
++      // (stable across token refreshes) rather than object reference.
++      setAccount((prev) => {
++        const prevId = prev?.localAccountId ?? null;
++        const nextId = next?.localAccountId ?? null;
++        return prevId === nextId ? prev : next;
++      });
++      if (Date.now() - start > 5000 || next !== null) {
++        window.clearInterval(id);
++      }
++    }, 250);
++    return () => window.clearInterval(id);
++  }, []);
++
++  // No MSAL instance or no account yet => render nothing.
++  // The CapabilityBanner already handles the "Sign in" CTA for
++  // auth-required state on all non-landing routes; we only surface
++  // the identity indicator once the user has signed in.
++  if (account === null) {
++    return null;
++  }
++
++  return (
++    <span
++      data-testid="lobster-top-nav-account"
++      style={{ marginLeft: 'auto' }}
++      className={styles.link}
++      aria-label={`Signed in as ${account.name ?? account.username}`}
++    >
++      {account.name ?? account.username}
++    </span>
++  );
++}
++
+ function NavShell({ children }: { readonly children: ReactNode }): ReactNode {
+   return (
+     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
