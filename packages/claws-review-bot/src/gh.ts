@@ -18,20 +18,59 @@ export interface GhComment {
   updated_at: string;
 }
 
-function ghApi<T>(path: string, hostname = "microsoft.ghe.com"): T {
-  const result = spawnSync(
-    "gh",
-    ["api", "--hostname", hostname, "--paginate", path],
-    { encoding: "utf8", maxBuffer: 50 * 1024 * 1024 }
+const GH_RETRIES = 5;
+const GH_BACKOFF_BASE_MS = 1000;
+
+function isTransient(stderr: string): boolean {
+  return /TLS handshake timeout|forcibly closed|connection refused|connection reset|i\/o timeout|ECONNRESET|EPIPE|503\s|502\s|504\s/i.test(
+    stderr
   );
+}
 
-  if (result.status !== 0) {
-    throw new Error(
-      `gh api ${path} failed (status ${result.status}): ${result.stderr}`
+function sleepSync(ms: number): void {
+  // Atomics.wait on a SAB is the standard sync sleep — doesn't peg CPU.
+  const sab = new SharedArrayBuffer(4);
+  const view = new Int32Array(sab);
+  Atomics.wait(view, 0, 0, ms);
+}
+
+function ghSpawn(
+  args: string[],
+  description: string
+): { stdout: string; stderr: string } {
+  let lastStderr = "";
+  for (let attempt = 0; attempt < GH_RETRIES; attempt++) {
+    const result = spawnSync("gh", args, {
+      encoding: "utf8",
+      maxBuffer: 50 * 1024 * 1024,
+    });
+
+    if (result.status === 0) {
+      return { stdout: result.stdout, stderr: result.stderr };
+    }
+
+    lastStderr = result.stderr;
+    if (!isTransient(result.stderr) || attempt === GH_RETRIES - 1) {
+      throw new Error(
+        `${description} failed (status ${result.status}, attempt ${attempt + 1}/${GH_RETRIES}): ${result.stderr}`
+      );
+    }
+
+    const backoff = GH_BACKOFF_BASE_MS * Math.pow(2, attempt);
+    console.error(
+      `[gh] transient error (attempt ${attempt + 1}/${GH_RETRIES}), retrying in ${backoff}ms: ${result.stderr.split("\n")[0]}`
     );
+    sleepSync(backoff);
   }
+  throw new Error(`${description} failed after ${GH_RETRIES} attempts: ${lastStderr}`);
+}
 
-  return JSON.parse(result.stdout) as T;
+function ghApi<T>(path: string, hostname = "microsoft.ghe.com"): T {
+  const { stdout } = ghSpawn(
+    ["api", "--hostname", hostname, "--paginate", path],
+    `gh api ${path}`
+  );
+  return JSON.parse(stdout) as T;
 }
 
 function ghApiRaw(
@@ -39,19 +78,11 @@ function ghApiRaw(
   acceptHeader: string,
   hostname = "microsoft.ghe.com"
 ): string {
-  const result = spawnSync(
-    "gh",
+  const { stdout } = ghSpawn(
     ["api", "--hostname", hostname, "-H", `Accept: ${acceptHeader}`, path],
-    { encoding: "utf8", maxBuffer: 50 * 1024 * 1024 }
+    `gh api ${path}`
   );
-
-  if (result.status !== 0) {
-    throw new Error(
-      `gh api ${path} failed (status ${result.status}): ${result.stderr}`
-    );
-  }
-
-  return result.stdout;
+  return stdout;
 }
 
 export function listOpenPulls(repo: string): GhPullSummary[] {
