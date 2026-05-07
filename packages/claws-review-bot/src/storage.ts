@@ -1,4 +1,4 @@
-import { BlobServiceClient } from "@azure/storage-blob";
+import { BlobServiceClient, RestError } from "@azure/storage-blob";
 
 export interface VerdictBlob {
   repo: string;
@@ -54,4 +54,76 @@ export async function writeVerdictBlob(
 export function extractMarker(body: string): string {
   const match = body.match(/<!--\s*claws-lobster-architect:([\w:-]+)\s*-->/);
   return match && match[1] ? match[1] : "unknown";
+}
+
+/**
+ * Acquire a per-(repo, PR, SHA) review lock via blob-create-if-not-exists.
+ *
+ * Two parallel executions race on the same path with `If-None-Match: *`.
+ * Storage atomically grants exactly one. The loser gets HTTP 409 and skips
+ * the LLM call entirely. Without this, every cron-overlap (which happens
+ * naturally when reviews run longer than the cron interval) duplicates
+ * AOAI cost.
+ *
+ * The lock blob stays in place after a successful review — that's the
+ * point: same (repo, PR, SHA) is never reviewed twice, even by future
+ * executions. When the PR's head SHA moves, the lock path changes and
+ * a fresh review is allowed.
+ *
+ * On review failure, the caller should delete the lock to allow retry —
+ * see `releasePrLock`.
+ */
+export async function tryAcquirePrLock(
+  repo: string,
+  prNumber: number,
+  headSha: string,
+  connectionString: string,
+  containerName = "verdicts"
+): Promise<boolean> {
+  const service = BlobServiceClient.fromConnectionString(connectionString);
+  const container = service.getContainerClient(containerName);
+  await container.createIfNotExists();
+
+  const blob = container.getBlockBlobClient(lockPath(repo, prNumber, headSha));
+  const body = `locked at ${new Date().toISOString()}`;
+
+  try {
+    await blob.upload(body, Buffer.byteLength(body, "utf8"), {
+      conditions: { ifNoneMatch: "*" },
+      metadata: {
+        acquired_at: new Date().toISOString(),
+        execution_id:
+          process.env["CONTAINER_APP_REVISION"] ??
+          process.env["HOSTNAME"] ??
+          "unknown",
+      },
+    });
+    return true;
+  } catch (e) {
+    if (e instanceof RestError && (e.statusCode === 409 || e.statusCode === 412)) {
+      return false;
+    }
+    throw e;
+  }
+}
+
+/**
+ * Delete a previously-acquired lock so a future execution can retry. Call
+ * on review failure (LLM error, network error, etc.) — never on success.
+ */
+export async function releasePrLock(
+  repo: string,
+  prNumber: number,
+  headSha: string,
+  connectionString: string,
+  containerName = "verdicts"
+): Promise<void> {
+  const service = BlobServiceClient.fromConnectionString(connectionString);
+  const container = service.getContainerClient(containerName);
+  const blob = container.getBlockBlobClient(lockPath(repo, prNumber, headSha));
+  await blob.deleteIfExists();
+}
+
+function lockPath(repo: string, prNumber: number, headSha: string): string {
+  return `_locks/${repo}/${prNumber}-${headSha.slice(0, 9)}.lock`;
 }

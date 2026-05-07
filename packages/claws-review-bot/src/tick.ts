@@ -7,7 +7,12 @@ import {
 } from "./gh.js";
 import { invokeClaude } from "./claude.js";
 import { loadVoice } from "./voice.js";
-import { writeVerdictBlob, extractMarker } from "./storage.js";
+import {
+  writeVerdictBlob,
+  extractMarker,
+  tryAcquirePrLock,
+  releasePrLock,
+} from "./storage.js";
 
 export interface TickOptions {
   repo: string;
@@ -46,6 +51,29 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
     }
   }
 
+  // Per-(repo, PR, SHA) dedup lock — see storage.tryAcquirePrLock.
+  // When two cron executions race on the same PR+SHA (common when reviews
+  // run longer than the cron interval), exactly one wins and the others
+  // skip the LLM call entirely. Saves AOAI cost.
+  const connStrEarly = process.env["STORAGE_CONNECTION_STRING"];
+  const containerEarly = process.env["STORAGE_CONTAINER"] ?? "verdicts";
+  let lockAcquired = false;
+  if (connStrEarly) {
+    lockAcquired = await tryAcquirePrLock(
+      opts.repo,
+      opts.num,
+      headSha,
+      connStrEarly,
+      containerEarly
+    );
+    if (!lockAcquired) {
+      return {
+        skipped: true,
+        reason: `lock held for ${opts.repo}#${opts.num}@${shortSha} — another execution already reviewing or completed`,
+      };
+    }
+  }
+
   const diff = getPullDiff(opts.repo, opts.num);
   const systemPrompt = loadVoice("reviewer");
 
@@ -66,10 +94,25 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
     `## Instructions\n\nFollow R0-R5 protocol per voice.md. Output the verdict comment body only — start with the marker line, end with the footer per grammar.md. No commentary outside the comment body.`,
   ];
 
-  const verdictBody = await invokeClaude({
-    systemPrompt,
-    userPrompt: userPromptParts.join("\n\n"),
-  });
+  let verdictBody: string;
+  try {
+    verdictBody = await invokeClaude({
+      systemPrompt,
+      userPrompt: userPromptParts.join("\n\n"),
+    });
+  } catch (e) {
+    // Release the lock on LLM failure so a future execution can retry.
+    if (lockAcquired && connStrEarly) {
+      await releasePrLock(
+        opts.repo,
+        opts.num,
+        headSha,
+        connStrEarly,
+        containerEarly
+      ).catch(() => {});
+    }
+    throw e;
+  }
 
   // Always archive to Storage if STORAGE_CONNECTION_STRING is set —
   // independent of whether we post. The blob is the audit trail.
