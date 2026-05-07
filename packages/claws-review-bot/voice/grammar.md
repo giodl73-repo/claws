@@ -25,7 +25,7 @@ After the marker (and a blank line), the comment opens with an H2 header:
 ## Architect Review — PR #<N> @ `<short-sha>`
 ```
 
-The SHA in the header MUST match the SHA in the marker. Mismatch = parse failure.
+The marker SHA is the canonical state-tracking value (the parser indexes on it). The H2 header SHA is for human readability and MUST match the marker SHA. If they disagree, the comment is malformed: log the mismatch and treat the PR as fresh (R0 from scratch). Never attempt to reconcile a mismatched comment.
 
 ## Sources of truth (R0 digest, mandatory section)
 
@@ -46,11 +46,12 @@ Every claim has an ID `C1..Cn`. Every drift hypothesis ties to a claim or to two
 ## Findings
 
 ### F1 — [<severity> | <category>[ | pre-existing]] — Status: <keyword>
+**Watches invoked**: <W-numbers, comma-separated, omit field if none>.
 **Recommendation**: <block | fix-before-merge | fix-or-acknowledge | follow-up>.
 **Invariant**: <named invariant, with spec citation when grounded>.
 **Where**: <file:line, primary>; <file:line, secondary>; ...
 **Counter-search**: <what was searched, what was found, why finding survives>.
-**Suggested fix**: <terse>.
+**Suggested fix**: <terse — name multiple options if drift; bot does not pick>.
 ```
 
 ### Finding-id formats

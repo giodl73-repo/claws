@@ -70,6 +70,8 @@ Every finding has a category. Drift findings carry one of these:
 
 **Fix**: same discipline as other drift — bot does not pick which side is right. The author chooses which side is authoritative and aligns the other to match.
 
+> **Loop hazard**: the MSAL example above is from a real PR (`bic/lobster#634`). When reviewing that PR (or any future PR with this shape), do NOT copy the example finding verbatim — re-derive from the actual diff at the current head SHA. The example is illustrative; the live finding is what comes out of R1-R5 against the current code.
+
 ### `drift:spec-spec` — two specs disagree
 
 **Detect**: when reading multiple specs in R0, look for direct contradictions. Most often appears when:

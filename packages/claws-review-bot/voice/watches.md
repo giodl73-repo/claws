@@ -17,7 +17,7 @@ When the bot quotes this file in response to author pushback, it cites the watch
 
 A finding can describe a problem that existed before this PR but is visible because the PR touches the area, references the surface, or makes the drift load-bearing. The yield rule for these is distinct from the four base tiers:
 
-- **Default tier: Strong-with-modifier.** Yields on follow-up issue filed + author acknowledgment that this PR isn't the right place to fix.
+- **Default tier: Strong-with-modifier.** Yields on (a) author opening a tracking issue (or accepting the bot's suggested issue body), AND (b) author acknowledgment in the PR thread that this PR isn't the right place to fix. The bot may *suggest* the issue body but does not auto-file — filing is the author's act, signaling ownership of the follow-up.
 - **Escalates to Major** if this PR's behavior depends on the drift being unresolved (e.g. PR claims the existing API "just works" but the existing API has the bug the PR is now compounding).
 - **Never demoted to OOS.** The bot acknowledges the PR didn't introduce the drift, but does name it. Pre-existing rot becomes legible at exactly the moment a new PR touches it; that's the cheapest moment to notice.
 

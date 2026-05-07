@@ -27,8 +27,10 @@ A PR is in review if its most recent comment carrying any `claws-lobster-archite
 When a PR is being actively pushed (multiple force-pushes within an hour, or a `wip:` / `[draft]` marker), don't run a full review on every head SHA. Instead:
 
 1. Post the `:hold` marker once on the first new SHA we observe.
-2. Wait until either (a) 30 min elapse without a new push, OR (b) the `[draft]` flag clears, OR (c) the PR is explicitly tagged for review.
+2. Wait until either (a) 30 min elapse without a new commit, OR (b) the `[draft]` flag clears, OR (c) the PR is explicitly tagged for review.
 3. Then run R0-R5 on the settled head SHA.
+
+**Which clock counts**: HEAD's commit `authored_at` (the timestamp of the actual commit on the PR head ref). NOT the repo's `pushed_at` — that field updates whenever any branch in the repo is touched, even unrelated branches. NOT `updated_at` on the PR — that updates on comment activity too. Always read `committed_at` / `authored_at` of the head commit via `gh api repos/<r>/commits/<sha>`.
 
 Otherwise we burn cycles reviewing intermediate states and produce stale verdicts the author has to mentally diff against. The hold marker is enough — it tells the author we're aware and waiting.
 
@@ -63,6 +65,7 @@ This is the shape every finding takes. Match the structure exactly so subsequent
 
 ```
 ### F1 — [Major | block | drift:spec-code] — Status: open
+**Watches invoked**: W6, W10.
 **Recommendation**: block — must fix before merge.
 **Invariant**: `aether_runtime/CLAUDE.md` §"Graph SSRF allowlist" requires every Graph base URL to pass through `_assert_graph_host_allowlisted()` before any request fires.
 **Where**: `aether_runtime/src/orchestrator/api/v1/lobster_workspace.py:42` — module-level call at import time.
@@ -70,10 +73,22 @@ This is the shape every finding takes. Match the structure exactly so subsequent
 **Suggested fix**: move the assertion into `_get_http_client_async()` at first request. Two regression tests pinning "import does not raise on non-Graph base URL" survive a future refactor.
 ```
 
+When a finding could be fixed in either of two ways (drift findings often look like this — bot doesn't pick a side), the **Suggested fix** field names both options:
+
+```
+### F2 — [Major | drift:code-code] — Status: open
+**Watches invoked**: W1.
+**Recommendation**: fix-or-acknowledge — pick one option.
+**Invariant**: lobster_web bundle and the `/auth/callback` server route disagree about which redirect URI is in use. Either both must agree, or one is dead code.
+**Where**: `src/lobster_web/src/services/msalAuth.ts:106` defaults `auth.redirectUri = window.location.origin`; `src/lobster_runtime/src/auth/callback.rs:14` registers `/auth/callback` route handler.
+**Counter-search**: searched for any wiring that overrides `redirectUri` to `/auth/callback` — none found. Searched for runtime config that sets `auth.redirectUri` — none.
+**Suggested fix**: option A — set `redirectUri: '/auth/callback'` at MSAL init in `msalAuth.ts`, plus a unit test pinning the constructed instance carries this value. Option B — remove the `/auth/callback` route handler if `window.location.origin` is the intended URI. Pick A (preserves the bouncer pattern) or B (simplifies). The bot does not pick.
+```
+
 Required structure (full grammar in `grammar.md`):
 - `### F<N>` or `### F-new<N>` (regression introduced this push) or `### LQ<N>` header
 - `[severity | category]` and `Status: <keyword>` on the header line (or directly below)
-- Bold-prefixed fields: **Recommendation**, **Invariant**, **Where**, **Counter-search**, **Suggested fix** — omit fields that don't apply, never invent prefix names
+- Bold-prefixed fields: **Watches invoked** (the W-numbers that fire on this finding), **Recommendation**, **Invariant**, **Where**, **Counter-search**, **Suggested fix** — omit fields that don't apply, never invent prefix names
 
 ## What this bot does NOT do
 

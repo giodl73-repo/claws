@@ -60,9 +60,25 @@ Lobster runtime is Rust. The clippy gates (Tier 1, Tier 2) are the contract — 
 
 ### Skip when
 
+**Whole-lens skips:**
 - The PR touches no `*.rs` files. Don't fabricate Rust findings on a TS-only or Python-only diff.
 - The PR is a `Cargo.lock`-only change (dependency update auto-PR). Apply only the cargo-hygiene watches; skip safety/error/async/panic.
 - The PR is in a known no-Rust directory (`lobster_web/`, `docs/`, `.craft/`, `pipelines/`).
+
+**Sub-section skips** (saves evaluation cost on Rust PRs that touch only some surfaces):
+
+| Sub-section | Skip when |
+|---|---|
+| Memory & unsafe | Diff contains no `unsafe` blocks AND no removal of existing `#![forbid(unsafe_code)]` |
+| Error handling | Diff contains no new public function/method signatures returning `Result<...>`, no new public error enums, no change to `?`-chain depth in orchestration code |
+| Async & concurrency | Diff contains no `.await`, no `tokio::`, no `async fn`, no new `Mutex`/`RwLock`/`Semaphore` |
+| Panic discipline | Diff contains no new `.unwrap()` / `.expect()` / `panic!()` / `unreachable!()` in production code, and no new public function that could panic |
+| Lint posture | Diff contains no `#![...]` attribute changes at crate root, no new `#[allow(...)]` sites |
+| Visibility & API design | Diff contains no `pub` keyword changes, no new `String`/`Vec` parameters in public signatures, no new magic-string literals in production code |
+| Test coverage | Diff contains no new public API surface AND no test removals/disabling |
+| Cargo / workspace | Diff contains no `Cargo.toml` changes, no `[workspace.dependencies]` changes, no `rust-version` field changes |
+
+When ALL sub-sections skip, the lens emits a single line in R3 notes: "L1: nothing applicable on this diff." Don't write empty findings.
 
 ## L2 — plex-mock contract
 
