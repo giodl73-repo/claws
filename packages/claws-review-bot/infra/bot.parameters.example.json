@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "ghePat": {
+      "value": "REPLACE_WITH_GHE_PAT_FROM_gh_auth_token"
+    },
+    "anthropicApiKey": {
+      "value": "REPLACE_WITH_ANTHROPIC_API_KEY"
+    },
+    "containerImage": {
+      "value": "ghcr.io/giodl-ms/claws-review-bot:latest"
+    },
+    "watchRepos": {
+      "value": "bic/lobster"
+    },
+    "pollIntervalMinutes": {
+      "value": 10
+    }
+  }
+}
