@@ -27,8 +27,9 @@ COPY package.json package-lock.json ./
 COPY packages/claws-review-bot/package.json ./packages/claws-review-bot/
 RUN npm ci --workspace=@bic/claws-review-bot --include-workspace-root
 
-# Install Anthropic CLI globally (for the subprocess invocation in src/claude.ts)
-RUN npm install -g @anthropic-ai/claude-code@latest
+# Container deployment uses LLM_BACKEND=azure-openai (set by Bicep), which
+# calls AOAI directly via fetch. No claude CLI needed in the image — that
+# path is local-dev only via the relay.
 
 # Copy source + voice + build
 COPY packages/claws-review-bot/tsconfig.json packages/claws-review-bot/tsup.config.ts ./packages/claws-review-bot/

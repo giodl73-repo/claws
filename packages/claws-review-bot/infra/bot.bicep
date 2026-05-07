@@ -1,4 +1,5 @@
-// bot.bicep — claws-review-bot Container Apps Job + KeyVault + Managed Identity.
+// bot.bicep — claws-review-bot Container Apps Job + KeyVault + Storage Account
+// + role assignments. Backend: Azure OpenAI (existing clawcode-aoai resource).
 //
 // Deploy:
 //   az deployment group create \
@@ -16,9 +17,17 @@ param botName string = 'claws-review-bot'
 @secure()
 param ghePat string
 
-@description('Anthropic API key (will be stored in KeyVault)')
-@secure()
-param anthropicApiKey string
+@description('Existing AOAI account resource group')
+param aoaiResourceGroup string = 'rg-clawcode'
+
+@description('Existing AOAI account name')
+param aoaiAccountName string = 'clawcode-aoai'
+
+@description('AOAI deployment name to use as the reviewer model')
+param aoaiDeploymentName string = 'reviewer-gpt5'
+
+@description('AOAI API version')
+param aoaiApiVersion string = '2025-01-01-preview'
 
 @description('Container image (built and pushed separately)')
 param containerImage string = 'ghcr.io/giodl-ms/claws-review-bot:latest'
@@ -28,6 +37,52 @@ param watchRepos string = 'bic/lobster'
 
 @description('Polling interval in minutes')
 param pollIntervalMinutes int = 10
+
+@description('Whether the bot posts comments to PRs (false = dry-run, archive to Storage only)')
+param postComments bool = false
+
+// ---- Reference existing AOAI account (different RG) ----
+
+resource aoaiAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' existing = {
+  name: aoaiAccountName
+  scope: resourceGroup(aoaiResourceGroup)
+}
+
+// ---- Storage account for verdict archive ----
+
+resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
+  name: replace('${botName}stg', '-', '')
+  location: location
+  sku: { name: 'Standard_LRS' }
+  kind: 'StorageV2'
+  properties: {
+    minimumTlsVersion: 'TLS1_2'
+    allowBlobPublicAccess: false
+    publicNetworkAccess: 'Enabled'
+  }
+}
+
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
+  parent: storage
+  name: 'default'
+}
+
+resource verdictsContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+  parent: blobService
+  name: 'verdicts'
+  properties: { publicAccess: 'None' }
+}
+
+// ---- Log Analytics ----
+
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
+  name: '${botName}-logs'
+  location: location
+  properties: {
+    sku: { name: 'PerGB2018' }
+    retentionInDays: 30
+  }
+}
 
 // ---- Container Apps Environment ----
 
@@ -42,17 +97,6 @@ resource env 'Microsoft.App/managedEnvironments@2024-03-01' = {
         sharedKey: logAnalytics.listKeys().primarySharedKey
       }
     }
-  }
-}
-
-// ---- Log Analytics ----
-
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
-  name: '${botName}-logs'
-  location: location
-  properties: {
-    sku: { name: 'PerGB2018' }
-    retentionInDays: 30
   }
 }
 
@@ -86,10 +130,18 @@ resource gheSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   properties: { value: ghePat }
 }
 
-resource anthropicSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+resource aoaiSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   parent: keyvault
-  name: 'anthropic-api-key'
-  properties: { value: anthropicApiKey }
+  name: 'aoai-api-key'
+  properties: { value: aoaiAccount.listKeys().key1 }
+}
+
+resource storageSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyvault
+  name: 'storage-connection-string'
+  properties: {
+    value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+  }
 }
 
 // ---- KeyVault Secrets User role for the managed identity ----
@@ -134,8 +186,13 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
           identity: identity.id
         }
         {
-          name: 'anthropic-api-key'
-          keyVaultUrl: anthropicSecret.properties.secretUri
+          name: 'aoai-api-key'
+          keyVaultUrl: aoaiSecret.properties.secretUri
+          identity: identity.id
+        }
+        {
+          name: 'storage-connection-string'
+          keyVaultUrl: storageSecret.properties.secretUri
           identity: identity.id
         }
       ]
@@ -151,12 +208,22 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
             '--repo'
             watchRepos
             '--once'  // Cron triggers each invocation; run once per fire and exit
-            '--post'
           ]
           env: [
             { name: 'GH_HOST', value: 'microsoft.ghe.com' }
             { name: 'GH_TOKEN', secretRef: 'ghe-pat' }
-            { name: 'ANTHROPIC_API_KEY', secretRef: 'anthropic-api-key' }
+            { name: 'LLM_BACKEND', value: 'azure-openai' }
+            { name: 'AOAI_ENDPOINT', value: aoaiAccount.properties.endpoint }
+            { name: 'AOAI_DEPLOYMENT', value: aoaiDeploymentName }
+            { name: 'AOAI_API_VERSION', value: aoaiApiVersion }
+            { name: 'AOAI_API_KEY', secretRef: 'aoai-api-key' }
+            { name: 'STORAGE_CONNECTION_STRING', secretRef: 'storage-connection-string' }
+            { name: 'STORAGE_CONTAINER', value: 'verdicts' }
+            // POST_COMMENTS toggle: false = archive to Storage only (dry-run);
+            // true = also post to PR. Flip via:
+            //   az containerapp job update -n claws-review-bot-job \
+            //     -g <rg> --set-env-vars POST_COMMENTS=true
+            { name: 'POST_COMMENTS', value: postComments ? 'true' : 'false' }
           ]
         }
       ]
@@ -166,4 +233,7 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
 
 output jobName string = job.name
 output keyvaultName string = keyvault.name
+output storageAccountName string = storage.name
+output verdictsContainerUrl string = '${storage.properties.primaryEndpoints.blob}verdicts'
 output identityClientId string = identity.properties.clientId
+output aoaiEndpoint string = aoaiAccount.properties.endpoint

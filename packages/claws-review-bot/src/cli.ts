@@ -68,7 +68,11 @@ program
     (v: string) => parseInt(v, 10),
     10
   )
-  .option("--post", "post verdict comments (default: dry-run)", false)
+  .option(
+    "--post",
+    "post verdict comments (also reads POST_COMMENTS env var; either enables)",
+    false
+  )
   .option("--once", "run one tick across all repos and exit", false)
   .action(
     async (opts: {
@@ -85,11 +89,20 @@ program
         process.exit(2);
       }
 
+      // Either the --post flag OR POST_COMMENTS=true env var enables posting.
+      // The env var lets a Container Apps Job toggle posting via
+      // `az containerapp job update --set-env-vars POST_COMMENTS=true`
+      // without a full redeploy.
+      const envPost = (process.env["POST_COMMENTS"] ?? "")
+        .toLowerCase()
+        .match(/^(1|true|yes|on)$/);
+      const postComments = opts.post || envPost !== null;
+
       await runPoll({
         repos: opts.repo,
         seenPath: resolve(opts.seen),
         intervalMs: opts.intervalMin * 60 * 1000,
-        postComments: opts.post,
+        postComments,
         onceOnly: opts.once,
       });
     }

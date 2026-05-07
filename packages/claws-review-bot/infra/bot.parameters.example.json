@@ -5,9 +5,6 @@
     "ghePat": {
       "value": "REPLACE_WITH_GHE_PAT_FROM_gh_auth_token"
     },
-    "anthropicApiKey": {
-      "value": "REPLACE_WITH_ANTHROPIC_API_KEY"
-    },
     "containerImage": {
       "value": "ghcr.io/giodl-ms/claws-review-bot:latest"
     },
@@ -16,6 +13,18 @@
     },
     "pollIntervalMinutes": {
       "value": 10
+    },
+    "postComments": {
+      "value": false
+    },
+    "aoaiResourceGroup": {
+      "value": "rg-clawcode"
+    },
+    "aoaiAccountName": {
+      "value": "clawcode-aoai"
+    },
+    "aoaiDeploymentName": {
+      "value": "reviewer-gpt5"
     }
   }
 }

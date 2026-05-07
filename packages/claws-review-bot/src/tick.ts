@@ -7,6 +7,7 @@ import {
 } from "./gh.js";
 import { invokeClaude } from "./claude.js";
 import { loadVoice } from "./voice.js";
+import { writeVerdictBlob, extractMarker } from "./storage.js";
 
 export interface TickOptions {
   repo: string;
@@ -20,6 +21,7 @@ export interface TickResult {
   reason?: string;
   verdictBody?: string;
   postedCommentId?: number;
+  blobUrl?: string;
 }
 
 export async function runTick(opts: TickOptions): Promise<TickResult> {
@@ -69,12 +71,36 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
     userPrompt: userPromptParts.join("\n\n"),
   });
 
+  // Always archive to Storage if STORAGE_CONNECTION_STRING is set —
+  // independent of whether we post. The blob is the audit trail.
+  let blobUrl: string | undefined;
+  const connStr = process.env["STORAGE_CONNECTION_STRING"];
+  if (connStr) {
+    try {
+      blobUrl = await writeVerdictBlob(
+        {
+          repo: opts.repo,
+          prNumber: opts.num,
+          headSha,
+          marker: extractMarker(verdictBody),
+          body: verdictBody,
+        },
+        connStr,
+        process.env["STORAGE_CONTAINER"] ?? "verdicts"
+      );
+    } catch (e) {
+      console.error(
+        `[tick] storage write failed (continuing): ${(e as Error).message}`
+      );
+    }
+  }
+
   if (opts.dryRun) {
-    return { skipped: false, verdictBody };
+    return { skipped: false, verdictBody, ...(blobUrl ? { blobUrl } : {}) };
   }
 
   if (!opts.postComment) {
-    return { skipped: false, verdictBody };
+    return { skipped: false, verdictBody, ...(blobUrl ? { blobUrl } : {}) };
   }
 
   const posted = postIssueComment(opts.repo, opts.num, verdictBody);
@@ -82,5 +108,6 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
     skipped: false,
     verdictBody,
     postedCommentId: posted.id,
+    ...(blobUrl ? { blobUrl } : {}),
   };
 }
