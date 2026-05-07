@@ -53,6 +53,23 @@ Every finding has a category. Drift findings carry one of these:
 
 **Fix**: the bot does not pick a side. It says: *"either fix the code to match `<spec-path>:<line>` or update `<spec-path>:<line>` in this PR. Choose."*
 
+### `drift:code-code` — production code disagrees with itself
+
+**Detect**: when reading the diff and surrounding context, look for places where two pieces of production code assert different things about the same surface, or where test setup contradicts the production code path the test is supposed to exercise.
+
+**Examples**:
+- Bundle's MSAL init defaults `auth.redirectUri = window.location.origin`. Backend `/auth/callback` route assumes `redirectUri = "/auth/callback"`. Both are production code; they disagree about which redirect URI is in use. (Reference: `bic/lobster#634` F1.)
+- Test setup constructs an HTTP client with `follow_redirects=False`; production constructs the same client with `follow_redirects=True`. Test exercises a path production never takes.
+- Two callers of the same function pass arguments in different orders or types — one or both has the wrong understanding.
+- A constant declared in one module shadows / contradicts a `const` of the same name in a sibling module that's imported by the same caller.
+
+**Severity**:
+- If both sides are load-bearing in this PR's diff and the disagreement breaks the feature → `[Major | block | drift:code-code]`.
+- If one side is pre-existing and this PR exposes the disagreement → `[Major | drift:code-code | pre-existing]` (see `watches.md` "pre-existing drift" branch).
+- If the disagreement is benign (different code paths, never reached together) → demote to LQ or drop.
+
+**Fix**: same discipline as other drift — bot does not pick which side is right. The author chooses which side is authoritative and aligns the other to match.
+
 ### `drift:spec-spec` — two specs disagree
 
 **Detect**: when reading multiple specs in R0, look for direct contradictions. Most often appears when:

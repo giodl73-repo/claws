@@ -30,7 +30,7 @@ In rough order of authority on lobster:
 
 Run these in order. Stop when you have enough grounding for the touched area.
 
-1. **Walk up from each changed file**: does any ancestor directory have a `CLAUDE.md`? The closest one is the most authoritative. Read it.
+1. **Walk up from each changed file**: does any ancestor directory have a `CLAUDE.md`? The closest one is the most authoritative. Read it. **If no `CLAUDE.md` exists in any ancestor up to the repo root** (common in lobster — many packages don't have one), fall back to: nearest `README.md`, then root-level `README.md` and `CONTRIBUTING.md`, then any `docs/architecture.md` / `docs/overview.md`. Note in R0 explicitly that no CLAUDE.md was found — this affects which W11 watches apply (a missing CLAUDE.md in a contract-class area is itself a spec gap worth raising as LQ).
 2. **PR body links**: any link or relative path to a `docs/`, `design/`, `.craft/`, `*.md` file. Read every one.
 3. **Grep by symbol**: take the most prominent function / class / type added or modified, grep `docs/`, `design/`, `.craft/plans/` for the symbol. Read what matches.
 4. **API-REFERENCE / endpoint-side**: if the change adds or modifies an HTTP endpoint, gRPC method, SSE event, or Pydantic model used in a response, `docs/API-REFERENCE.md` is in scope.

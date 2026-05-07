@@ -58,6 +58,12 @@ Lobster runtime is Rust. The clippy gates (Tier 1, Tier 2) are the contract — 
 - Generic style — `harryf` peer-review covers this with named PASS rules
 - Imports ordering (rustfmt handles)
 
+### Skip when
+
+- The PR touches no `*.rs` files. Don't fabricate Rust findings on a TS-only or Python-only diff.
+- The PR is a `Cargo.lock`-only change (dependency update auto-PR). Apply only the cargo-hygiene watches; skip safety/error/async/panic.
+- The PR is in a known no-Rust directory (`lobster_web/`, `docs/`, `.craft/`, `pipelines/`).
+
 ## L2 — plex-mock contract
 
 `lobster_runtime` and `lobster_plex_mock` evolve in lockstep — this is the contract that lets PR-time CI run the same tests against both. The PR #618 family established the convention.
@@ -69,6 +75,12 @@ Lobster runtime is Rust. The clippy gates (Tier 1, Tier 2) are the contract — 
 - New `clippy::allow` site present in one and not the other — divergence in the lint contract.
 
 **Yield**: divergence is not automatically a finding. The PR may have a justification ("plex-mock parity will land in the follow-up") — but that justification must be in the PR body. If absent, raise as Major drift:pr-code finding.
+
+### Skip when
+
+- The PR touches neither `lobster_runtime/` nor `lobster_plex_mock/`. No Rust runtime change → no parity check.
+- The PR is `lobster_web/` only or `docs/` only.
+- Both `lobster_runtime` and `lobster_plex_mock` are touched in the diff with matching shape (e.g. both Cargo.toml bumps to the same version, both have a new public function with the same signature) — note the lockstep was honored and skip the lens body.
 
 ## L3 — OpenClaw integration shard
 
@@ -82,6 +94,12 @@ The OpenClaw container shard depends on lobster-side runtime contracts. Changes 
 
 **Cross-references**: memory `project_openclaw_upstream.md`, `reference_eduardo_governance_design.md`.
 
+### Skip when
+
+- The PR touches only `lobster_web/`, `docs/`, `.craft/`, or `pipelines/` with no gateway / dispatch / snap-restore / container-shard surface.
+- The PR is a Rust-only change in a non-shard crate (e.g. `clippy` lint Tier rollouts, internal refactors of `runtime/auth/`).
+- The PR is a `lobster_plex_mock` parity follow-up (already covered by L2).
+
 ## L4 — Azure Linux build resilience
 
 Lobster builds on Azure Linux via OneBranch. Transient `tdnf` HTTP 429 rate limits are a recurring failure mode. PR `bic/lobster#648` extracted `scripts/tdnf-install-with-retry.sh` as the canonical retry path.
@@ -91,6 +109,11 @@ Lobster builds on Azure Linux via OneBranch. Transient `tdnf` HTTP 429 rate limi
 - New ADO tasks that don't set `retryCountOnTaskFailure: 1` (or higher) on image-build steps where transient failures are expected.
 - Image-build context paths where `.dockerignore` is missing or stale — bloated context inflates push times and obscures which files are actually used.
 - Backoff strategy regressions — current convention is linear (15/30/45/60/75s, ~3.75 min total). Changes to this need justification.
+
+### Skip when
+
+- The PR touches no `Dockerfile*`, no `*.Dockerfile`, no `pipelines/*.yml`, no `.dockerignore`. No build-system change → no build-resilience review.
+- The PR is a pure code change in any source crate (TS, Rust, Python).
 
 ## L5 — lobster_web wire-format
 

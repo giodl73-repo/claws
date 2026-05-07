@@ -13,6 +13,16 @@ Every finding lives in one of four tiers. The tier dictates how the bot responds
 
 When the bot quotes this file in response to author pushback, it cites the watch number and tier verbatim: *"You've argued F4 is intentional. F4 is non-negotiable per W9. The bot does not yield on this category."*
 
+### Pre-existing drift surfaced by this PR
+
+A finding can describe a problem that existed before this PR but is visible because the PR touches the area, references the surface, or makes the drift load-bearing. The yield rule for these is distinct from the four base tiers:
+
+- **Default tier: Strong-with-modifier.** Yields on follow-up issue filed + author acknowledgment that this PR isn't the right place to fix.
+- **Escalates to Major** if this PR's behavior depends on the drift being unresolved (e.g. PR claims the existing API "just works" but the existing API has the bug the PR is now compounding).
+- **Never demoted to OOS.** The bot acknowledges the PR didn't introduce the drift, but does name it. Pre-existing rot becomes legible at exactly the moment a new PR touches it; that's the cheapest moment to notice.
+
+Verdict labels these explicitly with the modifier appended after the category: `### F3 — [Major | drift:code-code | pre-existing] — Status: open`. The `pre-existing` modifier signals to the author that fix-in-this-PR is not required, but the finding does not silently disappear.
+
 ---
 
 ## Non-negotiable watches
@@ -41,7 +51,10 @@ A change in one repo that requires (or assumes) a coordinated change in another 
 Token leakage to non-allowlisted hosts, Authorization header forwarded across origin-redirect, OBO token reuse without invalidate-on-401, secrets in logs.
 - **Why**: credential class. Single instance is a security incident.
 - **Yield**: never. Class-level rule.
-- **Reference example**: PR `bic/aether#7229` httpx redirect-Authorization-strip test.
+- **Surfaces (aether-side)**: httpx redirect-strip transport, Graph 401-invalidate-and-retry, OBO token cache invalidation, Bearer header forwarding across origins.
+- **Surfaces (lobster-side)**: MSAL `auth.redirectUri` configuration (must match the AAD app-registration redirect-URI list exactly — bundle vs doc-list drift is a W6 finding), AAD nonce-in-header JWT handling, MSAL `acquireTokenSilent` fallback paths, sign-in cookie scope and expiry, `/auth/callback` route hardening, AAD PKCE flow integrity.
+- **Surfaces (cross-cutting)**: secrets in logs (regex-grep `Authorization`, `token`, `secret`, `password`, `client_secret` near log statements), env-var-as-secret without `Secret<T>` / Pydantic `SecretStr` wrapping.
+- **Reference examples**: PR `bic/aether#7229` httpx redirect-Authorization-strip test; PR `bic/lobster#634` MSAL redirect-URI mismatch (where `/auth/callback` was added to docs but never wired into the bundle's MSAL init — F1 in dogfood verdict).
 
 ### W7 — No environmental assertion at module-import time
 Module-level `assert` / raise that depends on environment variables, network reachability, or external service state.
@@ -111,7 +124,7 @@ Findings the bot drops immediately on any rebuttal — or never raises in the fi
 - **Style / format checklist** — `harryf` covers this on lobster.
 - **Eval-impact gating** — `akbhatna` covers this on aether.
 - **Multi-model consensus** — `lukas`/automaton covers this on aether.
-- **Pre-existing tech debt** in touched files but not introduced by this PR.
+- **Pre-existing tech debt** in touched files but not introduced by this PR — *unless* the PR surfaces it (then see "Pre-existing drift surfaced by this PR" branch above).
 - **Build / CI flakiness** not addressed by this PR.
 - **Author-attribution / commit-message style** — humans review this, not bots.
 - **Performance speculation** without a benchmark — can be raised as LQ if specific, never as a finding.
