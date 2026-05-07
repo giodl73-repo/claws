@@ -4,17 +4,59 @@ These are the lenses the bot evaluates on every PR after R0 (sources of truth) a
 
 ## L1 — Rust safety
 
-Lobster runtime is Rust. The clippy gates (Tier 1, Tier 2) are the contract.
+Lobster runtime is Rust. The clippy gates (Tier 1, Tier 2) are the contract — but the contract is broader than clippy. The watches below are grounded in patterns we run in our own Rust codebases (`icelines`, `apportionment`, `craft`); when an author challenges a watch, the bot cites the cross-repo precedent.
 
-**Watch for:**
-- New `#[allow(<lint>)]` sites without a `reason = "..."` string. Convention from PR `bic/lobster#668` requires every allow site to document why the lint's auto-suggestion would be unsound.
-- New `.unwrap()` / `.expect()` in production code without a documented invariant in a comment immediately above. PR `bic/lobster#657` landed `clippy::expect_used = deny`; new escapes need explicit allow + reason.
-- `.await` while holding a non-async lock (`std::sync::Mutex`, `RwLock`). Use `tokio::sync` types or drop the guard explicitly before `.await`.
-- New `Drop` impls that call `.await` (impossible — flag as definite bug) or that rely on async cleanup.
-- Public APIs that take `String` where `&str` would do, or `Vec<T>` where `&[T]` would do, without justification.
-- `unsafe` blocks without a `// SAFETY:` comment naming the invariant being upheld.
+### Memory and unsafe discipline
 
-**Don't watch for** (handled elsewhere): formatting (`cargo fmt`), generic style (`harryf`), basic lints (CI enforces).
+- **`unsafe` blocks without a `// SAFETY:` comment** naming the OS contract or invariant being upheld. *Cross-repo: `craft` uses `#![forbid(unsafe_code)]` in every library crate; `icelines` has 2 unsafe blocks (libc::signal at startup) each with a SAFETY comment naming the contract; `apportionment` has 0 unsafe blocks and uses `// SAFETY:` to document why patterns are safe (not why unsafe was needed).* The lobster bar should be: every `unsafe` block names the invariant that makes the operation sound.
+- **New `unsafe` in a library crate** that doesn't already have an opt-in justification at the module or crate level. Library crates should aim for `#![forbid(unsafe_code)]` (craft pattern); when they can't, the deviation should be explicit.
+
+### Error handling
+
+- **Public library APIs returning `anyhow::Result<T>`** instead of a typed `Result<T, MyError>`. *Cross-repo: `apportionment` and `icelines` use `thiserror` for library errors and `anyhow` only at the CLI/orchestration layer; `craft` uses `thiserror` exclusively with typed Diagnostic builders.* Library callers can't pattern-match on `anyhow::Error` — typed errors force the producer to enumerate failure modes.
+- **Public error enums without `#[non_exhaustive]`** (craft Rule 5). Future additions become breaking changes without it. Demote to LQ if the convention isn't established for the touched crate; promote to Major if the crate already follows it.
+- **Errors propagated without context** in the orchestration layer. *Cross-repo: `icelines` carries 227 `.context()` / `.with_context()` decoration calls; `craft` uses typed Diagnostic builders that self-redact for `Secret<T>`.* New `?` chains in orchestration code should add context at the point where the error crosses a meaningful boundary (operation, request, file).
+
+### Async and concurrency
+
+- **`.await` while holding `std::sync::Mutex`, `parking_lot::Mutex`, or `RwLock`.** *Cross-repo: `icelines` has zero `std::sync::Mutex` in production, all locks are `tokio::sync::Mutex`; `craft` carries `CancellationToken` through context and uses `tokio::sync::Semaphore` for bounded concurrency, never blocking-locks across `.await`.* Use `tokio::sync` types or drop the guard explicitly before `.await`.
+- **`Drop` impls that rely on async cleanup.** Async work in `Drop` is fundamentally broken; flag as a definite bug.
+- **Unbounded channels in hot paths.** *Cross-repo: `craft` uses `mpsc::channel(N)` not `unbounded_channel()`.* New `tokio::sync::mpsc::unbounded_channel()` without a justification (typically: "this is bounded by upstream throttling at ...") is a backpressure hole.
+- **Unbounded `tokio::spawn` in a hot loop without a Semaphore.** *Cross-repo: `craft` providers hold `Semaphore::new(8)`-style gates.* Every fan-out site should have an upper bound.
+- **`Send` regressions on public types** that were previously `Send`. Check `cargo check --tests` reasoning when public types add a `Rc<T>`, `RefCell<T>`, or `dyn Trait` without `+ Send`.
+
+### Panic discipline
+
+- **New `.unwrap()` / `.expect()` in production code without a documented invariant** in a comment immediately above. *Cross-repo: `apportionment` has 1032 `.unwrap()` calls but most are in test code; `icelines` reserves `.expect("infallible with these options")`-style strings for cases where the contract makes failure impossible; `craft` has zero unwrap/expect in production paths because `clippy::expect_used = deny` is on.* PR `bic/lobster#657` landed the same gate on lobster — new escapes need explicit `#[allow(clippy::expect_used)]` + reason.
+- **`panic!` outside test code or impossible-branch match arms.** *Cross-repo: `apportionment` uses `panic!` only in tests and unreachable match arms (e.g., `panic!("expected Singular, got {:?}", other)` after exhaustive enum match).* Production `panic!` is a category-error in this codebase.
+
+### Lint posture
+
+- **New `#[allow(<lint>)]` sites without a `reason = "..."` string.** Convention from PR `bic/lobster#668`: every allow site documents why the lint's auto-suggestion would be unsound. *Cross-repo: `craft` makes this strict via `#![deny(clippy::pedantic)]` everywhere with surgical per-crate allows that name the rationale (e.g., `module_name_repetitions` global, `missing_panics_doc` only in `craft-agent`).*
+- **Lint posture changes** (`#![deny(...)]`, `#![warn(...)]`, `#![allow(...)]`) at crate root without a comment naming the reason. Crate-level lint posture is a contract with the rest of the workspace.
+
+### Visibility and API design
+
+- **New `pub` items where `pub(crate)` would suffice.** *Cross-repo: `apportionment` 6 `pub(crate)`, `icelines` 54, `craft` enforces visibility via compile-fail doctest (`FormaIR` cannot be re-exported by external code).* The lobster default should be `pub(crate)` first, `pub` only when crossing the crate boundary deliberately.
+- **Magic-string literals for evolving values.** *Cross-repo: `apportionment` requires lowercase_underscores constants for state names (CLAUDE.md line 77); `icelines` requires `CURRENT_SEASON` constant, never `"20252026"` inline (CLAUDE.md line 116); `craft` uses typed slug newtypes.* Watch for: hardcoded version strings, route paths, identifier patterns, environment names that should be constants or typed wrappers.
+- **Public APIs that take `String` where `&str` would do, or `Vec<T>` where `&[T]` would do**, without justification. Owned types in public signatures force the caller into allocations they may not need.
+
+### Test coverage
+
+- **New public API without a test** at any tier. *Cross-repo: `apportionment` mandates "Add tests for EVERY enhancement" with a unit/integration/e2e/dashboard decision tree; `icelines` requires L0 (inline) for new features and L2 (subprocess) for new commands; `craft` is integration-first with golden tests in `tests/`.* The tier should match the surface — internal helper gets L0; new endpoint gets L1+L2.
+- **Removed or disabled test without a replacement** pinning the same behavior. (Reinforces W2 non-negotiable; surfaces here as the diff-side detection of W2.)
+
+### Cargo / workspace hygiene
+
+- **Dependency bumps in one crate without sibling crates that should evolve together.** *Lobster: `lobster_runtime` + `lobster_plex_mock` lockstep (PR #618 family); `icelines` uses `[workspace.dependencies]` for shared deps.* Watch for: new direct dep in a leaf crate that should be inherited via `workspace = true`.
+- **`Cargo.toml` MSRV (`rust-version = "..."`) drift.** *Cross-repo: `craft` pins MSRV at `clippy.toml` (currently 1.94.1).* Bumping MSRV is a downstream-consumer-impacting change.
+
+### Don't watch for (handled elsewhere)
+
+- Formatting (`cargo fmt --check` is a CI gate)
+- Basic clippy lints (CI enforces with `-D warnings`)
+- Generic style — `harryf` peer-review covers this with named PASS rules
+- Imports ordering (rustfmt handles)
 
 ## L2 — plex-mock contract
 
