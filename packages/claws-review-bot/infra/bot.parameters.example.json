@@ -6,7 +6,7 @@
       "value": "REPLACE_WITH_GHE_PAT_FROM_gh_auth_token"
     },
     "containerImage": {
-      "value": "ghcr.io/giodl-ms/claws-review-bot:latest"
+      "value": "clawsreviewbotacr.azurecr.io/claws-review-bot:latest"
     },
     "watchRepos": {
       "value": "bic/lobster"
@@ -25,6 +25,9 @@
     },
     "aoaiDeploymentName": {
       "value": "reviewer-gpt5"
+    },
+    "acrAccountName": {
+      "value": "clawsreviewbotacr"
     }
   }
 }
