@@ -23,8 +23,11 @@ param aoaiResourceGroup string = 'rg-clawcode'
 @description('Existing AOAI account name')
 param aoaiAccountName string = 'clawcode-aoai'
 
-@description('AOAI deployment name to use as the reviewer model')
+@description('AOAI deployment name to use as the reviewer model (full-tier; used for initial reviews)')
 param aoaiDeploymentName string = 'reviewer-gpt5'
+
+@description('AOAI deployment name for cheap-tier reevals (delta analysis; cuts ~80% on reeval cost). Empty disables two-tier routing — all calls use aoaiDeploymentName.')
+param aoaiDeploymentNameReeval string = 'reviewer-gpt5-mini'
 
 @description('AOAI API version')
 param aoaiApiVersion string = '2025-01-01-preview'
@@ -38,8 +41,8 @@ param acrAccountName string = 'clawsreviewbotacr'
 @description('Repos to poll, comma-separated (e.g. "bic/lobster")')
 param watchRepos string = 'bic/lobster'
 
-@description('Polling interval in minutes')
-param pollIntervalMinutes int = 10
+@description('Polling interval in minutes (15 = standard cadence; lengthens cron, reduces overlap-driven reeval pressure)')
+param pollIntervalMinutes int = 15
 
 @description('Whether the bot posts comments to PRs (false = dry-run, archive to Storage only)')
 param postComments bool = false
@@ -249,6 +252,7 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
             { name: 'LLM_BACKEND', value: 'azure-openai' }
             { name: 'AOAI_ENDPOINT', value: aoaiAccount.properties.endpoint }
             { name: 'AOAI_DEPLOYMENT', value: aoaiDeploymentName }
+            { name: 'AOAI_DEPLOYMENT_REEVAL', value: aoaiDeploymentNameReeval }
             { name: 'AOAI_API_VERSION', value: aoaiApiVersion }
             { name: 'AOAI_API_KEY', secretRef: 'aoai-api-key' }
             { name: 'STORAGE_CONNECTION_STRING', secretRef: 'storage-connection-string' }

@@ -15,6 +15,10 @@ export interface InvokeClaudeOptions {
   aoaiDeployment?: string;
   aoaiApiKey?: string;
   aoaiApiVersion?: string;
+  /** prompt-cache hint for AOAI; stable string per static-prompt config so
+   *  the system prompt prefix hits cache across calls. Cached tokens bill
+   *  at ~10% of normal input rate. */
+  promptCacheKey?: string;
 }
 
 const DEFAULT_RELAY = "http://127.0.0.1:8716";
@@ -101,6 +105,10 @@ async function invokeAzureOpenAI(opts: InvokeClaudeOptions): Promise<string> {
         max_completion_tokens: 8000,
         temperature: 0.2,
       };
+
+  if (opts.promptCacheKey) {
+    body["prompt_cache_key"] = opts.promptCacheKey;
+  }
 
   const timeout = opts.timeoutMs ?? 30 * 60 * 1000;
   const controller = new AbortController();

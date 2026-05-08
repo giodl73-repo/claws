@@ -13,6 +13,7 @@ import {
   tryAcquirePrLock,
   releasePrLock,
 } from "./storage.js";
+import type { GhComment } from "./gh.js";
 
 export interface TickOptions {
   repo: string;
@@ -29,6 +30,85 @@ export interface TickResult {
   blobUrl?: string;
 }
 
+const MAX_DIFF_CHARS = 120_000; // ~30k tokens at 4 chars/token
+
+const DOCS_EXT = /\.(md|svg|png|jpg|jpeg|gif|webp|pdf|txt|rst|adoc|markdown)$/i;
+const LOCK_FILES = new Set([
+  "Cargo.lock",
+  "package-lock.json",
+  "yarn.lock",
+  "pnpm-lock.yaml",
+  "composer.lock",
+  "poetry.lock",
+  "uv.lock",
+  "Gemfile.lock",
+  "Pipfile.lock",
+  "go.sum",
+]);
+const LICENSE_PATHS = /^(LICENSE|LICENCE|COPYING)(\.\w+)?$/;
+
+const FINDING_ID_RE = /\b(F-new\d+|F\d+|LQ\d+)\b/;
+const FIX_KEYWORDS_RE =
+  /\b(addressed|fixed|resolved|won't fix|wontfix|disagree|will fix|deferred|in-progress|please re-?review)\b/i;
+const BOT_MENTION_RE = /@giodl\b/i;
+
+function changedFilePaths(diffText: string): string[] {
+  const paths = new Set<string>();
+  for (const m of diffText.matchAll(/^diff --git a\/(\S+) b\/(\S+)/gm)) {
+    if (m[1]) paths.add(m[1]);
+    if (m[2]) paths.add(m[2]);
+  }
+  return [...paths];
+}
+
+function isDocsOnlyDiff(diffText: string): boolean {
+  const paths = changedFilePaths(diffText);
+  if (paths.length === 0) return false;
+  return paths.every((p) => {
+    const base = p.split("/").pop() ?? p;
+    return (
+      DOCS_EXT.test(p) ||
+      LOCK_FILES.has(base) ||
+      LICENSE_PATHS.test(base)
+    );
+  });
+}
+
+function isSubstantiveAuthorComment(body: string): boolean {
+  return (
+    FINDING_ID_RE.test(body) ||
+    FIX_KEYWORDS_RE.test(body) ||
+    BOT_MENTION_RE.test(body)
+  );
+}
+
+function capDiff(d: string): { diff: string; truncated: boolean } {
+  if (d.length <= MAX_DIFF_CHARS) return { diff: d, truncated: false };
+  const truncated =
+    d.slice(0, MAX_DIFF_CHARS) +
+    `\n\n... [diff truncated; original ${d.length} chars (~${Math.ceil(
+      d.length / 4
+    )} tokens); first ${MAX_DIFF_CHARS} chars shown to control review cost]\n`;
+  return { diff: truncated, truncated: true };
+}
+
+function extractShaFromVerdictHeader(body: string): string | null {
+  const match = body.match(/## Architect Review — PR #\d+ @ `([a-f0-9]+)`/);
+  return match && match[1] ? match[1] : null;
+}
+
+function newAuthorCommentsSincePrior(
+  comments: GhComment[],
+  authorLogin: string,
+  priorComment?: GhComment
+): GhComment[] {
+  return comments.filter(
+    (c) =>
+      c.user.login === authorLogin &&
+      (!priorComment || new Date(c.created_at) > new Date(priorComment.created_at))
+  );
+}
+
 export async function runTick(opts: TickOptions): Promise<TickResult> {
   const pull = getPull(opts.repo, opts.num);
   const headSha = pull.head.sha;
@@ -37,30 +117,61 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
   const comments = getIssueComments(opts.repo, opts.num);
   const prior = findPriorVerdict(comments);
 
+  // ---- Cheap skip paths (no diff fetch, no LLM call) ----
+
+  // C. Approve-then-stop: once a PR is :approve'd at this SHA, the bot has
+  // nothing to add. Don't re-review unless head moves.
+  if (prior?.marker === "approve") {
+    const approveSha = extractShaFromVerdictHeader(prior.comment.body);
+    if (approveSha && headSha.startsWith(approveSha)) {
+      return {
+        skipped: true,
+        reason: `already approved at SHA ${shortSha} — no further reevals on same SHA`,
+      };
+    }
+  }
+
+  // Same-SHA skip — only re-review if there are new substantive author
+  // comments. (B) "Substantive" means: references a finding ID, contains
+  // fix/disagree keywords, or @-mentions the bot. Pure thanks/acks don't
+  // trigger expensive reevals.
   if (prior && prior.shaInMarker && headSha.startsWith(prior.shaInMarker)) {
-    const newAuthorComments = comments.filter(
-      (c) =>
-        c.user.login === pull.user.login &&
-        new Date(c.created_at) > new Date(prior.comment.created_at)
+    const newAuthor = newAuthorCommentsSincePrior(
+      comments,
+      pull.user.login,
+      prior.comment
     );
-    if (newAuthorComments.length === 0) {
+    if (newAuthor.length === 0) {
       return {
         skipped: true,
         reason: `head SHA ${shortSha} unchanged since last review and no new author comments`,
       };
     }
+    const substantive = newAuthor.filter((c) => isSubstantiveAuthorComment(c.body));
+    if (substantive.length === 0) {
+      return {
+        skipped: true,
+        reason: `head SHA ${shortSha} unchanged; ${newAuthor.length} new author comment(s) but none substantive (no finding ref / fix keyword / @-mention)`,
+      };
+    }
   }
 
-  // Per-(repo, PR, SHA, comment-context) dedup lock — see storage.tryAcquirePrLock.
-  // When two cron executions race on the same PR+SHA, exactly one wins
-  // and the others skip the LLM call entirely.
-  //
-  // The comment-context suffix matters for SAME-SHA re-reviews. If the
-  // author posts a new comment without pushing, we want to re-evaluate
-  // (the prior-verdict skip-check above passed us through), but we still
-  // want only ONE parallel execution to do the re-eval. Lock path includes
-  // the latest author comment id so each new author comment unlocks a
-  // fresh re-review while still serializing parallel attempts on it.
+  // ---- Diff fetch + cheap content filter ----
+
+  const rawDiff = getPullDiff(opts.repo, opts.num);
+
+  // A. Skip docs/lockfile-only diffs — no architectural review value.
+  if (isDocsOnlyDiff(rawDiff)) {
+    return {
+      skipped: true,
+      reason: `docs/lockfile-only diff (${changedFilePaths(rawDiff).length} files) — no architectural review needed`,
+    };
+  }
+
+  // F. Cap diff size to control max LLM input cost.
+  const { diff, truncated: diffTruncated } = capDiff(rawDiff);
+
+  // ---- Lock acquisition (only after we've decided to actually review) ----
   const connStrEarly = process.env["STORAGE_CONNECTION_STRING"];
   const containerEarly = process.env["STORAGE_CONTAINER"] ?? "verdicts";
   const lastAuthorCommentId = comments
@@ -68,9 +179,7 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
     .map((c) => c.id)
     .reduce((max, id) => (id > max ? id : max), 0);
   const contextSuffix =
-    prior && lastAuthorCommentId > 0
-      ? `c${lastAuthorCommentId}`
-      : undefined;
+    prior && lastAuthorCommentId > 0 ? `c${lastAuthorCommentId}` : undefined;
 
   let lockAcquired = false;
   if (connStrEarly) {
@@ -90,7 +199,8 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
     }
   }
 
-  const diff = getPullDiff(opts.repo, opts.num);
+  // ---- Build prompt + call LLM ----
+
   const systemPrompt = loadVoice("reviewer");
 
   const userPromptParts = [
@@ -98,26 +208,35 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
     prior
       ? `## Prior verdict (in-band ledger)\n\n${prior.comment.body}`
       : `## Prior verdict\n\n(none — this is the initial review)`,
-    `## Diff\n\n\`\`\`diff\n${diff}\n\`\`\``,
-    `## Author comments since prior verdict\n\n${comments
-      .filter(
-        (c) =>
-          c.user.login === pull.user.login &&
-          (!prior || new Date(c.created_at) > new Date(prior.comment.created_at))
-      )
+    `## Diff${diffTruncated ? " (truncated)" : ""}\n\n\`\`\`diff\n${diff}\n\`\`\``,
+    `## Author comments since prior verdict\n\n${newAuthorCommentsSincePrior(
+      comments,
+      pull.user.login,
+      prior?.comment
+    )
       .map((c) => `@${c.user.login} ${c.created_at}:\n${c.body}`)
       .join("\n\n---\n\n") || "(none)"}`,
     `## Instructions\n\nFollow R0-R5 protocol per voice.md. Output the verdict comment body only — start with the marker line, end with the footer per grammar.md. No commentary outside the comment body.`,
   ];
+
+  // D. Two-tier model: use a cheaper deployment for reevals (delta-only
+  // analysis is well within mini's capability). Initial reviews keep the
+  // full-tier model where the heavy lifting happens.
+  const reevalDeployment = process.env["AOAI_DEPLOYMENT_REEVAL"];
+  const useReevalTier = !!prior && !!reevalDeployment;
 
   let verdictBody: string;
   try {
     verdictBody = await invokeClaude({
       systemPrompt,
       userPrompt: userPromptParts.join("\n\n"),
+      // G. Prompt caching: stable key per voice configuration so the static
+      // system prompt portion hits cache across calls. Reduces input cost
+      // by ~90% on the cached prefix.
+      promptCacheKey: "claws-lobster-architect-reviewer-v1",
+      ...(useReevalTier ? { aoaiDeployment: reevalDeployment } : {}),
     });
   } catch (e) {
-    // Release the lock on LLM failure so a future execution can retry.
     if (lockAcquired && connStrEarly) {
       await releasePrLock(
         opts.repo,
