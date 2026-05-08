@@ -152,6 +152,38 @@ Production behavior changes need a rollback story.
 - Removed feature flags (W3 Strong) — yield only on evidence the flag has been measurably no-op.
 - Default-on FF additions for risky surfaces — needs justification.
 
+## L8 — Factoring & reuse (DRY discipline)
+
+This is a deliberate **opinionated specialization** for this bot. Reviewers across the team have implicit specialties (someone catches security, someone catches concurrency); this bot is the one that holds the line on **code copy/paste, premature duplication, and proper factoring**. When in doubt, fire the lens — false-positive rate is acceptable here because the cost of unflagged duplication compounds over PRs and the cost of a "consider extracting this" comment is low.
+
+**Watch for:**
+
+- **Near-identical function bodies in the diff.** Two functions whose bodies differ only in a parameter, a constant, or a type — propose extracting to a single function with the variation as a parameter. Cite both file:line locations.
+- **Copy-paste from existing code with minor variation.** A new function that obviously cribs from an existing one in the codebase (search by signature, comment block, or distinctive variable names). The PR should either (a) call the existing function, (b) extract a shared helper, or (c) explicitly justify why divergence is needed.
+- **Repeated literal patterns.** The same regex / SQL fragment / URL prefix / path string appearing 3+ times across the diff — extract to a `const` or named function. Magic numbers/strings inline are exceptions only when self-evident from local context.
+- **Trait or interface re-defined locally** when a similar one exists in a shared crate or upstream module. Watch for `trait MyConverter { fn convert(...) -> ... }` patterns that mirror `Into<T>` / `From<T>` / `TryFrom<T>` / `serde::Deserialize` already in scope.
+- **Per-file struct duplication.** Two modules defining structs with the same field names + types — usually means the type belongs in a shared module, or the duplication is masking a missing abstraction.
+- **`if/else if/else if` chains over an enum variant.** If the chain exhausts a finite set of variants, an exhaustive `match` is the right factoring (compiler-checked, no missed-arm bugs).
+- **Test scaffolding duplication.** Same fixture-builder, same setup boilerplate appearing in 3+ test files — extract to `tests/common/` or a `#[cfg(test)] pub fn`.
+
+**Yield model for L8 findings:**
+- `[Major | code]` — when the duplication is load-bearing in this PR (multiple new copies of the same logic introduced together)
+- `[Minor | code]` — when one new copy joins an existing pattern that should be refactored but isn't introduced by this PR (the `pre-existing` modifier from `watches.md` applies — bot acknowledges this PR didn't introduce it)
+- `[LQ | code]` — when there's a plausible reason for divergence and the bot just wants to surface it
+
+**Don't watch for** (anti-DRY-zealotry):
+- Two functions that LOOK similar but mean different things — naming hints at intent; if the names diverge meaningfully, leave alone.
+- Test functions that share structure but exercise different invariants — duplication-for-readability in tests is a feature.
+- Three-line patterns that share two lines — not worth extracting.
+
+**Counter-search expectation:** for every L8 finding, search the codebase (or PR diff) for the existing function/pattern the new code resembles. Cite the existing location. If the new code IS the existing one (no duplicate found), demote to LQ or drop.
+
+### Skip when
+
+- The PR touches no production source files (test-only, docs-only).
+- The PR is a pure dependency bump or formatting-only change.
+- The diff is < 30 lines AND adds no new functions/types.
+
 ## L7 — Cross-repo ripples
 
 Many lobster PRs have implications outside lobster.
