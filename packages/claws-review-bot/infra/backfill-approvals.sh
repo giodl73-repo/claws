@@ -96,10 +96,15 @@ for blob in "${BLOBS[@]}"; do
     continue
   fi
 
-  # Check if @SELF already submitted an APPROVE review
-  existing=$(gh api --hostname "$HOSTNAME" "repos/${repo}/pulls/${pr}/reviews" --jq "[.[] | select(.user.login==\"$SELF\" and .state==\"APPROVED\" and (.commit_id // \"\") | startswith(\"$sha\"))] | length" 2>/dev/null || echo "0")
-  if [[ "$existing" != "0" && "$existing" != "" ]]; then
-    echo "[backfill] skip ${pr_key}@${sha} — @${SELF} already APPROVED"
+  # Check if @SELF already submitted an APPROVE review on this PR.
+  # Any prior APPROVE counts — GitHub UI shows the latest review state per
+  # user, so a stale APPROVE on an older SHA still presents as approved.
+  # Re-approving on every backfill run produces visible noise on the PR.
+  existing=$(gh api --hostname "$HOSTNAME" "repos/${repo}/pulls/${pr}/reviews" \
+    --jq "[.[] | select(.user.login==\"$SELF\" and .state==\"APPROVED\")] | length" \
+    2>/dev/null || echo "0")
+  if [[ "${existing:-0}" -gt 0 ]]; then
+    echo "[backfill] skip ${pr_key}@${sha} — @${SELF} already APPROVED ${existing} time(s)"
     SKIPPED_ALREADY=$((SKIPPED_ALREADY+1))
     continue
   fi
