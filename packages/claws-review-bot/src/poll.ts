@@ -8,11 +8,16 @@ export interface PollOptions {
   intervalMs?: number;
   postComments?: boolean;
   onceOnly?: boolean;
+  /** GHE logins to skip (e.g. own user, dependabot, other auto-author bots) */
+  skipAuthors?: string[];
 }
 
 export async function runPoll(opts: PollOptions): Promise<void> {
   const seen = new SeenStore(opts.seenPath);
   const interval = opts.intervalMs ?? 10 * 60 * 1000;
+  const skipSet = new Set(
+    (opts.skipAuthors ?? []).map((a) => a.toLowerCase().trim()).filter(Boolean)
+  );
 
   const tickAll = async (): Promise<void> => {
     for (const repo of opts.repos) {
@@ -26,6 +31,13 @@ export async function runPoll(opts: PollOptions): Promise<void> {
 
       for (const pull of pulls) {
         if (pull.draft) continue;
+
+        if (skipSet.has(pull.user.login.toLowerCase())) {
+          console.log(
+            `[poll] ${repo}#${pull.number} skip — author @${pull.user.login} is in SKIP_AUTHORS`
+          );
+          continue;
+        }
 
         const cached = seen.get(repo, pull.number);
         if (cached && cached.lastSeenUpdatedAt >= pull.updated_at) continue;

@@ -44,6 +44,9 @@ param pollIntervalMinutes int = 10
 @description('Whether the bot posts comments to PRs (false = dry-run, archive to Storage only)')
 param postComments bool = false
 
+@description('Comma-separated GHE logins to skip (own user, dependabot, etc.). Empty = review all.')
+param skipAuthors string = ''
+
 // ---- Reference existing AOAI account (different RG) ----
 
 resource aoaiAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' existing = {
@@ -255,6 +258,13 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
             //   az containerapp job update -n claws-review-bot-job \
             //     -g <rg> --set-env-vars POST_COMMENTS=true
             { name: 'POST_COMMENTS', value: postComments ? 'true' : 'false' }
+            // SKIP_AUTHORS: comma-separated GHE logins. Common values:
+            //   "giodl"          — bot can't sensibly review its operator's PRs
+            //   "dependabot[bot]" — auto-update bot
+            // Toggle without redeploy:
+            //   az containerapp job update -g <rg> -n claws-review-bot-job \
+            //     --set-env-vars SKIP_AUTHORS=giodl,otheruser
+            { name: 'SKIP_AUTHORS', value: skipAuthors }
           ]
         }
       ]

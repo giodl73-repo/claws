@@ -74,6 +74,12 @@ program
     false
   )
   .option("--once", "run one tick across all repos and exit", false)
+  .option(
+    "--skip-author <login>",
+    "skip PRs from this GHE login (repeatable; also reads SKIP_AUTHORS env var, comma-separated)",
+    (val: string, prev: string[]) => [...prev, val],
+    [] as string[]
+  )
   .action(
     async (opts: {
       repo: string[];
@@ -81,6 +87,7 @@ program
       intervalMin: number;
       post: boolean;
       once: boolean;
+      skipAuthor: string[];
     }) => {
       if (opts.repo.length === 0) {
         console.error(
@@ -89,14 +96,16 @@ program
         process.exit(2);
       }
 
-      // Either the --post flag OR POST_COMMENTS=true env var enables posting.
-      // The env var lets a Container Apps Job toggle posting via
-      // `az containerapp job update --set-env-vars POST_COMMENTS=true`
-      // without a full redeploy.
       const envPost = (process.env["POST_COMMENTS"] ?? "")
         .toLowerCase()
         .match(/^(1|true|yes|on)$/);
       const postComments = opts.post || envPost !== null;
+
+      const envSkip = (process.env["SKIP_AUTHORS"] ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const skipAuthors = [...opts.skipAuthor, ...envSkip];
 
       await runPoll({
         repos: opts.repo,
@@ -104,6 +113,7 @@ program
         intervalMs: opts.intervalMin * 60 * 1000,
         postComments,
         onceOnly: opts.once,
+        skipAuthors,
       });
     }
   );

@@ -51,12 +51,27 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
     }
   }
 
-  // Per-(repo, PR, SHA) dedup lock — see storage.tryAcquirePrLock.
-  // When two cron executions race on the same PR+SHA (common when reviews
-  // run longer than the cron interval), exactly one wins and the others
-  // skip the LLM call entirely. Saves AOAI cost.
+  // Per-(repo, PR, SHA, comment-context) dedup lock — see storage.tryAcquirePrLock.
+  // When two cron executions race on the same PR+SHA, exactly one wins
+  // and the others skip the LLM call entirely.
+  //
+  // The comment-context suffix matters for SAME-SHA re-reviews. If the
+  // author posts a new comment without pushing, we want to re-evaluate
+  // (the prior-verdict skip-check above passed us through), but we still
+  // want only ONE parallel execution to do the re-eval. Lock path includes
+  // the latest author comment id so each new author comment unlocks a
+  // fresh re-review while still serializing parallel attempts on it.
   const connStrEarly = process.env["STORAGE_CONNECTION_STRING"];
   const containerEarly = process.env["STORAGE_CONTAINER"] ?? "verdicts";
+  const lastAuthorCommentId = comments
+    .filter((c) => c.user.login === pull.user.login)
+    .map((c) => c.id)
+    .reduce((max, id) => (id > max ? id : max), 0);
+  const contextSuffix =
+    prior && lastAuthorCommentId > 0
+      ? `c${lastAuthorCommentId}`
+      : undefined;
+
   let lockAcquired = false;
   if (connStrEarly) {
     lockAcquired = await tryAcquirePrLock(
@@ -64,12 +79,13 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
       opts.num,
       headSha,
       connStrEarly,
-      containerEarly
+      containerEarly,
+      contextSuffix
     );
     if (!lockAcquired) {
       return {
         skipped: true,
-        reason: `lock held for ${opts.repo}#${opts.num}@${shortSha} — another execution already reviewing or completed`,
+        reason: `lock held for ${opts.repo}#${opts.num}@${shortSha}${contextSuffix ? `@${contextSuffix}` : ""} — another execution already reviewing or completed`,
       };
     }
   }
@@ -108,7 +124,8 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
         opts.num,
         headSha,
         connStrEarly,
-        containerEarly
+        containerEarly,
+        contextSuffix
       ).catch(() => {});
     }
     throw e;

@@ -78,13 +78,18 @@ export async function tryAcquirePrLock(
   prNumber: number,
   headSha: string,
   connectionString: string,
-  containerName = "verdicts"
+  containerName = "verdicts",
+  /** Suffix for re-reviews on the same SHA — typically the most recent
+   *  author-comment id, so a fresh comment unlocks a fresh review. */
+  contextSuffix?: string
 ): Promise<boolean> {
   const service = BlobServiceClient.fromConnectionString(connectionString);
   const container = service.getContainerClient(containerName);
   await container.createIfNotExists();
 
-  const blob = container.getBlockBlobClient(lockPath(repo, prNumber, headSha));
+  const blob = container.getBlockBlobClient(
+    lockPath(repo, prNumber, headSha, contextSuffix)
+  );
   const body = `locked at ${new Date().toISOString()}`;
 
   try {
@@ -116,14 +121,18 @@ export async function releasePrLock(
   prNumber: number,
   headSha: string,
   connectionString: string,
-  containerName = "verdicts"
+  containerName = "verdicts",
+  contextSuffix?: string
 ): Promise<void> {
   const service = BlobServiceClient.fromConnectionString(connectionString);
   const container = service.getContainerClient(containerName);
-  const blob = container.getBlockBlobClient(lockPath(repo, prNumber, headSha));
+  const blob = container.getBlockBlobClient(
+    lockPath(repo, prNumber, headSha, contextSuffix)
+  );
   await blob.deleteIfExists();
 }
 
-function lockPath(repo: string, prNumber: number, headSha: string): string {
-  return `_locks/${repo}/${prNumber}-${headSha.slice(0, 9)}.lock`;
+function lockPath(repo: string, prNumber: number, headSha: string, suffix?: string): string {
+  const base = `_locks/${repo}/${prNumber}-${headSha.slice(0, 9)}`;
+  return suffix ? `${base}-${suffix}.lock` : `${base}.lock`;
 }
