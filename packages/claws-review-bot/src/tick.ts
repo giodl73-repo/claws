@@ -4,6 +4,7 @@ import {
   getIssueComments,
   findPriorVerdict,
   postIssueComment,
+  submitPrReview,
 } from "./gh.js";
 import { invokeClaude } from "./claude.js";
 import { loadVoice } from "./voice.js";
@@ -27,7 +28,28 @@ export interface TickResult {
   reason?: string;
   verdictBody?: string;
   postedCommentId?: number;
+  approveReviewId?: number;
   blobUrl?: string;
+}
+
+/**
+ * Decide whether a verdict represents an effective approval, regardless
+ * of which marker the LLM emitted. Some clean-delta reevals don't get
+ * the :approve marker (LLM is conservative on first-clean-delta), so
+ * we also detect "Still open: <none>" or zero finding headers as approves.
+ */
+function isApproveVerdict(body: string, marker: string): boolean {
+  if (marker === "approve") return true;
+  if (!marker.startsWith("reeval")) return false;
+
+  // Empty findings section = effective approve. Match either "Still open:
+  // <none>" OR no `### F` headers AND no `### LQ` headers under Findings.
+  if (/^\s*-\s*Still open:\s*<none>\s*$/m.test(body)) return true;
+
+  // No F/LQ headers at all in the body = empty verdict
+  if (!/^### (F-new\d+|F\d+|LQ\d+)\b/m.test(body)) return true;
+
+  return false;
 }
 
 const MAX_DIFF_CHARS = 120_000; // ~30k tokens at 4 chars/token
@@ -280,6 +302,28 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
 
   if (!opts.postComment) {
     return { skipped: false, verdictBody, ...(blobUrl ? { blobUrl } : {}) };
+  }
+
+  // Approve verdicts → submit a formal PR review with event=APPROVE so
+  // it counts toward branch-protection approvals (the merge gate).
+  // Non-approve verdicts → issue comment (visible in conversation, not
+  // gating). The bot intentionally does NOT use REQUEST_CHANGES — that
+  // would block merges, and the bot is wrong often enough that hard
+  // gating on its findings is too aggressive.
+  const verdictMarker = extractMarker(verdictBody);
+  if (isApproveVerdict(verdictBody, verdictMarker)) {
+    const review = submitPrReview(
+      opts.repo,
+      opts.num,
+      verdictBody,
+      "APPROVE"
+    );
+    return {
+      skipped: false,
+      verdictBody,
+      approveReviewId: review.id,
+      ...(blobUrl ? { blobUrl } : {}),
+    };
   }
 
   const posted = postIssueComment(opts.repo, opts.num, verdictBody);

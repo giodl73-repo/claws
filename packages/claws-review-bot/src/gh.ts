@@ -135,6 +135,54 @@ export function postIssueComment(
   return JSON.parse(result.stdout) as GhComment;
 }
 
+export type ReviewEvent = "APPROVE" | "COMMENT" | "REQUEST_CHANGES";
+
+export interface GhReview {
+  id: number;
+  state: string;
+  body: string;
+  submitted_at: string;
+}
+
+/**
+ * Submit a formal PR review (Reviews tab, counts toward branch protection
+ * approvals when event=APPROVE). Distinct from issue comments.
+ *
+ * The body MAY be empty for APPROVE; we always pass the verdict body so
+ * the formal review carries the same audit content.
+ */
+export function submitPrReview(
+  repo: string,
+  prNumber: number,
+  body: string,
+  event: ReviewEvent
+): GhReview {
+  const result = spawnSync(
+    "gh",
+    [
+      "api",
+      "--hostname",
+      "microsoft.ghe.com",
+      "-X",
+      "POST",
+      "-f",
+      `body=${body}`,
+      "-f",
+      `event=${event}`,
+      `repos/${repo}/pulls/${prNumber}/reviews`,
+    ],
+    { encoding: "utf8", maxBuffer: 10 * 1024 * 1024 }
+  );
+
+  if (result.status !== 0) {
+    throw new Error(
+      `gh review submit failed (status ${result.status}): ${result.stderr}`
+    );
+  }
+
+  return JSON.parse(result.stdout) as GhReview;
+}
+
 const MARKER_RE = /<!--\s*claws-lobster-architect:([\w:-]+)\s*-->/;
 
 export interface PriorVerdict {

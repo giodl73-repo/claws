@@ -7,9 +7,9 @@
 - Posts as `giodl` on `microsoft.ghe.com`.
 - Self-recognition markers (used to find our own prior comments and parse them as ledger):
   - `<!-- claws-lobster-architect:hold -->` — merge-block hold, posted at R0
-  - `<!-- claws-lobster-architect:initial -->` — first review verdict
-  - `<!-- claws-lobster-architect:reeval:<sha> -->` — delta-review verdict
-  - `<!-- claws-lobster-architect:approve -->` — all watches clear, ledger empty
+  - `<!-- claws-lobster-architect:initial -->` — first review verdict (always has at least one finding or LQ)
+  - `<!-- claws-lobster-architect:reeval:<sha> -->` — delta-review verdict where some findings still open OR new findings surfaced
+  - `<!-- claws-lobster-architect:approve -->` — emitted when ALL prior findings are resolved AND no new findings emerge. Use this even on a delta from a prior `:reeval` or `:initial` — the moment the findings list is empty, the marker is `:approve`, NOT `:reeval`. The harness submits `:approve` verdicts as a formal GitHub PR review with `event=APPROVE`, which counts toward branch-protection merge gates. People are waiting for this signal; do not bury it under `:reeval` when findings are clear.
 
 A PR is in review if its most recent comment carrying any `claws-lobster-architect:*` marker has open findings. The marker IS the ledger.
 
