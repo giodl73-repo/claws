@@ -5,6 +5,7 @@ import {
   findPriorVerdict,
   postIssueComment,
   submitPrReview,
+  listPrReviews,
 } from "./gh.js";
 import { invokeClaude } from "./claude.js";
 import { loadVoice } from "./voice.js";
@@ -74,6 +75,16 @@ const FIX_KEYWORDS_RE =
   /\b(addressed|fixed|resolved|won't fix|wontfix|disagree|will fix|deferred|in-progress|please re-?review)\b/i;
 const BOT_MENTION_RE = /@giodl\b/i;
 
+// Author-bot prefixes — comments that start with these markers are
+// automated acknowledgments, not author intent. They tend to repeat every
+// cycle and trigger pointless reevals if we treat them as substantive.
+// Add new prefixes here as we discover other team bots. The match is
+// against the trimmed body's first ~80 chars.
+const AUTHOR_BOT_PREFIX_RE =
+  /^\s*\[(bot|peer-review)\]|^\s*<!--\s*(automaton|architect-review|peer-review)/i;
+const ACK_BOILERPLATE_RE =
+  /^\s*\[bot\]\s*(Acknowledg|Thanks (for|@)|Confirmed|Noted)/i;
+
 function changedFilePaths(diffText: string): string[] {
   const paths = new Set<string>();
   for (const m of diffText.matchAll(/^diff --git a\/(\S+) b\/(\S+)/gm)) {
@@ -97,6 +108,12 @@ function isDocsOnlyDiff(diffText: string): boolean {
 }
 
 function isSubstantiveAuthorComment(body: string): boolean {
+  // Author-bot acknowledgments / peer-review templates don't carry author
+  // intent. They're auto-posted in response to our (and others') reviews
+  // and would otherwise loop us into reviewing every cycle.
+  if (AUTHOR_BOT_PREFIX_RE.test(body) || ACK_BOILERPLATE_RE.test(body)) {
+    return false;
+  }
   return (
     FINDING_ID_RE.test(body) ||
     FIX_KEYWORDS_RE.test(body) ||
@@ -141,8 +158,36 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
 
   // ---- Cheap skip paths (no diff fetch, no LLM call) ----
 
-  // C. Approve-then-stop: once a PR is :approve'd at this SHA, the bot has
-  // nothing to add. Don't re-review unless head moves.
+  // C-prime. Formal-approve-then-stop: when we submit a formal APPROVE PR
+  // review (not an issue comment), findPriorVerdict can't see it next
+  // tick. Without this check, every author-bot ack comment triggers a
+  // fresh reeval that re-approves at $0.15 each.
+  //
+  // Self-login: hardcoded `giodl` for now. The container's GH_TOKEN is
+  // for that user; if we ever switch to a service account we'll source
+  // this from `gh api user --jq .login` once at startup.
+  try {
+    const myApproves = listPrReviews(opts.repo, opts.num).filter(
+      (r) =>
+        r.user?.login === "giodl" &&
+        r.state === "APPROVED" &&
+        r.commit_id === headSha
+    );
+    if (myApproves.length > 0) {
+      return {
+        skipped: true,
+        reason: `already formally APPROVED at SHA ${shortSha} (${myApproves.length} prior review(s))`,
+      };
+    }
+  } catch (e) {
+    console.error(
+      `[tick] formal-approve check failed (continuing): ${(e as Error).message}`
+    );
+  }
+
+  // C. Approve-then-stop (issue-comment branch — pre-66c51528 verdicts):
+  // when the prior :approve was an issue comment instead of a formal
+  // review, find it via findPriorVerdict.
   if (prior?.marker === "approve") {
     const approveSha = extractShaFromVerdictHeader(prior.comment.body);
     if (approveSha && headSha.startsWith(approveSha)) {

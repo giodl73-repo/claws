@@ -142,6 +142,19 @@ export interface GhReview {
   state: string;
   body: string;
   submitted_at: string;
+  commit_id?: string;
+  user?: { login: string };
+}
+
+/**
+ * List formal PR reviews. Used to short-circuit when we already have an
+ * APPROVE on the current head SHA (since formal reviews aren't issue
+ * comments, findPriorVerdict won't find them).
+ */
+export function listPrReviews(repo: string, prNumber: number): GhReview[] {
+  return ghApi<GhReview[]>(
+    `repos/${repo}/pulls/${prNumber}/reviews?per_page=100`
+  );
 }
 
 /**
