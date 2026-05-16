@@ -54,4 +54,3 @@ A fix is PR-ready only when:
 - Focused and changed-file checks pass.
 - A local maintainer-style review found no unresolved substantive issues.
 - The PR body can include real behavior proof with exact labels.
-

@@ -42,4 +42,3 @@ that run and retry on a smaller or different class. Do not wait indefinitely.
 
 After proof passes, use `skills\openclaw-pr-loop\references\real-behavior-proof.md`
 for exact labels.
-

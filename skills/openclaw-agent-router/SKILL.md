@@ -30,4 +30,3 @@ Use this skill first when the user asks which OpenClaw profile to load.
 - Skills directory in this repo: `skills\`
 - OpenClaw WSL checkout normally used for PRs: `/root/src/openclaw-branches/base`
 - Crabbox binary normally used for proof: `/root/src/openclaw-branches/crabbox/bin/crabbox`
-

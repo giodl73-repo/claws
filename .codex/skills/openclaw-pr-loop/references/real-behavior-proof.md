@@ -39,4 +39,3 @@ Notes:
 - A focused unit test can be included only as supporting proof. If the proof
   uses a source harness with mocked metadata, say that clearly in
   `Real environment tested` and `What was not tested`.
-
