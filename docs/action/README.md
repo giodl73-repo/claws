@@ -7,7 +7,7 @@ severity.
 ## Two-letter code
 
 **AC** — package primary. Sub-specs: **ACS** (SARIF pipeline),
-**ACC** (action cache).
+**ACC** (action cache), **ACR** (real behavior proof).
 
 ## Stability
 
@@ -21,6 +21,7 @@ severity.
 - [AC-action.md](./specs/AC-action.md) — primary spec
 - [ACS-sarif-pipeline.md](./specs/ACS-sarif-pipeline.md)
 - [ACC-action-cache.md](./specs/ACC-action-cache.md)
+- [ACR-real-behavior-proof.md](./specs/ACR-real-behavior-proof.md)
 
 ### Guides
 

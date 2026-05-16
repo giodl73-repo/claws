@@ -1,6 +1,6 @@
 # claws Roles — OpenClaw Governance & Integration Perspectives
 
-> 16 roles representing the key stakeholders who care about different aspects of
+> 17 roles representing the key stakeholders who care about different aspects of
 > OpenClaw agent governance, the claws product itself, and the integration
 > partners that consume claws's serve API and governance artifacts. Used for
 > reviews, design validation, and pitch testing.
@@ -32,6 +32,7 @@ pain points, and different definitions of success.
 | [ciso](ciso.md) | Chief Information Security Officer | OWASP coverage, audit trail, compliance evidence, incident response, OBO gates |
 | [platform-eng](platform-eng.md) | Enterprise platform engineer | Fleet governance, upgrade safety, drift detection, CI/CD integration |
 | [compliance](compliance.md) | Compliance/audit officer | SOC2/HIPAA/EU AI Act evidence, signed artifacts, tamper-proof chain, reporting |
+| [policy-steward](policy-steward.md) | Policy model steward | Category-first policy rules, evidence extraction, health checks, attestations, runtime gates |
 
 ### User Layer — The Operators
 
@@ -79,3 +80,4 @@ Reviews with 3+ roles from different clusters produce non-overlapping findings.
 | H | Boundary purity > Migration convenience | claws-repo-steward |
 | I | Publish reliability > Velocity | claws-release-eng |
 | J | Session-agnostic abstractions > Cowork-specific shortcuts | clawpilot-product |
+| K | Coherent policy model > One-off enforcement | policy-steward |

@@ -25,6 +25,7 @@ public surface of the compiler — internals live in `compiler-sdk`.
 ### Guides
 
 - [using-the-compiler.md](./guides/using-the-compiler.md)
+- [openclaw-policy-support-roadmap.md](./openclaw-policy-support-roadmap.md)
 
 ### Tutorials
 

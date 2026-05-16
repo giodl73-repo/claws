@@ -51,7 +51,9 @@
       "Bash(npx tsup *)",
       "Bash(pnpm lint *)",
       "Bash(rm -rf /c/src/lobster-pr1-oc-harness /c/src/lobster-pr2-substrate)",
-      "Read(//c/src/**)"
+      "Read(//c/src/**)",
+      "Bash(xargs wc -l)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }
