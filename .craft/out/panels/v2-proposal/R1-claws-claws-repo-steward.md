@@ -31,15 +31,15 @@ The package as a whole is directionally correct (the contract-first reframing fr
 **Severity**: BLOCK. Both pre-RFCs use `OcPath` as if it were a string typed alias. It isn't.
 
 **Evidence (hapi worktree)**:
-- `C:/src/claws-hapi/packages/openclaw-workspace/src/path/oc-path.ts:23-34` — `OcPath` is a structured object: `{ file, section?, item?, field?, session? }`. There is no string form; the string round-trips via `parseOcPath(s) → OcPath` and `formatOcPath(OcPath) → s`.
-- `C:/src/claws-hapi/packages/openclaw-workspace/src/path/oc-files.ts:20-30` — `OC_WORKSPACE_FILES` enumerates the 9 valid `file` values: `SOUL.md`, `TOOLS.md`, `AGENTS.md`, `MEMORY.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`, `skills/`, `lobster.yaml`. There is no `workspace` file. The first segment of an oc-workspace path must be one of these.
-- `C:/src/claws-hapi/packages/openclaw-workspace/src/path/oc-uri.ts:23-25` — the proper "string" union is `ParsedOcUri` (discriminated union over workspace + config branches), not `OcPath`.
+- `C:/src/claws/packages/openclaw-workspace/src/path/oc-path.ts:23-34` — `OcPath` is a structured object: `{ file, section?, item?, field?, session? }`. There is no string form; the string round-trips via `parseOcPath(s) → OcPath` and `formatOcPath(OcPath) → s`.
+- `C:/src/claws/packages/openclaw-workspace/src/path/oc-files.ts:20-30` — `OC_WORKSPACE_FILES` enumerates the 9 valid `file` values: `SOUL.md`, `TOOLS.md`, `AGENTS.md`, `MEMORY.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`, `skills/`, `lobster.yaml`. There is no `workspace` file. The first segment of an oc-workspace path must be one of these.
+- `C:/src/claws/packages/openclaw-workspace/src/path/oc-uri.ts:23-25` — the proper "string" union is `ParsedOcUri` (discriminated union over workspace + config branches), not `OcPath`.
 
 **Where the proposal is wrong**:
 - `snap-pre-rfc.md:30,40-44` — `SnapshotStore.read(snap, path: OcPath)` is fine if `OcPath` is the structured form; but that's not how the type-text reads as drafted (the rest of the doc treats path-as-string).
 - `policy-pre-rfc.md:69` — `export const POLICY_IR_PATH: OcPath = 'oc://workspace/.openclaw/policy-ir.json';` is **type-incorrect three ways**: (a) `OcPath` isn't a string type, so the assignment doesn't typecheck; (b) `'workspace'` isn't a valid `file`, so even if it parsed it would fail validation; (c) the underlying URI form is workspace-branch addressing, but we want a snapshot-internal path which is a different kind of address entirely.
 - `realigned-story.md:33,70` — uses `.openclaw/policy/policy-ir.json` (no oc:// prefix at all), inconsistent with the policy-pre-rfc value above.
-- `C:/src/claws-hapi/.craft/waves/260427+hapi-the-bringer+openclaw-upstream/pr-drafts/PR-6.md:79` — uses `oc://snapshot/3a7f.../policy/policy-ir.json` (a *snapshot*-branch URI, which doesn't exist in `oc-uri.ts` today as a recognized branch).
+- `C:/src/claws/.craft/waves/260427+hapi-the-bringer+openclaw-upstream/pr-drafts/PR-6.md:79` — uses `oc://snapshot/3a7f.../policy/policy-ir.json` (a *snapshot*-branch URI, which doesn't exist in `oc-uri.ts` today as a recognized branch).
 
 So we have **four different path conventions** across the chain — proposal docs alone disagree three ways, and the hapi PR-6 introduces a fourth that doesn't yet have a parser.
 
@@ -64,7 +64,7 @@ This is the steward's #1 spec-conformance concern: an upstream-bound contract th
 - `policy-pre-rfc.md:117` — table row: "**oc-path** (workspace) | small | in-flight (PR-2 in Hapi wave) | —".
 - `realigned-story.md:132` — "The Hapi wave's existing PR-7 (1665 LoC daemon) gets restructured into snap-pre-rfc's three layers (contract, plugin, CLI) before opening, replacing it with a much smaller PR. PR-6 (policy) similarly collapses to PR-6a (~80-220 LoC types-only)."
 
-**What hapi `wave.yaml` actually says** (`C:/src/claws-hapi/.craft/waves/260427+hapi-the-bringer+openclaw-upstream/wave.yaml`):
+**What hapi `wave.yaml` actually says** (`C:/src/claws/.craft/waves/260427+hapi-the-bringer+openclaw-upstream/wave.yaml`):
 - `pr-drafts/` contains `PR-1.md` … `PR-6.md` only. There is **no PR-7**. The cp-5 final checkpoint is `PR-6` (= snap).
 - `cp-2.description` (line 320-329): "Single upstream PR after the 2026-04-28 merge of former PR-2 into PR-1: **PR-1 ships @openclaw/workspace + replaceConfigFile + dual oc:// URI scheme + 13-code lint surface**." Oc-path is bundled into **PR-1**, not "PR-2."
 - `cp-3.description` (line 393-403): "**PR-2 (OC-4 stripFrontMatter raw-preserve, ~1 line) + PR-3 (@openclaw/guardrails)**." Hapi's PR-2 is the OC-4 strip-front-matter surgical fix, not oc-path.
@@ -295,7 +295,7 @@ The realigned-story (`:132`) and the user's prompt mention "Hapi PR-7 retired in
 
 **Recommended fix**:
 - Update `realigned-story.md:132` to: "The Hapi wave's PR-6 (1665-LoC snap daemon, drafted before yankee's audit) gets restructured into snap-pre-rfc's three layers (contract + plugin + CLI) before opening upstream."
-- Add a note to `C:/src/claws-hapi/.craft/waves/260427+hapi-the-bringer+openclaw-upstream/wave.yaml` cp-5 description: "PR-6 SHAPE UPDATE 2026-04-29: per yankee/pundit audits + v2 proposal, PR-6 reshapes from daemon-shape to contract+plugin+CLI per `.craft/out/proposals/snap-pre-rfc.md`."
+- Add a note to `C:/src/claws/.craft/waves/260427+hapi-the-bringer+openclaw-upstream/wave.yaml` cp-5 description: "PR-6 SHAPE UPDATE 2026-04-29: per yankee/pundit audits + v2 proposal, PR-6 reshapes from daemon-shape to contract+plugin+CLI per `.craft/out/proposals/snap-pre-rfc.md`."
 
 ---
 

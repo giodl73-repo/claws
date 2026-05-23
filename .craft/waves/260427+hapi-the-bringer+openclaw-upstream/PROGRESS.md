@@ -1,7 +1,7 @@
 # Hapi the Bringer — Progress
 
 **Wave dir**: `.craft/waves/260427+hapi-the-bringer+openclaw-upstream/`
-**Branch**: `feature/hapi-the-bringer` (own worktree at `C:\src\claws-hapi`; no longer cohabiting with isis-the-weaver as of 2026-04-28)
+**Branch**: `feature/hapi-the-bringer` (own worktree at `C:\src\claws`; no longer cohabiting with isis-the-weaver as of 2026-04-28)
 **Plans**: [`claws-openclaw-upstream`](../../plans/claws-openclaw-upstream.md) (primary) · [`claws-workspace-lint`](../../plans/claws-workspace-lint.md) (sister, added 2026-04-28 — JSONC lint surface in @bic/openclaw-workspace)
 **Pipeline**: `claws` (8 stages)
 **Started**: 2026-04-27
@@ -86,7 +86,7 @@
 
 ## Branch / worktree note
 
-As of 2026-04-28 this wave runs in its own worktree at `C:\src\claws-hapi`
+As of 2026-04-28 this wave runs in its own worktree at `C:\src\claws`
 on branch `feature/hapi-the-bringer`. Earlier cohabitation arrangement with
 isis-the-weaver was reversed; merge ordering at delivery time is independent.
 

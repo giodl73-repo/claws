@@ -1,5 +1,5 @@
 /**
- * `@openclaw/policy` — claws-hapi prototype of the upstream
+ * `@openclaw/policy` — downstream prototype of the upstream
  * `policy-anchoring` PR-1 surface (PolicyIR types contract +
  * reference markdown extractor pack).
  *

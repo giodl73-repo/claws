@@ -33,7 +33,7 @@ for (a). They are weak on (b) and have a documented gap on (c).
 **Sentinel-DoS — Concern #1.** I read the threat-model section in the PR-1
 draft and the L-020/L-021/L-022 entries in `lkg-recovery-substrate/PITFALLS.md`
 plus the substring guard in
-`C:\src\claws-hapi\packages\oc-paths-substrate\src\plugin-sdk\oc-path\sentinel.ts`.
+`C:\src\claws\packages\oc-paths-substrate\src\plugin-sdk\oc-path\sentinel.ts`.
 The mitigation logic is right (refuse-at-boundary, defense-in-depth on `.lkg`
 companion at recover, audit emit on every refusal). For Microsoft enterprise
 this is realistic v0 **with two caveats**:
@@ -67,7 +67,7 @@ of-band scrubber required" stance. I prefer rotation. Tracking ask for v1.
 ### lkg-recovery-substrate (CP-1 PR-2)
 
 **Audit chain tamper-evidence — Concern #4.** Read
-`C:\src\claws-hapi\packages\lkg-recovery-substrate\src\extensions\lkg-fs\audit.ts`
+`C:\src\claws\packages\lkg-recovery-substrate\src\extensions\lkg-fs\audit.ts`
 end-to-end. `LKGAuditRecord` has `event`, `path`, `outcome`,
 `fingerprintHash`, `clobberedFileHash`, `replacedFingerprintHash`, `actor`,
 `correlationEventId`, `observedAt`. **There is no `prevHash` / chained-hash
@@ -95,7 +95,7 @@ add a `requireAttestation: boolean` constructor option even if it ships as
 no-op for v0; otherwise the wrap is a fork.
 
 **Cross-tenant policy bleed — Concern #9.** Verified via
-`C:\src\claws-hapi\packages\lkg-recovery-substrate\src\extensions\lkg-fs\store.ts:79-107`
+`C:\src\claws\packages\lkg-recovery-substrate\src\extensions\lkg-fs\store.ts:79-107`
 and the api.ts comment at `api.ts:8-13`: each `FsLKGStore` constructs its
 own `trackers` Map, `entries` Map, audit/notice sinks, and `root`. The
 contract intentionally has no `tenantId` argument. Two stores in the same
@@ -142,7 +142,7 @@ this, a Microsoft federal-cloud customer reading the upstream doc thinks
 they have what they need and they don't.
 
 **`openclaw-policy evaluate` as enumeration surface — Concern #5.** The CLI
-at `C:\src\claws-hapi\packages\policy-substrate\src\cli\index.ts:636-675`
+at `C:\src\claws\packages\policy-substrate\src\cli\index.ts:636-675`
 takes a `policy.jsonc` file and a tool id and returns the Decision with the
 deny-rule id. **Anyone with read access to `policy.jsonc` and the CLI binary
 can fully enumerate the deny matrix.** A red-team operator drops the binary
@@ -165,7 +165,7 @@ self-hosters trust their own operators. Either fork the CLI or get
 `--allow-enumeration` upstream. I'd push for upstream.
 
 **`workspace.json` integrity — Concern #6.** Verified via
-`C:\src\claws-hapi\packages\oc-paths-substrate\src\plugin-sdk\oc-path\workspace\config.ts`:
+`C:\src\claws\packages\oc-paths-substrate\src\plugin-sdk\oc-path\workspace\config.ts`:
 `workspace.json` is a plain JSONC file at the workspace root, parsed
 permissively, no signing, no LKG-tracking documented in the loader. The lkg
 section has `skip: string[]` and `skipPaths: string[]`. An operator can write
@@ -181,7 +181,7 @@ key. This is fork-required if upstream won't take it; the OS layer above
 
 ### pinch (CP-2 PR-1)
 
-Reviewed `C:\src\claws-hapi\packages\pinch\src\cli\PITFALLS.md` and the
+Reviewed `C:\src\claws\packages\pinch\src\cli\PITFALLS.md` and the
 runner. The lint runner inherits the workspace.json governance gap (Concern
 #6) — `lint.skip: ["*"]` silences the policed surface. Same severity as
 above. **WARN here**: pinch is read-only over the workspace; the worst case

@@ -64,7 +64,7 @@ PR-1 currently pitches `@openclaw/workspace` as a substrate for lossless `replac
 
 This plan adds a 13-code JSONC config lint surface to the package, validated against real openclaw config-failure issues. The lint engine is schema-agnostic; schema-aware rules consume a DI'd `LintSchema` interface so the same engine works with our internal `OpenClawConfig` schema in tests and with upstream's Zod schema once PR-1 merges. Detection-only; fixers ship class-by-class in follow-up PRs.
 
-Built in `C:\src\claws-hapi\packages\openclaw-workspace\` first. Once the lint catalog passes against fixtures, PR-1 (`pulses/04+pr1-openclaw-workspace.md`) updates its scope to include the lint surface. PR description leads with the closeable-issue list, citing data.
+Built in `C:\src\claws\packages\openclaw-workspace\` first. Once the lint catalog passes against fixtures, PR-1 (`pulses/04+pr1-openclaw-workspace.md`) updates its scope to include the lint surface. PR description leads with the closeable-issue list, citing data.
 
 ## Evidence base — `openclaw/openclaw` config-issue stats (pulled 2026-04-28)
 

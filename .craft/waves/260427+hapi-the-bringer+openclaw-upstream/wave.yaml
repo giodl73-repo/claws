@@ -2,10 +2,10 @@ name: "Hapi the Bringer"
 deity: hapi
 epithet: the-bringer
 branch: feature/hapi-the-bringer
-worktree: "C:\\src\\claws-hapi"
+worktree: "C:\\src\\claws"
 branch_note: |
   Reversed 2026-04-28: Hapi now runs in its own worktree at
-  C:\src\claws-hapi on feature/hapi-the-bringer. Earlier cohabitation
+  C:\src\claws on feature/hapi-the-bringer. Earlier cohabitation
   with feature/isis-the-weaver was unwound at user direction; the two
   waves merge independently.
 description: |
@@ -343,7 +343,7 @@ checkpoints:
             PR-1 patches (config/io.ts:1381+2082, DiagnosticLocation
             discriminated union, doctor migration emit at
             doctor-legacy-config.migrations.ts + doctor-config-flow.ts, copy
-            packages/openclaw-workspace from claws-hapi); commit; push to fork
+            packages/openclaw-workspace from claws); commit; push to fork
             (`git push fork feat/openclaw-workspace-lossless-config`).
             Note: user is a maintainer of openclaw/openclaw and could push
             directly, but is using the standard fork-and-PR flow for review
@@ -469,12 +469,12 @@ related:
   cohabits_branch_with_wave: 260424+isis-the-weaver+lobster-foundation
 
 # Branch cohabitation reversed 2026-04-28: Hapi runs on its own worktree at
-# C:\src\claws-hapi on feature/hapi-the-bringer. The two waves merge
+# C:\src\claws on feature/hapi-the-bringer. The two waves merge
 # independently; no rebase coordination required.
 branch_cohabitation:
   status: reversed-2026-04-28
   current_state: |
-    Hapi has its own worktree at C:\src\claws-hapi on
+    Hapi has its own worktree at C:\src\claws on
     feature/hapi-the-bringer. Isis lobster-foundation continues on
     feature/isis-the-weaver in C:\src\claws. The two branches share git
     state but not working trees; merges are independent.

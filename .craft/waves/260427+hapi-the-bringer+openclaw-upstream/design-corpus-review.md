@@ -1,6 +1,6 @@
 # `design/openclaw/` corpus review for PR-1
 
-Read 31 docs in `C:\src\claws-hapi\design\openclaw\` (review run 2026-04-28 evening). Findings ranked so a tired reader can act on just the top items.
+Read 31 docs in `C:\src\claws\design\openclaw\` (review run 2026-04-28 evening). Findings ranked so a tired reader can act on just the top items.
 
 ## BLOCKING (verify before file)
 

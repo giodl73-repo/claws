@@ -27,7 +27,7 @@ The architectural framing is sound. The 0-LoC-guardrails finding is real. Trim i
 
 | Roles | Severity | Files |
 |---|---|---|
-| repo-steward (HC-BLOCK 2) + release-eng (B1) | **CRITICAL** | `C:/src/claws-hapi/.craft/waves/260427+hapi-the-bringer+openclaw-upstream/` |
+| repo-steward (HC-BLOCK 2) + release-eng (B1) | **CRITICAL** | `C:/src/claws/.craft/waves/260427+hapi-the-bringer+openclaw-upstream/` |
 
 The proposals claim "Hapi PR-7 (daemon-shape) retired in favor of snap-pre-rfc." Reality:
 
@@ -46,7 +46,7 @@ Without explicit hapi `wave.yaml` + `PROGRESS.md` amendments + pulse supersessio
 |---|---|---|
 | platform-eng (M1) + repo-steward (HC-BLOCK 1) | **CRITICAL** | all four proposal docs |
 
-`OcPath` in `C:/src/claws-hapi/packages/openclaw-workspace/src/path/oc-path.ts:23-34` is a structured `interface { file, section?, item?, field?, session? }`, not a string brand. The proposals treat it as a string alias:
+`OcPath` in `C:/src/claws/packages/openclaw-workspace/src/path/oc-path.ts:23-34` is a structured `interface { file, section?, item?, field?, session? }`, not a string brand. The proposals treat it as a string alias:
 
 - `POLICY_IR_PATH: OcPath = 'oc://workspace/.openclaw/policy-ir.json'` — type-incorrect three ways: (a) string→object mismatch, (b) `'workspace'` isn't in the 9-entry `OC_WORKSPACE_FILES` registry, (c) it's a workspace-branch URI for a snapshot-internal address.
 - **Four different path conventions across docs**: `oc://workspace/.openclaw/policy-ir.json` (policy-pre-rfc:69), `.openclaw/policy/policy-ir.json` (realigned-story:33,70,128), existing `packages/openclaw-policy/src/cli-handlers/doctor.ts:45`, and hapi PR-6 uses a fourth form `oc://snapshot/<id>/...` that no parser exists for.

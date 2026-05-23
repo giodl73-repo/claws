@@ -35,7 +35,7 @@ created: 2026-04-29
 
 ## Summary
 
-The hapi-the-bringer wave (`feature/hapi-the-bringer` in worktree `C:\src\claws-hapi`) was drafted 2026-04-27 around the OneDrive 2026-04-18 contribution proposal: four parallel `@openclaw/*` packages plus two surgical OC-core PRs. That proposal predates the v2 proposal package developed 2026-04-29 (`realigned-story.md`, `snap-pre-rfc.md`, `policy-pre-rfc.md`, `guardrails-adapter.md`), which collapsed the upstream surface from chunky daemon-shape packages into three small contract PRs (~390–510 LoC total) plus a downstream-only guardrails adapter. Hapi PR-5 (policy generator + 9-verb subcommand) and PR-6 (snap registry + 11-verb subcommand + HTTP server) directly contradict v2's contract-first stance: snap upstream is a `SnapshotStore` SDK contract + reference plugin, not a daemon; PolicyIR upstream is types-only, not a generator. PR-3 (guardrails) similarly contradicts v2 — upstream already ships `registerTrustedToolPolicy` + `runTrustedToolPolicies`, so guardrails has 0 LoC upstream and lives downstream as a ~50 LoC adapter, not as an upstream package with six runtime subpaths.
+The hapi-the-bringer wave (`feature/hapi-the-bringer` in worktree `C:\src\claws`) was drafted 2026-04-27 around the OneDrive 2026-04-18 contribution proposal: four parallel `@openclaw/*` packages plus two surgical OC-core PRs. That proposal predates the v2 proposal package developed 2026-04-29 (`realigned-story.md`, `snap-pre-rfc.md`, `policy-pre-rfc.md`, `guardrails-adapter.md`), which collapsed the upstream surface from chunky daemon-shape packages into three small contract PRs (~390–510 LoC total) plus a downstream-only guardrails adapter. Hapi PR-5 (policy generator + 9-verb subcommand) and PR-6 (snap registry + 11-verb subcommand + HTTP server) directly contradict v2's contract-first stance: snap upstream is a `SnapshotStore` SDK contract + reference plugin, not a daemon; PolicyIR upstream is types-only, not a generator. PR-3 (guardrails) similarly contradicts v2 — upstream already ships `registerTrustedToolPolicy` + `runTrustedToolPolicies`, so guardrails has 0 LoC upstream and lives downstream as a ~50 LoC adapter, not as an upstream package with six runtime subpaths.
 
 The hapi wave was drafted in good faith. Circumstances changed when the audits landed (`snap-openclaw-design-fit.md`, `policy-openclaw-design-fit.md`, `guardrails-openclaw-design-fit.md`) and the v2 proposal package was authored. This amendment realigns hapi to v2 without discarding the work that is still useful: the workspace foothold (PR-1), the OC-4 surgical fix (PR-2), the OC-7 surgical fix (PR-4), and most of the cp-1 prep artifacts (adapter audits, bot-preempt checklist, post-merge verification runbook, scenarios, findings) all survive intact and continue to anchor the downstream contract PRs that v2 introduces.
 
@@ -161,8 +161,8 @@ This is a planning amendment, not a code-shipping wave. Verification = **reading
 
 ### Concept Guides
 - [ ] `.craft/plans/claws-openclaw-upstream.md` — UPDATE: either flip to Superseded with sister plan, or revise in-place as v0.3 with retired headlines struck-through (decision per Risk §1)
-- [ ] `C:\src\claws-hapi\.craft\waves\260427+hapi-the-bringer+openclaw-upstream\wave.yaml` — UPDATE: add `v2_proposal_absorption:` block, edit cp-3/cp-4/cp-5 descriptions per "What changes" table
-- [ ] `C:\src\claws-hapi\.craft\waves\260427+hapi-the-bringer+openclaw-upstream\PROGRESS.md` — UPDATE: add v2-absorption row to stage checklist
+- [ ] `C:\src\claws\.craft\waves\260427+hapi-the-bringer+openclaw-upstream\wave.yaml` — UPDATE: add `v2_proposal_absorption:` block, edit cp-3/cp-4/cp-5 descriptions per "What changes" table
+- [ ] `C:\src\claws\.craft\waves\260427+hapi-the-bringer+openclaw-upstream\PROGRESS.md` — UPDATE: add v2-absorption row to stage checklist
 
 ### Tests (reference-only verification)
 - [ ] Manual: read amended `wave.yaml` and confirm `v2_proposal_absorption:` block records the supersession with pointers to `.craft/out/proposals/{realigned-story,snap-pre-rfc,policy-pre-rfc,guardrails-adapter}.md`
@@ -193,7 +193,7 @@ This is a planning amendment, not a code-shipping wave. Verification = **reading
 ## Notes
 
 - This plan is the concrete next action listed in `realigned-story.md` §"Hapi wave coordination" steps 1–5. The v2 proposal package authored 2026-04-29 explicitly flagged the steps as out-of-scope for the v2 docs-only fix-pass; this amendment is where they execute.
-- The hapi worktree is at `C:\src\claws-hapi`; this amendment plan lives in the main monorepo at `C:\src\claws\.craft\plans\` because it is a planning artefact for cross-wave coordination, not a hapi-internal artefact. The execution ITSELF will edit files in both worktrees (hapi-side: wave.yaml, PROGRESS.md, pr-drafts/, pulses/; main-side: this plan + the predecessor plan + index updates).
+- The hapi worktree is at `C:\src\claws`; this amendment plan lives in the main monorepo at `C:\src\claws\.craft\plans\` because it is a planning artefact for cross-wave coordination, not a hapi-internal artefact. The execution ITSELF will edit files in both worktrees (hapi-side: wave.yaml, PROGRESS.md, pr-drafts/, pulses/; main-side: this plan + the predecessor plan + index updates).
 - Per house convention (`.craft/plans/` + frontmatter + headlines), this plan is in standard shape and can be picked up by `/claws-start` or `/claws-pulse` once the user authorizes execution. **Recommendation: do NOT auto-execute.** This is a coordination amendment; user should review the v2 proposal package R2 panel verdict and confirm Risk §1 (in-place vs sister plan) before dispatching.
 
 ## Open questions to resolve before amendment-execute

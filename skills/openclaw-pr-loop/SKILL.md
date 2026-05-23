@@ -11,7 +11,7 @@ losing branch hygiene.
 
 ## Quick start
 
-From `C:\src\claws-hapi`:
+From `C:\src\claws`:
 
 ```powershell
 .\skills\openclaw-pr-loop\scripts\openclaw-pr-status.ps1

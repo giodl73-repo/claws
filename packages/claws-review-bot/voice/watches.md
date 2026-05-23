@@ -66,7 +66,7 @@ Module-level `assert` / raise that depends on environment variables, network rea
 ### W8 — No public-fork boundary leaks
 Internal repo names, internal tool names, internal incident IDs, internal directory paths, or internal user names in code or commit bodies destined for the public `openclaw/openclaw` fork.
 - **Why**: the fork is public-bound. Anything that lands in fork-bound files leaks.
-- **Surfaces**: `claws-hapi`, `bic/*`, `microsoft.ghe.com`, internal incident IDs, internal user emails, anything matching internal-only conventions.
+- **Surfaces**: `claws`, `bic/*`, `microsoft.ghe.com`, internal incident IDs, internal user emails, anything matching internal-only conventions.
 - **Yield**: never.
 - **Reference**: see memory `feedback_no_claws_in_fork.md`.
 

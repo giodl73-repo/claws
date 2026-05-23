@@ -31,7 +31,7 @@ Notes / context / decision:
 
 Statuses:
 - **open** — known issue, not yet fixed
-- **fixed** — repaired in claws-hapi or substrate/* branches; cite commit
+- **fixed** — repaired in claws or substrate/* branches; cite commit
 - **wontfix-by-design** — surfaced behavior is correct as-is; fixture or expectation changes instead
 - **duplicate-of-FX** — same root cause as another entry
 
@@ -50,7 +50,7 @@ $ openclaw policy check fixtures/synthetic/policy-jsonc-rich-syntax
 # exit=2; ERR_PARSE
 ```
 
-### F-002 — three lint starter packs unreachable from CLI bootstrap  [fixed: claws-hapi 9797aeaf, substrate/pinch on fork]
+### F-002 — three lint starter packs unreachable from CLI bootstrap  [fixed: claws 9797aeaf, substrate/pinch on fork]
 
 **Date**: 2026-05-04
 **Fixture**: any fixture with non-md content (jsonc / jsonl / *.lobster)

@@ -1,4 +1,4 @@
-# PR Drafts (claws-hapi side)
+# PR Drafts (claws side)
 
 **Source of truth lives in lobster-docs**, not here.
 
@@ -12,7 +12,7 @@ The canonical upstream proposal drafts are at:
 
 ## What lives where
 
-| Package | Drafts (in lobster-docs) | Code (here in claws-hapi) |
+| Package | Drafts (in lobster-docs) | Code (here in claws) |
 |---|---|---|
 | **oc-paths** | `oc-paths/upstream-pr1-workspace.md`, `pr2-oclint.md`, `pr3-ocdoctor.md` | `packages/oc-paths-{substrate,lint,doctor}/` |
 | **lkg-recovery** | `lkg-recovery/upstream-pr1-lkg.md`, `pr2-lkg-git.md` | `packages/lkg-recovery-{substrate,git}/` |
@@ -31,7 +31,7 @@ stack live here:
 
 ## When to update which side
 
-- **Implementation lands** → claws-hapi `packages/` + tests.
+- **Implementation lands** → claws `packages/` + tests.
 - **Implementation behavior changes the contract** → update the
   matching `lobster-docs` proposal draft.
 - **Wave-internal scratch / WIP** → here.

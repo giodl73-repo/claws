@@ -1,5 +1,5 @@
 /**
- * `@openclaw/oc-lint` — claws-hapi prototype of the upstream
+ * `@openclaw/oc-lint` — downstream prototype of the upstream
  * `@openclaw/oc-lint` package.
  *
  * @module @openclaw/oc-lint

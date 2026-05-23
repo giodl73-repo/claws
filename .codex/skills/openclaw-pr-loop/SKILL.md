@@ -76,7 +76,7 @@ If CodeClaw setup details are needed, read the local deployment notes before
 issuing cloud or remote commands:
 
 ```powershell
-Get-Content C:\src\claws-hapi\CLAWCODE-DEPLOYMENT.md
+Get-Content C:\src\claws\CLAWCODE-DEPLOYMENT.md
 ```
 
 ## Useful Commands

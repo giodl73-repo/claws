@@ -21,7 +21,7 @@
 - **L4 (Azure Linux build resilience)**: skipped — no Dockerfile / pipeline YAML / `.dockerignore` touched.
 - **L5 (lobster_web wire-format)**: skipped — no Pydantic alias / SSE event / response model touched.
 - **L6 (feature-flag / rollback)**: not directly relevant. The `JwksCache::new` change has rollback-trivial semantics (revert one commit, no schema, no client cache) — silent under W4.
-- **L7 (cross-repo ripples)**: skipped — no aether-paired or openclaw-fork-bound surface. The fork relevance is W8: nothing in the diff names internal repos / paths / users (verified the comments in clippy.toml + Cargo.toml + jwks_cache.rs don't leak `claws-hapi`, `bic/*`, internal users, etc.). Clean.
+- **L7 (cross-repo ripples)**: skipped — no aether-paired or openclaw-fork-bound surface. The fork relevance is W8: nothing in the diff names internal repos / paths / users (verified the comments in clippy.toml + Cargo.toml + jwks_cache.rs don't leak `claws`, `bic/*`, internal users, etc.). Clean.
 
 ## Watches evaluated
 

@@ -165,8 +165,8 @@ All eight v1-v8 items closed or follow-up'd. The voice updates measurably improv
 
 ## Files relevant to the human reviewing this dogfood
 
-- `C:\src\claws-hapi\packages\claws-review-bot\dogfood\lobster-634\verdict-redux.md` — the new verdict comment.
-- `C:\src\claws-hapi\packages\claws-review-bot\dogfood\lobster-634\notes-redux.md` — this file.
-- `C:\src\claws-hapi\packages\claws-review-bot\dogfood\lobster-634\verdict-initial.md` — the first verdict (for diff).
-- `C:\src\claws-hapi\packages\claws-review-bot\dogfood\lobster-634\notes.md` — the first run's notes (v1-v8 voice feedback).
-- `C:\src\claws-hapi\packages\claws-review-bot\dogfood\lobster-634\pr634.diff` — full PR diff cache (still valid, same SHA).
+- `C:\src\claws\packages\claws-review-bot\dogfood\lobster-634\verdict-redux.md` — the new verdict comment.
+- `C:\src\claws\packages\claws-review-bot\dogfood\lobster-634\notes-redux.md` — this file.
+- `C:\src\claws\packages\claws-review-bot\dogfood\lobster-634\verdict-initial.md` — the first verdict (for diff).
+- `C:\src\claws\packages\claws-review-bot\dogfood\lobster-634\notes.md` — the first run's notes (v1-v8 voice feedback).
+- `C:\src\claws\packages\claws-review-bot\dogfood\lobster-634\pr634.diff` — full PR diff cache (still valid, same SHA).

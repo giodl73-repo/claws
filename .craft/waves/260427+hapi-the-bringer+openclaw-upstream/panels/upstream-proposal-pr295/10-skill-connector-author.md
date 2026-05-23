@@ -199,7 +199,7 @@ before it lands.
   package entry
 - [[upstream-pr1-workspace]], [[upstream-pr2-lkg]],
   [[upstream-pr3-policyir]] — the three pre-RFCs reviewed
-- `C:\src\claws-hapi\.craft\waves\260427+hapi-the-bringer+openclaw-upstream\panels\cp-1\R1-architect.md` —
+- `C:\src\claws\.craft\waves\260427+hapi-the-bringer+openclaw-upstream\panels\cp-1\R1-architect.md` —
   format reference
 
 ---

@@ -161,7 +161,7 @@ import. That's exactly the failure mode this seat exists to catch.
    if any of these packages ever publishes from this repo, install-time
    consumers will get whatever `dist/` happened to be on disk at pack time.
    Either we explicitly disclaim "these are upstream-only, never published
-   from claws-hapi" — or we add `"prepublishOnly": "npm run build"` as a
+   from claws" — or we add `"prepublishOnly": "npm run build"` as a
    safety net. **WARN** for upstream review-readiness; the upstream
    maintainer will ask.
 
@@ -227,7 +227,7 @@ NITs (record, don't gate):
       (library), but call out in the upstream PR so reviewers don't ask.
 - [ ] (NIT) None of the five have install-smoke or dogfood tests; expected
       for an upstream prototype, but track the gap if any ever publishes
-      from claws-hapi directly.
+      from claws directly.
 - [ ] (NIT) Add a CI check that walks each `package.json`'s `exports` map
       and verifies every advertised file resolves on disk. This catches
       the BLOCK class above automatically and is a 30-line script.

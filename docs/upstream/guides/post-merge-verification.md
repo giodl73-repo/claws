@@ -270,7 +270,7 @@ cd /c/src/openclaw-core && git pull --ff-only
 # 2. Run our internal claws-side packages against trunk's widened
 #    requireApproval field. The codemod that adapts to ApprovalDescriptor[]
 #    must produce clean compiles.
-cd /c/src/claws-hapi
+cd /c/src/claws
 pnpm install --frozen-lockfile
 pnpm --filter @bic/openclaw-policy build
 pnpm --filter @bic/openclaw-snap build
@@ -282,7 +282,7 @@ pnpm --filter @bic/openclaw-snap test
 # 4. Codemod artifact: confirm the migration script committed in PR-4
 #    runs cleanly against a representative consumer fixture
 node /c/src/openclaw-core/scripts/oc7-codemod.js --dry-run \
-  /c/src/claws-hapi/packages/openclaw-policy
+  /c/src/claws/packages/openclaw-policy
 # Expect: zero changes (we already ship the new shape)
 ```
 
@@ -316,7 +316,7 @@ If §4 fails:
 
 1. Roll back internal consumers' adoption pending fix.
 2. PR-5 + PR-6 may still open since they don't consume the OC-7 surface yet.
-3. File a follow-up PR against `claws-hapi` correcting the codemod or our package's adoption.
+3. File a follow-up PR against `claws` correcting the codemod or our package's adoption.
 4. Once codemod gate green, resume the wave.
 
 ### §5.3 Adapter audit drift detected

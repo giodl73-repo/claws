@@ -1,6 +1,6 @@
 # `@openclaw/oc-path`
 
-claws-hapi prototype of the upstream `oc-paths` package's PR-1 substrate.
+downstream prototype of the upstream `oc-paths` package's PR-1 substrate.
 
 ## What this package contains
 

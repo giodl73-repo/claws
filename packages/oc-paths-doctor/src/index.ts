@@ -1,5 +1,5 @@
 /**
- * `@openclaw/oc-doctor` — claws-hapi prototype of the upstream
+ * `@openclaw/oc-doctor` — downstream prototype of the upstream
  * `@openclaw/oc-doctor` adapter package.
  *
  * @module @openclaw/oc-doctor

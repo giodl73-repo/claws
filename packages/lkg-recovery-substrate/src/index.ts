@@ -1,5 +1,5 @@
 /**
- * `@openclaw/lkg` — claws-hapi prototype of the upstream
+ * `@openclaw/lkg` — downstream prototype of the upstream
  * `lkg-recovery` PR-1 surface (LKGStore contract types + reference
  * filesystem-backed impl + config-LKG migration).
  *

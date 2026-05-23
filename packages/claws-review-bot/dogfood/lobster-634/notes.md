@@ -135,10 +135,10 @@ The voice gives severity / category templates, but the worked-example findings i
 
 ## Files relevant to the human reviewing this dogfood
 
-- `C:\src\claws-hapi\packages\claws-review-bot\dogfood\lobster-634\verdict-initial.md` — the verdict comment to be reviewed for voice.
-- `C:\src\claws-hapi\packages\claws-review-bot\dogfood\lobster-634\notes.md` — this file.
-- `C:\src\claws-hapi\packages\claws-review-bot\dogfood\lobster-634\pr634.diff` — full PR diff cache.
-- `C:\src\claws-hapi\packages\claws-review-bot\dogfood\lobster-634\issue-comments.json` — 23 issue comments cache.
-- `C:\src\claws-hapi\packages\claws-review-bot\dogfood\lobster-634\review-comments.json` — 16 review comments cache.
-- `C:\src\claws-hapi\packages\claws-review-bot\dogfood\lobster-634\files.json` — 12-file file list cache.
-- `C:\src\claws-hapi\packages\claws-review-bot\dogfood\lobster-634\commits.json` — 7-commit cache.
+- `C:\src\claws\packages\claws-review-bot\dogfood\lobster-634\verdict-initial.md` — the verdict comment to be reviewed for voice.
+- `C:\src\claws\packages\claws-review-bot\dogfood\lobster-634\notes.md` — this file.
+- `C:\src\claws\packages\claws-review-bot\dogfood\lobster-634\pr634.diff` — full PR diff cache.
+- `C:\src\claws\packages\claws-review-bot\dogfood\lobster-634\issue-comments.json` — 23 issue comments cache.
+- `C:\src\claws\packages\claws-review-bot\dogfood\lobster-634\review-comments.json` — 16 review comments cache.
+- `C:\src\claws\packages\claws-review-bot\dogfood\lobster-634\files.json` — 12-file file list cache.
+- `C:\src\claws\packages\claws-review-bot\dogfood\lobster-634\commits.json` — 7-commit cache.

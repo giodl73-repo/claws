@@ -131,7 +131,7 @@ The package punts signing to "operator-territory layered on top." Compliance off
 
 **HC-WARNs**:
 - "modernization" is Microsoft-shaped framing — community will read it as marketing. Pick a less loaded word.
-- 10-PR cap math: claws-hapi has 6 PRs in flight in the existing hapi wave; 3 more from this package puts the contributor at 9 against the 10-cap. Tight. Coordinate with the hapi wave maintainer before opening any of these.
+- 10-PR cap math: claws has 6 PRs in flight in the existing hapi wave; 3 more from this package puts the contributor at 9 against the 10-cap. Tight. Coordinate with the hapi wave maintainer before opening any of these.
 - `flock(2)`-on-FUSE for the git-backed LKG impl unresolved (raised in `downstream-lkg-git-backend.md`); should resolve before the FS-backed reference plugin ships, since the test matrix would benefit from that gating answer.
 
 ---

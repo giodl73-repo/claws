@@ -46,7 +46,7 @@ This doc preserves the R1/R2 archaeology to maintain the audit trail of how the 
 
 ## Hapi wave coordination (R1 amendment 2026-04-29 addressing M-HAPI-COLLISION)
 
-**Honest current state of the hapi worktree**: the hapi wave (`feature/isis-the-weaver` branches downstream of) currently has PR-drafts at `c:/src/claws-hapi/.craft/waves/260427+hapi-the-bringer+openclaw-upstream/pr-drafts/PR-{1..6}.md`. There is **no PR-7** in the current revision — that was a numbering artifact from an earlier plan. PR-6 in hapi is the **shipping daemon-shape** for snap (port + HTTP surface + audit chain coupling + 11-verb subcommand). PR-5 is the policy generator + 9-verb subcommand. Both contradict the v2 contract-first proposal (snap = thin contract not daemon; policy = types-only not generator+CLI).
+**Honest current state of the hapi worktree**: the hapi wave (`feature/isis-the-weaver` branches downstream of) currently has PR-drafts at `c:/src/claws/.craft/waves/260427+hapi-the-bringer+openclaw-upstream/pr-drafts/PR-{1..6}.md`. There is **no PR-7** in the current revision — that was a numbering artifact from an earlier plan. PR-6 in hapi is the **shipping daemon-shape** for snap (port + HTTP surface + audit chain coupling + 11-verb subcommand). PR-5 is the policy generator + 9-verb subcommand. Both contradict the v2 contract-first proposal (snap = thin contract not daemon; policy = types-only not generator+CLI).
 
 **Earlier drafts of this story claimed "PR-7 retired" — that's wrong; there is no PR-7 to retire.** The actual coordination need is to **amend hapi's PR-5 and PR-6 to contract-first** as part of the v2 proposal wave. We will fix hapi to align with v2, not the other way around.
 

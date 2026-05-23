@@ -44,7 +44,7 @@ The R0 fallback heuristic in `specs.md` is **doing real work** on PRs in `src/lo
 - **CSS injection / data URL XSS via UploadAvatarPanel** — considered W6-class. The data URL is set on `<img src>` only via React (escaped) and never written to a file (per F1, dropped at submit). No raw HTML injection surface. Dropped — would survive only if the data URL ever made it into a markdown body, which F1 says it doesn't.
 - **Cross-repo paired aether PR (L7)** — the PR touches no aether wire format, no SSE event, no Pydantic alias, no shared schema. The new files write through the existing `AetherWorkspaceClient.writeFile` and `AetherTeamsPairingClient.pair` interfaces (both already shipped). No paired aether PR is needed for this diff. The PR is correctly scoped as web-only. Skipped L7 finding.
 - **W7 import-time assertion** — none of the new files have module-level `assert` / network probes / env reads outside functions. Safe.
-- **W8 fork-boundary leak check** — searched the diff for `claws-hapi`, `bic/`, `microsoft.ghe.com`, internal incident IDs. None present. Safe.
+- **W8 fork-boundary leak check** — searched the diff for `claws`, `bic/`, `microsoft.ghe.com`, internal incident IDs. None present. Safe.
 - **L1 Rust safety / L2 plex-mock contract / L3 OpenClaw shard / L4 Azure Linux build** — PR touches no Rust files, no plex-mock, no gateway/dispatch/snap-restore, no Dockerfile / pipeline YAML. Skipped per the "skip when" clauses in `code.md`.
 
 ## Voice-file feedback (v9+)

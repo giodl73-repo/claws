@@ -58,10 +58,10 @@ What ships, ships.
   test. Two leaks in seven words. Replace with neutral
   organization (e.g., `Acme Corp / platform team`) or scrub to
   `<organization>` / `<team>` placeholders.
-- **WARN**: `README.md:3,7` — `claws-hapi prototype of the upstream`
+- **WARN**: `README.md:3,7` — `downstream prototype of the upstream`
   + the absolute URL
   `https://microsoft.ghe.com/bic/lobster/blob/main/project-lobster-vault/Tech/OpenClaw/specs/proposals/upstream/oc-paths.md`.
-  README likely doesn't ship upstream (per the file's "claws-hapi
+  README likely doesn't ship upstream (per the file's "claws
   prototype" framing it's a transplant cover sheet), but the GHE URL
   hard-codes the Microsoft GHE host into the public record. Either
   move the README to `.craft/` notes or scrub the URL.
@@ -79,10 +79,10 @@ What ships, ships.
   ships too.
 - **WARN**: `src/index.ts:2` and the `src/plugin-sdk/oc-path/find.ts`
   + `yaml/ast.ts` + `workspace/roles.ts` headers all describe
-  themselves as "claws-hapi prototype of the upstream..." — that's
+  themselves as "downstream prototype of the upstream..." — that's
   a useful prototype-stage banner here, but if `cp src/*
   openclaw-core/src/*` is the transplant rule, every header ships
-  with `claws-hapi prototype` baked in. Either strip on transplant
+  with `downstream prototype` baked in. Either strip on transplant
   (mechanical) OR make this an explicit transplant-step in the
   upstream PR plan.
 - **NIT**: yaml AST docstring at `yaml/ast.ts:14` mentions
@@ -133,7 +133,7 @@ What ships, ships.
 - **WARN**: `src/plugin-sdk/oc-lint/types.ts:27` — comment mentions
   "lobster-specific or workspace-specific conventions" by way of
   example. Generalize.
-- **WARN**: `src/index.ts:2` — `claws-hapi prototype of the
+- **WARN**: `src/index.ts:2` — `downstream prototype of the
   upstream` header (same family as oc-paths-substrate; same fix).
 - **NIT**: `tests/extensions/oclint-rules-starter/rules.test.ts:163`
   — `'## Organization\nMicrosoft\n'` test fixture content. In-line
@@ -149,7 +149,7 @@ What ships, ships.
   scope OR rename + rewrite to neutral yaml-starter shape. The
   fixer pack pairs 1:1 with the lint pack; any decision on one
   must apply identically to the other.
-- **WARN**: `src/index.ts:2` — `claws-hapi prototype of the
+- **WARN**: `src/index.ts:2` — `downstream prototype of the
   upstream` header. Same family.
 - Otherwise this substrate is the cleanest of the five — the
   contamination is concentrated in the yaml-starter pack.
@@ -176,7 +176,7 @@ What ships, ships.
 - **WARN**: `PITFALLS.md:9` references "claws-side
   `docs/PITFALLS.md`"; lines 73-74 mention `wf.lobster` as a kind
   exemplar. Same scrub.
-- **WARN**: `src/index.ts:2` — `claws-hapi prototype` header.
+- **WARN**: `src/index.ts:2` — `downstream prototype` header.
 - **NIT**: `src/trackers/openclaw-workspace.ts:1-3` docstring is
   fine — `openclaw artifact set` is the right vocabulary.
 
@@ -211,11 +211,11 @@ What ships, ships.
   `### name # R<n>, ...`." If the convention is the upstream
   contract (the `## Tools` ### form), describe it as the contract,
   not as claws's choice.
-- **WARN**: `src/index.ts:2` — `claws-hapi prototype` header.
+- **WARN**: `src/index.ts:2` — `downstream prototype` header.
 
 ## Cross-cutting boundary concerns
 
-1. **The `claws-hapi prototype of the upstream X` header pattern**
+1. **The `downstream prototype of the upstream X` header pattern**
    appears in the top-of-file JSDoc of every substrate's
    `src/index.ts` and several deep modules. It's a useful prototype
    marker today and a leak post-fork. Decide now whether the
@@ -275,7 +275,7 @@ BLOCK (residue that taints the fork at PR-open time):
 WARN (residue not visible at fork-time but ages badly):
 
 7. All five `src/index.ts` headers + ~6 deep-module headers
-   carrying `claws-hapi prototype of the upstream`. Decide the
+   carrying `downstream prototype of the upstream`. Decide the
    transplant policy: strip-on-cp or scrub-in-source.
 8. `pinch/src/cli/index.ts:386` and other `.lobster` extension
    dispatch arms — generalize once the canonical role generalizes.
