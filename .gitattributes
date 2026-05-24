@@ -1,0 +1,2 @@
+.gitattributes text eol=lf
+.agents/skills/**/scripts/* text eol=lf
