@@ -11,6 +11,7 @@ be buried in generated wave directories.
 | `policy/` | Policy conformance, evidence files, RFC addenda, and Lobster policy baselines. |
 | `doctor/` | Doctor health findings, structured repairs, and repair-stack PRs. |
 | `feeds/` | OpenClaw feed primitives and Lobster Scout feed integration. |
+| `admin/` | Lobster admin spaces, managed policy baselines, Partner Center, and tenant/global admin settings. |
 | `context-budget/` | Context-budget audit, runtime evidence, recommendations, and integrations. |
 | `oc-path/` | oc-path, workspace destination specs, and related local worktrees. |
 | `clawpilot/` | ClawPilot issue-loop and feedback-to-issue tracking. |
@@ -32,6 +33,7 @@ agent is assigned to an area, then read the area `README.md`.
 | Policy | `policy/SESSION.md` |
 | Doctor | `doctor/SESSION.md` |
 | Feeds | `feeds/SESSION.md` |
+| Admin | `admin/SESSION.md` |
 | Context budget | `context-budget/SESSION.md` |
 | oc-path | `oc-path/SESSION.md` |
 | ClawPilot | `clawpilot/SESSION.md` |

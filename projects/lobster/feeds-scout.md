@@ -23,5 +23,4 @@ notes.
 ## Related Areas
 
 - `projects/feeds/README.md`
-- `projects/lobster/admin-spaces.md`
-- `projects/lobster/partner-center.md`
+- `projects/admin/README.md`

@@ -1,15 +1,16 @@
 # Lobster Work
 
-Use this directory for active Lobster notes, especially dashboard and PR queue
-work that spans multiple checkouts.
+Use this directory for Lobster worktree, runtime, dashboard, and LobsterTank
+notes. Admin-plane work belongs in `projects/admin/`.
 
 ## Active Notes
 
 | Area | File |
 | --- | --- |
-| Admin spaces and managed policy baselines | `admin-spaces.md` |
 | Scout feeds and catalog work | `feeds-scout.md` |
-| Partner Center registration | `partner-center.md` |
+
+Admin spaces, policy baseline admin state, and Partner Center notes moved to
+`projects/admin/`.
 
 ## Active References
 

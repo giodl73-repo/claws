@@ -68,10 +68,10 @@ appear on the PR and follow its ADO build id from the check details URL.
 
 ## Admin Spaces Stack
 
-Current durable notes live in:
+Current durable admin notes live in:
 
 ```text
-projects/lobster/admin-spaces.md
+projects/admin/lobster-admin-spaces.md
 ```
 
 Do not prototype Lobster implementation code in `claws-hapi`; use Lobster
