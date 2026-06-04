@@ -37,18 +37,6 @@ describe('createApp', () => {
     const app = createApp(state);
     server = await listen(app);
 
-    const root = await request(server, 'GET', '/');
-    expect(root.status).toBe(200);
-    expect(JSON.parse(root.body)).toMatchObject({
-      service: 'claws-serve',
-      name: 'claws-serve',
-      status: 'ok',
-      routes: {
-        health: '/health',
-        apiHealth: '/api/health',
-      },
-    });
-
     const health = await request(server, 'GET', '/health');
     expect(health.status).toBe(200);
 

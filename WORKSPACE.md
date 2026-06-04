@@ -10,6 +10,11 @@ local tools, and wave research.
 | --- | --- | --- |
 | OpenClaw PR work | `projects/openclaw/` | Current OpenClaw branches, PR notes, review loops, proof, and RFC tracking. |
 | Lobster work | `projects/lobster/` | Lobster worktrees, dashboard links, PR notes, and local runtime notes. |
+| Policy | `projects/policy/` | Active policy conformance, evidence, RFC, and Lobster baseline work. |
+| Doctor | `projects/doctor/` | Active doctor health and structured-repair PR stacks. |
+| Feeds | `projects/feeds/` | OpenClaw feed support and Lobster Scout feed PR stacks. |
+| Context budget | `projects/context-budget/` | Context-budget PR plan, branches, and proof notes. |
+| oc-path | `projects/oc-path/` | oc-path worktrees, specs, and follow-up PRs. |
 | Local tools | `tools/` | Repo-local operator tools and launch notes. |
 | WSL tools | `tools/wsl/` and `projects/wsl/` | Stable wrappers and WSL worktree index for OpenClaw/Lobster work under `/root/src`. |
 | PR queues | `projects/prs/` | Cross-project PR tracking and handoff notes. |

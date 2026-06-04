@@ -263,18 +263,6 @@ export function createApp(
   app.post('/compile', rateLimit({ maxPerMinute: rateLimitMax }));
 
   // Register routes
-  app.get('/', (_req, res) => {
-    res.json({
-      service: 'claws-serve',
-      name: 'claws-serve',
-      status: 'ok',
-      routes: {
-        health: '/health',
-        apiHealth: '/api/health',
-        status: '/status',
-      },
-    });
-  });
   app.use(healthRouter(state));
 
   // Compile + IR routes (require compileFn)

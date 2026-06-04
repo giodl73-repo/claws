@@ -24,19 +24,7 @@
       "value": "clawcode-aoai"
     },
     "aoaiDeploymentName": {
-      "value": "reviewer-gpt-5.5"
-    },
-    "aoaiDeploymentNameReeval": {
-      "value": "reviewer-gpt-5.4-mini"
-    },
-    "aoaiReasoningEffort": {
-      "value": "high"
-    },
-    "aoaiVerbosity": {
-      "value": "medium"
-    },
-    "aoaiMaxCompletionTokens": {
-      "value": 32000
+      "value": "reviewer-gpt5"
     },
     "acrAccountName": {
       "value": "clawsreviewbotacr"

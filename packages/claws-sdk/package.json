@@ -68,10 +68,6 @@
       "import": "./dist/snapshot/index.js",
       "types": "./dist/snapshot/index.d.ts"
     },
-    "./sandbox": {
-      "import": "./dist/sandbox/index.js",
-      "types": "./dist/sandbox/index.d.ts"
-    },
     "./fleet": {
       "import": "./dist/fleet/index.js",
       "types": "./dist/fleet/index.d.ts"
@@ -205,14 +201,6 @@
     "typescript": "^5.0.0",
     "zod": "^4.3.6",
     "yaml": "^2.3.0"
-  },
-  "peerDependencies": {
-    "@microsoft/mxc-sdk": "*"
-  },
-  "peerDependenciesMeta": {
-    "@microsoft/mxc-sdk": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@bic/openclaw-lsp": "*",
