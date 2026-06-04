@@ -3,6 +3,14 @@
 Use this directory for active Lobster notes, especially dashboard and PR queue
 work that spans multiple checkouts.
 
+## Active Notes
+
+| Area | File |
+| --- | --- |
+| Admin spaces and managed policy baselines | `admin-spaces.md` |
+| Scout feeds and catalog work | `feeds-scout.md` |
+| Partner Center registration | `partner-center.md` |
+
 ## Active References
 
 | Item | Location |
@@ -33,4 +41,3 @@ Stop command:
 ```powershell
 Stop-Process -Id <pid>
 ```
-

@@ -17,9 +17,11 @@ For agent and harness entry points, start with `CONTEXT.md`.
 | Feeds | `projects/feeds/` | OpenClaw feed support and Lobster Scout feed PR stacks. |
 | Context budget | `projects/context-budget/` | Context-budget PR plan, branches, and proof notes. |
 | oc-path | `projects/oc-path/` | oc-path worktrees, specs, and follow-up PRs. |
+| ClawPilot | `projects/clawpilot/` | ClawPilot feedback-to-issue tracking and issue-loop notes. |
+| Bugs | `projects/bugs/` | Cross-cutting bugfix triage, reproduction notes, and fix proof. |
 | Local tools | `tools/` | Repo-local operator tools and launch notes. |
 | WSL tools | `tools/wsl/` and `projects/wsl/` | Stable wrappers and WSL worktree index for OpenClaw/Lobster work under `/root/src`. |
-| PR queues | `projects/prs/` | Cross-project PR tracking and handoff notes. |
+| PR queues | `projects/prs/` | Cross-project PR tracking, staleness, proof, and watcher notes. |
 | Archived waves | `.craft/waves/` | Historical research, panels, proposals, and generated wave artifacts. Do not use this as the active task surface. |
 
 ## Current External Worktrees

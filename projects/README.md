@@ -13,9 +13,29 @@ be buried in generated wave directories.
 | `feeds/` | OpenClaw feed primitives and Lobster Scout feed integration. |
 | `context-budget/` | Context-budget audit, runtime evidence, recommendations, and integrations. |
 | `oc-path/` | oc-path, workspace destination specs, and related local worktrees. |
+| `clawpilot/` | ClawPilot issue-loop and feedback-to-issue tracking. |
+| `bugs/` | Cross-cutting bugfix triage, reproduction notes, fix branches, and proof. |
 | `openclaw/` | OpenClaw PR stacks, RFC coordination, maintainer notes, proof commands. |
 | `lobster/` | Lobster worktree links, LobsterTank notes, runtime/dashboard notes. |
-| `prs/` | Cross-project PR queue views and handoff notes. |
+| `prs/` | Cross-project PR queue views, staleness, proof, and watcher notes. |
 
 Wave directories under `.craft/waves/` remain historical context. Promote useful
 wave output into one of these directories when it becomes active work.
+
+## Session Contexts
+
+Each active project area should have a `SESSION.md` file. Start there when a new
+agent is assigned to an area, then read the area `README.md`.
+
+| Area | Session |
+| --- | --- |
+| Policy | `policy/SESSION.md` |
+| Doctor | `doctor/SESSION.md` |
+| Feeds | `feeds/SESSION.md` |
+| Context budget | `context-budget/SESSION.md` |
+| oc-path | `oc-path/SESSION.md` |
+| ClawPilot | `clawpilot/SESSION.md` |
+| Bugs | `bugs/SESSION.md` |
+| PR watcher | `prs/SESSION.md` |
+
+Use `session-context-template.md` when adding a new area.
