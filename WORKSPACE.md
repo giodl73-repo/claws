@@ -4,6 +4,8 @@ This checkout is the local operating notebook for OpenClaw and Lobster work. It
 is not only a source package checkout; it also tracks PR queues, project notes,
 local tools, and wave research.
 
+For agent and harness entry points, start with `CONTEXT.md`.
+
 ## Active Map
 
 | Area | Home | Purpose |
