@@ -7,6 +7,7 @@ Repo-local operator tools live here.
 | Tool | Location | Notes |
 | --- | --- | --- |
 | LobsterTank | `C:\src\lobster-lobstertank\tools\lobstertank` | Dashboard currently lives in the Lobster worktree, not this directory. |
+| OpenClaw PR status | `tools/openclaw-prs/status.ps1` | Compact WSL/GitHub status for open fix PRs, checks, ClawSweeper, and requested changes. |
 | Worktree audit | `tools/worktrees/audit-worktrees.ps1` | Inventory local OpenClaw/Lobster worktrees and write `projects/prs/worktrees.md`. |
 | Worktree setup | `tools/worktrees/setup-worktree.ps1` | Create or hydrate a git worktree and run package-manager install. |
 

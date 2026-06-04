@@ -10,6 +10,14 @@ User: root
 Workspace root: /root/src
 ```
 
+Override the defaults per machine with environment variables:
+
+```powershell
+$env:CLAWS_WSL_DISTRO = "Ubuntu"
+$env:CLAWS_WSL_USER = "giodl"
+$env:CLAWS_WSL_ROOT = "/home/giodl/src"
+```
+
 ## Commands
 
 Run a one-line command in a WSL worktree:

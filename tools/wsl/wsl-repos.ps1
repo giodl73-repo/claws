@@ -1,7 +1,7 @@
 param(
-  [string]$Distro = "Ubuntu",
-  [string]$User = "root",
-  [string]$Root = "/root/src"
+  [string]$Distro = $(if ($env:CLAWS_WSL_DISTRO) { $env:CLAWS_WSL_DISTRO } else { "Ubuntu" }),
+  [string]$User = $(if ($env:CLAWS_WSL_USER) { $env:CLAWS_WSL_USER } else { "root" }),
+  [string]$Root = $(if ($env:CLAWS_WSL_ROOT) { $env:CLAWS_WSL_ROOT } else { "/root/src" })
 )
 
 $ErrorActionPreference = "Stop"
