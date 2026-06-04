@@ -11,6 +11,7 @@ coverage/
 tmp/
 inspect-*.sh
 pr*-body.md
+projects/prs/worktrees.md
 
 # Python/runtime byproducts from local tools.
 __pycache__/
