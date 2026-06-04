@@ -1,0 +1,34 @@
+# Claws Hapi Workspace
+
+This checkout is the local operating notebook for OpenClaw and Lobster work. It
+is not only a source package checkout; it also tracks PR queues, project notes,
+local tools, and wave research.
+
+## Active Map
+
+| Area | Home | Purpose |
+| --- | --- | --- |
+| OpenClaw PR work | `projects/openclaw/` | Current OpenClaw branches, PR notes, review loops, proof, and RFC tracking. |
+| Lobster work | `projects/lobster/` | Lobster worktrees, dashboard links, PR notes, and local runtime notes. |
+| Local tools | `tools/` | Repo-local operator tools and launch notes. |
+| WSL tools | `tools/wsl/` and `projects/wsl/` | Stable wrappers and WSL worktree index for OpenClaw/Lobster work under `/root/src`. |
+| PR queues | `projects/prs/` | Cross-project PR tracking and handoff notes. |
+| Archived waves | `.craft/waves/` | Historical research, panels, proposals, and generated wave artifacts. Do not use this as the active task surface. |
+
+## Current External Worktrees
+
+| Project | Path | Notes |
+| --- | --- | --- |
+| OpenClaw | `C:\src\openclaw` and PR-specific `C:\src\openclaw-*` worktrees | Use for upstream OpenClaw implementation and PR stacks. |
+| Lobster | `C:\src\lobster` | Main Lobster checkout. |
+| LobsterTank | `C:\src\lobster-lobstertank` | Dashboard worktree; current dashboard code is in `tools/lobstertank/`. |
+| RFCs | `C:\src\openclaw-rfcs` or the active RFC worktree when present | Use for RFC text and discussion follow-up. |
+| WSL active index | `/root/src/_hapi` | Symlinks to active WSL OpenClaw/RFC worktrees. |
+
+## Rules
+
+- Put active operating notes under `projects/`, not inside `.craft/waves/`.
+- Treat `.craft/waves/` as archive/source material unless intentionally promoting an artifact.
+- Put runnable local helper tools under `tools/<name>/` with a README and a stop command.
+- Keep PR proof and review-loop notes close to the project they belong to.
+- Before moving old wave artifacts, add an index first and move only obvious, named artifacts.

@@ -1,0 +1,94 @@
+name: "Hapi the Bringer: Context Budget Management"
+deity: hapi
+epithet: the-bringer
+status: active
+startedAt: "2026-06-04T00:00:00-07:00"
+lastUpdated: "2026-06-04T00:00:00-07:00"
+
+repo: openclaw/openclaw
+worktree: "/root/src/openclaw-context-budget"
+baseBranch: origin/main
+currentTopBranch: user/giodl/context-budget-audit
+
+description: |
+  Shortened OpenClaw context-budget management series. This wave supersedes the
+  earlier long-form context-budget PR plan for execution purposes, while keeping
+  the original 260427 proposal docs intact as design history.
+
+sourcePlans:
+  - wave: 260427+hapi-the-bringer+openclaw-upstream
+    file: package-proposals/context-budget-wave-plan.md
+    role: original-seven-pr-plan
+  - wave: 260427+hapi-the-bringer+openclaw-upstream
+    file: package-proposals/context-budget.md
+    role: product-boundary-and-evidence-model
+  - wave: 260427+hapi-the-bringer+openclaw-upstream
+    file: package-proposals/implementation-plan.md
+    role: enterprise-feeds-and-context-budget-sequencing
+
+branchStack:
+  - pr: 1
+    branch: user/giodl/context-budget-audit
+    base: origin/main
+    head: d979c26b47189d1048949327f14112d53b7cd942
+    title: "feat(context-budget): add static audit report"
+    status: committed-local
+    files: 21
+    loc: "+1283 / -0"
+    body: pr-drafts/PR-1-static-audit-foundation.md
+    scope: |
+      Add @openclaw/context-budget, static workspace and skill collectors,
+      deterministic report schema, openclaw budget audit/report/explain, and
+      build/test/watch wiring. No runtime evidence adapter, dedicated recommend
+      command, patch preview, policy evidence, or feeds integration.
+
+  - pr: 2
+    branch: user/giodl/context-budget-runtime-evidence
+    base: user/giodl/context-budget-audit
+    title: "feat(context-budget): add runtime evidence inputs"
+    status: planned
+    body: pr-drafts/PR-2-runtime-evidence.md
+    scope: |
+      Read existing OpenClaw signals such as systemPromptReport, /context-style
+      breakdowns, session usage, compaction metrics, context-engine estimates,
+      and provider usage where available. Mark values exact, estimated, stale,
+      or missing. No context-engine behavior changes.
+
+  - pr: 3
+    branch: user/giodl/context-budget-recommendations
+    base: user/giodl/context-budget-runtime-evidence
+    title: "feat(context-budget): add dry-run recommendations"
+    status: planned
+    body: pr-drafts/PR-3-recommendations.md
+    scope: |
+      Add openclaw budget recommend --dry-run --json with stable finding IDs,
+      conservative classes such as review, split, dedupe, tune-limit, and
+      archive, estimated savings, source targets, and markdown report sections.
+      No file edits.
+
+  - pr: 4
+    branch: user/giodl/context-budget-management-integrations
+    base: user/giodl/context-budget-recommendations
+    title: "feat(context-budget): add management integrations"
+    status: planned
+    body: pr-drafts/PR-4-management-integrations.md
+    scope: |
+      Add oc-path patch previews for narrow mechanical changes, policy-readable
+      evidence for recent reports and thresholds, and optional Enterprise Feeds
+      owner/range evidence. Patch preview remains explicit and non-applying by
+      default.
+
+story: |
+  Measure -> correlate runtime -> recommend -> manage safely.
+
+nonGoals:
+  - No autonomous prompt, skill, memory, or policy rewrites.
+  - No model-quality scoring.
+  - No mandatory per-turn runtime overhead.
+  - No policy enforcement inside the context-budget package.
+  - No feed dependency for the core package.
+
+notes: |
+  The original 260427 plan remains the clean design-history source for the
+  seven-PR version. This 260604 wave is the execution plan based on the current
+  direct-main Stage 1 implementation.

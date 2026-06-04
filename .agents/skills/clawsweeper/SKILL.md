@@ -263,6 +263,14 @@ If ClawSweeper passes while merge gates are closed, it labels
 `clawsweeper:merge-ready` and comments instead of merging. `@clawsweeper stop`
 adds `clawsweeper:human-review`.
 
+Do not confuse ClawSweeper automerge with the normal maintainer land flow.
+When the user asks to land a PR as a maintainer, use
+`$openclaw-pr-maintainer` and the private `openclaw/maintainers` repo
+`review-pr -> prepare-pr -> merge-pr` workflow. ClawSweeper automerge is only
+for PRs explicitly opted into the ClawSweeper gates and labels; it is not a
+replacement for the maintainer repo merge path, and it is not a reason to hit
+the GitHub merge button.
+
 When asked to create a PR and enable ClawSweeper automerge, do not
 leave the local OpenClaw checkout on the PR branch. After the PR is created,
 pushed, and the `@clawsweeper automerge` request is posted or otherwise

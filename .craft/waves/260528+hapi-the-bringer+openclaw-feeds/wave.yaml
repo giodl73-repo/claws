@@ -1,0 +1,137 @@
+name: "Hapi the Bringer: OpenClaw Feeds"
+deity: hapi
+epithet: the-bringer
+status: active
+startedAt: "2026-05-28T08:00:00-07:00"
+lastUpdated: "2026-05-30T09:30:00-07:00"
+
+repo: openclaw/openclaw
+worktree: "/home/giodl/src/openclaw-feeds-native"
+baseBranch: origin/main
+currentTopBranch: user/giodl/feeds-source-management
+
+description: |
+  Add native OpenClaw support for curated skill/plugin catalog feeds.
+  OpenClaw consumes explicit feed artifacts through normal config, search,
+  install handoff, policy conformance, and lifecycle tooling. ClawHub-native
+  hosted feeds and external enterprise feed producers can emit the same feed
+  contract; OpenClaw should not become a feed-hosting system.
+
+branchStack:
+  - pr: 1
+    branch: user/giodl/feeds-source-config
+    base: origin/main
+    head: bd7702492c426191587b2c03e1daf355729b11ab
+    title: "feat(feeds): add read-only catalog feed discovery"
+    status: committed-local
+    files: 18
+    loc: "+1578 / -0"
+    body: pr-drafts/pr1-read-only-discovery.md
+    scope: |
+      Adds feed document parsing, attestation verification, catalog feed source
+      config, SQLite-backed feed indexing, and read-only source/status/sync/search
+      commands. No install execution, update behavior, policy checks, or runtime
+      enforcement.
+
+  - pr: 2
+    branch: user/giodl/feeds-install-handoff
+    base: user/giodl/feeds-source-config
+    head: d11039d1256a7d51f22a6b479f1c719bd6011ce3
+    title: "feat(feeds): search and install feed entries"
+    status: committed-local
+    files: 12
+    loc: "+635 / -25"
+    body: pr-drafts/pr2-approved-installs.md
+    scope: |
+      Adds explicit feed-backed native skill/plugin search and install handoff.
+      Search uses configured feeds through the rollout path, and feed install
+      selectors resolve through existing OpenClaw install commands. No auto-install
+      or broad install interception.
+
+  - pr: 3
+    branch: user/giodl/feeds-policy-conformance
+    base: user/giodl/feeds-install-handoff
+    head: cbbf54c146327b6ef6d6420d76ccb9342691f267
+    title: "feat(policy): add feed catalog posture"
+    status: committed-local
+    files: 22
+    loc: "+1338 / -3"
+    body: pr-drafts/pr3-policy-conformance.md
+    scope: |
+      Adds feed update awareness, optional approved-only posture for explicit
+      feed-backed installs, and config-only Policy conformance checks for required
+      feed sources, integrity posture, and attestation posture.
+
+  - pr: 4
+    branch: user/giodl/feeds-lifecycle-tooling
+    base: user/giodl/feeds-policy-conformance
+    head: 98223970b29f8f20bd5c36d7d1f51563a5e7ad2b
+    title: "feat(feeds): add feed lifecycle tooling"
+    status: committed-local
+    files: 5
+    loc: "+888 / -5"
+    body: pr-drafts/pr4-lifecycle-tooling.md
+    scope: |
+      Adds validate/hash/build/diff/notice workflows for feed publishers and
+      subscribers. Build output is deterministic and attested; diff catches
+      catalog-visible entry changes. No daemon, background watch, auto-update, or
+      hosted feed service.
+
+  - pr: 5
+    branch: user/giodl/feeds-source-management
+    base: user/giodl/feeds-lifecycle-tooling
+    head: 660bdee7925aff3455930c909606990ab2dce9e6
+    title: "feat(feeds): manage catalog feed sources"
+    status: committed-local
+    files: 4
+    loc: "+278 / -3"
+    body: pr-drafts/pr5-source-management.md
+    scope: |
+      Adds `openclaw feeds sources add/remove` helpers for config-only feed source
+      management. Duplicate ids require `--replace`; removal mutates config only
+      and does not delete cache or installed packages.
+
+adjacentWork:
+  - repo: clawhub
+    title: "ClawHub-native catalog feed lanes"
+    scope: |
+      Add public feed lanes such as all, official, community, and reviewed.
+      ClawHub-hosted feeds are a public root-feed accelerator, not a dependency
+      for OpenClaw consuming enterprise-provided compatible feeds.
+  - repo: rfcs
+    branch: feeds-rfc-draft
+    file: rfcs/0004-feeds.md
+    scope: |
+      RFC updated with implementation learnings: explicit rollout path for native
+      search, config-only source management, canonical feed build output, and
+      ClawHub-native feeds as producer infrastructure.
+  - repo: lobster
+    branch: user/giodl/scout-feeds-clawhub-adapter
+    file: docs/design/scout-catalog-feeds.md
+    nextPr: prs/09-scout-catalog-publishing.md
+    title: "Scout catalog publishing lifecycle"
+    scope: |
+      Add the producer/admin motion that sits above feed files: submit/import
+      candidates from source systems, validate normalized metadata, approve,
+      reject, deny, pin, publish approved tenant feeds, and detect updates.
+      Scout does not upload packages to source systems; it manages catalog review
+      state after ClawHub, MOS3, GitHub, npm, or internal registries already have
+      package records.
+
+reviewLearnings:
+  - Keep OpenClaw as a feed consumer, not a feed host.
+  - Keep source management config-only; do not combine it with publisher build/diff.
+  - Treat ClawHub-native feeds as shared root feeds that enterprises can layer over.
+  - Use explicit search/install rollout paths before changing default ClawHub search.
+  - Diff feed entries by catalog-visible payload, not only metadata.
+  - Canonicalize build output before hashing so raw integrity stays stable.
+  - Normalize top-level build strings before attestation so build output validates.
+  - Keep Policy checks config conformance only; do not fetch feed documents in Policy.
+  - Separate source package publishing from Scout catalog publishing: source
+    systems own package upload; Scout owns candidate review and approved feed
+    materialization.
+
+notes: |
+  The branch stack is local and not pushed/opened yet. PR bodies should be copied
+  from pr-drafts only after the corresponding branch is pushed and the final
+  remote base/head relationship is confirmed.

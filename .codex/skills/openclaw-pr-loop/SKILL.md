@@ -34,6 +34,13 @@ losing branch hygiene.
 
 - Keep draft PRs draft unless the user explicitly says to mark ready.
 - Never force-push or squash without confirming the intended branch and stack.
+- Treat maintainer landing as a separate workflow owned by the private
+  `openclaw/maintainers` repo. The local PR loop can review, prepare, push,
+  update proof, and request re-review, but final land should run the
+  maintainers repo `review-pr -> prepare-pr -> merge-pr` flow when available.
+- Do not hit the GitHub merge button or use `gh pr merge --auto` for
+  maintainer landings. If `/root/src/openclaw-maintainers-repo` lacks the
+  documented landing scripts, report the setup mismatch instead of improvising.
 - Treat unrelated CI shard failures as base noise only after checking the log
   points outside the changed files.
 - Prefer small, reviewable fixes over broad cleanup.
@@ -61,6 +68,13 @@ For each active PR:
 
 Read `references/real-behavior-proof.md` before editing PR proof sections.
 OpenClaw's proof gate accepts exact field labels, not shortened aliases.
+
+Use Crabbox inside the PR loop when the behavior needs remote/user-path proof,
+especially install, plugin, Docker, gateway, provider, channel, platform, or
+service-lifecycle changes. If proof must come from the user's Azure/VPN-backed
+Crabbox setup, capture that as an explicit external proof step with operator,
+provider/lease id if available, command/path, redacted environment shape, and
+success marker before land.
 
 ## CodeClaw / Live Proof
 

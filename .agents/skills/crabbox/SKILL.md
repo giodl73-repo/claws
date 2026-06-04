@@ -28,6 +28,33 @@ comparison. Use `--provider blacksmith-testbox` when the task needs OpenClaw
 maintainer Testbox proof, prepared CI environment, broad/heavy pnpm gates, or
 the user asks for Testbox/Blacksmith.
 
+## Maintainer PR Proof Position
+
+Crabbox proof belongs inside the maintainer `review -> prepare -> land` loop,
+but it does not replace the maintainer repo landing workflow. Use WSL/local
+checks for fast investigation and edits, then collect Crabbox proof before
+declaring prepare complete or before land when the PR affects user-visible,
+platform, install, Docker, gateway, provider, channel, or service-lifecycle
+behavior.
+
+When a proof path depends on the user's Azure/VPN-backed Crabbox setup, do not
+substitute ordinary local tests and call it equivalent. Coordinate the external
+run, then record the operator, provider or lease id if available, exact command
+or UI path, redacted environment shape, and success/failure marker in the PR
+body or maintainer handoff.
+
+After Crabbox proof is collected, landing still goes through the private
+`openclaw/maintainers` repo flow, normally:
+
+```sh
+cd /root/src/openclaw-maintainers-repo
+scripts/pr-merge verify <PR>
+scripts/pr-merge run <PR>
+```
+
+If those maintainer scripts are missing from the checkout, report that setup
+mismatch. Do not fall back to the GitHub merge button.
+
 ## First Checks
 
 - Run from the repo root. Crabbox sync mirrors the current checkout.

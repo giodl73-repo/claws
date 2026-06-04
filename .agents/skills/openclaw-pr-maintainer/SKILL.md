@@ -22,6 +22,43 @@ same WSL root session with `gh auth login` or `codex login`, then rerun the
 failed command. Do not mix Windows `gh`/`git`/`codex` auth with WSL-root PR
 branches.
 
+## Maintainer Review Prepare Land Flow
+
+For maintainer-directed landing, the source of truth is the private
+`openclaw/maintainers` repo, not ad hoc GitHub UI actions or locally invented
+merge commands.
+
+- Use the maintainers repo workflow from beginning to end:
+  `review-pr` -> `prepare-pr` -> `merge-pr`.
+- Run maintainer scripts from the maintainers repo checkout, normally
+  `/root/src/openclaw-maintainers-repo` in WSL. If that checkout is missing,
+  clone or refresh `openclaw/maintainers` before attempting to land.
+- Do not hit the GitHub merge button and do not use `gh pr merge --auto` for
+  maintainer landings.
+- If the maintainers repo docs reference required wrappers such as
+  `scripts/pr-review`, `scripts/pr-prepare`, or `scripts/pr-merge` but the
+  checkout does not contain them, stop and report the repo setup mismatch.
+  Do not emulate the missing landing flow with GitHub UI merges.
+- Treat `land <PR>` as: verify live PR state, review latest bot/reviewer
+  signals, confirm proof, then run the maintainers repo merge verification and
+  merge wrapper when present.
+- If a PR is already `MERGED`, report the merge SHA, merged-by actor, and
+  merged-at timestamp, then do only post-merge cleanup or contributor notes
+  that still apply.
+
+Maintainer command shape:
+
+```bash
+cd /root/src/openclaw-maintainers-repo
+scripts/pr-review <PR>
+scripts/pr-prepare run <PR>
+scripts/pr-merge verify <PR>
+scripts/pr-merge run <PR>
+```
+
+Pause between review, prepare, and merge. A passing command is not a substitute
+for maintainer judgment about correctness, scope, proof, and risk.
+
 ## Start issue and PR triage with gitcrawl
 
 - Use `$gitcrawl` first anytime you inspect OpenClaw issues or PRs.
@@ -214,6 +251,11 @@ Output only qualifying candidates, with: ref, surface, proof, cause, fix sketch,
   commenting that a bug is unreproducible, closing an issue, or opening/landing
   a fix PR. Prefer a real packaged/Docker/live lane that exercises the reported
   user flow over unit-only proof.
+- If the real environment requires the user's Azure/VPN-backed Crabbox setup,
+  coordinate that proof explicitly before landing. Record who ran it, the
+  provider/lease id when available, the exact command/path, redacted environment
+  shape, and the success marker. If the proof cannot be collected by the agent,
+  say so instead of pretending local tests are equivalent.
 - Before landing, require:
   1. symptom evidence such as a repro, logs, or a failing test
   2. a verified root cause in code with file/line
@@ -275,7 +317,8 @@ gh search issues --repo openclaw/openclaw --match title,body --limit 50 \
   ClawSweeper comments/checks when present. Do not assume local proof is enough
   if a bot has reported actionable findings on the same head SHA.
 - Leave a review conversation unresolved only when reviewer or maintainer judgment is still needed.
-- When landing or merging any PR, follow the global `/landpr` process.
+- When landing or merging any PR, follow the global `/landpr` process through
+  the maintainers repo workflow above.
 - On Windows hosts, prepare and update OpenClaw PR branches from a Linux-side
   WSL checkout under `/root/src` unless the PR specifically targets native
   Windows behavior. Use WSL `git`, `gh`, `node`, `pnpm`, and `codex` for the

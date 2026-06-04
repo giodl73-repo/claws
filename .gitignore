@@ -2,6 +2,20 @@ node_modules/
 dist/
 coverage/
 *.log
+*.tgz
+*.tar.gz
+*.zip
+
+# Local scratch files from PR/review sessions.
+.tmp-*
+tmp/
+inspect-*.sh
+pr*-body.md
+
+# Python/runtime byproducts from local tools.
+__pycache__/
+*.py[cod]
+.logs/
 
 # test/e2e transient output — never committed
 test/e2e/.failures/

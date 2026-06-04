@@ -26,7 +26,7 @@ Azure deployment for the polling daemon. Personal VS Enterprise sub (`148f5576-7
           |
           | LLM call         +-----------------------+
           +---------->       | clawcode-aoai         |
-          |                  | (gpt-5 deployment)    |
+          |                  | (GPT-5.5 deployment)  |
           |                  +-----------------------+
           |
           | verdict archive  +-----------------------+
@@ -52,6 +52,8 @@ az group create --name claws-review-bot-rg --location eastus2
 cp infra/bot.parameters.example.json infra/bot.parameters.json
 #    - ghePat: paste output of `gh auth token --hostname microsoft.ghe.com`
 #    - containerImage: image you pushed in step 2
+#    - aoaiDeploymentName: Azure deployment name for GPT-5.5, e.g. reviewer-gpt-5.5
+#    - aoaiDeploymentNameReeval: cheaper GPT-5.x deployment for reevals, or "" to disable
 #    - postComments: false for first 6h (dry-run), then flip to true
 
 # 4. Deploy
@@ -85,9 +87,15 @@ Next cron fire onward, the bot will post verdicts to PRs in addition to archivin
 | KeyVault | ~$0.50/month |
 | Storage (verdicts ~10 KB each, indefinite retention) | ~$0.01/month |
 | Log Analytics | $1-3/month |
-| **Azure OpenAI gpt-5 inference** (50 reviews/day, ~50k tokens/review) | **~$225/month** |
+| **Azure OpenAI GPT-5.5 inference** (50 reviews/day, ~50k tokens/review) | **~$1,250/month at full-tier list price before cache/reeval savings** |
 
 Cost ceiling: AOAI dominates. To cap, lower `pollIntervalMinutes`, or set `replicaTimeout` lower (currently 30 min).
+
+## GPT-5.5 setup
+
+Deploy a GPT-5.5 model in the existing `clawcode-aoai` Azure OpenAI account and name the deployment `reviewer-gpt-5.5` (or update `aoaiDeploymentName` to match the actual deployment name). Keep `aoaiReasoningEffort=high` unless the deployed model explicitly supports `xhigh` and the extra latency/cost is intended. `aoaiMaxCompletionTokens=32000` is the operational default; raise it only for reviews that genuinely need longer verdicts.
+
+The bot still calls Chat Completions because the current harness is text-only and does not use hosted tools. GPT-5.5 deployments are sent the reasoning-model request shape: developer messages, `max_completion_tokens`, `reasoning_effort`, optional `verbosity`, and no `temperature`.
 
 ## If egress is blocked
 

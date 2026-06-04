@@ -32,6 +32,30 @@ param aoaiDeploymentNameReeval string = 'reviewer-gpt5-mini'
 @description('AOAI API version')
 param aoaiApiVersion string = '2025-01-01-preview'
 
+@description('Reasoning effort for GPT-5.x/o-series AOAI deployments. Keep high by default; use xhigh only if the deployed model supports it and latency/cost are acceptable.')
+@allowed([
+  'none'
+  'minimal'
+  'low'
+  'medium'
+  'high'
+  'xhigh'
+])
+param aoaiReasoningEffort string = 'high'
+
+@description('Optional verbosity for GPT-5.x AOAI deployments. Empty omits the parameter.')
+@allowed([
+  ''
+  'low'
+  'medium'
+  'high'
+])
+param aoaiVerbosity string = ''
+
+@description('Optional max_completion_tokens override. Zero keeps the bot default: 32000 for reasoning deployments, 8000 for legacy chat deployments.')
+@minValue(0)
+param aoaiMaxCompletionTokens int = 0
+
 @description('Container image (full ref with tag, e.g. clawsreviewbotacr.azurecr.io/claws-review-bot:abc123)')
 param containerImage string = 'clawsreviewbotacr.azurecr.io/claws-review-bot:latest'
 
@@ -255,6 +279,9 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
             { name: 'AOAI_DEPLOYMENT_REEVAL', value: aoaiDeploymentNameReeval }
             { name: 'AOAI_API_VERSION', value: aoaiApiVersion }
             { name: 'AOAI_API_KEY', secretRef: 'aoai-api-key' }
+            { name: 'AOAI_REASONING_EFFORT', value: aoaiReasoningEffort }
+            { name: 'AOAI_VERBOSITY', value: aoaiVerbosity }
+            { name: 'AOAI_MAX_COMPLETION_TOKENS', value: aoaiMaxCompletionTokens == 0 ? '' : string(aoaiMaxCompletionTokens) }
             { name: 'STORAGE_CONNECTION_STRING', secretRef: 'storage-connection-string' }
             { name: 'STORAGE_CONTAINER', value: 'verdicts' }
             // POST_COMMENTS toggle: false = archive to Storage only (dry-run);

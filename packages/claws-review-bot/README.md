@@ -44,10 +44,42 @@ Three layers, each with a single responsibility:
 | Preflight (pre-push self-review) | `voice/modes/preflight.md` | `preflight` |
 | Reply (respond to reviewer comments) | `voice/modes/reply.md` | (interactive — `claude --append-system-prompt`) |
 
+## Model Backend
+
+Local runs default to the relay backend, which shells out to Claude Code:
+
+```bash
+claws-review-bot tick bic/lobster#634 --dry-run
+```
+
+Production runs use Azure OpenAI directly:
+
+```bash
+LLM_BACKEND=azure-openai \
+AOAI_ENDPOINT=https://<resource>.cognitiveservices.azure.com \
+AOAI_DEPLOYMENT=reviewer-gpt-5.5 \
+AOAI_API_KEY=<key> \
+AOAI_REASONING_EFFORT=high \
+AOAI_VERBOSITY=medium \
+AOAI_MAX_COMPLETION_TOKENS=32000 \
+claws-review-bot tick bic/lobster#634 --dry-run
+```
+
+GPT-5.x and o-series deployment names use the reasoning-model request shape:
+`developer` + `user` messages, `max_completion_tokens`, `reasoning_effort`,
+optional `verbosity`, and no `temperature`. Legacy GPT-4.x deployment names keep
+the low-temperature chat shape.
+
+For GPT-5.5, create an Azure OpenAI deployment such as `reviewer-gpt-5.5` that
+points at the `gpt-5.5` model. The reeval deployment can be a cheaper GPT-5.x
+deployment, for example `reviewer-gpt-5.4-mini`, by setting
+`AOAI_DEPLOYMENT_REEVAL`.
+
 ## Authentication
 
 - **GHE**: requires `gh` CLI authenticated to `microsoft.ghe.com` (`gh auth login --hostname microsoft.ghe.com`).
-- **Anthropic**: requires `claude` CLI installed and authenticated.
+- **Local relay**: requires `claude` CLI installed and authenticated.
+- **Azure OpenAI**: requires `AOAI_ENDPOINT`, `AOAI_DEPLOYMENT`, and `AOAI_API_KEY`.
 
 ## Posting discipline
 
