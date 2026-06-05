@@ -33,6 +33,7 @@ agent is assigned to an area, then read the area `README.md`.
 | Policy | `policy/SESSION.md` |
 | Doctor | `doctor/SESSION.md` |
 | Feeds | `feeds/SESSION.md` |
+| Lobster | `lobster/SESSION.md` |
 | Admin | `admin/SESSION.md` |
 | Context budget | `context-budget/SESSION.md` |
 | oc-path | `oc-path/SESSION.md` |

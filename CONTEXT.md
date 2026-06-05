@@ -14,6 +14,7 @@ tools.
 | Policy work | `projects/policy/README.md` |
 | Doctor work | `projects/doctor/README.md` |
 | Feeds work | `projects/feeds/README.md` |
+| Lobster work | `projects/lobster/README.md` |
 | Admin work | `projects/admin/README.md` |
 | Context-budget work | `projects/context-budget/README.md` |
 | oc-path work | `projects/oc-path/README.md` |
@@ -35,6 +36,7 @@ Common session files:
 - `projects/policy/SESSION.md`
 - `projects/doctor/SESSION.md`
 - `projects/feeds/SESSION.md`
+- `projects/lobster/SESSION.md`
 - `projects/admin/SESSION.md`
 - `projects/context-budget/SESSION.md`
 - `projects/oc-path/SESSION.md`
@@ -106,6 +108,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
 - Doctor: health findings, structured repair output, dry-run repair preview
   stacks.
 - Feeds: OpenClaw feed primitives and Lobster Scout feed integration.
+- Lobster: Lobster vault/spec refresh PRs, LobsterTank dashboard notes, runtime
+  worktree links, and repo-specific PR readiness.
 - Admin: Lobster admin spaces, managed policy baselines, Partner Center, and
   tenant/global admin settings.
 - Context budget: audit, runtime evidence, recommendations, and management
