@@ -15,7 +15,8 @@
 - Primary repos: `openclaw/openclaw`, `openclaw/rfcs`, `bic/lobster`.
 - Main tracking file: `projects/policy/README.md`.
 - Current policy focus: `exec-approvals.json` evidence and rules, with the
-  next P1 stack layer covering `sandbox.allowModes`.
+  next P1 stack layer covering `sandbox.allowModes`, followed by the P2
+  config-coverage bundle.
 - Active OpenClaw PR: https://github.com/openclaw/openclaw/pull/90003.
 - Active RFC PR: https://github.com/openclaw/rfcs/pull/6.
 
@@ -27,7 +28,8 @@
   named `exec-approvals.json` artifact, without broadening config or plugin
   surface.
 - Active branch / PR: `policy-file-stores-exec` / OpenClaw #90003; stacked
-  draft `policy-sandbox-allow-modes` / giodl73-repo/openclaw #3.
+  draft `policy-sandbox-allow-modes` / giodl73-repo/openclaw #3; unfiled
+  branch `policy-config-coverage-p2`.
 - Known dirty state: check the target worktree before editing.
 - Blocking question: none recorded.
 
@@ -50,4 +52,6 @@
 - Keep the PR body concrete with redacted evidence examples and policy rule
   examples.
 - Track whether ClawSweeper or Codex review finds new policy issues.
-- Keep the P2 config/plugin coverage bundle separate from this P1 policy stack.
+- P2 branch `policy-config-coverage-p2` is stacked on `policy-sandbox-allow-modes`
+  and covers elevated defaults, agent-to-agent, safe-bin trusted dirs, and
+  plugin allow/deny policy checks.

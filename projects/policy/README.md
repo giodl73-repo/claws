@@ -9,6 +9,7 @@ proof, and next PRs without using `claws-hapi` as a prototype repo.
 | --- | --- | --- | --- | --- |
 | openclaw/openclaw | [#90003](https://github.com/openclaw/openclaw/pull/90003) | `policy-file-stores-exec` | Open | Cover `exec-approvals.json` policy evidence and rules. |
 | giodl73-repo/openclaw | [#3](https://github.com/giodl73-repo/openclaw/pull/3) | `policy-sandbox-allow-modes` | Draft open | Stack `sandbox.allowModes` on exec approvals as the P1 remainder. |
+| giodl73-repo/openclaw | Unfiled | `policy-config-coverage-p2` | Pushed branch | Stack P2 config coverage bundle on `sandbox.allowModes`. |
 | openclaw/rfcs | [#6](https://github.com/openclaw/rfcs/pull/6) | `policy-conformance-exec-approvals` | Draft open | RFC addendum for exec approvals evidence. |
 | openclaw/openclaw | [#89596](https://github.com/openclaw/openclaw/pull/89596) | `fix-77801-tool-policy-declared-tools` | Open | Recognize declared tool allowlists. |
 | openclaw/openclaw | [#87081](https://github.com/openclaw/openclaw/pull/87081) | `policy-config-coverage-maintainer-tool` | Open | Add policy config coverage report. |
@@ -44,5 +45,8 @@ proof, and next PRs without using `claws-hapi` as a prototype repo.
 - Keep #90003 and RFC #6 scoped to `exec-approvals.json` evidence.
 - Keep giodl73-repo/openclaw #3 scoped to `sandbox.allowModes` until #90003
   lands or the branch can be restacked for an upstream OpenClaw PR.
+- Keep `policy-config-coverage-p2` as the next stack layer for the P2 bundle:
+  `tools.elevated.requireDefaultOff`, `tools.agentToAgent`, `tools.exec.allowSafeBinDirs`,
+  and `plugins.allow` / `plugins.deny`.
 - Keep named product artifacts as concrete file evidence, not broad runtime calls.
 - Move Lobster integration only through Lobster PRs; do not prototype policy code in `claws-hapi`.
