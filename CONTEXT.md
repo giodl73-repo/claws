@@ -17,6 +17,7 @@ tools.
 | Lobster work | `projects/lobster/README.md` |
 | Admin work | `projects/admin/README.md` |
 | Context-budget work | `projects/context-budget/README.md` |
+| Snapshot work | `projects/snapshot/README.md` |
 | oc-path work | `projects/oc-path/README.md` |
 | ClawPilot issue loop | `projects/clawpilot/README.md` |
 | Bugfix work | `projects/bugs/README.md` |
@@ -39,6 +40,7 @@ Common session files:
 - `projects/lobster/SESSION.md`
 - `projects/admin/SESSION.md`
 - `projects/context-budget/SESSION.md`
+- `projects/snapshot/SESSION.md`
 - `projects/oc-path/SESSION.md`
 - `projects/clawpilot/SESSION.md`
 - `projects/bugs/SESSION.md`
@@ -114,6 +116,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
   tenant/global admin settings.
 - Context budget: audit, runtime evidence, recommendations, and management
   integrations.
+- Snapshot: SQLite-safe snapshot/restore plugin, backup integration, failover
+  substrate, and RFC coordination.
 - oc-path: destination specs, workspace path behavior, and follow-up branches.
 - ClawPilot: feedback-to-issue tracking in `gim-home/m` using the
   `clawpilot-issue-loop` skill.
