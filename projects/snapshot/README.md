@@ -15,6 +15,8 @@ coordination.
 | Repo | PR / Issue | Branch | Status | Purpose |
 | --- | --- | --- | --- | --- |
 | `openclaw/rfcs` | [PR #20](https://github.com/openclaw/rfcs/pull/20) | `rfc/cloud-serializable-sqlite-state` | Draft | Define the SQLite State Snapshot Plugin RFC. |
+| `openclaw/openclaw` | [PR #94694](https://github.com/openclaw/openclaw/pull/94694) | `giodl/snapshot-provider-proof` | Draft, re-review requested | Add the opt-in snapshot provider proof plugin. |
+| `openclaw/openclaw` | [PR #94717](https://github.com/openclaw/openclaw/pull/94717) | `giodl/snapshot-cli-pr2` | Draft, restack pending | Add the plugin-owned `openclaw snapshot` CLI on top of PR #94694. |
 | `openclaw/openclaw` | [#90370](https://github.com/openclaw/openclaw/issues/90370) | n/a | Open | Canonical storage-backend product/design tracker. |
 | `openclaw/openclaw` | [#94675](https://github.com/openclaw/openclaw/issues/94675) | n/a | Closed duplicate | Detailed SQLite/Postgres inventory routed to #90370. |
 | `openclaw/openclaw` | [#88838](https://github.com/openclaw/openclaw/issues/88838) | n/a | Open | Session/transcript SQLite migration and accessor seam. |
