@@ -20,8 +20,8 @@
 
 - Last updated: 2026-06-19
 - Last agent: Codex
-- Current focus: Snapshot implementation stack after RFC. PR 5 is restacked on the reviewed PR 4 head and now has default/large empirical stress results for both global and per-agent SQLite targets.
-- Active branch / PR: `giodl/snapshot-stress-pr5`, https://github.com/openclaw/openclaw/pull/94967
+- Current focus: Snapshot implementation stack after RFC. PR 1-3 were closed in favor of consolidated PR 4, which now targets `main` and contains the provider, CLI, named targets, and safe-sync artifact proof. PR 5 remains the stacked stress follow-up.
+- Active branch / PR: `giodl/snapshot-restore-proof-pr4`, https://github.com/openclaw/openclaw/pull/94805
 - Known dirty state: `claws-hapi` had unrelated modifications in `.agents/skills/openclaw-testing/SKILL.md` and `projects/prs/SESSION.md` before this project was renamed; do not include them in snapshot commits.
 - Blocking question: None. Keep logical DB units as existing context rather than the main RFC decision.
 
@@ -43,29 +43,24 @@
 ## Open Threads
 
 - Draft RFC: https://github.com/openclaw/rfcs/pull/20
-- Draft OpenClaw PR 1: https://github.com/openclaw/openclaw/pull/94694
+- Closed OpenClaw PR 1: https://github.com/openclaw/openclaw/pull/94694
   - Latest pushed head: `3d1a4064ab` (`fix: share snapshot sqlite primitive`)
-  - Current proof: snapshot provider tests pass, sqlite-vec tests pass, touched-file oxlint passes, import smoke passes, `git diff --check` passes.
-  - Known proof gap/noise: `src/infra/backup-create.test.ts` is 37/38 on Windows due a base-existing `EBUSY` cleanup failure; reproduced unchanged on clean `origin/main` in `C:\tmp\openclaw-main-backup-baseline`.
-  - ClawSweeper re-review requested after rebase: https://github.com/openclaw/openclaw/pull/94694#issuecomment-4747834207
-- Draft OpenClaw PR 2: https://github.com/openclaw/openclaw/pull/94717
+  - Closed in favor of consolidated core snapshot PR #94805.
+- Closed OpenClaw PR 2: https://github.com/openclaw/openclaw/pull/94717
   - Latest pushed head: `a341086a26` (`Add core snapshot CLI`)
-  - Restacked on PR 1 head `0175bf36aa`.
-  - Current proof: snapshot CLI/provider tests pass, register snapshot CLI tests pass, oxlint on changed snapshot files passes, `git diff --check` passes.
-- Draft OpenClaw PR 3: https://github.com/openclaw/openclaw/pull/94799
+  - Closed in favor of consolidated core snapshot PR #94805.
+- Closed OpenClaw PR 3: https://github.com/openclaw/openclaw/pull/94799
   - Latest pushed head: `addd22047e` (`Add named snapshot database targets`)
-  - Base: `giodl/snapshot-cli-pr2`
-  - Adds `openclaw snapshot create --target global` and `openclaw snapshot create --agent <id>` while preserving explicit `--db`.
-  - Current proof: `node scripts/run-vitest.mjs run src/commands/snapshot.test.ts src/cli/program/register.snapshot.test.ts src/snapshot/snapshot-provider.test.ts`; changed-file `oxlint`; `git diff --check`.
-  - Codex review clean: no accepted/actionable findings.
-- Draft OpenClaw PR 4: https://github.com/openclaw/openclaw/pull/94805
+  - Closed in favor of consolidated core snapshot PR #94805.
+- Draft OpenClaw PR A: https://github.com/openclaw/openclaw/pull/94805
   - Latest pushed head: `9d41f9f806` (`Add snapshot docs navigation entry`)
-  - Base: `giodl/snapshot-named-targets-pr3`
-  - Adds safe-sync workflow proof and `docs/cli/snapshot.md`.
+  - Base: `main`
+  - Combines the previous provider, CLI, named target, and safe-sync proof slices.
+  - LOC after retarget: `+1551/-17` across 17 files.
   - Current proof: `node scripts/run-vitest.mjs run src/commands/snapshot.test.ts src/cli/program/register.snapshot.test.ts src/snapshot/snapshot-provider.test.ts`; `pnpm exec oxfmt --check docs/docs.json docs/cli/snapshot.md docs/cli/index.md`; `git diff --check`; `pnpm docs:check-mdx`; `pnpm docs:check-links`; `pnpm docs:list`.
   - Codex review found one P3 docs navigation gap; fixed by adding `cli/snapshot` to `docs/docs.json`. Rerun Codex review clean with no actionable findings.
-  - GitHub checks were in progress after the new push; merge state temporarily `UNSTABLE`.
-- Draft OpenClaw PR 5: https://github.com/openclaw/openclaw/pull/94967
+  - PR body retitled to `Add core SQLite snapshot command` and updated as the combined core snapshot MVP.
+- Draft OpenClaw PR B: https://github.com/openclaw/openclaw/pull/94967
   - Latest pushed head: `ff7dd749a4` (`Add snapshot SQLite stress harness`)
   - Base: `giodl/snapshot-restore-proof-pr4`
   - Restacked on PR 4 head `9d41f9f806` and force-pushed with lease.
