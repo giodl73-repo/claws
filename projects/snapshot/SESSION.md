@@ -12,16 +12,16 @@
 - Area: OpenClaw SQLite state snapshot core feature
 - Primary repo: `openclaw/openclaw`
 - Local worktree: `C:\src\openclaw-snapshot-pr1`
-- Current branch: `giodl/snapshot-named-targets-pr3`
-- Main tracking file: `openclaw/openclaw#94799`
+- Current branch: `giodl/snapshot-restore-proof-pr4`
+- Main tracking file: `openclaw/openclaw#94805`
 - Skill to use: `openclaw-docs`
 
 ## Current Session
 
 - Last updated: 2026-06-19
 - Last agent: Codex
-- Current focus: Snapshot implementation stack after RFC. PR 1 and PR 2 are core-first; PR 3 now adds named OpenClaw database targets so operators can snapshot `global` and per-agent SQLite state without knowing live file paths.
-- Active branch / PR: `giodl/snapshot-named-targets-pr3`, https://github.com/openclaw/openclaw/pull/94799
+- Current focus: Snapshot implementation stack after RFC. PR 4 now proves and documents the safe-sync artifact workflow: create from named target, copy the snapshot directory, restore to a fresh SQLite path, and ignore live SQLite sidecars.
+- Active branch / PR: `giodl/snapshot-restore-proof-pr4`, https://github.com/openclaw/openclaw/pull/94805
 - Known dirty state: `claws-hapi` had unrelated modifications in `.agents/skills/openclaw-testing/SKILL.md` and `projects/prs/SESSION.md` before this project was renamed; do not include them in snapshot commits.
 - Blocking question: None. Keep logical DB units as existing context rather than the main RFC decision.
 
@@ -57,6 +57,12 @@
   - Base: `giodl/snapshot-cli-pr2`
   - Adds `openclaw snapshot create --target global` and `openclaw snapshot create --agent <id>` while preserving explicit `--db`.
   - Current proof: `node scripts/run-vitest.mjs run src/commands/snapshot.test.ts src/cli/program/register.snapshot.test.ts src/snapshot/snapshot-provider.test.ts`; changed-file `oxlint`; `git diff --check`.
+  - Codex review clean: no accepted/actionable findings.
+- Draft OpenClaw PR 4: https://github.com/openclaw/openclaw/pull/94805
+  - Latest pushed head: `7cfcd61a69` (`Document snapshot restore proof`)
+  - Base: `giodl/snapshot-named-targets-pr3`
+  - Adds safe-sync workflow proof and `docs/cli/snapshot.md`.
+  - Current proof: `node scripts/run-vitest.mjs run src/commands/snapshot.test.ts src/cli/program/register.snapshot.test.ts src/snapshot/snapshot-provider.test.ts`; changed-file `oxlint`; Prettier check for `docs/cli/snapshot.md docs/cli/index.md`; `git diff --check`.
   - Initial GitHub checks were still in progress when opened.
 - #90370 comment posted linking RFC PR #20.
 - #94675 follow-up posted after closure, linking #94646, RFC PR #20, and PR stack: https://github.com/openclaw/openclaw/issues/94675#issuecomment-4747834354
