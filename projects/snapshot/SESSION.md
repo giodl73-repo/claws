@@ -20,8 +20,8 @@
 
 - Last updated: 2026-06-19
 - Last agent: Codex
-- Current focus: Snapshot implementation stack after RFC. PR 4 just passed Codex review after adding the missing `cli/snapshot` docs navigation entry; PR 5 should be restacked on the new PR 4 head before the next PR5 review/update.
-- Active branch / PR: `giodl/snapshot-restore-proof-pr4`, https://github.com/openclaw/openclaw/pull/94805
+- Current focus: Snapshot implementation stack after RFC. PR 5 is restacked on the reviewed PR 4 head and now has default/large empirical stress results for both global and per-agent SQLite targets.
+- Active branch / PR: `giodl/snapshot-stress-pr5`, https://github.com/openclaw/openclaw/pull/94967
 - Known dirty state: `claws-hapi` had unrelated modifications in `.agents/skills/openclaw-testing/SKILL.md` and `projects/prs/SESSION.md` before this project was renamed; do not include them in snapshot commits.
 - Blocking question: None. Keep logical DB units as existing context rather than the main RFC decision.
 
@@ -66,12 +66,15 @@
   - Codex review found one P3 docs navigation gap; fixed by adding `cli/snapshot` to `docs/docs.json`. Rerun Codex review clean with no actionable findings.
   - GitHub checks were in progress after the new push; merge state temporarily `UNSTABLE`.
 - Draft OpenClaw PR 5: https://github.com/openclaw/openclaw/pull/94967
-  - Latest pushed head: `ce28ab4fc8` (`Add snapshot SQLite stress harness`)
+  - Latest pushed head: `ff7dd749a4` (`Add snapshot SQLite stress harness`)
   - Base: `giodl/snapshot-restore-proof-pr4`
-  - Needs restack/rebase after PR 4 head moved to `9d41f9f806`.
+  - Restacked on PR 4 head `9d41f9f806` and force-pushed with lease.
   - Adds `scripts/bench-snapshot-sqlite.ts`, `scripts/bench-snapshot-sqlite.mjs`, package scripts `test:snapshot:stress*`, and helper tests.
-  - Current proof: `node scripts/run-vitest.mjs run test/scripts/bench-snapshot-sqlite.test.ts`; changed-file `oxlint`; `pnpm exec oxfmt --check scripts/bench-snapshot-sqlite.ts scripts/bench-snapshot-sqlite.mjs test/scripts/bench-snapshot-sqlite.test.ts package.json`; `git diff --check`; `pnpm test:snapshot:stress:smoke`; `node --import tsx scripts/bench-snapshot-sqlite.mjs --profile smoke --agent main --output .artifacts/snapshot-stress/agent-smoke.json`.
-  - Global smoke proof: 3 snapshots/restores verified, 32 writer rows, snapshot p95 26.117 ms, restore p95 9.277 ms.
-  - Agent smoke proof: 3 snapshots/restores verified, 24 writer rows, snapshot p95 20.100 ms, restore p95 5.624 ms.
+  - Current proof: `node scripts/run-vitest.mjs run test/scripts/bench-snapshot-sqlite.test.ts`; changed-file `oxlint`; `pnpm exec oxfmt --check scripts/bench-snapshot-sqlite.ts scripts/bench-snapshot-sqlite.mjs test/scripts/bench-snapshot-sqlite.test.ts package.json`; `git diff --check`; `pnpm test:snapshot:stress`; `pnpm test:snapshot:stress:large`; `node --import tsx scripts/bench-snapshot-sqlite.mjs --profile default --agent main --output .artifacts/snapshot-stress/agent-default.json`; `node --import tsx scripts/bench-snapshot-sqlite.mjs --profile large --agent main --output .artifacts/snapshot-stress/agent-large.json`.
+  - Global default proof: 20 snapshots/restores verified, 832 writer rows, snapshot p95 28.581 ms, restore p95 13.623 ms.
+  - Global large proof: 100 snapshots/restores verified, 8640 writer rows, snapshot p95 26.910 ms, restore p95 16.386 ms.
+  - Agent default proof: 20 snapshots/restores verified, 544 writer rows, snapshot p95 17.472 ms, restore p95 7.456 ms.
+  - Agent large proof: 100 snapshots/restores verified, 5248 writer rows, snapshot p95 15.763 ms, restore p95 8.928 ms.
+  - Cross-platform stress not run: no Crabbox wrapper binary was available in the expected WSL locations on this machine.
 - #90370 comment posted linking RFC PR #20.
 - #94675 follow-up posted after closure, linking #94646, RFC PR #20, and PR stack: https://github.com/openclaw/openclaw/issues/94675#issuecomment-4747834354
