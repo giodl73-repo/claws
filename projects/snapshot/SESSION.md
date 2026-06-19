@@ -20,8 +20,8 @@
 
 - Last updated: 2026-06-19
 - Last agent: Codex
-- Current focus: Snapshot implementation stack after RFC. PR 1 was updated to address ClawSweeper provider-surface and lockfile concerns; PR 2 still needs restacking on top of the new PR 1 head.
-- Active branch / PR: `giodl/snapshot-provider-proof`, https://github.com/openclaw/openclaw/pull/94694
+- Current focus: Snapshot implementation stack after RFC. PR 1 and PR 2 are rebased on current `origin/main` after #94646 landed; both PR bodies now frame snapshot as the opt-in durability layer for #94646's database-first SQLite units.
+- Active branch / PR: `giodl/snapshot-cli-pr2`, https://github.com/openclaw/openclaw/pull/94717
 - Known dirty state: `claws-hapi` had unrelated modifications in `.agents/skills/openclaw-testing/SKILL.md` and `projects/prs/SESSION.md` before this project was renamed; do not include them in snapshot commits.
 - Blocking question: None. Keep logical DB units as existing context rather than the main RFC decision.
 
@@ -44,11 +44,15 @@
 
 - Draft RFC: https://github.com/openclaw/rfcs/pull/20
 - Draft OpenClaw PR 1: https://github.com/openclaw/openclaw/pull/94694
-  - Latest pushed head: `592e0c548f` (`fix: share snapshot sqlite primitive`)
+  - Latest pushed head: `3d1a4064ab` (`fix: share snapshot sqlite primitive`)
   - Current proof: snapshot provider tests pass, sqlite-vec tests pass, touched-file oxlint passes, import smoke passes, `git diff --check` passes.
   - Known proof gap/noise: `src/infra/backup-create.test.ts` is 37/38 on Windows due a base-existing `EBUSY` cleanup failure; reproduced unchanged on clean `origin/main` in `C:\tmp\openclaw-main-backup-baseline`.
-  - ClawSweeper re-review requested: https://github.com/openclaw/openclaw/pull/94694#issuecomment-4747749561
+  - ClawSweeper re-review requested after rebase: https://github.com/openclaw/openclaw/pull/94694#issuecomment-4747834207
 - Draft OpenClaw PR 2: https://github.com/openclaw/openclaw/pull/94717
-  - Needs restack on top of PR 1 head `592e0c548f`.
-  - Clean restack will require rebasing `giodl/snapshot-cli-pr2` and pushing with `--force-with-lease`; confirm before rewriting the PR2 branch.
+  - Latest pushed head: `d8c5d9a5a6` (`Add snapshot plugin CLI`)
+  - Restacked on PR 1 head `3d1a4064ab`.
+  - Current proof: snapshot CLI/provider tests pass, bundled plugin metadata tests pass, extension oxlint passes, `git diff --check` passes.
+  - Known proof gap/noise: extension package boundary compile reaches existing repo-level package-resolution/type errors (`@openclaw/gateway-protocol`, `@openclaw/net-policy/*`, duplicate `EventStream`) after an initial transient Windows `EBUSY` retry; no snapshot-specific diagnostic reported first.
+  - ClawSweeper re-review requested after rebase: https://github.com/openclaw/openclaw/pull/94717#issuecomment-4747834282
 - #90370 comment posted linking RFC PR #20.
+- #94675 follow-up posted after closure, linking #94646, RFC PR #20, and PR stack: https://github.com/openclaw/openclaw/issues/94675#issuecomment-4747834354
