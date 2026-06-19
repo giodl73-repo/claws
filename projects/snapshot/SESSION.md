@@ -20,8 +20,8 @@
 
 - Last updated: 2026-06-19
 - Last agent: Codex
-- Current focus: Snapshot implementation stack after RFC. PR 5 adds an opt-in stress harness that snapshots/restores while a concurrent writer commits transaction batches against global and per-agent SQLite DBs.
-- Active branch / PR: `giodl/snapshot-stress-pr5`, https://github.com/openclaw/openclaw/pull/94967
+- Current focus: Snapshot implementation stack after RFC. PR 4 just passed Codex review after adding the missing `cli/snapshot` docs navigation entry; PR 5 should be restacked on the new PR 4 head before the next PR5 review/update.
+- Active branch / PR: `giodl/snapshot-restore-proof-pr4`, https://github.com/openclaw/openclaw/pull/94805
 - Known dirty state: `claws-hapi` had unrelated modifications in `.agents/skills/openclaw-testing/SKILL.md` and `projects/prs/SESSION.md` before this project was renamed; do not include them in snapshot commits.
 - Blocking question: None. Keep logical DB units as existing context rather than the main RFC decision.
 
@@ -59,14 +59,16 @@
   - Current proof: `node scripts/run-vitest.mjs run src/commands/snapshot.test.ts src/cli/program/register.snapshot.test.ts src/snapshot/snapshot-provider.test.ts`; changed-file `oxlint`; `git diff --check`.
   - Codex review clean: no accepted/actionable findings.
 - Draft OpenClaw PR 4: https://github.com/openclaw/openclaw/pull/94805
-  - Latest pushed head: `7cfcd61a69` (`Document snapshot restore proof`)
+  - Latest pushed head: `9d41f9f806` (`Add snapshot docs navigation entry`)
   - Base: `giodl/snapshot-named-targets-pr3`
   - Adds safe-sync workflow proof and `docs/cli/snapshot.md`.
-  - Current proof: `node scripts/run-vitest.mjs run src/commands/snapshot.test.ts src/cli/program/register.snapshot.test.ts src/snapshot/snapshot-provider.test.ts`; changed-file `oxlint`; Prettier check for `docs/cli/snapshot.md docs/cli/index.md`; `git diff --check`.
-  - Initial GitHub checks were still in progress when opened.
+  - Current proof: `node scripts/run-vitest.mjs run src/commands/snapshot.test.ts src/cli/program/register.snapshot.test.ts src/snapshot/snapshot-provider.test.ts`; `pnpm exec oxfmt --check docs/docs.json docs/cli/snapshot.md docs/cli/index.md`; `git diff --check`; `pnpm docs:check-mdx`; `pnpm docs:check-links`; `pnpm docs:list`.
+  - Codex review found one P3 docs navigation gap; fixed by adding `cli/snapshot` to `docs/docs.json`. Rerun Codex review clean with no actionable findings.
+  - GitHub checks were in progress after the new push; merge state temporarily `UNSTABLE`.
 - Draft OpenClaw PR 5: https://github.com/openclaw/openclaw/pull/94967
   - Latest pushed head: `ce28ab4fc8` (`Add snapshot SQLite stress harness`)
   - Base: `giodl/snapshot-restore-proof-pr4`
+  - Needs restack/rebase after PR 4 head moved to `9d41f9f806`.
   - Adds `scripts/bench-snapshot-sqlite.ts`, `scripts/bench-snapshot-sqlite.mjs`, package scripts `test:snapshot:stress*`, and helper tests.
   - Current proof: `node scripts/run-vitest.mjs run test/scripts/bench-snapshot-sqlite.test.ts`; changed-file `oxlint`; `pnpm exec oxfmt --check scripts/bench-snapshot-sqlite.ts scripts/bench-snapshot-sqlite.mjs test/scripts/bench-snapshot-sqlite.test.ts package.json`; `git diff --check`; `pnpm test:snapshot:stress:smoke`; `node --import tsx scripts/bench-snapshot-sqlite.mjs --profile smoke --agent main --output .artifacts/snapshot-stress/agent-smoke.json`.
   - Global smoke proof: 3 snapshots/restores verified, 32 writer rows, snapshot p95 26.117 ms, restore p95 9.277 ms.
