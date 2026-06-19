@@ -69,7 +69,8 @@
   - Galin review: https://github.com/openclaw/openclaw/pull/94805#issuecomment-4752899418 asked to read `database.userVersion` from the generated artifact, not the live source before `VACUUM INTO`. Fixed in `31cb5374ef`; replied at https://github.com/openclaw/openclaw/pull/94805#issuecomment-4753084141.
   - Final PR A Codex review after the sensitive-docs fix: `codex review --base origin/main` returned no actionable correctness issues.
   - ClawSweeper re-review requested for current head: https://github.com/openclaw/openclaw/pull/94805#issuecomment-4754858603
-  - `gh pr checks 94805 --repo openclaw/openclaw` was green or skipped as of 2026-06-19 14:48 PT, including Real behavior proof.
+  - ClawSweeper review updated for `86f92a1e70`: ready for maintainer review, platinum hermit, no remaining rank-up moves. Remaining risk is maintainer acceptance of the new core CLI/artifact-manifest contract and local-only Phase 1 boundary.
+  - `gh pr checks 94805 --repo openclaw/openclaw` was green or skipped as of 2026-06-19 15:38 PT, including Real behavior proof.
 - Draft OpenClaw PR B: https://github.com/openclaw/openclaw/pull/94967
   - Latest pushed head: `50bc0b102e` (`Make snapshot stress state dirs reusable`)
   - Base: `giodl/snapshot-restore-proof-pr4`
@@ -83,6 +84,7 @@
   - Cross-platform stress not run: no Crabbox wrapper binary was available in the expected WSL locations on this machine.
   - Post-rebase proof: `node scripts/run-vitest.mjs run test/scripts/bench-snapshot-sqlite.test.ts` passed 1 file / 5 tests; `pnpm exec oxlint ...` passed; `pnpm exec oxfmt --check ...` passed; `git diff --check giodl/snapshot-restore-proof-pr4...HEAD` passed; `pnpm test:snapshot:stress:smoke` passed with 3 restores, 32 writer rows, snapshot p95 25.814 ms, restore p95 9.590 ms, max bytes 962560, WAL bytes after 0; `codex review --base origin/giodl/snapshot-restore-proof-pr4` returned no discrete correctness issue.
   - ClawSweeper re-review requested for current head: https://github.com/openclaw/openclaw/pull/94967#issuecomment-4754878613
-  - GitHub checks reran after force-push and were pending as of 2026-06-19 14:48 PT.
+  - ClawSweeper review updated for `50bc0b102e`: ready for maintainer review, platinum hermit. Remaining rank-up move is to refresh maintainer review after PR A is accepted, adopted, or otherwise settled.
+  - `gh pr checks 94967 --repo openclaw/openclaw` was green or skipped as of 2026-06-19 15:38 PT, including Real behavior proof and TUI PTY.
 - #90370 comment posted linking RFC PR #20.
 - #94675 follow-up posted after closure, linking #94646, RFC PR #20, and PR stack: https://github.com/openclaw/openclaw/issues/94675#issuecomment-4747834354
