@@ -20,8 +20,8 @@
 
 - Last updated: 2026-06-19
 - Last agent: Codex
-- Current focus: Snapshot implementation stack after RFC. PR 1-3 were closed in favor of consolidated PR A, which now targets `main` and contains the provider, CLI, named targets, safe-sync artifact proof, and docs that distinguish snapshot from backup. PR B remains the stacked stress follow-up.
-- Active branch / PR: `giodl/snapshot-stress-pr5`, https://github.com/openclaw/openclaw/pull/94967
+- Current focus: PR A readiness after ClawSweeper proof ask. PR A now has packaged `openclaw.mjs snapshot create|verify|restore` proof in the body, a clean fresh Codex review, and a queued ClawSweeper re-review. PR B remains the stacked stress follow-up.
+- Active branch / PR: `giodl/snapshot-restore-proof-pr4`, https://github.com/openclaw/openclaw/pull/94805
 - Known dirty state: `claws-hapi` had unrelated modifications in `.agents/skills/openclaw-testing/SKILL.md` and `projects/prs/SESSION.md` before this project was renamed; do not include them in snapshot commits.
 - Blocking question: None. Keep logical DB units as existing context rather than the main RFC decision.
 
@@ -60,6 +60,9 @@
   - Current proof: `node scripts/run-vitest.mjs run src/commands/snapshot.test.ts src/cli/program/register.snapshot.test.ts src/snapshot/snapshot-provider.test.ts`; `pnpm exec oxfmt --check docs/docs.json docs/cli/snapshot.md docs/cli/backup.md docs/cli/index.md`; `git diff --check`; `pnpm docs:check-mdx`; `pnpm docs:check-links`; `pnpm docs:list`.
   - Codex review found one P3 docs navigation gap; fixed by adding `cli/snapshot` to `docs/docs.json`. Rerun Codex review clean with no actionable findings.
   - PR body retitled to `Add core SQLite snapshot command` and updated as the combined core snapshot MVP. Body now states that `openclaw snapshot` is the per-database SQLite sync artifact and `openclaw backup` remains the broad `.tar.gz` recovery archive.
+  - ClawSweeper asked for packaged CLI proof. Added redacted PR-body proof from `pnpm build`, `node openclaw.mjs snapshot create --db <proof-root>/source.sqlite --repository <proof-root>/snapshots --id proof-db --kind operator-proof --json`, `node openclaw.mjs snapshot verify <snapshot> --json`, `node openclaw.mjs snapshot restore <snapshot> --target <proof-root>/restore/source.sqlite --json`, restored DB readback, and artifact file listing.
+  - Final PR A Codex review: `git fetch origin main; codex review --base origin/main` returned no actionable correctness issues.
+  - ClawSweeper re-review requested in https://github.com/openclaw/openclaw/pull/94805#issuecomment-4752649564. As of the last check, run https://github.com/openclaw/clawsweeper/actions/runs/27833432339 was still pending; old labels still showed `status: 📣 needs proof`.
 - Draft OpenClaw PR B: https://github.com/openclaw/openclaw/pull/94967
   - Latest pushed head: `764107b21b` (`Add snapshot SQLite stress harness`)
   - Base: `giodl/snapshot-restore-proof-pr4`
