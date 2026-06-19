@@ -20,8 +20,8 @@
 
 - Last updated: 2026-06-19
 - Last agent: Codex
-- Current focus: Snapshot implementation stack after RFC. PR 1-3 were closed in favor of consolidated PR 4, which now targets `main` and contains the provider, CLI, named targets, and safe-sync artifact proof. PR 5 remains the stacked stress follow-up.
-- Active branch / PR: `giodl/snapshot-restore-proof-pr4`, https://github.com/openclaw/openclaw/pull/94805
+- Current focus: Snapshot implementation stack after RFC. PR 1-3 were closed in favor of consolidated PR A, which now targets `main` and contains the provider, CLI, named targets, safe-sync artifact proof, and docs that distinguish snapshot from backup. PR B remains the stacked stress follow-up.
+- Active branch / PR: `giodl/snapshot-stress-pr5`, https://github.com/openclaw/openclaw/pull/94967
 - Known dirty state: `claws-hapi` had unrelated modifications in `.agents/skills/openclaw-testing/SKILL.md` and `projects/prs/SESSION.md` before this project was renamed; do not include them in snapshot commits.
 - Blocking question: None. Keep logical DB units as existing context rather than the main RFC decision.
 
@@ -53,17 +53,17 @@
   - Latest pushed head: `addd22047e` (`Add named snapshot database targets`)
   - Closed in favor of consolidated core snapshot PR #94805.
 - Draft OpenClaw PR A: https://github.com/openclaw/openclaw/pull/94805
-  - Latest pushed head: `9d41f9f806` (`Add snapshot docs navigation entry`)
+  - Latest pushed head: `99b33ae940` (`Clarify snapshot versus backup docs`)
   - Base: `main`
   - Combines the previous provider, CLI, named target, and safe-sync proof slices.
-  - LOC after retarget: `+1551/-17` across 17 files.
-  - Current proof: `node scripts/run-vitest.mjs run src/commands/snapshot.test.ts src/cli/program/register.snapshot.test.ts src/snapshot/snapshot-provider.test.ts`; `pnpm exec oxfmt --check docs/docs.json docs/cli/snapshot.md docs/cli/index.md`; `git diff --check`; `pnpm docs:check-mdx`; `pnpm docs:check-links`; `pnpm docs:list`.
+  - LOC after docs distinction: `+1566/-17` across 18 files.
+  - Current proof: `node scripts/run-vitest.mjs run src/commands/snapshot.test.ts src/cli/program/register.snapshot.test.ts src/snapshot/snapshot-provider.test.ts`; `pnpm exec oxfmt --check docs/docs.json docs/cli/snapshot.md docs/cli/backup.md docs/cli/index.md`; `git diff --check`; `pnpm docs:check-mdx`; `pnpm docs:check-links`; `pnpm docs:list`.
   - Codex review found one P3 docs navigation gap; fixed by adding `cli/snapshot` to `docs/docs.json`. Rerun Codex review clean with no actionable findings.
-  - PR body retitled to `Add core SQLite snapshot command` and updated as the combined core snapshot MVP.
+  - PR body retitled to `Add core SQLite snapshot command` and updated as the combined core snapshot MVP. Body now states that `openclaw snapshot` is the per-database SQLite sync artifact and `openclaw backup` remains the broad `.tar.gz` recovery archive.
 - Draft OpenClaw PR B: https://github.com/openclaw/openclaw/pull/94967
-  - Latest pushed head: `ff7dd749a4` (`Add snapshot SQLite stress harness`)
+  - Latest pushed head: `764107b21b` (`Add snapshot SQLite stress harness`)
   - Base: `giodl/snapshot-restore-proof-pr4`
-  - Restacked on PR 4 head `9d41f9f806` and force-pushed with lease.
+  - Restacked on PR A head `99b33ae940` and force-pushed with lease.
   - Adds `scripts/bench-snapshot-sqlite.ts`, `scripts/bench-snapshot-sqlite.mjs`, package scripts `test:snapshot:stress*`, and helper tests.
   - Current proof: `node scripts/run-vitest.mjs run test/scripts/bench-snapshot-sqlite.test.ts`; changed-file `oxlint`; `pnpm exec oxfmt --check scripts/bench-snapshot-sqlite.ts scripts/bench-snapshot-sqlite.mjs test/scripts/bench-snapshot-sqlite.test.ts package.json`; `git diff --check`; `pnpm test:snapshot:stress`; `pnpm test:snapshot:stress:large`; `node --import tsx scripts/bench-snapshot-sqlite.mjs --profile default --agent main --output .artifacts/snapshot-stress/agent-default.json`; `node --import tsx scripts/bench-snapshot-sqlite.mjs --profile large --agent main --output .artifacts/snapshot-stress/agent-large.json`.
   - Global default proof: 20 snapshots/restores verified, 832 writer rows, snapshot p95 28.581 ms, restore p95 13.623 ms.
