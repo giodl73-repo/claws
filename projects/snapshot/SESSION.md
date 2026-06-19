@@ -12,16 +12,16 @@
 - Area: OpenClaw SQLite state snapshot core feature
 - Primary repo: `openclaw/openclaw`
 - Local worktree: `C:\src\openclaw-snapshot-pr1`
-- Current branch: `giodl/snapshot-restore-proof-pr4`
-- Main tracking file: `openclaw/openclaw#94805`
+- Current branch: `giodl/snapshot-stress-pr5`
+- Main tracking file: `openclaw/openclaw#94967`
 - Skill to use: `openclaw-docs`
 
 ## Current Session
 
 - Last updated: 2026-06-19
 - Last agent: Codex
-- Current focus: Snapshot implementation stack after RFC. PR 4 now proves and documents the safe-sync artifact workflow: create from named target, copy the snapshot directory, restore to a fresh SQLite path, and ignore live SQLite sidecars.
-- Active branch / PR: `giodl/snapshot-restore-proof-pr4`, https://github.com/openclaw/openclaw/pull/94805
+- Current focus: Snapshot implementation stack after RFC. PR 5 adds an opt-in stress harness that snapshots/restores while a concurrent writer commits transaction batches against global and per-agent SQLite DBs.
+- Active branch / PR: `giodl/snapshot-stress-pr5`, https://github.com/openclaw/openclaw/pull/94967
 - Known dirty state: `claws-hapi` had unrelated modifications in `.agents/skills/openclaw-testing/SKILL.md` and `projects/prs/SESSION.md` before this project was renamed; do not include them in snapshot commits.
 - Blocking question: None. Keep logical DB units as existing context rather than the main RFC decision.
 
@@ -64,5 +64,12 @@
   - Adds safe-sync workflow proof and `docs/cli/snapshot.md`.
   - Current proof: `node scripts/run-vitest.mjs run src/commands/snapshot.test.ts src/cli/program/register.snapshot.test.ts src/snapshot/snapshot-provider.test.ts`; changed-file `oxlint`; Prettier check for `docs/cli/snapshot.md docs/cli/index.md`; `git diff --check`.
   - Initial GitHub checks were still in progress when opened.
+- Draft OpenClaw PR 5: https://github.com/openclaw/openclaw/pull/94967
+  - Latest pushed head: `ce28ab4fc8` (`Add snapshot SQLite stress harness`)
+  - Base: `giodl/snapshot-restore-proof-pr4`
+  - Adds `scripts/bench-snapshot-sqlite.ts`, `scripts/bench-snapshot-sqlite.mjs`, package scripts `test:snapshot:stress*`, and helper tests.
+  - Current proof: `node scripts/run-vitest.mjs run test/scripts/bench-snapshot-sqlite.test.ts`; changed-file `oxlint`; `pnpm exec oxfmt --check scripts/bench-snapshot-sqlite.ts scripts/bench-snapshot-sqlite.mjs test/scripts/bench-snapshot-sqlite.test.ts package.json`; `git diff --check`; `pnpm test:snapshot:stress:smoke`; `node --import tsx scripts/bench-snapshot-sqlite.mjs --profile smoke --agent main --output .artifacts/snapshot-stress/agent-smoke.json`.
+  - Global smoke proof: 3 snapshots/restores verified, 32 writer rows, snapshot p95 26.117 ms, restore p95 9.277 ms.
+  - Agent smoke proof: 3 snapshots/restores verified, 24 writer rows, snapshot p95 20.100 ms, restore p95 5.624 ms.
 - #90370 comment posted linking RFC PR #20.
 - #94675 follow-up posted after closure, linking #94646, RFC PR #20, and PR stack: https://github.com/openclaw/openclaw/issues/94675#issuecomment-4747834354

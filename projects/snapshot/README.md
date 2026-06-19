@@ -19,6 +19,7 @@ coordination.
 | `openclaw/openclaw` | [PR #94717](https://github.com/openclaw/openclaw/pull/94717) | `giodl/snapshot-cli-pr2` | Draft | Add the core `openclaw snapshot` CLI on top of PR #94694. |
 | `openclaw/openclaw` | [PR #94799](https://github.com/openclaw/openclaw/pull/94799) | `giodl/snapshot-named-targets-pr3` | Draft | Add named OpenClaw database targets for snapshot create. |
 | `openclaw/openclaw` | [PR #94805](https://github.com/openclaw/openclaw/pull/94805) | `giodl/snapshot-restore-proof-pr4` | Draft | Prove and document safe sync/restore from snapshot artifacts. |
+| `openclaw/openclaw` | [PR #94967](https://github.com/openclaw/openclaw/pull/94967) | `giodl/snapshot-stress-pr5` | Draft | Add opt-in SQLite snapshot stress harness for global and per-agent DBs. |
 | `openclaw/openclaw` | [#90370](https://github.com/openclaw/openclaw/issues/90370) | n/a | Open | Canonical storage-backend product/design tracker. |
 | `openclaw/openclaw` | [#94675](https://github.com/openclaw/openclaw/issues/94675) | n/a | Closed duplicate | Detailed SQLite/Postgres inventory routed to #90370. |
 | `openclaw/openclaw` | [#88838](https://github.com/openclaw/openclaw/issues/88838) | n/a | Open | Session/transcript SQLite migration and accessor seam. |
