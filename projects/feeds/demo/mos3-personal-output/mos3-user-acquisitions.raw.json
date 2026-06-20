@@ -1,0 +1,9 @@
+﻿{
+    "acquisitions":  [
+
+                     ],
+    "settings":  {
+                     "PromptUserToAcquireCopilot":  "false"
+                 },
+    "nextInterval":  1800
+}

@@ -18,14 +18,27 @@
 
 ## Current Session
 
-- Last updated: 2026-06-04.
+- Last updated: 2026-06-20.
 - Last agent: Codex.
-- Current focus: Preserve the reconstructed 24-item issue-loop state and make
-  future sessions start cleanly from the project context.
-- Active branch / PR: local checkout was
-  `fix-cli-clawpatch-findings`, ahead of `origin/main` by 1 commit when last
-  checked.
-- Known dirty state: check `C:\src\clawpilot` before edits.
+- Current focus: ClawPilot feeds PR review loop. PR #3542
+  `https://github.com/gim-home/m/pull/3542` is at head `fc9324c3` with the
+  Scout feed env/token security fix. PR #3613
+  `https://github.com/gim-home/m/pull/3613` is at head `6799ec5f` after
+  addressing publish review comments with fs-backed publish tests, dev/test
+  Publish gating, Hugin `PublishSkill` telemetry, catalog invalidation, and IPC
+  docs updates.
+- Update unblock note: user hit `No matching asset for this platform` while
+  updating from 0.21. Live issue search found no exact match. Likely cause:
+  older updater expects `Clawpilot-Windows-<version>-x64-Setup.exe`, while
+  latest stable `v0.23.0` publishes Windows assets as
+  `MicrosoftScout-Windows-0.23.0-x64-Setup.exe`. Downloaded and signature
+  verified the latest Windows x64 installer at
+  `C:\tmp\clawpilot-update\MicrosoftScout-Windows-0.23.0-x64-Setup.exe`.
+- Active branch / PR: `C:\src\clawpilot` is on
+  `user/giodl/scout-desktop-personal-feed-publish`, clean after pushing
+  `6799ec5f` to PR #3613. PR #3542 remains stacked underneath at `fc9324c3`.
+- Known dirty state: none in `C:\src\clawpilot`. `C:\src\claws-hapi` has this
+  session update.
 - Blocking question: none recorded.
 
 ## Resume Checklist

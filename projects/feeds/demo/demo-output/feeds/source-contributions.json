@@ -1,0 +1,52 @@
+﻿{
+    "schemaVersion":  1,
+    "feedId":  "clawhub-public-and-ms-curated",
+    "generatedAt":  "2026-06-17T14:21:53.8990304Z",
+    "entries":  [
+                    {
+                        "id":  "clawhub.openclaw.excel-review",
+                        "kind":  "skill",
+                        "version":  "1.4.2",
+                        "title":  "Excel Review",
+                        "source":  {
+                                       "feed":  "clawhub.community",
+                                       "publisher":  "openclaw"
+                                   },
+                        "artifact":  {
+                                         "type":  "file",
+                                         "path":  "C:\\src\\claws-hapi\\projects\\feeds\\demo\\demo-output\\packages\\excel-review",
+                                         "sha256":  "sha256:0a50b078e2c050fed08f7c3ecba2a69cbb0732ce1897751c19cfc0b3bf6ab46f"
+                                     }
+                    },
+                    {
+                        "id":  "microsoft.scout.sharepoint-summary",
+                        "kind":  "skill",
+                        "version":  "2.0.0",
+                        "title":  "SharePoint Summary",
+                        "source":  {
+                                       "feed":  "microsoft.curated",
+                                       "publisher":  "microsoft"
+                                   },
+                        "artifact":  {
+                                         "type":  "file",
+                                         "path":  "C:\\src\\claws-hapi\\projects\\feeds\\demo\\demo-output\\packages\\sharepoint-summary",
+                                         "sha256":  "sha256:af3f9c6b1a2967ee18be0f5e22479a7c117f6222d9a40ac0ccecb2a6c34ae9db"
+                                     }
+                    },
+                    {
+                        "id":  "clawhub.community.unreviewed-admin-script",
+                        "kind":  "skill",
+                        "version":  "0.9.0",
+                        "title":  "Unreviewed Admin Script",
+                        "source":  {
+                                       "feed":  "clawhub.community",
+                                       "publisher":  "unknown"
+                                   },
+                        "artifact":  {
+                                         "type":  "file",
+                                         "path":  "C:\\src\\claws-hapi\\projects\\feeds\\demo\\demo-output\\packages\\unreviewed-admin-script",
+                                         "sha256":  "sha256:1f27fe1d7ad2905539510c13810ec3afcb1e8f8810a592b324d081844501b140"
+                                     }
+                    }
+                ]
+}

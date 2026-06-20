@@ -28,20 +28,28 @@ For maintainer-directed landing, the source of truth is the private
 `openclaw/maintainers` repo, not ad hoc GitHub UI actions or locally invented
 merge commands.
 
-- Use the maintainers repo workflow from beginning to end:
-  `review-pr` -> `prepare-pr` -> `merge-pr`.
-- Run maintainer scripts from the maintainers repo checkout, normally
-  `/root/src/openclaw-maintainers-repo` in WSL. If that checkout is missing,
-  clone or refresh `openclaw/maintainers` before attempting to land.
+- Refresh `/root/src/openclaw-maintainers-repo` first and read its current
+  `.agents/skills/PR_WORKFLOW.md`, `.agents/skills/review-pr/SKILL.md`,
+  `.agents/skills/prepare-pr/SKILL.md`, and `.agents/skills/merge-pr/SKILL.md`.
+- Use the workflow from beginning to end: `review-pr` -> `prepare-pr` ->
+  `merge-pr`.
+- The maintainers repo owns queue/decision state (`scripts/pr-plan`,
+  `scripts/pr-handoff`, `scripts/pr-decide`), but it may not contain the
+  executable PR wrappers. The wrapper scripts usually live in the OpenClaw
+  checkout that has `scripts/pr-review`, `scripts/pr-prepare`, and
+  `scripts/pr-merge`.
+- Run the PR wrappers from an OpenClaw checkout where those scripts exist.
+  In this WSL setup, `/root/src/openclaw-workflow` is known to run them
+  correctly; linked worktrees backed directly by `/root/src/openclaw-mirror.git`
+  may mis-detect the repo root as `/root/src`.
 - Do not hit the GitHub merge button and do not use `gh pr merge --auto` for
   maintainer landings.
-- If the maintainers repo docs reference required wrappers such as
-  `scripts/pr-review`, `scripts/pr-prepare`, or `scripts/pr-merge` but the
-  checkout does not contain them, stop and report the repo setup mismatch.
+- If the current maintainer docs reference required wrappers but no OpenClaw
+  checkout on the machine contains them, stop and report the setup mismatch.
   Do not emulate the missing landing flow with GitHub UI merges.
 - Treat `land <PR>` as: verify live PR state, review latest bot/reviewer
-  signals, confirm proof, then run the maintainers repo merge verification and
-  merge wrapper when present.
+  signals, confirm proof, then run the OpenClaw wrapper verification and merge
+  wrapper when present.
 - If a PR is already `MERGED`, report the merge SHA, merged-by actor, and
   merged-at timestamp, then do only post-merge cleanup or contributor notes
   that still apply.
@@ -49,7 +57,7 @@ merge commands.
 Maintainer command shape:
 
 ```bash
-cd /root/src/openclaw-maintainers-repo
+cd /root/src/openclaw-workflow
 scripts/pr-review <PR>
 scripts/pr-prepare run <PR>
 scripts/pr-merge verify <PR>
@@ -58,6 +66,12 @@ scripts/pr-merge run <PR>
 
 Pause between review, prepare, and merge. A passing command is not a substitute
 for maintainer judgment about correctness, scope, proof, and risk.
+
+If `scripts/pr-prepare run <PR>` stops on a broad local gate that also
+reproduces on latest `origin/main` and is clearly outside the PR's touched
+surface, document it as baseline noise. Do not broaden the PR. Report the
+scoped proof, live required-check state, and the shortest maintainer-approved
+landing path.
 
 ## Start issue and PR triage with gitcrawl
 

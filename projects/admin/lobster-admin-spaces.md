@@ -8,15 +8,22 @@ worktrees; this file is the operator index.
 | PR | Branch | Purpose | Status |
 | --- | --- | --- | --- |
 | #2210 | `user/giodl/lobster-admin-spaces` | Design doc for Lobster admin spaces. | Merged |
-| #2211 | `user/giodl/lobster-admin-spaces-runtime` | Runtime authorization primitives for deployment and tenant admins. | Ready; waiting on PoP/merge |
-| #2275 | `user/giodl/lobster-admin-policy-state` | Policy baseline state primitives stacked on #2211. | Ready; waits for #2211 |
-| #2270 | `user/giodl/lobster-admin-policy-bootstrap` | OpenClaw container policy baseline bootstrap stacked on #2275. | Ready; waits for #2275 |
+| #2211 | `user/giodl/lobster-admin-spaces-runtime` | Runtime authorization primitives for deployment and tenant admins. | Merged 2026-06-04 as `a45e8328caf8566868dce1253d84b907b704c0c6` |
+| #2275 | `user/giodl/lobster-admin-policy-state` | Policy baseline state primitives. | Open; mergeable after refresh at `0d7cbfac8`; waits for PoP, CI, and re-review |
+| #2270 | `user/giodl/lobster-admin-policy-bootstrap` | OpenClaw container policy baseline bootstrap stacked on #2275. | Open; waits for #2275 refresh |
 
 ## Merge Order
 
-1. #2211
-2. #2275
-3. #2270
+1. #2275
+2. #2270
+
+## Next Admin Action
+
+1. Clear GitOps PoP for #2275 head `0d7cbfac8`.
+2. Watch ADO builds `166825922` (`Lobster-Runtime-PullRequest`) and
+   `166825926` (`Lobster-Runtime-Build-Validation`).
+3. Confirm stale review findings are addressed and get re-review.
+4. After #2275 is clean, update #2270 on top of the refreshed #2275 branch.
 
 ## Proof Notes
 
@@ -25,7 +32,21 @@ worktrees; this file is the operator index.
   `9ea875c24acea488cb05419880f5daa61bb6a89b`.
 - #2211 required `Lobster-Runtime-Build-Validation` did not attach from
   `/azp run`; direct ADO trigger was required.
-- #2275 and #2270 are marked ready, approved, and stacked.
+- #2275 was rebased/restacked onto `main` after #2211 merged and force-pushed
+  at signed head `0d7cbfac83fb963de76e0b7b53327a138a32a969`.
+- #2275 review feedback about content-addressed policy baseline documents was
+  addressed by validating `sha256` against `contentJsonc` before accepting,
+  selecting, or bootstrapping baseline content.
+- Local proof for #2275 head `0d7cbfac8`: `just cargo test
+  admin_policy_baselines --no-fail-fast` passed 14 tests, `just cargo fmt
+  --check` passed through `cargo.sh`, and `git diff --check` passed. `just
+  rust-fmt` remains blocked locally because the CI msrustup `ms-prod-1.93`
+  toolchain is not installed.
+- #2275 ADO builds manually queued: `166825922`
+  (`Lobster-Runtime-PullRequest`) and `166825926`
+  (`Lobster-Runtime-Build-Validation`).
+- #2270 remains stacked on #2275 and should not be treated as ready until #2275
+  is refreshed.
 
 ## Required Build-Validation Trigger
 

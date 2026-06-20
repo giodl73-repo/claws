@@ -9,6 +9,10 @@ notes.
 - Scout is the Lobster-side CLI/control-plane surface for catalog feed work.
 - It can consume external sources such as ClawHub snapshots and publish curated
   feed artifacts for tenant or deployment use.
+- MOS3 snapshot consumption is staged in Lobster PR #3170 as
+  `scout feed import mos3-snapshot --path <snapshot.json> --out <root.feed.json>`;
+  live MOS3 auth, OBO exchange, environment routing, refresh cursors, and
+  acquire/unacquire flows remain out of scope for that first adapter slice.
 - OpenClaw feed consumption should remain generic enough to read enterprise
   feeds produced outside OpenClaw.
 
