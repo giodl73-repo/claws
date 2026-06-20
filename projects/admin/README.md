@@ -28,7 +28,7 @@ tenant-subset model, but feed implementation and Scout catalog work belong in
 | #3355 | `user/giodl/lobster-scout-policy-cli` | Scout tenant feed policy preview command stacked after #2270. | Merged 2026-06-19 |
 | #3383 | `user/giodl/lobster-scout-policy-polish` | Follow-up polish for Scout policy preview scope ordering, sanitized reason text, and help. | Merged 2026-06-20 at merge commit `af6bfa7c`; final head `ccb87b2ef` |
 | #3388 | `user/giodl/lobster-personal-policy-mos3` | Personal policy baseline state, accepted only when MOS3-backed and equal-or-stricter than the tenant-effective baseline. | Merged 2026-06-20 at merge commit `f9278926`; final head `0b9f4af53` |
-| #3391 | `user/giodl/lobster-policy-ux-gate` | URL-gated Policy UX preview with scope/section controls, strictness preview, and generated policy JSON; save path remains disabled. | Rebased onto `main`; head `20c0682a9`; ADO `168860003`/`168860002` queued; blocked on GitOps PoP and refreshed review |
+| #3391 | `user/giodl/lobster-policy-ux-gate` | URL-gated Policy UX preview with scope/section controls, strictness preview, and generated policy JSON; save path remains disabled. | Copilot feedback fixed; head `a07e8915e`; ADO `168861357`/`168861356` queued; blocked on GitOps PoP and refreshed review |
 
 ## Current Read
 

@@ -359,6 +359,18 @@
   touched-file Biome, and diff checks. Fresh ADO queued: PullRequest
   `168860003`, Build Validation `168860002`. Comment posted:
   https://microsoft.ghe.com/bic/lobster/pull/3391#issuecomment-183686141.
+- #3391 Copilot feedback fix on 2026-06-20: amended head to
+  `a07e8915e9397d9920e9a1e2930178c3ab02f24d`. Fixes preview correctness by
+  building generated policy/strictness from all selected controls across every
+  section for the active scope, while keeping the current section as the render
+  filter. Policy preview JSON now emits nested overlay objects from dotted
+  policy paths. Updated tests to parse the JSON preview, assert nested shape,
+  and prove cross-section selections are retained. Local proof passed
+  `npm run type-check`, targeted PolicyPage/clientRoutes Vitest (10 tests),
+  touched-file Biome, and diff checks. Resolved the three Copilot threads.
+  Fresh ADO queued: PullRequest `168861357`, Build Validation `168861356`.
+  Comment posted:
+  https://microsoft.ghe.com/bic/lobster/pull/3391#issuecomment-183686641.
 
 ## Guardrails
 

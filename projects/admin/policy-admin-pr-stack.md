@@ -22,7 +22,7 @@ Existing admin policy PRs:
 | `bic/lobster#3355` | Merged 2026-06-19 | Adds `scout policy preview` for tenant-approved feeds, package-defense state, MOS3 block-status metadata, and text/JSON preview output. |
 | `bic/lobster#3383` | Merged 2026-06-20 at merge commit `af6bfa7c`; final head `ccb87b2ef` | Polish follow-up after #3355: scope-before-attestation error ordering, sanitized readable reason text, and read-only help text. |
 | `bic/lobster#3388` | Merged 2026-06-20 at merge commit `f9278926`; final head `0b9f4af53` | Personal policy baseline state: MOS3-backed personal policies accepted only when equal-or-stricter than the tenant-effective baseline. |
-| `bic/lobster#3391` | Rebased onto `main`, head `20c0682a9`; ADO `168860003`/`168860002` queued; GitOps PoP failed; review required | URL-gated Policy UX preview with section/scope controls, strictness comparison, generated policy JSON, and disabled MOS3 save path. |
+| `bic/lobster#3391` | Copilot feedback fixed, head `a07e8915e`; ADO `168861357`/`168861356` queued; GitOps PoP failed; review required | URL-gated Policy UX preview with section/scope controls, strictness comparison, generated policy JSON, and disabled MOS3 save path. |
 
 ## Proposed Stack
 
@@ -97,6 +97,6 @@ The quarantine policy should align with the feed notes:
 
 Watch the open stack in order:
 
-1. #3391: rebased onto `main` at head `20c0682a9`. Watch ADO builds
-   `168860003` and `168860002`, get refreshed formal review, clear GitOps PoP,
-   then merge.
+1. #3391: Copilot/dspektor feedback fixed at head `a07e8915e`. Watch ADO
+   builds `168861357` and `168861356`, get refreshed formal review, clear
+   GitOps PoP, then merge.
