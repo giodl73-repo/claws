@@ -18,11 +18,11 @@
 
 ## Current Session
 
-- Last updated: 2026-06-19
+- Last updated: 2026-06-20
 - Last agent: Codex
-- Current focus: PR A is the consolidated core `openclaw snapshot` MVP. It supports `--target global`, `--agent <id>`, and explicit `--db <path>`, documents that hosts should sync completed snapshot artifacts rather than live `.sqlite` / `-wal` / `-shm` / `-journal` files, and now warns that snapshot artifacts remain sensitive state. PR B is the stacked stress harness follow-up. Lobster PR #3371 should remain context-budget only and serve as the plugin-pattern prerequisite; Lobster PR #3402 carries the separate snapshot plugin bridge.
-- Active branch / PR: `giodl/snapshot-stress-pr5`, https://github.com/openclaw/openclaw/pull/94967
-- Known dirty state: `claws-hapi` had unrelated modifications in `.agents/skills/openclaw-testing/SKILL.md` and `projects/prs/SESSION.md` before this project was renamed; do not include them in snapshot commits.
+- Current focus: OpenClaw PR A remains the consolidated core `openclaw snapshot` MVP and PR B remains the stacked stress harness. Lobster PR #3402 carries the quarantined snapshot plugin bridge. Lobster PR #3423 is the follow-on sync-boundary proof: live SQLite files stay ignored by source-style workspace sync, while completed snapshot artifacts under `snapshots/<id>/` are explicitly syncable.
+- Active branch / PR: Lobster `user/giodl/openclaw-snapshot-sync-boundary`, https://microsoft.ghe.com/bic/lobster/pull/3423 stacked on https://microsoft.ghe.com/bic/lobster/pull/3402.
+- Known dirty state: `claws-hapi` has unrelated modifications in `.agents/skills/openclaw-testing/SKILL.md`, `projects/context-budget/README.md`, `projects/context-budget/SESSION.md`, `projects/lobster/SESSION.md`, `projects/prs/SESSION.md`, and untracked `projects/openclaw/SESSION.md`; do not include them in snapshot commits. This file also has local session updates pending commit.
 - Blocking question: None. Keep logical DB units as existing context rather than the main RFC decision.
 
 ## Resume Checklist
@@ -95,9 +95,15 @@
   - Latest fixes: `OPENCLAW_PLUGINS_ENABLED=false` now sets top-level `plugins.enabled=false`; policy bootstrap preserves global plugin disable and does not re-enable policy under it; Rust let-chain was rewritten for declared MSRV compatibility.
   - Proof after latest fix: context-budget plugin `npm test` passed 13 tests; direct TS check with `src/ambient.d.ts` passed; `bash scripts/validate-code-mode-container.sh` passed; `node --check` for context-budget `src/cli.js` and `index.js` passed; `git diff --check` passed; `codex review --base origin/main` found no actionable bugs. Local Rust tests/fmt blocked by broken Windows cargo component.
 - Lobster PR #3402: https://microsoft.ghe.com/bic/lobster/pull/3402
-  - Branch: `user/giodl/openclaw-snapshot-plugin`; base: `user/giodl/context-budget-plugin`; head: `9d247a93`.
+  - Branch: `user/giodl/openclaw-snapshot-plugin`; base: `main`; head: `cb6aa176`.
   - Adds the whole phase-A snapshot plugin bridge: plugin package/manifest, `snapshot` tool implementation, tests, plugin/tool config, Dockerfile gate, and code-mode overlay preservation.
   - Snapshot source paths are admin/plugin config only; tool calls cannot pass caller-controlled filesystem paths. The created artifact is the host-sync file, not the live `.sqlite` / `-wal` / `-shm` state.
-  - Restacked on updated PR #3371 head `4a19dbe1`; proof after restack: snapshot plugin `npm test` passed 4 tests; snapshot TypeScript declaration/transpile passed; `bash scripts/validate-code-mode-container.sh` passed; `git diff --check origin/user/giodl/context-budget-plugin...HEAD` passed. Targeted Rust overlay tests blocked locally by broken Windows Rust toolchain (`cargo.exe` not applicable for installed toolchains).
+  - Refreshed after PR #3371 merged. Proof after refresh: snapshot plugin `npm test` passed 4 tests; snapshot TypeScript declaration/transpile passed; `bash scripts/validate-code-mode-container.sh` passed; `git diff --check origin/main...HEAD` passed. Targeted Rust overlay tests blocked locally by broken Windows Rust toolchain (`cargo.exe` not applicable for installed toolchains).
   - Codex review: `codex review --base origin/user/giodl/context-budget-plugin` returned no discrete actionable bugs; evidence posted at https://microsoft.ghe.com/bic/lobster/pull/3402#issuecomment-183655706.
   - Initial checks: `GitOps/FileAffordance` passed; `GitOps/GitHubPop` requires proof-of-presence authentication.
+- Lobster PR #3423: https://microsoft.ghe.com/bic/lobster/pull/3423
+  - Branch: `user/giodl/openclaw-snapshot-sync-boundary`; base: `user/giodl/openclaw-snapshot-plugin`; head: `7b23e289`.
+  - Stacked after #3402. Updates `openclaw.gitignore` so live SQLite files and sidecars remain excluded from git-backed source sync, while completed `snapshots/<id>/database.sqlite` plus `manifest.json` artifacts remain syncable.
+  - Adds a hardening regression test that initializes a real temporary git repo and runs `git check-ignore` against live DB paths and snapshot artifact paths.
+  - Proof: `python -m unittest scripts.openclaw_container_hardening_test.OpenClawContainerHardeningContracts.test_workspace_persistence_policy_syncs_only_sqlite_snapshot_artifacts`; `python -m unittest scripts.openclaw_container_hardening_test`; snapshot plugin `npm test`; `bash scripts/validate-code-mode-container.sh`; `git diff --check`.
+  - Live status after open: mergeable, `GitOps/FileAffordance` passed; runtime required checks not yet attached.
