@@ -351,6 +351,14 @@
   `168815951` and `168815950` are still green. Current GitHub state is
   `MERGEABLE`/`BLOCKED`; visible blockers are `GitOps/GitHubPop` and refreshed
   formal review (`REVIEW_REQUIRED`) after the retarget.
+- #3391 rebase on 2026-06-20: rebased onto current Lobster `main`
+  `0ad443d8b`, resolving conflicts by preserving both the landed Feeds route
+  and the gated Policy UX route. New head:
+  `20c0682a9d5fa7505c995244a3f0c5c369c670cb`. Local proof passed
+  `npm run type-check`, targeted PolicyPage/clientRoutes Vitest (9 tests),
+  touched-file Biome, and diff checks. Fresh ADO queued: PullRequest
+  `168860003`, Build Validation `168860002`. Comment posted:
+  https://microsoft.ghe.com/bic/lobster/pull/3391#issuecomment-183686141.
 
 ## Guardrails
 
