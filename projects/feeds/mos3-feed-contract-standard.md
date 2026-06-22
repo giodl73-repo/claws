@@ -12,6 +12,27 @@ fields, integrity fields, and client-visible state.
 The standard should let a client consume a tenant effective feed without knowing
 which source catalog originally published each entry.
 
+## Additive Contract
+
+The feed contract is an additive contract over MOS3 registry state. It does not
+move ownership of metadata, acquisition state, admin settings, assignments, or
+policy decisions out of MOS3. Instead, it defines how MOS3 exposes the effective
+result of those records and decisions to clients.
+
+For a client, the feed should answer "what can this caller discover or install
+now?" without requiring that client to reproduce MOS3 composition logic. For
+MOS3, the feed should be a generated view with provenance back to the source
+records, imported catalogs, admin choices, and review evidence that produced
+it.
+
+That makes the contract narrower and clearer:
+
+- MOS3 remains the source of truth for records and decisions;
+- feeds are versioned projections of the effective outcome;
+- clients consume feeds for governed discovery and install;
+- clients can still call richer MOS3 APIs when they need authoring, purchase,
+  assignment, or management workflows.
+
 ## Contract Goals
 
 - Provide stable identity across source imports, MOS3 normalization, tenant

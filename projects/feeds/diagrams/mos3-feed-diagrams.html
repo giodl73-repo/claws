@@ -227,6 +227,40 @@ function board(title, subtitle, content) {
   root.innerHTML = `<main class="board"><h1>${title}</h1><div class="subtitle">${subtitle}</div>${content}</main>`;
 }
 
+function additive() {
+  board("What MOS3 Adds With Feeds",
+    "MOS3 keeps the registry and settings. Feeds package the effective decision for clients.",
+    panel("blue", 58, 142, 426, 590, "MOS3 already owns",
+      row("T","i-blue","titles and packages", "", ["records","ok"]) +
+      row("A","i-green","acquisitions and entitlements", "", ["state","ok"]) +
+      row("P","i-purple","publisher and source metadata", "", ["metadata","ok"]) +
+      row("S","i-amber","tenant and admin settings", "", ["policy","ok"]) +
+      row("R","i-red","review and revocation state", "", ["risk","warn"]) +
+      `<div style="padding:8px 20px;color:#cbd5e1;font-size:17px;font-weight:650;line-height:1.25">These remain authoritative. Feeds do not replace this system of record.</div>`) +
+    arrow(486, 390, 120) +
+    panel("purple", 606, 142, 390, 590, "Feeds add the projection",
+      `<div class="matrix" style="grid-template-columns:1fr 1fr">
+        <div class="cell"><strong>Compose</strong><span>N sources plus MOS3 records</span></div>
+        <div class="cell"><strong>Scope</strong><span>tenant, group, user, surface, region</span></div>
+        <div class="cell"><strong>Decide</strong><span>allow, deny, pin, revoke, review</span></div>
+        <div class="cell"><strong>Materialize</strong><span>signed effective feed revision</span></div>
+      </div>
+      ${row("F","i-blue","effective feed", "", ["signed","ok"])}
+      ${row("D","i-green","client diagnostics", "", ["fresh","ok"])}`) +
+    arrow(998, 390, 120) +
+    panel("green", 1118, 142, 424, 590, "Clients consume",
+      row("S","i-blue","Scout", "", ["search","ok"]) +
+      row("C","i-green","Chat and Cowork", "", ["install","ok"]) +
+      row("V","i-purple","VS Code and GitHub Copilot", "", ["browse","ok"]) +
+      row("O","i-amber","OpenClaw", "", ["policy","ok"]) +
+      row("A","i-red","future clients", "", ["same view","ok"]) +
+      `<div style="padding:12px 20px;color:#cbd5e1;font-size:18px;font-weight:650">Clients no longer reimplement source-specific filtering and tenant policy.</div>`) +
+    `<section class="lane" style="left:82px;top:760px;width:1436px;height:88px">
+      <div class="small-title" style="position:absolute;left:24px;top:17px;color:#93c5fd">Working-group framing</div>
+      <div style="position:absolute;left:330px;right:24px;top:20px;font-size:23px;line-height:1.2;font-weight:850;color:#f8fafc">MOS3 stores the records and decisions. Feeds package the effective decision for clients.</div>
+    </section>`);
+}
+
 function position() {
   board("MOS3 Managed Feeds",
     "Many sources become one tenant-approved view for skills, plugins, MCP servers, connectors, and agents",
@@ -403,7 +437,7 @@ function authoring() {
     `<div class="footer-note">Do not encode tenant approval in the package. Packages declare. Feeds govern.</div>`);
 }
 
-({position, architecture, contract, admin, client, npm, authoring}[diagram] || position)();
+({additive, position, architecture, contract, admin, client, npm, authoring}[diagram] || position)();
 </script>
 </body>
 </html>

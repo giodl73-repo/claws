@@ -21,6 +21,16 @@ support internal and external contributions without coupling every client to
 every upstream marketplace or forcing each client to implement its own tenant
 governance model.
 
+This proposal is not asking MOS3 to invent a second registry next to the
+metadata and user/admin settings it already owns. It asks MOS3 to add a
+distribution projection over that registry. MOS3 already knows about titles,
+packages, acquisitions, assignments, publisher metadata, and admin choices.
+Feeds make those records portable and enforceable for clients by turning the
+current registry state plus policy decisions into signed, scoped, materialized
+views. In other words, MOS3 remains the system of record, while feeds become
+the client-facing contract for what a tenant, group, user, or surface can
+discover and install at a point in time.
+
 ```text
 Problem: many sources, many clients, many tenant policies
 Pattern: feeds compose, curate, cache, and distribute source indexes
@@ -39,6 +49,37 @@ clients consume for discovery and install. This makes feeds the additive
 enterprise distribution model: source ecosystems can keep publishing with
 standard package workflows, while MOS3 gives tenants one place to approve, pin,
 revoke, scope, audit, and distribute capabilities across Microsoft surfaces.
+
+## What MOS3 Is Adding
+
+![What MOS3 adds with feeds](diagrams/mos3-feed-additive-model.png)
+
+MOS3 already has registry metadata and user/admin state. The missing piece is a
+standard way to project that state into clients without every client becoming a
+custom MOS3, ClawHub, GitHub, npm, and tenant-policy integration.
+
+The additive feed layer is:
+
+- a materialized tenant or user view, not a new source of truth;
+- a signed and versioned artifact or API response that clients can cache,
+  verify, search, and diagnose;
+- a composition result over multiple sources, not a single manual list;
+- a policy projection that carries allow, deny, pin, scope, review, package
+  defense, and revocation outcomes;
+- a bridge from MOS3 registry semantics to client behavior across Scout,
+  Chat/Cowork, VS Code/GitHub Copilot, OpenClaw, and future clients.
+
+The simplest way to say it to the working group:
+
+```text
+MOS3 already stores the records and decisions.
+Feeds package the effective decision for clients.
+```
+
+That means a manual admin setting that says "this package is allowed" can stay
+where it is. The feed is what turns that setting, plus all inherited source,
+review, package, tenant, and user context, into the exact searchable and
+installable view that clients receive.
 
 ## Decision Needed
 

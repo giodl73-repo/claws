@@ -16,8 +16,25 @@
 
 ## Current Session
 
-- Last updated: 2026-06-19.
+- Last updated: 2026-06-22.
 - Last agent: Codex.
+- 2026-06-22 proposal refresh: Updated the MOS3 feeds proposal set to make the
+  additive model explicit: MOS3 keeps owning registry metadata, acquisitions,
+  assignments, user/admin settings, review, and policy decisions; feeds add the
+  signed, scoped, materialized effective view that clients consume for governed
+  discovery and install. Added
+  `projects/feeds/mos3-feed-working-group-brief.md` as the short working-group
+  handout. Updated the position, architecture, contract, admin experience,
+  client conformance, and npm leverage docs with the same distinction. Copied
+  refreshed Markdown and diagrams into
+  `C:\Users\giodl\OneDrive - Microsoft\Documents\Microsoft Scout\Feeds` and
+  regenerated DOCX versions in that folder with Word automation.
+- 2026-06-22 ADO pipeline ops note: Lobster feed PRs that need manual ADO
+  queueing should use `projects/lobster/ado-pipelines.md`. The known working
+  machine has Azure CLI plus the `azure-devops` extension and is logged into
+  the Microsoft tenant as `giodl@microsoft.com`; pipeline commands must pass
+  `--organization https://msazure.visualstudio.com --project One` explicitly
+  and queue pipeline ids `457333` and `463346` for the PR source branch.
 - OpenClaw stakeholder context: Gio met with Vince, Patrick, and the OpenClaw
   group. Vince is strongly aligned on feeds, primarily for plugins, because
   feeds give OpenClaw a uniform model for plugin control across companies:
@@ -46,13 +63,19 @@
   the JSON catalog. The hosted-feed design should include manifest refactoring
   and use HTTP `Last-Modified` plus checksum to detect new feed versions.
   First RFC draft authored in WSL repo `/root/src/openclaw-rfcs` on branch
-  `feeds-plugin-registry-rfc`, latest commit `5812835`, file
+  `feeds-plugin-registry-rfc`, latest commit `da91683`, file
   `rfcs/0009-hosted-feeds-for-plugins-and-skills.md`. The draft follows
   `rfcs/0000-template.md`, uses `status: draft`, includes Mermaid diagrams for
   OpenClaw plugin feed behavior, Microsoft enterprise composition, and regional
   feeds, anchors the proposal to the existing external plugin catalog paths,
-  and has no em dashes. RFC PR:
-  `https://github.com/openclaw/rfcs/pull/19`.
+  and has no em dashes. Vincent added source-trust and signing-envelope detail
+  at `4399109`; the latest follow-up clarifies that OpenClaw computes and
+  persists a local `sha256` payload checksum after envelope verification, so
+  feed checksums are not self-referential. RFC PR:
+  `https://github.com/openclaw/rfcs/pull/19`. On 2026-06-20 no visible Patrick
+  issue/review comments were returned by GitHub APIs; PR #19 is mergeable/CLEAN
+  at `da91683252c93c864213a7f8a853bc6e74032c9f`, Socket checks are green, and
+  ClawSweeper review is in progress.
 - Latest update: Lobster PR #1946 `https://microsoft.ghe.com/bic/lobster/pull/1946` had a failed `Lobster-Runtime-PullRequest` run `168736240` on current head `381332ad9`. The failure was isolated to `Runtime E2E Tests Build images, run E2E tests (shard 3/4)`, specifically the setup step `Setup: Start docker-compose E2E stack`, which exited with code 17 after Docker returned `failed to receive status: rpc error: code = Canceled desc = context canceled`. Build Validation `168736237` is green and the local/unit/static checks in the failed PullRequest run were green, so this looks like an E2E infrastructure startup failure rather than a ClawHub adapter code failure. A replacement PullRequest pipeline was manually queued as ADO build `168781368` on the same head and is in progress; as of the last check it had not reached the Runtime E2E stage yet. GitHubPop is failing as usual.
 
   2026-06-20 update: Lobster PR #3368
@@ -796,6 +819,26 @@
   dev/test guardrails, durable personal artifact/feed storage checks, and the
   review hardening around public artifact base URLs, feed locking, stale-lock
   recovery, metadata caps, pending publish copy, and validation error surfacing.
+- 2026-06-20 Lobster Scout tenant-admin feed composition branch started:
+  PR #3422 `https://microsoft.ghe.com/bic/lobster/pull/3422` from
+  `user/giodl/scout-feeds-admin-composition` in
+  `C:\src\lobster-feeds-admin-composition`, head
+  `d4cf7a3667a4a2a76fb343fe95a6cfa3b131f4c5`. Scope: file-backed tenant
+  admin catalog APIs over the existing `scout_catalog` model, per-tenant
+  approved-feed output directory support, fail-closed `lobster.tenant.admin`
+  authorization via admin assignment snapshot, and a separately flighted Feeds
+  page tenant-admin composition panel. Local validation passed in WSL:
+  `cargo test web_feature_flags --lib` and `cargo test scout_feed --lib`
+  (116 feed-related tests). Web validation passed:
+  targeted Biome check for changed feed/web files, `pnpm vitest run
+  tests/services/webFeatureFlagsProbe.unit.test.ts`, and ECS inventory check.
+  `tests/pages/FeedsPage.unit.test.tsx` is authored but could not run locally
+  because this worktree's reused `node_modules` is missing
+  `@tanstack/react-query`; CI should run with a fresh install. Required ADO
+  queued: PullRequest build `168856235` and Build Validation build
+  `168856234`. Current PR state right after open: non-draft, mergeable,
+  review required, ADO queued, `GitOps/FileAffordance` passed, and
+  `GitOps/GitHubPop` failed with placeholder details URL.
 
 ## Resume Checklist
 

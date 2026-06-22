@@ -127,6 +127,7 @@ per-user personal feeds at `/v1/scout/feeds/personal.json`.
   feed for tenant/admin-managed consumption. Patrick is expected to add ClawHub
   details after the initial RFC PR is opened.
 - `mos3-feed-composition-position.md`
+- `mos3-feed-working-group-brief.md`
 - `mos3-feed-composition-architecture.md`
 - `mos3-feed-contract-standard.md`
 - `mos3-feed-admin-experience.md`

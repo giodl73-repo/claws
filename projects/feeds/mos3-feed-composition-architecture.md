@@ -9,6 +9,45 @@ The position paper answers why feeds should be the enterprise model. This note
 answers how the model can work across sources, MOS3, tenant administration, and
 clients.
 
+## Existing MOS3 Capabilities And Feed Additions
+
+MOS3 should not treat feeds as a replacement for its registry, metadata store,
+acquisition model, or user/admin settings. Those are the authority. Feeds are
+the projection layer that makes the authority consumable by clients.
+
+MOS3 already has or is expected to have several ingredients:
+
+- package, title, skill, connector, and agent metadata;
+- user acquisition and entitlement state;
+- publisher and source metadata;
+- tenant or admin configuration;
+- review, policy, assignment, or visibility decisions;
+- APIs that clients or services can use to query the current state.
+
+Feeds add the missing cross-client distribution contract:
+
+- deterministic composition across N source catalogs and MOS3 records;
+- materialized effective views for tenant, group, user, surface, environment,
+  or region;
+- signed feed identity, revision, scope, and freshness;
+- explicit allow, deny, pin, revoke, review, package defense, and compatibility
+  outcomes;
+- a stable cacheable/searchable payload that clients can consume without
+  reimplementing every source API and policy rule;
+- operational hooks for refresh, stale state, rollback, audit, and diagnostics.
+
+The architecture is therefore not:
+
+```text
+MOS3 metadata OR feeds
+```
+
+It is:
+
+```text
+MOS3 metadata + policy decisions -> feed composition -> effective client view
+```
+
 ## Principles
 
 - Keep source publication separate from tenant approval.

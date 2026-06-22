@@ -12,6 +12,26 @@ discovery or install.
 The goal is consistent client behavior without requiring every client to share
 the same runtime, install mechanism, or execution model.
 
+## What The Feed Is For
+
+The feed is the client-facing effective view of MOS3 decisions. It is not a
+replacement for MOS3 APIs that manage authoring, acquisition, assignment,
+publisher records, admin configuration, or package lifecycle.
+
+A client should use the feed when it needs to answer governed discovery and
+install questions:
+
+- what entries are visible for this tenant, user, group, surface, or region;
+- which version is approved or pinned;
+- whether the entry is denied, revoked, deprecated, blocked, or out of scope;
+- which source, review, package defense, and attestation evidence produced the
+  outcome.
+
+A client can still use richer MOS3 APIs for workflows that need live mutation
+or record management. The conformance point is that clients should not each
+invent their own feed-like filtering over raw registry state when MOS3 can
+materialize the effective view once.
+
 ## Client Responsibilities
 
 A conforming client must:

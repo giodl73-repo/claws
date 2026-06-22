@@ -11,6 +11,23 @@ implementation details.
 The goal is to let admins curate many source catalogs into tenant effective
 feeds that approved clients can consume.
 
+## What Changes For Admins
+
+MOS3 may already have manual controls that look feed-like: an admin can make a
+package, title, skill, connector, or acquisition visible or unavailable for a
+set of users. Those controls should stay in the admin and registry model.
+
+The feed addition is that those settings become part of a materialized effective
+view. Admins are no longer only editing isolated records. They can preview and
+publish the actual view clients will consume after MOS3 combines source
+catalogs, Microsoft review, package defense, tenant policy, group/surface
+scope, pins, denies, revocations, and personal eligibility.
+
+For admins, the new value is not "another place to click approve." The value is
+confidence that one decision in MOS3 becomes a consistent searchable,
+installable, auditable result across Scout, Chat/Cowork, VS Code/GitHub
+Copilot, OpenClaw, and other clients.
+
 ## Admin Jobs
 
 Admins need to answer five questions:

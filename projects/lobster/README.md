@@ -8,6 +8,7 @@ notes. Admin-plane work belongs in `projects/admin/`.
 | Area | File |
 | --- | --- |
 | Scout feeds and catalog work | `feeds-scout.md` |
+| ADO pipeline queueing and Azure login state | `ado-pipelines.md` |
 
 Admin spaces, policy baseline admin state, and Partner Center notes moved to
 `projects/admin/`.

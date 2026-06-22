@@ -27,6 +27,18 @@ client compatibility.
 This lets us reuse the parts of npm that already work well while avoiding the
 mistake of making every client become an npm governance client.
 
+The three-layer distinction should stay explicit:
+
+```text
+npm = package identity, version, artifact, and integrity substrate
+MOS3 = registry, metadata, acquisition, admin, review, and policy authority
+feeds = signed effective views that clients consume
+```
+
+That means MOS3 can keep existing metadata and manual settings while feeds
+project the effective outcome of those settings into Scout, Chat/Cowork,
+VS Code/GitHub Copilot, OpenClaw, and other clients.
+
 ## Current Stack Alignment
 
 The Lobster feed stack has not yet made npm the only artifact path. It first
