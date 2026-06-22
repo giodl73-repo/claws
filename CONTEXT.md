@@ -20,6 +20,7 @@ tools.
 | Context-budget work | `projects/context-budget/README.md` |
 | Snapshot work | `projects/snapshot/README.md` |
 | Memory work | `projects/memory/README.md` |
+| Claws Review Bot | `projects/claws-review-bot/README.md` |
 | oc-path work | `projects/oc-path/README.md` |
 | ClawPilot issue loop | `projects/clawpilot/README.md` |
 | Bugfix work | `projects/bugs/README.md` |
@@ -44,6 +45,7 @@ Common session files:
 - `projects/admin/SESSION.md`
 - `projects/context-budget/SESSION.md`
 - `projects/snapshot/SESSION.md`
+- `projects/claws-review-bot/SESSION.md`
 - `projects/oc-path/SESSION.md`
 - `projects/clawpilot/SESSION.md`
 - `projects/bugs/SESSION.md`
@@ -125,6 +127,9 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
   substrate, and RFC coordination.
 - Memory: AI agent memory strategy, OpenClaw memory assessment, and XAI
   Harness / Tools / Skills report coordination.
+- Claws Review Bot: `@bic/claws-review-bot` package notes, with Lobster PR
+  review as the primary lane and a separate ClawPilot issue-classifier
+  experiment.
 - oc-path: destination specs, workspace path behavior, and follow-up branches.
 - ClawPilot: feedback-to-issue tracking in `gim-home/m` using the
   `clawpilot-issue-loop` skill.

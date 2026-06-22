@@ -16,6 +16,7 @@ be buried in generated wave directories.
 | `context-budget/` | Context-budget audit, runtime evidence, recommendations, and integrations. |
 | `snapshot/` | SQLite-safe snapshot/restore plugin, backup integration, failover substrate, and RFC coordination. |
 | `memory/` | Agent memory strategy, OpenClaw memory assessment, and XAI report coordination. |
+| `claws-review-bot/` | `@bic/claws-review-bot` package notes; primary Lobster PR reviewer lane plus separate ClawPilot issue-classifier experiment. |
 | `oc-path/` | oc-path, workspace destination specs, and related local worktrees. |
 | `clawpilot/` | ClawPilot issue-loop and feedback-to-issue tracking. |
 | `bugs/` | Cross-cutting bugfix triage, reproduction notes, fix branches, and proof. |
@@ -42,6 +43,7 @@ agent is assigned to an area, then read the area `README.md`.
 | Context budget | `context-budget/SESSION.md` |
 | Snapshot | `snapshot/SESSION.md` |
 | Memory | `memory/SESSION.md` |
+| Claws Review Bot | `claws-review-bot/SESSION.md` |
 | oc-path | `oc-path/SESSION.md` |
 | ClawPilot | `clawpilot/SESSION.md` |
 | Bugs | `bugs/SESSION.md` |
