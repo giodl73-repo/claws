@@ -357,3 +357,19 @@
   maintainer acceptance, #86544 needs Gemini CLI OAuth proof, #86285 needs
   Twilio/OpenAI outbound-call proof, and #83991 needs Vertex/Gemini provider
   proof or maintainer override.
+- #84472 was updated on 2026-06-22 to head `b3563d3f34` after the dry-run
+  preview proof still hung and ClawSweeper's stale P1 concern mapped to config
+  preflight. The fix makes `loadAndMaybeMigrateDoctorConfig` pass
+  `migrateState: false` and `migrateLegacyConfig: false` for `dryRun`/`diff`,
+  while repair mode keeps both enabled. Added regression tests for dry-run,
+  diff, and repair preflight options. Validation passed: targeted Vitest
+  (3 tests), targeted `oxlint`, `git diff --check`, and `pnpm build`. Full
+  `doctor-config-flow.test.ts` still has an unrelated Windows path assertion
+  failure for `hooks.transformsDir`. Real built-launcher proof passed with
+  isolated env: `node openclaw.mjs doctor --dry-run --diff --json
+  --non-interactive` exited 0 and emitted clean preview JSON. PR body was
+  updated, `@clawsweeper review` was posted at
+  https://github.com/openclaw/openclaw/pull/84472#issuecomment-4770775197,
+  Real behavior proof check passes, merge state `CLEAN`, maintainer edits
+  enabled, draft still has stale unranked/re-review labels pending
+  ClawSweeper's fresh verdict.

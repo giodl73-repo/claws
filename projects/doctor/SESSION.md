@@ -21,7 +21,8 @@
 - Last agent: Codex.
 - Current focus: refreshed the active doctor structured-repair stack on current
   `upstream/main` after #84326's tooling check exposed a stale restart-intent
-  test.
+  test; added the official Doctor warning/info severity bar to the project
+  notes and RFC.
 - Active branch / PR: rebased and force-with-lease pushed #84326
   `ba2742aa6a`, #84340 `8fb226be72`, #84366 `15410e7115`, #84450
   `15f87d0cd7`, and #84472 `1d513afe79`; PR bodies and ClawSweeper
@@ -224,15 +225,26 @@
   individual rule intentionally migrates behind structured `healthChecks`.
 - Core doctor checks belong to ordered doctor contributions; bundled/plugin
   health checks belong to the shared extension registry after core checks.
+- Treat Doctor finding severity as user impact, not runtime survivability:
+  `warning` is for actionably wrong or stale state the user should correct;
+  `info` is for advisory state that can be left indefinitely without affecting
+  canonical behavior, repair clarity, upgrade safety, or reliability.
 
 ## Open Threads
 
 - #84326: current head `ba2742aa6a`; local validation including
-  `pnpm tsgo:core` passes after the session accessor cleanup. Wait for fresh
-  GitHub checks and ClawSweeper.
+  `pnpm tsgo:core` passes after the session accessor cleanup. PR body now
+  records the maintainer severity finding to keep
+  `core/doctor/sandbox/registry-files` at `warning`, plus the Doctor RFC
+  pointer for the warning/info bar. Wait for fresh GitHub checks and
+  ClawSweeper.
 - #84340: current head `8fb226be72`; local validation including
-  `pnpm tsgo:core` passes after the session accessor cleanup. Wait for fresh
-  GitHub checks and ClawSweeper.
+  `pnpm tsgo:core` passes after the session accessor cleanup. PR body was
+  repaired on 2026-06-22 to restore Markdown sections, remove the bad
+  `$(System.Collections.Hashtable.head)` placeholder, and record the
+  maintainer findings plus Doctor RFC pointer for lint severity, public
+  `HealthCheckContext.deep`, and the temporary structured-preview/legacy-repair
+  dual path. Wait for fresh GitHub mergeability and ClawSweeper.
 - #84366: current draft head `15410e7115`; live refresh after push showed merge
   `CLEAN` with lightweight checks/proof passing or skipped as expected. Wait
   for ClawSweeper.

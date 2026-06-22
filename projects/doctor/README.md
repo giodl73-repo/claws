@@ -32,6 +32,24 @@ repair and health-finding stack.
 | openclaw/openclaw | [#83753](https://github.com/openclaw/openclaw/pull/83753) | Normalize repair checks inside runner. |
 | openclaw/rfcs | [#1](https://github.com/openclaw/rfcs/pull/1) | Doctor health upgrades RFC. |
 
+## Severity Bar
+
+Doctor findings should use `warning` when the detected state is actionably wrong
+or stale enough that the user should correct it, even if OpenClaw can still run.
+That includes state that can affect reliability, correctness, safety, security
+posture, upgrade behavior, or future repair behavior; creates ambiguity between
+legacy and canonical storage, config, or runtime paths; is no longer
+authoritative but can still confuse debugging or support; or has a normal user
+or admin correction path such as `openclaw doctor --fix`.
+
+Use `info` when the state is noteworthy but not wrong: advisory,
+discoverability, or FYI output that a user can reasonably leave unchanged
+indefinitely, with no effect on canonical behavior, repair clarity, upgrade
+safety, or operational reliability.
+
+Legacy sandbox registry residue meets the `warning` bar because it is stale,
+noncanonical state with an existing corrective path.
+
 ## Next
 
 - Keep the stack about observable doctor findings and structured repair output.
