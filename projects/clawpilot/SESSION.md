@@ -28,9 +28,12 @@
   Claude Code/Gemini/Codex/Aider, phases, and open questions. Promoted the
   proposal into the ClawPilot repo as
   `docs/architecture/34-scout-desktop-cli.md` on branch
-  `user/giodl/scout-desktop-cli-design`, commit `89ef5ef9`, pushed to
+  `user/giodl/scout-desktop-cli-design`, pushed to
   `fork/user/giodl/scout-desktop-cli-design` for Stanislaw and Lorant to work
-  from; no PR opened.
+  from; no PR opened. Latest pushed commit is `dba564a9` after adversarial
+  `.craft\roles\claws` review. The doc now locks TypeScript/compiled-JS v1,
+  companion transport security boundary, manifest sensitivity/capability fields,
+  permission state model, golden output fixtures, and earlier eval determinism.
 - Update unblock note: user hit `No matching asset for this platform` while
   updating from 0.21. Live issue search found no exact match. Likely cause:
   older updater expects `Clawpilot-Windows-<version>-x64-Setup.exe`, while
@@ -40,13 +43,13 @@
   `C:\tmp\clawpilot-update\MicrosoftScout-Windows-0.23.0-x64-Setup.exe`.
 - Active branch / PR: `C:\src\clawpilot` is on
   `user/giodl/scout-desktop-cli-design`, pushed to
-  `fork/user/giodl/scout-desktop-cli-design` at `89ef5ef9`; no PR opened. The
+  `fork/user/giodl/scout-desktop-cli-design` at `dba564a9`; no PR opened. The
   prior feeds branch `user/giodl/scout-desktop-personal-feed-publish` remains
   pushed at `6799ec5f` to PR #3613, with PR #3542 stacked underneath at
   `fc9324c3`.
 - Known dirty state: none in `C:\src\clawpilot`. `C:\src\claws-hapi` has
-  `projects/clawpilot/scout-desktop-cli-proposal.md`, the ClawPilot README link,
-  and this session update.
+  unrelated dirty `projects/feeds/SESSION.md` plus this ClawPilot session
+  update.
 - Blocking question: none recorded.
 
 ## Resume Checklist
