@@ -56,6 +56,38 @@
   WSL note: this worktree has a stray local branch named `origin/main`, so
   future rebases should use `refs/remotes/origin/main` explicitly to avoid
   ambiguous-ref rebase failures.
+- 2026-06-22 OpenClaw hosted catalog stack update: Opened draft PR
+  `https://github.com/openclaw/openclaw/pull/95868` from branch
+  `feeds-hosted-catalog-fetch`, commit `50bb65f1c9b`, as the next RFC 19 slice
+  after #95846. It adds a guarded async hosted loader for
+  `register.openclaw.ai`, conditional request headers, bounded response reads,
+  checksum metadata, schema validation, and bundled fallback while leaving the
+  existing synchronous catalog path unchanged. Then opened draft PR
+  `https://github.com/openclaw/openclaw/pull/95877` from branch
+  `feeds-hosted-catalog-snapshot-cache`, commit `accc57e1e5d`, stacked after
+  #95846/#95868. #95877 adds the last-known-good snapshot store contract for
+  the hosted loader: successful hosted loads can write the exact response body
+  plus metadata and save time; fallback paths validate snapshot body checksum,
+  schema, and any caller-provided `expectedSha256` before using the snapshot;
+  missing or invalid snapshots still fall back to the bundled catalog. Local
+  proof for #95877 passed `pnpm exec oxfmt --check
+  src/plugins/official-external-plugin-catalog.ts
+  src/plugins/official-external-plugin-catalog.test.ts`, `pnpm exec oxlint
+  --deny-warnings src/plugins/official-external-plugin-catalog.ts
+  src/plugins/official-external-plugin-catalog.test.ts`, `git diff --check`,
+  `CI=1 timeout 180s node scripts/test-projects.mjs
+  src/plugins/official-external-plugin-catalog.test.ts` with 26 tests,
+  `timeout 300s pnpm tsgo:core:test`, and `codex review -c model=gpt-5.5
+  --uncommitted`. Codex initially found a real checksum-pinning issue for
+  snapshots; the PR fixes it and the final review reported no discrete
+  correctness issues. Live #95877 state after opening: draft, base `main`,
+  merge state `CLEAN`; Real behavior proof passed, many broad CI shards were
+  skipped by path selection. Next likely OpenClaw slice is binding this
+  snapshot contract to an actual runtime-owned persistent store, or adding the
+  hosted catalog source-profile selection if Vince wants that before storage.
+  Follow-up: PR bodies for #95846, #95868, and #95877 were updated to use a
+  shared journey structure with stack links, step number, what each PR does,
+  what it intentionally does not do, review guidance, and validation.
 - 2026-06-22 RFC #19 review update: Pushed
   `56577f97b2ad3c0b16299c3e84334255b2c7a462` to RFC PR #19 to address
   Patrick's review comments. The RFC now clarifies source refs versus local
