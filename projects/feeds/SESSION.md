@@ -56,6 +56,21 @@
   WSL note: this worktree has a stray local branch named `origin/main`, so
   future rebases should use `refs/remotes/origin/main` explicitly to avoid
   ambiguous-ref rebase failures.
+- 2026-06-22 RFC #19 review update: Pushed
+  `56577f97b2ad3c0b16299c3e84334255b2c7a462` to RFC PR #19 to address
+  Patrick's review comments. The RFC now clarifies source refs versus local
+  source profiles, preserves ClawHub/registry ownership of search ranking,
+  distinguishes stable ids from mutable slugs, defines recommended/disabled/
+  blocked semantics and composition precedence, moves regional behavior toward
+  separate edge-cached feed variants instead of per-entry `regions` policy,
+  adds GitHub-indexed skill caveats, simplifies signing to direct keys first
+  with key rotation as a later signed document, and updates rollout around RFC
+  alignment, signed public feeds, and small draft implementation PRs. Posted
+  PR comment
+  `https://github.com/openclaw/rfcs/pull/19#issuecomment-4772661178`. Vince is
+  expected to be the responsible maintainer/merger for the main OpenClaw feed
+  implementation chain; Gio will contribute draft PRs along the way for Vince
+  and Patrick to refine or take over.
 - 2026-06-22 proposal refresh: Updated the MOS3 feeds proposal set to make the
   additive model explicit: MOS3 keeps owning registry metadata, acquisitions,
   assignments, user/admin settings, review, and policy decisions; feeds add the
