@@ -88,6 +88,22 @@
   Follow-up: PR bodies for #95846, #95868, and #95877 were updated to use a
   shared journey structure with stack links, step number, what each PR does,
   what it intentionally does not do, review guidance, and validation.
+  Second Codex review round on the full stack found one actionable P2:
+  `official-external-plugin-catalog.ts` had introduced a top-level
+  `fetchWithSsrFGuard` import, which would eagerly load guarded network/runtime
+  dependencies for cold bundled-catalog callers. Fixed in #95868 by moving the
+  guard to a dynamic import inside `loadHostedOfficialExternalPluginCatalogEntries`
+  and adding a static regression test that rejects a top-level fetch-guard
+  import. #95868 was force-pushed to verified commit `2acadea045a`; #95877 was
+  rebased and force-pushed to verified commit `b1cb838ce1a`. Final validation
+  passed oxfmt, oxlint, `git diff --check`, focused catalog tests with 27 tests
+  passing on the top branch, `timeout 420s pnpm tsgo:core:test`, and
+  `codex review -c model=gpt-5.5 --base refs/remotes/origin/main`, which
+  reported no discrete actionable correctness issues. GitHub commit verification
+  is valid for all commits in #95846, #95868, and #95877. #95846/#95868 are
+  fork PRs with maintainer edits enabled; #95877 is a same-repo OpenClaw branch,
+  so GitHub does not expose the fork-only `maintainerCanModify` flag, but
+  OpenClaw maintainers can edit the branch directly.
 - 2026-06-22 RFC #19 review update: Pushed
   `56577f97b2ad3c0b16299c3e84334255b2c7a462` to RFC PR #19 to address
   Patrick's review comments. The RFC now clarifies source refs versus local
