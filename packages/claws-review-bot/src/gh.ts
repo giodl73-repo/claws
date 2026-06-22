@@ -20,6 +20,27 @@ export interface GhComment {
 
 const GH_RETRIES = 5;
 const GH_BACKOFF_BASE_MS = 1000;
+const GHE_DIFF_TOO_LARGE_RE =
+  /diff exceeded the maximum number of lines\s*\(20000\)|HTTP 406/i;
+
+export class PullDiffTooLargeError extends Error {
+  readonly repo: string;
+  readonly prNumber: number;
+
+  constructor(repo: string, prNumber: number, cause: Error) {
+    super(
+      `PR diff for ${repo}#${prNumber} exceeds GitHub Enterprise's 20,000-line diff API limit`
+    );
+    this.name = "PullDiffTooLargeError";
+    this.repo = repo;
+    this.prNumber = prNumber;
+    this.cause = cause;
+  }
+}
+
+export function isPullDiffTooLargeError(error: unknown): error is PullDiffTooLargeError {
+  return error instanceof PullDiffTooLargeError;
+}
 
 function isTransient(stderr: string): boolean {
   return /TLS handshake timeout|forcibly closed|connection refused|connection reset|i\/o timeout|ECONNRESET|EPIPE|503\s|502\s|504\s/i.test(
@@ -96,10 +117,18 @@ export function getPull(repo: string, num: number): GhPullSummary {
 }
 
 export function getPullDiff(repo: string, num: number): string {
-  return ghApiRaw(
-    `repos/${repo}/pulls/${num}`,
-    "application/vnd.github.v3.diff"
-  );
+  try {
+    return ghApiRaw(
+      `repos/${repo}/pulls/${num}`,
+      "application/vnd.github.v3.diff"
+    );
+  } catch (e) {
+    const err = e instanceof Error ? e : new Error(String(e));
+    if (GHE_DIFF_TOO_LARGE_RE.test(err.message)) {
+      throw new PullDiffTooLargeError(repo, num, err);
+    }
+    throw e;
+  }
 }
 
 export function getIssueComments(repo: string, num: number): GhComment[] {

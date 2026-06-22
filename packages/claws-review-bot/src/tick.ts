@@ -3,6 +3,7 @@ import {
   getPullDiff,
   getIssueComments,
   findPriorVerdict,
+  isPullDiffTooLargeError,
   postIssueComment,
   submitPrReview,
   listPrReviews,
@@ -225,7 +226,19 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
 
   // ---- Diff fetch + cheap content filter ----
 
-  const rawDiff = getPullDiff(opts.repo, opts.num);
+  let rawDiff: string;
+  try {
+    rawDiff = getPullDiff(opts.repo, opts.num);
+  } catch (e) {
+    if (isPullDiffTooLargeError(e)) {
+      return {
+        skipped: true,
+        reason:
+          "diff exceeds GitHub Enterprise's 20,000-line API limit - skipping automated review instead of failing poll",
+      };
+    }
+    throw e;
+  }
 
   // A. Skip docs/lockfile-only diffs — no architectural review value.
   if (isDocsOnlyDiff(rawDiff)) {
@@ -357,12 +370,24 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
   // gating on its findings is too aggressive.
   const verdictMarker = extractMarker(verdictBody);
   if (isApproveVerdict(verdictBody, verdictMarker)) {
-    const review = submitPrReview(
-      opts.repo,
-      opts.num,
-      verdictBody,
-      "APPROVE"
-    );
+    let review;
+    try {
+      review = submitPrReview(
+        opts.repo,
+        opts.num,
+        verdictBody,
+        "APPROVE"
+      );
+    } catch (e) {
+      console.error(
+        `[tick] formal review submit failed after verdict generation (continuing): ${(e as Error).message}`
+      );
+      return {
+        skipped: false,
+        verdictBody,
+        ...(blobUrl ? { blobUrl } : {}),
+      };
+    }
     return {
       skipped: false,
       verdictBody,
@@ -371,7 +396,19 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
     };
   }
 
-  const posted = postIssueComment(opts.repo, opts.num, verdictBody);
+  let posted;
+  try {
+    posted = postIssueComment(opts.repo, opts.num, verdictBody);
+  } catch (e) {
+    console.error(
+      `[tick] comment post failed after verdict generation (continuing): ${(e as Error).message}`
+    );
+    return {
+      skipped: false,
+      verdictBody,
+      ...(blobUrl ? { blobUrl } : {}),
+    };
+  }
   return {
     skipped: false,
     verdictBody,

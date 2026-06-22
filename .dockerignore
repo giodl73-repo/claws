@@ -1,0 +1,9 @@
+.git
+node_modules
+**/node_modules
+dist
+**/dist
+.craft
+.tmp
+*.log
+npm-debug.log*

@@ -322,3 +322,111 @@ Cloud verification:
 - AOAI usage from that proof: `prompt=17215 completion=5058 total=22273`, proving the reasoning completion cap is active (`5058 < 6000`).
 - The manual proof execution and two overlapping scheduled executions were stopped afterward to avoid a review burst.
 - Source package verification passed: `npm run check`, `npm run smoke`, and ACR build `chd` for `cost-controls-source`.
+
+## Azure Monitor Alert
+
+Last checked: 2026-06-22.
+
+- Container Apps job `claws-review-bot-job` is still provisioned and scheduled
+  every 15 minutes, but live executions showed repeated failures from
+  2026-06-21 through 2026-06-22, with one current execution still running at
+  the time of inspection.
+- Log Analytics on 2026-06-22 showed the current failure mode is large PR diffs:
+  `gh api repos/bic/lobster/pulls/<number>` returns HTTP 406
+  `Sorry, the diff exceeded the maximum number of lines (20000)` for PRs such
+  as `bic/lobster#2241`, `#2585`, and `#3023`. The bot then exits the one-shot
+  poll with `[poll] one-shot poll had errors`.
+- The same logs also showed comment posting failures for some PRs:
+  `gh comment post failed (status 1): gh: Validation Failed (HTTP 422)`.
+  That is secondary to the repeated diff-limit failure, but it is another
+  condition the bot should skip or downgrade instead of failing the full poll.
+- Action group `claws-review-bot-alerts` was created in `claws-review-bot-rg`
+  with email receiver `giodl25@hotmail.com`.
+- Metric alert `claws-review-bot-failed-executions` was created in
+  `claws-review-bot-rg`.
+- Alert scope:
+  `/subscriptions/148f5576-7098-45db-8258-76228e82ffdd/resourceGroups/claws-review-bot-rg/providers/Microsoft.App/jobs/claws-review-bot-job`.
+- Alert condition: `total Executions > 0 where state includes Failed`.
+- Evaluation frequency: 5 minutes. Window size: 15 minutes. Severity: 1.
+- Metric alert `claws-review-bot-no-executions` was also created against the
+  same scope.
+- No-execution alert condition: `total Executions < 1`.
+- No-execution alert evaluation frequency: 15 minutes. Window size: 30 minutes.
+  Severity: 1.
+
+Useful checks:
+
+```powershell
+az monitor metrics alert show --resource-group claws-review-bot-rg --name claws-review-bot-failed-executions -o json
+az monitor metrics alert show --resource-group claws-review-bot-rg --name claws-review-bot-no-executions -o json
+az monitor action-group show --resource-group claws-review-bot-rg --name claws-review-bot-alerts -o json
+az containerapp job execution list --name claws-review-bot-job --resource-group claws-review-bot-rg --query "[].{name:name,status:properties.status,start:properties.startTime,end:properties.endTime}" -o table
+az monitor metrics list --resource /subscriptions/148f5576-7098-45db-8258-76228e82ffdd/resourceGroups/claws-review-bot-rg/providers/Microsoft.App/jobs/claws-review-bot-job --metric Executions --interval PT15M --aggregation Total --dimension state -o json
+```
+
+## Diff-Limit Outage Fix
+
+Last updated: 2026-06-22.
+
+- Fixed `packages/claws-review-bot/src/gh.ts` and `src/tick.ts` so GHE HTTP
+  406 / `diff exceeded the maximum number of lines (20000)` is classified as
+  an oversized-diff skip, not a tick failure.
+- Also made post-submit failures after verdict generation non-fatal to the
+  scheduled poll. The bot logs the post failure and keeps the generated
+  verdict/blob instead of failing the whole job.
+- Added regression coverage in `packages/claws-review-bot/tests/tick.test.ts`.
+- Added root `.dockerignore` so ACR build does not upload local `node_modules`
+  or archived wave material.
+- Local validation passed:
+  - `npm run lint`
+  - `npm test`
+  - `npm run build`
+  - `node dist\cli.js tick bic/lobster#3023 --dry-run`
+- Targeted dry-run proof returned:
+  `[tick] skip - diff exceeds GitHub Enterprise's 20,000-line API limit - skipping automated review instead of failing poll`.
+- ACR build `che` succeeded and pushed
+  `clawsreviewbotacr.azurecr.io/claws-review-bot:diff-limit-skip-20260622`.
+- Container Apps job `claws-review-bot-job` was updated to that image.
+- The first scheduled run on the new image,
+  `claws-review-bot-job-29702445`, started at `2026-06-22T16:45:00Z`, posted
+  several live reviews, and was manually stopped to avoid an unintended review
+  burst after proving the new image was running.
+- Follow-up watch showed fixed-image run `claws-review-bot-job-29702460`
+  skipped oversized PRs `bic/lobster#2241` and `#2585` with the new
+  20,000-line diff-limit skip reason, confirming the outage fix worked.
+- The same watch showed backlog/concurrency risk: fixed-image executions
+  `29702460` and `29702475` overlapped and were actively spending AOAI tokens
+  / posting reviews. Both were manually stopped.
+- The Container Apps job schedule was effectively paused by changing the cron
+  from `*/15 * * * *` to `0 0 1 1 *`. Current image remains
+  `clawsreviewbotacr.azurecr.io/claws-review-bot:diff-limit-skip-20260622`.
+- While paused, metric alert `claws-review-bot-no-executions` was disabled to
+  avoid expected maintenance noise. Re-enable it when the 15-minute schedule is
+  restored. `claws-review-bot-failed-executions` remains enabled.
+- Before restoring the 15-minute schedule, add a per-poll review budget and/or
+  durable seen state so outage recovery cannot fan out into a review burst.
+
+## Poll Budget Fix
+
+Last updated: 2026-06-22.
+
+- Added `MAX_REVIEWS_PER_POLL` / `--max-reviews` support to cap non-skipped
+  reviews per poll cycle. Cheap skips do not count against the budget.
+- Added regression coverage in `packages/claws-review-bot/tests/poll.test.ts`
+  for budget stop behavior and skipped-PR handling.
+- Local validation passed:
+  - `npm run lint`
+  - `npm test`
+  - `npm run build`
+- ACR build `chf` succeeded and pushed
+  `clawsreviewbotacr.azurecr.io/claws-review-bot:poll-cap-20260622`.
+- Container Apps job `claws-review-bot-job` was updated to:
+  - image `clawsreviewbotacr.azurecr.io/claws-review-bot:poll-cap-20260622`
+  - cron `*/15 * * * *`
+  - `MAX_REVIEWS_PER_POLL=1`
+- Metric alert `claws-review-bot-no-executions` was re-enabled after restoring
+  the 15-minute schedule.
+- First capped scheduled run `claws-review-bot-job-29702505` started
+  `2026-06-22T17:45:00Z`, exited `Succeeded` at `2026-06-22T17:47:31Z`, posted
+  one review for `bic/lobster#3449`, and logged
+  `review budget reached (1/1); ending this poll cycle`.

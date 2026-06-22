@@ -75,6 +75,11 @@ program
   )
   .option("--once", "run one tick across all repos and exit", false)
   .option(
+    "--max-reviews <count>",
+    "maximum non-skipped reviews per poll cycle (also reads MAX_REVIEWS_PER_POLL env var)",
+    (v: string) => parseInt(v, 10)
+  )
+  .option(
     "--skip-author <login>",
     "skip PRs from this GHE login (repeatable; also reads SKIP_AUTHORS env var, comma-separated)",
     (val: string, prev: string[]) => [...prev, val],
@@ -87,6 +92,7 @@ program
       intervalMin: number;
       post: boolean;
       once: boolean;
+      maxReviews?: number;
       skipAuthor: string[];
     }) => {
       if (opts.repo.length === 0) {
@@ -106,6 +112,16 @@ program
         .map((s) => s.trim())
         .filter(Boolean);
       const skipAuthors = [...opts.skipAuthor, ...envSkip];
+      const envMaxReviews = parseInt(
+        process.env["MAX_REVIEWS_PER_POLL"] ?? "",
+        10
+      );
+      const maxReviewsPerCycle =
+        opts.maxReviews && opts.maxReviews > 0
+          ? opts.maxReviews
+          : Number.isFinite(envMaxReviews) && envMaxReviews > 0
+            ? envMaxReviews
+            : undefined;
 
       await runPoll({
         repos: opts.repo,
@@ -114,6 +130,7 @@ program
         postComments,
         onceOnly: opts.once,
         skipAuthors,
+        ...(maxReviewsPerCycle !== undefined ? { maxReviewsPerCycle } : {}),
       });
     }
   );

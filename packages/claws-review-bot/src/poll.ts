@@ -10,6 +10,8 @@ export interface PollOptions {
   onceOnly?: boolean;
   /** GHE logins to skip (e.g. own user, dependabot, other auto-author bots) */
   skipAuthors?: string[];
+  /** Maximum non-skipped review attempts per poll cycle. Unset means no cap. */
+  maxReviewsPerCycle?: number;
 }
 
 export async function runPoll(opts: PollOptions): Promise<void> {
@@ -18,8 +20,13 @@ export async function runPoll(opts: PollOptions): Promise<void> {
   const skipSet = new Set(
     (opts.skipAuthors ?? []).map((a) => a.toLowerCase().trim()).filter(Boolean)
   );
+  const maxReviewsPerCycle =
+    opts.maxReviewsPerCycle !== undefined && opts.maxReviewsPerCycle > 0
+      ? opts.maxReviewsPerCycle
+      : null;
 
   const tickAll = async (): Promise<void> => {
+    let reviewsThisCycle = 0;
     for (const repo of opts.repos) {
       let pulls;
       try {
@@ -64,6 +71,16 @@ export async function runPoll(opts: PollOptions): Promise<void> {
                 result.postedCommentId ? ` (posted #${result.postedCommentId})` : " (dry-run)"
               }`
             );
+            reviewsThisCycle += 1;
+            if (
+              maxReviewsPerCycle !== null &&
+              reviewsThisCycle >= maxReviewsPerCycle
+            ) {
+              console.log(
+                `[poll] review budget reached (${reviewsThisCycle}/${maxReviewsPerCycle}); ending this poll cycle`
+              );
+              return;
+            }
           }
         } catch (e) {
           console.error(`[poll] tick ${repo}#${pull.number} failed:`, e);
