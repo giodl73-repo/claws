@@ -20,7 +20,7 @@
 
 - Last updated: 2026-06-22
 - Last agent: Codex
-- Current focus: OpenClaw RFC #20 and PR A now explicitly say the Microsoft Scout/Lobster plugin path will exercise the SQLite-safe artifact boundary for about one week before maintainers treat the core `openclaw snapshot` command as the accepted path. Lobster PR #3402 has merged. Lobster PR #3423 has been rebased on `main` and tightened so only final `snapshots/<id>/database.sqlite` and `manifest.json` artifacts are syncable.
+- Current focus: OpenClaw RFC #20 and PR A now explicitly say the Microsoft Scout/Lobster plugin path will exercise the SQLite-safe artifact boundary for about one week before maintainers treat the core `openclaw snapshot` command as the accepted path. Lobster PR #3402 has merged. Lobster PR #3423 now stages snapshots outside the syncable tree and publishes completed directories only after `database.sqlite` and `manifest.json` are finalized.
 - Active branch / PR: Lobster `user/giodl/openclaw-snapshot-sync-boundary`, https://microsoft.ghe.com/bic/lobster/pull/3423; RFC https://github.com/openclaw/rfcs/pull/20; OpenClaw PR A https://github.com/openclaw/openclaw/pull/94805.
 - Known dirty state: `claws-hapi` has unrelated modifications in `.agents/skills/openclaw-testing/SKILL.md`, `projects/context-budget/README.md`, `projects/context-budget/SESSION.md`, `projects/lobster/SESSION.md`, `projects/prs/SESSION.md`, and untracked `projects/openclaw/SESSION.md`; do not include them in snapshot commits. This file also has local session updates pending commit.
 - Blocking question: None. Keep logical DB units as existing context rather than the main RFC decision.
@@ -102,9 +102,11 @@
   - Codex review: `codex review --base origin/user/giodl/context-budget-plugin` returned no discrete actionable bugs; evidence posted at https://microsoft.ghe.com/bic/lobster/pull/3402#issuecomment-183655706.
   - Initial checks: `GitOps/FileAffordance` passed; `GitOps/GitHubPop` requires proof-of-presence authentication.
 - Lobster PR #3423: https://microsoft.ghe.com/bic/lobster/pull/3423
-  - Branch: `user/giodl/openclaw-snapshot-sync-boundary`; base: `main`; head: `24f8e61f`.
+  - Branch: `user/giodl/openclaw-snapshot-sync-boundary`; base: `main`; head: `5ea90145d` (`Publish snapshots after manifest finalization`).
   - Rebased after #3402 merged. Updates `openclaw.gitignore` so live SQLite files and sidecars remain excluded from git-backed source sync, while only completed `snapshots/<id>/database.sqlite` plus `manifest.json` artifacts are syncable.
-  - Requested-change fix: replaced broad `!snapshots/**` with an exact allowlist, then added `git check-ignore` regression cases proving `database.sqlite.tmp`, WAL/SHM/journal-shaped names, random `.db` files, and nested snapshot files remain ignored.
-  - Proof after fix: focused hardening test passed; full `python -m unittest scripts.openclaw_container_hardening_test` passed 13 tests; snapshot plugin `npm test` passed 6 tests; direct JSON parse and `node --check` checks passed; `git diff --check` passed.
+  - Daron latest-feedback fix: snapshot creation now writes to ignored sibling staging path `.snapshot-staging/<snapshot-id>.<uuid>/`, materializes and hashes `database.sqlite`, writes `manifest.json`, then renames the completed directory into `snapshots/<id>/` as the publish step. This prevents `database.sqlite` from becoming syncable before its manifest exists.
+  - Sync policy/test fix: replaced broad `!snapshots/**` with an exact depth-1 allowlist, added `.snapshot-staging/` ignore coverage, and added `git check-ignore` regression cases proving staging files, `database.sqlite.tmp`, WAL/SHM/journal-shaped names, random `.db` files, and nested snapshot files remain ignored.
+  - Proof after fix: focused hardening test passed; full `python -m unittest scripts.openclaw_container_hardening_test` passed 13 tests; snapshot plugin `npm test` passed 6 tests; `node --check` on snapshot `tool.js` and `index.js` passed; `git diff --check` passed.
   - Local `bash scripts/validate-code-mode-container.sh` remained blocked by the WSL/Windows jq path mismatch (`jq.exe` cannot open `/mnt/c/...` paths), noted in the PR comment.
-  - Live status after push: mergeable, `GitOps/FileAffordance` passed, `GitOps/GitHubPop` failed, reviewDecision still `CHANGES_REQUESTED` until dspektor re-reviews or maintainer dismisses stale review.
+  - PR comment with proof: https://microsoft.ghe.com/bic/lobster/pull/3423#issuecomment-183945061
+  - Live status after push: mergeable, `GitOps/FileAffordance` passed, `GitOps/GitHubPop` failed proof-of-presence, reviewDecision still `CHANGES_REQUESTED` until dspektor re-reviews or maintainer dismisses stale review.
