@@ -49,6 +49,20 @@
   envelope/exit codes, `scout version`, manifest-backed
   `scout capabilities list`, focused Vitest coverage, and `tools:typecheck`
   wiring. No desktop companion, runtime IPC dispatch, or UI behavior changes.
+- Third fork-stacked PR authored as
+  [giodl_microsoft/m#2](https://github.com/giodl_microsoft/m/pull/2), stacked
+  on `user/giodl/scout-cli-entrypoint`, commit `acd98a98`. Scope: golden
+  envelope fixtures for success, validation error, runtime unavailable, policy
+  denial, and permission-required results; shared `serializeResult()` helper;
+  command-level fixture assertions; focused fixture tests. No new commands,
+  desktop companion, runtime IPC dispatch, or UI behavior changes.
+- Fourth fork-stacked PR authored as
+  [giodl_microsoft/m#3](https://github.com/giodl_microsoft/m/pull/3), stacked
+  on `user/giodl/scout-cli-envelope-fixtures`, commit `b0c91ff9`. Scope:
+  typed local companion status model, `scout status` text/JSON output, global
+  profile/workspace propagation, and `--require-running` fail-fast behavior
+  using the runtime-unavailable envelope. No companion server, runtime IPC
+  dispatch, or UI behavior changes.
 - Update unblock note: user hit `No matching asset for this platform` while
   updating from 0.21. Live issue search found no exact match. Likely cause:
   older updater expects `Clawpilot-Windows-<version>-x64-Setup.exe`, while
@@ -57,8 +71,12 @@
   verified the latest Windows x64 installer at
   `C:\tmp\clawpilot-update\MicrosoftScout-Windows-0.23.0-x64-Setup.exe`.
 - Active branch / PR: `C:\src\clawpilot` is on
-  `user/giodl/scout-cli-entrypoint`, pushed to fork and open as
-  [giodl_microsoft/m#1](https://github.com/giodl_microsoft/m/pull/1), commit
+  `user/giodl/scout-cli-status-preflight`, pushed to fork and open as
+  [giodl_microsoft/m#3](https://github.com/giodl_microsoft/m/pull/3), commit
+  `b0c91ff9`, stacked on `user/giodl/scout-cli-envelope-fixtures`. The prior
+  fork PR is [giodl_microsoft/m#2](https://github.com/giodl_microsoft/m/pull/2),
+  commit `acd98a98`, stacked on `user/giodl/scout-cli-entrypoint`. The earlier
+  fork PR is [giodl_microsoft/m#1](https://github.com/giodl_microsoft/m/pull/1), commit
   `8e66cc11`, stacked on `user/giodl/scout-cli-manifest`. The base manifest PR
   is [gim-home/m#3786](https://github.com/gim-home/m/pull/3786), commit
   `6e6473ac`. The design branch
