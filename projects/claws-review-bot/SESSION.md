@@ -24,9 +24,8 @@
 
 - Last updated: 2026-06-22.
 - Last agent: Codex.
-- Current focus: Explore whether a separate ClawPilot issue-classifier mode can
-  help classify and resolve issues without overlapping existing `m-agent`
-  automation or changing the main Lobster PR reviewer lane.
+- Current focus: Learn from a manual first pass of the separate ClawPilot
+  issue-classifier mode before turning it into bot rules or automation.
 - Findings from first live pass:
   - Across 26 issues updated on 2026-06-22, there were 18 comments created that
     day.
@@ -40,9 +39,20 @@
   regression/severity assessment, issue clustering, owner-area routing, and
   concrete next-action comments. It should avoid duplicate one-liners and
   generic validity sweeps.
+- First manual pass completed on 2026-06-22:
+  - Posted assessment comments on #3749, #3739, #3616, #3601, #3518, #3068,
+    and #2939.
+  - Skipped #3747 because the issue body already reframed it as design-gap
+    feedback and the existing bot had linked the duplicate/design context.
+  - Skipped #3505 because PR #3713 is already open and an assistant had claimed
+    the fix path in the issue.
+  - Skipped #2974 because the existing validity sweep found the evidence likely
+    belongs to a different codebase/version.
+  - Early rule: comment when the classifier adds owner routing, related PR/issue
+    context, severity normalization, or a concrete next action; skip when it
+    would only restate an existing duplicate/validity/claimed-fix thread.
 - Active branch / PR: none.
-- Known dirty state: this new project area and index updates in
-  `C:\src\claws-hapi`.
+- Known dirty state: session notes updated after the manual pass.
 - Blocking question: none.
 
 ## Resume Checklist
@@ -66,8 +76,8 @@
 
 ## Open Threads
 
-- Run a first limited ClawPilot issue-classifier pass on the 10 open likely
-  regression candidates if the user approves live issue comments.
+- Follow up on maintainer reactions to the seven assessment comments and adjust
+  the issue-classifier rules before automating.
 - Decide whether to create a `regression` label family:
   `regression: suspected`, `regression: confirmed`,
   `regression: needs-version`, `regression: fixed-needs-validation`.

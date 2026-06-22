@@ -56,9 +56,26 @@ Out of scope for now:
 - enhancement/design-only issues;
 - vulnerability workflow issue #2629 unless explicitly requested.
 
+Skip instead of commenting when:
+
+- the issue already reframes itself from regression to design-gap/product
+  feedback and the existing automation has linked the duplicate/design context;
+- a live PR or human/assistant assignee has already claimed the exact fix path;
+- the only useful statement would be "could not validate" or "maybe wrong
+  codebase";
+- the comment would only repeat an existing `m-agent` duplicate hint or
+  validity sweep.
+
+Comment when the classifier can add at least one of:
+
+- severity normalization;
+- owner-area routing;
+- related PR/issue context not already present;
+- a concrete next diagnostic or validation action.
+
 ## First Batch Scope
 
-Start with the 10 open likely regression candidates from the 2026-06-22 pass:
+Started with the 10 open likely regression candidates from the 2026-06-22 pass:
 
 - #3749: Windows freezes after updating to latest version.
 - #3747: locally-created sessions no longer sync across devices in `v0.23.176`.
@@ -70,6 +87,9 @@ Start with the 10 open likely regression candidates from the 2026-06-22 pass:
 - #3068: `assistant_usage` telemetry removed in `v0.22.351`.
 - #2974: session history not visible after updating to `v1.0.40`.
 - #2939: automation run fails after queued same-session `sendAndCollect`.
+
+Posted assessment comments on #3749, #3739, #3616, #3601, #3518, #3068, and
+#2939. Skipped #3747, #3505, and #2974 under the skip rules above.
 
 ## Comment Template
 
