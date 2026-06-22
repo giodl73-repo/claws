@@ -110,3 +110,4 @@
   - Local `bash scripts/validate-code-mode-container.sh` remained blocked by the WSL/Windows jq path mismatch (`jq.exe` cannot open `/mnt/c/...` paths), noted in the PR comment.
   - PR comment with proof: https://microsoft.ghe.com/bic/lobster/pull/3423#issuecomment-183945061
   - Live status after push: mergeable, `GitOps/FileAffordance` passed, `GitOps/GitHubPop` failed proof-of-presence, reviewDecision still `CHANGES_REQUESTED` until dspektor re-reviews or maintainer dismisses stale review.
+  - 2026-06-22 ADO fallback queued required runtime checks for head `5ea90145d`: `Lobster-Runtime-PullRequest` build `169083376` and `Lobster-Runtime-Build-Validation` build `169083372`. Both attached to the PR as pending.
