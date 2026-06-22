@@ -8,6 +8,7 @@ material.
 
 | PR | Branch | Status | Purpose |
 | --- | --- | --- | --- |
+| [#95846](https://github.com/openclaw/openclaw/pull/95846) | `feeds-hosted-catalog-prep` | Draft open, opened 2026-06-22 at `44c0884c3ed`; based on current `main`; focused tests/format/lint passed locally | First RFC 19 implementation prep slice: reshape the bundled official external plugin catalog into a feed-shaped local fallback while preserving current behavior. No hosted fetch, auth, signed envelope, regional selection, SQLite cache, search, or skills behavior yet. |
 | [#88732](https://github.com/openclaw/openclaw/pull/88732) | `feeds-native-search-default` | Draft open, updated 2026-06-19 to `c487721eafb`; mergeable; native search docs/import/policy evidence fixes pushed; PR body has real skills/plugins feed-search proof; stale `needs proof` label awaiting ClawSweeper refresh and maintainer trust/default approval | Native feed search defaults. |
 | [#87827](https://github.com/openclaw/openclaw/pull/87827) | `feeds-lifecycle-tooling` | Draft open, updated 2026-06-19 to `47aabc7bcd`; mergeable; deterministic build and URL validate/hash findings fixed; PR body has real lifecycle CLI proof; stale `needs proof` label awaiting ClawSweeper refresh | Feed lifecycle tooling. |
 | [#87826](https://github.com/openclaw/openclaw/pull/87826) | `feeds-policy-conformance-4pr` | Draft open, rebased, merge clean | Feed catalog policy conformance. |

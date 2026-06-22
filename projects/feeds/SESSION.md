@@ -18,6 +18,44 @@
 
 - Last updated: 2026-06-22.
 - Last agent: Codex.
+- 2026-06-22 OpenClaw hosted-feed prep: Read latest RFC #19 after Vince's
+  edits. Current RFC PR is `https://github.com/openclaw/rfcs/pull/19` at
+  `da91683252c93c864213a7f8a853bc6e74032c9f`; Vince's commits emphasize named
+  local source profiles, source refs instead of feed-owned domains or
+  credentials, local auth/trust roots, signed envelopes, explicit unsigned-feed
+  opt-in, and locally computed payload checksums after envelope verification.
+  Patrick's review comments are now visible. Main points: clarify named local
+  package sources and source refs; keep ClawHub owning registry search while
+  clients filter results against feeds; avoid depending on mutable slugs where
+  stable ids are needed; clarify priority/recommended/blocked/disabled
+  semantics and feed composition precedence; be careful with skills because
+  GitHub-synced skills may not have versions and may be indexed by ClawHub but
+  installed directly from GitHub; consider whether regional feeds can be
+  separate edge-cached feeds instead of an in-payload `regions` field; use
+  "marketplace" for the user-facing concept where appropriate; clarify signing
+  and trust-envelope terminology; and note ClawHub publisher labels are
+  currently binary official/not official. Based on this, opened OpenClaw draft
+  PR `https://github.com/openclaw/openclaw/pull/95846` from WSL worktree
+  `/root/src/openclaw-feeds-hosted-catalog-prep`, branch
+  `feeds-hosted-catalog-prep`, commit `44c0884c3ed`. The PR intentionally only
+  implements RFC rollout step 1: reshapes
+  `scripts/lib/official-external-plugin-catalog.json` as a feed-shaped bundled
+  fallback, adds parser/type support in
+  `src/plugins/official-external-plugin-catalog.ts`, preserves legacy local
+  catalog parsing, and fails closed for unsupported versioned feed wrappers.
+  It does not add hosted fetch, auth, source profiles, signed envelopes,
+  regional selection, SQLite snapshots, search behavior, or skills. Local proof
+  passed `pnpm exec oxfmt --check
+  src/plugins/official-external-plugin-catalog.ts
+  src/plugins/official-external-plugin-catalog.test.ts`, `pnpm exec oxlint
+  --deny-warnings src/plugins/official-external-plugin-catalog.ts
+  src/plugins/official-external-plugin-catalog.test.ts`, JSON parse of
+  `scripts/lib/official-external-plugin-catalog.json`, `git diff --check`, and
+  `CI=1 timeout 180s node scripts/test-projects.mjs
+  src/plugins/official-external-plugin-catalog.test.ts` with 17 tests passing.
+  WSL note: this worktree has a stray local branch named `origin/main`, so
+  future rebases should use `refs/remotes/origin/main` explicitly to avoid
+  ambiguous-ref rebase failures.
 - 2026-06-22 proposal refresh: Updated the MOS3 feeds proposal set to make the
   additive model explicit: MOS3 keeps owning registry metadata, acquisitions,
   assignments, user/admin settings, review, and policy decisions; feeds add the
