@@ -30,10 +30,11 @@
   `docs/architecture/34-scout-desktop-cli.md` on branch
   `user/giodl/scout-desktop-cli-design`, pushed to
   `fork/user/giodl/scout-desktop-cli-design` for Stanislaw and Lorant to work
-  from; no PR opened. Latest pushed commit is `dba564a9` after adversarial
+  from; no PR opened. Latest pushed commit is `3355f9ad` after adversarial
   `.craft\roles\claws` review. The doc now locks TypeScript/compiled-JS v1,
   companion transport security boundary, manifest sensitivity/capability fields,
-  permission state model, golden output fixtures, and earlier eval determinism.
+  permission state model, golden output fixtures, earlier eval determinism, and
+  an explicit second-round role-review summary.
 - Update unblock note: user hit `No matching asset for this platform` while
   updating from 0.21. Live issue search found no exact match. Likely cause:
   older updater expects `Clawpilot-Windows-<version>-x64-Setup.exe`, while
@@ -43,7 +44,7 @@
   `C:\tmp\clawpilot-update\MicrosoftScout-Windows-0.23.0-x64-Setup.exe`.
 - Active branch / PR: `C:\src\clawpilot` is on
   `user/giodl/scout-desktop-cli-design`, pushed to
-  `fork/user/giodl/scout-desktop-cli-design` at `dba564a9`; no PR opened. The
+  `fork/user/giodl/scout-desktop-cli-design` at `3355f9ad`; no PR opened. The
   prior feeds branch `user/giodl/scout-desktop-personal-feed-publish` remains
   pushed at `6799ec5f` to PR #3613, with PR #3542 stacked underneath at
   `fc9324c3`.
