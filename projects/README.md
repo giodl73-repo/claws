@@ -11,6 +11,7 @@ be buried in generated wave directories.
 | `policy/` | Policy conformance, evidence files, RFC addenda, and Lobster policy baselines. |
 | `doctor/` | Doctor health findings, structured repairs, and repair-stack PRs. |
 | `feeds/` | OpenClaw feed primitives and Lobster Scout feed integration. |
+| `ux-state/` | Gated Lobster Feeds, Policy, and Context Budget UX previews, flags, and design-review notes. |
 | `admin/` | Lobster admin spaces, managed policy baselines, Partner Center, and tenant/global admin settings. |
 | `context-budget/` | Context-budget audit, runtime evidence, recommendations, and integrations. |
 | `snapshot/` | SQLite-safe snapshot/restore plugin, backup integration, failover substrate, and RFC coordination. |
@@ -35,6 +36,7 @@ agent is assigned to an area, then read the area `README.md`.
 | Policy | `policy/SESSION.md` |
 | Doctor | `doctor/SESSION.md` |
 | Feeds | `feeds/SESSION.md` |
+| UX state | `ux-state/SESSION.md` |
 | Lobster | `lobster/SESSION.md` |
 | Admin | `admin/SESSION.md` |
 | Context budget | `context-budget/SESSION.md` |

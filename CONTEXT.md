@@ -15,6 +15,7 @@ tools.
 | Doctor work | `projects/doctor/README.md` |
 | Feeds work | `projects/feeds/README.md` |
 | Lobster work | `projects/lobster/README.md` |
+| UX state work | `projects/ux-state/README.md` |
 | Admin work | `projects/admin/README.md` |
 | Context-budget work | `projects/context-budget/README.md` |
 | Snapshot work | `projects/snapshot/README.md` |
@@ -39,6 +40,7 @@ Common session files:
 - `projects/doctor/SESSION.md`
 - `projects/feeds/SESSION.md`
 - `projects/lobster/SESSION.md`
+- `projects/ux-state/SESSION.md`
 - `projects/admin/SESSION.md`
 - `projects/context-budget/SESSION.md`
 - `projects/snapshot/SESSION.md`
@@ -113,6 +115,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
 - Feeds: OpenClaw feed primitives and Lobster Scout feed integration.
 - Lobster: Lobster vault/spec refresh PRs, LobsterTank dashboard notes, runtime
   worktree links, and repo-specific PR readiness.
+- UX state: gated Lobster Feeds, Policy, and Context Budget UX previews,
+  launch flags, Jesse review notes, and convergence decisions.
 - Admin: Lobster admin spaces, managed policy baselines, Partner Center, and
   tenant/global admin settings.
 - Context budget: audit, runtime evidence, recommendations, and management
