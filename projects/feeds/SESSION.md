@@ -907,6 +907,39 @@
   `168856234`. Current PR state right after open: non-draft, mergeable,
   review required, ADO queued, `GitOps/FileAffordance` passed, and
   `GitOps/GitHubPop` failed with placeholder details URL.
+- 2026-06-22 OpenClaw hosted catalog prep review refreshed: PR #95846
+  `https://github.com/openclaw/openclaw/pull/95846` remains draft and
+  mergeable at head `44c0884c3edcaa07ea94d5f82624fe99b3f532b7`. Default
+  `codex review --base refs/remotes/origin/main` is blocked by local Codex
+  account/model entitlement for `gpt-5.3-codex`, but the explicit override
+  `codex review -c model=gpt-5.5 --base refs/remotes/origin/main` completed
+  and reported no actionable correctness issues. The review sandbox could not
+  run tests because its read-only filesystem could not create the heavy-check
+  lock directory; normal writable-shell validation passed:
+  `pnpm exec oxfmt --check src/plugins/official-external-plugin-catalog.ts src/plugins/official-external-plugin-catalog.test.ts`,
+  `pnpm exec oxlint --deny-warnings src/plugins/official-external-plugin-catalog.ts src/plugins/official-external-plugin-catalog.test.ts`,
+  `git diff --check refs/remotes/origin/main...HEAD`, and
+  `CI=1 timeout 180s node scripts/test-projects.mjs src/plugins/official-external-plugin-catalog.test.ts`
+  with 17 tests passing. ClawSweeper re-review is queued after proof was added
+  to the PR body; latest PR comments only show the old proof-needed verdict,
+  the `@clawsweeper re-review` command, and the queue acknowledgment.
+- 2026-06-22 OpenClaw hosted catalog fetch draft opened: PR #95868
+  `https://github.com/openclaw/openclaw/pull/95868` from
+  `feeds-hosted-catalog-fetch`, commit
+  `50bb65f1c9b211bc2cfaf28d5714dbd2de2e790a`, stacked on #95846 but opened
+  against `main` because the base prep branch is a fork PR. Scope: async
+  guarded fetch loader for
+  `https://register.openclaw.ai/official-external-plugin-catalog.json`, HTTPS
+  and hostname allowlist enforcement, optional `If-None-Match` /
+  `If-Modified-Since` headers, `sha256:` body checksum, schema v1 validation,
+  bounded body reads with chunk timeout, and bundled fallback for network,
+  HTTP, schema, checksum, size, timeout, or 304-without-cache cases. Existing
+  sync `listOfficialExternalPluginCatalogEntries()` remains bundled only.
+  Validation passed: targeted `oxfmt --check`, targeted `oxlint
+  --deny-warnings`, `git diff --check`, focused catalog test with 21 tests,
+  `pnpm tsgo:core:test`, and `codex review -c model=gpt-5.5 --uncommitted`
+  with no actionable correctness issues. PR body had to be repaired through
+  REST API after an initial shell-substitution create mangled backticked text.
 
 ## Resume Checklist
 
