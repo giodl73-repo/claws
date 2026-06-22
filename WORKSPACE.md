@@ -18,6 +18,7 @@ For agent and harness entry points, start with `CONTEXT.md`.
 | Admin | `projects/admin/` | Lobster admin spaces, managed policy baselines, and Partner Center notes. |
 | Context budget | `projects/context-budget/` | Context-budget PR plan, branches, and proof notes. |
 | Snapshot | `projects/snapshot/` | SQLite-safe snapshot/restore plugin, backup integration, failover substrate, and RFC coordination. |
+| Memory | `projects/memory/` | Agent memory strategy, OpenClaw assessment, and XAI report notes. |
 | oc-path | `projects/oc-path/` | oc-path worktrees, specs, and follow-up PRs. |
 | ClawPilot | `projects/clawpilot/` | ClawPilot feedback-to-issue tracking and issue-loop notes. |
 | Bugs | `projects/bugs/` | Cross-cutting bugfix triage, reproduction notes, and fix proof. |

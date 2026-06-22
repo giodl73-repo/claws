@@ -18,6 +18,7 @@ tools.
 | Admin work | `projects/admin/README.md` |
 | Context-budget work | `projects/context-budget/README.md` |
 | Snapshot work | `projects/snapshot/README.md` |
+| Memory work | `projects/memory/README.md` |
 | oc-path work | `projects/oc-path/README.md` |
 | ClawPilot issue loop | `projects/clawpilot/README.md` |
 | Bugfix work | `projects/bugs/README.md` |
@@ -118,6 +119,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
   integrations.
 - Snapshot: SQLite-safe snapshot/restore plugin, backup integration, failover
   substrate, and RFC coordination.
+- Memory: AI agent memory strategy, OpenClaw memory assessment, and XAI
+  Harness / Tools / Skills report coordination.
 - oc-path: destination specs, workspace path behavior, and follow-up branches.
 - ClawPilot: feedback-to-issue tracking in `gim-home/m` using the
   `clawpilot-issue-loop` skill.

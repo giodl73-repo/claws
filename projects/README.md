@@ -14,6 +14,7 @@ be buried in generated wave directories.
 | `admin/` | Lobster admin spaces, managed policy baselines, Partner Center, and tenant/global admin settings. |
 | `context-budget/` | Context-budget audit, runtime evidence, recommendations, and integrations. |
 | `snapshot/` | SQLite-safe snapshot/restore plugin, backup integration, failover substrate, and RFC coordination. |
+| `memory/` | Agent memory strategy, OpenClaw memory assessment, and XAI report coordination. |
 | `oc-path/` | oc-path, workspace destination specs, and related local worktrees. |
 | `clawpilot/` | ClawPilot issue-loop and feedback-to-issue tracking. |
 | `bugs/` | Cross-cutting bugfix triage, reproduction notes, fix branches, and proof. |
@@ -38,6 +39,7 @@ agent is assigned to an area, then read the area `README.md`.
 | Admin | `admin/SESSION.md` |
 | Context budget | `context-budget/SESSION.md` |
 | Snapshot | `snapshot/SESSION.md` |
+| Memory | `memory/SESSION.md` |
 | oc-path | `oc-path/SESSION.md` |
 | ClawPilot | `clawpilot/SESSION.md` |
 | Bugs | `bugs/SESSION.md` |
