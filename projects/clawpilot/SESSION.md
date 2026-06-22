@@ -20,7 +20,7 @@
 
 - Last updated: 2026-06-22.
 - Last agent: Codex.
-- Current focus: Scout Desktop CLI proposal and first implementation PR. Added
+- Current focus: Scout Desktop CLI proposal and first implementation stack. Added
   `projects/clawpilot/scout-desktop-cli-proposal.md`, framing the CLI as a
   typed, scriptable surface over the existing IPC layer for agent-native parity,
   headless/mobile portability, and evals. The proposal includes command
@@ -41,6 +41,14 @@
   `common/scout-cli-manifest.json`, manifest schema, verifier script, script
   tests, and `pnpm test:scripts` wiring. No runtime behavior or CLI entrypoint
   yet.
+- Second implementation PR authored as
+  [giodl_microsoft/m#1](https://github.com/giodl_microsoft/m/pull/1), stacked
+  on the manifest branch because `user/giodl/scout-cli-manifest` exists only in
+  the fork. Branch `user/giodl/scout-cli-entrypoint`, commit `8e66cc11`. Scope:
+  `scout` bin entry, `tools/scout-cli` TypeScript skeleton, stable JSON result
+  envelope/exit codes, `scout version`, manifest-backed
+  `scout capabilities list`, focused Vitest coverage, and `tools:typecheck`
+  wiring. No desktop companion, runtime IPC dispatch, or UI behavior changes.
 - Update unblock note: user hit `No matching asset for this platform` while
   updating from 0.21. Live issue search found no exact match. Likely cause:
   older updater expects `Clawpilot-Windows-<version>-x64-Setup.exe`, while
@@ -49,8 +57,10 @@
   verified the latest Windows x64 installer at
   `C:\tmp\clawpilot-update\MicrosoftScout-Windows-0.23.0-x64-Setup.exe`.
 - Active branch / PR: `C:\src\clawpilot` is on
-  `user/giodl/scout-cli-manifest`, pushed to fork and open as
-  [gim-home/m#3786](https://github.com/gim-home/m/pull/3786), commit
+  `user/giodl/scout-cli-entrypoint`, pushed to fork and open as
+  [giodl_microsoft/m#1](https://github.com/giodl_microsoft/m/pull/1), commit
+  `8e66cc11`, stacked on `user/giodl/scout-cli-manifest`. The base manifest PR
+  is [gim-home/m#3786](https://github.com/gim-home/m/pull/3786), commit
   `6e6473ac`. The design branch
   `fork/user/giodl/scout-desktop-cli-design` remains pushed at `3355f9ad`; no
   PR opened for that design-only branch. The
