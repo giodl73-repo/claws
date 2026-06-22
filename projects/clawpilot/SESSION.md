@@ -18,15 +18,19 @@
 
 ## Current Session
 
-- Last updated: 2026-06-20.
+- Last updated: 2026-06-22.
 - Last agent: Codex.
-- Current focus: ClawPilot feeds PR review loop. PR #3542
-  `https://github.com/gim-home/m/pull/3542` is at head `fc9324c3` with the
-  Scout feed env/token security fix. PR #3613
-  `https://github.com/gim-home/m/pull/3613` is at head `6799ec5f` after
-  addressing publish review comments with fs-backed publish tests, dev/test
-  Publish gating, Hugin `PublishSkill` telemetry, catalog invalidation, and IPC
-  docs updates.
+- Current focus: Drafting a Scout Desktop CLI proposal for Jakob. Added
+  `projects/clawpilot/scout-desktop-cli-proposal.md`, framing the CLI as a
+  typed, scriptable surface over the existing IPC layer for agent-native parity,
+  headless/mobile portability, and evals. The proposal includes command
+  families, security carveouts, JSON/stream output contracts, comparison with
+  Claude Code/Gemini/Codex/Aider, phases, and open questions. Promoted the
+  proposal into the ClawPilot repo as
+  `docs/architecture/34-scout-desktop-cli.md` on branch
+  `user/giodl/scout-desktop-cli-design`, commit `89ef5ef9`, pushed to
+  `fork/user/giodl/scout-desktop-cli-design` for Stanislaw and Lorant to work
+  from; no PR opened.
 - Update unblock note: user hit `No matching asset for this platform` while
   updating from 0.21. Live issue search found no exact match. Likely cause:
   older updater expects `Clawpilot-Windows-<version>-x64-Setup.exe`, while
@@ -35,10 +39,14 @@
   verified the latest Windows x64 installer at
   `C:\tmp\clawpilot-update\MicrosoftScout-Windows-0.23.0-x64-Setup.exe`.
 - Active branch / PR: `C:\src\clawpilot` is on
-  `user/giodl/scout-desktop-personal-feed-publish`, clean after pushing
-  `6799ec5f` to PR #3613. PR #3542 remains stacked underneath at `fc9324c3`.
-- Known dirty state: none in `C:\src\clawpilot`. `C:\src\claws-hapi` has this
-  session update.
+  `user/giodl/scout-desktop-cli-design`, pushed to
+  `fork/user/giodl/scout-desktop-cli-design` at `89ef5ef9`; no PR opened. The
+  prior feeds branch `user/giodl/scout-desktop-personal-feed-publish` remains
+  pushed at `6799ec5f` to PR #3613, with PR #3542 stacked underneath at
+  `fc9324c3`.
+- Known dirty state: none in `C:\src\clawpilot`. `C:\src\claws-hapi` has
+  `projects/clawpilot/scout-desktop-cli-proposal.md`, the ClawPilot README link,
+  and this session update.
 - Blocking question: none recorded.
 
 ## Resume Checklist
@@ -57,5 +65,7 @@
 
 ## Open Threads
 
+- Scout Desktop CLI proposal should be reviewed/trimmed into a Jakob-facing
+  spec or issue/umbrella before filing implementation work.
 - Items 17-19 are umbrella update/link work.
 - Items 20-24 are design-first topics, not immediate implementation issues.

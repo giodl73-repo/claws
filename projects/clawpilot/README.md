@@ -61,6 +61,11 @@ Filed or covered on 2026-06-01:
 
 - `.craft/waves/260528+hapi-the-bringer+openclaw-feeds/clawpilot-issue-loop.md`
 
+## Design Notes
+
+- `scout-desktop-cli-proposal.md` - draft proposal for a first-class Scout
+  Desktop CLI aligned with the IPC layer and agent-native parity.
+
 ## Next
 
 - Check #2712-#2719 for assignment, comments, linked PRs, and closure.

@@ -7,7 +7,6 @@ repair and health-finding stack.
 
 | Repo | PR | Branch | Status | Purpose |
 | --- | --- | --- | --- | --- |
-| openclaw/openclaw | [#86627](https://github.com/openclaw/openclaw/pull/86627) | `doctor-core-contribution-health` | Open | Keep core doctor health in contribution order. |
 | openclaw/openclaw | [#84472](https://github.com/openclaw/openclaw/pull/84472) | `doctor-dry-run-contribution-guard` | Draft open | Expose dry-run preview reports. |
 | openclaw/openclaw | [#84450](https://github.com/openclaw/openclaw/pull/84450) | `doctor-cron-audit-structured-repairs` | Draft open | Expose config audit scrub findings. |
 | openclaw/openclaw | [#84366](https://github.com/openclaw/openclaw/pull/84366) | `doctor-state-session-structured-repairs` | Draft open | Expose session lock findings. |
@@ -18,6 +17,7 @@ repair and health-finding stack.
 
 | Repo | PR | Purpose |
 | --- | --- | --- |
+| openclaw/openclaw | [#86627](https://github.com/openclaw/openclaw/pull/86627) | Keep core doctor health in contribution order. |
 | openclaw/openclaw | [#88100](https://github.com/openclaw/openclaw/pull/88100) | Quiet tool policy removal audits. |
 | openclaw/openclaw | [#87361](https://github.com/openclaw/openclaw/pull/87361) | Make restart follow-up actionable. |
 | openclaw/openclaw | [#86101](https://github.com/openclaw/openclaw/pull/86101) | Keep hooks model checks read-only. |
