@@ -71,6 +71,21 @@
   expected to be the responsible maintainer/merger for the main OpenClaw feed
   implementation chain; Gio will contribute draft PRs along the way for Vince
   and Patrick to refine or take over.
+- 2026-06-22 OpenClaw #95846 review update: User clarified they wanted the
+  main code PR reviewed, not the RFC. Automated `codex review` was attempted
+  against `refs/remotes/origin/main` but the WSL Codex CLI rejected both
+  `gpt-5.3-codex` and explicit `gpt-5-codex`/`gpt-5.1` overrides for the
+  current ChatGPT account, so the automated Codex pass is blocked by model
+  entitlement. Manual review of the three-file diff and surrounding
+  catalog/doctor/install consumers found no code defect. ClawSweeper's concrete
+  blocker was missing real behavior proof, not a code finding. Added PR body
+  proof showing the patched module loads 74 official external entries, resolves
+  `acpx` and `exa` install metadata, and passes
+  `src/plugins/official-external-plugin-catalog.test.ts` with 17 tests. Also
+  reran oxfmt, oxlint, JSON parse, and `git diff --check`. Requested
+  `@clawsweeper re-review` at
+  `https://github.com/openclaw/openclaw/pull/95846#issuecomment-4772902830`;
+  ClawSweeper acknowledged and proof/check rerun is in progress.
 - 2026-06-22 proposal refresh: Updated the MOS3 feeds proposal set to make the
   additive model explicit: MOS3 keeps owning registry metadata, acquisitions,
   assignments, user/admin settings, review, and policy decisions; feeds add the
