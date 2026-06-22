@@ -20,7 +20,7 @@
 
 - Last updated: 2026-06-22.
 - Last agent: Codex.
-- Current focus: Drafting a Scout Desktop CLI proposal for Jakob. Added
+- Current focus: Scout Desktop CLI proposal and first implementation PR. Added
   `projects/clawpilot/scout-desktop-cli-proposal.md`, framing the CLI as a
   typed, scriptable surface over the existing IPC layer for agent-native parity,
   headless/mobile portability, and evals. The proposal includes command
@@ -35,6 +35,12 @@
   companion transport security boundary, manifest sensitivity/capability fields,
   permission state model, golden output fixtures, earlier eval determinism, and
   an explicit second-round role-review summary.
+- First implementation PR opened as
+  [gim-home/m#3786](https://github.com/gim-home/m/pull/3786) from
+  `user/giodl/scout-cli-manifest`, commit `6e6473ac`. Scope: checked-in
+  `common/scout-cli-manifest.json`, manifest schema, verifier script, script
+  tests, and `pnpm test:scripts` wiring. No runtime behavior or CLI entrypoint
+  yet.
 - Update unblock note: user hit `No matching asset for this platform` while
   updating from 0.21. Live issue search found no exact match. Likely cause:
   older updater expects `Clawpilot-Windows-<version>-x64-Setup.exe`, while
@@ -43,14 +49,16 @@
   verified the latest Windows x64 installer at
   `C:\tmp\clawpilot-update\MicrosoftScout-Windows-0.23.0-x64-Setup.exe`.
 - Active branch / PR: `C:\src\clawpilot` is on
-  `user/giodl/scout-desktop-cli-design`, pushed to
-  `fork/user/giodl/scout-desktop-cli-design` at `3355f9ad`; no PR opened. The
+  `user/giodl/scout-cli-manifest`, pushed to fork and open as
+  [gim-home/m#3786](https://github.com/gim-home/m/pull/3786), commit
+  `6e6473ac`. The design branch
+  `fork/user/giodl/scout-desktop-cli-design` remains pushed at `3355f9ad`; no
+  PR opened for that design-only branch. The
   prior feeds branch `user/giodl/scout-desktop-personal-feed-publish` remains
   pushed at `6799ec5f` to PR #3613, with PR #3542 stacked underneath at
   `fc9324c3`.
-- Known dirty state: none in `C:\src\clawpilot`. `C:\src\claws-hapi` has
-  unrelated dirty `projects/feeds/SESSION.md` plus this ClawPilot session
-  update.
+- Known dirty state: none in `C:\src\clawpilot`. `C:\src\claws-hapi` has this
+  ClawPilot session update.
 - Blocking question: none recorded.
 
 ## Resume Checklist
