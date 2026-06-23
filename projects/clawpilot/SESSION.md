@@ -44,25 +44,30 @@
 - Second implementation PR authored as
   [giodl_microsoft/m#1](https://github.com/giodl_microsoft/m/pull/1), stacked
   on the manifest branch because `user/giodl/scout-cli-manifest` exists only in
-  the fork. Branch `user/giodl/scout-cli-entrypoint`, commit `8e66cc11`. Scope:
+  the fork. Branch `user/giodl/scout-cli-entrypoint`, commit `cbe11689`. Scope:
   `scout` bin entry, `tools/scout-cli` TypeScript skeleton, stable JSON result
   envelope/exit codes, `scout version`, manifest-backed
   `scout capabilities list`, focused Vitest coverage, and `tools:typecheck`
   wiring. No desktop companion, runtime IPC dispatch, or UI behavior changes.
+  Codex review found and fixed two type-aware lint blockers: unsafe manifest
+  JSON narrowing and a `never` formatter interpolation in the command-failure
+  fallback.
 - Third fork-stacked PR authored as
   [giodl_microsoft/m#2](https://github.com/giodl_microsoft/m/pull/2), stacked
-  on `user/giodl/scout-cli-entrypoint`, commit `acd98a98`. Scope: golden
+  on `user/giodl/scout-cli-entrypoint`, commit `002ff8af`. Scope: golden
   envelope fixtures for success, validation error, runtime unavailable, policy
   denial, and permission-required results; shared `serializeResult()` helper;
   command-level fixture assertions; focused fixture tests. No new commands,
-  desktop companion, runtime IPC dispatch, or UI behavior changes.
+  desktop companion, runtime IPC dispatch, or UI behavior changes. Codex review
+  is clean after removing an unsafe test-only fixture-key cast.
 - Fourth fork-stacked PR authored as
   [giodl_microsoft/m#3](https://github.com/giodl_microsoft/m/pull/3), stacked
-  on `user/giodl/scout-cli-envelope-fixtures`, commit `b0c91ff9`. Scope:
+  on `user/giodl/scout-cli-envelope-fixtures`, commit `c84646ed`. Scope:
   typed local companion status model, `scout status` text/JSON output, global
   profile/workspace propagation, and `--require-running` fail-fast behavior
   using the runtime-unavailable envelope. No companion server, runtime IPC
-  dispatch, or UI behavior changes.
+  dispatch, or UI behavior changes. Codex review found and fixed missing
+  `--stream-json` rejection for the one-shot status command.
 - Update unblock note: user hit `No matching asset for this platform` while
   updating from 0.21. Live issue search found no exact match. Likely cause:
   older updater expects `Clawpilot-Windows-<version>-x64-Setup.exe`, while
@@ -73,11 +78,11 @@
 - Active branch / PR: `C:\src\clawpilot` is on
   `user/giodl/scout-cli-status-preflight`, pushed to fork and open as
   [giodl_microsoft/m#3](https://github.com/giodl_microsoft/m/pull/3), commit
-  `b0c91ff9`, stacked on `user/giodl/scout-cli-envelope-fixtures`. The prior
+  `c84646ed`, stacked on `user/giodl/scout-cli-envelope-fixtures`. The prior
   fork PR is [giodl_microsoft/m#2](https://github.com/giodl_microsoft/m/pull/2),
-  commit `acd98a98`, stacked on `user/giodl/scout-cli-entrypoint`. The earlier
+  commit `002ff8af`, stacked on `user/giodl/scout-cli-entrypoint`. The earlier
   fork PR is [giodl_microsoft/m#1](https://github.com/giodl_microsoft/m/pull/1), commit
-  `8e66cc11`, stacked on `user/giodl/scout-cli-manifest`. The base manifest PR
+  `cbe11689`, stacked on `user/giodl/scout-cli-manifest`. The base manifest PR
   is [gim-home/m#3786](https://github.com/gim-home/m/pull/3786), commit
   `6e6473ac`. The design branch
   `fork/user/giodl/scout-desktop-cli-design` remains pushed at `3355f9ad`; no
