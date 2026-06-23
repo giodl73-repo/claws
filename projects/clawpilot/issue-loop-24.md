@@ -79,3 +79,18 @@ Use the `clawpilot-issue-loop` skill before filing or updating issues. Prefer
 updating umbrellas and linking related issues over creating duplicates. File
 only 3-5 small PR-able child issues per pass unless explicitly directed
 otherwise.
+
+## Manual Fix Pass: 2026-06-23
+
+Live triage focused on open recent issues with small PR-able scope.
+
+| Issue | Assessment | Action |
+| --- | --- | --- |
+| [#3758](https://github.com/gim-home/m/issues/3758) | Small copy regression: restore-chat surfaces still said "local Copilot history" after product naming moved to Scout. | Fixed in [PR #3820](https://github.com/gim-home/m/pull/3820). |
+| [#3672](https://github.com/gim-home/m/issues/3672) | Plausible Windows regression, but many `windowsHide: true` fixes already exist and remaining child-process sites need ownership audit before patching. | Keep as follow-up candidate after targeted spawn audit. |
+| [#2720](https://github.com/gim-home/m/issues/2720) | Real customer-facing diagnostics copy issue, but solution depends on diagnostics flight/privacy choice. | Keep as design-sensitive follow-up, likely not a drive-by fix. |
+
+Verification for PR #3820:
+
+- `pnpm vitest run --project unit src/features/settings/SettingsModal.test.tsx`
+- `pnpm vitest run --project browser src/shell/RestoreSessionsBanner.browser.test.tsx`
