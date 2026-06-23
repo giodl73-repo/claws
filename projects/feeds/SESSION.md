@@ -154,17 +154,19 @@
   package/source owner, Microsoft curator, tenant admin, and operator/auditor.
   Synced the updated Markdown files and regenerated matching DOCX files in
   `C:\Users\giodl\OneDrive - Microsoft\Documents\Microsoft Scout\Feeds`.
-- 2026-06-23 RFC feed telemetry addendum: After RFC #19 merged, opened follow-up
-  RFC PR `https://github.com/openclaw/rfcs/pull/24` from WSL worktree
+- 2026-06-23 RFC 0009 feed telemetry addendum: After RFC #19 merged, opened
+  follow-up PR `https://github.com/openclaw/rfcs/pull/24` from WSL worktree
   `/root/src/openclaw-rfcs-feed-telemetry-addendum`, branch
-  `feeds-telemetry-addendum`, latest signed commit `c11eca7`. The addendum
-  answers the telemetry question: OpenClaw already has diagnostics events,
-  local diagnostics bundles, `diagnostics-otel`, and plugin install records, so
-  feeds can reuse the existing pipeline, but feed usage will not be measured
-  automatically without explicit feed provenance and lifecycle events. The RFC
-  proposes feed fetch, snapshot load, entry action, update, policy decision, and
-  activation events, plus a feed provenance block on feed-backed install records.
-  Local validation passed `git diff --check`, no em-dash check, and ASCII check.
+  `feeds-telemetry-addendum`, latest signed commit `b877bbb`. The PR now edits
+  `rfcs/0009-hosted-feeds-for-plugins-and-skills.md` directly instead of adding
+  a separate RFC. The addendum answers the telemetry question: OpenClaw already
+  has diagnostics events, local diagnostics bundles, `diagnostics-otel`, and
+  plugin install records, so feeds can reuse the existing pipeline, but feed
+  usage will not be measured automatically without explicit feed provenance and
+  lifecycle events. It proposes feed fetch, snapshot load, entry action, update,
+  policy decision, and activation events, plus a feed provenance block on
+  feed-backed install records. Local validation passed `git diff --check` and
+  no-em-dash check; Socket checks are green on the PR.
 - 2026-06-22 ADO pipeline ops note: Lobster feed PRs that need manual ADO
   queueing should use `projects/lobster/ado-pipelines.md`. The known working
   machine has Azure CLI plus the `azure-devops` extension and is logged into
