@@ -104,6 +104,26 @@
   fork PRs with maintainer edits enabled; #95877 is a same-repo OpenClaw branch,
   so GitHub does not expose the fork-only `maintainerCanModify` flag, but
   OpenClaw maintainers can edit the branch directly.
+- 2026-06-23 OpenClaw hosted catalog PR4: Drafted
+  `https://github.com/openclaw/openclaw/pull/95964` from WSL worktree
+  `/root/src/openclaw-feeds-hosted-catalog-prep`, branch
+  `feeds-hosted-catalog-persistent-snapshot`, commit `c371b39a93e`, stacked on
+  `feeds-hosted-catalog-snapshot-cache`. This binds the #95877 snapshot
+  contract to a SQLite-backed OpenClaw state table
+  `official_external_plugin_catalog_snapshots`. The hosted loader now uses the
+  persistent store by default, with `snapshotStore: null` preserved for callers
+  and tests that need persistence disabled. It persists feed URL, body, HTTP
+  status, ETag, Last-Modified, checksum, saved time, and update time, so HTTP
+  304 or transient hosted failures can use a last-known-good state snapshot
+  before falling back to the bundled catalog. Deliberately not included: source
+  profiles, authenticated feed URLs, signed envelopes, background refresh,
+  search, install UX, skills, or telemetry. Local validation passed
+  `pnpm exec oxfmt --check` on touched TS/generated files, `pnpm exec oxlint
+  --deny-warnings` on touched TS files, `pnpm db:kysely:check`,
+  `git diff --check`, `CI=1 timeout 180s node scripts/test-projects.mjs
+  src/plugins/official-external-plugin-catalog.test.ts` with 29 tests, and
+  `pnpm tsgo:core:test`. PR is draft; initial GitHub checks were in progress
+  with merge state `UNSTABLE` immediately after opening.
 - 2026-06-22 RFC #19 review update: Pushed
   `56577f97b2ad3c0b16299c3e84334255b2c7a462` to RFC PR #19 to address
   Patrick's review comments. The RFC now clarifies source refs versus local
