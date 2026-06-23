@@ -28,6 +28,8 @@ Microsoft agent experiences.
      app-specific state, and emerging memory services.
    - Microsoft can differentiate with a governed shared memory substrate that
      spans Apps, Agents, MCS, Scout, and future harnesses.
+   - Selcuk's two-layer MCS proposal can be summarized as solving for memory
+     that is governable, shareable, and cost-efficient.
 
 2. Vocabulary and design dimensions
    - Working context vs durable memory.
@@ -101,6 +103,32 @@ Microsoft agent experiences.
 | Hermes memory architecture | Hermes owner | Needed |
 | Microsoft Apps & Agents memory inventory | Selcuk / topic team | Needed |
 | OpenClaw source-grounded assessment | `openclaw-memory-assessment.md` | Seeded |
+
+## Selcuk MCS Two-Layer Proposal
+
+Clean framing:
+
+Selcuk's proposal is solving for memory that is governable, shareable, and
+cost-efficient.
+
+- Governable: Memory must be externalized, inspectable, scoped, auditable,
+  policy-aware, and subject to retention, sensitivity, tenant, and access
+  controls.
+- Shareable: Memory should not be trapped inside one agent runtime. A common
+  memory contract lets MCS, Copilot, Cowork, Lobster, and future agents reuse
+  memory consistently.
+- Cost-efficient: Memory cannot mean dumping every past interaction into the
+  prompt. The system needs selective retrieval, summarization, deduplication,
+  consolidation, ranking, and token-budget-aware injection.
+
+How the two-layer design delivers:
+
+- Native markdown-style memory gives MCS a fast, transparent MVP with durable,
+  editable, inspectable artifacts and basic retrieval.
+- The standalone plugin layer provides the governed shared substrate and a
+  stable platform-owned memory contract.
+- Retrieval, consolidation, deduplication, and promotion keep memory useful
+  without blowing up token cost or latency.
 
 ## POC Candidate: MCS + Scout Global User Memory
 

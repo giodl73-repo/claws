@@ -20,7 +20,10 @@
 
 - Last updated: 2026-06-22
 - Last agent: Codex
-- Current focus: Start the memory project and seed report materials for the XAI Harness / Tools / Skills memory topic.
+- Current focus: Added Selcuk MCS two-layer proposal framing to the paper
+  outline. Principal challenges are now captured as governable, shareable, and
+  cost-efficient memory, with token-budget-aware retrieval/consolidation as the
+  cost-efficiency mechanism.
 - Active branch / PR: none
 - Known dirty state: Pre-existing unrelated edits in `projects/clawpilot`, `projects/doctor`, `projects/feeds`, and `projects/lobster`; leave untouched. `C:\src\openclaw-stack` has untracked `artifacts/`; source assessment only.
 - Blocking question: Need confirmation from Selcuk/Gio/Eduardo/Todd on desired depth for Microsoft internal memory inventory and whether Cowork/MCS/Scout details can be cited.
@@ -44,3 +47,4 @@
 - Gather current memory approaches for Claude Code, Hermes, Cowork, MCS, Scout, and Microsoft Apps & Agents.
 - Decide whether the July 6 presentation should propose a POC for shared memory between MCS and Scout.
 - Define enterprise requirements: governance, tenant/user scoping, consent, retention, audit, compliance, export/delete, and cross-agent access controls.
+- Validate Selcuk framing in review: governable, shareable, cost-efficient.
