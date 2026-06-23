@@ -151,27 +151,33 @@
   the Microsoft tenant as `giodl@microsoft.com`; pipeline commands must pass
   `--organization https://msazure.visualstudio.com --project One` explicitly
   and queue pipeline ids `457333` and `463346` for the PR source branch.
-- 2026-06-22 Lobster #3422 fix pass: PR
-  `https://microsoft.ghe.com/bic/lobster/pull/3422` was updated on branch
-  `user/giodl/scout-feeds-admin-composition` with commit `fc34a1c4e` to
-  address requested tenant-admin feed composition changes. Fixes include:
-  server-side ECS fail-closed gating on `lobster.scout_feeds_admin_ux_enabled`,
+- 2026-06-22 Lobster #3422 fix/rebase pass: PR
+  `https://microsoft.ghe.com/bic/lobster/pull/3422` was rebased onto current
+  `origin/main` and force-pushed on branch
+  `user/giodl/scout-feeds-admin-composition` at head
+  `7981f08dade5c35f3f55507c48f048658b6ae8f1`. Fixes include server-side ECS
+  fail-closed gating on `lobster.scout_feeds_admin_ux_enabled`,
   durable-storage acknowledgement before admin writes, admin publish serialized
   under the catalog lock/file lock, update-available approvals using the
   pending candidate version, pending-update rejection that preserves the
   reviewed package, source-coordinate selector bodies for approve/deny routes,
   clippy cleanup, sibling feature-flag tests, and docs for routes/env/flag.
-  Local proof passed `just rust-fmt-check`, `just rust-clippy`,
-  `just cargo test scout_feed --no-fail-fast`,
-  `just cargo test scout_catalog --no-fail-fast`, `just web-fmt-check`,
-  `just web-lint`, `just web-type-check`, focused
-  `FeedsPage.unit.test.tsx`, and ECS inventory via
-  `py -3 scripts/ci/check-ecs-settings-inventory.py`. Note: the repo `just
-  ecs-settings-inventory-check` recipe still fails locally on this Windows
-  shell because `python3` is missing, but the same script passes through `py
-  -3`. ADO was requeued on `fc34a1c4e`: PullRequest build `169089956`, Build
-  Validation build `169089957`; both were pending when last checked. GitHubPop
-  remains noisy.
+  Current local proof on the rebased head passed `just rust-fmt-check`,
+  `just web-fmt-check`, `just web-lint`, `just web-type-check`,
+  `cd src/lobster_web; npm run test:unit -- tests/pages/FeedsPage.unit.test.tsx
+  tests/services/webFeatureFlagsProbe.unit.test.ts`, ECS inventory via
+  `py -3 scripts/ci/check-ecs-settings-inventory.py`, `git diff --check`, and
+  `git diff --check origin/main...HEAD`. Local Rust validation is blocked after
+  `just rust-auth` by Azure Artifacts `Lobster-Oxy` `ReadPackages` permission
+  for this account; before rebase, the same fix set passed `just rust-clippy`,
+  `just cargo test scout_feed --no-fail-fast`, and
+  `just cargo test scout_catalog --no-fail-fast` on `fc34a1c4e`. ADO was
+  requeued on `7981f08d`: PullRequest build `169091410`, Build Validation build
+  `169091409`; both attached and were queued/in progress when last checked.
+  The PR is mergeable but still shows `CHANGES_REQUESTED` from stale reviews on
+  older commits until reviewers re-review. PR body and comment
+  `https://microsoft.ghe.com/bic/lobster/pull/3422#issuecomment-184112536`
+  summarize all addressed review items. GitHubPop remains noisy.
 - OpenClaw stakeholder context: Gio met with Vince, Patrick, and the OpenClaw
   group. Vince is strongly aligned on feeds, primarily for plugins, because
   feeds give OpenClaw a uniform model for plugin control across companies:
