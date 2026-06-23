@@ -79,15 +79,16 @@
   direct dispatcher rejection of `--stream-json` for `scout status`.
 - Sixth fork-stacked PR authored as
   [giodl_microsoft/m#5](https://github.com/giodl_microsoft/m/pull/5), stacked
-  on `user/giodl/scout-cli-companion-contract`, commit `011dc580`. Scope:
+  on `user/giodl/scout-cli-companion-contract`, commit `e0e70f05`. Scope:
   injects the companion client into `buildProgram()`, routes `scout status`
   through the typed dispatcher helper, and adds `scout auth status` as the first
   manifest-backed companion command surface while keeping default execution
   fail-closed with the unavailable companion client. No real companion server,
   desktop IPC dispatch, UI behavior change, or token surface. Codex review
   found and fixed two `auth status` issues before publish: default text output
-  now reflects the returned `signedIn` state, and `--stream-json` is rejected
-  before companion dispatch for the one-shot command.
+  now reflects the returned `signedIn` state, `--stream-json` is rejected before
+  companion dispatch for the one-shot command, and JSON output is shaped to the
+  minimal redacted `{ signedIn }` DTO before serialization.
 - Update unblock note: user hit `No matching asset for this platform` while
   updating from 0.21. Live issue search found no exact match. Likely cause:
   older updater expects `Clawpilot-Windows-<version>-x64-Setup.exe`, while
@@ -98,7 +99,7 @@
 - Active branch / PR: `C:\src\clawpilot` is on
   `user/giodl/scout-cli-dispatch-wiring`, pushed to fork and open as
   [giodl_microsoft/m#5](https://github.com/giodl_microsoft/m/pull/5), commit
-  `011dc580`, stacked on `user/giodl/scout-cli-companion-contract`. The prior
+  `e0e70f05`, stacked on `user/giodl/scout-cli-companion-contract`. The prior
   fork PR is [giodl_microsoft/m#4](https://github.com/giodl_microsoft/m/pull/4),
   commit `0b9653eb`, stacked on `user/giodl/scout-cli-status-preflight`. The
   previous fork PR is [giodl_microsoft/m#3](https://github.com/giodl_microsoft/m/pull/3),
