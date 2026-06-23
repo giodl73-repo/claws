@@ -31,6 +31,12 @@ views. In other words, MOS3 remains the system of record, while feeds become
 the client-facing contract for what a tenant, group, user, or surface can
 discover and install at a point in time.
 
+This is also not a replacement for DV or for MOS3's existing artifact
+authority. Artifact upload, package ownership, acquisition, assignment, and
+record mutation should continue to flow through the systems that own those
+operations. Feeds package the effective answer for clients after those systems
+and policies have made their decisions.
+
 ```text
 Problem: many sources, many clients, many tenant policies
 Pattern: feeds compose, curate, cache, and distribute source indexes
@@ -81,6 +87,34 @@ where it is. The feed is what turns that setting, plus all inherited source,
 review, package, tenant, and user context, into the exact searchable and
 installable view that clients receive.
 
+## RBAC And Personas
+
+Salem's question is the right validation point: what is the MOS3 RBAC story
+today, and which personas already exist as concrete roles or permissions? The
+feed proposal should not invent a parallel RBAC system. It should project the
+results of MOS3 registry permissions, package ownership, acquisitions,
+assignments, admin policies, and service-to-service authority.
+
+The architecture needs to distinguish at least these personas:
+
+- **Client reader:** fetches an effective feed for the signed-in user, tenant,
+  group, or surface.
+- **Personal publisher:** publishes or updates packages the user owns or has
+  rights to publish.
+- **Package or source owner:** manages package metadata, source feed
+  registration, publisher records, and source refresh configuration.
+- **Microsoft curator:** attaches Microsoft review, package defense, curated
+  defaults, and baseline decisions.
+- **Tenant admin:** approves, denies, pins, scopes, revokes, and publishes the
+  tenant effective view.
+- **Operator or auditor:** inspects feed revisions, policy reasons, client
+  refresh state, drift, and audit trails without changing policy.
+
+The required MOS3 work is to map those personas to today's RBAC constructs.
+Some may already exist through package ownership, acquisitions, assignments,
+admin center roles, or service principals. Any missing persona should become an
+explicit platform gap, not something hidden inside the feed document.
+
 ## Decision Needed
 
 The near-term decision is whether MOS3 should be treated only as a shared
@@ -96,6 +130,8 @@ The ask for the shared registry v-team is:
 
 - agree that feeds are the cross-surface distribution contract;
 - agree that MOS3 owns feed composition semantics, not just record storage;
+- map read, publish, curate, administer, and audit actions to concrete MOS3
+  RBAC roles or identify gaps;
 - identify the first source feed to import and the first tenant effective feed
   to materialize;
 - align Scout, Chat/Cowork, VS Code/GitHub Copilot, and OpenClaw on the minimum

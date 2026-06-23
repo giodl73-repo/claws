@@ -145,6 +145,15 @@
   refreshed Markdown and diagrams into
   `C:\Users\giodl\OneDrive - Microsoft\Documents\Microsoft Scout\Feeds` and
   regenerated DOCX versions in that folder with Word automation.
+- 2026-06-22 Salem feedback update: Updated MOS3 feeds docs to address Salem's
+  feedback that the proposal could read like a replacement for DV/agent
+  artifacts and needed a clearer MOS3 RBAC story. The brief, position,
+  architecture, admin experience, contract, and client conformance docs now
+  state that feeds are not DV/artifact authority or write permission, and add
+  explicit RBAC/persona validation around client reader, personal publisher,
+  package/source owner, Microsoft curator, tenant admin, and operator/auditor.
+  Synced the updated Markdown files and regenerated matching DOCX files in
+  `C:\Users\giodl\OneDrive - Microsoft\Documents\Microsoft Scout\Feeds`.
 - 2026-06-22 ADO pipeline ops note: Lobster feed PRs that need manual ADO
   queueing should use `projects/lobster/ado-pipelines.md`. The known working
   machine has Azure CLI plus the `azure-devops` extension and is logged into

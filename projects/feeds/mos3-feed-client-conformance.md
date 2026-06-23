@@ -18,6 +18,12 @@ The feed is the client-facing effective view of MOS3 decisions. It is not a
 replacement for MOS3 APIs that manage authoring, acquisition, assignment,
 publisher records, admin configuration, or package lifecycle.
 
+It is also not a replacement for MOS3 or DV artifact authorization. The feed
+tells the client what is visible or installable for the caller after MOS3
+policy has been applied. It does not grant package write rights, source
+administration rights, ownership changes, acquisition bypass, or runtime data
+permissions.
+
 A client should use the feed when it needs to answer governed discovery and
 install questions:
 

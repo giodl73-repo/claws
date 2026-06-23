@@ -16,6 +16,9 @@ feeds that approved clients can consume.
 MOS3 may already have manual controls that look feed-like: an admin can make a
 package, title, skill, connector, or acquisition visible or unavailable for a
 set of users. Those controls should stay in the admin and registry model.
+Feeds should not replace DV or any artifact ownership path either. Upload,
+artifact mutation, package ownership, acquisition, and assignment remain with
+the systems that already authorize those actions.
 
 The feed addition is that those settings become part of a materialized effective
 view. Admins are no longer only editing isolated records. They can preview and
@@ -53,6 +56,29 @@ revocation events. Microsoft curators attach Microsoft review state and curated
 defaults. Helpdesk and operator roles need enough visibility to inspect feed
 state, client refresh state, and installed-entry drift without becoming policy
 owners.
+
+These are product personas, not a claim that MOS3 already has exactly these
+RBAC roles. The admin experience should map each action to existing MOS3
+permissions where possible and call out gaps where the role does not exist
+today.
+
+Suggested action map:
+
+- **Read effective feed:** client reader or service principal, scoped to the
+  authenticated tenant, user, group, or surface.
+- **Publish personal package:** package owner or user with explicit publish
+  rights.
+- **Manage source registration:** source owner, registry owner, or deployment
+  admin.
+- **Curate Microsoft baseline:** Microsoft curator or package defense reviewer.
+- **Administer tenant effective feed:** tenant admin.
+- **Investigate drift and audit:** operator, helpdesk, or auditor with
+  read-only diagnostics access.
+
+Before implementation, MOS3 should confirm which of these map to package
+ownership, acquisitions, assignments, admin center roles, service principals,
+or registry ACLs today. Any missing mapping should be tracked as an RBAC gap
+rather than embedded as ad hoc feed-specific authorization.
 
 ## Core Workflows
 

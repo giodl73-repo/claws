@@ -15,6 +15,13 @@ MOS3 should not treat feeds as a replacement for its registry, metadata store,
 acquisition model, or user/admin settings. Those are the authority. Feeds are
 the projection layer that makes the authority consumable by clients.
 
+The same boundary applies to artifact systems such as DV. Feeds are not the
+artifact write path and not the permission source for artifact mutation. A feed
+can reference an artifact, package, title, connector, or skill and expose the
+effective discovery/install outcome, but ownership, write access, acquisition,
+assignment, and artifact lifecycle remain with MOS3 and the underlying artifact
+authority.
+
 MOS3 already has or is expected to have several ingredients:
 
 - package, title, skill, connector, and agent metadata;
@@ -211,6 +218,34 @@ Tenant admin owns tenant approval and narrowing.
 End users consume the materialized approved feed.
 Clients own runtime install and execution.
 ```
+
+## RBAC Model To Validate
+
+The feed service should reuse MOS3 RBAC and assignment decisions instead of
+creating a second authorization model. The architecture depends on a clear map
+from actor to allowed operation:
+
+- **Read effective feed:** a signed-in user, client, or service principal can
+  read only the tenant, user, group, or surface feed it is authorized to see.
+- **Publish personal package:** a user can publish only packages they own or
+  have explicit publishing rights for.
+- **Manage package or source:** a package owner, source owner, or registry
+  owner can update metadata, source registration, refresh settings, and
+  publisher records.
+- **Curate Microsoft baseline:** a Microsoft curator can attach review,
+  package defense state, baseline eligibility, and Microsoft curated defaults.
+- **Administer tenant feed:** a tenant admin can allow, deny, pin, scope,
+  revoke, preview, and publish the tenant effective view.
+- **Operate and audit:** an operator or auditor can inspect revisions, drift,
+  policy reasons, refresh failures, and audit events without changing the
+  effective policy.
+
+The open implementation question is which of these are already represented in
+MOS3 today through acquisitions, assignments, owner ACLs, admin center roles,
+service principals, or existing registry permissions. Feed generation should
+call those systems for authorization and should include enough provenance in
+the feed and audit trail to explain which role or assignment produced each
+decision.
 
 ## Lifecycle
 

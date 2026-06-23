@@ -10,6 +10,11 @@ Feeds do not replace that foundation. Feeds add a signed, scoped, materialized
 projection of the effective decision so clients can consistently answer:
 "what can this caller discover or install now?"
 
+This should also not be read as a replacement for DV or any existing artifact
+authority. MOS3 continues to own the records, artifact references, acquisition
+state, assignment state, and policy decisions. The feed is the client-facing
+projection of those decisions, not the write path or the authorization source.
+
 ## The Clarification
 
 The feed proposal is not asking MOS3 to become a second package registry or to
@@ -53,6 +58,33 @@ MOS3 already has or is expected to have the hard internal state:
 
 Those remain authoritative. The feed layer should be generated from them, not
 separate from them.
+
+## RBAC Question To Validate
+
+The proposal assumes MOS3 can distinguish the actor who reads an effective
+feed from the actor who authors, curates, approves, administers, or audits the
+underlying records. That may already exist through MOS3 acquisitions,
+assignments, package ownership, admin center permissions, service principals,
+or registry ACLs. We should not assume the exact mapping.
+
+The working model needs at least these personas:
+
+- **Client reader:** fetches a tenant or personal effective feed for the
+  authenticated caller.
+- **Personal publisher:** publishes or updates packages the user owns or has
+  acquired rights to publish.
+- **Package/source owner:** owns package metadata, source feed registration, or
+  publisher records.
+- **Microsoft curator:** attaches Microsoft review, package defense, and
+  curated baseline decisions.
+- **Tenant admin:** allows, denies, pins, scopes, revokes, and publishes the
+  tenant effective view.
+- **Operator or auditor:** inspects feed revisions, policy reasons, refresh
+  state, drift, and audit trails without becoming a policy owner.
+
+The near-term ask for MOS3 is to map these personas to concrete RBAC constructs
+that exist today, identify gaps, and decide which actions are feed-generation
+actions versus underlying MOS3 registry or artifact actions.
 
 ## What Feeds Add
 

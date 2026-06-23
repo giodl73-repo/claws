@@ -19,6 +19,12 @@ move ownership of metadata, acquisition state, admin settings, assignments, or
 policy decisions out of MOS3. Instead, it defines how MOS3 exposes the effective
 result of those records and decisions to clients.
 
+The contract also does not replace DV or any artifact authority. Artifact
+storage, package writes, ownership changes, acquisition, assignment, and admin
+mutation remain controlled by MOS3 and the systems that already authorize those
+operations. A feed can reference the selected artifact or package and describe
+the effective outcome, but it is not itself the write permission.
+
 For a client, the feed should answer "what can this caller discover or install
 now?" without requiring that client to reproduce MOS3 composition logic. For
 MOS3, the feed should be a generated view with provenance back to the source
@@ -32,6 +38,13 @@ That makes the contract narrower and clearer:
 - clients consume feeds for governed discovery and install;
 - clients can still call richer MOS3 APIs when they need authoring, purchase,
   assignment, or management workflows.
+
+Authorization for creating or mutating the underlying records is intentionally
+outside the feed payload. Feed generation should be driven by MOS3 RBAC and
+assignment checks. The feed should carry provenance and audit references that
+let clients and admins explain the result, but clients must not treat the
+presence of an entry as permission to bypass MOS3 write, acquisition, consent,
+or runtime authorization flows.
 
 ## Contract Goals
 
