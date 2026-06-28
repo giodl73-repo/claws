@@ -1250,6 +1250,16 @@
   `user/giodl/scout-cloud-brain-architecture` commit `b6725d288`. Updated the
   grouped plan files under
   `projects/clawpilot/pr-plans/local-openclaw/group-*.md`.
+- Local OpenClaw switch-over plan added on 2026-06-28: defined the next six
+  planned PRs #78-#83 to get from "credible alternative runtime proof" to
+  practical Copilot CLI switch-over candidate. The plan pairs runtime
+  foundations with capability expansion: #78 non-Copilot provider plus
+  credential/policy ownership, #79 managed package plus reliability envelope,
+  #80 browser plus clipboard, #81 local app plus workspace write/edit, #82 M365
+  delegated actions plus token broker boundary, and #83 CI/full switch-over
+  dogfood plus rollback. Updated #3854 body and architecture docs on
+  `user/giodl/scout-cloud-brain-architecture` commit `ba298a5a4`; added plan
+  files under `projects/clawpilot/pr-plans/local-openclaw-switch-over/`.
 - Known dirty state: `C:\src\clawpilot` is clean on
   `user/giodl/scout-cloud-brain-architecture`. `C:\tmp\clawpilot-pr7-review`
   is clean on `user/giodl/cloud-agent-pr7-approval-ux-contract`.
