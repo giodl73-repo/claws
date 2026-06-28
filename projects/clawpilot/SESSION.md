@@ -1263,17 +1263,24 @@
 - Local OpenClaw switch-over PR78 opened as draft on 2026-06-28:
   [giodl_microsoft/m#78](https://github.com/giodl_microsoft/m/pull/78) from
   `user/giodl/local-openclaw-switch-pr78-provider-credentials`, stacked on #77.
-  First cut adds explicit model-provider proof metadata to the Lobster Gateway
-  stdio adapter, redacts credential-source labels, and fails closed when
-  `LOBSTER_OPENCLAW_REQUIRE_NON_COPILOT=1` is configured with a Copilot/cccproxy
-  provider marker. Validation passed: adapter `node:test` 3 tests, full
-  `pnpm run test:scripts` before final import cleanup, focused `oxfmt --check`,
-  and `git diff --check`; focused `oxlint` does not match the changed
-  `.mjs`/`.cjs` files in this repo config. Remaining PR78 proof gap: live
-  non-Copilot package-path completion without GitHub Copilot CLI or cccproxy.
+  Current head `802af7fef` adds explicit model-provider proof metadata to the
+  Lobster Gateway stdio adapter, redacts credential-source labels, fails closed
+  when `LOBSTER_OPENCLAW_REQUIRE_NON_COPILOT=1` is configured with a
+  Copilot/cccproxy/GitHub provider marker, and now also requires the declared
+  credential source to be configured. `env:NAME` credential-source proof checks
+  that `NAME` exists without emitting the secret value, and the adapter emits a
+  redacted `credentialConfigured` status bit. Validation passed: adapter
+  `node:test` 4 tests, full `pnpm run test:scripts` 124 tests / 21 suites,
+  focused `oxfmt --check`, and `git diff --check`; focused `oxlint` does not
+  match the changed `.mjs`/`.cjs` files in this repo config. Comments posted on
+  PR78 and #3854. Remaining PR78 proof gap: live non-Copilot package-path
+  completion without GitHub Copilot CLI or cccproxy; local env check found no
+  `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `AZURE_OPENAI_API_KEY`,
+  `LLM_ANTHROPIC_API_KEY`, or `LLM_OPENAI_API_KEY`.
 - Known dirty state: `C:\src\clawpilot` is clean on
-  `user/giodl/scout-cloud-brain-architecture`. `C:\tmp\clawpilot-pr7-review`
-  is clean on `user/giodl/cloud-agent-pr7-approval-ux-contract`.
+  `user/giodl/local-openclaw-switch-pr78-provider-credentials`.
+  `C:\tmp\clawpilot-pr7-review` is clean on
+  `user/giodl/cloud-agent-pr7-approval-ux-contract`.
   `C:\src\claws-hapi` has this ClawPilot session update plus pre-existing
   notebook dirt.
 - Blocking question: none recorded.
