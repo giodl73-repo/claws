@@ -34,18 +34,13 @@ Each plan records:
 
 | Step | PR | Plan |
 | --- | --- | --- |
-| 1 | [#45](https://github.com/giodl_microsoft/m/pull/45) | [01-tether-status.md](cloud-agent/01-tether-status.md) |
-| 2 | [#46](https://github.com/giodl_microsoft/m/pull/46) | [02-hosted-roster.md](cloud-agent/02-hosted-roster.md) |
-| 3 | [#47](https://github.com/giodl_microsoft/m/pull/47) | [03-runtime-routing.md](cloud-agent/03-runtime-routing.md) |
-| 4 | [#48](https://github.com/giodl_microsoft/m/pull/48) | [04-session-binding.md](cloud-agent/04-session-binding.md) |
-| 5 | [#49](https://github.com/giodl_microsoft/m/pull/49) | [05-hosted-chat-adapter.md](cloud-agent/05-hosted-chat-adapter.md) |
-| 6 | [#50](https://github.com/giodl_microsoft/m/pull/50) | [06-desktop-capability-envelope.md](cloud-agent/06-desktop-capability-envelope.md) |
-| 7 | [#51](https://github.com/giodl_microsoft/m/pull/51) | [07-approval-ux-contract.md](cloud-agent/07-approval-ux-contract.md) |
-| 8 | [#52](https://github.com/giodl_microsoft/m/pull/52) | [08-audit-replay.md](cloud-agent/08-audit-replay.md) |
-| 9 | [#53](https://github.com/giodl_microsoft/m/pull/53) | [09-lobster-policy-contract.md](cloud-agent/09-lobster-policy-contract.md) |
-| 10 | [#54](https://github.com/giodl_microsoft/m/pull/54) | [10-device-routing.md](cloud-agent/10-device-routing.md) |
-| 11 | [#55](https://github.com/giodl_microsoft/m/pull/55) | [11-rollout-readiness.md](cloud-agent/11-rollout-readiness.md) |
-| 12 | [#56](https://github.com/giodl_microsoft/m/pull/56) | [12-degraded-mode-evals.md](cloud-agent/12-degraded-mode-evals.md) |
-| 13 | [#59](https://github.com/giodl_microsoft/m/pull/59) | [13-protocol-transcript.md](cloud-agent/13-protocol-transcript.md) |
-| 14 | [#60](https://github.com/giodl_microsoft/m/pull/60) | [14-hosted-dispatch-seam.md](cloud-agent/14-hosted-dispatch-seam.md) |
-| 15 | [#61](https://github.com/giodl_microsoft/m/pull/61) | [15-hosted-adapter-composition.md](cloud-agent/15-hosted-adapter-composition.md) |
+| 1 | [#66](https://github.com/giodl_microsoft/m/pull/66) | [group-01-foundations.md](cloud-agent/group-01-foundations.md) |
+| 2 | [#67](https://github.com/giodl_microsoft/m/pull/67) | [group-02-approval-policy.md](cloud-agent/group-02-approval-policy.md) |
+| 3 | [#68](https://github.com/giodl_microsoft/m/pull/68) | [group-03-device-readiness-evals.md](cloud-agent/group-03-device-readiness-evals.md) |
+| 4 | [#69](https://github.com/giodl_microsoft/m/pull/69) | [group-04-hosted-runtime.md](cloud-agent/group-04-hosted-runtime.md) |
+| 5 | [#70](https://github.com/giodl_microsoft/m/pull/70) | [group-05-desktop-approval-gateway.md](cloud-agent/group-05-desktop-approval-gateway.md) |
+| 6 | [#71](https://github.com/giodl_microsoft/m/pull/71) | [group-06-execution-transport.md](cloud-agent/group-06-execution-transport.md) |
+
+The original 19 cloud-agent slice plans remain in `cloud-agent/` as source
+material for the grouped plans. The old draft PRs #45-#56 and #59-#65 were
+closed in favor of #66-#71.
