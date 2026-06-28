@@ -1293,8 +1293,24 @@
   PR79 proof gap: no live Lobster package launch, image signature verification
   service, Docker restart loop, or packaged Scout build; this PR is source
   harness proof plus runbook alignment for the package reliability envelope.
+- Local OpenClaw switch-over PR80 opened as draft on 2026-06-28:
+  [giodl_microsoft/m#80](https://github.com/giodl_microsoft/m/pull/80) from
+  `user/giodl/local-openclaw-switch-pr80-browser-clipboard`, stacked on PR79.
+  Current head `8b05b6a96` adds gated Desktop node capability contracts and
+  handlers for `browser.open`, `browser.readActiveTab`,
+  `browser.extractSelection`, `clipboard.read`, and `clipboard.write` behind
+  `SCOUT_LOCAL_OPENCLAW_BROWSER_CLIPBOARD=1`. It adds policy validation for
+  explicit browser URL/origin/context binding, clipboard preview requirements,
+  generic browser-control denial, background clipboard denial, approval-card
+  preview projections, and fail-closed active-tab/selection reads without an
+  injected provider. Validation passed: focused Node Vitest 7 files / 79 tests,
+  `pnpm run typecheck`, focused type-aware `oxlint`, focused `oxfmt --check`,
+  `git diff --check`, and pre-commit lint-staged. Comments posted on PR79 and
+  #3854. Remaining PR80 proof gap: no GUI approval card, real browser open,
+  real clipboard read/write, or Lobster package-path runtime request yet; this
+  PR is source-harness proof with explicit live dogfood gaps.
 - Known dirty state: `C:\src\clawpilot` is clean on
-  `user/giodl/local-openclaw-switch-pr79-package-reliability`.
+  `user/giodl/local-openclaw-switch-pr80-browser-clipboard`.
   `C:\tmp\clawpilot-pr7-review` is clean on
   `user/giodl/cloud-agent-pr7-approval-ux-contract`.
   `C:\src\claws-hapi` has this ClawPilot session update plus pre-existing
