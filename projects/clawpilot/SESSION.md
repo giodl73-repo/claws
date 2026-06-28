@@ -1277,8 +1277,24 @@
   completion without GitHub Copilot CLI or cccproxy; local env check found no
   `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `AZURE_OPENAI_API_KEY`,
   `LLM_ANTHROPIC_API_KEY`, or `LLM_OPENAI_API_KEY`.
+- Local OpenClaw switch-over PR79 opened as draft on 2026-06-28:
+  [giodl_microsoft/m#79](https://github.com/giodl_microsoft/m/pull/79) from
+  `user/giodl/local-openclaw-switch-pr79-package-reliability`, stacked on PR78.
+  Current head `0751198b1` adds package descriptor source identity and
+  signature/fingerprint proof fields, package source/fingerprint compatibility
+  failure states, descriptor parsing for the new proof fields, Agents package
+  verification diagnostics, and explicit
+  `LocalOpenClawLifecycle.rollbackToExistingProvider()` behavior that closes
+  the local client, stops the sidecar, clears attach state, and reports local
+  OpenClaw unavailable for fallback. Validation passed: focused Node Vitest 4
+  files / 84 tests, AgentsPanel unit test 4 tests, `pnpm run typecheck`,
+  focused type-aware `oxlint`, focused `oxfmt --check`, `git diff --check`,
+  and pre-commit lint-staged. Comments posted on PR78 and #3854. Remaining
+  PR79 proof gap: no live Lobster package launch, image signature verification
+  service, Docker restart loop, or packaged Scout build; this PR is source
+  harness proof plus runbook alignment for the package reliability envelope.
 - Known dirty state: `C:\src\clawpilot` is clean on
-  `user/giodl/local-openclaw-switch-pr78-provider-credentials`.
+  `user/giodl/local-openclaw-switch-pr79-package-reliability`.
   `C:\tmp\clawpilot-pr7-review` is clean on
   `user/giodl/cloud-agent-pr7-approval-ux-contract`.
   `C:\src\claws-hapi` has this ClawPilot session update plus pre-existing
