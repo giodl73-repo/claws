@@ -18,7 +18,7 @@
 
 ## Current Session
 
-- Last updated: 2026-06-27.
+- Last updated: 2026-06-28.
 - Last agent: Codex.
 - Current focus: Scout Desktop CLI proposal and first implementation stack. Added
   `projects/clawpilot/scout-desktop-cli-proposal.md`, framing the CLI as a
@@ -1296,7 +1296,7 @@
 - Local OpenClaw switch-over PR80 opened as draft on 2026-06-28:
   [giodl_microsoft/m#80](https://github.com/giodl_microsoft/m/pull/80) from
   `user/giodl/local-openclaw-switch-pr80-browser-clipboard`, stacked on PR79.
-  Current head `8b05b6a96` adds gated Desktop node capability contracts and
+  Current head `886bac03f` adds gated Desktop node capability contracts and
   handlers for `browser.open`, `browser.readActiveTab`,
   `browser.extractSelection`, `clipboard.read`, and `clipboard.write` behind
   `SCOUT_LOCAL_OPENCLAW_BROWSER_CLIPBOARD=1`. It adds policy validation for
@@ -1305,10 +1305,17 @@
   preview projections, and fail-closed active-tab/selection reads without an
   injected provider. Validation passed: focused Node Vitest 7 files / 79 tests,
   `pnpm run typecheck`, focused type-aware `oxlint`, focused `oxfmt --check`,
-  `git diff --check`, and pre-commit lint-staged. Comments posted on PR79 and
-  #3854. Remaining PR80 proof gap: no GUI approval card, real browser open,
-  real clipboard read/write, or Lobster package-path runtime request yet; this
-  PR is source-harness proof with explicit live dogfood gaps.
+  `git diff --check`, `pnpm run build:vite`, focused Electron Playwright GUI
+  dogfood `pnpm exec playwright test e2e/local-openclaw-dogfood.test.ts
+  --retries=0 --workers=1`, focused E2E `oxfmt --check`, and pre-commit
+  lint-staged. The GUI proof captured Agents diagnostics, browser approval,
+  clipboard write/read approvals, completion screenshot, and
+  `test-screenshots/local-openclaw-dogfood-sidecar.jsonl` showing executed
+  `dogfood-browser-open-1`, `dogfood-clipboard-write-1`,
+  `dogfood-clipboard-read-1`, and retained fail-closed `browser.control`.
+  Updated PR80 body plus comments on PR79 and #3854. Remaining PR80 proof gap:
+  no Lobster package-path launch; active-tab/selection provider still
+  intentionally fail closed until the provider PR.
 - Known dirty state: `C:\src\clawpilot` is clean on
   `user/giodl/local-openclaw-switch-pr80-browser-clipboard`.
   `C:\tmp\clawpilot-pr7-review` is clean on
