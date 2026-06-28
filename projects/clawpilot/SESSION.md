@@ -1316,8 +1316,33 @@
   Updated PR80 body plus comments on PR79 and #3854. Remaining PR80 proof gap:
   no Lobster package-path launch; active-tab/selection provider still
   intentionally fail closed until the provider PR.
+- Local OpenClaw switch-over PR81 opened as draft on 2026-06-28:
+  [giodl_microsoft/m#81](https://github.com/giodl_microsoft/m/pull/81) from
+  `user/giodl/local-openclaw-switch-pr81-app-write`, stacked on PR80. Current
+  head `d239239bd` adds PR81 local app and workspace write/edit capability
+  contracts and handlers: `filesystem.write`, `filesystem.patch`, `app.open`,
+  `file.openWithDefaultApp`, `url.openExternal`, and legacy
+  `local-app.open`, all gated behind `SCOUT_LOCAL_OPENCLAW_APP_WRITE=1`. It
+  adds policy validation for diff-preview requirements, broad destructive file
+  operation denial, allowlisted app intents, URL origin binding, and arbitrary
+  executable/command launch denial; approval previews include paths, diff
+  summaries, expected digests, app ids, file targets, and URL targets. Source
+  handlers provide workspace-scoped text write/patch with digest,
+  previous-digest, rollback-hint output, plus local app/file/url seams.
+  Validation passed: focused Node Vitest 7 files / 88 tests,
+  `pnpm run typecheck`, focused type-aware `oxlint`, focused `oxfmt --check`,
+  `git diff --check`, `pnpm run build:vite`, Electron Playwright dogfood
+  `pnpm exec playwright test e2e/local-openclaw-dogfood.test.ts --retries=0
+  --workers=1`, and pre-commit lint-staged. GUI proof captured write, patch,
+  app-open, outside-workspace write approval screenshots, completion
+  screenshot, and sidecar JSONL showing `dogfood-filesystem-write-1`,
+  `dogfood-filesystem-patch-1`, `dogfood-app-open-1`, outside-workspace denial
+  `desktop-node-filesystem-write-outside-workspace`, digest/rollback output,
+  and retained fail-closed `browser.control`. Comments posted on PR80 and
+  #3854. Remaining PR81 proof gap: no Lobster package-path launch; no M365 or
+  token-sensitive flow yet.
 - Known dirty state: `C:\src\clawpilot` is clean on
-  `user/giodl/local-openclaw-switch-pr80-browser-clipboard`.
+  `user/giodl/local-openclaw-switch-pr81-app-write`.
   `C:\tmp\clawpilot-pr7-review` is clean on
   `user/giodl/cloud-agent-pr7-approval-ux-contract`.
   `C:\src\claws-hapi` has this ClawPilot session update plus pre-existing
