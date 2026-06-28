@@ -1,6 +1,6 @@
 # Local OpenClaw Switch-Over PR78: Provider and Credential Independence
 
-Planned PR: #78
+PR: [giodl_microsoft/m#78](https://github.com/giodl_microsoft/m/pull/78)
 Branch: `user/giodl/local-openclaw-switch-pr78-provider-credentials`
 Base: `user/giodl/local-openclaw-group6-gui-lobster-dogfood`
 

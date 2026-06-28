@@ -1260,6 +1260,17 @@
   dogfood plus rollback. Updated #3854 body and architecture docs on
   `user/giodl/scout-cloud-brain-architecture` commit `ba298a5a4`; added plan
   files under `projects/clawpilot/pr-plans/local-openclaw-switch-over/`.
+- Local OpenClaw switch-over PR78 opened as draft on 2026-06-28:
+  [giodl_microsoft/m#78](https://github.com/giodl_microsoft/m/pull/78) from
+  `user/giodl/local-openclaw-switch-pr78-provider-credentials`, stacked on #77.
+  First cut adds explicit model-provider proof metadata to the Lobster Gateway
+  stdio adapter, redacts credential-source labels, and fails closed when
+  `LOBSTER_OPENCLAW_REQUIRE_NON_COPILOT=1` is configured with a Copilot/cccproxy
+  provider marker. Validation passed: adapter `node:test` 3 tests, full
+  `pnpm run test:scripts` before final import cleanup, focused `oxfmt --check`,
+  and `git diff --check`; focused `oxlint` does not match the changed
+  `.mjs`/`.cjs` files in this repo config. Remaining PR78 proof gap: live
+  non-Copilot package-path completion without GitHub Copilot CLI or cccproxy.
 - Known dirty state: `C:\src\clawpilot` is clean on
   `user/giodl/scout-cloud-brain-architecture`. `C:\tmp\clawpilot-pr7-review`
   is clean on `user/giodl/cloud-agent-pr7-approval-ux-contract`.

@@ -32,7 +32,7 @@ closed in favor of #72-#77.
 
 | Step | Planned PR | Plan |
 | --- | --- | --- |
-| 1 | #78 | [01-provider-credential-independence.md](local-openclaw-switch-over/01-provider-credential-independence.md) |
+| 1 | [#78](https://github.com/giodl_microsoft/m/pull/78) | [01-provider-credential-independence.md](local-openclaw-switch-over/01-provider-credential-independence.md) |
 | 2 | #79 | [02-managed-package-reliability.md](local-openclaw-switch-over/02-managed-package-reliability.md) |
 | 3 | #80 | [03-browser-clipboard-capabilities.md](local-openclaw-switch-over/03-browser-clipboard-capabilities.md) |
 | 4 | #81 | [04-local-app-workspace-write.md](local-openclaw-switch-over/04-local-app-workspace-write.md) |
