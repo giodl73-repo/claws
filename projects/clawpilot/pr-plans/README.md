@@ -17,18 +17,16 @@ Each plan records:
 
 | Step | PR | Plan |
 | --- | --- | --- |
-| 1 | [#35](https://github.com/giodl_microsoft/m/pull/35) | [01-provider-discovery.md](local-openclaw/01-provider-discovery.md) |
-| 2 | [#36](https://github.com/giodl_microsoft/m/pull/36) | [02-runtime-core-agent-roster.md](local-openclaw/02-runtime-core-agent-roster.md) |
-| 3 | [#37](https://github.com/giodl_microsoft/m/pull/37) | [03-policy-session-foundation.md](local-openclaw/03-policy-session-foundation.md) |
-| 4 | [#38](https://github.com/giodl_microsoft/m/pull/38) | [04-dogfood-lifecycle-transport.md](local-openclaw/04-dogfood-lifecycle-transport.md) |
-| 5 | [#39](https://github.com/giodl_microsoft/m/pull/39) | [05-dogfood-ui-chat-routing.md](local-openclaw/05-dogfood-ui-chat-routing.md) |
-| 6 | [#40](https://github.com/giodl_microsoft/m/pull/40) | [06-sidecar-package-dogfood.md](local-openclaw/06-sidecar-package-dogfood.md) |
-| 7 | [#41](https://github.com/giodl_microsoft/m/pull/41) | [07-node-policy-evals.md](local-openclaw/07-node-policy-evals.md) |
-| 8 | [#42](https://github.com/giodl_microsoft/m/pull/42) | [08-node-runtime-entrypoint.md](local-openclaw/08-node-runtime-entrypoint.md) |
-| 9 | [#43](https://github.com/giodl_microsoft/m/pull/43) | [09-filesystem-read-handler.md](local-openclaw/09-filesystem-read-handler.md) |
-| 10 | [#44](https://github.com/giodl_microsoft/m/pull/44) | [10-shell-exec-diagnostics.md](local-openclaw/10-shell-exec-diagnostics.md) |
-| 11 | [#57](https://github.com/giodl_microsoft/m/pull/57) | [11-gui-dogfood-e2e.md](local-openclaw/11-gui-dogfood-e2e.md) |
-| 12 | [#58](https://github.com/giodl_microsoft/m/pull/58) | [12-lobster-package-adapter.md](local-openclaw/12-lobster-package-adapter.md) |
+| 1 | [#72](https://github.com/giodl_microsoft/m/pull/72) | [group-01-foundation-runtime.md](local-openclaw/group-01-foundation-runtime.md) |
+| 2 | [#73](https://github.com/giodl_microsoft/m/pull/73) | [group-02-policy-lifecycle.md](local-openclaw/group-02-policy-lifecycle.md) |
+| 3 | [#74](https://github.com/giodl_microsoft/m/pull/74) | [group-03-dogfood-sidecar.md](local-openclaw/group-03-dogfood-sidecar.md) |
+| 4 | [#75](https://github.com/giodl_microsoft/m/pull/75) | [group-04-node-policy-runtime.md](local-openclaw/group-04-node-policy-runtime.md) |
+| 5 | [#76](https://github.com/giodl_microsoft/m/pull/76) | [group-05-local-tools-diagnostics.md](local-openclaw/group-05-local-tools-diagnostics.md) |
+| 6 | [#77](https://github.com/giodl_microsoft/m/pull/77) | [group-06-gui-lobster-dogfood.md](local-openclaw/group-06-gui-lobster-dogfood.md) |
+
+The original 12 Local OpenClaw slice plans remain in `local-openclaw/` as
+source material for the grouped plans. The old PRs #35-#44, #57, and #58 were
+closed in favor of #72-#77.
 
 ## Cloud Agent Stack
 

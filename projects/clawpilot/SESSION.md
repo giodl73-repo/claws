@@ -1238,6 +1238,18 @@
   `docs/architecture/29-scout-cloud-brain-integration.md` on
   `user/giodl/scout-cloud-brain-architecture` commit `8ae364c33`. Updated the
   grouped plan files under `projects/clawpilot/pr-plans/cloud-agent/group-*.md`.
+- Local OpenClaw regrouping completed on 2026-06-28: closed the old 12 Local
+  OpenClaw PRs #35-#44, #57, and #58 and replaced them with six review groups:
+  #72 foundation runtime contracts (#35-#36), #73 policy/session/lifecycle
+  (#37-#38), #74 dogfood UI/sidecar/package alignment (#39-#40), #75
+  node-mode policy/runtime entry point (#41-#42), #76 filesystem/shell
+  diagnostics proof (#43-#44), and draft #77 GUI/Lobster package dogfood proof
+  (#57-#58). Updated architecture PR #3854 body and
+  `docs/architecture/29-scout-cloud-brain-integration.md` plus
+  `docs/architecture/35-local-openclaw-runtime.md` on
+  `user/giodl/scout-cloud-brain-architecture` commit `b6725d288`. Updated the
+  grouped plan files under
+  `projects/clawpilot/pr-plans/local-openclaw/group-*.md`.
 - Known dirty state: `C:\src\clawpilot` is clean on
   `user/giodl/scout-cloud-brain-architecture`. `C:\tmp\clawpilot-pr7-review`
   is clean on `user/giodl/cloud-agent-pr7-approval-ux-contract`.
