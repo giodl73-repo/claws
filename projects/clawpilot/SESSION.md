@@ -1364,8 +1364,32 @@
   fields. Comments posted on PR81 and #3854. Remaining PR82 proof gap: no live
   M365 Graph draft creation; this PR uses the source harness to prove the
   Scout/OpenClaw broker boundary without tenant credentials.
+- Local OpenClaw switch-over PR83 opened as draft on 2026-06-28:
+  [giodl_microsoft/m#83](https://github.com/giodl_microsoft/m/pull/83) from
+  `user/giodl/local-openclaw-switch-pr83-ci-dogfood`, stacked on PR82. Current
+  head `918df7d44` adds the named `test:local-openclaw-switch-over`
+  source-harness lane and wires it into CI. The lane composes the new
+  `electron/local-openclaw-switch-over-proof.ts` source harness with existing
+  desktop capability evals, lifecycle rollback coverage, and the Lobster stdio
+  adapter tests. It proves declared non-Copilot provider metadata is accepted,
+  Copilot provider metadata is denied, missing credential proof is denied,
+  Lobster package compatibility/eligibility fields are present, local
+  filesystem/shell/browser/clipboard/write/app/M365 draft capabilities execute
+  through the Desktop bridge with approval, raw `m365.token.acquire` is denied
+  with `desktop-node-policy-m365-token-pass-through-denied`, unsupported
+  platform behavior is explicit, and rollback clears the local client with
+  `local-openclaw-rollback-requested`. Validation passed:
+  `pnpm run test:local-openclaw-switch-over` (Vitest 3 files / 34 tests plus
+  adapter `node:test` 4 pass), `pnpm run typecheck`, focused type-aware
+  `oxlint`, focused `oxfmt --check`, `git diff --check`, `pnpm run build:vite`,
+  Electron Playwright dogfood `pnpm exec playwright test
+  e2e/local-openclaw-dogfood.test.ts --retries=0 --workers=1`, and pre-commit
+  lint-staged. Comments posted on PR82 and #3854. Remaining PR83 proof gap:
+  live non-Copilot model completion, live Lobster package launch, live M365
+  Graph draft creation, and packaged installer/update rollback remain outside
+  this source-harness PR.
 - Known dirty state: `C:\src\clawpilot` is clean on
-  `user/giodl/local-openclaw-switch-pr82-m365-token-broker`.
+  `user/giodl/local-openclaw-switch-pr83-ci-dogfood`.
   `C:\tmp\clawpilot-pr7-review` is clean on
   `user/giodl/cloud-agent-pr7-approval-ux-contract`.
   `C:\src\claws-hapi` has this ClawPilot session update plus pre-existing
@@ -1390,8 +1414,8 @@
 
 - Scout Desktop CLI proposal should be reviewed/trimmed into a Jakob-facing
   spec or issue/umbrella before filing implementation work.
-- Local OpenClaw dogfood stack next action: start PR83 full switch-over/CI
-  dogfood and rollback proof, while watching Lobster draft PR #3714 for the
-  package-path runtime checks.
+- Local OpenClaw dogfood stack next action: watch PR78-PR83 CI/review state and
+  pursue the remaining live package-path runtime proof, especially Lobster draft
+  PR #3714 and non-Copilot provider credentials.
 - Items 17-19 are umbrella update/link work.
 - Items 20-24 are design-first topics, not immediate implementation issues.
