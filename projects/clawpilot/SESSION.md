@@ -48,7 +48,7 @@
 - Managed Copilot/internal model capacity lane added on 2026-06-29.
   ClawPilot architecture commit `0a4f05080` on
   `user/giodl/scout-cloud-brain-architecture` adds
-  `docs/architecture/38-managed-copilot-provider.md`, updates the umbrella
+  `docs/architecture/34-managed-copilot-provider.md`, updates the umbrella
   architecture doc and quick reference, and pushes to fork/origin. #3854 body
   now presents this as the planned fourth implementation lane after #3953:
   Scout Cloud/Lobster owns entitlement, model auth, metering, quota, and
