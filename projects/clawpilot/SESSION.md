@@ -18,8 +18,150 @@
 
 ## Current Session
 
-- Last updated: 2026-06-28.
+- Last updated: 2026-06-29.
 - Last agent: Codex.
+- Latest follow-up: #3854 architecture docs now match the three proof PRs:
+  `docs/architecture/36-provider-routing-flexibility.md` for #3953,
+  `docs/architecture/35-local-openclaw-runtime.md` for #3954, and
+  `docs/architecture/37-provider-neutral-desktop-capabilities.md` for #3955.
+  Commit `9a62e2db7` was pushed to fork and origin. #3854 body now links all
+  three focused docs, and #3953 body now explicitly shows one Scout Desktop app
+  using 0-N hosted agents with graceful fallback to the current fully capable
+  Desktop provider path.
+- Capability narrative cleanup: commit `cf4e6b3cc` pushed to fork and origin
+  front-loads the #3955 capability story in
+  `docs/architecture/29-scout-cloud-brain-integration.md` and
+  `docs/architecture/37-provider-neutral-desktop-capabilities.md`. #3854 body
+  now has a dedicated `Capability lead` section, and #3955 body now opens with
+  the concrete surfaces: filesystem read, shell execution, browser,
+  clipboard, local app/open, workspace write/patch, and M365 draft broker,
+  each tied to the Desktop safety boundary.
+- #3953 Desktop-provider preservation proof: rebased
+  `user/giodl/cloud-agent-group6-execution-transport` onto current #3854 and
+  added commit `6697eb41d` (`test: prove desktop provider routing fallback`).
+  New tests pin `undefined`, `desktop-local`, and `copilot-sdk` bindings to the
+  primary backend and prove unbound/current-provider `SessionManager`
+  send/subscribe/abort/cancel stay on the Desktop backend even when a hosted
+  adapter is configured. Validation passed: focused Vitest 9 files / 664 tests,
+  `pnpm run typecheck`, focused `oxfmt --check`, and `git diff --check`.
+  Pushed to fork and origin; #3953 body updated and live checks are `CLEAN`.
+- Managed Copilot/internal model capacity lane added on 2026-06-29.
+  ClawPilot architecture commit `0a4f05080` on
+  `user/giodl/scout-cloud-brain-architecture` adds
+  `docs/architecture/38-managed-copilot-provider.md`, updates the umbrella
+  architecture doc and quick reference, and pushes to fork/origin. #3854 body
+  now presents this as the planned fourth implementation lane after #3953:
+  Scout Cloud/Lobster owns entitlement, model auth, metering, quota, and
+  provider attestation; Desktop keeps current-provider fallback and local
+  capability authority; #3955 can be used when managed-provider turns need
+  Desktop-local browser, clipboard, app, workspace, filesystem, shell, or M365
+  draft capabilities. Added AI-executable plan files under
+  `projects/clawpilot/pr-plans/managed-copilot-provider/`.
+- Latest follow-up: added
+  `projects/clawpilot/provider-routing-flexibility-pitch.md` as a separate
+  #3953-focused pitch for provider/routing optionality, with ASCII diagrams and
+  the Local OpenClaw material left to the broader walkthrough.
+- Runtime v2 fork shards opened on 2026-06-29 for rebuilding #3954 as a
+  Local-OpenClaw-runtime-only PR stack, with provider-neutral Desktop
+  capabilities excluded for the rebuilt #3955: #84 provider discovery, #85
+  sidecar/client/roster, #86 session binding and eligibility, #87 lifecycle and
+  transport, #88 dogfood routing, and #89 Lobster package artifact alignment.
+  Branches are stacked from `user/giodl/scout-cloud-brain-architecture` through
+  `user/giodl/local-openclaw-runtime-v2-06-package-artifact` in the
+  `giodl_microsoft/m` fork. Validation passed in `C:\src\clawpilot`:
+  focused Vitest for IPC/runtime/session/eligibility/discovery/lifecycle/client/
+  sidecar/Agents panel tests (9 files / 109 tests) and `git diff --check`.
+- Upstream grouped PRs were restacked on 2026-06-29: #3954 now points to
+  runtime-only v2 head `816943742` on fork branch
+  `user/giodl/local-openclaw-group6-gui-lobster-dogfood`; #3955 was rebuilt as
+  the provider-neutral Desktop capability platform at `dfbb1ca7b`, retargeted
+  to base `user/giodl/cloud-agent-group6-execution-transport` (#3953), and its
+  body now links fork shards #90-#95. New fork shards #90-#95 cover core
+  contract, approval/executor/audit, policy/evals, filesystem/shell,
+  browser/clipboard, and app/workspace-write/M365 draft broker. Validation for
+  #3955 passed focused capability Vitest (13 files / 121 tests),
+  `pnpm exec tsc --noEmit --pretty false`, and `git diff --check`.
+- Architecture PR #3854 was updated at `a666bd89c` to document the new stack
+  split: #3953 cloud/provider routing, #3954 Local OpenClaw runtime-only,
+  #3955 provider-neutral Desktop capabilities, and a later integration proof
+  for Local OpenClaw adapter wiring, live Lobster package/provider attestation,
+  live M365 Graph draft, packaged rollout, managed acquisition, and admin
+  policy. #3854 PR body now carries the same split.
+- Grouped PR body table pass: updated grouped review PR bodies #3953, #3954,
+  and #3955 with explicit Markdown tables linking each original fork shard PR
+  (#66-#71, #72-#77, and #78-#83) and a short title, in addition to the
+  existing grouped compare links.
+- Fork shard body cleanup: rewrote giodl_microsoft/m PR bodies #66-#83 from
+  the plan files with standalone `What`, `Objective`, `Code Surfaces`,
+  `Acceptance Criteria`, `Validation`, and `Review Notes` sections. Removed
+  `Replaces`/replacement-style stack-management wording from those 18 bodies.
+- Fork shard diagrams: added ASCII-only `Concept Diagram` sections to
+  giodl_microsoft/m PR bodies #66-#83 and verified each live PR body contains
+  the diagram block.
+- Grouped PR body enrichment: added ASCII-only `Concept Diagram` and
+  `How to Review This Grouped PR` sections to gim-home/m #3953, #3954, and
+  #3955 while preserving their shard tables.
+- Diagram polish: replaced the initial linear diagrams across giodl_microsoft/m
+  #66-#83 and gim-home/m #3953-#3955 with clearer ASCII boundary diagrams that
+  show trust gates, policy/approval/audit boundaries, execution paths, and proof
+  outcomes. Verified all 21 live PR bodies remain ASCII-only.
+- Lorant narrative guide: added
+  `projects/clawpilot/openclaw-pr-walkthrough-for-lorant.md`, a reviewer
+  walkthrough that explains #3953, #3954, and #3955 in sequence and links the
+  relevant fork PRs #66-#83 at the point each concept is introduced.
+- Lorant guide rewrite: expanded the walkthrough into a concept-first guide
+  organized around what exists today, what is missing, why each new concept is
+  necessary, what it adds, what to review, and then which grouped/fork PRs prove
+  that concept.
+- Lorant guide comparison: added tables contrasting ClawPilot today, Gateway
+  mode, and the OpenClaw stack, plus a concrete list of Gateway-mode reductions
+  and gaps backed by known PRs/docs.
+- Provider flexibility pitch: added
+  `projects/clawpilot/provider-routing-flexibility-pitch.md` as a shorter,
+  #3953-focused narrative with ASCII diagrams. It separates the provider
+  routing/optionality argument from the broader Local OpenClaw value pitch so
+  Lorant can review flexibility without having to absorb the full switch-over
+  stack first.
+- Provider flexibility concepts: expanded the same doc with concept sections
+  for provider, runtime routing, hosted agent roster, session runtime binding,
+  capability envelope, Desktop local authority, readiness/degraded mode,
+  approval/audit, and the boundary between this pitch and the Local OpenClaw
+  value narrative.
+- Provider flexibility baseline: updated the doc to state that the current
+  Desktop provider is the fully capable compatibility baseline, provider routing
+  must not silently regress behavior, and new cloud/OpenClaw paths should become
+  eligible only when capability/readiness/proof preserve the requested behavior
+  or expose explicit degraded/unavailable state.
+- Local OpenClaw guide simplification: rewrote
+  `projects/clawpilot/local-openclaw-value-walkthrough.md` as a shorter Local
+  OpenClaw value/proof walkthrough for #3954. It depends on the #3953
+  provider-routing pitch for the flexibility/baseline model and focuses on Local
+  OpenClaw as a governed provider, Desktop node-mode authority, package proof,
+  and remaining runtime gaps.
+- #3955 separation decision: direct rebase of the existing #3955 head off #3954
+  conflicts because the current branch contains Local OpenClaw runtime/package
+  proof files introduced by #3954. Added
+  `projects/clawpilot/provider-neutral-desktop-capabilities.md` as the cleaner
+  PR-body-ready target for #3955: browser, clipboard, local app, workspace
+  write, and M365 become provider-neutral Desktop capability contracts usable by
+  hosted cloud, Local OpenClaw, and future providers. The Local OpenClaw guide
+  now points shared capability work to that doc instead of treating it as
+  Local-only.
+- Integration proof split: added
+  `projects/clawpilot/local-openclaw-integration-proof.md` as the PR-body-ready
+  narrative for moving package/admin/live-proof work into a separate proof PR
+  that depends on both #3954 and the rebuilt provider-neutral #3955. The docs now
+  frame #3954 as runtime/provider foundation, #3955 as shared Desktop capability
+  hardening, and the new proof PR as the place for live Lobster package path,
+  provider evidence, admin gates, package integrity, lifecycle, rollback, and
+  remaining-gap proof.
+- Capability boundary refinement: audited the current #3954 commit range and
+  found Desktop node capability contract, approval router, executor, audit,
+  policy gates, evals, filesystem read, and shell exec mixed into the Local
+  OpenClaw runtime PR. Updated the docs so rebuilt #3955 owns that provider-
+  neutral Desktop capability platform, while the integration proof owns the
+  Local OpenClaw adapter/GUI/package/admin/live proof that composes #3954 and
+  #3955.
 - Current focus: Scout Desktop CLI proposal and first implementation stack. Added
   `projects/clawpilot/scout-desktop-cli-proposal.md`, framing the CLI as a
   typed, scriptable surface over the existing IPC layer for agent-native parity,
@@ -1069,12 +1211,22 @@
   Repeatability follow-up opened as Lobster draft PR
   [bic/lobster#3714](https://microsoft.ghe.com/bic/lobster/pull/3714) from
   `user/giodl/openclaw-copilot-dev-validation`, stacked on Ryan's
-  `cloud-permission-capabilities-api` branch at commit `5d4992a91`. It carries
+  `cloud-permission-capabilities-api` branch. Current head `bbc5db292` carries
   the local-dev proxy base URL, explicit local HTTP allow, model override, e2e
-  env pass-through, and Docker pnpm-timeout hardening. Current #3714 state:
-  draft, `UNSTABLE` because `GitOps/GitHubPop` attached and failed,
-  `GitOps/FileAffordance` passed; Lobster runtime ADO checks are not
-  attached/queued yet.
+  env pass-through, Docker pnpm-timeout hardening, and the requested-change
+  proof commit. Review feedback was addressed by adding a
+  `handle_forward_authorized` regression that drives the documented
+  `LLM_ANTHROPIC_BASE_URL` + `LLM_ANTHROPIC_ALLOW_LOCAL_HTTP=true` +
+  `LLM_ANTHROPIC_MODEL_OVERRIDE` path against a real local HTTP server with
+  only `api.anthropic.com` allowlisted, plus docs updates for the local-dev
+  env knobs. PR body and comment were updated with validation. Current #3714
+  state: open non-draft, `CHANGES_REQUESTED` until reviewer re-review,
+  `UNSTABLE` because `GitOps/GitHubPop` requires proof-of-presence on
+  `bbc5db292`, `GitOps/FileAffordance` passed, and the required Lobster
+  runtime ADO checks are pending. ADO fallback was queued against the correct
+  PR head after pushing the same branch to `origin`: PullRequest build
+  `170113844`, Build-Validation build `170113843`, both sourceVersion
+  `bbc5db2923506d22b6aeb2adf39cba47c3970112`.
 - Cloud-agent protocol transcript PR13 opened as draft on 2026-06-27:
   [giodl_microsoft/m#59](https://github.com/giodl_microsoft/m/pull/59) from
   `C:\src\clawpilot` branch
@@ -1388,10 +1540,221 @@
   live non-Copilot model completion, live Lobster package launch, live M365
   Graph draft creation, and packaged installer/update rollback remain outside
   this source-harness PR.
+- Architecture PR #3854 body/doc was updated on 2026-06-28 to present the real
+  upstream review shape as four draft `gim-home/m` PRs: #3854 architecture,
+  #3953 Cloud agent integration proof stack, #3954 Local OpenClaw runtime proof
+  stack, and #3955 Local OpenClaw switch-over plus admin readiness proof stack.
+  The old fork shards remain provenance only: #3953 folds fork shards #66-#71,
+  #3954 folds #72-#77, and #3955 folds #78-#83 plus the ten post-PR83
+  admin/readiness commits. Commit `e022da883` on
+  `user/giodl/scout-cloud-brain-architecture` updates
+  `docs/architecture/29-scout-cloud-brain-integration.md` and
+  `docs/architecture/35-local-openclaw-runtime.md`; #3854 PR body now points to
+  #3953-#3955 and preserves the PR template sections. Created upstream base
+  branches `user/giodl/scout-cloud-brain-architecture` and
+  `user/giodl/local-openclaw-group6-gui-lobster-dogfood` in `gim-home/m` so the
+  grouped PRs can be reviewed as real stacked PRs.
+- Grouped PR hygiene pass completed on 2026-06-28 after reviewing #3953-#3955:
+  PR bodies were rewritten with template-style What/Why/Linked issue/Scope/Test
+  plan/Proof sections, the grouped heads were restacked onto the updated #3854
+  base, and obsolete pre-grouping docs commits were skipped during rebase rather
+  than reintroducing stale fork-shard tables. Final live state: #3953 clean at
+  `976a1eafc`, #3954 clean at `6b7c95d03`, and #3955 clean at `14a7984f2`,
+  with no non-green checks reported by `gh pr view`.
+- Local OpenClaw post-mega-PR admin/switch-over readiness series started on
+  2026-06-28 as commit-first work, with no new PRs filed. Current commits on
+  `C:\src\clawpilot` branch `user/giodl/local-openclaw-switch-pr83-ci-dogfood`:
+  `4f9532656` adds typed `localOpenClaw` tenant admin policy constraints and
+  sanitizer/tests; `5c9900a6f` wires admin policy into runtime compatibility,
+  provider eligibility, and Desktop node capability policy while preserving the
+  existing safe defaults; `82fdae246` adds
+  `docs/architecture/37-local-openclaw-admin-policy.md` explaining
+  Scout-managed install vs Windows Companion attach, user approval, tenant
+  policy controls, enforcement points, defaults, and the next switch-over
+  series. Follow-up commits `902e87ad8` and `61c59b13f` add typed
+  Local OpenClaw admin/runtime diagnostics to the Agent inventory and Agents
+  panel, then extend the switch-over source harness to prove admin policy gates:
+  Scout-managed install disabled, Windows Companion attach disabled, package
+  source denied, and capability denied. Follow-up commit `112c239b6` frames
+  Scout-managed install and Windows Companion attach as separate Agents panel
+  setup paths/states without exposing broad install/attach controls yet.
+  Follow-up commit `d1d23c586` extends the switch-over source harness with a
+  managed lifecycle timeline proving install start, package-ready compatibility
+  refresh/client attach, and rollback/client clear states. Follow-up commit
+  `6a5f12d55` adds package-integrity denial evidence to the same source harness:
+  source identity mismatch and missing fingerprint both degrade before sidecar
+  start and before client attach. Follow-up commit `0e287af79` surfaces that
+  source-harness evidence in the admin readiness note and dogfood status ladder.
+  Follow-up commit `7f84a45d8` adds a compact
+  `formatLocalOpenClawSwitchOverEvidenceSummary()` formatter so the source
+  harness can emit a reviewer/operator summary covering model provider,
+  package launch, admin gates, lifecycle, package-integrity denials, Desktop
+  node capabilities, token isolation, rollback, and unsupported-platform proof
+  without secrets.
+  Validation passed: focused Vitest for admin/tenant/runtime/capability policy,
+  lifecycle, Agent inventory, Agents panel, and the full
+  `test:local-openclaw-switch-over` lane; focused type-aware `oxlint`; focused
+  `oxfmt --check`; `pnpm run typecheck`; `git diff --check`; and pre-commit
+  hooks. Latest doc-only validation: focused `oxfmt --check`, `git diff
+  --check`, and pre-commit hook. Latest summary validation: focused Vitest,
+  full `test:local-openclaw-switch-over`, focused type-aware `oxlint`, focused
+  `oxfmt --check`, `pnpm run typecheck`, `git diff --check`, and pre-commit
+  hook. Broad validation pass after commit 10 passed: branch clean, full
+  `test:local-openclaw-switch-over`, `pnpm run typecheck`, focused Agent
+  inventory and Agents panel Vitest, focused type-aware `oxlint`, focused
+  `oxfmt --check`, `git diff --check`, and `pnpm run build:vite`. The Vite
+  build completed with pre-existing CSS `::highlight` and chunk-size warnings,
+  but no failures and no worktree dirt. Recommendation: freeze this 10-commit
+  admin/switch-over readiness series unless a real reviewer requirement appears,
+  then group it into the eventual large Local OpenClaw switch-over PR.
+- Live Lobster package-path proof added on 2026-06-29 to PR #3955 branch
+  `user/giodl/local-openclaw-switch-mega-admin-readiness` at commit
+  `4545551da`. The Scout local OpenClaw stdio adapter now matches the current
+  Lobster Gateway handshake (`connect.challenge` / UI operator `connect` /
+  `hello-ok`), uses the `ws` client with explicit Origin, current
+  `sessions.create` shape, and normalizes live `chat` delta/final events. New
+  doc `docs/architecture/38-local-openclaw-live-proof.md` records the live run
+  against `lobster-e2e-runtime-1` on `ws://127.0.0.1:18001/v1/openclaw-gateway`,
+  including sanitized Scout frames showing `ready`, accepted `chat.send`,
+  assistant events, and `turn.complete`, plus runtime markers for WebSocket
+  `101`, proof route identity, proxy-pipe forwarding ready, and upstream
+  dialed. Local validation passed `pnpm run test:local-openclaw-switch-over`,
+  focused `oxfmt --check`, `git diff --check`, and pre-commit lint-staged.
+  #3955 body was updated to add this proof while keeping remaining gaps precise:
+  live non-Copilot completion, live Graph draft creation, packaged
+  installer/update rollback, and Scout-managed package acquisition/launch.
+  After push, #3955 was at `4545551da`; new PR-agent debounce was queued and
+  previous superseded agent checks showed cancelled, so merge state was
+  temporarily `UNSTABLE` pending fresh checks.
+- Follow-up live-proof reproducibility commit added on 2026-06-29 to PR #3955
+  at `cc984915e`. Added
+  `scripts/local-openclaw-lobster-live-proof.mjs` and package script
+  `pnpm run proof:local-openclaw-lobster-live`, which starts the Scout stdio
+  adapter, waits for `ready`, sends `chat.send`, requires accepted run metadata
+  and `turn.complete`, and emits a redacted JSON proof summary. Live run passed
+  against `ws://127.0.0.1:18001/v1/openclaw-gateway` with run id
+  `scout-local-openclaw-ada4431e-4b91-4eae-ad5e-6e06591b2763` and content
+  preview `live`. Validation passed the live proof script, full
+  `pnpm run test:local-openclaw-switch-over`, focused `oxfmt --check`,
+  `git diff --check`, and pre-commit lint-staged. #3955 body now includes the
+  rerunnable proof command and redacted output summary. After push, #3955 was
+  at `cc984915e`; debounce was queued and old agent rows were cancelled, so
+  merge state was temporarily `UNSTABLE` pending fresh checks. Follow-up check
+  showed fresh debounce, cache, barnacle, merit-bot, complexity-tag, and
+  GitOps/AdvancedSecurity succeeded; #3955 returned to `CLEAN`.
+- Non-Copilot provider validation continued on 2026-06-29. Host env has no
+  `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `AZURE_OPENAI_API_KEY`,
+  `LLM_ANTHROPIC_API_KEY`, `LLM_OPENAI_API_KEY`,
+  `LOBSTER_OPENCLAW_MODEL_PROVIDER`, or `LOBSTER_OPENCLAW_CREDENTIAL_SOURCE`.
+  `lobster-e2e-runtime-1` has non-secret provider markers
+  `LLM_PROVIDER=anthropic-direct`, `LLM_ANTHROPIC_MODEL_OVERRIDE=gpt-4.1`,
+  `LLM_ANTHROPIC_ALLOW_LOCAL_HTTP=true`,
+  `LLM_ANTHROPIC_BASE_URL=http://host.docker.internal:8088`, and a present
+  `LLM_ANTHROPIC_API_KEY` value not printed. Host `127.0.0.1:8088` returned
+  HTTP 200. Live package-path proof passed on both
+  `ws://127.0.0.1:18001/v1/openclaw-gateway` and
+  `ws://127.0.0.1:18002/v1/openclaw-gateway` with run ids
+  `scout-local-openclaw-7bf91534-d62d-4ae1-bef9-93df3fba45eb` and
+  `scout-local-openclaw-4d9241d4-ee20-4ec9-a8c3-0e5dde9cde10`. Commit
+  `f146fe38b` records this in
+  `docs/architecture/38-local-openclaw-live-proof.md` as an inconclusive
+  provider route check because Scout still lacks a source-authenticated runtime
+  provider attestation or a directly provisioned non-Copilot credential.
+  Validation passed focused doc `oxfmt --check`, `git diff --check`, and
+  pre-commit lint-staged. #3955 body was updated with this status. After push,
+  #3955 was at `f146fe38b`; debounce was queued and old agent rows were
+  cancelled, so merge state was temporarily `UNSTABLE` pending fresh checks.
+  Follow-up check showed fresh debounce, cache, barnacle, merit-bot,
+  complexity-tag, and GitOps/AdvancedSecurity succeeded; #3955 returned to
+  `CLEAN`.
+- M365/live-provider validation continued on 2026-06-29. Runtime logs for the
+  live proof tenant provided stronger non-Copilot evidence than the earlier
+  route check: `provider=anthropic-direct`, `provider_source=env`,
+  `provider_model=claude-opus-4-6`,
+  `upstream_host=http://host.docker.internal:8088/v1/messages`, `status=200`,
+  `outcome=success`, and `activity_category=llm_provider`. Commit
+  `eb6a357b8` upgrades `docs/architecture/38-local-openclaw-live-proof.md` to
+  treat non-Copilot completion as passed at Lobster runtime level, with the
+  remaining caveat that Scout still needs a Gateway/audit provider attestation
+  instead of relying on runtime logs. The same commit records the live M365
+  broker blocker: host has no Graph/M365 token env vars, `SCOUT_LOCAL_OPENCLAW_M365_BROKER`
+  is absent, `electron/main.ts` wires `createDraft` only under the source
+  harness, and production handlers fail closed with
+  `desktop-node-m365-draft-broker-unavailable`; Lobster dev Graph identity
+  fields inspected were empty. Validation passed focused doc `oxfmt --check`,
+  `git diff --check`, and pre-commit lint-staged. #3955 body now reflects
+  runtime-level non-Copilot proof plus blocked live Graph draft proof. After
+  push, #3955 was at `eb6a357b8`; debounce was in progress and old agent rows
+  were cancelled, so merge state was temporarily `UNSTABLE` pending fresh
+  checks. Follow-up check showed fresh debounce, cache, barnacle, merit-bot,
+  complexity-tag, and GitOps/AdvancedSecurity succeeded; #3955 returned to
+  `CLEAN`.
+- Packaged rollout and managed acquisition validation continued on 2026-06-29.
+  Commit `88eeeb539` records in
+  `docs/architecture/38-local-openclaw-live-proof.md` that packaged
+  install/update/rollback remains live-blocked while source lifecycle is proven.
+  Evidence: `electron/local-openclaw-lifecycle.test.ts` covers configured
+  sidecar start before endpoint descriptor, compatibility refresh after ready,
+  stdio client attach, shutdown, rollback closing the client and stopping the
+  sidecar; `pnpm run test:local-openclaw-switch-over` composes the rollback
+  source proof. No installer/update E2E artifact was produced or installed for
+  this proof, no Scout-owned Local OpenClaw package downloader/acquirer is
+  wired, no Scout-managed Lobster container acquisition path is wired, and
+  `LocalOpenClawSidecarManager` only launches an operator-configured
+  `SCOUT_LOCAL_OPENCLAW_SIDECAR_COMMAND` plus JSON args. #3955 body now includes
+  this status. Validation passed focused doc `oxfmt --check`, `git diff
+  --check`, and pre-commit lint-staged. After push, #3955 was at `88eeeb539`;
+  debounce was in progress and old agent rows were cancelled, so merge state
+  was temporarily `UNSTABLE` pending fresh checks. Follow-up check showed fresh
+  debounce, cache, barnacle, merit-bot, complexity-tag, and
+  GitOps/AdvancedSecurity succeeded; #3955 returned to `CLEAN`.
+- Architecture umbrella #3854 updated on 2026-06-29 at commit `9ab230811`.
+  `docs/architecture/29-scout-cloud-brain-integration.md` and
+  `docs/architecture/35-local-openclaw-runtime.md` now summarize the latest
+  #3955 switch-over validation matrix: live Lobster Gateway package path
+  passed, rerunnable proof command passed, runtime-level non-Copilot provider
+  proof passed from Lobster logs, provider attestation returned to Scout still
+  missing, M365 live Graph draft blocked, packaged installer/update rollback
+  not run, and Scout-managed package acquisition not wired. #3854 PR body was
+  rewritten back into readable template sections and now carries the same
+  current validation / remaining-gap summary. Validation passed focused
+  `oxfmt --check`, `git diff --check`, and pre-commit lint-staged. After push,
+  #3854 was at `9ab230811`; new debounce/semgrep/analysis checks were running
+  and one older failed `check` row was still visible, so live merge state was
+  temporarily `BLOCKED` pending fresh checks. Follow-up `gh pr checks 3854`
+  showed all current-head checks passing or neutral at `9ab230811`:
+  Analyze actions/javascript-typescript, Semgrep OSS, barnacle, cache, check,
+  complexity-tag, debounce, label, merit-bot, semgrep, GitOps/AdvancedSecurity,
+  and CodeQL neutral/skipping. `gh pr view` still showed `BLOCKED` because it
+  includes a stale failed `check` row alongside the current successful `check`;
+  do not treat that stale row as a current-head failure unless GitHub attaches a
+  fresh failing check.
 - Known dirty state: `C:\src\clawpilot` is clean on
-  `user/giodl/local-openclaw-switch-pr83-ci-dogfood`.
+  `user/giodl/scout-cloud-brain-architecture` at pushed commit `a666bd89c`.
+  Runtime v2 fork shard PRs #84-#89 are open as drafts and #3954 now points to
+  their grouped head `816943742`. Provider-neutral Desktop capability fork
+  shard PRs #90-#95 are open as drafts and #3955 now points to their grouped
+  head `dfbb1ca7b` with base #3953. Cloud group #3953 remains at
+  `976a1eafc`. The old local PR83 branch still exists and was not force pushed.
   `C:\tmp\clawpilot-pr7-review` is clean on
   `user/giodl/cloud-agent-pr7-approval-ux-contract`.
+  `C:\src\lobster` is on `user/giodl/openclaw-copilot-dev-validation` with
+  PR3714 files clean/pushed at `3caf85671`. A later shard-1 Runtime E2E
+  failure on build `170138071` showed all three same-identity follow-up pages
+  loading fresh chat surfaces, so the `434bc4f79` history-hydration gate was a
+  false assumption: the test proves same identity keeps the same
+  container/proxy-pipe path, not cross-page conversation hydration. Commit
+  `3caf85671` removes `historyTextToWaitFor` from the shared helper and three
+  follow-up callsites, keeps the exact submitted-message assertion, and adds a
+  composer-ready wait before baselining assistant messages. Local validation
+  passed targeted Biome format/lint for the two changed E2E files,
+  `pnpm run type-check`, and `git diff --check`. PR #3714 body was updated with
+  the corrected failure analysis and new ADO run IDs. Required ADO contexts were
+  requeued for head `3caf856719e08ccc839847a3f25314cb128c15f6` as PullRequest
+  `170145288` and Build-Validation `170145287`; both checks are attached and
+  pending. `GitOps/GitHubPop` still needs interactive proof-of-presence on the
+  new SHA after a non-interactive POP request returned `400 Bad Request`.
+  Unrelated policy/oc-harness dirty files remain.
   `C:\src\claws-hapi` has this ClawPilot session update plus pre-existing
   notebook dirt.
 - Blocking question: none recorded.
@@ -1414,8 +1777,10 @@
 
 - Scout Desktop CLI proposal should be reviewed/trimmed into a Jakob-facing
   spec or issue/umbrella before filing implementation work.
-- Local OpenClaw dogfood stack next action: watch PR78-PR83 CI/review state and
-  pursue the remaining live package-path runtime proof, especially Lobster draft
-  PR #3714 and non-Copilot provider credentials.
+- Local OpenClaw dogfood stack next action: watch #3854, #3953, #3954, and
+  #3955 CI/review state, complete POP / required checks / re-review on Lobster
+  PR #3714, and pursue live non-Copilot provider credentials, live M365 Graph
+  draft proof, packaged installer/update rollback, and Scout-managed package
+  acquisition/launch proof.
 - Items 17-19 are umbrella update/link work.
 - Items 20-24 are design-first topics, not immediate implementation issues.
