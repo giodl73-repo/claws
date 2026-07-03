@@ -76,3 +76,15 @@ This planned fourth implementation lane adds Microsoft 365 Copilot or internal
 managed model capacity as a routed provider. It depends on #3953 for provider
 routing, keeps the current Desktop provider as fallback, and composes with
 #3955 when managed-provider turns need Desktop-local capabilities.
+
+## Node Mode Built-Ins Parity Stack
+
+| Step | Planned PR | Plan |
+| --- | --- | --- |
+| 1 | Planned | [node-mode-builtins-parity](node-mode-builtins-parity/README.md) |
+
+This planned follow-up comes after the M365 draft command work. It closes the
+remaining Scout Desktop built-in parity gaps by routing existing `m_*`,
+`workiq_*`, MCP browser, and approval-kind surfaces through the Desktop
+local-tool/approval envelope instead of inventing bespoke node commands for
+every built-in.

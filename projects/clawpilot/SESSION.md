@@ -18,8 +18,1103 @@
 
 ## Current Session
 
-- Last updated: 2026-06-29.
+- Last updated: 2026-07-02.
 - Last agent: Codex.
+- Latest follow-up: Updated final node-mode stack proof PR
+  `gim-home/m#4137`
+  `https://github.com/gim-home/m/pull/4137` from isolated worktree
+  `C:\src\clawpilot-review-mcp-harness`. Base is #4090
+  `user/giodl/node-mode-capabilities-upstream-5-trust-hardening`; head is
+  `user/giodl/node-mode-capabilities-upstream-6-mcp-harness-parity`.
+  Scope now has three commits after restack on current #4090: `1d9dca8c5`
+  (`test: prove mcp node harness parity`), `f59d8056e`
+  (`feat: route desktop mcp harness through node runtime`), and `c296315d9`
+  (`feat: route desktop filesystem harness through node executor`). The
+  production wiring lets Gateway `desktop.executeLocalTool({ kind: "mcp" })`
+  use the same node-mode MCP runtime as raw `mcp.invoke`, and
+  `desktop.executeLocalTool({ kind: "read" | "write", toolName:
+  "filesystem.read" | "filesystem.write" | "filesystem.patch" })` use the same
+  Desktop Node filesystem executor as raw filesystem node commands. Desktop
+  trusted context is supplied by the node subsystem separately from tool args,
+  so Desktop/cloud callers can converge on the Desktop capability harness while
+  the active provider owns the backing runtime/executor. The proof verifies
+  Desktop-owned MCP lifecycle state
+  (`connected`, `needs-auth`, failed), discovery/input schemas, approval only
+  on `mcp.invoke`, exact runtime invoke contract, approval-free cancel, and
+  paired activity-log entries, plus filesystem harness routing into the
+  command executor with exact command names and request session stamped into
+  trusted context. Validation passed: focused Vitest 7 files / 225 tests,
+  `pnpm run typecheck`, changed-file type-aware `oxlint
+  --deny-warnings --type-check`, changed-file `oxfmt --check`, and `git diff
+  --check`; pre-commit lint-staged also passed on the committed files. PR body
+  title/summary now present this as `Node mode commands: route Desktop harness
+  through node runtime`. Clipboard is intentionally not part of this parity
+  proof because it is not an existing Desktop capability.
+- Latest follow-up: Rebuilt and pushed #4088 in isolated worktree
+  `C:\src\clawpilot-review-4088` to follow the simplified #4086
+  direct-command model instead of reintroducing the deleted
+  `desktop-node-capability-*` approval/bridge/executor/adapter layer. The
+  local branch was reset onto live #4086 head `d13ec27c1`, then #4088 was
+  committed as `237731487` (`feat: add browser clipboard app node commands`)
+  and force-with-lease pushed to
+  `user/giodl/node-mode-capabilities-upstream-3-browser-clipboard-local-app`.
+  #4088 now advertises raw node commands `browser.open`, `clipboard.read`,
+  `clipboard.write`, `app.open`, `local-app.open`,
+  `file.openWithDefaultApp`, and `url.openExternal`; routes them through
+  `DesktopNodeCommandExecutor`; maps browser/external URL opens to existing
+  `kind:"url"` approval; keeps filesystem content on existing read/write
+  approvals; maps clipboard and file/default-app launch/reveal commands to
+  one-shot `custom-tool` approvals with `noPersist`; redacts clipboard details
+  from external prompt channels while preserving in-app detail; and constrains
+  `browser.open` to trusted external-open origins. Accepted/fixed Codex review
+  findings: removed unreachable active-tab/selection command surface,
+  constrained browser open origins, kept file/default-app launch actions out of
+  `tool:read`, and prevented persisted clipboard grants. Validation passed
+  focused Vitest (7 files / 212 tests), changed-file `oxfmt --check`,
+  changed-file type-aware `oxlint --deny-warnings`, `git diff --check`, and
+  final `codex review --uncommitted` clean. PR body was rewritten with the
+  simplified command-first model and validation proof. Fresh `/m-code-review`
+  was posted for current #4088 head `237731487`
+  `https://github.com/gim-home/m/pull/4088#issuecomment-4869836841`; async
+  bot response had not landed at the time of this note. Live state after push:
+  worktree clean, debounce/cache/GitOps/barnacle/complexity-tag/merit-bot
+  passed, ClawPilot Buddy skipping.
+- Latest follow-up: Rebuilt #4089 in isolated worktree
+  `C:\src\clawpilot-review-4089` on branch `review-4089-simplified`, based
+  directly on current #4088 head `237731487`. Preserved the old live branch on
+  `backup/4089-before-simplified-restack`, then replaced the stale
+  capability-adapter-heavy #4089 diff with one clean commit `03ce90911`
+  (`feat: add m365 draft node command`) and force-with-lease pushed
+  `gim-home/m:user/giodl/node-mode-capabilities-upstream-4-m365-drafts`.
+  The rebuilt PR now advertises only production-backed
+  `m365.mail.createDraft`, routes it through the simplified
+  `DesktopNodeCommandExecutor`, maps approval to the existing
+  `workiq_create_draft` `custom-tool` permission for parity, runs the existing
+  WorkIQ pre-hook before the Outlook draft tool, and keeps Calendar/Teams
+  draft shapes non-advertised until they have real brokers. Validation passed:
+  focused Vitest 4 files / 77 tests, `pnpm run typecheck`, changed-file
+  `oxfmt --check`, changed-file type-aware `oxlint --deny-warnings`, and
+  `git diff --check`. #4089 body was rewritten with the simplified command
+  model, WorkIQ approval parity, proof established, and current validation.
+  Fresh `/m-code-review` was posted at
+  `https://github.com/gim-home/m/pull/4089#issuecomment-4870058732`; live PR
+  state immediately after push/body/comment update was `UNSTABLE` because a
+  new debounce run was pending and stale bot rows from the prior SHA were still
+  visible.
+- Latest follow-up: Restacked #4123 in isolated worktree
+  `C:\src\clawpilot-review-builtins-self-tools` after #4089 was rebuilt.
+  Preserved old head on `backup/4123-before-4089-restack`, created
+  `review-4123-restack` from #4089 head `03ce90911`, cherry-picked only the
+  two built-ins commits, and force-with-lease pushed both the PR fork branch
+  `giodl_microsoft:m:user/giodl/node-mode-builtins-self-tools` and the
+  upstream mirror `gim-home/m:user/giodl/node-mode-builtins-self-tools` to
+  `ade9674bc`. The refreshed diff is limited to the built-ins slice: existing
+  `desktop.executeLocalTool({ kind: "custom-tool" })` routing, self-tools plus
+  WorkIQ/M365 custom built-in registry, local policy deny floor, and timezone
+  provider parity. Validation passed: focused Vitest 4 files / 139 tests,
+  `pnpm run typecheck`, changed-file `oxfmt --check`, changed-file type-aware
+  `oxlint --deny-warnings`, and `git diff --check`. #4123 body was updated
+  with the exact RPC shape, custom-tool approval model, proof established, and
+  current validation. Fresh `/m-code-review` was posted at
+  `https://github.com/gim-home/m/pull/4123#issuecomment-4870089476`; live PR
+  state immediately after push/body/comment update was `UNSTABLE` because a
+  new debounce run was pending and stale bot rows from the superseded SHA were
+  still visible.
+- Latest follow-up: Restacked #4087 in isolated worktree
+  `C:\src\clawpilot-review-4087` after #4123 moved to `ade9674bc`. The
+  worktree had been detached on the old PR head, so the old branch was
+  preserved at `backup/4087-before-4123-restack`, a fresh
+  `review-4087-restack` branch was created from
+  `origin/user/giodl/node-mode-builtins-self-tools`, and only the
+  `system.run` governance commit was cherry-picked. Conflict resolution
+  intentionally excluded stale `desktop.capabilities` catalog content from the
+  later #4090 slice and kept only #4087's approval-metadata behavior. Pushed
+  `gim-home/m:user/giodl/node-mode-capabilities-upstream-2-filesystem-shell`
+  to `d6e87d488`. Validation passed: focused Vitest 3 files / 73 tests,
+  `pnpm run typecheck`, changed-file/doc `oxfmt --check`, changed-file
+  type-aware `oxlint --deny-warnings`, and `git diff --check`. #4087 body was
+  updated with the exact `system.run` scope, approval model, proof
+  established, and current validation. Fresh `/m-code-review` was posted at
+  `https://github.com/gim-home/m/pull/4087#issuecomment-4870123530`; live PR
+  state immediately after push/body/comment update was `UNSTABLE` because a
+  new debounce run was pending and stale bot rows from the superseded SHA were
+  still visible.
+- Latest follow-up: Collapsed #4086 in isolated worktree
+  `C:\src\clawpilot-review-4086` after Gio asked to cut the extra Desktop Node
+  framework. Added/pushed commit `d13ec27c1`
+  (`refactor: collapse filesystem node command path`) on
+  `user/giodl/node-mode-capabilities-upstream-1-foundation`. Removed the
+  standalone Desktop Node capability approval/bridge/executor/adapter files and
+  kept a direct filesystem path:
+  `NodeCommandsBridge` -> `DesktopNodeCommandExecutor` ->
+  `DesktopFilesystemPermissionService` -> existing filesystem read/write/patch
+  handlers. Preserved Desktop file permission parity through existing
+  read/write policy/card semantics and generic permission audit rows for saved
+  allow, prompt allow, policy deny/defer, user deny, malformed request, and
+  handler failure; retained legacy
+  `desktop-node-capabilities-YYYY-MM-DD.jsonl` pruning for upgraded users
+  without continuing that custom audit stream. Final PR size versus #4045 base
+  is 27 files / 2558 insertions / 47 deletions, down from the earlier 4013
+  insertions; the cut commit itself was 598 insertions / 2055 deletions.
+  Validation passed focused Desktop Node filesystem parity slice 11 files / 576
+  tests, `pnpm run typecheck`, changed-file `oxfmt --check`, changed-file
+  type-aware `oxlint --deny-warnings`, `git diff --check`, pre-commit
+  lint-staged, and final `codex review --uncommitted` clean after accepting
+  three audit parity findings. Refreshed m-code-review cache and posted fresh
+  `/m-code-review`
+  `https://github.com/gim-home/m/pull/4086#issuecomment-4869644703`; posted
+  current-head validation
+  `https://github.com/gim-home/m/pull/4086#issuecomment-4869657058`. Regenerated
+  drag/drop proof GIF from real Microsoft Scout allow/deny frames at
+  `C:\src\clawpilot-proof-images\node-mode-pr4086-filesystem-parity\pr4086-filesystem-allow-deny-real-app.gif`.
+  Live state after rerunning a transient `complexity-tag` GitHub 503 failure:
+  head `d13ec27c197d029559fccb7e31a9cddb8ab12695`, PR open/non-draft,
+  merge state `CLEAN`; current rows pass except expected ClawPilot Buddy
+  skipping.
+- Latest follow-up: Continued #4086 in isolated worktree
+  `C:\src\clawpilot-review-4086` after the filesystem permission parity
+  review. Added commit `4ca447ea4` (`refactor: extract desktop filesystem
+  permission service`) and pushed
+  `user/giodl/node-mode-capabilities-upstream-1-foundation`. The new
+  `DesktopFilesystemPermissionService` is a narrow shared filesystem permission
+  layer under node-mode for read/write/patch approval request construction,
+  local `PermissionPolicy.evaluate`, broker prompts, timeout logging, and
+  interactive outcome recording; Desktop Node still emits normal `read`/`write`
+  approval requests, not `external-action`. Composition now uses the same
+  service for saved-rule evaluation and prompting so the paths cannot drift.
+  Added service/router regression tests for saved allow/deny/prompt, no-session
+  deferral, malformed request denial, pre-prompt target validation, user
+  allow/deny, and timeout. Validation passed focused parity slice 4 files / 27
+  tests, broader Desktop Node filesystem/bridge slice 11 files / 120 tests,
+  `pnpm run typecheck`, focused `oxfmt --check`, focused type-aware `oxlint`,
+  `git diff --check`, pre-commit lint-staged, and `codex review --uncommitted`
+  clean after one timeout/retry. Posted fresh `/m-code-review`
+  `https://github.com/gim-home/m/pull/4086#issuecomment-4869167901` and
+  current-head validation
+  `https://github.com/gim-home/m/pull/4086#issuecomment-4869179034`. Manual
+  Lorant-style current-head pass found no new actionable blocker from the
+  extraction. Live state after short polling: head
+  `4ca447ea4ddd05c966ddcfc8ed55dd4e79122cfa`, merge state `UNSTABLE` only
+  because fresh barnacle/complexity-tag/merit-bot rows were pending;
+  cache/debounce/GitOps were passing, and the async m-code-review response had
+  not posted yet.
+- Latest follow-up: Continued the command-first Desktop Node review loop on
+  #4089 in isolated worktrees only. Clean-context review of #4089 found M365
+  command reachability gaps, synthetic Calendar/Teams success, M365 identity
+  casing, and an inherited #4088 clipboard preview issue. Fixed the inherited
+  #4088 issue first in `C:\src\clawpilot-review-4088` with commit
+  `cc8935af0` (`fix: require exact clipboard write previews`): `clipboard.write`
+  policy and handler now require `text === textPreview`, approval tests no
+  longer imply redacted metadata can hide suffix payloads, and hidden suffix
+  content is denied before dispatch. Validation passed 8 focused files / 228
+  tests, focused `oxfmt --check`, focused type-aware `oxlint`, `git diff
+  --check`, and `codex review --uncommitted` clean. Pushed #4088 to
+  `cc8935af0` and posted disposition
+  `https://github.com/gim-home/m/pull/4088#issuecomment-4868552825`.
+  Restacked #4089 in `C:\src\clawpilot-review-4089` on #4088, fixed production
+  M365 reachability and review findings, and pushed #4089 to `c598f603a`
+  (`fix: keep m365 catalog policy aligned`). #4089 now advertises/routes only
+  the backed production `m365.mail.createDraft` command, removes synthetic
+  Calendar/Teams production success, compares tenant/UPN case-insensitively,
+  keeps clipboard exact-preview behavior from #4088, and feeds composed M365
+  allowed capabilities into catalog policy so `desktop.capabilities` agrees
+  with direct invoke. Validation passed 8 focused files / 243 tests, focused
+  `oxfmt --check`, focused type-aware `oxlint`, `git diff --check`, and final
+  `codex review --base origin/user/giodl/node-mode-capabilities-upstream-3-browser-clipboard-local-app`
+  clean. Updated #4088/#4089 PR bodies and posted #4089 disposition
+  `https://github.com/gim-home/m/pull/4089#issuecomment-4868553106`. Live
+  state immediately after push/body/comment update: #4088 head `cc8935af0`
+  and #4089 head `c598f603a`; both are `UNSTABLE` only because fresh
+  barnacle/merit-bot/complexity-tag rows are running or queued after the
+  force-push, with debounce/cache/GitOps passing and no fresh failure visible.
+- Latest follow-up: Completed fresh review passes for gim-home/m #4086 at head
+  `caf356a80` in isolated worktree `C:\src\clawpilot-review-4086`. Ran
+  `m-code-review` cache refresh for PR #4086, direct Lorant-style manual review
+  of the current-head filesystem Desktop Node command diff, and
+  `codex review --base origin/user/giodl/desktop-mcp-capability-stack`; no
+  high-confidence actionable findings were found. Validation rerun passed:
+  focused Vitest over 12 node files / 242 tests. Live PR state observed during
+  review: draft/open, merge state `CLEAN`, no formal reviews or inline review
+  comments, current checks passing/skipping as expected.
+- Latest follow-up: Completed the #4088 review-readiness pass in isolated
+  worktree `C:\src\clawpilot-review-4088`. Rebased
+  `user/giodl/node-mode-capabilities-upstream-3-browser-clipboard-local-app`
+  onto current #4086 head `caf356a80`, force-pushed #4088 to `f4b99a355`, and
+  updated the PR body/comment
+  `https://github.com/gim-home/m/pull/4088#issuecomment-4867254901`. Accepted
+  review fixes: advertised only the browser/clipboard/local-app commands that
+  are actually wired end-to-end, added node bridge routing proof, removed the
+  duplicate `previewForCapability` restack artifact, kept optional
+  `browser.readActiveTab`/`browser.extractSelection` out of the advertised
+  bridge list until production registers an active-tab provider, and fixed
+  `local-app.open` approval/audit target URLs for both browser and file-path
+  flows. Validation passed: focused Vitest 8 files / 226 tests, focused
+  `oxfmt --check`, focused type-aware `oxlint`, `git diff --check`, and final
+  `codex review --base origin/user/giodl/node-mode-capabilities-upstream-1-foundation`
+  with no actionable regressions. Live #4088 checks are passing/skipping as
+  expected and merge state is `CLEAN`; PR remains draft.
+- Latest follow-up: Booked the post-M365 Node Mode built-ins parity stack in
+  `projects/clawpilot/pr-plans/node-mode-builtins-parity/README.md` and linked
+  it from `projects/clawpilot/pr-plans/README.md`. The planned order is:
+  self-tools bridge, WorkIQ/M365 read and metadata tools, WorkIQ/M365 mutating
+  tools, then browser MCP special actions plus remaining permission kinds. The
+  design rule is to keep typed node commands for new stable Desktop capability
+  contracts, but use `executeLocalTool({ kind, toolName, toolArgs, sessionId })`
+  for existing built-ins such as `m_*`, `workiq_*`, and MCP browser tools. This
+  work should come after #4089 M365 draft commands; shell `system.run` can stay
+  as a separate shell-specific follow-up or be restacked later if review flow
+  requires non-shell parity before shell.
+- Latest follow-up: Started the built-ins parity implementation in isolated
+  worktree `C:\src\clawpilot-review-builtins-self-tools` on branch
+  `user/giodl/node-mode-builtins-self-tools`, based directly on #4089 commit
+  `3787d6960`. Added commit `51de73a19`
+  (`test: prove desktop self-tools local execution`) proving
+  `DesktopCapabilitiesImpl.executeLocalTool({ kind: "custom-tool" })` executes
+  a registered `m_*` self-tool through the composed Desktop local-tool path and
+  still honors the local `PermissionPolicy.evaluate` deny floor before handler
+  execution. Pushed the branch to fork
+  `giodl_microsoft/m:user/giodl/node-mode-builtins-self-tools`; no PR opened
+  yet. Validation passed: focused Vitest self-tool/local-tool slice (3 files /
+  19 tests), focused `oxfmt --check`, focused type-aware `oxlint`, and
+  `git diff --check`.
+- Latest follow-up: Replaced the insufficient static visual proof for
+  #4086-#4090 with actual animated GIF proof captured from the real Electron
+  app in the isolated worktree `C:\src\clawpilot-review-4090`. The temporary
+  local Playwright capture spec seeded command-specific Desktop Node cards,
+  launched Electron, clicked/expanded the visible app UI, saved frame PNGs, and
+  was removed afterward so the worktree returned clean. GIF artifacts are in
+  `C:\src\clawpilot-proof-images\node-mode-prs-4086-4090-real\approval-gifs`:
+  `pr4086-file-commands.gif` (5 frames), `pr4087-shell-command.gif` (5),
+  `pr4088-browser-clipboard-local-app.gif` (5), `pr4089-m365-drafts.gif` (5),
+  and `pr4090-catalog-trust.gif` (4). #4086-#4089 show approval-card flows;
+  #4090 shows catalog/result-trust output expansion because that PR is a
+  read-only catalog/trust proof rather than an approval prompt.
+- Latest follow-up: Fixed the broken visual-proof path for #4086-#4090 by
+  using the isolated top-stack worktree `C:\src\clawpilot-review-4090` instead
+  of `C:\src\clawpilot`. Removed the stale `node_modules` junction to the main
+  checkout, ran a real install/build, verified Electron resolves from
+  `C:\src\clawpilot-review-4090\node_modules\electron\dist\electron.exe`, and
+  launched the app successfully via `scripts/launch-electron.cjs`
+  (`app.getAppPath()` logged the review worktree). Generated actual Scout UI
+  screenshots, not diagrams, using a temporary local-only Playwright proof spec
+  that seeded command-specific Desktop Node `external-action` cards before
+  Electron boot and then removed the spec so the worktree stayed clean.
+  Artifacts are in
+  `C:\src\clawpilot-proof-images\node-mode-prs-4086-4090-real`:
+  `pr4086-file-commands.png`, `pr4087-shell-command.png`,
+  `pr4088-browser-clipboard-local-app.png`, `pr4089-m365-drafts.png`, and
+  `pr4090-catalog-trust.png`. Also reran the existing real Electron permission
+  pipeline proof:
+  `pnpm exec playwright test e2e/permission-live-chat.test.ts --project electron
+  --workers=1 --retries=0 --grep "deny both tools"` passed 1/1. Important
+  caveat: the five PR screenshots are seeded visual proof of the actual app UI
+  and Desktop Node approval card shape; execution proof remains the focused
+  backend/Vitest stack already run on the branches.
+- Latest follow-up: Replaced the insufficient seeded screenshot story with
+  actual per-PR execution proof for #4086-#4090. Installed dependencies in the
+  isolated review worktrees as needed, then ran branch-local focused suites and
+  saved logs under
+  `C:\src\clawpilot-proof-images\node-mode-prs-4086-4090-real\execution-proof`.
+  Results: #4086 file commands passed 5 files / 69 tests
+  (`pr4086-filesystem.log`); #4087 shell command passed 4 files / 68 tests
+  (`pr4087-shell.log`); #4088 browser/clipboard/local-app passed 7 files / 87
+  tests (`pr4088-browser-clipboard-app.log`); #4089 M365 draft commands passed
+  5 files / 84 tests (`pr4089-m365-drafts.log`); #4090 catalog/result-trust
+  passed 6 files / 536 tests (`pr4090-catalog-trust.log`). Also saved a real
+  Electron app permission pipeline proof on #4090:
+  `pnpm exec playwright test e2e/permission-live-chat.test.ts --project electron
+  --workers=1 --retries=0 --grep "deny both tools"` passed 1/1 and is logged as
+  `pr-live-permission-chat.log`. All five review worktrees remained clean.
+- Latest follow-up: Continued the Lorant-style fine-tooth-comb review on the
+  #4088-#4090 Desktop Node command PRs using isolated detached worktrees only:
+  `C:\src\clawpilot-review-4088`, `C:\src\clawpilot-review-4089`, and
+  `C:\src\clawpilot-review-4090`. Did not edit, switch, or stash
+  `C:\src\clawpilot`; that checkout remains dirty with the separate #4045
+  files `electron/backend/gateway/node-backend.test.ts` and
+  `electron/backend/gateway/node-mcp-runtime.test.ts`. Pushed #4088 to
+  `b524f9e1f` after fixing optional active-browser command advertisement,
+  default-browser approval targets, and raw clipboard preview-prefix
+  validation; focused validation passed 6 files / 58 tests plus `oxfmt`,
+  `git diff --check`, and
+  `codex review --base origin/user/giodl/node-mode-capabilities-upstream-2-filesystem-shell`
+  clean. Rebased/pushed #4089 to `b75010317` on #4088 after preserving
+  clipboard preview-prefix execution, advertising M365 catalog auth readiness,
+  gating draft creation through WorkIQ pre-hook policy, preserving broker
+  error JSON, forwarding supported draft fields, and avoiding token-word false
+  positives in ordinary output text; focused validation passed 6 files / 71
+  tests, type-aware `oxlint`, `oxfmt`, `git diff --check`, and
+  `codex review --base origin/user/giodl/node-mode-capabilities-upstream-3-browser-clipboard-local-app`
+  clean. Rebased/pushed #4090 to `c44811670` on #4089, preserving #4090 catalog
+  route/result-trust hardening while carrying #4088 active-browser gating and
+  #4089 M365 auth defaults; focused validation passed 9 files / 262 tests,
+  `oxfmt`, `git diff --check`, and
+  `codex review --base origin/user/giodl/node-mode-capabilities-upstream-4-m365-drafts`
+  clean. Live PR state immediately after push: #4088 `CLEAN`, #4089 `CLEAN`,
+  #4090 `UNSTABLE` while fresh checks settle.
+- Latest follow-up: Audited the #4086-#4090 Desktop Node command stack against
+  Lorant-style #4045 approval feedback. Added #4086 commit `234e8a856`
+  (`docs: define desktop node command approvals`) so
+  `docs/architecture/06-permissions.md` now documents the exact-command
+  Desktop Node approval lane: per-command policy, scoped prompts, trusted
+  Desktop context only, and fail-closed approval/audit behavior. The same
+  commit extends `electron/desktop-node-command-adapter.test.ts` to prove
+  caller-supplied `context.sessionId` is ignored while Desktop-owned
+  `trustedContext.sessionId` and desktop-generated audit id win. Restacked and
+  force-pushed #4086-#4090 branches; rewrote PR bodies for #4086-#4090 with an
+  `Approval model` section and restored multiline Markdown after a PowerShell
+  `--jq .body` flattening mishap. Validation passed on clean
+  `user/giodl/node-mode-capabilities-upstream-5-trust-hardening`: focused
+  approval-policy slice (4 files / 29 tests), full top-stack targeted suite
+  (17 files / 314 tests), focused `oxfmt --check`, `git diff --check`, and
+  `codex review --base origin/user/giodl/node-mode-capabilities-upstream-4-m365-drafts`
+  with no actionable correctness issues. Live #4086 and #4090 report `CLEAN`.
+  Local scratch/preserved #4045 review-fix attempts are intentionally stashed
+  (`preserve-4045-*`, `scratch-4090-*`) and should not be popped into this
+  stack unless explicitly resuming that separate review-fix work.
+- Latest follow-up: Reworked the #4086-#4090 Desktop Node command stack into
+  the command-first review order requested by Gio. #4086 is now filesystem
+  commands, #4087 shell, #4088 browser/clipboard/local app, #4089 M365
+  brokered drafts, and #4090 catalog/result-trust hardening. Removed the
+  standalone foundation framing from #4086 by making it the first concrete
+  command PR; kept shared routing/policy/approval/audit code only as needed by
+  concrete commands. Fixed branch-local test boundaries so #4089 proves the
+  M365 draft command path while #4090 owns the stronger catalog/auth/degradation
+  assertions. Force-pushed updated upstream branches:
+  `user/giodl/node-mode-capabilities-upstream-1-foundation`,
+  `...-2-filesystem-shell`, `...-3-browser-clipboard-local-app`,
+  `...-4-m365-drafts`, and `...-5-trust-hardening`. Updated PR bodies for
+  #4086-#4090, posted `/m-code-review` on #4086-#4090, and generated manual
+  drag/drop visuals under `C:\src\clawpilot\test-screenshots\pr4086-visuals`,
+  `pr4087-visuals`, `pr4088-visuals`, `pr4089-visuals`, and `pr4090-visuals`.
+  Validation passed: #4087 focused 5 files / 83 tests, #4088 focused 6 files /
+  56 tests, #4089 focused 4 files / 57 tests, and full top-stack focused run
+  on #4090 17 files / 314 tests. Live GitHub checks for #4089/#4090 were still
+  fresh/pending (`UNSTABLE`) immediately after the final push; local
+  `C:\src\clawpilot` was clean on
+  `user/giodl/node-mode-capabilities-upstream-5-trust-hardening`.
+- Latest follow-up: Rebased the #3955 continuation branch
+  `user/giodl/local-openclaw-switch-mega-admin-readiness-on-4045` onto the
+  refreshed #4045 base `c26575e0f`, resolving additive conflicts between #4045
+  MCP approval/status/cancel docs and #3955 Desktop Node catalog/command
+  wiring. Saved a local backup branch
+  `user/giodl/local-openclaw-switch-mega-admin-readiness-rebased-backup` at
+  `f3f6ef2c7`. Added commit `c38fe3c17`
+  (`docs: put node command PRs before capability catalog`) to change the review
+  story: concrete file/clipboard, browser/local-app, shell, and M365 commands
+  come before `desktop.capabilities`; the catalog/discovery PR is now framed as
+  a reporting layer over real commands rather than a prerequisite abstraction.
+  Validation for this doc-only follow-up passed focused `oxfmt --check` and
+  `git diff --check`. Important: do not push this as the final split yet; the
+  local branch is rebased and documented, but the actual fork PR branch cuts
+  still need to be made so review order matches the new command-first story.
+- Latest follow-up: Updated #4045 on
+  `user/giodl/desktop-mcp-capability-stack` with commit `c26575e0f`
+  (`feat: gate node mcp invokes with approvals`). Node-routed `mcp.invoke`
+  now runs a per-tool approval hook before `GatewayNodeMcpRuntime.callTool`,
+  wired through `GatewayToolBackend` to the existing PermissionPolicy /
+  ApprovalBroker / permission-card path using the established
+  `mcp:<server>:<tool>` permission key. `mcp.help`, `mcp.status`, and
+  `mcp.cancel` remain approval-free. Promptable MCP approvals file under the
+  invocation session id or active chat session; if no visible session exists,
+  the node request fails closed rather than creating an invisible card. Pushed
+  fork PR head `giodl_microsoft/m:user/giodl/desktop-mcp-capability-stack` and
+  rewrote the #4045 body to remove stale approval-out-of-scope wording and add
+  the approval/visual proof. Also updated
+  `docs/architecture/05-mcp-servers.md` and
+  `docs/architecture/14-backend-abstraction.md` so the architecture docs list
+  all five node commands and the MCP approval gate. Codex review accepted one
+  actionable finding after the approval update: the bridge should verify MCP
+  runtime/server availability before showing an approval prompt. Fixed in
+  `c26575e0f` by moving approval after the runtime and `hasServer` gates, with
+  tests proving both `not-supported` paths do not prompt. Final
+  `codex review --base origin/main` reported no discrete actionable
+  regressions. Validation passed: focused Vitest 5 files / 919 tests, focused
+  type-aware `oxlint`, focused `oxfmt --check`, `pnpm run typecheck`, `git
+  diff --check`, pre-commit lint-staged on commit, and Electron visual permission-card proof
+  `pnpm run test:e2e:file -- e2e/permission-timeline.test.ts
+  --project=electron` (3 tests passed, screenshot
+  `test-screenshots/screenshot-with-output-panels-expanded.png`). Pushed both
+  the fork PR head and upstream base mirror branch
+  `gim-home/m:user/giodl/desktop-mcp-capability-stack` to `c26575e0f`, so
+  #3955's base branch now reflects the same #4045 code. Live #4045
+  head is `c26575e0f`; mergeStateStatus is `BLOCKED` while fresh CI/security/
+  PR-agent checks are still running after the push.
+- Latest follow-up: Cleaned the PR-series narrative after #4045. Posted a
+  clarifying comment on #4045 for the stale Barnacle surface-spread finding,
+  then rewrote #3854 and #3955 PR bodies back into the required default
+  template shape while removing old grouped/folded/restitch wording. Current
+  story: #3854 is the architecture umbrella, #4045 is the focused MCP Gateway
+  Node command proof, #3955 is the broader Desktop Node capability continuation
+  on top of #4045, and #3953/#3954 are deferred sibling topics for provider
+  routing and Local OpenClaw runtime lifecycle. Rebased #3955 onto the current
+  #4045 base `26b56fc3b`, resolved bridge/subsystem conflicts without
+  reintroducing `DesktopMcpCapabilityHost`, and force-with-lease pushed fork
+  branches `user/giodl/local-openclaw-switch-mega-admin-readiness-on-4045` and
+  `user/giodl/local-openclaw-switch-mega-admin-readiness` to `1df973a3f`.
+  Validation after the rebase passed: focused gateway/MCP suite (6 files / 217
+  tests), broader Desktop Node touched-test suite (20 files / 671 tests),
+  repo-wide `oxfmt --check`, full type-aware `oxlint --type-aware
+  --deny-warnings --quiet`, `git diff --check`, pre-commit lint-staged, and
+  `codex review --base origin/user/giodl/desktop-mcp-capability-stack` with no
+  discrete actionable bugs. Live status after cleanup: #3955 `CLEAN` with all
+  current checks passing; #4045 and #3854 checks passing but `BLOCKED` by normal
+  review-required state.
+- Latest follow-up: Addressed the #4045 maintainability concern by trimming
+  `user/giodl/desktop-mcp-capability-stack` from a speculative MCP host layer
+  back to the existing `NodeCommandsBridge` / `GatewayNodeMcpRuntime` path.
+  Commit `32940fc41` (`refactor: keep gateway mcp on bridge runtime`) removes
+  the parallel `DesktopMcpCapabilityHost`, shared MCP contract files, parity
+  test, and two architecture docs, reducing the live PR diff to 6 files /
+  327 insertions / 16 deletions against `origin/main`. The PR body now frames
+  #4045 as the focused MCP node-mode bridge fix for #3679 and points broader
+  node capability work to the 3955-a / #4086-#4090 split. Validation passed:
+  focused Vitest bridge/provider/subsystem/MCP suite (4 files / 155 tests),
+  focused type-aware `oxlint`, focused `oxfmt --check`, `git diff --check`,
+  and pre-commit lint-staged. Pushed to both `origin` and fork PR head
+  `giodl_microsoft/m:user/giodl/desktop-mcp-capability-stack`; live #4045 head
+  is `32940fc411cbdbfbaed0db1c312fe624be72700f`. Follow-up regression
+  validation passed 20 files / 759 tests across existing MCP config/UI plumbing,
+  existing Copilot-provider/backend MCP behavior, and gateway node/Desktop
+  capability behavior. #4045 PR body now includes that regression matrix plus
+  the green CI state: lint, unit tests on Windows/macOS/Ubuntu, e2e on
+  Windows/macOS, Semgrep, AdvancedSecurity, barnacle, complexity-tag,
+  merit-bot, cache, debounce, label, and ADO gate are passing or skipping as
+  expected.
+- Latest follow-up: Continued #4045 validation after Gio confirmed login in
+  the running Desktop app. Live Desktop launch from #4045 passed via
+  `node scripts/launch-electron.cjs --remote-debugging-port=9222` and
+  `node e2e-real/runner.mjs --suite 01-smoke --port 9222`: authenticated,
+  app ready, welcome state visible, chat input enabled, and permissions seeded/
+  restored. Live MCP toggle run
+  `node e2e-real/runner.mjs --suite 19-mcp-toggle --port 9222` correctly
+  disabled Browser Control and the assistant reported it was blocked; the suite
+  failed only because it reads the old `~/.copilot-dev/m-audit-logs` path.
+  Actual audit entries in `~/.scout-dev/m-audit-logs/permissions-2026-07-01.jsonl`
+  recorded `playwright-browser_navigate` and `web_fetch` denied with
+  `source: pre-hook-disabled-server`; the runner restored settings. A serial
+  mock-mode Electron slice passed gateway smoke plus MCP OAuth/startup-card
+  flows (7/13) and the remaining failures were the Extensions nav-button test
+  fixture timing out. `pnpm run typecheck` and `pnpm run build:vite` passed
+  (with pre-existing CSS/chunk warnings). #4045 PR body now includes this live
+  validation. `C:\src\clawpilot` is clean.
+- Latest follow-up: Validated #4045 UI/migration story. Source diff against
+  `origin/main` touches only six backend/gateway files and tests: no renderer,
+  Settings/Extensions UI, MCP store/schema, or settings migration files changed.
+  Targeted suites passed: MCP store/settings/sync persistence (4 files / 153
+  tests), gateway MCP runtime/subsystem/bridge reconnect/status/cancel path (4
+  files / 67 tests), and existing MCP tools/status/IPC/Copilot provider behavior
+  (6 files / 144 tests). PR body now includes the explicit conclusion: no UI
+  change, no data migration, saved MCP config persists, active MCP child
+  processes still restart with the app as before, and gateway-node MCP reuses
+  saved config after launch.
+- Latest follow-up: Continued
+  `user/giodl/node-mode-parity-hardening` and pushed it to fork at
+  `9014cfaa2`. Commit `9014cfaa2`
+  (`fix: reject mixed desktop catalog metadata`) closes the matching entry
+  freshness gap: fresh Desktop Node route lookup now fails closed with
+  `desktop-node-catalog-entry-metadata-mismatch` when a catalog entry's
+  schema/TTL/timestamp metadata does not match the containing catalog header.
+  Validation passed: focused Vitest catalog/adapter/bridge/provider suite (4
+  files / 184 tests), focused type-aware `oxlint`, focused `oxfmt --check`,
+  `git diff --check`, and pre-commit lint-staged. `C:\src\clawpilot` is clean.
+- Latest follow-up: Continued
+  `user/giodl/node-mode-parity-hardening` and pushed it to fork at
+  `5c79d3084`. Commit `5c79d3084`
+  (`fix: reject mismatched desktop result trust routes`) closes the mixed
+  catalog-entry trust gap: fresh Desktop Node route lookup now fails closed
+  when an entry's `resultTrust.nodeEndpointId` does not match the containing
+  catalog's node endpoint id, reusing the deterministic
+  `desktop-node-catalog-node-endpoint-mismatch` denial. Validation passed:
+  focused Vitest catalog/adapter/bridge/provider suite (4 files / 183 tests),
+  focused type-aware `oxlint`, focused `oxfmt --check`, `git diff --check`,
+  and pre-commit lint-staged. `C:\src\clawpilot` is clean.
+- Latest follow-up: Continued
+  `user/giodl/node-mode-parity-hardening` and pushed it to fork at
+  `962b0cb7a`. Commit `962b0cb7a`
+  (`feat: include node endpoint in desktop result trust`) carries
+  `nodeEndpointId` in Desktop Node result-trust metadata for both invocation
+  results and `desktop.capabilities` catalog entries. The catalog schema is now
+  version 3 so cloud/local callers reject older trust metadata before routing.
+  Validation passed: focused Vitest catalog/adapter/bridge/provider suite (4
+  files / 182 tests), focused type-aware `oxlint`, focused `oxfmt --check`,
+  `git diff --check`, and pre-commit lint-staged. `C:\src\clawpilot` is clean.
+- Latest follow-up: Continued
+  `user/giodl/node-mode-parity-hardening` and pushed it to fork at
+  `47d490d01`. Commit `47d490d01`
+  (`test: cover stale desktop node route preflights`) adds bridge-boundary
+  coverage proving stale catalogs and incompatible catalog schemas fail before
+  raw Desktop Node capability adapter dispatch. Validation passed: focused
+  bridge+catalog Vitest (58 tests), broader focused catalog/adapter/
+  composition/bridge/provider/node-subsystem suite (202 tests), focused
+  type-aware `oxlint`, focused `oxfmt --check`, `git diff --check`, and
+  pre-commit lint-staged. `C:\src\clawpilot` is clean.
+- Latest follow-up: Continued
+  `user/giodl/node-mode-parity-hardening` and pushed it to fork at
+  `64bbe6d36`. Commit `64bbe6d36`
+  (`feat: bind desktop node catalog routes to endpoint`) binds catalog route
+  decisions to the trusted Desktop node endpoint id. `lookupFresh...` and
+  `resolveDesktopNodeCapabilityCatalogRoute()` now fail closed with
+  `desktop-node-catalog-node-endpoint-mismatch` when a catalog belongs to a
+  different node, and `NodeCommandsBridge` passes
+  `trustedContext.nodeEndpointId` into the route preflight before dispatching
+  raw Desktop capability commands. Validation passed: focused Vitest catalog/
+  bridge/node-subsystem/provider suite (178 tests), broader focused capability
+  suite (200 tests), focused type-aware `oxlint`, focused `oxfmt --check`,
+  `git diff --check`, and pre-commit lint-staged. `C:\src\clawpilot` is clean.
+- Latest follow-up: Continued
+  `user/giodl/node-mode-parity-hardening` and pushed it to fork at
+  `f01364feb`. Commit `f01364feb`
+  (`feat: preflight desktop node commands with catalog routes`) wires the
+  catalog route resolver into `NodeCommandsBridge` for raw Desktop Node
+  capability commands when a catalog supplier is available. The bridge now
+  fails before adapter dispatch for stale/incompatible catalogs, missing
+  handlers, signed-out M365, policy-denied commands, or unknown commands, while
+  preserving old behavior for builds without a catalog supplier. Missing
+  handlers map to `not-supported`; policy/auth/freshness failures map to
+  `policy-deny` and include the route denial payload. Validation passed:
+  focused Vitest catalog/adapter/composition/bridge/provider/node-subsystem
+  suite (198 tests), focused bridge+catalog Vitest (54 tests), focused
+  type-aware `oxlint`, focused `oxfmt --check`, `git diff --check`, and
+  pre-commit lint-staged. `C:\src\clawpilot` is clean.
+- Latest follow-up: Continued
+  `user/giodl/node-mode-parity-hardening` and pushed it to fork at
+  `e558ae049`. Commit `e558ae049`
+  (`feat: resolve desktop node catalog routes`) adds
+  `resolveDesktopNodeCapabilityCatalogRoute()`, a canonical fail-closed
+  routing decision helper that combines catalog freshness, schema compatibility,
+  handler registration, policy status, auth state, approval requirement, and
+  result-trust metadata. The helper returns route-ready entries with
+  `approvalRequired`/`resultTrust`, or deterministic deny reasons for stale
+  catalogs, missing handlers, signed-out M365, policy-denied commands, and
+  unknown commands. Validation passed: focused Vitest catalog/adapter/
+  composition/bridge/provider suite (192 tests), focused type-aware `oxlint`,
+  focused `oxfmt --check`, `git diff --check`, and pre-commit lint-staged.
+  `C:\src\clawpilot` is clean.
+- Latest follow-up: Continued
+  `user/giodl/node-mode-parity-hardening` and pushed it to fork at
+  `d8aeba5b6`. Commit `e1c08f2d0`
+  (`feat: fail closed on stale desktop node catalogs`) adds
+  `lookupFreshDesktopNodeCapabilityCatalogEntry()`, a routing-safe catalog
+  lookup that denies stale, malformed, bad-TTL, or unknown command entries
+  before a cloud/local caller routes work. Commit `d8aeba5b6`
+  (`feat: reject incompatible desktop node catalogs`) extends that helper to
+  reject incompatible schema versions by default, with an explicit expected
+  schema override for migration tests. Validation passed: focused Vitest
+  catalog/adapter/composition/bridge/provider suite (190 tests), focused
+  type-aware `oxlint`, focused `oxfmt --check`, `git diff --check`, and
+  pre-commit lint-staged. `C:\src\clawpilot` is clean.
+- Latest follow-up: Continued
+  `user/giodl/node-mode-parity-hardening` and pushed it to fork at
+  `6f6078ea1`. Commit `25b6e019a`
+  (`feat: mark desktop node command result trust`) adds a
+  `resultTrust` envelope to command-native Desktop Node invocation results and
+  returns it through `NodeCommandsBridge`, marking local Desktop output as
+  `untrusted-local-output` with `wrap-before-model-context`. Commit
+  `6f6078ea1` (`feat: advertise desktop node result trust in catalog`) bumps
+  the Desktop Node capability catalog schema to 2 and advertises the same
+  result-trust policy in `desktop.capabilities`; updated the catalog discovery
+  plan doc accordingly. Validation passed: focused Vitest catalog/adapter/
+  composition/bridge/provider suite (187 tests), focused type-aware `oxlint`,
+  focused `oxfmt --check`, `git diff --check`, and pre-commit lint-staged.
+  `C:\src\clawpilot` is clean.
+- Latest follow-up: Started the post-#3955 Node-mode parity hardening branch
+  `user/giodl/node-mode-parity-hardening` from clean #3955 head `467b72cbc`
+  and pushed it to fork at `c8e17c6e9`. Commit `3d480bf9c`
+  (`feat: compose browser context node commands`) wires optional
+  `browser.readActiveTab` / `browser.extractSelection` composition behind an
+  injected active-browser-tab provider, keeping production honest by leaving
+  those commands missing unless a real provider is supplied. Commit
+  `c8e17c6e9` (`test: prove m365 draft broker opt-in commands`) adds proof
+  that all M365 draft commands can be registered when a local broker opts in,
+  while production remains mail-only via `main.ts`. Validation passed:
+  focused Vitest for composition/browser/M365/catalog/policy suites (55 tests
+  on latest pass), focused type-aware `oxlint`, focused `oxfmt --check`,
+  `git diff --check`, and pre-commit lint-staged. `C:\src\clawpilot` is clean.
+- Latest follow-up: Continued implementation on
+  the #3955 restitch. Created and pushed stable fork anchor branch
+  `user/giodl/local-openclaw-switch-mega-admin-readiness-pre-node-mode` at the
+  old #3955 head `d84a55799`, then repointed fork PRs #107 and #113 to that
+  anchor so their diffs stay reviewable after #3955 moves. Force-with-lease
+  updated the actual #3955 fork head
+  `user/giodl/local-openclaw-switch-mega-admin-readiness` from `d84a55799` to
+  `09ff87cd7`, folding the command-native Node-mode follow-up work into #3955.
+  Rewrote the #3955 PR body to frame the combined provider-neutral Desktop
+  capability platform plus command-native Gateway Node surface, with links to
+  original capability fork PRs #90-#95 and folded Node-mode fork PRs #107-#112
+  plus grouped fork PR #113. Live #3955 now reports head `09ff87cd7` and merge
+  state `DIRTY`, so the next mechanical task is conflict/base hygiene against
+  base `user/giodl/cloud-agent-group6-execution-transport`.
+- Latest follow-up: Continued implementation on
+  `user/giodl/node-mode-capability-followups` by opening the fork review PRs
+  for the post-#3955 Node mode capability follow-up stack. Fine-grained draft
+  fork PRs are open in `giodl_microsoft/m`: #107 catalog discovery, #108
+  command-native adapter seam, #109 audit plus filesystem/clipboard
+  composition, #110 browser/local-app/workspace writes, #111 shell plus M365
+  mail draft composition, and #112 catalog truth/result state. The grouped fork
+  mega PR is #113, titled `Node mode follow-up: command-native Desktop
+  capabilities`, with base `user/giodl/local-openclaw-switch-mega-admin-readiness`
+  (#3955 fork head) and head `user/giodl/node-mode-capability-followups`.
+  No code changes were made in this step; branch state remains clean at
+  `09ff87cd7`.
+- Latest follow-up: Continued implementation on
+  `user/giodl/node-mode-capability-followups` with commit `09ff87cd7`
+  (`feat: report composed desktop node catalog state`). The command-native
+  adapter catalog now merges composed execution defaults into
+  `desktop.capabilities`, so discovery reflects the same allowed capability
+  set, audit availability, and `medium`/`high`/`destructive` approval rules
+  used by execution. The composition layer also supplies M365 auth state from
+  `readM365Status`, failing closed to `unavailable` if status cannot be read.
+  Added tests proving `browser.open` and `shell.exec` advertise as
+  approval-required, `m365.mail.createDraft` reports ready/signed-out correctly,
+  and calendar drafts remain denied/missing until real brokers are wired.
+  Validation passed after push: focused Vitest 5 files / 178 tests, focused
+  type-aware `oxlint`, `oxfmt --write`, `git diff --check`, and pre-commit
+  lint-staged. `C:\src\clawpilot` is clean and the branch is pushed to fork at
+  `09ff87cd7`.
+- Latest follow-up: Continued implementation on
+  `user/giodl/node-mode-capability-followups` with commit `3b454c30d`
+  (`feat: compose desktop node m365 mail drafts`). The composed Desktop Node
+  adapter can now opt into M365 draft capabilities only when both M365 status
+  and a draft broker are injected. Production `main.ts` wires
+  `m365.mail.createDraft` only, backed by the existing `workiq_create_draft`
+  Graph tool, and adapts its JSON result into the Desktop Node broker output
+  without token material. Calendar/Teams draft commands remain unavailable
+  until real brokers are provided. Added composition proof that
+  `m365.mail.createDraft` prompts, checks signed-in tenant/user state, calls
+  the injected broker, and returns `tokenStatus: brokered-redacted`.
+  Validation passed after push: focused M365/shell/bridge suite (5 files / 71
+  tests), focused type-aware `oxlint`, `oxfmt --write`, `git diff --check`,
+  and pre-commit lint-staged. Broader post-push validation also passed:
+  `pnpm exec vitest run --project node` across 18 targeted capability/bridge
+  files (324 tests), focused type-aware `oxlint`, focused `oxfmt --check`, and
+  `git diff --check`. `C:\src\clawpilot` is clean and the branch is pushed to
+  fork at `3b454c30d`.
+- Latest follow-up: Continued implementation on
+  `user/giodl/node-mode-capability-followups` with commit `ccc7323b0`
+  (`feat: compose desktop node shell command`). The composed Desktop Node
+  adapter now conditionally registers `shell.exec` only when an explicit shell
+  policy evaluator is injected. Production `main.ts` wires that evaluator to
+  the existing `permissionPolicy.evaluate` path, while tests keep the
+  no-evaluator unavailable case. Added composition proof that `shell.exec`
+  prompts, emits the destructive approval request, runs the shell policy check,
+  spawns from the sandboxed workspace cwd, and returns stdout/stderr/exit code.
+  Validation passed after push: `pnpm exec vitest run --project node
+  electron/desktop-node-command-composition.test.ts
+  electron/desktop-node-shell-exec-handler.test.ts
+  electron/desktop-node-capability-executor.test.ts
+  electron/desktop-node-command-adapter.test.ts
+  electron/backend/gateway/node-commands-bridge.test.ts` (5 files / 67 tests),
+  focused type-aware `oxlint`, `oxfmt --write`, `git diff --check`, and
+  pre-commit lint-staged. `C:\src\clawpilot` is clean and the branch is pushed
+  to fork at `ccc7323b0`.
+- Latest follow-up: Continued implementation on
+  `user/giodl/node-mode-capability-followups` with commit `720864441`
+  (`feat: compose desktop node filesystem writes`). The composed Desktop Node
+  adapter now registers the existing `filesystem.write` / `filesystem.patch`
+  handler pair so the clean Node command names execute workspace-scoped text
+  writes and patches through policy, approval, audit, digest protection, diff
+  preview, and rollback metadata. Added composition tests for both commands
+  proving prompt generation, audited execution, file mutation, and rollback
+  output. Validation passed after push: `pnpm exec vitest run --project node
+  electron/desktop-node-command-composition.test.ts
+  electron/desktop-node-filesystem-write-handler.test.ts
+  electron/desktop-node-filesystem-read-handler.test.ts
+  electron/desktop-node-capability-executor.test.ts
+  electron/desktop-node-command-adapter.test.ts
+  electron/backend/gateway/node-commands-bridge.test.ts` (6 files / 67 tests),
+  focused type-aware `oxlint`, `oxfmt --write`, `git diff --check`, and
+  pre-commit lint-staged. `C:\src\clawpilot` is clean and the branch is pushed
+  to fork at `720864441`.
+- Latest follow-up: Continued implementation on
+  `user/giodl/node-mode-capability-followups` with commit `2b07ea239`
+  (`feat: compose desktop node app and browser commands`). The composed
+  Desktop Node adapter now registers `browser.open`, `url.openExternal`,
+  `file.openWithDefaultApp`, `app.open`, and `local-app.open` against the
+  existing browser/local-app handlers, and `electron/main.ts` passes Electron
+  `shell.openExternal`, `shell.openPath`, and `shell.showItemInFolder` into the
+  adapter. Added composition tests proving `browser.open`,
+  `file.openWithDefaultApp`, and `app.open` flow through the clean Node command
+  names, approval prompt generation, audited execution, and shell delegate
+  calls. Validation passed after push: `pnpm exec vitest run --project node
+  electron/desktop-node-command-composition.test.ts
+  electron/desktop-node-browser-handler.test.ts
+  electron/desktop-node-local-app-handler.test.ts
+  electron/backend/gateway/provider.test.ts
+  electron/backend/gateway/node-subsystem.test.ts
+  electron/backend/gateway/node-commands-bridge.test.ts
+  electron/audit-log.test.ts electron/desktop-node-command-adapter.test.ts
+  electron/desktop-node-capability-executor.test.ts` (9 files / 217 tests),
+  focused type-aware `oxlint`, focused `oxfmt --check`, `git diff --check`,
+  and pre-commit lint-staged. `C:\src\clawpilot` is clean and the branch is
+  pushed to fork at `2b07ea239`.
+- Latest follow-up: Created the fork-only post-#3955 Node mode capability
+  follow-up branch stack before opening any upstream PR. The grouped branch is
+  `user/giodl/node-mode-capability-followups` at `e39fd0193`, force-updated
+  from the earlier one-shot draft to the full six-commit stack. Fork slice
+  branches are pushed as:
+  `user/giodl/node-mode-capabilities-pr1-catalog-discovery` (`d39af3171`),
+  `user/giodl/node-mode-capabilities-pr2-approval-ux` (`e2f535c2a`),
+  `user/giodl/node-mode-capabilities-pr3-device-routing` (`2e5f737c6`),
+  `user/giodl/node-mode-capabilities-pr4-browser-depth` (`07675c95d`),
+  `user/giodl/node-mode-capabilities-pr5-auth-m365` (`52b6caf87`), and
+  `user/giodl/node-mode-capabilities-pr6-result-trust-observability`
+  (`e39fd0193`). Added
+  `docs/architecture/36-node-mode-capability-followups.md`, the
+  `docs/architecture/node-mode-capability-followups/` six-plan folder, and a
+  pointer from `docs/architecture/29-scout-cloud-brain-integration.md`.
+  Validation passed on the grouped branch: focused `pnpm exec oxfmt --check`
+  across all nine docs and `git diff --check`; `C:\src\clawpilot` is clean on
+  `user/giodl/node-mode-capability-followups`.
+- Latest follow-up: Simplified the post-#3955 follow-up shape to one grouped
+  branch for all six spec slices, with the earlier slice branches kept only as
+  provenance. Reviewed the grouped spec against `.craft/roles/claws` lenses
+  (ClawPilot product, Gateway engineering, policy steward, CISO/compliance,
+  platform, Cowork UX, M365 connector, Aether/Lobster runtime, and power user)
+  and pushed commit `bfe5b997a` on
+  `user/giodl/node-mode-capability-followups`. The review tightened
+  implementation constraints around session-agnostic command surfaces,
+  sub-50ms/cacheable Gateway overhead, category-first policy/evidence,
+  fail-closed high-risk actions, SIEM-safe replayable audit, fleet kill
+  switches, explicit UX lock/risk/data movement fields, M365 idempotency, and
+  preserving Desktop-local fallback. Validation passed full focused docs
+  `pnpm exec oxfmt --check`, `git diff --check`, and pre-commit lint-staged.
+- Latest follow-up: Started implementation on the single grouped
+  `user/giodl/node-mode-capability-followups` branch. Commit `7a5bf1e77`
+  adds the first Desktop Node capability catalog/discovery primitive:
+  `common/desktop-node-capability-catalog.ts` builds a read-only catalog from
+  command names, registered handlers, policy config, auth status, schema
+  version, TTL, and freshness time; it reports category, handler status,
+  policy status, approval requirement, risk, data boundary, auth status, and a
+  safe degradation reason. `DesktopNodeCapabilityExecutor` now exposes
+  `getRegisteredCapabilities()`, and `DesktopNodeCommandAdapter.catalog()`
+  builds the catalog without dispatching or executing a capability. Focused
+  validation passed after push: `pnpm exec vitest run --project node
+  common/desktop-node-capability-catalog.test.ts
+  electron/desktop-node-command-adapter.test.ts
+  electron/desktop-node-capability-executor.test.ts` (3 files / 19 tests),
+  focused `oxfmt --check`, focused type-aware `oxlint` via pre-commit, and
+  `git diff --check`. `C:\src\clawpilot` is clean at `7a5bf1e77`.
+- Latest follow-up: Continued implementation with commit `560eb8d3f` on
+  `user/giodl/node-mode-capability-followups`. `NodeCommandsBridge` now
+  advertises and parses `desktop.capabilities` alongside `mcp.help`,
+  `mcp.invoke`, and `system.run`. The command returns `{ ok: true, catalog }`
+  when an optional Desktop capability catalog supplier is wired, and fails
+  closed with `not-supported` when absent instead of fabricating state. Updated
+  help guidance plus `docs/architecture/14-backend-abstraction.md` and
+  `docs/architecture/05-mcp-servers.md` to describe the four-command node
+  surface. Validation passed after push: focused Vitest 4 files / 50 tests
+  (`node-commands-bridge`, catalog, command adapter, capability executor),
+  focused type-aware `oxlint`, focused `oxfmt --check`, pre-commit
+  lint-staged, and `git diff --check`. `C:\src\clawpilot` is clean at
+  `560eb8d3f`.
+- Latest follow-up: Continued the post-#3955 Node mode capability follow-up
+  with commit `3b4098e6b` on
+  `user/giodl/node-mode-capability-followups`. The real Gateway production path
+  now supplies the read-only `desktop.capabilities` catalog from the existing
+  desktop-capabilities attach point: `GatewayToolBackend` returns null before
+  Desktop capability deps are wired, reports bridge-unavailable before a client
+  attach, and after init reports policy/approval/degradation state without
+  claiming command-native handlers are registered. `GatewayBackend` passes that
+  supplier through `GatewayNodeSubsystem` using the node backend device id, and
+  `IToolBackend` exposes the nullable read-only accessor with Copilot returning
+  null. Validation passed focused Vitest 4 files / 159 tests
+  (`provider`, `node-subsystem`, `node-commands-bridge`, catalog), focused
+  type-aware `oxlint`, focused `oxfmt --check`, `git diff --check`, and
+  pre-commit lint-staged. Pushed to fork; `C:\src\clawpilot` is clean at
+  `3b4098e6b`.
+- Latest follow-up: Continued the same follow-up with commit `9e91fbc91` on
+  `user/giodl/node-mode-capability-followups`. `NodeCommandsBridge` now
+  advertises and parses the exact Desktop Node capability command names from
+  `DESKTOP_NODE_CAPABILITY_NAMES` (`filesystem.read`, `clipboard.write`,
+  `m365.mail.createDraft`, etc.) alongside `mcp.help`, `mcp.invoke`,
+  `desktop.capabilities`, and `system.run`. Those raw commands route to an
+  optional `DesktopNodeCommandAdapter` with Desktop-supplied trusted node/user
+  context; without the adapter they fail closed with `not-supported`, so the
+  gateway allowlist and parser now match the MCP-style raw-command convention
+  without claiming execution handlers are composed yet. `GatewayNodeSubsystem`
+  now owns the trusted context hook from node device id + current
+  `GatewayAuthIdentity`. Updated architecture docs to describe the exact
+  command allowlist and fail-closed adapter state. Validation passed focused
+  Vitest 6 files / 173 tests, focused type-aware `oxlint`, focused
+  `oxfmt --check`, `git diff --check`, and pre-commit lint-staged. Pushed to
+  fork; `C:\src\clawpilot` is clean at `9e91fbc91`.
+- Latest follow-up: Continued with commits `96bb7f1e2` and `303725e57` on
+  `user/giodl/node-mode-capability-followups`. `IToolBackend` now exposes a
+  nullable command-native Desktop Node adapter seam, Copilot returns null, and
+  Gateway wires the accessor into `GatewayNodeSubsystem`. `AttachDesktopCapabilitiesDeps`
+  can now carry an injected `desktopNodeCommandAdapter` with `invoke` and
+  `catalog`; Gateway returns it for raw node command dispatch and delegates
+  `desktop.capabilities` to it when present so registered handlers are reported
+  truthfully. Without an injected adapter the raw Desktop capability commands
+  still fail closed with `not-supported`. Validation passed focused Vitest 7
+  files / 497 tests including `electron/backend/conformance.test.ts`, focused
+  type-aware `oxlint`, focused `oxfmt --check`, `git diff --check`, and
+  pre-commit lint-staged. Pushed to fork; `C:\src\clawpilot` is clean at
+  `303725e57`.
+- Latest follow-up: Continued with commits `c05796f40` and `e2b0907ac` on
+  `user/giodl/node-mode-capability-followups`. Added a durable
+  `desktop-node-capabilities-YYYY-MM-DD.jsonl` audit stream to `AuditLogger`
+  for Desktop Node capability approval/execution records, including M365 UPN
+  enrichment, serialized writes, disabled no-op behavior, and retention
+  pruning. Added `createDesktopNodeCommandAdapter()` composition for the first
+  production command-native handler set: `filesystem.read`, `clipboard.read`,
+  and `clipboard.write`. The adapter uses the shared Desktop Node policy
+  evaluator/approval router/executor, logs approval and execution audit records,
+  runs filesystem reads inside the Scout workspace/registered workspace
+  sandbox, and uses Electron clipboard read/write from `main.ts`. Gateway now
+  injects the composed adapter through `attachDesktopCapabilities`, and
+  `GatewayNodeSubsystem` includes the active gateway session id in trusted
+  Desktop context so clipboard approvals can surface under the active chat.
+  Validation passed focused Vitest 7 files / 205 tests, focused type-aware
+  `oxlint`, focused `oxfmt --check`, `git diff --check`, and pre-commit
+  lint-staged. Pushed to fork; `C:\src\clawpilot` is clean at `e2b0907ac`.
+- Latest follow-up: Opened draft `gim-home/m#4043` from fork branch
+  `codex/add-giodl-codeowners` to add `@giodl_microsoft` to the catch-all
+  `.github/CODEOWNERS` line, following the same config-only pattern as #3998.
+  Commit `78bdaaf97`; validation was `git diff --check` plus pre-commit
+  lint-staged/oxfmt on the staged file.
+- Latest follow-up: Reworked the #3955 Desktop capability stack to follow the
+  MCP-style command-native Node convention. Slice
+  `desktop-capabilities-v2-02-approval-executor-audit` now contains commit
+  `0e2c69862` adding `DesktopNodeCommandAdapter`, which accepts clean commands
+  such as `filesystem.read`, `shell.exec`, `browser.open`, `clipboard.write`,
+  and `m365.mail.createDraft`, keeps `context` out of tool input, normalizes
+  trusted Desktop metadata into the internal capability envelope, and rejects
+  `desktop.nodeCapability.execute`. Hosted chat tool display tests now use
+  clean `filesystem.read` names. Rebased/pushed fork slices 02-06 and
+  reassembled #3955 mega branch `local-openclaw-switch-mega-admin-readiness` at
+  `8f516ef3b`; #3955 body updated with the command-native section and current
+  proof. Validation passed 15 focused files / 139 tests, focused type-aware
+  oxlint, oxfmt, and `git diff --check`.
+- Latest follow-up: Added the #3955 follow-up Desktop-local wiring proof in
+  slice `desktop-capabilities-v2-03-policy-evals` at commit `f274e545a`.
+  `runDesktopNodeCommandEvalScenario()` builds the same approval/executor
+  harness but invokes through `DesktopNodeCommandAdapter` with
+  `requestingRuntime: "desktop-local"`, proving current Desktop-owned flows can
+  call clean node commands before policy, approval, execution, and audit instead
+  of bypassing node mode. Rebased/pushed slices 03-06 and reassembled #3955 at
+  `d84a55799`; PR body now mentions the Desktop-local eval proof. Validation
+  passed 15 focused files / 140 tests, focused type-aware oxlint, formatting,
+  and `git diff --check`.
+- Latest follow-up: Opened draft MCP mega PR `gim-home/m#4045` from fork branch
+  `user/giodl/desktop-mcp-capability-stack` at `38012d929`. The PR groups the
+  Desktop MCP capability contract/host/Gateway bridge/parity/live-validation
+  stack and frames it as the MCP-specific command-native Gateway Node proof:
+  `mcp.invoke`, `mcp.status`, and `mcp.cancel` stay clean public commands while
+  Desktop normalizes them into the internal MCP host envelope with context,
+  readiness, cancellation, invocation correlation, and runtime attribution.
+  Validation passed 7 files / 84 tests, focused type-aware oxlint, oxfmt, and
+  `git diff --check`. Updated #3854 body to list #4045 as the Desktop MCP
+  Gateway parity companion proof.
+- Latest follow-up: Trimmed the MCP stack's caller attribution model so it is
+  generic Desktop Node request context instead of MCP-specific runtime/provider
+  taxonomy. The shared contract now exposes
+  `DesktopNodeRequestingRuntimeKind = "desktop-local" | "cloud-gateway"` and
+  `DesktopNodeRequestingRuntime`, with optional provider/session/run/caller
+  metadata; speculative `hosted-openclaw`, `managed-model`, `unknown`, and old
+  `desktop-provider` strings were removed. Rebased and force-pushed all MCP
+  fork branches: `desktop-mcp-capability-contract`,
+  `desktop-mcp-capability-host`, `gateway-mcp-capability-bridge`,
+  `desktop-mcp-parity-proof`, `desktop-mcp-live-validation`, and mega branch
+  `desktop-mcp-capability-stack` now at `5147e08b5` for #4045. Updated #4045
+  and #3854 PR bodies to describe clean MCP commands plus generic Desktop Node
+  request context. Validation on the final mega branch passed focused Vitest
+  7 files / 84 tests, focused type-aware oxlint, focused oxfmt, and
+  `git diff --check`.
+- Latest follow-up: Finished the MCP context naming cleanup for #4045. The
+  stack now uses `context.caller = "desktop-local" | "cloud-gateway"` instead
+  of `DesktopNodeRequestingRuntime` / `requestingRuntime.kind`; optional
+  gateway caller metadata is kept as `callerId`. Rebased and pushed the fork
+  branches again: contract `bf8f5385b`, host `f5ba38af9`, gateway bridge
+  `2c888a6bf`, parity `3dbea37d3`, live/mega `0590da6ff`. Updated #4045 body
+  to frame it as the focused MCP/node-mode proof that can move before deferred
+  #3953/#3954 provider-flexibility/runtime-provider topics, with #3955 following
+  as the broader Desktop Node capability set. Updated #3854 with the same
+  sequencing language. Validation passed on the final mega branch: focused
+  Vitest 7 files / 84 tests, focused type-aware oxlint, focused oxfmt, and
+  `git diff --check`. Copied a Teams-friendly rich HTML note to the clipboard.
+- Latest follow-up: Fixed #4045's PR-template CI failure. The failing GitHub
+  Actions job was `PR template / check`, with log error "Could not detect a PR
+  template in the description." Updated the #4045 PR body back into the default
+  template shape with `Linked issue` (`Refs #3679`), `Scope`, `Test plan`
+  checkboxes, and `Proof` while preserving the MCP/node-mode sequencing
+  narrative. The rerun `check` job passed; remaining #4045 rows were pending
+  long CI/agent checks at last recheck, with no active failures reported.
+- Latest follow-up: Ran targeted live #3954 runtime-only validation at detached
+  head `816943742` and recorded the pass/fail matrix in
+  `projects/clawpilot/local-openclaw-3954-runtime-validation.md`. Targeted
+  Vitest proofs passed for stdio ready/request/event/error/timeout handling,
+  Local OpenClaw session routing/cancel/busy/attachment rejection, runtime
+  compatibility and policy blocks, lifecycle attach/degrade behavior, sidecar
+  start/failure/restart handling, discovery endpoint descriptors, and Lobster
+  package metadata. The recorded failures are expected fail-closed/degraded
+  states on #3954: no endpoint descriptor, incompatible manifest/protocol,
+  missing policy prerequisites, missing sidecar command/binary, malformed args,
+  sidecar exit, busy sends, attachments, malformed protocol frames, and ready
+  timeout. Confirmed #3955 capability files are absent on #3954, so browser,
+  clipboard, app/workspace-write, M365 draft broker, filesystem read, shell,
+  and token-sensitive Desktop capability flows remain outside #3954.
+- Latest follow-up: Validated live #3954 as the runtime-only Local OpenClaw
+  proxy. The actual PR head is fork/origin
+  `user/giodl/local-openclaw-group6-gui-lobster-dogfood` at `816943742`, not
+  the local branch head `6b7c95d03` (the local named branch contains older/full
+  dogfood capability commits and must not be pushed over #3954 without an
+  explicit regroup decision). Switched to the live PR head detached and ran the
+  #3954 validation: focused Vitest 9 files / 109 tests passed and
+  `git diff --check` passed. Live PR checks are all passing, but GitHub reports
+  merge state `DIRTY`, so the next mechanical task for #3954 is conflict/base
+  hygiene. Conclusion: #3954 is a good proxy for cloud/OpenClaw runtime
+  plumbing without #3955 capabilities. It proves discovery/status, lifecycle,
+  sidecar/client/stdio transport, session binding/routing, Agents diagnostics,
+  and Lobster package metadata. It does not prove provider-neutral Desktop
+  capability execution, browser/clipboard/app/M365/token-sensitive flows, or a
+  default-provider switch.
+- Latest follow-up: Added the fourth/follow-on #3854 architecture companion doc
+  in the ClawPilot repo:
+  `docs/architecture/38-openclaw-upstream-leverage.md`. Commit `7802bed76`
+  on `user/giodl/scout-cloud-brain-architecture` adds the OpenClaw upstream
+  leverage tracker and updates
+  `docs/architecture/29-scout-cloud-brain-integration.md` to link it from the
+  focused architecture docs table. The doc ranks the most important upstream
+  OpenClaw work for ClawPilot: provider safety first, then gateway token
+  scopes, node-hosted plugin tools, session reliability, SQLite runtime/recovery
+  state, workspace checkpoints, worker isolation, plugin/catalog hardening,
+  channel delivery, and control dashboard signals. It keeps landed OpenClaw
+  hardening as alignment/proof context while keeping open/conflicting OpenClaw
+  PRs as watchlist items only. Validation passed focused `oxfmt --check` using
+  the existing checkout formatter and `git diff --check`. Pushed to fork; live
+  gim-home/m#3854 head is `7802bed76`, merge state `BLOCKED` while checks
+  refresh.
+- Latest follow-up: #3953 gained protective provider-envelope tests at commit
+  `57a762072` on `user/giodl/cloud-agent-group6-execution-transport`. Added
+  a routing test proving a ready hosted agent does not steal default traffic
+  unless hosted is explicitly preferred/requested, and changed hosted session
+  dispatch so unsupported future-provider bindings fail closed instead of
+  silently executing on the primary Desktop backend until an explicit dispatcher
+  is wired. Updated the #3953 PR body with the new proof/validation. Validation
+  passed focused routing/dispatch Vitest 2 files / 19 tests, the #3953 focused
+  suite 9 files / 666 tests, `pnpm run typecheck`, focused type-aware
+  `oxlint`, focused `oxfmt --check`, `git diff --check`, and pre-commit
+  lint-staged.
+- Latest follow-up: Added
+  `projects/clawpilot/openclaw-upstream-alignment.md` to track Peter
+  Steinberger's recent upstream OpenClaw work and how ClawPilot can leverage it.
+  The note separates landed work that can be used now as alignment/proof
+  context from open/conflicting OpenClaw PRs that should remain watchlist items.
+  It maps landed provider-safety, session reliability, channel delivery,
+  plugin/catalog, and release/update hardening to ClawPilot #3953/#3954/#3955,
+  while keeping node-hosted plugin tools, gateway token scopes, checkpoints,
+  worker isolation, and SQLite runtime-state PRs out of the dependency path
+  until they land and are available in the validated build. README design notes
+  now link the file.
+- Latest follow-up: #3953 was trimmed for skeptical/codebase-expert review.
+  Commit `e16ab24b9` on
+  `user/giodl/cloud-agent-group6-execution-transport` rewrites
+  `docs/architecture/36-provider-routing-flexibility.md` from the broader
+  flexibility pitch into a bone-level compatibility envelope: provider
+  identity, session runtime binding, readiness/degraded state, 0..N hosted
+  roster, and cloud-to-Desktop capability envelope. The #3953 PR body now
+  mirrors that framing with a decision ledger showing the simpler alternative,
+  why it is insufficient, and the proof in the PR. Validation for the doc-only
+  trim passed focused `oxfmt --check` and `git diff --check`; prior functional
+  validation remains 9 files / 664 tests, typecheck, focused format, and diff
+  check. #3953 was `UNSTABLE` immediately after the push while cache refreshed;
+  barnacle/complexity-tag/merit-bot showed quick failures on the fresh run and
+  may need inspection if they do not self-clear.
+- Latest follow-up: Managed-provider fork branch PRs were opened to mirror the
+  other mega-PR review shape. Created draft fork PRs
+  giodl_microsoft/m#96-#101 for the six slices: readiness contract, chat
+  adapter, routing/fallback, metering/attestation, Desktop capability
+  composition, and dogfood gates. Added missing slice branch
+  `user/giodl/managed-copilot-provider-readiness-contract` at `3b704af19`.
+  Fast-forwarded upstream and fork grouped branch
+  `user/giodl/managed-copilot-provider-contract` from `6909c789b` to
+  `7b2db532f`, so gim-home/m#4005 now contains the complete six-slice managed
+  provider stack. Rewrote #4005 body as the comprehensive PR body with
+  architecture diagrams, scope, proof, validation, and live links to fork PRs
+  #96-#101. #4005 merge state was `UNSTABLE` immediately after the head update
+  while checks refreshed.
+- Latest follow-up: Managed provider dogfood gates slice was implemented,
+  validated, and pushed as a fork-only branch
+  `user/giodl/managed-copilot-provider-dogfood-gates` at `7b2db532f`; no real
+  PR was opened and #4005 was left untouched. The slice adds
+  `runManagedModelDogfoodProof()`, a no-secret source-harness proof covering
+  managed chat success, capacity limited/unavailable, policy denial,
+  entitlement missing, provider transport failure, and Desktop-provider
+  fallback. The success case requires managed-provider attestation,
+  `llm-usage`, metadata, `turn-complete`, `idle`, and approved/executed
+  Desktop capability composition; routing-only cases avoid overclaiming
+  metering/attestation; bound transport failure proves fail-closed behavior.
+  Validation passed `pnpm run test:managed-provider-dogfood`, focused Vitest
+  11 files / 101 tests, `pnpm run typecheck`, focused `oxfmt --check`,
+  focused type-aware `oxlint`, `git diff --check`, and pre-commit lint-staged.
+  `codex review --commit HEAD` was rerun after compaction but timed out again
+  without returning findings. Next step: regroup the managed-provider fork
+  slices into #4005 only when requested.
+- Latest follow-up: Managed provider Desktop capability composition slice was
+  implemented, amended after review, and pushed as a fork-only branch
+  `user/giodl/managed-copilot-provider-desktop-capability-composition` at
+  `ff24e1cb3`; no real PR was opened. The slice adds provider-neutral Desktop
+  capability approval/execution modules, keeps hosted OpenClaw as a shim over
+  the neutral surface, allows managed-model Desktop capability requests only
+  through explicit managed composition, rejects provider/request mismatches
+  before approval/execution using trusted session context, preserves hosted-only
+  default request mapping, and carries `requestingRuntime` through approval,
+  audit records, and replay proof so managed-model approvals are not attributed
+  as hosted OpenClaw. Validation passed focused Vitest 11 files / 92 tests,
+  `pnpm run typecheck`, focused `oxfmt --check`, focused type-aware `oxlint`,
+  `git diff --check`, and pre-commit lint-staged. `codex review --commit HEAD`
+  was attempted twice after the final amend but timed out without returning
+  findings. Next managed-provider slice is step 6 dogfood gates; leave #4005
+  untouched until the slice branches are intentionally grouped.
+- Latest follow-up: Corrected managed-provider PR shape after accidentally
+  opening slice PRs. #4005 is now the single grouped managed-provider review PR
+  titled `feat: add managed model provider foundation`, with head
+  `6909c789b` on `user/giodl/managed-copilot-provider-contract` and base
+  `user/giodl/cloud-agent-group6-execution-transport` (#3953). The #4005 body
+  now presents the full managed-provider stack and includes a fine-grained fork
+  branch table. Real draft PRs #4007 and #4008 were closed, and the accidentally
+  opened #4031 was already closed. Fork branches remain for slice/provenance
+  review: `managed-copilot-provider-chat-adapter` at `4737d938a`,
+  `managed-copilot-provider-routing-fallback` at `c8f199a45`,
+  `managed-copilot-provider-metering-attestation` at `6909c789b`, and grouped
+  `managed-copilot-provider-contract` at `6909c789b`. Extra upstream base
+  branches for chat-adapter and routing-fallback were deleted; upstream now only
+  has the grouped #4005 head branch. #4005 checks were rerunning after the head
+  update; debounce, cache, and GitOps/AdvancedSecurity had passed at last poll,
+  while barnacle, merit-bot, and complexity-tag were pending, so merge state was
+  `UNSTABLE` pending checks.
+- Latest follow-up: Managed provider metering/attestation slice was implemented
+  and validated on fork branch
+  `user/giodl/managed-copilot-provider-metering-attestation`, stacked on #4008
+  via upstream base branch
+  `user/giodl/managed-copilot-provider-routing-fallback`. Head commit
+  `6909c789b` adds a redacted managed-provider attestation contract,
+  normalizes `provider.attestation` managed chat events to backend
+  `managed-provider-attestation` events, has the source harness emit
+  deterministic metering/provider/attestation correlation IDs plus usage/quota
+  metadata, and logs flattened `ManagedModelProviderAttestation` telemetry
+  fields so the renderer bridge preserves provider/model/outcome/correlation/
+  usage/quota values. It preserves explicit `tenantPolicySource: null` for
+  no-policy proof cases. Validation passed focused managed-model/hosted
+  dispatch/session Vitest 5 files / 299 tests, `pnpm run typecheck`, focused
+  `oxfmt --check`, focused type-aware `oxlint`, `git diff --check`, pre-commit
+  lint-staged, and `codex review --commit HEAD` clean after fixing review
+  findings about flattened telemetry and explicit-null policy source. A real
+  draft PR was briefly opened as #4031 by mistake and then closed; keep this
+  slice branch/commit-level until the managed-provider work is intentionally
+  grouped into its review PR.
+- Latest follow-up: Managed Copilot/internal model capacity implementation
+  stack continued before the grouping correction. The chat adapter slice at
+  `4737d938a` adds the managed model chat adapter/source harness and 17 focused
+  adapter tests. The routing/fallback slice at `c8f199a45` routes explicit
+  `providerKind: "managed-model"` session bindings through the managed adapter,
+  preserves Desktop/current-provider fallback, adds fail-closed unavailable
+  behavior, and wires a production source-harness adapter behind
+  `M_MANAGED_MODEL_SOURCE_HARNESS=1`. Local validation passed focused Vitest,
+  `pnpm run typecheck`, focused type-aware `oxlint`, focused `oxfmt --check`,
+  `git diff --check`, and `codex review --commit HEAD`. These slices now live
+  as fork branches inside grouped #4005, not as active real draft PRs.
 - Latest follow-up: #3854 architecture docs now match the three proof PRs:
   `docs/architecture/36-provider-routing-flexibility.md` for #3953,
   `docs/architecture/35-local-openclaw-runtime.md` for #3954, and
@@ -1758,6 +2853,158 @@
   `C:\src\claws-hapi` has this ClawPilot session update plus pre-existing
   notebook dirt.
 - Blocking question: none recorded.
+
+### 2026-07-01 #3955 restack update
+
+- Restacked #3955 (`user/giodl/local-openclaw-switch-mega-admin-readiness`) on
+  top of #4045's Desktop MCP capability base instead of #3953. Created upstream
+  mirror branch `gim-home/m:user/giodl/desktop-mcp-capability-stack` so #3955
+  can use it as the GitHub PR base while #4045 remains a fork PR.
+- Pushed candidate branch
+  `user/giodl/local-openclaw-switch-mega-admin-readiness-on-4045` and then
+  force-pushed the live #3955 fork head to the same commit `ef19a0989`.
+- Retargeted #3955 base to `user/giodl/desktop-mcp-capability-stack` and
+  rewrote the PR body to present #3955 as the node-mode capability continuation
+  after #4045. #3953 provider routing and #3954 local OpenClaw runtime lifecycle
+  are now explicitly deferred sibling topics, not hard dependencies.
+- Local validation on the final branch passed:
+  `pnpm exec vitest run --project node` over the 20 focused Desktop Node,
+  gateway, audit, catalog, policy, and M365 files (347 tests); focused
+  type-aware `oxlint`; focused `oxfmt --check`; and `git diff --check
+  fork/user/giodl/desktop-mcp-capability-stack..HEAD`. Pre-commit lint-staged
+  passed on the final formatting cleanup commit.
+- Live #3955 state after push/body update: draft PR, base
+  `user/giodl/desktop-mcp-capability-stack`, head
+  `user/giodl/local-openclaw-switch-mega-admin-readiness`, merge state
+  `UNSTABLE` only because fresh PR-agent checks were queued/cancelling older
+  rows. ClawPilot Buddy/Official still show `ACTION_REQUIRED` as expected for
+  that review system.
+
+### 2026-07-01 #3955 Codex review update
+
+- Ran `codex review --base origin/user/giodl/desktop-mcp-capability-stack` on
+  #3955 and applied the accepted findings into the owning stack commits via
+  fixup/autosquash. Fixes covered safe local file opening, filesystem diff
+  preview verification, exact M365 draft preview/body matching, metadata-only
+  Node activity logging, concrete shell command approval text, trusted
+  Microsoft/GitHub/local external-open origins, tenant attribution in audit,
+  clipboard read `maxChars`, catalog availability during gateway reconnect,
+  and IPv6 loopback normalization for `http://[::1]` browser/external opens.
+- Final validation passed on
+  `user/giodl/local-openclaw-switch-mega-admin-readiness-on-4045`: focused
+  policy regression test (1 file / 26 tests), full targeted Desktop Node slice
+  (21 files / 674 tests), focused type-aware `oxlint` over 44 files,
+  `oxfmt --check` over 52 code/doc files, and `git diff --check
+  origin/user/giodl/desktop-mcp-capability-stack..HEAD`.
+- Final `codex review --base origin/user/giodl/desktop-mcp-capability-stack`
+  reported no discrete actionable regressions. Force-with-lease pushed both
+  fork branches to `467b72cbc`:
+  `user/giodl/local-openclaw-switch-mega-admin-readiness-on-4045` and
+  `user/giodl/local-openclaw-switch-mega-admin-readiness`.
+
+### 2026-07-02 node-mode built-ins parity update
+
+- Continued the post-M365 built-ins parity stack in isolated worktree
+  `C:\src\clawpilot-review-builtins-self-tools` on fork branch
+  `user/giodl/node-mode-builtins-self-tools`, based on #4089 head
+  `3787d6960`.
+- Pushed two commits to `fork/user/giodl/node-mode-builtins-self-tools`:
+  `51de73a19` proves existing self-tools already execute through
+  `desktop.executeLocalTool({ kind: "custom-tool" })` with the local policy
+  deny floor, and `91d17904d` expands that registry to include WorkIQ/M365
+  built-ins while honoring gateway `setTimezoneProvider`.
+- Design retained the existing raw command shape: no generic
+  `desktop.capability.invoke` wrapper and no per-WorkIQ node commands. Gateway
+  now adapts existing Desktop built-in tools into the `custom-tool` executor,
+  while leaving local filesystem self-tools out because node-mode already has
+  remote-runtime filesystem access.
+- Validation passed in the isolated worktree: focused Vitest over gateway
+  provider and Desktop capability executor tests (4 files / 142 tests),
+  focused type-aware `oxlint`, focused `oxfmt --check`, and `git diff
+  --check`.
+- Next implementation slice: decide whether to open this branch as the first
+  built-ins parity PR now, then continue with WorkIQ/M365 mutating-tool proof
+  and scoped approval evidence, followed by browser MCP special actions and any
+  remaining permission-kind parity gaps.
+- Opened draft PR #4123:
+  `https://github.com/gim-home/m/pull/4123`. Base is #4089 head
+  `user/giodl/node-mode-capabilities-upstream-4-m365-drafts`; head is fork
+  branch `giodl_microsoft:user/giodl/node-mode-builtins-self-tools`. Live state
+  after creation: draft/open, merge state `UNSTABLE` only because fresh checks
+  were queued; `debounce` was pending and no fresh failure was present.
+- Corrected the node-mode follow-up order to
+  #4086 -> #4088 -> #4089 -> #4123 -> #4087 -> #4090. Pushed an upstream mirror
+  branch for #4123 at `gim-home/m:user/giodl/node-mode-builtins-self-tools`,
+  retargeted #4087 to that branch, and retargeted #4090 to #4087.
+- Rebuilt #4090 in isolated worktree `C:\src\clawpilot-review-4090` so it is
+  one trust-hardening commit (`93ea63c97`) over #4087 instead of carrying
+  duplicated older browser/M365/system-run stack commits. Important correction:
+  #4087 is the `system.run` governance upgrade, not a command-native
+  `shell.exec` slice, so #4090 was repaired to harden Desktop capability
+  catalog routing/result-trust without reintroducing the stale `shell.exec`
+  handler path.
+- #4090 validation before force-push: focused Vitest over catalog, adapter,
+  composition, node bridge, and provider tests (5 files / 202 tests), focused
+  type-aware `oxlint`, focused `oxfmt --check`, `git diff --check`, and
+  pre-commit lint-staged. Live after push: #4087 `CLEAN`; #4090 draft/open
+  merge state `UNSTABLE` only because fresh `debounce` was pending.
+- Correction/latest #4090 rebuild: replaced the old adapter-heavy catalog slice
+  with one lightweight commit `7ec52625d` (`feat: add desktop node command
+  catalog`) directly over #4087 `d6e87d488`. The new shape keeps the existing
+  direct Desktop node command executor and adds only:
+  `common/desktop-node-command-catalog.ts`, executor `catalog()` metadata,
+  `desktop.capabilities`, bridge preflight, and result-trust output metadata.
+  It intentionally does not reintroduce `desktop.capability.invoke`, the old
+  command adapter, or a parallel capability-policy layer.
+- #4090 validation after rebuild passed in `C:\src\clawpilot-review-4090`:
+  `pnpm exec vitest run --project node
+  common/desktop-node-command-catalog.test.ts
+  electron/desktop-node-command-composition.test.ts
+  electron/backend/gateway/node-commands-bridge.test.ts` (3 files / 68 tests),
+  `pnpm run typecheck`, focused `oxfmt --check`, focused type-aware
+  `oxlint --deny-warnings`, and `git diff --check`. Force-with-lease pushed to
+  `user/giodl/node-mode-capabilities-upstream-5-trust-hardening`, updated PR
+  #4090 body to the lightweight catalog narrative, and posted fresh
+  `/m-code-review` at
+  `https://github.com/gim-home/m/pull/4090#issuecomment-4870204779`.
+- Fresh native `codex review --commit HEAD` on #4090 commit `7ec52625d`
+  reported no discrete actionable regressions; disposition posted at
+  `https://github.com/gim-home/m/pull/4090#issuecomment-4870230150`. Live
+  #4090 GitHub state after the rebuild is `CLEAN`: barnacle, cache,
+  complexity-tag, merit-bot, debounce, and GitOps/AdvancedSecurity passed;
+  ClawPilot Buddy is neutral/skipping as expected.
+- Follow-up cleanup: live stack check showed #4089 `DIRTY` after #4088 moved.
+  Restacked #4089 onto #4088 head `430ad5117`, producing `d251f76d6`; validation
+  passed (4 files / 76 tests, typecheck, focused oxfmt, focused type-aware
+  oxlint, diff check) and force-pushed
+  `user/giodl/node-mode-capabilities-upstream-4-m365-drafts`.
+- Propagated the restack upward: #4123 now `49ccd2f70` over #4089 `d251f76d6`
+  (4 files / 139 tests + typecheck/format/lint/diff), #4087 now `6db121f7a`
+  over #4123 `49ccd2f70` (3 files / 72 tests + typecheck/format/lint/diff),
+  and #4090 now `2d821db9e` over #4087 `6db121f7a` (3 files / 67 tests +
+  typecheck/format/lint/diff). Updated affected PR body validation counts.
+  During conflict resolution, kept #4088 ownership boundaries intact and did
+  not reintroduce clipboard command wiring into #4089/#4090.
+- Corrected the #4089/#4123/#4087/#4090 review workflow after Gio clarified
+  `/m-code-review` is a local ClawPilot repo skill, not a PR trigger comment.
+  Removed the bad fresh slash comments, refreshed the skill caches with
+  `skills/m-code-review/scripts/fetch-pr-cache.py --force`, ran local review
+  passes, fixed the accepted findings, and posted real disposition comments:
+  #4089 `4870725464`, #4123 `4870725531`, #4087 `4870725678`, #4090
+  `4870725605`.
+- Final pushed heads after review fixes: #4089 `71921f7bc` (trusted
+  `request.tenantId` for M365 drafts + regression), #4123 `774746ba4`
+  (Gateway custom-tool pre-hook for WorkIQ/M365 disabled-server gate,
+  registry-backed WorkIQ mapping from `getM365Tools()`, sensitivity callback,
+  deterministic fake WorkIQ executor tests), #4087 `962eee732` (`system.run`
+  approval metadata logged before long command preview truncation), and #4090
+  `070a30403` (`desktop.capabilities` catalog docs). Validation passed:
+  #4089 focused 4 files / 77 tests, #4123 focused 3 files / 762 tests (broader
+  earlier 5 files / 774 tests), #4087 focused 3 files / 73 tests, #4090
+  focused 3 files / 68 tests, plus top-stack `pnpm run typecheck`.
+  Live CI immediately after push: current-head debounce/cache/GitOps green,
+  barnacle/merit-bot/complexity-tag still in progress; no current-head failure
+  visible.
 
 ## Resume Checklist
 
