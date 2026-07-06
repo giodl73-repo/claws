@@ -18,10 +18,10 @@
 
 ## Current Session
 
-- Last updated: 2026-06-22
+- Last updated: 2026-07-06
 - Last agent: Codex
-- Current focus: OpenClaw RFC #20 and PR A now explicitly say the Microsoft Scout/Lobster plugin path will exercise the SQLite-safe artifact boundary for about one week before maintainers treat the core `openclaw snapshot` command as the accepted path. Lobster PR #3402 has merged. Lobster PR #3423 now stages snapshots outside the syncable tree and publishes completed directories only after `database.sqlite` and `manifest.json` are finalized.
-- Active branch / PR: Lobster `user/giodl/openclaw-snapshot-sync-boundary`, https://microsoft.ghe.com/bic/lobster/pull/3423; RFC https://github.com/openclaw/rfcs/pull/20; OpenClaw PR A https://github.com/openclaw/openclaw/pull/94805.
+- Current focus: Lobster snapshot telemetry proved the plugin events are wired, but the trial only showed two `openclaw.snapshot.list` rows and no create/recover rows. New Lobster PR #4064 enables opt-in startup snapshot creation so the trial actually produces global DB snapshot artifacts and `openclaw.snapshot.create` telemetry.
+- Active branch / PR: Lobster `user/giodl/openclaw-snapshot-auto-create`, https://microsoft.ghe.com/bic/lobster/pull/4064; RFC https://github.com/openclaw/rfcs/pull/20; OpenClaw PR A https://github.com/openclaw/openclaw/pull/94805.
 - Known dirty state: `claws-hapi` has unrelated modifications in `.agents/skills/openclaw-testing/SKILL.md`, `projects/context-budget/README.md`, `projects/context-budget/SESSION.md`, `projects/lobster/SESSION.md`, `projects/prs/SESSION.md`, and untracked `projects/openclaw/SESSION.md`; do not include them in snapshot commits. This file also has local session updates pending commit.
 - Blocking question: None. Keep logical DB units as existing context rather than the main RFC decision.
 
@@ -102,6 +102,7 @@
   - Codex review: `codex review --base origin/user/giodl/context-budget-plugin` returned no discrete actionable bugs; evidence posted at https://microsoft.ghe.com/bic/lobster/pull/3402#issuecomment-183655706.
   - Initial checks: `GitOps/FileAffordance` passed; `GitOps/GitHubPop` requires proof-of-presence authentication.
 - Lobster PR #3423: https://microsoft.ghe.com/bic/lobster/pull/3423
+  - Merged 2026-06-23 at `066f4160e058f804fae58d5244de888743f71acf`.
   - Branch: `user/giodl/openclaw-snapshot-sync-boundary`; base: `main`; head: `5ea90145d` (`Publish snapshots after manifest finalization`).
   - Rebased after #3402 merged. Updates `openclaw.gitignore` so live SQLite files and sidecars remain excluded from git-backed source sync, while only completed `snapshots/<id>/database.sqlite` plus `manifest.json` artifacts are syncable.
   - Daron latest-feedback fix: snapshot creation now writes to ignored sibling staging path `.snapshot-staging/<snapshot-id>.<uuid>/`, materializes and hashes `database.sqlite`, writes `manifest.json`, then renames the completed directory into `snapshots/<id>/` as the publish step. This prevents `database.sqlite` from becoming syncable before its manifest exists.
@@ -111,3 +112,43 @@
   - PR comment with proof: https://microsoft.ghe.com/bic/lobster/pull/3423#issuecomment-183945061
   - Live status after push: mergeable, `GitOps/FileAffordance` passed, `GitOps/GitHubPop` failed proof-of-presence, reviewDecision still `CHANGES_REQUESTED` until dspektor re-reviews or maintainer dismisses stale review.
   - 2026-06-22 ADO fallback queued required runtime checks for head `5ea90145d`: `Lobster-Runtime-PullRequest` build `169083376` and `Lobster-Runtime-Build-Validation` build `169083372`. Both attached to the PR as pending.
+- Lobster PR #3549: https://microsoft.ghe.com/bic/lobster/pull/3549
+  - Merged 2026-06-23 at `d8971a9f39a08a1b3f4976050800d003f535ef7b`.
+  - Branch: `user/giodl/openclaw-snapshot-telemetry`; base: `main`; head: `c1a09a1ab` (`Emit snapshot plugin telemetry`).
+  - Adds best-effort stdout JSON events for `openclaw.snapshot.create`, `openclaw.snapshot.verify`, and `openclaw.snapshot.list`.
+  - Telemetry fields: `ok`, `durationMs`, `target`, `databaseId`, `databaseKind`, `artifactBytes`, `snapshotCount`, `skippedEntries`, and `errorKind` as applicable.
+  - Redaction contract: no source paths, repository paths, snapshot paths, hashes, manifest `sourcePath` values, or raw exception messages.
+  - Proof: snapshot plugin `npm test` passed 8 tests; `node --check src/tool.js` and `node --check index.js` passed; focused hardening regression `python -m unittest scripts.openclaw_container_hardening_test.OpenClawContainerHardeningContracts.test_workspace_persistence_policy_syncs_only_sqlite_snapshot_artifacts` passed; `git diff --check` passed.
+  - ADO fallback queued for head `c1a09a1ab`: `Lobster-Runtime-PullRequest` build `169208215` and `Lobster-Runtime-Build-Validation` build `169208213`. Initial PR checks: FileAffordance passed; GitHubPop requires proof-of-presence auth; ADO builds pending/queued.
+- Lobster PR #3557: https://microsoft.ghe.com/bic/lobster/pull/3557
+  - Merged 2026-06-24 at `87a0989b33603bd8ff777e4300efdfe62e0c0e60`.
+  - Branch: `user/giodl/openclaw-snapshot-recovery`; base: `main`; head: `6c1301527` (`Fix snapshot recovery sidecar cleanup`).
+  - Adds `snapshot` action `recover` for configured `global` and `agent` DB targets. Callers still cannot pass filesystem paths.
+  - Default recovery behavior is cold-start safe: recover only if the configured target DB is absent. `overwrite=true` is required to replace an existing DB, and SQLite sidecars are removed before replacement.
+  - Recovery verifies the snapshot manifest/artifact first, copies the artifact to a target-adjacent temp file, runs SQLite integrity check on the temp DB, then renames it into place.
+  - Adds redacted `openclaw.snapshot.recover` telemetry with duration, target, database id/kind, artifact bytes, overwrite, recoveredExistingTarget, and classified failure kind.
+  - Proof: snapshot plugin `npm test` passed 11 tests; `node --check src/tool.js` and `node --check index.js` passed; focused safe-sync hardening regression passed; full `python -m unittest scripts.openclaw_container_hardening_test` passed 13 tests; `git diff --check` passed. `bash scripts/validate-code-mode-container.sh` blocked locally because `jq` is missing on PATH.
+  - Ed/Codeclaw requested one fix: cold-start recovery removed SQLite sidecars only when the main DB existed, so stale `-wal` / `-shm` could be replayed into the restored DB.
+  - Fixed in `6c1301527`: recovery now always removes `db`, `db-wal`, `db-shm`, and `db-journal` immediately before publishing the recovered DB; added regression where main DB is missing but stale sidecars exist.
+  - Post-fix proof: snapshot plugin `npm test` passed 11 tests; `node --check src/tool.js` and `node --check index.js` passed; focused safe-sync hardening regression passed; `git diff --check` passed.
+  - PR comment posted: https://microsoft.ghe.com/bic/lobster/pull/3557#issuecomment-184486341
+  - ADO fallback requeued for fixed head `6c1301527`: `Lobster-Runtime-PullRequest` build `169247835` and `Lobster-Runtime-Build-Validation` build `169247832`. As of last check, GitHub showed only GitOps checks on the new head: FileAffordance passed, GitHubPop requires proof-of-presence auth; ADO check-runs had not attached yet.
+- Lobster PR #3712: https://microsoft.ghe.com/bic/lobster/pull/3712
+  - Open as of 2026-06-27. Branch: `user/giodl/openclaw-snapshot-telemetry-queries`; base: `main`; head: `9e7f9e5ba` (`Use boot id in snapshot telemetry queries`).
+  - Adds `docs/operations/snapshot-telemetry/queries.kql` with a base `TraceEventsOT` query over promoted `openclaw.snapshot.*` Gateway plugin events plus tiles for volume, failures, recovery, latency, artifact size, list skipped entries, and raw drilldown.
+  - Updates `docs/troubleshooting/openclaw-telemetry.md` with the canonical `customDimensions.component == "openclaw_gateway_plugin"` filter shape and a pointer to the query bundle.
+  - Codeclaw requested changes: replace likely-empty `container_id` projection with canonical OpenClaw `boot_id`; Copilot also noted latency tile should match create/verify/recover label.
+  - Fixed in `9e7f9e5ba`: base query and raw drilldown now project `boot_id = tostring(cd.boot_id)`, and latency tile filters to create/verify/recover.
+  - Local proof after fix: `git diff --check` passed.
+  - PR comment with fix/proof: https://microsoft.ghe.com/bic/lobster/pull/3712#issuecomment-188090011
+  - ADO fallback requeued for head `9e7f9e5ba`: `Lobster-Runtime-PullRequest` build `170094364` and `Lobster-Runtime-Build-Validation` build `170094360`.
+  - Live status after fix: mergeable, `CHANGES_REQUESTED` pending Codeclaw/Ed re-review or dismissal, `GitOps/FileAffordance` passed, `GitOps/GitHubPop` failed proof-of-presence, ADO checks queued/in progress.
+- Lobster PR #4064: https://microsoft.ghe.com/bic/lobster/pull/4064
+  - Opened 2026-07-06. Branch: `user/giodl/openclaw-snapshot-auto-create`; base: `main`; head: `7cdc84e29` (`Enable snapshot auto-create trial`).
+  - Adds opt-in `autoCreateOnStartup` snapshot plugin config and enables the Lobster trial to run a best-effort `snapshot create` for the global OpenClaw DB 60 seconds after plugin startup.
+  - Startup snapshot creation is non-blocking: registration/startup proceeds normally, the timer is unref'd, and create failures rely on existing redacted `openclaw.snapshot.create` telemetry without failing the container.
+  - Updates the snapshot Kusto docs after live CAP data showed promoted plugin events under `component=openclaw-adapter`; the stable filter is now `customDimensions has "openclaw.snapshot"` plus `cd.event startswith "openclaw.snapshot."`.
+  - Live telemetry before this PR: prod CAPAnalytics over 30d showed only two successful `openclaw.snapshot.list` rows, both with `snapshotCount=0` and no create/recover events; CAPAnalyticsDev had no snapshot rows.
+  - Proof before PR open: snapshot plugin `npm test` passed 14 tests; `node --check src/tool.js` and `node --check index.js` passed; `python scripts/validate-openclaw-telemetry-docs.py` passed; `bash scripts/validate-code-mode-container.sh` passed; focused workspace persistence hardening unittest passed; `git diff --check` passed. Local TypeScript compiler check was unavailable because the plugin package does not install `typescript`.
+  - Initial PR status: mergeable, `REVIEW_REQUIRED`; `GitOps/FileAffordance` passed; `GitOps/GitHubPop` failed proof-of-presence auth as expected.
+  - ADO status for head `7cdc84e29`: GitHub attached `Lobster-Runtime-PullRequest` PR-merge build `171071506`; manual fallback branch build `171071515` was also queued. `Lobster-Runtime-Build-Validation` branch build `171071512` is attached. All three were queued/notStarted at the first check.
