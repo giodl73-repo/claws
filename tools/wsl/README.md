@@ -5,7 +5,7 @@ These wrappers keep WSL work out of nested PowerShell/Bash quoting traps.
 Default target:
 
 ```text
-Distribution: Ubuntu-24.04
+Distribution: Ubuntu
 User: root
 Workspace root: /root/src
 ```

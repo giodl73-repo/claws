@@ -15,15 +15,15 @@ use live `gh` only for final status or mutation decisions.
 ## Refresh
 
 ```powershell
-wsl.exe -d Ubuntu-24.04 -u root -- bash -lc 'gitcrawl doctor --json'
-wsl.exe -d Ubuntu-24.04 -u root -- bash -lc 'gitcrawl sync openclaw/openclaw --state open --include-pr-details --json'
+wsl.exe -d Ubuntu -u root -- bash -lc 'gitcrawl doctor --json'
+wsl.exe -d Ubuntu -u root -- bash -lc 'gitcrawl sync openclaw/openclaw --state open --include-pr-details --json'
 ```
 
 Use targeted sync for normal triage:
 
 ```powershell
-wsl.exe -d Ubuntu-24.04 -u root -- bash -lc 'gitcrawl sync openclaw/openclaw --numbers <pr-or-issue> --include-pr-details --json'
-wsl.exe -d Ubuntu-24.04 -u root -- bash -lc 'gitcrawl gh pr status <number-or-url> -R openclaw/openclaw --compact'
+wsl.exe -d Ubuntu -u root -- bash -lc 'gitcrawl sync openclaw/openclaw --numbers <pr-or-issue> --include-pr-details --json'
+wsl.exe -d Ubuntu -u root -- bash -lc 'gitcrawl gh pr status <number-or-url> -R openclaw/openclaw --compact'
 ```
 
 ## Project Buckets

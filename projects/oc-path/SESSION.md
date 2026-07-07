@@ -19,19 +19,23 @@
 
 ## Current Session
 
-- Last updated: 2026-06-04.
+- Last updated: 2026-06-26.
 - Last agent: Codex.
-- Current focus: Inventory local oc-path worktrees and decide what remains
-  active.
-- Active branch / PR: see local worktrees and `projects/oc-path/README.md`.
-- Known dirty state: unknown until audited.
-- Blocking question: which oc-path follow-up branches should be kept.
+- Current focus: oc-path upstream issue #85929 is closed by merged OpenClaw
+  PR #86060. No active oc-path OpenClaw issue was identified in the latest
+  live refresh.
+- Active branch / PR: no local oc-path worktrees were present at the paths
+  listed in `projects/oc-path/README.md` during the 2026-06-26 check.
+- Known dirty state: `claws-hapi` has unrelated pre-existing dirty files plus
+  this session refresh.
+- Blocking question: decide whether the dry-run diff and YAML follow-ups still
+  matter, then recreate worktrees only if there is a concrete issue/PR target.
 
 ## Resume Checklist
 
-- Run: `git -C C:\src\openclaw-pr-oc-path status --short --branch`.
-- Run: check the dry-run diff and YAML worktrees.
-- Verify: map each worktree to a PR or retire candidate.
+- Run: search live OpenClaw issues/PRs before recreating any oc-path worktree.
+- Verify: #85929 / #86060 remain closed/merged and no new oc-path issue has
+  superseded the local dry-run diff or YAML follow-ups.
 - Update: this file and README with current status.
 
 ## Guardrails
@@ -42,4 +46,5 @@
 
 ## Open Threads
 
-- Decide whether the dry-run diff and YAML follow-ups are still needed.
+- Decide whether to retire or re-file the dry-run diff and YAML follow-ups;
+  there is no current local worktree evidence for either branch.

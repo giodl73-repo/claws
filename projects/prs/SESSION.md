@@ -21,20 +21,61 @@
 
 ## Current Session
 
-- Last updated: 2026-06-19.
+- Last updated: 2026-06-20.
 - Last agent: Codex.
-- Current focus: OpenClaw PR-fix sweep, rebase-to-main, and ClawSweeper repair
-  follow-up.
-- Active branch / PRs: openclaw/openclaw#89596, #86627, #90708, #87471, and
-  #90062 were updated/rechecked; #90003 merged. Proof-gated fix PRs #90708,
-  #86544, #86285, and #83991 still need real external proof or maintainer
-  acceptance.
-- Known dirty state: local `projects/prs/worktrees.md` is generated/ignored;
-  `claws-hapi` already had unrelated local project/admin edits before this
-  session.
-- Blocking question: wait for ClawSweeper label/status sync on #89596, #90708,
-  #87471, and #90062; remaining proof-gated PRs require real provider/channel
-  proof or explicit maintainer acceptance.
+- Current focus: OpenClaw PR #86627 prepared through review and hosted-gate
+  setup; waiting on refreshed non-required hosted checks after rebase.
+- Active branch / PR: `openclaw/openclaw#86627`, head
+  `0928476673c7323bd7a3fba51b5a565b4fbe5d07`, base `main`.
+- Live PR state: open, not draft, `MERGEABLE` / `UNSTABLE` as of the last poll
+  because refreshed hosted checks are queued after the rebase. Review decision
+  empty, review requested from `steipete`, no assignees. Prior ClawSweeper
+  verdict for head `9b06037369ac463a914fb82702edc3e31a38fe26` was
+  `needs-human`, `rating: 🐚 platinum hermit`, `proof: sufficient`,
+  `status: 👀 ready for maintainer look`.
+- Checks: after switching GitHub auth to `giodl73-repo`, the PR was rebased
+  cleanly onto current `origin/main` and force-with-lease pushed to
+  `doctor-core-contribution-health`. Latest poll showed no failures, but
+  non-required hosted jobs were still queued (`preflight`, `security-fast`,
+  CodeQL security shards, `Scan changed paths`, `Select Critical Quality
+  shards`). `gh pr checks --required` reports no required checks configured.
+- PR body: updated twice on 2026-06-20. It no longer calls
+  `0b64c4ebda2c4610994b3eb46e1012c71ad28d22` the current signed head and now
+  references current head `0928476673c7323bd7a3fba51b5a565b4fbe5d07` as a clean
+  rebase of the previously reviewed `9b06037369ac463a914fb82702edc3e31a38fe26`.
+- Remaining maintainer judgment: accept the compatibility-sensitive doctor
+  lint ordering change and the plugin-SDK/core doctor reserved-ID boundary
+  called out by ClawSweeper.
+- Local workflow fixes: GitHub.com auth is now active as `giodl73-repo`, which
+  has `MAINTAIN` on `openclaw/maintainers`. `C:\src\openclaw-maintainers-repo`
+  fetched/pulled successfully. `Ubuntu` starts again, and
+  `/root/src/openclaw-maintainers-repo` is now present via the WSL symlink to
+  `C:\src\openclaw-maintainers-repo`; WSL `gh` auth is also configured.
+  A clean standalone checkout was created at `C:\src\openclaw-prflow` to avoid
+  stale-script/re-exec hangs from `C:\src\srcopenclaw`'s unrelated branch.
+- Script wrapper gotchas: direct `bash scripts/pr-review 86627` hangs on Windows
+  because `scripts/pr` re-execs through a `C:/...` path. The successful path was
+  to source `scripts/pr-lib/*.sh` with
+  `script_parent_dir=/c/src/openclaw-prflow/scripts` and add Codex's bundled
+  `rg.exe` directory to Bash `PATH`.
+- Prepared artifacts: `.worktrees/pr-86627/.local/review.md` and
+  `.local/review.json` were written and validated. `prepare_gates 86627` passed
+  in `OPENCLAW_TESTBOX=1` hosted exact-head mode for the pre-rebase head.
+  `prepare_push 86627` was idempotent before sync. Local full `pnpm check`
+  failed only on stale `npm-shrinkwrap.json`, and the same shrinkwrap guard
+  failure reproduced on current `origin/main`, so it is baseline noise.
+- Sync state: `merge_verify 86627` required sync because mainline drift touched
+  critical CI/script files. The wrapper sync path produced a same-tree remote
+  commit that GitHub still saw as conflicting, so the final clean state was made
+  by direct rebase onto latest `origin/main` and
+  `git push prhead HEAD:doctor-core-contribution-health
+  --force-with-lease=<current-remote-head>`. No final merge was run.
+- Gitcrawl: unavailable on Windows in this session (`gitcrawl` command not
+  recognized); live GitHub was used as fallback.
+- Next action: wait for the queued hosted checks on
+  `0928476673c7323bd7a3fba51b5a565b4fbe5d07`. If they pass and `main` has not
+  drifted into relevant files again, rerun hosted gates/prep artifacts as needed
+  and `merge_verify 86627`; pause before any `merge_run`.
 
 ## Watch Checklist
 
@@ -65,6 +106,61 @@
   PR body.
 - If a ClawSweeper finding is valid, fix it and note the verification. If it is
   invalid or base noise, record why.
+
+## OpenClaw Verify/Merge Best Practices
+
+- Start every PR by checking live state, not local memory:
+  `gh pr view <PR> --repo openclaw/openclaw --json url,isDraft,headRefName,headRefOid,baseRefName,mergeStateStatus,reviewDecision,statusCheckRollup,labels,comments,reviews`.
+- For stacked PRs, restack by cherry-picking only PR-owned commits onto current
+  `origin/main` after predecessors merge. Keep already-merged predecessor
+  commits out of the branch and force-push only with an exact
+  `--force-with-lease=refs/heads/<branch>:<old-head-sha>`.
+- Run a Codex review after the branch is restacked and pushed or immediately
+  before push if the diff is final: `codex review --base origin/main`. Fix real
+  findings, rerun focused validation, then rerun Codex review until there are no
+  actionable correctness issues.
+- Update the PR body after every meaningful branch/proof change. The body must
+  match the current head, current base, validation commands, real behavior
+  proof, not-tested gaps, and any maintainer boundary decisions.
+- Use live proof when ClawSweeper is deciding proof labels. Source harness proof
+  is acceptable only when it exercises the real runtime path under review and
+  prints concrete output; note explicitly when it is not a packaged CLI/app
+  proof.
+- Queue exactly one fresh ClawSweeper review after final push/body update:
+  comment `@clawsweeper re-review`, then wait for the durable review comment
+  and labels on the exact current head. Do not treat the command ack as the
+  review result.
+- Treat ClawSweeper `status: ready for maintainer look` plus `proof:
+  sufficient` as author-action clear, not automatic merge approval. If
+  ClawSweeper calls out `needs-human`, security, compatibility, schema, trust,
+  or storage-boundary concerns, record the maintainer decision before marking
+  ready or merging.
+- Keep draft PRs draft unless the user explicitly says to mark ready. Marking a
+  draft ready retriggers checks, so recheck `mergeStateStatus`, fresh checks,
+  and ClawSweeper exact-head labels afterward.
+- Use the Windows wrapper from `C:\src\openclaw-prflow` with Git for Windows
+  Bash for the current local maintainer path:
+  `& 'C:\Program Files\Git\bin\bash.exe' scripts/pr <subcommand> ...`.
+  Do not use the GitHub merge button or `gh pr merge`.
+- Expected maintainer wrapper order is review artifacts, prepare, push if
+  needed, merge verify, then merge run only after explicit user approval:
+  `scripts/pr review-init <PR>`, fill `.local/review.md` and
+  `.local/review.json`, `scripts/pr review-validate-artifacts <PR>`,
+  `scripts/pr prepare-run <PR>` or hosted-gate fallback when full local checks
+  hit known baseline noise, `scripts/pr merge-verify <PR>`, and only then
+  `scripts/pr merge-run <PR>`.
+- If full local `pnpm check` fails on `npm-shrinkwrap.json is stale`, reproduce
+  it on latest `origin/main` before calling it baseline noise. When it is
+  baseline-only and unrelated to touched files, use hosted exact-head gates
+  with `OPENCLAW_TESTBOX=1 scripts/pr prepare-gates <PR>` and document the
+  reason.
+- Before merge, require: non-draft unless intentionally held, `APPROVED` or
+  explicit maintainer acceptance, merge state clean or wrapper-accepted
+  unrelated drift, pass/skip checks with no PR-owned failures, current-head
+  ClawSweeper labels, accurate PR body, and a clean maintainer review artifact
+  recommendation.
+- After merge, record merge SHA, merged-by actor, timestamp, completion comment,
+  cleanup warnings, and any remaining local worktree or remote branch state.
 
 ## Open Threads
 

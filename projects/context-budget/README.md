@@ -16,8 +16,8 @@ Current target: a Lobster-owned OpenClaw plugin at
 | openclaw/openclaw | [#84676](https://github.com/openclaw/openclaw/pull/84676) | `fix/68609-precheck-budget-log` | Merged | Log pre-prompt compaction fits decisions. |
 | openclaw/openclaw | [#84800](https://github.com/openclaw/openclaw/pull/84800) | `budget-3-context-budget-pressure` | Closed draft | Superseded pressure classification branch. |
 | openclaw/rfcs | TBD | `context-budget-management-rfc` | Local rewrite committed, not pushed | RFC 0008: Context Budget Management as a Quarantined Extension. |
-| bic/lobster | [#3371](https://microsoft.ghe.com/bic/lobster/pull/3371) | `user/giodl/context-budget-plugin` | Open, review required | Quarantined `context-budget` plugin parallel to `tools-code-mode`. |
-| bic/lobster | [#3379](https://microsoft.ghe.com/bic/lobster/pull/3379) | `user/giodl/context-budget-ux` | Open, approved; GitHubPop auth required; ADO queued | Stacked Budget tool-result UX, gated behind `lobster.web_context_budget_ui_enabled`. |
+| bic/lobster | [#3371](https://microsoft.ghe.com/bic/lobster/pull/3371) | `user/giodl/context-budget-plugin` | Merged 2026-06-20 | Quarantined `context-budget` plugin parallel to `tools-code-mode`. |
+| bic/lobster | [#3379](https://microsoft.ghe.com/bic/lobster/pull/3379) | `user/giodl/context-budget-ux` | Open; approved with required checks green on `0306300d` | Budget tool-result UX, gated behind `lobster.web_context_budget_ui_enabled`. |
 
 ## Reference Prototype Stack
 
@@ -53,14 +53,15 @@ Current target: a Lobster-owned OpenClaw plugin at
 - Lobster plugin worktree: `C:\src\lobster-context-budget-plugin`.
 - Lobster plugin branch: `user/giodl/context-budget-plugin`.
 - Lobster plugin PR: https://microsoft.ghe.com/bic/lobster/pull/3371.
-- Lobster plugin commit: `01e2c0723 feat(openclaw): add context budget plugin`.
+- Lobster plugin PR merged on 2026-06-20 at merge commit `0ad443d8`.
 - Plugin CLI pattern: Budget owns the OpenClaw CLI contribution from the
   plugin package itself (`activation.onCommands`, `commandAliases`, and
   `api.registerCli`) so future Feed/Policy plugin PRs can follow that pattern
   without hardcoding CLI commands in core or Lobster.
 - Lobster Budget UX branch: `user/giodl/context-budget-ux`.
 - Lobster Budget UX PR: https://microsoft.ghe.com/bic/lobster/pull/3379.
-- Lobster Budget UX commit: `feb1b9ded feat(lobster-web): show context budget tool insights`.
+- Lobster Budget UX head: `0306300d fix(lobster-web): render budget card in chat rail paths`,
+  rebased onto `main` after PR 3371 merged.
 - User-facing tool command: `budget` with `audit`, `report`, `explain`,
   `recommend`, and `inspect` actions.
 - Review fix: runtime OpenClaw plugin overlay preserves `context-budget` so the
@@ -84,8 +85,16 @@ Current target: a Lobster-owned OpenClaw plugin at
     `Lobster-Runtime-Build-Validation` build `168820452`.
   - PR 3379: `Lobster-Runtime-PullRequest` build `168820507` and
     `Lobster-Runtime-Build-Validation` build `168820506`.
-- Immediate PR 3379 checks: `GitOps/FileAffordance` passed;
-  `GitOps/GitHubPop` failed for proof-of-presence auth on `feb1b9ded`.
+- Immediate PR 3379 fix on `5db2e08b`: after the branch moved to `78ab0761`,
+  removed duplicate gateway default initializers causing runtime
+  `error[E0062]`, restored Scout/Budget web feature flag shape cleanup,
+  included the Biome formatter delta, restored raw Budget usage percentage
+  labels while clamping only progress bar width, and updated API reference docs
+  for the web feature flag contract.
+- PR 3379 current live status on 2026-06-22: approved on head `0306300d`; all
+  required GitOps and Lobster ADO checks are green. ADO builds:
+  `Lobster-Runtime-PullRequest` `168878551` and
+  `Lobster-Runtime-Build-Validation` `168878550`.
 - Lobster plugin target:
   `src/openclaw_container/plugins/context-budget`.
 
@@ -120,6 +129,31 @@ Current target: a Lobster-owned OpenClaw plugin at
   - Local `cargo check` is blocked by Windows OpenSSL discovery before checking
     the touched code.
 - Diff checks passed.
+- Lobster Budget UX fix validation on 2026-06-20 for head `5db2e08b`:
+  - `git diff --check`.
+  - `cargo +stable fmt --check` in `src/lobster_runtime`.
+  - `python scripts/ci/check-ecs-settings-inventory.py`.
+  - Biome formatter write for `src/lobster_web`.
+  - Biome formatter check for `src/lobster_web`.
+  - Biome lint for `src/lobster_web`.
+  - Full local Cargo checks remain blocked by the private `lobster` cargo
+    registry token.
+- Lobster Budget UX real-result unwrap fix on 2026-06-20 for head `e0888026`:
+  - Unwrapped `jsonToolResult().details` so real context-budget tool results
+    render the specialized Budget card when the ECS gate is enabled.
+  - Added component coverage for the `{ content, details }` envelope.
+  - Biome formatter write/check, Biome lint, and `git diff --check` passed.
+  - Targeted local Vitest could not run because this worktree lacks
+    `node_modules` and `vitest`.
+- Lobster Budget UX production render-path fix on 2026-06-20 for head
+  `0306300d`:
+  - Shared the Budget renderer across `ToolCard`, minimal `MinimalToolRow`,
+    and orb `ActivityToolLine`.
+  - Added production-path tests for minimal burst rows and orb inline activity
+    rails using a real `{ content, details }` budget result envelope.
+  - Biome formatter write/check, Biome lint, and `git diff --check` passed.
+  - Targeted local Vitest could not run because this worktree lacks
+    `node_modules` and `vitest`.
 - Repo-wide `pnpm exec tsgo --noEmit --pretty false` still fails only on the
   existing unrelated migrate-hermes `AuthProfileCredential.key` errors.
 
@@ -132,9 +166,8 @@ Current target: a Lobster-owned OpenClaw plugin at
 
 ## Next
 
-- Monitor Lobster PRs 3371 and 3379 for required checks:
-  `GitOps/GitHubPop`, `Lobster-Runtime-PullRequest`, and
-  `Lobster-Runtime-Build-Validation`.
+- PR 3379 is approved with required checks green; watch for maintainer
+  merge/readiness follow-up.
 - Review the local RFC rewrite before filing an RFC PR; push only when
   explicitly requested.
 - Create the required `maintainer-discussion` Discord thread if the RFC is

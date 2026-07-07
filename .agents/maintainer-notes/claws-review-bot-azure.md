@@ -225,7 +225,7 @@ Last refreshed: 2026-05-22 17:55 PDT.
 
 Sebby runs in WSL under isolated state:
 
-- WSL distro: `Ubuntu-24.04`
+- WSL distro: `Ubuntu`
 - state dir: `/root/.openclaw-sebby`
 - config: `/root/.openclaw-sebby/openclaw.json`
 - workspace: `/root/src/sebby`

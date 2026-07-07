@@ -29,23 +29,22 @@
   defaults because this machine defaults to `https://msfast.visualstudio.com`;
   always pass `--organization https://msazure.visualstudio.com --project One`
   and queue pipeline ids `457333` and `463346` against the PR source branch.
-- Current focus: Budget quarantine plugin PR created parallel to
-  `tools-code-mode`.
-- Active branch / PR: `user/giodl/context-budget-plugin` in
-  `C:\src\lobster-context-budget-plugin`; PR
-  https://microsoft.ghe.com/bic/lobster/pull/3371.
+- Current focus: PR 3395 latest line-range patrol finding fixed; checks, ADO kickoff, PoP, and renewed review remain.
+- Active branch / PR: `user/giodl/openclaw-vault-refresh-fresh-pr` at `2edf5e0fa7a6d0b2b7b03f45c2821c0a15204710`, https://microsoft.ghe.com/bic/lobster/pull/3395
+- Local PR worktree: `C:\src\lobster-pr-1419` on `user/giodl/openclaw-vault-refresh-fresh-pr`, tracking the PR branch cleanly.
 - LobsterTank: `C:\src\lobster-lobstertank\tools\lobstertank`, branch `user/giodl/lobstertank`, running at `http://127.0.0.1:8787/` when started locally.
 - Known dirty state: `C:\src\lobster` has unrelated dirty work on
   `user/giodl/policy-compare-lifecycle`. Budget plugin work is isolated in
-  clean worktree `C:\src\lobster-context-budget-plugin`.
+  clean worktree `C:\src\lobster-context-budget-plugin`; PR 3395 work is in
+  clean worktree `C:\src\lobster-pr-1419`.
 - Blocking question: none.
 
 ## Resume Checklist
 
 - Read: `projects/lobster/ado-pipelines.md` before queueing or diagnosing
   Lobster ADO checks from a new machine/session.
-- Run: `gh pr view https://microsoft.ghe.com/bic/lobster/pull/1419 --json headRefName,mergeStateStatus,mergeable,reviewDecision,statusCheckRollup,updatedAt`
-- Verify: `gh pr checks https://microsoft.ghe.com/bic/lobster/pull/1419`
+- Run: `gh pr view https://microsoft.ghe.com/bic/lobster/pull/3395 --json headRefName,mergeStateStatus,mergeable,reviewDecision,statusCheckRollup,updatedAt`
+- Verify: `gh pr checks https://microsoft.ghe.com/bic/lobster/pull/3395`
 - Review: latest comments for stale-link, provenance, and CI blockers.
 - For LobsterTank: run `cd C:\src\lobster-lobstertank; python -m unittest discover -s tools/lobstertank/tests`; local dashboard command is `cd C:\src\lobster-lobstertank\tools\lobstertank; python .\lobstertank.py --author giodl73-repo --port 8787`.
 - For Budget plugin: use `C:\src\lobster-context-budget-plugin` and verify
@@ -98,7 +97,54 @@
   PullRequest build `168873059`, Build Validation build `168873058`; both
   attached as pending on the new head. Posted PR comment:
   `https://microsoft.ghe.com/bic/lobster/pull/3422#issuecomment-183697506`.
-- PR 1419 is open, non-draft, mergeable, and review-required. GitHub had not reported checks on refreshed head `68c642803` immediately after push.
+- PR 1419 was closed on 2026-06-20 as superseded by fresh PR 3395.
+- PR 3395 is open, non-draft, and mergeable at refreshed head `ff2b9268`.
+- `aa0807fd` advances the OpenClaw architecture snapshot baseline from `5e8cc1d9c` to `9594300f8c92646807a18c75a47f822a02912efc`, updates stale `releases-private` -> `releases`, and retires the no-longer-resolvable `openclaw/trust` repo page.
+- PR 3395 body created with the new baseline, refreshed live OpenClaw repo metadata, stale-link fixes, current verification checklist, and `Supersedes #1419` note.
+- `a0fbce1b` fixes all three Galin requested changes: release public/private wording, retired `openclaw/trust` historical wording, and `pr-draft-*` README/file mismatch. PR body updated with this fix commit.
+- On head `a0fbce1b`, `GitOps/FileAffordance` passed; `GitOps/GitHubPop` failed and needs POP; ADO checks were not reported immediately after the fix commit.
+- On head `8ab99c9d`, Daron baseline patrol notes were addressed across architecture README, ACP, diagnostic-event-stream, gateway-protocol, build-and-release, trust links, and releases evidence wording.
+- On head `189d7872`, the latest Daron/Galin patrol findings were addressed:
+  Codex package command, gateway protocol handshake range, Clawpatch
+  human-gated landing posture, async diagnostic drain event list, moved
+  `packages/gateway-protocol` citations, current upstream `Evidence` PR
+  template wording, `AGENTS.md:108` prompt-cache cite, and the minor
+  release/private + adjacent-tools wording nits.
+- PR comment posted with fix summary:
+  https://microsoft.ghe.com/bic/lobster/pull/3395#issuecomment-183696841.
+- Validation on `189d7872`: `git diff --check` passed; targeted stale-pattern
+  grep clean; live npm registry check confirmed `@openai/codex-cli` = 404 and
+  `@openai/codex` = 200.
+- On head `ff2b9268`, the remaining release visibility wording nit was
+  addressed in `specs/architecture/build-and-release.md` by changing
+  `private dist-tags workflow` to `access-controlled dist-tags workflow`.
+  PR comment: https://microsoft.ghe.com/bic/lobster/pull/3395#issuecomment-183696901.
+  Validation: `git diff --check` passed; targeted stale-string grep was clean
+  in the release/build/crabbox files; GraphQL review-thread check showed both
+  inline Copilot discussions resolved. Immediately after push, no checks were
+  attached to the new head, and `reviewDecision` remained `CHANGES_REQUESTED`
+  from the older review pending re-review.
+- ADO kickoff attempt on 2026-06-20: `/azp run Lobster-Runtime-PullRequest` + `/azp run Lobster-Runtime-Build-Validation` received Azure Pipelines response `No pipelines are associated with this pull request.` Direct ADO kickoff remains blocked locally: no working `az`, `azd`, `autodev`, or Az PowerShell auth path; attempted `winget install Microsoft.AzureCLI` hung and was stopped before `az` became available.
+- On 2026-06-22, direct ADO kickoff was retried after Azure CLI became
+  available (`az` 2.87.0 with `azure-devops` 1.0.4), but both pipeline runs
+  failed before queueing because neither `az login` nor `az devops login` is
+  configured and `AZURE_DEVOPS_EXT_PAT` is unset. The commands attempted were
+  pipeline id `457333` (`Lobster-Runtime-PullRequest`) and id `463346`
+  (`Lobster-Runtime-Build-Validation`) for branch
+  `user/giodl/openclaw-vault-refresh-fresh-pr`.
+- On head `2edf5e0fa`, dspektor's 2026-06-22 comment about stale gateway
+  protocol line ranges was addressed by refreshing the
+  `packages/gateway-protocol/src/schema/frames.ts` ranges in
+  `guides/internals/03-gateway-bus.md` and `specs/architecture/gateway.md`.
+  Validation: `git diff --check` passed and targeted stale-range grep was
+  clean. Immediately after push, GitHub reported no checks attached,
+  `reviewDecision=REVIEW_REQUIRED`, `mergeable=MERGEABLE`, and
+  `mergeStateStatus=BLOCKED`.
+- After Azure login was restored on 2026-06-22, required ADO checks were
+  manually queued for PR 3395 head `2edf5e0fa`: `Lobster-Runtime-PullRequest`
+  build `169018239` and `Lobster-Runtime-Build-Validation` build `169018234`.
+  Both contexts attached to the PR as pending; ADO initially reported both
+  builds as `notStarted`.
 - Latest blocking stale-link review was addressed by retargeting `nix-steipete-tools` references to `nix-openclaw-tools` and removing live `moltbench` links after deleting the entry.
 - LobsterTank LOC update summarizes GitHub PR file `additions + deletions` into total/code/test/docs/other buckets, shows LOC in the PR table, includes aggregate summary pills, and expands a per-PR LOC breakdown in the detail drawer.
 - Budget plugin branch adds Lobster-owned `context-budget` OpenClaw plugin,

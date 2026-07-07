@@ -1,5 +1,5 @@
 param(
-  [string]$WslDistro = "Ubuntu-24.04",
+  [string]$WslDistro = "Ubuntu",
   [string]$OpenClawPath = "",
   [switch]$Fix,
   [switch]$Json

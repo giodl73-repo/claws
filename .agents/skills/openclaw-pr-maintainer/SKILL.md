@@ -13,7 +13,7 @@ When the active PR worktree is under `/root/src` in WSL, run GitHub and Codex
 operations from the same WSL distro/user as the worktree, currently:
 
 ```powershell
-wsl -d Ubuntu-24.04 -u root -- bash -lc 'cd /root/src/openclaw-<slug> && ...'
+wsl -d Ubuntu -u root -- bash -lc 'cd /root/src/openclaw-<slug> && ...'
 ```
 
 Before PR mutations, pushes, or `codex review`, verify auth there with

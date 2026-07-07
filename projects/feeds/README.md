@@ -4,14 +4,34 @@ Feeds work spans OpenClaw native feed support and Lobster Scout feed
 integration. This folder is the active index; old wave docs remain source
 material.
 
-## OpenClaw Active PRs
+## OpenClaw Hosted Catalog Stack
 
 | PR | Branch | Status | Purpose |
 | --- | --- | --- | --- |
-| [#95846](https://github.com/openclaw/openclaw/pull/95846) | `feeds-hosted-catalog-prep` | Draft open, opened 2026-06-22 at `44c0884c3ed`; based on current `main`; focused tests/format/lint passed locally | First RFC 19 implementation prep slice: reshape the bundled official external plugin catalog into a feed-shaped local fallback while preserving current behavior. No hosted fetch, auth, signed envelope, regional selection, SQLite cache, search, or skills behavior yet. |
-| [#95868](https://github.com/openclaw/openclaw/pull/95868) | `feeds-hosted-catalog-fetch` | Draft open, commit `2acadea045a`; stacked after #95846; local format/lint/focused tests/typecheck and Codex review passed; maintainer edits enabled; commits verified | Add guarded hosted catalog fetch from `register.openclaw.ai` with conditional headers, bounded response reads, checksum metadata, schema validation, bundled fallback, and lazy network-guard import coverage. No persistent snapshot store yet. |
-| [#95877](https://github.com/openclaw/openclaw/pull/95877) | `feeds-hosted-catalog-snapshot-cache` | Draft open, commit `b1cb838ce1a`; stacked after #95846/#95868; merge state clean; local format/lint/focused tests/typecheck and Codex review passed; same-repo OpenClaw branch; commits verified | Add the last-known-good snapshot fallback contract for the hosted catalog loader. Validates cached body checksum/schema and preserves `expectedSha256` pinning before using a snapshot; falls back to bundled catalog when no valid snapshot exists. |
-| [#95964](https://github.com/openclaw/openclaw/pull/95964) | `feeds-hosted-catalog-persistent-snapshot` | Draft open, commit `c371b39a93e`; stacked on #95877 base branch; local format/lint/focused tests/Kysely check/typecheck passed | Bind the hosted catalog snapshot contract to OpenClaw state with a SQLite-backed last-known-good feed snapshot store. This preserves bundled fallback and does not add source profiles, auth, signing, scheduler, search, skills, or telemetry. |
+| [#95846](https://github.com/openclaw/openclaw/pull/95846) | `feeds-hosted-catalog-prep` -> `main` | Merged 2026-06-27 at `4010b81a77` | Reshape the bundled official external plugin catalog into a feed-shaped local fallback while preserving current behavior. No hosted fetch, auth, signed envelope, regional selection, SQLite cache, search, or skills behavior yet. |
+| [#95868](https://github.com/openclaw/openclaw/pull/95868) | `feeds-hosted-catalog-fetch` -> `main` | Merged 2026-06-27 at `c29e1fe764` from prepared head `76da9328af` | Add guarded hosted catalog fetch from ClawHub with conditional headers, bounded response reads, checksum metadata, schema validation, bundled fallback, lazy network-guard import coverage, and metadata-only ClawHub entry preservation through hosted dedupe. Candidate-to-install metadata synthesis is deliberately deferred to #95969. |
+| [#95877](https://github.com/openclaw/openclaw/pull/95877) | `feeds-hosted-catalog-snapshot-cache` -> `main` | Merged 2026-06-27 at `12685ee6b7` from prepared head `5f71635bba` | Add the last-known-good snapshot fallback contract for the hosted catalog loader. Validates cached body checksum/schema, preserves `expectedSha256` pinning, and honors `ETag` / `Last-Modified` validators before using a snapshot. |
+| [#95964](https://github.com/openclaw/openclaw/pull/95964) | `feeds-hosted-catalog-persistent-snapshot` -> `main` | Merged 2026-06-28 at `d1b917120a` from prepared head `372ec63c99`; boundary accepted as inert durable cache, not install/search authority | Persist hosted catalog snapshots in OpenClaw state. |
+| [#95969](https://github.com/openclaw/openclaw/pull/95969) | `feeds-hosted-catalog-source-profiles` -> `main` | Merged 2026-06-28 at `1b0766080a` from prepared head `6dc6ca154c`; ClawHub candidate hashes stay on the ClawHub install path and direct feed URL overrides remain `clawhub.ai` only | Add hosted catalog source profile validation, including ClawHub `sha256:<hex>` integrity normalization for `public-clawhub` source candidates while keeping npm source integrity SRI-only. |
+| [#95981](https://github.com/openclaw/openclaw/pull/95981) | `feeds-hosted-catalog-config-profiles` -> `main` | Merged 2026-06-28 at `70e0fd4d8b` from prepared head `ef4d81cd08`; durable `marketplaces.*` config/trust-root contract accepted for this staged config slice | Add hosted catalog config profiles, with plain HTTPS feed URLs only and generated config baseline updated. |
+| [#96155](https://github.com/openclaw/openclaw/pull/96155) | `feeds-hosted-catalog-marketplace-refresh` -> `main` | Merged 2026-06-28 at `102a65477e` from prepared head `1614070e92`; public refresh CLI contract accepted for this manual snapshot-refresh slice | Add marketplace feed refresh command. |
+| [#96158](https://github.com/openclaw/openclaw/pull/96158) | `feeds-hosted-catalog-marketplace-entries` -> `main` | Merged 2026-06-28 at `9bb004359e` from prepared head `1289a25156`; public entries CLI contract accepted for this explicit manual read slice | Add marketplace feed entries command. |
+| [#96194](https://github.com/openclaw/openclaw/pull/96194) | `feeds-hosted-catalog-marketplace-telemetry` -> `main` | Merged 2026-06-28 at `9c5ee4676d` from hardened head `be9ce48da0`; narrowed telemetry event contract accepted before merge | Add marketplace feed telemetry. |
+
+## OpenClaw Hosted Feed Trust Series
+
+| PR | Branch | Status | Purpose |
+| --- | --- | --- | --- |
+| [RFC #25](https://github.com/openclaw/rfcs/pull/25) | `codex/hosted-feed-trust-addendum` | Draft open | Series PR #1: RFC addendum for hosted feed trust, ClawHub account feeds, and follow-up implementation slices. |
+| [#98299](https://github.com/openclaw/openclaw/pull/98299) | `feeds-trust-envelope-verifier` | Series PR #2 / OpenClaw PR #1; draft open at `8742cc6515`; GitHub checks pass/skip, ClawSweeper says ready for maintainer look, Codex review clean again on 2026-07-01 | Add signed hosted feed envelope verifier primitives for the official external plugin catalog. This is primitives only: no marketplace refresh wiring, config changes, snapshot trust-state persistence, CLI output, or install eligibility changes yet. |
+| [#98316](https://github.com/openclaw/openclaw/pull/98316) | `feeds-trust-source-profiles` | Series PR #3 / OpenClaw PR #2; draft open at `16cbe678ce`; stacked after #98299 and currently targets `main` because the dependency branch is on the fork; strict raw-key parsing and duplicate trust-anchor validation pushed; final Codex review clean on 2026-07-01; ClawSweeper re-review requested | Add source-profile trust config that can name trusted hosted-feed signing keys without wiring refresh, snapshot trust-state persistence, CLI output, or install eligibility changes yet. |
+| [#98338](https://github.com/openclaw/openclaw/pull/98338) | `feeds-trust-refresh-state` | Series PR #4 / OpenClaw PR #3; draft open at `3ce0cfafaf`; stacked after #98316 and currently targets `main` because dependency branches are on the fork; duplicate trust-anchor threshold hardening pushed; focused Codex review clean again on 2026-07-01; ClawSweeper re-review requested | Wire signed source profiles into marketplace refresh, persist bounded signed-feed trust state with snapshots, and re-verify signed snapshots before use while keeping install eligibility and current CLI payload shape unchanged. |
+| [#98350](https://github.com/openclaw/openclaw/pull/98350) | `feeds-trust-cli-visibility` | Series PR #5 / OpenClaw PR #4; draft open at `3bda4dbcc3`; stacked after #98338 and currently targets `main` because dependency branches are on the fork; rebased onto the hardened trust stack; focused Codex review clean again on 2026-07-01; ClawSweeper re-review requested | Show bounded signed feed trust state in marketplace refresh/entries JSON and text output, plus low-cardinality diagnostics facts, without exposing signing material, raw URLs, checksums, or signing key ids in diagnostics. |
+
+## OpenClaw Native Feed Stack
+
+| PR | Branch | Status | Purpose |
+| --- | --- | --- | --- |
 | [#88732](https://github.com/openclaw/openclaw/pull/88732) | `feeds-native-search-default` | Draft open, updated 2026-06-19 to `c487721eafb`; mergeable; native search docs/import/policy evidence fixes pushed; PR body has real skills/plugins feed-search proof; stale `needs proof` label awaiting ClawSweeper refresh and maintainer trust/default approval | Native feed search defaults. |
 | [#87827](https://github.com/openclaw/openclaw/pull/87827) | `feeds-lifecycle-tooling` | Draft open, updated 2026-06-19 to `47aabc7bcd`; mergeable; deterministic build and URL validate/hash findings fixed; PR body has real lifecycle CLI proof; stale `needs proof` label awaiting ClawSweeper refresh | Feed lifecycle tooling. |
 | [#87826](https://github.com/openclaw/openclaw/pull/87826) | `feeds-policy-conformance-4pr` | Draft open, rebased, merge clean | Feed catalog policy conformance. |
@@ -120,6 +140,12 @@ per-user personal feeds at `/v1/scout/feeds/personal.json`.
 
 ## Source Notes
 
+- `clawhub-account-feeds/README.md`
+- `clawhub-account-feeds/account-feed-model-api.md`
+- `clawhub-account-feeds/claim-official-state.md`
+- `clawhub-account-feeds/follow-graph-notifications.md`
+- `clawhub-account-feeds/profile-discovery-surfaces.md`
+- `clawhub-account-feeds/registry-scan-bridge.md`
 - `openclaw-feeds-rfc-meeting-2026-06-17.md`
 - OpenClaw RFC direction from the Vince/Patrick/OpenClaw meeting: feeds should
   be framed first as a plugin distribution and governance model. The core value

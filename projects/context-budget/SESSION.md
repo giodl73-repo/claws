@@ -18,10 +18,9 @@
 
 ## Current Session
 
-- Last updated: 2026-06-19.
+- Last updated: 2026-06-20.
 - Last agent: Codex.
-- Current focus: Lobster-owned quarantined OpenClaw `context-budget` plugin PR
-  plus stacked Budget tool-result UX PR.
+- Current focus: Lobster Budget UX PR is approved with required checks green.
 - Active OpenClaw branch: `user/giodl/context-budget-management-integrations`.
 - Current local stack:
   - PR 1: `user/giodl/context-budget-audit` at `7d9019efda4`.
@@ -47,10 +46,8 @@
 - Lobster plugin branch / PR:
   `user/giodl/context-budget-plugin`,
   https://microsoft.ghe.com/bic/lobster/pull/3371.
-- Lobster plugin PR state: current head `01e2c0723`; review required;
-  required ADO checks queued on 2026-06-19:
-  `Lobster-Runtime-PullRequest` build `168820453` and
-  `Lobster-Runtime-Build-Validation` build `168820452`.
+- Lobster plugin PR state: merged to `main` on 2026-06-20 at merge commit
+  `0ad443d8b0cf49d8e4192b67f641bf13c1bcd9c3`.
 - Lobster PR changes after review: user-facing tool renamed from
   `context_budget` to `budget`; runtime plugin overlay now preserves
   `context-budget` during normal code-mode startup.
@@ -72,18 +69,34 @@
 - Lobster UX branch / PR:
   `user/giodl/context-budget-ux`,
   https://microsoft.ghe.com/bic/lobster/pull/3379.
-- Lobster UX PR state: stacked on PR 3371, current head `feb1b9ded`,
-  approved, restacked on `01e2c0723`, and blocked by GitHubPop
-  proof-of-presence plus queued ADO checks.
+- Lobster UX PR state: rebased onto `main` after PR 3371 merged; current head
+  `0306300dd1100c58e52d03921d73e52d617d2415`; branch pushed to
+  `user/giodl/context-budget-ux`. Latest fix was reapplied after a force-push
+  to `78ab0761`: removed duplicate gateway default initializers causing
+  `error[E0062]`, restored Scout/Budget web feature-flag cleanup, included the
+  Biome formatter delta, restored raw Budget usage percentage labels while
+  clamping only the progress bar, and updated API docs for the feature-flag
+  contract. Follow-up `e0888026` addresses dspektor's real-tool-result finding
+  by unwrapping `jsonToolResult().details` and adding component coverage for
+  the `{ content, details }` envelope. Follow-up `0306300d` addresses the
+  remaining production render-path finding by routing the Budget card through
+  `ToolCard`, `MinimalToolRow`, and `ActivityToolLine`, with minimal and orb
+  production-path tests. Live check on 2026-06-22 showed PR 3379 approved with
+  `GitOps/GitHubPop`, `GitOps/FileAffordance`, `GitOps/OwnershipEnforcer`,
+  `Lobster-Runtime-PullRequest` build `168878551`, and
+  `Lobster-Runtime-Build-Validation` build `168878550` all green.
+- Lobster UX worktree: `C:\src\lobster-pr-3379`.
 - Budget UX gate: specialized Budget card is behind ECS flag
   `lobster.web_context_budget_ui_enabled`, projected to the SPA as
   `context_budget_ui_enabled`. Default false keeps `budget` results on the
   generic tool card.
-- Lobster checks: PR 3379 has `GitOps/FileAffordance` passing and
-  `GitOps/GitHubPop` failing only for proof-of-presence auth on
-  `feb1b9ded`. Required runtime checks were requeued after the stack rebase:
-  `Lobster-Runtime-PullRequest` build `168820507` and
-  `Lobster-Runtime-Build-Validation` build `168820506`.
+- Lobster checks: PR 3379 head `0306300d` has local validation for
+  `git diff --check`, `cargo +stable fmt --check` in `src/lobster_runtime`,
+  ECS inventory check, Biome formatter check, and Biome lint. Full local Cargo
+  checks are still blocked by the private `lobster` cargo registry token.
+  Azure CLI is installed locally, but device login is blocked by Conditional
+  Access error 53003 for the Microsoft Azure CLI app, so ADO runs must be
+  monitored or queued from an approved machine.
 - Design note: `projects/context-budget/lobster-budget-plugin-design.md`.
 
 ## Resume Checklist
@@ -113,9 +126,8 @@
 
 - Decide where the quarantined Budget extension/fork should live and how Galin
   will maintain it.
-- Monitor Lobster PRs 3371 and 3379 for required checks:
-  `GitOps/GitHubPop`, `Lobster-Runtime-PullRequest`, and
-  `Lobster-Runtime-Build-Validation`.
+- PR 3371 is merged. PR 3379 is approved with required checks green; watch only
+  for maintainer merge/readiness follow-up.
 - Review the local RFC rewrite before filing any RFC PR; push only when
   explicitly requested.
 - If the RFC is filed, create the required `maintainer-discussion` Discord

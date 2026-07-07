@@ -20,7 +20,11 @@
 | `C:\src\openclaw-pr-oc-path-dry-run-diff` | Dry-run diff follow-up. |
 | `C:\src\openclaw-pr-oc-path-yaml` | YAML follow-up. |
 
+2026-06-26 refresh: none of the three listed paths existed locally on this
+machine. Treat them as historical pointers until a concrete follow-up issue or
+branch is found.
+
 ## Next
 
-- Inventory the three local oc-path worktrees before deleting or restacking.
+- Recreate an oc-path worktree only after confirming a live issue or PR target.
 - Keep active specs in project notes or upstream repo branches, not wave folders.

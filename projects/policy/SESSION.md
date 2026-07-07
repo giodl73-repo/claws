@@ -22,18 +22,26 @@
 
 ## Current Session
 
-- Last updated: 2026-06-19.
+- Last updated: 2026-07-07.
 - Last agent: Codex.
-- Current focus: #90003 and #89596 have merged. #94314 is the current
-  OpenClaw-side policy PR, splitting the policy doctor register module into
-  focused metadata, strictness, shared types, utility, and health-check factory
-  modules by policy scope. Remaining OpenClaw-side policy work also includes
-  #87081, #87826, and the stacked `sandbox.allowModes` / P2 config coverage
-  branches. A local unpublished RFC draft now tracks plugin feed policy
-  conformance after hosted feeds: `projects/policy/plugin-feed-policy-rfc-draft.md`.
-- Active branch / PR: OpenClaw #94314 branch `policy-doctor-register-split` at
-  `789c0ce2cc61dd14479edd6b03fd40a7c918e626`; stacked draft
-  `policy-sandbox-allow-modes` / giodl73-repo/openclaw #3; unfiled branch
+- Current focus: #90003, #89596, #94314, #99121, #99686, #99690, #99700, #99720, and #99731 have merged. #99121
+  landed the managed-policy `gateway.nodes.denyCommands` rule after Omar's
+  coverage finding was fixed and maintainer confirmation accepted exact,
+  case-sensitive deny-superset semantics. #99686 landed the policy-owned doctor
+  fix recommendation metadata and public `policy.fixRecommendation` JSON
+  subtree. #99690 landed guarded automatic `doctor --fix` repairs for automatic
+  narrowing findings. #99700 landed guarded required-deny automatic repairs
+  for root and agent deny-list findings. #99720 landed guarded channel ingress
+  automatic repairs for exact reported channel config paths while skipping
+  scoped inherited `channels.defaults.*` findings. #99731 landed guarded Gateway
+  HTTP endpoint automatic repairs for exact reported endpoint `enabled` leaves
+  while leaving URL-fetch allowlist findings manual. Remaining OpenClaw-side policy work includes #87081, #87826, and the stacked
+  `sandbox.allowModes` / P2 config coverage branches. Live issue #85938 remains
+  product-decision gated.
+  A local unpublished RFC draft tracks plugin feed policy conformance after
+  hosted feeds: `projects/policy/plugin-feed-policy-rfc-draft.md`.
+- Active branch / PR: Stacked draft `policy-sandbox-allow-modes` /
+  giodl73-repo/openclaw #3; unfiled branch
   `policy-config-coverage-p2`; OpenClaw #87081 and #87826 remain open. RFC #6 branch
   `policy-conformance-exec-approvals` is rebased to current RFC `main` at
   `b733875` and now edits
@@ -41,14 +49,192 @@
 - Known dirty state: `claws-hapi` has this session/README update plus unrelated
   pre-existing dirty files. The WSL OpenClaw worktree
   `/root/src/openclaw-89596-review` was clean after the #94314 push.
-- Blocking question: #94314 is no longer draft; GitHub checks are green and
-  ClawSweeper re-review is pending on head
-  `789c0ce2cc61dd14479edd6b03fd40a7c918e626`. RFC #6 is no longer path-conflicted
-  (`MERGEABLE`/`CLEAN`) but remains draft pending ClawSweeper re-review and
-  maintainer/security acceptance. #87081 was rebased on 2026-06-19 to
+- Blocking question: #87081 is the next concrete policy PR to
+  refresh for mergeability; #87826 is still draft and stacked on feeds. RFC #6 is
+  no longer path-conflicted (`MERGEABLE`/`CLEAN`) but remains draft pending
+  ClawSweeper re-review and maintainer/security acceptance. #87081 was rebased on 2026-06-19 to
   `373f83cd0e`; it is mergeable with GitHub CI green and the old
   `CHANGES_REQUESTED` review still appears stale after the gateway schema path
   update.
+
+## Latest #99690 State
+
+- Merged PR: https://github.com/openclaw/openclaw/pull/99690.
+- Merge commit: `14b2ca11ffa97c8e98ee186a0300f563f88fdce6`.
+- Completion comment:
+  https://github.com/openclaw/openclaw/pull/99690#issuecomment-4886513460.
+- Landed on 2026-07-05 after a clean restack to current `main`; final PR head
+  was `a5b42a57d6d55c1692e7050b22e50ff4fa56ff0b`.
+- Final diff was scoped to six policy/docs files: automatic repair helper,
+  policy doctor registration tests, scoped data-auth/gateway/tools repair
+  wiring, and `docs/cli/policy.md`.
+- Local proof on the clean restack passed: focused policy/repair Vitest for
+  `register.test.ts`, `metadata.test.ts`, and `doctor-repair-flow.test.ts`,
+  targeted `oxfmt --check`, `git diff --check origin/main...HEAD`, `git diff
+  --check`, and `pnpm tsgo:extensions`.
+- Hosted exact-head checks passed on `a5b42a57d6d55c1692e7050b22e50ff4fa56ff0b`.
+  `scripts/pr-prepare run 99690` recorded hosted gates, `scripts/pr-merge
+  verify 99690` accepted final behind-main drift as unrelated, and
+  `scripts/pr-merge run 99690` landed the PR.
+- The WSL PR worktree `/root/src/openclaw-workflow/.worktrees/pr-99690` and
+  local temporary branches `pr-99690-prep`, `pr-99690-clean`, and
+  `pr-99690-remote` were removed after merge.
+
+## Latest #99700 State
+
+- Merged PR: https://github.com/openclaw/openclaw/pull/99700.
+- Merge commit: `5b06eba9fe9e6caf224d6d573b2116149b7755b7`.
+- Completion comment:
+  https://github.com/openclaw/openclaw/pull/99700#issuecomment-4895462470.
+- Landed on 2026-07-06 after repeated clean restacks to current `main`; final
+  PR head was `18ff62b1797fe2f18a31814565f8decf0fa27a7f`.
+- Final diff was scoped to six policy/docs files: required-deny automatic
+  repair helper behavior, fix metadata, focused policy doctor tests, required
+  deny repair wiring, and `docs/cli/policy.md`.
+- Local proof on the final restacks passed: focused policy/repair Vitest for
+  `register.test.ts`, `metadata.test.ts`, and `doctor-repair-flow.test.ts`,
+  targeted `oxfmt --check`, `git diff --check origin/main...HEAD`, `git diff
+  --check`, and `pnpm tsgo:extensions`.
+- Hosted exact-head checks passed on `18ff62b1797fe2f18a31814565f8decf0fa27a7f`.
+  A transient `check-test-types` failure on an earlier restack was in Discord
+  test typing and was fixed by newer `main`; the final head included that main
+  fix and was green.
+- `scripts/pr-merge verify 99700` accepted final behind-main drift as unrelated
+  to the prepared files and not merge-critical. `scripts/pr-merge run 99700`
+  landed the PR.
+- Local cleanup completed after merge: removed
+  `/root/src/openclaw-workflow/.worktrees/pr-99700`, deleted local
+  `pr-99700-prep` and `pr-99700-clean-current`, and pruned worktrees.
+
+## Latest #99720 State
+
+- Merged PR: https://github.com/openclaw/openclaw/pull/99720.
+- Merge commit: `97777a70268a39ab29b1dcdac94a01565efb8077`.
+- Completion comment:
+  https://github.com/openclaw/openclaw/pull/99720#issuecomment-4899065638.
+- Maintainer acceptance comment:
+  https://github.com/openclaw/openclaw/pull/99720#issuecomment-4898354865.
+- Landed on 2026-07-07 after repeated clean restacks through fast-moving
+  `main`; final PR head was `65363dea5ee47b29097ea41fe71c65e82abc23f3`.
+- Final diff was scoped to five policy/docs files: channel ingress automatic
+  repair behavior, channel repair registration, focused doctor/doctor-lint
+  tests, and `docs/cli/policy.md`.
+- During restack, current `main` absorbed the docs-map and plugin SDK surface
+  budget baseline fixes needed by hosted gates; the final PR head dropped the
+  temporary gate-fix commit and returned to the intended five-file policy diff.
+- Local proof on the final restack passed: `git diff --check
+  origin/main...HEAD`, `git diff --check`, focused
+  `test/scripts/plugin-sdk-surface-report.test.ts` while diagnosing the
+  transient hosted failure, and `pnpm docs:map:check` before main absorbed that
+  baseline.
+- Hosted exact-head checks passed on
+  `65363dea5ee47b29097ea41fe71c65e82abc23f3`. `scripts/pr-prepare run 99720`
+  hit the known hosted-gate repo-argument bug, so direct
+  `verify-pr-hosted-gates.mjs --repo openclaw/openclaw --pr 99720` proof was
+  recorded before `scripts/pr prepare-push 99720`.
+- `scripts/pr-merge verify 99720` accepted final behind-main drift as unrelated
+  to the prepared files and not merge-critical. `scripts/pr-merge run 99720`
+  landed the PR.
+- Local cleanup completed after merge: removed
+  `/root/src/openclaw-workflow/.worktrees/pr-99720`, deleted local
+  `pr-99720-prep` and `pr-99720-live`, and pruned worktrees. The OpenClaw
+  workflow checkout still has unrelated pre-existing dirty doctor files.
+
+## Latest #99731 State
+
+- Merged PR: https://github.com/openclaw/openclaw/pull/99731.
+- Merge commit: `41425bf094ec7f65f673a0d99f8a185354a3b8bf`.
+- Completion comment:
+  https://github.com/openclaw/openclaw/pull/99731#issuecomment-4907158064.
+- Maintainer acceptance comment:
+  https://github.com/openclaw/openclaw/pull/99731#issuecomment-4907134219.
+- Landed on 2026-07-07 after clean restacks through fast-moving `main`; final
+  PR head was `c216e7485c5e12df315a70543f092a6cce801b58`.
+- Final diff was scoped to six policy/docs files: Gateway HTTP endpoint
+  automatic repair classification and wiring, fix metadata, focused doctor
+  tests, and `docs/cli/policy.md`.
+- Local proof on the final restack passed: `node --import tsx
+  .local/proof-99731.mts`, focused policy doctor Vitest for `register.test.ts`
+  and `metadata.test.ts` (2 files / 299 tests), `pnpm docs:map:check`,
+  touched-file `oxfmt --check`, `git diff --check origin/main...HEAD`, and
+  `git diff --check`.
+- ClawSweeper re-reviewed the exact head and reported no contributor-facing
+  blocker; remaining risk was maintainer acceptance of automatic endpoint
+  disabling, which was explicitly posted before merge.
+- Hosted exact-head checks passed on
+  `c216e7485c5e12df315a70543f092a6cce801b58`. `scripts/pr-merge verify 99731`
+  accepted final behind-main drift as unrelated to the prepared files and not
+  merge-critical. `scripts/pr-merge run 99731` landed the PR.
+
+## Latest #99686 State
+
+- Merged PR: https://github.com/openclaw/openclaw/pull/99686.
+- Merge commit: `55683d23e35af8a343889fec691000dbd29430cd`.
+- Completion comment:
+  https://github.com/openclaw/openclaw/pull/99686#issuecomment-4884585493.
+- Landed on 2026-07-05 after marking ready, fixing CI's test-type failure from
+  `Object.groupBy` in `extensions/policy/src/doctor/metadata.test.ts`, and
+  restacking through the maintainer wrapper to head
+  `ef4face24273eb4a4f387c85fbb4bdf2e84c471c`.
+- Local proof on the final rebased head passed: `pnpm check:test-types`,
+  targeted `oxfmt --check`, and focused policy Vitest for `metadata.test.ts`,
+  `register.test.ts`, and `cli.test.ts` (316 tests). Earlier focused proof also
+  covered `src/commands/doctor-lint.test.ts` for the generic doctor-lint
+  absence path.
+- Hosted exact-head CI passed on `ef4face24273eb4a4f387c85fbb4bdf2e84c471c`.
+  `scripts/pr-merge verify 99686` accepted the remaining behind-main drift as
+  unrelated and `scripts/pr-merge run 99686` landed the PR.
+- A local `prepare-sync-head` gate observed `pnpm check` failing the npm
+  shrinkwrap guard; the same `pnpm deps:shrinkwrap:check` failure reproduced on
+  clean `origin/main@b4f09fe7fa5`, so it was treated as baseline local noise.
+- Restacked on 2026-07-04 from old head
+  `076a5cb2225fede0c22261221e9daaf4af148db2` to
+  `2466c7a3f21afc82848df02ef25886ac0177319b` by cherry-picking only the PR-owned
+  recommendation commits onto `origin/main` after #99121 merged. Pushed with
+  `--force-with-lease` to `giodl73-repo/openclaw:policy-doctor-fix-rules`.
+- Final landed diff is 5 policy files directly against `main`: policy fix
+  metadata, policy CLI JSON output, policy doctor registration, and focused
+  tests. Old gateway stack commits are no longer carried in the branch history.
+- PR body was refreshed with exact `Real behavior proof`. The proof used an
+  isolated `/tmp/openclaw-policy-fix-proof.*` workspace where Telegram was
+  enabled and denied by `policy.jsonc`. `doctor --lint --json --only
+  policy/channels-denied-provider` through `node scripts/run-node.mjs --dev`
+  emitted `fixRecommendation`; supplemental `policyCheckCommand({ json: true })`
+  emitted the same recommendation while the attestation object stayed
+  recommendation-free.
+- Local validation on the restacked head passed: focused policy/doctor/JSON
+  Vitest (4 files, 329 tests), `pnpm tsgo:extensions`, targeted `oxfmt`, targeted
+  `oxlint`, and `git diff --check origin/main...HEAD && git diff --check`.
+- Final hosted checks on the landed head passed. Cancelled superseded
+  `auto-response` / `Real behavior proof` runs appeared during the ready/sync
+  churn but were not current-head failures.
+
+## Latest #99121 State
+
+- Merged on 2026-07-04:
+  https://github.com/openclaw/openclaw/pull/99121.
+- Prepared head:
+  `21347f2b55ebf57f7352e3098e774fa6e209357c`.
+- Merge commit:
+  `832cb3c48880b672a72bfcbdb570e7d123412d8e`.
+- Completion comment:
+  https://github.com/openclaw/openclaw/pull/99121#issuecomment-4883949783.
+- Review/prepare/merge flow ran from `/root/src/openclaw-workflow`:
+  `scripts/pr-review 99121`, validated `.local/review.md` and
+  `.local/review.json` with no findings, `OPENCLAW_TESTBOX=1 scripts/pr-prepare
+  run 99121`, `prepare-sync-head 99121` after merge-critical mainline drift,
+  then `scripts/pr-merge verify 99121` and `scripts/pr-merge run 99121`.
+- Sync rebase conflict in `test/scripts/plugin-sdk-surface-report.test.ts` was
+  resolved by keeping current-main's split surface-budget tests plus the PR's
+  ambient `OPENCLAW_PLUGIN_SDK_MAX_*` isolation. Focused validation after the
+  conflict passed: `node scripts/run-vitest.mjs
+  test/scripts/plugin-sdk-surface-report.test.ts --reporter=dot` (9 tests).
+- Hosted exact-head checks reached 98 total, 0 pending, 0 failed after rerunning
+  one unrelated `checks-node-compact-small-whole-2` gateway CPU scenario flake.
+- Local cleanup completed after merge: removed
+  `/root/src/openclaw-workflow/.worktrees/pr-99121`, deleted local
+  `pr-99121-prep`, and pruned worktrees. Other unrelated PR worktrees were left
+  alone.
 
 ## Latest #87081 State
 

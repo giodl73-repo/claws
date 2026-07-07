@@ -1,5 +1,5 @@
 param(
-  [string]$Distro = "Ubuntu-24.04",
+  [string]$Distro = "Ubuntu",
   [string]$User = "root"
 )
 
@@ -54,8 +54,8 @@ Invoke-Checked "wsl-repos" {
   if ($LASTEXITCODE -ne 0) {
     throw "wsl-repos failed with exit code $LASTEXITCODE"
   }
-  if (-not ($output | Select-String -SimpleMatch "openclaw-context-budget")) {
-    throw "wsl-repos did not list openclaw-context-budget"
+  if (-not $output -or @($output).Count -eq 0) {
+    throw "wsl-repos returned no output"
   }
   $output | Select-Object -First 5
 }

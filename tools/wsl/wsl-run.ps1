@@ -1,5 +1,5 @@
 param(
-  [string]$Distro = "Ubuntu-24.04",
+  [string]$Distro = "Ubuntu",
   [string]$User = "root",
   [string]$Root = "/root/src",
   [string]$Repo,

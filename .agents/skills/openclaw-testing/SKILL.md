@@ -59,6 +59,11 @@ Prove the touched surface first. Do not reflexively run the whole suite.
   `node scripts/run-vitest.mjs` for tiny local proof, `node
 scripts/crabbox-wrapper.mjs` for Testbox, and `git commit --no-verify` only
   after the relevant remote or node-wrapper proof is already clean.
+- On Windows, invoke local formatter/linter package bins through the generated
+  `.CMD` shims, for example `node_modules\.bin\oxfmt.CMD` and
+  `node_modules\.bin\oxlint.CMD`. Do not execute extensionless package scripts
+  such as `node_modules/oxfmt/bin/oxfmt` directly; Windows may show an app
+  chooser popup instead of running them through Node.
 - For remote proof, use the Crabbox wrapper first, but name the actual backend.
   Direct AWS Crabbox uses `provider=aws` and `cbx_...` ids. Delegated
   Blacksmith Testbox through Crabbox uses `provider=blacksmith-testbox`,

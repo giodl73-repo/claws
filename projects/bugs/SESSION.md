@@ -19,9 +19,57 @@
 
 ## Current Session
 
-- Last updated: 2026-06-19.
+- Last updated: 2026-07-03.
 - Last agent: Codex.
-- Current focus: OpenClaw bugfix PR sweep; #85791, #89596, #90003, and #93738
+- Current focus: OpenClaw bugfix PR sweep; latest triage looked for open P1
+  issues in doctor, policy, oc-path, config, and workspace that do not have an
+  open PR. `gitcrawl` was unavailable in this Windows shell, so discovery used
+  live `gh` search and open-PR reference checks. Clean no-open-PR candidates
+  found: #86215, #90881, #84942, #85042, #93140, #87284, and #99550. Exact
+  oc-path search found no true oc-path P1 candidate; the hits were generic path
+  or channel issues.
+  P2 follow-up on the same surfaces found better-looking small candidates, but
+  the obvious queueable/source-repro issues mostly already have open PRs:
+  #99237, #98591, #99185, #91514, #99239, #97880, #77802, and #60612 all showed
+  open PR references in live search. Potential no-open-direct-PR candidates:
+  #98799 (`install.sh` channel config overwrite; exact keyword PR search found
+  no direct match, though generic config-merge PR #98901 mentions the issue),
+  and #97180 (`doctor --fix` enables uninstalled `codex` plugin; no PR refs,
+  but product-decision gated). #99237 would otherwise be the cleanest doctor
+  bug, but it already has multiple open fix PRs.
+  Current implementation thread: issue #84212 now has draft PR #99619 from
+  local OpenClaw branch `user/giodl/doctor-model-ref-lint` in
+  `C:\tmp\openclaw-doctor-model-ref-lint`. The branch adds warning-only
+  `openclaw doctor --lint --only core/doctor/agent-model-runtime-policies`
+  coverage for active agent model refs that do not match explicit
+  `agentRuntime` policies, plus stale policy keys that no active ref uses. This
+  is a partial mitigation that helps diagnose #84212; it does not fully fix the
+  issue because config save/reload still accepts the contradictory state. It
+  intentionally avoids hard-failing config save/reload, which remains a product
+  decision on #84212. On 2026-07-03 the branch was rebased onto current main,
+  adjusted for upstream's removal of `doctor-health-conversion-plan.ts`, and
+  amended to register the new check in the current ordered doctor health
+  contributions so `--lint --only` actually runs it. Proof passed: `pnpm
+  format:check src\flows\doctor-core-checks.ts
+  src\commands\doctor-lint.test.ts src\flows\doctor-health-contributions.ts`
+  and `node scripts/run-vitest.mjs src\commands\doctor-lint.test.ts
+  src\flows\doctor-core-checks.test.ts src\flows\doctor-lint-flow.test.ts
+  src\flows\doctor-health-contributions.test.ts`. Commit `eccd735f3e` was
+  force-pushed to `giodl73-repo:user/giodl/doctor-model-ref-lint`. Live PR
+  state after fresh checks: draft, mergeStateStatus `CLEAN`, Real behavior
+  proof passed, and all non-skipped checks reported by `gh pr checks` passed.
+  Open bug PR sweep on 2026-07-03: #90708 is clean/proof-sufficient/ready for
+  maintainer review; #87471 is clean/proof-sufficient but still
+  draft/canonical-fix gated; #90062 is now proof-sufficient/ready but still
+  draft/canonical-fix gated; #83991 and #86285 remain live-provider-proof or
+  maintainer-override gated; #94187 is closed and no longer updateable. #86627
+  still has old failing CI, but current `origin/main` already contains the
+  ordered contribution health path, reserved `core/doctor/*` rejection tests,
+  and plugin SDK `health` surface budget. A 2026-07-03 rebase attempt in
+  `C:\tmp\openclaw-86627` conflicted across obsolete doctor conversion-plan
+  surfaces and was aborted; treat #86627 as superseded/obsolete unless
+  maintainers explicitly want the old branch rewritten or closed.
+  Prior focus: OpenClaw bugfix PR sweep; #85791, #89596, #90003, and #93738
   are merged. #86627, #83991, and #86285 are rebased/refreshed and CI-clean.
   #86627 is mergeable/CLEAN with proof sufficient. #83991 and #86285 are
   blocked only on live provider proof or maintainer override. #89596, #90708,
@@ -29,22 +77,16 @@
   #94187 remains blocked on PR-body real behavior proof and disabled maintainer
   edits.
 - Active branch / PR: openclaw/openclaw#86627, #90708, #87471, #90062,
-  #83991, #86285, and #94187.
+  #83991, #86285, #94187, and draft #99619 for #84212.
 - Known dirty state: `claws-hapi` already had unrelated local admin/context
   edits before this session; do not revert them.
-- Blocking question: #90062 still needs real CLI/Gateway proof for a fresh
-  `agent:main:probe-*` session-key send; local isolated Gateway proof attempts
-  start Gateway but the unbuilt-source `agent` CLI hangs before stdout/session
-  write. #83991 needs live Vertex/Gemini proof or maintainer acceptance; CI is
-  green.
+- Blocking question: #83991 needs live Vertex/Gemini proof or maintainer
+  acceptance; CI is green.
   #86285 needs live Twilio/OpenAI outbound-call proof or maintainer acceptance,
-  though source/local proof and live CI are now clean. #94187 has green code CI,
-  but Real behavior proof is currently failing because the external PR body
-  lacks the required section/evidence and it still lacks live Telegram Desktop
-  after-fix visibility because Mantis did not produce a bot reply in either
-  checkout. #90708 is clean after removing the Slack timeout behavior change;
-  live 2026-06-19 state is mergeable/CLEAN with passing checks, proof
-  sufficient, and ready for maintainer review.
+  though source/local proof and live CI are now clean. #90062 is now
+  proof-sufficient/ready but remains draft. #94187 is closed. #90708 is clean
+  after removing the Slack timeout behavior change; live 2026-07-03 state has
+  passing non-skipped checks, proof sufficient, and ready-for-maintainer labels.
 
 ## Resume Checklist
 
@@ -101,6 +143,15 @@
   noise outside the PR surface. Live GitHub head later advanced to
   `9b06037369ac`; latest CI refresh showed mergeable/CLEAN, proof sufficient,
   and all checks green.
+- PR #86627 was rechecked on 2026-07-03. Live head is now `e0955797c1` with old
+  failing CI (`check-test-types`, `checks-node-agentic-agents-embedded`, and
+  `checks-node-core-tooling`), but the current `origin/main` already contains
+  the ordered contribution health path and reserved `core/doctor/*` collision
+  checks. A refresh worktree at `C:\tmp\openclaw-86627` attempted to rebase the
+  five old PR commits and stopped on conflicts in current doctor lint,
+  contribution, registry, and deleted conversion-plan surfaces. Rebase was
+  aborted. Recommendation: treat #86627 as superseded/obsolete unless
+  maintainers explicitly ask for the old branch to be rewritten or closed.
 - PR #90708 opened from
   `/root/src/openclaw-workflow/.worktrees/baseline-prepare-gates-20260605c` on
   branch `user/giodl/fix-local-baseline-prepare-gates-20260605c`. It fixes the

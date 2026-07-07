@@ -23,6 +23,12 @@ proof, and next PRs without using `claws-hapi` as a prototype repo.
 | openclaw/openclaw | [#87074](https://github.com/openclaw/openclaw/pull/87074) | Reject unsupported policy keys. |
 | openclaw/openclaw | [#90003](https://github.com/openclaw/openclaw/pull/90003) | Cover `exec-approvals.json` policy evidence and rules. Merged 2026-06-16 at `55263b3dfa416425f4fc4fdc60cd08d6e8bbb345`. |
 | openclaw/openclaw | [#89596](https://github.com/openclaw/openclaw/pull/89596) | Recognize declared plugin/MCP tool allowlists. Merged 2026-06-18 at `fadbcf8a4e43d7f4384c49972fdaff17bb34e6d7`. |
+| openclaw/openclaw | [#99121](https://github.com/openclaw/openclaw/pull/99121) | Cover Gateway node command deny policy. Merged 2026-07-04 at `832cb3c48880b672a72bfcbdb570e7d123412d8e`. |
+| openclaw/openclaw | [#99686](https://github.com/openclaw/openclaw/pull/99686) | Add policy-owned doctor fix recommendation metadata and public `policy.fixRecommendation` JSON output. Merged 2026-07-05 at `55683d23e35af8a343889fec691000dbd29430cd`. |
+| openclaw/openclaw | [#99690](https://github.com/openclaw/openclaw/pull/99690) | Add guarded automatic `doctor --fix` repairs for policy narrowing findings. Merged 2026-07-05 at `14b2ca11ffa97c8e98ee186a0300f563f88fdce6`. |
+| openclaw/openclaw | [#99700](https://github.com/openclaw/openclaw/pull/99700) | Add guarded required-deny automatic repairs for Policy doctor findings. Merged 2026-07-06 at `5b06eba9fe9e6caf224d6d573b2116149b7755b7`. |
+| openclaw/openclaw | [#99720](https://github.com/openclaw/openclaw/pull/99720) | Add guarded channel ingress automatic repairs for Policy doctor findings. Merged 2026-07-07 at `97777a70268a39ab29b1dcdac94a01565efb8077`. |
+| openclaw/openclaw | [#99731](https://github.com/openclaw/openclaw/pull/99731) | Add guarded Gateway HTTP endpoint automatic repairs for Policy doctor findings. Merged 2026-07-07 at `41425bf094ec7f65f673a0d99f8a185354a3b8bf`. |
 | openclaw/openclaw | [#87056](https://github.com/openclaw/openclaw/pull/87056) | Data handling conformance checks. |
 | openclaw/openclaw | [#86768](https://github.com/openclaw/openclaw/pull/86768) | Policy file comparison command. |
 | openclaw/openclaw | [#85817](https://github.com/openclaw/openclaw/pull/85817) | Agent-scoped policy overlays. |
