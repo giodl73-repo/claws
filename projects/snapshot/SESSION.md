@@ -20,8 +20,8 @@
 
 - Last updated: 2026-07-06
 - Last agent: Codex
-- Current focus: Lobster snapshot telemetry proved the plugin events are wired, but the trial only showed two `openclaw.snapshot.list` rows and no create/recover rows. New Lobster PR #4064 enables opt-in startup snapshot creation so the trial actually produces global DB snapshot artifacts and `openclaw.snapshot.create` telemetry.
-- Active branch / PR: Lobster `user/giodl/openclaw-snapshot-auto-create`, https://microsoft.ghe.com/bic/lobster/pull/4064; RFC https://github.com/openclaw/rfcs/pull/20; OpenClaw PR A https://github.com/openclaw/openclaw/pull/94805.
+- Current focus: Lobster PR #4064 enables opt-in startup snapshot creation so the trial actually produces global DB snapshot artifacts and `openclaw.snapshot.create` telemetry. OpenClaw PR A and RFC #20 were reframed from a top-level `openclaw snapshot` command to the narrower SQLite-specific backup surface: `openclaw backup sqlite snapshot`.
+- Active branch / PR: OpenClaw `giodl/snapshot-restore-proof-pr4`, https://github.com/openclaw/openclaw/pull/94805; RFC https://github.com/openclaw/rfcs/pull/20; Lobster `user/giodl/openclaw-snapshot-auto-create`, https://microsoft.ghe.com/bic/lobster/pull/4064.
 - Known dirty state: `claws-hapi` has unrelated modifications in `.agents/skills/openclaw-testing/SKILL.md`, `projects/context-budget/README.md`, `projects/context-budget/SESSION.md`, `projects/lobster/SESSION.md`, `projects/prs/SESSION.md`, and untracked `projects/openclaw/SESSION.md`; do not include them in snapshot commits. This file also has local session updates pending commit.
 - Blocking question: None. Keep logical DB units as existing context rather than the main RFC decision.
 
@@ -43,8 +43,8 @@
 ## Open Threads
 
 - Draft RFC: https://github.com/openclaw/rfcs/pull/20
-  - Latest pushed head: `7f09e0a22a` (`Move memory search snapshot target to future design`)
-  - RFC Phase 1 now only includes the core snapshot command for `--target global`, `--agent <id>`, explicit `--db`, verify, and restore.
+  - Latest pushed head: `e26ef5c` (`Frame snapshots as SQLite backup artifacts`)
+  - RFC Phase 1 now uses the narrower `openclaw backup sqlite snapshot` command surface for `--target global`, `--agent <id>`, explicit `--db`, verify, and restore.
   - Memory-search-only artifacts are explicitly future design because memory-search currently shares the per-agent database-first store; a future target needs either a dedicated owner DB or a true logical export.
   - ClawSweeper re-review requested after the update: https://github.com/openclaw/rfcs/pull/20#issuecomment-4754635986
 - Closed OpenClaw PR 1: https://github.com/openclaw/openclaw/pull/94694
@@ -57,14 +57,15 @@
   - Latest pushed head: `addd22047e` (`Add named snapshot database targets`)
   - Closed in favor of consolidated core snapshot PR #94805.
 - Draft OpenClaw PR A: https://github.com/openclaw/openclaw/pull/94805
-  - Latest pushed head: `86f92a1e70` (`Warn that snapshot artifacts are sensitive`)
+  - Latest pushed head: `409d54170f` (`Nest SQLite snapshots under backup`)
   - Base: `main`
-  - Combines the previous provider, CLI, named target, safe-sync proof, restore proof/docs, realpath handling, global transient-row scrub, rollback-journal cleanup, and sensitive-artifact docs slices.
-  - Supported Phase 1 targets: `openclaw snapshot create --target global`, `openclaw snapshot create --agent <id>`, and explicit `--db <path>`.
+  - Combines the previous provider, CLI, named target, safe-sync proof, restore proof/docs, realpath handling, global transient-row scrub, rollback-journal cleanup, sensitive-artifact docs slices, and narrower command-surface update.
+  - Supported Phase 1 targets: `openclaw backup sqlite snapshot create --target global`, `openclaw backup sqlite snapshot create --agent <id>`, and explicit `--db <path>`.
+  - Rebased on current `origin/main` on 2026-07-06; PR is mergeable again after resolving command-index conflicts and regenerating the lockfile with `pnpm install --lockfile-only --ignore-scripts` during rebase.
+  - PR title/body updated to `Add SQLite snapshot artifacts under backup`; the old top-level `openclaw snapshot` registrar, docs page, and docs-nav entry were removed.
+  - Current proof after command-surface update/rebase: `node scripts/run-vitest.mjs run src/cli/program/register.backup.test.ts src/cli/program/command-registry.test.ts src/commands/snapshot.test.ts src/snapshot/snapshot-provider.test.ts`; `git diff --check origin/main...HEAD`; `node scripts/format-docs.mjs --check` only reports unrelated pre-existing `docs/reference/templates/CLAUDE.md`.
   - No `memory-search` named target remains in PR A.
-  - Current proof: `node scripts/run-vitest.mjs run src/commands/snapshot.test.ts src/snapshot/snapshot-provider.test.ts src/cli/program/register.snapshot.test.ts src/agents/memory-search.test.ts src/config/config.schema-regressions.test.ts`; `pnpm exec oxfmt --check` on changed code/docs; `git diff --check`; `pnpm docs:check-mdx`; `pnpm docs:check-links`; `pnpm build`; packaged `node openclaw.mjs snapshot create|verify|restore` proof for canonical global/per-agent DBs; `codex review --base origin/main`.
-  - Codex review found one P3 docs navigation gap; fixed by adding `cli/snapshot` to `docs/docs.json`. Rerun Codex review clean with no actionable findings.
-  - PR body retitled to `Add core SQLite snapshot command` and updated as the combined core snapshot MVP. Body now states that `openclaw snapshot` is the per-database SQLite sync artifact and `openclaw backup` remains the broad `.tar.gz` recovery archive.
+  - Earlier packaged CLI proof covered create/verify/restore for canonical global/per-agent DBs before the command-surface rename. Refresh packaged CLI proof with `openclaw backup sqlite snapshot ...` before asking for final maintainer acceptance.
   - ClawSweeper asked for packaged CLI proof and later a sensitive-artifact warning. Added current-head PR-body proof from `pnpm build`, `node openclaw.mjs snapshot create|verify|restore`, restored DB readback, and docs warning that global/per-agent artifacts can include auth profile records, session state, plugin state, and credentials-adjacent data.
   - Galin review: https://github.com/openclaw/openclaw/pull/94805#issuecomment-4752899418 asked to read `database.userVersion` from the generated artifact, not the live source before `VACUUM INTO`. Fixed in `31cb5374ef`; replied at https://github.com/openclaw/openclaw/pull/94805#issuecomment-4753084141.
   - Final PR A Codex review after the sensitive-docs fix: `codex review --base origin/main` returned no actionable correctness issues.
