@@ -22,9 +22,9 @@
 
 ## Current Session
 
-- Last updated: 2026-07-07.
+- Last updated: 2026-07-08.
 - Last agent: Codex.
-- Current focus: #90003, #89596, #94314, #99121, #99686, #99690, #99700, #99720, and #99731 have merged. #99121
+- Current focus: #90003, #89596, #94314, #99121, #99686, #99690, #99700, #99720, #99731, and #99776 have merged. #99121
   landed the managed-policy `gateway.nodes.denyCommands` rule after Omar's
   coverage finding was fixed and maintainer confirmation accepted exact,
   case-sensitive deny-superset semantics. #99686 landed the policy-owned doctor
@@ -35,7 +35,9 @@
   automatic repairs for exact reported channel config paths while skipping
   scoped inherited `channels.defaults.*` findings. #99731 landed guarded Gateway
   HTTP endpoint automatic repairs for exact reported endpoint `enabled` leaves
-  while leaving URL-fetch allowlist findings manual. Remaining OpenClaw-side policy work includes #87081, #87826, and the stacked
+  while leaving URL-fetch allowlist findings manual. #99776 landed
+  review-required Gateway repair previews for non-loopback bind and node command
+  deny findings without mutating security-sensitive gateway config. Remaining OpenClaw-side policy work includes #87081, #87826, and the stacked
   `sandbox.allowModes` / P2 config coverage branches. Live issue #85938 remains
   product-decision gated.
   A local unpublished RFC draft tracks plugin feed policy conformance after
@@ -46,9 +48,10 @@
   `policy-conformance-exec-approvals` is rebased to current RFC `main` at
   `b733875` and now edits
   `rfcs/needs_refactoring/0003-policy-conformance.md`.
-- Known dirty state: `claws-hapi` has this session/README update plus unrelated
-  pre-existing dirty files. The WSL OpenClaw worktree
-  `/root/src/openclaw-89596-review` was clean after the #94314 push.
+- Known dirty state: `claws-hapi` has this session/README update. The WSL
+  OpenClaw workflow checkout still has unrelated pre-existing dirty doctor
+  files; the merged #99776 worktree and local `pr-99776-prep` branch were
+  removed after landing.
 - Blocking question: #87081 is the next concrete policy PR to
   refresh for mergeability; #87826 is still draft and stacked on feeds. RFC #6 is
   no longer path-conflicted (`MERGEABLE`/`CLEAN`) but remains draft pending
@@ -165,6 +168,38 @@
   `c216e7485c5e12df315a70543f092a6cce801b58`. `scripts/pr-merge verify 99731`
   accepted final behind-main drift as unrelated to the prepared files and not
   merge-critical. `scripts/pr-merge run 99731` landed the PR.
+
+## Latest #99776 State
+
+- Merged PR: https://github.com/openclaw/openclaw/pull/99776.
+- Merge commit: `aa27ae9d9f37ee1127f89952e1dfeb9fb8577b99`.
+- Completion comment:
+  https://github.com/openclaw/openclaw/pull/99776#issuecomment-4917592989.
+- Maintainer acceptance comment:
+  https://github.com/openclaw/openclaw/pull/99776#issuecomment-4917324141.
+- Landed on 2026-07-08 after two clean sync restacks through fast-moving
+  `main`; final PR head was `5a76487a31e25a98caa8c0012bc3c1b9cb4d203c`.
+- Final diff was scoped to six policy/docs files: review-required Gateway
+  repair preview helpers, Gateway policy scope wiring, doctor repair flow
+  handling for skipped split repairs, focused tests, and `docs/cli/policy.md`.
+- Local proof on the prepared stack passed focused policy/repair Vitest for
+  `extensions/policy/src/doctor/register.test.ts` and
+  `src/flows/doctor-repair-flow.test.ts` (2 files / 308 tests), plus source
+  proof that `doctor --fix` surfaces `would-set-after-review` and
+  `would-append-after-review` preview effects while leaving gateway config
+  unchanged.
+- ClawSweeper re-reviewed the exact prepared head and reported proof sufficient
+  with maintainer signoff required for the operator-facing doctor output
+  contract; maintainer acceptance was posted before merge.
+- Hosted exact-head gates passed on
+  `5a76487a31e25a98caa8c0012bc3c1b9cb4d203c`: CI, Blacksmith Testbox,
+  Blacksmith ARM Testbox, Blacksmith Build Artifacts Testbox, and Workflow
+  Sanity. `scripts/pr-merge verify 99776` accepted final behind-main drift as
+  unrelated after the last sync, and `scripts/pr-merge run 99776` landed the PR.
+- Local cleanup completed after merge: removed
+  `/root/src/openclaw-workflow/.worktrees/pr-99776`, deleted local
+  `pr-99776-prep`, and pruned worktrees. The OpenClaw workflow checkout still
+  has unrelated pre-existing dirty doctor files.
 
 ## Latest #99686 State
 

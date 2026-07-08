@@ -29,6 +29,7 @@ proof, and next PRs without using `claws-hapi` as a prototype repo.
 | openclaw/openclaw | [#99700](https://github.com/openclaw/openclaw/pull/99700) | Add guarded required-deny automatic repairs for Policy doctor findings. Merged 2026-07-06 at `5b06eba9fe9e6caf224d6d573b2116149b7755b7`. |
 | openclaw/openclaw | [#99720](https://github.com/openclaw/openclaw/pull/99720) | Add guarded channel ingress automatic repairs for Policy doctor findings. Merged 2026-07-07 at `97777a70268a39ab29b1dcdac94a01565efb8077`. |
 | openclaw/openclaw | [#99731](https://github.com/openclaw/openclaw/pull/99731) | Add guarded Gateway HTTP endpoint automatic repairs for Policy doctor findings. Merged 2026-07-07 at `41425bf094ec7f65f673a0d99f8a185354a3b8bf`. |
+| openclaw/openclaw | [#99776](https://github.com/openclaw/openclaw/pull/99776) | Add review-required Gateway repair previews for non-loopback bind and node command deny Policy doctor findings. Merged 2026-07-08 at `aa27ae9d9f37ee1127f89952e1dfeb9fb8577b99`. |
 | openclaw/openclaw | [#87056](https://github.com/openclaw/openclaw/pull/87056) | Data handling conformance checks. |
 | openclaw/openclaw | [#86768](https://github.com/openclaw/openclaw/pull/86768) | Policy file comparison command. |
 | openclaw/openclaw | [#85817](https://github.com/openclaw/openclaw/pull/85817) | Agent-scoped policy overlays. |
