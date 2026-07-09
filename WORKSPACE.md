@@ -15,6 +15,7 @@ For agent and harness entry points, start with `CONTEXT.md`.
 | Policy | `projects/policy/` | Active policy conformance, evidence, RFC, and Lobster baseline work. |
 | Doctor | `projects/doctor/` | Active doctor health and structured-repair PR stacks. |
 | Feeds | `projects/feeds/` | OpenClaw feed support and Lobster Scout feed PR stacks. |
+| Catalog | `projects/catalog/` | OpenClaw command/tool catalog metadata, generated docs, prompt/audit lenses, and PR/RFC stack notes. |
 | UX state | `projects/ux-state/` | Gated Lobster Feeds, Policy, and Context Budget UX previews, flags, and design-review notes. |
 | Admin | `projects/admin/` | Lobster admin spaces, managed policy baselines, and Partner Center notes. |
 | Staffing | `projects/staffing/` | Lobster and ClawPilot staffing analysis and gap mapping; WorkIQ only as a search term. |

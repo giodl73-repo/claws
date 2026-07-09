@@ -11,6 +11,7 @@ be buried in generated wave directories.
 | `policy/` | Policy conformance, evidence files, RFC addenda, and Lobster policy baselines. |
 | `doctor/` | Doctor health findings, structured repairs, and repair-stack PRs. |
 | `feeds/` | OpenClaw feed primitives and Lobster Scout feed integration. |
+| `catalog/` | OpenClaw command/tool catalog metadata, generated docs, prompt/audit lenses, and PR/RFC stack notes. |
 | `ux-state/` | Gated Lobster Feeds, Policy, and Context Budget UX previews, flags, and design-review notes. |
 | `admin/` | Lobster admin spaces, managed policy baselines, Partner Center, and tenant/global admin settings. |
 | `staffing/` | Staffing analysis across Lobster and ClawPilot; WorkIQ only as a search term. |
@@ -41,6 +42,7 @@ agent is assigned to an area, then read the area `README.md`.
 | Policy | `policy/SESSION.md` |
 | Doctor | `doctor/SESSION.md` |
 | Feeds | `feeds/SESSION.md` |
+| Catalog | `catalog/SESSION.md` |
 | UX state | `ux-state/SESSION.md` |
 | Lobster | `lobster/SESSION.md` |
 | Admin | `admin/SESSION.md` |

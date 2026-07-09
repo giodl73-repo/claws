@@ -14,6 +14,7 @@ tools.
 | Policy work | `projects/policy/README.md` |
 | Doctor work | `projects/doctor/README.md` |
 | Feeds work | `projects/feeds/README.md` |
+| Catalog work | `projects/catalog/README.md` |
 | Lobster work | `projects/lobster/README.md` |
 | UX state work | `projects/ux-state/README.md` |
 | Admin work | `projects/admin/README.md` |
@@ -44,6 +45,7 @@ Common session files:
 - `projects/policy/SESSION.md`
 - `projects/doctor/SESSION.md`
 - `projects/feeds/SESSION.md`
+- `projects/catalog/SESSION.md`
 - `projects/lobster/SESSION.md`
 - `projects/ux-state/SESSION.md`
 - `projects/admin/SESSION.md`
@@ -120,6 +122,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
 - Doctor: health findings, structured repair output, dry-run repair preview
   stacks.
 - Feeds: OpenClaw feed primitives and Lobster Scout feed integration.
+- Catalog: OpenClaw command/tool catalog metadata, lenses, generated docs,
+  prompt/audit consumers, and catalog PR/RFC stack coordination.
 - Lobster: Lobster vault/spec refresh PRs, LobsterTank dashboard notes, runtime
   worktree links, and repo-specific PR readiness.
 - UX state: gated Lobster Feeds, Policy, and Context Budget UX previews,
