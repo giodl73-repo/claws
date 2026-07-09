@@ -16,7 +16,7 @@
 
 ## Current Session
 
-- Last updated: 2026-07-08.
+- Last updated: 2026-07-09.
 - Last agent: Codex.
 - Current focus: ClawHub account-feed draft PRs #2948, #2949, #2950, #2951,
   #2953, #2957, #2958, and #2959 are code-backed implementation drafts, not
@@ -34,16 +34,14 @@
   fails for expected fork authorization. They remain draft and should not be
   merged or marked ready without explicit user approval. RFC #25 includes the
   next ClawHub implementation stack at `26f4f346944179900cb129ff3b09dd93818a9aa5`.
-  The OpenClaw trust stack is now non-draft/open and restacked in order:
-  #98299 at `297003b252`, #98316 at `09734e867b`, #98338 at `231292f3ce`,
-  and #98350 at `1a0102e1ea`. #98299 fixed the DSSE decoded-payload-byte
-  verifier blocker and #98316/#98338/#98350 were rebased on top with PR bodies
-  and re-review requests refreshed. #98299 and #98316 have exact-head
-  ClawSweeper platinum/ready reviews, Patrick approval, proof sufficient, and
-  no pending or non-cancelled failing checks. #98338 and #98350 have green
-  labels/checks on the new heads but their durable ClawSweeper comments were
-  still from older heads at last check; wait for exact-head ClawSweeper refresh
-  before calling them merge-ready. Do not merge without explicit user approval.
+  OpenClaw #98299 is merged at `30b3a7cded` from prepared head `eb6fcb20af`;
+  the DSSE decoded-payload-byte verifier foundation is landed. #98316 remains
+  the next trust-stack PR, open/non-draft at `09734e867b`, with Patrick
+  approval, exact-head ClawSweeper platinum/ready, proof sufficient, and no
+  pending or non-cancelled failing checks before #98299 landed. #98338 at
+  `231292f3ce` and #98350 at `1a0102e1ea` still need exact-head ClawSweeper
+  refresh before merge. Do not merge remaining stack PRs without explicit user
+  approval.
 - 2026-07-03 opened ClawHub draft PR #2957,
   https://github.com/openclaw/clawhub/pull/2957, from
   `giodl73-repo:follow-controls-discovery` with the PR #6 implementation slice.
