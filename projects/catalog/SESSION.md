@@ -21,10 +21,15 @@
 
 - Last updated: 2026-07-09
 - Last agent: Codex
-- Current focus: keep catalog as a standalone project area rather than burying
-  it only under OpenClaw session notes.
+- Current focus: RFC PR filed and implementation stack prepared as both an
+  upstream rollup PR and fork-local step PRs.
 - Active branch / PR:
-  - Draft PR: `https://github.com/openclaw/openclaw/pull/100960`.
+  - RFC PR: `https://github.com/openclaw/rfcs/pull/32`.
+  - Upstream rollup draft PR:
+    `https://github.com/openclaw/openclaw/pull/100960`.
+  - Fork-local step PRs:
+    `https://github.com/giodl73-repo/openclaw/pull/11` through
+    `https://github.com/giodl73-repo/openclaw/pull/16`.
   - Local branch: `user/giodl/cli-catalog-review-node-restack`.
 - Known dirty state:
   - `projects/openclaw/SESSION.md` has catalog review notes from the latest
@@ -34,12 +39,39 @@
 
 ## Current Catalog Stack
 
-- PR1 `user/giodl/cli-catalog-review-foundation` at `94cac8b6b8`.
-- PR2 `user/giodl/cli-catalog-review-dynamic-lenses` at `e291175a98`.
-- PR3 `user/giodl/cli-catalog-review-prompt` at `1261f102f7`.
-- PR4 `user/giodl/cli-catalog-review-schema-fixtures` at `aca97c919f`.
-- PR5 `user/giodl/cli-catalog-review-generated-docs` at `7dfea9de9f`.
-- PR6 `user/giodl/cli-catalog-review-hardening` at `bb4111952c`.
+- PR1 `user/giodl/cli-catalog-review-foundation` at `ea7066c51d`.
+- PR2 `user/giodl/cli-catalog-review-dynamic-lenses` at `5c3974e241`.
+- PR3 `user/giodl/cli-catalog-review-prompt` at `f54594b703`.
+- PR4 `user/giodl/cli-catalog-review-schema-fixtures` at `7628b91a81`.
+- PR5 `user/giodl/cli-catalog-review-generated-docs` at `98b48beaeb`.
+- PR6 `user/giodl/cli-catalog-review-hardening` at `e8fca427fb`.
+
+## 2026-07-09 RFC Filing / Review PR Prep
+
+- Opened RFC PR `openclaw/rfcs#32`:
+  `https://github.com/openclaw/rfcs/pull/32`.
+- Updated upstream rollup draft PR `openclaw/openclaw#100960` to link the RFC
+  and the six fork-local review PRs.
+- Opened fork-local draft review PRs:
+  - PR1 foundation: `https://github.com/giodl73-repo/openclaw/pull/11`.
+  - PR2 dynamic/operator lenses:
+    `https://github.com/giodl73-repo/openclaw/pull/12`.
+  - PR3 prompt projection:
+    `https://github.com/giodl73-repo/openclaw/pull/13`.
+  - PR4 schema fixtures:
+    `https://github.com/giodl73-repo/openclaw/pull/14`.
+  - PR5 generated docs:
+    `https://github.com/giodl73-repo/openclaw/pull/15`.
+  - PR6 hardening and consumer contract:
+    `https://github.com/giodl73-repo/openclaw/pull/16`.
+- Rebased the stack onto current `origin/main` after #100960 reported
+  `DIRTY`; resolved one glossary conflict by preserving current main's pairing
+  entries and adding `CLI catalog reference`.
+- Validation after rebase passed in `C:\src\openclaw-catalog-restack`:
+  focused catalog Vitest shards, targeted `oxfmt --check`, and
+  `git diff --check origin/main...HEAD`.
+- Live state after push: #100960 is `UNSTABLE` only because checks are running,
+  not because of merge conflicts.
 
 ## Resume Checklist
 
@@ -60,7 +92,6 @@
 
 ## Open Threads
 
-- Push/force-with-lease the rewritten catalog branch stack if the user decides
-  to update the fork branches and draft PR.
-- Keep the RFC and PR body aligned with the six-PR stack and node/operator
-  catalog support.
+- Watch #100960 checks after the rebased push.
+- Use the fork-local PRs as review aids; open equivalent upstream PRs only if
+  maintainers prefer separate implementation PRs.
