@@ -17,13 +17,17 @@ tools.
 | Lobster work | `projects/lobster/README.md` |
 | UX state work | `projects/ux-state/README.md` |
 | Admin work | `projects/admin/README.md` |
+| Staffing analysis | `projects/staffing/README.md` |
 | Context-budget work | `projects/context-budget/README.md` |
 | Snapshot work | `projects/snapshot/README.md` |
 | Memory work | `projects/memory/README.md` |
+| Mail work | `projects/mail/README.md` |
+| Claws work | `projects/claws/README.md` |
 | Claws Review Bot | `projects/claws-review-bot/README.md` |
 | oc-path work | `projects/oc-path/README.md` |
 | ClawPilot issue loop | `projects/clawpilot/README.md` |
 | Bugfix work | `projects/bugs/README.md` |
+| PR loop | `projects/pr-loop/README.md` |
 | PR queues and Gitcrawl | `projects/prs/README.md`, `projects/prs/gitcrawl.md` |
 | WSL operation | `projects/wsl/README.md`, `tools/wsl/README.md` |
 | Local tools | `tools/README.md` |
@@ -49,6 +53,7 @@ Common session files:
 - `projects/oc-path/SESSION.md`
 - `projects/clawpilot/SESSION.md`
 - `projects/bugs/SESSION.md`
+- `projects/pr-loop/SESSION.md`
 - `projects/prs/SESSION.md`
 
 ## Current Rules
@@ -121,12 +126,18 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
   launch flags, Jesse review notes, and convergence decisions.
 - Admin: Lobster admin spaces, managed policy baselines, Partner Center, and
   tenant/global admin settings.
+- Staffing: Lobster and ClawPilot staffing analysis, area ownership, and gap
+  mapping. WorkIQ is a search term only, not a separate staffing repo.
 - Context budget: audit, runtime evidence, recommendations, and management
   integrations.
 - Snapshot: SQLite-safe snapshot/restore plugin, backup integration, failover
   substrate, and RFC coordination.
 - Memory: AI agent memory strategy, OpenClaw memory assessment, and XAI
   Harness / Tools / Skills report coordination.
+- Mail: OpenClaw mail-channel research, plugin options, and Exchange/Microsoft
+  Graph integration framing.
+- Claws: OpenClaw RFC direction for runnable starter setups across skills,
+  plugins, MCP servers, workspace files, persona files, and automations.
 - Claws Review Bot: `@bic/claws-review-bot` package notes, with Lobster PR
   review as the primary lane and a separate ClawPilot issue-classifier
   experiment.
@@ -134,6 +145,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
 - ClawPilot: feedback-to-issue tracking in `gim-home/m` using the
   `clawpilot-issue-loop` skill.
 - Bugs: cross-cutting bugfix triage, reproduction, fix branches, and proof.
+- PR loop: active stacked-PR operations, dependency restacks, review refreshes,
+  CI gates, and handoffs while driving PRs to approval/merge.
 - PR watcher: staleness, proof freshness, CI/review comments, ClawSweeper, and
   branch hygiene across active PRs.
 

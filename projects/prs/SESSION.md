@@ -469,3 +469,18 @@
   Real behavior proof check passes, merge state `CLEAN`, maintainer edits
   enabled, draft still has stale unranked/re-review labels pending
   ClawSweeper's fresh verdict.
+- #97086 maintainer re-review on 2026-07-06 at head `9d79002fbacafe`
+  (`feat(mxc): add Windows MXC sandbox backend`): current code addresses the
+  prior `workspaceAccess: none`/`docker.binds` and protected-skill-overlay
+  requested changes. Local WSL proof: `git diff --check origin/main...HEAD`
+  passed; `pnpm test extensions/mxc/test/config.test.ts -- --reporter=verbose`
+  passed; `pnpm test extensions/mxc/test/mxc-spawn-launcher.test.ts --
+  --reporter=verbose` passed; `pnpm test
+  extensions/mxc/test/sandbox-policy-loader.test.ts -- --reporter=verbose`
+  passed; `pnpm test extensions/mxc/test/mxc-backend.test.ts --
+  --reporter=verbose` passed as an explicit non-Windows skip. Live state:
+  non-draft, assigned to `steipete` since 2026-06-29, stale
+  `CHANGES_REQUESTED` reviews from earlier heads, one failing
+  `dependency-guard` check pending exact-head maintainer/secops dependency
+  approval. Remaining maintainer decision: accept or pause on the MXC SDK
+  native dependency graph and argv config transport boundary.

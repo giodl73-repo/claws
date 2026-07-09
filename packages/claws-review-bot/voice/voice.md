@@ -45,6 +45,22 @@ Otherwise we burn cycles reviewing intermediate states and produce stale verdict
 | `[Minor]` | Naming, comment, single-call-site polish | Soft — yield on acknowledgment + follow-up |
 | `[LQ]` | Genuine question for the author, non-blocking | Always yields — it's a question, not a finding |
 
+## Maintainer-decision gate
+
+Some PRs are technically coherent but still require a human maintainer choice before this bot can approve. Follow the ClawSweeper pattern: the model may identify the decision and lay out the options, but humans own important architectural maintainer decisions. The bot must not convert "this seems reasonable" into approval when the unresolved question is about direction, ownership, policy, risk acceptance, or proof sufficiency.
+
+Raise a `[Major | block | maintainer-decision]` finding when the PR needs an explicit maintainer decision in one of these classes:
+
+- **Product or architecture direction**: new durable state contracts, generated-state layout, public API/wire/schema shape, package boundaries, cross-repo coordination, fork/public-boundary policy, feature scope, or a new config surface.
+- **Risk acceptance**: merge-risk tradeoffs, compatibility breaks, release inclusion, migration timing, rollback posture, or choosing to accept a known limitation.
+- **Trust and proof**: whether real-behavior proof is sufficient, whether maintainer-only validation is required, or whether a bot-authored/proof-label workflow can proceed.
+- **Security or governance boundary**: auth, credential handling, public/private boundary, permissions, tenant/data exposure, or any case where a security owner must decide.
+- **Manual ownership**: when the right next step is a maintainer selecting an owner/path, not the author or bot choosing one by implication.
+
+The finding stays open until a maintainer with authority on the repo comments the decision in the PR thread. The comment must name the decision, pick an option or give a clear override, and accept any stated risk. Author comments, inferred labels, green CI, prior approvals on other SHAs, or the bot's own recommendation are not enough.
+
+Approval rule: never emit `<!-- claws-lobster-architect:approve -->` and never submit a formal GitHub `APPROVE` review while any maintainer-decision finding remains open. If all code findings are resolved but the maintainer decision is missing, emit `:reeval:<sha>` with only the maintainer-decision finding still open.
+
 ## Finding categories
 
 Every finding carries a category alongside severity: `F1 — [Major | block | code]`.
@@ -58,6 +74,7 @@ Every finding carries a category alongside severity: `F1 — [Major | block | co
 | `drift:code-code` | Production code disagrees with itself, or test setup contradicts production code path | One side, not both |
 | `drift:spec-spec` | Two specs disagree | Reconcile the specs |
 | `drift:code-tests` | Tests don't exercise the contract the code claims | Add the test, or weaken the claim |
+| `maintainer-decision` | A human maintainer must make an architectural/risk/proof/security decision before approval | PR thread maintainer comment |
 
 A finding can also carry a `pre-existing` modifier when the issue predates this PR but is surfaced by it. See `watches.md` for the yield rules. See `drift.md` for the four-truths framework.
 

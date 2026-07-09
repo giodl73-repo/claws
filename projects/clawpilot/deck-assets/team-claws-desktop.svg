@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760">
+  <defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto"><path d="M0,0 L0,8 L11,4 z" fill="#4b5563"/></marker></defs>
+  <rect width="1400" height="760" fill="#f7f9fc"/>
+  <rect x="70" y="310" width="220" height="130" rx="20" fill="#ffffff" stroke="#ccd5e2" stroke-width="3"/>
+  <text x="116" y="363" font-family="Segoe UI, Arial" font-size="30" font-weight="900" fill="#172033">User goal</text>
+  <text x="112" y="404" font-family="Segoe UI, Arial" font-size="22" fill="#526070">delegate work</text>
+
+  <rect x="380" y="145" width="540" height="380" rx="24" fill="#fffaf0" stroke="#8a5a12" stroke-width="3"/>
+  <text x="430" y="198" font-family="Segoe UI, Arial" font-size="34" font-weight="900" fill="#63400e">Hosted OpenClaw team</text>
+  <circle cx="490" cy="300" r="58" fill="#fff3dd" stroke="#8a5a12" stroke-width="3"/>
+  <text x="460" y="309" font-family="Segoe UI, Arial" font-size="25" font-weight="900" fill="#63400e">Claw A</text>
+  <circle cx="650" cy="300" r="58" fill="#fff3dd" stroke="#8a5a12" stroke-width="3"/>
+  <text x="620" y="309" font-family="Segoe UI, Arial" font-size="25" font-weight="900" fill="#63400e">Claw B</text>
+  <circle cx="810" cy="300" r="58" fill="#fff3dd" stroke="#8a5a12" stroke-width="3"/>
+  <text x="780" y="309" font-family="Segoe UI, Arial" font-size="25" font-weight="900" fill="#63400e">Claw C</text>
+  <rect x="470" y="410" width="360" height="68" rx="12" fill="#ffffff" stroke="#cdd6e6" stroke-width="2"/>
+  <text x="512" y="452" font-family="Segoe UI, Arial" font-size="24" font-weight="800" fill="#223047">reason · plan · cloud tools</text>
+
+  <rect x="1050" y="205" width="280" height="360" rx="24" fill="#e7efff" stroke="#1f4f99" stroke-width="3"/>
+  <text x="1090" y="260" font-family="Segoe UI, Arial" font-size="34" font-weight="900" fill="#183c76">Desktop</text>
+  <text x="1090" y="310" font-family="Segoe UI, Arial" font-size="24" fill="#183c76">local approval gate</text>
+  <text x="1090" y="356" font-family="Segoe UI, Arial" font-size="22" fill="#183c76">filesystem</text>
+  <text x="1090" y="394" font-family="Segoe UI, Arial" font-size="22" fill="#183c76">shell</text>
+  <text x="1090" y="432" font-family="Segoe UI, Arial" font-size="22" fill="#183c76">browser</text>
+  <text x="1090" y="470" font-family="Segoe UI, Arial" font-size="22" fill="#183c76">clipboard</text>
+  <text x="1090" y="508" font-family="Segoe UI, Arial" font-size="22" fill="#183c76">local apps</text>
+
+  <line x1="290" y1="375" x2="380" y2="375" stroke="#4b5563" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="920" y1="375" x2="1050" y2="375" stroke="#4b5563" stroke-width="4" stroke-dasharray="12 9" marker-end="url(#arrow)"/>
+  <text x="946" y="350" font-family="Segoe UI, Arial" font-size="20" fill="#4b5563">capability request</text>
+  <line x1="1190" y1="565" x2="1190" y2="635" stroke="#4b5563" stroke-width="4" marker-end="url(#arrow)"/>
+  <rect x="960" y="638" width="460" height="54" rx="12" fill="#ffffff" stroke="#cdd6e6" stroke-width="2"/>
+  <text x="996" y="673" font-family="Segoe UI, Arial" font-size="24" font-weight="800" fill="#223047">execute · deny · defer · require user</text>
+</svg>

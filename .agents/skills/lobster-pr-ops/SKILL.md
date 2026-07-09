@@ -45,75 +45,12 @@ As of 2026-06-05 it includes repository-required checks:
 - `Lobster-Runtime-PullRequest` (`integration_id: 136`)
 - `Lobster-Runtime-Build-Validation` (`integration_id: 136`)
 
-## ADO Queue Fallback
+## ADO Queue Policy
 
-If either `Lobster-Runtime-PullRequest` or `Lobster-Runtime-Build-Validation`
-is missing, pending forever, or excluded by path filters, trigger the exact ADO
-pipelines directly. Do this for docs-only PRs too. The `/azp run` comment can
-fail with `No pipelines are associated with this pull request` or `pipeline
-triggers exclude this branch/path`, so use `az pipelines run`.
-
-ADO definitions:
-
-- Project: `One`
-- Pipeline id: `457333`
-- Pipeline name: `Lobster-Runtime-PullRequest`
-- Pipeline id: `463346`
-- Pipeline name: `Lobster-Runtime-Build-Validation`
-
-Commands:
-
-```powershell
-az pipelines run `
-  --organization https://msazure.visualstudio.com `
-  --project One `
-  --id 457333 `
-  --branch <source-branch>
-
-az pipelines run `
-  --organization https://msazure.visualstudio.com `
-  --project One `
-  --id 463346 `
-  --branch <source-branch>
-```
-
-Record the returned ADO build ids in the relevant project/session notes and
-watch `gh pr checks <number>` until both required contexts attach to the PR
-head.
-
-If `az pipelines run` fails with only `Could not queue the build because there
-were validation errors or warnings`, treat the PR as not ready. The branch may
-be too stale for the current pipeline YAML/ruleset; rebase or update the branch
-against current `main`, push, then queue the missing required ADO context again.
-
-## Build-Validation Fallback
-
-If `Lobster-Runtime-Build-Validation` alone is missing while
-`Lobster-Runtime-PullRequest` is already green, trigger only BuildValidation
-with pipeline id `463346`.
-
-Command:
-
-```powershell
-az pipelines run `
-  --organization https://msazure.visualstudio.com `
-  --project One `
-  --id 463346 `
-  --branch <source-branch>
-```
-
-Example:
-
-```powershell
-az pipelines run `
-  --organization https://msazure.visualstudio.com `
-  --project One `
-  --id 463346 `
-  --branch user/giodl/lobster-admin-spaces-runtime
-```
-
-After triggering, wait for the `Lobster-Runtime-Build-Validation` check-run to
-appear on the PR and follow its ADO build id from the check details URL.
+Do not manually queue ADO pipelines by default. For Lobster PR checks, report
+whether the required contexts are attached, pending, running, missing, failed,
+or stale. Only queue or rerun ADO jobs when the user explicitly asks for a
+specific branch or PR.
 
 ## Admin Spaces Stack
 

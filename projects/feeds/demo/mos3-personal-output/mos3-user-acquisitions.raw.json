@@ -5,5 +5,5 @@
     "settings":  {
                      "PromptUserToAcquireCopilot":  "false"
                  },
-    "nextInterval":  1800
+    "nextInterval":  15
 }

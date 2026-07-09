@@ -22,10 +22,78 @@
 
 ## Current Session
 
-- Last updated: 2026-06-22.
-- Last agent: Codex.
-- Current focus: Learn from a manual first pass of the separate ClawPilot
-  issue-classifier mode before turning it into bot rules or automation.
+- Last updated: 2026-07-07.
+- Last agent: Copilot.
+- Current focus: Azure `claws-review-bot-job` reviewer voice now requires
+  explicit human maintainer decisions before approval for important
+  architectural/risk/proof/security gates; ClawPilot issue-classifier learning
+  remains a separate open thread.
+- 2026-07-07 Azure reviewer-bot guidance update:
+  - Added `maintainer-decision` as a blocking finding category in
+    `packages/claws-review-bot/voice/voice.md` and `voice/grammar.md`.
+  - The bot must not emit `:approve` or submit formal GitHub `APPROVE` while an
+    architectural maintainer decision is still open.
+  - The gate requires an authoritative maintainer PR comment naming the
+    decision, choosing an option or override, and accepting stated risk.
+  - Validated with `pnpm -C packages/claws-review-bot test`, `lint`, and
+    `build`.
+- 2026-07-07 Azure deployment:
+  - Built and pushed ACR image
+    `clawsreviewbotacr.azurecr.io/claws-review-bot:maintainer-decision-20260707`
+    from a minimal clean context; ACR run `chg` succeeded.
+  - Updated Container Apps job `claws-review-bot-job` in
+    `claws-review-bot-rg` to that image, preserving schedule `*/15 * * * *`,
+    `POST_COMMENTS=true`, and `MAX_REVIEWS_PER_POLL=1`.
+  - Manual proof execution `claws-review-bot-job-0cq4nic` succeeded; logs show
+    AOAI usage, one review posted for `bic/lobster#4115`, and
+    `review budget reached (1/1)`.
+- 2026-07-07 targeted Lobster reviews for Galin:
+  - Scheduled poll `claws-review-bot-job-29724675` spent its one-review budget
+    on `bic/lobster#4118`, so targeted job starts were used for `#4076` and
+    `#4142`.
+  - Direct ARM start required preserving the existing container env/secret refs;
+    executions without env failed because `GH_TOKEN` was absent.
+  - Successful targeted executions: `claws-review-bot-job-8hhvieo` posted
+    `#4076` comment `198631441`; `claws-review-bot-job-20if07u` posted `#4142`
+    comment `198631391`.
+- 2026-07-08 approve-reeval bugfix:
+  - Debugged `#4076` and `#4142`: `#4076` emitted an approval-equivalent
+    reeval (`Still open: <none>.`) but did not submit a formal `APPROVE`;
+    `#4142` correctly stayed non-approve with open Major/block findings.
+  - Root cause: `isApproveVerdict` only matched plain `Still open: <none>`
+    without bold markdown or trailing punctuation, then saw the resolved `F1`
+    header and treated the verdict as non-approve.
+  - Local fix updates the matcher and adds same-SHA recovery so an existing
+    clean reeval comment can submit the missing formal approval without another
+    LLM call.
+  - Validation: `pnpm -C packages/claws-review-bot test -- tests/tick.test.ts`,
+    `pnpm -C packages/claws-review-bot lint`, and
+    `pnpm -C packages/claws-review-bot build` passed.
+  - ACR run `chh` built
+    `clawsreviewbotacr.azurecr.io/claws-review-bot:approve-reeval-20260708`;
+    the Azure CLI exited nonzero only because Windows log encoding failed after
+    the successful run. Updated `claws-review-bot-job` to this image, preserving
+    schedule `*/15 * * * *`, `POST_COMMENTS=true`, and
+    `MAX_REVIEWS_PER_POLL=1`.
+  - Recovery execution `claws-review-bot-job-0mch0yh` succeeded and submitted a
+    formal `APPROVED` review on `#4076` head
+    `fd45d41afe84393e4cfab7b42efe94abf6868209` without another AOAI call.
+  - `#4142` advanced to head `018723f149f069220abd66ae3d8ce6330e6a6d41`; the
+    latest bot reeval still has F1-F7 open and the PR remains
+    `CHANGES_REQUESTED`, so no approval is expected there.
+- 2026-07-08 daily email digest:
+  - Created Copilot schedule `#1` at `0 8 * * *` to email
+    `giodl@microsoft.com` a daily Lobster PR review-progress digest.
+  - Digest scope: open `bic/lobster` PRs, recent Claws Review Bot markers,
+    approvals / changes requested, maintainer comments, required checks, and
+    PRs needing Gio attention.
+  - Sent a proof email via WorkIQ `/me/sendMail` with subject
+    `Claws Review Bot daily digest proof - Lobster PR reviews`; Graph returned
+    `202 Accepted`.
+  - User feedback: first proof email was too long. Stopped schedule `#1` and
+    replaced it with schedule `#2`, still at `0 8 * * *`, with a compact
+    aggregate-first format: counts at top, max 8 Gio-action items, max 8
+    progress items, max 10 blocked/waiting items, no full PR dump.
 - Findings from first live pass:
   - Across 26 issues updated on 2026-06-22, there were 18 comments created that
     day.
@@ -35,6 +103,19 @@
     6 vulnerability workflow notices on #2629.
   - Human comments provided acknowledgement, repro/version details, deeper
     investigation, or human validation.
+- 2026-07-04 reviewer distribution snapshot:
+  - `bic/lobster` merged PRs authored by `giodl`: 107.
+  - Unique merged PR approvals for `giodl` PRs: `edpiva` 72, `dspektor` 67,
+    `Galin-Iliev` 43, `adamsheppard` 15, `harryf` 9.
+  - Last 500 Lobster PRs with Codeclaw/Synthesis/EmmBot review markers were
+    concentrated on authors `harryf` 111 unique PRs, `Ryan-Gregg` 70,
+    `giodl` 70, `bcleaver` 57, `edpiva` 42, `dspektor` 37,
+    `Jesse-Francisco` 32, `Galin-Iliev` 16.
+  - Marker review accounts in that sample: `edpiva` 1401 submissions,
+    `Galin-Iliev` 608, `emiranda` 176.
+  - Interpretation: `giodl` receives regular review from the core bot/human
+    reviewer cluster, but the broader review automation also spends heavily on
+    Harry/Ryan/Brian/Eduardo/Daron/Jesse PRs; it is not only reviewing `giodl`.
 - Proposed ClawPilot lane: issue classification should focus on
   regression/severity assessment, issue clustering, owner-area routing, and
   concrete next-action comments. It should avoid duplicate one-liners and
@@ -51,8 +132,12 @@
   - Early rule: comment when the classifier adds owner routing, related PR/issue
     context, severity normalization, or a concrete next action; skip when it
     would only restate an existing duplicate/validity/claimed-fix thread.
-- Active branch / PR: none.
-- Known dirty state: session notes updated after the manual pass.
+- Active branch / PR: local branch
+  `user/giodl/clawpilot-pr-plan-files`; no PR recorded for this bot guidance
+  update.
+- Known dirty state: many pre-existing unrelated hapi notes and scratch files;
+  this update intentionally touched only `packages/claws-review-bot/voice/*`,
+  `packages/claws-review-bot/tests/voice.test.ts`, and this session note.
 - Blocking question: none.
 
 ## Resume Checklist

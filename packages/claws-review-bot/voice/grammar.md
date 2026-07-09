@@ -76,6 +76,7 @@ Every claim has an ID `C1..Cn`. Every drift hypothesis ties to a claim or to two
 - `drift:code-code` — production code disagrees with itself
 - `drift:spec-spec` — two specs disagree
 - `drift:code-tests` — tests don't exercise the contract the code claims
+- `maintainer-decision` — a human maintainer must make an architectural/risk/proof/security decision before approval
 
 ### Optional modifiers (any number, separated by ` | `)
 
@@ -143,7 +144,7 @@ Empty bullets are written as `<none>`, not omitted. This makes the parse determi
 **Final R0 digest**: same shape as initial.
 ```
 
-No findings section, no LQ section. Approve is a closing receipt.
+No findings section, no LQ section. Approve is a closing receipt. It is only valid when every prior finding is resolved or conceded and no `maintainer-decision` finding remains open. If code findings are clear but a maintainer has not commented the required decision, emit `:reeval:<sha>` rather than `:approve`.
 
 ## What does NOT go in the comment
 

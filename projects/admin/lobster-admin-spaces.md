@@ -48,42 +48,17 @@ worktrees; this file is the operator index.
 - #2270 remains stacked on #2275 and should not be treated as ready until #2275
   is refreshed.
 
-## Required Build-Validation Trigger
+## ADO Check Policy
 
 The repository ruleset requires both Azure contexts:
 
 - `Lobster-Runtime-PullRequest`
 - `Lobster-Runtime-Build-Validation`
 
-If `Lobster-Runtime-Build-Validation` is pending/missing on a PR even after
-`Lobster-Runtime-PullRequest` is green, trigger the exact ADO definition
-directly:
-
-```powershell
-az pipelines run `
-  --organization https://msazure.visualstudio.com `
-  --project One `
-  --id 463346 `
-  --branch <source-branch>
-```
-
-For #2211, the branch was:
-
-```powershell
-az pipelines run `
-  --organization https://msazure.visualstudio.com `
-  --project One `
-  --id 463346 `
-  --branch user/giodl/lobster-admin-spaces-runtime
-```
-
-Notes:
-
-- ADO definition id `463346` is `Lobster-Runtime-Build-Validation`.
-- YAML path is `.pipelines/lobster_runtime/BuildValidation.yml`.
-- `/azp run Lobster-Runtime-Build-Validation` can reply
-  `No pipelines are associated with this pull request`; use the direct
-  `az pipelines run` fallback in that case.
+Lobster ADO checks should attach/run automatically. Do not manually trigger
+ADO definitions or use `az pipelines run` unless the user explicitly asks to
+queue a named PR/branch. If checks are missing, stale, or confusing, report
+the live PR status and inspect the ruleset/check-run state instead of queuing.
 
 ## Follow-Up Topics
 

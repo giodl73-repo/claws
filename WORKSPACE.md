@@ -17,15 +17,19 @@ For agent and harness entry points, start with `CONTEXT.md`.
 | Feeds | `projects/feeds/` | OpenClaw feed support and Lobster Scout feed PR stacks. |
 | UX state | `projects/ux-state/` | Gated Lobster Feeds, Policy, and Context Budget UX previews, flags, and design-review notes. |
 | Admin | `projects/admin/` | Lobster admin spaces, managed policy baselines, and Partner Center notes. |
+| Staffing | `projects/staffing/` | Lobster and ClawPilot staffing analysis and gap mapping; WorkIQ only as a search term. |
 | Context budget | `projects/context-budget/` | Context-budget PR plan, branches, and proof notes. |
 | Snapshot | `projects/snapshot/` | SQLite-safe snapshot/restore plugin, backup integration, failover substrate, and RFC coordination. |
 | Memory | `projects/memory/` | Agent memory strategy, OpenClaw assessment, and XAI report notes. |
+| Mail | `projects/mail/` | Mail-channel research, mail plugin options, and Exchange/Microsoft Graph integration framing. |
+| Claws | `projects/claws/` | OpenClaw RFC direction for runnable starter setups across skills, plugins, MCP servers, workspace files, persona files, and automations. |
 | Claws Review Bot | `projects/claws-review-bot/` | `@bic/claws-review-bot` package notes; primary Lobster PR reviewer lane plus separate ClawPilot issue-classifier experiment. |
 | oc-path | `projects/oc-path/` | oc-path worktrees, specs, and follow-up PRs. |
 | ClawPilot | `projects/clawpilot/` | ClawPilot feedback-to-issue tracking and issue-loop notes. |
 | Bugs | `projects/bugs/` | Cross-cutting bugfix triage, reproduction notes, and fix proof. |
 | Local tools | `tools/` | Repo-local operator tools and launch notes. |
 | WSL tools | `tools/wsl/` and `projects/wsl/` | Stable wrappers and WSL worktree index for OpenClaw/Lobster work under `/root/src`. |
+| PR loop | `projects/pr-loop/` | Active stacked-PR operations, dependency restacks, review refreshes, and CI gate handoffs. |
 | PR queues | `projects/prs/` | Cross-project PR tracking, staleness, proof, and watcher notes. |
 | Archived waves | `.craft/waves/` | Historical research, panels, proposals, and generated wave artifacts. Do not use this as the active task surface. |
 

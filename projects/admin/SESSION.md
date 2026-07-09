@@ -21,16 +21,18 @@
 
 ## Current Session
 
-- Last updated: 2026-06-19.
+- Last updated: 2026-06-26.
 - Last agent: Codex.
-- Current focus: Policy admin stack has landed through the first feed-aware
-  Scout policy slice. #2275 has merged with policy baseline state primitives and
-  optional MOS3 policy-artifact metadata, #2270 has merged with OpenClaw policy
-  bootstrap, and #3355 has merged with `scout policy preview` for tenant-feed
-  package-defense/MOS3 block-status preview.
-- Active branch / PR: #2275, #2270, #3355, and Partner Center prep doc #2422
-  are merged; feed-related Lobster PRs through #3305 have landed enough to
-  unblock the next policy-admin/feed pass.
+- Current focus: MAC / Partner Center filing refresh has merged. Policy admin
+  stack has landed through baseline state, OpenClaw policy bootstrap, Scout
+  policy preview, MOS3-backed personal policy state, gated Policy UX preview,
+  and MAC registration guidance refresh.
+- Active branch / PR: draft Lobster stack #3585 -> #3586 -> #3588 -> #3590
+  -> #3603 -> #3607 -> #3623 -> #3693. #3693 branch
+  `user/giodl/lobster-policy-admin-read-ux` lives in
+  `C:\src\lobster-policy-default-config`. #2275, #2270, #3355, #3383, #3388,
+  #3391, Partner Center prep doc #2422, and MAC registration refresh #3555 are
+  merged.
 - Known dirty state: `claws-hapi` had unrelated local edits before this
   update. #2422 merged on 2026-06-05 at merge commit
   `fe4837d5b8b193e0e9e68afde451845910aa6d92`.
@@ -39,9 +41,19 @@
   attestation metadata, resolves the effective baseline, and materializes the
   selected policy into OpenClaw. OpenClaw evaluates local policy conformance and
   does not fetch policy directly from MOS3 in this slice.
+- MAC/M365 admin center registration note from Aether review: public
+  app/package distribution remains Partner Center or Microsoft 365/Teams admin
+  center upload/preinstall. Aether's MOS3 path is runtime-side: discover the
+  tenant MOS3 titles URL, mint MOS3-scoped user OBO tokens, query Titles &
+  Acquisitions for `AgentSkills`/`AgentConnectors`, and register discovered
+  connectors dynamically for TGS auth. Aether's proposed admin/publisher flows
+  proxy MOS3 builder/admin endpoints using user OBO; tenant-admin gating is a
+  local `wids`-claim precheck before forwarding to MOS3.
 - The quarantine/admin policy slice should treat quarantined or failed package
   defense state as blocked for new discovery and install unless an explicit
   tenant or Microsoft exception outcome exists.
+- Next Lobster policy-admin implementation slice after #3607: quarantine
+  enforcement.
 
 ## Resume Checklist
 
@@ -371,6 +383,232 @@
   Fresh ADO queued: PullRequest `168861357`, Build Validation `168861356`.
   Comment posted:
   https://microsoft.ghe.com/bic/lobster/pull/3391#issuecomment-183686641.
+
+## 2026-06-23 Update
+
+- MAC registration refresh: opened Lobster #3555 from
+  `user/giodl/lobster-mac-registration-refresh` at head
+  `44cc96c649019e2b62353d40f4afdb385ca1f1dd`. It updates
+  `docs/partner-center-registration.md` to make #2422's prep packet
+  actionable for filing: register the M365 app package through Partner Center
+  or Microsoft 365/Teams admin center, keep MOS3 as catalog/governance
+  authority, mirror Aether/Cowork runtime discovery with MOS3-scoped OBO and
+  tenant titles environment discovery, and add validation/open-decision items
+  for MAC package proof and MOS3 integration proof. Local proof:
+  `git diff --check`. PR comment:
+  https://microsoft.ghe.com/bic/lobster/pull/3555#issuecomment-184318121.
+  Required ADO manually queued because only GitOps attached initially:
+  PullRequest `169222837`, Build Validation `169222908`. Current visible state
+  at filing: `GitOps/FileAffordance` passed, `GitOps/GitHubPop` failed, ADO
+  queued/pending.
+
+## 2026-06-24 Update
+
+- Live GHE check: #3391 merged on 2026-06-20 at head
+  `a07e8915e9397d9920e9a1e2930178c3ab02f24d`.
+- Live GHE check: #3555 merged on 2026-06-24 at head
+  `44cc96c649019e2b62353d40f4afdb385ca1f1dd`.
+- `gh pr checks` showed all required contexts green on both final heads:
+  `GitOps/GitHubPop`, `Lobster-Runtime-PullRequest`, and
+  `Lobster-Runtime-Build-Validation`.
+- Lobster personal-policy upload/admin progress opened draft PR #3585 from
+  worktree `C:\src\lobster-personal-policy-upload`, branch
+  `user/giodl/lobster-personal-policy-upload`, head
+  `d101becd8c9188af5b66f92cd5677e8dfbb1ccc9`, based on Lobster `origin/main`
+  `a7df08c85`. This first live write slice adds authenticated
+  `POST /v1/policy/personal/accept`, gated by
+  `LOBSTER_POLICY_BASELINE_STATE_PATH` plus
+  `LOBSTER_POLICY_BASELINE_STORAGE_DURABLE=true`, requiring a MOS3 artifact ref
+  and OpenClaw comparison attestation before calling the #3388
+  equal-or-stricter personal baseline state path. It also adds a web
+  `policyApi` client for the route, but intentionally does not wire the Policy
+  UX save button until the UI has a real MOS3 artifact/upload source.
+- Local proof for that branch passed:
+  `cd src/lobster_runtime && bash ../../cargo.sh fmt --check`,
+  `bash ../../cargo.sh clippy --lib -- -D warnings`,
+  `bash ../../cargo.sh test policy --lib --no-fail-fast` (103 tests),
+  `cd src/lobster_web && npm run type-check`,
+  `npx vitest run tests/services/policyApi.unit.test.ts --project unit`, and
+  touched-file Biome for `policyApi.ts` / `policyApi.unit.test.ts`.
+- Required ADO was manually queued for #3585 because no checks attached
+  initially: PullRequest `169344001`, Build Validation `169344000`.
+- Stacked draft PR #3586 opened from branch
+  `user/giodl/lobster-policy-ux-save`, based on #3585 branch
+  `user/giodl/lobster-personal-policy-upload`, head
+  `ac17a114216c70c4d57b7ef4d37a94addc8d8042`. It wires the gated Policy UX
+  save button to `policyApi.acceptPersonalPolicy`, adds explicit MOS3 artifact
+  id/revision/attestation and OpenClaw comparison attestation fields, computes
+  the SHA-256 over the generated policy JSON before save, and surfaces
+  success/error status. This is artifact-selection save wiring, not a
+  policy-specific MOS3 publish/upload backend.
+- Local proof for #3586 passed:
+  `cd src/lobster_web && npm run type-check`,
+  `npx vitest run tests/pages/PolicyPage.unit.test.tsx tests/services/policyApi.unit.test.ts --project unit`
+  (8 tests), touched-file Biome for `PolicyPage.tsx`, `PolicyPage.unit.test.tsx`,
+  `policyApi.ts`, and `policyApi.unit.test.ts`, plus `git diff --check`.
+- Required ADO was manually queued for #3586:
+  PullRequest `169347041`, Build Validation `169347040`.
+- Stacked draft PR #3588 opened from branch
+  `user/giodl/lobster-policy-mos3-upload`, based on #3586 branch
+  `user/giodl/lobster-policy-ux-save`, head
+  `d516124c91aef0e949042b80e60a0d2b6ffe1020`. It adds
+  `POST /v1/policy/personal/artifacts/publish`, packages generated policy
+  JSONC for MOS3, mints MOS3 OBO tokens from the caller assertion, returns a
+  hash-bound artifact ref for synchronous publishes, and updates the gated
+  Policy UX save path to publish first and only call accept when an artifact is
+  returned. Pending MOS3 publishes surface as submitted/pending and do not write
+  Lobster policy state.
+- Local proof for #3588 passed:
+  `cd src/lobster_runtime && bash ../../cargo.sh fmt --check`,
+  `bash ../../cargo.sh test policy --lib --no-fail-fast` (107 tests),
+  `bash ../../cargo.sh test scout_mos3_publish --lib --no-fail-fast` (8 tests),
+  `bash ../../cargo.sh clippy --lib -- -D warnings`,
+  `cd src/lobster_web && npm run type-check`,
+  `npx vitest run tests/pages/PolicyPage.unit.test.tsx tests/services/policyApi.unit.test.ts --project unit`
+  (10 tests), touched-file Biome for Policy UX/API files and tests, plus
+  `git diff --check`.
+- Required ADO was manually queued for #3588:
+  PullRequest `169350500`, Build Validation `169350496`.
+- Stacked draft PR #3590 opened from branch
+  `user/giodl/lobster-policy-materialization`, based on #3588 branch
+  `user/giodl/lobster-policy-mos3-upload`, head
+  `371d30e6910034b646be83aa673288065f9aa4cd`. It resolves the effective user
+  policy baseline from durable Lobster policy state during gateway start option
+  construction and projects `LOBSTER_OPENCLAW_POLICY_BASELINE_JSONC` plus
+  managed policy delivery env into OpenClaw starts. Projection only activates
+  when `LOBSTER_POLICY_BASELINE_STORAGE_DURABLE=true`; a configured but missing
+  durable state path disables managed policy delivery for that start.
+- Local proof for #3590 passed:
+  `cd src/lobster_runtime && bash ../../cargo.sh fmt --check`,
+  `bash ../../cargo.sh test gateway_proxy::start_options --lib --no-fail-fast`
+  (38 tests), `bash ../../cargo.sh test admin_policy_baselines --lib --no-fail-fast`
+  (28 tests), `bash ../../cargo.sh test policy --lib --no-fail-fast`
+  (110 tests), `bash ../../cargo.sh clippy --lib -- -D warnings`, plus
+  `git diff --check`.
+- OpenClaw container companion proof
+  `cd src/openclaw_container && bash ../../cargo.sh test policy_bootstrap --lib --no-fail-fast`
+  is locally blocked by missing private `lobster` cargo registry auth
+  (`cargo login --registry lobster` / `CARGO_REGISTRIES_LOBSTER_TOKEN`).
+- Required ADO was manually queued for #3590:
+  PullRequest `169354920`, Build Validation `169354917`.
+- Stacked draft PR #3603 opened from branch
+  `user/giodl/lobster-policy-review-fixes`, based on #3590 branch
+  `user/giodl/lobster-policy-materialization`, head
+  `905b75fd43889a9ea0c2fad0128fd365fb65c0e6`. It closes the Codex review
+  findings across the active personal-policy stack: MOS3 personal artifact
+  publish now requires durable policy storage before external publish, personal
+  accept verifies an HMAC-backed trusted OpenClaw comparison attestation before
+  persisting state, pending MOS3 publish responses serialize camelCase fields
+  expected by the web client, and policy-state writes use temp-file persist plus
+  cross-process sentinel locking with stale-lock recovery instead of
+  delete-before-rename.
+- Local proof for #3603 passed:
+  `cd src/lobster_runtime && bash ../../cargo.sh fmt --check`,
+  `bash ../../cargo.sh test policy --lib --no-fail-fast` (112 tests),
+  `bash ../../cargo.sh test scout_mos3_publish --lib --no-fail-fast` (8 tests),
+  `bash ../../cargo.sh clippy --lib -- -D warnings`, `git diff --check`, and
+  `codex review --uncommitted` with no blocking correctness/security/
+  maintainability findings.
+- Required ADO was manually queued for #3603:
+  PullRequest `169385504`, Build Validation `169385503`. Current visible state
+  after attachment: draft, mergeable, `UNSTABLE`; `GitOps/FileAffordance`
+  passed, `GitOps/GitHubPop` failed, and both Lobster runtime ADO contexts are
+  attached and in progress/queued.
+- Stacked draft PR #3607 opened from branch
+  `user/giodl/lobster-feed-policy-sources`, based on #3603 branch
+  `user/giodl/lobster-policy-review-fixes`, head
+  `d78015a29ed6d0cf5a970bcc8c298f8ef8a87220`. It adds durable tenant feed
+  policy source selection to the policy state snapshot, validates selected
+  sources as attested tenant-approved feeds scoped to the caller tenant,
+  persists only feed-bound source identity (`store`, `feedId`,
+  `sourceRevision`, `sha256`), and exposes tenant-admin-gated
+  `POST /v1/policy/feed-sources/select` with env-backed admin assignment
+  loading via `LOBSTER_POLICY_ADMIN_ASSIGNMENTS_PATH`.
+- Local proof for #3607 passed:
+  `cd src/lobster_runtime && bash ../../cargo.sh fmt --check`,
+  `bash ../../cargo.sh test policy --lib --no-fail-fast` (118 tests),
+  `bash ../../cargo.sh clippy --lib -- -D warnings`, `git diff --check`, and
+  `codex review --uncommitted` clean with no discrete bug identified.
+- Required ADO was manually queued for #3607:
+  PullRequest `169392741`, Build Validation `169392740`. Current visible state
+  after attachment: draft, mergeable, `UNSTABLE`; `GitOps/FileAffordance`
+  passed, `GitOps/GitHubPop` failed, and both Lobster runtime ADO contexts are
+  attached and queued.
+- Late 2026-06-24 policy stack refresh: #3585 was rebased onto Lobster
+  `origin/main` `e31e8b3b2` after edpiva's review was resolved. The force-push
+  produced new head `fa46e80e41c09e186a99c89bfbeaf6d0b3214ae9` and added
+  `fix(runtime): block privileged tool gate overrides` because current `main`
+  introduced `gateway_proxy::ecs_settings::tests::privileged_openclaw_tool_gates_are_not_user_overridable`.
+  Local proof on the rebased head passed: exact failing ECS test,
+  `gateway_proxy::ecs_settings` tests, `policy` tests (104), runtime
+  `fmt --check`, runtime `clippy --lib -- -D warnings`, and `git diff --check`.
+  #3585 was force-pushed and now needs refreshed review (`REVIEW_REQUIRED`) plus
+  green ADO. Queued required ADO: PullRequest `169427858`, Build Validation
+  `169427856`.
+- Restacked and force-pushed dependent branches on top of #3585 head
+  `fa46e80e4`: #3586 head `ac516dc64`, #3588 head `d39822134`, #3590 head
+  `be7b4be00`, #3603 head `ce5787719`, and #3607 head `b42ff6397`.
+  Manually queued required ADO for each pushed head: #3586 PullRequest
+  `169428034` / Build Validation `169428055`; #3588 PullRequest `169428074` /
+  Build Validation `169428096`; #3590 PullRequest `169428108` / Build
+  Validation `169428137`; #3603 PullRequest `169428211` / Build Validation
+  `169428367`; #3607 PullRequest `169428458` / Build Validation `169428471`.
+  GitOps/FileAffordance remained green and GitHubPop remained failed on the
+  higher PRs at the first post-push refresh.
+- Local worktree `C:\src\lobster-personal-policy-upload` is currently on
+  `user/giodl/lobster-policy-default-config`, reset onto refreshed #3607 head
+  `b42ff6397`, with the intended uncommitted default OpenClaw config changes
+  restored. Known concern before opening that PR: the proposed baked
+  `gateway.auth.mode = trusted-proxy` still needs a boot-compatible trusted
+  proxy header/proxy config decision.
+- Default-config follow-up opened on 2026-06-25 as draft Lobster #3623 from
+  `user/giodl/lobster-policy-default-config`, based on #3607 branch
+  `user/giodl/lobster-feed-policy-sources`, latest head
+  `403899240415c1f9f57c79c202e50f55f07edfe7`. It aligns the baked OpenClaw
+  config with the default policy posture and fixes the runtime WS dial to
+  overwrite `x-forwarded-user` / `x-forwarded-proto` for OpenClaw
+  trusted-proxy auth. The container regression now loads the real baked
+  `openclaw.json`, resolves sibling `$include` fragments, and evaluates the
+  effective config against Lobster's default policy posture. Required ADO queued
+  on the latest head: PullRequest `169441035`, Build Validation `169441034`.
+  Local proof passed focused runtime trusted-proxy header tests from the prior
+  head, runtime `fmt --check`, runtime `clippy --lib -- -D warnings`,
+  openclaw-container `fmt --check`, effective-config Node smoke, and
+  `git diff --check`. OpenClaw container Rust tests remain locally blocked by
+  missing private `lobster` cargo registry auth; the OpenClaw policy checker
+  script was blocked by a missing built OpenClaw plugin-sdk dependency in
+  `C:\src\openclaw-stack`.
+- #3585 review follow-up on 2026-06-25: used dedicated worktree
+  `C:\src\lobster-personal-policy-accept`, rebased
+  `user/giodl/lobster-personal-policy-upload` onto current Lobster `origin/main`
+  `68fdbc5c0`, resolved the `ecs-settings.json` conflict by keeping current
+  main's tailored disabled-reason text, and fixed Galin/edpiva's remaining
+  CodeClaw blocker by adding `user_override_disabled_reason` for
+  `openclaw_workiq_office_enabled` and `openclaw_customizations_enabled`.
+  Regression coverage now includes both keys in
+  `privileged_openclaw_tool_gates_*`. Also fixed the ADO clippy failure in
+  `routes/policy.rs` by passing the copy artifact store enum by value. Pushed
+  #3585 head `cb7f0ed2d9ad32bec610313726a898a860fb50cf`; PR is mergeable but
+  still shows `CHANGES_REQUESTED` until reviewers refresh. Local proof passed:
+  `cargo.sh fmt --check`, `cargo.sh test privileged_openclaw_tool_gates --lib
+  --no-fail-fast`, `cargo.sh test policy --lib --no-fail-fast` (109 tests),
+  `cargo.sh clippy --lib -- -D warnings`, and `git diff --check`. Required ADO
+  queued: PullRequest `169445321`, Build Validation `169445320`.
+- #3693 opened on 2026-06-26 from
+  `user/giodl/lobster-policy-admin-read-ux`, stacked on #3623. It adds
+  authenticated effective-policy state readback and renders the loaded
+  baseline source/id/revision/hash in the gated Policy UX. Local proof passed
+  runtime fmt, policy tests, runtime clippy, web type-check, focused web
+  Vitest, touched-file Biome, and `git diff --check`. Required ADO queued:
+  PullRequest `170027612`, Build Validation `170027607`.
+- #3695 opened on 2026-06-26 from
+  `user/giodl/lobster-policy-source-selection-ux`, stacked on #3693. It adds
+  tenant-approved feed source selection to the gated Policy UX and brings the
+  supporting tenant feed-source runtime route/state into this stack. Local
+  proof passed runtime fmt, `cargo test policy`, runtime clippy, web
+  type-check, focused PolicyPage/policyApi Vitest, touched-file Biome, and
+  `git diff --check`. Required ADO queued: PullRequest `170033542`, Build
+  Validation `170033541`. Later restack likely needed once #3623/#3693 settle.
 
 ## Guardrails
 

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760">
+  <defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto"><path d="M0,0 L0,8 L11,4 z" fill="#4b5563"/></marker></defs>
+  <rect width="1400" height="760" fill="#f7f9fc"/>
+  <rect x="420" y="70" width="560" height="106" rx="18" fill="#efe8ff" stroke="#7141a4" stroke-width="3"/>
+  <text x="470" y="132" font-family="Segoe UI, Arial" font-size="34" font-weight="900" fill="#4d2478">Permissions API</text>
+  <text x="760" y="132" font-family="Segoe UI, Arial" font-size="24" fill="#4d2478">CAS · audit · adminPolicy</text>
+
+  <rect x="110" y="310" width="310" height="100" rx="14" fill="#fff3dd" stroke="#8a5a12" stroke-width="3"/>
+  <text x="154" y="372" font-family="Segoe UI, Arial" font-size="28" font-weight="800" fill="#63400e">Hosted OpenClaw</text>
+
+  <rect x="545" y="310" width="310" height="100" rx="14" fill="#fff9eb" stroke="#c28b2a" stroke-width="3"/>
+  <text x="580" y="372" font-family="Segoe UI, Arial" font-size="28" font-weight="800" fill="#63400e">Execution container</text>
+
+  <rect x="980" y="310" width="310" height="100" rx="14" fill="#e7efff" stroke="#1f4f99" stroke-width="3"/>
+  <text x="1044" y="372" font-family="Segoe UI, Arial" font-size="28" font-weight="800" fill="#183c76">Desktop node</text>
+
+  <rect x="545" y="530" width="310" height="100" rx="14" fill="#f2edf8" stroke="#7141a4" stroke-width="3"/>
+  <text x="612" y="592" font-family="Segoe UI, Arial" font-size="28" font-weight="800" fill="#4d2478">Lobster egress</text>
+
+  <line x1="620" y1="176" x2="265" y2="310" stroke="#4b5563" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="700" y1="176" x2="700" y2="310" stroke="#4b5563" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="780" y1="176" x2="1135" y2="310" stroke="#4b5563" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="700" y1="176" x2="700" y2="530" stroke="#4b5563" stroke-width="4" stroke-dasharray="12 9" marker-end="url(#arrow)"/>
+  <rect x="250" y="680" width="900" height="48" rx="12" fill="#ffffff" stroke="#ccd5e2" stroke-width="2"/>
+  <text x="310" y="711" font-family="Segoe UI, Arial" font-size="24" font-weight="800" fill="#223047">One policy surface; decisions name the tier that enforced them.</text>
+</svg>

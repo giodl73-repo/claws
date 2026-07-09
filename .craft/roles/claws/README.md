@@ -1,6 +1,6 @@
 # claws Roles — OpenClaw Governance & Integration Perspectives
 
-> 17 roles representing the key stakeholders who care about different aspects of
+> 18 roles representing the key stakeholders who care about different aspects of
 > OpenClaw agent governance, the claws product itself, and the integration
 > partners that consume claws's serve API and governance artifacts. Used for
 > reviews, design validation, and pitch testing.
@@ -57,6 +57,7 @@ pain points, and different definitions of success.
 |------|------------|-------------|
 | [claws-repo-steward](claws-repo-steward.md) | Repository boundary steward | craftworks ↔ claws separation, residue sweeps, filter-repo history preservation, package scope cleanliness |
 | [claws-release-eng](claws-release-eng.md) | GPR release engineer | Publish workflow, version/tag conventions, install smoke + dogfood tests, registry auth scope, atomic releases |
+| [lorant-reviewer](lorant-reviewer.md) | Maintainer-grade PR reviewer | Current-head review, partial conversions, fail-closed security gates, branch coverage, docs drift, repo hygiene |
 
 ### Future Surface Layer — The Extension Guardrail (Horus, selective)
 
@@ -81,3 +82,4 @@ Reviews with 3+ roles from different clusters produce non-overlapping findings.
 | I | Publish reliability > Velocity | claws-release-eng |
 | J | Session-agnostic abstractions > Cowork-specific shortcuts | clawpilot-product |
 | K | Coherent policy model > One-off enforcement | policy-steward |
+| L | Merge-ready correctness > Optimistic approval | lorant-reviewer |

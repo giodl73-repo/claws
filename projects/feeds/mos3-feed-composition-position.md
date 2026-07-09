@@ -152,6 +152,14 @@ in user, with hashed tenant and user partitioning. These PRs do not make
 Lobster the MOS3 publishing plane. They prove the client-facing feed boundary
 that MOS3 or a MOS3-backed control plane can materialize.
 
+The newer Lobster durable-feed paths should be read the same way. File-backed
+approved feeds, personal overlays, hosted artifact bytes, and tenant admin
+catalog state are useful for local development, CI proof, and short-term
+bridging. They should not become the durable product authority. The target is
+for MOS3 to own effective feed projections, named-feed or collection identity,
+sharing ACLs, tenant-admin promotion, search, and audit, with Lobster acting as
+the authenticated UX/API adapter and temporary projection layer where needed.
+
 ## Terms
 
 For this discussion:
@@ -312,7 +320,7 @@ by a tenant admin, be pinned to version `1.4.2`, and become visible only to
 Scout and VS Code users in selected groups. MOS3 should preserve that chain of
 custody.
 
-## Personal And Team Feeds
+## Personal, Named, And Team Feeds
 
 A user's local skills folder is an inventory, not automatically an enterprise
 feed. It can become a personal feed only after it has stable identity, version,
@@ -336,6 +344,15 @@ Cowork and Scout. Lobster PR #3238 models that as a signed feed projection with
 The publishing act still belongs upstream in MOS3 or an approved package
 workflow; the client-facing feed is the governed projection.
 
+For viral growth, the shareable object should be a named feed, not direct access
+to a user's mutable personal feed. A user can create a named feed from selected
+personal-feed entries, publish an immutable revision, and share that feed with
+specific people, M365 groups, or the whole tenant. Recipients can inspect the
+feed and either install selected entries or follow the named feed into their
+personal effective feed. Tenant-visible still does not mean tenant-approved;
+tenant admins can promote a selected named-feed revision into the official
+tenant-approved effective feed after review, pinning, policy, and audit.
+
 Recommended posture:
 
 ```text
@@ -345,13 +362,18 @@ Phase 1:
   Imported private/source feeds
 
 Phase 2:
-  Team feeds
+  User-created named feeds
+  Shared people/group feeds
+  Tenant-visible community feeds
+
+Phase 3:
+  Team and group-owned feeds
   User-scoped personal feed projections
-  Promotion workflows from personal or team feeds to tenant approval
+  Promotion workflows from named or team feeds to tenant approval
 ```
 
-This supports sharing without turning every local folder into an uncontrolled
-distribution channel.
+This supports sharing and tenant-level growth without turning every local
+folder or mutable personal feed into an uncontrolled distribution channel.
 
 ## Non-Goals
 

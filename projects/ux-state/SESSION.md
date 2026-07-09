@@ -25,12 +25,17 @@
 
 ## Current Session
 
-- Last updated: 2026-06-22
+- Last updated: 2026-06-26
 - Last agent: Codex
-- Current focus: Prepare Jesse discussion notes for gated Feeds, Policy, and
-  Context Budget UX.
+- Current focus: Gated Policy UX now has stacked admin-read and tenant feed
+  source selection slices; Feeds admin composition and broader control-plane IA
+  remain open.
 - Active branch / PR:
-  - Policy UX: `https://microsoft.ghe.com/bic/lobster/pull/3391`, merged.
+  - Policy UX: `https://microsoft.ghe.com/bic/lobster/pull/3391`, merged;
+    follow-up drafts `https://microsoft.ghe.com/bic/lobster/pull/3693`
+    (effective policy readback) and
+    `https://microsoft.ghe.com/bic/lobster/pull/3695` (tenant feed source
+    selection), stacked on policy default config.
   - Feeds admin composition: `https://microsoft.ghe.com/bic/lobster/pull/3422`,
     open.
   - Context budget UX: `https://microsoft.ghe.com/bic/lobster/pull/3379`,
@@ -66,3 +71,6 @@
   design review or stay ECS-only for admin controls.
 - Whether Context Budget needs a route-level settings surface after the inline
   card ships.
+- Policy UX next after #3695: tenant baseline selection/upload and richer
+  admin assignment affordances, once the lower stack clears enough to avoid
+  excessive restacking churn.

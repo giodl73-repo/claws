@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto">
+      <path d="M0,0 L0,8 L11,4 z" fill="#4b5563"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto">
+      <path d="M0,0 L0,8 L11,4 z" fill="#1f4f99"/>
+    </marker>
+    <filter id="shadow" x="-12%" y="-12%" width="124%" height="124%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#111827" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="900" fill="#f7f9fc"/>
+  <text x="72" y="72" font-family="Segoe UI, Arial" font-size="38" font-weight="900" fill="#0f172a">Agents In The Left Nav, Local Work Through Desktop Node Mode</text>
+  <text x="72" y="112" font-family="Segoe UI, Arial" font-size="23" fill="#475569">Each agent is directly interactive; local capabilities still pass through Desktop policy, approval, execution, and audit.</text>
+
+  <rect x="70" y="155" width="300" height="640" rx="24" fill="#eef2f7" stroke="#cbd5e1" stroke-width="3" filter="url(#shadow)"/>
+  <text x="105" y="205" font-family="Segoe UI, Arial" font-size="28" font-weight="900" fill="#111827">Scout</text>
+
+  <rect x="105" y="246" width="230" height="46" rx="12" fill="#ffffff" stroke="#d6dee9" stroke-width="2"/>
+  <text x="138" y="276" font-family="Segoe UI, Arial" font-size="21" fill="#334155">Chat</text>
+  <rect x="105" y="306" width="230" height="46" rx="12" fill="#ffffff" stroke="#d6dee9" stroke-width="2"/>
+  <text x="138" y="336" font-family="Segoe UI, Arial" font-size="21" fill="#334155">Automations</text>
+  <rect x="105" y="366" width="230" height="56" rx="14" fill="#e7efff" stroke="#1f4f99" stroke-width="4"/>
+  <circle cx="135" cy="394" r="10" fill="#1f4f99"/>
+  <text x="160" y="402" font-family="Segoe UI, Arial" font-size="23" font-weight="900" fill="#183c76">Agents</text>
+  <rect x="105" y="438" width="230" height="46" rx="12" fill="#ffffff" stroke="#d6dee9" stroke-width="2"/>
+  <text x="138" y="468" font-family="Segoe UI, Arial" font-size="21" fill="#334155">Activity</text>
+  <rect x="105" y="498" width="230" height="46" rx="12" fill="#ffffff" stroke="#d6dee9" stroke-width="2"/>
+  <text x="138" y="528" font-family="Segoe UI, Arial" font-size="21" fill="#334155">Settings</text>
+
+  <rect x="430" y="155" width="455" height="640" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="3" filter="url(#shadow)"/>
+  <text x="470" y="210" font-family="Segoe UI, Arial" font-size="30" font-weight="900" fill="#111827">Agent roster</text>
+  <text x="470" y="246" font-family="Segoe UI, Arial" font-size="21" fill="#475569">Open any agent as a full interaction surface.</text>
+
+  <rect x="470" y="292" width="360" height="104" rx="18" fill="#fff3dd" stroke="#8a5a12" stroke-width="3"/>
+  <text x="502" y="334" font-family="Segoe UI, Arial" font-size="25" font-weight="900" fill="#63400e">Research Claw</text>
+  <text x="502" y="368" font-family="Segoe UI, Arial" font-size="20" fill="#63400e">Hosted OpenClaw · active task</text>
+
+  <rect x="470" y="420" width="360" height="104" rx="18" fill="#e7efff" stroke="#1f4f99" stroke-width="3"/>
+  <text x="502" y="462" font-family="Segoe UI, Arial" font-size="25" font-weight="900" fill="#183c76">Local Claw</text>
+  <text x="502" y="496" font-family="Segoe UI, Arial" font-size="20" fill="#183c76">Desktop-local runtime · node capable</text>
+
+  <rect x="470" y="548" width="360" height="104" rx="18" fill="#f1f5f9" stroke="#64748b" stroke-width="3"/>
+  <text x="502" y="590" font-family="Segoe UI, Arial" font-size="25" font-weight="900" fill="#334155">Agent N</text>
+  <text x="502" y="624" font-family="Segoe UI, Arial" font-size="20" fill="#334155">Unavailable or policy-disabled</text>
+
+  <rect x="960" y="155" width="540" height="330" rx="26" fill="#fffaf0" stroke="#8a5a12" stroke-width="4" filter="url(#shadow)"/>
+  <text x="1005" y="210" font-family="Segoe UI, Arial" font-size="31" font-weight="900" fill="#63400e">Opened agent</text>
+  <text x="1005" y="252" font-family="Segoe UI, Arial" font-size="23" fill="#63400e">Chat · task state · memory scope · runtime · permissions</text>
+  <rect x="1005" y="298" width="450" height="58" rx="13" fill="#ffffff" stroke="#d0a252" stroke-width="2"/>
+  <text x="1034" y="335" font-family="Segoe UI, Arial" font-size="22" fill="#63400e">"Analyze this local repo and draft the plan."</text>
+  <rect x="1005" y="378" width="450" height="58" rx="13" fill="#ffffff" stroke="#d0a252" stroke-width="2"/>
+  <text x="1034" y="415" font-family="Segoe UI, Arial" font-size="22" fill="#63400e">Needs filesystem.read from this Desktop node</text>
+
+  <rect x="960" y="555" width="540" height="240" rx="26" fill="#e7efff" stroke="#1f4f99" stroke-width="4" filter="url(#shadow)"/>
+  <text x="1005" y="610" font-family="Segoe UI, Arial" font-size="31" font-weight="900" fill="#183c76">Desktop node-mode gate</text>
+  <text x="1005" y="652" font-family="Segoe UI, Arial" font-size="23" fill="#183c76">Policy · user approval · local execution · local evidence</text>
+  <rect x="1005" y="692" width="138" height="50" rx="12" fill="#ffffff" stroke="#b6c7e8" stroke-width="2"/>
+  <text x="1039" y="724" font-family="Segoe UI, Arial" font-size="21" font-weight="900" fill="#183c76">Allow</text>
+  <rect x="1165" y="692" width="138" height="50" rx="12" fill="#ffffff" stroke="#b6c7e8" stroke-width="2"/>
+  <text x="1204" y="724" font-family="Segoe UI, Arial" font-size="21" font-weight="900" fill="#183c76">Deny</text>
+  <rect x="1325" y="692" width="130" height="50" rx="12" fill="#ffffff" stroke="#b6c7e8" stroke-width="2"/>
+  <text x="1358" y="724" font-family="Segoe UI, Arial" font-size="21" font-weight="900" fill="#183c76">Defer</text>
+
+  <line x1="335" y1="394" x2="430" y2="344" stroke="#1f4f99" stroke-width="5" marker-end="url(#arrowBlue)"/>
+  <text x="382" y="331" font-family="Segoe UI, Arial" font-size="20" font-weight="800" fill="#183c76">open</text>
+
+  <line x1="830" y1="344" x2="960" y2="316" stroke="#4b5563" stroke-width="5" marker-end="url(#arrow)"/>
+  <text x="856" y="302" font-family="Segoe UI, Arial" font-size="20" font-weight="800" fill="#4b5563">select agent</text>
+
+  <line x1="1230" y1="485" x2="1230" y2="555" stroke="#1f4f99" stroke-width="5" stroke-dasharray="13 9" marker-end="url(#arrowBlue)"/>
+  <text x="1252" y="530" font-family="Segoe UI, Arial" font-size="20" font-weight="800" fill="#183c76">local capability request</text>
+
+  <rect x="245" y="830" width="1110" height="52" rx="15" fill="#ffffff" stroke="#ccd5e2" stroke-width="2"/>
+  <text x="302" y="864" font-family="Segoe UI, Arial" font-size="24" font-weight="900" fill="#223047">Agents are fully interactive. Local actions stay governed by Desktop node mode, not ambient remote control.</text>
+</svg>
