@@ -34,12 +34,18 @@ lens:
   verify:
     - "What exact head SHA am I reviewing, and did any prior approval predate important final commits?"
     - "Does the PR extend the existing owner seam, or create a parallel path that will drift?"
+    - "Does each newly exposed command have a distinct job from existing tools? If two commands do the same thing (`browser.open` vs a generic URL opener), delete or defer one instead of shipping duplicate security surfaces."
+    - "If a command exists because it uses the user's real profile/session (for example default browser cookies), is that distinction stated and tested separately from isolated automation tools such as Playwright?"
     - "Does every new security or approval gate fail closed when a dependency, session, window, policy, or runtime is missing?"
+    - "Is there exactly one source of truth for a security decision such as a trusted-origin allowlist? Duplicated allowlists or deny floors are future drift bugs."
     - "Are caller-supplied identifiers used to route security prompts, persist decisions, or scope audit records? If yes, should those be desktop-owned instead?"
     - "Do new permission keys use the same normalization as settings, saved policy, and sibling runtime paths?"
     - "For filesystem or local-action commands, is the target resolved exactly once and then reused for policy evaluation, approval display, execution, audit, and saved-rule lookup? If different layers use raw path, cwd-resolved path, workspace-resolved path, or file URL variants, prove they cannot drift."
+    - "For URL/browser opens, does the trusted-host gate prove anchoring and protocol behavior with negative tests (`evilmicrosoft.com`, `microsoft.com.attacker.com`, protocol downgrade, localhost suffix spoof) plus positive subdomain/localhost cases?"
+    - "If the security story relies on the human seeing a target, does the renderer actually show the full target at decision time? Long URLs, file paths, diffs, and command previews must not hide dangerous tails behind truncation without an obvious review affordance."
     - "For patch/edit commands, do tests prove the exact approved bytes are the bytes written, including language/runtime replacement semantics (`$&`, `$'`, regex backrefs), duplicate matches, empty content, newline normalization, and stale digest mismatches?"
     - "Do all terminal denials emit the expected audit/security record, including parse failures, unsupported commands, unsupported runtimes, missing trusted context, no session, policy deny, user deny, timeout, target-validation failure, and handler failure?"
+    - "Are approved-but-failed handler executions audited distinctly from true policy/security-gate denials? Execution errors should not inflate deny-floor metrics or imply a security block."
     - "Are raw local errors sanitized before crossing to an untrusted caller while precise diagnostics stay local in logs/audit? Search for `err.message` / `String(err)` returned across cloud, node, MCP, or renderer trust boundaries."
     - "Is the trusted context builder itself covered end-to-end, including where identity/session/device id come from, what happens when each is missing, and whether lifecycle methods clear stale identity/context?"
     - "Does cancellation cover every wait window, including before runtime dispatch and while approval UI is pending?"
@@ -47,6 +53,8 @@ lens:
     - "Are branchy failure paths tested: deny, timeout, no window, no session, not supported, reset, dispose, saturation, and duplicate/concurrent calls?"
     - "Do tests assert the failure that matters, or merely exercise the happy path with canonical names and default values?"
     - "Did the PR update the authoritative architecture or permissions doc, not just a nearby doc?"
+    - "Does the proof demonstrate the exact user-facing security control claimed in docs, not just the backend unit path? If the approval card is the backstop, require a screenshot/e2e proof of the actual card state."
+    - "After narrowing scope, are all downstream catalogs, harness adapters, tests, docs, and PR bodies swept for removed commands or aliases? Stale advertised names can silently reopen a removed surface."
     - "Are proof screenshots or temporary PR artifacts committed to git? If so, remove them unless they are permanent, referenced docs assets."
     - "Is an `as` cast hiding a missing interface method or contract that should be typed at the port boundary?"
     - "Are optional dependencies being used for security-critical gates? If so, make the dependency required or fail closed."
@@ -98,17 +106,26 @@ approval.
   `mcp:Power BI:tool`.
 - Hand-rolled duplicate request shape: a new approval builder drifts from the
   shared card builder.
+- Duplicate command surface: two node commands open the same URL target with
+  different names, creating two approval/audit paths for one job.
+- Duplicated security constant: trusted-host allowlists or deny floors copied
+  into sibling handlers instead of shared at the owner boundary.
 - Optional security dependency: omitting a hook silently permits dispatch.
 - Caller-owned security context: remote `context.sessionId` chooses where a
   local approval card appears.
 - Raw/resolved target drift: policy evaluates `notes.md`, prompt shows
   `file://notes.md`, and handler writes `workspaceDir/notes.md`.
+- Trusted-host tail blindness: origin allowlist passes `github.com`, but the
+  approval card truncates `...?body=<exfil>` so the user approves without seeing
+  the dangerous path/query tail.
 - Approved bytes drift: an edit preview renders literal text but execution uses
   a language API whose replacement-string rules mutate `$&`, `$'`, backrefs, or
   newlines.
 - Missing terminal audit: parse/unsupported-runtime/not-supported exits return
   before the audit sink, even though later policy/user/handler denials are
   audited.
+- Misclassified audit: an approved handler failure is logged as a
+  `policy-security-gate` denial, corrupting both audit meaning and gate metrics.
 - Caller error leak: raw `fs`/OS/network exception messages cross to cloud or a
   less-trusted runtime instead of a stable public error code.
 - Trusted-context gap: tests inject a literal trusted context but never cover
@@ -125,6 +142,9 @@ approval.
   doc still describes the old model.
 - Live-capability understatement: docs say a command fails closed until future
   wiring, while the current PR already wires local read/write side effects.
+- Scope-reduction residue: removed commands still appear in a catalog,
+  harness adapter, proof image, test name, or PR body after the implementation
+  was narrowed.
 - Cast smell: `as SomeExtendedInterface` is compensating for a missing method
   on the public port.
 - PR artifact hygiene: one-off proof images committed to git instead of hosted

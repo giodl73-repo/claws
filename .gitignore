@@ -17,6 +17,7 @@ projects/prs/worktrees.md
 __pycache__/
 *.py[cod]
 .logs/
+.scratch/
 
 # test/e2e transient output — never committed
 test/e2e/.failures/

@@ -94,3 +94,10 @@ Verification for PR #3820:
 
 - `pnpm vitest run --project unit src/features/settings/SettingsModal.test.tsx`
 - `pnpm vitest run --project browser src/shell/RestoreSessionsBanner.browser.test.tsx`
+
+## Cloud Automation Feedback: 2026-06-26
+
+| Issue | Signal | Action |
+| --- | --- | --- |
+| [#3934](https://github.com/gim-home/m/issues/3934) | Recurring Repo Activity-style automations can fully block on cloud-service permissions; user sees the failure from mobile but must open Desktop locally to resolve WorkIQ Teams send, repo/project data, and people/org scoping permissions. | Filed new product issue for cloud-service automations that can run or resolve permissions without requiring local Desktop at run time. |
+| [#1162](https://github.com/gim-home/m/issues/1162) | User reports CUA leaves hanging Edge sessions after delegated automation work. | Added comment with the new automation/CUA signal; treat as related to orphaned browser-session cleanup unless owners split a child issue. |

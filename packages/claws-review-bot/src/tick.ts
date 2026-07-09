@@ -46,7 +46,11 @@ function isApproveVerdict(body: string, marker: string): boolean {
 
   // Empty findings section = effective approve. Match either "Still open:
   // <none>" OR no `### F` headers AND no `### LQ` headers under Findings.
-  if (/^\s*-\s*Still open:\s*<none>\s*$/m.test(body)) return true;
+  if (
+    /^\s*-\s*(?:\*\*)?Still open(?:\*\*)?:\s*<none>\s*\.?\s*$/m.test(body)
+  ) {
+    return true;
+  }
 
   // No F/LQ headers at all in the body = empty verdict
   if (!/^### (F-new\d+|F\d+|LQ\d+)\b/m.test(body)) return true;
@@ -196,6 +200,39 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
         skipped: true,
         reason: `already approved at SHA ${shortSha} — no further reevals on same SHA`,
       };
+    }
+  }
+
+  // If an older build emitted an approval-equivalent reeval as an issue
+  // comment, recover on the next tick by submitting the formal APPROVE review.
+  if (
+    prior &&
+    prior.shaInMarker &&
+    headSha.startsWith(prior.shaInMarker) &&
+    isApproveVerdict(prior.comment.body, prior.marker)
+  ) {
+    if (opts.dryRun) {
+      return { skipped: false, verdictBody: prior.comment.body };
+    }
+    if (opts.postComment) {
+      try {
+        const review = submitPrReview(
+          opts.repo,
+          opts.num,
+          prior.comment.body,
+          "APPROVE"
+        );
+        return {
+          skipped: false,
+          verdictBody: prior.comment.body,
+          approveReviewId: review.id,
+        };
+      } catch (e) {
+        console.error(
+          `[tick] formal review submit failed for prior clean verdict (continuing): ${(e as Error).message}`
+        );
+        return { skipped: false, verdictBody: prior.comment.body };
+      }
     }
   }
 

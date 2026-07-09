@@ -65,6 +65,25 @@ Filed or covered on 2026-06-01:
 
 - `scout-desktop-cli-proposal.md` - draft proposal for a first-class Scout
   Desktop CLI aligned with the IPC layer and agent-native parity.
+- `local-openclaw-gateway-dev.md` - Lorant's runbook for pointing a Scout dev
+  build at a token-auth local OpenClaw gateway for node-tier E2E testing.
+- `provider-routing-flexibility-pitch.md` - focused pitch for #3953 as a
+  provider/routing optionality layer that lets Gateway/OpenClaw be adopted
+  without giving up existing Desktop provider behavior.
+- `local-openclaw-value-walkthrough.md` - simplified Local OpenClaw value guide
+  for #3954 that assumes the #3953 provider-routing pitch has already been
+  read.
+- `local-openclaw-3954-runtime-validation.md` - focused evidence matrix for
+  live #3954 runtime-only validation, including the deliberately blocked cases
+  before #3955 capabilities are present.
+- `provider-neutral-desktop-capabilities.md` - PR-body-ready narrative for
+  reframing #3955 as shared Desktop capability hardening for cloud, Local
+  OpenClaw, and future providers.
+- `local-openclaw-integration-proof.md` - PR-body-ready narrative for the proof
+  PR that should depend on both #3954 and the rebuilt provider-neutral #3955.
+- `openclaw-upstream-alignment.md` - tracking note for landed and open upstream
+  OpenClaw work that can inform ClawPilot Local OpenClaw, managed-provider, and
+  Desktop-capability PRs.
 
 ## Next
 

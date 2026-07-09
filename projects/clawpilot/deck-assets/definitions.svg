@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760">
+  <rect width="1400" height="760" fill="#f7f9fc"/>
+  <rect x="70" y="120" width="380" height="460" rx="22" fill="#e4f6fb" stroke="#1f6f8b" stroke-width="3"/>
+  <text x="112" y="188" font-family="Segoe UI, Arial" font-size="30" font-weight="800" fill="#15536a">Cloud tether</text>
+  <text x="112" y="238" font-family="Segoe UI, Arial" font-size="23" fill="#15536a">Control plane for:</text>
+  <text x="112" y="282" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">identity</text>
+  <text x="112" y="322" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">policy + config</text>
+  <text x="112" y="362" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">entitlements</text>
+  <text x="112" y="402" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">routing</text>
+  <text x="112" y="442" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">session linkage</text>
+  <text x="112" y="482" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">audit correlation</text>
+
+  <rect x="510" y="120" width="380" height="460" rx="22" fill="#fff3dd" stroke="#8a5a12" stroke-width="3"/>
+  <text x="552" y="188" font-family="Segoe UI, Arial" font-size="30" font-weight="800" fill="#63400e">Hosted OpenClaw</text>
+  <text x="552" y="238" font-family="Segoe UI, Arial" font-size="23" fill="#63400e">AI agent runtime for:</text>
+  <text x="552" y="282" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">reasoning + planning</text>
+  <text x="552" y="322" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">tool use</text>
+  <text x="552" y="362" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">cloud tasks</text>
+  <text x="552" y="402" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">operator work</text>
+  <text x="552" y="442" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">co-create loops</text>
+  <text x="552" y="482" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">0-N hosted Claws</text>
+
+  <rect x="950" y="120" width="380" height="460" rx="22" fill="#e7efff" stroke="#1f4f99" stroke-width="3"/>
+  <text x="992" y="188" font-family="Segoe UI, Arial" font-size="30" font-weight="800" fill="#183c76">Desktop runtime</text>
+  <text x="992" y="238" font-family="Segoe UI, Arial" font-size="23" fill="#183c76">Local boundary for:</text>
+  <text x="992" y="282" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">UI + local context</text>
+  <text x="992" y="322" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">files</text>
+  <text x="992" y="362" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">shell</text>
+  <text x="992" y="402" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">browser + clipboard</text>
+  <text x="992" y="442" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">approvals</text>
+  <text x="992" y="482" font-family="Segoe UI, Arial" font-size="22" fill="#24324a">local evidence</text>
+</svg>

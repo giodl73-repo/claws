@@ -1,6 +1,6 @@
 # Local OpenClaw Switch-Over PR80: Browser and Clipboard Capabilities
 
-Planned PR: #80
+PR: [giodl_microsoft/m#80](https://github.com/giodl_microsoft/m/pull/80)
 Branch: `user/giodl/local-openclaw-switch-pr80-browser-clipboard`
 Base: PR79
 

@@ -1,6 +1,6 @@
 # Local OpenClaw Switch-Over PR79: Managed Package and Reliability Envelope
 
-Planned PR: #79
+PR: [giodl_microsoft/m#79](https://github.com/giodl_microsoft/m/pull/79)
 Branch: `user/giodl/local-openclaw-switch-pr79-package-reliability`
 Base: PR78
 

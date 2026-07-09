@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760">
+  <defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto"><path d="M0,0 L0,8 L11,4 z" fill="#4b5563"/></marker></defs>
+  <rect width="1400" height="760" fill="#f7f9fc"/>
+  <text x="96" y="90" font-family="Segoe UI, Arial" font-size="24" font-weight="900" fill="#63400e">Hosted Claw</text>
+  <text x="360" y="90" font-family="Segoe UI, Arial" font-size="24" font-weight="900" fill="#4d2478">Lobster policy</text>
+  <text x="650" y="90" font-family="Segoe UI, Arial" font-size="24" font-weight="900" fill="#15536a">Cloud tether</text>
+  <text x="930" y="90" font-family="Segoe UI, Arial" font-size="24" font-weight="900" fill="#183c76">Desktop</text>
+  <text x="1180" y="90" font-family="Segoe UI, Arial" font-size="24" font-weight="900" fill="#223047">Audit sink</text>
+  <g stroke="#ccd5e2" stroke-width="3">
+    <line x1="150" y1="120" x2="150" y2="630"/>
+    <line x1="430" y1="120" x2="430" y2="630"/>
+    <line x1="710" y1="120" x2="710" y2="630"/>
+    <line x1="990" y1="120" x2="990" y2="630"/>
+    <line x1="1250" y1="120" x2="1250" y2="630"/>
+  </g>
+  <line x1="150" y1="185" x2="430" y2="185" stroke="#4b5563" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="206" y="165" font-family="Segoe UI, Arial" font-size="21" fill="#4b5563">request local shell</text>
+  <line x1="430" y1="270" x2="710" y2="270" stroke="#4b5563" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="490" y="250" font-family="Segoe UI, Arial" font-size="21" fill="#4b5563">policy pass + envelope</text>
+  <line x1="710" y1="355" x2="990" y2="355" stroke="#4b5563" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="760" y="335" font-family="Segoe UI, Arial" font-size="21" fill="#4b5563">route to eligible Desktop</text>
+  <line x1="990" y1="425" x2="990" y2="500" stroke="#1f4f99" stroke-width="8"/>
+  <text x="1024" y="466" font-family="Segoe UI, Arial" font-size="21" fill="#183c76">approve / deny / execute</text>
+  <line x1="990" y1="550" x2="1250" y2="550" stroke="#4b5563" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="1032" y="530" font-family="Segoe UI, Arial" font-size="21" fill="#4b5563">decision + result</text>
+  <line x1="1250" y1="610" x2="150" y2="610" stroke="#4b5563" stroke-width="4" stroke-dasharray="12 9" marker-end="url(#arrow)"/>
+  <text x="480" y="590" font-family="Segoe UI, Arial" font-size="21" fill="#4b5563">correlated outcome visible to user and hosted agent team</text>
+</svg>

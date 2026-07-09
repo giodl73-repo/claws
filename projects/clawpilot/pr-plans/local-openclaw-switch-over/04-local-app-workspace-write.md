@@ -1,6 +1,6 @@
 # Local OpenClaw Switch-Over PR81: Local App and Workspace Write Capabilities
 
-Planned PR: #81
+PR: [giodl_microsoft/m#81](https://github.com/giodl_microsoft/m/pull/81)
 Branch: `user/giodl/local-openclaw-switch-pr81-app-write`
 Base: PR80
 

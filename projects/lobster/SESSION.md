@@ -18,27 +18,343 @@
 
 ## Current Session
 
-- Last updated: 2026-06-22
+- - Last updated: 2026-07-07T08:26:00-07:00
+- Last agent: Copilot
+- Current PR-loop focus: named-feeds stack should be drained one PR at a time
+ from the dependency bottom because ADO pools are exhausted. Start with #4044,
+ then #3990, #3991, #3995, #3996, and #3997.
+- #4044 bottom-stack update: fixed the current-head Web Unit Tests failure from
+ `HabitsPage.tsx` close-timer cleanup, merged current `origin/main`, fixed
+ the follow-up Rust compile drift from removed
+ `AgentProvisioningService.agent_activated_tx`, handled the runtime
+ `RUSTSEC-2026-0204` cargo-deny advisory via main's transitive waiver, and
+ pushed latest-main merge head
+ `b648a0ece9d693e2d38003e7c728a77bf400859a` on
+ `user/giodl/scout-feeds-followable-foundation-refresh`. Local proof passed
+ the focused HabitsPage unit file, web type-check, web format check, focused
+ runtime `dev_proxy` tests, runtime fmt, runtime clippy,
+ `scripts/stale-advisories.sh`, and `git diff --check`. Live after latest
+ push: non-draft, mergeable/BLOCKED, `GitOps/GitHubPop` red, required ADO
+ queued on exact head as PullRequest `171137037` and Build Validation
+ `171137041`. #3749 is approved/mergeable with Build Validation green and a
+ current-head PullRequest E2E flake-looking failure in build `170882504`;
+ rerun #3749 only after #4044 settles.
+- 2026-07-07 update: #3749 was handled first after #4044 ADO went green. #3749
+ is now at `bcfe1ca4f14f194a73aa2d911c77e5e7a1289cd5` after adding the
+ runtime `RUSTSEC-2026-0204` waiver, removing the duplicate old anyhow waiver,
+ merging current `origin/main`, and resolving `deny.toml` with main's refined
+ waiver. Queued #3749 PullRequest `171204412` and Build Validation
+ `171204430`; proof comment:
+ https://microsoft.ghe.com/bic/lobster/pull/3749#issuecomment-198070346.
+ #4044 requested changes are also pushed at `958f92830` with MOS3 ACL
+ filtering and GET/diagnostics coverage; proof comment:
+ https://microsoft.ghe.com/bic/lobster/pull/4044#issuecomment-198070366.
+ Hold #4044 ADO until #3749 settles.
+- 2026-07-07 named/followable feeds parking: closed the named/followable feeds
+ stack at user request until runtime/ADO stability improves. Closed PRs:
+ #4044, #3990, #3991, #3995, #3996, and #3997. Each PR has a parking comment
+ explaining the work is paused for now and should be revisited later after
+ stability settles.
+- 2026-07-07 #4066 closed: after risk review, closed
+ [bic/lobster#4066](https://microsoft.ghe.com/bic/lobster/pull/4066) instead
+ of continuing the broad revert. It restored several baked OpenClaw config
+ fragments to pre-#3623, but the policy baseline did not restore pre-#3623
+ guardrails and weakened auth/rate-limit/http/sandbox/fs/tool protections. It
+ also left #3623 conformance tests expecting trusted-proxy posture, and the
+ area has later owner changes (context budget, self-diagnosis, skill-doc
+ reads, compaction, adapter/Substrate, cron policy, eval framework, policy
+ plugin load path). Comment:
+ https://microsoft.ghe.com/bic/lobster/pull/4066#issuecomment-198224596.
+ Future work should be a narrower fix that preserves current policy baseline
+ and later config dependencies.
+- #3623 follow-up: #3623 merged, so created fresh draft PR
+  [bic/lobster#4066](https://microsoft.ghe.com/bic/lobster/pull/4066)
+  from `user/giodl/revert-openclaw-baked-config` at
+  `7e892d5b8033e0015512e5c93e9b4526a065d331`. Scope: restore the baked
+  OpenClaw container config to the pre-#3623 posture (`auth.mode=none`, legacy
+  chat-completions enabled, no session include, no restrictive tools deny/profile
+  block, no baked agent sandbox/compaction defaults), stop ECS seeding from
+  reinjecting the #3623 sandbox/compaction defaults, and loosen
+  `policy.global.jsonc` so the registered Lobster policy allows that restored
+  config as-is. Local proof: `cargo fmt --manifest-path src/openclaw_container/Cargo.toml -- --check`,
+  `git diff --check HEAD`, and
+  `cargo test --manifest-path src/openclaw_container/Cargo.toml --bin openclaw-adapter shipped_ -- --nocapture`
+  (13 passed). Broad Windows Cargo test remains blocked by existing Unix-only
+  `aether-priv-bridge` targets. PR is draft, review-required, with no checks
+  attached immediately after creation.
+
+- Last updated: 2026-07-02T13:11:00-07:00
 - Last agent: Codex
-- ADO pipeline state: added `projects/lobster/ado-pipelines.md` because another
-  computer/session could not queue Lobster ADO pipeline feeds. This Windows
-  machine has a known working setup: Azure CLI `2.86.0`, `azure-devops`
-  extension `1.0.4`, `az account show` logged in as `giodl@microsoft.com` in
-  the Microsoft tenant, and `gh auth status --hostname microsoft.ghe.com`
-  logged in as `giodl`. For Lobster PRs, do not rely on local Azure DevOps
-  defaults because this machine defaults to `https://msfast.visualstudio.com`;
-  always pass `--organization https://msazure.visualstudio.com --project One`
-  and queue pipeline ids `457333` and `463346` against the PR source branch.
-- Current focus: Budget quarantine plugin PR created parallel to
-  `tools-code-mode`.
-- Active branch / PR: `user/giodl/context-budget-plugin` in
-  `C:\src\lobster-context-budget-plugin`; PR
-  https://microsoft.ghe.com/bic/lobster/pull/3371.
+- Current PR-loop state: only #3749 remains open for `@me` after three PRs
+  merged. #3749 was restacked onto current `main` with merge commit
+  `4d5751a6ce29c05e6fec89e25057236850033031`; the only conflict was
+  `src/lobster_runtime/src/routes/policy.rs`, resolved by preserving both the
+  tenant draft API and `main`'s policy source diagnostics route. Local proof:
+  `cargo fmt --all -- --check`, `cargo test policy_draft --manifest-path src/lobster_runtime/Cargo.toml --no-fail-fast`
+  (11 pass), `cargo test source_diagnostics --manifest-path src/lobster_runtime/Cargo.toml --no-fail-fast`
+  (8 pass), and `git diff --check`. Current-head ADO queued:
+  PullRequest `170754253`, Build Validation `170754254`. PR is mergeable but
+  blocked while ADO is pending, `GitOps/GitHubPop` is red, and reviewer refresh
+  is needed after the merge commit.
+- Lobster Scout feeds Skills-page UX PR opened on 2026-06-27:
+  [bic/lobster#3718](https://microsoft.ghe.com/bic/lobster/pull/3718) from
+  `user/giodl/scout-feeds-skills-ux` at `6da2dbe06`. Scope: move normal-user
+  Scout feed discovery into `/skills` as a searchable tenant-approved and
+  marketplace skill list with Add-to-personal-feed actions, while leaving the
+  dedicated `/feeds` page and rail nav tenant-admin-only. Local proof:
+  `npm run type-check`, focused web unit tests
+  `SkillsPage.feeds`/`FeedsPage`/`App.rail-hoist` (15 tests), targeted lint,
+  `npm run format:check`, and `git diff --check`. Initial PR state:
+  mergeable, review-required, no checks initially attached; manually queued
+  required ADO PullRequest `170094658` and Build Validation `170094657`.
+- Follow-up for Lobster #3718 on 2026-06-27: pushed `739eee806` to preserve
+  Skills feed-load failures as a visible error state instead of silently
+  presenting an empty available-skills catalog. Local proof: focused web unit
+  tests `SkillsPage.feeds`/`FeedsPage`/`App.rail-hoist` (16 tests), web
+  `npm run type-check`, targeted lint, `npm run format:check`, and
+  `git diff --check`. Requeued required ADO PullRequest `170097420` and Build
+  Validation `170097417`.
+- Lobster Scout feeds docs PR opened on 2026-06-27:
+  [bic/lobster#3717](https://microsoft.ghe.com/bic/lobster/pull/3717) from
+  `user/giodl/scout-feeds-install-docs` at `8258c4d39`. Scope:
+  `docs/reference/scout-catalog-feeds.md` now documents
+  `POST /v1/scout/feeds/marketplace/install` and
+  `POST /v1/scout/feeds/approved/install`, selector fields, skill-only
+  behavior, clean HTTPS URL requirements, durable personal storage, and
+  marketplace-vs-tenant-approved source/auth boundaries. Local proof:
+  `git diff --check`. Initial PR state: mergeable, review-required,
+  GitOps/FileAffordance passed, GitOps/GitHubPop failed for Proof of Presence,
+  PullRequest ADO `170093644` queued naturally, and Build Validation ADO
+  `170093656` queued manually.
+- Follow-up for Lobster #3717 on 2026-06-27: pushed `d8e60d184` to document
+  the flattened install selector request fields at top level rather than a
+  nested `selector` object. Local proof: `git diff --check`. Requeued required
+  ADO PullRequest `170097418` and Build Validation `170097419`.
+- OpenClaw Copilot dev-validation scaffold PR opened on 2026-06-27:
+  [bic/lobster#3714](https://microsoft.ghe.com/bic/lobster/pull/3714) from
+  `user/giodl/openclaw-copilot-dev-validation` at `5d4992a91`, stacked on Ryan
+  Gregg's draft `ryan-gregg/cloud-permission-capabilities-api` branch. Scope:
+  `LLM_ANTHROPIC_BASE_URL` and `LLM_ANTHROPIC_MODEL_OVERRIDE` for
+  `anthropic-direct`, explicit local-only
+  `LLM_ANTHROPIC_ALLOW_LOCAL_HTTP` for `localhost` / `127.0.0.1` /
+  `host.docker.internal`, e2e compose pass-through, focused provider/forwarder
+  tests, and OpenClaw Docker pnpm fetch timeout/retry hardening. Validation
+  before push: runtime `cargo.sh fmt --check`,
+  `cargo.sh test anthropic_direct -- --nocapture`,
+  `cargo.sh test local_http_anthropic_proxy -- --nocapture`,
+  focused `git diff --check`, `just e2e-build-runtime`, and live Scout PR58
+  package-path proof through `cccproxy` / GitHub Copilot with
+  `LLM_ANTHROPIC_MODEL_OVERRIDE=gpt-4.1`, Gateway run id
+  `scout-local-openclaw-46b606e6-9d47-4a66-91a8-dba9e49e4780`, and
+  `turn.complete` content `OK`. Current #3714 state after creation:
+  draft, mergeable/clean, only `GitOps/FileAffordance` visible; required
+  Lobster runtime ADO checks are not attached/queued yet. User had previously
+  asked to go slow on ADO in this repo, so do not manually queue runtime ADO for
+  #3714 without explicit confirmation. Final poll after creation showed #3714
+  as draft/`UNSTABLE`: `GitOps/FileAffordance` passed,
+  `GitOps/GitHubPop` failed, and the Lobster runtime ADO checks were not
+  attached.
+- Latest policy feed-source PR: opened Lobster #3685
+  `https://microsoft.ghe.com/bic/lobster/pull/3685` from
+  `user/giodl/lobster-policy-feed-sources-v2` at head `8b7fd05e`. This is the
+  replacement for closed/conflicting #3607: it adds durable tenant feed policy
+  source selection, validates the real attested tenant-approved feed from
+  `LOBSTER_POLICY_TENANT_APPROVED_FEED_DIR`, gates selection on
+  `LOBSTER_POLICY_ADMIN_ASSIGNMENTS_PATH` tenant-admin assignments, and
+  persists only feed-bound source identity. Local proof passed runtime
+  `cargo fmt --check`, `bash ../../cargo.sh test policy --lib --no-fail-fast`
+  (119 tests), runtime `clippy --lib -- -D warnings`, and `git diff --check`.
+  Initial PR state: non-draft, `REVIEW_REQUIRED`; GitHubPop failed as expected
+  and natural PullRequest ADO build `170005391` attached/queued. No manual ADO
+  was queued.
+- Latest #3623 fix: ADO build `169953966` on head `0d3b5c4f` failed all E2E
+  shards because the spawned OpenClaw Gateway rejected adapter/eager-pair WS
+  connects with `trusted_proxy_missing_header_x-forwarded-proto`. Pushed
+  `f1824cf2b` to `user/giodl/lobster-policy-default-config`: adapter-owned
+  `OpenClawGatewayClient` connects now attach `x-forwarded-proto: https` and
+  `x-forwarded-user: lobster-openclaw-adapter`; the in-container
+  `gateway_ws_proxy` also synthesizes/overwrites `x-forwarded-proto: https`
+  when forwarding a trusted-proxy user. Added focused regression tests and
+  removed stale `auth.mode="none"` warning text. Local validation passed
+  `openclaw_container` `cargo fmt --check` and `git diff --check`; focused Rust
+  tests are locally blocked before compilation by missing Lobster Cargo registry
+  auth. Natural PR ADO attached as PullRequest build `169973396`; no manual ADO
+  was queued.
+- Latest loop update: closed non-useful/conflicting #3607, retargeted/restacked
+  #3623 onto #3603, fixed #3588 web Biome formatting, restacked #3590/#3603/#3623,
+  fixed #3620 duplicate `marketplace_mos3_environment` test fields, and
+  restacked #3622. Current active PRs excluding #3586 have no merge conflicts and
+  are non-draft; remaining work is pending ADO, PoP, and stale re-review on
+  #3588/#3604/#3608/#3623.
+- Latest 2026-06-25 pass including #3586: fixed #3608 current-head ADO compile
+  failure by removing the stale duplicate `marketplace_feed` handler and pushed
+  `7b93f7f06`; restacked #3620 to `de7d08b44` and #3622 to `84f49de7e`.
+  Fixed #3586 current-head ADO Web Static Checks failure by running Biome on the
+  four policy web files and pushed `7b8079592`; restacked #3588 to
+  `ca2097f2c`, #3590 to `d9fbdb9d5`, #3603 to `d017e9796`, and #3623 to
+  `99906e460`. Fresh ADO queued: #3608 `169563647`/`169563649`; #3620
+  `169563933`/`169563935`; #3622 `169564622`/`169564621`; #3586
+  `169566258`/`169566257`; #3588 `169567687`/`169567683`; #3590
+  `169567957`/`169567951`; #3603 `169568561`/`169568559`; #3623
+  `169569164`/`169569165`. Re-review nudges posted on #3586/#3588/#3604/#3608/#3623.
+  Remaining expected blockers are pending ADO, stale review decisions until
+  reviewers refresh, and known GitOps/GitHubPop proof-of-presence failures.
+- Latest 2026-06-25 follow-up pass: fixed #3586 Web Static regression by
+  deleting `window.__LOBSTER_RUNTIME_CONFIG__` in policy API tests and pushed
+  `843fa3236`; fixed #3608 current-head duplicate
+  `marketplace_mos3_environment` test initializer regression and pushed
+  `c413fe6e`. Restacked #3588 to `68c993f66`, #3590 to `2b891656a`,
+  #3603 to `30bced270`, #3623 to `0248ace59`, #3620 to `b3dcd7e16`, and
+  #3622 to `47d7e66e`. Fresh ADO queued: #3586 `169618847`/`169618836`;
+  #3588 `169620428`/`169620402`; #3590 `169621266`/`169621262`;
+  #3603 `169621716`/`169621709`; #3623 `169622368`/`169622363`;
+  #3608 `169618840`/`169618837`; #3620 `169622679`/`169622677`;
+  #3622 `169623113`/`169623098`. Local focused checks passed for the Rust
+  fix/restack paths and #3622 web checks; #3588/#3590 web npm checks were
+  blocked locally by missing web dependency packages in those worktrees. ADO was
+  in progress/not started when last polled. #3604 remains unchanged with stale
+  cancelled rollup noise but green later ADO jobs visible; #3627 is approved
+  and waiting on ADO from its externally updated head.
+- Latest 2026-06-25 policy-stack rebase after #3586 merge: #3586 merged to
+  `main` at `d6dede37`. Restacked #3588 onto current `main` and pushed
+  `ebe8772d7`; restacked #3590 to `26e205716`; restacked #3603 to
+  `c1da0f204`; restacked #3623 to `08562bf0c`, preserving the OpenClaw
+  formatter/unused-mut fix. Fresh ADO queued: #3588 `169739870`/`169739848`;
+  #3590 `169741047`/`169741025`; #3603 `169741277`/`169741273`; #3623
+  `169741517`/`169741518`. Local focused runtime checks passed for the stack;
+  #3588 web checks remain locally blocked by missing web deps, and #3623 full
+  OpenClaw tests remain locally blocked by missing private cargo registry token.
+- Latest 2026-06-26 pass: refreshed policy stack after `main` moved to
+  `640e585e1`. Restacked #3590 to `3be909f4e` by skipping already-merged MOS3
+  upload commits; local web checks were blocked by missing deps/toolchain but
+  `git diff --check` passed. Restacked #3603 to `769a06ac3` and #3623 to
+  `6741f7a30`; #3603/#3623 PullRequest checks currently show neutral/skipping
+  on the fresh heads, while #3590 PullRequest is queued. Fixed #3604 review
+  blocker by adding `openclaw_workiq_sharepoint_enabled` to both protected
+  OpenClaw/WorkIQ ECS override test tables and pushed `7a0f493ae`; validation:
+  `cargo fmt --manifest-path src/lobster_runtime/Cargo.toml -- --check`,
+  `./cargo.sh test privileged_openclaw_tool_gates --manifest-path
+  src/lobster_runtime/Cargo.toml --lib --no-fail-fast`, and `git diff --check`.
+  Fixed #3608 review blocker by normalizing MOS3 marketplace approval feed
+  `source.url` from `mos3.publicSkillPath` / `publicSkillPath`, strengthened
+  catalog coverage, then restacked onto #3604 and pushed `883cc30b3`;
+  validation: runtime `cargo fmt`, focused catalog and tenant-admin marketplace
+  publish tests, and `git diff --check`. Restacked #3620 onto #3608 and pushed
+  `5bf1987db`; validation: runtime `cargo fmt`, `marketplace` and
+  `catalog_publish` focused tests, and `git diff --check`. Restacked #3622 onto
+  #3620 and pushed `53e691272`; validation: `npm test -- --project unit
+  tests/pages/FeedsPage.unit.test.tsx` and `git diff --check`. No manual ADO
+  runs were queued; only branch pushes triggered normal checks. Current known
+  blockers: GitHubPop proof-of-presence fails on all active PRs, #3604/#3608
+  still show stale `CHANGES_REQUESTED` pending reviewer refresh, and fresh ADO
+  rollups are queued/skipping/settling.
+- Follow-up same pass: #3590 merged to `main` on 2026-06-26 at head
+  `3be909f4e`. Next policy-stack PR is #3603 on `main` at `769a06ac3`; it
+  currently needs review again and has PullRequest queued. #3623 remains stacked
+  on #3603 at `6741f7a30` and should wait behind #3603.
+- #3620 review fix: addressed Galin's 2026-06-26 requested changes and pushed
+  `17224d4d3`. The emitted fallback tenant feed now strips reserved
+  `marketplace.*` catalog-only provenance via `feed_metadata()`, the
+  absent-from-baseline catalog test asserts `marketplace.approvalSource` is not
+  emitted, `docs/design/scout-catalog-feeds.md` documents the admin-approved
+  MOS3 Marketplace expansion lane, and the PR body now describes the union
+  contract instead of the older baseline-only contract. Local validation:
+  runtime `cargo fmt`, focused absent/in-baseline catalog publish tests,
+  broader `catalog_publish` focused test, and `git diff --check`. Posted review
+  note and requested `Galin-Iliev`/`dspektor`.
+- #3622 restacked onto #3620 after that fix and pushed `c9898d2cb`; local
+  validation: `npm test -- --project unit tests/pages/FeedsPage.unit.test.tsx`
+  and `git diff --check origin/user/giodl/scout-feeds-marketplace-admin-publish...HEAD`.
+  #3622 is clean/approved but still missing required green GitHubPop and
+  Build-Validation, with PullRequest currently neutral/skipping.
+- ADO pipeline state: `projects/lobster/ado-pipelines.md` is now a
+  status/troubleshooting note only. Lobster ADO checks attach/run
+  automatically; do not manually queue or rerun ADO unless the user explicitly
+  asks for a named PR/branch. If a manual queue is explicitly requested, do not
+  rely on local Azure DevOps defaults because this machine defaults to
+  `https://msfast.visualstudio.com`; use
+  `--organization https://msazure.visualstudio.com --project One`.
+- Current focus: Lobster PR-loop follow-up for open Gio PRs excluding #3731,
+  currently #3726, #3742, and #3746.
+- Active branch / PR: #3746
+  `user/giodl/scout-feeds-admin-tenant-claims` in
+  `C:\src\lobster-feeds-admin-tenant-claims`; PR
+  https://microsoft.ghe.com/bic/lobster/pull/3746.
 - LobsterTank: `C:\src\lobster-lobstertank\tools\lobstertank`, branch `user/giodl/lobstertank`, running at `http://127.0.0.1:8787/` when started locally.
-- Known dirty state: `C:\src\lobster` has unrelated dirty work on
-  `user/giodl/policy-compare-lifecycle`. Budget plugin work is isolated in
-  clean worktree `C:\src\lobster-context-budget-plugin`.
+- Known dirty state: `C:\src\lobster` is currently on
+  `user/giodl/openclaw-copilot-dev-validation` with the #3714 commit pushed,
+  plus unrelated dirty policy/harness files and generated dirs left unstaged:
+  `project-lobster-vault/Tech/OpenClaw/specs/proposals/upstream/policy-1-0.md`,
+  `tools/oc-harness/*`, `_partner_inspect/`, and `tools/oc-triage/`. Budget
+  plugin work is isolated in clean worktree `C:\src\lobster-context-budget-plugin`.
 - Blocking question: none.
+
+## 2026-06-28 #3742 governance runtime follow-up
+
+- Addressed dspektor patrol requests on #3742 and pushed `479c688e4`
+  (`fix(context-budget): manage governance start env`).
+- Added all context-budget governance runtime env vars to
+  `MANAGED_EXTRA_ENV_KEYS` in `plex_api.rs` with regression coverage, preventing
+  per-start `OPENCLAW_CONTEXT_BUDGET_MODE` / `OPENCLAW_CONTEXT_BUDGET_EMERGENCY_*`
+  projections from leaking across `/start` calls.
+- Bumped the context-budget audit report schema from
+  `2026-06-27.context-budget.v7` to `2026-06-28.context-budget.v8` in TS/JS and
+  updated the unit expectation.
+- Local proof: OpenClaw adapter fmt, focused `context_budget_` Rust tests (10
+  pass), context-budget Node test suite (51 pass), JS syntax checks for
+  `audit.js`/`runtime-evidence.js`/`schema.js`, and diff check.
+- Live after push: #3742 head `479c688e4`, still draft and stale
+  `CHANGES_REQUESTED`, `GitOps/GitHubPop` red. PullRequest ADO attached as
+  `170163348`; missing Build Validation manually queued as `170163391`.
+
+## 2026-06-28 #3746 tenant-admin claims docs follow-up
+
+- Addressed Eduardo/dspektor requested changes on #3746 and pushed
+  `a03fa887e` (`docs(scout-feeds): document tenant admin claims gate`).
+- Updated `docs/reference/scout-catalog-feeds.md`,
+  `docs/reference/admin-spaces.md`, and `docs/design/scout-catalog-feeds.md`
+  to document the current authorization contract: server-side ECS admin flag
+  plus either validated M365 tenant-admin Entra `wids` (Global Administrator /
+  Cloud Application Administrator) or the local
+  `LOBSTER_SCOUT_ADMIN_ASSIGNMENTS_PATH` assignment-snapshot fallback.
+- Local proof: stale wording `rg` sweep and `git diff --check
+  origin/main...HEAD`.
+- Live after push: #3746 head `a03fa887e`, non-draft, mergeable, stale
+  `CHANGES_REQUESTED`, `GitOps/GitHubPop` red. PullRequest ADO attached as
+  `170173249`; missing Build Validation manually queued as `170173268`.
+
+## 2026-06-25 PR Handoff
+
+- #3604 `user/giodl/scout-feeds-marketplace-install`: rebased onto current
+  marketplace UX base and pushed `86d97474186aebebafe9c4a08edd518ace6bdb4b`.
+  Removed stale ECS `user_override_disabled_reason` metadata for the
+  user-overridable OpenClaw/WorkIQ gates. Local checks: ECS JSON parse,
+  `cargo fmt --check`, `git diff --check`; targeted Rust test blocked by
+  missing Windows OpenSSL/vcpkg. ADO queued: `169440803` / `169440801`.
+- #3620 `user/giodl/scout-feeds-marketplace-admin-publish`: rebased onto
+  current #3608 and pushed `cda6c0e39a81c3b1eff85a1459903c0599b85ea6`.
+  Conflict resolution preserved the reviewed baseline-boundary behavior:
+  marketplace-only approvals stay out of the materialized tenant feed. Local
+  checks: `cargo fmt --check`, `git diff --check`; focused Rust test blocked
+  by missing Windows OpenSSL/vcpkg. ADO queued: `169441194` / `169441193`.
+- #3622 `user/giodl/scout-feeds-marketplace-admin-state`: fixed review blocker
+  by changing marketplace approved copy from `In tenant feed` to
+  `Approved in catalog`, restacked onto #3620, and pushed
+  `6efa1959a2b1790bc5c04fc74f6b5326d7393a8f`. Local checks:
+  `pnpm vitest run tests/pages/FeedsPage.unit.test.tsx`, `git diff --check`.
+  ADO queued: `169441285` / `169441284`.
+- #3585 `user/giodl/lobster-personal-policy-upload`: created isolated worktree
+  `C:\src\lobster-personal-policy-accept`, fixed artifact-attestation and lock
+  ownership review blockers, and pushed
+  `a2f6509cfe4c01235aa7cb409fb503033c729b2e`. The route now binds persisted
+  MOS3 artifact identity/revision/hash/attestation into the trusted OpenClaw
+  comparison HMAC, requires artifact attestation, and only removes policy lock
+  files owned by its token. Local checks: `cargo fmt --check`,
+  `git diff --check`; focused `cargo test policy --manifest-path
+  src\lobster_runtime\Cargo.toml --lib` blocked by missing Windows
+  OpenSSL/vcpkg before compiling the changed crate. ADO queued: `169441882` /
+  `169441881`. Dependent policy stack starts with #3586 and likely needs
+  restacking after #3585 review/CI settles.
 
 ## Resume Checklist
 
@@ -98,6 +414,92 @@
   PullRequest build `168873059`, Build Validation build `168873058`; both
   attached as pending on the new head. Posted PR comment:
   `https://microsoft.ghe.com/bic/lobster/pull/3422#issuecomment-183697506`.
+- PR #3422 CI follow-up on 2026-06-24: ADO PullRequest builds `169376673` and
+  `169376727` failed in hidden `Lobster Runtime — Unit Tests` because
+  `routes::web_feature_flags::tests::projection_does_not_leak_unrelated_server_side_flags`
+  still expected 9 projected fields after adding
+  `scout_feeds_admin_ux_enabled`. Pushed one-line fix head
+  `9ce43517a9eab817582dacac100b69a370028bba` in
+  `C:\src\lobster-feeds-admin-composition`. Local validation passed:
+  focused `cargo.sh test projection_does_not_leak_unrelated_server_side_flags
+  --manifest-path src/lobster_runtime/Cargo.toml --lib`, `rustfmt --edition
+  2021 --check src/lobster_runtime/src/routes/web_feature_flags_tests.rs`,
+  and `git diff --check`. Requeued required ADO on the new head:
+  PullRequest build `169389969`, Build Validation build `169389963`.
+- PR #3604 review fix on 2026-06-24: pushed head
+  `f002be5eadf92e49ff9ad566feccc78bf9d221bf` for
+  `user/giodl/scout-feeds-marketplace-install`. The install helper now prefers
+  `mos3.publicSkillPath` / `publicSkillPath` over `source.url`, with divergent
+  URL coverage proving the personal feed persists the SKILL.md artifact URL.
+  Local validation passed: focused `cargo.sh test marketplace_skill_install_url
+  install_marketplace_skill --manifest-path src/lobster_runtime/Cargo.toml
+  --lib`, rustfmt check for touched route files, and `git diff --check`.
+  Requeued ADO: branch runs PullRequest `169427963`, Build Validation
+  `169427962`; GitHub attached PR-merge runs PullRequest `169427988`, Build
+  Validation `169427990`.
+  Comment: `https://microsoft.ghe.com/bic/lobster/pull/3604#issuecomment-184964606`.
+- PR #3608 review fix on 2026-06-24: pushed head
+  `1de0dc3a7d26694a2b328bde5be8f2d9a3c5e500` for
+  `user/giodl/scout-feeds-marketplace-admin-approval`. Ported the marketplace
+  install URL precedence fix and changed catalog publish to append publishable
+  reviewed entries absent from the configured baseline feed, with catalog and
+  route coverage for marketplace approve -> tenant publish. Local validation
+  passed: focused `cargo.sh test
+  catalog_publish_includes_approved_entry_absent_from_baseline
+  tenant_admin_publishes_approved_marketplace_entry_absent_from_baseline
+  install_marketplace_skill --manifest-path src/lobster_runtime/Cargo.toml
+  --lib`, rustfmt check for touched catalog/route files, and
+  `git diff --check`. Requeued ADO: PullRequest `169427964`, Build Validation
+  `169427961`. Comment:
+  `https://microsoft.ghe.com/bic/lobster/pull/3608#issuecomment-184964611`.
+- Lobster policy stack refresh on 2026-06-24: in
+  `C:\src\lobster-personal-policy-upload`, rebased #3585
+  `user/giodl/lobster-personal-policy-upload` onto current `origin/main`,
+  fixed the current-main ECS settings regression by adding
+  `user_override_disabled_reason` metadata for protected OpenClaw tool gates,
+  and force-pushed head `fa46e80e41c09e186a99c89bfbeaf6d0b3214ae9`. Local
+  validation passed: exact failed ECS test, `gateway_proxy::ecs_settings`,
+  `policy` tests, runtime `fmt --check`, runtime `clippy --lib -- -D warnings`,
+  and `git diff --check`. #3585 now has required ADO queued on the new head:
+  PullRequest `169427858`, Build Validation `169427856`; review reset to
+  `REVIEW_REQUIRED` after the force-push.
+- Restacked and force-pushed dependent policy branches: #3586
+  `ac516dc64`, #3588 `d39822134`, #3590 `be7b4be00`, #3603 `ce5787719`,
+  #3607 `b42ff6397`. Manually queued required ADO for each: #3586
+  `169428034`/`169428055`, #3588 `169428074`/`169428096`, #3590
+  `169428108`/`169428137`, #3603 `169428211`/`169428367`, #3607
+  `169428458`/`169428471`.
+- Local default-config PR work was preserved, then restored on branch
+  `user/giodl/lobster-policy-default-config` on top of refreshed #3607 head
+  `b42ff6397`. It remains intentionally dirty. Before committing/opening that
+  PR, resolve the trusted-proxy boot config concern in the baked OpenClaw
+  config.
+- Default-config PR #3623 opened on 2026-06-25 as a draft from
+  `user/giodl/lobster-policy-default-config`, based on
+  `user/giodl/lobster-feed-policy-sources`, latest head `403899240`. It commits
+  the default policy-conformant baked OpenClaw config plus the runtime
+  trusted-proxy WS identity-header injection needed for boot compatibility. The
+  container regression now loads the real baked `openclaw.json`, resolves
+  sibling `$include` fragments, and evaluates the effective config against
+  Lobster's default policy posture. Required ADO queued on the latest head:
+  PullRequest `169441035`, Build Validation `169441034`. Local runtime focused
+  tests, runtime clippy/fmt, container `fmt --check`, effective-config Node
+  smoke, and `git diff --check` passed; container Rust tests are still blocked
+  locally by private registry auth.
+- #3585 review follow-up on 2026-06-25: in
+  `C:\src\lobster-personal-policy-accept`, rebased
+  `user/giodl/lobster-personal-policy-upload` onto current `origin/main`
+  `68fdbc5c0` and pushed head
+  `cb7f0ed2d9ad32bec610313726a898a860fb50cf`. This clears the merge conflict
+  and fixes Galin/edpiva's remaining requested-change blocker by adding
+  `user_override_disabled_reason` to `openclaw_workiq_office_enabled` and
+  `openclaw_customizations_enabled`, with
+  `privileged_openclaw_tool_gates_*` regression coverage. It also fixes the
+  stale-head ADO clippy failure in `routes/policy.rs`. Local proof passed
+  runtime `fmt --check`, focused privileged-gate tests, `policy` tests (109),
+  runtime `clippy --lib -- -D warnings`, and `git diff --check`. Required ADO
+  queued: PullRequest `169445321`, Build Validation `169445320`. PR is
+  mergeable but still shows `CHANGES_REQUESTED` until reviewers refresh.
 - PR 1419 is open, non-draft, mergeable, and review-required. GitHub had not reported checks on refreshed head `68c642803` immediately after push.
 - Latest blocking stale-link review was addressed by retargeting `nix-steipete-tools` references to `nix-openclaw-tools` and removing live `moltbench` links after deleting the entry.
 - LobsterTank LOC update summarizes GitHub PR file `additions + deletions` into total/code/test/docs/other buckets, shows LOC in the PR table, includes aggregate summary pills, and expands a per-PR LOC breakdown in the detail drawer.
@@ -116,6 +518,387 @@
 - Codex review accepted/fixed one issue: msteams reconciliation no longer
   bypasses `OPENCLAW_PLUGINS_ENABLED=false`; final
   `codex review --base origin/main` reported no actionable bugs.
+- PR #3620 follow-up on 2026-06-25: in
+  `C:\src\lobster-scout-feeds-marketplace-admin-publish`, fixed marketplace
+  catalog publish source matching so catalog-only `marketplace.*` provenance
+  metadata does not make an in-baseline approved entry look source-changed.
+  Pushed head `2da18c24c725335e46e6338eb10a99ad4570e814` with commit
+  `2da18c24c725335e46e6338eb10a99ad4570e814`. Local validation passed
+  runtime `fmt --check` and `git diff --check`; the focused Rust test is
+  blocked on Windows by missing OpenSSL/vcpkg. Required ADO queued:
+  PullRequest `169445333`, Build Validation `169445332`. Current state after
+  push: ADO in progress, `GitOps/FileAffordance` passed, `GitOps/GitHubPop`
+  failed with placeholder URL, review still `CHANGES_REQUESTED` until
+  reviewers refresh.
+- PR #3622 follow-up on 2026-06-25: in
+  `C:\src\lobster-scout-feeds-marketplace-admin-state`, rebased
+  `user/giodl/scout-feeds-marketplace-admin-state` onto #3620 head
+  `2da18c24c725335e46e6338eb10a99ad4570e814` and force-pushed head
+  `28b4676d6a3061d8f54f2f8d56ddf4aae032d970`. Local validation passed
+  `pnpm vitest run tests/pages/FeedsPage.unit.test.tsx` in `src/lobster_web`
+  and `git diff --check`. Required ADO queued: PullRequest `169445379`, Build
+  Validation `169445378`. Current state after push: ADO in progress,
+  `GitOps/FileAffordance` passed, `GitOps/GitHubPop` failed with placeholder
+  URL, review still `CHANGES_REQUESTED` until reviewers refresh.
+- PR #3585 state check on 2026-06-25: current pushed head is
+  `cb7f0ed2d9ad32bec610313726a898a860fb50cf` and already contains the
+  requested `user_override_disabled_reason` fixes for
+  `openclaw_workiq_office_enabled` and `openclaw_customizations_enabled`, plus
+  the privileged gate coverage. No additional edit was needed on this pass.
+  Local validation passed runtime `fmt --check` and `git diff --check`.
+  Required ADO is in progress: PullRequest `169445321`, Build Validation
+  `169445320`. PR still shows `CHANGES_REQUESTED` until reviewers refresh.
+- PR #3604 refresh after #3565 merge on 2026-06-25: in
+  `C:\src\lobster-scout-feeds-marketplace-install`, rebased
+  `user/giodl/scout-feeds-marketplace-install` onto current `origin/main`
+  `0ad33a6d8` after #3565 merged. Skipped the duplicate #3565 commit and
+  preserved the reviewed ECS override-policy cleanup by removing stale
+  `user_override_disabled_reason` entries from the user-overridable
+  code-mode/WorkIQ gates. Force-pushed head
+  `a7ae8bce5a6734a355fc8a9b575037046d51139c`. Local validation passed:
+  `cargo.sh test marketplace_skill_install_url install_marketplace_skill
+  --manifest-path src/lobster_runtime/Cargo.toml --lib`, rustfmt check for the
+  touched route/test files, and `git diff --check`. Required ADO queued:
+  PullRequest `169446269`, Build Validation `169446268`. Current PR state
+  after push: `REVIEW_REQUIRED`, required ADO attached/queued, file affordance
+  passed.
+- PR #3627 refresh after #3565 merge on 2026-06-25: remote branch
+  `user/giodl/scout-feeds-admin-composition` was independently updated with a
+  merge-from-main commit while the local worktree was rebasing. Current remote
+  head is `a2d2a961ac61be36d6e1e69136553f3ab513240d`; it contains the combined
+  marketplace MOS3 state plus tenant-admin catalog/user-config-provider state,
+  with no conflict markers in the inspected runtime/web surfaces. I did not
+  overwrite it with the local linear rebase because the PR diff surface matched
+  and remote ADO had already attached. Local rebase validation passed before
+  leaving the worktree divergent: focused runtime tenant-admin tests,
+  `pnpm vitest run tests/pages/FeedsPage.unit.test.tsx
+  tests/services/webFeatureFlagsProbe.unit.test.ts`, runtime `fmt --check`,
+  Biome on touched web files, and `git diff --check`. Required ADO on remote:
+  PullRequest `169446392`, Build Validation `169446539`.
+- Lobster PR follow-up scan on 2026-06-25 after #3565 merge:
+  - #3604 current head `a7ae8bce5a6734a355fc8a9b575037046d51139c` has
+    required ADO still running (`169446269`/`169446268`) and needs fresh review
+    after rebase.
+  - #3627 current remote head `a2d2a961ac61be36d6e1e69136553f3ab513240d` has
+    required ADO still running (`169446392`/`169446539`) and needs review.
+  - #3608 is now `DIRTY` because its base #3627 moved; do not restack until
+    #3627 finishes or unless deliberately choosing to chase the current remote
+    head.
+  - #3622 is approved with ADO still running on head
+    `28b4676d6a3061d8f54f2f8d56ddf4aae032d970`.
+  - #3620 current head `2da18c24c725335e46e6338eb10a99ad4570e814` fixed the
+    metadata comparison blocker, but dspektor's latest review now blocks on a
+    product/PR contract mismatch: PR/body says catalog-only marketplace
+    approvals are published, while the code now intentionally preserves the
+    deployment baseline boundary and excludes catalog-only entries. Decide
+    whether to update PR/docs/product contract or restore catalog-only
+    publishing.
+  - #3585 current head `cb7f0ed2d9ad32bec610313726a898a860fb50cf` has
+    engineering approvals, but Galin's synthesis marks `CHANGES_REQUESTED`
+    because the privileged-gate override policy reversal needs namespace-owner
+    adjudication. This is not currently a mechanical CI/code failure.
+  - #3586 is `DIRTY` against updated #3585; defer restack until #3585 policy
+    decision is settled.
+  - #3588 current head `d398221341ed1b2c5b2c4941c1b2b60b1268cc6f` has a real
+    standalone-stack blocker: MOS3 publish lacks the durable-storage guard that
+    later #3603 adds. Either bring that guard/test into #3588 or accept that the
+    stack must not be reviewed as standalone.
+- Lobster PR loop on 2026-06-25:
+  - #3588 `user/giodl/lobster-policy-mos3-upload`: added the missing
+    `LOBSTER_POLICY_BASELINE_STORAGE_DURABLE` guard to the MOS3 policy artifact
+    publish route, with regression coverage proving no MOS3 request is sent
+    when durable storage is not acknowledged. Restacked after #3586 moved and
+    pushed head `c662f07457265b07a5f457bcbc0f5edb0c00cc5d`. Local validation:
+    runtime `cargo fmt --check`, focused
+    `cargo.sh test publish_personal_policy_artifact_requires_durable_storage_ack
+    --manifest-path src/lobster_runtime/Cargo.toml --lib`, and
+    `git diff --check`. ADO queued: PullRequest `169449164`, Build Validation
+    `169449161`.
+  - #3608 `user/giodl/scout-feeds-marketplace-admin-approval`: restacked onto
+    refreshed #3627 head `a2d2a961ac61be36d6e1e69136553f3ab513240d` and pushed
+    head `88c5173dcebb621a403aed268f07bb6b0221aabc`. Conflict resolution kept
+    the marketplace install route, the newer discovered MOS3 host validation,
+    and the marketplace approval fixture shape. Local validation: runtime
+    `cargo fmt --check`, focused Scout feed tests, FeedsPage vitest, and
+    `git diff --check`. ADO queued: PullRequest `169447811`, Build Validation
+    `169447812`.
+  - #3620 `user/giodl/scout-feeds-marketplace-admin-publish`: restacked onto
+    refreshed #3608 and pushed head
+    `ac4de2e022a8a6d18bbee6d7a6d109b70f01d00d`. Local validation: runtime
+    `cargo fmt --check`, focused catalog publish tests, and `git diff --check`.
+    ADO queued: PullRequest `169447921`, Build Validation `169447922`.
+  - #3622 `user/giodl/scout-feeds-marketplace-admin-state`: restacked onto
+    refreshed #3620 and pushed head
+    `529b359252ee6f053d60d93d6ffe58ceec006a50`. Local validation: FeedsPage
+    vitest and `git diff --check`. ADO queued: PullRequest `169448727`, Build
+    Validation `169448728`.
+  - Policy draft stack restacked after #3588/#3586 movement:
+    #3586 `866d3107669fe0d331d327bb7d96d8e70b1a0f58` (ADO `169448917` /
+    `169448916`; local `git diff --check`, web vitest blocked by missing local
+    `vitest` in the fresh `-NoInstall` worktree), #3590
+    `6c65a435bf5d14aecd5139f90f67c48095272d47` (ADO `169449363` /
+    `169449360`; runtime fmt and diff check), #3603
+    `b81894b122deacf6dc8258a7d5fe36060f1b8ab7` (ADO `169449527` /
+    `169449524`; runtime fmt and diff check), #3607
+    `1b2d2dbfec99efa05093409442b803586f069eb6` (ADO `169449695` /
+    `169449694`; runtime fmt and diff check), and #3623
+    `4b7453d400aefdc988c6bcb2b01500e7ea030850` (ADO `169449829` /
+    `169449828`; runtime/container fmt and diff check).
+  - Final sweep: all open author PRs are mergeable at the GitHub merge-conflict
+    layer. Remaining actionable owners are CI completion and review refreshes:
+    #3585 still has the namespace-owner policy review blocker; #3620 still
+    shows `CHANGES_REQUESTED` until dspektor refreshes after the PR body/code
+    contract clarification; #3604 and #3627 are review/check gated.
+- PR #3585 gate-policy cleanup on 2026-06-25: dropped the accidental
+  `fix(runtime): block privileged tool gate overrides` commit from
+  `user/giodl/lobster-personal-policy-upload` because it reversed #3457/#3618
+  precedent and caused Galin's namespace-owner blocker. Rebased onto current
+  `origin/main` `93125abf7`, force-pushed head
+  `2a82f5aead92e3e0103cf35aecdb400878489f9a`, and posted
+  `https://microsoft.ghe.com/bic/lobster/pull/3585#issuecomment-185118311`.
+  PR diff is back to personal policy accept/hardening only; no ECS gate-policy
+  files remain in the PR-owned diff. Local validation passed runtime
+  `cargo fmt --check`, focused `policy` tests, and `git diff --check`; local
+  web vitest is blocked in this worktree by missing `vitest`. Required ADO is
+  attached on the new head: PullRequest `169450827`, Build Validation
+  `169450825`. Current blockers: ADO still running, `GitOps/GitHubPop` needs
+  human proof-of-presence auth, and review still shows old
+  `CHANGES_REQUESTED` until reviewers refresh after the dropped commit.
+- Policy stack restacked after the #3585 rewrite on 2026-06-25, preserving only
+  PR-owned commits above each refreshed base and keeping the removed gate-policy
+  commit out of downstream ancestry. Force-pushed heads and queued required ADO:
+  #3586 `16b127bcf1aa4b70f52948651a876143418cb356` with ADO
+  `169451328`/`169451337`; #3588
+  `aefdbfc506dd6c8a5e6b7779944d899fc6fc5d90` with ADO
+  `169451348`/`169451365`; #3590
+  `b97c954142486bd97bd158da2ab6278231eb0a9a` with ADO
+  `169451390`/`169451406`; #3603
+  `27db2c6d91a3f4836b13d37a2ed32d51a438b6f5` with ADO
+  `169451423`/`169451429`; #3607
+  `0759beb3cb6dfaa421e413906450e624e6bd89b9` with ADO
+  `169451434`/`169451444`; #3623
+  `7082062b90826e23df851c2d30294cc764ec7b14` with ADO
+  `169451457`/`169451472`. Each restack passed `git diff --check`; PRs are
+  mergeable at the GitHub conflict layer, but most remain draft/unstable while
+  queued ADO settles. GitOps/PoP is expected to fail on refreshed heads until
+  human proof-of-presence is completed.
+- Scout feed stack CI fixes on 2026-06-25:
+  - #3620 `user/giodl/scout-feeds-marketplace-admin-publish`: fixed ADO
+    Rust compile failure from duplicate restack artifacts in
+    `src/lobster_runtime/src/routes/scout_feed.rs`
+    (`SCOUT_MARKETPLACE_FEED_MOS3_ENV_ENV`, `marketplace_mos3_environment`,
+    and duplicate `marketplace_feed`). Initial fix head `2acade47a` was
+    validated with runtime fmt, focused `marketplace` tests, runtime lib check,
+    and `git diff --check`, then after #3608 moved was restacked and pushed as
+    `fa2fe04c9e5f55fb687d3039a51ff6d771eacb68`. Fresh ADO:
+    PullRequest `169452836`, Build Validation `169452845`. PR comment:
+    `https://microsoft.ghe.com/bic/lobster/pull/3620#issuecomment-185119876`.
+  - #3622 `user/giodl/scout-feeds-marketplace-admin-state`: restacked twice
+    after #3620 moved, latest pushed head
+    `f3877aae706d8598b22487e01573f48ac9d0b118`. Local validation passed
+    `pnpm vitest run tests/pages/FeedsPage.unit.test.tsx` and
+    `git diff --check`. Fresh ADO: PullRequest `169452924`, Build Validation
+    `169452933`.
+  - #3627 `user/giodl/scout-feeds-admin-composition`: fixed ADO
+    clippy/unit-test compile failure by adding
+    `marketplace_mos3_environment: None` to five `ScoutFeedRouteSources` test
+    initializers. Used clean temporary worktree `C:\tmp\lobster-3627-ci-fix`
+    because the existing `C:\src\lobster-feeds-admin-composition` worktree was
+    locally divergent. Pushed head
+    `5a7223bcee1e3cc8940c30546c765ddc4815fc41`. Local validation passed
+    runtime fmt, focused `scout_feed` tests, runtime lib check, and
+    `git diff --check`. Fresh ADO: PullRequest `169452634`, Build Validation
+    `169452657`.
+  - #3608 `user/giodl/scout-feeds-marketplace-admin-approval`: restacked onto
+    refreshed #3627 and pushed
+    `ae95dfd4c5a9200c3079262cba86048907ec8723`. Local validation passed
+    runtime fmt, focused `scout_feed` tests, FeedsPage vitest, and
+    `git diff --check`. Fresh ADO: PullRequest `169452767`, Build Validation
+    `169452780`.
+  - Final sweep after pushes: #3585 is now review-approved; #3627/#3608/#3620
+    and #3622 are mergeable at the conflict layer with fresh ADO pending. PoP
+    still needs human auth on refreshed heads where `GitOps/GitHubPop` fails.
+- #3627 runtime unit-test fix on 2026-06-25: ADO PullRequest build
+  `169545372` failed `Lobster Runtime — Unit Tests` on head `d2136e3dc`
+  because `routes::web_feature_flags::tests::projection_does_not_leak_unrelated_server_side_flags`
+  expected 10 projected keys while the current response shape explicitly
+  includes 11 after `scout_feeds_admin_ux_enabled`. Used clean temporary
+  worktree `C:\tmp\lobster-3627-unitfix` from the remote PR head, changed the
+  expected count to 11, and pushed `a7ca1b3f77f075cf46ca0b5b9123db549dbb279e`
+  to `user/giodl/scout-feeds-admin-composition`. Local proof passed
+  `rustfmt --edition 2021 --check
+  src/lobster_runtime/src/routes/web_feature_flags_tests.rs`,
+  `.\cargo.sh test projection_does_not_leak_unrelated_server_side_flags
+  --manifest-path src/lobster_runtime/Cargo.toml --lib --no-fail-fast`, and
+  `git diff --check`. PR evidence comment:
+  `https://microsoft.ghe.com/bic/lobster/pull/3627#issuecomment-185213196`.
+  Fresh ADO queued: PullRequest `169552257`, Build Validation `169552255`.
+  Push reset review to `REVIEW_REQUIRED`; edpiva review was re-requested. PoP
+  failed on the new head and needs human proof-of-presence auth.
+- Policy stack ready-for-review transition on 2026-06-25: marked formerly draft
+  PRs #3586, #3588, #3590, #3603, #3607, and #3623 ready for review. #3588
+  still shows stale `CHANGES_REQUESTED` from dspektor's durable-storage guard
+  review, but current head `aefdbfc506dd6c8a5e6b7779944d899fc6fc5d90` already
+  contains the `state.storage_durable` guard in
+  `publish_personal_policy_artifact` and regression test
+  `publish_personal_policy_artifact_requires_durable_storage_ack`; posted
+  re-review evidence at
+  `https://microsoft.ghe.com/bic/lobster/pull/3588#issuecomment-185121586`.
+  #3620 still shows stale `CHANGES_REQUESTED` from the earlier product-contract
+  mismatch, but the current PR body and head
+  `fa2fe04c9e5f55fb687d3039a51ff6d771eacb68` now explicitly preserve the
+  deployment-baseline boundary and include the provenance-matching fix/tests;
+  posted re-review evidence at
+  `https://microsoft.ghe.com/bic/lobster/pull/3620#issuecomment-185121656`.
+  Direct ADO status check showed all fresh policy/Scout runs still
+  `inProgress` or `notStarted`, with no new completed failure yet. The leftover
+  temp directory `C:\tmp\lobster-3627-ci-fix` is no longer a registered git
+  worktree but could not be fully deleted because Windows still locks Rust
+  proc-macro DLLs under `target\debug\deps`.
+- Lobster open-PR loop on 2026-06-25 after making PRs non-draft: re-requested
+  dspektor review on #3588 and #3620 to lift stale `CHANGES_REQUESTED` reviews
+  after evidence comments; re-requested edpiva review on #3627 because the
+  latest head only has a comment, not an approving review, after the test-only
+  constructor fix. ADO poll still showed all fresh watched builds either
+  `inProgress` or `notStarted` with no completed failure: #3627
+  `169452634`/`169452657`, #3608 `169452767`/`169452780`, #3620
+  `169452836`/`169452845`, #3622 `169452924`/`169452933`, policy stack
+  `169451328` through `169451472`, #3585 `169450827`/`169450825`, and #3604
+  PullRequest `169446269`.
+- Follow-up fixes from new 2026-06-25 reviews: #3623 got commit
+  `1c4388e149d91cf12c0fdff232d62b0dc5d801ba` in
+  `C:\src\lobster-personal-policy-upload`, updating the OpenClaw container
+  baked Gateway posture test to assert trusted-proxy/no-Control-UI-bypass
+  instead of the old auth-none allowlist contract. Local proof passed direct
+  rustfmt, targeted `baked_gateway_auth_posture_matches_lobster_proxy_contract`
+  test, and `git diff --check`; comment
+  `https://microsoft.ghe.com/bic/lobster/pull/3623#issuecomment-185124196`.
+  Fresh ADO: PullRequest `169454580`, Build Validation `169454586`. #3607 got
+  commit `6ee4190c527e4e7ec28b3cd63ff3ddcc8128d9ca` in
+  `C:\src\lobster-feed-policy-sources`, removing unused feed-source test
+  fixtures/imports from `policy_tests.rs`. Local proof passed direct rustfmt,
+  runtime `cargo.sh check --lib --tests`, and `git diff --check`; comment
+  `https://microsoft.ghe.com/bic/lobster/pull/3607#issuecomment-185124191`.
+  Fresh ADO: PullRequest `169454579`, Build Validation `169454585`. Re-requested
+  edpiva review on both refreshed heads.
+- #3590 follow-up on 2026-06-25 for edpiva policy-env leak blocker: pushed
+  `22fd4f05fd9cc68cf0b01406bc7e426ada9c4dd0` in
+  `C:\src\lobster-policy-materialization`. Added policy baseline env keys
+  (`LOBSTER_OPENCLAW_POLICY_BASELINE_ENABLED`, exempt/reason/jsonc, and path
+  override keys) to `MANAGED_EXTRA_ENV_KEYS` and added
+  `gateway_start_restores_policy_baseline_env_between_user_starts` to prove a
+  later `/start` with `extra_env: {}` restores the container baseline instead
+  of leaking a previous tenant/user policy projection. Local proof passed direct
+  rustfmt, targeted OpenClaw container test, and `git diff --check`; comment
+  `https://microsoft.ghe.com/bic/lobster/pull/3590#issuecomment-185125766`.
+  Fresh ADO: PullRequest `169455018`, Build Validation `169455030`.
+  Re-requested edpiva review.
+- #3586 follow-up on 2026-06-25 for edpiva client/runtime contract blocker:
+  pushed `8c1166b856c548dccc88eaddc1889df900e4dff2` in
+  `C:\src\lobster-policy-ux-save`. `PolicyPage` now requires non-empty
+  `artifactAttestation` before enabling Save, matching the runtime
+  `artifact.attestation` requirement, and the unit test suite has a negative
+  save-disabled case when the MOS3 attestation is missing. `git diff --check`
+  passed; local Vitest/Prettier were blocked because this worktree lacks web
+  dependencies (`vitest/config` and `prettier` missing). Comment:
+  `https://microsoft.ghe.com/bic/lobster/pull/3586#issuecomment-185126216`.
+  Fresh ADO: PullRequest `169455334`, Build Validation `169455340`.
+  Re-requested edpiva review.
+- #3588 restack on 2026-06-25 after #3586 moved: rebased
+  `user/giodl/lobster-policy-mos3-upload` onto refreshed #3586
+  `8c1166b856c548dccc88eaddc1889df900e4dff2`, resolved the `PolicyPage`
+  conflict by preserving both MOS3 publish behavior and #3586's new
+  `artifactAttestation` save requirement, and force-pushed head
+  `3b7ef5cc651f9fae0b3f93ae8945e9f7db6e1863`. Local proof passed focused
+  `publish_personal_policy_artifact` runtime tests, direct rustfmt on touched
+  runtime files, and `git diff --check`; comment
+  `https://microsoft.ghe.com/bic/lobster/pull/3588#issuecomment-185127416`.
+  Fresh ADO: PullRequest `169455754`, Build Validation `169455763`.
+  Re-requested dspektor and edpiva review.
+- #3590 restack on 2026-06-25 after #3588 moved: rebased
+  `user/giodl/lobster-policy-materialization` onto refreshed #3588
+  `3b7ef5cc651f9fae0b3f93ae8945e9f7db6e1863` and force-pushed
+  `2f2e2b3c50deaa12d293ed01a01246fc0b5bd07e`. The policy materialization
+  slice and policy-env leak fix were preserved. Local proof passed targeted
+  `gateway_start_restores_policy_baseline_env_between_user_starts`, direct
+  rustfmt on `plex_api` files, and `git diff --check`; comment
+  `https://microsoft.ghe.com/bic/lobster/pull/3590#issuecomment-185128011`.
+  Fresh ADO: PullRequest `169455929`, Build Validation `169455936`.
+  Re-requested edpiva review.
+- #3603 restack on 2026-06-25 after #3590 moved: rebased
+  `user/giodl/lobster-policy-review-fixes` onto refreshed #3590
+  `2f2e2b3c50deaa12d293ed01a01246fc0b5bd07e` and force-pushed
+  `4454a74ccb9e57d6cfcdcde2b0d5543da4a6c132`. The personal-policy hardening
+  commit was preserved. Local proof passed focused `accept_personal_policy`
+  runtime tests, direct rustfmt on policy route/test files, and
+  `git diff --check`; comment
+  `https://microsoft.ghe.com/bic/lobster/pull/3603#issuecomment-185129331`.
+  Fresh ADO: PullRequest `169456156`, Build Validation `169456238`.
+  Re-requested edpiva and dspektor review after the restack.
+- #3607 restack on 2026-06-25 after #3603 moved: rebased
+  `user/giodl/lobster-feed-policy-sources` onto refreshed #3603
+  `4454a74ccb9e57d6cfcdcde2b0d5543da4a6c132` and force-pushed
+  `82785553e68088d5acfd04dc520b5f72360ba3d2`. The feed policy-source changes
+  and unused-fixture cleanup were preserved. Local proof passed runtime
+  `cargo.sh check --lib --tests`, direct rustfmt on `policy_tests.rs`, and
+  `git diff --check`; comment
+  `https://microsoft.ghe.com/bic/lobster/pull/3607#issuecomment-185129741`.
+  Fresh ADO: PullRequest `169456456`, Build Validation `169456465`.
+  Re-requested edpiva review.
+- #3623 restack on 2026-06-25 after #3607 moved: rebased
+  `user/giodl/lobster-policy-default-config` onto refreshed #3607
+  `82785553e68088d5acfd04dc520b5f72360ba3d2` and force-pushed
+  `05c1eeb4e594f2c0359c1cba5784aa328da1df4f`. The baked OpenClaw config
+  alignment and trusted-proxy test fix were preserved. Local proof passed
+  targeted `baked_gateway_auth_posture_matches_lobster_proxy_contract`, direct
+  rustfmt on `gateway_process_tests.rs`, and `git diff --check`; comment
+  `https://microsoft.ghe.com/bic/lobster/pull/3623#issuecomment-185130581`.
+  Fresh ADO: PullRequest `169456585`, Build Validation `169456591`.
+  Re-requested edpiva review.
+- #3586 follow-up after #3585 merged on 2026-06-25: fixed the current
+  dspektor blockers in `C:\src\lobster-policy-ux-save` by adding a
+  fail-closed server-side personal-write gate
+  (`LOBSTER_POLICY_PERSONAL_WRITES_ENABLED`) and changing the UI-computed
+  policy artifact hash back to plain 64-char hex so runtime comparison no
+  longer sees `POLICY_ARTIFACT_HASH_MISMATCH`. Local proof passed
+  `accept_personal_policy`, direct rustfmt on policy route/tests, and
+  `git diff --check`; Vitest remained locally blocked by missing web deps.
+  Comment: `https://microsoft.ghe.com/bic/lobster/pull/3586#issuecomment-185202776`.
+  After `main` moved, rebased onto current `origin/main` and force-pushed
+  `389a0c75fa812b861774ecb83641fd8d355a1886`; fresh ADO queued:
+  PullRequest `169544923`, Build Validation `169544937`. Restack/proof
+  comment:
+  `https://microsoft.ghe.com/bic/lobster/pull/3586#issuecomment-185203301`.
+  Re-requested dspektor and edpiva review.
+- #3586 update on 2026-06-25 for Copilot/client-contract comments: pushed
+  signed commit `593bc8873041118c2142727fe85b5007d33d7595` in
+  `C:\src\lobster-policy-ux-save`. The update aligns the Policy UX save
+  contract with runtime validation by sending `sha256:<hex>` artifact hashes,
+  always requiring/sending MOS3 artifact attestation on save, using
+  `openclaw-comparison:v1:` comparison attestations in tests, and removing the
+  now-unreachable nullable API factory path. Focused local proof passed Biome
+  format/lint on the four touched web files using the neighboring Lobster
+  worktree's installed Biome, `git diff --check`, and runtime `cargo fmt
+  --check`; full web type/unit checks remain locally blocked because this
+  worktree cannot install private npm dependencies (`npm ci` hit registry
+  auth, leaving no local `vitest`/`tsc` binaries). Fresh required ADO queued:
+  PullRequest `169547994`, Build Validation `169547993`. Current GitOps
+  blocker is Proof of Presence for PR #3586 at the new head; the check output
+  provides Microsoft/PME auth links.
+- #3588 restack after #3586 moved on 2026-06-25: rebased
+  `user/giodl/lobster-policy-mos3-upload` onto refreshed #3586
+  `389a0c75fa812b861774ecb83641fd8d355a1886`, resolved policy
+  route/test conflicts by preserving both the server-side personal-write gate
+  and MOS3 publish configuration, removed stale `PolicyPage` unit-test coverage
+  for manual MOS3 artifact inputs, and force-pushed
+  `49ca1a36da4fd9c2c143b53efd02de944b386f5c`. Local proof passed
+  `git diff --check`, direct rustfmt on policy/MOS3 runtime files,
+  `publish_personal_policy_artifact`, and
+  `accept_personal_policy_requires_personal_write_gate`; local Vitest remains
+  blocked by missing web deps (`vitest/config`). Comment:
+  `https://microsoft.ghe.com/bic/lobster/pull/3588#issuecomment-185205851`.
+  Fresh ADO queued: PullRequest `169545922`, Build Validation `169545898`.
+  Re-requested dspektor and edpiva review.
 - PR 3371 current head is `953dcdd00`. GitHub reported the branch mergeable and
   review required. `GitOps/FileAffordance` passed, `GitOps/GitHubPop` failed
   with only a placeholder details URL, and the required runtime ADO checks were
@@ -159,3 +942,269 @@
   both ADO checks pending/in progress, `GitOps/FileAffordance` passed,
   `GitOps/GitHubPop` failed with placeholder details URL, review decision
   `CHANGES_REQUESTED`, mergeable but blocked.
+
+## 2026-06-25 Policy stack latest heads
+
+- #3588 merged at `10acd9a1f10df43dfc2a6f4ca780643f1c611755`
+  (`2026-06-26T00:09:06Z`). After merge, do not queue extra ADO runs unless
+  a required context is actually missing or failed; the user was called out for
+  too many ADO runs today.
+- #3588 `user/giodl/lobster-policy-mos3-upload` is now head
+  `ccb6fd408eb676f5f0795a6e2223ae82c83eee25`. Fixed the latest PullRequest
+  web-unit failure by wrapping `App.workspace-client-auth-boundary`'s `<App />`
+  render in the existing `renderWithQueryClient` helper. `git diff --check`
+  passed; focused Vitest is locally blocked by incomplete web `node_modules`
+  (`vitest` missing). Fresh ADO queued: PullRequest `169781475`, Build
+  Validation `169781470`. Comment:
+  `https://microsoft.ghe.com/bic/lobster/pull/3588#issuecomment-185390266`.
+- #3590 `user/giodl/lobster-policy-materialization` was rebased onto the new
+  #3588 head and pushed at `125139a453accd355ba2f8aab469c34812fef403`.
+  Fresh ADO queued: PullRequest `169782025`, Build Validation `169782022`.
+  Comment:
+  `https://microsoft.ghe.com/bic/lobster/pull/3590#issuecomment-185390316`.
+- #3603 `user/giodl/lobster-policy-review-fixes` was rebased onto the new
+  #3590 head and pushed at `8200fb1116068cfd3fdf3a3a8b448fecc1838a43`.
+  Fresh ADO queued: PullRequest `169782026`, Build Validation `169782019`.
+  Comment:
+  `https://microsoft.ghe.com/bic/lobster/pull/3603#issuecomment-185391191`.
+- #3623 `user/giodl/lobster-policy-default-config` was rebased onto the new
+  #3603 head and pushed at `9e97eb85ec3538a15b8f5a6fe156553803141924`.
+  Fresh ADO queued: PullRequest `169782021`, Build Validation `169782020`.
+  Comment:
+  `https://microsoft.ghe.com/bic/lobster/pull/3623#issuecomment-185390276`.
+
+## 2026-06-25 Scout marketplace roots
+
+- #3604 `https://microsoft.ghe.com/bic/lobster/pull/3604`, branch
+  `user/giodl/scout-feeds-marketplace-install`, rebased onto `origin/main`
+  after #3588 merged and force-pushed at
+  `f2ff926a87cb8e537f6e2bf48c29af937f73513a`. Conflict resolution kept the
+  marketplace install route/web action plus restored privileged OpenClaw/WorkIQ
+  ECS override-disabled reasons. Local web unit validation passed:
+  `npm test -- --project unit tests/pages/FeedsPage.unit.test.tsx tests/services/scoutFeedsApi.unit.test.ts`.
+  Focused Rust tests are locally blocked because `ms-prod-1.93` is not
+  installed and default Cargo cannot parse lockfile v4. No manual ADO was
+  queued; ADO attached automatically from the push. Review requested from
+  `dspektor` and `edpiva`; comment:
+  `https://microsoft.ghe.com/bic/lobster/pull/3604#issuecomment-185490006`.
+- #3608 `https://microsoft.ghe.com/bic/lobster/pull/3608`, branch
+  `user/giodl/scout-feeds-marketplace-admin-approval`, rebased onto
+  `origin/main` after #3588 merged and force-pushed at
+  `2b8e6c638c71a4ac1e690dcef35208ac931295f5`. Duplicate admin-composition
+  setup/hardening commits were skipped because they are already upstream; the
+  PR is now scoped to marketplace tenant approval / approved marketplace feed
+  publish behavior. Local web unit validation passed:
+  `npm test -- --project unit tests/pages/FeedsPage.unit.test.tsx tests/services/scoutFeedsApi.unit.test.ts`.
+  Focused Rust tests are locally blocked by the same missing `ms-prod-1.93`
+  toolchain. No manual ADO was queued. Review requested from `dspektor` and
+  `edpiva`; comment:
+  `https://microsoft.ghe.com/bic/lobster/pull/3608#issuecomment-185490011`.
+- Follow-up on #3604/#3608: ADO failed both PRs on the same web issue:
+  duplicate `renderWithQueryClient` import in
+  `src/lobster_web/tests/App.workspace-client-auth-boundary.unit.test.tsx`.
+  Fixed and pushed #3604 at `c3b25df8511140c9c02161608c23bc2b19de831a`
+  and #3608 at `e90c083c9454bd9483f3952f3da1bf0f1f49e937`. Local validation
+  passed in both worktrees:
+  `npm run lint -- tests/App.workspace-client-auth-boundary.unit.test.tsx`
+  and
+  `npm test -- --project unit tests/App.workspace-client-auth-boundary.unit.test.tsx`.
+  Immediately after push both PRs were non-draft, mergeable, still
+  `CHANGES_REQUESTED`, and checks had not reattached yet. No manual ADO was
+  queued.
+
+## 2026-06-26 Scout marketplace continuation
+
+- #3608 `user/giodl/scout-feeds-marketplace-admin-approval` fixed ADO build
+  `169873835` Runtime unit-test failure:
+  `catalog_publish_includes_approved_entry_absent_from_baseline` failed because
+  post-publish validation compared against the pre-materialized catalog source
+  after `feed_source()` rewrote the MOS3 URL. Pushed `affa40575` to validate
+  published entries against `CatalogEntry::to_feed_entry()`. Local validation:
+  runtime fmt check, focused catalog publish test, `catalog_publish` filter,
+  and `git diff --check`.
+- #3608 then addressed all three unresolved Copilot selector threads. Pushed
+  `0d9dad165`: marketplace install and tenant approval requests now carry
+  `type`, `sourceRegistry`, `sourcePackage`, and `version`; runtime selection
+  fails closed on ambiguous id-only matches; personal marketplace installs
+  replace only the same skill/source package identity. Local validation:
+  runtime fmt check, runtime lib check, focused marketplace selector/install
+  tests, web unit tests for `scoutFeedsApi` and `FeedsPage`, web type-check,
+  and `git diff --check`. Resolved all #3608 Copilot review threads. No manual
+  ADO was queued.
+- #3620 `user/giodl/scout-feeds-marketplace-admin-publish` restacked on #3608
+  `0d9dad165` and pushed `0f0a86466`. Local validation: runtime fmt check and
+  `./cargo.sh test catalog_publish --manifest-path src/lobster_runtime/Cargo.toml --lib --no-fail-fast`.
+  No manual ADO was queued.
+- #3622 `user/giodl/scout-feeds-marketplace-admin-state` restacked on #3620
+  `0f0a86466` and pushed `1725d9508`. Local validation:
+  `npm test -- --project unit tests/pages/FeedsPage.unit.test.tsx` and
+  `git diff --check origin/user/giodl/scout-feeds-marketplace-admin-publish...HEAD`.
+  No manual ADO was queued.
+- Review-thread sweep after those pushes: #3604, #3608, #3620, #3622, and
+  #3623 all had zero unresolved review threads.
+- Live status after the push/restack pass: #3608 ADO PullRequest is running on
+  `0d9dad165`; #3603 PullRequest is still running; #3604 has green
+  PullRequest but stale `CHANGES_REQUESTED`; #3620 and #3622 are restacked but
+  still show neutral/missing ADO rollups; #3623 remains behind #3603 with stale
+  `CHANGES_REQUESTED`. User asked to go slow on ADO, so do not manually queue
+  missing required ADO contexts without explicit permission.
+- Follow-up: ADO build `169887658` on #3608 failed Runtime unit tests and E2E
+  shard 3. Shard 3 was infra/noise: plex-mock image build failed downloading
+  crates.io `mime` with curl HTTP/2 framing error before E2E tests ran. Runtime
+  unit failures were real: `matches_feed_entry()` full equality compared
+  non-review fields such as baseline `updatedAt`. Pushed #3608 `741006829`
+  to compare publish/review fields explicitly while still using materialized
+  `feed_source()` and `feed_metadata()`. Local validation:
+  `cargo fmt --manifest-path src/lobster_runtime/Cargo.toml -- --check`,
+  `./cargo.sh test catalog_publish catalog_import_approve_publish_and_updates_workflow --manifest-path src/lobster_runtime/Cargo.toml --lib --no-fail-fast`,
+  and `git diff --check`.
+- Restacked #3620 on #3608 `741006829` and pushed `544942cca`; local runtime
+  fmt and `catalog_publish` filter passed. Restacked #3622 on #3620
+  `544942cca` and pushed `3a65eabcd`; focused FeedsPage unit test and
+  diff-check passed. No manual ADO was queued.
+- After #3604 merged at `a5c325379`, #3608 was rebased onto `main` and pushed
+  `225e70419`, dropping the now-upstream #3604 commits. #3620 was restacked on
+  #3608 and pushed `e88c9c86c`; #3622 was restacked on #3620 and pushed
+  `74f7a8ed7`. Local focused Rust/web validations passed; no manual ADO was
+  queued.
+- After #3603 merged at `ad4ad6b27`, #3623 was rebased onto `main` and pushed
+  `9846ba436`, dropping now-upstream #3603 policy review/materialization
+  commits. Remaining diff is the baked OpenClaw default-config/trusted-proxy
+  posture slice. Local validation passed: runtime fmt, focused runtime
+  policy/default-config filters, openclaw_container fmt, focused
+  openclaw_container posture/path/stderr filters, and `git diff --check`.
+  No manual ADO was queued.
+- Follow-up #3608 ADO build `169909933` failed with a real compile error:
+  `src/scout_catalog.rs:602` called nonexistent `CatalogEntry::feed_metadata()`.
+  Pushed `b1f95221f` to compare `self.metadata` directly in
+  `matches_feed_entry()`. Local validation passed: runtime fmt, focused
+  marketplace/catalog runtime tests, runtime clippy, and diff-check. Comment:
+  `https://microsoft.ghe.com/bic/lobster/pull/3608#issuecomment-185527506`.
+  No manual ADO was queued; the push attached natural PR build `169912946`.
+- Follow-up #3608 requested-changes review from `dspektor` on `b1f95221f`
+  noted that the internal `marketplace.approvalSource=mos3` catalog marker was
+  still part of public feed entry equality. Pushed `d3f467a8b` to strip that
+  marker from feed metadata projections, compare source/metadata through the
+  public feed projection, and add the baseline-overlap regression for an
+  already-published MOS3 marketplace entry without the marker. Local validation
+  passed: runtime fmt check, focused `catalog_publish` runtime tests, and
+  diff-check. No manual ADO was queued.
+- Follow-up #3608 requested-changes review from `dspektor` on `d3f467a8b`
+  flagged unsafe `mos3.publicSkillPath` values being copied into tenant-approved
+  feed source URLs without the personal-install clean HTTPS validation. Pushed
+  `03507ef6b` to extract/reuse `clean_marketplace_skill_url`, reject unsafe
+  marketplace skill URLs during catalog publish, and add regression coverage for
+  userinfo, query, and fragment URLs. Local validation passed: runtime fmt
+  check, focused marketplace/catalog tests including the personal install helper,
+  broader `catalog_publish` runtime filter, and diff-check. No manual ADO was
+  queued; immediately after push the PR head updated but checks had not attached
+  yet.
+- #3608 ADO build `169946729` on `03507ef6b` failed Runtime container build,
+  Runtime quality, and Runtime unit checks because `map_catalog_error()` did not
+  handle the new `CatalogError::InvalidMarketplaceSkillUrl` variant. Pushed
+  `c5459fb9e` to map it to a bad-request route error. Local validation passed:
+  runtime fmt check, focused `catalog_publish`, `install_marketplace_skill`, and
+  tenant-admin marketplace publish tests, and `git diff --check`. A full local
+  runtime lib sweep also showed one unrelated
+  `teams_bridge::native_delivery::tests::warm_container_delivery_auth_reproject_scenarios`
+  failure under full load; do not treat that as Scout-specific without matching
+  CI log evidence. No manual ADO was queued.
+- #3623 ADO build `169911466` had green build/quality/unit checks but all
+  Runtime E2E shards failed after the trusted-proxy default-config change. The
+  common failure shape was OpenClaw/Gateway chat turns timing out with no
+  assistant reply; Rust E2E failures timed out around 242s and Playwright
+  gateway/Teams failover tests observed zero assistant messages. Root cause:
+  #3623 injected `x-forwarded-user` from runtime to Plex, but the E2E
+  `lobster_plex_mock` WS forwarder and in-container `gateway_ws_proxy` did not
+  preserve that header, so trusted-proxy auth reached Gateway without user
+  identity. Pushed `0d3b5c4f` to forward `x-forwarded-user` through both hops
+  and extend both forwarding tests. Local validation passed: focused runtime
+  header-injection test, runtime/plex-mock/openclaw-container fmt checks, and
+  `git diff --check`. The plex-mock and openclaw-container focused tests could
+  not run locally because the private registry cache/token was unavailable
+  (`axum-macros` / `chrono-tz` missing offline). No manual ADO was queued.
+- #3608 dspektor patrol after ADO green found two remaining source-identity
+  issues: local personal-feed merge de-duped by `package_type + id`, and
+  Feeds page row keys omitted `entry.source.package`. Pushed `661d0d47d` to
+  use `type/id/source.registry/source.package` as the shared feed-entry
+  replacement identity, preserve same-id different-source entries during
+  local/personal merge, and include `source.package` in feed/admin row keys.
+  Local validation passed: runtime fmt check, focused
+  `merge_local_personal_feed_overlays_live_mos3_entries` and
+  `install_marketplace_skill` runtime tests, FeedsPage unit suite, web
+  type-check, and `git diff --check`. No manual ADO was queued.
+- #3620 was restacked on refreshed #3608 `661d0d47d` and pushed `49a8a88d`.
+  Rebase kept the marketplace publish/provenance delta and resolved the
+  catalog-publish test conflict by preserving URL-safety coverage plus
+  emitted-feed `marketplace.*` stripping assertions. Local validation passed:
+  runtime fmt check, focused `catalog_publish` runtime filter, and
+  `git diff --check` against #3608. GitHub now reports `CLEAN`/mergeable and
+  non-draft, with no review threads; `reviewDecision` still shows
+  `CHANGES_REQUESTED` from stale Galin review state on old head `5bf1987d`.
+  No checks attached immediately after push, and no manual ADO was queued.
+- After #3608 merged into `main` as `81c7e21c1`, #3620 was rebased directly
+  onto `origin/main` and pushed `5f3324c6c`, leaving only the two
+  publish/provenance commits over main. Local validation passed: runtime fmt,
+  focused `catalog_publish` runtime filter, and `git diff --check`. GitHub
+  reports mergeable but blocked by stale `CHANGES_REQUESTED`; natural ADO
+  attached as build `169964998` and was queued/in progress at last check. No
+  manual ADO was queued.
+- #3622 was then rebased onto refreshed #3620 `5f3324c6c` and pushed
+  `4419cc8bc`, leaving only the FeedsPage/admin-state UI delta over #3620.
+  Local validation passed: web type-check, focused `FeedsPage.unit.test.tsx`,
+  and `git diff --check`. GitHub reports `CLEAN`, mergeable, approved, and
+  non-draft; only `GitOps/FileAffordance` had attached immediately after push.
+  No manual ADO was queued.
+- After #3620 merged into `main` as `301afcdf9`, #3622 was rebased directly
+  onto `origin/main` and pushed `04701b9ce`, leaving only the two FeedsPage UI
+  commits over main. Local validation passed: web type-check, focused
+  `FeedsPage.unit.test.tsx`, and `git diff --check`. GitHub reports mergeable
+  but blocked with `REVIEW_REQUIRED`; prior edpiva/Galin approvals show
+  dismissed after the force-push and no checks had attached immediately after
+  push. No manual ADO was queued.
+
+## 2026-06-26 #3623 follow-up
+- Pushed `15865f3c8 fix(openclaw): box gateway request build errors` on `user/giodl/lobster-policy-default-config` after ADO build `169973396` failed OpenClaw Adapter Quality on `clippy::result_large_err` for `build_gateway_connect_request`.
+- Prior run showed `OpenClaw Adapter — Unit Tests` and `Pipeline YAML and Policy Lint` passing, so the baked config policy check path stayed clean.
+- Remaining red E2E symptoms on build `169973396` were Playwright assistant-message timeouts in shards 1 and 3; the old `trusted_proxy_missing_header_x-forwarded-proto` error was no longer present in the inspected shard 3 logs.
+- ADO build `169982463` on `15865f3c8` failed only Runtime E2E shards 1 and 3. Root cause from shard logs was the nested OpenClaw cron error `No callable tools remain`: the baked minimal policy allowed `execute_code`, `budget`, and `snapshot`, while Lobster remember/behavioral cron turns run with `sessions_list,sessions_history,read,write`.
+- Pushed `524439f2e fix(openclaw): allow policy cron tools in default config` to add those narrow cron/session/file tools to `tools.alsoAllow` while preserving `group:runtime` and `group:fs` denial in the default config. The real resolved baked-config posture test now asserts those explicit exceptions. Local validation: `openclaw_container` fmt, `git diff --check`, and a Node smoke resolving the real baked `openclaw.json` includes. Focused cargo tests remain locally blocked by missing `CARGO_REGISTRIES_LOBSTER_TOKEN`.
+- PR note posted: `https://microsoft.ghe.com/bic/lobster/pull/3623#issuecomment-185832751`. Natural ADO attached as PullRequest build `169997459`; no manual ADO was queued. Review reset to `REVIEW_REQUIRED`; refreshed review requested from `edpiva` and `dspektor`.
+- ADO build `169997459` failed only Runtime E2E shard 3. Failed tests timed out waiting for an assistant message during the warm-up chat turn. Artifact logs showed browser-side telemetry `missing scope: operator.read`/`operator.write` after the runtime-local `connect:ok` returned `auth.scopes: []`, plus repeated admin ContainerClient handshake rejects after #3623 disabled the Control UI device/insecure local-hop bypass.
+- Pushed `bda3c5543 fix(runtime): preserve local gateway UI scopes` to keep trusted-proxy mode but restore `controlUi.dangerouslyDisableDeviceAuth=true` and `allowInsecureAuth=true` for Lobster's current SPA relay/runtime ContainerClient shape, and to have the runtime-local browser `connect:ok` advertise `operator.read`/`operator.write` while server-side relay authorization still uses the container-accepted scope latch. Local validation: runtime/openclaw-container fmt checks, `git diff --check`, and focused `lobster_runtime` `runtime_local_connect` tests (15 passed). Focused `openclaw_container` tests remain locally blocked by missing `CARGO_REGISTRIES_LOBSTER_TOKEN`. No manual ADO was queued after push; GitHub saw head `bda3c5543` with no checks attached yet and review reset to `REVIEW_REQUIRED`.
+- #3623 ADO build `170019349` on `1fc228f6` failed Runtime Quality because
+  `src/lobster_runtime/src/teams_bridge/container_client_tests.rs` needed
+  rustfmt, and failed Runtime E2E shard 1 with a page alert saying Docker was
+  unavailable inside the sandboxed OpenClaw turn. The failure shape matched the
+  latest default-tools broadening that removed the `group:fs` deny while adding
+  narrow `read`/`write` exceptions. Pushed `0cac5682d fix(openclaw): keep
+  filesystem group denied`, preserving explicit cron/session/file exceptions
+  while restoring the default filesystem group denial and updating the posture
+  assertion. Local validation passed: runtime fmt check, openclaw_container fmt
+  check, `git diff --check`, JSON posture smoke, focused
+  `openclaw-adapter` `default_policy` tests (2 passed), and
+  `openclaw-adapter` clippy. Runtime clippy had already passed locally on the
+  same branch before the config/test-only fix. No manual ADO was queued; after
+  push GitHub saw head `0cac5682d`, non-draft/mergeable, with checks not yet
+  attached. GitOps/GitHubPop proof-of-presence remains a user-action blocker.
+- #3623 ADO build `170030817` on `0cac5682d` passed Quality, Runtime unit
+  tests, OpenClaw adapter tests, GitOps/FileAffordance, and GitOps/GitHubPop,
+  but failed Runtime E2E shard 1 and shard 3. Shard 1 Rust E2E failed
+  `behavioral_self_eval_crons_run_against_live_gateway` because
+  `behavioral-judge` never became visible; worker logs showed the underlying
+  OpenClaw CLI cron seed failed with Gateway
+  `trusted_proxy_user_missing` / unauthorized. Shard 3 Teams drain failover
+  timed out with no assistant reply and the same class of local Gateway backend
+  auth failures was visible. Root cause: the baked Gateway was in
+  `auth.mode="trusted-proxy"` and runtime/Plex were sending
+  `x-forwarded-user`, but OpenClaw's bundled CLI/backend same-host direct
+  callers do not traverse that proxy path and need the documented local
+  `gateway.auth.password` fallback. Pushed `baadadf90 fix(openclaw): allow
+  local gateway password fallback`, adding a local-only password fallback while
+  keeping `gateway.auth.token` unset in trusted-proxy mode and preserving the
+  external `x-forwarded-user` contract. Local validation passed:
+  `openclaw_container` fmt check, `git diff --check`, JSON Gateway auth posture
+  smoke, focused `openclaw-adapter` `gateway_auth_posture` test, focused
+  `openclaw-adapter` `default_policy` tests (2 passed), and
+  `openclaw-adapter` clippy. No manual ADO was queued; after push GitHub saw
+  head `baadadf90`, non-draft/mergeable, with checks not yet attached.

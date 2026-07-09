@@ -16,8 +16,20 @@ Current target: a Lobster-owned OpenClaw plugin at
 | openclaw/openclaw | [#84676](https://github.com/openclaw/openclaw/pull/84676) | `fix/68609-precheck-budget-log` | Merged | Log pre-prompt compaction fits decisions. |
 | openclaw/openclaw | [#84800](https://github.com/openclaw/openclaw/pull/84800) | `budget-3-context-budget-pressure` | Closed draft | Superseded pressure classification branch. |
 | openclaw/rfcs | TBD | `context-budget-management-rfc` | Local rewrite committed, not pushed | RFC 0008: Context Budget Management as a Quarantined Extension. |
-| bic/lobster | [#3371](https://microsoft.ghe.com/bic/lobster/pull/3371) | `user/giodl/context-budget-plugin` | Open, review required | Quarantined `context-budget` plugin parallel to `tools-code-mode`. |
-| bic/lobster | [#3379](https://microsoft.ghe.com/bic/lobster/pull/3379) | `user/giodl/context-budget-ux` | Open, approved; GitHubPop auth required; ADO queued | Stacked Budget tool-result UX, gated behind `lobster.web_context_budget_ui_enabled`. |
+| bic/lobster | [#3371](https://microsoft.ghe.com/bic/lobster/pull/3371) | `user/giodl/context-budget-plugin` | Merged 2026-06-19 | Quarantined `context-budget` plugin parallel to `tools-code-mode`. |
+| bic/lobster | [#3379](https://microsoft.ghe.com/bic/lobster/pull/3379) | `user/giodl/context-budget-ux` | Merged 2026-06-19 | Stacked Budget tool-result UX, gated behind `lobster.web_context_budget_ui_enabled`. |
+| bic/lobster | [#3700](https://microsoft.ghe.com/bic/lobster/pull/3700) | `user/giodl/context-budget-docs-roadmap` | Open; review required; GitHubPop failed | RFC / roadmap for continuing Budget as a Lobster-owned plugin. |
+| bic/lobster | [#3713](https://microsoft.ghe.com/bic/lobster/pull/3713) | `giodl:user/giodl/context-budget-test-hardening` | Open; stacked on #3700 | Test hardening for the Lobster-owned Budget plugin. |
+| giodl/lobster | [#1](https://microsoft.ghe.com/giodl/lobster/pull/1) | `user/giodl/context-budget-runtime-evidence-contract` | Open; stacked on fork PR2 branch | Runtime evidence contract for plugin load state and bounded host-owned metadata. |
+| giodl/lobster | [#2](https://microsoft.ghe.com/giodl/lobster/pull/2) | `user/giodl/context-budget-telemetry` | Open; stacked on fork PR3 branch | Privacy-safe Budget runtime evidence telemetry events. |
+| giodl/lobster | [#3](https://microsoft.ghe.com/giodl/lobster/pull/3) | `user/giodl/context-budget-rate-card` | Open; stacked on fork PR4 branch | Versioned rate-card contract and unavailable/partial cost estimates. |
+| giodl/lobster | [#4](https://microsoft.ghe.com/giodl/lobster/pull/4) | `user/giodl/context-budget-spend-attribution` | Open; stacked on fork PR5 branch | Privacy-aware spend attribution and unknown-field coverage. |
+| giodl/lobster | [#5](https://microsoft.ghe.com/giodl/lobster/pull/5) | `user/giodl/context-budget-spend-recommendations` | Open; stacked on fork PR6 branch | Read-only spend reduction recommendations from attribution and cost signals. |
+| giodl/lobster | [#6](https://microsoft.ghe.com/giodl/lobster/pull/6) | `user/giodl/context-budget-admin-policy-preview` | Open; stacked on fork PR7 branch | Preview-only admin policy metadata for soft limits, attribution, identity, and rate-card readiness. |
+| giodl/lobster | [#7](https://microsoft.ghe.com/giodl/lobster/pull/7) | `user/giodl/context-budget-anomaly-rollout-readiness` | Open; stacked on fork PR8 branch | Read-only anomaly signals and rollout readiness metadata. |
+| giodl/lobster | [#8](https://microsoft.ghe.com/giodl/lobster/pull/8) | `user/giodl/context-budget-gated-ux-dogfooding` | Open; stacked on fork PR9 branch | Gated Budget card dogfooding for readiness and anomaly signals. |
+| giodl/lobster | [#9](https://microsoft.ghe.com/giodl/lobster/pull/9) | `user/giodl/context-budget-enforcement-design` | Open; stacked on fork PR10 branch | Design gate for soft degradation and hard-cap enforcement semantics. |
+| giodl/lobster | [#10](https://microsoft.ghe.com/giodl/lobster/pull/10) | `user/giodl/context-budget-upstream-assessment` | Open; stacked on fork PR11 branch | Upstream assessment and Lobster-only boundary decision record. |
 
 ## Reference Prototype Stack
 
@@ -50,16 +62,171 @@ Current target: a Lobster-owned OpenClaw plugin at
   pushed on explicit request.
 - Lobster plugin design note:
   `projects/context-budget/lobster-budget-plugin-design.md`.
+- Lobster in-repo RFC / roadmap doc:
+  `C:\src\lobster-context-budget-plugin\docs\superpowers\specs\2026-06-27-context-budget-plugin-design.md`.
+- Lobster RFC PR: https://microsoft.ghe.com/bic/lobster/pull/3700.
+  Current head `a84e63838`; includes concept text mocks, a synthetic 12-user
+  review, an implementation-shape matrix, and Role Review Round 3 against
+  `.craft/roles/claws` for the plugin-vs-host PR boundaries. Current ADO
+  builds: `Lobster-Runtime-PullRequest` build `170088667` and
+  `Lobster-Runtime-Build-Validation` build `170088665`. `GitOps/GitHubPop`
+  is expected to require Proof of Presence authentication.
+- Lobster implementation stack remote: `giodl`
+  (`https://microsoft.ghe.com/giodl/lobster.git`). PR 2 is
+  https://microsoft.ghe.com/bic/lobster/pull/3713 with head
+  `giodl:user/giodl/context-budget-test-hardening` at `862668b4f`, stacked on
+  #3700. Required ADO was queued against `refs/pull/3713/head`:
+  `Lobster-Runtime-PullRequest` build `170090598` and
+  `Lobster-Runtime-Build-Validation` build `170090596`.
+- Lobster PR 3 is open in the fork as
+  https://microsoft.ghe.com/giodl/lobster/pull/1 with head
+  `user/giodl/context-budget-runtime-evidence-contract` at `9ebaf8c1b`,
+  stacked on fork branch `user/giodl/context-budget-test-hardening`. GHE cannot
+  open a clean upstream PR against PR2's fork-only branch because `bic/lobster`
+  requires base refs to live in the upstream repo.
+- PR 3 validation on 2026-06-27: `node --test src/*.test.mjs` in
+  `src/openclaw_container/plugins/context-budget` passed 21 tests;
+  `cargo fmt --check` in `src/openclaw_container` passed;
+  `cargo test -p openclaw-adapter openclaw_plugins_override` passed 54 overlay
+  tests; `git diff --check` passed. The fork PR reports no attached checks.
+- Lobster PR 4 is open in the fork as
+  https://microsoft.ghe.com/giodl/lobster/pull/2 with head
+  `user/giodl/context-budget-telemetry` at `49f518fe7`, stacked on fork branch
+  `user/giodl/context-budget-runtime-evidence-contract`. It adds the
+  `openclaw.context_budget` adapter activity category plus
+  `budget.evidence.loaded` / `budget.evidence.rejected` events for
+  metadata-only runtime evidence health. The event contract uses status and
+  error buckets, evidence kind, path class, plugin gate state, byte count, and
+  privacy marker; tests assert no raw runtime evidence path enters these Budget
+  telemetry events. Local validation passed: `cargo fmt --check`;
+  `cargo test -p openclaw-adapter openclaw_plugins_override`;
+  `cargo test -p openclaw-adapter telemetry::activity`;
+  `node --test src/*.test.mjs`; and `git diff --check`. The fork PR reports no
+  attached checks.
+- Lobster PR 5 is open in the fork as
+  https://microsoft.ghe.com/giodl/lobster/pull/3 with head
+  `user/giodl/context-budget-rate-card` at `55cf97162`, stacked on fork branch
+  `user/giodl/context-budget-telemetry`. It adds a versioned `rateCard`
+  runtime-evidence contract and report `cost` block with `estimated`,
+  `partial`, or `unavailable` status. Trusted cards must include version,
+  currency, authority, approval owner, `approved: true`, and an integrity
+  marker. Unknown models, missing token-class prices, stale cards, unsigned
+  cards, and unapproved cards degrade instead of inventing cost truth. Local
+  validation passed: `node --test src/*.test.mjs`; `tsc src/rate-card.ts
+  --target ES2022 --module Node16 --moduleResolution Node16 --noEmit
+  --skipLibCheck`; and `git diff --check`. A broader isolated plugin `tsc`
+  pass remains blocked by existing missing local Node/OpenClaw type
+  declarations, not by the new rate-card module. The fork PR reports no
+  attached checks.
+- Lobster PR 6 is open in the fork as
+  https://microsoft.ghe.com/giodl/lobster/pull/4 with head
+  `user/giodl/context-budget-spend-attribution` at `dfc7399c0`, stacked on
+  fork branch `user/giodl/context-budget-rate-card`. It adds a
+  `spendAttribution` report block that normalizes provider usage by provider,
+  model, session, agent, workspace class, user, task phase, skill, tool
+  category, and token class. Missing fields degrade to `unknown` and coverage
+  counts; user identifiers are redacted unless runtime evidence explicitly
+  authorizes user attribution. Local validation passed: `node --test
+  src/*.test.mjs`; `tsc src/spend-attribution.ts --target ES2022 --module
+  Node16 --moduleResolution Node16 --noEmit --skipLibCheck`; `tsc
+  src/rate-card.ts --target ES2022 --module Node16 --moduleResolution Node16
+  --noEmit --skipLibCheck`; and `git diff --check`. The fork PR currently has
+  no attached checks and reports `mergeStateStatus: CLEAN`.
+- Lobster PR 7 is open in the fork as
+  https://microsoft.ghe.com/giodl/lobster/pull/5 with head
+  `user/giodl/context-budget-spend-recommendations` at `b9ad1bed6`, stacked on
+  fork branch `user/giodl/context-budget-spend-attribution`. It extends the
+  existing read-only recommendation engine with spend-aware guidance for
+  attribution coverage, rate-card/model mapping, cache reuse, cache-write
+  stabilization, output reduction, and model-routing review by task phase. It
+  avoids raw prompt, transcript, tool-argument, file-content, and redacted user
+  identifier collection in recommendation text. Local validation passed:
+  `node --test src/*.test.mjs`; `tsc src/recommendations.ts --target ES2022
+  --module Node16 --moduleResolution Node16 --noEmit --skipLibCheck`; `tsc
+  src/spend-attribution.ts --target ES2022 --module Node16 --moduleResolution
+  Node16 --noEmit --skipLibCheck`; and `git diff --check`. The fork PR
+  currently has no attached checks and reports `mergeStateStatus: CLEAN`.
+- Lobster PR 8 is open in the fork as
+  https://microsoft.ghe.com/giodl/lobster/pull/6 with head
+  `user/giodl/context-budget-admin-policy-preview` at `8f2ce2529`, stacked on
+  fork branch `user/giodl/context-budget-spend-recommendations`. It adds
+  preview-only `management.policyPreviews` metadata for soft-token-limit,
+  spend-attribution coverage, user-attribution readiness, and rate-card
+  readiness. Every row is `enforcement: preview-only`; RBAC, tenant hierarchy,
+  rollout, audit export, and runtime enforcement remain outside the plugin.
+  Local validation passed: `node --test src/*.test.mjs`; `tsc src/schema.ts
+  --target ES2022 --module Node16 --moduleResolution Node16 --noEmit
+  --skipLibCheck`; and `git diff --check`. The fork PR currently has no
+  attached checks and reports `mergeStateStatus: CLEAN`.
+- Lobster PR 9 is open in the fork as
+  https://microsoft.ghe.com/giodl/lobster/pull/7 with head
+  `user/giodl/context-budget-anomaly-rollout-readiness` at `b86c00d3f`,
+  stacked on fork branch `user/giodl/context-budget-admin-policy-preview`. It
+  adds read-only `management.anomalySignals` and
+  `management.rolloutReadiness` metadata for token spikes against recent
+  reports, attribution gaps, identity redaction, cost readiness, and staged
+  rollout readiness. The plugin remains advisory; Lobster owns rollout
+  cohorts, kill switches, audit export/SIEM, RBAC, tenant policy, and
+  enforcement. Local validation passed: `node --test src/*.test.mjs`; `tsc
+  src/schema.ts --target ES2022 --module Node16 --moduleResolution Node16
+  --noEmit --skipLibCheck`; and `git diff --check`. A broader isolated plugin
+  TypeScript emit still reports existing missing local Node type declarations
+  for `node:*`, `NodeJS`, `Buffer`, and `process`, while emitting the checked-in
+  JS/d.ts files. The fork PR currently has no attached checks and reports
+  `mergeStateStatus: CLEAN`.
+- Lobster PR 10 is open in the fork as
+  https://microsoft.ghe.com/giodl/lobster/pull/8 with head
+  `user/giodl/context-budget-gated-ux-dogfooding` at `1c1eee9c`, stacked on
+  fork branch `user/giodl/context-budget-anomaly-rollout-readiness`. It keeps
+  plugin behavior unchanged and dogfoods PR9 metadata in Lobster-only web code
+  behind the existing `context_budget_ui_enabled` gate: the Budget tool card
+  now shows concise rollout readiness, readiness review count, and top anomaly
+  signals. The generic tool-card fallback remains the flag-off path. Local
+  validation passed: `npx vitest run
+  tests/pages/ChatPage.approvalGroup.component.unit.test.tsx
+  tests/pages/ChatPage.component.unit.test.tsx
+  tests/pages/ChatPage.BurstRow.unit.test.tsx --project unit`; `npm run
+  type-check -- --pretty false`; focused `npx biome check` on touched web
+  files; and `git diff --check`. The Vitest run still prints existing ChatPage
+  React `act(...)` warnings and the npm `always-auth` warning. The fork PR
+  currently has no attached checks and reports `mergeStateStatus: CLEAN`.
+- Lobster PR 11 is open in the fork as
+  https://microsoft.ghe.com/giodl/lobster/pull/9 with head
+  `user/giodl/context-budget-enforcement-design` at `b7b089558`, stacked on
+  fork branch `user/giodl/context-budget-gated-ux-dogfooding`. It adds
+  `docs/superpowers/specs/2026-06-27-context-budget-enforcement-design.md`
+  and links it from the main Budget RFC. The design keeps plugin behavior
+  read-only, chooses a Lobster-owned composed enforcement path, defines rollout
+  modes, hierarchy/precedence, soft degradation, hard-cap provider admission,
+  fail behavior, latency budgets, audit event fields, user-facing copy, and
+  the pre-implementation test plan. It enables no production hard cap. Local
+  validation passed: `git diff --check`. The fork PR currently has no attached
+  checks and reports `mergeStateStatus: CLEAN`.
+- Lobster PR 12 is open in the fork as
+  https://microsoft.ghe.com/giodl/lobster/pull/10 with head
+  `user/giodl/context-budget-upstream-assessment` at `52ccde7ac`, stacked on
+  fork branch `user/giodl/context-budget-enforcement-design`. It adds
+  `docs/superpowers/specs/2026-06-27-context-budget-upstream-assessment.md`
+  and links it from the main Budget RFC. The assessment keeps Budget
+  Lobster-owned for the current series, identifies the upstreamable
+  host-agnostic plugin slice, marks billing/rate-card authority, telemetry
+  transport, admin policy, Scout UX, rollout, and enforcement as Lobster-only,
+  and requires maintainer interest plus non-Lobster install/smoke proof before
+  reviving an OpenClaw RFC. Local validation passed: `git diff --check`. The
+  fork PR currently has no attached checks and reports `mergeStateStatus:
+  CLEAN`.
 - Lobster plugin worktree: `C:\src\lobster-context-budget-plugin`.
 - Lobster plugin branch: `user/giodl/context-budget-plugin`.
-- Lobster plugin PR: https://microsoft.ghe.com/bic/lobster/pull/3371.
+- Lobster plugin PR: https://microsoft.ghe.com/bic/lobster/pull/3371, merged
+  on 2026-06-19.
 - Lobster plugin commit: `01e2c0723 feat(openclaw): add context budget plugin`.
 - Plugin CLI pattern: Budget owns the OpenClaw CLI contribution from the
   plugin package itself (`activation.onCommands`, `commandAliases`, and
   `api.registerCli`) so future Feed/Policy plugin PRs can follow that pattern
   without hardcoding CLI commands in core or Lobster.
 - Lobster Budget UX branch: `user/giodl/context-budget-ux`.
-- Lobster Budget UX PR: https://microsoft.ghe.com/bic/lobster/pull/3379.
+- Lobster Budget UX PR: https://microsoft.ghe.com/bic/lobster/pull/3379,
+  merged on 2026-06-19.
 - Lobster Budget UX commit: `feb1b9ded feat(lobster-web): show context budget tool insights`.
 - User-facing tool command: `budget` with `audit`, `report`, `explain`,
   `recommend`, and `inspect` actions.
@@ -84,13 +251,79 @@ Current target: a Lobster-owned OpenClaw plugin at
     `Lobster-Runtime-Build-Validation` build `168820452`.
   - PR 3379: `Lobster-Runtime-PullRequest` build `168820507` and
     `Lobster-Runtime-Build-Validation` build `168820506`.
-- Immediate PR 3379 checks: `GitOps/FileAffordance` passed;
-  `GitOps/GitHubPop` failed for proof-of-presence auth on `feb1b9ded`.
+- Budget PR checks: PRs 3371 and 3379 are merged. Later live check output
+  showed required GitOps and Lobster runtime gates passing for both PR heads.
 - Lobster plugin target:
   `src/openclaw_container/plugins/context-budget`.
 
 ## Review / Verification
 
+- 2026-06-28 Lobster Budget PR stack review sweep:
+  - Restacked fork PRs 3-12 onto PR 2 head `864ef746d` and pushed rewritten
+    branches to `giodl`.
+  - Final fork heads: PR 3 `ffe275488`, PR 4 `971494378`, PR 5 `94c197bb1`,
+    PR 6 `cccf6ef01`, PR 7 `649b86fb2`, PR 8 `8cf4f4ec6`, PR 9
+    `ff405ee25`, PR 10 `990ef94c3`, PR 11 `4d1362e81`, PR 12 `c8b6f0db6`.
+  - Codex review is clean for each branch after fixes. Accepted findings covered
+    disabled plugin state, rate-card selection/schema edge cases, privacy
+    redaction, sparse attribution compatibility, cache context attribution, and
+    PR 9 schema versioning.
+  - Validation passed: Budget plugin `node --test src/*.test.mjs` with 47 tests,
+    `git diff --check`, focused `tsc src/schema.ts ... --noEmit`, and targeted
+    Lobster web Vitest with 3 files / 94 tests. Web tests still print existing
+    ChatPage React `act(...)` warnings and the npm `always-auth` warning.
+- 2026-06-28 condensed direct Lobster stack:
+  - #3722 `user/giodl/context-budget-foundation` at `81a77af1b`, base #3700.
+  - #3723 `user/giodl/context-budget-runtime-telemetry` at `ad5bb804e`, base
+    #3722.
+  - #3724 `user/giodl/context-budget-cost-spend-intelligence` at `1547b1664`,
+    base #3723.
+  - #3725 `user/giodl/context-budget-admin-readiness-ux` at `6a7ee0fb1`, base
+    #3724.
+  - #3726 `user/giodl/context-budget-governance-decisions` at `ac30e58f3`, base
+    #3725.
+  - These five direct `bic/lobster` PRs supersede #3713 and fork PRs #1-#10.
+    The older PRs were left open pending explicit close/comment direction.
+  - Revalidation after restacking onto current #3700: Budget plugin
+    `node --test src/*.test.mjs` passed 47 tests; targeted Lobster web Vitest
+    passed 3 files / 94 tests with existing warnings; condensed-stack
+    `git diff --check` passed.
+  - Live merge state update: #3700, #3722, #3723, #3724, and #3725 are merged.
+    #3724 merged on 2026-06-28 at 14:26:09Z with merge commit `5ec308934`;
+    #3725 merged on 2026-06-28 at 16:58:44Z with merge commit `a9d202760`.
+    #3726 was closed unmerged on 2026-06-29 because it was docs-only; carry its
+    governance decisions forward in code-backed implementation PRs and PR
+    bodies rather than reopening a design-only branch.
+  - #3742 `user/giodl/context-budget-governance-runtime` starts the first
+    governance implementation slice. Head `78f29aedc` adds a
+    Lobster-owned governance snapshot to the existing Budget runtime evidence
+    file, parses `OPENCLAW_CONTEXT_BUDGET_MODE`, buckets emergency-disable
+    metadata, and keeps enforcement explicitly `none`. Validation passed:
+    `cargo fmt --check`; `cargo test -p openclaw-adapter
+    openclaw_plugins_override` with 62 overlay tests; Budget plugin
+    `node --test src/*.test.mjs` with 48 tests; `git diff --check`.
+    Live checks: `GitOps/GitHubPop` failed on the draft, likely Proof of
+    Presence; `Lobster-Runtime-PullRequest` auto-queued as build `170151977`;
+    `Lobster-Runtime-Build-Validation` manually queued as build `170152028`.
+  - #3742 review-fix head `eb57506cf` reserves `emergency-disabled` mode for
+    `OPENCLAW_CONTEXT_BUDGET_EMERGENCY_DISABLED=true` and adds Budget plugin
+    reader/report/schema coverage so emitted governance evidence is consumed
+    rather than dropped. Validation passed: Budget plugin `node --test
+    src/*.test.mjs` with 51 tests; `cargo fmt --check`; `cargo test -p
+    openclaw-adapter openclaw_plugins_override` with 62 overlay tests; pure
+    schema/types `npx tsc ... --noEmit`; `git diff --check`. Broader plugin
+    `tsc` remains blocked by existing missing local Node type declarations.
+    Required ADO manually queued on the new head: PullRequest build
+    `170160660`, Build Validation build `170160659`.
+  - #3742 follow-up head `479c688e4` addresses the final Patrol requested
+    changes by managing all Budget governance env vars across `/start` and
+    bumping the Budget report schema to v8. The PR body was updated to be
+    self-contained now that #3726 is closed, the PR was marked ready for
+    review, and a reviewer follow-up comment was posted. Live ADO checks pass:
+    PullRequest build `170163348` and Build Validation build `170163391`;
+    marking the PR ready attached a fresh PullRequest build `170174792`, now
+    pending. Remaining blockers are `GitOps/GitHubPop`, latest PullRequest
+    completion, and clearing `CHANGES_REQUESTED`.
 - GPT-5.5 Codex review is clean for PR 2, PR 3, and PR 4 with
   `codex review -c model="gpt-5.5" --commit HEAD`.
 - Focused tests passed on the current stack on 2026-06-15:
@@ -132,9 +365,62 @@ Current target: a Lobster-owned OpenClaw plugin at
 
 ## Next
 
-- Monitor Lobster PRs 3371 and 3379 for required checks:
+- Budget Lobster PRs 3371 and 3379 have merged; no required check monitoring is
+  pending for those PRs.
+- Monitor Lobster PR 3700 for design feedback and required checks:
   `GitOps/GitHubPop`, `Lobster-Runtime-PullRequest`, and
   `Lobster-Runtime-Build-Validation`.
+- Continue stacked implementation branches from the fork remote `giodl`. Do not
+  publish implementation stack branches directly to `bic/lobster`.
+- With #3726 closed, continue governance as code-backed Lobster PRs rather than
+  docs-only decision records. The immediate live PR is #3742; next slices should
+  cover policy snapshot / cap ledger ownership, soft degradation planning,
+  hard-cap provider admission, cap-hit audit/export, durable emergency-disable
+  records, and Scout/admin UX for policy owner, escalation, approval, and
+  no-files-changed copy.
+- Planned Lobster PR series:
+  1. docs/roadmap,
+  2. plugin test hardening,
+  3. runtime evidence contract (fork PR
+     https://microsoft.ghe.com/giodl/lobster/pull/1),
+  4. telemetry (fork PR https://microsoft.ghe.com/giodl/lobster/pull/2),
+  5. rate-card foundation (fork PR
+     https://microsoft.ghe.com/giodl/lobster/pull/3),
+  6. token spend attribution (fork PR
+     https://microsoft.ghe.com/giodl/lobster/pull/4),
+  7. spend reduction recommendations (fork PR
+     https://microsoft.ghe.com/giodl/lobster/pull/5),
+  8. admin policy preview (fork PR
+     https://microsoft.ghe.com/giodl/lobster/pull/6),
+  9. anomaly detection and rollout controls (fork PR
+     https://microsoft.ghe.com/giodl/lobster/pull/7),
+  10. gated UX dogfooding (fork PR
+     https://microsoft.ghe.com/giodl/lobster/pull/8),
+  11. soft-cap degradation and hard-cap enforcement design (fork PR
+     https://microsoft.ghe.com/giodl/lobster/pull/9),
+  12. upstream assessment (fork PR
+     https://microsoft.ghe.com/giodl/lobster/pull/10).
+- PR 3700 now records the intended implementation boundary for every PR: keep
+  command/tool behavior in `src/openclaw_container/plugins/context-budget/`
+  where it can stay upstreamable, and keep Scout/Lobster-specific telemetry,
+  rate-card authority, admin policy, UX, rollout, and enforcement outside the
+  plugin. The latest role review also adds hot-path proof for runtime evidence,
+  audit/SIEM/export ownership before cap enforcement, CLI/tool examples for
+  recommendations, explicit owner/escalation/no-files-changed UX copy, and
+  release/install smoke-proof requirements if an upstream plugin artifact is
+  later proposed.
+- Continue improving the Lobster-owned plugin first: runtime evidence,
+  telemetry, bounds/error coverage, web card dogfooding, agent/operator
+  ergonomics, and token spend visibility/governance for customers and admins,
+  including admin attribution by tenant, workspace, agent, user, model, skill,
+  tool, evidence kind, and policy outcome. The governance contract must also
+  cover rate-card source, budget hierarchy, RBAC, retention/export, anomaly
+  detection, rollout modes, quality-versus-cost measurement, rate-card
+  integrity/staleness, audit attestations, false-positive handling, and
+  emergency disablement. Budget also needs model-routing and cache-reuse
+  recommendations by task phase, while keeping raw prompts/content out of
+  telemetry. The default customer/admin experience must stay simple,
+  plain-language, and progressively disclosed.
 - Review the local RFC rewrite before filing an RFC PR; push only when
   explicitly requested.
 - Create the required `maintainer-discussion` Discord thread if the RFC is

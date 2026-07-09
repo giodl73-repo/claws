@@ -28,7 +28,14 @@ tenant-subset model, but feed implementation and Scout catalog work belong in
 | #3355 | `user/giodl/lobster-scout-policy-cli` | Scout tenant feed policy preview command stacked after #2270. | Merged 2026-06-19 |
 | #3383 | `user/giodl/lobster-scout-policy-polish` | Follow-up polish for Scout policy preview scope ordering, sanitized reason text, and help. | Merged 2026-06-20 at merge commit `af6bfa7c`; final head `ccb87b2ef` |
 | #3388 | `user/giodl/lobster-personal-policy-mos3` | Personal policy baseline state, accepted only when MOS3-backed and equal-or-stricter than the tenant-effective baseline. | Merged 2026-06-20 at merge commit `f9278926`; final head `0b9f4af53` |
-| #3391 | `user/giodl/lobster-policy-ux-gate` | URL-gated Policy UX preview with scope/section controls, strictness preview, and generated policy JSON; save path remains disabled. | Copilot feedback fixed; head `a07e8915e`; ADO `168861357`/`168861356` queued; blocked on GitOps PoP and refreshed review |
+| #3391 | `user/giodl/lobster-policy-ux-gate` | URL-gated Policy UX preview with scope/section controls, strictness preview, and generated policy JSON; save path remains disabled. | Merged 2026-06-20 at head `a07e8915e` |
+| #3555 | `user/giodl/lobster-mac-registration-refresh` | Refresh Partner Center / MAC registration guidance to align with Aether/Cowork MOS3 registration and runtime boundaries. | Merged 2026-06-24 at head `44cc96c6` |
+| #3585 | `user/giodl/lobster-personal-policy-upload` | First live authenticated personal-policy accept route, requiring durable policy state plus MOS3 artifact metadata and OpenClaw comparison attestation. | Draft; ADO queued 2026-06-24 |
+| #3586 | `user/giodl/lobster-policy-ux-save` | Stacked on #3585; wires gated Policy UX save to selected MOS3 artifact metadata and the personal-policy accept API. | Draft; ADO queued 2026-06-24 |
+| #3588 | `user/giodl/lobster-policy-mos3-upload` | Stacked on #3586; adds policy-specific MOS3 publish backend and updates Policy UX save to publish before accepting returned artifacts. | Draft; ADO queued 2026-06-24 |
+| #3590 | `user/giodl/lobster-policy-materialization` | Stacked on #3588; projects the selected effective policy baseline into OpenClaw gateway start env for container materialization. | Draft; ADO queued 2026-06-24 |
+| #3603 | `user/giodl/lobster-policy-review-fixes` | Stacked on #3590; fixes review findings with durable publish gating, HMAC-backed OpenClaw comparison attestation verification, camelCase MOS3 pending fields, and locked temp-file policy state writes. | Draft; ADO queued 2026-06-24 |
+| #3607 | `user/giodl/lobster-feed-policy-sources` | Stacked on #3603; records tenant-admin-selected attested tenant-approved feed policy sources in durable policy state. | Draft; ADO queued 2026-06-24 |
 
 ## Current Read
 
@@ -51,6 +58,19 @@ tenant-subset model, but feed implementation and Scout catalog work belong in
   which verifies tenant-approved feeds and previews allowed/warning/blocked
   package outcomes from package-defense and MOS3 block-status metadata before
   install/discovery enforcement is wired in.
+- #3555 refreshes the Partner Center prep doc for filing: Partner Center or
+  Microsoft 365/Teams admin center remains the app-package registration path;
+  MOS3 is the catalog/governance authority behind package acquisition, policy
+  artifacts, package-defense state, and effective availability; Lobster is the
+  runtime materialization layer.
+- #3391 landed the gated Policy UX preview. #3585 adds the first live
+  personal-policy acceptance route and matching web API client. #3586 stacks on
+  it and wires the Policy UX save action to selected MOS3 artifact metadata.
+  #3588 replaces manual artifact metadata with a policy-specific MOS3 publish
+  backend and publish-before-accept save flow. #3590 projects the selected
+  effective baseline into OpenClaw starts for container materialization. #3603
+  closes review findings across the stack. #3607 records tenant-selected feed
+  policy sources. Next is quarantine enforcement.
 
 ## Merge Order
 

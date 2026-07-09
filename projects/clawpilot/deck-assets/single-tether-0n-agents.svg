@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto">
+      <path d="M0,0 L0,8 L11,4 z" fill="#4b5563"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto">
+      <path d="M0,0 L0,8 L11,4 z" fill="#1f4f99"/>
+    </marker>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#111827" flood-opacity="0.20"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="#f7f9fc"/>
+
+  <text x="70" y="70" font-family="Segoe UI, Arial" font-size="34" font-weight="900" fill="#0f172a">Single Cloud Tether, One Desktop Runtime, 0-N Hosted OpenClaw Agents</text>
+
+  <rect x="90" y="140" width="1420" height="130" rx="22" fill="#e4f6fb" stroke="#1f6f8b" stroke-width="4" filter="url(#shadow)"/>
+  <text x="132" y="196" font-family="Segoe UI, Arial" font-size="34" font-weight="900" fill="#15536a">Cloud tether / control plane</text>
+  <text x="132" y="238" font-family="Segoe UI, Arial" font-size="24" fill="#15536a">identity · tenant policy · config · entitlements · routing · session linkage · audit correlation · rollout / kill switches</text>
+
+  <rect x="95" y="372" width="460" height="330" rx="28" fill="#e7efff" stroke="#1f4f99" stroke-width="4" filter="url(#shadow)"/>
+  <text x="140" y="432" font-family="Segoe UI, Arial" font-size="34" font-weight="900" fill="#183c76">Scout Desktop runtime</text>
+  <text x="140" y="482" font-family="Segoe UI, Arial" font-size="24" fill="#183c76">local UI · local context</text>
+  <text x="140" y="522" font-family="Segoe UI, Arial" font-size="24" fill="#183c76">files · shell · browser · clipboard</text>
+  <text x="140" y="562" font-family="Segoe UI, Arial" font-size="24" fill="#183c76">local approvals and local evidence</text>
+  <rect x="140" y="612" width="340" height="52" rx="12" fill="#ffffff" stroke="#b6c7e8" stroke-width="2"/>
+  <text x="166" y="646" font-family="Segoe UI, Arial" font-size="23" font-weight="800" fill="#183c76">Can run with 0 hosted agents</text>
+
+  <rect x="760" y="350" width="680" height="380" rx="28" fill="#fffaf0" stroke="#8a5a12" stroke-width="4" filter="url(#shadow)"/>
+  <text x="805" y="410" font-family="Segoe UI, Arial" font-size="34" font-weight="900" fill="#63400e">0-N hosted OpenClaw agents</text>
+  <text x="805" y="452" font-family="Segoe UI, Arial" font-size="24" fill="#63400e">AI agent runtimes: reason, plan, use cloud tools, run cloud tasks</text>
+
+  <circle cx="880" cy="558" r="60" fill="#fff3dd" stroke="#8a5a12" stroke-width="3"/>
+  <text x="838" y="568" font-family="Segoe UI, Arial" font-size="25" font-weight="900" fill="#63400e">Agent 1</text>
+  <circle cx="1085" cy="558" r="60" fill="#fff3dd" stroke="#8a5a12" stroke-width="3"/>
+  <text x="1043" y="568" font-family="Segoe UI, Arial" font-size="25" font-weight="900" fill="#63400e">Agent 2</text>
+  <circle cx="1290" cy="558" r="60" fill="#fff3dd" stroke="#8a5a12" stroke-width="3"/>
+  <text x="1252" y="568" font-family="Segoe UI, Arial" font-size="25" font-weight="900" fill="#63400e">Agent N</text>
+
+  <rect x="900" y="650" width="400" height="46" rx="12" fill="#ffffff" stroke="#d0a252" stroke-width="2"/>
+  <text x="934" y="681" font-family="Segoe UI, Arial" font-size="22" font-weight="800" fill="#63400e">selected per session / turn / task</text>
+
+  <line x1="330" y1="270" x2="330" y2="372" stroke="#4b5563" stroke-width="5" marker-end="url(#arrow)"/>
+  <text x="356" y="334" font-family="Segoe UI, Arial" font-size="20" fill="#4b5563">identity / policy / audit</text>
+
+  <line x1="1100" y1="270" x2="1100" y2="350" stroke="#4b5563" stroke-width="5" marker-end="url(#arrow)"/>
+  <text x="1126" y="322" font-family="Segoe UI, Arial" font-size="20" fill="#4b5563">routing / allocation</text>
+
+  <line x1="760" y1="560" x2="555" y2="560" stroke="#1f4f99" stroke-width="5" stroke-dasharray="14 10" marker-end="url(#arrowBlue)"/>
+  <text x="578" y="538" font-family="Segoe UI, Arial" font-size="21" fill="#1f4f99">local capability request</text>
+
+  <line x1="555" y1="615" x2="760" y2="615" stroke="#4b5563" stroke-width="4" stroke-dasharray="10 9" marker-end="url(#arrow)"/>
+  <text x="594" y="648" font-family="Segoe UI, Arial" font-size="20" fill="#4b5563">approved result / denial / deferral</text>
+
+  <rect x="210" y="785" width="1180" height="58" rx="16" fill="#ffffff" stroke="#ccd5e2" stroke-width="2"/>
+  <text x="270" y="823" font-family="Segoe UI, Arial" font-size="26" font-weight="900" fill="#223047">Cloud tether aligns everyone. Hosted OpenClaw is optional capacity. Desktop remains the local execution boundary.</text>
+</svg>

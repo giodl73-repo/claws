@@ -1,0 +1,154 @@
+{
+  "pull_request": {
+    "number": 3972,
+    "url": "https://microsoft.ghe.com/bic/lobster/pull/3972",
+    "title": "Fix Scout feed skill add UX",
+    "state": "OPEN",
+    "owner": "bic",
+    "repo": "lobster"
+  },
+  "conversation_comments": [],
+  "reviews": [
+    {
+      "id": "PRR_kwDOAA_wH84I7QYP",
+      "state": "COMMENTED",
+      "body": "## Pull request overview\n\nThis PR updates the Skills feed discovery \u201cAdd\u201d flow so that successful feed installs also materialize the installed skill into the workspace (writing `AGENTS.md` plus `skills/<id>/SKILL.md`), and improves the discovery UX messaging for install status and feed-load failures.\n\n**Changes:**\n- After a feed install succeeds, write `AGENTS.md` and `skills/<id>/SKILL.md` so the skill follows the normal workspace install path.\n- Add inline pending/success/error status near discovery controls (including the selected skill title).\n- Suppress tenant-approved feed load failures when marketplace skills are available, to avoid noisy user-facing warnings.\n\n### Reviewed changes\n\nCopilot reviewed 2 out of 2 changed files in this pull request and generated 4 comments.\n\n| File | Description |\n| ---- | ----------- |\n| src/lobster_web/src/pages/SkillsPage.tsx | Implements workspace writes after feed install; refactors feed-load warnings; adds install status UX. |\n| src/lobster_web/tests/pages/SkillsPage.feeds.unit.test.tsx | Updates/extends unit tests for new install messaging, workspace writes, and warning suppression behavior. |\n\n\n\n\n",
+      "submittedAt": "2026-07-02T22:53:50Z",
+      "author": {
+        "login": "copilot-pull-request-reviewer"
+      }
+    },
+    {
+      "id": "PRR_kwDOAA_wH84I7rQK",
+      "state": "CHANGES_REQUESTED",
+      "body": "Inspektor found a data-loss path in the new feed install flow.\n\n**HIGH** `src/lobster_web/src/pages/SkillsPage.tsx:539-555`\n\n`installFeedSkillInWorkspace` makes `addSkillLine` idempotent for `AGENTS.md`, but then unconditionally writes `skills/${skill.id}/SKILL.md`:\n\n```ts\nawait client.writeFile(AGENTS_PATH, nextAgents);\nawait client.writeFile(`${SKILLS_DIR}/${skill.id}/SKILL.md`, buildSkillFile(skill));\n```\n\nIf the workspace already has a custom/user-edited skill with the same id as a marketplace or tenant-approved feed entry, clicking **Install** silently overwrites the existing `SKILL.md`. The new tests only cover installing into an empty workspace, so they miss the collision path.\n\nPlease either detect an existing `skills/<id>/SKILL.md` before writing and surface an explicit overwrite/merge flow, or disable/label the feed action when that skill id is already installed.\n\nCI summary: GitHubPop is failing; runtime/web static/unit/e2e checks that have completed are green, with some runtime E2E shards still in progress at review time.\n\nReviewed @ 7a72267536c9243bbb8a0571a51254f49e5ae961",
+      "submittedAt": "2026-07-03T01:17:23Z",
+      "author": {
+        "login": "dspektor"
+      }
+    },
+    {
+      "id": "PRR_kwDOAA_wH84I7rVU",
+      "state": "CHANGES_REQUESTED",
+      "body": "# PR Review Synthesis\n\n**Decision: request changes**\nSpecialists: architecture, engineering, design, investigation, CTO\nHead reviewed: `7a72267536c9243bbb8a0571a51254f49e5ae961` (open, not draft)\nSurface: web-only \u2014 `SkillsPage.tsx` + `SkillsPage.feeds.unit.test.tsx`; all new behavior gated behind `scoutFeedsUxEnabled`.\n\n## Blocking Findings\n\n**[High] Feed-entry IDs are written into `AGENTS.md` and the `skills/<id>/SKILL.md` path without validation, breaking the workspace-install round-trip for non-conforming IDs.**\n- `installFeedSkillInWorkspace` uses `entry.id` directly in `addSkillLine(...)` and `writeFile(\\`${SKILLS_DIR}/${skill.id}/SKILL.md\\`, ...)`, but the AGENTS parser only recognizes IDs matching `[A-Za-z0-9_\\-.]+` (`src/lobster_web/src/services/agentsFile.ts:49-55`). The feed `entry.id` comes from upstream `titleId`/`package` with no server-side normalization (`scout_feeds.rs:245`, `scout_mos3_adapter.rs:187`). The Create-skill path already gates its id on `CUSTOM_SKILL_ID_RE` (`SkillsPage.tsx:1377`); the feed-install path has no equivalent guard.\n- Impact: an id with a space/`@`/`:`/Unicode is written but the AGENTS line does **not** re-parse \u2192 the UI reports \"installed here\" while the skill never renders as installed after refresh; an id containing `/` produces a nested `skills/a/b/SKILL.md`. This invalidates the PR's core claim (\"install materializes into the workspace\") for non-conforming marketplace/approved IDs. (`..` traversal is blocked by `LobsterWorkspaceClient` normalization, so this is a correctness/round-trip defect, not a filesystem escape.) Independently flagged by Copilot (SkillsPage.tsx:523) and by 4 of 5 review lenses.\n- Fix: validate/normalize the feed `entry.id` against the AGENTS parser charset before the backend install + workspace write (reuse the existing slug rule); reject with a clear install error or persist a slug mapping. Add unit coverage for `/`, space, `@`, newline, and `..` IDs. The same pass should single-line-normalize untrusted `title`/`description` embedded in the managed AGENTS line (newlines/backticks can corrupt the line format).\n\n## Non-Blocking Risks\n\n- **Partial-success state:** both mutations call the backend install *then* the workspace write; if the write throws after the backend installed, the user sees a generic \"We couldn't add \u2026 yet\" while backend and workspace diverge. `addSkillLine` is idempotent for AGENTS.md only, so a re-click still re-invokes the backend install. Prefer a distinct \"installed in the service but couldn't save to this workspace\" message.\n- **Both-feeds-fail copy:** when approved *and* marketplace both fail, only \"Marketplace skills are unavailable \u2026\" is shown, dropping the approved reason (misleading). The suppression when only approved fails is fine and now test-locked.\n- **`handleSaveToLibrary` fallback** silently publishes generated markdown if the canonical SKILL.md read fails \u2192 risk of stale/wrong library content; untested.\n- **UX/a11y (design):** button \"Install\" vs live status \"Adding\u2026\"; \"installed here\" is vague (prefer \"Installed in this workspace.\"); the live region is conditionally mounted \u2014 use a stable `role=\"status\" aria-live=\"polite\"` container.\n- Hiding tenant-approved feed outages can mask a tenant provisioning problem from admins; consider a subdued diagnostic signal.\n\n## Verification Gaps\n\n- No tests for invalid feed IDs, workspace-write failure, partial-success, retry-after-partial, or the save-to-library read fallback.\n- `git diff --check` on both changed files: **clean**.\n- CI (informational): web lanes passed on this head in the completed run (Static, Unit vitest, Playwright E2E, bundle); a fresh pipeline run is currently re-executing (Web Unit Tests `in_progress`). Runtime E2E shards 1\u20134 + Rust MITM canary and GitOps/GitHubPop FAIL \u2014 classified **unrelated/stale infra** (web-only TS diff; no SkillsPage/feed E2E coverage; GitHubPop fails on unrelated PRs too). No failing check invalidates a diff claim.\n\n## Specialist Summary\n\n- **Architecture** \u2014 request changes: feed-ID\u2192workspace contract break is blocking; also untrusted title/description can corrupt the managed AGENTS line.\n- **Engineering** \u2014 request changes: same High feed-ID finding; partial-success non-blocking; strong happy-path tests, missing negative tests; whitespace clean.\n- **Design** \u2014 request changes: both-feeds copy inaccurate, Install/Adding label mismatch, conditionally-mounted live region; two-step model OK but needs clearer copy.\n- **Investigation** \u2014 request changes: fix works for normal IDs but unvalidated-ID path undermines it; all failing CI unrelated/stale; head matches, no post-review commits.\n- **CTO** \u2014 approve *while dark* (default-off flag = no prod exposure); treats feed-ID validation as a **pre-broadening requirement**; wants a human owner for admin-visibility policy on approved-feed outages.\n\n**Dissent:** CTO would merge dark and gate ID validation on rollout; the other four lenses (and Copilot) treat the unvalidated feed-ID write as a blocking correctness defect. Since it's a real bug that invalidates the PR's core claim for external IDs, is trivially fixable (the create path already has the guard), and lands the same test file that should lock it, this synthesis lands on **request changes** \u2014 the fix is small and unblocks a clean approve.\n\n<sub>Automated multi-agent review (architecture \u00b7 engineering \u00b7 design \u00b7 investigation \u00b7 CTO). CI treated as informational per repo policy.</sub>\n",
+      "submittedAt": "2026-07-03T01:27:11Z",
+      "author": {
+        "login": "Galin-Iliev"
+      }
+    }
+  ],
+  "review_threads": [
+    {
+      "id": "PRRT_kwDOAA_wH84C2O5z",
+      "isResolved": true,
+      "isOutdated": true,
+      "path": "src/lobster_web/src/pages/SkillsPage.tsx",
+      "line": 2072,
+      "diffSide": "RIGHT",
+      "startLine": 1951,
+      "startDiffSide": "RIGHT",
+      "originalLine": 1954,
+      "originalStartLine": 1951,
+      "resolvedBy": {
+        "login": "giodl"
+      },
+      "comments": {
+        "nodes": [
+          {
+            "id": "PRRC_kwDOAA_wH84Eq6RS",
+            "body": "When both tenant-approved and marketplace feeds fail, the thrown error message says only \"Marketplace skills are unavailable\", which is inaccurate and can hide the tenant-approved outage. This branch is specifically the \"both rejected\" case, so the message should mention both feeds (and ideally include both reasons) to avoid misleading users and complicating debugging.",
+            "createdAt": "2026-07-02T22:53:49Z",
+            "updatedAt": "2026-07-02T22:53:50Z",
+            "author": {
+              "login": "copilot-pull-request-reviewer"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "PRRT_kwDOAA_wH84C2O54",
+      "isResolved": true,
+      "isOutdated": true,
+      "path": "src/lobster_web/src/pages/SkillsPage.tsx",
+      "line": 596,
+      "diffSide": "RIGHT",
+      "startLine": 510,
+      "startDiffSide": "RIGHT",
+      "originalLine": 523,
+      "originalStartLine": 510,
+      "resolvedBy": {
+        "login": "giodl"
+      },
+      "comments": {
+        "nodes": [
+          {
+            "id": "PRRC_kwDOAA_wH84Eq6RX",
+            "body": "Feed entry IDs are written into both AGENTS.md and the `skills/<id>/SKILL.md` path without validation. If a feed returns an id with characters outside the AGENTS.md parser\u2019s expected `[A-Za-z0-9_\\-.]+` (or with path separators), the skill line won\u2019t round-trip through `parseAgentsFile`, and the workspace write path could end up surprising (nested dirs). Validate/sanitize the id before writing to the workspace.",
+            "createdAt": "2026-07-02T22:53:49Z",
+            "updatedAt": "2026-07-02T22:53:50Z",
+            "author": {
+              "login": "copilot-pull-request-reviewer"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "PRRT_kwDOAA_wH84C2O59",
+      "isResolved": true,
+      "isOutdated": true,
+      "path": "src/lobster_web/src/pages/SkillsPage.tsx",
+      "line": 2099,
+      "diffSide": "RIGHT",
+      "startLine": 1971,
+      "startDiffSide": "RIGHT",
+      "originalLine": 1973,
+      "originalStartLine": 1971,
+      "resolvedBy": {
+        "login": "giodl"
+      },
+      "comments": {
+        "nodes": [
+          {
+            "id": "PRRC_kwDOAA_wH84Eq6Rc",
+            "body": "If the workspace write fails after the feed install succeeds, the mutation currently surfaces a generic error even though the backend has already installed the skill. That leaves the system in a partial-success state that\u2019s hard for the user to interpret (and may make retries confusing). Consider catching workspace-write failures and rethrowing an error that explicitly indicates the skill was installed in the feed but couldn\u2019t be saved to the workspace.",
+            "createdAt": "2026-07-02T22:53:49Z",
+            "updatedAt": "2026-07-02T22:53:50Z",
+            "author": {
+              "login": "copilot-pull-request-reviewer"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "PRRT_kwDOAA_wH84C2O6C",
+      "isResolved": true,
+      "isOutdated": true,
+      "path": "src/lobster_web/src/pages/SkillsPage.tsx",
+      "line": 2122,
+      "diffSide": "RIGHT",
+      "startLine": 1986,
+      "startDiffSide": "RIGHT",
+      "originalLine": 1988,
+      "originalStartLine": 1986,
+      "resolvedBy": {
+        "login": "giodl"
+      },
+      "comments": {
+        "nodes": [
+          {
+            "id": "PRRC_kwDOAA_wH84Eq6Rh",
+            "body": "Same partial-success risk as the tenant-approved install path: if `installFeedSkillInWorkspace` fails after `installMarketplaceSkill` succeeds, the UI will show a generic failure even though the backend install has already happened. Catch the workspace-write error and throw a clearer message so users understand what happened and what to do next.",
+            "createdAt": "2026-07-02T22:53:50Z",
+            "updatedAt": "2026-07-02T22:53:50Z",
+            "author": {
+              "login": "copilot-pull-request-reviewer"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

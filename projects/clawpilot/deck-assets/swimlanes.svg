@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="650" viewBox="0 0 1400 650">
+  <rect width="1400" height="650" fill="#f7f9fc"/>
+  <rect x="60" y="56" width="1280" height="86" rx="14" fill="#efe8ff" stroke="#7141a4" stroke-width="3"/>
+  <text x="94" y="110" font-family="Segoe UI, Arial" font-size="30" font-weight="900" fill="#4d2478">Lobster</text>
+  <text x="305" y="110" font-family="Segoe UI, Arial" font-size="23" fill="#4d2478">tenant policy</text>
+  <text x="548" y="110" font-family="Segoe UI, Arial" font-size="23" fill="#4d2478">admin overrides</text>
+  <text x="835" y="110" font-family="Segoe UI, Arial" font-size="23" fill="#4d2478">audit taxonomy</text>
+  <text x="1120" y="110" font-family="Segoe UI, Arial" font-size="23" fill="#4d2478">kill switches</text>
+
+  <rect x="60" y="188" width="1280" height="86" rx="14" fill="#e4f6fb" stroke="#1f6f8b" stroke-width="3"/>
+  <text x="94" y="242" font-family="Segoe UI, Arial" font-size="30" font-weight="900" fill="#15536a">Cloud tether</text>
+  <text x="350" y="242" font-family="Segoe UI, Arial" font-size="23" fill="#15536a">identity</text>
+  <text x="548" y="242" font-family="Segoe UI, Arial" font-size="23" fill="#15536a">policy + config sync</text>
+  <text x="880" y="242" font-family="Segoe UI, Arial" font-size="23" fill="#15536a">routing</text>
+  <text x="1080" y="242" font-family="Segoe UI, Arial" font-size="23" fill="#15536a">session linkage</text>
+
+  <rect x="60" y="320" width="1280" height="86" rx="14" fill="#fff3dd" stroke="#8a5a12" stroke-width="3"/>
+  <text x="94" y="374" font-family="Segoe UI, Arial" font-size="30" font-weight="900" fill="#63400e">Hosted OpenClaw</text>
+  <text x="420" y="374" font-family="Segoe UI, Arial" font-size="23" fill="#63400e">AI agent loops</text>
+  <text x="675" y="374" font-family="Segoe UI, Arial" font-size="23" fill="#63400e">cloud tools + MCP</text>
+  <text x="1010" y="374" font-family="Segoe UI, Arial" font-size="23" fill="#63400e">operator/co-create</text>
+
+  <rect x="60" y="452" width="1280" height="86" rx="14" fill="#e7efff" stroke="#1f4f99" stroke-width="3"/>
+  <text x="94" y="506" font-family="Segoe UI, Arial" font-size="30" font-weight="900" fill="#183c76">Desktop</text>
+  <text x="305" y="506" font-family="Segoe UI, Arial" font-size="23" fill="#183c76">local UI</text>
+  <text x="500" y="506" font-family="Segoe UI, Arial" font-size="23" fill="#183c76">local files/shell/browser</text>
+  <text x="880" y="506" font-family="Segoe UI, Arial" font-size="23" fill="#183c76">approvals</text>
+  <text x="1080" y="506" font-family="Segoe UI, Arial" font-size="23" fill="#183c76">local evidence</text>
+</svg>

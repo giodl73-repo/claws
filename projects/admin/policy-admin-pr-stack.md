@@ -2,7 +2,7 @@
 
 Status: planning note, not filed
 
-Last checked: 2026-06-19
+Last checked: 2026-06-24
 
 ## Current Read
 
@@ -22,7 +22,14 @@ Existing admin policy PRs:
 | `bic/lobster#3355` | Merged 2026-06-19 | Adds `scout policy preview` for tenant-approved feeds, package-defense state, MOS3 block-status metadata, and text/JSON preview output. |
 | `bic/lobster#3383` | Merged 2026-06-20 at merge commit `af6bfa7c`; final head `ccb87b2ef` | Polish follow-up after #3355: scope-before-attestation error ordering, sanitized readable reason text, and read-only help text. |
 | `bic/lobster#3388` | Merged 2026-06-20 at merge commit `f9278926`; final head `0b9f4af53` | Personal policy baseline state: MOS3-backed personal policies accepted only when equal-or-stricter than the tenant-effective baseline. |
-| `bic/lobster#3391` | Copilot feedback fixed, head `a07e8915e`; ADO `168861357`/`168861356` queued; GitOps PoP failed; review required | URL-gated Policy UX preview with section/scope controls, strictness comparison, generated policy JSON, and disabled MOS3 save path. |
+| `bic/lobster#3391` | Merged 2026-06-20 at head `a07e8915e` | URL-gated Policy UX preview with section/scope controls, strictness comparison, generated policy JSON, and disabled MOS3 save path. |
+| `bic/lobster#3555` | Merged 2026-06-24 at head `44cc96c6` | MAC / Partner Center registration guidance refresh aligned with MOS3 catalog/governance boundaries. |
+| `bic/lobster#3585` | Draft | Live authenticated personal-policy accept route requiring durable policy state, MOS3 artifact metadata, and OpenClaw comparison attestation. |
+| `bic/lobster#3586` | Draft, stacked on #3585 | Policy UX save wiring to the personal-policy accept API using selected MOS3 artifact metadata. |
+| `bic/lobster#3588` | Draft, stacked on #3586 | Policy-specific MOS3 publish backend and Policy UX publish-before-accept save flow. |
+| `bic/lobster#3590` | Draft, stacked on #3588 | Effective policy baseline projection into OpenClaw gateway start env for container materialization. |
+| `bic/lobster#3603` | Draft, stacked on #3590 | Review fixes: durable publish gate, trusted comparison attestation verification, pending response wire shape, and locked temp-file state writes. |
+| `bic/lobster#3607` | Draft, stacked on #3603 | Tenant-admin-selected attested tenant-approved feed policy sources recorded in durable policy state. |
 
 ## Proposed Stack
 
@@ -41,7 +48,7 @@ Existing admin policy PRs:
    - Materialize the accepted policy locally into OpenClaw.
 
 3. **Gated Policy UX preview**
-   - Land #3391.
+   - Landed as #3391.
    - Keep the route hidden unless `?enablePolicyUx=1` is present.
    - Use the current descriptor registry to shape sections, scopes, and
      generated policy JSON with Jesse/admin reviewers.
@@ -49,12 +56,12 @@ Existing admin policy PRs:
      acceptance flow from #3388.
 
 4. **Personal policy upload/admin endpoint**
-   - Add the live user/admin workflow that uploads or selects the personal
-     policy artifact and calls the #3388 acceptance path.
-   - Keep endpoint authorization and MOS3 upload mechanics separate from
-     strictness semantics.
+   - Opened as #3585 through #3603.
+   - Keep endpoint authorization, MOS3 upload mechanics, strictness semantics,
+     and trusted comparison attestation verification explicit.
 
 5. **Feed policy source selection**
+   - Opened as #3607.
    - Add admin state for selecting tenant-approved feed sources as the governed
      plugin/skill distribution input.
    - Use the landed Scout approved-feed publishing workflow as the concrete
@@ -95,8 +102,8 @@ The quarantine policy should align with the feed notes:
 
 ## Recommended Next Action
 
-Watch the open stack in order:
-
-1. #3391: Copilot/dspektor feedback fixed at head `a07e8915e`. Watch ADO
-   builds `168861357` and `168861356`, get refreshed formal review, clear
-   GitOps PoP, then merge.
+Start the quarantine enforcement slice on top of #3607. It should consume the
+tenant-selected feed policy source, preserve the #3355 preview semantics, and
+block new discovery/install for `quarantined` or `failed` package-defense/MOS3
+block-status outcomes unless an explicit tenant or Microsoft exception outcome
+is present.

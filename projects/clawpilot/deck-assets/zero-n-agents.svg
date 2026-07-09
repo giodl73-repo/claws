@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760">
+  <defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto"><path d="M0,0 L0,8 L11,4 z" fill="#4b5563"/></marker></defs>
+  <rect width="1400" height="760" fill="#f7f9fc"/>
+  <rect x="90" y="110" width="330" height="430" rx="22" fill="#ffffff" stroke="#ccd5e2" stroke-width="3"/>
+  <text x="150" y="220" font-family="Segoe UI, Arial" font-size="96" font-weight="900" fill="#123b76">0</text>
+  <text x="150" y="286" font-family="Segoe UI, Arial" font-size="31" font-weight="800" fill="#172033">No hosted agent</text>
+  <text x="150" y="340" font-family="Segoe UI, Arial" font-size="24" fill="#526070">Desktop-local or</text>
+  <text x="150" y="375" font-family="Segoe UI, Arial" font-size="24" fill="#526070">offline/local execution</text>
+  <text x="150" y="430" font-family="Segoe UI, Arial" font-size="24" fill="#526070">Cloud tether may still</text>
+  <text x="150" y="465" font-family="Segoe UI, Arial" font-size="24" fill="#526070">align policy + audit</text>
+
+  <rect x="535" y="110" width="330" height="430" rx="22" fill="#ffffff" stroke="#ccd5e2" stroke-width="3"/>
+  <text x="595" y="220" font-family="Segoe UI, Arial" font-size="96" font-weight="900" fill="#123b76">1</text>
+  <text x="595" y="286" font-family="Segoe UI, Arial" font-size="31" font-weight="800" fill="#172033">Selected agent</text>
+  <text x="595" y="340" font-family="Segoe UI, Arial" font-size="24" fill="#526070">One hosted OpenClaw</text>
+  <text x="595" y="375" font-family="Segoe UI, Arial" font-size="24" fill="#526070">agent owns this turn,</text>
+  <text x="595" y="410" font-family="Segoe UI, Arial" font-size="24" fill="#526070">session, or step</text>
+
+  <rect x="980" y="110" width="330" height="430" rx="22" fill="#ffffff" stroke="#ccd5e2" stroke-width="3"/>
+  <text x="1040" y="220" font-family="Segoe UI, Arial" font-size="96" font-weight="900" fill="#123b76">N</text>
+  <text x="1040" y="286" font-family="Segoe UI, Arial" font-size="31" font-weight="800" fill="#172033">Hosted team</text>
+  <text x="1040" y="340" font-family="Segoe UI, Arial" font-size="24" fill="#526070">Multiple hosted Claws,</text>
+  <text x="1040" y="375" font-family="Segoe UI, Arial" font-size="24" fill="#526070">providers, regions, or</text>
+  <text x="1040" y="410" font-family="Segoe UI, Arial" font-size="24" fill="#526070">execution containers</text>
+
+  <line x1="420" y1="320" x2="535" y2="320" stroke="#4b5563" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="865" y1="320" x2="980" y2="320" stroke="#4b5563" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <rect x="245" y="620" width="910" height="58" rx="14" fill="#e8efff" stroke="#9eb7e8" stroke-width="2"/>
+  <text x="304" y="657" font-family="Segoe UI, Arial" font-size="28" font-weight="800" fill="#153e8a">The invariant is explicit routing and ownership, not exactly one hosted agent.</text>
+</svg>

@@ -4,14 +4,45 @@ Feeds work spans OpenClaw native feed support and Lobster Scout feed
 integration. This folder is the active index; old wave docs remain source
 material.
 
-## OpenClaw Active PRs
+## OpenClaw Hosted Feed Trust Stack
+
+This is the current signed hosted-feed trust series. It supersedes the older
+`extensions/feeds` trust framing for active trust work; use the older #87824
+series only as historical reference for feed discovery, lifecycle, policy, and
+search ideas.
+
+| PR | Branch | Status | Purpose |
+| --- | --- | --- | --- |
+| [RFC #25](https://github.com/openclaw/rfcs/pull/25) | `codex/hosted-feed-trust-addendum` | Open draft, merge clean; waiting on maintainer RFC scope/draft-status review | RFC 0009 addendum for hosted-feed trust verification, ClawHub account feeds/following boundaries, fail-closed signed feeds, explicit unsigned opt-in, and bounded diagnostics. |
+| [#98299](https://github.com/openclaw/openclaw/pull/98299) | `feeds-trust-envelope-verifier` | Open draft; stale ClawSweeper re-review-loop label after proof/helper fixes | Add signed hosted feed envelope verifier primitives: Ed25519 signatures, shared PEM/raw key helpers with device identity, payload-type validation, tamper/wrong-key/malformed coverage, and source-harness proof. |
+| [#98316](https://github.com/openclaw/openclaw/pull/98316) | `feeds-trust-source-profiles` | Open draft; stale ClawSweeper re-review-loop label after source-harness proof | Add signed `marketplaces.feeds` trust config with local Ed25519 keys, threshold validation, duplicate key-id/material rejection, strict raw base64url parsing, and fail-closed no-fetch behavior before enforcement. |
+| [#98338](https://github.com/openclaw/openclaw/pull/98338) | `feeds-trust-refresh-state` | Open draft; proof sufficient, waiting on maintainer/security acceptance and predecessor order | Verify signed marketplace feed refreshes, persist bounded snapshot trust state, re-verify signed snapshots with the current profile, and reject unsigned old snapshots under signed profiles. |
+| [#98350](https://github.com/openclaw/openclaw/pull/98350) | `feeds-trust-cli-visibility` | Open draft; stale ClawSweeper re-review-loop label after real CLI proof | Surface verified trust state in `plugins marketplace refresh` and `plugins marketplace entries` JSON/text output, with bounded diagnostics that omit signing material, raw URLs, checksums, and key ids. |
+
+Next action: get fresh ClawSweeper/maintainer review on #98299, #98316, and
+#98350 after the proof refreshes, then land/rebase the stack in order.
+
+ClawHub-specific signing lives in the follow-up layer, not the four generic
+trust PRs. RFC #25 now records the platform model: OpenClaw bundles the ClawHub
+feed public key in the release, ClawHub keeps the private key in Convex/env
+secret storage, and clients must not bootstrap trust from a ClawHub
+`/public-key` endpoint. ClawHub #3005 signs `/v1/feeds/plugins` and carries the
+runbook; OpenClaw #101981 adds the bundled trust-root slot while keeping
+env/config as override paths until the production public key is generated.
+
+## OpenClaw Hosted Marketplace PRs
 
 | PR | Branch | Status | Purpose |
 | --- | --- | --- | --- |
 | [#95846](https://github.com/openclaw/openclaw/pull/95846) | `feeds-hosted-catalog-prep` | Draft open, opened 2026-06-22 at `44c0884c3ed`; based on current `main`; focused tests/format/lint passed locally | First RFC 19 implementation prep slice: reshape the bundled official external plugin catalog into a feed-shaped local fallback while preserving current behavior. No hosted fetch, auth, signed envelope, regional selection, SQLite cache, search, or skills behavior yet. |
-| [#95868](https://github.com/openclaw/openclaw/pull/95868) | `feeds-hosted-catalog-fetch` | Draft open, commit `2acadea045a`; stacked after #95846; local format/lint/focused tests/typecheck and Codex review passed; maintainer edits enabled; commits verified | Add guarded hosted catalog fetch from `register.openclaw.ai` with conditional headers, bounded response reads, checksum metadata, schema validation, bundled fallback, and lazy network-guard import coverage. No persistent snapshot store yet. |
-| [#95877](https://github.com/openclaw/openclaw/pull/95877) | `feeds-hosted-catalog-snapshot-cache` | Draft open, commit `b1cb838ce1a`; stacked after #95846/#95868; merge state clean; local format/lint/focused tests/typecheck and Codex review passed; same-repo OpenClaw branch; commits verified | Add the last-known-good snapshot fallback contract for the hosted catalog loader. Validates cached body checksum/schema and preserves `expectedSha256` pinning before using a snapshot; falls back to bundled catalog when no valid snapshot exists. |
-| [#95964](https://github.com/openclaw/openclaw/pull/95964) | `feeds-hosted-catalog-persistent-snapshot` | Draft open, commit `c371b39a93e`; stacked on #95877 base branch; local format/lint/focused tests/Kysely check/typecheck passed | Bind the hosted catalog snapshot contract to OpenClaw state with a SQLite-backed last-known-good feed snapshot store. This preserves bundled fallback and does not add source profiles, auth, signing, scheduler, search, skills, or telemetry. |
+| [#95868](https://github.com/openclaw/openclaw/pull/95868) | `feeds-hosted-catalog-fetch` | Draft open, commit `f184d6d84a7`; stacked after #95846; local format/lint/focused tests/typecheck and Codex review passed; maintainer edits enabled; commits verified; Patrick approved | Add guarded hosted marketplace feed fetch from `https://register.openclaw.ai/official-marketplace.json` with conditional headers, bounded response reads, checksum metadata, schema validation, bundled fallback, and lazy network-guard import coverage. No persistent snapshot store yet. |
+| [#95877](https://github.com/openclaw/openclaw/pull/95877) | `feeds-hosted-catalog-snapshot-cache` | Draft open, commit `68a85a8e500`; stacked after #95846/#95868; rebased after PR2 marketplace endpoint rename; focused snapshot tests pass; commits verified | Add the last-known-good snapshot fallback contract for the hosted catalog loader. Validates cached body checksum/schema and preserves `expectedSha256` pinning before using a snapshot; falls back to bundled catalog when no valid snapshot exists. Latest head fixes the invalid-snapshot fixture to use the active default feed URL. |
+| [#95964](https://github.com/openclaw/openclaw/pull/95964) | `feeds-hosted-catalog-persistent-snapshot` | Draft open, commit `fb61b1d1fcb`; stacked on #95877 base branch; rebased after PR3 fixture fix; local format/lint/focused tests/Kysely check/typecheck passed | Bind the hosted catalog snapshot contract to OpenClaw state with a SQLite-backed last-known-good feed snapshot store. This preserves bundled fallback and does not add source profiles, auth, signing, scheduler, search, skills, or telemetry. |
+| [#95969](https://github.com/openclaw/openclaw/pull/95969) | `feeds-hosted-catalog-source-profiles` | Draft open, commit `b551983516c`; stacked on #95964; Patrick approved; ClawSweeper re-review queued; focused tests and proof passed | Add named local feed/source profile validation and move the default feed to live ClawHub at `https://clawhub.ai/v1/feeds/plugins`, with ClawHub and npm source refs. Latest head accepts live ClawHub `schemaVersion: 2` feeds while continuing to reject unsupported versions. |
+| [#95981](https://github.com/openclaw/openclaw/pull/95981) | `feeds-hosted-catalog-config-profiles` | Draft open, commit `da816509136`; stacked on #95969; rebased after PR3 and PR5 fixes; ClawSweeper re-review queued; focused tests and proof passed | Add the persisted OpenClaw config surface as `marketplaces.feeds` and `marketplaces.sources`, plus the bridge from `config.marketplaces` into the hosted loader. This addresses Patrick's marketplace naming/API-shape feedback. |
+| [#96155](https://github.com/openclaw/openclaw/pull/96155) | `feeds-hosted-catalog-marketplace-refresh` | Draft open, commit `82c404263a1`; stacked on #95981; rebased after PR3 and PR5 fixes; ClawSweeper re-review queued; focused tests/build and proof passed | Add `openclaw plugins marketplace refresh` as the first manual activation slice for the hosted marketplace feed path. It reads `config.marketplaces`, refreshes the configured/default feed into the snapshot store, reports hosted/snapshot/bundled fallback, and fails checksum-pinned refreshes that do not accept a fresh hosted payload. |
+| [#96158](https://github.com/openclaw/openclaw/pull/96158) | `feeds-hosted-catalog-marketplace-entries` | Draft open, commit `bedf630f675`; stacked on #96155; rebased after PR3 and PR5 fixes; ClawSweeper re-review queued; focused tests/build and proof passed | Add `openclaw plugins marketplace entries` as the first explicit read path over the configured hosted marketplace feed, including `--offline` snapshot listing, normalized entry output, docs, and focused tests before wiring marketplace data into startup or install flows. Live retries currently exercise timeout fallback against `https://clawhub.ai/v1/feeds/plugins`; schema v2 hosted-path coverage is covered by focused tests and live feed header/body proof. |
+| [#96194](https://github.com/openclaw/openclaw/pull/96194) | `feeds-hosted-catalog-marketplace-telemetry` | Draft open, commit `1985e1c07e1`; stacked on #96158; focused format/lint/tests/typecheck passed; GitHub selected checks green; commits verified; GPT-5.5 Codex review blocked by invalidated local Codex token | Add opt-in diagnostics timeline telemetry for `openclaw plugins marketplace refresh` and `openclaw plugins marketplace entries`, with bounded feed provenance fields and tests proving raw URL credentials/query strings are not emitted. |
 | [#88732](https://github.com/openclaw/openclaw/pull/88732) | `feeds-native-search-default` | Draft open, updated 2026-06-19 to `c487721eafb`; mergeable; native search docs/import/policy evidence fixes pushed; PR body has real skills/plugins feed-search proof; stale `needs proof` label awaiting ClawSweeper refresh and maintainer trust/default approval | Native feed search defaults. |
 | [#87827](https://github.com/openclaw/openclaw/pull/87827) | `feeds-lifecycle-tooling` | Draft open, updated 2026-06-19 to `47aabc7bcd`; mergeable; deterministic build and URL validate/hash findings fixed; PR body has real lifecycle CLI proof; stale `needs proof` label awaiting ClawSweeper refresh | Feed lifecycle tooling. |
 | [#87826](https://github.com/openclaw/openclaw/pull/87826) | `feeds-policy-conformance-4pr` | Draft open, rebased, merge clean | Feed catalog policy conformance. |
@@ -19,6 +50,11 @@ material.
 | [#87824](https://github.com/openclaw/openclaw/pull/87824) | `feeds-read-only-discovery` | Draft open, updated 2026-06-19 to `57d27be40d`; mergeable; SSRF guard and remote body-cap findings fixed; PR body has real `openclaw feeds` CLI proof; ClawSweeper re-review queued | Read-only feed discovery. |
 
 ## Lobster Active PRs
+
+Current Lobster ADO policy: checks attach/run automatically. Treat any
+historical “required ADO queued” status below as past-tense context only; do not
+manually queue or rerun ADO unless the user explicitly asks for a named
+PR/branch.
 
 | PR | Branch | Status | Purpose |
 | --- | --- | --- | --- |
@@ -38,7 +74,15 @@ material.
 | [#3345](https://microsoft.ghe.com/bic/lobster/pull/3345) | `user/giodl/scout-feeds-personal-openclaw-install` | Merged into `main` on 2026-06-18 | Allow `scout feed install` to install from attested personal feeds as the user's portable skill library, including hosted personal skill artifacts, while preserving tenant-approved feeds as the enterprise marketplace lane. Root and baseline feeds remain non-installable. |
 | [#3353](https://microsoft.ghe.com/bic/lobster/pull/3353) | `user/giodl/scout-feeds-hosted-personal-artifacts` | Merged into `main` on 2026-06-18 | Add Lobster-hosted content-addressed personal skill artifact storage for the personal feed lane, plus `publish-local --artifact-dir --artifact-base-url` to emit hosted artifact URLs. |
 | [#1946](https://microsoft.ghe.com/bic/lobster/pull/1946) | `user/giodl/scout-feeds-clawhub-adapter` | Merged into `main` on 2026-06-19 at merge commit `2e67898e` | Import ClawHub snapshots into Scout feeds. Latest head accepts native package catalog snapshots and digest wrappers. This is a replaceable snapshot adapter until the OpenClaw RFC hosted-feed format lands. |
-| [#3368](https://microsoft.ghe.com/bic/lobster/pull/3368) | `user/giodl/scout-feeds-web-ux` | Open, non-draft at `8d4f43555`; mergeable; ADO PullRequest `168850652` and Build Validation `168850649` in progress; GitHubPop failing for Proof of Presence; review still changes-requested pending refresh | Add the Lobster web `/feeds` page for personal and tenant-approved feed search, plus a personal publish panel. Latest head gates the UX behind ECS, gates local publish behind an explicit env flag, limits URL override to dev/localhost, keeps direct `/feeds` loads alive while flags resolve, handles MOS3 pending publish copy, preflights MOS3-backed publish storage, serializes artifact write/feed cleanup under the feed lock, and verifies stale-lock token claims. Tenant-admin source composition and ClawHub approval UX remain follow-up work. |
+| [#3422](https://microsoft.ghe.com/bic/lobster/pull/3422) | `user/giodl/scout-feeds-admin-composition` | Open, non-draft at `314aeed55`; rebased onto current `main`; GitHubPop failing for Proof of Presence; fresh ADO queued as PullRequest `169376727` and Build Validation `169376721`; review decision still changes-requested due to an older Galin review pending refresh | Add tenant-admin Scout feed composition: server-side admin routes, fail-closed ECS/admin assignment gates, source feed import, approve/reject/update handling, approved-feed publish, and web UX controls for tenant admins. |
+| [#3368](https://microsoft.ghe.com/bic/lobster/pull/3368) | `user/giodl/scout-feeds-web-ux` | Merged | Add the Lobster web `/feeds` page for personal and tenant-approved feed search, plus a personal publish panel. Tenant-admin source composition moved to #3422. |
+| [#3545](https://microsoft.ghe.com/bic/lobster/pull/3545) | `user/giodl/scout-cli-auth-login` | Open, latest head `e29b45f1a`; follow-up review fix pushed after Codeclaw found the MOS3 cached-token guard gap; local format, focused Scout CLI tests, clippy with tests, and diff-check passed; fresh ADO PullRequest `169229042` and Build Validation `169229041` queued | Add `scout auth login/token/status/logout` with explicit token cache management, and opt-in `--auth-scope` / `--auth-cache` for hosted feed fetch, live MOS3 import, and MOS3 publish validation flows. Latest fixes remove token-bearing `Debug`, make auth-cache writes atomic/private, reject conflicting logout flags, bind cached auth-scope feed fetch/import/publish destinations to loopback, Lobster gateway feed hosts, or MOS3 Titles hosts unless explicitly overridden, and add mocked AAD/device/refresh plus host-boundary coverage. |
+| [#3564](https://microsoft.ghe.com/bic/lobster/pull/3564) | `user/giodl/scout-mos3-marketplace-search` | Merged into `main` on 2026-06-25 at merge commit `0db07340` | Add `scout feed import mos3-marketplace` for `/marketplace/v1/users/titles/query`, normalize marketplace title skill/connector summaries into Scout feed entries, and let existing `scout feed search` browse the resulting MOS3 marketplace feed. |
+| [#3565](https://microsoft.ghe.com/bic/lobster/pull/3565) | `user/giodl/scout-feeds-marketplace-ux` | Open, non-draft, rebased onto `main` after #3564 merged, now at `326e5642`; local Rust/web validation passed; required ADO queued as PullRequest `169427727` and Build Validation `169427726`; GitHubPop failing for Proof of Presence | Add the MOS3 marketplace as a third Lobster web `/feeds` tab backed by `/v1/scout/feeds/marketplace.json`, reusing the existing feed search/filter UX. |
+| [#3604](https://microsoft.ghe.com/bic/lobster/pull/3604) | `user/giodl/scout-feeds-marketplace-install` | Open, non-draft, rebased on #3565 at `f002be5e`; local Rust/web validation passed; required ADO queued as PullRequest `169427988` and Build Validation `169427990`; GitHubPop failing for Proof of Presence | Add the first Marketplace tab install action: `POST /v1/scout/feeds/marketplace/install` copies an installable MOS3 marketplace skill into the caller's personal Scout feed, validates skill-only entries, promotes `publicSkillPath` to `source.url`, and rejects credential/query/fragment install URLs before durable feed persistence. |
+| [#3608](https://microsoft.ghe.com/bic/lobster/pull/3608) | `user/giodl/scout-feeds-marketplace-admin-approval` | Open, non-draft, stacked on #3422 at `78a31492b`; local Rust/web validation passed; required ADO queued as PullRequest `169394372` and Build Validation `169394371`; GitHubPop failing for Proof of Presence | Connect MOS3 marketplace entries to tenant-admin composition: fetch live marketplace feed, allow personal Add from Marketplace, and add tenant-admin-only Marketplace Approve that imports the selected entry into the tenant catalog with exact source/version selection. |
+| [#3620](https://microsoft.ghe.com/bic/lobster/pull/3620) | `user/giodl/scout-feeds-marketplace-admin-publish` | Open, non-draft, stacked on #3608 at `5d931002`; local focused Rust validation passed; required ADO queued as PullRequest `169423527` and Build Validation `169423528`; GitHubPop failing for Proof of Presence | Publish marketplace-approved catalog-only entries into tenant-approved feeds, preserving baseline-first behavior, avoiding duplicate ids, and reattesting the effective feed after adding entries absent from the baseline/source feed. |
+| [#3622](https://microsoft.ghe.com/bic/lobster/pull/3622) | `user/giodl/scout-feeds-marketplace-admin-state` | Open, non-draft, stacked on #3620 at `db0dffcb`; local web validation passed; required ADO queued as PullRequest `169424716` and Build Validation `169424707`; GitHubPop failing for Proof of Presence | Show catalog-approved or pinned marketplace entries as already in the tenant feed on the Marketplace tab, avoiding a repeat Marketplace Approve action for entries the tenant admin has already approved. |
 
 ## Scout Desktop / ClawPilot Active PR
 
@@ -136,8 +180,11 @@ per-user personal feeds at `/v1/scout/feeds/personal.json`.
 - `mos3-feed-contract-standard.md`
 - `mos3-feed-admin-experience.md`
 - `mos3-feed-client-conformance.md`
+- `mos3-shared-registry-delivery-plan.md`
 - `mos3-feed-npm-leverage.md`
 - `mos3-feed-npm-authoring.md`
+- `user-shared-named-feeds-plan.md`
+- `user-shared-named-feeds-role-review.md`
 - `skills-marketplace-feeds-architecture.md`
 - `.craft/waves/260528+hapi-the-bringer+openclaw-feeds/`
 - `.craft/waves/260427+hapi-the-bringer+openclaw-upstream/package-proposals/enterprise-feeds.md`
@@ -168,6 +215,25 @@ not a confirmed MOS3 product noun.
 ## Next
 
 - Keep OpenClaw feed primitives separate from Lobster Scout publishing choices.
+- Make the MOS3-first feed contract explicit before adding more product UX:
+  Lobster's file-backed durable feed directories are development/proof/fallback
+  infrastructure, while MOS3 should own feed identity, sharing ACLs, effective
+  personal and tenant-approved projections, named-feed revisions, admin review,
+  search, and audit where available. Track the validation and migration plan in
+  `user-shared-named-feeds-plan.md`.
+- Add followable feeds as the viral sharing and discovery layer for the
+  ecosystem: personal feeds stay private effective views over direct personal
+  entries plus followed feeds; users can follow named feeds shared by people or
+  groups and source feeds such as ClawHub where policy allows; named feeds can
+  later be shared, made tenant-visible, and promoted by tenant admins as a
+  selected revision. Track the taxonomy, UX, API, follow/include semantics,
+  guardrails, and PR plan in `user-shared-named-feeds-plan.md`.
+- OpenClaw hosted marketplace feed stack is now at PR9:
+  PR #96155 adds `openclaw plugins marketplace refresh`, and PR #96158 adds
+  `openclaw plugins marketplace entries` plus offline snapshot listing. PR
+  #96194 adds opt-in diagnostics timeline telemetry for those explicit
+  marketplace feed refresh/read commands. These remain draft so Vince can shape
+  or take over the stack while reviewing the first hosted-feed PRs.
 - Lobster #3272 and #3273 are now merged into `main`; the local and MOS3
   personal-feed publish arc is landed.
 - Lobster #3305 is merged into `main`; Scout catalog review and approved-feed
@@ -175,6 +241,20 @@ not a confirmed MOS3 product noun.
 - Lobster #3345 is merged into `main`; personal feeds can now install into an
   OpenClaw enlistment. Lobster PR #3353 is now open for Lobster-hosted personal
   artifact bytes for portable personal feed entries.
+- Lobster PR #3565 is open for the Scout feeds marketplace UX on branch
+  `user/giodl/scout-feeds-marketplace-ux`. Latest head `e5c8735` addresses
+  edpiva's ECS override review by removing the stray `user_override_disabled_reason`
+  fields from the user-overridable OpenClaw code-mode and WorkIQ namespace
+  gates, leaving only `openclaw_code_mode_judge_enabled` protected per #3618.
+  It also clarifies the hosted-feed router comment for the marketplace MOS3
+  environment. Required ADO builds were requeued as PullRequest `169436683` and
+  Build Validation `169436681`; an auto PR run `169436671` is also attached.
+- Lobster PR #3422 was closed in favor of fresh PR #3627:
+  `https://microsoft.ghe.com/bic/lobster/pull/3627`. It uses the same
+  `user/giodl/scout-feeds-admin-composition` branch at `9ce43517`, targeting
+  `main`, to reset stale review state for tenant admin Scout feed composition.
+  Required ADO builds were queued as PullRequest `169436955` and Build
+  Validation `169436951`.
 - Lobster PR #3368 is open for the first Scout feeds web UX: search personal
   and tenant-approved feeds, and publish local `SKILL.md` content into the
   caller's Lobster-hosted personal feed. Latest head `4a3df009b` adds the

@@ -1,6 +1,6 @@
 # Local OpenClaw Switch-Over PR83: CI and Full Switch-Over Dogfood Proof
 
-Planned PR: #83
+PR: [giodl_microsoft/m#83](https://github.com/giodl_microsoft/m/pull/83)
 Branch: `user/giodl/local-openclaw-switch-pr83-ci-dogfood`
 Base: PR82
 

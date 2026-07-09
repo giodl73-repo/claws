@@ -18,8 +18,939 @@
 
 ## Current Session
 
-- Last updated: 2026-07-02.
-- Last agent: Codex.
+- Last updated: 2026-07-08.
+- Last agent: Copilot.
+- Latest follow-up: Opened Lobster stacked PR `bic/lobster#4220` (`Add
+  node-skills bridge plugin`) from worktree
+  `C:\src\lobster-clawpilot-node-commands`, branch
+  `user/giodl/lobster-node-skills-plugin`, head `b8f53ce571`, stacked on
+  Lobster #4206 (`user/giodl/clawpilot-node-command-allowlist`). Scope: adds
+  Lobster-owned `node-skills` OpenClaw plugin with model-facing tools
+  `node_skills_list`, `node_skills_read`, and `node_skills_prepare`, wrapping
+  Scout node commands `skills.help`, `skills.read`, and `skills.prepare` via
+  `runtime.nodes.invoke`. The plugin returns explicit no-grant guidance and
+  never invokes referenced browser/file/system/MCP actions automatically.
+  Added fail-disabled ECS gate `lobster.openclaw_node_skills_enabled` /
+  `OPENCLAW_NODE_SKILLS_ENABLED`; baked plugin and `skills.*` gateway node
+  allowlist are disabled by default, runtime overlays enable both only on
+  explicit ECS true while preserving existing custom node allowlist entries.
+  Validation passed node-skills tests (7), existing MJS plugin suites
+  context-budget (51) + snapshot (11) + node-skills (7), generated JS syntax
+  checks, node-skills fail-disabled config gate, `rustfmt --check` on touched
+  Rust files, `git diff --check`, and final `codex review --uncommitted` with no
+  actionable issues. Targeted `cargo test` was blocked before compilation by
+  missing private Cargo registry auth (`cargo login --registry lobster` /
+  `CARGO_REGISTRIES_LOBSTER_TOKEN`). Live #4220 after create: open, head
+  `b8f53ce571`, base `user/giodl/clawpilot-node-command-allowlist`, merge state
+  `CLEAN`.
+- Latest follow-up: Updated node-mode skills implementation PR3
+  `gim-home/m#4443` (`Node mode skills: task-scoped preparation`) from worktree
+  `C:\src\clawpilot-node-skills-arch`, branch
+  `user/giodl/node-mode-skills-activate`, head `15364e9b`, stacked on #4440
+  head `795d45d5`.
+  Scope: shared `NodeSkillPrepareResult` DTO and default preparation TTL,
+  Desktop `NodeSkillCatalogProvider.prepare()` using the same policy/digest/
+  byte-cap gates as `skills.read`, `skills.prepare` command advertisement and
+  bridge parsing/logging, architecture response update, and focused tests.
+  Behavior: preparation is side-effect-free, task-scoped, returns scope/TTL,
+  preparation id, bounded task metadata (`task: { bytes }`), user-authored-content
+  `_note`, constraints, declared command refs, source metadata, safety flags, and
+  `permissionBoundary` (`preparationGrants: []`, per-ref advertised/not-advertised
+  readiness, and approval `not-granted-by-preparation`). It creates no standing
+  grant, dispatches no local action, and does not echo raw task text. Preparation
+  fails closed for missing provider, malformed args, policy deny, stale digest,
+  oversized payload, and missing skill. Prose-inferred command refs are advisory
+  until a required-capability manifest exists; preparation returns them as context
+  but does not hard-fail on unsupported mentions. Codex found and PR3 fixed four
+  real issues before final clean review: documented `unsupported-command-ref` was
+  not enforced, malformed preparation parse errors could log raw task text, later
+  branch review showed hard-failing on inferred command refs would break valid
+  skills, and preparation echoed unbounded raw task text while byte caps covered
+  only skill instructions. Validation passed hydrated-toolchain focused Vitest (4
+  files / 62 tests), focused `oxfmt --check`, `git diff --check`,
+  changed-file type-error filtering, and final `codex review --base
+  user/giodl/node-mode-skills-catalog-read` with no actionable issues. The stack
+  was also back-propagated so #4438 architecture uses `skills.prepare` at head
+  `15d16813`, and #4440 was rebased on it at head `795d45d5`.
+  Full `tsc --noEmit` in the fresh worktree still reports unrelated current-main
+  telemetry errors (`TelemetryErrorBridge.tsx`, `TelemetryErrorRouter.tsx`).
+  Live #4443 after latest push: open/non-draft, head `15364e9b`, merge state
+  `UNSTABLE` while PR-agent checks settle; title/body now say task-scoped
+  preparation.
+- Latest follow-up: Updated node-mode skills implementation PR2
+  `gim-home/m#4440` (`Node mode skills: catalog and read commands`) from
+  worktree `C:\src\clawpilot-node-skills-arch`, branch
+  `user/giodl/node-mode-skills-catalog-read`, head `795d45d5`, stacked on
+  #4438. Scope: shared `common/node-skill-catalog.ts` DTO/helpers, Desktop
+  `electron/node-skill-catalog.ts` provider over existing `electron/skills.ts`,
+  `skills.help` and `skills.read` in `NodeCommandsBridge`, plus focused tests.
+  Behavior: `skills.help` returns metadata only (id/digest/source/policy/command
+  refs, no skill text); `skills.read` returns bounded text by id+digest; disabled
+  or workspace-local skills deny by policy; stale digest, oversized payload,
+  missing skill, malformed args, and missing provider fail closed. Codex found
+  and PR2 fixed a real cap issue: caller `maxBytes` is clamped to the local 32
+  KiB default rather than overriding it. A second Codex pass found another real
+  issue: `skills.read` returned skill text without explicit user-authored-content
+  framing. Head `495ac0f57` added `_note` to the shared result DTO, provider
+  response, bridge/provider tests, and architecture response shape. Final branch
+  Codex review then found and PR2 fixed a P1 privacy bug: name-based
+  `getSkillContent(skill.name)` could collide with a denied workspace/local skill
+  and leak its content through a readable bundled/global catalog entry. Head
+  `21f26ebf` now uses the selected loaded `Skill.instructions` entry directly
+  and adds a global/local name-collision regression test. Lorant-role review
+  passed: source policy/digest/byte-cap gates fail closed, logs stay
+  metadata-only, no raw local path/error crosses the cloud-facing result, and the
+  authoritative architecture doc matches the wire contract. Validation passed
+  hydrated-toolchain focused Vitest (4 files / 57 tests after final fix),
+  focused `oxfmt --check`, `git diff --check`, and final `codex review --base
+  origin/user/giodl/node-mode-skills-architecture` with no actionable issues.
+  Full `tsc --noEmit` in the fresh worktree still reports unrelated current-main
+  telemetry type errors (`TelemetryErrorBridge.tsx`, `TelemetryErrorRouter.tsx`);
+  filtering showed no errors in changed files. Direct `pnpm exec` in the fresh
+  worktree attempted dependency install and hit private registry/dependency-tree
+  issues, so use hydrated `C:\src\clawpilot` tooling there. Live #4440 after
+  push: open/non-draft, head `795d45d5`, merge state `CLEAN`, checks green.
+- Latest follow-up: Opened node-mode local skills architecture PR
+  `gim-home/m#4438` (`docs: propose node-mode skills architecture`) from fresh
+  main-based worktree `C:\src\clawpilot-node-skills-arch`, branch
+  `user/giodl/node-mode-skills-architecture`, commit `a383f69fd`. The doc
+  `docs/architecture/35-node-mode-skills.md` frames skills as cloud-readable
+  recipes, not authority: Desktop exposes read-only `skills.help` /
+  `skills.read` and side-effect-free task-scoped `skills.prepare`; cloud
+  receives skill instructions; all local actions still route through governed
+  node commands (`mcp.invoke`, `system.run`, and future Desktop node
+  capabilities such as `browser.open` / `custom-tool.invoke`) with
+  Desktop-owned policy, approval, audit, and result trust. The draft covers
+  source classes, policy gates, digest/staleness, byte caps, plugin-bundled
+  skills, prompt safety, audit, open questions, non-goals, and a compact 3-PR
+  implementation stack. Later renamed `skills.activate` to `skills.prepare`
+  across the architecture because "activate" implied session setup or permission
+  grants. Current PR1 head is `15d16813`. Validation passed hydrated
+  `C:\src\clawpilot\node_modules\.bin\oxfmt.cmd --check`, `git diff --check`,
+  and `codex review --uncommitted` with no blocking issues. Direct `pnpm exec`
+  in the fresh worktree attempted dependency install and failed on private
+  `@microsoft/workiq` 401, so use hydrated tooling for validation there. Live
+  #4438 after create: open/non-draft, head `a383f69fd`, checks queued / merge
+  state `BLOCKED`, review required.
+- Latest follow-up: Fixed Carmen's #4123 custom-tool review findings. New
+  #4123 head `cf3b1fd54` makes raw `custom-tool.invoke` derive session identity
+  only from the trusted active Scout session resolver; caller-supplied
+  `context.sessionId` is ignored for policy, approval, audit, self-tool
+  construction, and sensitivity elevation. No active Scout session now fails
+  closed before local auto-approve/saved-allow dispatch. Unknown custom tools
+  and unavailable registries are preflighted before approval/policy prompt using
+  shared error constants with `execute-self-tool.ts`; help text no longer claims
+  precise diagnostics are exposed in activity logs. Custom-tool runtime failures
+  remain public-result sanitized, and local logs keep metadata-only failure
+  records. `initM365Tools(...)` is lazy-one-time for the custom-tool resolver,
+  while registry construction remains per trusted session because self-tools and
+  sensitivity callbacks are session-bound. Added tests for no-active-session,
+  user-deny, timeout, unknown-tool preflight, scalar `toolArgs` wrapping, and
+  bridge-facing sanitization. Validation passed focused node Vitest (6 files /
+  896 tests), full `pnpm run typecheck`, focused `oxlint`, focused `oxfmt
+  --check`, `git diff --check`, pre-commit lint-staged, and `codex review
+  --uncommitted` with no actionable bugs. Replayed downstream replacements:
+  #4389 `1d0a98736`, #4390 `8a867eab`, #4391 `27e374af` draft,
+  #4392 `82345e67` draft, #4393 `4e3ee691` draft, and #4394 `83a66d00`.
+  #4394 auto-closed during replay but reopened successfully. Posted #4123
+  response: `https://github.com/gim-home/m/pull/4123#issuecomment-4916719403`.
+- Latest follow-up: Continued the Scout Desktop CLI stack after #4377 by
+  replaying old fork PR #4 as new upstream PR `gim-home/m#4398` (`Add Scout CLI
+  companion dispatch contract`). Branch
+  `user/giodl/scout-cli-companion-contract-upstream`, head `3ed8e575`, is
+  stacked on #4377 `user/giodl/scout-cli-status-preflight-upstream`. Scope:
+  mockable `ScoutCliCompanionClient`, `dispatchCommand()`, manifest lookup,
+  unknown-command validation, blocked/deferred manifest gates,
+  desktop-running readiness checks, and preserved `scout status` preflight
+  behavior. No real companion server, Desktop IPC transport, auth token surface,
+  UI behavior, or runtime command implementation beyond status preflight.
+  Validation passed `node scripts\verify-scout-cli-manifest.mjs`, `node --test
+  scripts\verify-scout-cli-manifest.test.cjs`, focused Scout CLI Vitest (3 files
+  / 21 tests), Scout CLI `tsc --noEmit`, focused `oxfmt --check`, and
+  `git diff --check`. Because `C:\src\clawpilot-cli-stack` node_modules remains
+  unreliable after earlier registry tarball failures, focused Vitest/typecheck/
+  format used the hydrated `C:\src\clawpilot` toolchain against this worktree.
+  Codex review against #4377 found no discrete/actionable bug; its own direct
+  `pnpm exec tsc` timed out in the damaged dependency tree, while the hydrated
+  tsc command completed successfully. Live #4398 after create: open, head
+  `3ed8e575`, merge state `UNSTABLE` while checks queue.
+- Latest follow-up: Applied the updated Lorant-reviewer persona heuristics to
+  #4123 (`custom-tool.invoke`) before review. Found and fixed one high-confidence
+  pre-review issue: the node bridge sanitized custom-tool handler failures for
+  `custom-tool.invoke`, but the shared Desktop custom-tool executor
+  (`desktop.executeLocalTool({ kind: "custom-tool" })`) could still return raw
+  handler exception text in `LocalToolResult.error`. New #4123 head
+  `fee78f221` (`fix: sanitize custom-tool handler failures`) returns stable
+  public error `custom-tool execution failed` at the executor boundary and logs
+  only metadata (`tool=<name>`), with a focused test proving a raw
+  path/token-cache-like handler error is not returned. Validation passed focused
+  node Vitest (6 files / 891 tests), full `pnpm run typecheck`, focused
+  `oxlint`, focused `oxfmt --check`, `git diff --check`, pre-commit
+  oxlint/oxfmt, and final `codex review --uncommitted` with no discrete
+  correctness/security/maintainability issues. Pushed #4123 to upstream and
+  fork, then replayed downstream replacements on the new #4123 head:
+  #4389 `5e0102c26`, #4390 `ba96824e6`, #4391 `49dd16f2` draft,
+  #4392 `574e0550` draft, #4393 `7db48514` draft, #4394 `9d86224c`.
+  Posted PR comment:
+  `https://github.com/gim-home/m/pull/4123#issuecomment-4909974801`.
+- Latest follow-up: After #4088 merged into
+  `user/giodl/node-mode-capabilities-upstream-1-foundation` at merge commit
+  `8b80cd92b`, restacked the downstream node-mode stack. Initial scripted
+  attempt repeated the known failure mode (continued after a #4123 rebase
+  conflict and pushed partial head `5dc70127e`); immediately restored all
+  affected refs to their pre-restack heads, then restacked manually/guarded.
+  #4123 was rebased and retargeted to the merged #4088 base; resolved docs and
+  `node-commands-bridge.ts` conflicts by preserving `custom-tool.invoke` while
+  keeping #4088's narrowed command set (`browser.open` +
+  `file.openWithDefaultApp`, no `url.openExternal`). #4308 and #4309 were
+  rebased with docs/catalog conflicts resolved to preserve `node.help`,
+  `custom-tool.invoke`, `system.run` approval metadata, and the narrowed #4088
+  command vocabulary. #4311 had stale `url.openExternal` in
+  `execute-node-command-tool`; removed it and replayed #4312/#4313 on top. Old
+  auto-closed replacement PRs #4308-#4313 could not be reopened by GitHub, so
+  opened fresh replacements and linked from the old PRs:
+  #4389 replaces #4308, #4390 replaces #4309, #4391 replaces #4310,
+  #4392 replaces #4311, #4393 replaces #4312, and #4394 replaces #4313.
+  Current stack: #4123 `8a65836e0` -> #4389 `5a205cdb0` -> #4390
+  `818282574` -> #4391 `1d3ff8645` draft -> #4392 `3ce972eef` draft ->
+  #4393 `4df0faace` draft -> #4394 `40604943`. Validation passed focused node
+  Vitest (5 files / 98 tests), full `pnpm run typecheck`, focused `oxfmt
+  --check`, `git diff --check`, and no conflict markers or stale
+  `url.openExternal`/app/local-app references in common/gateway/docs surfaces.
+- Latest follow-up: Addressed Lorant's final #4088 re-request about the
+  trusted-host residual-risk backstop. New #4088 head `d76b0b448`
+  (`fix: show full URL approval details`) changes URL permission cards so long
+  URL details render full inline in a scrollable block instead of using the
+  generic 200-character collapsed preview. Added a renderer test with a long
+  trusted-origin `github.com/.../issues/new?...&body=` URL and suspicious tail,
+  asserting the full URL/tail is present inline before approval and no `Expand
+  details` gate is needed. Updated `docs/architecture/25-xpia-defense.md` to
+  state that URL cards render the full value inline because the origin gate does
+  not inspect path/query. Validation passed focused unit Vitest
+  (`PermissionCard.test.tsx`, 72 tests), full `pnpm run typecheck`, focused
+  `oxfmt --check`, `git diff --check`, pre-commit oxlint/oxfmt, and
+  `codex review --uncommitted` with no correctness issues. Posted PR response:
+  `https://github.com/gim-home/m/pull/4088#issuecomment-4908654380`. Live #4088
+  after push: open at `d76b0b448`, checks pending/`UNSTABLE`, review decision
+  back to `CHANGES_REQUESTED` until Lorant rereviews.
+- Latest follow-up: Captured real-app visual proof for #4088's final long-URL
+  approval-card thread after Gio shut down running Scout instances that were
+  holding the Electron single-instance lock. Temporary E2E harness
+  `e2e/gateway-node-browser-long-url.capture.test.ts` seeded a real Microsoft
+  Scout Electron app with a `browser.open` URL approval card containing a long
+  trusted-origin GitHub URL and suspicious query tail. Validation passed
+  `pnpm --dir C:\src\clawpilot-review-4088-edge run build:vite` and
+  `pnpm --dir C:\src\clawpilot-review-4088-edge test:e2e:file
+  e2e/gateway-node-browser-long-url.capture.test.ts --reporter=line` (1
+  passed). Artifact for drag/drop:
+  `C:\src\clawpilot-proof-images\node-mode-pr4088-browser-long-url\pr4088-browser-long-url-approval.png`;
+  summary JSON:
+  `C:\src\clawpilot-proof-images\node-mode-pr4088-browser-long-url\pr4088-browser-long-url-summary.json`.
+  Temporary harness was removed after capture. Posted PR comment:
+  `https://github.com/gim-home/m/pull/4088#issuecomment-4909138372`.
+- Latest follow-up: Continued the Scout Desktop CLI stack after #4320 by
+  replaying old fork PR #3 as new upstream PR `gim-home/m#4377` (`Add Scout CLI
+  status preflight`). Branch
+  `user/giodl/scout-cli-status-preflight-upstream`, head `df092470`, is stacked
+  on #4320 `user/giodl/scout-cli-envelope-fixtures-upstream`. Scope: typed local
+  companion status model, `scout status` text/JSON output, profile/workspace
+  propagation, and `--require-running` fail-fast behavior using the
+  runtime-unavailable envelope. No real companion server, desktop IPC dispatch,
+  UI behavior, or token surface. Validation passed from
+  `C:\src\clawpilot-cli-stack`: `node scripts\verify-scout-cli-manifest.mjs`,
+  `node --test scripts\verify-scout-cli-manifest.test.cjs`, focused Scout CLI
+  Vitest (2 files / 13 tests), Scout CLI `tsc --noEmit`, focused `oxfmt
+  --check`, and `git diff --check`. Because local `pnpm exec` attempted to
+  repair/install incomplete dependencies and failed on registry tarball/network
+  errors, the focused Vitest/typecheck/format runs used the hydrated
+  `C:\src\clawpilot` toolchain against this worktree. Codex review against #4320
+  raised one P2 asking for a real companion probe; rejected as intentionally
+  deferred for this staged preflight slice and documented in the PR body. Live
+  #4377 after create: open, head `df092470`, merge state `UNSTABLE` while checks
+  queue.
+- Latest follow-up: Corrected #4088 after Lorant clarified that prior head
+  `4c4ade629` fixed m-code-review/Codex bugs but did not address his requested
+  changes. New #4088 head `99bbfac26` (`refactor: address browser file-open
+  review`) actually addresses the checklist: removed `url.openExternal`, leaving
+  only `browser.open` plus `file.openWithDefaultApp`; extracted the trusted URL
+  origin gate to `electron/desktop-node-trusted-open-origin.ts`; added anchored
+  negative/positive URL-origin tests; added non-filesystem approval state-machine
+  deny/timeout/user-deny/allow/execution-error coverage; split post-approval
+  handler failures to audit source `execution-error`; removed dead app/local-app
+  residue and raw `showItemInFolder` wiring from the Desktop node executor;
+  projected explicit file-open approval args instead of copying caller args; and
+  derived advertised Desktop node capability names from
+  `DESKTOP_NODE_CAPABILITY_NAMES`. Updated docs 05/06/14 and XPia doc 25 for the
+  narrowed surface and path/query residual risk. Validation passed targeted node
+  Vitest (4 files / 51 tests), conformance + permission-policy Vitest (4 files /
+  1077 tests), full `pnpm run typecheck`, focused `oxfmt --check`,
+  `git diff --check`, pre-commit oxlint/oxfmt, and `codex review --uncommitted`
+  with no actionable findings. Posted PR response:
+  `https://github.com/gim-home/m/pull/4088#issuecomment-4906256780`. Live #4088
+  after push: open at `99bbfac26`, checks pending/`UNSTABLE`, review decision
+  still `CHANGES_REQUESTED` until Lorant rereviews.
+- Latest follow-up: Refreshed #4088 narrowed proof from isolated worktree
+  `C:\src\clawpilot-review-4088-edge` at live PR head `4c4ade629`
+  (`Node mode commands: browser and file open`). Captured a clean real-app
+  screenshot showing only `browser.open`, `url.openExternal`, and
+  `file.openWithDefaultApp`; the visible proof no longer shows `app.open` or
+  `local-app.open`. Artifact path:
+  `C:\src\clawpilot-proof-images\node-mode-pr4088-browser-file-open\pr4088-browser-file-open-real-app.png`;
+  summary JSON:
+  `C:\src\clawpilot-proof-images\node-mode-pr4088-browser-file-open\pr4088-browser-file-open-summary.json`.
+  The temporary capture harness
+  `e2e/gateway-node-browser-file-open.capture.test.ts` was deleted after the
+  successful run.
+- Latest follow-up: Removed generic `app.open` and `local-app.open` from the
+  #4088 node command stack after reviewer feedback that Desktop does not have a
+  first-class generic app-open capability today. #4088 commit `866f07382`
+  (`refactor: remove generic app node commands`) leaves only
+  `browser.open`, `url.openExternal`, and `file.openWithDefaultApp`. Validation
+  passed focused node Vitest (5 files / 86 tests) and typecheck on #4088. While
+  restacking downstream branches, an initial rebase script continued after a
+  conflict and temporarily pushed a partial head (`e869ac23a`) to downstream
+  refs, which auto-closed #4087/#4090/#4137/#4193/#4194/#4200. Repaired the
+  stack from saved local heads with `rebase --onto`, resolved docs conflicts to
+  preserve `custom-tool.invoke`, `system.run`, and `node.help` wording while
+  excluding app/local-app, and pushed repaired refs: replacement #4308
+  (`Node mode: system.run governance upgrade`) at `5906c2f21`, #4309
+  (`Node mode commands: catalog and result-trust hardening`) at `f4c70b535`,
+  #4310 (`Node mode commands: route Desktop harness through node runtime`) at
+  `195b3fb09` draft, #4311 (`Node mode commands: route Desktop command
+  harness`) at `9b57729b2` draft, #4312 (`Node mode commands: route Desktop
+  custom-tool harness`) at `ed308e770` draft, and #4313 (`Node mode: catalog
+  remaining Desktop harness gaps`) at `8c29c3a24`. Added replacement comments
+  on old closed PRs #4087/#4090/#4137/#4193/#4194/#4200. Final top-of-stack
+  validation passed focused node Vitest (9 files / 121 tests), `pnpm run
+  typecheck`, focused `oxfmt --check`, `git diff --check`, and no remaining
+  `app.open`/`local-app.open` references in TypeScript/Markdown.
+- Latest follow-up: Updated #4088 PR title/body to match the narrowed scope.
+  New title is `Node mode commands: browser and file open`. Body now lists only
+  `browser.open`, `url.openExternal`, and `file.openWithDefaultApp`, explicitly
+  calls `app.open` / `local-app.open` out of scope because Desktop does not have
+  a generic app-launch capability today, and updates approval/safety/validation
+  text to current head `866f07382`.
+- Latest follow-up: Opened standalone CLI architecture PR `gim-home/m#4299`
+  (`docs: propose Scout Desktop CLI architecture`) from isolated worktree
+  `C:\src\clawpilot-cli-architecture`, branch
+  `user/giodl/scout-desktop-cli-architecture`, commit `12468ca5d`. The PR adds
+  only `docs/architecture/39-scout-desktop-cli.md` (502 lines) based on the
+  ClawPilot notebook proposal `projects/clawpilot/scout-desktop-cli-proposal.md`.
+  It is intentionally separate from #3854 and covers the first-class `scout`
+  CLI rationale, IPC alignment, command families, JSON/stream output contracts,
+  phased rollout, and product/architecture open questions. Validation passed
+  `pnpm exec oxfmt --check docs/architecture/39-scout-desktop-cli.md` (run from
+  the hydrated `C:\src\clawpilot-3953-rebuild` toolchain against the new
+  worktree file) and `git diff --check`. Live #4299 after create: open/non-draft,
+  merge state `BLOCKED` while initial GitHub/ADO analysis checks are pending.
+- Latest follow-up: Refreshed the Scout Desktop CLI PR stack. Fixed #4299 PR
+  body to satisfy the default PR template (`Refs #3786`, pre-publish checkbox
+  checked); #4299 checks now pass/skip and merge state remains `BLOCKED` only
+  due to stale/overall GitHub aggregation. Rebased #3786
+  `user/giodl/scout-cli-manifest` from old `6e6473ac7` onto current `main` at
+  `4b3fe0f1a`; resolved `package.json` script conflict by keeping
+  `version:derive` and `verify:scout-cli-manifest`. Updated
+  `scripts/verify-scout-cli-manifest.mjs` to avoid the old TypeScript compiler
+  API import, which current TypeScript 7 native package no longer exports, and
+  switched stale manifest channels to current names (`app:getVersion`,
+  `copilotAuth:checkAuth`, `chat:send`, `chat:abort`; system info remains a
+  `service:` placeholder). Pushed #3786 to both upstream/fork head as needed;
+  #3786 now points at `4b3fe0f1a` with quick PR-agent checks passing and long
+  CI/ADO still pending. Restacked #3828 `user/giodl/scout-cli-entrypoint` onto
+  updated #3786 at `1fd3ab763`; #3828 is open/draft/`CLEAN` with PR-agent checks
+  passing/skipping. Local validation in `C:\src\clawpilot-cli-stack` passed:
+  `node scripts/verify-scout-cli-manifest.mjs`,
+  `node --test scripts/verify-scout-cli-manifest.test.cjs`, `oxfmt --check`, and
+  `git diff --check`. Full dependency install/test via `pnpm exec vitest` hit
+  repeated network tarball timeouts, but the Node manifest tests completed
+  successfully once dependencies were sufficiently present.
+- Latest follow-up: Continued the Scout Desktop CLI implementation series from
+  the architecture doc by replaying old fork PR #2 as a new upstream PR
+  `gim-home/m#4320` (`Add Scout CLI envelope fixtures`). Branch
+  `user/giodl/scout-cli-envelope-fixtures-upstream`, head `3101edf4`, is stacked
+  on #3828 `user/giodl/scout-cli-entrypoint`. Scope: deterministic result
+  envelope fixtures for success, validation error, runtime unavailable, policy
+  denial, and permission-required shapes; shared `serializeResult()` helper;
+  fixture comparison tests. Validation passed `node
+  scripts/verify-scout-cli-manifest.mjs`, `node --test
+  scripts/verify-scout-cli-manifest.test.cjs`, `oxfmt --check`, and
+  `git diff --check`. `pnpm exec vitest run --project tools ...` could not
+  complete locally because `pnpm exec` repeatedly attempted to finish dependency
+  install and timed out on package tarball fetches; noted this in the PR body.
+  Live #4320 after create: open/non-draft/`UNSTABLE` while initial checks queue.
+- Latest follow-up: Ran Codex review on #4320 against #3828 base
+  `origin/user/giodl/scout-cli-entrypoint`. Codex found no actionable
+  correctness issues, noting the diff only adds result-envelope serialization
+  fixtures and routes JSON output through `serializeResult()`. Local validation
+  passed `node scripts/verify-scout-cli-manifest.mjs` and `node --test
+  scripts/verify-scout-cli-manifest.test.cjs`; Codex attempted TypeScript
+  tooling but the worktree still lacked complete `node_modules/.bin` because
+  `pnpm exec` triggers dependency install and tarball fetch timeouts. Live #4320
+  PR-agent checks now pass/skip as expected.
+- Latest follow-up: Saved current parked follow-up branch inventory. Command
+  parity follow-ups are based on #4200 head `517de4567`:
+  `user/giodl/node-mode-followup-lifecycle`,
+  `user/giodl/node-mode-followup-browser-special-actions`,
+  `user/giodl/node-mode-followup-workspace-write`,
+  `user/giodl/node-mode-followup-approval-only-surfaces`, and
+  `user/giodl/node-mode-followup-local-app-workspace-edges`. Provider-readiness
+  follow-ups are based on #4199 head `114732015`:
+  `user/giodl/provider-routing-followup-lifecycle-routed-switchover`,
+  `user/giodl/provider-routing-followup-live-readiness-source`,
+  `user/giodl/provider-routing-followup-production-audit-writes`,
+  `user/giodl/provider-routing-followup-fallback-degraded-ui`, and
+  `user/giodl/provider-routing-followup-provider-default-proof`. Codex review
+  was run on all ten parked branches; all were still empty diffs at their base
+  heads and had no findings. No PRs are open for these parked branches yet.
+- Latest follow-up: Created and pushed five provider-readiness next-wave fork
+  branches from #4199 head `114732015`, without opening PRs:
+  `user/giodl/provider-routing-followup-lifecycle-routed-switchover`,
+  `user/giodl/provider-routing-followup-live-readiness-source`,
+  `user/giodl/provider-routing-followup-production-audit-writes`,
+  `user/giodl/provider-routing-followup-fallback-degraded-ui`, and
+  `user/giodl/provider-routing-followup-provider-default-proof`. These are
+  placeholders for the post-command-parity wave: lifecycle-routed provider
+  switchover, live provider readiness sources, durable route/harness audit
+  writes, fallback/degraded UI, and real provider-default proof.
+- Latest follow-up: Ran Codex review on all five provider-readiness next-wave
+  branches against #4199 base
+  `origin/user/giodl/local-openclaw-provider-candidate-minimal`: lifecycle-
+  routed-switchover, live-readiness-source, production-audit-writes,
+  fallback-degraded-ui, and provider-default-proof. All five branches are still
+  at #4199 head `114732015`, so each review saw an empty diff and reported no
+  findings. No tests were rerun because there are no branch-specific changes
+  yet.
+- Latest follow-up: Updated #4088
+  (`Node mode commands: browser and local app`) with small in-scope
+  browser/local-app edge coverage from fresh worktree
+  `C:\src\clawpilot-review-4088-edge`. Commit `84d12475c`
+  (`test: cover browser app node edge cases`) adds tests for IPv6 localhost
+  browser origin fidelity, workspace folder reveal via `local-app.open`
+  `file-manager`, and rejecting `default-file-app` directory opens before the
+  OS open seam. No browser MCP special actions, workspace create/save behavior,
+  or execution changes were added. Validation passed focused node Vitest
+  (`electron/desktop-node-local-app-handler.test.ts`,
+  `electron/desktop-node-browser-handler.test.ts`,
+  `electron/desktop-node-command-composition.test.ts`; 34 tests),
+  `pnpm run typecheck`, focused type-aware `oxlint`, focused `oxfmt --check`,
+  `git diff --check`, and pre-commit lint-staged. Pushed to
+  `gim-home/m:user/giodl/node-mode-capabilities-upstream-3-browser-clipboard-local-app`;
+  live #4088 is open/non-draft/`CLEAN` at `84d12475c` with checks passing or
+  skipping as expected. Downstream #4123 recalculated back to `CLEAN`.
+- Latest follow-up: Restacked the downstream node-mode PR series after #4088
+  moved to `84d12475c`. Used clean worktree
+  `C:\src\clawpilot-review-4194-harness-custom-tools` and temporary restack
+  branches to rebase/push in order: #4123 -> `0cb86351d`, #4087 ->
+  `e58c05a7e`, #4090 -> `76bc40e92`, #4137 -> `177cd640d`, #4193 ->
+  `6b3276503`, #4194 -> `ffd4b8547`, #4200 -> `517de4567`. #4123 is a fork
+  PR (`giodl_microsoft/m`), so after first updating the upstream mirror branch
+  we also pushed `0cb86351d` to the actual fork head
+  `giodl_microsoft:m:user/giodl/node-mode-builtins-self-tools`. Repointed the
+  five unopened follow-up branches (lifecycle, browser-special-actions,
+  workspace-write, approval-only-surfaces, local-app-workspace-edges) to the
+  new #4200 head `517de4567`. Validation on the corrected restacked top passed
+  focused node Vitest (5 files / 42 tests, including the new #4088 edge tests),
+  `pnpm run typecheck`, focused `oxfmt --check`, and `git diff --check`. Final
+  live state: #4088, #4123, #4087, #4090, #4137, #4193, #4194, and #4200 are
+  all open with merge state `CLEAN`; #4137/#4193/#4194 remain draft, the others
+  are non-draft.
+- Latest follow-up: Created and pushed five fork branches from #4200 head
+  `3d06df2eb` for weekend node-mode follow-up strategy, without opening PRs:
+  `user/giodl/node-mode-followup-lifecycle`,
+  `user/giodl/node-mode-followup-browser-special-actions`,
+  `user/giodl/node-mode-followup-workspace-write`,
+  `user/giodl/node-mode-followup-approval-only-surfaces`, and
+  `user/giodl/node-mode-followup-local-app-workspace-edges`. Initial push hit
+  the recurring GitHub account mismatch, then succeeded after switching
+  github.com auth back to `giodl_microsoft` and running `gh auth setup-git`.
+- Latest follow-up: Ran Codex review on each of the five follow-up fork
+  branches against #4200 base `origin/user/giodl/node-mode-remaining-desktop-
+  harness-gaps`: lifecycle, browser-special-actions, workspace-write,
+  approval-only-surfaces, and local-app-workspace-edges. All five branches were
+  still at the same head as #4200 (`3d06df2eb`), so each review found an empty
+  diff and no findings. No tests were rerun because there were no branch-specific
+  changes to validate.
+- Latest follow-up: Opened node-mode follow-up PR
+  `gim-home/m#4200` (`Node mode: catalog remaining Desktop harness gaps`) from
+  `user/giodl/node-mode-remaining-desktop-harness-gaps` onto #4194
+  `user/giodl/node-mode-harness-custom-tools`. Commit `3d06df2eb`
+  (`feat: catalog remaining desktop harness gaps`) adds
+  `common/desktop-node-harness-gap-catalog.ts`, tests, and architecture doc
+  `docs/architecture/38-node-mode-remaining-harness-gaps.md`. It catalogs
+  remaining non-M365/non-token gaps only: workspace write/create-file shell
+  flows, browser MCP special actions, approval-only settings/memory/hook/
+  extension surfaces, non-MCP cancellation/timeout/activity cleanup, and local
+  app/workspace open/reveal edge cases. It explicitly excludes M365 mutating
+  actions, token broker surfaces, new executable commands, provider-routing
+  changes, and new harness dispatch. Validation passed focused node Vitest
+  (desktop harness gap catalog + command catalog), `pnpm run typecheck`,
+  focused type-aware `oxlint`, focused `oxfmt --check`, `git diff --check`,
+  and pre-commit lint-staged. Live #4200 after create: open/non-draft/`CLEAN`,
+  checks queued at debounce.
+- Latest follow-up: Ran Codex review on #4200 against base
+  `origin/user/giodl/node-mode-harness-custom-tools`. Review found no
+  actionable correctness issues; it noted the change only adds catalog, tests,
+  and matching architecture documentation without affecting existing behavior.
+  Focused test `common/desktop-node-harness-gap-catalog.test.ts` passed (Codex
+  first tried invalid Vitest `--runInBand`, then reran successfully without it),
+  and full `pnpm typecheck` passed. Live #4200 is open/non-draft/`CLEAN` with
+  PR-agent checks passing, GitOps/AdvancedSecurity passing, and ClawPilot Buddy
+  neutral/skipping.
+- Latest follow-up: Rebuilt the old #3954 Local OpenClaw runtime direction on
+  the new #4197/#4198 provider-routing model. Opened stacked PR
+  `gim-home/m#4199`
+  (`Local OpenClaw: provider candidate on routing contract`) from
+  `user/giodl/local-openclaw-provider-candidate-minimal` onto #4198. Commit
+  `114732015` (`feat: model local openclaw provider candidate`) adds a narrow
+  Local OpenClaw readiness descriptor, conversion to `local-openclaw` provider
+  candidate, route-selection tests for eligible Local OpenClaw, explicit
+  Desktop-baseline fallback tests for blocked Local OpenClaw, and architecture
+  doc `docs/architecture/37-local-openclaw-provider-candidate.md`. It does not
+  launch/package a sidecar, route chat to Local OpenClaw, execute Desktop
+  capabilities, broker tokens, or prove live Lobster package/runtime behavior.
+  Validation passed focused node Vitest for Local OpenClaw/provider/schema/
+  session routing (10 selected tests), `pnpm run typecheck`, focused type-aware
+  `oxlint`, focused `oxfmt --check`, `git diff --check`, and pre-commit
+  lint-staged. Captured real-app proof from a temporary E2E harness: Microsoft
+  Scout Electron launched in mock mode, loaded a persisted
+  `runtimeBinding.providerKind = "local-openclaw"` session, and completed chat
+  send/assistant response while Local OpenClaw remained provider metadata only.
+  Artifacts are under
+  `C:\src\clawpilot-proof-images\local-openclaw-provider-4199\`:
+  `01-local-openclaw-bound-session-running.png`,
+  `02-local-openclaw-bound-session-chat-complete.png`, and
+  `local-openclaw-provider-proof-summary.json`. Temporary harness
+  `e2e/local-openclaw-provider-proof.capture.test.ts` was removed afterward.
+  Posted proof placeholder comment
+  `https://github.com/gim-home/m/pull/4199#issuecomment-4884037801`. Closed old
+  broad #3954 with a comment pointing to #4199 as the narrower replacement.
+  Live #4199 after create/proof: open/non-draft, base #4198, checks pending
+  after debounce/cache/GitOps pass and ClawPilot Buddy skip.
+- Latest follow-up: Ran ClawPilot repo `m-code-review`-style review on both
+  provider PRs using fresh caches. #4197 head
+  `470c4320c02f91a64894f167ef4f26877ac1b930` had no high-confidence findings;
+  posted clean review comment
+  `https://github.com/gim-home/m/pull/4197#issuecomment-4883966244`.
+  #4198 head `ffc5e2162d899af9d4a5b73619db7262e4ae0e38` had no new
+  high-confidence findings after the Codex lifecycle fix; posted clean review
+  comment `https://github.com/gim-home/m/pull/4198#issuecomment-4883966295`.
+  Captured real-app proof from temporary E2E harness on PR2 after
+  `pnpm run build:vite`: a Microsoft Scout Electron app launched in mock mode,
+  loaded a persisted provider-bound session (`providerId:
+  cloud:lorant-brain`, `providerKind: hosted-cloud`), and completed chat
+  send/assistant response while sends remained on the subscribed Desktop
+  backend. Artifacts are under
+  `C:\src\clawpilot-proof-images\provider-routing-4197-4198\`:
+  `01-provider-bound-session-running.png`,
+  `02-provider-bound-session-chat-complete.png`, and
+  `provider-routing-proof-summary.json`. Temporary harness
+  `e2e/provider-routing-proof.capture.test.ts` was removed afterward. Posted
+  proof placeholder comments for Gio drag/drop:
+  `https://github.com/gim-home/m/pull/4197#issuecomment-4883972052` and
+  `https://github.com/gim-home/m/pull/4198#issuecomment-4883972106`.
+  #4197 checks are passing/skipping and `CLEAN`; #4198 PR-agent rerun succeeded
+  after a transient instant `complexity-tag` failure with no failed log output,
+  and visible #4198 checks now pass/skip as expected.
+- Latest follow-up: Ran Codex review on both provider PRs. For #4198, first
+  review against #4197 found one accepted P1: alternate send backend selection
+  without also routing create/resume/subscribe lifecycle would strand assistant
+  events. Fixed in commit `ec094b33b` then rebased onto updated #4197 as
+  `ffc5e2162` (`fix: keep sends on subscribed backend`); #4198 now persists
+  route binding and emits decisions but keeps `sendMessage` on the subscribed
+  backend until a later lifecycle-routing PR. Updated #4198 body accordingly.
+  Final Codex review reported no actionable correctness issues; focused tests
+  passed (`runtimeBinding|subscribed backend`) and Codex also ran
+  `pnpm test electron/sessions.test.ts` successfully after an invalid
+  `--runInBand` attempt. For #4197, Codex found one accepted P2: malformed or
+  future `runtimeBinding` values should degrade to `undefined` instead of
+  dropping the whole session. Fixed in `470c4320c`
+  (`fix: tolerate invalid runtime bindings`) on #4197 and rebased #4198 on top.
+  Final #4197 Codex review reported no actionable correctness issues; focused
+  provider/schema tests, typecheck, lint, format, and diff checks passed.
+- Latest follow-up: Marked `gim-home/m#4087`
+  (`Node mode: system.run governance upgrade`) and `gim-home/m#4090`
+  (`Node mode commands: catalog and result-trust hardening`) ready for review
+  after confirming both were open drafts, merge state `CLEAN`, and current
+  checks passing/skipping as expected. Both are now open/non-draft/`CLEAN`.
+- Latest follow-up: Opened stacked PR
+  `gim-home/m#4198` (`Provider routing: controlled switchover hooks`) from
+  `user/giodl/cloud-brain-provider-switchover-pr2` onto #4197
+  `user/giodl/cloud-brain-provider-contract-minimal`. Commit `f9f209353`
+  (`feat: wire session provider routing hooks`) adds optional `SessionManager`
+  runtime-routing deps that can resolve provider candidates for new sessions,
+  persist `runtimeBinding` from a real route decision, emit the
+  `runtime.route.decision` descriptor, and select the send backend from the
+  persisted binding. Default behavior is unchanged when the dependency is not
+  wired; no default flip, live Gateway readiness source, production audit-log
+  write, fallback UI, or Local OpenClaw rebasing is included. Validation passed
+  focused node Vitest for provider contract/schema/session routing (filtered
+  `runtimeBinding|runtime-bound send backend`), `pnpm run typecheck`, focused
+  type-aware `oxlint`, focused `oxfmt --check`, `git diff --check`, and
+  pre-commit lint-staged. Live #4198 after create: open/non-draft,
+  base #4197, merge state `UNSTABLE` while PR-agent checks were still queued
+  after debounce passed; ClawPilot Buddy neutral/skipping.
+- Latest follow-up: Opened replacement PR
+  `gim-home/m#4197` (`Provider routing: minimal cloud-brain contract`) from
+  `user/giodl/cloud-brain-provider-contract-minimal` into
+  `user/giodl/scout-cloud-brain-architecture`; live state immediately after
+  create was open/non-draft/`CLEAN`. Closed old broad grouped proof PR
+  `gim-home/m#3953` with a comment pointing reviewers to #4197 as the narrower
+  replacement for the cloud-brain/provider-routing contract.
+- Latest follow-up: Rebuilt #3953 as a minimal candidate branch in isolated
+  worktree `C:\src\clawpilot-3953-rebuild`, based on
+  `origin/user/giodl/scout-cloud-brain-architecture`. Pushed
+  `gim-home/m:user/giodl/cloud-brain-provider-contract-minimal` with three
+  commits: `03484be4f` (`feat: add minimal provider routing contract`) and
+  `c16877618` (`docs: narrow cloud brain provider pitch`), `dba6cca4a`
+  (`feat: persist session runtime binding contract`), and `107f69260`
+  (`feat: expose provider route decision descriptors`), plus `a99e47d58`
+  (`test: prove provider routing contract flow`). The branch is only
+  6 files / 852 insertions versus the live #3953 branch's 49 files / ~9k
+  insertions, and reframes #3953 as cloud-brain ingress + provider identity /
+  route reason + explicit Desktop-baseline fallback + shared Desktop node
+  harness boundary + auditable provider/capability/executor path. The latest
+  commits add `runtimeBinding?: SessionRuntimeBinding` to `SessionMetadata`,
+  schema persistence/round-trip coverage, bind/read/clear helpers, canonical
+  Desktop baseline candidate helper, provider readiness DTO-to-candidate
+  conversion, observable `runtime.route.decision` event shape, Desktop harness
+  route descriptor, end-to-end contract proof tests for eligible cloud routing
+  and blocked-cloud Desktop fallback, and PR2 switchover checklist doc sections
+  without changing live `sendMessage` dispatch. It has not force-updated live
+  #3953 yet.
+  Validation passed focused node Vitest
+  `common/provider-routing-contract.test.ts`
+  `electron/schemas/session-schema.test.ts` (49 tests), `pnpm run typecheck`,
+  type-aware `oxlint`, `oxfmt --check`, `git diff --check`, and pre-commit
+  lint-staged on all commits.
+- Latest follow-up: Streamlined
+  `projects/clawpilot/provider-routing-flexibility-pitch.md` to position #3953
+  as a minimal cloud-brain enablement contract aligned with the active node-mode
+  harness PR chain (#4086/#4087/#4088/#4123/#4090/#4137/#4193/#4194). Added a
+  narrowed five-point contract (provider identity, route reason, shared Desktop
+  harness boundary, explicit fallback, audit clarity) plus an explicit "why this
+  still fits after #4086-#4194" section to keep #3953 framed as provider routing
+  and not a competing execution-path rewrite.
+- Latest follow-up: Ran the local ClawPilot `skills/m-code-review` workflow
+  against the current pushed heads for the final Desktop harness PRs and posted
+  consolidated review comments on each PR. #4137 head `1cbeefa` received one
+  actionable finding: MCP `desktop.executeLocalTool` approval drops the
+  originating request `sessionId` and falls back to the active session; fix is
+  to pass `request.sessionId` through the MCP approval context while preserving
+  active-session fallback for raw node invocations. Comment:
+  `https://github.com/gim-home/m/pull/4137#issuecomment-4880067843`.
+  #4193 head `35fe4b7` had no high-confidence findings; comment:
+  `https://github.com/gim-home/m/pull/4193#issuecomment-4880067842`.
+  #4194 head `1a680a7` had no high-confidence findings; comment:
+  `https://github.com/gim-home/m/pull/4194#issuecomment-4880067846`.
+- Latest follow-up: Fixed the #4137 `m-code-review` finding in isolated
+  worktree `C:\src\clawpilot-review-4137-node-help`. Commit `fa0bb109d`
+  (`fix: preserve desktop MCP approval session`) widens MCP approval context to
+  carry the originating `request.sessionId`, passes it from
+  `executeMcpTool`, and updates the provider regression to assert
+  `desktop.executeLocalTool({kind:"mcp"})` uses `session-1` instead of falling
+  back to `active-session`. Pushed to
+  `gim-home/m:user/giodl/node-mode-capabilities-upstream-6-mcp-harness-parity`.
+  Disposition comment:
+  `https://github.com/gim-home/m/pull/4137#issuecomment-4880203880`.
+  Validation passed focused 2-file MCP/provider suite (138 tests), broader
+  focused #4137 suite (6 files / 216 tests), `pnpm run typecheck`, focused
+  `oxfmt --check`, focused type-aware `oxlint`, `git diff --check`, and
+  pre-commit lint-staged. Worktree clean; #4137 is draft/open at
+  `fa0bb109d` with fresh checks queued (`UNSTABLE`).
+- Latest follow-up: Restacked the downstream Desktop harness PRs after #4137
+  moved to `fa0bb109d`. #4193 (`Node mode commands: route Desktop command
+  harness`) was rebased cleanly in
+  `C:\src\clawpilot-review-4138-harness-browser-shell` onto #4137 and pushed
+  to `gim-home/m:user/giodl/node-mode-harness-browser-shell` at `b5e88800b`.
+  Validation passed focused node Vitest (5 files / 211 tests), `pnpm run
+  typecheck`, focused `oxfmt --check`, focused type-aware `oxlint`, and
+  `git diff --check`; live GitHub state after push was draft/open,
+  `MERGEABLE`, `CLEAN`, with all checks passing/skipping as expected. #4194
+  (`Node mode commands: route Desktop custom-tool harness`) was then rebased
+  cleanly in `C:\src\clawpilot-review-4194-harness-custom-tools` onto #4193
+  and pushed to `gim-home/m:user/giodl/node-mode-harness-custom-tools` at
+  `41cd3afde`. Validation passed focused node Vitest (5 files / 210 tests),
+  `pnpm run typecheck`, focused `oxfmt --check`, focused type-aware `oxlint`,
+  and `git diff --check`; live GitHub state after push was draft/open,
+  `MERGEABLE`, `CLEAN`, base `b5e88800b`, with all checks passing/skipping as
+  expected. Both implementation worktrees are clean.
+- Latest follow-up: Restacked `gim-home/m#4137`
+  `https://github.com/gim-home/m/pull/4137` onto the current #4090
+  `node.help` head `fd66ae716` from isolated worktree
+  `C:\src\clawpilot-review-4137-node-help`. Replayed only the intended three
+  Desktop-harness commits and force-updated
+  `user/giodl/node-mode-capabilities-upstream-6-mcp-harness-parity` to
+  `f7d89b109`; PR is draft/open/mergeable. Validation passed focused Vitest 7
+  files / 244 tests, `pnpm run typecheck`, focused `oxfmt --check`, focused
+  type-aware `oxlint --deny-warnings --type-check`, and `git diff --check`.
+  Opened two new stacked draft PRs for the remaining Desktop harness
+  alignment: `gim-home/m#4193`
+  `https://github.com/gim-home/m/pull/4193`
+  (`user/giodl/node-mode-harness-browser-shell`, head `aea729bb7`) routes
+  shell through the node `system.run` executor plus browser/url/local-app exact
+  command names through the Desktop node command executor; validation passed 4
+  files / 154 tests, typecheck, focused format/lint, diff-check. `gim-home/m#4194`
+  `https://github.com/gim-home/m/pull/4194`
+  (`user/giodl/node-mode-harness-custom-tools`, head `03f9b7ae`) routes
+  generic custom-tool harness calls through the same node custom-tool executor
+  used by raw `custom-tool.invoke`; validation passed 5 files / 162 tests,
+  typecheck, focused format/lint, diff-check. All three local worktrees were
+  clean after push.
+- Latest follow-up: Recaptured #4090 real-app proof after the current head
+  moved from the older `desktop.capabilities` proof path to `node.help`.
+  Isolated worktree `C:\src\clawpilot-review-4090` was rebuilt with a
+  temporary capture harness, ran a Microsoft Scout Electron app in Gateway node
+  mode at head `fd66ae716d2664b635db8d4c12fdabcdc4228d1b`, injected raw
+  `node.invoke.request` for `node.help`, and asserted the live returned catalog
+  contained direct commands (`filesystem.read`, `browser.open`,
+  `file.openWithDefaultApp`), direct command `resultTrust` metadata
+  (`producer: "desktop-node"`, `trustLevel: "untrusted-local-output"`,
+  `modelContextPolicy: "wrap-before-model-context"`), and WorkIQ custom-tool
+  metadata (`toolName: "workiq_list_emails"`, `allowKey:
+  "tool:workiq_list_emails"`, `groupKey: "tool:workiq_email"`). Artifacts are
+  under `C:\src\clawpilot-proof-images\node-mode-pr4090-node-help\`:
+  `pr4090-node-help-real-app.gif`, `pr4090-node-help-contact-sheet.png`,
+  `gateway-node-4090-node-help-results.jsonl`, debug log, and raw frame PNGs.
+  Validation passed temporary-harness type-aware `oxlint`, `pnpm run
+  build:vite` (existing CSS/chunk-size warnings only),
+  `pnpm test:e2e:file e2e/gateway-node-help.capture.test.ts --reporter=line`
+  (1 passed), then the temporary harness was removed and worktree returned
+  clean. Clean-source validation passed focused #4090 Vitest (3 files / 80
+  tests), `pnpm run typecheck`, and `git diff --check`. Posted PR placeholder
+  comment for Gio drag/drop:
+  `https://github.com/gim-home/m/pull/4090#issuecomment-4879238875`.
+- Latest follow-up: Captured #4090 real-app proof images in isolated worktree
+  `C:\src\clawpilot-review-4090` at PR head
+  `ce6527f9b614d21cfadec7c7ff0cf6802962d300`, with the worktree returned
+  clean afterward. Temporary E2E/mock harness delivered raw gateway
+  `node.invoke.request` into a running Microsoft Scout Electron app in Gateway
+  node mode. Proof used raw command `desktop.capabilities`, showed the live
+  Gateway Node activity list, asserted the returned Desktop command catalog
+  contained direct commands (`filesystem.read`, `browser.open`,
+  `file.openWithDefaultApp`), asserted direct command `resultTrust` metadata
+  (`producer: "desktop-node"`, `trustLevel: "untrusted-local-output"`,
+  `modelContextPolicy: "wrap-before-model-context"`), and asserted WorkIQ
+  custom-tool metadata (`toolName: "workiq_list_emails"`,
+  `allowKey: "tool:workiq_list_emails"`, `groupKey: "tool:workiq_email"`).
+  Validation passed focused type-aware `oxlint` over the temporary proof files,
+  `pnpm run build:vite` (existing CSS/chunk-size warnings only), and
+  `pnpm test:e2e:file e2e/gateway-node-desktop-capabilities.capture.test.ts
+  --reporter=line` (1 passed). Artifacts are under
+  `C:\src\clawpilot-proof-images\node-mode-pr4090-desktop-capabilities\`:
+  `pr4090-desktop-capabilities-real-app.gif`,
+  `pr4090-desktop-capabilities-contact-sheet.png`,
+  `gateway-node-4090-results.jsonl`, and raw frame PNGs. Posted PR placeholder
+  comment for Gio drag/drop:
+  `https://github.com/gim-home/m/pull/4090#issuecomment-4878645544`.
+- Latest follow-up: Captured #4087 real-app proof images in isolated worktree
+  `C:\src\clawpilot-review-4087` at PR head
+  `401af0da3b664a48bf3edbeb858aa999074b09b5`, with the worktree returned
+  clean afterward. Temporary E2E/mock harness delivered gateway
+  `exec.approval.requested` events into a running Microsoft Scout Electron app,
+  matching the OpenClaw chat `exec host=node` approval interposition for
+  `system.run`. Proof used command
+  `echo PR4087 system run proof > pr4087-system-run-proof.txt`, showed the
+  existing `shell` permission card, asserted Allow ->
+  `exec.approval.resolve` decision `allow-once`, and asserted Deny ->
+  `exec.approval.resolve` decision `deny`. Validation passed focused
+  type-aware `oxlint` over the temporary proof files, `pnpm run build:vite`
+  (existing CSS/chunk-size warnings only), and
+  `pnpm test:e2e:file e2e/gateway-node-system-run.capture.test.ts
+  --reporter=line` (2 passed). Artifacts are under
+  `C:\src\clawpilot-proof-images\node-mode-pr4087-system-run\`:
+  `pr4087-system-run-real-app.gif`,
+  `pr4087-system-run-contact-sheet.png`, and raw frame PNGs. Posted PR
+  placeholder comment for Gio drag/drop:
+  `https://github.com/gim-home/m/pull/4087#issuecomment-4878507270`.
+- Latest follow-up: Captured #4123 real-app proof images in isolated worktree
+  `C:\src\clawpilot-review-builtins-self-tools` at PR head
+  `e362e32210e1cb20abeb6bf35e9f35754ff5ec6d`, with the worktree returned
+  clean afterward. Temporary E2E/mock harness injected raw gateway
+  `node.invoke.request` frames into a running Microsoft Scout Electron app,
+  using one real app launch each for the allow and deny paths. Proof used raw
+  `custom-tool.invoke` with `toolName: "m_update_settings"` and an idempotent
+  `toolArgs: { theme: "system" }` payload so the existing `custom-tool`
+  approval card rendered without external M365/WorkIQ dependencies. The run
+  asserted Allow -> `node.invoke.result ok:true` and Deny ->
+  `node.invoke.result ok:false`. Validation passed focused type-aware
+  `oxlint` over the temporary proof files, `pnpm run build:vite`, and
+  `pnpm test:e2e:file e2e/gateway-node-custom-tool.capture.test.ts
+  --reporter=line` (2 passed). Artifacts are under
+  `C:\src\clawpilot-proof-images\node-mode-pr4123-custom-tool\`:
+  `pr4123-custom-tool-real-app.gif`,
+  `pr4123-custom-tool-contact-sheet.png`, and raw frame PNGs. Posted PR
+  placeholder comment for Gio drag/drop:
+  `https://github.com/gim-home/m/pull/4123#issuecomment-4878251671`.
+- Latest follow-up: Captured #4088 real-app proof images in isolated worktree
+  `C:\src\clawpilot-review-4088` at PR head
+  `63c7e05ac8638b661f732a2f3c2f787c281dc6e4` with the worktree returned
+  clean afterward. Temporary E2E/mock harness injected raw gateway
+  `node.invoke.request` frames into a running Microsoft Scout Electron app,
+  using one real app launch each for `browser.open`, `file.openWithDefaultApp`,
+  and `local-app.open` to avoid synthetic multi-prompt contention. Proof
+  asserted `browser.open` Allow -> `node.invoke.result ok:true`,
+  `file.openWithDefaultApp` Deny -> `ok:false`, and `local-app.open`
+  `file-manager` Allow -> `ok:true`; external OS open/reveal side effects were
+  suppressed only for capture. Validation passed `pnpm run build:vite` and
+  `pnpm test:e2e:file e2e/gateway-node-browser-local-app.capture.test.ts
+  --reporter=line` (3 passed). Artifacts are under
+  `C:\src\clawpilot-proof-images\node-mode-pr4088-browser-local-app\`:
+  `pr4088-browser-local-app-real-app.gif`,
+  `pr4088-browser-local-app-contact-sheet.png`, and raw frame PNGs. Posted PR
+  placeholder comment for Gio drag/drop:
+  `https://github.com/gim-home/m/pull/4088#issuecomment-4878196914`.
+- Latest follow-up: Restacked #4090 (`Node mode commands: catalog and
+  result-trust hardening`) after #4087 moved to `401af0da3`. Replayed the
+  single catalog commit and force-with-lease pushed
+  `gim-home/m:user/giodl/node-mode-capabilities-upstream-5-trust-hardening`
+  to `7e274c164`, then amended/pushed final head `ce6527f9b` with explicit
+  proof that `desktop.capabilities` reads the command/custom-tool catalog
+  without invoking a Desktop command handler. Conflict resolution preserved
+  #4087's `system.run` approval metadata/preview hardening and added #4090's
+  `desktop.capabilities` catalog command, direct-command catalog metadata,
+  custom-tool `allowKey`/`groupKey` metadata, direct-command preflight, and
+  `resultTrust` output metadata.
+  Validation passed: focused Vitest 4 files / 209 tests, `pnpm run typecheck`,
+  focused `oxfmt --check`, focused type-aware
+  `oxlint --deny-warnings --type-check`, and `git diff --check`. PR #4090 body
+  now has the updated validation count, calls this a Desktop node command
+  catalog, states `desktop.capabilities` never approves/persists/executes,
+  states `allowKey`/`groupKey` are metadata only, and includes a concrete
+  `resultTrust` example. Live state immediately after push/body update was
+  `UNSTABLE` only because fresh PR-agent checks were queued and stale rows were
+  cancelled.
+- Latest follow-up: Restacked #4087 (`Node mode: system.run governance
+  upgrade`) after #4123 moved to `e362e3221`. Updated upstream #4123 mirror
+  branch `gim-home/m:user/giodl/node-mode-builtins-self-tools`, replayed the
+  single #4087 commit, and force-with-lease pushed
+  `gim-home/m:user/giodl/node-mode-capabilities-upstream-2-filesystem-shell`
+  to `401af0da3`. During the fine-tooth pass, tightened node activity logging
+  so `system.run` no longer stores the full shell command payload in
+  `paramsPreview`; it records approval metadata, command length, and a bounded
+  command preview instead. The PR body now states this proof explicitly and
+  keeps the scope clear: no `shell.exec`, existing `system.run` only, routed
+  explicit deny metadata fails before spawn, and direct/debug invocations still
+  pass through the native shell deny-floor. Validation passed: focused Vitest 3
+  files / 87 tests, `pnpm run typecheck`, focused `oxfmt --check`, focused
+  type-aware `oxlint --deny-warnings --type-check`, and `git diff --check`.
+  Live #4087 immediately after push/body update was `UNSTABLE` only because
+  fresh PR-agent checks were queued and stale rows were cancelled.
+- Latest follow-up: Updated #4123 in isolated worktree
+  `C:\src\clawpilot-review-builtins-self-tools` after deciding prompt-required
+  `custom-tool.invoke` calls should use the same local approval UI as the other
+  node-mode command PRs instead of failing closed whenever policy returns
+  `prompt`. Amended/pushed head `e362e3221` to fork branch
+  `giodl_microsoft:m:user/giodl/node-mode-builtins-self-tools`. The raw command
+  shape remains `custom-tool.invoke`; Desktop now builds the existing
+  `kind:"custom-tool"` approval request (`tool:<toolName>` / registry group
+  keys), runs the local pre-hook deny floor, routes prompt through
+  `ApprovalBroker`, records the interactive outcome, then dispatches to the
+  existing built-in handler only after approval. Missing router/UI/session,
+  timeout, and user deny still fail closed before handler execution. #4088
+  already had equivalent local prompt behavior for its browser/local-app/file
+  command lanes via `DesktopNodeCommandExecutor`. Validation passed: focused
+  Vitest 5 files / 199 tests, `pnpm run typecheck`, focused `oxfmt --check`,
+  focused type-aware `oxlint --deny-warnings --type-check`, and `git diff
+  --check`. PR #4123 body was updated with the prompt behavior and proof; live
+  state immediately after push/body update was `UNSTABLE` only because fresh
+  PR-agent checks were queued.
+- Latest follow-up: Corrected the node-mode built-ins stack after deciding
+  WorkIQ/M365/self-tools should be first-class node-mode commands, not a
+  DesktopCapabilities-only special case. #4123 now exposes
+  `custom-tool.invoke` as the raw node command and routes
+  `{ toolName, toolArgs, context }` through the existing Desktop custom-tool
+  registry, pre-hook, and local policy deny floor. Closed #4089 as superseded
+  by this generic custom-tool node command. Restacked #4087 on the corrected
+  #4123 and #4090 on the corrected #4087. #4090 now has
+  `desktop.capabilities` return direct-command catalog metadata plus
+  `customTools` entries for `custom-tool.invoke`, including concrete
+  `toolName`, `allowKey`, and registry `groupKey` values (for example
+  `tool:workiq_list_emails` / `tool:workiq_email`). Removed old
+  `m365.mail.createDraft` catalog references. Pushed heads: #4123
+  `f2c8cd066`, #4087 `b1e5d0d67`, #4090 `39a44f103`; #4089 is closed.
+  Validation passed: #4123 focused 5 files / 194 tests plus typecheck,
+  focused oxfmt/oxlint/diff-check; #4087 focused 3 files / 84 tests plus
+  typecheck, focused oxfmt/oxlint/diff-check; #4090 focused 4 files / 204
+  tests plus typecheck, focused oxfmt/oxlint/diff-check.
+- Latest follow-up: Continued #4088 browser parity in isolated worktree
+  `C:\src\clawpilot-review-4088` after deciding file chooser state belongs to
+  Desktop, not the OpenClaw wire protocol. Added/pushed commit `900840c31`
+  (`fix: carry browser upload state into node mode`) to
+  `user/giodl/node-mode-capabilities-upstream-3-browser-clipboard-local-app`.
+  `GatewayBackend.setInterceptFileChooser()` now stores the setting and passes
+  it to `GatewayToolBackend` plus `GatewayNodeMcpRuntime`; node-routed
+  Playwright MCP approvals run the existing PermissionPolicy pre-hook with the
+  normalized `playwright-browser_*` tool name, so Browser Control disabled,
+  filesystem-disabled browser writes/code execution, and file-upload disabled
+  deny before prompt/execution. For exposed Playwright command-server runtime
+  launches, `GatewayNodeMcpRuntime` appends `--handle-file-chooser` when the
+  Desktop setting is enabled and avoids duplicating an existing flag. This does
+  not require an OpenClaw protocol change; OpenClaw still calls raw
+  `mcp.invoke`, while Desktop supplies trusted local state. Validation passed:
+  focused Vitest 5 files / 862 tests, `pnpm run typecheck`, changed-file
+  type-aware `oxlint`, changed-file `oxfmt --check`, and `git diff --check`.
+  PR #4088 body was updated with file-upload/pre-hook/runtime proof. Live state
+  immediately after push/body update: head
+  `900840c31e9d3cfa6209318fec2462f56acb557f`, draft/open, merge state
+  `UNSTABLE` with a fresh debounce run pending; visible PR-agent failures were
+  from the superseded pre-debounce run.
+- Latest follow-up: Updated #4088 in isolated worktree
+  `C:\src\clawpilot-review-4088` after the browser parity review. Added and
+  pushed commit `4c3f3d30d` (`fix: align playwright node approvals`) to
+  `user/giodl/node-mode-capabilities-upstream-3-browser-clipboard-local-app`.
+  The change keeps #4088 command-first and does not add new raw browser
+  commands; instead, node-routed `mcp.invoke` against the exposed `playwright`
+  MCP server now reuses Desktop's existing browser-write approval shape.
+  Explicit file-output tools such as `browser_take_screenshot` become
+  `kind: "write"` with `origin: "synthesized-browser"` and the filename when
+  supplied; browser code tools such as `browser_run_code` become
+  `kind: "write"` with `path: "*"`; normal Playwright tools such as
+  `browser_click` remain `kind: "mcp"`. Added provider tests for all three
+  approval shapes. Validation passed: focused Vitest 7 files / 964 tests,
+  `pnpm run typecheck`, changed-file type-aware `oxlint`, changed-file
+  `oxfmt --check`, and `git diff --check`. Updated PR #4088 body with the
+  Playwright MCP approval parity diagram/proof and current head. Live GitHub
+  state after push/body update: head `4c3f3d30d147440c482231f76625881f5889580a`,
+  draft/open, `debounce` and `cache` green; barnacle/merit-bot/complexity-tag
+  were pending on the fresh current-head run, and ClawPilot Buddy was skipping.
+- Latest follow-up: Reviewed #4086 merged comments/reviews for reusable #4088
+  lessons. Main applied lessons: resolve/validate targets before policy and
+  prompt, keep approval target/details aligned with eventual execution target,
+  return sanitized caller errors while keeping local detail in audit/logs, keep
+  advertised command/help text honest, and avoid prompts for unsupported
+  actions. Rebased local #4088 worktree `C:\src\clawpilot-review-4088`
+  branch `review-4088-local-fix` onto final #4086 head `7c5d96f17`, resolving
+  the single conflict in `electron/desktop-node-command-composition.ts`.
+  Added/pushed #4088 commit `87b09e024`
+  (`fix: align browser app node approvals`) so `browser.open` and
+  local-app/file actions
+  validate trusted URL/workspace targets before prompting, custom-tool approval
+  args carry the resolved workspace path, outside-workspace and untrusted URL
+  actions fail before showing a card, and gateway error/help text says
+  "Desktop node commands" instead of stale "filesystem commands". Updated PR
+  #4088 body with #3679 tracking context, merged-#4086 base, target-fidelity
+  proof, macOS/Linux defer notes, and current validation. Validation passed:
+  focused Vitest 6 files / 213 tests, focused type-aware `oxlint`, focused
+  `oxfmt --check`, `pnpm run typecheck`, and `git diff --check`. Live PR head
+  after force-with-lease push:
+  `87b09e024b6ac62788087cb5f3b410e8103db770`; GitHub merge state was
+  `UNSTABLE` while fresh checks were pending.
+- Latest follow-up: Continued #4086 local OpenClaw-style node-permission proof
+  in isolated worktree `C:\src\clawpilot-review-4086` without importing the
+  older full sidecar PR. Added a minimal E2E-only gateway mock node socket path:
+  `MockGatewayWsClient` can inject scripted `node.invoke.request` frames for
+  node-role clients and record `node.invoke.result`; `GatewayNodeBackend` now
+  accepts an injectable WebSocket client factory that defaults to the real
+  `GatewayWsClient`; mock gateway E2E seeds `operator-and-node` role mode and
+  passes per-test launch env through `gatewayLaunchEnv`. New E2E
+  `e2e/gateway-node-filesystem-permissions.test.ts` proves raw gateway node
+  `filesystem.write` reaches the desktop node bridge, renders the existing
+  write permission card, writes the allowed file, leaves the denied file
+  absent, and reports both allow/deny results. Validation passed focused
+  type-aware `oxlint --deny-warnings --type-check`, focused Gateway Node
+  Vitest slice (3 files / 35 tests), `git diff --check`, the new permission
+  E2E, and existing `e2e/gateway-smoke.test.ts`. Worktree remains dirty with
+  these uncommitted #4086 proof changes.
 - Latest follow-up: Updated final node-mode stack proof PR
   `gim-home/m#4137`
   `https://github.com/gim-home/m/pull/4137` from isolated worktree

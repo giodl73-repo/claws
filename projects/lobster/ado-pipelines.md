@@ -1,11 +1,11 @@
-# Lobster ADO Pipeline Operations
+# Lobster ADO Pipeline Status Operations
 
 ## Why This Exists
 
-Some machines can inspect GitHub/GHE PR state but cannot queue the Lobster ADO
-pipeline feeds. The working setup depends on both Azure CLI auth and the Azure
-DevOps CLI extension. Use this note when another session says ADO pipeline
-queueing is not available.
+Lobster PR ADO checks are expected to attach automatically. This note exists
+for status inspection and troubleshooting auth/tooling only. Do **not** manually
+queue or rerun Lobster ADO pipelines unless the user explicitly asks for a
+specific PR or branch.
 
 ## Known Working Machine State
 
@@ -74,9 +74,16 @@ gh pr checks <pr-number> --repo microsoft.ghe.com/bic/lobster
 gh pr view <pr-number> --repo microsoft.ghe.com/bic/lobster --json headRefName,headRefOid,statusCheckRollup,mergeStateStatus,mergeable,reviewDecision
 ```
 
-## Queue Required ADO Pipelines
+## Manual Queueing Policy
 
-Use the PR source branch, not the PR number.
+Do not manually queue ADO pipelines by default. Report whether required
+contexts are attached, pending, running, missing, failed, or stale. If checks
+are missing after a push, wait for automatic attachment and inspect GitHub/ADO
+state; do not use `az pipelines run` unless the user explicitly asks you to
+queue a named PR/branch.
+
+If the user explicitly requests a manual queue, use the PR source branch, not
+the PR number:
 
 ```powershell
 az pipelines run `
@@ -113,17 +120,20 @@ az pipelines run `
   --branch user/giodl/scout-feeds-admin-composition
 ```
 
-Record the returned build ids in `projects/lobster/SESSION.md` or the relevant
-project session note.
+When the user explicitly requests a manual queue, record the returned build ids
+in `projects/lobster/SESSION.md` or the relevant project session note.
 
 ## Common Failures
 
 If `az pipelines run` says the build cannot be queued because of validation
-errors or warnings, the branch may be stale relative to current pipeline YAML or
-rules. Rebase/update the branch against current `main`, push, then queue again.
+errors or warnings during an explicitly requested manual queue, the branch may
+be stale relative to current pipeline YAML or rules. Rebase/update the branch
+against current `main`, push, then wait for automatic checks unless the user
+again explicitly asks for a manual queue.
 
 If `/azp run` comments say no pipeline is associated with the PR or path filters
-exclude the branch, use the explicit `az pipelines run` commands above.
+exclude the branch, report that state. Do not use the explicit
+`az pipelines run` commands above unless the user explicitly asks.
 
 If another computer cannot queue at all, check in this order:
 
@@ -134,14 +144,13 @@ If another computer cannot queue at all, check in this order:
 5. The branch name exists in `microsoft.ghe.com/bic/lobster`.
 6. The signed-in user has permission to queue those ADO definitions.
 
-## Watch After Queue
+## Watch Checks
 
-After queueing, wait for the checks to attach to the PR head:
+Watch checks with:
 
 ```powershell
 gh pr checks <pr-number> --repo microsoft.ghe.com/bic/lobster
 ```
 
-If the check details URL points at an ADO build, record that build id in the
-session note. Do not mark the PR ready until both ADO contexts are attached to
-the current head and green.
+Do not mark the PR ready until both ADO contexts are attached to the current
+head and green.

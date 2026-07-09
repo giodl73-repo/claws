@@ -1,6 +1,6 @@
 # Local OpenClaw Switch-Over PR82: M365 Delegated Actions and Token Broker Boundary
 
-Planned PR: #82
+PR: [giodl_microsoft/m#82](https://github.com/giodl_microsoft/m/pull/82)
 Branch: `user/giodl/local-openclaw-switch-pr82-m365-token-broker`
 Base: PR81
 
