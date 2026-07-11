@@ -31,7 +31,7 @@
   seam.
 - Active branch / PR: `user/giodl/typeclaw-ts-native-eval` in
   `C:\src\openclaw-typeclaw`, pushed to
-  `giodl73-repo/openclaw:user/giodl/typeclaw-ts-native-eval` at `0cea014673`.
+  `giodl73-repo/openclaw:user/giodl/typeclaw-ts-native-eval` at `47bcbcb19d`.
 - Known dirty state: `C:\src\claws-hapi` already has unrelated dirty project
   notes. This session added `projects/typeclaw/`.
 - Blocking question: none yet; first work item is to gather baseline timings and
@@ -85,8 +85,17 @@
   --tsBuildInfoFile .artifacts/typeclaw/seam-core.tsbuildinfo`,
   `node scripts/run-vitest.mjs src/agents/code-mode.test.ts
   src/plugin-sdk/api-baseline.test.ts`, and `git diff --check`.
+- Pushed follow-up diagnostic commit `47bcbcb19d`: the compiler API seam now
+  reports the installed TypeScript package shape and names the classic APIs
+  OpenClaw still requires when a rootless TS7/native package is installed. It
+  confirms TS7 exposes `typescript/unstable/*`, but OpenClaw still needs
+  `transpileModule`, `createProgram`, `createPrinter`,
+  `parseJsonConfigFileContent`, `readConfigFile`, `sys`, and `SyntaxKind`.
+  Validation passed current-toolchain core tsgo, focused code-mode/API-baseline
+  tests plus `src/typescript/compiler-api.test.ts`, and `git diff --check`.
 - Remaining classic TypeScript compiler/API imports in `src/` are currently
   test-only files. Next step is to reapply the TS7 candidate and see whether
-  the root-module blocker is cleared or whether runtime fallback to
-  `typescript/unstable/*` needs implementation.
+  the root-module blocker is replaced by the new targeted diagnostic; then
+  decide whether to map `typescript/unstable/sync`/`ast` to the subset OpenClaw
+  needs or file the API-parity gap upstream.
 - Decide what evidence Anders/internal TS owners would need.
