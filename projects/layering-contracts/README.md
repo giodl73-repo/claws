@@ -33,6 +33,8 @@ boundary; neither is a fifth semantic area.
 | Explicit as-is Lobster/OpenClaw integration ABI and migration ledger | `compatibility-boundary.md` |
 | Approved Managed Configuration deliverable | `managed-configuration-deliverable.md` |
 | Approved ordered evidence and decision plan | `next-evidence-plan.md` |
+| Lobster workaround-to-contract removal queue | `lobster-deletion-ledger.md` |
+| Cross-RFC portfolio review and remaining evidence gates | `portfolio-review-2026-07-10.md` |
 | Current portfolio, ownership rules, and audit plan | `contract-portfolio.md` |
 | Completed four-corner framing and surface disposition | `four-corners.md` |
 | Working `/synced`, generation, provider, and graceful-shutdown hypothesis | `synchronization-model.md` |

@@ -90,7 +90,20 @@
 
 ## Open Threads
 
-- Fork PR 3 is now **Runtime State Continuity** at head `2a87e05`. State
+- 2026-07-10 portfolio hardening completed across all four RFCs. Readiness head
+  `23474e7` defines the packaged profile-conformance record. Managed
+  Configuration head `3068754` adds source identity, transactional generations,
+  stale-write rejection, and a host deletion gate. Duplex Transport head
+  `ade8ddc` adds deterministic routing, overload/backpressure bounds, retry
+  constraints, and semantic ProxyPipe retirement. Runtime State Continuity head
+  `e2b02aa` adds the mandatory component descriptor, writer accounting,
+  generation/manifest fencing, restore-generation rules, and persistence
+  deletion proof. All four PR bodies carry the corresponding reviewer summary.
+- Use `portfolio-review-2026-07-10.md` as the cross-RFC model and
+  `lobster-deletion-ledger.md` as the required removal queue. An upstream
+  contract is not complete for this project until its Lobster workaround has a
+  minimum release, conformance proof, expiry, and deletion change.
+- Fork PR 3 is now **Runtime State Continuity** at head `e2b02aa`. State
   inventory, writer ownership, consistency, checkpointing, publication,
   fencing, restore, compatibility, and evidence are the contract. `/synced`
   is its aggregate durability projection and safe shutdown is one outcome, not
