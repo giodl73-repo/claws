@@ -6,6 +6,9 @@ Identify every behavior Lobster depends on to host OpenClaw, classify its real
 owner, and turn repeated private patches into upstream contracts and
 conformance tests. Do not design one large Lobster-shaped OpenClaw API.
 
+Apply `charter.md` as the ownership rule and `compatibility-boundary.md` as the
+inventory boundary for the audit.
+
 ## Classification
 
 Every audited item must be classified as one of:
@@ -91,3 +94,7 @@ Keep no more than two active initiatives from this portfolio at once:
 Activation stays a readiness condition family plus inventory. Remaining Runtime
 Boundary items and Evidence/Compatibility stay as inventory until evidence
 establishes a narrow independently useful change.
+
+The completed surface disposition is recorded in `four-corners.md`. Evidence
+and Compatibility uses artifact capabilities, release conformance, runtime
+identity, and stable events; it does not introduce `/compatible`.

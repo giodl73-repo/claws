@@ -21,13 +21,21 @@ These are durable classification areas, not four automatic RFCs or projects.
 An item leaves the umbrella project only when it has a distinct active RFC,
 implementation stack, or operating loop.
 
+The four areas classify portable semantics. They are governed by the project
+charter and exercised through the concrete Lobster/OpenClaw compatibility
+boundary; neither is a fifth semantic area.
+
 ## Active Notes
 
 | Area | File |
 | --- | --- |
+| Governing ownership thesis and working rules | `charter.md` |
+| Explicit as-is Lobster/OpenClaw integration ABI and migration ledger | `compatibility-boundary.md` |
 | Current portfolio, ownership rules, and audit plan | `contract-portfolio.md` |
+| Completed four-corner framing and surface disposition | `four-corners.md` |
 | Working `/synced`, generation, provider, and graceful-shutdown hypothesis | `synchronization-model.md` |
 | As-is inventory index and evidence requirements | `inventory/README.md` |
+| Boot/start DTO, environment, and baked-config audit pass 1 | `inventory/boot-config-2026-07-10.md` |
 | Current session and resume state | `SESSION.md` |
 | Historical boundary analysis | `../hosting-profiles/analysis.md` |
 | Historical Lobster inventory | `../hosting-profiles/lobster-layer-inventory.md` |
