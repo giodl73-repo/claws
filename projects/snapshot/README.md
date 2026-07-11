@@ -40,6 +40,7 @@ how an opt-in `snapshot` feature can provide:
 
 ## Related Areas
 
+- `projects/layering-contracts/synchronization-model.md` - project-note hypothesis for composing SQLite snapshot evidence into broader state synchronization
 - `projects/openclaw/README.md`
 - `projects/prs/README.md`
 - `projects/policy/README.md`

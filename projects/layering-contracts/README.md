@@ -1,0 +1,84 @@
+# Lobster/OpenClaw Layering Contracts Project
+
+Use this area for the broader Lobster/OpenClaw host-runtime contract portfolio.
+The goal is to reduce Lobster-only runtime patches by making the OpenClaw
+contracts required by any serious host explicit, testable, and upstream-owned.
+
+This is the umbrella effort. Individual contracts can have their own RFCs and
+implementation stacks without becoming one monolithic hosted configuration
+envelope.
+
+## Areas
+
+| Area | Question | Current work | File |
+| --- | --- | --- | --- |
+| Runtime activation | How does host intent become one accepted effective OpenClaw configuration? | Fold startup-critical observations into readiness | `activation.md` |
+| Runtime boundary | How does a host authenticate, connect to, supervise, and route traffic to OpenClaw? | Hosting Profiles RFC 33 | `runtime-boundary.md` |
+| State and continuity | What must survive, when is it consistent, and how can execution continue elsewhere? | Next discovery area | `state-continuity.md` |
+| Evidence and compatibility | How does a host prove behavior and select a compatible OpenClaw release? | Inventory only | `evidence-compatibility.md` |
+
+These are durable classification areas, not four automatic RFCs or projects.
+An item leaves the umbrella project only when it has a distinct active RFC,
+implementation stack, or operating loop.
+
+## Active Notes
+
+| Area | File |
+| --- | --- |
+| Current portfolio, ownership rules, and audit plan | `contract-portfolio.md` |
+| Working `/synced`, generation, provider, and graceful-shutdown hypothesis | `synchronization-model.md` |
+| As-is inventory index and evidence requirements | `inventory/README.md` |
+| Current session and resume state | `SESSION.md` |
+| Historical boundary analysis | `../hosting-profiles/analysis.md` |
+| Historical Lobster inventory | `../hosting-profiles/lobster-layer-inventory.md` |
+| Historical first-pass contract audit | `../hosting-profiles/contract-audit.md` |
+| Historical architecture milestones | `../hosting-profiles/milestones.md` |
+
+## Active Work
+
+| Repo | PR / Issue | Status | Purpose |
+| --- | --- | --- | --- |
+| `bic/lobster` | TBD | Audit | Inventory current host pressure and private runtime assumptions. |
+| `openclaw/openclaw` | Per-contract follow-ups | Discovery | Find existing homes before proposing new contracts. |
+| `openclaw/rfcs` | [RFC 33](https://github.com/openclaw/rfcs/pull/33) | Child initiative | Readiness Conditions and Standard Hosting Profiles. |
+| `openclaw/rfcs` | [RFC 31](https://github.com/openclaw/rfcs/pull/31) | Related | Remote AgentHarness data-plane contract. |
+
+## Ownership Rule
+
+OpenClaw owns portable runtime semantics and conformance. Lobster owns
+enterprise hosting decisions and implementations. OCC may eventually compile
+declarative desired state into these contracts; AgentHarness carries execution
+events after admission and startup. Neither future architecture is a reason to
+keep an implicit Lobster-only runtime contract today.
+
+## Architecture Alignment
+
+```text
+OCC desired state
+      |
+      v
+runtime activation
+      |
+      v
+runtime boundary <--- host supervision and traffic
+      |
+      v
+OpenClaw runtime ----> AgentHarness execution events
+      |
+      v
+state and continuity
+      |
+      v
+evidence and compatibility
+```
+
+OCC is a future producer of activation inputs. AgentHarness is an execution
+data-plane protocol. Neither is another contract area to invent here.
+
+## Related Areas
+
+- `projects/hosting-profiles/README.md`
+- `projects/lobster/README.md`
+- `projects/openclaw/README.md`
+- `projects/snapshot/README.md`
+- `projects/policy/README.md`

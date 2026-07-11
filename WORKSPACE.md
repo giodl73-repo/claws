@@ -23,6 +23,7 @@ For agent and harness entry points, start with `CONTEXT.md`.
 | Context budget | `projects/context-budget/` | Context-budget PR plan, branches, and proof notes. |
 | Snapshot | `projects/snapshot/` | SQLite-safe snapshot/restore plugin, backup integration, failover substrate, and RFC coordination. |
 | OpenClaw hosting profiles | `projects/hosting-profiles/` | Standard hostee profiles, ready checks, status conditions, and container/platform hosting conventions for OpenClaw. |
+| Lobster/OpenClaw layering contracts | `projects/layering-contracts/` | Umbrella host-runtime contract portfolio, Lobster boundary audit, and upstream contract extraction. |
 | PromoteClaw | `projects/promoteclaw/` | Regular Lobster OpenClaw version promotion from quarantine-cleared LTS releases, with patch carry-forward validation. |
 | TypeClaw | `projects/typeclaw/` | OpenClaw TypeScript native / TS7 performance and compatibility evaluation. |
 | Memory | `projects/memory/` | Agent memory strategy, OpenClaw assessment, and XAI report notes. |

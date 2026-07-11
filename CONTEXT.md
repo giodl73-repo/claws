@@ -23,6 +23,7 @@ tools.
 | Context-budget work | `projects/context-budget/README.md` |
 | Snapshot work | `projects/snapshot/README.md` |
 | OpenClaw hosting profiles | `projects/hosting-profiles/README.md` |
+| Lobster/OpenClaw layering contracts | `projects/layering-contracts/README.md` |
 | PromoteClaw | `projects/promoteclaw/README.md` |
 | TypeClaw | `projects/typeclaw/README.md` |
 | Memory work | `projects/memory/README.md` |
@@ -148,6 +149,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
   substrate, and RFC coordination.
 - OpenClaw hosting profiles: standard hostee profiles, ready checks, status
   conditions, and container/platform hosting conventions for OpenClaw.
+- Lobster/OpenClaw layering contracts: umbrella host-runtime contract portfolio,
+  current Lobster boundary audit, and upstream contract extraction.
 - PromoteClaw: regular Lobster OpenClaw version promotion from Galin's
   quarantine-cleared LTS feed, including patch carry-forward/drop validation.
 - TypeClaw: OpenClaw TypeScript native / TS7 evaluation, benchmarks,

@@ -19,6 +19,7 @@ be buried in generated wave directories.
 | `context-budget/` | Context-budget audit, runtime evidence, recommendations, and integrations. |
 | `snapshot/` | SQLite-safe snapshot/restore plugin, backup integration, failover substrate, and RFC coordination. |
 | `hosting-profiles/` | Standard OpenClaw hostee profiles, ready checks, status conditions, and container/platform hosting conventions. |
+| `layering-contracts/` | Umbrella Lobster/OpenClaw host-runtime contract portfolio, boundary audit, and upstream contract extraction. |
 | `promoteclaw/` | Lobster OpenClaw version promotion from quarantine-cleared LTS releases, including patch carry-forward/drop validation. |
 | `typeclaw/` | OpenClaw TypeScript native / TS7 performance and compatibility evaluation. |
 | `memory/` | Agent memory strategy, OpenClaw memory assessment, and XAI report coordination. |
@@ -55,6 +56,7 @@ agent is assigned to an area, then read the area `README.md`.
 | Context budget | `context-budget/SESSION.md` |
 | Snapshot | `snapshot/SESSION.md` |
 | OpenClaw hosting profiles | `hosting-profiles/SESSION.md` |
+| Lobster/OpenClaw layering contracts | `layering-contracts/SESSION.md` |
 | PromoteClaw | `promoteclaw/SESSION.md` |
 | TypeClaw | `typeclaw/SESSION.md` |
 | Memory | `memory/SESSION.md` |

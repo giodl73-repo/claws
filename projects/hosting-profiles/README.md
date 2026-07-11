@@ -65,6 +65,7 @@ test plan are stable.
 
 ## Related Areas
 
+- `projects/layering-contracts/README.md` - umbrella contract portfolio and Lobster boundary audit
 - `projects/lobster/README.md`
 - `projects/openclaw/README.md`
 - `projects/admin/README.md`
