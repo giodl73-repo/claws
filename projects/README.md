@@ -20,6 +20,9 @@ be buried in generated wave directories.
 | `snapshot/` | SQLite-safe snapshot/restore plugin, backup integration, failover substrate, and RFC coordination. |
 | `hosting-profiles/` | Standard OpenClaw hostee profiles, ready checks, status conditions, and container/platform hosting conventions. |
 | `layering-contracts/` | Umbrella Lobster/OpenClaw host-runtime contract portfolio, boundary audit, and upstream contract extraction. |
+| `managed-config/` | Managed and operator config authority, transactional effective config, conformance, and Lobster config-writer deletion. |
+| `duplex-transport/` | OpenClawTransport host-provider calls, shared Gateway peer invocation, and ProxyPipe retirement. |
+| `state-continuity/` | State inventory, consistency, checkpoint/publication, dirty/synced status, fencing, restore, and persistence deletion. |
 | `promoteclaw/` | Lobster OpenClaw version promotion from quarantine-cleared LTS releases, including patch carry-forward/drop validation. |
 | `typeclaw/` | OpenClaw TypeScript native / TS7 performance and compatibility evaluation. |
 | `memory/` | Agent memory strategy, OpenClaw memory assessment, and XAI report coordination. |
@@ -57,6 +60,9 @@ agent is assigned to an area, then read the area `README.md`.
 | Snapshot | `snapshot/SESSION.md` |
 | OpenClaw hosting profiles | `hosting-profiles/SESSION.md` |
 | Lobster/OpenClaw layering contracts | `layering-contracts/SESSION.md` |
+| Managed Configuration | `managed-config/SESSION.md` |
+| Duplex Transport | `duplex-transport/SESSION.md` |
+| Runtime State Continuity | `state-continuity/SESSION.md` |
 | PromoteClaw | `promoteclaw/SESSION.md` |
 | TypeClaw | `typeclaw/SESSION.md` |
 | Memory | `memory/SESSION.md` |

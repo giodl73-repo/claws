@@ -63,6 +63,12 @@
 - Known dirty state: `.artifacts/` is an unrelated untracked workspace item
 - Blocking question: none
 
+Three execution areas now have independent sessions: `projects/managed-config`,
+`projects/duplex-transport`, and `projects/state-continuity`. Resume the named
+child project for implementation/evidence work; use this umbrella session for
+portfolio ownership, compatibility-boundary inventory, and deletion-ledger
+coordination.
+
 ## Resume Checklist
 
 - Run: `git status --short --branch`

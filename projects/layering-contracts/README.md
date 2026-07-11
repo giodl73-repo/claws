@@ -12,10 +12,10 @@ envelope.
 
 | Area | Question | Current work | File |
 | --- | --- | --- | --- |
-| Runtime activation | How does host intent become one accepted effective OpenClaw configuration? | Fold startup-critical observations into readiness | `activation.md` |
-| Runtime boundary | How does a host authenticate, connect to, supervise, and route traffic to OpenClaw? | Hosting Profiles RFC 33 | `runtime-boundary.md` |
-| State and continuity | What must survive, when is it consistent, and how can execution continue elsewhere? | Next discovery area | `state-continuity.md` |
-| Evidence and compatibility | How does a host prove behavior and select a compatible OpenClaw release? | Inventory only | `evidence-compatibility.md` |
+| Runtime activation | How does host intent become one accepted effective OpenClaw configuration? | `projects/managed-config/` child project plus startup readiness conditions | `activation.md` |
+| Runtime boundary | How does a host authenticate, connect to, supervise, and route traffic to OpenClaw? | Hosting Profiles and `projects/duplex-transport/` child projects | `runtime-boundary.md` |
+| State and continuity | What must survive, when is it consistent, and how can execution continue elsewhere? | `projects/state-continuity/` child project | `state-continuity.md` |
+| Evidence and compatibility | How does a host prove behavior and select a supported OpenClaw release? | Packaged profile evidence in Readiness; cross-contract inventory remains here | `evidence-compatibility.md` |
 
 These are durable classification areas, not four automatic RFCs or projects.
 An item leaves the umbrella project only when it has a distinct active RFC,
@@ -104,6 +104,9 @@ data-plane protocol. Neither is another contract area to invent here.
 ## Related Areas
 
 - `projects/hosting-profiles/README.md`
+- `projects/managed-config/README.md`
+- `projects/duplex-transport/README.md`
+- `projects/state-continuity/README.md`
 - `projects/lobster/README.md`
 - `projects/openclaw/README.md`
 - `projects/snapshot/README.md`
