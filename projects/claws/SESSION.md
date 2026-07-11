@@ -22,7 +22,240 @@
 
 ## Current Session
 
-- Last updated: 2026-07-08.
+### 2026-07-09 Patrick review update
+
+### 2026-07-10 Control UI plugin-management impact
+
+- Reviewed merged OpenClaw PR `#103176` (`feat: add Control UI plugin
+  management`) and Patrick's `patrick.webp` analysis. The hosted RFC 0009 feed
+  powers plugin/skill catalog discovery; installed MCP servers still come from
+  local `mcp.servers`, and the Control UI MCP connector shelf remains a
+  separately curated presentation surface.
+- RFC PR `openclaw/rfcs#27` now makes that boundary normative: feeds discover
+  plugin/skill packages, Claws compose exact package versions plus direct
+  portable MCP declarations, and Claws do not define a connector catalog.
+  It also requires CLI, Gateway, and Control UI uninstall paths to share
+  Claw-reference warnings. RFC head is `fcc497d456a66ea5ae258578bf882d28bbcc42db`.
+- The implementation stack was rebased onto current OpenClaw `main`
+  `b7e7c27ef094de95947cfa637b5eecf906053038`. Bottom schema PR `#101328`
+  now accepts a strict portable MCP union: stdio declarations or remote
+  `sse`/`streamable-http` declarations with optional credential-free OAuth
+  intent. Headers, tokens, client secrets, and completed OAuth state remain
+  rejected. Head: `4ba6435fe0ddb0c08efff5afedb99b0c3ca7046d`.
+- Package PR `#102228` moves Claw-reference discovery to a shared plugin
+  uninstall helper used by the CLI and `uninstallManagedPlugin`, so the new
+  Gateway/Control UI surface receives the same warning without turning
+  provenance into an uninstall lock. Head:
+  `ad96186c7e3f3c622b081e13c14e22a88611e306`.
+- MCP PR `#102406` now installs, digests, exports, status-checks, and removes
+  remote OAuth declarations as well as stdio declarations. Focused MCP/export/
+  lifecycle tests passed (16 tests), and core typecheck passed. Head:
+  `6c61f3c7f9287d1a751a557ecc5aad0b4c5d2f1f`.
+- Restacked published heads through doctor: `#101755` `0d5051128fc`,
+  `#101973` `92c5fc13bac`, `#102296` `93f51863427`, `#102306`
+  `59f8ce33197`, `#102383` `d8d91d4e0b8`, and `#102427`
+  `d1546122e546`. The in-progress `#102959` worktree was rebased onto the new
+  doctor head; its untracked grouped update-planner files remain local.
+- Focused validation passed 48 bottom schema/gate/CLI tests and 46 package/
+  provenance/CLI/management-service tests. The only live red check is the
+  unrelated label workflow on `#101755`: GitHub refuses to add a size label
+  because the PR already has 100 labels; real behavior proof passes.
+- PR `#102959` was rewritten and force-pushed as one grouped, agent-centric
+  read-only update planner at `fac569fe76a73aa2b21008b3886948511d1761ea`
+  (`Add grouped Claw update planning`). It adds
+  `claws update <claw-or-agent> --from <source> --dry-run`, resolves package
+  names only when unambiguous, compares agent/files/packages/MCP/cron by exact
+  ownership and canonical digests, restores missing owned state, and marks
+  operator drift or unresolved ownership as blocked manual work. Remote OAuth
+  MCP declarations are covered. Validation passed 85 focused tests, core
+  typecheck, and a real isolated add -> update dry-run round trip. PR title/body
+  were refreshed to `Plan grouped Claw agent updates`.
+- The broader PR11 pass corrected a stale offline cron-collision assertion in
+  cron PR `#102383`, because scheduler collisions are owned by gateway
+  `cron.add`, not dry-run local state. Restacked heads are `#102383`
+  `63334bfe073`, `#102406` `76caf2cfbf8`, and `#102427` `d47b47c5adc`.
+- PR `#102982` was rewritten and force-pushed at
+  `af69df0dfacf9b2544af82bc937724a3d0a37931` (`Apply consented
+  agent-only Claw updates`). It adds `claws update ... --yes` and
+  `openclaw.clawUpdateResult.v1`, rebuilds the plan before mutation,
+  compare-and-swaps the owned agent entry and root package/version/integrity
+  record, preserves the original install timestamp, and rolls the config back
+  if provenance fails while the written agent remains unchanged. Workspace,
+  package-ref, MCP, and cron changes fail before mutation with
+  `unsupported_update_actions`; future owner executors widen the same framework.
+  Validation passed 90 focused tests, core typecheck, a real isolated
+  add -> preview -> consented update -> status round trip, and a real remote MCP
+  update rejection. PR title/body are `Apply consented agent-only Claw updates`.
+- Final live stack audit: all eleven OpenClaw PR heads match their configured
+  preceding stack bases and report successful required behavior/admission
+  checks. `#101755` retains only the unrelated size-label workflow failure due
+  GitHub's 100-label limit. RFC `#27` remains at `fcc497d456a6` and reports no
+  configured checks.
+
+- RFC PR `openclaw/rfcs#27` was rewritten around the principle that one Claw
+  creates one complete new agent and workspace. It now uses grouped `agent`,
+  `workspace`, `packages`, `mcpServers`, and `cronJobs` fields; keeps skills and
+  plugins as portable packages; excludes credentials, bindings, providers, and
+  runtime-specific account IDs; and renames the lifecycle verb from `apply` to
+  `add`. Patrick's feedback was answered at
+  `https://github.com/openclaw/rfcs/pull/27#issuecomment-4931913856`.
+- RFC head: `5829ce30c1520e46d21f291d39866d2cb25d1d14` (`Revise Claws
+  around agent ownership`). The RFC also defines the process-only experimental
+  gate `OPENCLAW_EXPERIMENTAL_CLAWS=1`; disabled mode omits Claws from command
+  registration, help, and completion without writing persistent config.
+- Bottom OpenClaw PR `#101328` now includes the experimental CLI gate at
+  `9a2b55625b73894d4d2761d93940731a93a03b14` (`feat(claws): gate
+  experimental CLI`). Focused validation passed 190 tests across argv, schema,
+  feed, CLI registry, root help, and lifecycle E2E. Direct root-help proof found
+  zero `claws` entries with the env unset and one with it set.
+- The previously reviewed 11-PR implementation stack remains prototype
+  evidence and must be reshaped to the RFC before restacking. Start with the
+  grouped manifest schema and `claws add --dry-run`, then propagate the new base
+  through the descendants once that contract is stable.
+- Bottom PR `#101328` was fully rewritten and pushed at
+  `7f3bab34903639a51545291b6c2286c678695364` (`feat(claws): adopt
+  grouped agent manifest`). It now validates schema version `1`, takes Claw
+  identity from package metadata or explicit development identity, exposes
+  `inspect` and `add --dry-run`, plans a new agent/workspace plus all grouped
+  resources, and rejects the old flat/apply/feed CLI contract. PR title/body
+  were refreshed. Validation passed 186 focused tests, lint, real CLI proof,
+  help-gate proof, formatting, and conflict checks; full typecheck still reaches
+  only the unrelated `src/secrets/config-io.ts` TS4058.
+- PR `#101755` was rebased and repurposed as the second RFC slice, then
+  force-pushed with lease at `f2f90aa72694a20428d10c7329106e512273ef84`
+  (`feat(claws): create agent and install record`). `claws add --yes` now
+  reserves one new workspace, appends one portable agent while preserving
+  defaults/existing agents, rechecks config races, and persists one root
+  `claw_installs` SQLite row. Declared files/packages/MCP/cron fail before
+  mutation until their owner slices land. Validation passed 195 focused tests,
+  lint, real config/SQLite proof, formatting, and conflict checks. PR title/body
+  were refreshed to `Create Claw agent and root install record`.
+- Next: rebase `#101973` / `user/giodl/claws-pr4-artifact-plan` onto `#101755`
+  and rewrite it as confined bootstrap/supporting workspace file creation with
+  managed hashes and partial-failure visibility.
+- PR `#101973` was rebased, rewritten, squashed to one commit, and force-pushed
+  with lease at `47facef73082edd1961f685f5fc3be93a967c630` (`feat(claws):
+  create managed workspace files`). It now writes only declared bootstrap and
+  supporting files into the newly created agent workspace, uses fs-safe rooted
+  IO, revalidates source digests, never overwrites an existing destination, and
+  persists each successful file immediately in `claw_workspace_files`. Later
+  failures mark the root install partial while preserving earlier file refs.
+  The prototype caller-selected workspace and managed overwrite/update behavior
+  were removed. Validation passed 204 focused tests, lint, real CLI/config/file/
+  SQLite proof, formatting, and conflict checks; full typecheck still reaches
+  only the unrelated `src/secrets/config-io.ts` TS4058. PR title/body were
+  refreshed to `Create Claw-managed workspace files`.
+- PR `#102228` was rebased, rewritten, squashed to one commit, and force-pushed
+  with lease at `e550a6d10ed56eea7c70f54bccb156a8e69cbb0f` (`Install ClawHub packages
+  for new agents`). It installs exact-version ClawHub skills into the created
+  agent workspace and plugins through the existing shared plugin lifecycle,
+  records each successful package reference immediately in root SQLite, and
+  returns partial state without rolling back prior resources if a later package
+  fails. Shared plugin uninstall remains operator-controlled: referenced Claws
+  produce a deduplicated warning but do not block removal. MCP and cron actions
+  remain fail-closed for later slices. Validation passed `pnpm tsgo:core`,
+  `pnpm tsgo:core:test`, focused Oxlint, 22 package/provenance/uninstall tests,
+  and all 6 Claw lifecycle E2E tests. PR title/body were refreshed to `Install
+  ClawHub packages for new Claw agents`; current checks have no pending or
+  failing jobs.
+- PR `#102296` was rebased onto rewritten `#102228`, rewritten, squashed to one
+  commit, and force-pushed with lease at
+  `d11434ddfe47010980aa09fe03f342c6ed5b5914` (`Add plan-first Claw status and
+  remove`). It adds experimental agent-centric status plus read-only remove
+  planning and separately consented apply. Remove blocks agent-config drift and
+  unsafe files, deletes only unchanged managed files, preserves local edits,
+  releases package references without uninstalling artifacts, and keeps the
+  install ledger/package refs visible when cleanup becomes unsafe after config
+  commit. Package identity resolves only unambiguous installs; final agent ids
+  disambiguate repeated adds. Validation passed `pnpm tsgo:core`, `pnpm
+  tsgo:core:test`, focused Oxlint, 18 status/remove CLI tests, and 7 lifecycle
+  E2E tests including a real add/status/preview/remove round trip. PR title/body
+  were refreshed to `Add plan-first Claw status and remove`; current checks
+  have no pending or failing jobs.
+- Next: rebase `#102306` / `user/giodl/claws-pr7-export` onto rewritten
+  `#102296` and adapt export to the grouped package identity and one-agent
+  provenance ledger.
+- PR `#102306` was rebased onto rewritten `#102296`, rewritten, squashed to one
+  commit, and force-pushed with lease at
+  `06b1e172426d02fa1370a3f4f3c7087254905064` (`Export installed agents as
+  grouped Claw packages`). It adds agent-id-only export, explicitly projects
+  portable agent fields, copies only ledger-managed workspace files through
+  rooted IO, emits exact recorded package refs, and writes package identity plus
+  the grouped manifest and safe sidecars into a new directory. Published
+  identity is retained; development identity becomes
+  `openclaw-claw-<agent-id>`. Validation passed `pnpm tsgo:core`, `pnpm
+  tsgo:core:test`, focused Oxlint, 17 export/CLI tests, and 8 lifecycle E2E
+  tests including add -> export -> inspect -> add in a fresh state directory.
+  PR title/body were refreshed to `Export installed agents as grouped Claw
+  packages`; current checks have no pending or failing jobs.
+- Next: repurpose redundant skill PR `#102383` / `user/giodl/claws-pr8-skills`
+  as the missing agent-pinned cron-job slice, then keep `#102406` for MCP and
+  `#102427` for doctor diagnostics.
+- Local `user/giodl/claws-pr8-skills` has been rebased onto export commit
+  `06b1e172426` with both obsolete generic skill-installer commits dropped; it
+  currently equals its new base and has not been pushed. Cron mutation must use
+  the gateway-owned `cron.add`/`cron.remove` API because direct offline store
+  replacement can race a running gateway. The slice should inject that owner
+  API into add/remove, pin jobs to the final agent id, and persist returned
+  scheduler ids immediately for partial cleanup/status/export.
+- PR `#102383` was repurposed, rewritten, and force-pushed with lease at
+  `1549403834f8008f56670c92f2d07183d0b6ef7b` (`Manage Claw cron jobs through
+  the gateway`). Grouped cron declarations now use gateway-owned `cron.add`
+  with agent-scoped declaration keys, persist pending/complete/failed ownership
+  before and after scheduler mutation, appear in status, round-trip through
+  export, and are removed through `cron.remove` before agent config. Ambiguous
+  pending/failed ownership blocks destructive cleanup. Validation passed
+  `pnpm tsgo:core`, 27 cron/lifecycle/export/CLI tests, 9 provenance/add tests,
+  the real gateway protocol validator, formatting, and `git diff --check`.
+  Fresh-model `codex review --commit HEAD` could not start because the local
+  CLI selected unsupported ChatGPT model `gpt-5.3-codex`; no model override was
+  used. PR title/body were refreshed to `Manage Claw cron jobs through the
+  gateway`.
+- Next: rebase `#102406` / `user/giodl/claws-pr9-mcp` onto rewritten `#102383`
+  and replace its obsolete flat artifact logic with grouped `mcpServers`
+  ownership, conflict handling, status/remove/export, and secret-safe
+  provenance through the existing validated MCP config boundary.
+- PR `#102406` was rebased onto rewritten `#102383`, rewritten, and
+  force-pushed with lease at `794cbe6445f7209019a2160b69847264f64282da`
+  (`Manage Claw MCP server ownership`). Grouped MCP declarations now use the
+  validated top-level MCP config writer with atomic create-only collision
+  protection; provenance stores only agent/name/canonical digest, not server
+  config. Status reports present/modified/missing/pending/failed ownership,
+  export round-trips only unchanged declarations, and removal compare-checks
+  live config before unsetting it ahead of cron and agent cleanup. Structured
+  failures are non-owning; thrown writes remain pending and block destructive
+  cleanup. Validation passed `pnpm tsgo:core`, focused Oxlint with zero
+  findings, 46 focused tests, and all 8 lifecycle E2E tests including a real
+  add -> status -> export -> remove MCP config round trip. Fresh-model `codex
+  review --commit HEAD` again could not start because local Codex selected the
+  unsupported ChatGPT model `gpt-5.3-codex`; no model override was used. PR
+  title/body were refreshed and latest GitHub Real behavior proof plus
+  admission/sanity checks pass.
+- Next: review and adapt `#102427` / `user/giodl/claws-pr10-doctor` for the new
+  ownership ledgers. Its single doctor commit rebased cleanly onto `#102406` as
+  local commit `e9cc5e2e4ee`, but has not been validated or pushed; inspect it
+  as old-model prototype evidence rather than assuming its flat diagnostics
+  remain correct.
+- PR `#102427` was rewritten into one commit and force-pushed with lease at
+  `74a53bb9ac3d1ab15b8a0ba004d65d76daf0ceb1` (`Add experimental Claw lifecycle
+  diagnostics`). Doctor now projects the canonical `claws status` model rather
+  than duplicating file/MCP inspection, reports partial installs, agent and
+  workspace drift, MCP ownership states, unresolved cron refs, and orphaned
+  subordinate rows across the workspace/package/MCP/cron ledgers. It remains
+  advisory and mutation-free. Both the core check and ordered doctor
+  contribution are omitted unless `OPENCLAW_EXPERIMENTAL_CLAWS=1`; real CLI
+  proof showed the check is unknown when disabled and reports a modified
+  managed `SOUL.md` when enabled. Validation passed `pnpm tsgo:core`, focused
+  Oxlint with zero findings, 114 doctor tests, and real CLI proof. Fresh-model
+  review remained blocked by the unsupported local `gpt-5.3-codex` ChatGPT
+  pairing. PR title/body were refreshed and current GitHub behavior/admission/
+  sanity checks pass.
+- Next: rewrite `#102959` / `user/giodl/claws-pr11-update-plan` as grouped,
+  agent-centric update planning. Its obsolete flat planner commit conflicted
+  with the new schema and CLI and was skipped during local rebase; the local
+  branch currently equals doctor head `74a53bb9ac3` and has not been pushed.
+
+- Last updated: 2026-07-10.
 - Last agent: Codex.
 - Current focus: RFC PR `https://github.com/openclaw/rfcs/pull/27` was
   refreshed after authoring the five-PR OpenClaw lifecycle stack. The RFC now
@@ -408,3 +641,177 @@
   Live labels now show `proof: sufficient`, `rating: 🐚 platinum hermit`, and
   `status: 👀 ready for maintainer look`; live checks have no current failures
   or pending checks.
+
+- PR8 skill-artifact apply: draft PR `https://github.com/openclaw/openclaw/pull/102383`
+  is open against PR7 (`user/giodl/claws-pr7-export`) at commit
+  `71fbfbce624`. It implements the RFC #27 first-series skill installer track:
+  `claws apply --yes` can install supported Claw `skill` artifacts via existing
+  ClawHub and local/git source skill installers, records skill artifact
+  provenance only for installed/satisfied artifact keys, validates ClawHub
+  owner-qualified refs against local status/origin metadata, and requires
+  matching `.openclaw/source-origin.json` for local/git idempotence. Validation
+  passed: focused Claws/provenance/artifact installer/CLI/lifecycle E2E Vitest
+  suites; `git diff --check`; `node scripts/check-no-conflict-markers.mjs`;
+  final `codex review -c model=gpt-5.5 --uncommitted` reported no discrete
+  correctness issues. `pnpm exec tsgo --noEmit --pretty false` remains blocked
+  by inherited unrelated `src/secrets/config-io.ts(12,17)` TS4058. ClawSweeper
+  re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/102383#issuecomment-4921267686`.
+
+- OpenClaw PR #102406 is the next first-series Claws PR, title
+  `Apply Claw MCP server artifacts`, head
+  `openclaw/openclaw:user/giodl/claws-pr9-mcp`, base
+  `user/giodl/claws-pr8-skills`, commit `430b524495a`. It is draft and adds
+  inline MCP server artifact apply for `mcpServer` entries by using the Claw
+  entry id as the `mcp.servers` name and a JSON object selector as the server
+  config. Writes delegate through the existing validated MCP config writer;
+  non-inline MCP selectors remain unsupported/skipped until a resolver exists;
+  differing existing MCP server configs fail closed instead of being
+  overwritten; and persisted artifact identity uses digest-only labels so inline
+  MCP secrets are not stored in artifact keys/selectors. Validation passed:
+  `node scripts/run-vitest.mjs src/claws/schema.test.ts
+  src/claws/provenance.test.ts src/claws/artifact-installers.test.ts
+  src/cli/claws-cli.test.ts src/claws/lifecycle.e2e.test.ts`; real CLI proof
+  for `claws apply --yes --json` writing `mcp.servers.docs` and recording one
+  digest-only MCP artifact ref; `git diff --check`; and
+  `node scripts/check-no-conflict-markers.mjs`. Final
+  `codex review -c model=gpt-5.5 --uncommitted` reported no actionable
+  correctness issues after fixes for non-inline MCP skipping, config-sensitive
+  artifact identity, overwrite conflicts, and secret-safe provenance. Full
+  `pnpm exec tsgo --noEmit --pretty false` remains blocked only by inherited
+  unrelated `src/secrets/config-io.ts(12,17)` TS4058. PR body was created and
+  `@clawsweeper re-review` was posted at
+  `https://github.com/openclaw/openclaw/pull/102406#issuecomment-4921474710`.
+
+- OpenClaw PR #102427 is the next first-series Claws PR, title
+  `Add Claw doctor diagnostics`, head
+  `openclaw/openclaw:user/giodl/claws-pr10-doctor`, base
+  `user/giodl/claws-pr9-mcp`, commit `b00b2badccb`. It is draft and adds
+  `core/doctor/claws-state` for applied Claw provenance drift: orphaned refs
+  without apply records, missing/disabled/changed inline MCP server config,
+  missing/modified/unreadable/unsafe/oversized Claw-managed workspace files,
+  and future persisted connector refs as unsupported until OpenClaw has a
+  stable connector setup path. Regular `openclaw doctor` and structured
+  `doctor --lint` both see the check. Validation passed:
+  `node scripts/run-vitest.mjs src/claws/doctor.test.ts
+  src/flows/doctor-core-checks.test.ts
+  src/flows/doctor-health-contributions.test.ts`; the broader Claws/doctor
+  suite including `src/claws/lifecycle.e2e.test.ts`; `git diff --check`;
+  `node scripts/check-no-conflict-markers.mjs`; real CLI proof for
+  `doctor --lint --only core/doctor/claws-state --json` reporting a modified
+  Claw-managed `SOUL.md`; and final `codex review -c model=gpt-5.5
+  --uncommitted`, which reported no discrete regression after fixes for the
+  interactive doctor no-op, read-error handling, and MCP config drift. Full
+  `node scripts/run-tsgo.mjs --noEmit --pretty false` is blocked in this linked
+  worktree because `node_modules/.bin/tsgo` is absent. PR body was created and
+  `@clawsweeper re-review` was posted at
+  `https://github.com/openclaw/openclaw/pull/102427#issuecomment-4921668047`.
+- RFC PR #27 was refreshed at commit `bd8a9ba` to simplify the first-series
+  plan after connector review: connectors are no longer an OpenClaw
+  implementation PR in this stack. They remain preview-only/fail-closed until
+  OpenClaw has a stable connector-owned setup surface. The authored stack now
+  lists #102383 skills, #102406 MCP, and #102427 doctor diagnostics as the
+  three first-series completion PRs. The RFC PR body was refreshed and
+  `@clawsweeper re-review` was posted at
+  `https://github.com/openclaw/rfcs/pull/27#issuecomment-4921709497`.
+- RFC PR #27 was refreshed again at commit `6365389` to add the two-PR
+  OpenClaw update/reconcile track: read-only `claws update --dry-run --json`
+  planning first, then consent-gated `claws update --yes` apply. The RFC PR
+  body was refreshed and `@clawsweeper re-review` was posted at
+  `https://github.com/openclaw/rfcs/pull/27#issuecomment-4926164140`.
+- OpenClaw PR #102959 is the next Claws PR, title `Add Claw update dry-run
+  planning`, head `openclaw/openclaw:user/giodl/claws-pr11-update-plan`, base
+  `user/giodl/claws-pr10-doctor`, commit `9904dd9e6b7`. It is draft and adds
+  `openclaw.clawUpdatePlan.v1` plus
+  `openclaw claws update <claw> --from <manifest> --dry-run --json`. The
+  planner compares persisted Claw state to a target manifest, reports
+  artifact/workspace add/change/remove/unchanged/manual/blocked decisions,
+  scopes workspace refs by canonical workspace root, fans out unscoped
+  workspace plans across all managed roots, fails target id mismatches, and
+  keeps `claws update --yes` fail-closed for the next PR. Validation passed:
+  focused Claws update/CLI tests; the broader Claws/provenance/workspace/state
+  CLI/lifecycle E2E/registry suite; `git diff --check`;
+  `node scripts/check-no-conflict-markers.mjs`; `oxfmt --check` for touched
+  files; real CLI proof for apply followed by update dry-run; and final
+  `codex review -c model=gpt-5.5 --uncommitted`, which reported no discrete
+  correctness issues after fixes for workspace drift, phase changes, target
+  diagnostics, and multi-workspace planning. Full `node scripts/run-tsgo.mjs
+  --noEmit --pretty false` timed out after 180s without diagnostics in this
+  linked WSL worktree. `@clawsweeper re-review` was posted at
+  `https://github.com/openclaw/openclaw/pull/102959#issuecomment-4926723757`.
+
+- OpenClaw PR #102982 is the next Claws PR, title `Apply Claw update
+  reconciliations`, head
+  `openclaw/openclaw:user/giodl/claws-pr12-update-apply`, base
+  `user/giodl/claws-pr11-update-plan`, commit
+  `86d6f0aa891b0540e9e6e843b24eb6705ab77079`. It is draft and implements the
+  consent-gated `claws update <claw> --from <manifest> --yes` path on top of
+  the read-only planner. The update apply path revalidates the plan, fails on
+  manual/blocker/error states, requires `--workspace` for workspace/persona
+  reconciliation, validates workspace writes before artifact mutation, installs
+  supported target artifacts, removes stale unchanged Claw-managed workspace
+  files, preserves local edits, handles same-entry-id target moves, defers
+  artifact provenance rewrites until workspace reconciliation succeeds, and
+  emits `openclaw.clawUpdateResult.v1`. Validation passed:
+  `node scripts/run-vitest.mjs src/cli/claws-cli.test.ts
+  src/claws/update-plan.test.ts src/claws/provenance.test.ts`; the broader
+  Claws/doctor/CLI suite including `src/claws/lifecycle.e2e.test.ts`;
+  `git diff --check`; `node scripts/check-no-conflict-markers.mjs`;
+  `pnpm exec oxfmt --check --threads=1 src/cli/claws-cli.runtime.ts
+  src/cli/claws-cli.test.ts src/claws/lifecycle-state.ts
+  src/claws/provenance.ts src/claws/update-plan.ts`; and real CLI proof for
+  apply followed by `claws update --yes --workspace --json` updating `SOUL.md`
+  and deleting a stale managed file. `node_modules/.bin/tsgo --noEmit
+  --pretty false` now gets past this patch and stops at inherited
+  `src/secrets/config-io.ts(12,17)` TS4058. Final `codex review -c
+  model=gpt-5.5 --uncommitted` reported no actionable correctness issues after
+  fixes for same-id workspace moves, premature provenance rewrites, and the
+  update-result logger type. PR body was created and `@clawsweeper re-review`
+  was posted at
+  `https://github.com/openclaw/openclaw/pull/102982#issuecomment-4927121568`.
+
+- OpenClaw PR #102982 was superseded in place at commit `5f121bf3f93` and
+  retitled `Apply consented grouped Claw updates`. The consented `--yes` path
+  now executes every grouped owner from PR #102959: agent config, managed
+  workspace files, package references/installers, MCP servers, and cron jobs.
+  Workspace and MCP writes use digest/expected-value checks; cron changes must
+  converge on the stable declaration key and scheduler id; package removal is
+  reference-only and conflicting shared plugin version pins fail closed.
+  Completed owners compensate in reverse order before root Claw provenance is
+  advanced. Uncertain config/gateway writes and package artifacts without an
+  installer rollback surface `update_partial` rather than claiming atomicity.
+  The PR body explicitly aligns shared package ownership with Control UI plugin
+  management PR #103176 and keeps portable MCP declarations separate from its
+  curated connector shelf. Validation passed: 133 tests across the full Claws,
+  CLI, lifecycle, config, and executor surface; non-incremental
+  `tsgo -p tsconfig.json --noEmit`; `git diff --check`; and a real isolated CLI
+  `1.1.0 -> 1.2.0` preview/apply/status proof that changed the agent, added two
+  managed files, added a remote OAuth MCP server, and ended with zero partial,
+  drifted, or unresolved records. A fresh `@clawsweeper re-review` was posted
+  at `https://github.com/openclaw/openclaw/pull/102982#issuecomment-4938897298`.
+
+- RFC PR #27 was synchronized with the completed implementation series at
+  commit `845df5c`. The RFC now links all eleven ordered OpenClaw PRs, cites
+  merged Control UI plugin-management PR #103176, defines exact-version package
+  update and conflicting shared-plugin pin behavior, documents per-owner
+  concurrency boundaries and reverse compensation, and requires explicit
+  partial results for uncertain Gateway/config writes or installed artifacts
+  without rollback. The resolved shared-package update question was removed
+  from `Unresolved questions`, and update acceptance criteria now cover
+  revalidation, compensation, and partial outcomes. The RFC PR body was
+  refreshed; live state is mergeable with no reported checks. A fresh
+  `@clawsweeper re-review` was posted through the GitHub app as comment
+  `4939017821` after the CLI identity was rejected by the RFC repo's managed
+  user policy.
+
+- All eleven live OpenClaw PR bodies were audited and normalized as one review
+  arc. PRs #101328, #101755, and #101973 no longer pin stale pre-rebase branch
+  or RFC heads. PRs #102228 through #102427 now state their dependency, precise
+  ownership boundary, sequencing rationale, and next stage. The cron contract
+  now correctly says `main` maps to `session:main` while the scheduler record
+  remains pinned to the final Claw agent id. The package PR explicitly names the
+  shared CLI/Gateway/Control UI uninstall-warning path and #103176 alignment.
+  PR #102959 explains why planning is read-only, and #102982 identifies itself
+  as the final consent/compensation stage. A live follow-up scan confirmed every
+  body has stack and arc context, every base is correct, and no stale head hash
+  claims remain.
