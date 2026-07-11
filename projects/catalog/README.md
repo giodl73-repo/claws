@@ -16,7 +16,8 @@ and RFC/PR-stack coordination.
 | Repo | PR / Issue | Branch | Status | Purpose |
 | --- | --- | --- | --- | --- |
 | OpenClaw RFCs | `openclaw/rfcs#32` | `codex/cli-catalog-overlay-rfc` | Open | RFC for the catalog view, review stack, and implementation boundaries. |
-| OpenClaw | `openclaw/openclaw#100960` | `user/giodl/cli-catalog-review-hardening` | Draft rollup | Catalog list command, lenses, generated docs, plugin/runtime/node metadata, and prompt/audit consumers. |
+| OpenClaw | `openclaw/openclaw#100960` | `user/giodl/cli-catalog-review-hardening` | Draft | Initial `commands list` and `commands inspect` implementation. |
+| OpenClaw fork | `giodl73-repo/openclaw#24`-`#26` | `user/giodl/commands-inventory-*` | Draft review PRs | Command inventory list, exact inspection, and optional scoped prompt projection. |
 | OpenClaw fork | `giodl73-repo/openclaw#11`-`#16` | `user/giodl/cli-catalog-review-*` | Draft review PRs | Fork-local step PRs for one-layer-at-a-time review. |
 
 ## Related Areas

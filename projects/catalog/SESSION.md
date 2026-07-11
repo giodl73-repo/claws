@@ -12,17 +12,17 @@
 - Area: OpenClaw catalog metadata and catalog-driven command/tool inventory.
 - Primary repo: `https://github.com/openclaw/openclaw`.
 - Local worktree: `C:\src\openclaw-catalog-restack`.
-- Current branch: `user/giodl/cli-catalog-review-node-restack`.
+- Current branch: `user/giodl/cli-catalog-review-dynamic-lenses`.
 - Main tracking file: `projects/catalog/SESSION.md`.
 - Skill to use: `codex-review` for review passes; `openclaw-pr-loop` for PR
   updates, CI, or push/PR handling.
 
 ## Current Session
 
-- Last updated: 2026-07-09
+- Last updated: 2026-07-10
 - Last agent: Codex
-- Current focus: RFC PR filed and implementation stack prepared as both an
-  upstream rollup PR and fork-local step PRs.
+- Current focus: command inventory PR1+PR2 promoted to the upstream draft, with
+  a fork-only scoped prompt projection prepared as optional PR3.
 - Active branch / PR:
   - RFC PR: `https://github.com/openclaw/rfcs/pull/32`.
   - Upstream rollup draft PR:
@@ -30,7 +30,11 @@
   - Fork-local step PRs:
     `https://github.com/giodl73-repo/openclaw/pull/11` through
     `https://github.com/giodl73-repo/openclaw/pull/16`.
-  - Local branch: `user/giodl/cli-catalog-review-node-restack`.
+  - Commands comparison PRs:
+    `https://github.com/giodl73-repo/openclaw/pull/24` through
+    `https://github.com/giodl73-repo/openclaw/pull/26`.
+  - Current local branch: `user/giodl/commands-inventory-prompt` in
+    `C:\src\openclaw-commands-inventory`.
 - Known dirty state:
   - `projects/openclaw/SESSION.md` has catalog review notes from the latest
     per-PR review pass.
@@ -39,17 +43,186 @@
 
 ## Current Catalog Stack
 
-- PR1 `user/giodl/cli-catalog-review-foundation` at `ea7066c51d`.
-- PR2 `user/giodl/cli-catalog-review-dynamic-lenses` at `5c3974e241`.
-- PR3 `user/giodl/cli-catalog-review-prompt` at `f54594b703`.
-- PR4 `user/giodl/cli-catalog-review-schema-fixtures` at `7628b91a81`.
-- PR5 `user/giodl/cli-catalog-review-generated-docs` at `98b48beaeb`.
-- PR6 `user/giodl/cli-catalog-review-hardening` at `e8fca427fb`.
+- PR1 `user/giodl/cli-catalog-review-foundation` at `a80610e1be`.
+- PR2 `user/giodl/cli-catalog-review-dynamic-lenses` at `e67c446807`.
+- PR3 `user/giodl/cli-catalog-review-prompt` at `6c0c7f1eb5`.
+- PR4 `user/giodl/cli-catalog-review-schema-fixtures` at `e08b56c47d`.
+- PR5 `user/giodl/cli-catalog-review-generated-docs` at `34d5578e3b`.
+- Preserved reviewed full stack:
+  `user/giodl/cli-catalog-review-full-stack` at `a86631846a`.
+- The catalog PR2 remains preserved at `e67c446807`. The remote
+  `user/giodl/cli-catalog-review-hardening` branch is the head of upstream draft
+  `openclaw/openclaw#100960` and now points to the promoted commands stack at
+  `90a7b1ca2b`.
+
+## 2026-07-10 Reduced Upstream Draft
+
+- Completed another sequential Codex review and repair loop across PR3, PR6,
+  and the full rollup. Final rollup review reported no actionable correctness
+  regressions.
+- Accepted and fixed three substantive cross-layer findings before reducing
+  the upstream draft:
+  - sandboxed `exec` no longer advertises host-only `openclaw` routes;
+  - plugin prompt metadata is normalized and bounded;
+  - routed operation effect metadata now reaches list/audit/summary outputs.
+- Full-stack focused validation passed: 201 tests across five Vitest projects,
+  generated-doc freshness, 53-file formatting, 50-file lint, diff checks, and
+  conflict-free merge-tree.
+- Preserved that reviewed result on fork branch
+  `user/giodl/cli-catalog-review-full-stack` at `a86631846a`.
+- Narrowed upstream draft `openclaw/openclaw#100960` to PR1+PR2 only and then
+  updated PR2 to `e67c446807`; the title/body now center the core read-only catalog,
+  runtime/plugin inventory, audit, operator-summary, and test-plan views.
+- Fork review PR `giodl73-repo/openclaw#16` auto-closed after its shared head
+  branch moved behind the PR5 base; the complete PR6/full-stack result remains
+  preserved on `user/giodl/cli-catalog-review-full-stack`.
+- Folded the minimum trustworthy-audit metadata down from the preserved full
+  stack into PR2:
+  - `CommandEffectProfile` contains only effect mode, optional risk, and
+    optional confirmation requirement.
+  - `CatalogExposure` contains only `public` / `internal` tier.
+  - Plugin descriptors can be hidden; plugin metadata is runtime-validated at
+    both registration boundaries.
+  - Prompt command hints remain excluded from the source contract.
+- `catalog audit --plugin-descriptors` and
+  `catalog summary --plugin-descriptors` now load opted-in plugin descriptors;
+  operator summaries include separate high-risk attention.
+- Final Codex review accepted and fixed plugin prompt-visibility inconsistency,
+  missing CLI plugin loading for audit/summary, and omitted high-risk summary
+  attention. The convergence review was clean.
+- Reduced-draft validation passed: 57 focused tests, `pnpm tsgo:core:test`,
+  changed-file format/lint, `git diff --check`, and a conflict-free merge-tree
+  against current `origin/main`.
+- Removed the dormant `promptProjection` JSON/count and `prompt` visibility
+  value from PR2 so prompt generation is fully deferred instead of leaking an
+  unused public shape into the initial catalog contract.
+- Final branch Codex review at `e67c446807` found no actionable regressions.
+- Rewrote RFC #32 to the compact template shape and pushed `842da7f`; PR1+PR2
+  are the initial implementation, while fork PR3-PR6 are linked as example next
+  steps rather than acceptance requirements. The RFC Codex review was clean,
+  and the live RFC PR body now matches that boundary.
 
 ## 2026-07-09 RFC Filing / Review PR Prep
 
 - Opened RFC PR `openclaw/rfcs#32`:
   `https://github.com/openclaw/rfcs/pull/32`.
+- Latest RFC PR head: `767108a`, titled `Command Catalog`. The RFC file is now
+  `rfcs/0016-command-catalog.md`. It recommends
+  `openclaw commands` list/inspect as Option A and preserves the broader
+  `openclaw catalog` list/audit/test-matrix/summary work as Option B.
+
+## 2026-07-10 Commands Prompt Follow-Up
+
+- Opened fork-only draft PR #26, `Optional PR3: add scoped command prompt
+  projection`: `https://github.com/giodl73-repo/openclaw/pull/26`.
+- Branch `user/giodl/commands-inventory-prompt` at `1eb05fc55a`, stacked on
+  PR #25 (`user/giodl/commands-inventory-inspect`).
+- The projection uses only command-owned catalog records: routed CLI
+  operations, explicitly prompt-enabled plugin CLI commands, and caller-supplied
+  node commands in `node-operator` scope. It excludes ownerless tool adapters
+  and broader catalog reports.
+- Safety behavior gates host CLI routes on available, unsandboxed `exec`,
+  bounds externally supplied strings, and renders confirmation requirements.
+- Validation passed: 103 focused tests, core TypeScript check,
+  `git diff --check`, and a clean final Codex review.
+- RFC PR #32 now links the optional follow-up at head `767108a`; its live PR
+  body leads with the compliance/operator inventory need, cites related
+  OpenClaw issues #52919, #77943, #50011, and #77730, and states that PR #26
+  is not included in the initial upstream draft.
+- A `.craft/roles/claws` review added three guardrails: omitted effect metadata
+  means unknown rather than permissive, plugin collection is non-activating and
+  fails visibly when incomplete, and catalog snapshots are not signed
+  attestations by themselves.
+- A final GitHub issue search added #98978 (help/completion metadata drift),
+  #96697 (plugin-runtime cost on read-only listing), #89797 (node capability /
+  command mismatch), and #78082 (stale external-provider registrations). The
+  RFC now states that catalog output is OpenClaw-known state, not proof that an
+  external provider has reconciled its control plane.
+- The RFC now describes the right documentation automation boundary. Fork PR
+  #15 generated one reference page plus navigation/map/glossary/freshness
+  wiring; it did not update every CLI document. A future command-only docs PR
+  should generate `/cli/commands`, enforce cross-surface description
+  consistency, retain hand-authored workflow/SDK guidance, and exclude dynamic
+  deployment inventory from checked-in snapshots.
+- Opened fork-only optional PR4
+  `https://github.com/giodl73-repo/openclaw/pull/28`, branch
+  `user/giodl/commands-inventory-docs` at `375e03d6b8`, stacked on PR2. It adds
+  generated `/cli/commands`, `docs:commands:gen` / `docs:commands:check`,
+  `check:docs` integration, navigation/docs-map wiring, and three generator
+  tests. It reuses the existing root-help/registered-command description
+  contract rather than creating a duplicate guard.
+- PR28 adversarial validation: private-QA environment output is stable; a
+  temporary canonical description change made the freshness check fail with
+  the expected regeneration instruction; restoration returned it to green.
+  Final focused validation passed 10 tests across three shards and the branch
+  diff Codex review was clean.
+- PR28 CI-routing validation found and fixed a descriptor-only gap: changes to
+  `src/cli/program/subcli-descriptors.ts` or the command-reference generator now
+  schedule `check-docs` while remaining non-doc changes for lane selection.
+  Focused catalog/generator/workflow validation passed 50 tests, formatting,
+  generated-doc freshness, docs-map freshness, and `git diff --check`.
+- Opened optional live-node follow-up
+  `https://github.com/giodl73-repo/openclaw/pull/29`, branch
+  `user/giodl/commands-live-node` at `6df97ae7021`, stacked on prompt PR26. It
+  reuses Gateway `node.describe` for `commands list/inspect --node <id>`,
+  requires a connected node, and emits timestamped identifier-only runtime
+  records compatible with the node-operator projection. Validation passed 29
+  focused tests, type-aware lint, formatting, and diff checks. Full lint was
+  blocked by a missing unrelated dependency in the borrowed WSL dependency
+  tree; nested Codex review was blocked by unavailable WSL authentication.
+- RFC PR32 now documents PR29 and the live-node metadata boundary at `67d5851`.
+- RFC documentation follow-ups now include: public command page coverage,
+  generated subcommand/option references, and runtime plugin inventory
+  guidance. Live node guidance remains deferred until a paired-node collector
+  exists; dynamic results are not canonical checked-in docs.
+- PR2 and upstream draft #100960 now point to `90a7b1ca2b`. ClawSweeper's
+  contributor-owned findings were addressed: requested plugin scans fail on
+  loader exceptions or error diagnostics, the three plugin descriptor fields
+  are documented with defaults and an example, and the PR body contains live
+  core/plugin/failure proof.
+- Exact-head proof: core inventory reported 61 descriptors / 26 runtime / 0
+  plugin commands; opt-in plugin inventory reported 3 plugin commands; a
+  controlled plugin registration failure exited 1 with zero stdout bytes.
+- Focused hardening validation passed (10 tests), both final Codex reviews were
+  clean, and fresh ClawSweeper reviews were requested on #100960 and RFC #32.
+- The full core TypeScript runner emitted no diagnostics but did not complete
+  within two five-minute local attempts; do not report that latest rerun as a
+  pass.
+
+## 2026-07-10 Commands Comparison Stack
+
+- Preserved the existing catalog branches and upstream draft unchanged for
+  side-by-side review.
+- Created `C:\src\openclaw-commands-inventory` from current `origin/main`.
+- Opened fork draft PR #24, `Alternative PR1: add commands inventory list`:
+  `https://github.com/giodl73-repo/openclaw/pull/24`, branch
+  `user/giodl/commands-inventory-foundation`, head `d038dbb415`.
+- Opened stacked fork draft PR #25, `Alternative PR2: add exact command
+  inspection`: `https://github.com/giodl73-repo/openclaw/pull/25`, branch
+  `user/giodl/commands-inventory-inspect`, current head `90a7b1ca2b`.
+- Option B removes ownerless tool adapters and aggregate audit/test-matrix/
+  summary reports. It retains CLI descriptors, routes, runtime commands,
+  opt-in plugin CLI descriptors, and caller-supplied node command records.
+- Node records are explicitly labeled `caller-supplied`; neither comparison PR
+  claims a live `node.list` / `node.describe` bridge yet.
+- Current OpenClaw main already exposes Gateway RPC `commands.list` for
+  agent-facing chat/native/skill/plugin commands. The RFC treats it as a
+  separate existing surface and asks how future convergence should work.
+- PR1 Codex review was clean after routing plugin logs away from both JSON and
+  Markdown output and clarifying node scope.
+- PR2 Codex review was clean after fixing inherited route semantics, exact
+  existence, runtime aliases, inherited operations, dynamic Markdown fences,
+  and lazy sub-CLI hydration for paths such as `models aliases list`.
+- Validation: 44 focused tests on the full alternate stack and the core TypeScript
+  check passed; focused PR1 and PR2 reruns also passed after review fixes.
+- Promoted the commands stack to upstream draft
+  `https://github.com/openclaw/openclaw/pull/100960` by moving its existing head
+  branch `user/giodl/cli-catalog-review-hardening` to `7ad20bd596`. The PR title
+  and body now describe `commands list` / `commands inspect`; the former catalog
+  implementation remains preserved on the dedicated fork branches.
+- Final promoted-head proof: 44 focused tests, core TypeScript check,
+  `git diff --check`, and clean per-commit Codex reviews. The last review fix
+  hydrates both core and sub-CLI lazy command groups before exact inspection.
 - Updated upstream rollup draft PR `openclaw/openclaw#100960` to link the RFC
   and the six fork-local review PRs.
 - Opened fork-local draft review PRs:
@@ -90,8 +263,68 @@
   exact PID and ask explicitly first.
 - Do not overwrite unrelated dirty notes such as `projects/doctor/*`.
 
+## 2026-07-09 Fresh Per-Branch Codex Review
+
+- Reviewed all six OpenClaw catalog branches independently against their
+  actual stacked bases, then reviewed the complete rollup against current
+  `origin/main`. No implementation changes were made or pushed.
+- PR1 accepted one Markdown-rendering finding: runtime-supplied node fields
+  are interpolated into table cells without escaping delimiters, line breaks,
+  or backticks.
+- PR2 accepted the same rendering bug class for plugin descriptions; the
+  sibling runtime-command description path needs the same shared table-cell
+  encoder. PR3 prompt projection and PR4 schema fixtures were clean.
+- PR5 accepted two documentation-contract findings: the generated page points
+  users to the CLI for node inventory even though only programmatic callers can
+  currently supply node commands, and `cli/catalog` is missing from
+  `docs/docs.json` navigation.
+- PR6 accepted three findings: no OpenClaw production caller populates
+  `cliCatalogOverlay`; plugin effect/exposure metadata is copied across the JS
+  plugin boundary without runtime validation; and hidden lazy plugin
+  descriptors can reappear through runtime Commander enumeration.
+- The rollup review accepted two cross-layer findings: routed CLI operations
+  remain prompt-visible when an agent lacks an execution surface, and plugin
+  logs are isolated from JSON output but can corrupt Markdown catalog output.
+- Verification on `user/giodl/cli-catalog-review-hardening` passed: 15 focused
+  files / 145 tests across 5 Vitest shards, generated-doc `--check`, both diff
+  checks, and a conflict-free `git merge-tree` with current `origin/main`.
+- Review checkout note: the nested reviewer launched a local `pnpm install`
+  and stopped only its own two Node child processes; it did not target Codex or
+  pre-existing sessions.
+
 ## Open Threads
 
+- Lobster Scout catalog PR1 is open:
+  `https://microsoft.ghe.com/bic/lobster/pull/4272`, branch
+  `user/giodl/scout-catalog-inventory-plugin`, head `c0386a6b6`, rebased on
+  current `origin/main`. Fix follow-up added 2026-07-09: catalog-inventory is
+  preserved by the OpenClaw plugin overlay, strict container wiring validation
+  now includes the catalog plugin files/CLI/tool contract, shipped-manifest
+  tests cover the catalog plugin, and the unrelated `backup_sqlite_snapshot`
+  allowance was removed from the catalog PR. Validation passed locally:
+  `bash scripts/validate-code-mode-container.sh`,
+  `python scripts/openclaw_container_hardening_test.py`, catalog plugin
+  `npm test -- --test-reporter=dot`, `cargo fmt --check`, JSON parse smoke,
+  node syntax checks, and `git diff --check`. Targeted Cargo tests were
+  blocked locally by missing `CARGO_REGISTRIES_LOBSTER_TOKEN`. Live ADO build
+  `171662067`: repaired `Validate code-mode container wiring` task passed;
+  broader Lobster runtime checks were still running. `GitOps/GitHubPop` still
+  needs PoP.
+- Lobster Scout catalog PR2 is open:
+  `https://microsoft.ghe.com/bic/lobster/pull/4297`, branch
+  `user/giodl/scout-catalog-node-prompt`, head `8471b690a`, restacked on PR1
+  `https://microsoft.ghe.com/bic/lobster/pull/4272`. Scope: adds a
+  catalog-backed `node-operator` prompt projection to Lobster's
+  `catalog-inventory` plugin, exposes it through
+  `catalog prompt --scope node-operator` and
+  `catalog_inventory { action: "nodePrompt" }`, and updates `nodes-code-mode`
+  to use the shared catalog renderer instead of a separate hand-written prompt.
+  Validation after restack passed: catalog plugin
+  `npm test -- --test-reporter=dot`, node-prompt import smoke using
+  `renderNodeOperatorPromptReport`, bundled `nodes-code-mode/index.js` syntax
+  check, `bash scripts/validate-code-mode-container.sh`, and
+  `git diff --check`. Local `nodes-code-mode` tests are blocked because `tsx`
+  is not installed in that plugin worktree environment.
 - Watch #100960 checks after the rebased push.
 - Use the fork-local PRs as review aids; open equivalent upstream PRs only if
   maintainers prefer separate implementation PRs.
