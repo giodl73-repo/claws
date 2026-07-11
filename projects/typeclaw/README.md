@@ -13,6 +13,7 @@ worth filing. It should not blindly upgrade OpenClaw's toolchain without data.
 | Area | File |
 | --- | --- |
 | Session handoff | `SESSION.md` |
+| TS7/native findings report | `ts7-native-api-report.md` |
 
 ## Active Work
 

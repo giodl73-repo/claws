@@ -28,7 +28,8 @@
 - Last agent: Copilot.
 - Current focus: Created the OpenClaw TypeClaw branch/worktree for TypeScript
   native / TS7 evaluation; added and pushed the first TypeScript compiler API
-  seam, TS7/native diagnostics, and an unstable API coverage map.
+  seam, TS7/native diagnostics, an unstable API coverage map, and a TS owner
+  findings report.
 - Active branch / PR: `user/giodl/typeclaw-ts-native-eval` in
   `C:\src\openclaw-typeclaw`, pushed to
   `giodl73-repo/openclaw:user/giodl/typeclaw-ts-native-eval` at `f93f344c18`.
@@ -121,4 +122,8 @@
   the root-module blocker is replaced by the new targeted diagnostic; then
   either prototype the `typescript/unstable/sync`/`ast` adapter for the partial
   API-baseline path or file the missing API-parity gaps upstream.
-- Decide what evidence Anders/internal TS owners would need.
+- Added `projects/typeclaw/ts7-native-api-report.md`, a concise report for
+  Anders/internal TypeScript owners. It captures the baseline timings,
+  `typescript@7.0.1-rc` export shape, branch commits, API coverage map, and
+  questions about root compatibility, `transpileModule`, tsconfig parsing, and
+  stable native compiler API direction.
