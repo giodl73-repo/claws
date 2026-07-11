@@ -95,6 +95,17 @@
 
 ## Implementation Notes
 
+- 2026-07-10: RFC PR 33 now includes one explicit completion roadmap at RFC
+  head `dc7927b`. It records the remaining work as canonical core-condition
+  completion, projection parity across ready/readyz/health/status/CLI, bounded
+  readiness-provider behavior, executed package-installed Linux/Docker proof,
+  later blocking release conformance, stable readiness transition events, and
+  non-blocking Doctor/lint guidance. It also draws the four-corner boundary:
+  readiness owns startup and serviceability; dirty/synced state, checkpoint
+  publication, and generation-fenced safe destruction remain in Runtime
+  Continuity and Safe Shutdown. The upstream RFC PR body carries the same
+  compact roadmap.
+
 - 2026-07-10: Normalized the original Gateway readiness evaluator and restacked
   the full draft implementation stack.
   - PR 17 `1bb6bfd5`: startup, drain, channel, and event-loop observations now
