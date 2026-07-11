@@ -14,6 +14,7 @@ worth filing. It should not blindly upgrade OpenClaw's toolchain without data.
 | --- | --- |
 | Session handoff | `SESSION.md` |
 | TS7/native findings report | `ts7-native-api-report.md` |
+| Minimal compiler API repro | `ts7-native-minimal-repro.md` |
 
 ## Active Work
 

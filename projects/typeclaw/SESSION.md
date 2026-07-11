@@ -133,3 +133,7 @@
   native-preview package exports `"."` only as `./lib/version.cjs`, not as the
   classic compiler API; the regular `typescript@7.0.1-rc` package still exports
   only `./unstable/*` plus `./package.json`.
+- Added `projects/typeclaw/ts7-native-minimal-repro.md`, a verified throwaway
+  npm repro showing `require("typescript")` fails for `typescript@7.0.1-rc` and
+  `require("@typescript/native-preview")` exposes only version metadata at the
+  root. Use this as the smallest handoff artifact for TypeScript/native owners.
