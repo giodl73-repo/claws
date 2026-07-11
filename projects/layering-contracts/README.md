@@ -36,6 +36,8 @@ boundary; neither is a fifth semantic area.
 | Working `/synced`, generation, provider, and graceful-shutdown hypothesis | `synchronization-model.md` |
 | As-is inventory index and evidence requirements | `inventory/README.md` |
 | Boot/start DTO, environment, and baked-config audit pass 1 | `inventory/boot-config-2026-07-10.md` |
+| Managed env reset, forwarding, and consumer audit pass 2 | `inventory/env-matrix-2026-07-10.md` |
+| Effective config writer and ordering audit pass 3 | `inventory/config-writers-2026-07-10.md` |
 | Current session and resume state | `SESSION.md` |
 | Historical boundary analysis | `../hosting-profiles/analysis.md` |
 | Historical Lobster inventory | `../hosting-profiles/lobster-layer-inventory.md` |

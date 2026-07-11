@@ -12,8 +12,10 @@ The allowed integration surfaces and required disposition fields are defined in
 | Inventory | Area | Status |
 | --- | --- | --- |
 | Boot/start/config audit pass 1 | Activation / Runtime boundary | `boot-config-2026-07-10.md` |
-| Exact environment projection, reset, forwarding, and consumer matrix | Activation / Runtime boundary | In progress |
-| Baked config field, writer, and consumer map | Activation | Pass 1 complete; writer trace pending |
+| Managed environment matrix pass 2 | Activation / Runtime boundary | `env-matrix-2026-07-10.md` |
+| Complete environment registry including per-claims injectors | Activation / Runtime boundary | In progress |
+| Effective config writer/order audit pass 3 | Activation | `config-writers-2026-07-10.md` |
+| Config writer failure and preparation-path parity matrix | Activation | Pending |
 | State path durability table | State and continuity | Pending |
 | Mutation generation and component watermark map | State and continuity | Pending |
 | Snapshot materialization versus host publication flow | State and continuity | Pending |

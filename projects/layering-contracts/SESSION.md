@@ -30,8 +30,9 @@
 - Current focus: Four-corner framing is complete. Runtime Activation folds into
   readiness; Evidence/Compatibility uses capabilities, conformance, identity,
   and events; State/Continuity has the only new `/synced` hypothesis. Boot and
-  Configuration audit pass 1 is complete at Lobster `0a9514c1ce`; resume with
-  the exact env reset/forwarding/consumer matrix.
+  Boot/config pass 1, managed-env pass 2, and effective-config writer pass 3 are
+  complete at Lobster `0a9514c1ce`; resume with complete env registry or trusted
+  identity/proxy-pipe tracing.
 - Active branch / PR: none for the umbrella effort
 - Known dirty state: `.artifacts/` is an unrelated untracked workspace item
 - Blocking question: none
@@ -41,7 +42,7 @@
 - Run: `git status --short --branch`
 - Discover: current Lobster and OpenClaw worktrees and branches
 - Audit first: state paths, writers, durability, consistency, and restore order
-- Audit now: exact env projection, reset, child forwarding, and consumers
+- Audit now: complete env registry or trace trusted identity/proxy-pipe
 - Inventory later: proxy-pipe/lifecycle, state paths, and telemetry dependencies
 - Update: `contract-portfolio.md` and this session after each audit slice
 
@@ -75,4 +76,6 @@
   independently useful upstream primitive is proven.
 - Start the State and Continuity repo audit without changing or filing RFCs.
 - Verify the eight projection/reset candidates in
-  `inventory/boot-config-2026-07-10.md` before treating any as a bug.
+  `inventory/boot-config-2026-07-10.md` before treating any as a bug. Candidate
+  resolution is recorded in `inventory/env-matrix-2026-07-10.md`; two keys have
+  no source consumer and one conditional repo filename is process-sticky.
