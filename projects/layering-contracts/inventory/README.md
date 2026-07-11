@@ -15,6 +15,7 @@ The allowed integration surfaces and required disposition fields are defined in
 | Managed environment matrix pass 2 | Activation / Runtime boundary | `env-matrix-2026-07-10.md` |
 | Complete environment registry including per-claims injectors | Activation / Runtime boundary | In progress |
 | Effective config writer/order audit pass 3 | Activation | `config-writers-2026-07-10.md` |
+| Host/operator config replacement fit | Activation | `host-operator-config-fit-2026-07-10.md` |
 | Config writer failure and preparation-path parity matrix | Activation | Pending |
 | State path durability table | State and continuity | Pending |
 | Mutation generation and component watermark map | State and continuity | Pending |

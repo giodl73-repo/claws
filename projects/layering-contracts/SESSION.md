@@ -30,9 +30,9 @@
 - Current focus: Four-corner framing is complete. Runtime Activation folds into
   readiness; Evidence/Compatibility uses capabilities, conformance, identity,
   and events; State/Continuity has the only new `/synced` hypothesis. Boot and
-  Boot/config pass 1, managed-env pass 2, and effective-config writer pass 3 are
-  complete at Lobster `0a9514c1ce`; resume with complete env registry or trusted
-  identity/proxy-pipe tracing.
+  Boot/config pass 1, managed-env pass 2, effective-config writer pass 3, and
+  host/operator authority fit assessment are complete at Lobster `0a9514c1ce`.
+  Resume with leaf classification/prototype or trusted identity/proxy-pipe.
 - Active branch / PR: none for the umbrella effort
 - Known dirty state: `.artifacts/` is an unrelated untracked workspace item
 - Blocking question: none
@@ -74,6 +74,9 @@
   upstream contract after evidence review.
 - Keep Activation and Evidence/Compatibility as inventories until a narrow
   independently useful upstream primitive is proven.
+- Test the sparse host-authority model before proposing a general overlay
+  framework: same OpenClaw schema, host owns declared fields, operator owns the
+  rest, conflicts fail validation.
 - Start the State and Continuity repo audit without changing or filing RFCs.
 - Verify the eight projection/reset candidates in
   `inventory/boot-config-2026-07-10.md` before treating any as a bug. Candidate

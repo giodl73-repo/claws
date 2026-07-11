@@ -8,6 +8,12 @@ observations should contribute to the existing readiness result. Broader
 desired-versus-effective configuration drift belongs in status and future
 control-plane reconciliation work.
 
+The current leading configuration hypothesis is two authorities over the same
+OpenClaw schema: a sparse read-only host document claims fields by presence,
+while the operator controls undeclared fields. See
+`inventory/host-operator-config-fit-2026-07-10.md`. This is composition and
+provenance, not a `/converged` probe.
+
 ## Question
 
 How does host intent become one accepted, inspectable OpenClaw runtime
