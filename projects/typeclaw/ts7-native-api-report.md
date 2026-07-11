@@ -17,6 +17,14 @@ Current head: `f93f344c18`
 
 ## Evidence
 
+- Live npm release check on 2026-07-10:
+  - `typescript@latest` and `typescript@rc` both resolve to `7.0.1-rc`.
+  - `@typescript/native-preview@latest` resolves to
+    `7.0.0-dev.20260705.1`.
+  - No newer stable or RC package with classic root compiler API parity was
+    available from npm.
+  - `@typescript/native-preview@latest` does export `"."`, but only to
+    `./lib/version.cjs`; it does not provide the classic root compiler API.
 - Current OpenClaw baseline:
   - `typescript@6.0.3`
   - `@typescript/native-preview@7.0.0-dev.20260704.1`

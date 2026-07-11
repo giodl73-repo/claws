@@ -127,3 +127,9 @@
   `typescript@7.0.1-rc` export shape, branch commits, API coverage map, and
   questions about root compatibility, `transpileModule`, tsconfig parsing, and
   stable native compiler API direction.
+- Live npm release check on 2026-07-10 found no better package to try:
+  `typescript@latest` and `typescript@rc` are both `7.0.1-rc`, and
+  `@typescript/native-preview@latest` is `7.0.0-dev.20260705.1`. The
+  native-preview package exports `"."` only as `./lib/version.cjs`, not as the
+  classic compiler API; the regular `typescript@7.0.1-rc` package still exports
+  only `./unstable/*` plus `./package.json`.
