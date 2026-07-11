@@ -28,10 +28,10 @@
 - Last agent: Copilot.
 - Current focus: Created the OpenClaw TypeClaw branch/worktree for TypeScript
   native / TS7 evaluation; added and pushed the first TypeScript compiler API
-  seam.
+  seam plus TS7/native diagnostic hardening.
 - Active branch / PR: `user/giodl/typeclaw-ts-native-eval` in
   `C:\src\openclaw-typeclaw`, pushed to
-  `giodl73-repo/openclaw:user/giodl/typeclaw-ts-native-eval` at `47bcbcb19d`.
+  `giodl73-repo/openclaw:user/giodl/typeclaw-ts-native-eval` at `6669f86e91`.
 - Known dirty state: `C:\src\claws-hapi` already has unrelated dirty project
   notes. This session added `projects/typeclaw/`.
 - Blocking question: none yet; first work item is to gather baseline timings and
@@ -93,6 +93,16 @@
   `parseJsonConfigFileContent`, `readConfigFile`, `sys`, and `SyntaxKind`.
   Validation passed current-toolchain core tsgo, focused code-mode/API-baseline
   tests plus `src/typescript/compiler-api.test.ts`, and `git diff --check`.
+- Pushed diagnostic hardening commit `6669f86e91`: exposes the required classic
+  compiler API list as structured data and makes the TS7/native diagnostic test
+  independent from the locally installed package by injecting simulated
+  `typescript@7.0.1-rc` metadata with `./unstable/sync` and `./unstable/ast`
+  exports. Validation passed
+  `node scripts/run-tsgo.mjs -p tsconfig.core.json --incremental
+  --tsBuildInfoFile .artifacts/typeclaw/compiler-api-core.tsbuildinfo`,
+  `node scripts/run-vitest.mjs src/typescript/compiler-api.test.ts
+  src/agents/code-mode.test.ts src/plugin-sdk/api-baseline.test.ts`, and
+  `git diff --check`.
 - Remaining classic TypeScript compiler/API imports in `src/` are currently
   test-only files. Next step is to reapply the TS7 candidate and see whether
   the root-module blocker is replaced by the new targeted diagnostic; then
