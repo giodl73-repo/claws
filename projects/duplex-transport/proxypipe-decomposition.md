@@ -13,6 +13,12 @@ The upstream mistake would be to rename ProxyPipe or tunnel its `oneof` through
 OpenClaw owner and upstreams only the missing runtime-to-host provider
 primitive.
 
+The resulting supported session is **ClawBus**: the hosted duplex form of the
+OpenClaw protocol. It intentionally carries all seven OpenClaw business
+families over one connection while preserving their canonical subsystem-owned
+schemas. The problem was not multiplexing; it was allowing the private pipe to
+become the semantic definition of everything it carried.
+
 ## What The Duplicate Protocol Carries
 
 | Family | Current ProxyPipe behavior | Correct owner | Duplex role |
@@ -27,6 +33,36 @@ primitive.
 
 Legacy `CronSchedule` is compatibility-only and should be deleted after rolling
 decode support is no longer required.
+
+## Resolved Home Matrix
+
+| ProxyPipe family | Concrete OpenClaw home | Remaining upstream work | Lobster disposition |
+| --- | --- | --- | --- |
+| Brokered HTTP egress | New `host-provider` specialization of `OpenClawTransport`/Gateway peer invocation; initial bounded methods under `host.egress.v1` | Unary foundation first; a separate typed stream extension must define credit, backpressure, cancellation, half-close, and terminal acknowledgement before replacing arbitrary HTTP bodies | Implement provider backend and tenant routing; delete tags 1-5 only after bounded/streamed parity is proven |
+| Judge dedup, user-turn hints, feedback | Owning code-mode/WorkIQ/self-diagnosis plugin. Remote dependencies use `plugin.<plugin-id>.<service>.v1`; ordinary turn observation uses existing plugin/session/agent event hooks. Feedback storage and tenant routing remain a Lobster product API | No core provider for judge or feedback. Add a plugin-owned provider only where the plugin truly requires a remote host service; verify whether `UserTurnPush` can disappear behind existing agent/session events | Move handlers out of central pipe ownership; retain Redis/feedback backend as Lobster service; delete tags 7-11 and 15-16 per plugin migration |
+| Teams activity delivery | Existing `extensions/msteams` Channel plugin and plugin SDK channel ingress (`channel-inbound`, webhook ingress, channel status/ack semantics) | Define/confirm a transport-neutral activity injection adapter if the current webhook cannot be reached in hosted topology; do not define raw Bot Framework activity semantics in Duplex | Keep Bot Framework endpoint, tenant routing, and delivery UI in Lobster; replace tags 12-13 with the Channel adapter |
+| Container/build evidence | Readiness RFC conditions `ArtifactIdentityAvailable`, `SelectedProfileConformant`, and `ExpectedArtifactMatched`; Gateway connect/hello already carries client version/platform/instance and negotiated capabilities | Bind packaged conformance metadata to immutable artifact digest and expose the same identity through readiness/status | Supply expected artifact/profile and consume evidence; delete tag 14 and private build parsing |
+| Lifecycle supervision | `gateway.suspend.prepare/status/resume` in `src/gateway/server-methods/suspend.ts`; readiness conditions for accepting work; Runtime State Continuity for dirty/synced, checkpoint publication, restore, and safe-to-destroy | Add continuity operations/conditions after writer inventory; keep scheduler actions out of OpenClaw | Lobster keeps pause/delete/recreate placement decisions; replace tags 17 and 24-26 with Gateway lifecycle plus continuity calls |
+| Node, exec, and plugin approvals | `node.pair.approve/reject`, `exec.approval.get/list/request/waitDecision/resolve`, and `plugin.approval.list/request/waitDecision/resolve` from Gateway descriptors and protocol schemas | Ensure the Lobster operator connection carries pinned tenant/user/runtime provenance and Teams can render/resolve the same pending approval; no new approval protocol | Keep approval UX/broker and identity routing; delete tags 27-32 after using canonical Gateway methods/events |
+| Remote AgentHarness | Remote AgentHarness RFC 31; current core types live under `packages/agent-core/src/harness`; Duplex may later supply a typed stream carrier | Define remote ordering, cancellation, terminal persistence, reconnect/non-resume, and conformance in AgentHarness; transport streaming remains separate | Implement cell/harness adapter and routing; delete tags 20-23 when the RFC 31 protocol runs over an accepted carrier |
+
+### No orphan rule
+
+Every current tag now has one disposition:
+
+- tags 1-5: Duplex host-provider/streaming;
+- tag 6: rolling compatibility deletion;
+- tags 7-11 and 15-16: plugin or Lobster product services;
+- tags 12-13: Channel ingress;
+- tag 14: readiness/runtime identity;
+- tag 17 and 24-26: Gateway lifecycle plus Runtime State Continuity;
+- tags 20-23: AgentHarness; and
+- tags 27-32: existing Gateway approvals.
+
+The physical ProxyPipe may temporarily carry adapters for these contracts, but
+it no longer owns any of their semantics. Removal is complete when no tag or
+private retry/identity/lifecycle rule remains, not merely when the gRPC service
+is renamed.
 
 ## Duplicated Transport Mechanics
 

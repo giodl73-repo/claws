@@ -1,4 +1,4 @@
-# Duplex Transport Session Context
+# ClawBus / Duplex Transport Session Context
 
 ## Agent Start
 
@@ -10,7 +10,7 @@
 
 ## Baseline
 
-- Area: Duplex Transport and Host Providers
+- Area: ClawBus: OpenClaw Hosted Duplex Protocol
 - Primary repos: `openclaw/rfcs`, `openclaw/openclaw`, `bic/lobster`
 - RFC worktree: `C:\src\openclaw-rfcs-duplex-transport`
 - Lobster audit worktree: `C:\src\lobster-layering-audit`
@@ -22,7 +22,7 @@
 
 - Last updated: 2026-07-10
 - Last agent: Codex
-- Current focus: Audit secret/provider seams and choose the first portable unary provider for the foundation proof.
+- Current focus: Define the ClawBus canonical family catalog and audit secret/provider seams for the first portable reverse-call proof.
 - Active branch / PR: [fork RFC PR 2](https://github.com/giodl73-repo/rfcs/pull/2), head `ade8ddc`
 - Known dirty state: none in the RFC worktree; `.artifacts/` is unrelated in `claws-hapi`
 - Blocking question: Which existing OpenClaw provider seam provides the smallest credible runtime-to-host proof?
@@ -47,8 +47,9 @@
 ## Open Threads
 
 - `proxypipe-decomposition.md` now records the seven semantic families and the
-  duplicated connection/correlation/retry/identity/generation mechanics. Treat
-  only bounded host-service invocation as the new Duplex primitive.
+  duplicated connection/correlation/retry/identity/generation mechanics. All
+  seven families have canonical homes on one ClawBus session; bounded
+  host-service invocation is the genuinely new reverse-call primitive.
 - Select the first provider and exact method schema.
 - Prove host-provider credential and generation binding against current Gateway auth.
 - Define extraction boundaries for shared unary peer invocation.

@@ -1,12 +1,16 @@
-# Duplex Transport Project
+# ClawBus / Duplex Transport Project
 
-Use this area to extend `OpenClawTransport` and Gateway peer invocation with a
-least-privilege host-provider role, then retire portable ProxyPipe semantics
-without upstreaming Lobster's private wire format.
+Use this area to define **ClawBus**, the hosted duplex form of the OpenClaw
+protocol, over `OpenClawTransport` and Gateway peer invocation. ClawBus gives a
+host one authenticated, generation-bound session for canonical OpenClaw
+requests, events, results, and streams, then retires ProxyPipe without
+upstreaming its private wire format.
 
 ## Objective
 
-Prove one bounded runtime-to-host provider over shared OpenClaw transport
+Prove one host-facing OpenClaw session carrying canonical Gateway, Channel,
+approval, lifecycle, identity, host-service, continuity, and AgentHarness
+families. Add one bounded runtime-to-host provider over shared transport
 machinery, with identity, permissions, generation fencing, overload behavior,
 typed failures, and reusable TypeScript/non-TypeScript conformance.
 
@@ -45,10 +49,11 @@ typed failures, and reusable TypeScript/non-TypeScript conformance.
 
 ## Boundaries
 
-Channels own messages, Gateway owns approvals and lifecycle APIs, AgentHarness
-owns execution events, and Runtime State Continuity owns publication meaning.
-Duplex Transport carries typed host-service calls; it does not absorb those
-semantics.
+ClawBus streamlines OpenClaw business for hosts but does not become a generic
+bus. Channels own messages, Gateway owns approvals and lifecycle APIs,
+AgentHarness owns execution events, and Runtime State Continuity owns
+publication meaning. ClawBus carries their canonical schemas plus typed
+host-service calls on one session.
 
 ## Related Areas
 
