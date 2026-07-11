@@ -30,10 +30,10 @@
 - Current focus: Four-corner framing is complete. Runtime Activation folds into
   readiness; Evidence/Compatibility uses capabilities, conformance, identity,
   and events; State/Continuity has the only new `/synced` hypothesis. Boot and
-  Managed Configuration is an approved project deliverable after boot/config,
-  managed-env, effective-writer, and host/operator fit audits at Lobster
-  `0a9514c1ce`. Resume with baked-leaf classification and current OpenClaw config
-  concept audit; do not file the RFC yet.
+  Managed Configuration is approved; trusted identity/proxy-pipe pass 4 and
+  ProxyPipe frame ownership pass 5 are complete at Lobster `0a9514c1ce`. Resume
+  by tracing lifecycle `checkpoint_unmount`/`shutdown_ready` into real state
+  durability, then map Snapshot RFC 20. Do not file RFCs yet.
 - Active branch / PR: none for the umbrella effort
 - Known dirty state: `.artifacts/` is an unrelated untracked workspace item
 - Blocking question: none
@@ -43,7 +43,7 @@
 - Run: `git status --short --branch`
 - Discover: current Lobster and OpenClaw worktrees and branches
 - Audit first: state paths, writers, durability, consistency, and restore order
-- Audit now: complete env registry or trace trusted identity/proxy-pipe
+- Audit now: lifecycle checkpoint/shutdown guarantees and state durability
 - Inventory later: proxy-pipe/lifecycle, state paths, and telemetry dependencies
 - Update: `contract-portfolio.md` and this session after each audit slice
 

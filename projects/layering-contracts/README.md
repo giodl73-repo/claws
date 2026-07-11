@@ -40,6 +40,8 @@ boundary; neither is a fifth semantic area.
 | Managed env reset, forwarding, and consumer audit pass 2 | `inventory/env-matrix-2026-07-10.md` |
 | Effective config writer and ordering audit pass 3 | `inventory/config-writers-2026-07-10.md` |
 | Sparse host authority versus operator config fit assessment | `inventory/host-operator-config-fit-2026-07-10.md` |
+| Trusted identity and proxy-pipe boundary audit pass 4 | `inventory/trust-proxy-pipe-2026-07-10.md` |
+| Proxy-pipe frame ownership and AgentHarness overlap pass 5 | `inventory/proxy-pipe-frames-2026-07-10.md` |
 | Current session and resume state | `SESSION.md` |
 | Historical boundary analysis | `../hosting-profiles/analysis.md` |
 | Historical Lobster inventory | `../hosting-profiles/lobster-layer-inventory.md` |

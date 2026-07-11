@@ -55,3 +55,9 @@ mechanism to map, not a replacement for the overall continuity contract:
 
 - https://github.com/openclaw/rfcs/pull/20
 - https://github.com/openclaw/openclaw/pull/94805
+
+The current Lobster ProxyPipe lifecycle protocol also carries generation-fenced
+`LifecycleCommand`/`LifecycleCommandResult` messages with
+`workspace_action=checkpoint_unmount` and `shutdown_ready`. See
+`inventory/proxy-pipe-frames-2026-07-10.md`; the next audit must determine what
+state those outcomes actually guarantee.

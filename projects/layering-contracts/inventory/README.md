@@ -17,6 +17,8 @@ The allowed integration surfaces and required disposition fields are defined in
 | Effective config writer/order audit pass 3 | Activation | `config-writers-2026-07-10.md` |
 | Host/operator config replacement fit | Activation | `host-operator-config-fit-2026-07-10.md` |
 | Config writer failure and preparation-path parity matrix | Activation | Pending |
+| Trusted identity and proxy-pipe audit pass 4 | Runtime boundary | `trust-proxy-pipe-2026-07-10.md` |
+| Proxy-pipe frame ownership and AgentHarness overlap pass 5 | Runtime boundary | `proxy-pipe-frames-2026-07-10.md` |
 | State path durability table | State and continuity | Pending |
 | Mutation generation and component watermark map | State and continuity | Pending |
 | Snapshot materialization versus host publication flow | State and continuity | Pending |

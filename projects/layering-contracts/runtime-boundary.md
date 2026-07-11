@@ -37,3 +37,10 @@ identity, proxy-pipe, or lifecycle-control semantics in this area.
 - What are the retry, keepalive, drain, and warm-container reuse state machines?
 - Which remaining Lobster checks became redundant after RFC 33?
 
+## Current Evidence
+
+`inventory/trust-proxy-pipe-2026-07-10.md` traces the current trusted identity
+and brokered-egress boundary. Trusted-proxy behavior is a portable OpenClaw
+Gateway contract selected through Managed Configuration. ProxyPipe remains a
+Lobster transport that should contribute typed readiness/evidence without
+placing Plex or Lobster protocol concepts in OpenClaw core.
