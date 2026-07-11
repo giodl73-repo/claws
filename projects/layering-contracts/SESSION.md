@@ -30,9 +30,10 @@
 - Current focus: Four-corner framing is complete. Runtime Activation folds into
   readiness; Evidence/Compatibility uses capabilities, conformance, identity,
   and events; State/Continuity has the only new `/synced` hypothesis. Boot and
-  Boot/config pass 1, managed-env pass 2, effective-config writer pass 3, and
-  host/operator authority fit assessment are complete at Lobster `0a9514c1ce`.
-  Resume with leaf classification/prototype or trusted identity/proxy-pipe.
+  Managed Configuration is an approved project deliverable after boot/config,
+  managed-env, effective-writer, and host/operator fit audits at Lobster
+  `0a9514c1ce`. Resume with baked-leaf classification and current OpenClaw config
+  concept audit; do not file the RFC yet.
 - Active branch / PR: none for the umbrella effort
 - Known dirty state: `.artifacts/` is an unrelated untracked workspace item
 - Blocking question: none
@@ -77,7 +78,11 @@
 - Test the sparse host-authority model before proposing a general overlay
   framework: same OpenClaw schema, host owns declared fields, operator owns the
   rest, conflicts fail validation.
+- Keep Managed Configuration V1 to one managed document, one operator document,
+  exact authority, and a small closed set of built-in bounded comparators.
 - Start the State and Continuity repo audit without changing or filing RFCs.
+- Complete the Managed Configuration delivery proof in
+  `managed-configuration-deliverable.md` before external promotion.
 - Verify the eight projection/reset candidates in
   `inventory/boot-config-2026-07-10.md` before treating any as a bug. Candidate
   resolution is recorded in `inventory/env-matrix-2026-07-10.md`; two keys have

@@ -14,6 +14,9 @@ while the operator controls undeclared fields. See
 `inventory/host-operator-config-fit-2026-07-10.md`. This is composition and
 provenance, not a `/converged` probe.
 
+This hypothesis is now tracked as the scoped Managed Configuration deliverable
+in `managed-configuration-deliverable.md`.
+
 ## Question
 
 How does host intent become one accepted, inspectable OpenClaw runtime

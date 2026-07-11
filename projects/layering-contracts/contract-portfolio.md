@@ -83,6 +83,11 @@ future control-plane producer, not an implementation dependency.
 The next strongest contract candidates are state portability and trusted hosted
 identity. The audit must test that hypothesis before selecting another RFC.
 
+Managed Configuration is now an approved project deliverable under Runtime
+Activation. It remains unfiled until the Lobster replacement proof and current
+OpenClaw config concept audit satisfy
+`managed-configuration-deliverable.md`.
+
 ## Effort Limit
 
 Keep no more than two active initiatives from this portfolio at once:
