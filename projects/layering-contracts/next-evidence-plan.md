@@ -77,9 +77,17 @@ Deliver a keep/split/upstream/plugin map for every frame family. In particular,
 remote-harness semantics must converge on RFC 31, while Plex routing, provider
 brokering, and physical transport may remain Lobster-owned.
 
-### 5. Host Approval Contract
+### 5. Duplex Transport And Approval Reuse
 
-Compare the repeated approval families:
+`node.invoke` comparison completed in pass 8. It proves the unary
+server-to-peer foundation; Duplex Transport should add sibling host-provider
+invocation over shared machinery rather than treating hosts as nodes. Hosted
+peer identity completed in pass 9: use a distinct `host-provider` role,
+capability-bound proof-of-possession admission, separate provider permissions,
+and active-generation fencing. The next gate is selecting the first portable
+bounded unary provider after auditing existing secret/provider seams.
+
+Then compare the repeated approval families:
 
 - node-pair approval;
 - per-command exec approval;
@@ -108,9 +116,10 @@ Audit requirements:
 - plugin extension boundary;
 - AgentHarness overlap.
 
-Decision: whether OpenClaw already has a reusable host-approval contract that
-Lobster should adapt to, whether a small upstream primitive is missing, or
-whether only plugin SDK exposure is needed.
+Decision: approvals use existing Gateway contracts. Duplex Transport uses a
+sibling host-provider surface over shared peer-invocation machinery; preserve
+`node.invoke` wire behavior. Explicit cancellation and streaming remain later,
+evidence-gated extensions.
 
 ### 6. Managed Configuration OpenClaw Audit
 
@@ -146,7 +155,7 @@ Keep at most two implementation/RFC initiatives active at once.
 
 ## Current Discussion Focus
 
-Before executing Pass 1, examine ProxyPipe and Host Approval conceptually to
-ensure the audit asks the right ownership questions. Do not change the evidence
-order or file proposals solely from the conceptual discussion.
-
+Before executing Pass 1, examine ProxyPipe, existing Gateway transport, and
+Duplex Transport conceptually to ensure the audit asks the right ownership
+questions. The `node.invoke` and hosted peer identity gates are complete; first
+provider selection is next. Do not file a proposal before that comparison.

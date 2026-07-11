@@ -19,6 +19,10 @@ The allowed integration surfaces and required disposition fields are defined in
 | Config writer failure and preparation-path parity matrix | Activation | Pending |
 | Trusted identity and proxy-pipe audit pass 4 | Runtime boundary | `trust-proxy-pipe-2026-07-10.md` |
 | Proxy-pipe frame ownership and AgentHarness overlap pass 5 | Runtime boundary | `proxy-pipe-frames-2026-07-10.md` |
+| Gateway coverage versus ProxyPipe pass 6 | Runtime boundary | `gateway-proxypipe-coverage-2026-07-10.md` |
+| ProxyPipe and `OpenClawTransport` fit pass 7 | Runtime boundary | `proxypipe-openclaw-transport-fit-2026-07-10.md` |
+| `node.invoke` fit for Duplex Transport pass 8 | Runtime boundary | `node-invoke-duplex-fit-2026-07-10.md` |
+| Hosted peer identity for Duplex Transport pass 9 | Runtime boundary | `hosted-peer-identity-2026-07-10.md` |
 | State path durability table | State and continuity | Pending |
 | Mutation generation and component watermark map | State and continuity | Pending |
 | Snapshot materialization versus host publication flow | State and continuity | Pending |

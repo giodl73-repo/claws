@@ -43,6 +43,12 @@ boundary; neither is a fifth semantic area.
 | Sparse host authority versus operator config fit assessment | `inventory/host-operator-config-fit-2026-07-10.md` |
 | Trusted identity and proxy-pipe boundary audit pass 4 | `inventory/trust-proxy-pipe-2026-07-10.md` |
 | Proxy-pipe frame ownership and AgentHarness overlap pass 5 | `inventory/proxy-pipe-frames-2026-07-10.md` |
+| Gateway coverage versus ProxyPipe and residual Host Bridge gaps pass 6 | `inventory/gateway-proxypipe-coverage-2026-07-10.md` |
+| ProxyPipe fit with `OpenClawTransport` and migration options pass 7 | `inventory/proxypipe-openclaw-transport-fit-2026-07-10.md` |
+| `node.invoke` fit and shared peer-invocation decision pass 8 | `inventory/node-invoke-duplex-fit-2026-07-10.md` |
+| Hosted peer role, authentication, permissions, and generation pass 9 | `inventory/hosted-peer-identity-2026-07-10.md` |
+| Duplex Transport candidate project and design gates | `duplex-transport.md` |
+| Superseded Host Bridge composition hypothesis | `host-bridge-hypothesis.md` |
 | Current session and resume state | `SESSION.md` |
 | Historical boundary analysis | `../hosting-profiles/analysis.md` |
 | Historical Lobster inventory | `../hosting-profiles/lobster-layer-inventory.md` |

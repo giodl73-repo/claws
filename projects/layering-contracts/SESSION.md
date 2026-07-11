@@ -9,11 +9,13 @@
 5. Read `projects/layering-contracts/contract-portfolio.md`.
 6. Read `projects/layering-contracts/next-evidence-plan.md`.
 7. Read `projects/layering-contracts/four-corners.md`.
-8. Read the relevant area note; begin with `state-continuity.md`.
-9. Read `projects/layering-contracts/synchronization-model.md` as a hypothesis.
-10. Read `projects/layering-contracts/inventory/README.md`.
-11. Read the linked historical audit notes under `projects/hosting-profiles/`.
-12. Check the Lobster and OpenClaw worktree state before auditing code.
+8. Read `projects/layering-contracts/duplex-transport.md` for the current
+   candidate project and design gate.
+9. Read the relevant area note; begin with `state-continuity.md`.
+10. Read `projects/layering-contracts/synchronization-model.md` as a hypothesis.
+11. Read `projects/layering-contracts/inventory/README.md`.
+12. Read the linked historical audit notes under `projects/hosting-profiles/`.
+13. Check the Lobster and OpenClaw worktree state before auditing code.
 
 ## Baseline
 
@@ -34,8 +36,26 @@
   Managed Configuration is approved; trusted identity/proxy-pipe pass 4 and
   ProxyPipe frame ownership pass 5 are complete at Lobster `0a9514c1ce`. Resume
   with the approved ordered evidence plan. Current conceptual discussion is
-  ProxyPipe and reusable Host Approval; execution resumes with lifecycle
-  `checkpoint_unmount`/`shutdown_ready`. Do not file RFCs yet.
+  originally captured in `host-bridge-hypothesis.md`; that composition note is
+  now superseded by the named `duplex-transport.md` candidate project. Gateway,
+  Channels, AgentHarness, and plugins retain their semantics.
+  Gateway coverage pass 6 further narrowed the candidate: public
+  `OpenClawTransport` and Gateway already cover transport-neutral RPC/events,
+  approvals, pairing, health, restart, and suspend. Residual evidence work is
+  host services and durable lifecycle composition. Pass 7 found two existing
+  Lobster Gateway paths: a runtime Plex WebSocket proxy and a purpose-built
+  in-container Rust client. Prefer a dedicated least-privilege runtime host
+  operator connection over the existing Plex Gateway route; use a canonical
+  Gateway subprotocol over ProxyPipe only if authentication blocks that path.
+  `node.invoke` design gate pass 8 is complete: share/extract its unary peer
+  invocation machinery, but add a sibling host-provider identity and permission
+  model rather than representing hosts as nodes. Streaming and explicit remote
+  cancellation remain later gaps. Hosted peer identity pass 9 selected a
+  distinct `host-provider` role with short-lived capability-bound,
+  proof-of-possession admission and explicit runtime-generation fencing; no
+  operator scopes or node pairing. Execution resumes by auditing existing
+  secret-provider/broker seams and selecting the first portable unary provider,
+  then lifecycle `checkpoint_unmount`/`shutdown_ready`. Do not file RFCs yet.
 - Active branch / PR: none for the umbrella effort
 - Known dirty state: `.artifacts/` is an unrelated untracked workspace item
 - Blocking question: none
@@ -85,8 +105,26 @@
 - Start the State and Continuity repo audit without changing or filing RFCs.
 - Complete the Managed Configuration delivery proof in
   `managed-configuration-deliverable.md` before external promotion.
-- Follow `next-evidence-plan.md`; preserve ProxyPipe and Host Approval as
+- Follow `next-evidence-plan.md`; preserve ProxyPipe and Duplex Transport as
   evidence investigations rather than assumed new RFCs.
+- Test the Duplex Transport project by proving what remains after mapping
+  ProxyPipe to existing Gateway, Channel, AgentHarness, lifecycle, and plugin
+  contracts; do not upstream the ProxyPipe wire schema.
+- Use `inventory/gateway-proxypipe-coverage-2026-07-10.md` as the current
+  Gateway coverage baseline; do not propose a second RPC/event transport or a
+  generic approval protocol.
+- Use `inventory/proxypipe-openclaw-transport-fit-2026-07-10.md` for the current
+  migration decision: try a runtime host-operator Gateway connection before a
+  ProxyPipe-backed Gateway relay.
+- Use `duplex-transport.md` as the project definition. Audit `node.invoke`
+  before sketching or filing an upstream transport/provider interface. Pass 8
+  completed that gate and selected sibling host-provider invocation over shared
+  machinery.
+- Use `inventory/node-invoke-duplex-fit-2026-07-10.md` as the peer invocation
+  baseline; do not make host providers use node pairing or node identity.
+- Use `inventory/hosted-peer-identity-2026-07-10.md` as the identity baseline;
+  keep host-provider permissions separate from operator scopes and bind every
+  provider session/invocation to the active hosted generation.
 - Verify the eight projection/reset candidates in
   `inventory/boot-config-2026-07-10.md` before treating any as a bug. Candidate
   resolution is recorded in `inventory/env-matrix-2026-07-10.md`; two keys have
