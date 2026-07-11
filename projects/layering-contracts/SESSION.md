@@ -56,7 +56,10 @@
   operator scopes or node pairing. Execution resumes by auditing existing
   secret-provider/broker seams and selecting the first portable unary provider,
   then lifecycle `checkpoint_unmount`/`shutdown_ready`. Do not file RFCs yet.
-- Active branch / PR: none for the umbrella effort
+- Active branch / PR: fork-only RFC review branches and draft PRs:
+  `user/giodl/rfc-managed-configuration` ([PR 1](https://github.com/giodl73-repo/rfcs/pull/1)),
+  `user/giodl/rfc-duplex-transport` ([PR 2](https://github.com/giodl73-repo/rfcs/pull/2)), and
+  `user/giodl/rfc-state-continuity` ([PR 3](https://github.com/giodl73-repo/rfcs/pull/3)).
 - Known dirty state: `.artifacts/` is an unrelated untracked workspace item
 - Blocking question: none
 
@@ -125,6 +128,9 @@
 - Use `inventory/hosted-peer-identity-2026-07-10.md` as the identity baseline;
   keep host-provider permissions separate from operator scopes and bind every
   provider session/invocation to the active hosted generation.
+- The Managed Configuration, Duplex Transport, and Runtime Continuity RFCs are
+  staged only on `giodl73-repo/rfcs` for Omar/architecture review. Do not open
+  upstream PRs until explicitly requested after that review.
 - Verify the eight projection/reset candidates in
   `inventory/boot-config-2026-07-10.md` before treating any as a bug. Candidate
   resolution is recorded in `inventory/env-matrix-2026-07-10.md`; two keys have

@@ -63,6 +63,9 @@ boundary; neither is a fifth semantic area.
 | `openclaw/openclaw` | Per-contract follow-ups | Discovery | Find existing homes before proposing new contracts. |
 | `openclaw/rfcs` | [RFC 33](https://github.com/openclaw/rfcs/pull/33) | Child initiative | Readiness Conditions and Standard Hosting Profiles. |
 | `openclaw/rfcs` | [RFC 31](https://github.com/openclaw/rfcs/pull/31) | Related | Remote AgentHarness data-plane contract. |
+| `giodl73-repo/rfcs` | [Fork PR 1](https://github.com/giodl73-repo/rfcs/pull/1) | Draft, fork-only | Managed Configuration RFC review. |
+| `giodl73-repo/rfcs` | [Fork PR 2](https://github.com/giodl73-repo/rfcs/pull/2) | Draft, fork-only | Duplex Transport and Host Providers RFC review. |
+| `giodl73-repo/rfcs` | [Fork PR 3](https://github.com/giodl73-repo/rfcs/pull/3) | Draft, fork-only | Runtime Continuity and Safe Shutdown RFC review. |
 
 ## Ownership Rule
 
