@@ -96,7 +96,7 @@
 ## Implementation Notes
 
 - 2026-07-10: RFC PR 33 now includes one explicit completion roadmap at RFC
-  head `ab1c3b1`. It records the remaining work as canonical core-condition
+  head `1dc60f1`. It records the remaining work as canonical core-condition
   completion, projection parity across ready/readyz/health/status/CLI, bounded
   readiness-provider behavior, executed package-installed Linux/Docker proof,
   later blocking release conformance, stable readiness transition events, and
@@ -107,7 +107,13 @@
   compact roadmap. The Runtime Activation candidates are now reconciled
   explicitly: `ConfigLoaded` proves the effective snapshot, and completion work
   adds bounded snapshot-backed `RequiredPluginsActivated`,
-  `RequiredSecretsAvailable`, and `ModelRoutingResolved` conditions.
+  `RequiredSecretsAvailable`, and `ModelRoutingResolved` conditions. Release
+  support evidence also stays in readiness rather than becoming a separate
+  compatibility system: `ArtifactIdentityAvailable` and
+  `SelectedProfileConformant` are advisory by default, while
+  `ExpectedArtifactMatched` is required whenever the host supplies an expected
+  immutable artifact identity. Readiness reads packaged evidence and never
+  reruns release conformance.
 
 - 2026-07-10: Normalized the original Gateway readiness evaluator and restacked
   the full draft implementation stack.
