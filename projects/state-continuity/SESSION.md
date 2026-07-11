@@ -23,7 +23,7 @@
 - Last updated: 2026-07-10
 - Last agent: Codex
 - Current focus: Build the source-backed state component, path, writer, consistency, and restore-order inventory before choosing a generation model.
-- Active branch / PR: [fork RFC PR 3](https://github.com/giodl73-repo/rfcs/pull/3), head `e2b02aa`
+- Active branch / PR: [fork RFC PR 3](https://github.com/giodl73-repo/rfcs/pull/3), head `b335298`
 - Known dirty state: none in the RFC worktree; `.artifacts/` is unrelated in `claws-hapi`
 - Blocking question: Can OpenClaw prove one global mutation generation, or must V1 use component watermarks?
 

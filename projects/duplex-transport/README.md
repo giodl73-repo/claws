@@ -31,7 +31,7 @@ typed failures, and reusable TypeScript/non-TypeScript conformance.
 
 | Repo | PR | Branch | Status | Purpose |
 | --- | --- | --- | --- | --- |
-| `giodl73-repo/rfcs` | [Fork PR 2](https://github.com/giodl73-repo/rfcs/pull/2) | `user/giodl/rfc-duplex-transport` at `ade8ddc` | Draft, fork-only | Architecture review before upstream submission. |
+| `giodl73-repo/rfcs` | [Fork PR 2](https://github.com/giodl73-repo/rfcs/pull/2) | `user/giodl/rfc-duplex-transport` at `f5fb0ba` | Draft, fork-only | ClawBus architecture review before upstream submission. |
 | `bic/lobster` | TBD | `user/giodl/layering-contract-audit` | Evidence | Decompose ProxyPipe and select a portable provider. |
 | `openclaw/openclaw` | TBD | New isolated worktree | Discovery | Audit provider/secret seams and shared peer-invocation extraction. |
 

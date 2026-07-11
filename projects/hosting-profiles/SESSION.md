@@ -95,6 +95,11 @@
 
 ## Implementation Notes
 
+- 2026-07-10: RFC PR 33 head `5a61d98` adds conditional required
+  `RequiredClawBusCapabilitiesAvailable`, evaluated from the live
+  generation-bound negotiated ClawBus session snapshot without probing remote
+  host services on each readiness call.
+
 - 2026-07-10: RFC PR 33 now includes one explicit completion roadmap at RFC
   head `1dc60f1`. It records the remaining work as canonical core-condition
   completion, projection parity across ready/readyz/health/status/CLI, bounded

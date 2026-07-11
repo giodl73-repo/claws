@@ -27,7 +27,7 @@ is one outcome, not the whole feature.
 
 | Repo | PR | Branch | Status | Purpose |
 | --- | --- | --- | --- | --- |
-| `giodl73-repo/rfcs` | [Fork PR 3](https://github.com/giodl73-repo/rfcs/pull/3) | `user/giodl/rfc-state-continuity` at `e2b02aa` | Draft, fork-only | Architecture review before upstream submission. |
+| `giodl73-repo/rfcs` | [Fork PR 3](https://github.com/giodl73-repo/rfcs/pull/3) | `user/giodl/rfc-state-continuity` at `b335298` | Draft, fork-only | Architecture review; ClawBus may carry publication without owning semantics. |
 | `openclaw/rfcs` | [Snapshot RFC 20](https://github.com/openclaw/rfcs/pull/20) | Existing | Related | SQLite-safe component checkpoint primitive. |
 | `bic/lobster` | TBD | `user/giodl/layering-contract-audit` | Evidence | Trace checkpoint, publication, shutdown, and restore behavior. |
 | `openclaw/openclaw` | TBD | New isolated worktree | Discovery | Build the complete state owner/writer/path inventory. |
