@@ -18,7 +18,7 @@ worth filing. It should not blindly upgrade OpenClaw's toolchain without data.
 
 | Repo | PR / Issue | Branch | Status | Purpose |
 | --- | --- | --- | --- | --- |
-| `openclaw/openclaw` | TBD | TBD | Planning | Evaluate TypeScript native / TS7 impact on OpenClaw typecheck/build workflows. |
+| `openclaw/openclaw` | TBD | `user/giodl/typeclaw-ts-native-eval` | Active fork branch | Evaluate TypeScript native / TS7 impact on OpenClaw typecheck/build workflows. |
 
 ## Evaluation Plan
 

@@ -28,10 +28,10 @@
 - Last agent: Copilot.
 - Current focus: Created the OpenClaw TypeClaw branch/worktree for TypeScript
   native / TS7 evaluation; added and pushed the first TypeScript compiler API
-  seam plus TS7/native diagnostic hardening.
+  seam, TS7/native diagnostics, and an unstable API coverage map.
 - Active branch / PR: `user/giodl/typeclaw-ts-native-eval` in
   `C:\src\openclaw-typeclaw`, pushed to
-  `giodl73-repo/openclaw:user/giodl/typeclaw-ts-native-eval` at `6669f86e91`.
+  `giodl73-repo/openclaw:user/giodl/typeclaw-ts-native-eval` at `f93f344c18`.
 - Known dirty state: `C:\src\claws-hapi` already has unrelated dirty project
   notes. This session added `projects/typeclaw/`.
 - Blocking question: none yet; first work item is to gather baseline timings and
@@ -103,9 +103,22 @@
   `node scripts/run-vitest.mjs src/typescript/compiler-api.test.ts
   src/agents/code-mode.test.ts src/plugin-sdk/api-baseline.test.ts`, and
   `git diff --check`.
+- Pushed coverage-map commit `f93f344c18`: added
+  `src/typescript/native-api-coverage.ts` to classify the classic compiler APIs
+  OpenClaw still needs against TS7 unstable exports. Current map:
+  `SyntaxKind` is available via `typescript/unstable/ast`; `createProgram`,
+  `createPrinter`, `readConfigFile`, and `sys` are partial adapter candidates;
+  `transpileModule` and `parseJsonConfigFileContent` are missing direct parity.
+  The diagnostic now includes this map so TS7/native failures distinguish
+  available, partial, and missing API coverage. Validation passed
+  `node scripts/run-tsgo.mjs -p tsconfig.core.json --incremental
+  --tsBuildInfoFile .artifacts/typeclaw/native-api-coverage-core.tsbuildinfo`,
+  `node scripts/run-vitest.mjs src/typescript/compiler-api.test.ts
+  src/agents/code-mode.test.ts src/plugin-sdk/api-baseline.test.ts`, and
+  `git diff --check`.
 - Remaining classic TypeScript compiler/API imports in `src/` are currently
   test-only files. Next step is to reapply the TS7 candidate and see whether
   the root-module blocker is replaced by the new targeted diagnostic; then
-  decide whether to map `typescript/unstable/sync`/`ast` to the subset OpenClaw
-  needs or file the API-parity gap upstream.
+  either prototype the `typescript/unstable/sync`/`ast` adapter for the partial
+  API-baseline path or file the missing API-parity gaps upstream.
 - Decide what evidence Anders/internal TS owners would need.
