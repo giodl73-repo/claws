@@ -203,6 +203,21 @@
   `policy.global.jsonc`, and `bash scripts/validate-code-mode-container.sh`.
   Live after amend: non-draft, FileAffordance green, ADO queued, GitHubPop
   pending human proof.
+- 2026-07-11 Lobster #4355 PromoteClaw follow-up:
+  `https://microsoft.ghe.com/bic/lobster/pull/4355` head `b7276b0ada`.
+  Addressed the review blocker that checked-in YAML alone does not prove a live
+  ADO definition by documenting the actual pending-registration state instead
+  of inventing an id. Updated `docs/pipelines.md`,
+  `docs/ops-catalog/pipelines.yml`, and `docs/feed/README.md` to list
+  `Lobster-PromoteClaw-OpenCandidatePr` as TBD / pending ADO registration under
+  `\OneBranch\Lobster`, with `GHE_PROMOTECLAW_TOKEN` required before it can run.
+  Live ADO search found existing LTS package definition `457932` but no
+  PromoteClaw candidate-PR definition yet. Validation: `git diff --check` on
+  touched docs/catalog files. Posted PR comment:
+  `https://microsoft.ghe.com/bic/lobster/pull/4355#issuecomment-200291251`.
+  Current PR state after push: `CHANGES_REQUESTED`, `BLOCKED`, and required
+  checks not yet attached to new head; do not manually queue Lobster ADO unless
+  explicitly asked.
 - 2026-07-09 Lobster #4220 status: marked
   `https://microsoft.ghe.com/bic/lobster/pull/4220` draft again because the
   Scout/Desktop node-side `skills.*` commands are not available/stable yet.
