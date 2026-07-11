@@ -90,6 +90,12 @@
 
 ## Open Threads
 
+- Fork PR 3 is now **Runtime State Continuity** at head `2a87e05`. State
+  inventory, writer ownership, consistency, checkpointing, publication,
+  fencing, restore, compatibility, and evidence are the contract. `/synced`
+  is its aggregate durability projection and safe shutdown is one outcome, not
+  the whole feature.
+
 - Establish the current Lobster worktree and source revision for the audit.
 - Build the first complete state-path durability table.
 - Determine whether runtime generations, component watermarks, and `/synced`
