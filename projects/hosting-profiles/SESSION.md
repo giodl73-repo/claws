@@ -95,6 +95,11 @@
 
 ## Implementation Notes
 
+- 2026-07-11: Renumbered the live Readiness Conditions and Standard Hosting
+  Profiles RFC from `0010` to `0018` on the existing RFC PR 33 branch. The
+  project-local `0010-standard-hosting-ready-check.md` remains the historical
+  pre-promotion draft and is not the normative RFC source.
+
 - 2026-07-10: RFC PR 33 head `5a61d98` adds conditional required
   `RequiredClawBusCapabilitiesAvailable`, evaluated from the live
   generation-bound negotiated ClawBus session snapshot without probing remote
@@ -237,7 +242,7 @@
 - Upstream RFC PR:
   - https://github.com/openclaw/rfcs/pull/33
   - branch `giodl73-repo:user/giodl/standard-hosting-profiles-ready-check`
-  - file `rfcs/0010-standard-hosting-profiles-and-ready-check.md`
+  - live normative file `rfcs/0018-standard-hosting-profiles-and-ready-check.md`
 - Publishing note: the fork stack was shaped in
   `C:\src\openclaw-hosting-profiles-publish` from reviewed base
   `62de86c978950bc1eca1aa86befc2fbb977ebb38`. Commit hooks were bypassed in

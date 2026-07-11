@@ -65,7 +65,7 @@ Filed:
 - Upstream RFC PR: https://github.com/openclaw/rfcs/pull/33
 - RFC branch:
   `giodl73-repo:user/giodl/standard-hosting-profiles-ready-check`
-- RFC file: `rfcs/0010-standard-hosting-profiles-and-ready-check.md`
+- RFC file: `rfcs/0018-standard-hosting-profiles-and-ready-check.md`
 
 Scope:
 
