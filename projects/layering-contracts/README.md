@@ -32,6 +32,7 @@ boundary; neither is a fifth semantic area.
 | Governing ownership thesis and working rules | `charter.md` |
 | Explicit as-is Lobster/OpenClaw integration ABI and migration ledger | `compatibility-boundary.md` |
 | Approved Managed Configuration deliverable | `managed-configuration-deliverable.md` |
+| Approved ordered evidence and decision plan | `next-evidence-plan.md` |
 | Current portfolio, ownership rules, and audit plan | `contract-portfolio.md` |
 | Completed four-corner framing and surface disposition | `four-corners.md` |
 | Working `/synced`, generation, provider, and graceful-shutdown hypothesis | `synchronization-model.md` |

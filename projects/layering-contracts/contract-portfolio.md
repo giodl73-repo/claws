@@ -103,3 +103,6 @@ establishes a narrow independently useful change.
 The completed surface disposition is recorded in `four-corners.md`. Evidence
 and Compatibility uses artifact capabilities, release conformance, runtime
 identity, and stable events; it does not introduce `/compatible`.
+
+The ordered remaining evidence work is recorded in `next-evidence-plan.md`,
+including dedicated ProxyPipe decomposition and Host Approval investigations.

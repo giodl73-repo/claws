@@ -7,12 +7,13 @@
 3. Read `projects/layering-contracts/charter.md`.
 4. Read `projects/layering-contracts/compatibility-boundary.md`.
 5. Read `projects/layering-contracts/contract-portfolio.md`.
-6. Read `projects/layering-contracts/four-corners.md`.
-7. Read the relevant area note; begin with `state-continuity.md`.
-8. Read `projects/layering-contracts/synchronization-model.md` as a hypothesis.
-9. Read `projects/layering-contracts/inventory/README.md`.
-10. Read the linked historical audit notes under `projects/hosting-profiles/`.
-11. Check the Lobster and OpenClaw worktree state before auditing code.
+6. Read `projects/layering-contracts/next-evidence-plan.md`.
+7. Read `projects/layering-contracts/four-corners.md`.
+8. Read the relevant area note; begin with `state-continuity.md`.
+9. Read `projects/layering-contracts/synchronization-model.md` as a hypothesis.
+10. Read `projects/layering-contracts/inventory/README.md`.
+11. Read the linked historical audit notes under `projects/hosting-profiles/`.
+12. Check the Lobster and OpenClaw worktree state before auditing code.
 
 ## Baseline
 
@@ -32,8 +33,9 @@
   and events; State/Continuity has the only new `/synced` hypothesis. Boot and
   Managed Configuration is approved; trusted identity/proxy-pipe pass 4 and
   ProxyPipe frame ownership pass 5 are complete at Lobster `0a9514c1ce`. Resume
-  by tracing lifecycle `checkpoint_unmount`/`shutdown_ready` into real state
-  durability, then map Snapshot RFC 20. Do not file RFCs yet.
+  with the approved ordered evidence plan. Current conceptual discussion is
+  ProxyPipe and reusable Host Approval; execution resumes with lifecycle
+  `checkpoint_unmount`/`shutdown_ready`. Do not file RFCs yet.
 - Active branch / PR: none for the umbrella effort
 - Known dirty state: `.artifacts/` is an unrelated untracked workspace item
 - Blocking question: none
@@ -83,6 +85,8 @@
 - Start the State and Continuity repo audit without changing or filing RFCs.
 - Complete the Managed Configuration delivery proof in
   `managed-configuration-deliverable.md` before external promotion.
+- Follow `next-evidence-plan.md`; preserve ProxyPipe and Host Approval as
+  evidence investigations rather than assumed new RFCs.
 - Verify the eight projection/reset candidates in
   `inventory/boot-config-2026-07-10.md` before treating any as a bug. Candidate
   resolution is recorded in `inventory/env-matrix-2026-07-10.md`; two keys have
