@@ -15,6 +15,7 @@ typed failures, and reusable TypeScript/non-TypeScript conformance.
 | Area | File |
 | --- | --- |
 | Current session and resume state | `SESSION.md` |
+| ProxyPipe semantic and transport decomposition | `proxypipe-decomposition.md` |
 | Candidate design and completed gates | `../layering-contracts/duplex-transport.md` |
 | OpenClawTransport fit audit | `../layering-contracts/inventory/proxypipe-openclaw-transport-fit-2026-07-10.md` |
 | `node.invoke` reuse decision | `../layering-contracts/inventory/node-invoke-duplex-fit-2026-07-10.md` |

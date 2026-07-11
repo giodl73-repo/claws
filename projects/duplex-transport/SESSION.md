@@ -46,6 +46,9 @@
 
 ## Open Threads
 
+- `proxypipe-decomposition.md` now records the seven semantic families and the
+  duplicated connection/correlation/retry/identity/generation mechanics. Treat
+  only bounded host-service invocation as the new Duplex primitive.
 - Select the first provider and exact method schema.
 - Prove host-provider credential and generation binding against current Gateway auth.
 - Define extraction boundaries for shared unary peer invocation.
