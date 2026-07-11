@@ -14,9 +14,13 @@ be buried in generated wave directories.
 | `catalog/` | OpenClaw command/tool catalog metadata, generated docs, prompt/audit lenses, and PR/RFC stack notes. |
 | `ux-state/` | Gated Lobster Feeds, Policy, and Context Budget UX previews, flags, and design-review notes. |
 | `admin/` | Lobster admin spaces, managed policy baselines, Partner Center, and tenant/global admin settings. |
+| `config-admin/` | Shared Lobster/OpenClaw admin-config UX framework: settings descriptors, preview-first validation, governed save, and Scout CLI parity. |
 | `staffing/` | Staffing analysis across Lobster and ClawPilot; WorkIQ only as a search term. |
 | `context-budget/` | Context-budget audit, runtime evidence, recommendations, and integrations. |
 | `snapshot/` | SQLite-safe snapshot/restore plugin, backup integration, failover substrate, and RFC coordination. |
+| `hosting-profiles/` | Standard OpenClaw hostee profiles, ready checks, status conditions, and container/platform hosting conventions. |
+| `promoteclaw/` | Lobster OpenClaw version promotion from quarantine-cleared LTS releases, including patch carry-forward/drop validation. |
+| `typeclaw/` | OpenClaw TypeScript native / TS7 performance and compatibility evaluation. |
 | `memory/` | Agent memory strategy, OpenClaw memory assessment, and XAI report coordination. |
 | `mail/` | OpenClaw mail-channel research, mail plugin options, and Exchange/Microsoft Graph integration framing. |
 | `claws/` | OpenClaw RFC direction for runnable starter setups across skills, plugins, MCP servers, workspace files, persona files, and automations. |
@@ -46,9 +50,13 @@ agent is assigned to an area, then read the area `README.md`.
 | UX state | `ux-state/SESSION.md` |
 | Lobster | `lobster/SESSION.md` |
 | Admin | `admin/SESSION.md` |
+| Config admin UX | `config-admin/SESSION.md` |
 | Staffing | `staffing/SESSION.md` |
 | Context budget | `context-budget/SESSION.md` |
 | Snapshot | `snapshot/SESSION.md` |
+| OpenClaw hosting profiles | `hosting-profiles/SESSION.md` |
+| PromoteClaw | `promoteclaw/SESSION.md` |
+| TypeClaw | `typeclaw/SESSION.md` |
 | Memory | `memory/SESSION.md` |
 | Mail | `mail/SESSION.md` |
 | Claws | `claws/SESSION.md` |

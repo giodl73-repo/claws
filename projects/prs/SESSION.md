@@ -21,24 +21,33 @@
 
 ## Current Session
 
-- Last updated: 2026-06-20.
-- Last agent: Codex.
-- Current focus: OpenClaw PR #86627 prepared through review and hosted-gate
-  setup; waiting on refreshed non-required hosted checks after rebase.
-- Active branch / PR: `openclaw/openclaw#86627`, head
-  `0928476673c7323bd7a3fba51b5a565b4fbe5d07`, base `main`.
-- Live PR state: open, not draft, `MERGEABLE` / `UNSTABLE` as of the last poll
-  because refreshed hosted checks are queued after the rebase. Review decision
-  empty, review requested from `steipete`, no assignees. Prior ClawSweeper
-  verdict for head `9b06037369ac463a914fb82702edc3e31a38fe26` was
-  `needs-human`, `rating: 🐚 platinum hermit`, `proof: sufficient`,
-  `status: 👀 ready for maintainer look`.
-- Checks: after switching GitHub auth to `giodl73-repo`, the PR was rebased
-  cleanly onto current `origin/main` and force-with-lease pushed to
-  `doctor-core-contribution-health`. Latest poll showed no failures, but
-  non-required hosted jobs were still queued (`preflight`, `security-fast`,
-  CodeQL security shards, `Scan changed paths`, `Select Critical Quality
-  shards`). `gh pr checks --required` reports no required checks configured.
+- Last updated: 2026-07-10.
+- Last agent: Copilot.
+- Current focus: Lobster PR cleanup for Gio-authored front queue in
+  `microsoft.ghe.com/bic/lobster`; no ADO jobs were manually queued or rerun
+  because ADO pool exhaustion is blocking dependency-track progress.
+- Active branch / PR: Gio open Lobster queue is #4298, #4297, #4272, #4092,
+  and #4064. Session-highlighted #4206 is already merged.
+- Live PR state: #4272 pushed to `1f9d4dd8d1`, fixing fail-closed inventory
+  source handling and configured `load.paths` manifest scanning; proof comment:
+  https://microsoft.ghe.com/bic/lobster/pull/4272#issuecomment-199982276.
+  #4092 pushed to `d5fcc05a1a`, fixing the stale `snapshot` README allowlist
+  reference; proof comment:
+  https://microsoft.ghe.com/bic/lobster/pull/4092#issuecomment-199982776.
+  #4064 pushed to `5825b59b88`, adding duplicate-schedule guard plus startup
+  artifact/telemetry proof; proof comment:
+  https://microsoft.ghe.com/bic/lobster/pull/4064#issuecomment-199983351.
+  #4298 remains non-draft at `755d7f8a7d`, PullRequest green, GitHubPop red,
+  Build Validation missing, and reviewDecision `CHANGES_REQUESTED` despite
+  newer approvals. #4297 remains draft at `8471b690ae`, PullRequest neutral,
+  GitHubPop red, and Build Validation missing.
+- Checks: branch rules require `GitOps/GitHubPop`,
+  `Lobster-Runtime-PullRequest`, and `Lobster-Runtime-Build-Validation` on
+  every Lobster PR head. After the pushes, #4272/#4092/#4064 natural
+  PullRequest checks are queued, GitHubPop is red or missing-on-new-head, and
+  Build Validation remains missing. Per Lobster policy and current pool
+  exhaustion, do not manually queue or rerun ADO unless the user explicitly
+  names a PR/branch.
 - PR body: updated twice on 2026-06-20. It no longer calls
   `0b64c4ebda2c4610994b3eb46e1012c71ad28d22` the current signed head and now
   references current head `0928476673c7323bd7a3fba51b5a565b4fbe5d07` as a clean

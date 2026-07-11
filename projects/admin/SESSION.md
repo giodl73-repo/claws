@@ -21,12 +21,12 @@
 
 ## Current Session
 
-- Last updated: 2026-06-26.
-- Last agent: Codex.
-- Current focus: MAC / Partner Center filing refresh has merged. Policy admin
-  stack has landed through baseline state, OpenClaw policy bootstrap, Scout
-  policy preview, MOS3-backed personal policy state, gated Policy UX preview,
-  and MAC registration guidance refresh.
+- Last updated: 2026-07-10.
+- Last agent: Copilot CLI.
+- Current focus: Reuse readout for OpenClaw config/admin UX in Lobster/Scout:
+  OpenClaw has interactive config/onboarding, schema-driven Control UI, strict
+  config CLI/dry-run/validate, doctor repair, and policy conformance surfaces
+  that map into Lobster policy/feed/admin previews.
 - Active branch / PR: draft Lobster stack #3585 -> #3586 -> #3588 -> #3590
   -> #3603 -> #3607 -> #3623 -> #3693. #3693 branch
   `user/giodl/lobster-policy-admin-read-ux` lives in

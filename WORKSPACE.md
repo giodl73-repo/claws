@@ -18,9 +18,13 @@ For agent and harness entry points, start with `CONTEXT.md`.
 | Catalog | `projects/catalog/` | OpenClaw command/tool catalog metadata, generated docs, prompt/audit lenses, and PR/RFC stack notes. |
 | UX state | `projects/ux-state/` | Gated Lobster Feeds, Policy, and Context Budget UX previews, flags, and design-review notes. |
 | Admin | `projects/admin/` | Lobster admin spaces, managed policy baselines, and Partner Center notes. |
+| Config admin UX | `projects/config-admin/` | Shared Lobster/OpenClaw admin-config UX framework: settings descriptors, preview-first validation, governed save, and Scout CLI parity. |
 | Staffing | `projects/staffing/` | Lobster and ClawPilot staffing analysis and gap mapping; WorkIQ only as a search term. |
 | Context budget | `projects/context-budget/` | Context-budget PR plan, branches, and proof notes. |
 | Snapshot | `projects/snapshot/` | SQLite-safe snapshot/restore plugin, backup integration, failover substrate, and RFC coordination. |
+| OpenClaw hosting profiles | `projects/hosting-profiles/` | Standard hostee profiles, ready checks, status conditions, and container/platform hosting conventions for OpenClaw. |
+| PromoteClaw | `projects/promoteclaw/` | Regular Lobster OpenClaw version promotion from quarantine-cleared LTS releases, with patch carry-forward validation. |
+| TypeClaw | `projects/typeclaw/` | OpenClaw TypeScript native / TS7 performance and compatibility evaluation. |
 | Memory | `projects/memory/` | Agent memory strategy, OpenClaw assessment, and XAI report notes. |
 | Mail | `projects/mail/` | Mail-channel research, mail plugin options, and Exchange/Microsoft Graph integration framing. |
 | Claws | `projects/claws/` | OpenClaw RFC direction for runnable starter setups across skills, plugins, MCP servers, workspace files, persona files, and automations. |

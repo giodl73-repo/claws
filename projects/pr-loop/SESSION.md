@@ -24,21 +24,97 @@
 
 ## Current Session
 
-- - Last updated: 2026-07-07T08:26:00-07:00.
+- Last updated: 2026-07-10T06:55:00-07:00.
 - Last agent: Copilot.
-- Current focus: Lobster named/followable feeds stack is parked until after
-  runtime/ADO stability improves. Let ADO attach/run automatically; do not
-  manually queue or rerun ADO unless the user explicitly names a PR/branch to
-  queue.
-- Active branch / PR: #3749 `user/giodl/lobster-policy-drafts-api` at
-  `bcfe1ca4f14f194a73aa2d911c77e5e7a1289cd5` remains active; named/followable
-  feeds PRs #4044, #3990, #3991, #3995, #3996, and #3997 are closed/parked.
+- Current focus: Lobster open authored PR sweep. Let ADO attach/run
+  automatically; do not manually queue or rerun ADO unless the user explicitly
+  names a PR/branch to queue.
+- Active branch / PR: open authored Lobster PRs are #4298, #4297, #4272,
+  #4220, #4092, and #4064. Recent handoff PRs #4206, #4247, and #3749 are
+  merged; #4044 is closed/parked.
 - Known dirty state: `claws-hapi` already has unrelated project notes and
  assets modified outside this project. Do not revert them. Lobster #4044
  worktree `C:\src\lobster-feeds-named-management` is clean after push.
 - Blocking question: none. Do not manually queue ADO; rely on automatic check
   attachment after pushes.
 - Latest operator pass:
+ - 2026-07-10 06:55 PT:
+   - Live open authored Lobster PR sweep found #4298, #4297, #4272, #4220,
+     #4092, and #4064. `claws-hapi` and `C:\src\lobster` both have unrelated
+     dirty state; do not revert it.
+   - #4298 `Add custom-tool node command allowlist`: non-draft,
+     `CONFLICTING`/`DIRTY`, stale `CHANGES_REQUESTED`; mandatory contexts:
+     `Lobster-Runtime-PullRequest` passed, `GitOps/GitHubPop` failed,
+     `Lobster-Runtime-Build-Validation` missing.
+   - #4297 `Add Scout node catalog prompt projection`: draft, mergeable but
+     `UNSTABLE`; mandatory contexts: `Lobster-Runtime-PullRequest` neutral /
+     skipping, `GitOps/GitHubPop` failed,
+     `Lobster-Runtime-Build-Validation` missing.
+   - #4272 `Add Scout catalog inventory plugin`: draft, mergeable/BLOCKED,
+     stale `CHANGES_REQUESTED`; mandatory contexts:
+     `Lobster-Runtime-PullRequest` failed (OpenClaw Adapter unit tests and
+     OpenClaw Agent container build/smoke failed), `GitOps/GitHubPop` failed,
+     `Lobster-Runtime-Build-Validation` missing.
+   - #4220 `Add node-skills bridge plugin`: draft and intentionally parked,
+     `CONFLICTING`/`DIRTY`, stale `CHANGES_REQUESTED`; mandatory contexts:
+     `Lobster-Runtime-PullRequest` failed broadly across runtime E2E shards,
+     runtime quality/unit, and repo validation; `GitOps/GitHubPop` failed,
+     `Lobster-Runtime-Build-Validation` missing.
+   - #4092 `Align snapshot plugin with backup sqlite surface`: non-draft,
+     mergeable/BLOCKED, stale `CHANGES_REQUESTED`; mandatory contexts:
+     `Lobster-Runtime-PullRequest` passed, `GitOps/GitHubPop` failed,
+     `Lobster-Runtime-Build-Validation` missing.
+   - #4064 `Enable snapshot auto-create trial`: non-draft, mergeable/BLOCKED,
+     stale `CHANGES_REQUESTED`; mandatory contexts:
+     `Lobster-Runtime-PullRequest` passed, `GitOps/GitHubPop` failed,
+     `Lobster-Runtime-Build-Validation` missing.
+   - Handoff cleanup: #4206 `Bake ClawPilot node command allowlist`, #4247
+     `fix(openclaw): stop baking sandbox defaults`, and #3749
+     `feat(policy): add tenant draft validation api` are merged. #4044
+     `Add Scout followable feed contract` remains closed/parked.
+ - 2026-07-09 07:45 PT:
+   - Started the remaining Lobster PR sweep after parking named feeds and
+     closing #4066. Open authored PRs were #4064, #4092, #4206, and #4220.
+     Per user reminder, do not manually queue ADO; rely on automatic checks.
+   - Focused #4206 first because #4220 is stacked on it. Current #4206 head is
+     `c57eccad2e` (`user/giodl/clawpilot-node-command-allowlist`), mergeable
+     but still review-gated. Verified the current branch already contains the
+     requested cleanup/doc/test fixes: legacy `tools.exec` cleanup now removes
+     only the generated node-exec shape and preserves operator-owned exec
+     overrides; node-pairing docs/runtime comments describe the baked Gateway
+     allowlist and baked `tools.exec` posture rather than per-start env
+     widening; OpenClaw targeted validation passed
+     `cargo fmt --manifest-path src/openclaw_container/Cargo.toml -- --check`,
+     `cargo fmt --manifest-path src/lobster_runtime/Cargo.toml -- --check`,
+     and `cargo test --manifest-path src/openclaw_container/Cargo.toml -p
+     openclaw-adapter gateway_config_override --no-fail-fast` (15 pass).
+     Posted proof comment:
+     https://microsoft.ghe.com/bic/lobster/pull/4206#issuecomment-198969501.
+     GitHub shows natural `Lobster-Runtime-PullRequest=QUEUED`,
+     `Build-Validation=MISSING`, and stale `CHANGES_REQUESTED`.
+   - Attempted to inspect #4064/#4092 ADO failure timelines with `az devops
+     invoke`, but Azure CLI auth is currently unavailable; use GitHub check
+     rollups or re-auth before raw ADO log pulls.
+ - 2026-07-09 17:07 PT:
+   - Marked Lobster #4220 (`Add node-skills bridge plugin`) back to draft at
+     user request because the Scout/Desktop node-side skills commands are not
+     available/stable yet. Comment:
+     https://microsoft.ghe.com/bic/lobster/pull/4220#issuecomment-199257946.
+     Keep #4220 parked until the provider-side skills surface lands; do not
+     spend ADO/review effort on it while #4206 settles.
+ - 2026-07-09 09:58 PT:
+   - Clarified the Lobster/OpenClaw hosting assessment: most team PRs are
+     fixing Lobster's hosted OpenClaw integration rather than upstream
+     OpenClaw directly. For the specific #3623 residue, created narrow Lobster
+     PR #4247 instead of reviving broad revert #4066:
+     https://microsoft.ghe.com/bic/lobster/pull/4247. Branch
+     `user/giodl/openclaw-sandbox-default-cleanup`, head `bcccab67cc`.
+     Scope: stop baking/injecting `agents.defaults.sandbox = {mode: off,
+     workspaceAccess: ro}` while preserving compaction reserve, auth/tool/cron
+     posture, stale inline sandbox cleanup, and operator-owned stricter sandbox
+     hardening. Local proof passed focused OpenClaw adapter seeding/sandbox and
+     shipped-policy posture tests plus `git diff --check`. No manual ADO queued;
+     initial PR state mergeable/BLOCKED with required checks not attached yet.
  - 2026-07-07 10:14 PT:
    - Closed/parked the named/followable feeds stack at user request until
      Lobster runtime/ADO stability improves: #3997, #3996, #3995, #3991,

@@ -18,9 +18,13 @@ tools.
 | Lobster work | `projects/lobster/README.md` |
 | UX state work | `projects/ux-state/README.md` |
 | Admin work | `projects/admin/README.md` |
+| Config admin UX | `projects/config-admin/README.md` |
 | Staffing analysis | `projects/staffing/README.md` |
 | Context-budget work | `projects/context-budget/README.md` |
 | Snapshot work | `projects/snapshot/README.md` |
+| OpenClaw hosting profiles | `projects/hosting-profiles/README.md` |
+| PromoteClaw | `projects/promoteclaw/README.md` |
+| TypeClaw | `projects/typeclaw/README.md` |
 | Memory work | `projects/memory/README.md` |
 | Mail work | `projects/mail/README.md` |
 | Claws work | `projects/claws/README.md` |
@@ -49,8 +53,11 @@ Common session files:
 - `projects/lobster/SESSION.md`
 - `projects/ux-state/SESSION.md`
 - `projects/admin/SESSION.md`
+- `projects/config-admin/SESSION.md`
 - `projects/context-budget/SESSION.md`
 - `projects/snapshot/SESSION.md`
+- `projects/promoteclaw/SESSION.md`
+- `projects/typeclaw/SESSION.md`
 - `projects/claws-review-bot/SESSION.md`
 - `projects/oc-path/SESSION.md`
 - `projects/clawpilot/SESSION.md`
@@ -130,12 +137,22 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
   launch flags, Jesse review notes, and convergence decisions.
 - Admin: Lobster admin spaces, managed policy baselines, Partner Center, and
   tenant/global admin settings.
+- Config admin UX: shared Lobster/OpenClaw admin-config UX framework for
+  descriptor-driven settings, preview-first validation, doctor-style findings,
+  governed save, and Scout CLI parity.
 - Staffing: Lobster and ClawPilot staffing analysis, area ownership, and gap
   mapping. WorkIQ is a search term only, not a separate staffing repo.
 - Context budget: audit, runtime evidence, recommendations, and management
   integrations.
 - Snapshot: SQLite-safe snapshot/restore plugin, backup integration, failover
   substrate, and RFC coordination.
+- OpenClaw hosting profiles: standard hostee profiles, ready checks, status
+  conditions, and container/platform hosting conventions for OpenClaw.
+- PromoteClaw: regular Lobster OpenClaw version promotion from Galin's
+  quarantine-cleared LTS feed, including patch carry-forward/drop validation.
+- TypeClaw: OpenClaw TypeScript native / TS7 evaluation, benchmarks,
+  compatibility findings, and feedback suitable for OpenClaw or Microsoft TS
+  owners.
 - Memory: AI agent memory strategy, OpenClaw memory assessment, and XAI
   Harness / Tools / Skills report coordination.
 - Mail: OpenClaw mail-channel research, plugin options, and Exchange/Microsoft
