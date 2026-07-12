@@ -688,7 +688,7 @@
     config system or an OCC-style instance resource in OpenClaw.
 - 2026-07-11: Implemented runtime activation identity as the final stack slice.
   - Draft fork PR 42: https://github.com/giodl73-repo/openclaw/pull/42
-  - Branch `user/giodl/hosting-runtime-activation`, head `f4da151a2d1`, based on
+  - Branch `user/giodl/hosting-runtime-activation`, head `400cf831997`, based on
     consolidated branch `user/giodl/readiness-profiles-upstream`.
   - Adds optional runtime/incarnation CLI and environment inputs, generated
     zero-config local identity, required `RuntimeActivationIdentified`, and
@@ -698,6 +698,9 @@
   - Focused validation passed 197 assertions. The first Codex review found and
     fixed blank-value fallback and restart identity rotation; the final review
     reported no correctness regression.
+  - A later commit review found the canonical Gateway merge dropped the
+    activation payload. Commit `400cf831997` preserves it and adds direct
+    merge-boundary coverage; the final patch review was clean.
   - RFC 0018 head `92c434c`, RFC PR 33 body, and combined upstream PR 104018
     now link the new slice.
   - Clean implementation worktree: `C:\src\openclaw-hosting-runtime-activation-pr`.
