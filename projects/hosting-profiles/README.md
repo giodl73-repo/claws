@@ -55,7 +55,7 @@ keep container-only implementation details in the host.
 | --- | --- | --- | --- | --- |
 | bic/lobster | TBD | TBD | Analysis | Inventory host pressure and patches OpenClaw should absorb as generic contracts. |
 | openclaw/rfcs | [RFC 33](https://github.com/openclaw/rfcs/pull/33) | `user/giodl/standard-hosting-profiles-ready-check` | Draft | Define the canonical readiness framework, hosting profiles, boundaries, and implementation stack. |
-| giodl73-repo/openclaw | [PRs 17-19, 22, 23, and 21](https://github.com/giodl73-repo/openclaw/pulls) | stacked hosting-profile branches | Draft | Implement readiness, built-in profiles, workspace evidence, extensible criteria/operator profiles, and blocking packaged release conformance. |
+| giodl73-repo/openclaw | [PRs 17-19, 22, 23, 27, 42, and 21](https://github.com/giodl73-repo/openclaw/pulls) | stacked hosting-profile branches | Draft | Implement readiness, built-in profiles, workspace evidence, extensible criteria/operator profiles, CLI projection, runtime activation identity, and blocking packaged release conformance. |
 
 ## Scope
 
