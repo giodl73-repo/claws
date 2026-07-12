@@ -14,6 +14,7 @@ Lobster patches still needed on that release.
 | --- | --- |
 | Session handoff | `SESSION.md` |
 | Feed discovery | `feed-discovery.md` |
+| Upstream patch admission, promotion, and deletion rules | `../layering-contracts/upstream-first-release-compact.md` |
 
 ## Active Work
 
@@ -40,6 +41,8 @@ Lobster patches still needed on that release.
    - reapply/rebase leftover Lobster-only patches onto the new tag;
    - keep patch numbering and README descriptions current;
    - run the patch drift gate.
+   - reject retained patches without an upstream link, owner, expiry, minimum
+     replacement release, and deletion target;
 5. Run focused OpenClaw container validation:
    - package install/build checks;
    - OpenClaw image build path;
@@ -53,6 +56,7 @@ Lobster patches still needed on that release.
    - patch carry-forward/drop summary;
    - validation proof;
    - known risks and rollback plan.
+   - patch-added, patch-retained, patch-dropped, and deletion-ready counts.
 
 ## Guardrails
 
@@ -60,6 +64,9 @@ Lobster patches still needed on that release.
   explicitly approve an exception.
 - Do not blindly replay all patches. First verify whether each patch landed
   upstream; carry forward only what remains necessary.
+- A patch still applying cleanly is not evidence that it should be retained.
+  Apply the Upstream-First Release Compact and block expired or unowned
+  workarounds.
 - Do not fake a green promotion when patch drift or image build validation is
   blocked.
 - Do not manually queue Lobster ADO while pools are exhausted unless the user

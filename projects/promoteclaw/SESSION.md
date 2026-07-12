@@ -79,3 +79,6 @@
 - Define the regular cadence and owner notification format for Omar.
 - Decide whether PromoteClaw should have a small helper script to read the
   feed, compare pins, and produce a PR checklist.
+- Extend PR 4355 or its follow-up to consume the Upstream-First Release Compact:
+  patch admission metadata, patch-added/retained/dropped/deletion-ready counts,
+  expiry blocking, and deletion-ledger updates.

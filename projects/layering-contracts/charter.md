@@ -54,6 +54,15 @@ OpenClaw's value remains the portable agent runtime:
 6. Make upstream conformance tests the support promise. Lobster should promote a
    release because the contract is proven, then delete the corresponding patch.
 
+## Release Compact
+
+The architecture is enforced through the
+[Upstream-First Release Compact](upstream-first-release-compact.md). Every
+Lobster-carried OpenClaw workaround must have upstream ownership, an expiry,
+conformance evidence, a minimum replacement release, and a deletion target.
+PromoteClaw turns quarantine-cleared releases into patch-deletion events rather
+than mechanically replaying a private fork.
+
 ## Plugin-First Boundary
 
 Plugin-first does not mean every underlying semantic belongs in a plugin.
@@ -72,4 +81,3 @@ Lobster
 For example, SQLite-safe snapshot creation and restore semantics can be an
 OpenClaw primitive; Lobster-specific publication, trial policy, telemetry, and
 storage integration can remain plugin/host behavior.
-
