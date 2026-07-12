@@ -11,6 +11,26 @@ small OpenClaw core feature:
 hosting profile + runtime evidence -> ready conditions -> host-facing signal
 ```
 
+## Runtime Activation Context
+
+Hosting Profiles are also the OpenClaw entry point for a minimal runtime
+activation context. OpenClaw resolves a logical runtime id and a unique
+process/container incarnation id, then reports them with the selected profile
+and readiness result. Launchers may provide stable identities through startup
+arguments, environment, or a mounted descriptor; OpenClaw generates local
+defaults so existing installations remain zero-configuration.
+
+Managed Configuration, Hosted Integration, and Runtime State Continuity keep
+ownership of configuration sources, host-bundle selection, and restore state.
+They publish resolved generations and owner-produced readiness conditions. A
+Hosting Profile composes those conditions into a support contract without
+copying their configuration, credentials, or state into a new envelope.
+
+This is the disposition for Lobster's broad environment/startup ABI: retain a
+small documented activation carrier, move ordinary settings to Managed
+Configuration, move enterprise bindings and credentials to their owners, and
+keep container-only implementation details in the host.
+
 ## Active Notes
 
 | Area | File |

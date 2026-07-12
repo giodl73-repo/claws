@@ -676,3 +676,13 @@
     Crabbox proof did not allocate a lease because WSL lacks broker login; the
     wrapper requires `crabbox login --url https://crabbox.openclaw.ai
     --provider aws`. No remote runtime pass is claimed yet.
+- 2026-07-11: Extended RFC 0018 with the minimal runtime activation context.
+  - Hosting Profiles now identify the activation being evaluated with logical
+    runtime and unique incarnation ids.
+  - OpenClaw may generate local defaults; stable host values can arrive through
+    startup arguments, environment, or a mounted descriptor.
+  - Configuration sources, host-bundle selection, and restore selection remain
+    with Managed Configuration, Hosted Integration, and Runtime State
+    Continuity. Their resolved generations and conditions join readiness.
+  - This classifies Lobster environment variables without creating a second
+    config system or an OCC-style instance resource in OpenClaw.
