@@ -27,7 +27,7 @@ RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), file
 
 Real upstream draft:
 [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
-head `d82da685c500`. It contains the four slices below as four commits and no
+head `c1da72178933`. It contains the four slices below as four commits and no
 Hosting Profile implementation.
 
 | Slice | Draft PR | Base | Head |
@@ -80,10 +80,12 @@ Lobster, doctor, or policy part of the runtime readiness path.
 
 ## Proof State
 
-- Upstream PR 104018 was rebased onto OpenClaw main `0571e0ecff0`; packaged
-  proof produced amended exact head `d82da685c500`.
-- Twelve focused readiness, plugin registry, configuration, Gateway HTTP/RPC,
-  status, and CLI files pass 96 tests across seven Vitest shards.
+- Upstream PR 104018 is rebased onto OpenClaw main `c2e0ce7b686`; resilience
+  hardening produced exact head `c1da72178933` while preserving four commits.
+- Eighteen focused readiness, plugin registry, configuration, Gateway HTTP/RPC,
+  status, and CLI files pass 193 tests across eight Vitest shards. An expanded
+  19-file run passed 208/209; the remaining health snapshot assertion is blocked
+  by the Node 24.14/SQLite 3.51.2 WAL-safety guard and requires Node 24.15+.
   `git diff --check`, package build, tarball integrity, and plugin SDK export
   checks pass.
 - The workspace criterion is observational: it never creates a missing
@@ -96,7 +98,7 @@ Lobster, doctor, or policy part of the runtime readiness path.
   temporary-directory cleanup `EPERM`.
 - The release-conformance planner passed 33 assertions. Package acceptance
   passed 44/49; five existing Windows fixture/executable metadata tests failed.
-- Exact-head packaged Docker proof passes on `d82da685c500`. The installed
+- Exact-head packaged Docker proof passes on `c1da72178933`. The installed
   package proves `/ready` and `/readyz` transition `200 -> 503 -> 200` for a
   required workspace failure and recovery, `/healthz` stays live, and the CLI
   exits `0 -> 1 -> 0` with the same canonical condition.
@@ -104,7 +106,12 @@ Lobster, doctor, or policy part of the runtime readiness path.
   Gateway `ready` RPC. The amended head fixes it and passes the existing
   descriptor-to-dispatch regression guard while preserving append-only method
   ordering.
-- A marker-backed ClawSweeper review for exact head `d82da685c500` is queued;
+- The complete evaluator now converts timeout or unexpected failure into a
+  redacted required `ReadinessEvaluationComplete=Unknown` condition. A provider
+  callback that ignores cancellation remains single-flight after timeout.
+- The exact-head proof image is
+  `sha256:1ec173320e96a546b9671402475b91764b309c22d8e999c854ad8b12a017e22c`.
+- A marker-backed ClawSweeper review for exact head `c1da72178933` is queued;
   the durable verdict remains pending.
 
 ## Landing Guidance

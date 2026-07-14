@@ -38,11 +38,11 @@
   [giodl73-repo/rfcs#7](https://github.com/giodl73-repo/rfcs/pull/7). The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `d82da685c500`; exact review slices are recorded in
+  at `c1da72178933`; exact review slices are recorded in
   `openclaw-pr-plan.md`.
 - Known dirty state: `claws-hapi` contains this update plus unrelated existing
   project changes. `C:\src\openclaw-readiness-upstream` is clean and rebased
-  on OpenClaw main `0571e0ecff0`; both RFC worktrees and all pushed
+  on OpenClaw main `c2e0ce7b686`; both RFC worktrees and all pushed
   implementation branches are clean.
 - Blocking question: none
 
@@ -98,6 +98,22 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-14: Hardened the consolidated readiness implementation against probe
+  failure and provider misbehavior, then rebased it onto current OpenClaw main.
+  - Exact implementation head: `c1da72178933`; RFC 0018 head: `227f834`.
+  - The outer two-second watchdog now returns a redacted required
+    `ReadinessEvaluationComplete=Unknown` condition instead of rejecting
+    health/status when canonical evaluation times out or throws.
+  - A provider callback that ignores cancellation remains single-flight after
+    timeout, so readiness polling cannot accumulate hung callbacks.
+  - Eighteen focused files pass 193 tests across eight shards; an expanded run
+    passed 208/209, with only the Node 24.14 SQLite safety guard blocking the
+    remaining health snapshot assertion.
+  - Exact-head package-installed Docker proof passes with image
+    `sha256:1ec173320e96a546b9671402475b91764b309c22d8e999c854ad8b12a017e22c`.
+  - PR and RFC bodies are current; a fresh exact-head ClawSweeper review is
+    queued.
 
 - 2026-07-14: Split the combined proposal and rebuilt the draft branches.
   - RFC 0018 now covers canonical conditions, bounded providers, direct
