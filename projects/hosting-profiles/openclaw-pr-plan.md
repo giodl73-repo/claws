@@ -10,15 +10,15 @@ Readiness and profiles compose but are separable:
 
 ```text
 RFC 0018: Readiness Conditions and Providers
-  PR 17 -> PR 22 -> PR 23 -> PR 27
-                         \
+  upstream PR 104018
+          |
 RFC 0023: Standard Hosting Profiles
-                           PR 18 -> PR 19 -> PR 42 -> PR 21
+  fork PR 94 -> upstream after readiness lands
 ```
 
-PR 23 is the shared foundation. `openclaw ready` is the final readiness
-projection and is not a prerequisite for profile evaluation. Profiles are
-optional named presets over the same reusable criteria.
+PR 104018 is the complete readiness foundation. Profiles are optional named
+presets over the same reusable criteria and remain a separate product/support
+decision.
 
 ## Readiness Stack
 
@@ -54,15 +54,21 @@ gateway: {
 
 ## Hosting Profile Stack
 
-RFC: [giodl73-repo/rfcs#7](https://github.com/giodl73-repo/rfcs/pull/7), file
+RFC: [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37), file
 `rfcs/0023-standard-hosting-profiles.md`.
 
-| Slice | Draft PR | Base | Head |
-| --- | --- | --- | --- |
-| Local, container, reverse-proxy profiles | [PR 18](https://github.com/giodl73-repo/openclaw/pull/18) | PR 23 | `b29161aeff2` |
-| Node-mode standard profile | [PR 19](https://github.com/giodl73-repo/openclaw/pull/19) | PR 18 | `8411687fe04` |
-| Runtime activation identity | [PR 42](https://github.com/giodl73-repo/openclaw/pull/42) | PR 19 | `4a5d6a509a0` |
-| Packaged release conformance | [PR 21](https://github.com/giodl73-repo/openclaw/pull/21) | PR 42 | `f78cad26802` |
+Primary implementation: [giodl73-repo/openclaw#94](https://github.com/giodl73-repo/openclaw/pull/94),
+head `2f8defb707c`, based on readiness head `c1da72178933`.
+
+| Commit | Review slice | Scope |
+| --- | --- | --- |
+| `63596d964b7` | [PR 18](https://github.com/giodl73-repo/openclaw/pull/18) | Local, container, and reverse-proxy profiles. |
+| `a68829096d1` | [PR 19](https://github.com/giodl73-repo/openclaw/pull/19) | Node-mode standard profile. |
+| `11322a977f6` | [PR 42](https://github.com/giodl73-repo/openclaw/pull/42) | Runtime activation identity. |
+| `2f8defb707c` | [PR 21](https://github.com/giodl73-repo/openclaw/pull/21) | Packaged release conformance. |
+
+PR 94 is the proposed implementation shape. The four smaller fork PRs expose
+the same commits as review aids and are not separate landing requests.
 
 The profile stack adds named support presets and a release validation matrix. It
 does not replace `openclaw.json`, change readiness aggregation, or make OCC,
@@ -100,8 +106,14 @@ Lobster, doctor, or policy part of the runtime readiness path.
   `src/secrets/config-io.ts`.
 - One Windows health snapshot test completed assertions but hit an existing
   temporary-directory cleanup `EPERM`.
-- The release-conformance planner passed 33 assertions. Package acceptance
-  passed 44/49; five existing Windows fixture/executable metadata tests failed.
+- The profile-only series changes 31 files with 1,248 insertions and 5
+  deletions, including docs and tests. Its 61 focused profile/config/CLI/Gateway
+  tests, 34 Docker planner tests, changed package-acceptance assertion,
+  formatting check, and `git diff --check` pass.
+- The broader package-acceptance file has 17 unrelated Windows fixture/tooling
+  failures; the assertion changed by the profile branch passes in isolation.
+- Branch-level `codex review --base c1da72178933...` timed out after ten minutes
+  without output. No clean automated review verdict is claimed.
 - Exact-head packaged Docker proof passes on `c1da72178933`. The installed
   package proves `/ready` and `/readyz` transition `200 -> 503 -> 200` for a
   required workspace failure and recovery, `/healthz` stays live, and the CLI
@@ -121,6 +133,6 @@ Lobster, doctor, or policy part of the runtime readiness path.
 ## Landing Guidance
 
 Review and land RFC 0018/readiness first through upstream draft PR 104018. RFC
-0023 and its stack can follow without changing the accepted readiness-provider
-contract. PR 104018 is now the proposed readiness landing shape; the profile
-implementation remains fork-only until RFC 0023 is ready for upstream review.
+0023 is now independently proposed in upstream RFC PR 37. Profile PR 94 remains
+fork-only until readiness lands; then rebase its four profile-only commits onto
+upstream `main` and promote them as one OpenClaw implementation PR.

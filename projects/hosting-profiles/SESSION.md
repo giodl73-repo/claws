@@ -35,11 +35,12 @@
   independently reviewable RFCs and implementation stacks.
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
-  [giodl73-repo/rfcs#7](https://github.com/giodl73-repo/rfcs/pull/7). The real
+  [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `c1da72178933`; exact review slices are recorded in
-  `openclaw-pr-plan.md`.
+  at `c1da72178933`. The dependent consolidated profile implementation is
+  [giodl73-repo/openclaw#94](https://github.com/giodl73-repo/openclaw/pull/94)
+  at `2f8defb707c`; exact review slices are recorded in `openclaw-pr-plan.md`.
 - Known dirty state: `claws-hapi` contains this update plus unrelated existing
   project changes. `C:\src\openclaw-readiness-upstream` is clean and rebased
   on OpenClaw main `c2e0ce7b686`; both RFC worktrees and all pushed
@@ -98,6 +99,24 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-14: Promoted Standard Hosting Profiles as its own upstream RFC and
+  consolidated implementation shape.
+  - Upstream RFC 0023 is draft PR 37 at `77e9893` and changes only
+    `rfcs/0023-standard-hosting-profiles.md` from RFC main.
+  - Consolidated fork implementation PR 94 is based on exact readiness head
+    `c1da72178933` and ends at `2f8defb707c`.
+  - Its four profile-only commits are `63596d964b7`, `a68829096d1`,
+    `11322a977f6`, and `2f8defb707c`; PRs 18/19/42/21 expose them as review
+    slices only.
+  - The profile diff is 31 files, 1,248 insertions, and 5 deletions. Sixty-one
+    focused tests, 34 Docker planner tests, the changed package-acceptance
+    assertion, formatting, and diff checks pass.
+  - The broader package workflow has 17 unrelated Windows fixture/tooling
+    failures. Branch-level Codex review timed out after ten minutes with no
+    output, so no automated clean verdict is claimed.
+  - Promotion order is RFC 0018/readiness PR 104018, RFC 0023, then rebase PR
+    94 onto upstream main and open one profile-only implementation PR.
 
 - 2026-07-14: Hardened the consolidated readiness implementation against probe
   failure and provider misbehavior, then rebased it onto current OpenClaw main.
