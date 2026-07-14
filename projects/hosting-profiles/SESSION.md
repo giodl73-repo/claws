@@ -38,11 +38,11 @@
   [giodl73-repo/rfcs#7](https://github.com/giodl73-repo/rfcs/pull/7). The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `61b63467ac0`; exact review slices are recorded in
+  at `05d3df2ced8`; exact review slices are recorded in
   `openclaw-pr-plan.md`.
 - Known dirty state: `claws-hapi` contains this update plus unrelated existing
   project changes. `C:\src\openclaw-readiness-upstream` is clean and rebased
-  on OpenClaw main `9f206933aff`; both RFC worktrees and all pushed
+  on OpenClaw main `0571e0ecff0`; both RFC worktrees and all pushed
   implementation branches are clean.
 - Blocking question: none
 
@@ -737,3 +737,20 @@
   - Fixed review findings so CLI, health, and status all use the canonical live
     evaluator. The post-rebase projection/CLI shard passed 33 assertions; the
     final Gateway handler regression passed 8 assertions.
+- 2026-07-14: Completed the exact-head review and maintenance pass for upstream
+  PR 104018.
+  - Fixed the remaining ClawSweeper findings: workspace readiness is strictly
+    observational and reports `WorkspaceMissing` without creating directories;
+    readiness configuration now has canonical help and label metadata.
+  - Fixed a Codex review finding so regular text `openclaw status` does not
+    issue and discard a readiness RPC; JSON and other readiness-rendering
+    callers explicitly request the canonical result.
+  - Rebased the four-commit stack onto OpenClaw main `0571e0ecff0` and pushed
+    exact head `05d3df2ced8` with an explicit lease.
+  - Nine focused files passed 65 tests, `git diff --check` passed, and the
+    package SDK surface check passed with 10,698 public exports.
+  - The earlier Docker proof covered the superseded combined profile branch
+    and is explicitly not evidence for this exact head. Exact-head packaged
+    runtime proof remains pending.
+  - Requested a fresh marker-backed ClawSweeper review for `05d3df2ced8`; the
+    command router accepted it and the durable verdict is pending.

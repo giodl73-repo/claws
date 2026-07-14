@@ -27,7 +27,7 @@ RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), file
 
 Real upstream draft:
 [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
-head `61b63467ac0`. It contains the four slices below as four commits and no
+head `05d3df2ced8`. It contains the four slices below as four commits and no
 Hosting Profile implementation.
 
 | Slice | Draft PR | Base | Head |
@@ -80,18 +80,26 @@ Lobster, doctor, or policy part of the runtime readiness path.
 
 ## Proof State
 
-- Focused readiness tests pass across the rebuilt slices.
-- Upstream PR 104018 was rebased onto OpenClaw main `9f206933aff`; its
-  post-rebase status/health/CLI shard passed 33 assertions and its final
-  Gateway-handler regression passed 8 assertions.
+- Upstream PR 104018 was rebased onto OpenClaw main `0571e0ecff0` at exact
+  head `05d3df2ced8`.
+- Nine focused readiness, Gateway, status, CLI, configuration-metadata, and
+  workspace suites passed 65 tests. `git diff --check` passed, and the package
+  SDK surface check passed with 10,698 public exports.
+- The workspace criterion is observational: it never creates a missing
+  workspace and reports stable `WorkspaceMissing`/`Unknown` evidence instead.
+- Regular text `openclaw status` does not pay for an unused readiness RPC;
+  JSON and other readiness-rendering callers explicitly request it.
 - Typecheck reaches one unrelated baseline `TS4058` in
   `src/secrets/config-io.ts`.
 - One Windows health snapshot test completed assertions but hit an existing
   temporary-directory cleanup `EPERM`.
 - The release-conformance planner passed 33 assertions. Package acceptance
   passed 44/49; five existing Windows fixture/executable metadata tests failed.
-- A real Docker runtime proof remains required before upstream implementation
-  PRs are promoted.
+- The old Docker proof is for the superseded combined readiness/profile head
+  and is not evidence for `05d3df2ced8`. A real exact-head packaged runtime
+  proof remains required before promotion.
+- A marker-backed ClawSweeper review for exact head `05d3df2ced8` is queued;
+  the durable verdict remains pending.
 
 ## Landing Guidance
 
