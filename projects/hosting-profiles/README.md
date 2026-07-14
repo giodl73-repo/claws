@@ -59,6 +59,7 @@ keep container-only implementation details in the host.
 | bic/lobster | TBD | TBD | Analysis | Inventory host pressure and patches OpenClaw should absorb as generic contracts. |
 | openclaw/rfcs | [RFC 0018 / PR 33](https://github.com/openclaw/rfcs/pull/33) | `user/giodl/standard-hosting-profiles-ready-check` | Review | Define readiness conditions/providers, direct operator selection, canonical projections, and CLI. |
 | giodl73-repo/rfcs | [RFC 0023 / PR 7](https://github.com/giodl73-repo/rfcs/pull/7) | `user/giodl/rfc-0023-standard-hosting-profiles` | Draft | Define standard, release-tested hosting profile presets over RFC 0018. |
+| openclaw/openclaw | [Readiness PR 104018](https://github.com/openclaw/openclaw/pull/104018) | `user/giodl/readiness-profiles-upstream` | Draft | Real readiness-only landing candidate for RFC 0018; four commits, no profile implementation. |
 | giodl73-repo/openclaw | [Readiness PRs 17, 22, 23, 27](https://github.com/giodl73-repo/openclaw/pulls) | readiness-only stack | Draft | Modernize Gateway readiness without requiring profiles. |
 | giodl73-repo/openclaw | [Profile PRs 18, 19, 42, 21](https://github.com/giodl73-repo/openclaw/pulls) | profile stack based on PR 23 | Draft | Add standard profiles, node-mode, activation identity, and packaged conformance. |
 

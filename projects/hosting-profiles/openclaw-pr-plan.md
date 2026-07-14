@@ -25,6 +25,11 @@ optional named presets over the same reusable criteria.
 RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), file
 `rfcs/0018-readiness-conditions-and-providers.md`.
 
+Real upstream draft:
+[openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
+head `61b63467ac0`. It contains the four slices below as four commits and no
+Hosting Profile implementation.
+
 | Slice | Draft PR | Base | Head |
 | --- | --- | --- | --- |
 | Canonical Gateway conditions | [PR 17](https://github.com/giodl73-repo/openclaw/pull/17) | `hosting-profiles-base` | `f3113fbae1a` |
@@ -75,7 +80,10 @@ Lobster, doctor, or policy part of the runtime readiness path.
 
 ## Proof State
 
-- Focused readiness/profile tests pass across the rebuilt slices.
+- Focused readiness tests pass across the rebuilt slices.
+- Upstream PR 104018 was rebased onto OpenClaw main `9f206933aff`; its
+  post-rebase status/health/CLI shard passed 33 assertions and its final
+  Gateway-handler regression passed 8 assertions.
 - Typecheck reaches one unrelated baseline `TS4058` in
   `src/secrets/config-io.ts`.
 - One Windows health snapshot test completed assertions but hit an existing
@@ -87,7 +95,7 @@ Lobster, doctor, or policy part of the runtime readiness path.
 
 ## Landing Guidance
 
-Review and land RFC 0018/readiness first. RFC 0023 and its stack can follow
-without changing the accepted readiness-provider contract. The earlier
-consolidated upstream draft is behavior evidence only, not the proposed landing
-shape.
+Review and land RFC 0018/readiness first through upstream draft PR 104018. RFC
+0023 and its stack can follow without changing the accepted readiness-provider
+contract. PR 104018 is now the proposed readiness landing shape; the profile
+implementation remains fork-only until RFC 0023 is ready for upstream review.

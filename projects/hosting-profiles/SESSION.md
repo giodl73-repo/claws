@@ -35,11 +35,15 @@
   independently reviewable RFCs and implementation stacks.
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
-  [giodl73-repo/rfcs#7](https://github.com/giodl73-repo/rfcs/pull/7). Exact
-  implementation stacks are recorded in `openclaw-pr-plan.md`.
+  [giodl73-repo/rfcs#7](https://github.com/giodl73-repo/rfcs/pull/7). The real
+  readiness-only implementation is
+  [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
+  at `61b63467ac0`; exact review slices are recorded in
+  `openclaw-pr-plan.md`.
 - Known dirty state: `claws-hapi` contains this update plus unrelated existing
-  project changes. `C:\src\openclaw-readiness-split`, both RFC worktrees, and
-  all pushed implementation branches are clean.
+  project changes. `C:\src\openclaw-readiness-upstream` is clean and rebased
+  on OpenClaw main `9f206933aff`; both RFC worktrees and all pushed
+  implementation branches are clean.
 - Blocking question: none
 
 ## Resume Checklist
@@ -720,3 +724,16 @@
   - RFC 0018 head `92c434c`, RFC PR 33 body, and combined upstream PR 104018
     now link the new slice.
   - Clean implementation worktree: `C:\src\openclaw-hosting-runtime-activation-pr`.
+- 2026-07-14: Converted upstream PR 104018 into the real readiness-only landing
+  candidate.
+  - Replaced the old combined readiness/profile history with the four RFC 0018
+    commits: canonical Gateway conditions, workspace writability, selectable
+    providers, and `openclaw ready`.
+  - Rebased cleanly onto current OpenClaw main and force-updated the existing
+    branch with an explicit lease. Exact head: `61b63467ac0`.
+  - Renamed and rewrote the PR to exclude hosting profiles, node-mode, runtime
+    activation identity, and release conformance. Those remain in RFC 0023 and
+    its separate fork stack.
+  - Fixed review findings so CLI, health, and status all use the canonical live
+    evaluator. The post-rebase projection/CLI shard passed 33 assertions; the
+    final Gateway handler regression passed 8 assertions.
