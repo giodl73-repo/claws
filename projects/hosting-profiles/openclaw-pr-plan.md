@@ -30,6 +30,10 @@ Real upstream draft:
 head `c1da72178933`. It contains the four slices below as four commits and no
 Hosting Profile implementation.
 
+RFC 0018 and its PR body identify this upstream draft as the primary
+implementation to review. The fork PRs below are commit-level review aids, not
+alternative landing PRs.
+
 | Slice | Draft PR | Base | Head |
 | --- | --- | --- | --- |
 | Canonical Gateway conditions | [PR 17](https://github.com/giodl73-repo/openclaw/pull/17) | `hosting-profiles-base` | `66710bed548` |

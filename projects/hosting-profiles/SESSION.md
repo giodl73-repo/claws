@@ -101,7 +101,7 @@
 
 - 2026-07-14: Hardened the consolidated readiness implementation against probe
   failure and provider misbehavior, then rebased it onto current OpenClaw main.
-  - Exact implementation head: `c1da72178933`; RFC 0018 head: `227f834`.
+  - Exact implementation head: `c1da72178933`; RFC 0018 head: `5d9da74`.
   - The outer two-second watchdog now returns a redacted required
     `ReadinessEvaluationComplete=Unknown` condition instead of rejecting
     health/status when canonical evaluation times out or throws.
@@ -114,6 +114,9 @@
     `sha256:1ec173320e96a546b9671402475b91764b309c22d8e999c854ad8b12a017e22c`.
   - PR and RFC bodies are current; a fresh exact-head ClawSweeper review is
     queued.
+  - RFC 0018 now identifies upstream PR 104018 as the primary implementation
+    and proposed landing shape. Fork PRs 17/22/23/27 are supporting review
+    slices only.
 
 - 2026-07-14: Split the combined proposal and rebuilt the draft branches.
   - RFC 0018 now covers canonical conditions, bounded providers, direct
