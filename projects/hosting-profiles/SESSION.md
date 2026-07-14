@@ -38,7 +38,7 @@
   [giodl73-repo/rfcs#7](https://github.com/giodl73-repo/rfcs/pull/7). The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `05d3df2ced8`; exact review slices are recorded in
+  at `d82da685c500`; exact review slices are recorded in
   `openclaw-pr-plan.md`.
 - Known dirty state: `claws-hapi` contains this update plus unrelated existing
   project changes. `C:\src\openclaw-readiness-upstream` is clean and rebased
@@ -745,12 +745,22 @@
   - Fixed a Codex review finding so regular text `openclaw status` does not
     issue and discard a readiness RPC; JSON and other readiness-rendering
     callers explicitly request the canonical result.
-  - Rebased the four-commit stack onto OpenClaw main `0571e0ecff0` and pushed
-    exact head `05d3df2ced8` with an explicit lease.
-  - Nine focused files passed 65 tests, `git diff --check` passed, and the
-    package SDK surface check passed with 10,698 public exports.
-  - The earlier Docker proof covered the superseded combined profile branch
-    and is explicitly not evidence for this exact head. Exact-head packaged
-    runtime proof remains pending.
-  - Requested a fresh marker-backed ClawSweeper review for `05d3df2ced8`; the
-    command router accepted it and the durable verdict is pending.
+  - Rebased the four-commit stack onto OpenClaw main `0571e0ecff0`, then pushed
+    exact head `d82da685c500` with an explicit lease after packaged proof.
+  - The first exact-head package run found that the new `ready` RPC descriptor
+    and handler lacked a lazy dispatch binding. The final commit now wires it
+    through `loadHealthHandlers` and appends the descriptor without shifting
+    existing Gateway method order.
+  - Twelve focused files pass 96 tests across seven Vitest shards;
+    `git diff --check`, package build, tarball integrity, and plugin SDK export
+    checks pass.
+  - Package-installed Docker proof passes on `d82da685c500`: `/ready` and
+    `/readyz` transition `200 -> 503 -> 200` as the required workspace is
+    removed and restored, `/healthz` remains `200`, and `openclaw ready --json`
+    exits `0 -> 1 -> 0` with the same canonical condition.
+  - Functional image:
+    `sha256:6448ba902d74aacfc25a4456572ec0c42448dca7507aa5a64ab348ef12347518`.
+    Direct AWS Crabbox was unauthorized and Blacksmith lacked `openclaw` org
+    access, so this is local Docker Linux proof rather than remote proof.
+  - Requested a fresh marker-backed ClawSweeper review for `d82da685c500`; the
+    durable verdict is pending.

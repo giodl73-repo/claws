@@ -27,7 +27,7 @@ RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), file
 
 Real upstream draft:
 [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
-head `05d3df2ced8`. It contains the four slices below as four commits and no
+head `d82da685c500`. It contains the four slices below as four commits and no
 Hosting Profile implementation.
 
 | Slice | Draft PR | Base | Head |
@@ -80,11 +80,12 @@ Lobster, doctor, or policy part of the runtime readiness path.
 
 ## Proof State
 
-- Upstream PR 104018 was rebased onto OpenClaw main `0571e0ecff0` at exact
-  head `05d3df2ced8`.
-- Nine focused readiness, Gateway, status, CLI, configuration-metadata, and
-  workspace suites passed 65 tests. `git diff --check` passed, and the package
-  SDK surface check passed with 10,698 public exports.
+- Upstream PR 104018 was rebased onto OpenClaw main `0571e0ecff0`; packaged
+  proof produced amended exact head `d82da685c500`.
+- Twelve focused readiness, plugin registry, configuration, Gateway HTTP/RPC,
+  status, and CLI files pass 96 tests across seven Vitest shards.
+  `git diff --check`, package build, tarball integrity, and plugin SDK export
+  checks pass.
 - The workspace criterion is observational: it never creates a missing
   workspace and reports stable `WorkspaceMissing`/`Unknown` evidence instead.
 - Regular text `openclaw status` does not pay for an unused readiness RPC;
@@ -95,10 +96,15 @@ Lobster, doctor, or policy part of the runtime readiness path.
   temporary-directory cleanup `EPERM`.
 - The release-conformance planner passed 33 assertions. Package acceptance
   passed 44/49; five existing Windows fixture/executable metadata tests failed.
-- The old Docker proof is for the superseded combined readiness/profile head
-  and is not evidence for `05d3df2ced8`. A real exact-head packaged runtime
-  proof remains required before promotion.
-- A marker-backed ClawSweeper review for exact head `05d3df2ced8` is queued;
+- Exact-head packaged Docker proof passes on `d82da685c500`. The installed
+  package proves `/ready` and `/readyz` transition `200 -> 503 -> 200` for a
+  required workspace failure and recovery, `/healthz` stays live, and the CLI
+  exits `0 -> 1 -> 0` with the same canonical condition.
+- The first packaged run exposed a missing lazy dispatch binding for the new
+  Gateway `ready` RPC. The amended head fixes it and passes the existing
+  descriptor-to-dispatch regression guard while preserving append-only method
+  ordering.
+- A marker-backed ClawSweeper review for exact head `d82da685c500` is queued;
   the durable verdict remains pending.
 
 ## Landing Guidance
