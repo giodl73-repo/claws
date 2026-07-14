@@ -32,10 +32,10 @@ Hosting Profile implementation.
 
 | Slice | Draft PR | Base | Head |
 | --- | --- | --- | --- |
-| Canonical Gateway conditions | [PR 17](https://github.com/giodl73-repo/openclaw/pull/17) | `hosting-profiles-base` | `f3113fbae1a` |
-| Bounded workspace criterion | [PR 22](https://github.com/giodl73-repo/openclaw/pull/22) | PR 17 | `19fba8e882e` |
-| Selectable readiness providers | [PR 23](https://github.com/giodl73-repo/openclaw/pull/23) | PR 22 | `f5b33760430` |
-| Canonical `openclaw ready` CLI | [PR 27](https://github.com/giodl73-repo/openclaw/pull/27) | PR 23 | `8d0e9045c12` |
+| Canonical Gateway conditions | [PR 17](https://github.com/giodl73-repo/openclaw/pull/17) | `hosting-profiles-base` | `66710bed548` |
+| Bounded workspace criterion | [PR 22](https://github.com/giodl73-repo/openclaw/pull/22) | PR 17 | `a46ab9a67b0` |
+| Selectable readiness providers | [PR 23](https://github.com/giodl73-repo/openclaw/pull/23) | PR 22 | `6d8eda8a7c4` |
+| Canonical `openclaw ready` CLI | [PR 27](https://github.com/giodl73-repo/openclaw/pull/27) | PR 23 | `c1da7217893` |
 
 This stack adds no profile selection. Operators can use the facility directly:
 
