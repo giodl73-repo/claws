@@ -29,17 +29,17 @@
 
 ## Current Session
 
-- Last updated: 2026-07-10
+- Last updated: 2026-07-14
 - Last agent: Codex
-- Current focus: Align RFC 33 and implementation PR 23 around a concrete,
-  enumerable readiness-provider contract and explicit built-in profile support
-  inheritance, then execute the package-installed Docker conformance lane.
-- Active branch / PR: `C:\src\openclaw-hosting-profiles-local` on
-  `user/giodl/hosting-profiles-local` remains the reviewed dirty worktree.
-  Publish worktree: `C:\src\openclaw-hosting-profiles-publish`.
-- Known dirty state: `claws-hapi` has this session-note update plus unrelated
-  existing project changes. OpenClaw publish and RFC worktrees are clean; all
-  three fork branches and RFC PR 33 are pushed.
+- Current focus: Readiness and Standard Hosting Profiles are split into two
+  independently reviewable RFCs and implementation stacks.
+- Active branch / PR: RFC 0018 is
+  [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
+  [giodl73-repo/rfcs#7](https://github.com/giodl73-repo/rfcs/pull/7). Exact
+  implementation stacks are recorded in `openclaw-pr-plan.md`.
+- Known dirty state: `claws-hapi` contains this update plus unrelated existing
+  project changes. `C:\src\openclaw-readiness-split`, both RFC worktrees, and
+  all pushed implementation branches are clean.
 - Blocking question: none
 
 ## Resume Checklist
@@ -94,6 +94,22 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-14: Split the combined proposal and rebuilt the draft branches.
+  - RFC 0018 now covers canonical conditions, bounded providers, direct
+    `gateway.readiness` selection, and the final `openclaw ready` projection.
+  - RFC 0023 now covers Standard Hosting Profiles as a separate support and
+    release-conformance decision.
+  - Readiness stack: PR 17 -> PR 22 -> PR 23 -> PR 27.
+  - Profile stack: PR 23 -> PR 18 -> PR 19 -> PR 42 -> PR 21.
+  - All live fork PR bases, titles, bodies, and branch heads were aligned to
+    this graph. The consolidated upstream draft remains evidence only.
+
+- 2026-07-13: Rewrote the live RFC PR 33 body as a properly formatted,
+  maintainer-facing decision summary. It now separates the bounded v1 contract
+  from runtime-identity and release-gate follow-ups, retains implementation and
+  packaged Docker proof links, and removes the stale ClawBus appendix. The
+  normative RFC source was not changed.
 
 - 2026-07-11: Renumbered the live Readiness Conditions and Standard Hosting
   Profiles RFC from `0010` to `0018` on the existing RFC PR 33 branch. The

@@ -1,14 +1,17 @@
 # OpenClaw Hosting Profiles Project
 
-Use this area to define OpenClaw's readiness-provider contract and hosting profiles: the standard hostee contract
-OpenClaw exposes when it is run by Docker, Compose, Kubernetes, Lobster, OCC, or
-another platform.
+Use this area to coordinate two related but independently adoptable contracts:
+OpenClaw readiness conditions/providers and Standard Hosting Profiles. Together
+they define the hostee contract OpenClaw exposes when run by Docker, Compose,
+Kubernetes, Lobster, OCC, or another platform.
 
 The center of the proposal is not a Lobster-only compatibility layer. It is a
 small OpenClaw core feature:
 
 ```text
-hosting profile + runtime evidence -> ready conditions -> host-facing signal
+runtime evidence -> readiness conditions -> host-facing signal
+                                  ^
+                    optional hosting-profile preset
 ```
 
 ## Runtime Activation Context
@@ -44,7 +47,7 @@ keep container-only implementation details in the host.
 | Milestone path from as-is Lobster layer to upstream conformance | `milestones.md` |
 | Real OpenClaw hosting seams and missing startup-admission contract | `hosting-seams.md` |
 | Standard container/workload hosting model and one-line-to-platform progression | `standard-hosting-model.md` |
-| Original project RFC draft; live normative source is RFC PR 33 | `0010-standard-hosting-ready-check.md` |
+| Original combined RFC draft; retained as historical context | `0010-standard-hosting-ready-check.md` |
 | Older draft notes before the profiles framing stabilized | `rfc-draft.md` |
 | Compact upstream PR series for the RFC and first implementation slices | `openclaw-pr-plan.md` |
 | Live GitHub evidence for readiness demand and extensibility boundaries | `github-readiness-demand-2026-07-10.md` |
@@ -54,23 +57,26 @@ keep container-only implementation details in the host.
 | Repo | PR / Issue | Branch | Status | Purpose |
 | --- | --- | --- | --- | --- |
 | bic/lobster | TBD | TBD | Analysis | Inventory host pressure and patches OpenClaw should absorb as generic contracts. |
-| openclaw/rfcs | [RFC 33](https://github.com/openclaw/rfcs/pull/33) | `user/giodl/standard-hosting-profiles-ready-check` | Draft | Define the canonical readiness framework, hosting profiles, boundaries, and implementation stack. |
-| giodl73-repo/openclaw | [PRs 17-19, 22, 23, 27, 42, and 21](https://github.com/giodl73-repo/openclaw/pulls) | stacked hosting-profile branches | Draft | Implement readiness, built-in profiles, workspace evidence, extensible criteria/operator profiles, CLI projection, runtime activation identity, and blocking packaged release conformance. |
+| openclaw/rfcs | [RFC 0018 / PR 33](https://github.com/openclaw/rfcs/pull/33) | `user/giodl/standard-hosting-profiles-ready-check` | Review | Define readiness conditions/providers, direct operator selection, canonical projections, and CLI. |
+| giodl73-repo/rfcs | [RFC 0023 / PR 7](https://github.com/giodl73-repo/rfcs/pull/7) | `user/giodl/rfc-0023-standard-hosting-profiles` | Draft | Define standard, release-tested hosting profile presets over RFC 0018. |
+| giodl73-repo/openclaw | [Readiness PRs 17, 22, 23, 27](https://github.com/giodl73-repo/openclaw/pulls) | readiness-only stack | Draft | Modernize Gateway readiness without requiring profiles. |
+| giodl73-repo/openclaw | [Profile PRs 18, 19, 42, 21](https://github.com/giodl73-repo/openclaw/pulls) | profile stack based on PR 23 | Draft | Add standard profiles, node-mode, activation identity, and packaged conformance. |
 
 ## Scope
 
-The target deliverable is a proposal for OpenClaw hosting profiles:
+The readiness contract is independently useful:
+
+- canonical required and advisory conditions over existing Gateway evidence
+- direct `gateway.readiness` selection without a profile
+- bounded, activation-scoped plugin readiness providers
+- consistent `/ready`, `/readyz`, health, status, and `openclaw ready` results
+
+The separate hosting-profile proposal adds:
 
 - built-in profiles `local`, `container`, `reverse-proxy`, and `node-mode`
 - profile-selected defaults and required startup evidence
-- host-facing readiness, liveness, and status conditions
-- stable failure and advisory reasons
-- required workspace writability across every built-in profile
-- enumerable, self-describing, activation-scoped plugin readiness providers
-  whose criteria are advisory by default
-- additive namespaced operator profiles that cannot weaken built-in contracts
-- explicit support inheritance: OpenClaw owns the release-tested built-in
-  baseline, while operators and plugins own criteria added by derived profiles
+- named presets over reusable readiness criteria
+- runtime activation identity
 - packaged release conformance for every built-in profile
 - standard Docker/Compose/Kubernetes examples
 
@@ -78,10 +84,9 @@ The guiding rule: OpenClaw owns the hostee contract; each platform owns how it
 supplies the envelope. Lobster remains one host implementation, not the owner of
 the generic contract.
 
-Author the RFC in this project first
-(`0010-standard-hosting-ready-check.md`). Promote it to the real OpenClaw RFC
-repo after profile names, repo placement, non-goals, and the first ready-check
-test plan are stable.
+RFC 0018 is the readiness acceptance decision. RFC 0023 depends on it but is a
+separate product/support decision. The old combined project draft is not the
+normative source for either RFC.
 
 ## Related Areas
 
