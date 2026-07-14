@@ -60,9 +60,10 @@ keep container-only implementation details in the host.
 | openclaw/rfcs | [RFC 0018 / PR 33](https://github.com/openclaw/rfcs/pull/33) | `user/giodl/standard-hosting-profiles-ready-check` | Review | Define readiness conditions/providers, direct operator selection, canonical projections, and CLI. |
 | openclaw/rfcs | [RFC 0023 / PR 37](https://github.com/openclaw/rfcs/pull/37) | `user/giodl/rfc-0023-standard-hosting-profiles` | Draft | Define standard, release-tested hosting profile presets over RFC 0018. |
 | openclaw/openclaw | [Readiness PR 104018](https://github.com/openclaw/openclaw/pull/104018) | `user/giodl/readiness-profiles-upstream` | Draft | Real readiness-only landing candidate for RFC 0018; four commits, no profile implementation. |
+| openclaw/openclaw | [Hosting Profiles PR 107765](https://github.com/openclaw/openclaw/pull/107765) | `user/giodl/standard-hosting-profiles-upstream` | Draft | Real stacked implementation request for RFC 0023; depends on readiness PR 104018. |
 | giodl73-repo/openclaw | [Readiness PRs 17, 22, 23, 27](https://github.com/giodl73-repo/openclaw/pulls) | readiness-only stack | Draft | Modernize Gateway readiness without requiring profiles. |
-| giodl73-repo/openclaw | [Profile PR 94](https://github.com/giodl73-repo/openclaw/pull/94) | `user/giodl/standard-hosting-profiles-upstream` | Draft | Consolidated profile-only implementation based on readiness PR 104018. |
-| giodl73-repo/openclaw | [Profile review slices 18, 19, 42, 21](https://github.com/giodl73-repo/openclaw/pulls) | four-commit profile stack | Draft | Optional commit-level review aids for PR 94. |
+| giodl73-repo/openclaw | [Profile comparison PR 94](https://github.com/giodl73-repo/openclaw/pull/94) | `user/giodl/standard-hosting-profiles-upstream` | Draft | Clean profile-only comparison against readiness PR 104018. |
+| giodl73-repo/openclaw | [Profile review slices 18, 19, 42, 21](https://github.com/giodl73-repo/openclaw/pulls) | four-commit profile stack | Draft | Optional commit-level review aids for upstream PR 107765. |
 
 ## Scope
 

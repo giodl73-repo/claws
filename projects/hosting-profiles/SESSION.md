@@ -38,9 +38,11 @@
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `c1da72178933`. The dependent consolidated profile implementation is
-  [giodl73-repo/openclaw#94](https://github.com/giodl73-repo/openclaw/pull/94)
-  at `2f8defb707c`; exact review slices are recorded in `openclaw-pr-plan.md`.
+  at `c1da72178933`. The dependent upstream profile implementation is
+  [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765)
+  at `2f8defb707c`; [fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
+  provides the clean profile-only comparison. Exact review slices are recorded
+  in `openclaw-pr-plan.md`.
 - Known dirty state: `claws-hapi` contains this update plus unrelated existing
   project changes. `C:\src\openclaw-readiness-upstream` is clean and rebased
   on OpenClaw main `c2e0ce7b686`; both RFC worktrees and all pushed
@@ -100,6 +102,16 @@
 
 ## Implementation Notes
 
+- 2026-07-14: Opened upstream draft PR 107765 for Standard Hosting Profiles.
+  - It targets upstream `main`, explicitly depends on readiness PR 104018, and
+    links upstream RFC 0023 / PR 37.
+  - GitHub temporarily shows readiness plus profiles in the aggregate diff.
+    Once PR 104018 lands, PR 107765 naturally reduces to the four profile-only
+    commits without opening another implementation request.
+  - RFC PR 37 and its source now identify PR 107765 as the primary
+    implementation. Fork PR 94 remains the profile-only comparison view, and
+    PRs 18/19/42/21 remain commit-level review aids.
+
 - 2026-07-14: Promoted Standard Hosting Profiles as its own upstream RFC and
   consolidated implementation shape.
   - Upstream RFC 0023 is draft PR 37 at `77e9893` and changes only
@@ -115,8 +127,9 @@
   - The broader package workflow has 17 unrelated Windows fixture/tooling
     failures. Branch-level Codex review timed out after ten minutes with no
     output, so no automated clean verdict is claimed.
-  - Promotion order is RFC 0018/readiness PR 104018, RFC 0023, then rebase PR
-    94 onto upstream main and open one profile-only implementation PR.
+  - The original promotion plan was RFC 0018/readiness PR 104018, RFC 0023,
+    then one profile implementation. Upstream PR 107765 now represents that
+    final step as a draft stacked on PR 104018.
 
 - 2026-07-14: Hardened the consolidated readiness implementation against probe
   failure and provider misbehavior, then rebased it onto current OpenClaw main.

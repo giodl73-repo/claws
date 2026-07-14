@@ -13,7 +13,7 @@ RFC 0018: Readiness Conditions and Providers
   upstream PR 104018
           |
 RFC 0023: Standard Hosting Profiles
-  fork PR 94 -> upstream after readiness lands
+  upstream stacked PR 107765
 ```
 
 PR 104018 is the complete readiness foundation. Profiles are optional named
@@ -57,8 +57,11 @@ gateway: {
 RFC: [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37), file
 `rfcs/0023-standard-hosting-profiles.md`.
 
-Primary implementation: [giodl73-repo/openclaw#94](https://github.com/giodl73-repo/openclaw/pull/94),
-head `2f8defb707c`, based on readiness head `c1da72178933`.
+Primary implementation: [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765),
+head `2f8defb707c`, stacked on readiness head `c1da72178933` from PR 104018.
+[Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94) provides a
+clean profile-only comparison while the upstream aggregate diff contains both
+layers.
 
 | Commit | Review slice | Scope |
 | --- | --- | --- |
@@ -67,8 +70,9 @@ head `2f8defb707c`, based on readiness head `c1da72178933`.
 | `11322a977f6` | [PR 42](https://github.com/giodl73-repo/openclaw/pull/42) | Runtime activation identity. |
 | `2f8defb707c` | [PR 21](https://github.com/giodl73-repo/openclaw/pull/21) | Packaged release conformance. |
 
-PR 94 is the proposed implementation shape. The four smaller fork PRs expose
-the same commits as review aids and are not separate landing requests.
+PR 107765 is the real upstream implementation request. The four smaller fork
+PRs expose the profile commits as review aids and are not separate landing
+requests.
 
 The profile stack adds named support presets and a release validation matrix. It
 does not replace `openclaw.json`, change readiness aggregation, or make OCC,
@@ -133,6 +137,7 @@ Lobster, doctor, or policy part of the runtime readiness path.
 ## Landing Guidance
 
 Review and land RFC 0018/readiness first through upstream draft PR 104018. RFC
-0023 is now independently proposed in upstream RFC PR 37. Profile PR 94 remains
-fork-only until readiness lands; then rebase its four profile-only commits onto
-upstream `main` and promote them as one OpenClaw implementation PR.
+0023 is independently proposed in upstream RFC PR 37. Upstream profile PR
+107765 is explicitly stacked on PR 104018. Until readiness lands, its aggregate
+diff includes both layers; afterward it naturally reduces to the four
+profile-only commits and can be refreshed for landing.
