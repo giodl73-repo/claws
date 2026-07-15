@@ -1998,3 +1998,11 @@
   `cli.version-delete.test.ts` timeout; both tests passed isolated and every
   remaining stage passed. RFC PR #27 and its body now link the complete
   four-PR ClawHub stack at `2f2dd83`.
+- 2026-07-15 OpenClaw PR #106888 Patrick follow-up is fixed at
+  `429399a19ee`. `CLAW.md` parsing strips exactly one leading UTF-8 BOM only
+  for frontmatter recognition while provenance integrity continues to hash the
+  original bytes; the regression asserts both behaviors. The package-symlink
+  expectation now uses `realpath()` so macOS `/var` aliases compare against the
+  reader's canonical path. Focused schema/reader proof passed 32 tests, scoped
+  formatting passed, and Codex review was clean. Both inline threads received
+  evidence replies and were resolved. The PR remains draft and was not merged.
