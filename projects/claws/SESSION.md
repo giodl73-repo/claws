@@ -1859,3 +1859,14 @@
   Codex autoreview with no accepted/actionable findings. RFC PR #27 now records
   the four-stage ClawHub sequence at commit `9cb7c8e`: schema/data model;
   publish validation/docs; search/detail/API; feed export and published E2E.
+- 2026-07-15 ClawHub PR 2 of 4 is open as draft
+  [#3090](https://github.com/openclaw/clawhub/pull/3090), branch
+  `user/giodl/clawhub-claws-publish`, head `476e86d`. It enables authenticated
+  `family: claw` publication only behind `CLAWHUB_EXPERIMENTAL_CLAWS=1`,
+  validates `CLAW.md`/JSON package content and referenced workspace files,
+  persists the validated manifest plus safe summary through the existing
+  release pipeline, and adds CLI dry-run/publish authoring support and docs.
+  The final Codex convergence review was clean after fixing Windows separator
+  normalization in the server manifest lookup; the 285-test Convex publication
+  suite and `ci:static` pass. RFC PR #27 links PRs #3089 and #3090 at
+  `92e0a07`. Next is ClawHub PR 3: guarded search, detail, and API projection.
