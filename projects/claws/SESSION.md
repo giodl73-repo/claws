@@ -22,6 +22,52 @@
 
 ## Current Session
 
+### 2026-07-15 RFC 0022 reviewer-series reformulation
+
+- Replaced the exploratory Skill Receipts/metadata chronology with six
+  reviewer-facing fork drafts: RFC
+  [#6](https://github.com/giodl73-repo/rfcs/pull/6), OpenClaw
+  [#97](https://github.com/giodl73-repo/openclaw/pull/97) business work,
+  [#98](https://github.com/giodl73-repo/openclaw/pull/98) managed skill
+  lineage, [#100](https://github.com/giodl73-repo/openclaw/pull/100) managed
+  workflows, Lobster [#1](https://github.com/giodl73-repo/lobster/pull/1)
+  accounting continuity, and OpenClaw
+  [#109](https://github.com/giodl73-repo/openclaw/pull/109) workflow spend.
+- RFC 0022 is now titled **Agent Skills Metadata for Outcomes and
+  Composition**, commit `92f746e`. Portable `SKILL.md` metadata remains only
+  `outcomes`, `uses-skills`, and `isolation`; observed records, regarding,
+  lineage, accounting, and limits remain runtime-owned.
+- OpenClaw #100 was rebuilt directly on #98 and squashed at `9cbb3b3f`. It
+  consolidates the embedded Lobster bridge and exploratory #102-#108 behavior:
+  managed skill calls, regarding inheritance, ordered completion, recorded
+  outcome branching, approval, and selected-data handoff. The late
+  cross-session query demo was intentionally omitted because #97 already owns
+  the foundational business-record query and the demo depended on the deleted
+  mixed accounting/history layer.
+- OpenClaw #109 is a new 154-line draft at `75904368`. It projects completed
+  child audit input/output usage and one unambiguous model into Lobster's native
+  result shape, and preserves `_meta.cost` through the OpenClaw runner. It
+  deliberately depends on Lobster #1; integrated proof cannot pass against the
+  currently published Lobster package because that release drops `_meta.cost`.
+- The former #99 custom accounting/budget/history layer is not in the new
+  chain. Lobster's existing `CostTracker` and `cost_limit` own workflow totals
+  and enforcement; OpenClaw supplies observed managed-run usage. Useful work
+  history remains part of the experimental record rather than a second ledger.
+- Updated all six PR titles/bodies with the same opportunity, ownership model,
+  support-case example, links, and proof boundaries. All remain draft,
+  mergeable, and fork-only. Nothing was opened upstream.
+- Closed superseded fork experiments #66-#70, #76-#93, #95-#96, #99, and
+  #102-#108 with replacement links. Their branches and discussion remain; no
+  branches were deleted. Unrelated fork PRs were untouched.
+- Full fork CI was manually dispatched for condensed OpenClaw #100 at run
+  `29444392432` and #109 at run `29444491276`. Both were still running at this
+  handoff; draft PR event checks passed the proof/format admission surface.
+- Active implementation worktrees:
+  `C:\src\openclaw-skill-workflows-condensed` on
+  `agent/skill-workflows-condensed` (same head as #100) and
+  `C:\src\openclaw-skill-workflows-usage-rollup` on
+  `agent/skill-workflows-usage-rollup` (#109). Both source trees are clean.
+
 ### 2026-07-14 Patrick review completion
 
 - Patrick's review pass and the resulting ClawSweeper findings are implemented
