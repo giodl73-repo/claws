@@ -54,6 +54,19 @@ proof, and next PRs without using `claws-hapi` as a prototype repo.
 | bic/lobster | [#878](https://microsoft.ghe.com/bic/lobster/pull/878) | Policy proposal coverage in oc-harness. |
 | bic/lobster | [#877](https://microsoft.ghe.com/bic/lobster/pull/877) | OpenClaw policy proposal drafts. |
 
+## 2026-07-13 Issue Watch
+
+- #101060's reported `PolicyFixMetadata` inheritance failure was not
+  reproducible: the helper is private, its runtime merge does not drop fields,
+  and custom checks use the public health-check contract. PR #101288 also
+  failed current prod/test type checks and reversed recent private-boundary
+  cleanup. The issue and PR were closed as not planned via `invalid`
+  automation; the issue workflow needed one runner retry.
+- #103877 is a maintainer/security-sensitive partial-approval update, not a
+  new small-fix target.
+- #102932 and #105427 are nested URL-redaction/security reports and should stay
+  in security/duplicate triage rather than the automatic policy bug queue.
+
 ## Source Notes
 
 - `.craft/waves/260528+hapi-the-bringer+openclaw-feeds/lobster-openclaw-default-policy-baselines.md`

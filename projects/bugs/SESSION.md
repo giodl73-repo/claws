@@ -19,9 +19,28 @@
 
 ## Current Session
 
-- Last updated: 2026-07-03.
+- Last updated: 2026-07-13.
 - Last agent: Codex.
-- Current focus: OpenClaw bugfix PR sweep; latest triage looked for open P1
+- Current focus: refreshed the owned bugfix PR loop and the policy, oc-path,
+  and doctor-lint issue watch. PR #99619 was updated to `12b3f07565d` with a
+  runtime-equivalent model-policy matcher, a bare-model-key regression test,
+  focused formatting/lint/Vitest proof (103 tests), and real CLI drift/bare-key
+  proof; its body now uses the exact Real behavior proof schema and a fresh
+  ClawSweeper exact-head review was requested. PR #90708
+  was re-proved at `6c770202967`, its stale Slack-timeout claims were removed
+  from the body, and the non-reproducing fake-corepack finding was answered
+  with exact source and test evidence. #86627 merged 2026-06-20 at
+  `e56fd1dc0466`; #86285 merged 2026-07-05 at `85ad4cb20028f`.
+  Policy #101060 was not reproducible as a public or runtime contract; its PR
+  #101288 failed current type checks and reversed private-boundary cleanup, so
+  the invalid-label automation closed both the PR and issue as not planned
+  after the issue workflow needed one runner retry. oc-path/config #105683 has
+  competing PRs #105935 and #106339: #105935 has an architecture failure in
+  a raw-SQLite file outside its diff, while #106339 has owned lint failures;
+  doctor lint #100529 has PR #100549 with no current failed checks. Security or
+  product-decision reports #102932, #105427, #103877, #100071, and #101290
+  remain outside the small automatic bugfix queue.
+- Previous 2026-07-03 focus: OpenClaw bugfix PR sweep; latest triage looked for open P1
   issues in doctor, policy, oc-path, config, and workspace that do not have an
   open PR. `gitcrawl` was unavailable in this Windows shell, so discovery used
   live `gh` search and open-PR reference checks. Clean no-open-PR candidates

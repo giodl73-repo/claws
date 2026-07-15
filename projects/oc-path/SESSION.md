@@ -19,23 +19,28 @@
 
 ## Current Session
 
-- Last updated: 2026-06-26.
+- Last updated: 2026-07-13.
 - Last agent: Codex.
-- Current focus: oc-path upstream issue #85929 is closed by merged OpenClaw
-  PR #86060. No active oc-path OpenClaw issue was identified in the latest
-  live refresh.
+- Current focus: oc-path upstream issue #85929 remains closed by merged
+  OpenClaw PR #86060. New config-path persistence issue #105683 reports JSON5
+  comments being silently stripped on write. It already has competing open
+  fixes #105935 and #106339, so do not open another PR. Both candidates need
+  CI refresh/canonical selection: #105935's raw-SQLite architecture failure is
+  outside its four-file config diff, while #106339 has owned lint failures plus
+  a dependency gate failure.
 - Active branch / PR: no local oc-path worktrees were present at the paths
   listed in `projects/oc-path/README.md` during the 2026-06-26 check.
 - Known dirty state: `claws-hapi` has unrelated pre-existing dirty files plus
   this session refresh.
-- Blocking question: decide whether the dry-run diff and YAML follow-ups still
-  matter, then recreate worktrees only if there is a concrete issue/PR target.
+- Blocking question: choose the canonical #105683 fix after each candidate
+  repairs CI; separately decide whether the dry-run diff and YAML follow-ups
+  still matter.
 
 ## Resume Checklist
 
 - Run: search live OpenClaw issues/PRs before recreating any oc-path worktree.
-- Verify: #85929 / #86060 remain closed/merged and no new oc-path issue has
-  superseded the local dry-run diff or YAML follow-ups.
+- Verify: #85929 / #86060 remain closed/merged; monitor #105683 and competing
+  PRs #105935 / #106339 before recreating an implementation worktree.
 - Update: this file and README with current status.
 
 ## Guardrails
