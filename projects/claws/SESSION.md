@@ -22,6 +22,55 @@
 
 ## Current Session
 
+### 2026-07-14 fresh-session handoff
+
+- Last updated: 2026-07-14 America/Los_Angeles.
+- Last agent: Codex.
+- Current focus: finish Patrick/ClawSweeper repairs in stack order, starting
+  with ownership-aware package cleanup in OpenClaw PR `#102296`.
+- Package lifecycle PR `#102228` is pushed at `8c11734c566`. Patrick's six
+  package findings are addressed: package decisions precede agent/workspace
+  mutation, exact plugins reuse or conflict through shared preflight, root and
+  package provenance is pending before external installers, package ownership
+  records distinguish `claw-installed` from `preexisting`, JSON stdout stays
+  machine-readable, and uninstall warnings survive version drift. Resolution
+  comment:
+  `https://github.com/openclaw/openclaw/pull/102228#issuecomment-4975724028`.
+- Shared plugin preflight prerequisite PR `#107867` remains separate at
+  `23300a476f4`; `#102228` currently contains the same helper commit because a
+  fork-backed head cannot be used as an upstream stack base. Land or restack
+  that prerequisite before final stack cleanup to avoid duplicate review
+  surface.
+- Status/remove PR `#102296` is restacked on repaired `#102228` and pushed at
+  `4f0cd88bd47`. It now uses canonical `pruneAgentConfig`, atomically moves a
+  managed file to a nonce staging path before digest/removal, and has a
+  deterministic post-plan replacement test proving the replacement is
+  retained. Direct core typecheck and seven focused lifecycle-state tests pass.
+- Active worktree:
+  `/root/src/openclaw-claws-pr6-lifecycle`, branch
+  `user/giodl/claws-pr6-lifecycle`. Source worktree was clean at handoff. Its
+  root `node_modules` is a local symlink to the healthy PR5 rebuild dependency
+  tree because the original PR6 tree repeatedly triggered a stalled pnpm
+  workspace install; invoke `node scripts/run-tsgo.mjs` and
+  `node scripts/run-vitest.mjs` directly there.
+- Remaining `#102296` work: extract a shared artifact lifecycle instead of
+  adding Claw-specific uninstall code. The plugin adapter should delegate to
+  existing `planPluginUninstall` / `uninstallPlugin`; contribute a canonical
+  skill uninstall API with equivalent safety; Claws should invoke removal only
+  for a sole, completed, unchanged `claw-installed` artifact. Pre-existing,
+  shared, pending, modified, or ambiguous artifacts must be released but
+  retained and reported. Do not post the PR-level Patrick resolution comment
+  until this is implemented and verified.
+- Downstream warning: `#102306` and all later Claws PR branches have not yet
+  been restacked on repaired `#102296`. Finish PR6 first, then restack and
+  address Patrick's remaining review findings in order: portable export
+  (`#102306`), cron recovery/schema (`#102383`), MCP comparison/recovery/schema
+  (`#102406`), provenance-defaulted update planning (`#102959`), then dependent
+  update/CLAW.md heads.
+- Blocking question: none. The agreed design is to contribute/refactor shared
+  skill/plugin artifact lifecycle APIs and keep Claws as the provenance and
+  final-reference policy caller.
+
 ### 2026-07-09 Patrick review update
 
 ### 2026-07-10 Control UI plugin-management impact
@@ -815,3 +864,31 @@
   as the final consent/compensation stage. A live follow-up scan confirmed every
   body has stack and arc context, every base is correct, and no stale head hash
   claims remain.
+
+- OpenClaw PR `#106888` (`Add CLAW.md manifest support`) is a new draft slice
+  above `#102982`, at `a8015acb698`. It adds YAML-frontmatter `CLAW.md`
+  support for direct/package reads, local feed resolution, and `claws export`,
+  while using the existing typed manifest schema and lifecycle unchanged. It
+  has 67 passing focused reader/feed/export/CLI/lifecycle E2E tests, real CLI
+  inspect/add proof, and a clean final stacked-base Codex review. The review
+  fixes preserve a declared `CLAW.md` format through in-package symlinks and
+  keep that internal format hint out of public source/provenance output.
+  `pnpm tsgo:core` remains
+  blocked by the inherited unused `PersistedClawPackageRef` import in
+  `src/claws/package-update.ts`. Draft PR:
+  `https://github.com/openclaw/openclaw/pull/106888`; `@clawsweeper re-review`
+  was refreshed at `https://github.com/openclaw/openclaw/pull/106888#issuecomment-4964031316`.
+  This is OpenClaw format compatibility only. Defer the standalone portable
+  `npx claws` CLI/spec until a separate project and npm namespace decision.
+
+- 2026-07-14 package-review repair: `#102228` is now at `8c11734c566` with
+  Patrick's six package findings addressed and a resolution comment at
+  `https://github.com/openclaw/openclaw/pull/102228#issuecomment-4975724028`.
+  It stages package decisions before agent/workspace mutation, uses shared
+  plugin preflight for exact reuse/conflicts, records root/package pending
+  provenance before external installers, keeps JSON stdout quiet, uses shared
+  schema state, and warns on version-drifted uninstall dependencies. Focused
+  `pnpm tsgo:core` plus CLI/lifecycle/provenance/package/uninstall tests pass.
+  Next active repair is `#102296`: use canonical agent-delete behavior, make
+  managed-file removal identity safe, and implement ownership-aware package
+  removal as requested by Patrick/ClawSweeper.
