@@ -1884,3 +1884,17 @@
   package stages passed. RFC PR #27 links PR #3091 at `c305d9a`. Next is
   ClawHub PR 4: hosted feed export and published-package E2E through OpenClaw
   `claws add --dry-run`.
+- 2026-07-15 ClawHub PR 4 of 4 is open as draft
+  [#3092](https://github.com/openclaw/clawhub/pull/3092), branch
+  `user/giodl/clawhub-claws-feed`, head `632ab66`. It adds the separately gated
+  `/api/v1/feeds/claws` feed, projects only validated safe summaries with exact
+  package versions and digests, fails closed while disabled, and deliberately
+  leaves the experimental route out of static registry discovery. A repeatable
+  E2E downloads and verifies a hosted fixture, rejects unsafe archive paths,
+  extracts it, and invokes real OpenClaw `claws add --dry-run --json` from
+  OpenClaw PR #106888. Focused feed tests, full unit/static/type/build lanes,
+  CLI/admin package stages, the real cross-repo proof, and structured Codex
+  review passed. The combined package lane reproduced the inherited WSL
+  `cli.version-delete.test.ts` timeout; both tests passed isolated and every
+  remaining stage passed. RFC PR #27 and its body now link the complete
+  four-PR ClawHub stack at `2f2dd83`.
