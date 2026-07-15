@@ -804,6 +804,22 @@
     Crabbox proof did not allocate a lease because WSL lacks broker login; the
     wrapper requires `crabbox login --url https://crabbox.openclaw.ai
     --provider aws`. No remote runtime pass is claimed yet.
+- 2026-07-10: Completed package-installed Docker proof for upstream draft
+  #104018 from this machine.
+  - The first Docker-capable exact-head run exposed a real harness gap: device
+    authentication auto-approval did not approve the separate node command
+    pairing, so `node-ready` never became ready.
+  - Pushed `153d413b25c`, which explicitly waits for and approves the pending
+    node pairing before asserting node-mode readiness.
+  - Local proof: `bash -n`, `git diff --check`, and 33 Docker planner tests.
+  - Sanitized direct AWS Crabbox proof passed on exact head
+    `153d413b25cefa8b44978ff16bece0604863d9af`: provider `aws`, run
+    `run_578659dd34be`, lease `cbx_221b83795d90` (`swift-krill`), machine
+    `c7a.8xlarge`, exit 0, lease stopped.
+  - Passed scenarios: local ready; container ready/loopback fail-closed;
+    reverse-proxy ready/missing-auth fail-closed; node-mode not-ready and
+    paired/approved ready; workspace storage-full fail-closed and recovery.
+  - PR #104018 body and proof comment now contain the exact-head evidence.
 - 2026-07-11: Extended RFC 0018 with the minimal runtime activation context.
   - Hosting Profiles now identify the activation being evaluated with logical
     runtime and unique incarnation ids.
