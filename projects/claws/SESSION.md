@@ -1906,3 +1906,12 @@
   reader's canonical path. Focused schema/reader proof passed 32 tests, scoped
   formatting passed, and Codex review was clean. Both inline threads received
   evidence replies and were resolved. The PR remains draft and was not merged.
+- 2026-07-15 ClawHub PR #3092 CI triage found no Claws regression. Core
+  `pr-gates` passed static, unit, package, type/build, and HTTP E2E stages. The
+  failed `publish-new-version` browser shard passed unchanged on targeted
+  rerun. `inspector-version` failed original and rerun attempts on shared
+  Convex one-second timeouts in `users:ensure` and
+  `touchRateLimitKeyMetadata`; concurrent `main` run 29457984080 independently
+  failed the same shard while its core and other browser gates passed. The
+  evidence is recorded on PR #3092 in issue comment 4986303339. No Claws code
+  changed, all four ClawHub PRs remain draft, and nothing was merged.
