@@ -22,6 +22,39 @@
 
 ## Current Session
 
+### 2026-07-15 Auditable Skills simplification: remove `regarding`
+
+- Removed the separate session business-association concept from the active RFC
+  and all four stacked OpenClaw implementation branches. Historical notes below
+  remain as the design trail; they are no longer the proposed architecture.
+- The retained model is smaller: native OpenClaw session/channel identity keeps
+  the work thread, a typed receipt records the observed outcome, optional
+  producer-owned `subject` identifies the affected object, and run/invocation
+  envelopes supply lineage, model usage, and cost.
+- Rebuilt and lease-updated the fork-only stack:
+  - #97 `3b1511c1`: 560 additions / 32 deletions / 27 files;
+  - #98 `432af457`: 2,587 additions / 451 deletions / 71 files;
+  - #100 `9467b2be`: 1,782 additions / 151 deletions / 41 files;
+  - #109 `3463566a`: 154 additions / 2 deletions / 4 files.
+- RFC #6 is now `0465101` at 675 lines. Lobster #1 remains `0ad538b3` at
+  242 additions / 25 deletions. The complete six-PR series is now exactly
+  6,000 additions / 661 deletions, down 1,257 lines of churn from the prior
+  7,918-line series.
+- Verified there are no `regarding`, Dataverse, or Dynamics references in the
+  active RFC, cumulative OpenClaw stack diff, or any of the six live PR bodies.
+- Focused proof after rebuilding:
+  - #97: 20 receipt and session-query assertions passed;
+  - #98: 21 audit-run and query assertions passed;
+  - #100: 120 managed-skill, Lobster, and audit-reader assertions passed, plus
+    24/25 spawn assertions; the remaining assertion is the pre-existing Windows
+    `/tmp` versus `C:\tmp` path expectation;
+  - #109 retains the deliberate Lobster #1 source dependency for `_meta.cost`.
+- Automatic PR CI passed on all four rebuilt OpenClaw heads. Full fork CI was
+  dispatched for #100 as run `29454546127` and #109 as run `29454548242`.
+- Rewrote and published all six PR bodies from
+  `projects/claws/auditable-skills-pr-bodies/`. Every PR remains draft,
+  fork-only, open, and mergeable.
+
 ### 2026-07-15 Auditable Skills presentation
 
 - Reframed RFC 0022 and the full six-draft fork series under the umbrella
