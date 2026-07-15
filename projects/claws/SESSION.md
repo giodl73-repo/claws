@@ -22,6 +22,31 @@
 
 ## Current Session
 
+### 2026-07-15 Auditable Skills presentation
+
+- Reframed RFC 0022 and the full six-draft fork series under the umbrella
+  **Auditable Skills**. Metadata is now presented as the portable declaration
+  mechanism; durable outcome evidence, `regarding`, invocation lineage, search,
+  usage, cost, and workflow accounting are the runtime-owned audit story.
+- Renamed the RFC source to `rfcs/0022-auditable-skills.md`, changed its title
+  to **RFC 0022: Auditable Skills**, and pushed commit `9580ab5` to RFC fork
+  PR [#6](https://github.com/giodl73-repo/rfcs/pull/6).
+- Retitled and rewrote every live draft body with a shared six-slice map,
+  slice-specific opportunity and boundaries, accurate validation, and complete
+  Real behavior proof sections: OpenClaw
+  [#97](https://github.com/giodl73-repo/openclaw/pull/97),
+  [#98](https://github.com/giodl73-repo/openclaw/pull/98),
+  [#100](https://github.com/giodl73-repo/openclaw/pull/100), Lobster
+  [#1](https://github.com/giodl73-repo/lobster/pull/1), and OpenClaw
+  [#109](https://github.com/giodl73-repo/openclaw/pull/109).
+- Live verification confirms all six remain open, draft, and mergeable; every
+  OpenClaw Real behavior proof recheck passed; and the OpenClaw ancestry remains
+  #97 -> #98 -> #100 -> #109. RFC, OpenClaw #109, and Lobster worktrees are
+  clean.
+- Current live GitHub review size is 7,236 additions and 682 deletions across
+  the six incremental drafts (7,918 lines of churn), including RFC text, tests,
+  docs, fixtures, and generated updates.
+
 ### 2026-07-15 RFC 0022 cross-repository accounting proof
 
 - Expanded RFC fork PR #6's reviewer-facing body to match the final RFC thesis:
