@@ -1752,7 +1752,7 @@
 - Nothing was opened against the upstream OpenClaw or RFC repositories.
 - 2026-07-15 ClawHub track started with draft PR
   [#3089](https://github.com/openclaw/clawhub/pull/3089), branch
-  `user/giodl/clawhub-claws-schema`, commit `5a65897`. PR 1 of 4 adds the
+  `user/giodl/clawhub-claws-schema`, commit `0087aea`. PR 1 of 4 adds the
   shared grouped Claw schema, fail-closed semantic validation, safe manifest
   summaries, and Convex release storage fields while keeping generic package
   publication closed to `family: "claw"`. No runtime Claw surface is exposed
