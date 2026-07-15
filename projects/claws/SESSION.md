@@ -1870,3 +1870,17 @@
   normalization in the server manifest lookup; the 285-test Convex publication
   suite and `ci:static` pass. RFC PR #27 links PRs #3089 and #3090 at
   `92e0a07`. Next is ClawHub PR 3: guarded search, detail, and API projection.
+- 2026-07-15 ClawHub PR 3 of 4 is open as draft
+  [#3091](https://github.com/openclaw/clawhub/pull/3091), branch
+  `user/giodl/clawhub-claws-discovery`, head `9023abd`. It gates Claw list,
+  search, detail, and version reads behind `CLAWHUB_EXPERIMENTAL_CLAWS=1`,
+  projects only the safe manifest summary, withholds full extracted manifests
+  from public release responses, and keeps plugin categories/trending
+  plugin-only. Focused gate, package, and HTTP suites passed 659 tests;
+  `ci:unit`, `ci:static`, `ci:types-build`, CLI/admin source and artifact tests,
+  and structured Codex review also passed. The exact highly concurrent
+  `ci:packages` command hit the existing WSL timeout in
+  `cli.version-delete.test.ts`; that test passed isolated and all remaining
+  package stages passed. RFC PR #27 links PR #3091 at `c305d9a`. Next is
+  ClawHub PR 4: hosted feed export and published-package E2E through OpenClaw
+  `claws add --dry-run`.
