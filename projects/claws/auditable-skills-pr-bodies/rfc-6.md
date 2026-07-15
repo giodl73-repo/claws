@@ -76,6 +76,6 @@ The implementation slices prove the progression independently: durable outcomes 
 
 The stack has been reduced after implementation learning: the separate session business-association concept was removed. The series now relies on native session/thread identity plus receipt type and subject.
 
-Automatic fork CI passed on all four rebuilt OpenClaw heads. Complete fork CI is running on the consolidated [#100 workflow head](https://github.com/giodl73-repo/openclaw/actions/runs/29454546127) and [#109 accounting head](https://github.com/giodl73-repo/openclaw/actions/runs/29454548242).
+The final rebuilt heads are `dd7495e9` (#97), `62bf8ebc` (#98), `023f4092` (#100), and `2c7f5e26` (#109). Complete 114-job fork CI passed on both the consolidated [#100 workflow head](https://github.com/giodl73-repo/openclaw/actions/runs/29456949470) and [#109 accounting head](https://github.com/giodl73-repo/openclaw/actions/runs/29456951214).
 
 This RFC and every implementation PR remain draft, fork-only review material. Nothing has been proposed to the upstream OpenClaw, Lobster, or RFC repositories.

@@ -42,7 +42,7 @@ Isolated execution becomes the honest skill-level accounting boundary. No workfl
 
 - Audit-run projection: 4 passing tests.
 - Session-tail audit summary and outcome filtering: 17 passing tests.
-- Automatic fork CI passed at head `432af457` in [run 29453778291](https://github.com/giodl73-repo/openclaw/actions/runs/29453778291).
+- Final head: `62bf8ebc` (71 files, 2,589 additions, 451 deletions).
 - `git diff --check` clean and no dependency on a separate session business-association model.
 
 ## Real behavior proof

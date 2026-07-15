@@ -32,13 +32,13 @@
   producer-owned `subject` identifies the affected object, and run/invocation
   envelopes supply lineage, model usage, and cost.
 - Rebuilt and lease-updated the fork-only stack:
-  - #97 `3b1511c1`: 560 additions / 32 deletions / 27 files;
-  - #98 `432af457`: 2,587 additions / 451 deletions / 71 files;
-  - #100 `9467b2be`: 1,782 additions / 151 deletions / 41 files;
-  - #109 `3463566a`: 154 additions / 2 deletions / 4 files.
-- RFC #6 is now `0465101` at 675 lines. Lobster #1 remains `0ad538b3` at
+  - #97 `dd7495e9`: 566 additions / 32 deletions / 29 files;
+  - #98 `62bf8ebc`: 2,589 additions / 451 deletions / 71 files;
+  - #100 `023f4092`: 1,782 additions / 152 deletions / 41 files;
+  - #109 `2c7f5e26`: 154 additions / 2 deletions / 4 files.
+- RFC #6 is now `04651012` at 675 lines. Lobster #1 remains `0ad538b3` at
   242 additions / 25 deletions. The complete six-PR series is now exactly
-  6,000 additions / 661 deletions, down 1,257 lines of churn from the prior
+  6,008 additions / 662 deletions, down 1,248 lines of churn from the prior
   7,918-line series.
 - Verified there are no `regarding`, Dataverse, or Dynamics references in the
   active RFC, cumulative OpenClaw stack diff, or any of the six live PR bodies.
@@ -49,8 +49,9 @@
     24/25 spawn assertions; the remaining assertion is the pre-existing Windows
     `/tmp` versus `C:\tmp` path expectation;
   - #109 retains the deliberate Lobster #1 source dependency for `_meta.cost`.
-- Automatic PR CI passed on all four rebuilt OpenClaw heads. Full fork CI was
-  dispatched for #100 as run `29454546127` and #109 as run `29454548242`.
+- Complete 114-job fork CI passed on both exact final heads: #100 in run
+  `29456949470` and #109 in run `29456951214`. An earlier #109 proof had one
+  unrelated 40 ms media timeout; both authoritative final-head runs passed.
 - Rewrote and published all six PR bodies from
   `projects/claws/auditable-skills-pr-bodies/`. Every PR remains draft,
   fork-only, open, and mergeable.

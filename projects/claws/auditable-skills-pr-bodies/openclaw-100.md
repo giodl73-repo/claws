@@ -59,9 +59,9 @@ No new workflow DSL, business database, receipt ledger, approval engine, or task
 - Managed skill tool surface: 58 passing tests.
 - Embedded Lobster workflow registry and runner: 37 passing tests.
 - Audit-run reader: 1 passing test.
-- Automatic fork CI passed at head `9467b2be` in [run 29454039587](https://github.com/giodl73-repo/openclaw/actions/runs/29454039587); the complete fork graph is running in [run 29454546127](https://github.com/giodl73-repo/openclaw/actions/runs/29454546127).
+- Final head: `023f4092`; the complete 114-job fork graph passed in [run 29456949470](https://github.com/giodl73-repo/openclaw/actions/runs/29456949470).
 - `git diff --check` clean.
-- Reduced slice: 41 files, 1,782 additions, 151 deletions.
+- Reduced slice: 41 files, 1,782 additions, 152 deletions.
 
 The branch was rebuilt after prototype learning to remove business-association inheritance. Workflow continuity now relies on OpenClaw's native session and TaskFlow identities, while business objects remain in typed outcome subjects.
 

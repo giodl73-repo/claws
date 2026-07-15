@@ -41,9 +41,9 @@ This slice does not add a CRM, payment ledger, workflow engine, model-prose infe
 
 - Receipt normalization, persistence, and filtering: 6 passing tests.
 - Session-tail retrieval and safe JSON projection: 14 passing tests.
-- Automatic fork CI passed at head `3b1511c1` in [run 29453465264](https://github.com/giodl73-repo/openclaw/actions/runs/29453465264).
+- Final head: `dd7495e9`.
 - `git diff --check` clean.
-- Reduced diff: 27 files, 560 additions, 32 deletions.
+- Reduced diff: 29 files, 566 additions, 32 deletions.
 
 The branch was rebuilt after prototype learning to remove the separate session-association feature. It now contains only durable outcome recording, session/run correlation, retrieval, and cross-harness observation.
 

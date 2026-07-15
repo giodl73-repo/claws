@@ -29,7 +29,7 @@ Together, OpenClaw reports observed child usage, Lobster aggregates each contrib
 - The prior cross-repository source proof covered two managed skill steps, approval pause/resume, total token aggregation, per-step attribution, and `_meta.cost`.
 - That proof returned 300 input tokens, 75 output tokens, and `$0.00009`, split 100/20 and 200/55 across the two steps.
 - The current stock Lobster package does not preserve the envelope; Lobster #1 is therefore an intentional dependency and landing-order gate, not a local override hidden in this PR.
-- Automatic fork CI passed at head `3463566a` in [run 29454126305](https://github.com/giodl73-repo/openclaw/actions/runs/29454126305); the complete fork graph is running in [run 29454548242](https://github.com/giodl73-repo/openclaw/actions/runs/29454548242).
+- Final head: `2c7f5e26` (4 files, 154 additions, 2 deletions); the complete 114-job fork graph passed in [run 29456951214](https://github.com/giodl73-repo/openclaw/actions/runs/29456951214).
 
 No live model or external channel was used. Pricing and child audit inputs were deterministic fixtures; the OpenClaw adapter, Lobster workflow runtime, persisted approval-resume state, and returned envelope were the real source implementations.
 
