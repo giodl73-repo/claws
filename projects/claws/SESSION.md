@@ -22,6 +22,31 @@
 
 ## Current Session
 
+### 2026-07-15 RFC 0022 sidecar specifications
+
+- Rebased RFC fork PR #6 on current upstream RFC `main` (`2d213ae`) and
+  fast-forwarded the fork base so RFC 0009's newly landed sidecars do not appear
+  in the RFC 0022 diff.
+- Added `rfcs/0022/auditable-skills-v1-spec.md`, the normative core v1 contract
+  for skill metadata, producer receipts, harness-owned recorded receipt
+  envelopes, managed invocation, exact skill identity, usage/cost, queries,
+  failure behavior, and conformance.
+- Added `rfcs/0022/orchestration-runner-v1-spec.md`, a runner-neutral addendum
+  defining normalized workflow plans and step results, lifecycle, accounting
+  deduplication, cancellation, resume, capability discovery, a deliberately
+  small core runner, a Lobster adapter, and five mechanical migration phases.
+- Updated RFC 0022 and its PR body to make Lobster the current advanced proof,
+  not a permanent dependency. Direct managed invocation remains runner-free;
+  simple composition can use the core profile; Lobster remains available for
+  conditions, retries, approvals, structured input, and durable resume.
+- Architecture review kept the three-line `SKILL.md` author experience,
+  required bounded/non-blocking plan validation, separated plan identity from
+  execution identity, covered cancel-before-dispatch and active-wait
+  cancellation, and required sanitized stable errors across the runner boundary.
+- RFC PR #6 is draft, open, cleanly mergeable, and limited to three files at
+  head `24b3e615`: 1,540 additions / 0 deletions. Relative Markdown links and
+  `git diff --check` pass.
+
 ### 2026-07-15 Auditable Skills simplification: remove `regarding`
 
 - Removed the separate session business-association concept from the active RFC
@@ -36,10 +61,11 @@
   - #98 `62bf8ebc`: 2,589 additions / 451 deletions / 71 files;
   - #100 `023f4092`: 1,782 additions / 152 deletions / 41 files;
   - #109 `2c7f5e26`: 154 additions / 2 deletions / 4 files.
-- RFC #6 is now `04651012` at 675 lines. Lobster #1 remains `0ad538b3` at
-  242 additions / 25 deletions. The complete six-PR series is now exactly
-  6,008 additions / 662 deletions, down 1,248 lines of churn from the prior
-  7,918-line series.
+- RFC #6 was `04651012` at 675 lines before its two sidecar specifications were
+  added; current RFC state is recorded above. Lobster #1 remains `0ad538b3` at
+  242 additions / 25 deletions. The implementation simplification removed
+  1,248 lines of churn; the later implementer specs add documentation without
+  restoring the removed runtime design.
 - Verified there are no `regarding`, Dataverse, or Dynamics references in the
   active RFC, cumulative OpenClaw stack diff, or any of the six live PR bodies.
 - Focused proof after rebuilding:
