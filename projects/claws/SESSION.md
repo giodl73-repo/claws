@@ -122,6 +122,600 @@
 - Blocking question: none. The agreed design is to contribute/refactor shared
   skill/plugin artifact lifecycle APIs and keep Claws as the provenance and
   final-reference policy caller.
+### 2026-07-15 recorded-outcome workflow branch
+
+- Opened fork-only stacked OpenClaw draft PR
+  [#106](https://github.com/giodl73-repo/openclaw/pull/106), title **Skills
+  metadata: branch on recorded outcomes**, commit `4596814b`, base
+  `agent/skill-workflows-two-step` / PR #105. It is open, draft, and mergeable;
+  nothing was opened upstream.
+- The existing trusted `subagent.waitForRun` result can now include the
+  completed child's persisted `openclaw-audit-run` summary when the caller
+  supplies the child session key. The reader reuses the current SQLite
+  trajectory store and audit projection, so receipts, token usage, cost,
+  models, skills, and invocation facts keep their existing owner and schema.
+- Embedded `openclaw.skill --receipt-type <type>` returns the full recorded run
+  audit plus the matching receipt, if present. It does not parse assistant
+  prose, trust declared skill outcomes as evidence, or copy facts into a new
+  workflow/CRM store.
+- The support-case example now uses Lobster's existing `when:` expression.
+  `resolve-case` runs only when `verify-customer` records
+  `customer.verified`; a non-matching receipt leaves the dependent step
+  skipped. This is the next natural workflow stair-step after recording facts
+  and waiting for ordered completion.
+- Focused proof passed 97 tests: 1 real SQLite audit-reader test, 62 Gateway
+  plugin-runtime tests, and 34 embedded Lobster tests. Both the matching and
+  non-matching receipt branches are covered. Scoped Oxfmt and
+  `git diff --check` passed.
+- Legacy full TypeScript exhausted its 4 GB Windows heap; the repository tsgo
+  project check exceeded its bounded run without emitting diagnostics. The
+  first Codex review attempt hit the missing Windows sandbox helper and the
+  sandbox-bypass retry exceeded five minutes without a result. Direct
+  owner-boundary review found no actionable issue, and the PR body reports the
+  review and live-proof limits explicitly.
+- Next narrow slice: place Lobster's existing approval step in front of the
+  mutating resolution action. Keep approval identity and resume state in
+  Lobster/TaskFlow, then consider passing selected receipt data such as a
+  payment authorization code into a later skill without introducing a second
+  workflow state model.
+
+### 2026-07-15 ordered managed support-case workflow
+
+- Opened fork-only stacked OpenClaw draft PR
+  [#105](https://github.com/giodl73-repo/openclaw/pull/105), title **Skills
+  metadata: run case steps to completion in order**, commit `f1f5514c`, base
+  `agent/skill-workflows-support-case-proof` / PR #104. It is draft and
+  mergeable; nothing was opened upstream.
+- The POC adds a readable `support-case.lobster` example: a root
+  `support-case` skill declares `case.resolved` and
+  `uses-skills: verify-customer resolve-case`; Lobster sequences those two
+  ordinary managed OpenClaw skill calls under stable TaskFlow step identities.
+- Codex review caught that `sessions_spawn` acceptance is asynchronous and
+  therefore did not prove dependency ordering. The accepted P1 was fixed by
+  reusing the existing plugin runtime `subagent.waitForRun` primitive.
+  `openclaw.skill` now waits for successful managed-run completion before the
+  workflow advances; error or timeout stops the workflow before the dependent
+  step. No new workflow DSL, storage, CRM, receipt, or accounting layer was
+  added.
+- Both children continue through the existing `sessions_spawn` owner, so
+  OpenClaw retains skill visibility and `uses-skills` policy, parent lineage,
+  receipt/outcome recording, regarding inheritance, usage, and the shared root
+  token budget. Child steps deliberately omit independent token budgets.
+- Focused proof passed 122 tests across the managed-skill and Lobster shards,
+  plus 6 targeted regarding-inheritance tests. The real embedded
+  `@clawdbot/lobster` 2026.6.11 runtime produced the trace
+  `spawn verify -> complete verify -> spawn resolve -> complete resolve`; a
+  verification error invoked only the first child. Scoped Oxfmt, Oxlint, and
+  `git diff --check` passed. One broad Windows subagent-spawn run retained the
+  unrelated `/tmp/task-repo` versus `C:\tmp\task-repo` fixture mismatch.
+- The first Codex review produced the ordering P1 above. The post-fix review
+  exceeded its four-minute bound without returning a result, so the PR does
+  not claim a clean automated post-fix verdict. Manual invariant review and
+  the new success/failure execution tests found no further actionable issue.
+- Fork checks passed real-behavior proof, runner admission, actionlint,
+  no-tabs, dispatch, and all platform-scope detections. Label and auto-response
+  failed only at the expected fork permission boundary; draft-scoped CI lanes
+  skipped.
+- Next stair-step: carry a small structured child outcome into the next
+  Lobster step and branch on it using Lobster's existing condition primitive,
+  then add an approval gate for the mutating resolution action. Keep outcome
+  facts and approvals in their existing OpenClaw owners and avoid inventing a
+  second workflow state model.
+
+### 2026-07-15 support-case golden-path query
+
+- Opened fork-only stacked OpenClaw draft PR
+  [#104](https://github.com/giodl73-repo/openclaw/pull/104), title **Skills
+  metadata: find all work regarding a case**, commit `3aa7fbcc`, base
+  `agent/skill-workflows-regarding-inheritance` / PR #103. It is draft and
+  mergeable; nothing was opened upstream.
+- A receipt-filtered `sessions tail --audit-runs` query without an explicit
+  session key now searches every session in the selected agent/store scope,
+  includes retained session-family history, orders matching runs by first
+  event, and applies one global tail. Explicit-session and ordinary unfiltered
+  active/latest selection remain unchanged.
+- The golden source-harness case uses the real session store, SQLite trajectory
+  persistence/reader, receipt matcher, run projection, lineage, usage, and cost
+  records. One Dataverse case query returns an email support run plus its
+  managed `verify-customer` child, `case.updated` and `customer.verified`
+  evidence, `run-child -> run-parent`, 175 tokens, and USD 0.01 mixed-basis
+  cost; an unrelated case is excluded.
+- Command and CLI proof passed 58 tests across two routed Vitest shards. Scoped
+  Oxfmt, Oxlint, and `git diff --check` passed. WSL was unresponsive, so the
+  documented tiny linked-worktree Windows fallback was used. The bounded
+  `codex review --uncommitted` attempt timed out without output; direct review
+  found no actionable issue.
+- The change adds no CRM/index/workflow store. It composes existing OpenClaw
+  primitives into the operator question: “what work did we do for this case?”
+  The PR body shows the exact one-command query and frames it as the golden
+  support-case workflow stepping stone.
+- Fork checks passed real-behavior proof, runner admission, actionlint,
+  no-tabs, dispatch, and all platform-scope detections. Label and auto-response
+  failed only at the expected fork permission boundary; draft-scoped CI lanes
+  skipped.
+
+### 2026-07-15 managed skill regarding inheritance
+
+- Opened fork-only stacked OpenClaw draft PR
+  [#103](https://github.com/giodl73-repo/openclaw/pull/103), title **Skills
+  metadata: keep child work regarding the same record**, commit `8cf77e54`,
+  base `agent/skill-workflows-managed-skill` / PR #102. It is draft and
+  mergeable; nothing was opened upstream.
+- The existing context-bound nested tool path now carries the exact requester
+  `sessionId` into managed `sessions_spawn`. An isolated child skill copies the
+  parent session's existing singular `regarding` value only when the current
+  stored parent entry still has that exact session id. This lets case-,
+  invoice-, or order-filtered receipt queries find the managed child work
+  directly while preventing late work from inheriting a rotated replacement
+  session's record.
+- Ordinary subagents do not inherit the relationship. Missing, stale, or
+  unreadable parent state fails closed. The copied value is revalidated at the
+  existing child-session patch boundary. No relationship store, CRM matching,
+  multi-regarding model, or workflow DSL was added.
+- Focused proof passed: 2 managed-spawn lineage tests, 6 exact inheritance
+  boundary tests, 2 runtime invocation tests, and 3 targeted Gateway invocation
+  tests. Scoped Oxfmt, Oxlint, `git diff --check`, and whitespace checks passed.
+  `codex review --uncommitted` and direct core/test TypeScript checker attempts
+  exceeded their bounded Windows timeouts without producing a patch diagnostic;
+  manual invariant review found no actionable issue.
+- The PR body tells the business/query story and frames direct relationship
+  inheritance as a natural workflow stepping stone: independently executed
+  skill steps retain lineage, spend, receipts, and the record their work is
+  about. Sequencing, branching, and expressions remain later layers.
+- Fork checks passed real-behavior proof, runner admission, actionlint,
+  no-tabs, dispatch, and all three platform-scope detections. Label and
+  auto-response failed only at the expected fork permission boundary; the
+  draft-scoped CI lanes skipped.
+
+### 2026-07-15 Skill metadata stack Codex review closeout
+
+- Completed Codex branch review and corrective loops for fork-only OpenClaw
+  drafts [#97](https://github.com/giodl73-repo/openclaw/pull/97),
+  [#98](https://github.com/giodl73-repo/openclaw/pull/98),
+  [#99](https://github.com/giodl73-repo/openclaw/pull/99), and
+  [#100](https://github.com/giodl73-repo/openclaw/pull/100). All four remain
+  drafts, preserve their stacked bases, and report mergeable.
+- Published reviewed heads: #97 `63626f9e`, #98 `4cfc9c3d`, #99 `22d4300c`,
+  and #100 `3b9256c4`. Every force-push used an explicit lease against the
+  previously observed fork head.
+- #98 now preserves trusted CLI invocation context and parent lineage, validates
+  cross-agent skills against the target, and settles lifecycle/telemetry only
+  after actual fallback decisions. Final focused Codex review was clean.
+- #99 now retains durable budget owners through supported cleanup, includes
+  rotated session families, and deterministically orders reconstructed history.
+  The chronology correction passed 25 focused tests and a clean fix review.
+- #100 replaced the invalid Gateway RPC experiment with one public,
+  context-bound `runtime.tools.invoke` plugin primitive backed by the existing
+  canonical invocation engine. Nested calls retain session, channel, account,
+  destination, thread, sender/owner, conversation-read origin, and active
+  provider/model policy; naming a target does not expand the allowed tool
+  surface. Final proof passed 131 focused policy tests after a broader 180-test
+  regression run, production TypeScript, plugin-SDK declarations/API/surface
+  guards, lint, format, and diff checks.
+- Refreshed all four PR bodies with the business opportunity, search/count/audit
+  story, workflow stepping-stone framing, current architecture, and exact proof.
+  The new #100 `actionlint` and `no-tabs` failures were checkout fetch timeouts
+  for GitHub's merge SHA; both passed on the rerun. Fork label/auto-response
+  failures remain the expected permission boundary.
+
+### 2026-07-14 condensed Skill Metadata stack review
+
+- Ran `codex review` against each PR's actual stacked base for fork PRs
+  #97-#100. #97 and #99 completed; #98 and #100 reached the ten-minute command
+  cap without a result and are not considered clean.
+- Accepted #97 P1: receipt snapshotting reloads a reusable session key without
+  verifying the loaded row still has the attempt's session id, so a late old
+  tool result can inherit a newly rebound session's `regarding` association.
+- Accepted #99 P1: the durable budget owner is stored on the root child session;
+  supported delete cleanup paths that do not wait for requester delivery can
+  remove that row while descendants still hold its owner reference.
+- Accepted #99 P2: `--audit-thread` and `--audit-orchestrations` read only the
+  current `TailSelection`; retained `usageFamilySessionIds` from session
+  rotation are not included, producing incomplete histories.
+- Manual verification for timed-out #98 found that `skill` is validated against
+  the parent run's skill snapshot even when `agentId` targets a different agent,
+  so the child may lack the skill whose invocation is recorded.
+- Manual verification for timed-out #100 found two issues: embedded
+  `openclaw.invoke --session-key` can select another agent/session instead of
+  staying within the invoking plugin context, and `--each --step-id` reuses one
+  idempotency key for every mapped item.
+- Review-only pass: no code, branch, or PR comments were changed. Fix the two
+  foundation findings in #97/#99 first, then #98 and #100, rerun focused proof,
+  and rerun Codex review until clean.
+
+### 2026-07-14 Skill metadata workflow consolidation
+
+- Condensed the fork-only OpenClaw proof into four reviewable draft PRs:
+  [#97 business work records](https://github.com/giodl73-repo/openclaw/pull/97),
+  [#98 managed invocation and lineage](https://github.com/giodl73-repo/openclaw/pull/98),
+  [#99 usage, budgets, and work history](https://github.com/giodl73-repo/openclaw/pull/99),
+  and [#100 embedded Lobster workflow bridge](https://github.com/giodl73-repo/openclaw/pull/100).
+- The workflow architecture now reuses existing owners: Lobster supplies typed
+  steps, branching, approvals, and resume; TaskFlow owns durable flow identity,
+  status, waits, revisions, and child-task lineage; OpenClaw sessions and tools
+  supply execution context and policy. Agent Skills metadata remains limited to
+  portable declarations of outcomes, possible skill use, and isolation.
+- PR #100 routes embedded `openclaw.invoke` through the plugin runtime's
+  existing `tools.invoke` Gateway primitive, defaults to the current session,
+  carries TaskFlow identity, derives stable per-step idempotency keys, and
+  prevents recursive Lobster invocation. Focused validation passed 61 tests,
+  targeted Oxlint, Oxfmt, and `git diff --check`.
+- Updated fork RFC PR #6 and source commit `6e12252` to describe this reuse-first
+  architecture and the four-PR proof series:
+  `https://github.com/giodl73-repo/rfcs/pull/6`.
+- Fork-only stacked OpenClaw draft PR #102 completes the next narrow slice:
+  `https://github.com/giodl73-repo/openclaw/pull/102`, commit `55f33285`, base
+  `agent/skill-workflows-lobster-bridge`. It adds the friendly embedded Lobster
+  command `openclaw.skill` / `clawd.skill`, which delegates one named skill step
+  to the existing context-bound `runtime.tools.invoke` and `sessions_spawn`
+  path. The command accepts a task, optional root token budget, optional model,
+  optional task name, and stable step id. OpenClaw still owns skill visibility,
+  `uses-skills` validation, policy, child-run lineage, receipts, usage, and
+  shared descendant budgets; no second workflow engine or ledger was added.
+- The trusted plugin tool context now carries the current run id, skill
+  snapshot, and explicit skill invocation into nested Gateway tool resolution,
+  allowing a managed skill to call a declared child skill without losing
+  lineage or budget context. Regarding remains joined through the parent
+  orchestration; directly copying the regarding record onto isolated child
+  sessions is a later query/usability slice.
+- Final focused validation passed 173 managed-skill/context tests plus 51
+  Lobster regressions. Targeted lint, format, diff, SDK API baseline, SDK
+  surface, and export checks passed. Full TS remained blocked by the inherited
+  `packages/net-policy/src/ip.ts` diagnostics. Codex review found and fixed one
+  real bare-`--token-budget` boolean coercion bug; three post-fix clean-verdict
+  attempts were blocked by the missing Windows sandbox helper or 15/30-minute
+  review infrastructure ceilings, so PR #102 explicitly does not claim a clean
+  post-fix review. The draft is open and mergeable. Real behavior proof,
+  runner admission, actionlint, no-tabs, dispatch, and platform-scope detection
+  passed; label and auto-response failed only at the expected fork permission
+  boundary, while draft-scoped CI lanes skipped.
+- Next narrow slice: decide whether managed child sessions should inherit the
+  parent's `regarding` identity directly so case/invoice-filtered receipt
+  queries include isolated child work without first traversing orchestration
+  lineage. Keep that separate from expressions, branching, and workflow DSLs.
+
+### 2026-07-14 RFC 0022 architecture consolidation
+
+- Fork RFC PR #6 was rewritten around the tighter Skill Receipts and
+  Orchestration contract: `https://github.com/giodl73-repo/rfcs/pull/6`, commit
+  `e42c82f`.
+- The central ownership rule is: `SKILL.md` declares intent, a Claw or caller
+  supplies policy, and the OpenClaw harness records facts. Skill declarations
+  never become evidence or widen runtime authority.
+- The portable Agent Skills author surface is three plain string metadata hints:
+  `outcomes`, `uses-skills`, and `isolation`. Actual receipts, tokens, cost,
+  credentials, permissions, and authoritative budgets remain runtime evidence
+  or caller policy.
+- When a Claw owns the agent, RFC 0022 depends on RFC 0016 for exact package
+  identity, installed-agent provenance, composition, and lifecycle. Standalone
+  skill invocation remains supported with equivalent local caller policy.
+- Spend is owned by model runs: isolated children may receive exclusive token
+  and USD attribution, shared turns remain shared, and orchestration totals
+  count each run once. Cost records capture both amount and whether the basis
+  was provider-billed, catalog-estimated, or mixed.
+- The first orchestration milestone is one audited, measurable, budgeted child
+  skill call. The 17 exploratory fork POCs are now consolidated into six
+  implementation slices: receipts, regarding, metadata/invocation, child
+  lineage, spend, and a shared root budget. Ordered steps, expressions, retries,
+  loops, joins, and parallel fan-out remain later work.
+
+### 2026-07-14 Skill Receipts six-slice proof stack
+
+- Published six fork-only stacked OpenClaw draft PRs:
+  [#88 receipts](https://github.com/giodl73-repo/openclaw/pull/88),
+  [#89 regarding](https://github.com/giodl73-repo/openclaw/pull/89),
+  [#90 metadata and invocation](https://github.com/giodl73-repo/openclaw/pull/90),
+  [#91 child lineage](https://github.com/giodl73-repo/openclaw/pull/91),
+  [#92 token and USD spend](https://github.com/giodl73-repo/openclaw/pull/92),
+  and [#93 shared budget enforcement](https://github.com/giodl73-repo/openclaw/pull/93).
+- Slice 6 owns one durable token counter on the root managed skill session,
+  atomically charges every completed attempt including overshoot, and checks
+  admission before the next model attempt and before a descendant managed skill
+  starts. Descendants inherit the owner reference and cannot widen the budget.
+- Final slice validation: 102 focused tests passed; the broader focused run
+  passed 145 tests with only the existing Windows `/tmp/task-repo` fixture
+  mismatch. Type-aware Oxlint, Oxfmt, and `git diff --check` passed across all
+  22 changed files.
+- Updated fork RFC PR #6 at commit `c494837` to point at the consolidated proof
+  stack and to keep version 1 budget enforcement token-based. Captured USD
+  spend and its basis remain in the run/orchestration projection; hard USD
+  enforcement stays a later policy decision. No upstream RFC PR is open.
+- Reframed the RFC PR body around the enterprise opportunity: skills as
+  measurable business capabilities and Claws as the packaging, provenance,
+  policy, and budget standard they can excel at. Added a complete `SKILL.md`
+  metadata example for an isolated refund skill, a concrete
+  `payment.refunded` authorization-code receipt, cross-domain receipt examples,
+  and direct links to the six consolidated proofs.
+- Simplified the author-facing metadata after comparing the current Agent
+  Skills specification and community proposals. RFC head `24bb048` uses
+  the provisional `openclaw.orchestration` JSON envelope with three plain
+  string hints: `outcomes`, `uses-skills`, and `isolation`. Receipt remains a
+  runtime evidence term; skill authors declare outcomes. `uses-skills` denotes
+  possible delegation and is intentionally distinct from community proposals
+  for hard `requires` dependencies.
+- Migrated the actual consolidated OpenClaw stack to that vocabulary. Current
+  heads: #90 `d36cd9eb`, #91 `2b31d0b4`, #92 `c00692cd`, and #93 `127a21bb`.
+  The runtime/gateway/audit property is now `executionHints`; declared-child
+  enforcement reads `usesSkills`. The provisional JSON envelope and its parser
+  are absent from the current stack.
+- Current-head validation after migration: slice 3 had 44 focused passes plus
+  one unrelated Windows SQLite cleanup `EBUSY`; slice 4 had 106 passes plus the
+  existing `/tmp/task-repo` Windows fixture; slice 5 had 172 passes; slice 6
+  had 120 focused passes. Type-aware Oxlint, Oxfmt, and diff checks passed for
+  every affected slice.
+- Rewrote all six OpenClaw PR bodies around the enterprise opportunity and the
+  outcome/regarding/receipt distinction, and added exact `Real behavior proof`
+  sections. All six remain fork-only drafts and report mergeable.
+- Follow-up body audit removed the last historical references to the
+  provisional metadata key from OpenClaw #90 and RFC #6. Live verification now
+  finds no old key in any of the six OpenClaw PR bodies or the RFC PR body;
+  #90's proof section describes only `outcomes`, `uses-skills`, `isolation`, and
+  normalized `executionHints`.
+- Retitled the fork RFC for standards discussion with Anthropic and the wider
+  Agent Skills community: **RFC 0022: Agent Skills Metadata for Outcomes and
+  Execution**. Renamed the RFC source to
+  `rfcs/0022-agent-skills-metadata.md`, pushed fork head `d8782e4`, and rewrote
+  the PR body so Agent Skills is the protagonist while OpenClaw/Claws and the
+  six Skill Receipts PRs are presented as reference implementation evidence.
+- The RFC and PR body now make typed outcomes explicitly searchable and
+  countable: operators can filter and group by outcome type, skill revision,
+  session/run, model, time, status, or `regarding` business record; join the
+  evidence to lineage, usage, cost, and budgets; and audit declared outcomes
+  that have no corresponding observed evidence.
+- The RFC and PR body also describe these same primitives as a natural stepping
+  stone to later workflows. Outcomes, skill composition edges, isolation,
+  lineage, evidence, spend, and budgets can support ordered steps, gates,
+  retries, and fan-out later without putting workflow semantics in the initial
+  Agent Skills metadata contract.
+- Added two fork-only follow-on demonstrations for lightweight operational
+  memory. OpenClaw draft PR #95 finds durable sessions by exact `regarding`
+  identity (`6ef073a0`), and stacked draft PR #96 reconstructs the selected
+  session's outcomes, evidence, association changes, skill/model lineage,
+  usage, and cost (`d71cc664`). Both are mergeable and have exact Real behavior
+  proof sections.
+- PR #95 passed 33 CLI registration tests; its Windows session-command cases
+  reached the assertions but retained the existing SQLite cleanup `EBUSY`.
+  PR #96 passed all 57 focused projection, command, and CLI tests. Targeted
+  Oxfmt, type-aware Oxlint, and diff checks passed for both. Fork CI admitted
+  both heads and passed proof/workflow checks while the normal Node lanes
+  skipped under draft/fork policy.
+- RFC 0022 and its PR body now call this a lightweight case-tracking or
+  operational-memory path, not a full CRM. A Claw packages skills, outcome
+  vocabulary, policy, budgets, and views; OpenClaw retains live operational
+  records. Long-term revisitability remains subject to retention, backup, and
+  export policy.
+- Reworked the RFC and fork PR body into one natural customer-thread story:
+  inbound email becomes a stable session, `regarding` supplies business
+  context, skill metadata declares possible outcomes, tools supply evidence,
+  the harness records execution and spend, and a later operator or agent can
+  find and reconstruct the work. CRM is now mentioned only as an optional
+  richer system of record rather than a separate headline feature.
+
+### 2026-07-14 orchestration token usage charging
+
+- Fork-only stacked OpenClaw draft PR #87 connects completed embedded model
+  attempts to the shared orchestration budget owner:
+  `https://github.com/giodl73-repo/openclaw/pull/87`, commit `6bcd1cd0`, base
+  `agent/orchestration-token-budget-owner` / PR #86.
+- Each completed attempt with an inherited budget reference charges the root
+  session before OpenClaw can dispatch a retry or fallback. Failed and timed-out
+  attempts are included when normalized usage is available. Ordinary runs and
+  attempts without observed usage remain unchanged.
+- The charge uses OpenClaw's existing normalized billing total: the provider
+  aggregate when present, otherwise input + output + cache read + cache write.
+  A call that crosses the limit is recorded in full, preserving actual observed
+  spend rather than clipping it to the remaining allowance.
+- The atomic mutation now validates `rootRunId`, preventing a stale descendant
+  reference from charging a different root run's owner. The accounting helper
+  returns the charge result so the next stair-step can enforce exhaustion
+  without rereading the ledger.
+- This slice records spend only; it does not block model calls or child skill
+  invocations. Next: check the shared owner before the next model action and
+  before accepting another child skill once the prior charge reports exhaustion.
+- Proof passed: 23 focused budget/accounting/usage tests and the production
+  retry-boundary case in both agent test projects. Scoped Oxfmt, type-aware
+  Oxlint, and diff checks passed. The core type pass reached only the three
+  existing `packages/net-policy/src/ip.ts` diagnostics. Codex autoreview timed
+  out after two minutes without output; manual diff review found no actionable
+  issue.
+
+### 2026-07-14 orchestration token budget owner
+
+- Fork-only stacked OpenClaw draft PR #86 adds the first live orchestration
+  budget owner: `https://github.com/giodl73-repo/openclaw/pull/86`, commit
+  `a046f82b`, base `agent/audit-orchestration-usage` / PR #85.
+- `sessions_spawn` accepts `tokenBudget` only with a named root child skill.
+  Before the child agent starts, OpenClaw persists one core-owned
+  `orchestrationBudget` on the canonical root child session. The record carries
+  `rootRunId`, `tokenLimit`, `tokensUsed`, timestamps, and first exhaustion
+  time. The session slot is reserved from plugin collisions.
+- Descendant skill invocations inherit a trusted owner session/run reference;
+  they cannot redefine the root limit. The session-store API provides
+  serialized create/read/charge operations, including concurrent-charge proof.
+  Retained trajectory totals are not used as the enforcement counter.
+- This slice deliberately does not connect normalized model usage or block
+  work. Next: charge each completed model attempt to the shared owner, recording
+  actual observed tokens even when a provider call overshoots the remaining
+  limit. After that, add admission checks that stop before the next model or
+  child-skill action once exhausted.
+- Proof passed: 66 budget/invocation/tool tests, 4 focused gateway-ordering
+  cases, 17 plugin slot tests, scoped type-aware Oxlint, formatting, and diff
+  checks. A broader spawn/tool run passed 83 tests and retained the existing
+  Windows `/tmp/task-repo` normalization assertion failure. A bounded Codex
+  review produced no output before its two-minute timeout; manual closeout
+  found no actionable issue. The draft is mergeable at `a046f82b` with no
+  comments or reviews. Real-behavior proof, runner admission, dispatch,
+  actionlint, no-tabs, and platform-scope detection passed; label and
+  auto-response failed only because fork secrets are unavailable.
+
+### 2026-07-14 orchestration usage accounting
+
+- Fork-only stacked OpenClaw draft PR #85 adds a read-only orchestration usage
+  view: `https://github.com/giodl73-repo/openclaw/pull/85`, commit `83772dc4`,
+  base `agent/audit-child-skill-correlation` / PR #84.
+- `sessions tail --audit-orchestrations` scans the selected agent session
+  trajectories, links retained parent and child runs through existing
+  `parentRunId` data, and emits one `openclaw-audit-orchestration` record per
+  observed root. Each record preserves per-run/session usage and sums every
+  contributing run exactly once.
+- The schema declares `accountingScope: observed-runs`. This is deliberately a
+  retention-bounded audit total, not a hard budget ledger. Orphaned child
+  fragments are omitted rather than presented as complete totals. Cross-agent
+  inspection continues to use the existing `--all-agents` selector.
+- No budget configuration or enforcement, workflow step, expression, fan-out,
+  executor, or persistence was added. Existing run-audit behavior remains
+  unchanged.
+- Focused projection, SQLite multi-session command, and CLI registration proof
+  passed 56 tests across three shards. Scoped formatting, Oxlint, and diff
+  checks passed. A bounded direct Codex review produced no output before its
+  90-second timeout; manual closeout added the explicit observed-accounting
+  scope and found no further actionable issue. Fork checks passed real-behavior
+  proof, runner admission, actionlint, no-tabs, dispatch, and platform-scope
+  detection; label and auto-response failed only at the expected fork
+  permission boundary. The PR is draft and mergeable with no comments or
+  reviews at head `83772dc4`.
+- Next: if the POC continues toward enforcement, introduce a live shared budget
+  owner with an explicit limit and atomic consumption. Do not use retained
+  trajectory totals as the enforcement counter.
+
+### 2026-07-14 child audit-run correlation
+
+- Fork-only stacked OpenClaw draft PR #84 exposes child invocation lineage in
+  the existing run audit projection:
+  `https://github.com/giodl73-repo/openclaw/pull/84`, commit `638697ec`, base
+  `agent/child-skill-invocation` / PR #83.
+- Each `skillInvocations[]` summary may now include the already-recorded
+  `parentInvocationId` and `parentRunId`. The fields are additive and optional;
+  the `openclaw-audit-run` schema remains version 1.
+- Parent and child remain separate run summaries. Model usage stays on the run
+  that consumed it, so consumers can join the records without falsely rolling
+  child tokens into the parent or attributing tokens to an individual receipt.
+  No executor, store, workflow step, budget, expression, or fan-out behavior is
+  added.
+- Focused audit projection and sessions-tail proof passed 21 tests across two
+  shards. Scoped formatting, Oxlint, and diff checks passed. A bounded direct
+  Codex review produced no output before its 60-second timeout; manual
+  closeout found no actionable issue. Fork checks passed real-behavior proof,
+  runner admission, actionlint, no-tabs, dispatch, and platform-scope
+  detection; label and auto-response failed only at the expected fork
+  permission boundary. The PR is draft and mergeable with no comments or
+  reviews at head `638697ec`.
+- Next: use the joined parent/child run view to define explicit accounting
+  semantics before introducing a budget. Ordered steps and skill-to-skill
+  declarations remain later slices.
+
+### 2026-07-14 child skill invocation
+
+- Fork-only stacked OpenClaw draft PR #83 runs one named child skill through
+  the existing `sessions_spawn` subagent/session and gateway-agent path:
+  `https://github.com/giodl73-repo/openclaw/pull/83`, commit
+  `a29cf827644f0707b6405f199d9998019d25be61`, base
+  `agent/shared-skill-invocation-identity` / PR #82.
+- `sessions_spawn` gains one optional `skill` selector. The selector must match
+  exactly one model-visible, model-invocable skill in the current run snapshot;
+  hidden, ambiguous, missing, and `disableModelInvocation` skills are rejected.
+  ACP child-skill invocation remains intentionally deferred.
+- A successful child request uses the shared invocation constructor and carries
+  a complete `parentInvocationId` / `parentRunId` pair through a backend-only
+  gateway request into the ordinary child agent run. The child trajectory
+  records invocation start/completion as `activation: orchestration` and
+  `caller: skill`; its existing model lifecycle continues to own token usage.
+  The accepted spawn result returns `skillInvocationId` beside `runId` and
+  `childSessionKey`.
+- This adds no second executor, sidecar, step engine, expressions, budgets, or
+  parallel fan-out. It is the first production consumer that justifies child
+  invocation lineage.
+- Focused proof passed: 3 invocation-constructor tests, 57 spawn/trajectory
+  tests, 4 gateway authorization/forwarding tests across both gateway configs,
+  and the focused subagent transport test. Formatting, diff checks, and scoped
+  Oxlint passed. The full typecheck did not complete within ten minutes in the
+  junction-backed worktree. The full subagent-spawn file retains an unrelated
+  Windows `/tmp` normalization failure; the changed case passes in isolation.
+  Autoreview recursively launched itself under nested skill discovery and was
+  stopped after ten minutes; manual closeout tightened lineage to all-or-none
+  and found no further actionable issue. Fork checks passed real-behavior
+  proof, runner admission, actionlint, no-tabs, dispatch, and platform-scope
+  detection; label and auto-response failed only at the expected fork
+  permission boundary. The PR is draft and mergeable with no comments or
+  reviews at head `a29cf827`.
+- Next: let this child-run receipt settle before adding any ordered-step state.
+  A later narrow slice may expose child invocation/run correlation in the
+  existing run audit summary. Budgets still wait for explicit parent/child
+  accounting semantics; expressions remain later.
+
+### 2026-07-14 shared skill invocation identity
+
+- Fork-only stacked OpenClaw draft PR #82 centralizes invocation identity for
+  both prompt-backed and direct tool-dispatched skill commands:
+  `https://github.com/giodl73-repo/openclaw/pull/82`, commit
+  `80cc78421bf32fe57b1efdbd2360ad3abc5160d4`, base
+  `agent/direct-skill-dispatch-audit` / PR #81.
+- The shared constructor owns the secure invocation ID plus command, skill, and
+  bounded source fields. It replaces two duplicate production constructions
+  without changing the recorded event shape or runtime behavior.
+- Two autoreview passes correctly rejected proposed parent/child metadata as
+  inert because no production child-session path consumed it. Those fields,
+  projections, and synthetic tests were removed rather than publishing a
+  correlation contract that real skill dispatch could not produce.
+- Focused helper proof passed (1 test), and prompt/direct inline dispatch proof
+  passed (2 tests). Focused type-aware Oxlint, formatting, and diff checks
+  passed. The remote Crabbox wrapper failed its binary sanity check before
+  allocating a box. The final bounded Codex review timed out without output;
+  manual review covered the final three-file patch.
+- Next: design one real managed child invocation through OpenClaw's existing
+  child-session/subagent primitive, including how the child receives an
+  explicit skill identity. Do not add parent fields until that production path
+  can emit them. Ordered steps, model overrides, budgets, and expressions
+  remain deferred.
+
+### 2026-07-14 direct skill dispatch audit
+
+- Fork-only stacked OpenClaw draft PR #81 audits direct
+  `command-dispatch: tool` skill runs:
+  `https://github.com/giodl73-repo/openclaw/pull/81`, commit
+  `5da326fc8ef3402dd7069f3e667178fcec407286`, base
+  `agent/explicit-skill-invocation-audit` / PR #80.
+- Each durable direct dispatch now receives its own run, invocation, and tool
+  call IDs. It records `skill.invocation.started`, records `skill.used` only
+  after policy resolution selects a real tool, collects existing typed audit
+  receipts, snapshots `regarding`, and records a blocked, error, or success
+  completion.
+- The integration proof uses a `payment.authorized` receipt with authorization
+  code `AUTH-123`, regarding Dynamics case `case-42` / `CAS-42`. The joined run
+  audit exposes the skill, tool, tool call, receipt, authorization code, and
+  case correlation.
+- Direct tool dispatch does not invent model or token data: its summary has no
+  models and no usage. Model-backed prompt invocations continue to inherit
+  real model/token telemetry from the existing trajectory recorder.
+- Focused trajectory tests passed (4), focused inline dispatch tests passed
+  (3), and focused type-aware Oxlint plus `git diff --check` passed. Codex
+  review produced no findings before its three-minute timeout; manual review
+  found no actionable issue. Fork real-behavior and dispatch checks pass; only
+  the expected label and auto-response jobs fail for fork permissions.
+- The next narrow slice should add parent/child invocation correlation using a
+  shared invocation primitive. Ordered steps, per-child model overrides,
+  expressions, and enforceable budgets remain intentionally deferred.
+
+### 2026-07-14 explicit skill invocation audit
+
+- Fork-only stacked OpenClaw draft PR #80 adds the first explicit skill-call
+  lifecycle audit: `https://github.com/giodl73-repo/openclaw/pull/80`, commit
+  `7dbcbb43c5f2`, base `agent/audit-run-summary` / PR #79.
+- Authorized prompt-based skill commands now carry one stable invocation ID
+  into the existing run and record `skill.invocation.started` plus
+  `skill.invocation.completed`. The facts include command, resolved skill,
+  bounded source, inbound caller, and terminal status; trajectory continues to
+  supply run/session/model identity and existing `model.completed` events supply
+  token usage. The run audit summary joins attempts by invocation ID.
+- This slice deliberately excludes direct `command-dispatch: tool` skills,
+  nested skill invocation, model selection, budgets, expressions, and new
+  workflow/storage primitives.
+- Focused invocation, terminal event, and audit-summary tests passed. Focused
+  type-aware Oxlint and `git diff --check` passed. The broader Windows inline
+  test file had one unrelated SQLite temp-file `EBUSY`; the new test passed
+  independently. Core tsgo remains blocked by existing `packages/net-policy`
+  typing errors. Codex review emitted no findings before timing out after three
+  minutes; manual diff review found no actionable issue.
 
 ### 2026-07-09 Patrick review update
 
@@ -944,3 +1538,199 @@
   Next active repair is `#102296`: use canonical agent-delete behavior, make
   managed-file removal identity safe, and implement ownership-aware package
   removal as requested by Patrick/ClawSweeper.
+### 2026-07-13 auditable skill invocation RFC fork review
+
+- Drafted RFC 0022, `Auditable Skill Invocation and Managed Skill Runs`, as an
+  OpenClaw-native staged proposal: observe explicit invocation versus model
+  access, enrich receipts, converge on one harness invocation primitive, add
+  parent/child skill calls, then add durable static sequential skill runs.
+- Expressions, conditions, parallelism, loops, joins, per-step models, and
+  budgets remain explicitly deferred. The RFC contains no dependency on or
+  reference to an external workflow system.
+- Fork-only draft review PR:
+  `https://github.com/giodl73-repo/rfcs/pull/6`, head
+  `agent/rfc-0022-skill-invocation-audit` at `2df8c6b439cc`. Base and head both
+  belong to `giodl73-repo/rfcs`; no PR or discussion was opened against
+  `openclaw/rfcs`.
+- Local RFC worktree: `C:\src\openclaw-rfcs-skill-audit`, clean after push.
+
+### 2026-07-13 Skill Receipts and Orchestration fork prototypes
+
+- Project name: **Skill Receipts and Orchestration**. The implementation begins
+  with Skill Receipts; ordered steps, nested skills, model selection, token
+  attribution, and budgets remain later phases.
+- Fork-only OpenClaw draft PR #66 adds a typed receipt/audit record contract to
+  structured tool results and preserves it through after-tool hooks and
+  tool-result middleware:
+  `https://github.com/giodl73-repo/openclaw/pull/66`, commit
+  `5c5e6fd3e37`.
+- Fork-only stacked OpenClaw draft PR #67 records valid receipts from successful
+  tool calls as existing `audit.receipt` trajectory events with business type,
+  tool name, and tool-call ID; existing trajectory adds time/session/run/model
+  correlation:
+  `https://github.com/giodl73-repo/openclaw/pull/67`, commit
+  `749e7dc5fa5`.
+- Exact `oxfmt 0.58.0` checks passed for both PRs. Fork CI ran fork-safe checks,
+  but the main Node lane was skipped by runner admission. Sanitized AWS Crabbox
+  lease `cbx_efb18a92fef0` was attempted and released during hydration before
+  project tests ran; this is recorded as an infrastructure limitation, not a
+  test pass or product failure. A final fresh-box retry stopped before lease
+  creation because WSL could not mount its VHDX (`ERROR_SHARING_VIOLATION`).
+- RFC fork PR #6 was rewritten and retitled **RFC 0022: Skill Receipts and
+  Orchestration** at commit `029d376`. It now starts with typed/filterable
+  receipts, reuses OpenClaw trajectory/session/usage primitives, and defers
+  orchestration capabilities one phase at a time:
+  `https://github.com/giodl73-repo/rfcs/pull/6`.
+- Fork-only stacked OpenClaw draft PR #68 adds the first query surface by
+  reusing `sessions tail` across SQLite and legacy trajectory storage:
+  `https://github.com/giodl73-repo/openclaw/pull/68`, commit
+  `ff4b4a86057`. `--receipt-type payment.authorized` filters on the business
+  type before applying the tail limit, and `--json` returns the sanitized
+  receipt payload only when that filter is present. Targeted trajectory,
+  command, and CLI tests passed (51 tests across 3 shards), along with exact
+  `oxfmt 0.58.0`, targeted `oxlint`, and `git diff --check`. Automated Codex
+  review could not authenticate in WSL (HTTP 401); manual review caught and
+  removed the broader general-trajectory JSON exposure before the final test
+  run.
+- Fork-only stacked OpenClaw draft PR #69 persists OpenClaw's existing trusted
+  `skill.used` diagnostic fact into the trajectory without adding a second
+  detector: `https://github.com/giodl73-repo/openclaw/pull/69`, commit
+  `4d203233e037`. It records public skill name/source, exact `read` versus
+  `command` activation, tool name, and optional tool-call ID, filtered by the
+  existing run ID; private skill file paths stay out of the trajectory. The
+  listener drains before terminal model/session events and detaches on success
+  or error. Focused proof passed (3 tests), along with scoped `oxfmt`, scoped
+  `oxlint`, and `git diff --check`. Manual review fixed an initially vacuous
+  async disposal assertion; the focused proof was rerun afterward. Codex
+  autoreview timed out and the Claude fallback rejected the workspace API key.
+  The next stair-step is the generic session `regarding` seam described below;
+  the joined receipt/skill/usage view follows it and must not claim per-receipt
+  token attribution.
+- Design clarification: use OpenClaw's existing session model as the primary
+  conversation/thread identity. `sessionKey` is the stable logical routing key;
+  channel adapters can derive thread sessions with `resolveThreadSessionKeys`,
+  while `sessionId` identifies the current transcript instance and may rotate.
+  Session entries already retain origin and delivery channel/account/thread
+  metadata. Receipts therefore inherit session/run correlation from their
+  trajectory envelope. A CRM support case is an optional external/business
+  link that may span sessions, not a replacement core object and not required
+  in the base receipt schema. For email, the channel adapter must use a stable
+  provider conversation/thread id rather than message id or subject text.
+- RFC fork PR #6 was updated at commit `4fd512918d0f` after reviewing
+  Microsoft's Dataverse **Set Regarding** pattern. The OpenClaw session remains
+  the conversation/activity stream and gains one optional primary `regarding`
+  association shaped as opaque `system`, `type`, `id`, and optional human
+  `key`. Plugins/tools own matching and external record creation; OpenClaw owns
+  session persistence, audited set/replace/clear transitions, receipt snapshots,
+  and filtering. The existing producer-owned receipt `subject` remains because
+  it describes the object a specific event concerns; it is distinct from the
+  session's primary `regarding` context, so PRs #66-#69 do not need restacking.
+  The RFC and fork PR body cite official Microsoft Set Regarding, Dataverse
+  Email/RegardingObjectId, automatic case creation, and reply-correlation docs.
+- Fork-only stacked OpenClaw draft PR #70 adds the first generic session
+  `regarding` primitive: `https://github.com/giodl73-repo/openclaw/pull/70`,
+  head `b390cc4b4471`. It extends the existing `sessions.patch` path with one
+  singular `{ system, type, id, key? }` association, supports set/replace/clear,
+  projects it through normal session rows, and reserves the core slot from
+  plugin extension claims. Follow-up commit `b390cc4b4471` also places
+  `regarding` in the existing write-scoped patch allowlist, so channel/CRM
+  integrations do not need admin permission. Focused regarding proof passed
+  across protocol, mutation, row projection, and method-scope tests; exact
+  formatting, scoped lint, and diff checks passed. The broader session-utils
+  suite retained one unrelated Windows `/tmp` fixture mismatch. Full typecheck
+  is clear for this change and remains blocked by inherited receipt-stack
+  tool-call-id and net-policy diagnostics. Fork checks passed real-behavior
+  proof, runner admission, actionlint, no-tabs, dispatch, and platform-scope
+  detection; the label and auto-response jobs failed on the expected fork
+  permission boundary, while draft-scoped CI lanes skipped.
+- Fork-only stacked OpenClaw draft PR #76 adds the first audited `regarding`
+  transition: `https://github.com/giodl73-repo/openclaw/pull/76`, commit
+  `836a80934cb4`. A successful real change records one existing bounded SQLite
+  trajectory event, `session.regarding.changed`, with `set`, `replace`, or
+  `clear`, the control-plane actor, and previous/current business identity as
+  applicable. The event is recorded inside the existing exclusive session
+  mutation so concurrent changes retain storage order. Identical and rejected
+  patches produce no event; recording remains best-effort and cannot turn an
+  already-committed patch into an RPC failure. The session's optional
+  human-facing `key` is emitted in trajectory data as `reference`, preserving
+  case numbers such as `CAS-1042` without weakening OpenClaw's secret redaction
+  for generic fields named `key`. Focused persistence proof passed for all
+  three actions and unchanged suppression; the existing regarding mutation
+  proof also passed. Scoped format, lint, diff checks, and Codex autoreview were
+  clean. Full typecheck added no diagnostics beyond the eight inherited stacked
+  branch errors. Fork checks passed real-behavior proof, runner admission,
+  actionlint, no-tabs, dispatch, and platform-scope detection; label and
+  auto-response failed only at the expected fork permission boundary, and
+  draft-scoped CI lanes skipped. The head is mergeable with no comments or
+  reviews. Receipt snapshots and regarding filters remain later PRs; token
+  accounting and budgets still wait for the joined usage view rather than
+  claiming per-receipt attribution.
+- Fork-only stacked OpenClaw draft PR #77 snapshots business context onto each
+  typed receipt: `https://github.com/giodl73-repo/openclaw/pull/77`, commit
+  `88a30d1e6723`, base `agent/session-regarding-audit`. At the existing
+  successful-tool-result receipt seam, OpenClaw reads the latest durable
+  session association once and adds it to every valid `audit.receipt` from that
+  result as `{ system, type, id, reference? }`. This makes earlier receipts
+  immutable across later session reassignment while keeping the producer-owned
+  receipt `subject` distinct. Failed tools and results without valid receipts
+  do not read session context; missing context leaves the receipt unchanged.
+  Focused audit and attempt-helper proof passed 9 tests across 2 shards,
+  including reassignment between tool results. Scoped format, lint, and diff
+  checks passed; full typecheck added no diagnostics beyond the eight inherited
+  stack errors. Direct Codex review timed out after 180 seconds and the repo
+  autoreview helper timed out after 600 seconds, both without output; manual
+  source review found no actionable issue. The PR is draft and mergeable with
+  no comments or reviews. Fork checks passed real-behavior proof, runner
+  admission, actionlint, no-tabs, dispatch, and platform-scope detection;
+  label and auto-response failed only at the expected fork permission boundary,
+  and draft-scoped CI lanes skipped. Filtering by regarding identity remains
+  the next narrow query stair-step; token attribution and budgets remain
+  deferred.
+- Fork-only stacked OpenClaw draft PR #78 adds exact receipt filtering by the
+  snapshotted session-regarding identity:
+  `https://github.com/giodl73-repo/openclaw/pull/78`, commit
+  `be3468c5e532`, base `agent/audit-receipt-regarding-snapshot`. The existing
+  `sessions tail` command now accepts `--regarding-system`,
+  `--regarding-type`, and `--regarding-id`; supplied selectors are conjunctive
+  and can be combined with `--receipt-type`. The shared trajectory predicate is
+  applied before the initial tail limit and to followed events. JSON remains
+  receipt-only and requires either a receipt-type or regarding selector.
+  Human-facing `reference` is deliberately not a canonical filter. Focused
+  trajectory, command, and CLI proof passed 54 tests across 3 shards, with
+  scoped format, lint, and diff checks clean. Full typecheck added no
+  diagnostics beyond the eight inherited stack errors. The bounded Codex
+  autoreview attempt timed out after 180 seconds without output; direct review
+  of the six-file diff found no actionable issue. The PR is draft and
+  mergeable with no comments or reviews. Fork checks passed real-behavior
+  proof, runner admission, actionlint, no-tabs, dispatch, and platform-scope
+  detection; label and auto-response failed only at the expected fork
+  permission boundary. The regarding receipt path is now complete through
+  record, snapshot, and query. The next independent stair-step should expose a
+  joined run-level view over receipts, `skill.used`, and existing usage data,
+  while explicitly avoiding per-receipt token attribution; budgets remain
+  deferred until that correlation is honest.
+- Fork-only stacked OpenClaw draft PR #79 adds the first joined run-level audit
+  view: `https://github.com/giodl73-repo/openclaw/pull/79`, commit
+  `15da7152f8ff`, base `agent/audit-receipt-regarding-filter`. The existing
+  `sessions tail --audit-runs` surface projects already-recorded trajectory
+  facts into one versioned `openclaw-audit-run` JSONL record per run. It joins
+  matching typed receipts, trusted `skill.used` activations, model identities,
+  terminal status, and normalized usage summed across `model.completed`
+  attempts. Existing receipt-type and regarding selectors choose runs and
+  matching receipts before `--tail` limits the summaries. The view deliberately
+  attributes tokens only to the run, never to an individual receipt or skill.
+  It adds no recorder, storage, cost estimator, budget state, or workflow
+  execution. Follow mode is rejected until incremental summary semantics are
+  defined. Focused projection, receipt, session-command, and CLI proof passed
+  60 tests across 3 shards; scoped formatting, lint, and diff checks passed.
+  Full typecheck added no diagnostics beyond the eight inherited stack errors.
+  The bounded Codex autoreview attempt timed out after 180 seconds without
+  output; direct review fixed one invalid CLI test flag combination and found
+  no further actionable issue. The PR is draft and mergeable with no comments
+  or reviews. Fork checks passed real-behavior proof, runner admission,
+  actionlint, no-tabs, dispatch, and platform-scope detection; label and
+  auto-response failed only at the expected fork permission boundary. The next
+  stair-step can define declarative skill invocation metadata and record one
+  explicit invocation against this run identity; budgets should remain
+  deferred until invocation boundaries and child-run accounting exist.
+- Nothing was opened against the upstream OpenClaw or RFC repositories.
