@@ -20,9 +20,28 @@ the durable review shape.
 | 2. CAPI owner and operations | [#72](https://github.com/giodl73-repo/openclaw/pull/72) | Package 1 | 14 commits, 16 files, +3211/-3 | Let the CAPI owner prepare exact semantics while cell-local bundle registration, Status, and Doctor expose inactive composition. |
 | 3. Hosted CAPI execution | [#73](https://github.com/giodl73-repo/openclaw/pull/73) | Package 2 | 15 commits, 80 files, +7676/-114 | Add one cell-local bounded reverse carrier, least-privilege Gateway endpoint, traffic-policy intersection, exclusive package contribution, and inactive hosted CAPI binding as one end-to-end proof. |
 | 4. Additional provider owners | [#74](https://github.com/giodl73-repo/openclaw/pull/74) | Package 3 | 7 commits, 24 files, +4743/-113 | Prove the owner model across Substrate, WebIQ, and Anthropic while preserving cell-local bundle incarnations, route invariants, cancellation, and narrow outbound header authority without a universal adapter registry. |
-| 5. Microsoft interactions | [#75](https://github.com/giodl73-repo/openclaw/pull/75) | Package 3 | 2 commits, 57 files, +6349/-105 | Prove Channel- and mailbox-specific ownership for ACF and Graph without flattening those semantics into provider dispatch. |
+| 5. Microsoft interactions | [#75](https://github.com/giodl73-repo/openclaw/pull/75) | Package 3 | 3 commits, 69 files, +7086/-140 | Prove Channel- and mailbox-specific ownership for ACF and Graph without flattening those semantics into provider dispatch. |
 
 Packages 4 and 5 are parallel. Neither is a prerequisite for the other.
+
+## Delivery Readiness
+
+| Package | Current fork head | State |
+| --- | --- | --- |
+| 1 | `8c3f109a1e2` | Draft, mergeable, review-clean, and ready for explicit upstream filing authorization. |
+| 2 | `0526a4a9e15` | Draft, mergeable, review-clean, and ready for review after package 1. |
+| 3 | `df1e3c6a724` | Draft, mergeable, review-clean, and ready for review after package 2. |
+| 4 | `f518a822261` | Draft, mergeable, review-clean parallel child of package 3. |
+| 5 | PR still at obsolete `5cce30fce01`; local candidate `caaf26da771` | Three-commit local stack with 128 m365mail tests passing. One deterministic Teams runtime-barrel guardrail failure remains before force-with-lease publication. |
+
+Package 5 hardening now covers root-package inclusion, generated Plugin SDK and
+channel metadata, exact Graph and ACF owner authority, direct-token SSRF
+protection, brokered Graph transport, mailbox/tenant identity validation,
+account-aware pairing, normalized route ownership, full runtime config
+validation, persistent replay suppression, and atomic concurrent-delivery
+dedupe. The final remaining correction is to keep hosted-dispatch exports out
+of the guarded `extensions/msteams/runtime-api.ts` barrel or intentionally
+update its pinned export contract.
 
 ## Branches And Worktrees
 

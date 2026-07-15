@@ -20,38 +20,31 @@
 
 ## Current Session
 
-- Last updated: 2026-07-14
+- Last updated: 2026-07-15
 - Last agent: Copilot
 - Current focus: five consolidated OpenClaw fork-only draft PRs are now the
   reviewer-facing implementation stack: #71 guarded dispatch core, #72 CAPI
   owner/operations, #73 hosted CAPI execution, #74 additional provider owners,
-  and #75 Microsoft interactions. `fork-review-stack.md` records exact
-  branches, worktrees, sizes, source PRs, Lobster evidence, and upstream filing
-  gates. `decision-package.md` provides the reviewer-facing front
-  door: a thirty-second pitch, value by audience, current/proposed comparison,
-  evidence map, explicit non-goals, staged approval path, objection handling,
-  and a 35-minute review flow. RFC 0020 has been restructured around the implementation-proven
-  strategy: native attachments first, semantic owner contracts second, and
-  optional hosted physical dispatch only for the residual network boundary.
-  The rewrite removes the four-framework presentation, universal provider
-  adapter framing, early carrier milestone, and duplicated capability catalogs
-  while retaining exact identity, credential slots, policy, generations,
-  readiness, uncertainty, conformance, paired adoption, and deletion gates.
-  The fork-only draft now also adopts OpenClaw Fleet's one-cell-per-tenant
-  trust model: bindings and evidence are cell-local, payload identity cannot
-  select another cell, Fleet owns single-host lifecycle, Lobster remains the
-  higher multi-machine control plane, and outbound egress still requires
-  explicit governance. The update is pushed at `1cf5afd2964`. Package 1 is
-  finalized at `8c3f109a1e2` with a 3-commit, 8-file fork PR against `main`.
-  Package 2 is restacked and published at `0526a4a9e15` with 14 commits and 16
-  files against package 1. Its final review repaired split CRLF and CR-only SSE
-  streaming boundaries; all 53 changed tests pass across four shards. D5d now proves the
-  Lobster Graph token-source, exact policy/composition canary, trusted mailbox
-  subject binding, and Gateway-authenticated inbound delivery. Live D5c
-  selection and vendored-extension deletion remain gated on OpenClaw artifact
-  promotion. F2 has now started with an exact CAPI mixed-version observer on
-  D2b: recorded/synthetic fingerprints only, independently observed authority,
-  and explicit removal blockers.
+  and #75 Microsoft interactions. Packages 1-4 are published, mergeable,
+  review-clean fork drafts at `8c3f109a1e2`, `0526a4a9e15`, `df1e3c6a724`,
+  and `f518a822261`. Package 5 has been rebuilt locally as an exact three-commit
+  stack at `caaf26da771` over package 3, with 69 files and +7086/-140. Its
+  hardening now covers root packaging, generated SDK/channel metadata, exact
+  ACF and Graph authority, brokered versus direct-token transport, mailbox and
+  tenant identity, route normalization, complete config validation, persistent
+  replay suppression, and atomic concurrent-delivery dedupe. All 128 m365mail
+  tests pass. The last publication gate is one deterministic P1 guardrail:
+  remove hosted-dispatch exports from the pinned Teams runtime barrel or
+  intentionally update that barrel's export contract, rerun review, then
+  force-with-lease push PR #75 over obsolete head `5cce30fce01`.
+  `fork-review-stack.md` records exact package sizes, heads, evidence, and
+  readiness. `decision-package.md` remains the reviewer-facing front door.
+  RFC 0020 is pushed at `1cf5afd2964` and presents the implementation-proven
+  native attachment -> semantic owner -> optional hosted dispatch decision
+  tree under Fleet's one-cell-per-tenant trust model. D5d proves Graph token
+  sourcing, exact policy/composition, trusted mailbox binding, and
+  Gateway-authenticated inbound delivery; F2 provides the bounded mixed-version
+  CAPI observation contract.
 - Consolidated fork review stack: [OpenClaw PR 71](https://github.com/giodl73-repo/openclaw/pull/71)
   guarded dispatch core; [PR 72](https://github.com/giodl73-repo/openclaw/pull/72)
   CAPI owner and operations; [PR 73](https://github.com/giodl73-repo/openclaw/pull/73)
@@ -59,7 +52,7 @@
   additional provider owners; and [PR 75](https://github.com/giodl73-repo/openclaw/pull/75)
   Microsoft interactions. All are fork-only drafts; packages 4 and 5 are
   parallel children of package 3.
-- Active branch / PR: [fork package 4 PR 74](https://github.com/giodl73-repo/openclaw/pull/74), branch `user/giodl/hosted-integration-additional-provider-owners`, head `f518a822261`; [fork package 2 PR 72](https://github.com/giodl73-repo/openclaw/pull/72), branch `user/giodl/hosted-integration-capi-owner-operations`, head `0526a4a9e15`; [fork-only Lobster F2 PR 14](https://microsoft.ghe.com/giodl/lobster/pull/14), branch `user/giodl/hosted-integration-f2-capi-observation`, head `257933405d`; [fork-only Lobster D5d PR 13](https://microsoft.ghe.com/giodl/lobster/pull/13), branch `user/giodl/hosted-integration-d5d-graph-adoption`, head `39adcd9f2d`; [fork RFC PR 2](https://github.com/giodl73-repo/rfcs/pull/2), branch `user/giodl/rfc-duplex-transport`, head `1cf5afd2964`; [fork D5c PR 65](https://github.com/giodl73-repo/openclaw/pull/65), branch `user/giodl/hosted-integration-d5c-openclaw-graph-owner`, head `5cce30fce01`; [fork-only Lobster D5b PR 11](https://microsoft.ghe.com/giodl/lobster/pull/11), branch `user/giodl/hosted-integration-d5b-acf-obo-resolver`, head `681a394bf7`; [fork D5a PR 63](https://github.com/giodl73-repo/openclaw/pull/63), branch `user/giodl/hosted-integration-d5a-acf-channel-owner`, head `0b8f8684457`; [fork-only Lobster D4d PR 10](https://microsoft.ghe.com/giodl/lobster/pull/10), branch `user/giodl/hosted-integration-d4d-anthropic-adoption`, head `96d9b358da`; [fork D4c PR 62](https://github.com/giodl73-repo/openclaw/pull/62), branch `user/giodl/hosted-integration-d4c-anthropic-owner`, head `a2a11dfadb8`; [fork-only Lobster D4b PR 9](https://microsoft.ghe.com/giodl/lobster/pull/9), branch `user/giodl/hosted-integration-d4b-webiq-adoption`, head `2ef805b5e0`; [fork D4a PR 59](https://github.com/giodl73-repo/openclaw/pull/59), branch `user/giodl/hosted-integration-d4a-webiq-owner`, head `b359c0541ed`; [fork E4a PR 54](https://github.com/giodl73-repo/openclaw/pull/54), branch `user/giodl/hosted-integration-e4a-continuity-restore-hold`, head `6c86b760d76`; [fork-only Lobster E4b PR 8](https://microsoft.ghe.com/giodl/lobster/pull/8), branch `user/giodl/hosted-integration-e4b-continuity-restore-hold`, head `8ffc1317e4`; [fork-only Lobster D3b PR 7](https://microsoft.ghe.com/giodl/lobster/pull/7), branch `user/giodl/hosted-integration-d3b-substrate-adoption`, head `8428a9928428`; [fork D3a PR 53](https://github.com/giodl73-repo/openclaw/pull/53), branch `user/giodl/hosted-integration-d3a-substrate-owner`, head `f58b0b24ee0`; [fork-only Lobster D2b PR 6](https://microsoft.ghe.com/giodl/lobster/pull/6), branch `user/giodl/hosted-integration-d2b-capi-cutover`, head `b7eb31865e`; [fork D2a PR 52](https://github.com/giodl73-repo/openclaw/pull/52), branch `user/giodl/hosted-integration-d2a-capi-hosted-binding`, head `aac68918149`; [fork-only Lobster F1 PR 5](https://microsoft.ghe.com/giodl/lobster/pull/5), branch `user/giodl/hosted-integration-f1-bundle-profile`, head `9ebedf42bb`; [fork-only Lobster E3b PR 4](https://microsoft.ghe.com/giodl/lobster/pull/4); [fork E3a PR 51](https://github.com/giodl73-repo/openclaw/pull/51); [fork-only Lobster D1b PR 3](https://microsoft.ghe.com/giodl/lobster/pull/3); [fork D1a PR 50](https://github.com/giodl73-repo/openclaw/pull/50); [fork-only Lobster C3 PR 2](https://microsoft.ghe.com/giodl/lobster/pull/2); [fork C2 PR 49](https://github.com/giodl73-repo/openclaw/pull/49); [fork C1 PR 48](https://github.com/giodl73-repo/openclaw/pull/48); [fork B6b PR 47](https://github.com/giodl73-repo/openclaw/pull/47); [fork B6a PR 46](https://github.com/giodl73-repo/openclaw/pull/46); [fork B5 PR 45](https://github.com/giodl73-repo/openclaw/pull/45); [fork B4 PR 43](https://github.com/giodl73-repo/openclaw/pull/43); [fork B3 PR 38](https://github.com/giodl73-repo/openclaw/pull/38); [fork B2 PR 35](https://github.com/giodl73-repo/openclaw/pull/35); and [fork B1 PR 34](https://github.com/giodl73-repo/openclaw/pull/34) remain open
+- Active branch / PR: local [fork package 5 PR 75](https://github.com/giodl73-repo/openclaw/pull/75) candidate, branch `user/giodl/hosted-integration-microsoft-interactions`, head `caaf26da771` (PR still at obsolete `5cce30fce01`); [fork package 4 PR 74](https://github.com/giodl73-repo/openclaw/pull/74), branch `user/giodl/hosted-integration-additional-provider-owners`, head `f518a822261`; [fork package 2 PR 72](https://github.com/giodl73-repo/openclaw/pull/72), branch `user/giodl/hosted-integration-capi-owner-operations`, head `0526a4a9e15`; [fork-only Lobster F2 PR 14](https://microsoft.ghe.com/giodl/lobster/pull/14), branch `user/giodl/hosted-integration-f2-capi-observation`, head `257933405d`; [fork-only Lobster D5d PR 13](https://microsoft.ghe.com/giodl/lobster/pull/13), branch `user/giodl/hosted-integration-d5d-graph-adoption`, head `39adcd9f2d`; [fork RFC PR 2](https://github.com/giodl73-repo/rfcs/pull/2), branch `user/giodl/rfc-duplex-transport`, head `1cf5afd2964`; [fork D5c PR 65](https://github.com/giodl73-repo/openclaw/pull/65), branch `user/giodl/hosted-integration-d5c-openclaw-graph-owner`, head `5cce30fce01`; [fork-only Lobster D5b PR 11](https://microsoft.ghe.com/giodl/lobster/pull/11), branch `user/giodl/hosted-integration-d5b-acf-obo-resolver`, head `681a394bf7`; [fork D5a PR 63](https://github.com/giodl73-repo/openclaw/pull/63), branch `user/giodl/hosted-integration-d5a-acf-channel-owner`, head `0b8f8684457`; [fork-only Lobster D4d PR 10](https://microsoft.ghe.com/giodl/lobster/pull/10), branch `user/giodl/hosted-integration-d4d-anthropic-adoption`, head `96d9b358da`; [fork D4c PR 62](https://github.com/giodl73-repo/openclaw/pull/62), branch `user/giodl/hosted-integration-d4c-anthropic-owner`, head `a2a11dfadb8`; [fork-only Lobster D4b PR 9](https://microsoft.ghe.com/giodl/lobster/pull/9), branch `user/giodl/hosted-integration-d4b-webiq-adoption`, head `2ef805b5e0`; [fork D4a PR 59](https://github.com/giodl73-repo/openclaw/pull/59), branch `user/giodl/hosted-integration-d4a-webiq-owner`, head `b359c0541ed`; [fork E4a PR 54](https://github.com/giodl73-repo/openclaw/pull/54), branch `user/giodl/hosted-integration-e4a-continuity-restore-hold`, head `6c86b760d76`; [fork-only Lobster E4b PR 8](https://microsoft.ghe.com/giodl/lobster/pull/8), branch `user/giodl/hosted-integration-e4b-continuity-restore-hold`, head `8ffc1317e4`; [fork-only Lobster D3b PR 7](https://microsoft.ghe.com/giodl/lobster/pull/7), branch `user/giodl/hosted-integration-d3b-substrate-adoption`, head `8428a9928428`; [fork D3a PR 53](https://github.com/giodl73-repo/openclaw/pull/53), branch `user/giodl/hosted-integration-d3a-substrate-owner`, head `f58b0b24ee0`; [fork-only Lobster D2b PR 6](https://microsoft.ghe.com/giodl/lobster/pull/6), branch `user/giodl/hosted-integration-d2b-capi-cutover`, head `b7eb31865e`; [fork D2a PR 52](https://github.com/giodl73-repo/openclaw/pull/52), branch `user/giodl/hosted-integration-d2a-capi-hosted-binding`, head `aac68918149`; [fork-only Lobster F1 PR 5](https://microsoft.ghe.com/giodl/lobster/pull/5), branch `user/giodl/hosted-integration-f1-bundle-profile`, head `9ebedf42bb`; [fork-only Lobster E3b PR 4](https://microsoft.ghe.com/giodl/lobster/pull/4); [fork E3a PR 51](https://github.com/giodl73-repo/openclaw/pull/51); [fork-only Lobster D1b PR 3](https://microsoft.ghe.com/giodl/lobster/pull/3); [fork D1a PR 50](https://github.com/giodl73-repo/openclaw/pull/50); [fork-only Lobster C3 PR 2](https://microsoft.ghe.com/giodl/lobster/pull/2); [fork C2 PR 49](https://github.com/giodl73-repo/openclaw/pull/49); [fork C1 PR 48](https://github.com/giodl73-repo/openclaw/pull/48); [fork B6b PR 47](https://github.com/giodl73-repo/openclaw/pull/47); [fork B6a PR 46](https://github.com/giodl73-repo/openclaw/pull/46); [fork B5 PR 45](https://github.com/giodl73-repo/openclaw/pull/45); [fork B4 PR 43](https://github.com/giodl73-repo/openclaw/pull/43); [fork B3 PR 38](https://github.com/giodl73-repo/openclaw/pull/38); [fork B2 PR 35](https://github.com/giodl73-repo/openclaw/pull/35); and [fork B1 PR 34](https://github.com/giodl73-repo/openclaw/pull/34) remain open
 - RFC file: `rfcs/0020-hosted-integration-and-capability-bindings.md`
 - Known dirty state: D4a and D3a source changes are committed and pushed, but
   their hydrated Windows worktrees report generated tracked `node_modules` link
@@ -122,11 +115,23 @@
   All 71 focused tests across the 10 changed test files pass in four Vitest
   shards. Oxfmt, Oxlint, diff hygiene, and the final `codex review --base
   fork/user/giodl/hosted-integration-hosted-capi-execution` are clean.
+  Package 5 is clean locally at `caaf26da771`, exactly three commits above
+  package 3. Its 128 m365mail tests, generated channel metadata check, focused
+  Oxfmt/Oxlint, and diff hygiene pass. Iterative Codex review fixed default
+  account field clearing, normalized webhook route ownership, missing bundled
+  channel metadata, incomplete runtime config validation, and concurrent
+  duplicate-delivery races. The latest review has one accepted finding:
+  `extensions/msteams/runtime-api.ts` expanded without satisfying its pinned
+  runtime API export guard. PR 75 remains on obsolete head `5cce30fce01` and is
+  conflicting until that final fix is folded into the three-commit stack and
+  force-with-lease pushed.
   Package 2 dependency hydration is blocked by the fork feed's unavailable
   `@openclaw/crabline@0.1.11` tarball, but the existing test harness and pinned
-  standalone Oxfmt/Oxlint proof pass. The RFC worktree is clean. D2a, D2b, B1-F1, and C3
-  worktrees are otherwise clean; `claws-hapi` contains this session/README
-  update and unrelated managed-config and `.artifacts/` changes.
+  standalone Oxfmt/Oxlint proof pass. The RFC worktree is clean. D2a, D2b,
+  B1-F1, and C3 worktrees are otherwise clean; `claws-hapi` contains these
+  hosted-integration note edits plus unrelated `projects/feeds/SESSION.md` and
+  `.codex-review-state-continuity-output.txt` changes that must remain
+  untouched.
 - Blocking question: which OpenClaw promotion establishes the real F2
   compatibility expiry and begins the bounded zero-old-path measurement window
   for CAPI and Graph deletion?
@@ -142,6 +147,8 @@
   dispatch decision tree.
 - Continue: paired owner/adopter deletion slices before designing a reverse
   carrier.
+- Complete: repair the Teams runtime API export guard, rerun package 5 review,
+  push PR 75 with force-with-lease, and refresh its fork PR body/head metrics.
 - Update: this file and the deletion ledger after each evidence slice
 
 ## Guardrails
@@ -186,6 +193,15 @@
   review is clean. The vendored overlay and legacy Graph injection remain
   promotion-gated deletion targets because Lobster is still pinned to
   OpenClaw `v2026.5.28`.
+- Consolidated package 5 is the reviewer-facing replacement for D5a/D5c:
+  `C:\src\openclaw-hosted-package-5-microsoft`, branch
+  `user/giodl/hosted-integration-microsoft-interactions`, local head
+  `caaf26da771`. It preserves Teams ACF Channel semantics and Graph mailbox
+  semantics as separate owners while sharing package 3's cell-local authority
+  fences. Root packaging, generated metadata/docs, exact credential slots,
+  identity checks, account behavior, rate limiting, persistent replay state,
+  and concurrent dedupe are proven. One Teams runtime-barrel guardrail repair
+  remains before PR 75 can be republished and marked review-clean.
 - F2 is implemented in
   `C:\src\lobster-hosted-integration-f2-capi-observation`, stacked on D2b. It
   adds an exact CAPI observation contract with four rollout phases, minimum
