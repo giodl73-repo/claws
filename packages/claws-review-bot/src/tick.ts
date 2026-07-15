@@ -7,6 +7,7 @@ import {
   postIssueComment,
   submitPrReview,
   listPrReviews,
+  listPrReviewComments,
 } from "./gh.js";
 import { invokeClaude } from "./claude.js";
 import { loadVoice } from "./voice.js";
@@ -16,7 +17,7 @@ import {
   tryAcquirePrLock,
   releasePrLock,
 } from "./storage.js";
-import type { GhComment } from "./gh.js";
+import type { GhComment, GhReview } from "./gh.js";
 
 export interface TickOptions {
   repo: string;
@@ -32,6 +33,10 @@ export interface TickResult {
   postedCommentId?: number;
   approveReviewId?: number;
   blobUrl?: string;
+}
+
+interface ReviewContextComment extends GhComment {
+  source: "issue" | "inline" | "review";
 }
 
 /**
@@ -86,9 +91,10 @@ const BOT_MENTION_RE = /@giodl\b/i;
 // Add new prefixes here as we discover other team bots. The match is
 // against the trimmed body's first ~80 chars.
 const AUTHOR_BOT_PREFIX_RE =
-  /^\s*\[(bot|peer-review)\]|^\s*<!--\s*(automaton|architect-review|peer-review)/i;
+  /^\s*\[(bot|peer-review)\]|^\s*<!--\s*(automaton|architect-review|claws-lobster-architect|peer-review)/i;
 const ACK_BOILERPLATE_RE =
   /^\s*\[bot\]\s*(Acknowledg|Thanks (for|@)|Confirmed|Noted)/i;
+const MAINTAINER_ASSOCIATIONS = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
 
 function changedFilePaths(diffText: string): string[] {
   const paths = new Set<string>();
@@ -126,6 +132,21 @@ function isSubstantiveAuthorComment(body: string): boolean {
   );
 }
 
+function isMaintainerComment(comment: GhComment, authorLogin: string): boolean {
+  return (
+    comment.user.login !== authorLogin &&
+    MAINTAINER_ASSOCIATIONS.has(comment.author_association ?? "")
+  );
+}
+
+function isAutomatedComment(comment: GhComment): boolean {
+  return (
+    comment.user.login.endsWith("[bot]") ||
+    AUTHOR_BOT_PREFIX_RE.test(comment.body) ||
+    ACK_BOILERPLATE_RE.test(comment.body)
+  );
+}
+
 function capDiff(d: string): { diff: string; truncated: boolean } {
   if (d.length <= MAX_DIFF_CHARS) return { diff: d, truncated: false };
   const truncated =
@@ -141,15 +162,47 @@ function extractShaFromVerdictHeader(body: string): string | null {
   return match && match[1] ? match[1] : null;
 }
 
-function newAuthorCommentsSincePrior(
-  comments: GhComment[],
+function newReviewCommentsSincePrior(
+  comments: ReviewContextComment[],
   authorLogin: string,
   priorComment?: GhComment
-): GhComment[] {
+): ReviewContextComment[] {
   return comments.filter(
     (c) =>
-      c.user.login === authorLogin &&
+      !isAutomatedComment(c) &&
+      (c.user.login === authorLogin || isMaintainerComment(c, authorLogin)) &&
       (!priorComment || new Date(c.created_at) > new Date(priorComment.created_at))
+  );
+}
+
+function reviewAsComment(review: {
+  id: number;
+  body: string;
+  submitted_at: string;
+  user?: { login: string };
+  author_association?: string;
+}): ReviewContextComment | null {
+  if (!review.user || !review.body.trim()) return null;
+  return {
+    id: review.id,
+    user: review.user,
+    body: review.body,
+    created_at: review.submitted_at,
+    updated_at: review.submitted_at,
+    source: "review",
+    ...(review.author_association
+      ? { author_association: review.author_association }
+      : {}),
+  };
+}
+
+function isSubstantiveReviewComment(
+  comment: GhComment,
+  authorLogin: string
+): boolean {
+  return (
+    isMaintainerComment(comment, authorLogin) ||
+    isSubstantiveAuthorComment(comment.body)
   );
 }
 
@@ -160,6 +213,32 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
 
   const comments = getIssueComments(opts.repo, opts.num);
   const prior = findPriorVerdict(comments);
+  let reviews: GhReview[] = [];
+  try {
+    reviews = listPrReviews(opts.repo, opts.num);
+  } catch (e) {
+    console.error(
+      `[tick] PR review list failed (continuing): ${(e as Error).message}`
+    );
+  }
+  let inlineReviewComments: GhComment[] = [];
+  try {
+    inlineReviewComments = listPrReviewComments(opts.repo, opts.num);
+  } catch (e) {
+    console.error(
+      `[tick] inline review comment list failed (continuing): ${(e as Error).message}`
+    );
+  }
+  const reviewContextComments = [
+    ...comments.map((comment) => ({ ...comment, source: "issue" as const })),
+    ...inlineReviewComments.map((comment) => ({
+      ...comment,
+      source: "inline" as const,
+    })),
+    ...reviews
+      .map((review) => reviewAsComment(review))
+      .filter((comment): comment is ReviewContextComment => comment !== null),
+  ];
 
   // ---- Cheap skip paths (no diff fetch, no LLM call) ----
 
@@ -171,23 +250,17 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
   // Self-login: hardcoded `giodl` for now. The container's GH_TOKEN is
   // for that user; if we ever switch to a service account we'll source
   // this from `gh api user --jq .login` once at startup.
-  try {
-    const myApproves = listPrReviews(opts.repo, opts.num).filter(
-      (r) =>
-        r.user?.login === "giodl" &&
-        r.state === "APPROVED" &&
-        r.commit_id === headSha
-    );
-    if (myApproves.length > 0) {
-      return {
-        skipped: true,
-        reason: `already formally APPROVED at SHA ${shortSha} (${myApproves.length} prior review(s))`,
-      };
-    }
-  } catch (e) {
-    console.error(
-      `[tick] formal-approve check failed (continuing): ${(e as Error).message}`
-    );
+  const myApproves = reviews.filter(
+    (r) =>
+      r.user?.login === "giodl" &&
+      r.state === "APPROVED" &&
+      r.commit_id === headSha
+  );
+  if (myApproves.length > 0) {
+    return {
+      skipped: true,
+      reason: `already formally APPROVED at SHA ${shortSha} (${myApproves.length} prior review(s))`,
+    };
   }
 
   // C. Approve-then-stop (issue-comment branch — pre-66c51528 verdicts):
@@ -236,27 +309,28 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
     }
   }
 
-  // Same-SHA skip — only re-review if there are new substantive author
-  // comments. (B) "Substantive" means: references a finding ID, contains
-  // fix/disagree keywords, or @-mentions the bot. Pure thanks/acks don't
-  // trigger expensive reevals.
+  // Same-SHA skip — re-review on substantive author comments or any human
+  // maintainer comment. Maintainer decisions often resolve policy/risk gates
+  // without changing the diff, so ignoring them would make approval impossible.
   if (prior && prior.shaInMarker && headSha.startsWith(prior.shaInMarker)) {
-    const newAuthor = newAuthorCommentsSincePrior(
-      comments,
+    const newReviewComments = newReviewCommentsSincePrior(
+      reviewContextComments,
       pull.user.login,
       prior.comment
     );
-    if (newAuthor.length === 0) {
+    if (newReviewComments.length === 0) {
       return {
         skipped: true,
-        reason: `head SHA ${shortSha} unchanged since last review and no new author comments`,
+        reason: `head SHA ${shortSha} unchanged since last review and no new author or maintainer comments`,
       };
     }
-    const substantive = newAuthor.filter((c) => isSubstantiveAuthorComment(c.body));
+    const substantive = newReviewComments.filter((c) =>
+      isSubstantiveReviewComment(c, pull.user.login)
+    );
     if (substantive.length === 0) {
       return {
         skipped: true,
-        reason: `head SHA ${shortSha} unchanged; ${newAuthor.length} new author comment(s) but none substantive (no finding ref / fix keyword / @-mention)`,
+        reason: `head SHA ${shortSha} unchanged; ${newReviewComments.length} new author comment(s) but none substantive (no finding ref / fix keyword / @-mention)`,
       };
     }
   }
@@ -291,12 +365,24 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
   // ---- Lock acquisition (only after we've decided to actually review) ----
   const connStrEarly = process.env["STORAGE_CONNECTION_STRING"];
   const containerEarly = process.env["STORAGE_CONTAINER"] ?? "verdicts";
-  const lastAuthorCommentId = comments
-    .filter((c) => c.user.login === pull.user.login)
-    .map((c) => c.id)
-    .reduce((max, id) => (id > max ? id : max), 0);
+  const latestReviewContext = reviewContextComments
+    .filter(
+      (c) =>
+        !isAutomatedComment(c) &&
+        (c.user.login === pull.user.login ||
+          isMaintainerComment(c, pull.user.login))
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime() ||
+        a.source.localeCompare(b.source) ||
+        a.id - b.id
+    )
+    .at(-1);
   const contextSuffix =
-    prior && lastAuthorCommentId > 0 ? `c${lastAuthorCommentId}` : undefined;
+    prior && latestReviewContext
+      ? `${latestReviewContext.source}${latestReviewContext.id}`
+      : undefined;
 
   let lockAcquired = false;
   if (connStrEarly) {
@@ -326,12 +412,15 @@ export async function runTick(opts: TickOptions): Promise<TickResult> {
       ? `## Prior verdict (in-band ledger)\n\n${prior.comment.body}`
       : `## Prior verdict\n\n(none — this is the initial review)`,
     `## Diff${diffTruncated ? " (truncated)" : ""}\n\n\`\`\`diff\n${diff}\n\`\`\``,
-    `## Author comments since prior verdict\n\n${newAuthorCommentsSincePrior(
-      comments,
+    `## Author and maintainer comments and reviews since prior verdict\n\n${newReviewCommentsSincePrior(
+      reviewContextComments,
       pull.user.login,
       prior?.comment
     )
-      .map((c) => `@${c.user.login} ${c.created_at}:\n${c.body}`)
+      .map(
+        (c) =>
+          `@${c.user.login} [${c.author_association ?? "UNKNOWN"}] ${c.created_at}:\n${c.body}`
+      )
       .join("\n\n---\n\n") || "(none)"}`,
     `## Instructions\n\nFollow R0-R5 protocol per voice.md. Output the verdict comment body only — start with the marker line, end with the footer per grammar.md. No commentary outside the comment body.`,
   ];

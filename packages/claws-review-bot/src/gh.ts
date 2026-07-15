@@ -16,6 +16,7 @@ export interface GhComment {
   body: string;
   created_at: string;
   updated_at: string;
+  author_association?: string;
 }
 
 const GH_RETRIES = 5;
@@ -88,10 +89,26 @@ function ghSpawn(
 
 function ghApi<T>(path: string, hostname = "microsoft.ghe.com"): T {
   const { stdout } = ghSpawn(
-    ["api", "--hostname", hostname, "--paginate", path],
+    ["api", "--hostname", hostname, path],
     `gh api ${path}`
   );
   return JSON.parse(stdout) as T;
+}
+
+function ghApiPaginated<T>(
+  path: string,
+  hostname = "microsoft.ghe.com"
+): T[] {
+  const items: T[] = [];
+  const perPage = 100;
+
+  for (let page = 1; ; page++) {
+    const separator = path.includes("?") ? "&" : "?";
+    const pagePath = `${path}${separator}per_page=${perPage}&page=${page}`;
+    const batch = ghApi<T[]>(pagePath, hostname);
+    items.push(...batch);
+    if (batch.length < perPage) return items;
+  }
 }
 
 function ghApiRaw(
@@ -107,8 +124,8 @@ function ghApiRaw(
 }
 
 export function listOpenPulls(repo: string): GhPullSummary[] {
-  return ghApi<GhPullSummary[]>(
-    `repos/${repo}/pulls?state=open&sort=updated&direction=desc&per_page=100`
+  return ghApiPaginated<GhPullSummary>(
+    `repos/${repo}/pulls?state=open&sort=updated&direction=desc`
   );
 }
 
@@ -132,7 +149,7 @@ export function getPullDiff(repo: string, num: number): string {
 }
 
 export function getIssueComments(repo: string, num: number): GhComment[] {
-  return ghApi<GhComment[]>(`repos/${repo}/issues/${num}/comments`);
+  return ghApiPaginated<GhComment>(`repos/${repo}/issues/${num}/comments`);
 }
 
 export function postIssueComment(
@@ -173,6 +190,7 @@ export interface GhReview {
   submitted_at: string;
   commit_id?: string;
   user?: { login: string };
+  author_association?: string;
 }
 
 /**
@@ -181,8 +199,17 @@ export interface GhReview {
  * comments, findPriorVerdict won't find them).
  */
 export function listPrReviews(repo: string, prNumber: number): GhReview[] {
-  return ghApi<GhReview[]>(
-    `repos/${repo}/pulls/${prNumber}/reviews?per_page=100`
+  return ghApiPaginated<GhReview>(
+    `repos/${repo}/pulls/${prNumber}/reviews`
+  );
+}
+
+export function listPrReviewComments(
+  repo: string,
+  prNumber: number
+): GhComment[] {
+  return ghApiPaginated<GhComment>(
+    `repos/${repo}/pulls/${prNumber}/comments`
   );
 }
 
