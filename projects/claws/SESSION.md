@@ -22,6 +22,28 @@
 
 ## Current Session
 
+### 2026-07-15 RFC 0022 cross-repository accounting proof
+
+- Closed the final validation gap between OpenClaw fork draft
+  [#109](https://github.com/giodl73-repo/openclaw/pull/109) at `56c9c6db`
+  and Lobster fork draft
+  [#1](https://github.com/giodl73-repo/lobster/pull/1) at `0ad538b3`.
+- Built Lobster #1 and loaded that source runtime directly from an ephemeral
+  OpenClaw Vitest harness. The scenario ran `verify_customer`, paused for
+  approval, resumed, and ran `resolve_case` using synthetic completed child-run
+  audits through the real OpenClaw adapter and Lobster workflow runtime.
+- The resumed native Lobster envelope returned 300 input tokens, 75 output
+  tokens, estimated cost `$0.00009`, and separate step entries of 100/20 and
+  200/55 tokens. This proves pre-approval spend survives the pause and combines
+  with post-approval spend without a second accounting store.
+- Updated #109's body and Real behavior proof with the exact environment,
+  command, output, and remaining live-provider limitation. The published
+  `@clawdbot/lobster@2026.6.11` still drops `_meta.cost`, so Lobster #1 remains
+  the deliberate landing-order dependency.
+- Removed the ephemeral proof file after the run. Both implementation
+  worktrees are clean; no dependency override or proof-only code entered either
+  PR. All six review drafts remain fork-only, draft, open, and mergeable.
+
 ### 2026-07-15 RFC 0022 reviewer-series reformulation
 
 - Replaced the exploratory Skill Receipts/metadata chronology with six
