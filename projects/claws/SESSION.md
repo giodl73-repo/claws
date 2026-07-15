@@ -153,11 +153,27 @@
   sandbox-bypass retry exceeded five minutes without a result. Direct
   owner-boundary review found no actionable issue, and the PR body reports the
   review and live-proof limits explicitly.
-- Next narrow slice: place Lobster's existing approval step in front of the
-  mutating resolution action. Keep approval identity and resume state in
-  Lobster/TaskFlow, then consider passing selected receipt data such as a
-  payment authorization code into a later skill without introducing a second
-  workflow state model.
+- Opened fork-only stacked OpenClaw draft PR
+  [#107](https://github.com/giodl73-repo/openclaw/pull/107), title **Skills
+  metadata: approve before acting on an outcome**, commit `4d90effc`, base
+  `agent/skill-workflows-outcomes` / PR #106. It is open, draft, and mergeable;
+  nothing was opened upstream.
+- The support-case example now uses Lobster's existing `approval:` step after
+  the `customer.verified` receipt and before the mutating `resolve-case` skill.
+  The receipt is the approval subject; Lobster owns suspension/resume and
+  TaskFlow keeps the durable flow relationship. No new runtime or schema was
+  added.
+- Approval resumes the same workflow and invokes `resolve-case`. Rejection,
+  failed verification, and a non-matching receipt do not invoke it. All 69
+  focused Lobster runner, registry, TaskFlow, and tool tests passed on Windows.
+- `codex --dangerously-bypass-approvals-and-sandbox review --uncommitted` was
+  attempted twice; both bounded five-minute runs timed out without output or
+  findings. Direct diff and published Lobster dependency review found no
+  actionable issue.
+- Next narrow slice: pass an explicitly selected receipt field, such as a
+  return or payment authorization code, into a later skill. Keep the receipt
+  in the existing audit record and avoid copying the whole audit envelope or
+  introducing a second workflow state model.
 
 ### 2026-07-15 ordered managed support-case workflow
 
