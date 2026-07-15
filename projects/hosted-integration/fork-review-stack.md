@@ -32,16 +32,17 @@ Packages 4 and 5 are parallel. Neither is a prerequisite for the other.
 | 2 | `0526a4a9e15` | Draft, mergeable, review-clean, and ready for review after package 1. |
 | 3 | `df1e3c6a724` | Draft, mergeable, review-clean, and ready for review after package 2. |
 | 4 | `f518a822261` | Draft, mergeable, review-clean parallel child of package 3. |
-| 5 | PR still at obsolete `5cce30fce01`; local candidate `caaf26da771` | Three-commit local stack with 128 m365mail tests passing. One deterministic Teams runtime-barrel guardrail failure remains before force-with-lease publication. |
+| 5 | `128df4698d8` | Draft, mergeable, review-clean parallel child of package 3; 148 changed tests pass across tooling, msteams, m365mail, and Lobster bundle lanes. |
 
 Package 5 hardening now covers root-package inclusion, generated Plugin SDK and
 channel metadata, exact Graph and ACF owner authority, direct-token SSRF
 protection, brokered Graph transport, mailbox/tenant identity validation,
 account-aware pairing, normalized route ownership, full runtime config
-validation, persistent replay suppression, and atomic concurrent-delivery
-dedupe. The final remaining correction is to keep hosted-dispatch exports out
-of the guarded `extensions/msteams/runtime-api.ts` barrel or intentionally
-update its pinned export contract.
+validation, persistent replay suppression, atomic concurrent-delivery dedupe,
+strict source/test typing, and an exported ACF contract included in the
+msteams CommonJS package build. PR 75 is published with three commits across
+71 files (+7118/-140), a curated reviewer-facing body, and no accepted Codex
+findings.
 
 ## Branches And Worktrees
 
