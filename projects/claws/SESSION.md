@@ -24,6 +24,12 @@
 
 ### 2026-07-15 RFC 0022 cross-repository accounting proof
 
+- Expanded RFC fork PR #6's reviewer-facing body to match the final RFC thesis:
+  portable Agent Skills declarations; observed, searchable business evidence;
+  `regarding` continuity; managed composition; native workflow accounting; and
+  the complete six-draft proof order. It now includes the support-case/query
+  story and completed cross-repository spend proof, and no longer says already
+  closed exploratory drafts "will be" superseded.
 - Closed the final validation gap between OpenClaw fork draft
   [#109](https://github.com/giodl73-repo/openclaw/pull/109) at `56c9c6db`
   and Lobster fork draft
