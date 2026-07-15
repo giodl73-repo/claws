@@ -254,6 +254,59 @@
 - Update: this file plus `projects/openclaw/SESSION.md` when branch hashes,
   review findings, or PR status change.
 
+## 2026-07-10 Upstream Commands Follow-Ups
+
+- Opened three upstream draft follow-ups to `openclaw/openclaw#100960` using
+  fresh branches that preserve the existing fork comparison PRs:
+  - `#104158`, live paired-node command collection, branch
+    `user/giodl/commands-upstream-node`, head `e13d199075`.
+  - `#104159`, scoped command prompt projection, branch
+    `user/giodl/commands-upstream-prompt`, head `9a6660bab1`.
+  - `#104160`, generated command reference and freshness guard, branch
+    `user/giodl/commands-upstream-docs`, head `9956762279`.
+- The Git history is ordered node -> prompt -> docs on top of #100960. All
+  three upstream PRs target `main` and remain draft; their diffs will contract
+  as preceding slices merge.
+- Fresh reordered validation passed: node 24 focused tests, prompt 103 focused
+  tests, docs 50 focused tests with 9 environment-specific skips, generated
+  command-reference freshness, and per-slice `git diff --check`.
+- `#100960` now links the three upstream follow-ups in its PR body.
+- `#104159` now threads a trusted run-scoped command inventory through the
+  embedded runner into `node-operator` prompts. Node commands require the
+  `nodes` tool, use the valid `nodes action=invoke` / `invokeCommand` /
+  `invokeParamsJson` shape, are deterministically capped at 32 dynamic
+  surfaces, and stay below and outside the stable prompt-cache boundary/key.
+- Prompt follow-up validation now passes 130 focused tests plus the core
+  TypeScript check. Commit-scoped Codex review on `9a6660bab1` reported no
+  actionable findings after fixing host/plugin gating, node-tool gating,
+  bounded ordering, cache placement/keying, and node invocation guidance.
+- Worktree `C:\src\openclaw-commands-upstream-stack` was recreated cleanly
+  after a Windows pnpm junction damaged only the initial disposable checkout.
+  The damaged checkout was moved to
+  `C:\src\_retired-openclaw-commands-upstream-stack-20260710`; do not treat it
+  as an active worktree.
+
+## 2026-07-10 Command Catalog Consumer Drafts
+
+- Updated RFC PR `openclaw/rfcs#32`; the RFC is now
+  `rfcs/0017-command-catalog.md` at head `66eb59c`, with three optional
+  consumer slices. They are examples, not acceptance requirements for the
+  initial `commands list` / `commands inspect` contract.
+- Opened fork-local draft PRs stacked on the upstream docs head:
+  - `giodl73-repo/openclaw#30`, policy evidence projection, head `ba23768930`.
+  - `giodl73-repo/openclaw#31`, runtime inventory comparison, head `1b7b6478fb`.
+  - `giodl73-repo/openclaw#32`, bounded command search projection, head
+    `200a5be6cb`.
+- The evidence projection is deterministic and explicitly non-attesting. The
+  drift projection reports OpenClaw-observed snapshot changes without inferring
+  policy violations or external control-plane state. Search results are
+  non-executable, capped at 20, and hydrate exact detail separately.
+- Focused Vitest coverage passed for all three slices (4 tests total), as did
+  formatting and `git diff --check`. The full Windows TypeScript check exhausted
+  both 4 GB and 8 GB heaps after focused tests passed; no type errors were
+  emitted before OOM.
+- Active implementation worktree: `C:\src\openclaw-commands-leverage-stack`.
+
 ## Guardrails
 
 - Keep implementation work in OpenClaw worktrees, not `claws-hapi`.

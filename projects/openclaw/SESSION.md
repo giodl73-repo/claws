@@ -944,6 +944,169 @@
   additive message that OpenClaw has internal command catalogs/descriptors
   today, but no user-facing `openclaw catalog` command or joined read-only
   inventory; the proposal adds that view without replacing existing owners.
+- Pushed RFC PR7 update to `giodl73-repo/rfcs` at `0f788bc` (`Add
+  node-operator catalog PR7 plan`). PR7 is now the Scout/OpenClaw node-operator
+  prompt lens over MCP, filesystem, browser/file-open, and future system/M365
+  node command families, motivated by `gim-home/m#4045`, `#4086`, and `#4088`.
+- Created fork branch for PR7:
+  `giodl73-repo/openclaw:user/giodl/cli-catalog-review-node-operator`, stacked
+  on `user/giodl/cli-catalog-review-hardening`. Current branch link:
+  https://github.com/giodl73-repo/openclaw/tree/user/giodl/cli-catalog-review-node-operator.
+- Updated upstream draft PR https://github.com/openclaw/openclaw/pull/100960
+  body to mention the PR7 node-operator branch and Scout/node-mode evidence.
 - Guardrail remains active: do not use broad process-kill commands for Codex,
   node, WSL, git, gh, or ssh. If cleanup is ever needed, identify the exact PID
   and ask explicitly first.
+
+## 2026-07-08 CLI catalog node/operator folded restack
+
+- Last updated: 2026-07-08
+- Last agent: Codex
+- Current focus: CLI catalog review stack with node/operator command metadata
+  folded into the six PRs instead of staged as a separate PR7.
+- Authoritative worktree for the restacked implementation:
+  `C:\src\openclaw-catalog-restack` on
+  `user/giodl/cli-catalog-review-node-restack`.
+- The older Windows review checkout
+  `C:\src\openclaw-catalog-codex-review` still has unrelated untracked files
+  from the larger OpenClaw checkout and could not be moved to the restacked tip
+  without overwriting them. Leave those untracked files alone. Its `.git`
+  pointer was restored after an interrupted rebase, but use the restack
+  worktree as the source of truth for this catalog stack.
+- Pushed fork branch heads on `giodl73-repo/openclaw`:
+  - PR1 `user/giodl/cli-catalog-review-foundation` at `601e7442d2`.
+  - PR2 `user/giodl/cli-catalog-review-dynamic-lenses` at `52f74540fb`.
+  - PR3 `user/giodl/cli-catalog-review-prompt` at `690af466e3`.
+  - PR4 `user/giodl/cli-catalog-review-schema-fixtures` at `b19cd95f36`.
+  - PR5 `user/giodl/cli-catalog-review-generated-docs` at `9a8ebf054d`.
+  - PR6 `user/giodl/cli-catalog-review-hardening` at `5c9b0b79f8`.
+  - Optional compatibility branch
+    `user/giodl/cli-catalog-review-node-operator` also points to
+    `5c9b0b79f8` on the fork.
+- Upstream draft PR updated:
+  https://github.com/openclaw/openclaw/pull/100960 now describes node/operator
+  support as folded through the six-PR stack, not as a separate PR7 branch.
+- RFC branch `giodl73-repo/rfcs:codex/cli-catalog-overlay-rfc` pushed at
+  `27c8a0d` (`Fold node catalog support into CLI catalog RFC stack`).
+- Implementation details now included across the stack:
+  - PR1 adds supplied `cli.nodeCommands` metadata with source, availability,
+    approval, risk, effect, argument-hint, and trust-boundary fields.
+  - PR2 carries node commands into audit, test-matrix, and operator summary
+    lenses.
+  - PR3 adds scoped `node-operator` prompt projection, disabled by default.
+  - PR4 snapshots representative node command records in schema fixtures.
+  - PR5 documents node/operator commands as a dynamic catalog family.
+  - PR6 carries node fields through advisory reports and the CLI-first consumer
+    contract.
+- Validation passed in `C:\src\openclaw-catalog-restack`:
+  - `node scripts/run-vitest.mjs src/cli-catalog-overlay/list.test.ts
+    src/cli-catalog-overlay/prompt-projection.test.ts
+    src/cli-catalog-overlay/audit.test.ts
+    src/cli-catalog-overlay/test-matrix.test.ts
+    src/cli-catalog-overlay/operator-summary.test.ts
+    src/cli-catalog-overlay/schema-fixtures.test.ts
+    src/cli-catalog-overlay/consumer-contract.test.ts
+    test/scripts/generate-cli-catalog-doc.test.ts
+    test/scripts/cli-catalog-overlay-report.test.ts --reporter=dot`
+    passed 2 shards / 9 files / 30 tests.
+  - `node --import tsx scripts/generate-cli-catalog-doc.ts --check` passed.
+  - `npm exec -- oxfmt --check <catalog/doc/report touched files>` passed.
+  - `git diff --check origin/main...HEAD && git diff --check` passed.
+- Temporary validation note: `C:\src\openclaw-catalog-restack\node_modules` is
+  a local junction to `C:\src\openclaw-catalog-codex-review\node_modules` so
+  the clean restack worktree can run tests without reinstalling packages.
+
+## 2026-07-08 CLI catalog node prompt overlay wiring
+
+- Last updated: 2026-07-08
+- Last agent: Codex
+- Current focus: tightened node/operator prompt-overlay story for draft PR
+  https://github.com/openclaw/openclaw/pull/100960.
+- Pushed follow-up implementation commit
+  `46e2d23008` (`Wire node catalog prompt overlay`) to
+  `giodl73-repo/openclaw:user/giodl/cli-catalog-review-hardening` and the
+  compatibility branch `user/giodl/cli-catalog-review-node-operator`.
+- Change summary: `buildCliCatalogOverlayPromptSection` now accepts
+  `nodeCommands` and `scope`, and `buildAgentSystemPrompt` threads optional
+  `cliCatalogOverlay` inputs through to the catalog prompt section. Node
+  commands remain excluded by default and render only with
+  `scope: "node-operator"`.
+- Validation passed in `C:\src\openclaw-catalog-restack`:
+  - `node scripts/run-vitest.mjs src/cli-catalog-overlay/prompt-projection.test.ts
+    src/agents/catalog-overlay-prompt.test.ts src/agents/system-prompt.test.ts
+    --reporter=dot` passed 2 shards / 3 files / 99 tests.
+  - `npm exec -- oxfmt --check src/agents/catalog-overlay-prompt.ts
+    src/agents/catalog-overlay-prompt.test.ts src/agents/system-prompt.ts
+    src/agents/system-prompt.test.ts` passed.
+  - `git diff --check` passed.
+- Remaining honest boundary for Vince/Peter: this proves the prompt-builder
+  seam end to end for callers that supply node declarations. It does not yet
+  implement live discovery of node command declarations from a running paired
+  node/gateway; that can be a follow-up integration once the declaration source
+  is finalized.
+- Follow-up pushed at `1776dd3887` (`Thread catalog overlay through embedded
+  runs`): `RunEmbeddedAgentParams`, `runEmbeddedAttempt`, and
+  `buildEmbeddedSystemPrompt` now all accept/pass `cliCatalogOverlay`, so an
+  actual embedded-run caller such as Lobster/Scout or a future node-mode
+  launcher can call the prompt with `scope: "node-operator"` and supplied node
+  declarations.
+- Additional validation passed:
+  `node scripts/run-vitest.mjs src/agents/embedded-agent-runner/system-prompt.test.ts
+  src/agents/system-prompt.test.ts src/agents/catalog-overlay-prompt.test.ts
+  src/cli-catalog-overlay/prompt-projection.test.ts --reporter=dot`,
+  `npm exec -- oxfmt --check <six prompt/threading files>`, and
+  `git diff --check`.
+- Codex review pass on 2026-07-09 found stale catalog CLI count
+  expectations after the branch grew to 60 command descriptors and 97 command
+  routes. Fixed and pushed `da8aca8f5a` (`Update catalog CLI count
+  expectations`) to the draft PR head and compatibility branch.
+- Latest review/proof: full-branch `codex review --base origin/main` timed out
+  twice without returning findings; focused `codex review --commit HEAD`
+  reported no introduced correctness issue for `da8aca8f5a`. Manual targeted
+  pass over the prompt overlay/threading seams found no additional accepted
+  findings. Focused catalog/prompt Vitest shards, `oxfmt --check`, and
+  `git diff --check` passed. PR #100960 checks for head `da8aca8f5a` are
+  success/skipped only as of the last poll.
+
+## 2026-07-09 CLI catalog per-PR review pass
+
+- Last updated: 2026-07-09
+- Last agent: Codex
+- Current focus: one Codex review per catalog PR branch diff after rebasing the
+  stack onto current `origin/main`.
+- Durable project home: `projects/catalog/` now owns catalog-specific notes;
+  keep this OpenClaw section as a cross-link and PR-loop summary.
+- Authoritative implementation worktree remains
+  `C:\src\openclaw-catalog-restack` on
+  `user/giodl/cli-catalog-review-node-restack`.
+- Local branch boundaries after review fixes:
+  - PR1 `user/giodl/cli-catalog-review-foundation` at `94cac8b6b8`.
+  - PR2 `user/giodl/cli-catalog-review-dynamic-lenses` at `e291175a98`.
+  - PR3 `user/giodl/cli-catalog-review-prompt` at `1261f102f7`.
+  - PR4 `user/giodl/cli-catalog-review-schema-fixtures` at `aca97c919f`.
+  - PR5 `user/giodl/cli-catalog-review-generated-docs` at `7dfea9de9f`.
+  - PR6 `user/giodl/cli-catalog-review-hardening` at `bb4111952c`.
+- Accepted review findings fixed and squashed into the owning PR layers:
+  stale descriptor/route counts after current `main` added `promos`; catalog
+  descriptor vs registered command description drift; unused audit import;
+  generated-doc QA-env count; schema fixtures leaking
+  `OPENCLAW_ENABLE_PRIVATE_QA_CLI`; plugin prompt visibility filtering; and
+  PR5 docs/glossary churn that had overwritten unrelated CLI index/glossary
+  content.
+- Per-branch `codex review` reruns are clean:
+  PR1 vs `origin/main`, PR2 vs PR1, PR3 vs PR2, PR4 vs PR3, PR5 vs PR4, and
+  PR6 vs PR5. Review-pass worktree
+  `C:\src\openclaw-catalog-review-pass` lacks `node_modules`, so some review
+  probes could not run Vitest there; hydrated validation ran in the
+  implementation worktree.
+- Final focused validation passed in `C:\src\openclaw-catalog-restack`:
+  `node scripts/run-vitest.mjs test/scripts/cli-catalog-overlay-list.test.ts
+  test/scripts/generate-cli-catalog-doc.test.ts
+  src/cli-catalog-overlay/schema-fixtures.test.ts
+  src/cli-catalog-overlay/prompt-projection.test.ts
+  src/cli-catalog-overlay/list.test.ts
+  src/cli-catalog-overlay/operator-summary.test.ts src/cli/catalog-cli.test.ts
+  --reporter=dot`, `npm exec -- oxfmt --check <review-touched files>`, and
+  `git diff --check origin/main...HEAD`.
+- Not yet pushed after this review restack. Push/force-with-lease is the next
+  step if the user wants to update the fork branches/PR #100960.
