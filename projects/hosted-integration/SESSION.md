@@ -22,31 +22,25 @@
 
 - Last updated: 2026-07-15
 - Last agent: Copilot
-- Current focus: correct the five-package fork review stack so OpenClaw owns
+- Current focus: review the corrected five-package fork stack. OpenClaw owns
   only generic composition, credential, diagnostics, traffic-policy, reverse
-  dispatch, and Gateway admission contracts. Lobster owns its external plugin,
-  CAPI provider binding, credential acquisition, dispatcher implementation,
-  Scout configuration, and deployment evidence. PR #72 is rebuilt and
-  published at `10b5d0f23c2` as generic host composition contracts. PR #73 is
-  rebuilt on that head and published at `1ac7184d60e` as generic hosted provider
-  dispatch. Both live PR titles and bodies now state the external-plugin
-  boundary. Package 72 has 37 focused tests plus production/test type proof;
-  package 73 has 218 focused tests plus production, core-test, and package-test
-  type proof. Packages #74 and #75 remain on their old product-coupled review
-  shapes and must be restacked onto the corrected package-3 head.
+  dispatch, Gateway admission, and native semantic-owner contracts. Lobster
+  owns its external plugin, CAPI binding, credential acquisition, physical
+  dispatcher, Scout configuration, and deployment evidence. PRs #72-#75 and
+  RFC PR #2 are rebuilt and published with that boundary. Package #74 is at
+  `633e087a455`; package #75 is at `bfc0e8fe5e3`.
 - Consolidated fork review stack: [OpenClaw PR 71](https://github.com/giodl73-repo/openclaw/pull/71)
   guarded dispatch core; [PR 72](https://github.com/giodl73-repo/openclaw/pull/72)
   generic host composition contracts; [PR 73](https://github.com/giodl73-repo/openclaw/pull/73)
   generic hosted provider dispatch; [PR 74](https://github.com/giodl73-repo/openclaw/pull/74)
   additional provider owners; and [PR 75](https://github.com/giodl73-repo/openclaw/pull/75)
   Microsoft interactions. All are fork-only drafts. Packages 4 and 5 are
-  parallel children of package 3 and require restacking before review.
-- Active branch / PR: [fork package 2 PR 72](https://github.com/giodl73-repo/openclaw/pull/72), branch `user/giodl/hosted-integration-capi-owner-operations`, head `10b5d0f23c2`; [fork package 3 PR 73](https://github.com/giodl73-repo/openclaw/pull/73), branch `user/giodl/hosted-integration-hosted-capi-execution`, head `1ac7184d60e`; [fork package 4 PR 74](https://github.com/giodl73-repo/openclaw/pull/74), branch `user/giodl/hosted-integration-additional-provider-owners`, old head `f518a822261`; [fork package 5 PR 75](https://github.com/giodl73-repo/openclaw/pull/75), branch `user/giodl/hosted-integration-microsoft-interactions`, old head `128df4698d8`; [fork RFC PR 2](https://github.com/giodl73-repo/rfcs/pull/2), branch `user/giodl/rfc-duplex-transport`, with external-plugin architecture edits pending commit.
+  corrected parallel children of package 3 and are ready for one-by-one review.
+- Active branch / PR: [fork package 2 PR 72](https://github.com/giodl73-repo/openclaw/pull/72), branch `user/giodl/hosted-integration-capi-owner-operations`, head `10b5d0f23c2`; [fork package 3 PR 73](https://github.com/giodl73-repo/openclaw/pull/73), branch `user/giodl/hosted-integration-hosted-capi-execution`, head `1ac7184d60e`; [fork package 4 PR 74](https://github.com/giodl73-repo/openclaw/pull/74), branch `user/giodl/hosted-integration-additional-provider-owners`, head `633e087a455`; [fork package 5 PR 75](https://github.com/giodl73-repo/openclaw/pull/75), branch `user/giodl/hosted-integration-microsoft-interactions`, head `bfc0e8fe5e3`; [fork RFC PR 2](https://github.com/giodl73-repo/rfcs/pull/2), branch `user/giodl/rfc-duplex-transport`, head `9bea1a0d68f`.
 - RFC file: `rfcs/0020-hosted-integration-and-capability-bindings.md`
-- Known dirty state: `claws-hapi` has this session edit plus unrelated
-  `projects/state-continuity/SESSION.md` changes that must remain untouched.
-  The RFC worktree has only the RFC 0020 external-plugin architecture edit.
-  Package-2 and package-3 WSL worktrees are clean and published. D4a and D3a
+- Known dirty state: `claws-hapi` has this session edit plus unrelated feeds
+  and state-continuity changes that must remain untouched. The RFC and generic
+  package #2-#5 worktrees are clean and published. D4a and D3a
   source changes are committed and pushed, but
   their hydrated Windows worktrees report generated tracked `node_modules` link
   churn that is intentionally unstaged. D4a PR 59 has the expected fork-only
@@ -99,24 +93,20 @@
   Vitest shards. The final `codex review --base
   fork/user/giodl/hosted-integration-capi-owner-operations` exited clean with no
   accepted/actionable findings.
-  Package 4 is restacked onto package 3, clean, synchronized, and mergeable at
-  `f518a822261`. Fork PR 74 now contains seven commits across 24 files
-  (+4743/-113): inactive Substrate, WebIQ, and Anthropic owner bindings, shared
-  model dispatch, deterministic bundle composition, unique bundle-incarnation
-  fences, HTTPS/route-policy redirect invariants, caller cancellation, and
-  outbound header allowlists that prevent credential or cookie forwarding.
-  All 71 focused tests across the 10 changed test files pass in four Vitest
-  shards. Oxfmt, Oxlint, diff hygiene, and the final `codex review --base
-  fork/user/giodl/hosted-integration-hosted-capi-execution` are clean.
-  Package 5 is published at `128df4698d8`, exactly three commits above package
-  3. Its 148 changed tests, generated channel metadata check, focused
-  Oxfmt/Oxlint, package build-plan proof, and diff hygiene pass. Iterative Codex review fixed default
-  account field clearing, normalized webhook route ownership, missing bundled
-  channel metadata, incomplete runtime config validation, and concurrent
-  duplicate-delivery races, runtime barrel drift, missing ACF package exports,
-  setup account status, and strict source/test typing. The final review is
-  clean. PR 75 is mergeable and its expected fork-only `label` failure remains;
-  `Real behavior proof` and `auto-response` are still pending.
+  Package 4 is rebuilt from corrected package 3, clean, synchronized, and
+  published at `633e087a455`. PR 74 contains provider-owned Substrate, WebIQ,
+  and Anthropic bindings with generic typed host policy and dispatcher
+  selections. It contains no CAPI or bundled Lobster host. All 59 focused tests
+  pass; production and core-test type checks, Oxfmt, Oxlint, generated checks,
+  and diff hygiene are clean.
+  Package 5 is rebuilt from corrected package 3, clean, synchronized, and
+  published at `bfc0e8fe5e3`. PR 75 contains native Teams ACF and Microsoft 365
+  mail owners using `msteams/acf-token`, `m365mail/graph-token`, and arbitrary
+  compatible typed host policy/dispatcher selections. It contains no CAPI,
+  `lobster-host`, or `lobster/*` source coupling. All 262 focused tests across
+  18 files pass; core source/tests and extension source/tests type-check; SDK
+  API/export, inventory, docs map, MDX, links, Oxfmt, Oxlint, and diff hygiene
+  are clean.
   Package 2 dependency hydration is blocked by the fork feed's unavailable
   `@openclaw/crabline@0.1.11` tarball, but the existing test harness and pinned
   standalone Oxfmt/Oxlint proof pass. The RFC worktree is clean. D2a, D2b,
@@ -186,14 +176,15 @@
   promotion-gated deletion targets because Lobster is still pinned to
   OpenClaw `v2026.5.28`.
 - Consolidated package 5 is the reviewer-facing replacement for D5a/D5c:
-  `C:\src\openclaw-hosted-package-5-microsoft`, branch
+  `/root/src/openclaw-hosted-package-5-generic`, remote branch
   `user/giodl/hosted-integration-microsoft-interactions`, published head
-  `128df4698d8`. It preserves Teams ACF Channel semantics and Graph mailbox
+  `bfc0e8fe5e3`. It preserves Teams ACF Channel semantics and Graph mailbox
   semantics as separate owners while sharing package 3's cell-local authority
-  fences. Root packaging, generated metadata/docs, exact credential slots,
-  identity checks, account behavior, rate limiting, persistent replay state,
-  concurrent dedupe, strict typing, and package contract exports are proven.
-  PR 75 is review-clean, mergeable, and curated as the final fork-only package.
+  fences and accepting generic external-host contributions. Root packaging,
+  generated metadata/docs, exact owner credential slots, identity checks,
+  account behavior, rate limiting, persistent replay state, concurrent dedupe,
+  strict typing, and package contract exports are proven. PR 75 is clean,
+  mergeable, and curated as the final fork-only package.
 - F2 is implemented in
   `C:\src\lobster-hosted-integration-f2-capi-observation`, stacked on D2b. It
   adds an exact CAPI observation contract with four rollout phases, minimum
@@ -661,13 +652,11 @@
   credential slots, one-hop dispatch, network guard, and guarded-fetch
   redirects; final `codex review --uncommitted` reported no
   accepted/actionable findings.
-  Package 4 is clean and published at `f518a822261`; PR 74 is a mergeable
-  fork-only draft based on package 3. Dependency installation remains
-  incomplete because the configured Microsoft package feed returns 404 for
-  `@openai/codex@0.144.4`, but the existing hydrated test harness was sufficient
-  for the full focused proof.
-  Package 5 is fully restacked and published at `128df4698d8` with exactly
-  three commits above `df1e3c6a724`. The ACF and Graph owners retain exact
-  identity, credential, response, replay, and route-policy semantics while
-  using package 3's bounded hosted-dispatch substrate. PR 75 is tested,
-  review-clean, mergeable, and curated with explicit evidence and non-goals.
+  Package 4 is clean and published at `633e087a455`; PR 74 is a mergeable
+  fork-only draft based on corrected package 3. It contains only provider-owned
+  bindings and generic host selections.
+  Package 5 is fully restacked and published at `bfc0e8fe5e3`. The ACF and
+  Graph owners retain exact identity, credential, response, replay, and
+  route-policy semantics while using package 3's bounded hosted-dispatch
+  substrate and external-host contributions. PR 75 is tested, mergeable, and
+  curated with explicit evidence and non-goals.
