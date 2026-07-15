@@ -10,13 +10,13 @@ repair and health-finding stack.
 | openclaw/openclaw | [#97514](https://github.com/openclaw/openclaw/pull/97514) | `doctor-systemd-linger-lint-findings` | Merged 2026-07-05 from `65ec5a0acfe` as `7bb686c14012`; completion comment posted | Expose default-off systemd-linger findings without enabling linger from lint. |
 | openclaw/openclaw | [#98869](https://github.com/openclaw/openclaw/pull/98869) | `doctor-channel-plugin-blocker-dry-run-effects` | Parked at `9c44766ab5`; branch diff empty after accepting Omar reachability finding | Dry-run backfill paused until core structured repair has a supported entry point. |
 | openclaw/openclaw | [#99255](https://github.com/openclaw/openclaw/pull/99255) | `doctor-config-write-dry-run` | Draft open at `3adfe2f2a1`; focused proof passed, ClawSweeper review requested | Preview Doctor config writes during dry-run without adding CLI, SDK, plugin, or config contract surface. |
-| openclaw/openclaw | [#100361](https://github.com/openclaw/openclaw/pull/100361) | `doctor-lint-defaults-audit` | Draft rebased after #100093 at `bad984deb76`; focused proof passed, ClawSweeper re-review requested | Apply default-lint changes from the audit; document default lint vs `--all` vs `--fix`, keep default-selection metadata internal, and move historical/advisory or optional inventory checks behind `--all`/`--only` without freezing the full rule list in tests. |
 | openclaw/openclaw | [#84472](https://github.com/openclaw/openclaw/pull/84472) | `doctor-dry-run-contribution-guard` | Draft open, paused | Expose dry-run preview reports after more rule slices are structured. |
 
 ## Landed PRs
 
 | Repo | PR | Purpose |
 | --- | --- | --- |
+| openclaw/openclaw | [#100361](https://github.com/openclaw/openclaw/pull/100361) | Audit Doctor lint defaults after 44/44 tracked rule families gained lint findings; keep legacy state, skills readiness, session transcripts, and session snapshots explicit-only via `--all`/`--only` with no plugin/SDK public contract change. |
 | openclaw/openclaw | [#100093](https://github.com/openclaw/openclaw/pull/100093) | Expose default-off write-config blocker findings for Nix/config write directory blockers; completes 44/44 tracked Doctor rule families with structured lint findings. |
 | openclaw/openclaw | [#99238](https://github.com/openclaw/openclaw/pull/99238) | Expose default-off generic channel preview warning findings under `core/doctor/channel-preview-warnings`. |
 | openclaw/openclaw | [#99250](https://github.com/openclaw/openclaw/pull/99250) | Keep legacy WhatsApp crontab shell-backed findings out of default lint while preserving `--all`/`--only`. |

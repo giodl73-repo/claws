@@ -17,9 +17,24 @@
 
 ## Current Session
 
-- Last updated: 2026-07-06.
+- Last updated: 2026-07-08.
 - Last agent: Codex.
-- Current focus: keep the open default-disabled Doctor rule slices reviewed and
+- Current focus: #100361 merged on 2026-07-08 from prepared head
+  `d5d88a0db14782a36f72aa1fbe5023570343f773` as
+  `7d82e5b658950a76973ebee2d8e379a3e54fbbf0` after Galin reviewed with no
+  blocking findings and maintainers accepted the default-lint compatibility
+  tradeoff. The audit keeps legacy state, skills readiness, session
+  transcripts, and session snapshots explicit-only through `--all`/`--only`,
+  keeps `defaultEnabled` internal to Doctor runner selection, and does not add
+  plugin/SDK public contract surface. Completion comment:
+  https://github.com/openclaw/openclaw/pull/100361#issuecomment-4919426952.
+  Exact-head hosted gates passed for `d5d88a0` via CI#28976811444 and Workflow
+  Sanity#28976811343. Local broad `pnpm check` stayed blocked by a shrinkwrap
+  guard failure that reproduced on current `origin/main`; also note the
+  prepare hosted-gate wrapper in the rebased branch had an argument mismatch
+  with `scripts/verify-pr-hosted-gates.mjs` requiring `--pr`, so exact-head
+  hosted verification was run directly before the pinned squash merge.
+  Keep the remaining default-disabled Doctor rule slices reviewed and
   proof-backed before returning to #84472 dry-run preview. #97358, #97366,
   #97496, #97500, #98391, #98400, #98406, #98695, #98725, #98729, #99211,
   and #99238 are merged. Omar's 2026-07-02 review pass has been addressed
