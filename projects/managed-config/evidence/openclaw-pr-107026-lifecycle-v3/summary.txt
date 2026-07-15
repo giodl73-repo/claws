@@ -1,0 +1,9 @@
+OpenClaw PR #107026 managed-config lifecycle proof
+branch: user/giodl/managed-config-upstream
+port: 35771
+success startup: PASS
+healthz: PASS
+composed config read (tenant origin, deny web, operator logging): PASS
+runtime config.patch rejection: PASS (exit 1)
+conflicting layer startup rejection: PASS (exit 1)
+canonical config path remained absent: PASS

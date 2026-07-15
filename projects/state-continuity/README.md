@@ -1,56 +1,108 @@
 # Runtime State Continuity Project
 
-Use this area to define and prove OpenClaw's complete portable state contract:
-state ownership, writer accounting, consistency, checkpoints, durable
-publication, dirty/synced status, fencing, compatible restore, and safe
-replacement.
+Use this area to define OpenClaw checkpoint and lifecycle semantics for backup,
+recovery portability, and scale from zero without changing canonical live
+storage.
 
 ## Objective
 
-Replace Lobster's path discovery, persistence wrappers, restore ordering, and
-private shutdown inference with OpenClaw-owned state semantics and host-owned
-storage policy. `/synced` is the aggregate durability projection; safe shutdown
-is one outcome, not the whole feature.
+Define:
+
+- online and final closed-state checkpoints;
+- exact publication and retrieval semantics;
+- explicit restore and compatibility validation;
+- clean shutdown, final handoff, hibernate, wake, and restored startup;
+- retained ingress and cron reconciliation across absent compute;
+- generation fencing, quarantine, readiness, Status, Doctor, and conformance;
+  and
+- the operator-facing CAPE levels: Conventional, Archived, Portable, Elastic.
+
+RFC 0020 Hosted Integration is a prerequisite for hosted publication,
+Portable, and Elastic. It owns host bundle registration, typed owner
+references, activation, Hosting Profiles readiness, Status/Doctor conventions,
+generations, and carriers. The continuity owner model and local Archived path
+can begin from OpenClaw `main` while those hosted seams land.
 
 ## Active Notes
 
 | Area | File |
 | --- | --- |
 | Current session and resume state | `SESSION.md` |
-| Original state audit definition | `../layering-contracts/state-continuity.md` |
-| Synchronization hypothesis | `../layering-contracts/synchronization-model.md` |
-| ProxyPipe lifecycle evidence | `../layering-contracts/inventory/proxy-pipe-frames-2026-07-10.md` |
-| Portfolio deletion ledger | `../layering-contracts/lobster-deletion-ledger.md` |
+| Revised falsifiable thesis and boundaries | `frame.md` |
+| OpenClaw, readiness, and Lobster source audit | `source-audit-2026-07-11.md` |
+| Credential-safe continuity capture treatment | `continuity-capture-treatment.md` |
+| Local Archived activation contract and blockers | `local-archived-activation-contract.md` |
+| Multi-role review of local activation | `local-archived-activation-role-review.md` |
+| Artifact-specific reconstruction and external obligations | `reconstruction-obligations.md` |
+| Non-active exact-target restore plan and journal slice | `restore-plan-journal-slice.md` |
+| Forward-only claim-and-assembly journal | `claim-assembly-journal.md` |
+| Managed restore executor and E4 binding | `restore-executor-binding.md` |
+| Exact E4c managed executor paper fixture | `e4c-executor-fixture.md` |
+| Final handoff closed-state capture contract | `final-handoff-capture.md` |
+| Final publication and destruction authority | `final-handoff-publication.md` |
+| V1 closeout and V2 horizon | `v1-closeout-v2-horizon.md` |
+| Fleet cell isolation and destruction scope | `fleet-cell-boundary.md` |
+| Internal and external comparison matrix | `comparison-matrix.md` |
+| Revised multi-role evaluation | `role-review-2026-07-11.md` |
+| PR-body value proposition review | `pr-body-role-review-2026-07-11.md` |
+| Main-first validation lanes and gates | `validation-first-plan.md` |
+| Six implementation PR execution briefs | `pr-plans/README.md` |
+| PR-plan multi-role review | `pr-plans/role-review-2026-07-11.md` |
+| Superseded initial provider hypothesis | `slice-1-readiness-shaped-provider.md` |
+| Next design-only evidence slice | `slice-2-local-archived-roundtrip.md` |
+| Hosted Integration project | `../hosted-integration/README.md` |
+| Hosting Profiles project | `../hosting-profiles/README.md` |
 | Snapshot project | `../snapshot/README.md` |
+| Portfolio deletion ledger | `../layering-contracts/lobster-deletion-ledger.md` |
 
 ## Active Work
 
 | Repo | PR | Branch | Status | Purpose |
 | --- | --- | --- | --- | --- |
-| `giodl73-repo/rfcs` | [Fork PR 3](https://github.com/giodl73-repo/rfcs/pull/3) | `user/giodl/rfc-state-continuity` at `b335298` | Draft, fork-only | Architecture review; ClawBus may carry publication without owning semantics. |
-| `openclaw/rfcs` | [Snapshot RFC 20](https://github.com/openclaw/rfcs/pull/20) | Existing | Related | SQLite-safe component checkpoint primitive. |
-| `bic/lobster` | TBD | `user/giodl/layering-contract-audit` | Evidence | Trace checkpoint, publication, shutdown, and restore behavior. |
-| `openclaw/openclaw` | TBD | New isolated worktree | Discovery | Build the complete state owner/writer/path inventory. |
+| `giodl73-repo/rfcs` | [Fork PR 5](https://github.com/giodl73-repo/rfcs/pull/5) | `user/giodl/rfc-0021-state-continuity` | Draft, fork-only | Revised lifecycle/checkpoint/CAPE architecture. |
+| `giodl73-repo/openclaw` | [Fork PR 41](https://github.com/giodl73-repo/openclaw/pull/41) | `user/giodl/state-continuity-owner-model` | Draft, fork-only | CAPE config, state inventory, and desired/effective Status contract. |
+| `giodl73-repo/openclaw` | [Fork PR 55](https://github.com/giodl73-repo/openclaw/pull/55) | `user/giodl/state-continuity-archived-verify` | Draft, fork-only; stacked on PR 41 | Exact artifact identity, bounded retrieval, restore-component graph, and fail-closed Archived assessment. |
+| `giodl73-repo/openclaw` | [Fork PR 56](https://github.com/giodl73-repo/openclaw/pull/56) | `user/giodl/state-continuity-archived-capture` | Draft, fork-only; stacked on PR 55 | Config dependency classification, copied-SQLite sanitation, capture planning/staging, and immutable continuity artifacts. |
+| `giodl73-repo/openclaw` | [Fork PR 57](https://github.com/giodl73-repo/openclaw/pull/57) | `user/giodl/state-continuity-archived-materialize` | Draft, fork-only; stacked on PR 56 | Offline materialization, compatibility validation, and closed artifact-specific obligations. |
+| `giodl73-repo/openclaw` | [Fork PR 58](https://github.com/giodl73-repo/openclaw/pull/58) | `user/giodl/state-continuity-archived-preview` | Draft, fork-only; stacked on PR 57 | Read-only exact-target restore preview with explicit execution blockers. |
+| `giodl73-repo/openclaw` | [Fork PR 64](https://github.com/giodl73-repo/openclaw/pull/64) | `user/giodl/state-continuity-e4c-executor` | Draft, fork-only; stacked on PR 58 | Launcher-fenced managed restore execution, forward-only evidence, exact assembly, and same-incarnation replay. |
+| `giodl73-repo/openclaw` | [Fork PR 101](https://github.com/giodl73-repo/openclaw/pull/101) | `user/giodl/state-continuity-e5a-final-capture` | Draft, fork-only; stacked on PR 64 | Strict managed final capture, atomic durable replay journal, credential-safe immutable archive, and exact local receipt. |
+| `giodl/lobster` | [Fork PR 15](https://microsoft.ghe.com/giodl/lobster/pull/15) | `user/giodl/state-continuity-e4d-operation` | Draft, fork-only; stacked on PR 8 | Strict allocation attestation, adapter execution, E4 replay/commit/quarantine, and exact-route restored startup. |
+| `giodl/lobster` | [Fork PR 16](https://microsoft.ghe.com/giodl/lobster/pull/16) | `user/giodl/state-continuity-e5a-final-capture` | Draft, fork-only; stacked on PR 15 | Durable final-handoff authority, exact-route capture, asynchronous turn drain, authoritative Gateway suspension, and closed-state local receipt. |
+| `giodl73-repo/rfcs` | [Fork PR 2](https://github.com/giodl73-repo/rfcs/pull/2) | `user/giodl/rfc-duplex-transport` | Prerequisite | Hosted Integration architecture and implementation patterns. |
+| `openclaw/rfcs` | [Snapshot RFC 20](https://github.com/openclaw/rfcs/pull/20) | Existing | Related | SQLite-safe component capture primitive. |
+| `bic/lobster` | TBD | `user/giodl/layering-contract-audit` | Evidence | Current workspace persistence, Teams inbox, cron wake, credentials, and lifecycle behavior. |
 
 ## Delivery Gates
 
-1. Account for every OpenClaw and Lobster-copied state path and writer.
-2. Classify state as durable, reconstructable, ephemeral, or secret.
-3. Prove whether one runtime generation is valid or component watermarks are required.
-4. Bind checkpoint, publication, restore, and destruction to runtime/checkpoint identity and manifest digest.
-5. Execute drain, mutation race, checkpoint, publication, replacement, restore, corruption, quota, and incompatibility proofs.
-6. Stage deletion of Lobster path-copy, restore-ordering, and private lifecycle code.
+1. Complete the core state-surface inventory and treatment.
+2. Prove local Archived capture, publication, retrieval, and restore on paper.
+3. Bound online-capture runtime, memory, disk, and I/O impact.
+4. Follow landed Hosted Integration owner/binding/readiness patterns.
+5. Prove Portable clean-shutdown capture, dependency closure, generation
+   fencing, and restore-gated readiness.
+6. Prove Elastic Teams/API/cron wake, retained delivery, quarantine, and cold
+   restore SLO.
+7. Run mixed-version shadow migration before deleting Lobster private paths.
 
 ## Boundaries
 
-OpenClaw owns state meaning, consistency, manifests, compatibility, restore
-ordering, and continuity evidence. Lobster owns storage destination, encryption,
-retention, scheduling, retries, and placement. Duplex Transport may carry a
-publication call but does not own publication semantics.
+- Existing OpenClaw stores, schemas, writers, transactions, and acknowledgement
+  semantics remain unchanged.
+- Host-managed credentials are re-issued or re-resolved, never checkpointed.
+- One tenant Gateway cell maps to one continuity owner lineage; continuity
+  identities never substitute for the cell isolation boundary.
+- `safeToDestroy` authorizes compute/container lifecycle only and never
+  persistent tenant-data purge.
+- Recurring capture does not pause the runtime.
+- Final capture follows clean shutdown and uses closed persisted state.
+- CAPE is an operator setting/projection, not an implementation decomposition.
+- No global consistency, mutation generation, `/synced`, generic provider bus,
+  normalized ingress API, or continuity-specific composition framework.
 
 ## Related Areas
 
-- `projects/layering-contracts/README.md`
-- `projects/snapshot/README.md`
-- `projects/duplex-transport/README.md`
+- `projects/hosted-integration/README.md`
 - `projects/hosting-profiles/README.md`
+- `projects/snapshot/README.md`
+- `projects/layering-contracts/README.md`

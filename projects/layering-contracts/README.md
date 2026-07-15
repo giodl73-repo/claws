@@ -13,7 +13,7 @@ envelope.
 | Area | Question | Current work | File |
 | --- | --- | --- | --- |
 | Runtime activation | How does host intent become one accepted effective OpenClaw configuration? | `projects/managed-config/` child project plus startup readiness conditions | `activation.md` |
-| Runtime boundary | How does a host authenticate, connect to, supervise, and route traffic to OpenClaw? | Hosting Profiles and `projects/duplex-transport/` child projects | `runtime-boundary.md` |
+| Runtime boundary | How does a host authenticate, connect to, supervise, and route traffic to OpenClaw? | Hosting Profiles and `projects/hosted-integration/` child projects | `runtime-boundary.md` |
 | State and continuity | What must survive, when is it consistent, and how can execution continue elsewhere? | `projects/state-continuity/` child project | `state-continuity.md` |
 | Evidence and compatibility | How does a host prove behavior and select a supported OpenClaw release? | Packaged profile evidence in Readiness; cross-contract inventory remains here | `evidence-compatibility.md` |
 
@@ -49,7 +49,8 @@ boundary; neither is a fifth semantic area.
 | ProxyPipe fit with `OpenClawTransport` and migration options pass 7 | `inventory/proxypipe-openclaw-transport-fit-2026-07-10.md` |
 | `node.invoke` fit and shared peer-invocation decision pass 8 | `inventory/node-invoke-duplex-fit-2026-07-10.md` |
 | Hosted peer role, authentication, permissions, and generation pass 9 | `inventory/hosted-peer-identity-2026-07-10.md` |
-| Duplex Transport candidate project and design gates | `duplex-transport.md` |
+| Residual environment, instance identity, start DTO, and patch-retirement audit | `inventory/residual-bloat-2026-07-11.md` |
+| Hosted Integration child project and design gates | `hosted-integration.md` |
 | Superseded Host Bridge composition hypothesis | `host-bridge-hypothesis.md` |
 | Current session and resume state | `SESSION.md` |
 | Historical boundary analysis | `../hosting-profiles/analysis.md` |
@@ -66,7 +67,7 @@ boundary; neither is a fifth semantic area.
 | `openclaw/rfcs` | [RFC 33](https://github.com/openclaw/rfcs/pull/33) | Child initiative | Readiness Conditions and Standard Hosting Profiles. |
 | `openclaw/rfcs` | [RFC 31](https://github.com/openclaw/rfcs/pull/31) | Related | Remote AgentHarness data-plane contract. |
 | `giodl73-repo/rfcs` | [Fork PR 1](https://github.com/giodl73-repo/rfcs/pull/1) | Draft, fork-only | Managed Configuration RFC review. |
-| `giodl73-repo/rfcs` | [Fork PR 2](https://github.com/giodl73-repo/rfcs/pull/2) | Draft, fork-only | Duplex Transport and Host Providers RFC review. |
+| `giodl73-repo/rfcs` | [Fork PR 2](https://github.com/giodl73-repo/rfcs/pull/2) | Draft, fork-only | Hosted Integration and Capability Bindings RFC review. |
 | `giodl73-repo/rfcs` | [Fork PR 3](https://github.com/giodl73-repo/rfcs/pull/3) | Draft, fork-only | Runtime State Continuity RFC review. |
 
 ## Ownership Rule
@@ -105,7 +106,7 @@ data-plane protocol. Neither is another contract area to invent here.
 
 - `projects/hosting-profiles/README.md`
 - `projects/managed-config/README.md`
-- `projects/duplex-transport/README.md`
+- `projects/hosted-integration/README.md`
 - `projects/state-continuity/README.md`
 - `projects/lobster/README.md`
 - `projects/openclaw/README.md`

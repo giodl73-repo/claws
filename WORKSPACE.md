@@ -25,7 +25,7 @@ For agent and harness entry points, start with `CONTEXT.md`.
 | OpenClaw hosting profiles | `projects/hosting-profiles/` | Standard hostee profiles, ready checks, status conditions, and container/platform hosting conventions for OpenClaw. |
 | Lobster/OpenClaw layering contracts | `projects/layering-contracts/` | Umbrella host-runtime contract portfolio, Lobster boundary audit, and upstream contract extraction. |
 | Managed Configuration | `projects/managed-config/` | Host/operator config authority, effective generations, conformance, and Lobster config-writer removal. |
-| Duplex Transport | `projects/duplex-transport/` | OpenClawTransport host-provider semantics, peer invocation reuse, and ProxyPipe retirement. |
+| Hosted Integration | `projects/hosted-integration/` | Host integration bundles, owner-selected capability bindings, Hosting Profiles, narrow carriers, and ProxyPipe retirement. |
 | Runtime State Continuity | `projects/state-continuity/` | State ownership, checkpoints, publication, dirty/synced status, fencing, restore, and persistence removal. |
 | PromoteClaw | `projects/promoteclaw/` | Regular Lobster OpenClaw version promotion from quarantine-cleared LTS releases, with patch carry-forward validation. |
 | TypeClaw | `projects/typeclaw/` | OpenClaw TypeScript native / TS7 performance and compatibility evaluation. |

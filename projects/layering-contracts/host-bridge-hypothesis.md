@@ -2,7 +2,7 @@
 
 ## Status
 
-Superseded as the project definition by `duplex-transport.md`. Host Bridge is
+Superseded as the project definition by `hosted-integration.md`. Host Bridge is
 retained as architectural motivation and composition language, not as a
 separate proposed OpenClaw abstraction or RFC.
 

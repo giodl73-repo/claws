@@ -13,11 +13,15 @@ The upstream mistake would be to rename ProxyPipe or tunnel its `oneof` through
 OpenClaw owner and upstreams only the missing runtime-to-host provider
 primitive.
 
-The resulting supported session is **ClawBus**: the hosted duplex form of the
-OpenClaw protocol. It intentionally carries all seven OpenClaw business
-families over one connection while preserving their canonical subsystem-owned
-schemas. The problem was not multiplexing; it was allowing the private pipe to
-become the semantic definition of everything it carried.
+The corrected target is a set of capability-specific interfaces with optional
+hosted bindings. **ClawBus** is the remote binding for interfaces whose
+implementation lives outside the container. It is not a second semantic
+catalog and does not extend the public app SDK's `OpenClawTransport`.
+
+One physical connection may still multiplex several bindings for operational
+reasons. The problem was not multiplexing; it was allowing the private pipe to
+define every interface and then treating transport consolidation as semantic
+ownership.
 
 ## What The Duplicate Protocol Carries
 
@@ -38,9 +42,9 @@ decode support is no longer required.
 
 | ProxyPipe family | Concrete OpenClaw home | Remaining upstream work | Lobster disposition |
 | --- | --- | --- | --- |
-| Brokered HTTP egress | New `host-provider` specialization of `OpenClawTransport`/Gateway peer invocation; initial bounded methods under `host.egress.v1` | Unary foundation first; a separate typed stream extension must define credit, backpressure, cancellation, half-close, and terminal acknowledgement before replacing arbitrary HTTP bodies | Implement provider backend and tenant routing; delete tags 1-5 only after bounded/streamed parity is proven |
+| Brokered HTTP egress | Hosted binding beneath the existing provider request policy/transport seam | Preserve OpenClaw auth, proxy, TLS, SSRF, and request policy; define streaming credit, backpressure, cancellation, half-close, and terminal acknowledgement before replacing arbitrary HTTP bodies | Implement provider backend and tenant routing; delete tags 1-5 only after bounded/streamed parity is proven |
 | Judge dedup, user-turn hints, feedback | Owning code-mode/WorkIQ/self-diagnosis plugin. Remote dependencies use `plugin.<plugin-id>.<service>.v1`; ordinary turn observation uses existing plugin/session/agent event hooks. Feedback storage and tenant routing remain a Lobster product API | No core provider for judge or feedback. Add a plugin-owned provider only where the plugin truly requires a remote host service; verify whether `UserTurnPush` can disappear behind existing agent/session events | Move handlers out of central pipe ownership; retain Redis/feedback backend as Lobster service; delete tags 7-11 and 15-16 per plugin migration |
-| Teams activity delivery | Existing `extensions/msteams` Channel plugin and plugin SDK channel ingress (`channel-inbound`, webhook ingress, channel status/ack semantics) | Define/confirm a transport-neutral activity injection adapter if the current webhook cannot be reached in hosted topology; do not define raw Bot Framework activity semantics in Duplex | Keep Bot Framework endpoint, tenant routing, and delivery UI in Lobster; replace tags 12-13 with the Channel adapter |
+| Teams activity delivery | Existing `extensions/msteams` Channel plugin and plugin SDK channel ingress (`channel-inbound`, webhook ingress, channel status/ack semantics) | Bind the existing pod-locality-independent HTTP route as a Channel-owned endpoint attachment with trusted-forwarder authentication, idempotency, classified acknowledgement, readiness, and route generation | Keep Bot Framework endpoint, tenant routing, and delivery UI in Lobster; replace tags 12-13 with the Channel endpoint attachment |
 | Container/build evidence | Readiness RFC conditions `ArtifactIdentityAvailable`, `SelectedProfileConformant`, and `ExpectedArtifactMatched`; Gateway connect/hello already carries client version/platform/instance and negotiated capabilities | Bind packaged conformance metadata to immutable artifact digest and expose the same identity through readiness/status | Supply expected artifact/profile and consume evidence; delete tag 14 and private build parsing |
 | Lifecycle supervision | `gateway.suspend.prepare/status/resume` in `src/gateway/server-methods/suspend.ts`; readiness conditions for accepting work; Runtime State Continuity for dirty/synced, checkpoint publication, restore, and safe-to-destroy | Add continuity operations/conditions after writer inventory; keep scheduler actions out of OpenClaw | Lobster keeps pause/delete/recreate placement decisions; replace tags 17 and 24-26 with Gateway lifecycle plus continuity calls |
 | Node, exec, and plugin approvals | `node.pair.approve/reject`, `exec.approval.get/list/request/waitDecision/resolve`, and `plugin.approval.list/request/waitDecision/resolve` from Gateway descriptors and protocol schemas | Ensure the Lobster operator connection carries pinned tenant/user/runtime provenance and Teams can render/resolve the same pending approval; no new approval protocol | Keep approval UX/broker and identity routing; delete tags 27-32 after using canonical Gateway methods/events |
@@ -66,8 +70,8 @@ is renamed.
 
 ## Duplicated Transport Mechanics
 
-ProxyPipe also reimplements concerns that should come from
-`OpenClawTransport`/Gateway peer invocation:
+ProxyPipe also reimplements carrier concerns that may reuse Gateway peer
+invocation internals when Gateway is the selected carrier:
 
 - connection establishment and runtime/container hello;
 - peer capability advertisement;
@@ -81,20 +85,20 @@ ProxyPipe also reimplements concerns that should come from
 - payload framing and buffering; and
 - telemetry for dispatch and failures.
 
-The Duplex RFC replaces these for host-service calls by extending the existing
-Gateway peer model. It shares correlation, timeout, connection binding, and
-late-result handling with `node.invoke`, while adding a distinct
-`host-provider` identity, provider permissions, typed schemas, overload bounds,
-and runtime-generation fencing.
+The hosted binding may reuse Gateway peer-invocation mechanics when Gateway is
+the selected carrier. That is an implementation option, not a requirement that
+host capability interfaces belong to Gateway. The binding still needs
+correlation, timeout, connection binding, typed failures, overload bounds, and
+runtime-generation fencing.
 
 ## What Is Actually New In OpenClaw
 
 The narrow missing primitive is:
 
 ```text
-OpenClaw runtime
-  -> invokes a named, versioned host-provider method
-  -> over the existing OpenClaw transport/Gateway peer session
+OpenClaw capability interface
+  -> has local and hosted implementations
+  -> hosted binding crosses the container boundary
   -> with bounded request/result, permission, deadline, identity, and generation
 ```
 
@@ -137,6 +141,7 @@ depending on unfinished state semantics:
 | Feedback | Too product-specific for the core proof |
 | Judge dedup | Plugin/Lobster-specific, not a core proof |
 
-The next evidence task is therefore to audit existing OpenClaw secret provider
-and broker extension points before choosing secret resolution or a narrowly
-bounded egress operation.
+The secret audit found an existing env/file/exec provider model. The next
+evidence task is to choose whether a hosted secret binding can extend that seam
+without changing consumers, or whether provider egress offers the cleaner first
+slice beneath the existing request-policy and guarded-fetch layers.

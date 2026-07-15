@@ -1,0 +1,11 @@
+{
+  gateway: {
+    mode: "local",
+    controlUi: {
+      enabled: false,
+    },
+  },
+  tools: {
+    deny: ["exec"],
+  },
+}

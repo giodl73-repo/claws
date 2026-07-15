@@ -77,10 +77,10 @@ Deliver a keep/split/upstream/plugin map for every frame family. In particular,
 remote-harness semantics must converge on RFC 31, while Plex routing, provider
 brokering, and physical transport may remain Lobster-owned.
 
-### 5. Duplex Transport And Approval Reuse
+### 5. Hosted Integration And Approval Reuse
 
 `node.invoke` comparison completed in pass 8. It proves the unary
-server-to-peer foundation; Duplex Transport should add sibling host-provider
+server-to-peer foundation; Hosted Integration should add sibling host-provider
 invocation over shared machinery rather than treating hosts as nodes. Hosted
 peer identity completed in pass 9: use a distinct `host-provider` role,
 capability-bound proof-of-possession admission, separate provider permissions,
@@ -116,7 +116,7 @@ Audit requirements:
 - plugin extension boundary;
 - AgentHarness overlap.
 
-Decision: approvals use existing Gateway contracts. Duplex Transport uses a
+Decision: approvals use existing Gateway contracts. Hosted Integration uses a
 sibling host-provider surface over shared peer-invocation machinery; preserve
 `node.invoke` wire behavior. Explicit cancellation and streaming remain later,
 evidence-gated extensions.
@@ -156,6 +156,6 @@ Keep at most two implementation/RFC initiatives active at once.
 ## Current Discussion Focus
 
 Before executing Pass 1, examine ProxyPipe, existing Gateway transport, and
-Duplex Transport conceptually to ensure the audit asks the right ownership
+Hosted Integration conceptually to ensure the audit asks the right ownership
 questions. The `node.invoke` and hosted peer identity gates are complete; first
 provider selection is next. Do not file a proposal before that comparison.

@@ -1,36 +1,32 @@
-# Duplex Transport Project
+# Hosted Integration Project
 
 ## Status
 
-Named candidate project within the Layering Contracts portfolio. Evidence and
-interface discovery only; no RFC has been filed.
+Named child project within the Layering Contracts portfolio. The fork-only RFC
+is active and the architecture review is complete.
 
 This note supersedes `host-bridge-hypothesis.md` as the project definition. The
-Host Bridge remains useful architectural motivation, but **Duplex Transport** is
-the narrow OpenClaw primitive being investigated.
+Host Bridge remains useful architectural motivation, but **Hosted Integration**
+is the durable project name. Transport is only Area 4 of the design.
 
 ## Goal
 
-Extend OpenClaw's transport contract from client requests plus server events
-into a secure, capability-negotiated duplex transport that can carry
-runtime-to-host service requests and streams.
+Define capability-specific host provider interfaces for isolated OpenClaw
+runtimes, then add an optional hosted remote binding where implementations live
+outside the container. Preserve the public SDK's `OpenClawTransport` as the
+client-to-Gateway request/event abstraction.
 
 ```text
-Current OpenClawTransport
+app/operator -> OpenClawTransport -> Gateway
 
-host/client  -- request -->  OpenClaw
-host/client  <-- event  ----  OpenClaw
-
-Duplex Transport
-
-host         -- request/stream -->  OpenClaw
-host         <-- request/stream --  OpenClaw
+OpenClaw runtime -> capability interface -> local or hosted binding -> host
 ```
 
-The intended outcome is that Lobster can implement the standard transport over
-its network topology, migrate portable semantics away from private ProxyPipe
-frames, and eventually delete ProxyPipe when no Lobster-only service still
-requires it.
+The intended outcome is that Lobster can implement standard OpenClaw capability
+interfaces over its network topology, migrate portable semantics away from
+private ProxyPipe frames, and eventually delete ProxyPipe when no Lobster-only
+service still requires it. One physical connection may carry several bindings,
+but it does not own their semantics.
 
 ## Existing Foundation
 
@@ -49,35 +45,24 @@ Lobster also already has two physical Gateway paths:
 - browser Gateway WebSockets proxied by the runtime through Plex;
 - a purpose-built Rust Gateway client inside the container.
 
-The missing candidate is not another client RPC/event envelope. It is the
-runtime-to-host half needed for bounded host services and duplex streams.
+The missing candidate is not another client RPC/event envelope. It is a
+carrier-neutral way for existing OpenClaw capability interfaces to acquire
+hosted bindings when local implementations are unavailable.
 
 ## Candidate Contract
 
-The current interface remains compatible. Duplex implementations add optional
-host-call and stream facilities, conceptually:
+`OpenClawTransport` remains compatible and unchanged. Capability interfaces
+gain bindings appropriate to their owners, conceptually:
 
 ```ts
-interface OpenClawDuplexTransport extends OpenClawTransport {
-  connect(): Promise<TransportSession>;
-
-  registerHandler(
-    method: string,
-    handler: HostRequestHandler,
-    options: HostHandlerOptions,
-  ): Disposable;
-
-  openStream(
-    protocol: string,
-    params: unknown,
-    options?: StreamOptions,
-  ): Promise<DuplexStream>;
+interface HostCapability<TRequest, TResult> {
+  invoke(request: TRequest, options?: HostCallOptions): Promise<TResult>;
 }
 ```
 
-This signature is illustrative, not approved. The `node.invoke` audit confirmed
-that OpenClaw already has the server-to-peer unary invocation substrate and
-needs a sibling, scoped host-provider specialization over shared machinery.
+This signature is illustrative, not approved. A hosted binding may reuse the
+server-to-peer unary machinery demonstrated by `node.invoke`, but that does not
+make Gateway or `OpenClawTransport` the semantic owner.
 
 ## Required Semantics
 
@@ -96,7 +81,8 @@ needs a sibling, scoped host-provider specialization over shared machinery.
 ## Provider Model
 
 Do not expose an unrestricted arbitrary callback bus. Portable host services
-must use explicit namespaces, permissions, schemas, and versioning:
+must extend explicit capability interfaces with permissions, schemas, and
+versioning. Local and hosted implementations must pass the same fixtures.
 
 ```text
 host.egress.v1
@@ -106,7 +92,7 @@ host.telemetry.v1
 plugin.<plugin-id>.<service>.v1
 ```
 
-Each provider declares:
+Each capability declares:
 
 - supported methods and streams;
 - request and response schemas;
@@ -138,7 +124,7 @@ does not upstream its proto, tags, Plex routing, or Lobster product semantics.
   lifecycle APIs.
 - **Channels** own messaging ingress and delivery semantics.
 - **AgentHarness** owns execution data-plane events and terminal behavior.
-- **Duplex Transport** carries canonical contracts and bounded host-service
+- **Hosted Integration** supplies canonical attachments and bounded host-service
   providers in both directions.
 - **Lobster** implements transport, identity mapping, enterprise services,
   approval UI, routing, and fleet operations.
@@ -159,10 +145,16 @@ does not upstream its proto, tags, Plex routing, or Lobster product semantics.
 - provider-specific implementation details;
 - one monolithic hosted OpenClaw envelope.
 
-## First Design Gate: `node.invoke`
+## First Design Gate: `OpenClawTransport`
+
+**Corrected in FACES pass 10.** `OpenClawTransport` was introduced for the
+public app SDK as a minimal Gateway request/event abstraction. It is not the
+runtime host-capability interface and should remain unchanged.
+
+## Second Design Gate: `node.invoke`
 
 **Completed in audit pass 8.** `node.invoke` proves the server-to-peer unary
-foundation. Duplex Transport should reuse or extract its correlation,
+foundation. Hosted Integration should reuse or extract its correlation,
 capability, timeout, connection-binding, and result machinery, but must use a
 distinct host-provider identity and permission model. Do not represent hosts as
 nodes. Streaming and explicit cancellation remain separate gaps.
@@ -197,12 +189,12 @@ Audit Gateway roles, pairing, bootstrap tokens, trusted proxy identity, device
 credentials, and generation binding to define how a host-provider peer is
 admitted with least privilege and without inheriting node/device semantics.
 
-## Next Design Gate: First Unary Provider
+## Next Design Gate: First Hosted Binding
 
-Audit existing secret-provider and broker extension points, then select one
-portable bounded provider for the foundation proof. Do not choose a
-Lobster-specific convenience service merely because its current ProxyPipe frame
-is small.
+Select one existing capability seam and implement a hosted binding without
+changing its consumers. SecretRef providers and provider request dispatch are
+the leading candidates. Do not choose a Lobster-specific convenience service
+merely because its current ProxyPipe frame is small.
 
 ## Delivery Shape
 
@@ -216,7 +208,7 @@ Keep the upstream work small and independently reviewable:
    non-TypeScript/Lobster conformance adapter.
 
 Approvals migrate through existing Gateway contracts and should not inflate the
-Duplex Transport implementation stack.
+hosted provider-dispatch implementation stack.
 
 ## Evidence Required Before RFC
 

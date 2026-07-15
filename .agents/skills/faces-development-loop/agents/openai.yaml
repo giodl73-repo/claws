@@ -1,0 +1,4 @@
+interface:
+  display_name: "FACES Development Loop"
+  short_description: "Evidence-led RFC and prototype development"
+  default_prompt: "Use $faces-development-loop to validate and develop this idea through source evidence, comparisons, role review, and bounded fork-only slices."

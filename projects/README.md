@@ -21,7 +21,7 @@ be buried in generated wave directories.
 | `hosting-profiles/` | Standard OpenClaw hostee profiles, ready checks, status conditions, and container/platform hosting conventions. |
 | `layering-contracts/` | Umbrella Lobster/OpenClaw host-runtime contract portfolio, boundary audit, and upstream contract extraction. |
 | `managed-config/` | Managed and operator config authority, transactional effective config, conformance, and Lobster config-writer deletion. |
-| `duplex-transport/` | OpenClawTransport host-provider calls, shared Gateway peer invocation, and ProxyPipe retirement. |
+| `hosted-integration/` | Host integration bundles, owner-selected capability bindings, Hosting Profiles, narrow carriers, and ProxyPipe retirement. |
 | `state-continuity/` | State inventory, consistency, checkpoint/publication, dirty/synced status, fencing, restore, and persistence deletion. |
 | `promoteclaw/` | Lobster OpenClaw version promotion from quarantine-cleared LTS releases, including patch carry-forward/drop validation. |
 | `typeclaw/` | OpenClaw TypeScript native / TS7 performance and compatibility evaluation. |
@@ -61,7 +61,7 @@ agent is assigned to an area, then read the area `README.md`.
 | OpenClaw hosting profiles | `hosting-profiles/SESSION.md` |
 | Lobster/OpenClaw layering contracts | `layering-contracts/SESSION.md` |
 | Managed Configuration | `managed-config/SESSION.md` |
-| Duplex Transport | `duplex-transport/SESSION.md` |
+| Hosted Integration | `hosted-integration/SESSION.md` |
 | Runtime State Continuity | `state-continuity/SESSION.md` |
 | PromoteClaw | `promoteclaw/SESSION.md` |
 | TypeClaw | `typeclaw/SESSION.md` |

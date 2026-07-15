@@ -1,0 +1,4 @@
+Gateway call failed: GatewayExplicitAuthRequiredError: gateway url override requires explicit credentials
+Fix: pass --token or --password *** --url (or gatewayToken in tools).
+For the default local or SSH-tunneled Gateway, remove --url to use the configured target.
+Config: /mnt/c/src/claws-hapi/projects/managed-config/evidence/openclaw-pr-107026-lifecycle-v2/canonical-unused.json5

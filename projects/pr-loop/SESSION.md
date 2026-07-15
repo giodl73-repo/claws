@@ -24,19 +24,75 @@
 
 ## Current Session
 
-- Last updated: 2026-07-10T06:55:00-07:00.
+- Last updated: 2026-07-14T14:24:00-07:00.
 - Last agent: Copilot.
-- Current focus: Lobster open authored PR sweep. Let ADO attach/run
-  automatically; do not manually queue or rerun ADO unless the user explicitly
-  names a PR/branch to queue.
-- Active branch / PR: open authored Lobster PRs are #4298, #4297, #4272,
-  #4220, #4092, and #4064. Recent handoff PRs #4206, #4247, and #3749 are
-  merged; #4044 is closed/parked.
+- Current focus: Recovering Lobster #4362 merge path and isolating ClawPilot
+  node-mode follow-up into separate PR #4644. Let ADO attach/run automatically;
+  do not manually queue or rerun ADO unless the user explicitly names a PR/branch
+  to queue.
+- Active branch / PR: open authored Lobster PRs include #4362, #4298, #4297,
+  #4272, #4220, #4092, and #4064. Recent handoff PRs #4206, #4247, and #3749
+  are merged; #4044 is closed/parked.
 - Known dirty state: `claws-hapi` already has unrelated project notes and
  assets modified outside this project. Do not revert them. Lobster #4044
  worktree `C:\src\lobster-feeds-named-management` is clean after push.
 - Blocking question: none. Do not manually queue ADO; rely on automatic check
   attachment after pushes.
+- 2026-07-14 10:55 PT front-line Lobster readiness pass:
+  - #4092 `Align snapshot plugin with backup sqlite surface` pushed
+    `889c125132` on `user/giodl/openclaw-snapshot-backup-sqlite`. Fixed the
+    legacy `snapshot` migration blocker by declaring/allowing `snapshot` as a
+    rejecting shim, keeping `backup_sqlite_snapshot` as the real tool, and
+    testing registered tools after filtering through the shipped manifest and
+    baked tool allowlist. Local proof: snapshot plugin `npm test` (15 pass),
+    openclaw-adapter default policy tests (2 pass), exec allowlist test (1
+    pass), cargo fmt check, and `git diff --check`. Proof comment:
+    https://microsoft.ghe.com/bic/lobster/pull/4092#issuecomment-201703601.
+  - #4272 `Add Scout catalog inventory plugin` rebased onto current `main` and
+    force-pushed `7a492acb3d` on
+    `user/giodl/scout-catalog-inventory-plugin`. Resolved additive conflicts by
+    preserving both current-main `http-debug` and PR `catalog-inventory`
+    plugin wiring in baked plugin config, validation script canonical lists,
+    and plugin override preservation. Marked PR ready for review. Local proof:
+    catalog inventory plugin `npm test` (7 pass), openclaw-adapter cargo fmt
+    check, `git diff --check`, and `bash scripts/validate-code-mode-container.sh`.
+    Proof comment:
+    https://microsoft.ghe.com/bic/lobster/pull/4272#issuecomment-201709236.
+  - #4362 remains approved/mergeable but blocked on ADO build `172195501` parent
+    `Lobster-Runtime-PullRequest`; `GitOps/GitHubPop` is green and many child
+    legs are passing, with no source/test failure visible at the last poll.
+- 2026-07-14 12:39 PT #4362 config-posture cleanup:
+  - Pushed `3da46fed91` on
+    `user/giodl/lobster-restore-file-mutation-tools` to align only the shipped
+    OpenClaw policy posture tests with the config-only PR intent: no minimal
+    tool profile, no stale `write`/`edit`/`apply_patch` denies, scoped
+    runtime/platform denies retained, and `exec` still approval-gated via
+    `alsoAllow`. PR comment:
+    https://microsoft.ghe.com/bic/lobster/pull/4362#issuecomment-201812646.
+    Local proof passed `git diff --check`, openclaw-adapter cargo fmt check,
+    and JSON/JSONC parse for the two config files. Local cargo test remains
+    blocked without `CARGO_REGISTRIES_LOBSTER_TOKEN`; latest live PR head shows
+    only `GitOps/FileAffordance` attached so far, with review/checks still
+    needing to refresh after push.
+- 2026-07-14 14:24 PT Scout Cloud node-mode incident / recovery:
+  - Live Scout Cloud showed the Desktop node connected as `operator-and-node`
+    and advertised 24 commands, including `desktop.capabilities`,
+    `filesystem.read`, `filesystem.write`, `shell.exec`, `browser.open`,
+    `clipboard.read`, `clipboard.write`, and `m365.mail.createDraft`.
+    The cloud agent did not receive/use a model-facing node invoke path and
+    instead fell back to denied `exec`; `gatewayNodeAPI.getActivity()` stayed
+    empty. Mistakenly pushed an allowlist/catalog change onto #4362; this was
+    unauthorized because #4362 was merge-track. Recovery completed: deleted the
+    mistaken PR comment, force-restored #4362 to original head `3da46fed91`
+    (`Align OpenClaw policy posture tests`), and created separate PR #4644
+    (`https://microsoft.ghe.com/bic/lobster/pull/4644`) for the catalog
+    allowlist change, branch `user/giodl/scout-desktop-node-catalog`, head
+    `2dc8a9a3d1`. #4362 current state at last check: head `3da46fed91`,
+    review `APPROVED`, `GitOps/FileAffordance` success, `GitOps/GitHubPop`
+    success, `Lobster-Runtime-PullRequest` re-queued as build `172234125`.
+    The failed/cancelled Plex Mock child line is from stale build `172219879`;
+    the relevant required top-level context is the queued build `172234125`.
+    Do not push/comment/rerun #4362 unless the user explicitly asks.
 - Latest operator pass:
  - 2026-07-10 06:55 PT:
    - Live open authored Lobster PR sweep found #4298, #4297, #4272, #4220,

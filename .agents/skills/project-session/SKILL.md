@@ -22,7 +22,7 @@ project area in `claws-hapi`.
 | bugs, bugfix | `bugs` | `projects/bugs/SESSION.md` |
 | pr watcher, pr loop, prs | `prs` | `projects/prs/SESSION.md` |
 | managed config, managed configuration | `managed-config` | `projects/managed-config/SESSION.md` |
-| duplex transport, host providers | `duplex-transport` | `projects/duplex-transport/SESSION.md` |
+| hosted integration, duplex transport, host providers | `hosted-integration` | `projects/hosted-integration/SESSION.md` |
 | state continuity, runtime state continuity, synced | `state-continuity` | `projects/state-continuity/SESSION.md` |
 
 If the user names an area that does not exist, use `project-creator` if they are

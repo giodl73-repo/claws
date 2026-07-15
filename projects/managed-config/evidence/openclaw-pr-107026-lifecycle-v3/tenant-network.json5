@@ -1,0 +1,10 @@
+{
+  gateway: {
+    controlUi: {
+      allowedOrigins: ["http://127.0.0.1:35771"],
+    },
+  },
+  tools: {
+    deny: ["exec", "web"],
+  },
+}

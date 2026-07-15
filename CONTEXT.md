@@ -25,7 +25,7 @@ tools.
 | OpenClaw hosting profiles | `projects/hosting-profiles/README.md` |
 | Lobster/OpenClaw layering contracts | `projects/layering-contracts/README.md` |
 | Managed Configuration | `projects/managed-config/README.md` |
-| Duplex Transport | `projects/duplex-transport/README.md` |
+| Hosted Integration | `projects/hosted-integration/README.md` |
 | Runtime State Continuity | `projects/state-continuity/README.md` |
 | PromoteClaw | `projects/promoteclaw/README.md` |
 | TypeClaw | `projects/typeclaw/README.md` |
@@ -61,7 +61,7 @@ Common session files:
 - `projects/context-budget/SESSION.md`
 - `projects/snapshot/SESSION.md`
 - `projects/managed-config/SESSION.md`
-- `projects/duplex-transport/SESSION.md`
+- `projects/hosted-integration/SESSION.md`
 - `projects/state-continuity/SESSION.md`
 - `projects/promoteclaw/SESSION.md`
 - `projects/typeclaw/SESSION.md`
@@ -159,8 +159,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
   current Lobster boundary audit, and upstream contract extraction.
 - Managed Configuration: host/operator config authority, effective config,
   provenance, transactional reload, and Lobster config-writer deletion.
-- Duplex Transport: OpenClawTransport host-provider calls, Gateway peer reuse,
-  provider conformance, and ProxyPipe retirement.
+- Hosted Integration: host integration bundles, owner-selected capability
+  bindings, Hosting Profiles, narrow carriers, and ProxyPipe retirement.
 - Runtime State Continuity: state inventory, consistency, checkpoint/publication,
   dirty/synced status, fencing, restore, and Lobster persistence deletion.
 - PromoteClaw: regular Lobster OpenClaw version promotion from Galin's

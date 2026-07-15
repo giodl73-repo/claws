@@ -18,8 +18,73 @@
 
 ## Current Session
 
-- Last updated: 2026-07-09.
+- Last updated: 2026-07-14T15:16:00-07:00.
 - Last agent: Copilot.
+- 2026-07-14 separate node-mode fix filed: opened Lobster #4648
+  (`https://microsoft.ghe.com/bic/lobster/pull/4648`) from
+  `C:\src\lobster-code-mode-node-invoke`, branch
+  `user/giodl/scout-code-mode-node-invoke`, head `9b0e2c2500`. The
+  `nodes-code-mode` namespace now exposes
+  `Nodes.invoke({ nodeId, command, params?, timeoutMs? })` through a
+  loopback-only adapter endpoint and the existing operator WebSocket. Before
+  dispatch, the adapter re-reads node inventory, requires the target to be
+  connected, requires the exact command to be advertised, and blocks
+  `system.run` / `system.run.prepare` so shell remains on governed
+  `exec host=node`. Invocations run concurrently with node inventory queries,
+  share one end-to-end deadline, and expired/abandoned queued requests do not
+  dispatch. Gateway and Scout Desktop retain policy, approval, execution, and
+  audit authority. The PR is non-draft, review required, merge blocked; only
+  `GitOps/FileAffordance` was attached and green at creation, while required
+  GitHubPop and Lobster runtime ADO contexts were not yet visible.
+- 2026-07-14 #4362 backup: opened Lobster #4653
+  (`https://microsoft.ghe.com/bic/lobster/pull/4653`) from
+  `C:\src\lobster-restore-tool-posture-backup`, branch
+  `user/giodl/lobster-restore-tool-posture-backup`, head `30e6596c33`.
+  This reapplies #4362's final three-file diff as one commit onto current
+  `origin/main`, preserving newer main changes such as the `http_debug` tool
+  entry. It is explicitly marked as a backup and should be closed if #4362
+  merges normally.
+- 2026-07-14 Scout Cloud node-mode validation: launched local Scout Cloud from
+  `C:\src\clawpilot`, signed in AAD as `operator-and-node` with node name
+  `Gio Cloud`, and confirmed the Desktop node socket advertised 24 commands:
+  `desktop.capabilities`, filesystem, shell, browser, clipboard, local app, and
+  M365 draft commands. The live cloud chat did not receive/use a model-facing
+  `node.invoke` tool and fell back to denied `exec` probes; renderer
+  `gatewayNodeAPI.getActivity()` stayed empty, proving no
+  `node.invoke.request` reached Desktop. Important correction: a config-only
+  allowlist change was mistakenly pushed to Lobster #4362 and then removed.
+  #4362 is restored to head `3da46fed91`; do not touch it. The mistaken PR
+  comment was deleted. The allowlist/catalog change is isolated in separate
+  Lobster PR #4644 (`https://microsoft.ghe.com/bic/lobster/pull/4644`), branch
+  `user/giodl/scout-desktop-node-catalog`, head `2dc8a9a3d1`.
+- 2026-07-14 node-mode root-cause notes after correction: Scout Desktop
+  advertisement works; the likely missing layer is agent/tool projection, not
+  the Desktop node socket. Lobster already has a `nodes-code-mode` plugin that
+  exposes only observational `Nodes.list()` through `execute_code`, backed by
+  `GET /scout/state/nodes` and `node.list`/`node.pair.list`. That helps the
+  model discover connected nodes, but it does not provide a model-facing
+  `node.invoke`/`desktop.capabilities` call. Next investigation should stay off
+  #4362 and trace OpenClaw/Lobster tool materialization: whether `node.invoke`
+  is intentionally hidden, whether there is an existing node-invoke tool/plugin
+  branch, or whether the proper fix is a narrow new plugin/tool that exposes
+  governed `desktop.capabilities`/node invoke rather than relying on denied
+  shell `exec` probes.
+- 2026-07-14 node-mode investigation conclusion: upstream OpenClaw already has
+  an agent-facing `nodes` tool whose `action: "invoke"` path resolves a node and
+  calls Gateway `node.invoke` for arbitrary non-shell commands
+  (`src/agents/tools/nodes-tool.ts` and `nodes-tool-commands.ts`). Scout Cloud
+  runs Code Mode, which removes that ordinary tool surface. Lobster #4233's
+  `nodes-code-mode` replacement exposes only `Nodes.list()` through
+  `execute_code`; its API, prompt, loopback endpoint, and tests contain no
+  invocation method. Therefore the model cannot call `desktop.capabilities` or
+  any advertised Desktop command even though the node socket is healthy. The
+  existing `user/giodl/scout-catalog-node-prompt` branch at `8471b690ae` only
+  projects command inventory into the prompt and does not close the execution
+  gap. The correct follow-up is a separate governed Code Mode invocation
+  bridge (preferably a narrow `Nodes.invoke(...)`/Desktop capability surface)
+  backed by an adapter-owned loopback POST that validates connected-node
+  command advertisement and preserves Gateway/Desktop policy and approval.
+  Keep this separate from Lobster #4362 and #4644.
 - 2026-07-09 Lobster split after #4206 merge: separated `custom-tool.invoke`
   from the node-skills bridge so skills integration is not blocked on the
   #4123 custom-tool allowlist. #4220

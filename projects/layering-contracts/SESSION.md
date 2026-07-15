@@ -9,7 +9,7 @@
 5. Read `projects/layering-contracts/contract-portfolio.md`.
 6. Read `projects/layering-contracts/next-evidence-plan.md`.
 7. Read `projects/layering-contracts/four-corners.md`.
-8. Read `projects/layering-contracts/duplex-transport.md` for the current
+8. Read `projects/layering-contracts/hosted-integration.md` for the current
    candidate project and design gate.
 9. Read the relevant area note; begin with `state-continuity.md`.
 10. Read `projects/layering-contracts/synchronization-model.md` as a hypothesis.
@@ -37,7 +37,7 @@
   ProxyPipe frame ownership pass 5 are complete at Lobster `0a9514c1ce`. Resume
   with the approved ordered evidence plan. Current conceptual discussion is
   originally captured in `host-bridge-hypothesis.md`; that composition note is
-  now superseded by the named `duplex-transport.md` candidate project. Gateway,
+  now superseded by the named `hosted-integration.md` child project. Gateway,
   Channels, AgentHarness, and plugins retain their semantics.
   Gateway coverage pass 6 further narrowed the candidate: public
   `OpenClawTransport` and Gateway already cover transport-neutral RPC/events,
@@ -64,7 +64,7 @@
 - Blocking question: none
 
 Three execution areas now have independent sessions: `projects/managed-config`,
-`projects/duplex-transport`, and `projects/state-continuity`. Resume the named
+`projects/hosted-integration`, and `projects/state-continuity`. Resume the named
 child project for implementation/evidence work; use this umbrella session for
 portfolio ownership, compatibility-boundary inventory, and deletion-ledger
 coordination.
@@ -99,7 +99,7 @@ coordination.
 - 2026-07-10 portfolio hardening completed across all four RFCs. Readiness head
   `23474e7` defines the packaged profile-conformance record. Managed
   Configuration head `3068754` adds source identity, transactional generations,
-  stale-write rejection, and a host deletion gate. Duplex Transport head
+  stale-write rejection, and a host deletion gate. Hosted Integration head
   `ade8ddc` adds deterministic routing, overload/backpressure bounds, retry
   constraints, and semantic ProxyPipe retirement. Runtime State Continuity head
   `e2b02aa` adds the mandatory component descriptor, writer accounting,
@@ -133,9 +133,9 @@ coordination.
 - Start the State and Continuity repo audit without changing or filing RFCs.
 - Complete the Managed Configuration delivery proof in
   `managed-configuration-deliverable.md` before external promotion.
-- Follow `next-evidence-plan.md`; preserve ProxyPipe and Duplex Transport as
+- Follow `next-evidence-plan.md`; preserve ProxyPipe and Hosted Integration as
   evidence investigations rather than assumed new RFCs.
-- Test the Duplex Transport project by proving what remains after mapping
+- Test the Hosted Integration project by proving what remains after mapping
   ProxyPipe to existing Gateway, Channel, AgentHarness, lifecycle, and plugin
   contracts; do not upstream the ProxyPipe wire schema.
 - Use `inventory/gateway-proxypipe-coverage-2026-07-10.md` as the current
@@ -144,7 +144,7 @@ coordination.
 - Use `inventory/proxypipe-openclaw-transport-fit-2026-07-10.md` for the current
   migration decision: try a runtime host-operator Gateway connection before a
   ProxyPipe-backed Gateway relay.
-- Use `duplex-transport.md` as the project definition. Audit `node.invoke`
+- Use `hosted-integration.md` as the project definition. Audit `node.invoke`
   before sketching or filing an upstream transport/provider interface. Pass 8
   completed that gate and selected sibling host-provider invocation over shared
   machinery.
@@ -153,10 +153,16 @@ coordination.
 - Use `inventory/hosted-peer-identity-2026-07-10.md` as the identity baseline;
   keep host-provider permissions separate from operator scopes and bind every
   provider session/invocation to the active hosted generation.
-- The Managed Configuration, Duplex Transport, and Runtime Continuity RFCs are
+- The Managed Configuration, Hosted Integration, and Runtime Continuity RFCs are
   staged only on `giodl73-repo/rfcs` for Omar/architecture review. Do not open
   upstream PRs until explicitly requested after that review.
 - Verify the eight projection/reset candidates in
   `inventory/boot-config-2026-07-10.md` before treating any as a bug. Candidate
   resolution is recorded in `inventory/env-matrix-2026-07-10.md`; two keys have
   no source consumer and one conditional repo filename is process-sticky.
+- 2026-07-11 residual-bloat pass: no fifth peer hosting contract found.
+  Remaining work separates into four-corner Lobster adoption, legitimate
+  enterprise-host ownership, ordinary upstream patch retirement, and
+  OCC/AgentHarness coordination. Added
+  `inventory/residual-bloat-2026-07-11.md` and ledger entries for `extra_env`,
+  activation identity adoption, and the eleven-patch/rewrite-script queue.

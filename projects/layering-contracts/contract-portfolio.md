@@ -105,4 +105,4 @@ and Compatibility uses artifact capabilities, release conformance, runtime
 identity, and stable events; it does not introduce `/compatible`.
 
 The ordered remaining evidence work is recorded in `next-evidence-plan.md`,
-including dedicated ProxyPipe decomposition and Duplex Transport investigation.
+including dedicated ProxyPipe decomposition and Hosted Integration investigation.

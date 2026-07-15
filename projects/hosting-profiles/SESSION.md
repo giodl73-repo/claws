@@ -38,16 +38,16 @@
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `c1da72178933`. The dependent upstream profile implementation is
+  at `89d8607aab9f`. The dependent upstream profile implementation is
   [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765)
-  at `2f8defb707c`; [fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
+  at `a416b9b9192`; [fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
   provides the clean profile-only comparison. Exact review slices are recorded
   in `openclaw-pr-plan.md`.
-- Known dirty state: `claws-hapi` contains this update plus unrelated existing
-  project changes. `C:\src\openclaw-readiness-upstream` is clean and rebased
-  on OpenClaw main `c2e0ce7b686`; both RFC worktrees and all pushed
-  implementation branches are clean.
-- Blocking question: none
+- Known dirty state: `claws-hapi` contains project-note updates plus unrelated
+  existing changes. The readiness and profile WSL worktrees are clean at pushed
+  heads `89d8607aab9f` and `a416b9b9192`.
+- Blocking question: exact-head ClawSweeper/CI review is pending on both draft
+  implementation PRs.
 
 ## Resume Checklist
 
@@ -101,6 +101,63 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-14: Completed published upgrade proof for readiness PR 104018 at
+  exact head `c1da72178933`.
+  - The repository `published-upgrade-survivor` Docker lane upgraded the
+    current published `openclaw@2026.7.1` package to the source-built 2026.7.2
+    candidate through the real `openclaw update` path.
+  - All 54 phases passed, including baseline CLI-authored config, agents,
+    sessions, workspaces, credentials, channel/plugin settings, legacy plugin
+    debris, Doctor repair, post-upgrade config validation, state survival,
+    Gateway startup, `/healthz`, `/readyz`, and RPC status.
+  - The upgraded installation returned ready without silently acquiring the
+    opt-in `WorkspaceWritable` requirement. This proves compatibility with
+    existing readiness defaults; the separate exact-package proof covers
+    explicit criterion failure and recovery.
+  - Updated PR 104018's body and posted marker
+    `READINESS_PUBLISHED_UPGRADE_PROOF=passed`.
+  - Detailed command and artifact location:
+    `readiness-upgrade-proof-2026-07-14.md`.
+
+- 2026-07-14: Completed and pushed the review/proof closeout for upstream
+  Hosting Profiles PR 107765.
+  - Added three follow-up commits: `4c308cf7fc7` validates profile startup and
+    destructive lifecycle inputs, `f1d203402bb` provisions the workspace in
+    every Docker profile scenario, and `70bcdc66b48` proves explicit node
+    command-surface approval before node-mode becomes ready.
+  - Final profile-only diff from readiness head `c1da72178933` is 32 files,
+    1,330 insertions, and 5 deletions across seven commits.
+  - Isolated Ubuntu 24.04 / Node 24.15.0 verification passed 115 focused
+    assertions plus shell, JavaScript, formatting, and diff checks. Final Codex
+    review reported no actionable regression.
+  - Exact-head package build, package inventory, tarball integrity, Docker
+    image build, and runtime matrix exited 0. The image is
+    `sha256:c57d56d22e7b320fee3818856543dc039536f9fae11319520c3c8614c09da425`.
+  - Runtime proof covers local/container/reverse-proxy/node-mode success and
+    expected 503 failures, including connected-but-unapproved node-mode and
+    workspace `ENOSPC`; approval or capacity restoration returns readiness to
+    200 without weakening the selected profile.
+  - Updated the upstream PR body with exact evidence and requested a fresh
+    `@clawsweeper re-review`. The PR remains draft and stacked on PR 104018;
+    most upstream CI jobs are skipped while draft, so do not claim CI green.
+
+- 2026-07-14: Completed a Codex review of upstream Hosting Profiles PR 107765.
+  - Fixed the package-acceptance client to select the emitted
+    `WorkspaceWritable` condition instead of the criterion id
+    `openclaw.workspace-writable`.
+  - Added fail-fast startup validation for invalid
+    `OPENCLAW_HOSTING_PROFILE` values and for runtime/incarnation identity
+    inputs before `--reset` or `--force` can perform destructive work.
+  - Added direct planner, Gateway startup, and CLI lifecycle regression tests.
+    The final local-patch Codex review reported no actionable findings.
+  - Focused validation passed 101 assertions before the identity fix, then the
+    61-test Gateway CLI shard passed after it; formatting, syntax, and diff
+    checks pass. The broader Gateway suite remains blocked on this machine by
+    Node 24.14.0's unsafe embedded SQLite 3.51.2 guard.
+  - The committed profile stack merges cleanly with OpenClaw main
+    `59dea92da1d` but is 62 commits behind it. Six local files contain 63
+    insertions and 8 deletions and remain uncommitted/unpushed for review.
 
 - 2026-07-14: Opened upstream draft PR 107765 for Standard Hosting Profiles.
   - It targets upstream `main`, explicitly depends on readiness PR 104018, and
@@ -815,3 +872,52 @@
     access, so this is local Docker Linux proof rather than remote proof.
   - Requested a fresh marker-backed ClawSweeper review for `d82da685c500`; the
     durable verdict is pending.
+- 2026-07-14: Rebased and re-proved readiness PR 104018 against current main.
+  - Final four-commit head is `89d8607aab9f`, based on OpenClaw main
+    `5fc7ba6da031`; both force-updates used explicit old-head leases.
+  - A moving-main follow-up rebase crossed seven unrelated commits. Range-diff
+    preserved all readiness patches; only the plugin SDK budget changed from
+    10,702 to the exact post-harvest total of 10,615.
+  - All 19 changed test files pass in every selected Vitest project: 22
+    files/shards and 259 assertions. Oxfmt, Oxlint, diff checks, SDK surface
+    checks, package build, declaration graph, inventory, and tarball integrity
+    pass. Final Codex review found no actionable correctness regression.
+  - Exact-head package-installed Docker image
+    `sha256:8add3c4f8ce2f1a444a735c43f19eac4ee0212778123fb883ff8f9f785a9fd0d`
+    proves `/ready` and `/readyz` `200 -> 503 -> 200`, `/healthz` remains 200,
+    and `openclaw ready --json` exits `0 -> 1 -> 0` for the same canonical
+    workspace condition.
+  - The published `2026.7.1 -> 2026.7.2` upgrade-survivor lane passed all 54
+    phases on patch-equivalent proved head `e5f5e97332e5` immediately before
+    the final upstream-only rebase. PR body distinguishes this from exact-head
+    package proof.
+  - Updated the PR body and posted marker
+    `READINESS_EXACT_HEAD_PROOF=passed`; current-head ClawSweeper re-review is
+    queued. The PR remains draft.
+- 2026-07-14: Restacked and re-proved Hosting Profiles PR 107765.
+  - Rebasing seven profile-only commits from old readiness head `c1da72178933`
+    onto final readiness head `89d8607aab9f` completed with zero conflicts.
+    Range-diff reports all seven patches identical. Final profile head:
+    `a416b9b9192`.
+  - The changed-file run passed 310 assertions. Two unrelated broad
+    `gateway.test.ts` cases failed identically on the exact readiness base; the
+    profile-added invalid-environment startup test passes both in the broad run
+    and alone. Syntax, Oxfmt, Oxlint, and diff checks pass.
+  - Profile-only Codex review is clean. The exact-head package-installed Docker
+    matrix completed with `Hosting profiles Docker E2E passed`, including all
+    four profiles, listener/auth failures, node approval, and workspace
+    `ENOSPC` recovery.
+  - Exact image:
+    `sha256:e87c9e0651d60b6b58262b6ee271f89d0bee060fd2761d0da1525aca60fd6337`.
+    PR body and marker `HOSTING_PROFILES_EXACT_HEAD_PROOF=passed` are updated;
+    ClawSweeper re-review is queued. The PR remains draft.
+- 2026-07-14: Refreshed both normative RFCs after implementation restacking.
+  - RFC 0018 source and PR body now point to readiness head `89d8607aab9f`,
+    exact package transitions, and published-upgrade compatibility evidence.
+    RFC PR 33 head: `3259e55815ea`.
+  - RFC 0023 source and PR body now describe the real seven-commit profile
+    stack, exact profile head `a416b9b9192`, 32-file profile-only diff, current
+    verification, and Docker proof image. RFC PR 37 head: `42c00aa748e8`.
+  - Requested current-head ClawSweeper re-review on both RFC PRs. RFC 0018's
+    prior verdict was already technically clean and waiting for maintainer
+    acceptance of the public config/plugin contracts; it was stale only by SHA.

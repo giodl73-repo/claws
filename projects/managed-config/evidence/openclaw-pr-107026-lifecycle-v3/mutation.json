@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "error": {
+    "type": "gateway_request_error",
+    "code": "INVALID_REQUEST",
+    "message": "configuration writes are unavailable while --config-layer is active",
+    "retryable": false
+  }
+}
