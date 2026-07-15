@@ -22,6 +22,58 @@
 
 ## Current Session
 
+### 2026-07-14 Patrick review completion
+
+- Patrick's review pass and the resulting ClawSweeper findings are implemented
+  across the complete OpenClaw stack. The architecture remains the RFC's
+  one-Claw-one-new-agent model; the repair pass hardened ownership, canonical
+  owner delegation, read-only diagnostics/planning, and mutation-boundary
+  concurrency rather than changing the product thesis.
+- Final repaired OpenClaw chain:
+  `#101328 39a9afb60ad` -> `#101755 223406487b3` ->
+  `#101973 400298d36e6` -> `#102228 8c11734c566` ->
+  `#102296 46d97677b2b` -> `#102306 b6ef82e81c1` ->
+  `#102383 466714509e5` -> `#102406 b47c2c5da3a` ->
+  `#102427 f0803441021` -> `#102959 c7c90c055f1` ->
+  `#102982 64d377f9d72` -> `#106888 1e9569dbbf0`.
+- The lower-stack mirror mismatch is fixed. `#101328` is fork-backed, while
+  `#101755` uses the same-named OpenClaw branch as its base. The repaired
+  `39a9afb60ad` head is now mirrored to that OpenClaw branch; the already
+  repaired `#101755` and `#101973` heads were pushed to their OpenClaw branches.
+  A live explicit-ref ancestry audit confirms every adjacent implementation
+  head through `#102982` is now a direct descendant; `#106888` is fork-backed
+  and directly descends from `#102982`.
+- `#102982` now rejects expected workspace files that disappear or missing
+  targets that appear after planning. Package updates atomically CAS the
+  expected package row to a pending claim before invoking an installer,
+  compensate that claim on failure/rollback, and reject concurrent ownership
+  changes before external mutation. Validation passed: 59 focused update/CLI/
+  owner/lifecycle tests including all 8 real lifecycle E2Es, full core
+  typecheck, touched-file lint/format, conflict/diff checks, and clean
+  `codex review --uncommitted`. Resolution comment:
+  `https://github.com/openclaw/openclaw/pull/102982#issuecomment-4977049421`.
+- `#106888` is restacked on the repaired update head. It is now a tight
+  four-file `CLAW.md` input/export slice; it intentionally does not resurrect
+  the local feed implementation removed by fail-closed planning. JSON reads
+  remain compatible. Validation passed: 63 reader/export/CLI/lifecycle tests,
+  all 8 real lifecycle E2Es, full core typecheck, lint/format/diff checks, and
+  clean `codex review --base 64d377f9d72`. Resolution comment:
+  `https://github.com/openclaw/openclaw/pull/106888#issuecomment-4977157123`.
+- RFC PR `openclaw/rfcs#27` is at `dc56fa3`. It now uses the repository-required
+  Summary/Motivation/Goals/Non-goals/Proposal/Rationale/Unresolved-questions
+  structure; records canonical `CLAW.md` export plus JSON read compatibility;
+  requires workspace-presence and package-ownership CAS at mutation time;
+  specifies canonical agent deletion and sole unchanged `claw-installed`
+  artifact uninstall; and lists all twelve OpenClaw PRs. Resolution comment:
+  `https://github.com/openclaw/rfcs/pull/27#issuecomment-4980547900`.
+- Fresh `@clawsweeper re-review` requests were posted on every head whose final
+  repair or corrected base had not yet received a current review. Draft PRs
+  remain draft. Do not treat stale `CHANGES_REQUESTED` bot reviews as current;
+  inspect the durable ClawSweeper comment after the queued reruns complete.
+- No Control UI implementation was added. Patrick explicitly accepted leaving
+  it out during the experiment. The future standalone harness-agnostic
+  `npx claws --agent openclaw|hermes` remains a separate project/spec decision.
+
 ### 2026-07-14 fresh-session handoff
 
 - Last updated: 2026-07-14 America/Los_Angeles.
