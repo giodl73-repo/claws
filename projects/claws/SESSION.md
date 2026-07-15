@@ -37,14 +37,14 @@
   Composition**, commit `92f746e`. Portable `SKILL.md` metadata remains only
   `outcomes`, `uses-skills`, and `isolation`; observed records, regarding,
   lineage, accounting, and limits remain runtime-owned.
-- OpenClaw #100 was rebuilt directly on #98 and squashed at `9cbb3b3f`. It
+- OpenClaw #100 was rebuilt directly on #98 and is now at `4e895252`. It
   consolidates the embedded Lobster bridge and exploratory #102-#108 behavior:
   managed skill calls, regarding inheritance, ordered completion, recorded
   outcome branching, approval, and selected-data handoff. The late
   cross-session query demo was intentionally omitted because #97 already owns
   the foundational business-record query and the demo depended on the deleted
   mixed accounting/history layer.
-- OpenClaw #109 is a new 154-line draft at `75904368`. It projects completed
+- OpenClaw #109 is a 154-line draft at `56c9c6db`. It projects completed
   child audit input/output usage and one unambiguous model into Lobster's native
   result shape, and preserves `_meta.cost` through the OpenClaw runner. It
   deliberately depends on Lobster #1; integrated proof cannot pass against the
@@ -59,9 +59,22 @@
 - Closed superseded fork experiments #66-#70, #76-#93, #95-#96, #99, and
   #102-#108 with replacement links. Their branches and discussion remain; no
   branches were deleted. Unrelated fork PRs were untouched.
-- Full fork CI was manually dispatched for condensed OpenClaw #100 at run
-  `29444392432` and #109 at run `29444491276`. Both were still running at this
-  handoff; draft PR event checks passed the proof/format admission surface.
+- Final OpenClaw heads are #97 `7a71d9a7`, #98 `eec741d7`, #100 `4e895252`,
+  and #109 `56c9c6db`. All four drafts are open and mergeable. RFC #6 remains
+  at `92f746e`; Lobster #1 remains at `0ad538b3` and is open and mergeable.
+- Full fork CI passed all 114 jobs for #100 at run `29449202361` and all 114
+  jobs for #109 at run `29449204163`. The repair loop regenerated the six
+  Linux/Node 24 prompt snapshots, preserved CLI managed-invocation lineage,
+  omitted absent lineage from ordinary CLI runs, synchronized the inherited
+  oxlint override contract, isolated workflow adapters so the LOC ratchet
+  passes, and fixed the #109 `_meta` lint access.
+- Local focused proof after the adapter split passed 195 regarding, gateway,
+  plugin-runtime, and audit assertions. The broader Windows spawn suite still
+  has its known `/tmp` path normalization mismatch, and the CLI prepare test
+  cleanup can hit a Windows SQLite `EBUSY`; Linux CI passed both owning lanes.
+- The temporary Linux prompt-snapshot generator branch, worktree, and local
+  artifact were removed after its deterministic patch was applied. No helper
+  commit is in the PR ancestry.
 - Active implementation worktrees:
   `C:\src\openclaw-skill-workflows-condensed` on
   `agent/skill-workflows-condensed` (same head as #100) and
