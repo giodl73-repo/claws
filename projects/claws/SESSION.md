@@ -170,10 +170,28 @@
   attempted twice; both bounded five-minute runs timed out without output or
   findings. Direct diff and published Lobster dependency review found no
   actionable issue.
-- Next narrow slice: pass an explicitly selected receipt field, such as a
-  return or payment authorization code, into a later skill. Keep the receipt
-  in the existing audit record and avoid copying the whole audit envelope or
-  introducing a second workflow state model.
+- Opened fork-only stacked OpenClaw draft PR
+  [#108](https://github.com/giodl73-repo/openclaw/pull/108), title **Skills
+  metadata: carry a selected outcome into the next skill**, commit `4e80444c`,
+  base `agent/skill-workflows-approval` / PR #107. It is open, draft, and
+  mergeable; nothing was opened upstream.
+- `openclaw.skill --input-name <name>` now accepts exactly one explicit
+  Lobster pipeline input and snapshots only that value into the existing
+  `sessions_spawn` attachment path as `workflow-input.json`. OpenClaw's normal
+  attachment limits and child-workspace materialization remain authoritative.
+- The support-case example selects only
+  `receipt.data.authorizationCode`; the approved `resolve-case` child receives
+  `{ "authorizationCode": "RET-42" }`, not the full receipt, audit summary, or
+  transcript. Missing input fails before child spawn.
+- All 71 focused Lobster runner, registry, TaskFlow, and tool tests passed on
+  Windows, with scoped format, lint, and diff checks clean. The bounded
+  `codex --dangerously-bypass-approvals-and-sandbox review --uncommitted` run
+  again timed out after five minutes without output or findings; direct review
+  of the Lobster template and OpenClaw attachment owner found no actionable
+  issue.
+- Next narrow question: roll actual child-run usage up at the TaskFlow/workflow
+  boundary so an operator can see and eventually constrain total workflow
+  spend without attributing tokens to individual receipts.
 
 ### 2026-07-15 ordered managed support-case workflow
 
