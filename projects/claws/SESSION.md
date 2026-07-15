@@ -1750,3 +1750,15 @@
   explicit invocation against this run identity; budgets should remain
   deferred until invocation boundaries and child-run accounting exist.
 - Nothing was opened against the upstream OpenClaw or RFC repositories.
+- 2026-07-15 ClawHub track started with draft PR
+  [#3089](https://github.com/openclaw/clawhub/pull/3089), branch
+  `user/giodl/clawhub-claws-schema`, commit `5a65897`. PR 1 of 4 adds the
+  shared grouped Claw schema, fail-closed semantic validation, safe manifest
+  summaries, and Convex release storage fields while keeping generic package
+  publication closed to `family: "claw"`. No runtime Claw surface is exposed
+  yet; PR 2 will add the first surface behind
+  `CLAWHUB_EXPERIMENTAL_CLAWS=1`. Validation passed `ci:static`, `ci:packages`,
+  `ci:types-build`, 19 focused tests, schema typecheck, and final structured
+  Codex autoreview with no accepted/actionable findings. RFC PR #27 now records
+  the four-stage ClawHub sequence at commit `9cb7c8e`: schema/data model;
+  publish validation/docs; search/detail/API; feed export and published E2E.
