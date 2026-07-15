@@ -1,5 +1,0 @@
-{
-  "gateway": { "mode": "local" },
-  "logging": { "level": "warn" },
-  "meta": { "lastTouchedVersion": "2025.1.1" }
-}
