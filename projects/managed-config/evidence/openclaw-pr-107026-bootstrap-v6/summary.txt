@@ -1,0 +1,10 @@
+OpenClaw PR #107026 managed-config bootstrap proof
+branch: user/giodl/managed-config-upstream
+head: 8dc592014ba01185adfa863b809702c62c3339c3
+fresh-state layered startup and health: PASS
+fresh-state effective tenant/operator config: PASS
+fresh-state canonical openclaw.json remained absent: PASS
+existing-state layered startup and health: PASS
+existing-state effective tenant/operator config ignored canonical values: PASS
+existing-state canonical openclaw.json SHA-256 unchanged: PASS
+existing-state legacy meta marker remained unchanged: PASS

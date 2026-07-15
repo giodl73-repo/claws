@@ -1,0 +1,153 @@
+{
+  "path": "/mnt/c/src/claws-hapi/projects/managed-config/evidence/openclaw-pr-107026-bootstrap-v6/scout-global.json5",
+  "exists": true,
+  "raw": "{\n  \"gateway\": {\n    \"controlUi\": {\n      \"enabled\": false,\n      \"allowedOrigins\": [\n        \"http://127.0.0.1:35841\"\n      ]\n    },\n    \"mode\": \"local\"\n  },\n  \"tools\": {\n    \"deny\": [\n      \"exec\",\n      \"web\"\n    ]\n  },\n  \"logging\": {\n    \"level\": \"info\"\n  }\n}",
+  "parsed": {
+    "gateway": {
+      "controlUi": {
+        "enabled": false,
+        "allowedOrigins": [
+          "http://127.0.0.1:35841"
+        ]
+      },
+      "mode": "local"
+    },
+    "tools": {
+      "deny": [
+        "exec",
+        "web"
+      ]
+    },
+    "logging": {
+      "level": "info"
+    }
+  },
+  "sourceConfig": {
+    "gateway": {
+      "controlUi": {
+        "enabled": false,
+        "allowedOrigins": [
+          "http://127.0.0.1:35841"
+        ]
+      },
+      "mode": "local"
+    },
+    "tools": {
+      "deny": [
+        "exec",
+        "web"
+      ]
+    },
+    "logging": {
+      "level": "info"
+    }
+  },
+  "resolved": {
+    "gateway": {
+      "controlUi": {
+        "enabled": false,
+        "allowedOrigins": [
+          "http://127.0.0.1:35841"
+        ]
+      },
+      "mode": "local"
+    },
+    "tools": {
+      "deny": [
+        "exec",
+        "web"
+      ]
+    },
+    "logging": {
+      "level": "info"
+    }
+  },
+  "valid": true,
+  "runtimeConfig": {
+    "logging": {
+      "level": "info",
+      "redactSensitive": "tools"
+    },
+    "tools": {
+      "deny": [
+        "exec",
+        "web"
+      ]
+    },
+    "commands": {
+      "native": "auto",
+      "nativeSkills": "auto",
+      "restart": true,
+      "ownerDisplay": "raw"
+    },
+    "gateway": {
+      "mode": "local",
+      "controlUi": {
+        "enabled": false,
+        "allowedOrigins": [
+          "http://127.0.0.1:35841"
+        ]
+      }
+    },
+    "messages": {
+      "ackReactionScope": "group-mentions"
+    },
+    "agents": {
+      "defaults": {
+        "maxConcurrent": 4,
+        "subagents": {
+          "maxConcurrent": 8,
+          "archiveAfterMinutes": 60
+        }
+      }
+    },
+    "cron": {
+      "maxConcurrentRuns": 8
+    }
+  },
+  "config": {
+    "logging": {
+      "level": "info",
+      "redactSensitive": "tools"
+    },
+    "tools": {
+      "deny": [
+        "exec",
+        "web"
+      ]
+    },
+    "commands": {
+      "native": "auto",
+      "nativeSkills": "auto",
+      "restart": true,
+      "ownerDisplay": "raw"
+    },
+    "gateway": {
+      "mode": "local",
+      "controlUi": {
+        "enabled": false,
+        "allowedOrigins": [
+          "http://127.0.0.1:35841"
+        ]
+      }
+    },
+    "messages": {
+      "ackReactionScope": "group-mentions"
+    },
+    "agents": {
+      "defaults": {
+        "maxConcurrent": 4,
+        "subagents": {
+          "maxConcurrent": 8,
+          "archiveAfterMinutes": 60
+        }
+      }
+    },
+    "cron": {
+      "maxConcurrentRuns": 8
+    }
+  },
+  "issues": [],
+  "warnings": [],
+  "legacyIssues": []
+}
