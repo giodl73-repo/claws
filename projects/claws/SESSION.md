@@ -192,6 +192,39 @@
 - Next narrow question: roll actual child-run usage up at the TaskFlow/workflow
   boundary so an operator can see and eventually constrain total workflow
   spend without attributing tokens to individual receipts.
+- Dependency audit found that published `@clawdbot/lobster` 2026.6.11 already
+  owns workflow token/cost aggregation and `cost_limit`, but its public tool
+  runtime drops `_meta.cost` and its pause state does not preserve the
+  `CostTracker` summary. OpenClaw should adapt child audit usage into Lobster's
+  native `usage` / `model` result convention rather than create a second
+  accounting ledger.
+- Opened fork-only Lobster draft PR
+  [#1](https://github.com/giodl73-repo/lobster/pull/1), title **Preserve
+  workflow cost metadata across pauses**, commit `0ad538b`, base `main`. It is
+  draft, open, and mergeable; nothing was opened against `openclaw/lobster`.
+  The PR snapshots Lobster's existing cost summary in existing resume state,
+  restores it across approval and structured-input pauses, returns `_meta.cost`
+  through embedded and CLI tool envelopes, and preserves incurred accounting
+  on cancellation without making stale-state cleanup less reliable. It adds no
+  database, pricing model, or receipt-level attribution.
+- Focused proof passed TypeScript compilation; approval/input/`for_each` resume
+  and cancellation behavior; the public CLI cost envelope; 12 CostTracker
+  tests; format, lint, and diff checks. The full Windows suite was attempted
+  but retained 108 existing Windows path/shell failures. Codex review accepted
+  and drove fixes for loop replay, human-input misclassification, CLI envelope
+  parity, cancellation accounting, stale-state cleanup, and cleanup-error
+  handling. The final full-access review reported no actionable regression.
+  Intermediate usage produced and consumed entirely inside one pipeline before
+  an in-pipeline input suspension remains a separate Lobster accounting topic;
+  managed OpenClaw skills are separate workflow steps and do not require it.
+- An OpenClaw follow-on worktree exists at
+  `C:\src\openclaw-skill-workflows-usage-rollup` on branch
+  `agent/skill-workflows-usage-rollup`, based on PR #108. Its local uncommitted
+  adapter projects child audit `input` / `output` usage and a single model ID
+  into Lobster's native result shape and preserves `_meta` in the OpenClaw
+  runner. Do not publish that branch until the Lobster prerequisite is
+  available as a dependency; then rerun the integrated multi-child and
+  approval-resume proof and open the next fork-only OpenClaw draft PR.
 
 ### 2026-07-15 ordered managed support-case workflow
 
