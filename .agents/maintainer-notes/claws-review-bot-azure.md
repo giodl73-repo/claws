@@ -430,3 +430,28 @@ Last updated: 2026-06-22.
   `2026-06-22T17:45:00Z`, exited `Succeeded` at `2026-06-22T17:47:31Z`, posted
   one review for `bic/lobster#3449`, and logged
   `review budget reached (1/1); ending this poll cycle`.
+
+## Maintainer-Triggered Re-review Repair
+
+Last updated: 2026-07-15.
+
+- Fixed same-SHA re-evaluation so maintainer decisions in conversation
+  comments, formal review summaries, and inline review comments reach the
+  reviewer model and can clear a `maintainer-decision` gate.
+- Only `OWNER`, `MEMBER`, and `COLLABORATOR` responses count as maintainer
+  input. Bot-authored and outsider comments do not trigger re-evaluation.
+- Review storage locks now include the GitHub event source and ID, avoiding
+  collisions between issue-comment, review, and inline-comment ID namespaces.
+- Replaced `gh --paginate` JSON concatenation with explicit page-by-page API
+  reads, compatible with the deployed CLI and PRs exceeding 100 review events.
+- Source commit: `499f051779`.
+- ACR run `chj` pushed
+  `clawsreviewbotacr.azurecr.io/claws-review-bot:maintainer-rereview-20260715`
+  with digest
+  `sha256:0667aed647e9c9efbc5dbb47a78ea490be3b5f9f6c18644bbdaa9d79b050670e`.
+- `claws-review-bot-job` was updated to that image while preserving cron
+  `*/15 * * * *`, `POST_COMMENTS=true`, `MAX_REVIEWS_PER_POLL=1`, and
+  parallelism `1`.
+- First scheduled execution on the image,
+  `claws-review-bot-job-29735355`, succeeded from
+  `2026-07-15T13:15:00Z` to `2026-07-15T13:16:37Z`.

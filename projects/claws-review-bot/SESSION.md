@@ -22,12 +22,30 @@
 
 ## Current Session
 
-- Last updated: 2026-07-07.
+- Last updated: 2026-07-15.
 - Last agent: Copilot.
-- Current focus: Azure `claws-review-bot-job` reviewer voice now requires
-  explicit human maintainer decisions before approval for important
-  architectural/risk/proof/security gates; ClawPilot issue-classifier learning
-  remains a separate open thread.
+- Current focus: Azure `claws-review-bot-job` now re-evaluates unchanged PR
+  heads when an authoritative maintainer responds, while preserving the
+  maintainer-decision approval gate.
+- 2026-07-15 maintainer-triggered re-review fix:
+  - Root cause: same-SHA re-evaluation only inspected PR-author conversation
+    comments. Maintainer comments were neither triggers nor model input, so a
+    required maintainer decision could not clear the gate without another
+    commit.
+  - Commit `499f051779` reads conversation comments, formal review summaries,
+    and inline review comments; accepts only `OWNER`/`MEMBER`/`COLLABORATOR`
+    maintainer responses; excludes bots and outsiders; and uses source-qualified
+    storage lock keys to avoid GitHub ID-namespace collisions.
+  - Replaced unsafe `gh --paginate` JSON concatenation with explicit
+    page-by-page parsing for open PRs and all review-ledger endpoints.
+  - Validation: targeted tests passed 8/8, TypeScript lint and build passed,
+    and final autoreview returned no accepted/actionable findings.
+  - ACR run `chj` built
+    `clawsreviewbotacr.azurecr.io/claws-review-bot:maintainer-rereview-20260715`.
+    The live job now uses that image with cron `*/15 * * * *`,
+    `POST_COMMENTS=true`, and `MAX_REVIEWS_PER_POLL=1`.
+  - First scheduled execution `claws-review-bot-job-29735355` succeeded from
+    2026-07-15T13:15:00Z to 13:16:37Z.
 - 2026-07-07 Azure reviewer-bot guidance update:
   - Added `maintainer-decision` as a blocking finding category in
     `packages/claws-review-bot/voice/voice.md` and `voice/grammar.md`.
