@@ -27,6 +27,17 @@
 - Current focus: Azure `claws-review-bot-job` now re-evaluates unchanged PR
   heads when an authoritative maintainer responds, while preserving the
   maintainer-decision approval gate.
+- 2026-07-15 targeted validation on Lobster PR `#4616`:
+  - Started execution `claws-review-bot-job-tklv3iv` with
+    `tick bic/lobster#4616 --post`, preserving the live job's env and secret
+    references.
+  - The execution succeeded and correctly skipped head `98314d42a`: no new PR
+    author or authoritative maintainer response had appeared since the latest
+    VClaws reevaluation, which still has F1-F4 open.
+  - Created Copilot schedule `#1` at 30-minute intervals to trigger a targeted
+    VClaws reevaluation when eligible evidence appears, recover a missing
+    formal approval from an approval-equivalent verdict, and stop once `giodl`
+    formally approves the current head or the PR closes.
 - 2026-07-15 maintainer-triggered re-review fix:
   - Root cause: same-SHA re-evaluation only inspected PR-author conversation
     comments. Maintainer comments were neither triggers nor model input, so a

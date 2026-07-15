@@ -21,11 +21,27 @@
 
 ## Current Session
 
-- Last updated: 2026-07-10.
+- Last updated: 2026-07-15.
 - Last agent: Copilot.
 - Current focus: Lobster PR cleanup for Gio-authored front queue in
-  `microsoft.ghe.com/bic/lobster`; no ADO jobs were manually queued or rerun
-  because ADO pool exhaustion is blocking dependency-track progress.
+  `microsoft.ghe.com/bic/lobster`; prioritize mergeable reviewed PRs, then
+  focused CI repairs, without manually queuing missing ADO validations unless
+  explicitly requested.
+- 2026-07-15 live front queue:
+  - `#4644` was closed after verifying its allowlist additions came from live
+    Desktop/local and stacked ClawPilot work rather than commands landed on
+    ClawPilot `main`. Future commands must be added only when the cross-repo
+    contract actually lands.
+  - `#4648` has two approvals and is mergeable, but PullRequest fails in the
+    OpenClaw image/Agent image and adapter quality/unit lanes; Build Validation
+    is missing.
+  - `#4528` has a local current-main rebase and timeout-hook repair not yet
+    pushed. Final autoreview found two obsolete upstream test paths restored in
+    the Docker conflict resolution; remove them, rerun focused proof, and push.
+  - `#4092` has PullRequest green and current-head approvals, but Harry's
+    current-head request-changes asks for a real system/E2E execution path.
+  - `#4616` is conflicting and remains properly held by VClaws F1-F4 plus two
+    formal request-changes reviews.
 - Active branch / PR: Gio open Lobster queue is #4298, #4297, #4272, #4092,
   and #4064. Session-highlighted #4206 is already merged.
 - Live PR state: #4272 pushed to `1f9d4dd8d1`, fixing fail-closed inventory

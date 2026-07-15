@@ -327,11 +327,17 @@ archiveSize
 adapterBootId
 publicationBindingId
 publicationBindingGeneration
-hostBundleGeneration
+hostBundleIdentity
 ```
 
 Carrier incarnation is recorded for diagnosis but cannot substitute for any
 owner or binding generation.
+
+The cross-process managed request carries the portable host-bundle identity
+(`bundleId@bundleVersion`), not a registration incarnation. After starting the
+scoped host package, E5b validates that identity and freezes the exact local
+registration generation into the publication acceptance. A process-local
+`#incarnation` from E5a is not portable authority.
 
 ### Publication request
 

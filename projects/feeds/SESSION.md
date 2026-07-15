@@ -1,5 +1,186 @@
+# 2026-07-15 MOS3 personal skill E2E alignment
+
+- Current target flow: discover/install a MOS3 marketplace skill, publish a
+  temporary skill to the caller's MOS3 personal space, reload acquisitions,
+  and prove the published skill is present in the personal feed.
+- Marketplace discovery/install is already proven in production: 301/302
+  returned the MOS3 marketplace feed, and 302 installed
+  `billing-info-lookup`. Lobster PRs #3717 and #3718 are merged.
+- The remaining runtime gate is Lobster PR #4344 at head `d237a6d22e`. It
+  makes personal publish MOS3-owned when no durable Lobster overlay is
+  configured, then reloads the caller's MOS3 acquisitions and checks readback.
+- Live #4344 blockers: branch is 209 commits behind `origin/main`; current ADO
+  fails on main-drift compile errors (`ManagedGatewayStartRequest` /
+  `SandboxConnectionCaller`), Build Validation is missing, GitHubPop is red,
+  and review remains `CHANGES_REQUESTED`. The standing review ask is an
+  endpoint-level 200 success test for MOS3-only personal publish; reviewer
+  hardening also requests bearer-header assertions and corrected chart
+  comments.
+- MOS3 v-team alignment: MOS3 remains the system of record; Scout should prove
+  MOS3 discovery, acquisitions-backed personal projection, and the personal
+  storage loop. The latest reported blocker is E2E validation of that personal
+  loop. Scout is reported preauthorized; delegated auth/environment routing
+  and agent-user token behavior remain integration dependencies.
+- Execution order: refresh #4344 onto current main, add the endpoint success
+  coverage and review hardening, get required checks/re-review, deploy to an
+  enabled Test or FirstRelease ring, then run
+  `projects/feeds/demo/record-mos3-live-proof.ps1 -Environment msit -Publish`
+  using browser/WAM auth rather than device code. Capture marketplace,
+  publish, acquisitions reload, and personal-feed readback artifacts.
+
 # 2026-07-10 301/302 feeds promise validation
 
+## 2026-07-15 feed spec, trust, and account-stack closeout
+
+- Marked the active ClawHub account-feed delivery stack #2948, #2950, #2957,
+  #2958, and #2959 ready for review on 2026-07-15. All five are non-draft and
+  mergeable. None has a formal GitHub review from Patrick or another reviewer
+  yet. Ready-for-review automation is running; no CI jobs were manually queued
+  or rerun. #2948 still shows the known transient secret-scan container-pull
+  failure and expected fork Vercel authorization failure.
+- Opened the corrective last-call spec PR
+  `https://github.com/openclaw/rfcs/pull/39` at head `22e73e2b125c`. It aligns
+  Hosted Feed v1 and signed DSSE trust with the merged ClawHub/OpenClaw wire
+  contracts, and clarifies account-feed URL references, millisecond timestamps,
+  stable ordering, and discovery-only semantics. The PR is non-draft and clean.
+- Opened OpenClaw rotation repair PR
+  `https://github.com/openclaw/openclaw/pull/108342` at rebased head
+  `4aa135fc9bc3`. It compares new verified feed sequence metadata with the
+  previously accepted snapshot metadata without requiring the old snapshot to
+  verify under a newly rotated key set. Fresh CI has 76 passing checks, no
+  failures, and no pending jobs; the PR is non-draft and awaiting review.
+- Narrowed ClawHub signer PR `https://github.com/openclaw/clawhub/pull/3005`
+  to sign the exact immutable `catalogFeedPublications.payload` bytes on the
+  existing public plugin-feed route. The signer now uses Convex default-runtime
+  Web Crypto instead of importing a Node-runtime module into `convex/http.ts`.
+  Head `e566e3e2c7b2` has 17 passing CI checks; only expected fork Vercel auth
+  fails. Keep it draft until ClawHub provisions the production Ed25519 private
+  key/key ID and live success plus missing-key proof can be captured.
+- Narrowed/rebased OpenClaw default ClawHub trust PR
+  `https://github.com/openclaw/openclaw/pull/101981` to the default-profile
+  delta at head `a518ad4ed3a2`. It binds the expected `clawhub-official` feed ID,
+  supports paired env trust-root overrides, and no longer claims that a key is
+  bundled before one exists. It has no failing checks and remains draft pending
+  the production ClawHub public key and end-to-end signed-feed proof.
+- Audited ClawHub account drafts #2948, #2949, #2950, #2951, #2953, #2957,
+  #2958, and #2959 against current main and the corrected account spec. The
+  delivery stack is #2948 account API, #2950 private follow graph, then separate
+  #2957 follow UX and #2958 notification slices. #2949 publisher-state facts,
+  #2951 status presentation, and #2953 registry export are adjacent independent
+  work. #2959 is accidentally cumulative over the follow stack and should be
+  reauthored on #2948 (or closed) as the public feed/profile surface.
+- Rebased and hardened ClawHub #2948 at head `9f2bda389a1d`. It now binds feed
+  IDs to stable scope identity, validates entry URL/timestamp/identity fields,
+  uses canonical publisher skill/plugin URLs, suppresses inactive linked
+  identities, uses stable kind/object-ID tie-breaking, and rejects unsupported
+  cursors or malformed limits. Focused Vitest passed 23 tests; targeted
+  type-aware oxlint, oxfmt, and diff checks passed. Typecheck reaches only the
+  shared-worktree missing `yauzl` typings. Fresh CI is queued automatically;
+  secret scanning failed only because the runner could not pull the TruffleHog
+  container (`ghcr.io` EOF), not because a secret was found.
+- Rebased and hardened #2950 at head `b5519cb2e99`. It preserves muted follow
+  preferences on retries, bounds private cursor/search reads, validates list
+  parameters before querying, and has explicit handler return typing. Focused
+  follow/API tests passed. It is the shared private follow foundation.
+- Restacked #2957 directly on #2950 at head `f5891c67383` as a UI-only child.
+  It preserves the current profile actions, adds Follow/Following and private
+  Creators > Following discovery, and avoids render loops when equivalent query
+  pages arrive with fresh object identity. Focused UI Vitest passed 35 tests;
+  targeted type-aware oxlint, oxfmt, and diff checks passed.
+- Restacked #2958 directly on #2950 at head `1a780b6929e` as a sibling of
+  #2957. Publish transactions now enqueue notification fanout; bounded
+  100-follower jobs schedule continuation pages instead of silently dropping
+  followers above a hard cap. Package delivery uses the effective normalized
+  scan verdict. Notification/follow/package/skill Vitest passed 312 tests;
+  targeted type-aware oxlint, oxfmt, and diff checks passed.
+- Reauthored #2959 directly on #2948 at head `fd30abc07ab`. The old cumulative
+  duplicate profile routes were removed. The narrow child now exposes the
+  stable machine-readable `/api/v1/publishers/{publisherId}/feed` URL from the
+  publisher profile. Focused helper/profile Vitest passed 24 tests; targeted
+  type-aware oxlint, oxfmt, and diff checks passed.
+- #2948, #2950, #2957, #2958, and #2959 remain draft and mergeable while fresh
+  CI runs. #2949 publisher-state facts, #2951 status presentation, and #2953
+  registry export remain adjacent independent drafts and were not mutated.
+
+## 2026-07-15 independent OpenClaw feeds audit
+
+- Audited the merged hosted-catalog series #95846, #95868, #95877, #95964,
+  #95969, #95981, #96155, #96158, and #96194 plus the merged trust series
+  #98299, #98316, #98338, and #98350 against current OpenClaw main. The
+  cumulative design is coherent and does not need rollback: guarded fetch,
+  persistent last-known-good snapshots, source profiles, refresh/entries CLI,
+  telemetry, DSSE verification, configured thresholds, signed snapshot
+  re-verification, monotonic storage, and operator diagnostics are all present.
+- Found one shipped trust-rotation defect requiring a focused follow-up PR.
+  After a newly fetched feed verifies with a rotated key set or threshold,
+  `official-external-plugin-catalog.ts` reparses the old snapshot with the new
+  verification policy before comparing sequence metadata. A legitimate key or
+  threshold rotation can therefore reject the new feed and also fail snapshot
+  fallback until the old cache is manually removed. Compare monotonic metadata
+  against the previously accepted snapshot without requiring that snapshot to
+  satisfy the newly rotated policy.
+- ClawHub #3005 is not ready as authored. It includes unrelated dynamic
+  all/official/community/reviewed feed lanes and signs a request-time projection
+  from `internal.feeds.rootFeed`; this bypasses ClawHub's existing immutable
+  `catalogFeedPublications` payload, exact package integrity, validators,
+  expiry, and monotonic publication sequence. Codex review also found that its
+  derived sequence can decrease after deletion/demotion and its sparse skill
+  scan can omit entries after 5,000 rows. Rewrite/restack it as a narrow signer
+  over the exact stored `clawhub-official` publication bytes. Focused ClawHub
+  feed-handler tests passed (9 passed); current hosted CI remains red.
+- OpenClaw #101981 is not ready as authored. It is still stacked on pre-merge
+  trust commits, so its live diff repeats the full trust series instead of only
+  the ClawHub default-profile delta. Its bundled trusted-key array is empty,
+  while its docs claim a bundled ClawHub key, so normal installs still accept
+  an unsigned default feed. Rebase onto current main and populate the stable
+  ClawHub key ID/public key after ClawHub generates the production Ed25519 key.
+- Reviewed the three merged RFC sidecars. The core spec currently disagrees
+  with shipped schema/config on trust values (`unofficial` versus `community`),
+  candidate shape, strict optional fields, and `catalog.*` versus
+  `marketplaces.*`. The trust spec disagrees with the shipped DSSE envelope and
+  key config field names and underspecifies exact PAE, feed-id binding, trusted
+  key rotation, and the rotation document wire contract. The account-feed spec
+  is conceptually sound but inherits core examples. File one corrective RFC PR
+  using the generated ClawHub schema and merged OpenClaw verifier as the v1
+  normative contract before calling the specs implementer-ready.
+- Current-main focused OpenClaw proof: 53 tests passed; two SQLite-backed tests
+  were blocked by local Node 24.14.0/SQLite 3.51.2 runtime safety enforcement,
+  not by assertion failures. Supported local proof requires Node 24.15.0+ (or
+  22.22.3+/25.9.0+). No PRs, branches, or GitHub review state were mutated by
+  this audit.
+
+- 2026-07-15 OpenClaw hosted-feed spec: updated RFC PR
+  `https://github.com/openclaw/rfcs/pull/25` on branch
+  `codex/hosted-feed-trust-addendum` with commit `3840098`. The PR now adds
+  `rfcs/0009/hosted-feed-v1-spec.md`, an implementer-facing Hosted Feed v1
+  core sidecar covering feed schema, examples, source profiles,
+  refresh/fallback, rejection rules, and publisher/client checklists. It
+  intentionally leaves signed envelopes, trust config, and account feeds for
+  separate addendum specs. RFC 0009 links to the sidecar, and the PR body was
+  updated with the maintainer-facing summary and validation.
+- 2026-07-15 RFC #25 merged: `https://github.com/openclaw/rfcs/pull/25`
+  merged into `openclaw/rfcs` at `2026-07-15T13:04:30Z` with merge commit
+  `f9ac10e91384e487c26458af1e03f5374ab25dae`. The merged RFC now includes the
+  hosted-feed trust addendum plus the narrowed Hosted Feed v1 Core
+  Specification sidecar.
+- 2026-07-15 RFC addendum specs PR opened:
+  `https://github.com/openclaw/rfcs/pull/38` from
+  `giodl73-repo:codex/hosted-feed-addendum-specs` at head `5e296e9`. The PR
+  adds `rfcs/0009/signed-feed-trust-v1-spec.md` and
+  `rfcs/0009/clawhub-account-feeds-v1-spec.md`, and updates RFC 0009 to link
+  the core, trust, and account-feed sidecar specs. Role-lens review fixes were
+  folded in before opening: the new specs avoid tenant/Microsoft/MOS3-specific
+  wording, keep account following separate from trust/approval/install state,
+  make follower lists private by default, require reversible/idempotent follow
+  controls, keep feed-signing keys separate from release/package credentials,
+  and require key-rotation/emergency-revocation ownership. Validation passed
+  `git diff --check` and scans for internal role-review references, conflict
+  markers, en/em dashes, and tenant/Microsoft/MOS3 wording in the new specs.
+- 2026-07-15 RFC #38 merged:
+  `https://github.com/openclaw/rfcs/pull/38` merged into `openclaw/rfcs` at
+  `2026-07-15T13:12:02Z` with merge commit
+  `2d213ae23462d425c84d0fd4ff8727f571b46602`. Follow-up feedback on signed
+  trust or account-feed spec details should now be filed as new RFC PRs.
 - Live 301 route/admin probe succeeded with artifacts at
   `C:\tmp\lobster-route-admin-prod-301eus-2026-07-10T165936-994Z`.
   Route lookup returned 200, feature flags show `scout_feeds_ux_enabled: true`,

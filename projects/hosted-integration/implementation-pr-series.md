@@ -17,6 +17,13 @@ Upstream PRs are framed as reusable OpenClaw factorings. They do not require
 maintainers to understand Lobster's private transport or accept Lobster cleanup
 as the reason for a public API.
 
+OpenClaw never bundles a `lobster-host` extension or CAPI implementation.
+External host products use normal plugin installation and
+`plugins.entries.<id>` configuration to register one bundle per Gateway cell.
+Fleet-wide configuration may be authored centrally, but runtime registration,
+credentials, generations, activation, Status, Doctor, and readiness remain
+cell-local.
+
 Each repository PR has an execution brief under `pr-plans/README.md`. Linked
 OpenClaw/Lobster work uses `a`/`b` identifiers; provider groups with separate
 owners use additional letters.
@@ -34,7 +41,7 @@ bundle inventory          approvals / Teams     guard + credentials
         |                      |                      |
         +----------------------+-----------> reverse carrier
                                                |
-                                      Lobster bundle implementation
+                                      external host plugin implementation
                                                |
                                provider-by-provider migration
                                                |
@@ -54,9 +61,9 @@ frame family.
 | --- | --- |
 | 0 | Contract and Hosting Profiles prerequisites |
 | 1 | Parallel OpenClaw foundations: local dispatcher, approvals, Teams endpoint, traffic policy |
-| 2 | Network guard, credential resolver, and CAPI owner adapter |
+| 2 | Network guard, credential slots, and generic bundle registration |
 | 3 | Bundle inventory, Status/Doctor, and reverse-session endpoint |
-| 4 | Full CAPI vertical proof through the Lobster bundle |
+| 4 | External-plugin vertical proof without host product code in OpenClaw |
 | 5 | Substrate, simple-key providers, Channel, and Graph adoption |
 | 6 | Fleet rollout and downstream compatibility cleanup |
 
@@ -67,10 +74,10 @@ Wave 1.
 
 | Area | Capability ownership | Registration and selection | Runtime path | Readiness and operations |
 | --- | --- | --- | --- | --- |
-| 1. Host integration plane | Gateway, Channel, provider-traffic, and lifecycle owners | B5, D1a/D1b, E1a-E4b | Native Gateway/Channel/lifecycle paths; traffic policy intersects Area 2 dispatch | A2/A3, B6a/B6b, F1 |
-| 2. Host capability providers | Model/provider, credential, secret, publication, and telemetry owners | B3-B5, D1a-D5d | Local or hosted owner-selected providers | Owner criteria through A3/B6a/B6b/F1 |
+| 1. Host integration plane | Gateway, Channel, provider-traffic, and lifecycle owners | B5, D1, E1a-E4b | Native Gateway/Channel/lifecycle paths; traffic policy intersects Area 2 dispatch | A2/A3, B6a/B6b, F1 |
+| 2. Host capability providers | Model/provider, credential, secret, publication, and telemetry owners | B3-B5, D1-D5d | Local or hosted owner-selected providers | Owner criteria through A3/B6a/B6b/F1 |
 | 3. Host wiring and composition | Each semantic owner; Hosting Profiles only aggregates | A2/A3, B5/B6a/B6b, F1/F2 | Owner-local activation and generation fencing | `/ready`, Status, Doctor, provenance, authority |
-| 4. Carrier options | Binding owner selects a conformant carrier | C1-C3 and D1a/D1b | Provider-dispatch-only reverse session for hosted egress; native transports elsewhere | Carrier incarnation and failure projected through B6a/B6b |
+| 4. Carrier options | Binding owner selects a conformant carrier | C1-C3 and D1 | Provider-dispatch-only reverse session for hosted egress; native transports elsewhere | Carrier incarnation and failure projected through B6a/B6b |
 
 Every host offering follows the same integration gate:
 
@@ -150,22 +157,24 @@ Requirements:
 Depends on B1. Can proceed in parallel with B2 after the dispatcher request
 shape stabilizes.
 
-### B4: Owner-specific adapter contribution
+### B4: Owner-specific contribution surface
 
 Add the first missing owner contribution surface only where current OpenClaw
 registries are insufficient.
 
-Recommended first proof is the CAPI model-provider adapter:
+The first upstream proof must be an existing OpenClaw-owned provider, Channel,
+or tool with a concrete user problem. WebIQ issue 107154 is the strongest
+current candidate:
 
-- prepare the provider-specific URL and query;
-- inspect model and stream mode;
-- produce non-secret metadata headers;
-- declare the CAPI bearer slot;
-- preserve bounded request-body semantics; and
-- interpret the provider-specific streamed response.
+- preserve the existing WebIQ owner and response semantics;
+- declare the exact API-key slot and origins;
+- support keyless host-proxied execution without in-container secret
+  preparation; and
+- preserve local behavior when hosted execution is not selected.
 
-Do not add a universal provider-adapter registry. CAPI/Substrate use the model
-provider owner; Channel and web adaptations use their own owners.
+Do not add a universal provider-adapter registry. Product-specific providers
+such as CAPI remain in their external plugin. Existing model providers,
+Channels, and web adaptations use their own owners.
 
 Can proceed in parallel with B2/B3 after the typed assembly is accepted.
 
@@ -182,8 +191,9 @@ Requirements:
 - reject duplicate, missing, or incompatible required contributions;
 - do not activate owners globally.
 
-Depends on at least one real contribution from B3/B4 so the bundle is not a
-speculative empty catalog.
+Depends on B3 and either one real OpenClaw-owned contribution from B4 or a
+neutral conformance plugin fixture. It must not depend on CAPI or Lobster
+product code.
 
 ### B6a: Status inventory
 
@@ -256,7 +266,7 @@ Depends on C1/C2 and B3.
 
 ## Track D: Lobster Bundle And Semantic Migrations
 
-### D1a/D1b: Initial `lobster-host` packages
+### D1: External `lobster-host` plugin
 
 Register the first atomically valid bundle snapshot:
 
@@ -272,22 +282,22 @@ catalog of every Lobster offering. E1b and E2b add their Gateway-client and
 Channel-endpoint contributions to later versioned snapshots of the same
 `lobster-host` bundle.
 
-Repository split:
+The plugin package, configuration schema, bundle manifest, credential
+resolvers, dispatcher implementation, and deployment metadata all live outside
+`openclaw/openclaw`, currently in `bic/lobster` or another Lobster-owned
+package repository.
 
-- OpenClaw plugin/package contribution in `openclaw/openclaw`;
-- host implementation and deployment metadata in `bic/lobster`.
+Scout enables and configures the plugin through normal
+`plugins.entries.<id>` managed configuration. Each Gateway cell registers one
+immutable bundle snapshot and generation. OpenClaw ships only the generic
+plugin registration and runtime contracts.
 
-These are two linked PRs because cross-repository atomic merge is not
-available. D1a adds inactive OpenClaw registrations; D1b adds the matching
-Lobster implementation. OpenClaw support lands first and remains inactive
-until Lobster selects it.
+D1 depends on B5, C2, and C3.
 
-D1a depends on B5 and C2. D1b depends on C3 and merged D1a support.
+### D2: External CAPI vertical proof
 
-### D2a/D2b: Full CAPI vertical proof
-
-D2a wires and conforms the OpenClaw CAPI hosted binding. D2b implements the
-Lobster adoption and owns the first authoritative canary:
+The Lobster-owned plugin implements the CAPI owner adapter, credential slot,
+hosted binding, and first authoritative canary:
 
 ```text
 lobster-host registration
@@ -315,12 +325,13 @@ Proof:
 - unresolved-reference Doctor finding; and
 - authoritative canary selection with explicit rollback.
 
-Repository split:
+Repository: `bic/lobster` or another Lobster-owned plugin package.
 
-- D2a: `openclaw/openclaw`, depending on B4, B6a, B6b, C2, D1a, and E3a;
-- D2b: `bic/lobster`, depending on C3, D1b, D2a, E3b, and F1.
+Depends on B3-B6, C2/C3, D1, E3b, and F1. No CAPI source, fixture,
+identifier, or configuration lands in `openclaw/openclaw`.
 
-The first milestone is not accepted until D2b proves the stack end to end.
+The first milestone is not accepted until the external adopter proves the stack
+end to end.
 
 ### D3a/D3b: Substrate model-provider adoption
 
@@ -532,13 +543,13 @@ The first stack proves the complete model:
 1. **B1** — local one-hop dispatcher seam with no behavior change.
 2. **B2** — fixed network guard profile and exported fixtures.
 3. **B3** — one header credential-slot resolver.
-4. **B4** — CAPI model-provider adapter and conformance.
+4. **B4** — existing OpenClaw-owned adopter or neutral conformance plugin.
 5. **B5** — bundle registration and effective inventory.
 6. **A3/B6a/B6b** — owner readiness plus Status and Doctor.
 7. **C1/C2** — reverse carrier contract and OpenClaw endpoint.
-8. **C3/D1a/D1b** — Lobster host peer and complete bundle snapshot.
+8. **C3/D1** — external Lobster host plugin and complete bundle snapshot.
 9. **E3a/E3b/F1** — traffic policy and inactive bundle/profile preparation.
-10. **D2a/D2b** — CAPI end-to-end and canary authority with rollback.
+10. **D2** — external CAPI end-to-end and canary authority with rollback.
 
 Individual PRs remain reviewable, but the milestone is the whole ten-part
 vertical proof. The project does not stop after a neutral fixture or a

@@ -23,11 +23,11 @@ decision.
 ## Readiness Stack
 
 RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), file
-`rfcs/0018-readiness-conditions-and-providers.md`, head `3259e55815ea`.
+`rfcs/0018-readiness-conditions-and-providers.md`, head `90ee87424b1f`.
 
 Real upstream draft:
 [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
-head `89d8607aab9f`. It contains the four slices below as four commits and no
+head `17b34f792d8`. It contains the four slices below as four commits and no
 Hosting Profile implementation.
 
 RFC 0018 and its PR body identify this upstream draft as the primary
@@ -55,10 +55,10 @@ gateway: {
 ## Hosting Profile Stack
 
 RFC: [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37), file
-`rfcs/0023-standard-hosting-profiles.md`, head `42c00aa748e8`.
+`rfcs/0023-standard-hosting-profiles.md`, head `a61b57d8e67a`.
 
 Primary implementation: [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765),
-head `a416b9b9192`, stacked directly on readiness head `89d8607aab9f` from PR
+head `f54affa3983`, stacked directly on readiness head `17b34f792d8` from PR
 104018.
 [Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94) provides a
 clean profile-only comparison while the upstream aggregate diff contains both
@@ -71,10 +71,11 @@ layers.
 | `11322a977f6` | [PR 42](https://github.com/giodl73-repo/openclaw/pull/42) | Runtime activation identity. |
 | `2f8defb707c` | [PR 21](https://github.com/giodl73-repo/openclaw/pull/21) | Packaged release conformance. |
 
-The real upstream stack contains seven profile-only commits. After restacking,
-their heads are `44c0f163489`, `d1a47217be6`, `057ad938451`, `ee942d3989a`,
-`02602feb858`, `1448fb9c749`, and `a416b9b9192`; range-diff reports every patch
-identical to the previous profile stack.
+The real upstream stack contains eight profile-only commits. After restacking,
+their heads are `642bed18093`, `b9121934a7f`, `2b10b218279`, `81f787820da`,
+`05bbe94f8d5`, `ab612666315`, `630684819c8`, and `f54affa3983`. The final commit
+makes profile activation explicitly opt-in and proves the unprofiled upgrade
+baseline.
 
 PR 107765 is the real upstream implementation request. The four smaller fork
 PRs expose the profile commits as review aids and are not separate landing
@@ -102,23 +103,26 @@ Lobster, doctor, or policy part of the runtime readiness path.
 
 Current readiness proof supersedes the older detailed snapshot below:
 
-- PR 104018 exact head: `89d8607aab9f`, based on main `5fc7ba6da031`.
-- 259 assertions pass across all 19 changed test files / 22 Vitest project
-  shards; format, lint, diff, SDK surface, package build, declaration graph,
-  inventory, and tarball integrity checks pass.
-- Exact-head package image
+- PR 104018 exact head: `17b34f792d8`, based on main `4e78d91c0f9`.
+- 211 assertions pass across all 19 changed test files; format, type-aware lint,
+  diff, SDK surface/API, and the full package build pass.
+- Most recent package-installed behavior proof, on pre-rebase readiness head
+  `89d8607aab9f`, used image
   `sha256:8add3c4f8ce2f1a444a735c43f19eac4ee0212778123fb883ff8f9f785a9fd0d`
   proves readiness `200 -> 503 -> 200`, liveness remains 200, and CLI exits
   `0 -> 1 -> 0`.
 - The 54-phase published upgrade lane passed on patch-equivalent proved head
   `e5f5e97332e5`; the final rebase changed only the SDK budget relative to the
   readiness patch. Exact-head Codex review is clean and ClawSweeper is queued.
-- PR 107765 exact head is `a416b9b9192`, directly stacked on readiness head
-  `89d8607aab9f`. Profile-only Codex review is clean; 310 changed-file
-  assertions and all static checks pass apart from two broad Gateway cases that
-  reproduce on the exact base. Exact package-installed profile matrix passes
+- PR 107765 exact head is `f54affa3983`, directly stacked on readiness head
+  `17b34f792d8`. Profiles are opt-in; an unprofiled Gateway keeps the RFC 0018
+  baseline and adds no `ProfileSelected` or `WorkspaceWritable` requirement.
+  273 focused assertions and all static checks pass. The unrelated
+  `sessions.abort` timeout reproduces on the exact readiness base; the
+  order-sensitive workspace-plugin assertion passes directly on both heads.
+  The exact package-installed matrix passes all unprofiled/profile transitions
   with image
-  `sha256:e87c9e0651d60b6b58262b6ee271f89d0bee060fd2761d0da1525aca60fd6337`.
+  `sha256:20d507b613b346e1165add88234eb00390ea6d1b086970dd3589dd3f41654175`.
 
 - Upstream PR 104018 is rebased onto OpenClaw main `c2e0ce7b686`; resilience
   hardening produced exact head `c1da72178933` while preserving four commits.
@@ -165,5 +169,5 @@ Current readiness proof supersedes the older detailed snapshot below:
 Review and land RFC 0018/readiness first through upstream draft PR 104018. RFC
 0023 is independently proposed in upstream RFC PR 37. Upstream profile PR
 107765 is explicitly stacked on PR 104018. Until readiness lands, its aggregate
-diff includes both layers; afterward it naturally reduces to the four
+diff includes both layers; afterward it naturally reduces to the eight
 profile-only commits and can be refreshed for landing.

@@ -17,8 +17,8 @@ the durable review shape.
 | Package | Fork PR | Base | Size | Review thesis |
 | --- | --- | --- | --- | --- |
 | 1. Guarded dispatch core | [#71](https://github.com/giodl73-repo/openclaw/pull/71) | `main` | 3 commits, 8 files, +843/-11 | Extract one local redirect-disabled hop and a runtime-validated `network-guard/v1` boundary without adding hosted execution or credentials. |
-| 2. CAPI owner and operations | [#72](https://github.com/giodl73-repo/openclaw/pull/72) | Package 1 | 14 commits, 16 files, +3211/-3 | Let the CAPI owner prepare exact semantics while cell-local bundle registration, Status, and Doctor expose inactive composition. |
-| 3. Hosted CAPI execution | [#73](https://github.com/giodl73-repo/openclaw/pull/73) | Package 2 | 15 commits, 80 files, +7676/-114 | Add one cell-local bounded reverse carrier, least-privilege Gateway endpoint, traffic-policy intersection, exclusive package contribution, and inactive hosted CAPI binding as one end-to-end proof. |
+| 2. Generic host composition and operations | [#72](https://github.com/giodl73-repo/openclaw/pull/72) | Package 1 | Rework in progress | Keep credential-slot, bundle registration, provenance, Status, Doctor, and external-plugin registration generic; remove CAPI and all `lobster/*` product semantics. |
+| 3. Generic hosted provider execution | [#73](https://github.com/giodl73-repo/openclaw/pull/73) | Package 2 | Rework in progress | Keep the bounded reverse carrier, least-privilege Gateway endpoint, traffic-policy intersection, and external-plugin contracts; remove `extensions/lobster-host` and the CAPI hosted binding. |
 | 4. Additional provider owners | [#74](https://github.com/giodl73-repo/openclaw/pull/74) | Package 3 | 7 commits, 24 files, +4743/-113 | Prove the owner model across Substrate, WebIQ, and Anthropic while preserving cell-local bundle incarnations, route invariants, cancellation, and narrow outbound header authority without a universal adapter registry. |
 | 5. Microsoft interactions | [#75](https://github.com/giodl73-repo/openclaw/pull/75) | Package 3 | 3 commits, 69 files, +7086/-140 | Prove Channel- and mailbox-specific ownership for ACF and Graph without flattening those semantics into provider dispatch. |
 
@@ -29,10 +29,10 @@ Packages 4 and 5 are parallel. Neither is a prerequisite for the other.
 | Package | Current fork head | State |
 | --- | --- | --- |
 | 1 | `8c3f109a1e2` | Draft, mergeable, review-clean, and ready for explicit upstream filing authorization. |
-| 2 | `0526a4a9e15` | Draft, mergeable, review-clean, and ready for review after package 1. |
-| 3 | `df1e3c6a724` | Draft, mergeable, review-clean, and ready for review after package 2. |
-| 4 | `f518a822261` | Draft, mergeable, review-clean parallel child of package 3. |
-| 5 | `128df4698d8` | Draft, mergeable, review-clean parallel child of package 3; 148 changed tests pass across tooling, msteams, m365mail, and Lobster bundle lanes. |
+| 2 | `0526a4a9e15` | Superseded review shape: CAPI must move to an external plugin before this is an upstream candidate. |
+| 3 | `df1e3c6a724` | Superseded review shape: bundled `lobster-host` and CAPI binding must move out of OpenClaw. |
+| 4 | `f518a822261` | Review-clean old stack head; requires restack after generic package 3. |
+| 5 | `128df4698d8` | Review-clean old stack head; requires restack after generic package 3. |
 
 Package 5 hardening now covers root-package inclusion, generated Plugin SDK and
 channel metadata, exact Graph and ACF owner authority, direct-token SSRF
@@ -64,9 +64,9 @@ findings.
 | 4 | #53, #59, #62 |
 | 5 | #63, #65 |
 
-Package 4 required additive composition of three sibling branches. Its combined
-`lobster/host` manifest is `1.3.0`, preserves provider/credential pairing, and
-contains CAPI, Substrate, WebIQ, and Anthropic contributions.
+Package 4 previously composed contributions into a bundled `lobster/host`
+manifest. That manifest is now a deletion target: an external Lobster plugin
+must own bundle configuration and registration.
 
 ## Lobster Evidence
 

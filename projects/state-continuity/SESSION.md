@@ -1,23 +1,17 @@
 # State Continuity Session
 
-**Last updated:** 2026-07-14
+**Last updated:** 2026-07-15
 
 **Last agent:** GitHub Copilot
 
-**Current focus:** The E5b continuity publication owner contract is implemented
-and review-clean in a fork-only OpenClaw worktree. The next bounded layer is the
-concrete `lobster-host` contribution plus a targeted managed bootstrap that
-loads only the selected host package, publishes the exact E5a artifact, and
-verifies it through a fresh provider instance before Lobster gains durable
-`safeToDestroy` authority.
+**Current focus:** Close out Lobster E5b durable publication/finalization
+authority and commit the fork-only slice:
+`Publishing -> Published -> SourceFinalizing -> SafeToDestroy`.
 
-**Blocking question:** E5b still has no concrete production publication
-provider or managed publication operation. Extend `lobster-host` from five to
-six contributions, bind the new provider contract without starting Gateway or
-unrelated plugins, then add Lobster publication/finalization authority. Avoid a
-broad merge of the provisional stacks. E5a production integration still
-requires promotion of the OpenClaw managed capture and
-`gateway.suspend.prepare` surfaces into the Lobster image baseline.
+**Blocking question:** There is no remaining E5b architecture choice or
+recovery blocker. E5a production integration still requires promotion of the
+OpenClaw managed capture and `gateway.suspend.prepare` surfaces into the Lobster
+image baseline.
 
 ## Active Work
 
@@ -65,16 +59,37 @@ requires promotion of the OpenClaw managed capture and
   creation, and fsynced publication/cleanup. Fork real-behavior proof and
   workflow sanity pass; fork-only `auto-response` and `label` fail before
   repository code because the fork lacks the GitHub App private-key secret.
+- Lobster E5b worktree:
+  `C:\src\lobster-state-continuity-e5b-publication-authority`, branch
+  `user/giodl/state-continuity-e5b-publication-authority`, dirty pending final
+  review and commit. The slice adds strict publication/finalization DTOs,
+  durable Redis/CAS `Publishing -> Published -> SourceFinalizing ->
+  SafeToDestroy`, exact-source-worker and source-runtime-generation binding,
+  same-route replay across uncertain publication/finalization outcomes, strict
+  passport release, and lifecycle-policy destruction gating. Production
+  invocation remains intentionally blocked with E5a until the managed capture
+  and `gateway.suspend.prepare` surfaces are promoted into the Lobster image
+  baseline.
 - OpenClaw E5b owner-contract worktree:
   `C:\src\openclaw-state-continuity-e5b-publication-owner`, branch
-  `user/giodl/state-continuity-e5b-publication-owner`, dirty and uncommitted on
-  Hosted Integration package 3 base `df1e3c6a724`. Defines the type-only
+  `user/giodl/state-continuity-e5b-publication-owner`, clean at
+  `44609139c47`. Defines the type-only
   streaming publication provider contract, registry/captured-runtime wiring,
   exact provenance and generation fencing, immutable acceptance, fresh
   retrieval integrity verification, and structured provider failures. Seventy-five
   focused tests pass; direct source/test type checks add no errors beyond the
   inherited package-3 baseline. Final Codex review reports no actionable
   correctness findings.
+- OpenClaw E5b operation worktree:
+  `C:\src\openclaw-state-continuity-e5b-operation`, branch
+  `user/giodl/state-continuity-e5b-operation`, clean at `92d23bd8bdc`.
+  Adds the sixth `lobster/continuity` contribution, strict durable filesystem
+  provider, `backup publish --managed --json`, complete
+  source/fresh-retrieval verification, pinned-source TOCTOU protection,
+  portable `hostBundleIdentity` fencing, and cleanup ordering that cannot mask
+  structured quarantine/hold results or interrupt fresh retrieval. Fifty-five
+  focused tests pass with targeted Oxfmt/Oxlint and diff checks. Final Codex
+  closeout accepted no actionable findings.
 - E4c proof:
   53 focused tests, core source/test typechecks, targeted Oxlint/Oxfmt, and
   `git diff --check` pass. Final autoreview accepted no actionable findings;
@@ -175,6 +190,37 @@ requires promotion of the OpenClaw managed capture and
 
 ## Completed This Session
 
+- Implemented the Lobster E5b fork slice in
+  `C:\src\lobster-state-continuity-e5b-publication-authority`. Review fixes
+  made advanced `Publishing`/`SourceFinalizing` revisions resumable from the
+  original operation revision, made passport checkout CAS loss fail closed,
+  rejected empty logical publication IDs, and corrected publication identity
+  to use the frozen source runtime generation rather than the handoff-store
+  owner generation. Focused schema, Plex orchestration, durable hold, and
+  lifecycle-policy tests pass. The full Rust workspace compiles and passes
+  except for two persistent Windows-only graceful-shutdown socket-reset tests;
+  the OpenClaw adapter package remains blocked on its inherited Windows
+  dead-code warning.
+- Committed the recovered OpenClaw E5b provider and managed publication
+  operation as `92d23bd8bdc`. Final closeout distinguished absent host-bundle
+  availability from stale identity, preserved structured failures across
+  cleanup errors, deferred/retried archive cleanup until after fresh
+  retrieval, and guaranteed service shutdown before returning. Fifty-five
+  focused tests pass and final Codex review is clean.
+- Implemented the OpenClaw E5b synthesis patch: `lobster-host` now declares and
+  registers `lobster/continuity`; publication is streamed to immutable,
+  owner/handoff-derived filesystem objects with replay/conflict semantics,
+  fsynced ancestor creation, and fresh-instance retrieval.
+- Added `openclaw backup publish --managed --json` with bounded strict stdin,
+  scoped plugin loading, no Gateway startup, a private content-pinned source
+  copy, complete backup verification, raw manifest identity checks before
+  publication and after fresh retrieval, and typed hold/retry/quarantine
+  results.
+- Corrected the cross-process fence: E5a/Lobster carries portable
+  `hostBundleIdentity` (`bundleId@bundleVersion`), while E5b validates it after
+  scoped startup and freezes the exact process-local registration generation
+  only in the acceptance receipt. Updated `final-handoff-publication.md` and
+  CLI documentation accordingly.
 - Implemented the E5b continuity publication owner contract in the fork-only
   OpenClaw worktree. The contract now enforces lowercase namespaced provider
   IDs, canonical generations, exact bundle provenance, class-safe provider
@@ -721,8 +767,10 @@ requires promotion of the OpenClaw managed capture and
    that stack lands.
 16. Run a final RFC de-duplication and internal-consistency pass without
    removing the decision history.
-17. Add the bounded Hosted Integration continuity-publication owner contract
-    before creating the E5b managed-operation worktree.
+17. Complete final Codex closeout and commit Lobster E5b.
+18. Promote the OpenClaw E5a/E5b managed operations into the Lobster image
+    baseline, then add the runtime-side exact-worker trigger that invokes
+    capture followed by publication/finalization.
 
 ## Resume Order
 

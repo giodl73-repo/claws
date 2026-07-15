@@ -10,8 +10,10 @@ OpenClaw can instead:
 
 1. use its existing Gateway, Channel, plugin, proxy, and lifecycle surfaces;
 2. let each semantic owner prepare the exact operation and declare its required
-   credentials and safety policy; and
-3. delegate only the final physical network exchange when the host must execute
+   credentials and safety policy;
+3. let an externally installed host plugin register one configured bundle per
+   Gateway cell; and
+4. delegate only the final physical network exchange when the host must execute
    it.
 
 This keeps ordinary OpenClaw installations unchanged, gives managed hosts
@@ -40,6 +42,8 @@ separately justified implementation choice.
 
 - Preserves the simple local installation and existing direct execution path.
 - Produces reusable owner contracts rather than Lobster-specific APIs.
+- Keeps Lobster's bundle, CAPI adapter, credential resolvers, and dispatcher in
+  Lobster-owned plugin code rather than bundled OpenClaw extensions.
 - Makes identity, credential, policy, readiness, and replay ownership explicit.
 - Avoids turning Gateway or `OpenClawTransport` into a reverse service bus.
 - Adds conformance points that other managed hosts can implement.
@@ -96,7 +100,7 @@ The fork-only implementation series is not a paper architecture. It includes:
 | Local provider-dispatch seam and network guard fixtures | Current local behavior can remain the default while physical execution becomes replaceable. |
 | Exact credential-slot resolver | Hosted execution does not require arbitrary header mutation or exposing credential values to OpenClaw. |
 | Bundle, readiness, Status, and Doctor slices | Registration, selection, compatibility, provenance, and health remain explicit and owner-local. |
-| CAPI and Substrate owner/adopter slices | Complex model-provider request and streamed-response semantics stay with their owner. |
+| External CAPI and Substrate adopter slices | Complex provider request and streamed-response semantics stay in external owner plugins rather than OpenClaw core. |
 | WebIQ and Anthropic slices | The model extends to bounded web/API-key providers without creating a universal adapter. |
 | ACF and Graph mail slices | Channel and mailbox identity remain owner-specific; routing input cannot choose trusted identity. |
 | Restore-hold slice | Lifecycle authority composes through owner generations rather than a generic host callback. |
@@ -121,8 +125,8 @@ the contracts for review; it is not a request to merge the full stack.
 The current fork review implementation is packaged as:
 
 1. [guarded dispatch core](https://github.com/giodl73-repo/openclaw/pull/71);
-2. [CAPI owner composition and operations](https://github.com/giodl73-repo/openclaw/pull/72);
-3. [hosted CAPI execution](https://github.com/giodl73-repo/openclaw/pull/73);
+2. [generic host composition and operations](https://github.com/giodl73-repo/openclaw/pull/72), currently being stripped of CAPI;
+3. [generic hosted provider execution](https://github.com/giodl73-repo/openclaw/pull/73), currently being stripped of CAPI and the bundled `lobster-host` extension;
 4. [additional provider owners](https://github.com/giodl73-repo/openclaw/pull/74); and
 5. [Microsoft interactions](https://github.com/giodl73-repo/openclaw/pull/75).
 
@@ -149,7 +153,7 @@ Review the smallest independently useful OpenClaw changes:
 1. one local provider-dispatch seam with no behavior change;
 2. one fixed network guard profile;
 3. one origin-bound credential-slot resolver; and
-4. one CAPI owner adapter.
+4. one neutral conformance fixture or existing OpenClaw-owned adopter.
 
 Exit: local conformance passes and no hosted carrier exists.
 
@@ -164,8 +168,9 @@ Exit: inactive support can land without activating or requiring a host.
 Only after the earlier contracts are accepted, review a bounded reverse carrier
 for provider dispatch.
 
-Exit: the CAPI owner/adopter pair proves exact semantics, overload, stale
-generations, uncertain outcomes, canary authority, and rollback.
+Exit: an external host plugin proves exact semantics, overload, stale
+generations, uncertain outcomes, canary authority, and rollback without adding
+its product-specific provider or bundle implementation to OpenClaw core.
 
 ### Decision 5: Adoption And Deletion
 
@@ -228,8 +233,9 @@ target. Side-effecting requests are not mirrored.
 1. **Problem, 5 minutes:** show how ProxyPipe accumulated unrelated ownership.
 2. **Decision tree, 5 minutes:** native surface, owner contract, optional
    physical dispatch.
-3. **CAPI proof, 10 minutes:** exact request, credential slot, policy,
-   dispatch, streamed response, readiness, and rollback.
+3. **External adopter proof, 10 minutes:** exact request, credential slot,
+   policy, dispatch, streamed response, readiness, and rollback through an
+   externally installed host plugin.
 4. **Graph proof, 5 minutes:** trusted mailbox identity and exact origins.
 5. **Migration, 5 minutes:** mixed-version evidence and deletion ledger.
 6. **Decision, 5 minutes:** approve the architecture boundary and first local

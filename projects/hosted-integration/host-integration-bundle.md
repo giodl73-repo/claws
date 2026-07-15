@@ -2,9 +2,9 @@
 
 ## Decision
 
-A hosting platform registers one namespaced integration bundle with OpenClaw.
-The bundle declares the Area 1 attachments, Area 2 capability providers, Area
-4 carrier implementations, and readiness criteria it can supply.
+An externally installed hosting plugin registers one namespaced integration
+bundle with OpenClaw. The plugin declares the capability implementations and
+readiness evidence it can supply.
 
 Owner-specific OpenClaw configuration selects those registered implementations.
 Hosting Profiles declares which resulting conditions are required. Status and
@@ -21,9 +21,10 @@ central host integration bundle registration
 
 This is the replacement for ProxyPipe's central semantic frame catalog.
 
-Managed Configuration may authoritatively select the typed owner references
-for a hosted deployment, but it does not define the bundle manifest or perform
-owner activation. See `managed-configuration-alignment.md`.
+Managed Configuration or Scout may authoritatively enable and configure that
+external plugin across a fleet. The policy is globally authored but every
+Gateway cell loads, validates, and activates its own bundle generation. It does
+not perform owner activation. See `managed-configuration-alignment.md`.
 
 ## Central Registration
 
@@ -31,57 +32,12 @@ Illustrative manifest:
 
 ```jsonc
 {
-  "id": "lobster-host",
+  "id": "example/managed-host",
   "version": "1.0.0",
   "contracts": {
-    "gatewayClients": [
-      "lobster/approvals",
-      "lobster/pairing",
-      "lobster/administration"
-    ],
-    "channelEndpoints": [
-      "lobster/teams"
-    ],
-    "trafficPolicies": [
-      "lobster/enterprise-egress"
-    ],
-    "providerRequestDispatchers": [
-      "lobster/egress"
-    ],
-    "modelProviderAdapters": [
-      "lobster/anthropic-direct",
-      "lobster/capi",
-      "lobster/substrate-llmapi"
-    ],
-    "credentialSlotResolvers": [
-      "lobster/anthropic-key",
-      "lobster/capi-token",
-      "lobster/substrate-token",
-      "lobster/entra-obo",
-      "lobster/agentic-user"
-    ],
-    "secretProviders": [
-      "lobster/vault"
-    ],
-    "publicationProviders": [
-      "lobster/workspace"
-    ],
-    "telemetryProviders": [
-      "lobster/telemetry"
-    ],
-    "carriers": [
-      "lobster/reverse-provider"
-    ],
-    "readinessCriteria": [
-      "channel.msteams.endpoint",
-      "provider.request.policy",
-      "model.provider.capi",
-      "provider.request.credentials.capi",
-      "provider.request.dispatcher",
-      "secrets.lobster-vault",
-      "publication.lobster-workspace",
-      "telemetry.lobster"
-    ]
+    "trafficPolicies": ["example/managed-egress"],
+    "providerRequestDispatchers": ["example/managed-dispatch"],
+    "credentialSlotResolvers": ["example/provider-token"]
   }
 }
 ```
@@ -89,15 +45,40 @@ Illustrative manifest:
 Names are illustrative. Every contract remains versioned and owned by its
 OpenClaw subsystem.
 
-The bundle may be an OpenClaw plugin package plus host-side implementation and
-deployment metadata. Existing plugin registration should be reused; missing
-contract types require additive registry contributions rather than a universal
-host method registry.
+The bundle is owned by an external OpenClaw plugin plus its host-side
+implementation and deployment metadata. OpenClaw does not bundle a
+`lobster-host` extension. Existing plugin installation, enablement, config,
+registration, and lifecycle surfaces are reused; missing contract types require
+additive registry contributions rather than a universal host method registry.
 
-Provider adapters register with their real semantic owner. CAPI and Substrate
-belong in the model-provider owner surface; Teams outbound adaptation belongs
-to the Channel owner; WebIQ belongs to its web/provider owner. The bundle does
-not introduce one cross-owner `providerRequestAdapters` registry.
+For Lobster, Scout-managed configuration selects the external plugin through
+the normal plugin configuration surface:
+
+```jsonc
+{
+  "plugins": {
+    "entries": {
+      "lobster-host": {
+        "enabled": true,
+        "config": {
+          "bundle": "lobster/managed",
+          "version": "1.0.0"
+        }
+      }
+    }
+  }
+}
+```
+
+The exact external plugin schema is Lobster-owned. Secrets, token values, and
+tenant-routing authority do not enter this configuration.
+
+Provider adapters register with their real semantic owner. Existing OpenClaw
+providers remain in their native owner surfaces. Product-specific providers
+such as CAPI stay in the external plugin that owns them. Teams outbound
+adaptation belongs to the Channel owner; WebIQ belongs to its web/provider
+owner. The bundle does not introduce one cross-owner
+`providerRequestAdapters` registry.
 
 The bundle manifest is validated as one immutable registration snapshot before
 any contribution becomes visible. This prevents a version-skewed bundle from
@@ -152,10 +133,10 @@ semantic owner selects adapter from its own registry
   -> semantic owner interprets the response
 ```
 
-For example, `lobster/capi` owns CAPI-specific request and response adaptation,
-`lobster/capi-token` supplies the declared bearer slot, and `lobster/egress`
-only performs physical dispatch. All three are available from the same bundle
-without becoming one interface.
+For example, an external CAPI plugin may own CAPI-specific request and response
+adaptation, declare an exact bearer slot, and select a host dispatcher. All
+three are available from the same externally owned bundle without becoming one
+interface or OpenClaw core code.
 
 Each owner publishes its own readiness evidence. A model-provider condition can
 therefore report that its adapter and credential resolver compose correctly,

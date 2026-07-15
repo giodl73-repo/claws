@@ -937,3 +937,33 @@
   - Requested current-head ClawSweeper re-review on both RFC PRs. RFC 0018's
     prior verdict was already technically clean and waiting for maintainer
     acceptance of the public config/plugin contracts; it was stale only by SHA.
+- 2026-07-15: Rebased and republished readiness PR 104018 after current-main
+  drift and ClawSweeper feedback.
+  - Four-commit readiness head is `17b34f792d8`, based on OpenClaw main
+    `4e78d91c0f9`; the branch is mergeable and contains no release-owned
+    changelog edit.
+  - Resolved the shared-types rebase conflict without losing the optional
+    canonical readiness callback. Refreshed Plugin SDK public/API baselines.
+  - All 19 changed test files pass 211 assertions. Oxfmt, type-aware Oxlint,
+    diff, Plugin SDK surface/API checks, and full build pass. `check:changed`
+    remains unavailable because Blacksmith lacks OpenClaw organization access.
+  - PR body and RFC 0018 now point at the exact head. RFC 0018 head is
+    `90ee87424b1f`. Fresh ClawSweeper reviews are queued; the remaining decision
+    is maintainer ownership of the public config, RPC, and Plugin SDK contract.
+- 2026-07-15: Fixed the Hosting Profiles upgrade-compatibility finding and
+  restacked PR 107765.
+  - Profiles are explicitly opt-in through startup argument, environment, or
+    `hosting.profile`. No selection preserves RFC 0018 readiness and adds no
+    profile-only conditions; `local` is now an explicit supported posture.
+  - Eight-commit profile head is `f54affa3983`, directly on readiness head
+    `17b34f792d8`. Profile-only diff is 32 files, 1,343 insertions, 5 deletions.
+  - 273 focused assertions, formatting, type-aware lint, and diff checks pass.
+    The unrelated `sessions.abort` E2E timeout reproduces on the readiness base;
+    the order-sensitive workspace-plugin assertion passes directly on both.
+  - Exact package-installed Docker proof passed unprofiled readiness, all four
+    explicit profiles, expected `503` failures, node approval, and workspace
+    `200 -> 503 -> 200` recovery. Image:
+    `sha256:20d507b613b346e1165add88234eb00390ea6d1b086970dd3589dd3f41654175`.
+  - RFC 0023 and its PR body now make activation opt-in, link directly to the
+    proof comment, and use RFC head `a61b57d8e67a`. Fresh ClawSweeper reviews
+    are queued for PR 107765 and RFC PR 37.
