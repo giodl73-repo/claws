@@ -29,23 +29,25 @@
 
 ## Current Session
 
-- Last updated: 2026-07-14
+- Last updated: 2026-07-15
 - Last agent: Codex
 - Current focus: Readiness and Standard Hosting Profiles are split into two
   independently reviewable RFCs and implementation stacks.
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
-  [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). The real
+  [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
+  `bacc7079b1a1` and includes `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
+  `6d7d4f4ceaca` and includes `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `89d8607aab9f`. The dependent upstream profile implementation is
+  at `17b34f792d87`. The dependent upstream profile implementation is
   [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765)
-  at `a416b9b9192`; [fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
+  at `f54affa3983b`; [fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
   provides the clean profile-only comparison. Exact review slices are recorded
   in `openclaw-pr-plan.md`.
-- Known dirty state: `claws-hapi` contains project-note updates plus unrelated
-  existing changes. The readiness and profile WSL worktrees are clean at pushed
-  heads `89d8607aab9f` and `a416b9b9192`.
+- Known dirty state: `claws-hapi` contains unrelated feeds and state-continuity
+  project edits. The RFC 0018 and RFC 0023 WSL worktrees are clean at pushed
+  heads `bacc7079b1a1` and `6d7d4f4ceaca`.
 - Blocking question: exact-head ClawSweeper/CI review is pending on both draft
   implementation PRs.
 
@@ -101,6 +103,23 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-15: Added implementer-facing sidecar specifications to both RFCs,
+  following RFC 0009's narrative-RFC plus normative-sidecar pattern.
+  - RFC 0018 now links `rfcs/0018/readiness-v1-spec.md`, which defines the v1
+    condition/result model, selector grammar, provider lifecycle, operator
+    selection, bounded evaluation, cache invalidation, projections, and
+    conformance checklist.
+  - RFC 0023 now links `rfcs/0023/hosting-profile-v1-spec.md`, which defines the
+    exact standard profile compositions, selection precedence, activation and
+    host assertions, operator extension, profile contract version, and packaged
+    conformance record.
+  - Reviewed both sidecars through the Gateway, Lobster container, platform,
+    maintainer, and CISO `.craft/roles`. Portable contract findings were applied;
+    Lobster-specific sidecar, reconnect, and product lifecycle requirements
+    stayed outside the OpenClaw specifications.
+  - Final Codex review and `git diff --check` found no actionable issue. RFC PR
+    33 and RFC PR 37 are both open and mergeable at the heads above.
 
 - 2026-07-14: Completed published upgrade proof for readiness PR 104018 at
   exact head `c1da72178933`.
