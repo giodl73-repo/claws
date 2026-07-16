@@ -17,9 +17,15 @@
 
 ## Current Session
 
-- Last updated: 2026-07-08.
-- Last agent: Codex.
-- Current focus: #100361 merged on 2026-07-08 from prepared head
+- Last updated: 2026-07-15.
+- Last agent: Copilot.
+- Current focus: RFC PR #41 rebuilds Doctor as RFC 0004 in the normal layout,
+  adds the structured health and repair sidecar specification, records the
+  completed 44-of-44 tracked lint migration and `--lint --all` evolution, and
+  leaves general repair dry-run as a future project with plumbing ready.
+  Branch `user/giodl/rfc-0004-doctor-structured-repair` is clean at
+  `6a2a0c2`.
+  #100361 merged on 2026-07-08 from prepared head
   `d5d88a0db14782a36f72aa1fbe5023570343f773` as
   `7d82e5b658950a76973ebee2d8e379a3e54fbbf0` after Galin reviewed with no
   blocking findings and maintainers accepted the default-lint compatibility

@@ -1,0 +1,2601 @@
+OpenAI Codex v0.143.0
+--------
+workdir: C:\src\openclaw-catalog-restack
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f490c-08da-7180-a843-aaf963536203
+--------
+user
+changes against 'user/giodl/cli-catalog-review-prompt'
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content -LiteralPath .agents/skills/autoreview/SKILL.md' in C:\src\openclaw-catalog-restack
+ succeeded in 400ms:
+---
+name: autoreview
+description: "Pre-commit/ship code review: Codex default; optional Claude, Pi, Droid, Copilot, Cursor, or OpenCode."
+---
+
+# Auto Review
+
+Run the bundled structured review helper as a closeout check. This is code review, not Guardian `auto_review` approval routing.
+
+Codex review is the default when no engine is set. It uses `gpt-5.5` by default, usually delivers the best review results, and should remain the normal final closeout engine. Claude review is optional and uses `claude-fable-5` by default.
+
+For user-visible behavior, pair autoreview with `behavior-validator`. Autoreview is source-aware and judges the change bundle; behavior validation is source-blind and judges the running product or tool against a behavior contract. A clean autoreview is not proof that a UI, CLI, API, or generated artifact works from the user's perspective.
+
+Use when:
+
+- user asks for Codex review / Claude review / Pi review / Droid review / Cursor review / OpenCode review / autoreview / second-model review
+- after non-trivial code edits, before final/commit/ship
+- reviewing a local branch or PR branch after fixes
+
+## Contract
+
+- Treat review output as advisory. Never blindly apply it.
+- Verify every finding by reading the real code path and adjacent files.
+- Read dependency docs/source/types when the finding depends on external behavior.
+- Reject unrealistic edge cases, speculative risks, broad rewrites, and fixes that over-complicate the codebase.
+- Prefer small fixes at the right ownership boundary; no refactor unless it clearly improves the bug class.
+- When an accepted finding shows a bug class or repeated pattern, inspect the current PR scope for sibling instances before fixing.
+- Fix the scoped bug class at once when practical; stop at touched surfaces, owner boundaries, and clear follow-up territory.
+- Keep going until structured review returns no accepted/actionable findings only while the work remains inside the original task scope.
+- If a review-triggered fix changes code, rerun focused tests and rerun the structured review helper.
+- For security-audit suppression changes, verify accepted findings remain auditable: suppressed findings stay in structured output, active output keeps an unsuppressible suppression notice, and aggregate findings cannot hide unrelated active risk.
+- Never switch or override the requested review engine/model. If the review hits model capacity, retry the same command a few times with the same engine/model.
+- Be patient with large bundles. Structured review can take up to 30 minutes while the model call is active, especially with Codex tools or web search.
+- Treat heartbeat lines like `review still running: ... elapsed=... pid=...` as healthy progress, not a hang. Let the helper continue while heartbeats are advancing. Pass `--stream-engine-output` when live engine text is useful; Codex, Claude, and Cursor filter tool/file chatter, other engines pass raw output through.
+- Do not kill a review just because it has been quiet for 2-5 minutes, or because it is still running under the 30-minute window. Inspect the process only after missing multiple expected heartbeats, after 30 minutes, or after an obviously failed subprocess; prefer letting the same helper command finish.
+- Tools are useful in review mode. The helper allows read-only inspection tools and web search by default so reviewers can check dependency contracts, upstream docs, and current behavior.
+- Security perspective is always included, but it should not cripple legitimate functionality. Report security findings only when the change creates a concrete, actionable risk or removes an important safety check.
+- For regression provenance, keep roles separate: blamed code author, blamed PR author, PR merger/committer, current PR author, and PR/date. If no blamed PR is traceable, use the blamed commit as the provenance: commit SHA, date, and author username. Do not guess a merger or frame missing PR metadata as a separate finding.
+- If the blamed PR was merged by `clawsweeper[bot]` or another automation, identify the human trigger when practical. Check timeline/comments first; if rate-limited, use gitcrawl/cache or public PR HTML. Look for maintainer commands such as `@clawsweeper automerge`, `/landpr`, or labels/status comments that armed automerge. Report `automerge triggered by @login`; if not found, say trigger unknown.
+- Do not invoke built-in `codex review`, nested reviewers, or reviewer panels from inside the review. The helper builds one bundle, calls one selected engine, validates one structured result, and stops.
+- Stop as soon as the helper exits 0 with no accepted/actionable findings. Do not run an extra review just to get a nicer "clean" line, a second opinion, or clearer closeout wording.
+- Treat the helper's successful exit plus absence of actionable findings as the clean review result, even if the underlying Codex CLI output is terse.
+- Multi-reviewer panels are opt-in only. Use them when explicitly requested or when risk justifies the extra spend; the main agent still verifies every accepted finding before fixing.
+- If rejecting a finding as intentional/not worth fixing, add a brief inline code comment only when it explains a real invariant or ownership decision that future reviewers should know.
+- If `gh`/Gitcrawl reports `database disk image is malformed`, run `gitcrawl doctor --json` once to let the portable cache repair before retrying review; do not bypass the shim unless repair fails and freshness requires live GitHub.
+- If Gitcrawl reports a portable manifest mismatch, source/runtime DB health error, or stale portable-store checkout, run `gitcrawl doctor --json` and inspect `source_db_health`, `runtime_db_health`, and `portable_store_status` before falling back to live GitHub.
+- Do not push just to review. Push only when the user requested push/ship/PR update.
+
+## Scope Governor
+
+Autoreview is a closeout gate, not permission to rewrite the task.
+
+Before the first review, freeze a scope baseline: original request or issue, target branch, intended behavior, owner boundary, changed files, and non-test LOC. For inherited or already-bloated branches, use the intended PR diff as the baseline rather than accepting all existing branch drift.
+
+Before patching a finding, classify it:
+
+- **In-scope blocker**: the finding is introduced by the current diff, affects the same owner boundary, and can be fixed without changing the task's contract.
+- **Follow-up**: the finding is real but belongs to an adjacent bug class, sibling surface, cleanup, or broader hardening track.
+- **Stop-and-escalate**: the finding requires a new protocol/config/storage/public API contract, a different owner boundary, a release-process change, or a design choice outside the original request.
+
+Stop patching and report the scope break instead of continuing when:
+
+- a narrow PR turns into an architecture change, protocol change, migration, or release-process change;
+- the diff grows past 2x the original files or non-test LOC without explicit approval to expand scope;
+- two review-triggered patch cycles have not converged; pause and reclassify every remaining finding before another edit;
+- the best fix is "define the canonical contract first" rather than another local inference layer;
+- fixing the accepted finding would make the PR no longer describe the same behavior, issue, or owner boundary.
+
+After the two-cycle pause, continue only when every remaining accepted finding is still an in-scope blocker. Otherwise preserve the useful analysis, identify the smallest safe landed subset if one exists, and open or request a follow-up for the larger fix. Do not keep committing speculative fixes just to satisfy the reviewer.
+
+Do not stack or push review-triggered fix commits while scope classification or focused proof is unresolved. Keep exploratory edits local until the cycle is proven in scope; if scope breaks, remove them from the landing lane instead of preserving them as branch history.
+
+Critical exceptions must be explicit: active data loss, crash, broken install/upgrade, release blocker, or concrete security exposure. If the exception is not one of those, it is not critical enough to blow up scope.
+
+## Release Branches And Release Process
+
+On release, beta, stable, hotfix, signing, notarization, appcast, package-publish, or release-check work, use freeze discipline even when the branch name is not release-like:
+
+- Fix only release blockers, failed release infrastructure, exact backports, install/upgrade breakage, data loss, crashes, or concrete security exposure.
+- Treat non-blocking autoreview findings as follow-ups for `main`, not reasons to broaden the release branch.
+- Do not introduce new product behavior, config surface, protocol shape, migration, plugin ownership, docs narrative, or process policy unless it directly unblocks the release.
+- Keep proof tied to the release target: exact branch/ref, failing check or shipped-risk reason, smallest command/proof, and whether the fix must also forward-port to `main`.
+- If review discovers a real but non-critical design problem during release closeout, stop with a follow-up issue/PR plan; do not use the release branch as the refactor lane.
+
+## Skill Path (set once)
+
+Set the skill script paths once, then use `"$AUTOREVIEW"` and `"$AUTOREVIEW_HARNESS"` in the examples below.
+
+Choose one:
+
+```bash
+# Project-local skill in the current repo:
+export AUTOREVIEW=".agents/skills/autoreview/scripts/autoreview"
+export AUTOREVIEW_HARNESS=".agents/skills/autoreview/scripts/test-review-harness"
+```
+
+```bash
+# Source checkout of openclaw/agent-skills:
+export AUTOREVIEW="skills/autoreview/scripts/autoreview"
+export AUTOREVIEW_HARNESS="skills/autoreview/scripts/test-review-harness"
+```
+
+```bash
+# Global skill:
+export AGENTS_HOME="${AGENTS_HOME:-$HOME/.agents}"
+export AUTOREVIEW="$AGENTS_HOME/skills/autoreview/scripts/autoreview"
+export AUTOREVIEW_HARNESS="$AGENTS_HOME/skills/autoreview/scripts/test-review-harness"
+```
+
+When using Claude Code, set `AGENTS_HOME="$HOME/.claude"` for global skills. Project-local skills live under `.claude/skills/` in the current repo.
+
+## Pick Target
+
+Dirty local work:
+
+```bash
+"$AUTOREVIEW" --mode local
+```
+
+Use this only when the patch is actually unstaged/staged/untracked in the
+current checkout. `--mode uncommitted` is accepted as an alias for `--mode local`.
+For committed, pushed, or PR work, point the helper at the commit
+or branch diff instead; do not force dirty modes just
+because the helper docs mention dirty work first. A clean local review
+only proves there is no local patch.
+
+Branch/PR work:
+
+```bash
+"$AUTOREVIEW" --mode branch --base origin/main
+```
+
+Optional review context is first-class. Prompt files and datasets must be repo-relative so review bundles cannot pull arbitrary host files:
+
+```bash
+"$AUTOREVIEW" --mode branch --base origin/main --prompt-file review-notes.md --dataset evidence.json
+```
+
+If an open PR exists, use its actual base:
+
+```bash
+base=$(gh pr view --json baseRefName --jq .baseRefName)
+"$AUTOREVIEW" --mode branch --base "origin/$base"
+```
+
+Committed single change:
+
+```bash
+"$AUTOREVIEW" --mode commit --commit HEAD
+```
+
+Use commit review for already-landed or already-pushed work on `main`. Reviewing
+clean `main` against `origin/main` is usually an empty diff after push. For a
+small stack, review each commit explicitly or review the branch before merging
+with `--base`.
+
+## Parallel Closeout
+
+Format first if formatting can change line locations. Then it is OK to run tests and review in parallel:
+
+```bash
+"$AUTOREVIEW" --parallel-tests "<focused test command>"
+```
+
+On Windows, the default `--parallel-tests` shell preserves the platform `cmd.exe`
+semantics used by Python `shell=True`. Use `--parallel-tests-shell powershell`
+or `--parallel-tests-shell pwsh` when the focused test command is PowerShell-specific.
+
+Tradeoff: tests may force code changes that stale the review. If tests or review lead to code edits, rerun the affected tests and rerun review until no accepted/actionable findings remain. Once that rerun exits cleanly, stop; do not spend another long review cycle on redundant confirmation.
+
+## Review Panels
+
+Run multiple reviewers against one frozen bundle:
+
+```bash
+"$AUTOREVIEW" --reviewers codex,claude,pi,opencode
+```
+
+`--panel` is shorthand for Codex plus Claude unless `--engine` changes the first reviewer:
+
+```bash
+"$AUTOREVIEW" --panel
+```
+
+Set reviewer models and thinking/effort explicitly:
+
+```bash
+"$AUTOREVIEW" --reviewers codex,claude --model codex=gpt-5.5 --thinking codex=high --model claude=claude-fable-5 --thinking claude=max
+```
+
+Inline syntax is also supported for simple model IDs:
+
+```bash
+"$AUTOREVIEW" --reviewers codex:gpt-5.5:high,claude:claude-fable-5:max
+```
+
+For models with slashes or extra colons, prefer keyed form:
+
+```bash
+"$AUTOREVIEW" --engine pi --model anthropic/claude-sonnet-4 --thinking high
+"$AUTOREVIEW" --engine opencode --model opencode/north-mini-code-free --thinking high
+"$AUTOREVIEW" --engine cursor --model auto --cursor-allow-workspace-instructions
+"$AUTOREVIEW" --reviewers codex,pi --model codex=gpt-5.5 --model pi=anthropic/claude-sonnet-4
+"$AUTOREVIEW" --reviewers codex,opencode --model codex=gpt-5.5 --model opencode=opencode/north-mini-code-free
+"$AUTOREVIEW" --reviewers codex,cursor --model codex=gpt-5.5 --model cursor=auto --cursor-allow-workspace-instructions
+```
+
+`--reviewers all` covers Codex, Claude, Copilot, Pi, and OpenCode. Cursor requires both explicit selection (`--engine cursor` or named in `--reviewers`) and `--cursor-allow-workspace-instructions` because the current Cursor CLI does not document a per-run flag that ignores project-local instructions/config. Droid selection currently fails closed because its CLI cannot disable both project instructions and all tools.
+
+## Models and thinking
+
+The helper accepts `--model` globally or per engine (`engine=model`) and `--thinking` globally or per engine (`engine=level`). Repeat either flag for multiple reviewers.
+
+Recommended model defaults:
+
+| Engine | Default model | Source note |
+|--------|---------------|-------------|
+| **codex** (default) | `gpt-5.5` | OpenAI's current GPT-5.5 alias |
+| **claude** | `claude-fable-5` | Anthropic's most capable widely released Claude model |
+
+CLI flags and environment variables override these defaults. Droid, Copilot, Pi, Cursor, and OpenCode do not get built-in model defaults here because their provider catalogs are external to the Codex/Claude closeout path and may vary by installation.
+
+| Engine | Model flag | Example model IDs | Thinking flag | Accepted levels |
+|--------|------------|-------------------|---------------|-----------------|
+| **codex** (default) | `codex --model X exec ...` | `gpt-5.5`, `gpt-5.5-2026-04-23` | `-c model_reasoning_effort=Y` | `none`, `minimal`, `low`, `medium`, `high`, `xhigh` |
+| **claude** | `claude --model X` | `claude-fable-5`, `claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5` | `--effort Y` | `low`, `medium`, `high`, `xhigh`, `max` |
+| **droid** | currently refused | Factory model IDs | `-r, --reasoning-effort Y` | `off`, `none`, `low`, `medium`, `high`, `xhigh`, `max` |
+| **copilot** | `copilot --model X` | `gpt-5.2`, Copilot model aliases | not supported | n/a |
+| **pi** | `pi --model X` | `anthropic/claude-sonnet-4`, `openai/gpt-4o` | `--thinking Y` | `off`, `minimal`, `low`, `medium`, `high`, `xhigh` |
+| **cursor** | `cursor-agent --model X` | `auto`, Cursor model aliases | not supported | n/a |
+| **opencode** | `opencode run -m X` | `opencode/north-mini-code-free`, OpenCode provider/model IDs | `--variant Y` | `minimal`, `low`, `medium`, `high`, `max` |
+
+Claude also supports `--fallback-model a,b` for availability-based fallback chains ([model-config](https://code.claude.com/docs/en/model-config)). Current Claude docs note that auth, billing, rate-limit, request-size, and transport errors do not trigger fallback, and the changelog documents interactive-session support in `v2.1.166`.
+
+Examples matching current `main` behavior:
+
+```bash
+# Codex with explicit model and reasoning
+"$AUTOREVIEW" --engine codex --model gpt-5.5 --thinking high
+
+# Codex fast mode (priority service tier); needs a model whose catalog lists the tier, silently standard otherwise
+"$AUTOREVIEW" --engine codex --codex-speed fast
+
+# Arbitrary Codex config overrides (isolation flags still win; --codex-speed wins over a service_tier here)
+"$AUTOREVIEW" --engine codex --codex-config 'service_tier="fast"'
+
+# Claude Code aliases or full model names, with optional availability fallback
+"$AUTOREVIEW" --engine claude --model claude-fable-5 --thinking max
+"$AUTOREVIEW" --engine claude --model claude-fable-5 --fallback-model claude-opus-4-8,claude-sonnet-4-6
+
+# GitHub Copilot (model only; no thinking knob)
+"$AUTOREVIEW" --engine copilot --model gpt-5.2
+
+# Pi with explicit model and thinking level
+"$AUTOREVIEW" --engine pi --model anthropic/claude-sonnet-4 --thinking high --pi-bin pi
+
+# Cursor print-mode review (`cursor-agent` remains a compatibility alias)
+"$AUTOREVIEW" --engine cursor --model auto --cursor-bin cursor-agent --cursor-allow-workspace-instructions
+
+# OpenCode with explicit provider/model and variant
+"$AUTOREVIEW" --engine opencode --model opencode/north-mini-code-free --thinking high
+```
+
+`--cursor-agent-bin` and `CURSOR_AGENT_BIN` remain compatibility aliases for
+`--cursor-bin` and `CURSOR_BIN`.
+
+### Environment defaults
+
+CLI flags take precedence over environment variables.
+
+Store persistent personal defaults in your shell startup file or launcher
+environment. For repository-local defaults, use an existing local environment
+loader such as an untracked `.envrc`; the helper does not write a config file.
+
+| Variable | Purpose |
+|----------|---------|
+| `AUTOREVIEW_MODEL` | Override the built-in default `--model` for all engines |
+| `AUTOREVIEW_THINKING` | Default `--thinking` for all engines |
+| `AUTOREVIEW_FALLBACK_MODEL` | Default Claude `--fallback-model` chain |
+| `AUTOREVIEW_<ENGINE>_MODEL` | Per-engine model override, for example `AUTOREVIEW_CODEX_MODEL=gpt-5.5` |
+| `AUTOREVIEW_<ENGINE>_THINKING` | Per-engine thinking override |
+| `AUTOREVIEW_CODEX_CONFIG` | Default Codex `-c key=value` overrides, semicolon-separated, e.g. `service_tier="fast"`; isolation flags still win |
+| `AUTOREVIEW_CODEX_SPEED` | Default Codex service tier: `fast` (priority), `flex`, or `default`; silently standard when the model does not list the tier |
+| `AUTOREVIEW_CLAUDE_FALLBACK_MODEL` | Claude-only fallback chain |
+| `AUTOREVIEW_CURSOR_ALLOW_WORKSPACE_INSTRUCTIONS` | Required `1`/true opt-in for Cursor reviews of trusted repositories |
+
+Codex maps thinking to `model_reasoning_effort`. Claude maps thinking to `--effort`. Droid maps thinking to `-r, --reasoning-effort`. Pi maps thinking to `--thinking`. OpenCode maps thinking to `--variant`. Copilot and Cursor reject `--thinking`. Only Claude accepts `--fallback-model`; global CLI/env fallback requires at least one Claude reviewer, and engine-specific fallback overrides require that reviewer to be selected. Non-Claude fallback overrides, including `AUTOREVIEW_<NONCLAUDE>_FALLBACK_MODEL`, fail closed instead of being silently ignored.
+
+## Review engine isolation
+
+When autoreview runs inside the repository under review, external reviewer CLIs must not load project-local trust or configuration that the branch controls.
+
+| Engine | Isolation flags | Reference |
+|--------|-----------------|-----------|
+| **codex** | Auth-only config overrides, `-c project_doc_max_bytes=0`, repo `trust_level="untrusted"`, `exec --ignore-user-config --ignore-rules`, plus read-only sandbox | Codex CLI `exec --help` |
+| **claude** | `--safe-mode --setting-sources user --strict-mcp-config --disallowedTools mcp__*` plus explicit `--allowedTools` (`--safe-mode` requires Claude Code `v2.1.169+`) | Claude Code [CLI reference](https://code.claude.com/docs/en/cli-reference) |
+| **droid** | Fails closed: current CLI cannot disable both project instructions and all tools | Droid CLI `exec --help` and `--list-tools` |
+| **pi** | `--no-approve --no-session --no-context-files --no-extensions --no-skills --no-prompt-templates --no-themes --no-tools` | Pi CLI `--help`; requires Pi `v0.79.0+` |
+| **opencode** | `opencode run --dir <repo> --pure --format json`, prompt over stdin, neutral subprocess cwd, injected deny-by-default permissions, project config disabled | OpenCode CLI `--help` |
+| **cursor** | `cursor-agent --print --mode ask --sandbox enabled --output-format json|stream-json`, prompt over stdin, temporary read-only permission config, help-probed flags, and mandatory explicit trusted-workspace opt-in | Cursor CLI [headless mode](https://cursor.com/docs/cli/headless), [output format](https://cursor.com/docs/cli/reference/output-format), [permissions](https://cursor.com/docs/cli/reference/permissions), [configuration](https://cursor.com/docs/cli/reference/configuration) |
+
+Codex `--ignore-user-config` skips config loading for the exec run. Autoreview reconstructs only the documented `cli_auth_credentials_store`, `forced_login_method`, and `forced_chatgpt_workspace_id` settings from `CODEX_HOME/config.toml`, keeping authentication and workspace restrictions usable without forwarding unrelated user configuration. The explicit repo trust override and zero project-doc budget keep reviewed-repo `AGENTS.md` and `.codex/` trust surfaces out of the review prompt. `--ignore-rules` skips user/project execpolicy rules. Claude `--safe-mode` disables project hooks, skills, plugins, MCP servers, and CLAUDE.md while preserving normal authentication, model selection, built-in tools, and permissions; managed settings policy can still apply. `--setting-sources user` avoids project/local settings from the reviewed checkout, and current Claude Code docs note the project-skill blocking behavior was fixed in `v2.1.69`. `--strict-mcp-config` and `--disallowedTools mcp__*` keep MCP unavailable to the review run. `--bare` is not used here because Claude's headless docs say it skips OAuth and keychain reads. Droid fails closed because its CLI cannot disable reviewed-repository `AGENTS.md` loading and all tools in the same run. Pi `--no-approve` ignores project-local files for one run; the helper requires Pi `v0.79.0+` plus help output that advertises every required isolation flag because older legacy binaries can ignore unknown flags. The current package is `@earendil-works/pi-coding-agent`; deprecated `@mariozechner/pi-coding-agent` `0.73.x` is intentionally rejected. Pi version/help probes and the review command run from neutral temporary directories, not the reviewed repo. Pi `--no-context-files` removes `AGENTS.md`/`CLAUDE.md`, the resource-disable flags keep `.pi` extensions, skills, prompts, and themes out of the run, `--no-session` avoids writing review sessions, and `--no-tools` prevents built-in read tools from escaping the repository through absolute paths. OpenCode starts from a neutral temporary directory, points at the reviewed repo with `--dir`, disables project config through `OPENCODE_DISABLE_PROJECT_CONFIG=1`, and injects `OPENCODE_CONFIG_CONTENT`; permissions default to deny, allow read/grep/glob, preserve OpenCode's `.env` ask rules, and gate `websearch`/`webfetch` with `--no-web-search`. The injected config also clears command/instruction/plugin arrays and disables write/edit/bash/task/skill/todowrite tools without changing user auth storage. Cursor's documented headless path is print mode with JSON output and workspace-relative project-resource discovery. Because the CLI exposes no per-run flag that disables every current and future project instruction surface, autoreview requires `--cursor-allow-workspace-instructions` (or its environment equivalent) for every Cursor run. Project-local Cursor/Claude hook settings, project MCP config, and global Cursor MCP config remain hard refusals because hooks execute host commands and MCP tools cannot be constrained to read-only review access. Cursor capability probes run from neutral temporary directories with the sanitized engine environment. Review runs set documented `CURSOR_CONFIG_DIR` to an ephemeral configuration that allows workspace reads while denying shell commands and relative or absolute writes. The helper sends review prompts to OpenCode and Cursor over stdin rather than argv and extracts final structured JSON from terminal result/text events. OpenCode and Cursor reject `--no-tools`; Cursor also rejects `--no-web-search` because the CLI does not expose a documented per-run web-search disable flag.
+
+## Context Efficiency
+
+Run the helper directly so target selection, engine choice, structured validation, and exit status all stay in one path. If output is noisy, summarize the completed helper output after it returns; do not ask another agent or reviewer to rerun the review.
+
+## Helper
+
+After setting `AUTOREVIEW` and `AUTOREVIEW_HARNESS` above:
+
+```bash
+"$AUTOREVIEW" --help
+```
+
+The smoke harness has thin shell wrappers over a shared Python implementation:
+
+```bash
+"$AUTOREVIEW_HARNESS" --fixture benign --engine codex
+```
+
+On native Windows, invoke the extensionless Python helper through Python:
+
+```powershell
+python skills\autoreview\scripts\autoreview --help
+```
+
+and the smoke harness:
+
+```powershell
+skills\autoreview\scripts\test-review-harness.ps1 -Fixture benign -Engine codex
+```
+
+The helper:
+
+- chooses dirty local changes first
+- accepts `--mode uncommitted` as an alias for `--mode local`
+- otherwise uses current PR base if `gh pr view` works
+- otherwise uses `origin/main` for non-main branches
+- does not fetch automatically during branch review; the selected base ref must already resolve locally
+- recognizes `--engine droid` only to fail closed with an isolation error; runnable engines are `codex`, `claude`, `copilot`, `pi`, `opencode`, and `cursor`; default is `AUTOREVIEW_ENGINE` or `codex`
+- resolves bare `git`, `gh`, reviewer, and PowerShell shell commands from absolute `PATH` entries only, never from the reviewed checkout; explicit relative `--*-bin` paths are resolved from the reviewed repository root
+- use `--mode commit --commit <ref>` for already-committed work, especially clean `main` after landing
+- should be left in `--mode auto` or forced to `--mode branch` for PR/branch work; do not force `--mode local` after committing
+- writes only to stdout unless `--output`, `--json-output`, or live streamed engine stderr is set
+- supports `--dry-run`, `--parallel-tests`, `--parallel-tests-shell`, `--prompt`, repo-relative `--prompt-file`, repo-relative `--dataset`, `--no-tools`, `--no-web-search`, repeatable Codex-only `--codex-config key=value`, Codex-only `--codex-speed fast|flex|default`, and commit refs
+- supports `--stream-engine-output` or `AUTOREVIEW_STREAM_ENGINE_OUTPUT=1` for live engine text while preserving structured validation; Codex, Claude, and Cursor hide tool/file event details, emit compact activity summaries, and report usage at turn completion
+- supports opt-in review panels with `--panel` / `--reviewers`, plus per-engine `--model`, `--thinking`, and Claude `--fallback-model`
+- uses built-in model defaults `codex=gpt-5.5` and `claude=claude-fable-5`; honors `AUTOREVIEW_MODEL`, `AUTOREVIEW_THINKING`, `AUTOREVIEW_FALLBACK_MODEL`, and per-engine `AUTOREVIEW_<ENGINE>_MODEL` / `AUTOREVIEW_<ENGINE>_THINKING` environment overrides when CLI flags are omitted
+- allows read-only tools and web search by default where the selected CLI supports them; forbids nested review in the prompt; Codex is run through `codex exec` with auth-only user settings, read-only sandbox, reviewed-repo instruction/config/rule isolation flags, and structured output
+- runs Claude with `--safe-mode` (`v2.1.169+`), `--setting-sources user`, MCP disabled, explicit allowed tools, and `--fallback-model` when set, so reviewed-repo hooks/skills/MCP do not affect the review run while normal auth still works; managed settings policy can still apply
+- refuses Droid reviews until the CLI exposes a complete project-instruction and tool-isolation contract
+- runs Pi `v0.79.0+` from neutral temporary directories with `--no-approve`, `--no-session`, disabled Pi context/resource loading, and `--no-tools` because its built-in read tools are not repository-confined
+- runs OpenCode with `opencode run --dir <repo> --pure --format json` from a neutral temporary directory, forwards `--model` and `--variant`, injects deny-by-default permissions, disables project config loading, and passes the review prompt over stdin
+- runs Cursor only with mandatory trusted-workspace opt-in, uses `cursor-agent --print --mode ask --sandbox enabled --output-format json`, forwards `--model`, passes the review prompt over stdin, and always refuses project-local hooks/MCP
+- prints `review still running: <engine> elapsed=<seconds>s pid=<pid>` to stderr at long-running intervals while waiting for the selected review engine, unless streamed output or compact Codex activity has been visible recently
+- prints `autoreview clean: no accepted/actionable findings reported` when the selected review command exits 0
+- exits nonzero when accepted/actionable findings are present
+
+## Final Report
+
+Include:
+
+- review command used
+- tests/proof run
+- findings accepted/rejected, briefly why
+- the clean review result from the final helper/review run, or why a remaining finding was consciously rejected
+
+Do not run another review solely to improve the final report wording. If the final helper run exited 0 and produced no accepted/actionable findings, report that exact run as clean.
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'git status -sb; git diff --name-only 992de73c08fcc672d5c67e6acfd494bc22b51802' in C:\src\openclaw-catalog-restack
+ succeeded in 689ms:
+## user/giodl/cli-catalog-review-schema-fixtures
+src/cli-catalog-overlay/schema-fixtures.test.ts
+test/fixtures/cli-catalog-overlay/catalog-audit.schema.json
+test/fixtures/cli-catalog-overlay/catalog-list.schema.json
+test/fixtures/cli-catalog-overlay/catalog-prompt-projection.schema.json
+test/fixtures/cli-catalog-overlay/catalog-summary.schema.json
+test/fixtures/cli-catalog-overlay/catalog-test-matrix.schema.json
+warning: unable to access 'C:\Users\giodl/.config/git/ignore': Permission denied
+warning: unable to access 'C:\Users\giodl/.config/git/ignore': Permission denied
+warning: unable to access 'C:\Users\giodl/.config/git/ignore': Permission denied
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-ChildItem -Path src,test -Filter AGENTS.md -Recurse | Select-Object -ExpandProperty FullName' in C:\src\openclaw-catalog-restack
+ succeeded in 403ms:
+C:\src\openclaw-catalog-restack\src\agents\AGENTS.md
+C:\src\openclaw-catalog-restack\src\agents\embedded-agent-runner\run\AGENTS.md
+C:\src\openclaw-catalog-restack\src\agents\tools\AGENTS.md
+C:\src\openclaw-catalog-restack\src\channels\AGENTS.md
+C:\src\openclaw-catalog-restack\src\channels\plugins\contracts\test-helpers\AGENTS.md
+C:\src\openclaw-catalog-restack\src\gateway\AGENTS.md
+C:\src\openclaw-catalog-restack\src\gateway\server-methods\AGENTS.md
+C:\src\openclaw-catalog-restack\src\infra\outbound\AGENTS.md
+C:\src\openclaw-catalog-restack\src\plugin-sdk\AGENTS.md
+C:\src\openclaw-catalog-restack\src\plugins\AGENTS.md
+C:\src\openclaw-catalog-restack\src\tui\AGENTS.md
+C:\src\openclaw-catalog-restack\test\AGENTS.md
+C:\src\openclaw-catalog-restack\test\helpers\AGENTS.md
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content -LiteralPath test/AGENTS.md' in C:\src\openclaw-catalog-restack
+ succeeded in 373ms:
+# Test Rules
+
+- Fake-timer tests in `unit-fast` belong in `vitest.unit-fast-fake-timers`: `unit-fast` is `isolate: false` and parallel, so fake timers share worker globals and can hang unrelated real-timer tests.
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'git diff --stat 992de73c08fcc672d5c67e6acfd494bc22b51802; git diff --color=never 992de73c08fcc672d5c67e6acfd494bc22b51802 -- src/cli-catalog-overlay/schema-fixtures.test.ts' in C:\src\openclaw-catalog-restack
+ succeeded in 705ms:
+ src/cli-catalog-overlay/schema-fixtures.test.ts    | 276 +++++++++++++++
+ .../cli-catalog-overlay/catalog-audit.schema.json  | 146 ++++++++
+ .../cli-catalog-overlay/catalog-list.schema.json   | 378 +++++++++++++++++++++
+ .../catalog-prompt-projection.schema.json          |  43 +++
+ .../catalog-summary.schema.json                    |  74 ++++
+ .../catalog-test-matrix.schema.json                | 106 ++++++
+ 6 files changed, 1023 insertions(+)
+diff --git a/src/cli-catalog-overlay/schema-fixtures.test.ts b/src/cli-catalog-overlay/schema-fixtures.test.ts
+new file mode 100644
+index 0000000000..0f1097038f
+--- /dev/null
++++ b/src/cli-catalog-overlay/schema-fixtures.test.ts
+@@ -0,0 +1,276 @@
++import { readFileSync, writeFileSync } from "node:fs";
++import path from "node:path";
++import { afterEach, beforeEach, describe, expect, it } from "vitest";
++import { buildCatalogAudit } from "./audit.js";
++import { buildCatalogList } from "./list.js";
++import type { CliCatalogNodeCommand } from "./node-commands.js";
++import { buildCatalogOperatorSummary } from "./operator-summary.js";
++import { buildPluginCatalogCommands } from "./plugin-commands.js";
++import { listCliCatalogPromptSurfaces } from "./prompt-projection.js";
++import type { CliCatalogRuntimeCommand } from "./runtime-commands.js";
++import { buildCatalogTestMatrix } from "./test-matrix.js";
++
++type JsonValue =
++  | null
++  | boolean
++  | number
++  | string
++  | readonly JsonValue[]
++  | { readonly [key: string]: JsonValue };
++
++type ArrayContract = {
++  readonly count: number;
++  readonly itemFields: readonly string[];
++  readonly ids?: readonly string[];
++};
++
++const FIXTURE_DIR = path.join(process.cwd(), "test/fixtures/cli-catalog-overlay");
++
++let originalPrivateQaCli: string | undefined;
++
++function sortedKeys(value: unknown): readonly string[] {
++  if (!value || typeof value !== "object" || Array.isArray(value)) {
++    return [];
++  }
++  return Object.keys(value).toSorted();
++}
++
++function idValue(value: unknown): string | null {
++  if (!value || typeof value !== "object" || Array.isArray(value)) {
++    return null;
++  }
++  const record = value as Record<string, unknown>;
++  const candidate =
++    record.id ?? record.routeId ?? record.policyKey ?? record.name ?? record.sourceId;
++  return typeof candidate === "string" ? candidate : null;
++}
++
++function arrayContract(items: readonly unknown[]): ArrayContract {
++  const itemFields = [...new Set(items.flatMap((item) => sortedKeys(item)))].toSorted();
++  const ids = items
++    .map(idValue)
++    .filter((value): value is string => Boolean(value))
++    .toSorted();
++  return {
++    count: items.length,
++    itemFields,
++    ...(ids.length > 0 ? { ids } : {}),
++  };
++}
++
++function readFixture(name: string): JsonValue {
++  return JSON.parse(readFileSync(path.join(FIXTURE_DIR, name), "utf8")) as JsonValue;
++}
++
++function expectFixture(name: string, value: JsonValue): void {
++  if (process.env.UPDATE_CATALOG_SCHEMA_FIXTURES === "1") {
++    writeFileSync(path.join(FIXTURE_DIR, name), JSON.stringify(value, null, 2) + "\n");
++  }
++  expect(value).toEqual(readFixture(name));
++}
++
++const sampleRuntimeCommands: readonly CliCatalogRuntimeCommand[] = [
++  {
++    commandPath: ["demo", "runtime"],
++    name: "runtime",
++    aliases: ["rt"],
++    description: "Demo runtime command",
++    hasSubcommands: false,
++    sourceKind: "runtime",
++    sourceId: "demo runtime",
++    discoveryMode: "runtime-registered",
++    visibility: ["audit", "operator", "policy"],
++  },
++];
++
++const sampleNodeCommands: readonly CliCatalogNodeCommand[] = [
++  {
++    id: "node:demo-filesystem:filesystem.read",
++    command: "filesystem.read",
++    title: "Read file through paired node",
++    nodeId: "demo-filesystem",
++    nodeName: "Demo filesystem node",
++    cap: "filesystem",
++    description: "Read a file through a paired node command declaration.",
++    argumentHints: ["path"],
++    invocationHint:
++      'openclaw nodes invoke --node demo-filesystem --command filesystem.read --params {"path":"..."}',
++    availability: "approved",
++    approvalKind: "pairing",
++    risk: "medium",
++    confirmationRequired: true,
++    effectMode: "read",
++    effects: ["filesystem.read"],
++    trustBoundary: "paired-node",
++    sourceKind: "node-pairing",
++    sourceId: "demo-filesystem:filesystem.read",
++    discoveryMode: "paired-node-declaration",
++    visibility: ["docs", "prompt", "audit", "operator", "policy"],
++  },
++];
++
++const samplePluginCommands = buildPluginCatalogCommands([
++  {
++    pluginId: "demo-plugin",
++    parentPath: ["demo"],
++    descriptors: [
++      {
++        name: "plugin",
++        description: "Demo plugin command",
++        hasSubcommands: false,
++        catalog: { visibility: ["prompt", "docs"] },
++      },
++    ],
++  },
++]);
++
++function buildCatalogListSchemaFixture(): JsonValue {
++  const list = buildCatalogList({
++    runtimeCommands: sampleRuntimeCommands,
++    pluginCommands: samplePluginCommands,
++    nodeCommands: sampleNodeCommands,
++  });
++  return {
++    schemaVersion: list.schemaVersion,
++    generatedFrom: list.generatedFrom,
++    topLevelFields: sortedKeys(list),
++    counts: list.counts,
++    countFields: sortedKeys(list.counts),
++    cliFields: sortedKeys(list.cli),
++    descriptors: arrayContract(list.cli.descriptors),
++    commandRoutes: arrayContract(list.cli.commandRoutes),
++    routedOperations: arrayContract(list.cli.routedOperations),
++    runtimeCommandScope: list.cli.runtimeCommandScope,
++    runtimeCommands: arrayContract(list.cli.runtimeCommands),
++    pluginCommands: arrayContract(list.cli.pluginCommands),
++    nodeCommands: arrayContract(list.cli.nodeCommands),
++    agentToolSurfaces: arrayContract(list.agentToolSurfaces),
++    promptProjection: {
++      fields: sortedKeys(list.promptProjection),
++      routedOperationIds: list.promptProjection.routedOperationIds.toSorted(),
++      agentToolSurfaceIds: list.promptProjection.agentToolSurfaceIds.toSorted(),
++    },
++  };
++}
++
++function buildCatalogAuditSchemaFixture(): JsonValue {
++  const audit = buildCatalogAudit(buildCatalogList({ nodeCommands: sampleNodeCommands }));
++  return {
++    schemaVersion: audit.schemaVersion,
++    generatedFrom: audit.generatedFrom,
++    topLevelFields: sortedKeys(audit),
++    counts: audit.counts,
++    countFields: sortedKeys(audit.counts),
++    surfaceFields: sortedKeys(audit.surfaces),
++    byRisk: arrayContract(audit.surfaces.byRisk),
++    byEffectMode: arrayContract(audit.surfaces.byEffectMode),
++    byOwner: arrayContract(audit.surfaces.byOwner),
++    confirmationRequiredSurfaceIds: audit.surfaces.confirmationRequiredSurfaceIds,
++    commandRouteFields: sortedKeys(audit.commandRoutes),
++    byPolicyKey: arrayContract(audit.commandRoutes.byPolicyKey),
++    routesWithoutPolicyKeys: audit.commandRoutes.routesWithoutPolicyKeys.map((path) =>
++      path.join(" "),
++    ),
++    nodeCommandFields: sortedKeys(audit.nodeCommands),
++    nodeCommandsByAvailability: arrayContract(audit.nodeCommands.byAvailability),
++    nodeCommandsByApprovalKind: arrayContract(audit.nodeCommands.byApprovalKind),
++    nodeCommandsByTrustBoundary: arrayContract(audit.nodeCommands.byTrustBoundary),
++    nodeCommandApprovalRequiredIds: audit.nodeCommands.approvalRequiredCommandIds,
++  };
++}
++
++function buildCatalogTestMatrixSchemaFixture(): JsonValue {
++  const matrix = buildCatalogTestMatrix({
++    list: buildCatalogList({ nodeCommands: sampleNodeCommands }),
++    coverageEvidence: [
++      {
++        routeId: "gateway-status",
++        testPath: "src/cli/catalog-cli.test.ts",
++        testName: "prints catalog list Markdown by default",
++      },
++    ],
++  });
++  return {
++    schemaVersion: matrix.schemaVersion,
++    generatedFrom: matrix.generatedFrom,
++    topLevelFields: sortedKeys(matrix),
++    counts: matrix.counts,
++    countFields: sortedKeys(matrix.counts),
++    candidates: arrayContract(matrix.candidates),
++    nodeCommandCandidates: arrayContract(matrix.nodeCommandCandidates),
++    coverageGaps: arrayContract(matrix.coverageGaps),
++    candidateRouteIds: matrix.candidates.map((candidate) => candidate.routeId).toSorted(),
++  };
++}
++
++function buildCatalogSummarySchemaFixture(): JsonValue {
++  const list = buildCatalogList({ nodeCommands: sampleNodeCommands });
++  const summary = buildCatalogOperatorSummary({ list, audit: buildCatalogAudit(list) });
++  return {
++    schemaVersion: summary.schemaVersion,
++    generatedFrom: summary.generatedFrom,
++    topLevelFields: sortedKeys(summary),
++    counts: summary.counts,
++    countFields: sortedKeys(summary.counts),
++    attentionFields: sortedKeys(summary.attention),
++    attention: summary.attention,
++    nextChecks: summary.nextChecks,
++  };
++}
++
++function buildPromptProjectionSchemaFixture(): JsonValue {
++  const surfaces = listCliCatalogPromptSurfaces({
++    pluginCommands: samplePluginCommands,
++    promptPluginIds: new Set(["demo-plugin"]),
++    nodeCommands: sampleNodeCommands,
++    scope: "node-operator",
++  });
++  return {
++    count: surfaces.length,
++    itemFields: arrayContract(surfaces).itemFields,
++    ids: surfaces.map((surface) => surface.id).toSorted(),
++    pluginSurfaceIds: surfaces
++      .filter((surface) => surface.kind === "plugin-command")
++      .map((surface) => surface.id)
++      .toSorted(),
++    nodeCommandSurfaceIds: surfaces
++      .filter((surface) => surface.kind === "node-command")
++      .map((surface) => surface.id)
++      .toSorted(),
++  };
++}
++
++describe("cli catalog schema fixtures", () => {
++  beforeEach(() => {
++    originalPrivateQaCli = process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
++    delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
++  });
++
++  afterEach(() => {
++    if (originalPrivateQaCli === undefined) {
++      delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
++    } else {
++      process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = originalPrivateQaCli;
++    }
++  });
++
++  it("matches the catalog list schema fixture", () => {
++    expectFixture("catalog-list.schema.json", buildCatalogListSchemaFixture());
++  });
++
++  it("matches the catalog audit schema fixture", () => {
++    expectFixture("catalog-audit.schema.json", buildCatalogAuditSchemaFixture());
++  });
++
++  it("matches the catalog test-matrix schema fixture", () => {
++    expectFixture("catalog-test-matrix.schema.json", buildCatalogTestMatrixSchemaFixture());
++  });
++
++  it("matches the catalog summary schema fixture", () => {
++    expectFixture("catalog-summary.schema.json", buildCatalogSummarySchemaFixture());
++  });
++
++  it("matches the prompt projection schema fixture", () => {
++    expectFixture("catalog-prompt-projection.schema.json", buildPromptProjectionSchemaFixture());
++  });
++});
+warning: unable to access 'C:\Users\giodl/.config/git/ignore': Permission denied
+warning: unable to access 'C:\Users\giodl/.config/git/ignore': Permission denied
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-ChildItem src/cli-catalog-overlay; Get-Content src/cli-catalog-overlay/list.ts; Get-Content src/cli-catalog-overlay/audit.ts; Get-Content src/cli-catalog-overlay/test-matrix.ts; Get-Content src/cli-catalog-overlay/operator-summary.ts; Get-Content src/cli-catalog-overlay/prompt-projection.ts' in C:\src\openclaw-catalog-restack
+ succeeded in 696ms:
+
+    Directory: C:\src\openclaw-catalog-restack\src\cli-catalog-overlay
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            7/9/2026  3:42 PM           3304 audit.test.ts
+-a---            7/9/2026  3:25 PM           7462 audit.ts
+-a---            7/9/2026  3:25 PM           3930 list.test.ts
+-a---            7/9/2026  3:25 PM          11491 list.ts
+-a---            7/9/2026  1:35 PM           1883 node-commands.ts
+-a---            7/9/2026  3:42 PM           3175 operator-summary.test.ts
+-a---            7/9/2026  3:25 PM           5221 operator-summary.ts
+-a---            7/9/2026  3:42 PM           1588 plugin-commands.test.ts
+-a---            7/9/2026  3:42 PM           2073 plugin-commands.ts
+-a---            7/9/2026  3:39 PM           3989 prompt-projection.test.ts
+-a---            7/9/2026  3:39 PM           4404 prompt-projection.ts
+-a---            7/9/2026  3:39 PM           3107 registry-guards.test.ts
+-a---            7/9/2026  1:35 PM           1084 registry.test.ts
+-a---            7/9/2026  3:22 PM           7661 registry.ts
+-a---            7/9/2026  3:25 PM           1418 runtime-commands.test.ts
+-a---            7/9/2026  3:25 PM           1582 runtime-commands.ts
+-a---            7/9/2026  3:42 PM           9738 schema-fixtures.test.ts
+-a---            7/9/2026  3:25 PM           3320 test-matrix.test.ts
+-a---            7/9/2026  3:25 PM           6175 test-matrix.ts
+import { cliCommandCatalog } from "../cli/command-catalog.js";
+import { getCoreCliCommandDescriptors } from "../cli/program/core-command-descriptors.js";
+import { getSubCliEntries } from "../cli/program/subcli-descriptors.js";
+import { buildNodeCommandCatalog, type CliCatalogNodeCommand } from "./node-commands.js";
+import type { CliCatalogPluginCommand } from "./plugin-commands.js";
+import {
+  listCliCatalogSurfaces,
+  type CliCatalogDiscoveryMode,
+  type CliCatalogSourceKind,
+  type CliCatalogVisibility,
+} from "./registry.js";
+import type { CliCatalogRuntimeCommand } from "./runtime-commands.js";
+
+export type CliCatalogListSurface = {
+  readonly id: string;
+  readonly title: string;
+  readonly kind: string;
+  readonly dispatchMode: string;
+  readonly target: string;
+  readonly source: string;
+  readonly sourceKind: CliCatalogSourceKind;
+  readonly sourceId: string;
+  readonly discoveryMode: CliCatalogDiscoveryMode;
+  readonly visibility: readonly CliCatalogVisibility[];
+  readonly owner: string;
+  readonly status: string;
+  readonly risk: string;
+  readonly confirmationRequired: boolean;
+  readonly effectMode: string;
+  readonly effects: readonly string[];
+  readonly commandHints: readonly string[];
+  readonly descriptor?: {
+    readonly name: string;
+    readonly hasSubcommands: boolean;
+  };
+};
+
+export type CliCatalogListDescriptor = {
+  readonly name: string;
+  readonly description: string;
+  readonly hasSubcommands: boolean;
+  readonly parentDefaultHelp: boolean;
+  readonly source: "core" | "subcli";
+  readonly sourceKind: "core" | "subcli";
+  readonly sourceId: string;
+  readonly discoveryMode: "static-descriptor";
+  readonly visibility: readonly CliCatalogVisibility[];
+};
+
+export type CliCatalogListCommandRoute = {
+  readonly commandPath: readonly string[];
+  readonly exact: boolean;
+  readonly routeId?: string;
+  readonly policyKeys: readonly string[];
+  readonly sourceKind: "route-policy";
+  readonly sourceId: string;
+  readonly discoveryMode: "route-policy";
+  readonly visibility: readonly CliCatalogVisibility[];
+};
+
+export type CliCatalogListRoutedOperation = {
+  readonly id: string;
+  readonly commandPaths: readonly (readonly string[])[];
+  readonly sourceKind: "route-policy";
+  readonly discoveryMode: "route-policy";
+  readonly visibility: readonly CliCatalogVisibility[];
+};
+
+export type CliCatalogRuntimeCommandScope = "current-invocation-registered-tree";
+
+const RUNTIME_COMMAND_SCOPE: CliCatalogRuntimeCommandScope = "current-invocation-registered-tree";
+
+export type CliCatalogList = {
+  readonly schemaVersion: 1;
+  readonly generatedFrom: "cli-catalog-overlay";
+  readonly counts: {
+    readonly commandDescriptors: number;
+    readonly commandRoutes: number;
+    readonly routedOperations: number;
+    readonly agentToolSurfaces: number;
+    readonly promptProjection: number;
+    readonly runtimeCommands: number;
+    readonly pluginCommands: number;
+    readonly nodeCommands: number;
+  };
+  readonly cli: {
+    readonly descriptors: readonly CliCatalogListDescriptor[];
+    readonly commandRoutes: readonly CliCatalogListCommandRoute[];
+    readonly routedOperations: readonly CliCatalogListRoutedOperation[];
+    readonly runtimeCommandScope: CliCatalogRuntimeCommandScope;
+    readonly runtimeCommands: readonly CliCatalogRuntimeCommand[];
+    readonly pluginCommands: readonly CliCatalogPluginCommand[];
+    readonly nodeCommands: readonly CliCatalogNodeCommand[];
+  };
+  readonly agentToolSurfaces: readonly CliCatalogListSurface[];
+  readonly promptProjection: {
+    readonly routedOperationIds: readonly string[];
+    readonly agentToolSurfaceIds: readonly string[];
+  };
+};
+
+function mapSurfaces(): readonly CliCatalogListSurface[] {
+  return listCliCatalogSurfaces().map((surface) => ({
+    id: surface.id,
+    title: surface.title,
+    kind: surface.kind,
+    dispatchMode: surface.dispatchMode,
+    target: surface.target,
+    source: surface.source,
+    owner: surface.owner,
+    sourceKind: surface.sourceKind,
+    sourceId: surface.sourceId,
+    discoveryMode: surface.discoveryMode,
+    visibility: surface.visibility,
+    status: surface.status,
+    risk: surface.risk,
+    confirmationRequired: surface.confirmationRequired,
+    effectMode: surface.effectMode,
+    effects: surface.effects,
+    commandHints: surface.commandHints,
+    ...(surface.cliDescriptor
+      ? {
+          descriptor: {
+            name: surface.cliDescriptor.name,
+            hasSubcommands: surface.cliDescriptor.hasSubcommands,
+          },
+        }
+      : {}),
+  }));
+}
+
+function buildDescriptors(): readonly CliCatalogListDescriptor[] {
+  const core = getCoreCliCommandDescriptors().map((descriptor) => ({
+    name: descriptor.name,
+    description: descriptor.description,
+    hasSubcommands: descriptor.hasSubcommands,
+    parentDefaultHelp: Boolean(descriptor.parentDefaultHelp),
+    source: "core" as const,
+    sourceKind: "core" as const,
+    sourceId: descriptor.name,
+    discoveryMode: "static-descriptor" as const,
+    visibility: ["docs", "audit", "operator", "policy"] as const,
+  }));
+  const subcli = getSubCliEntries().map((descriptor) => ({
+    name: descriptor.name,
+    description: descriptor.description,
+    hasSubcommands: descriptor.hasSubcommands,
+    parentDefaultHelp: Boolean(descriptor.parentDefaultHelp),
+    source: "subcli" as const,
+    sourceKind: "subcli" as const,
+    sourceId: descriptor.name,
+    discoveryMode: "static-descriptor" as const,
+    visibility: ["docs", "audit", "operator", "policy"] as const,
+  }));
+  return [...core, ...subcli];
+}
+
+function buildCommandRoutes(): readonly CliCatalogListCommandRoute[] {
+  return cliCommandCatalog.map((entry) => ({
+    commandPath: entry.commandPath,
+    exact: Boolean(entry.exact),
+    ...(entry.route ? { routeId: entry.route.id } : {}),
+    policyKeys: entry.policy ? Object.keys(entry.policy).toSorted() : [],
+    sourceKind: "route-policy" as const,
+    sourceId: entry.commandPath.join(" "),
+    discoveryMode: "route-policy" as const,
+    visibility: ["audit", "operator", "policy"] as const,
+  }));
+}
+
+function buildRoutedOperations(
+  routes = buildCommandRoutes(),
+): readonly CliCatalogListRoutedOperation[] {
+  return [...new Set(routes.flatMap((route) => (route.routeId ? [route.routeId] : [])))]
+    .toSorted()
+    .map((id) => ({
+      id,
+      sourceKind: "route-policy" as const,
+      discoveryMode: "route-policy" as const,
+      visibility: ["prompt", "audit", "operator", "policy"] as const,
+      commandPaths: routes
+        .filter((route) => route.routeId === id)
+        .map((route) => route.commandPath),
+    }));
+}
+
+export function buildCatalogList(
+  params: {
+    runtimeCommands?: readonly CliCatalogRuntimeCommand[];
+    pluginCommands?: readonly CliCatalogPluginCommand[];
+    nodeCommands?: readonly CliCatalogNodeCommand[];
+  } = {},
+): CliCatalogList {
+  const descriptors = buildDescriptors();
+  const commandRoutes = buildCommandRoutes();
+  const routedOperations = buildRoutedOperations(commandRoutes);
+  const agentToolSurfaces = mapSurfaces();
+  const runtimeCommands = params.runtimeCommands ?? [];
+  const pluginCommands = params.pluginCommands ?? [];
+  const nodeCommands = buildNodeCommandCatalog(params.nodeCommands);
+  const promptProjection = {
+    routedOperationIds: routedOperations.map((operation) => operation.id),
+    agentToolSurfaceIds: agentToolSurfaces.map((surface) => surface.id),
+  };
+  return {
+    schemaVersion: 1,
+    generatedFrom: "cli-catalog-overlay",
+    counts: {
+      commandDescriptors: descriptors.length,
+      commandRoutes: commandRoutes.length,
+      routedOperations: routedOperations.length,
+      agentToolSurfaces: agentToolSurfaces.length,
+      promptProjection:
+        promptProjection.routedOperationIds.length + promptProjection.agentToolSurfaceIds.length,
+      runtimeCommands: runtimeCommands.length,
+      pluginCommands: pluginCommands.length,
+      nodeCommands: nodeCommands.length,
+    },
+    cli: {
+      descriptors,
+      commandRoutes,
+      routedOperations,
+      runtimeCommandScope: RUNTIME_COMMAND_SCOPE,
+      runtimeCommands,
+      pluginCommands,
+      nodeCommands,
+    },
+    agentToolSurfaces,
+    promptProjection,
+  };
+}
+
+export function renderCatalogListMarkdown(
+  params: {
+    runtimeCommands?: readonly CliCatalogRuntimeCommand[];
+    pluginCommands?: readonly CliCatalogPluginCommand[];
+    nodeCommands?: readonly CliCatalogNodeCommand[];
+  } = {},
+): string {
+  const list = buildCatalogList(params);
+  const lines = [
+    "# CLI Catalog Overlay List",
+    "",
+    "Read-only catalog of existing OpenClaw command metadata, command-routing metadata, routed operations, and agent tool surfaces.",
+    "",
+    "## Counts",
+    "",
+    `- CLI descriptors: ${list.counts.commandDescriptors}`,
+    `- Command routes: ${list.counts.commandRoutes}`,
+    `- Routed operations: ${list.counts.routedOperations}`,
+    `- Agent/tool surfaces: ${list.counts.agentToolSurfaces}`,
+    `- Prompt projection items: ${list.counts.promptProjection}`,
+    `- Runtime commands: ${list.counts.runtimeCommands}`,
+    `- Runtime command scope: ${list.cli.runtimeCommandScope}`,
+    `- Plugin descriptor commands: ${list.counts.pluginCommands}`,
+    `- Node/operator commands: ${list.counts.nodeCommands}`,
+    "",
+    "## Routed operations",
+    "",
+    "| Operation | Command paths |",
+    "| --- | --- |",
+  ];
+  for (const operation of list.cli.routedOperations) {
+    const paths = operation.commandPaths.map((path) => "`" + path.join(" ") + "`").join(", ");
+    lines.push(`| \`${operation.id}\` | ${paths || "None"} |`);
+  }
+  if (list.cli.pluginCommands.length > 0) {
+    lines.push(
+      "",
+      "## Plugin descriptor commands",
+      "",
+      "| Command path | Plugin | Description |",
+      "| --- | --- | --- |",
+    );
+    for (const command of list.cli.pluginCommands) {
+      lines.push(
+        `| \`${command.commandPath.join(" ")}\` | \`${command.pluginId}\` | ${command.description || "None"} |`,
+      );
+    }
+  }
+
+  if (list.cli.runtimeCommands.length > 0) {
+    lines.push(
+      "",
+      "## Runtime registered commands",
+      "",
+      "| Command path | Description |",
+      "| --- | --- |",
+    );
+    for (const command of list.cli.runtimeCommands) {
+      lines.push(`| \`${command.commandPath.join(" ")}\` | ${command.description || "None"} |`);
+    }
+  }
+
+  if (list.cli.nodeCommands.length > 0) {
+    lines.push(
+      "",
+      "## Node/operator commands",
+      "",
+      "| Command | Node | Availability | Approval | Risk | Effect mode | Invocation |",
+      "| --- | --- | --- | --- | --- | --- | --- |",
+    );
+    for (const command of list.cli.nodeCommands) {
+      lines.push(
+        `| \`${command.command}\` | ${command.nodeName ?? command.nodeId ?? "Any"} | \`${command.availability}\` | \`${command.approvalKind}\` | \`${command.risk}\` | \`${command.effectMode}\` | \`${command.invocationHint}\` |`,
+      );
+    }
+  }
+
+  lines.push(
+    "",
+    "## Agent/tool surfaces",
+    "",
+    "| Surface | Owner | Risk | Effect mode | Confirmation | Target | Source | Discovery |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+  );
+  for (const surface of list.agentToolSurfaces) {
+    lines.push(
+      `| \`${surface.id}\` | \`${surface.owner}\` | \`${surface.risk}\` | \`${surface.effectMode}\` | ${surface.confirmationRequired ? "yes" : "no"} | \`${surface.target}\` | ${surface.source} | \`${surface.discoveryMode}\` |`,
+    );
+  }
+  lines.push("");
+  return lines.join("\n");
+}
+import { buildCatalogList, type CliCatalogList } from "./list.js";
+
+export type CliCatalogAuditSurfaceGroup = {
+  readonly id: string;
+  readonly count: number;
+  readonly surfaceIds: readonly string[];
+};
+
+export type CliCatalogAuditRoutePolicyGroup = {
+  readonly policyKey: string;
+  readonly count: number;
+  readonly commandPaths: readonly (readonly string[])[];
+};
+
+export type CliCatalogAudit = {
+  readonly schemaVersion: 1;
+  readonly generatedFrom: "cli-catalog-overlay-audit";
+  readonly counts: {
+    readonly agentToolSurfaces: number;
+    readonly confirmationRequiredSurfaces: number;
+    readonly commandRoutes: number;
+    readonly commandRoutesWithPolicyKeys: number;
+    readonly nodeCommands: number;
+    readonly nodeCommandsRequiringApproval: number;
+    readonly routePolicyKeys: number;
+  };
+  readonly surfaces: {
+    readonly byRisk: readonly CliCatalogAuditSurfaceGroup[];
+    readonly byEffectMode: readonly CliCatalogAuditSurfaceGroup[];
+    readonly byOwner: readonly CliCatalogAuditSurfaceGroup[];
+    readonly confirmationRequiredSurfaceIds: readonly string[];
+  };
+  readonly commandRoutes: {
+    readonly byPolicyKey: readonly CliCatalogAuditRoutePolicyGroup[];
+    readonly routesWithoutPolicyKeys: readonly (readonly string[])[];
+  };
+  readonly nodeCommands: {
+    readonly byAvailability: readonly CliCatalogAuditSurfaceGroup[];
+    readonly byApprovalKind: readonly CliCatalogAuditSurfaceGroup[];
+    readonly byTrustBoundary: readonly CliCatalogAuditSurfaceGroup[];
+    readonly approvalRequiredCommandIds: readonly string[];
+  };
+};
+
+function commandPathLabel(path: readonly string[]): string {
+  return path.join(" ");
+}
+
+function markdownCommandPath(path: readonly string[]): string {
+  return "`" + commandPathLabel(path) + "`";
+}
+
+function groupSurfacesBy<T extends { readonly id: string }>(
+  surfaces: readonly T[],
+  getKey: (surface: T) => string,
+): readonly CliCatalogAuditSurfaceGroup[] {
+  const groups = new Map<string, string[]>();
+  for (const surface of surfaces) {
+    const key = getKey(surface);
+    const surfaceIds = groups.get(key) ?? [];
+    surfaceIds.push(surface.id);
+    groups.set(key, surfaceIds);
+  }
+  return [...groups.entries()]
+    .toSorted(([left], [right]) => left.localeCompare(right))
+    .map(([id, surfaceIds]) => ({
+      id,
+      count: surfaceIds.length,
+      surfaceIds: surfaceIds.toSorted(),
+    }));
+}
+
+function groupRoutesByPolicyKey(
+  routes: CliCatalogList["cli"]["commandRoutes"],
+): readonly CliCatalogAuditRoutePolicyGroup[] {
+  const groups = new Map<string, string[][]>();
+  for (const route of routes) {
+    for (const policyKey of route.policyKeys) {
+      const commandPaths = groups.get(policyKey) ?? [];
+      commandPaths.push([...route.commandPath]);
+      groups.set(policyKey, commandPaths);
+    }
+  }
+  return [...groups.entries()]
+    .toSorted(([left], [right]) => left.localeCompare(right))
+    .map(([policyKey, commandPaths]) => ({
+      policyKey,
+      count: commandPaths.length,
+      commandPaths: commandPaths.toSorted((left, right) =>
+        commandPathLabel(left).localeCompare(commandPathLabel(right)),
+      ),
+    }));
+}
+
+export function buildCatalogAudit(list = buildCatalogList()): CliCatalogAudit {
+  const confirmationRequiredSurfaceIds = list.agentToolSurfaces
+    .filter((surface) => surface.confirmationRequired)
+    .map((surface) => surface.id)
+    .toSorted();
+  const byPolicyKey = groupRoutesByPolicyKey(list.cli.commandRoutes);
+  const approvalRequiredCommandIds = list.cli.nodeCommands
+    .filter((command) => command.approvalKind !== "none" || command.availability !== "approved")
+    .map((command) => command.id)
+    .toSorted();
+  const routesWithoutPolicyKeys = list.cli.commandRoutes
+    .filter((route) => route.policyKeys.length === 0)
+    .map((route) => route.commandPath)
+    .toSorted((left, right) => commandPathLabel(left).localeCompare(commandPathLabel(right)));
+
+  return {
+    schemaVersion: 1,
+    generatedFrom: "cli-catalog-overlay-audit",
+    counts: {
+      agentToolSurfaces: list.agentToolSurfaces.length,
+      confirmationRequiredSurfaces: confirmationRequiredSurfaceIds.length,
+      commandRoutes: list.cli.commandRoutes.length,
+      commandRoutesWithPolicyKeys: list.cli.commandRoutes.length - routesWithoutPolicyKeys.length,
+      nodeCommands: list.cli.nodeCommands.length,
+      nodeCommandsRequiringApproval: approvalRequiredCommandIds.length,
+      routePolicyKeys: byPolicyKey.length,
+    },
+    surfaces: {
+      byRisk: groupSurfacesBy(list.agentToolSurfaces, (surface) => surface.risk),
+      byEffectMode: groupSurfacesBy(list.agentToolSurfaces, (surface) => surface.effectMode),
+      byOwner: groupSurfacesBy(list.agentToolSurfaces, (surface) => surface.owner),
+      confirmationRequiredSurfaceIds,
+    },
+    commandRoutes: {
+      byPolicyKey,
+      routesWithoutPolicyKeys,
+    },
+    nodeCommands: {
+      byAvailability: groupSurfacesBy(list.cli.nodeCommands, (command) => command.availability),
+      byApprovalKind: groupSurfacesBy(list.cli.nodeCommands, (command) => command.approvalKind),
+      byTrustBoundary: groupSurfacesBy(list.cli.nodeCommands, (command) => command.trustBoundary),
+      approvalRequiredCommandIds,
+    },
+  };
+}
+
+export function renderCatalogAuditMarkdown(): string {
+  const audit = buildCatalogAudit();
+  const lines = [
+    "# CLI Catalog Overlay Audit",
+    "",
+    "Read-only inventory grouped by risk, confirmation requirement, effect mode, owner, and command-route policy keys.",
+    "",
+    "## Counts",
+    "",
+    `- Agent/tool surfaces: ${audit.counts.agentToolSurfaces}`,
+    `- Confirmation-required surfaces: ${audit.counts.confirmationRequiredSurfaces}`,
+    `- Command routes: ${audit.counts.commandRoutes}`,
+    `- Command routes with policy keys: ${audit.counts.commandRoutesWithPolicyKeys}`,
+    `- Node/operator commands: ${audit.counts.nodeCommands}`,
+    `- Node/operator commands requiring approval: ${audit.counts.nodeCommandsRequiringApproval}`,
+    `- Route policy keys: ${audit.counts.routePolicyKeys}`,
+    "",
+    "## Surface groups",
+    "",
+    "| Group | Values |",
+    "| --- | --- |",
+    `| Risk | ${audit.surfaces.byRisk.map((group) => `\`${group.id}\` (${group.count})`).join(", ")} |`,
+    `| Effect mode | ${audit.surfaces.byEffectMode.map((group) => `\`${group.id}\` (${group.count})`).join(", ")} |`,
+    `| Owner | ${audit.surfaces.byOwner.map((group) => `\`${group.id}\` (${group.count})`).join(", ")} |`,
+    `| Confirmation required | ${audit.surfaces.confirmationRequiredSurfaceIds.map((id) => "`" + id + "`").join(", ") || "None"} |`,
+    "",
+    "## Command route policy keys",
+    "",
+    "| Policy key | Routes |",
+    "| --- | --- |",
+  ];
+  for (const group of audit.commandRoutes.byPolicyKey) {
+    lines.push(
+      `| \`${group.policyKey}\` | ${group.commandPaths.map(markdownCommandPath).join(", ")} |`,
+    );
+  }
+  lines.push(
+    "",
+    "## Node/operator command groups",
+    "",
+    "| Group | Values |",
+    "| --- | --- |",
+    `| Availability | ${audit.nodeCommands.byAvailability.map((group) => `\`${group.id}\` (${group.count})`).join(", ") || "None"} |`,
+    `| Approval | ${audit.nodeCommands.byApprovalKind.map((group) => `\`${group.id}\` (${group.count})`).join(", ") || "None"} |`,
+    `| Trust boundary | ${audit.nodeCommands.byTrustBoundary.map((group) => `\`${group.id}\` (${group.count})`).join(", ") || "None"} |`,
+  );
+  lines.push("");
+  return lines.join("\n");
+}
+import {
+  buildCatalogList,
+  type CliCatalogList,
+  type CliCatalogListRoutedOperation,
+} from "./list.js";
+
+export type CliCatalogTestCoverageEvidence = {
+  readonly routeId: string;
+  readonly testPath: string;
+  readonly testName: string;
+};
+
+export type CliCatalogTestMatrixCandidate = {
+  readonly routeId: string;
+  readonly commandPaths: readonly (readonly string[])[];
+  readonly smokeCommands: readonly string[];
+  readonly recommendedTestName: string;
+  readonly coverageEvidence: readonly CliCatalogTestCoverageEvidence[];
+};
+
+export type CliCatalogNodeCommandTestCandidate = {
+  readonly commandId: string;
+  readonly command: string;
+  readonly smokeCommand: string;
+  readonly recommendedTestName: string;
+  readonly approvalKind: string;
+  readonly availability: string;
+};
+
+export type CliCatalogTestMatrix = {
+  readonly schemaVersion: 1;
+  readonly generatedFrom: "cli-catalog-overlay-test-matrix";
+  readonly counts: {
+    readonly routedOperations: number;
+    readonly nodeCommands: number;
+    readonly smokeCandidates: number;
+    readonly nodeCommandSmokeCandidates: number;
+    readonly coveredRoutedOperations: number;
+    readonly coverageGaps: number;
+  };
+  readonly candidates: readonly CliCatalogTestMatrixCandidate[];
+  readonly nodeCommandCandidates: readonly CliCatalogNodeCommandTestCandidate[];
+  readonly coverageGaps: readonly CliCatalogTestMatrixCandidate[];
+};
+
+function commandPathLabel(path: readonly string[]): string {
+  return path.join(" ");
+}
+
+function markdownCommand(value: string): string {
+  return "`" + value + "`";
+}
+
+function recommendedTestName(operation: CliCatalogListRoutedOperation): string {
+  return `catalog routed operation: ${operation.id}`;
+}
+
+function recommendedNodeCommandTestName(commandId: string): string {
+  return `catalog node command: ${commandId}`;
+}
+
+function groupCoverageByRouteId(
+  coverageEvidence: readonly CliCatalogTestCoverageEvidence[],
+): ReadonlyMap<string, readonly CliCatalogTestCoverageEvidence[]> {
+  const byRouteId = new Map<string, CliCatalogTestCoverageEvidence[]>();
+  for (const evidence of coverageEvidence) {
+    const routeId = evidence.routeId.trim();
+    if (!routeId) {
+      continue;
+    }
+    const entries = byRouteId.get(routeId) ?? [];
+    entries.push(evidence);
+    byRouteId.set(routeId, entries);
+  }
+  return new Map(
+    [...byRouteId.entries()].map(([routeId, entries]) => [
+      routeId,
+      entries.toSorted((left, right) =>
+        `${left.testPath}\0${left.testName}`.localeCompare(`${right.testPath}\0${right.testName}`),
+      ),
+    ]),
+  );
+}
+
+export function buildCatalogTestMatrix(
+  params: {
+    readonly list?: CliCatalogList;
+    readonly coverageEvidence?: readonly CliCatalogTestCoverageEvidence[];
+  } = {},
+): CliCatalogTestMatrix {
+  const list = params.list ?? buildCatalogList();
+  const coverageByRouteId = groupCoverageByRouteId(params.coverageEvidence ?? []);
+  const candidates = list.cli.routedOperations.map((operation) => {
+    const smokeCommands = operation.commandPaths.map(commandPathLabel);
+    return {
+      routeId: operation.id,
+      commandPaths: operation.commandPaths,
+      smokeCommands,
+      recommendedTestName: recommendedTestName(operation),
+      coverageEvidence: coverageByRouteId.get(operation.id) ?? [],
+    };
+  });
+  const coverageGaps = candidates.filter((candidate) => candidate.coverageEvidence.length === 0);
+  const nodeCommandCandidates = list.cli.nodeCommands.map((command) => ({
+    commandId: command.id,
+    command: command.command,
+    smokeCommand: command.invocationHint,
+    recommendedTestName: recommendedNodeCommandTestName(command.id),
+    approvalKind: command.approvalKind,
+    availability: command.availability,
+  }));
+
+  return {
+    schemaVersion: 1,
+    generatedFrom: "cli-catalog-overlay-test-matrix",
+    counts: {
+      routedOperations: list.cli.routedOperations.length,
+      nodeCommands: list.cli.nodeCommands.length,
+      smokeCandidates: candidates.length,
+      nodeCommandSmokeCandidates: nodeCommandCandidates.length,
+      coveredRoutedOperations: candidates.length - coverageGaps.length,
+      coverageGaps: coverageGaps.length,
+    },
+    candidates,
+    nodeCommandCandidates,
+    coverageGaps,
+  };
+}
+
+export function renderCatalogTestMatrixMarkdown(): string {
+  const matrix = buildCatalogTestMatrix();
+  const lines = [
+    "# CLI Catalog Overlay Test Matrix",
+    "",
+    "Read-only routed-operation smoke-test candidates derived from the catalog. Coverage gaps are explicit until a test supplies coverage evidence for a route ID.",
+    "",
+    "## Counts",
+    "",
+    `- Routed operations: ${matrix.counts.routedOperations}`,
+    `- Node/operator commands: ${matrix.counts.nodeCommands}`,
+    `- Smoke candidates: ${matrix.counts.smokeCandidates}`,
+    `- Node/operator smoke candidates: ${matrix.counts.nodeCommandSmokeCandidates}`,
+    `- Covered routed operations: ${matrix.counts.coveredRoutedOperations}`,
+    `- Coverage gaps: ${matrix.counts.coverageGaps}`,
+    "",
+    "## Candidates",
+    "",
+    "| Route ID | Smoke commands | Recommended test name | Coverage |",
+    "| --- | --- | --- | --- |",
+  ];
+  for (const candidate of matrix.candidates) {
+    const coverage =
+      candidate.coverageEvidence.length > 0
+        ? candidate.coverageEvidence
+            .map((evidence) => `${evidence.testPath} (${evidence.testName})`)
+            .join("; ")
+        : "Gap";
+    lines.push(
+      `| \`${candidate.routeId}\` | ${candidate.smokeCommands.map(markdownCommand).join(", ")} | ${candidate.recommendedTestName} | ${coverage} |`,
+    );
+  }
+  if (matrix.nodeCommandCandidates.length > 0) {
+    lines.push(
+      "",
+      "## Node/operator candidates",
+      "",
+      "| Command ID | Smoke command | Approval | Availability | Recommended test name |",
+      "| --- | --- | --- | --- | --- |",
+    );
+    for (const candidate of matrix.nodeCommandCandidates) {
+      lines.push(
+        `| \`${candidate.commandId}\` | ${markdownCommand(candidate.smokeCommand)} | \`${candidate.approvalKind}\` | \`${candidate.availability}\` | ${candidate.recommendedTestName} |`,
+      );
+    }
+  }
+  lines.push("");
+  return lines.join("\n");
+}
+import { buildCatalogAudit, type CliCatalogAudit } from "./audit.js";
+import { buildCatalogList, type CliCatalogList } from "./list.js";
+import { buildCatalogTestMatrix, type CliCatalogTestMatrix } from "./test-matrix.js";
+
+export type CliCatalogOperatorSummary = {
+  readonly schemaVersion: 1;
+  readonly generatedFrom: "cli-catalog-overlay-operator-summary";
+  readonly counts: {
+    readonly commandDescriptors: number;
+    readonly commandRoutes: number;
+    readonly routedOperations: number;
+    readonly agentToolSurfaces: number;
+    readonly nodeCommands: number;
+    readonly nodeCommandsRequiringApproval: number;
+    readonly confirmationRequiredSurfaces: number;
+    readonly routePolicyKeys: number;
+    readonly coverageGaps: number;
+  };
+  readonly attention: {
+    readonly confirmationRequiredSurfaceIds: readonly string[];
+    readonly mediumRiskSurfaceIds: readonly string[];
+    readonly mixedEffectSurfaceIds: readonly string[];
+    readonly nodeCommandApprovalIds: readonly string[];
+    readonly policyKeyIds: readonly string[];
+  };
+  readonly nextChecks: readonly string[];
+};
+
+function groupIds(
+  groups: readonly {
+    readonly id: string;
+    readonly surfaceIds: readonly string[];
+  }[],
+  id: string,
+): readonly string[] {
+  return groups.find((group) => group.id === id)?.surfaceIds ?? [];
+}
+
+export function buildCatalogOperatorSummary(
+  params: {
+    readonly list?: CliCatalogList;
+    readonly audit?: CliCatalogAudit;
+    readonly testMatrix?: CliCatalogTestMatrix;
+  } = {},
+): CliCatalogOperatorSummary {
+  const list = params.list ?? buildCatalogList();
+  const audit = params.audit ?? buildCatalogAudit(list);
+  const testMatrix = params.testMatrix ?? buildCatalogTestMatrix({ list });
+  const policyKeyIds = audit.commandRoutes.byPolicyKey.map((group) => group.policyKey).toSorted();
+  const confirmationRequiredSurfaceIds = audit.surfaces.confirmationRequiredSurfaceIds;
+  const coverageGaps = testMatrix.counts.coverageGaps;
+
+  return {
+    schemaVersion: 1,
+    generatedFrom: "cli-catalog-overlay-operator-summary",
+    counts: {
+      commandDescriptors: list.counts.commandDescriptors,
+      commandRoutes: list.counts.commandRoutes,
+      routedOperations: list.counts.routedOperations,
+      agentToolSurfaces: list.counts.agentToolSurfaces,
+      nodeCommands: list.counts.nodeCommands,
+      nodeCommandsRequiringApproval: audit.counts.nodeCommandsRequiringApproval,
+      confirmationRequiredSurfaces: audit.counts.confirmationRequiredSurfaces,
+      routePolicyKeys: audit.counts.routePolicyKeys,
+      coverageGaps,
+    },
+    attention: {
+      confirmationRequiredSurfaceIds,
+      mediumRiskSurfaceIds: groupIds(audit.surfaces.byRisk, "medium"),
+      mixedEffectSurfaceIds: groupIds(audit.surfaces.byEffectMode, "mixed"),
+      nodeCommandApprovalIds: audit.nodeCommands.approvalRequiredCommandIds,
+      policyKeyIds,
+    },
+    nextChecks: [
+      confirmationRequiredSurfaceIds.length > 0
+        ? "Review confirmation-required catalog surfaces before widening automation."
+        : "",
+      policyKeyIds.includes("networkProxy")
+        ? "Review command routes with networkProxy policy before changing proxy startup behavior."
+        : "",
+      coverageGaps > 0
+        ? "Use catalog test-matrix output to prioritize routed-operation smoke coverage."
+        : "",
+      audit.nodeCommands.approvalRequiredCommandIds.length > 0
+        ? "Review node/operator command approval state before exposing node-scoped prompt projections."
+        : "",
+    ].filter(Boolean),
+  };
+}
+
+function inlineCodeList(values: readonly string[]): string {
+  return values.length > 0 ? values.map((value) => "`" + value + "`").join(", ") : "None";
+}
+
+export function renderCatalogOperatorSummaryMarkdown(): string {
+  const summary = buildCatalogOperatorSummary();
+  return [
+    "# CLI Catalog Operator Summary",
+    "",
+    "Compact read-only summary for diagnostics, operator review, and admin handoffs.",
+    "",
+    "## Counts",
+    "",
+    `- CLI descriptors: ${summary.counts.commandDescriptors}`,
+    `- Command routes: ${summary.counts.commandRoutes}`,
+    `- Routed operations: ${summary.counts.routedOperations}`,
+    `- Agent/tool surfaces: ${summary.counts.agentToolSurfaces}`,
+    `- Node/operator commands: ${summary.counts.nodeCommands}`,
+    `- Node/operator commands requiring approval: ${summary.counts.nodeCommandsRequiringApproval}`,
+    `- Confirmation-required surfaces: ${summary.counts.confirmationRequiredSurfaces}`,
+    `- Route policy keys: ${summary.counts.routePolicyKeys}`,
+    `- Test-matrix coverage gaps: ${summary.counts.coverageGaps}`,
+    "",
+    "## Attention",
+    "",
+    `- Confirmation required: ${inlineCodeList(summary.attention.confirmationRequiredSurfaceIds)}`,
+    `- Medium risk: ${inlineCodeList(summary.attention.mediumRiskSurfaceIds)}`,
+    `- Mixed effect mode: ${inlineCodeList(summary.attention.mixedEffectSurfaceIds)}`,
+    `- Node/operator approval: ${inlineCodeList(summary.attention.nodeCommandApprovalIds)}`,
+    `- Route policy keys: ${inlineCodeList(summary.attention.policyKeyIds)}`,
+    "",
+    "## Next checks",
+    "",
+    ...summary.nextChecks.map((check) => `- ${check}`),
+    "",
+  ].join("\n");
+}
+import { cliCommandCatalog } from "../cli/command-catalog.js";
+import type { CliCatalogNodeCommand } from "./node-commands.js";
+import type { CliCatalogPluginCommand } from "./plugin-commands.js";
+import { listCliCatalogSurfaces } from "./registry.js";
+
+export type CliCatalogPromptSurface = {
+  readonly id: string;
+  readonly title: string;
+  readonly kind: string;
+  readonly dispatchMode: string;
+  readonly target: string;
+  readonly examples: readonly string[];
+  readonly commandHints: readonly string[];
+  readonly risk: string;
+  readonly confirmationRequired: boolean;
+};
+
+const ROUTED_OPERATION_TITLES: Readonly<Record<string, string>> = {
+  "agents-list": "List agents",
+  "channels-list": "List channels",
+  "channels-status": "Channel status",
+  "config-get": "Read config",
+  "config-unset": "Unset config",
+  "gateway-status": "Gateway status",
+  health: "Health check",
+  "models-list": "List models",
+  "models-status": "Model status",
+  "plugins-list": "List plugins",
+  sessions: "List sessions",
+  status: "Status summary",
+  "tasks-audit": "Audit tasks",
+  "tasks-list": "List tasks",
+};
+
+type PromptRoutedOperation = {
+  readonly id: string;
+  readonly commandPaths: readonly (readonly string[])[];
+};
+
+function routedOperationRisk(id: string): "low" | "medium" {
+  return id === "config-unset" ? "medium" : "low";
+}
+
+function listPromptRoutedOperations(): readonly PromptRoutedOperation[] {
+  const byId = new Map<string, string[][]>();
+  for (const entry of cliCommandCatalog) {
+    const id = entry.route?.id;
+    if (!id) {
+      continue;
+    }
+    const commandPaths = byId.get(id) ?? [];
+    commandPaths.push([...entry.commandPath]);
+    byId.set(id, commandPaths);
+  }
+
+  return [...byId.entries()]
+    .toSorted(([left], [right]) => left.localeCompare(right))
+    .map(([id, commandPaths]) => ({ id, commandPaths }));
+}
+
+export function listCliCatalogPromptSurfaces(
+  params: {
+    pluginCommands?: readonly CliCatalogPluginCommand[];
+    promptPluginIds?: ReadonlySet<string>;
+    nodeCommands?: readonly CliCatalogNodeCommand[];
+    scope?: "default" | "node-operator";
+  } = {},
+): readonly CliCatalogPromptSurface[] {
+  const routedOperations = listPromptRoutedOperations().map((operation) => ({
+    id: operation.id,
+    title: ROUTED_OPERATION_TITLES[operation.id] ?? operation.id,
+    kind: "routed-operation",
+    dispatchMode: "direct",
+    target: operation.commandPaths[0]?.join(" ") ?? operation.id,
+    examples: operation.commandPaths.slice(0, 2).map((path) => path.join(" ")),
+    commandHints: operation.commandPaths.map((path) => path.join(" ")),
+    risk: routedOperationRisk(operation.id),
+    confirmationRequired: routedOperationRisk(operation.id) !== "low",
+  }));
+  const agentToolSurfaces = listCliCatalogSurfaces()
+    .filter((surface) => surface.visibility.includes("prompt"))
+    .map((surface) => ({
+      id: surface.id,
+      title: surface.title,
+      kind: surface.kind,
+      dispatchMode: surface.dispatchMode,
+      target: surface.target,
+      examples: surface.examples,
+      commandHints: surface.commandHints,
+      risk: surface.risk,
+      confirmationRequired: surface.confirmationRequired,
+    }));
+  const pluginSurfaces = (params.pluginCommands ?? [])
+    .filter((command) => params.promptPluginIds?.has(command.pluginId))
+    .map((command) => ({
+      id: command.sourceId,
+      title: command.description || command.name,
+      kind: "plugin-command",
+      dispatchMode: "metadata-first",
+      target: command.commandPath.join(" "),
+      examples: [command.commandPath.join(" ")],
+      commandHints: [command.commandPath.join(" ")],
+      risk: "medium",
+      confirmationRequired: true,
+    }));
+  const nodeSurfaces =
+    params.scope === "node-operator"
+      ? (params.nodeCommands ?? [])
+          .filter((command) => command.visibility.includes("prompt"))
+          .map((command) => ({
+            id: command.id,
+            title: command.title,
+            kind: "node-command",
+            dispatchMode: "metadata-first",
+            target: command.command,
+            examples: [command.invocationHint],
+            commandHints: [command.invocationHint, ...command.argumentHints],
+            risk: command.risk,
+            confirmationRequired: command.confirmationRequired,
+          }))
+      : [];
+  return [...routedOperations, ...agentToolSurfaces, ...pluginSurfaces, ...nodeSurfaces];
+}
+
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'rg "OPENCLAW_ENABLE_PRIVATE_QA_CLI|PRIVATE_QA" -n src test | Select-Object -First 50; Get-Content src/cli/program/subcli-descriptors.ts; Get-Content src/cli/program/core-command-descriptors.ts' in C:\src\openclaw-catalog-restack
+2026-07-09T22:43:15.961386Z ERROR codex_core::tools::router: error=Exit code: 124
+Wall time: 10.3 seconds
+Output:
+command timed out after 10275 milliseconds
+src\dockerfile.test.ts:201:      "export OPENCLAW_BUILD_PRIVATE_QA=1 OPENCLAW_ENABLE_PRIVATE_QA_CLI=1",
+src\cli-catalog-overlay\schema-fixtures.test.ts:245:    originalPrivateQaCli = process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli-catalog-overlay\schema-fixtures.test.ts:246:    delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli-catalog-overlay\schema-fixtures.test.ts:251:      delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli-catalog-overlay\schema-fixtures.test.ts:253:      process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = originalPrivateQaCli;
+src\cli\program\private-qa-cli.ts:7:const PRIVATE_QA_DIST_RELATIVE_PATH = path.join("dist", "plugin-sdk", "qa-lab.js");
+src\cli\program\private-qa-cli.ts:12:  return env.OPENCLAW_ENABLE_PRIVATE_QA_CLI === "1";
+src\cli\program\private-qa-cli.ts:37:  const sourceModulePath = path.join(packageRoot, PRIVATE_QA_DIST_RELATIVE_PATH);
+src\cli\program\private-qa-cli.test.ts:10:  const originalPrivateQaCli = process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\private-qa-cli.test.ts:17:      delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\private-qa-cli.test.ts:19:      process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = originalPrivateQaCli;
+src\cli\program\private-qa-cli.test.ts:24:    process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = "1";
+src\cli\program\private-qa-cli.test.ts:56:    process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = "1";
+src\cli\program\private-qa-cli.test.ts:83:    process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = "1";
+src\cli\program\private-qa-cli.test.ts:99:    delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\register.subclis.test.ts:98:  const originalEnablePrivateQaCli = process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\register.subclis.test.ts:116:    process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = "1";
+src\cli\program\register.subclis.test.ts:143:      delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\register.subclis.test.ts:145:      process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = originalEnablePrivateQaCli;
+src\cli\program\register.subclis.test.ts:172:    delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\root-command-descriptions.test.ts:15:    vi.stubEnv("OPENCLAW_ENABLE_PRIVATE_QA_CLI", "");
+src\cli\program\subcli-descriptors.test.ts:14:  const originalPrivateQaCli = process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\subcli-descriptors.test.ts:18:      delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\subcli-descriptors.test.ts:20:      process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = originalPrivateQaCli;
+src\cli\program\subcli-descriptors.test.ts:26:    delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\subcli-descriptors.test.ts:36:    delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\subcli-descriptors.test.ts:51:    process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = "1";
+test\scripts\build-all.test.ts:437:      "OPENCLAW_BUILD_PRIVATE_QA",
+test\scripts\build-all.test.ts:593:          env: ["OPENCLAW_BUILD_PRIVATE_QA"],
+test\scripts\build-all.test.ts:598:        env: { OPENCLAW_BUILD_PRIVATE_QA: "0" },
+test\scripts\build-all.test.ts:604:        env: { OPENCLAW_BUILD_PRIVATE_QA: "1" },
+src\agents\model-runtime-policy.ts:253:  if (process.env.OPENCLAW_BUILD_PRIVATE_QA === "1") {
+src\agents\model-runtime-policy.test.ts:8:const ORIGINAL_BUILD_PRIVATE_QA = process.env.OPENCLAW_BUILD_PRIVATE_QA;
+src\agents\model-runtime-policy.test.ts:31:  name: "OPENCLAW_BUILD_PRIVATE_QA" | "OPENCLAW_QA_FORCE_RUNTIME",
+src\agents\model-runtime-policy.test.ts:57:  restoreEnv("OPENCLAW_BUILD_PRIVATE_QA", ORIGINAL_BUILD_PRIVATE_QA);
+src\agents\model-runtime-policy.test.ts:63:    deleteTestEnvValue("OPENCLAW_BUILD_PRIVATE_QA");
+src\agents\model-runtime-policy.test.ts:81:    setTestEnvValue("OPENCLAW_BUILD_PRIVATE_QA", "1");
+src\agents\model-runtime-policy.test.ts:97:    setTestEnvValue("OPENCLAW_BUILD_PRIVATE_QA", "1");
+test\scripts\check-gateway-cpu-scenarios.test.ts:313:      OPENCLAW_BUILD_PRIVATE_QA: "1",
+test\scripts\check-gateway-cpu-scenarios.test.ts:315:      OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1",
+
+ exited 124 in 10275ms:
+src\dockerfile.test.ts:201:      "export OPENCLAW_BUILD_PRIVATE_QA=1 OPENCLAW_ENABLE_PRIVATE_QA_CLI=1",
+src\cli-catalog-overlay\schema-fixtures.test.ts:245:    originalPrivateQaCli = process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli-catalog-overlay\schema-fixtures.test.ts:246:    delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli-catalog-overlay\schema-fixtures.test.ts:251:      delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli-catalog-overlay\schema-fixtures.test.ts:253:      process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = originalPrivateQaCli;
+src\cli\program\private-qa-cli.ts:7:const PRIVATE_QA_DIST_RELATIVE_PATH = path.join("dist", "plugin-sdk", "qa-lab.js");
+src\cli\program\private-qa-cli.ts:12:  return env.OPENCLAW_ENABLE_PRIVATE_QA_CLI === "1";
+src\cli\program\private-qa-cli.ts:37:  const sourceModulePath = path.join(packageRoot, PRIVATE_QA_DIST_RELATIVE_PATH);
+src\cli\program\private-qa-cli.test.ts:10:  const originalPrivateQaCli = process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\private-qa-cli.test.ts:17:      delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\private-qa-cli.test.ts:19:      process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = originalPrivateQaCli;
+src\cli\program\private-qa-cli.test.ts:24:    process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = "1";
+src\cli\program\private-qa-cli.test.ts:56:    process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = "1";
+src\cli\program\private-qa-cli.test.ts:83:    process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = "1";
+src\cli\program\private-qa-cli.test.ts:99:    delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\register.subclis.test.ts:98:  const originalEnablePrivateQaCli = process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\register.subclis.test.ts:116:    process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = "1";
+src\cli\program\register.subclis.test.ts:143:      delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\register.subclis.test.ts:145:      process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = originalEnablePrivateQaCli;
+src\cli\program\register.subclis.test.ts:172:    delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\root-command-descriptions.test.ts:15:    vi.stubEnv("OPENCLAW_ENABLE_PRIVATE_QA_CLI", "");
+src\cli\program\subcli-descriptors.test.ts:14:  const originalPrivateQaCli = process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\subcli-descriptors.test.ts:18:      delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\subcli-descriptors.test.ts:20:      process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = originalPrivateQaCli;
+src\cli\program\subcli-descriptors.test.ts:26:    delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\subcli-descriptors.test.ts:36:    delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
+src\cli\program\subcli-descriptors.test.ts:51:    process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = "1";
+test\scripts\build-all.test.ts:437:      "OPENCLAW_BUILD_PRIVATE_QA",
+test\scripts\build-all.test.ts:593:          env: ["OPENCLAW_BUILD_PRIVATE_QA"],
+test\scripts\build-all.test.ts:598:        env: { OPENCLAW_BUILD_PRIVATE_QA: "0" },
+test\scripts\build-all.test.ts:604:        env: { OPENCLAW_BUILD_PRIVATE_QA: "1" },
+src\agents\model-runtime-policy.ts:253:  if (process.env.OPENCLAW_BUILD_PRIVATE_QA === "1") {
+src\agents\model-runtime-policy.test.ts:8:const ORIGINAL_BUILD_PRIVATE_QA = process.env.OPENCLAW_BUILD_PRIVATE_QA;
+src\agents\model-runtime-policy.test.ts:31:  name: "OPENCLAW_BUILD_PRIVATE_QA" | "OPENCLAW_QA_FORCE_RUNTIME",
+src\agents\model-runtime-policy.test.ts:57:  restoreEnv("OPENCLAW_BUILD_PRIVATE_QA", ORIGINAL_BUILD_PRIVATE_QA);
+src\agents\model-runtime-policy.test.ts:63:    deleteTestEnvValue("OPENCLAW_BUILD_PRIVATE_QA");
+src\agents\model-runtime-policy.test.ts:81:    setTestEnvValue("OPENCLAW_BUILD_PRIVATE_QA", "1");
+src\agents\model-runtime-policy.test.ts:97:    setTestEnvValue("OPENCLAW_BUILD_PRIVATE_QA", "1");
+test\scripts\check-gateway-cpu-scenarios.test.ts:313:      OPENCLAW_BUILD_PRIVATE_QA: "1",
+test\scripts\check-gateway-cpu-scenarios.test.ts:315:      OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1",
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content src/cli/program/subcli-descriptors.ts; Get-Content src/cli/program/private-qa-cli.ts' in C:\src\openclaw-catalog-restack
+ succeeded in 368ms:
+// Sub-CLI descriptor catalog used for root help placeholders and lazy registration.
+import { defineCommandDescriptorCatalog } from "./command-descriptor-utils.js";
+import type { NamedCommandDescriptor } from "./command-group-descriptors.js";
+import { isPrivateQaCliEnabled } from "./private-qa-cli.js";
+
+/** Descriptor shape for root-level sub-CLI commands. */
+export type SubCliDescriptor = NamedCommandDescriptor;
+
+const subCliCommandCatalog = defineCommandDescriptorCatalog([
+  { name: "acp", description: "Run an ACP bridge backed by the Gateway", hasSubcommands: true },
+  {
+    name: "gateway",
+    description: "Run, inspect, and query the WebSocket Gateway",
+    hasSubcommands: true,
+  },
+  {
+    name: "daemon",
+    description: "Manage the Gateway service (launchd/systemd/schtasks)",
+    hasSubcommands: true,
+  },
+  { name: "logs", description: "Tail gateway file logs via RPC", hasSubcommands: false },
+  {
+    name: "system",
+    description: "System tools (events, heartbeat, presence)",
+    hasSubcommands: true,
+  },
+  {
+    name: "models",
+    description: "Model discovery, scanning, and configuration",
+    hasSubcommands: true,
+  },
+  {
+    name: "promos",
+    description: "Discover and claim promotional model offers from ClawHub",
+    hasSubcommands: true,
+  },
+  {
+    name: "catalog",
+    description: "List OpenClaw catalog metadata",
+    hasSubcommands: true,
+  },
+  {
+    name: "infer",
+    description: "Run provider-backed inference commands through a stable CLI surface",
+    hasSubcommands: true,
+  },
+  {
+    name: "capability",
+    description: "Run provider capability commands (fallback alias: infer)",
+    hasSubcommands: true,
+  },
+  {
+    name: "approvals",
+    description: "Manage exec approvals (gateway or node host)",
+    hasSubcommands: true,
+    parentDefaultHelp: true,
+  },
+  {
+    name: "exec-approvals",
+    description: "Manage exec approvals (alias for approvals)",
+    hasSubcommands: true,
+  },
+  {
+    name: "exec-policy",
+    description: "Show or synchronize requested exec policy with host approvals",
+    hasSubcommands: true,
+  },
+  {
+    name: "nodes",
+    description: "Manage gateway-owned nodes (pairing, status, invoke, and media)",
+    hasSubcommands: true,
+  },
+  {
+    name: "devices",
+    description: "Device pairing and auth tokens",
+    hasSubcommands: true,
+    parentDefaultHelp: true,
+  },
+  {
+    name: "node",
+    description: "Run and manage the headless node host service",
+    hasSubcommands: true,
+  },
+  {
+    name: "sandbox",
+    description: "Manage sandbox containers (Docker-based agent isolation)",
+    hasSubcommands: true,
+  },
+  {
+    name: "worktrees",
+    description: "Create, inspect, restore, and clean up managed worktrees",
+    hasSubcommands: true,
+    parentDefaultHelp: true,
+  },
+  {
+    name: "attach",
+    description: "Attach Claude Code to a gateway session with scoped MCP tools",
+    hasSubcommands: false,
+  },
+  {
+    name: "tui",
+    description: "Open a terminal UI connected to the Gateway",
+    hasSubcommands: false,
+  },
+  {
+    name: "terminal",
+    description: "Open a local terminal UI (alias for tui --local)",
+    hasSubcommands: false,
+  },
+  {
+    name: "chat",
+    description: "Open a local terminal UI (alias for tui --local)",
+    hasSubcommands: false,
+  },
+  {
+    name: "cron",
+    description: "Manage cron jobs (via Gateway)",
+    hasSubcommands: true,
+    parentDefaultHelp: true,
+  },
+  {
+    name: "dns",
+    description: "DNS helpers for wide-area discovery (Tailscale + CoreDNS)",
+    hasSubcommands: true,
+  },
+  {
+    name: "docs",
+    description: "Search the live OpenClaw docs",
+    hasSubcommands: false,
+  },
+  {
+    name: "qa",
+    description: "Run QA scenarios and launch the private QA debugger UI",
+    hasSubcommands: true,
+  },
+  {
+    name: "proxy",
+    description: "Run the OpenClaw debug proxy and inspect captured traffic",
+    hasSubcommands: true,
+  },
+  {
+    name: "hooks",
+    description: "Manage internal agent hooks",
+    hasSubcommands: true,
+  },
+  {
+    name: "webhooks",
+    description: "Webhook helpers and integrations",
+    hasSubcommands: true,
+  },
+  {
+    name: "qr",
+    description: "Generate a mobile pairing QR code and setup code",
+    hasSubcommands: false,
+  },
+  {
+    name: "clawbot",
+    description: "Legacy clawbot command aliases",
+    hasSubcommands: true,
+  },
+  {
+    name: "pairing",
+    description: "Secure DM pairing (approve inbound requests)",
+    hasSubcommands: true,
+  },
+  {
+    name: "plugins",
+    description: "Manage OpenClaw plugins and extensions",
+    hasSubcommands: true,
+    parentDefaultHelp: true,
+  },
+  {
+    name: "channels",
+    description: "Manage connected chat channels and accounts",
+    hasSubcommands: true,
+    parentDefaultHelp: true,
+  },
+  {
+    name: "directory",
+    description: "Lookup contact and group IDs (self, peers, groups) for supported chat channels",
+    hasSubcommands: true,
+  },
+  {
+    name: "security",
+    description: "Audit local config and state for common security foot-guns",
+    hasSubcommands: true,
+  },
+  {
+    name: "secrets",
+    description: "Secrets runtime controls",
+    hasSubcommands: true,
+  },
+  {
+    name: "skills",
+    description: "List and inspect available skills",
+    hasSubcommands: true,
+  },
+  {
+    name: "update",
+    description: "Update OpenClaw and inspect update channel status",
+    hasSubcommands: true,
+  },
+  {
+    name: "completion",
+    description: "Generate shell completion script",
+    hasSubcommands: false,
+  },
+] as const satisfies ReadonlyArray<SubCliDescriptor>);
+
+function filterPrivateQaItems<T>(
+  items: ReadonlyArray<T>,
+  getName: (item: T) => string,
+): ReadonlyArray<T> {
+  if (isPrivateQaCliEnabled()) {
+    return items;
+  }
+  return items.filter((item) => getName(item) !== "qa");
+}
+
+/** Visible sub-CLI descriptors after private QA gating. */
+export const SUB_CLI_DESCRIPTORS = filterPrivateQaItems(
+  subCliCommandCatalog.descriptors,
+  (descriptor) => descriptor.name,
+);
+
+/** Return visible sub-CLI descriptors in help/registration order. */
+export function getSubCliEntries(): ReadonlyArray<SubCliDescriptor> {
+  return filterPrivateQaItems(
+    subCliCommandCatalog.getDescriptors(),
+    (descriptor) => descriptor.name,
+  );
+}
+
+/** Return visible sub-CLI names that own child subcommands. */
+export function getSubCliCommandsWithSubcommands(): string[] {
+  return [
+    ...filterPrivateQaItems(
+      subCliCommandCatalog.getCommandsWithSubcommands(),
+      (command) => command,
+    ),
+  ];
+}
+
+/** Return visible sub-CLI names whose parent command should show help by default. */
+export function getSubCliParentDefaultHelpCommands(): string[] {
+  return [
+    ...filterPrivateQaItems(
+      subCliCommandCatalog.getParentDefaultHelpCommands(),
+      (command) => command,
+    ),
+  ];
+}
+// Private QA CLI loader, enabled only from source checkouts and explicit env opt-in.
+import fs from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { resolveOpenClawPackageRootSync } from "../../infra/openclaw-root.js";
+
+const PRIVATE_QA_DIST_RELATIVE_PATH = path.join("dist", "plugin-sdk", "qa-lab.js");
+const SOURCE_CHECKOUT_MARKER_RELATIVE_PATHS = [".git", "pnpm-workspace.yaml"] as const;
+
+/** Return true when private QA CLI routes should be exposed. */
+export function isPrivateQaCliEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return env.OPENCLAW_ENABLE_PRIVATE_QA_CLI === "1";
+}
+
+function resolvePrivateQaSourceModuleSpecifier(params?: {
+  env?: NodeJS.ProcessEnv;
+  cwd?: string;
+  argv1?: string;
+  moduleUrl?: string;
+  resolvePackageRootSync?: typeof resolveOpenClawPackageRootSync;
+  existsSync?: typeof fs.existsSync;
+}): string | null {
+  const env = params?.env ?? process.env;
+  if (!isPrivateQaCliEnabled(env)) {
+    return null;
+  }
+  const resolvePackageRootSync = params?.resolvePackageRootSync ?? resolveOpenClawPackageRootSync;
+  const packageRoot = resolvePackageRootSync({
+    argv1: params?.argv1 ?? process.argv[1],
+    cwd: params?.cwd ?? process.cwd(),
+    moduleUrl: params?.moduleUrl ?? import.meta.url,
+  });
+  if (!packageRoot) {
+    return null;
+  }
+  const existsSync = params?.existsSync ?? fs.existsSync;
+  const sourceModulePath = path.join(packageRoot, PRIVATE_QA_DIST_RELATIVE_PATH);
+  const hasSourceCheckoutMarker = SOURCE_CHECKOUT_MARKER_RELATIVE_PATHS.some((relativePath) =>
+    existsSync(path.join(packageRoot, relativePath)),
+  );
+  if (
+    !hasSourceCheckoutMarker ||
+    !existsSync(path.join(packageRoot, "src")) ||
+    !existsSync(sourceModulePath)
+  ) {
+    return null;
+  }
+  return pathToFileURL(sourceModulePath).href;
+}
+
+async function dynamicImportPrivateQaCliModule(
+  specifier: string,
+): Promise<Record<string, unknown>> {
+  return (await import(specifier)) as Record<string, unknown>;
+}
+
+/** Load the private QA module from a source checkout or throw a user-facing availability error. */
+export function loadPrivateQaCliModule(params?: {
+  env?: NodeJS.ProcessEnv;
+  cwd?: string;
+  argv1?: string;
+  moduleUrl?: string;
+  resolvePackageRootSync?: typeof resolveOpenClawPackageRootSync;
+  existsSync?: typeof fs.existsSync;
+  importModule?: (specifier: string) => Promise<Record<string, unknown>>;
+}): Promise<Record<string, unknown>> {
+  const specifier = resolvePrivateQaSourceModuleSpecifier(params);
+  if (!specifier) {
+    throw new Error("Private QA CLI is only available from an OpenClaw source checkout.");
+  }
+  return (params?.importModule ?? dynamicImportPrivateQaCliModule)(specifier);
+}
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'node scripts/run-vitest.mjs src/cli-catalog-overlay/schema-fixtures.test.ts --runInBand' in C:\src\openclaw-catalog-restack
+2026-07-09T22:43:27.868585Z ERROR codex_core::tools::router: error=Exit code: 1
+Wall time: 4.2 seconds
+Output:
+[test] starting test/vitest/vitest.unit.config.ts
+file:///C:/src/openclaw-catalog-codex-review/node_modules/vitest/dist/chunks/cac.D3xHeqeL.js:406
+          throw new CACError(`Unknown option \`${name.length > 1 ? `--${name}` : `-${name}`}\``);
+                ^
+
+CACError: Unknown option `--runInBand`
+    at Command.checkUnknownOptions (file:///C:/src/openclaw-catalog-codex-review/node_modules/vitest/dist/chunks/cac.D3xHeqeL.js:406:17)
+    at CAC.runMatchedCommand (file:///C:/src/openclaw-catalog-codex-review/node_modules/vitest/dist/chunks/cac.D3xHeqeL.js:606:13)
+    at CAC.parse (file:///C:/src/openclaw-catalog-codex-review/node_modules/vitest/dist/chunks/cac.D3xHeqeL.js:547:12)
+    at file:///C:/src/openclaw-catalog-codex-review/node_modules/vitest/dist/cli.js:11:13
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.22.3
+[test] failed 1 Vitest shard in 3.69s
+
+ exited 1 in 4166ms:
+[test] starting test/vitest/vitest.unit.config.ts
+file:///C:/src/openclaw-catalog-codex-review/node_modules/vitest/dist/chunks/cac.D3xHeqeL.js:406
+          throw new CACError(`Unknown option \`${name.length > 1 ? `--${name}` : `-${name}`}\``);
+                ^
+
+CACError: Unknown option `--runInBand`
+    at Command.checkUnknownOptions (file:///C:/src/openclaw-catalog-codex-review/node_modules/vitest/dist/chunks/cac.D3xHeqeL.js:406:17)
+    at CAC.runMatchedCommand (file:///C:/src/openclaw-catalog-codex-review/node_modules/vitest/dist/chunks/cac.D3xHeqeL.js:606:13)
+    at CAC.parse (file:///C:/src/openclaw-catalog-codex-review/node_modules/vitest/dist/chunks/cac.D3xHeqeL.js:547:12)
+    at file:///C:/src/openclaw-catalog-codex-review/node_modules/vitest/dist/cli.js:11:13
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.22.3
+[test] failed 1 Vitest shard in 3.69s
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'node scripts/run-vitest.mjs src/cli-catalog-overlay/schema-fixtures.test.ts' in C:\src\openclaw-catalog-restack
+ succeeded in 9462ms:
+
+ RUN  v4.1.9 C:/src/openclaw-catalog-restack
+
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  15:43:38
+   Duration  1.15s (transform 759ms, setup 618ms, import 48ms, tests 126ms, environment 0ms)
+
+[test] starting test/vitest/vitest.unit.config.ts
+The `envFile` option is deprecated, please use `envDir: false` instead.
+[test] passed 1 Vitest shard in 9.01s
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content test/vitest/vitest.unit.config.ts; rg "isolate" test/vitest -n' in C:\src\openclaw-catalog-restack
+ succeeded in 606ms:
+// Vitest unit config wires the unit test shard.
+import fs from "node:fs";
+import path from "node:path";
+import { defineConfig } from "vitest/config";
+import { loadPatternListFromEnv, narrowIncludePatternsForCli } from "./vitest.pattern-file.ts";
+import {
+  resolveVitestIsolation,
+  shouldPassWithNoTestsForCliIncludes,
+} from "./vitest.scoped-config.ts";
+import {
+  nonIsolatedRunnerPath,
+  repoRoot,
+  resolveRepoRootPath,
+  sharedVitestConfig,
+} from "./vitest.shared.config.ts";
+import { getUnitFastTestFiles } from "./vitest.unit-fast-paths.mjs";
+import {
+  isBundledPluginDependentUnitTestFile,
+  isUnitConfigTestFile,
+  unitTestAdditionalExcludePatterns,
+  unitTestIncludePatterns,
+} from "./vitest.unit-paths.mjs";
+
+const sharedTest = sharedVitestConfig.test ?? {};
+const exclude = sharedTest.exclude ?? [];
+
+export function loadIncludePatternsFromEnv(
+  env: Record<string, string | undefined> = process.env,
+): string[] | null {
+  return loadPatternListFromEnv("OPENCLAW_VITEST_INCLUDE_FILE", env);
+}
+
+export function loadExtraExcludePatternsFromEnv(
+  env: Record<string, string | undefined> = process.env,
+): string[] {
+  return loadPatternListFromEnv("OPENCLAW_VITEST_EXTRA_EXCLUDE_FILE", env) ?? [];
+}
+
+const defaultUnitCoverageRoots = ["src", "packages", "test"] as const;
+
+function toRepoPath(filePath: string): string {
+  return path.relative(repoRoot, filePath).split(path.sep).join("/");
+}
+
+function collectTestFiles(dir: string): string[] {
+  if (!fs.existsSync(dir)) {
+    return [];
+  }
+  const files: string[] = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === "node_modules" || entry.name === "dist" || entry.name === "coverage") {
+      continue;
+    }
+    const entryPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...collectTestFiles(entryPath));
+    } else if (entry.isFile() && entry.name.endsWith(".test.ts")) {
+      files.push(toRepoPath(entryPath));
+    }
+  }
+  return files;
+}
+
+function resolveSiblingSourceFile(testFile: string): string | null {
+  if (!testFile.endsWith(".test.ts")) {
+    return null;
+  }
+  const sourceFile = testFile.replace(/\.test\.ts$/u, ".ts");
+  return fs.existsSync(resolveRepoRootPath(sourceFile)) ? sourceFile : null;
+}
+
+export function resolveDefaultUnitCoverageIncludePatterns(
+  unitFastTestFiles = getUnitFastTestFiles(),
+): string[] {
+  const fastTestFiles = new Set(unitFastTestFiles);
+  const sourceFiles = new Set<string>();
+  for (const root of defaultUnitCoverageRoots) {
+    for (const testFile of collectTestFiles(resolveRepoRootPath(root))) {
+      if (!isUnitConfigTestFile(testFile) || fastTestFiles.has(testFile)) {
+        continue;
+      }
+      const sourceFile = resolveSiblingSourceFile(testFile);
+      if (sourceFile !== null) {
+        sourceFiles.add(sourceFile);
+      }
+    }
+  }
+  return [...sourceFiles].toSorted((left, right) => left.localeCompare(right));
+}
+
+function isEnabledFlagValue(value: string): boolean {
+  return !["0", "false", "no", "off"].includes(value.trim().toLowerCase());
+}
+
+function isCoverageEnabledFromArgv(argv: string[] = process.argv): boolean {
+  return argv.some((arg) => {
+    if (arg === "--coverage" || arg === "--coverage.enabled") {
+      return true;
+    }
+    const match = arg.match(/^--coverage(?:\.enabled)?=(.*)$/u);
+    return match ? isEnabledFlagValue(match[1] ?? "") : false;
+  });
+}
+
+export function createUnitVitestConfigWithOptions(
+  env: Record<string, string | undefined> = process.env,
+  options: {
+    includePatterns?: string[];
+    extraExcludePatterns?: string[];
+    name?: string;
+    argv?: string[];
+    passWithNoTests?: boolean;
+  } = {},
+) {
+  const isolate = resolveVitestIsolation(env);
+  const argv = options.argv ?? process.argv;
+  const unitFastTestFiles = getUnitFastTestFiles();
+  const envIncludePatterns = loadIncludePatternsFromEnv(env);
+  const defaultIncludePatterns = options.includePatterns ?? unitTestIncludePatterns;
+  const cliIncludePatterns = narrowIncludePatternsForCli(defaultIncludePatterns, argv);
+  const coverageIncludePatterns =
+    isCoverageEnabledFromArgv(argv) &&
+    options.includePatterns === undefined &&
+    envIncludePatterns === null &&
+    cliIncludePatterns === null
+      ? resolveDefaultUnitCoverageIncludePatterns(unitFastTestFiles)
+      : null;
+  const protectedIncludeFiles = new Set(
+    defaultIncludePatterns.filter((pattern) => isBundledPluginDependentUnitTestFile(pattern)),
+  );
+  const baseExcludePatterns = unitTestAdditionalExcludePatterns.filter((pattern) => {
+    if (protectedIncludeFiles.size === 0) {
+      return true;
+    }
+    return ![...protectedIncludeFiles].some((file) => pattern === file || pattern.endsWith("/**"));
+  });
+  const extraExcludePatterns = options.extraExcludePatterns ?? [];
+  const resolvedExcludePatterns = [
+    ...new Set([
+      ...exclude,
+      ...baseExcludePatterns,
+      ...unitFastTestFiles,
+      ...extraExcludePatterns,
+      ...loadExtraExcludePatternsFromEnv(env),
+    ]),
+  ];
+  return defineConfig({
+    ...sharedVitestConfig,
+    test: {
+      ...sharedTest,
+      name: options.name ?? "unit",
+      isolate,
+      ...(isolate ? { runner: undefined } : { runner: nonIsolatedRunnerPath }),
+      setupFiles: [
+        ...new Set(
+          [...(sharedTest.setupFiles ?? []), "test/setup-openclaw-runtime.ts"].map(
+            resolveRepoRootPath,
+          ),
+        ),
+      ],
+      include: envIncludePatterns ?? cliIncludePatterns ?? defaultIncludePatterns,
+      exclude: resolvedExcludePatterns,
+      coverage: {
+        ...sharedTest.coverage,
+        ...(coverageIncludePatterns !== null && coverageIncludePatterns.length > 0
+          ? { include: coverageIncludePatterns }
+          : {}),
+        exclude: [
+          ...new Set([
+            ...(sharedTest.coverage?.exclude ?? []),
+            ...baseExcludePatterns,
+            ...extraExcludePatterns,
+          ]),
+        ],
+      },
+      ...(options.passWithNoTests ||
+      shouldPassWithNoTestsForCliIncludes(cliIncludePatterns, resolvedExcludePatterns)
+        ? { passWithNoTests: true }
+        : {}),
+    },
+  });
+}
+
+export function createUnitVitestConfig(env: Record<string, string | undefined> = process.env) {
+  return createUnitVitestConfigWithOptions(env);
+}
+
+export default createUnitVitestConfigWithOptions();
+test/vitest\vitest.boundary.config.ts:19:  const isolate = resolveVitestIsolation(env);
+test/vitest\vitest.boundary.config.ts:25:      isolate,
+test/vitest\vitest.boundary.config.ts:26:      ...(isolate ? { runner: undefined } : { runner: nonIsolatedRunnerPath }),
+test/vitest\vitest.boundary.config.ts:29:      // Boundary workers still need the shared isolated HOME/bootstrap. Only
+test/vitest\vitest.config.ts:53:  "test/vitest/vitest.tooling-isolated.config.ts",
+test/vitest\vitest.contracts-shared.ts:86:      isolate: false,
+test/vitest\vitest.extension-memory.config.ts:21:      isolate: true,
+test/vitest\vitest.extension-providers.config.ts:21:      isolate: true,
+test/vitest\vitest.gateway-client.config.ts:17:      isolate: true,
+test/vitest\vitest.gateway-server.config.ts:25:      isolate: false,
+test/vitest\vitest.infra.config.ts:11:    isolate: true,
+test/vitest\vitest.plugins.config.ts:10:    isolate: false,
+test/vitest\vitest.scoped-config.ts:151:    "tooling-isolated",
+test/vitest\vitest.scoped-config.ts:203:    isolate?: boolean;
+test/vitest\vitest.scoped-config.ts:229:  const isolate = options?.isolate ?? resolveVitestIsolation(options?.env);
+test/vitest\vitest.scoped-config.ts:237:  const useNonIsolatedRunner = options?.useNonIsolatedRunner ?? !isolate;
+test/vitest\vitest.scoped-config.ts:248:      isolate,
+test/vitest\vitest.shared.config.ts:64:export const nonIsolatedRunnerPath = path.join(repoRoot, "test", "non-isolated-runner.ts");
+test/vitest\vitest.shared.config.ts:489:    isolate: false,
+test/vitest\vitest.shared.config.ts:577:      "test/vitest/vitest.tooling-isolated.config.ts",
+test/vitest\vitest.tasks.config.ts:13:  // other under the non-isolated runner.
+test/vitest\vitest.tooling-docker.config.ts:1:// Vitest tooling Docker config isolates the slow Docker helper contract tests.
+test/vitest\vitest.test-shards.mjs:48:      "test/vitest/vitest.tooling-isolated.config.ts",
+test/vitest\vitest.tooling-isolated.config.ts:1:// Vitest tooling isolated config wires the tooling isolated test shard.
+test/vitest\vitest.tooling-isolated.config.ts:7:    isolate: true,
+test/vitest\vitest.tooling-isolated.config.ts:8:    name: "tooling-isolated",
+test/vitest\vitest.ui-e2e.config.ts:30:      isolate: true,
+test/vitest\vitest.ui.config.ts:18:    isolate: false,
+test/vitest\vitest.unit-fast-fake-timers.config.ts:25:      isolate: false,
+test/vitest\vitest.unit-fast.config.ts:22:      isolate: false,
+test/vitest\vitest.unit.config.ts:115:  const isolate = resolveVitestIsolation(env);
+test/vitest\vitest.unit.config.ts:152:      isolate,
+test/vitest\vitest.unit.config.ts:153:      ...(isolate ? { runner: undefined } : { runner: nonIsolatedRunnerPath }),
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content test/vitest/vitest.scoped-config.ts | Select-Object -Skip 130 -First 70; Get-Content test/vitest/vitest.shared.config.ts | Select-Object -Skip 470 -First 30' in C:\src\openclaw-catalog-restack
+ succeeded in 590ms:
+    "extension-telegram",
+    "extension-voice-call",
+    "extension-whatsapp",
+    "extension-zalo",
+    "extensions",
+    "gateway",
+    "hooks",
+    "infra",
+    "logging",
+    "media",
+    "media-understanding",
+    "plugin-sdk",
+    "plugin-sdk-light",
+    "plugins",
+    "process",
+    "runtime-config",
+    "secrets",
+    "shared-core",
+    "tasks",
+    "tooling-docker",
+    "tooling-isolated",
+    "tooling",
+    "tui",
+    "ui",
+    "ui-e2e",
+    "unit-fast",
+    "unit-security",
+    "unit-src",
+    "unit-support",
+    "utils",
+    "wizard",
+  ].map((name, index) => [name, index + 10]),
+);
+
+function hashFallbackScopedProjectGroupOrder(key: string): number {
+  let hash = 0;
+  for (const char of key) {
+    hash = (hash * 33 + char.charCodeAt(0)) % 10_000;
+  }
+  return hash + 1_000;
+}
+
+function resolveScopedProjectGroupOrder(
+  name?: string,
+  dir?: string,
+  include?: string[],
+): number | undefined {
+  const normalizedName = name?.trim();
+  if (normalizedName) {
+    return (
+      SCOPED_PROJECT_GROUP_ORDER_BY_NAME.get(normalizedName) ??
+      hashFallbackScopedProjectGroupOrder(normalizedName)
+    );
+  }
+  const normalizedInclude = include?.map(normalizePathPattern).join("|") ?? "";
+  const key = [dir?.trim(), normalizedInclude].filter(Boolean).join("|");
+  if (!key) {
+    return undefined;
+  }
+  return hashFallbackScopedProjectGroupOrder(key);
+}
+
+export function createScopedVitestConfig(
+  include: string[],
+  options?: {
+    deps?: Record<string, unknown>;
+    dir?: string;
+    env?: Record<string, string | undefined>;
+    environment?: string;
+    exclude?: string[];
+        replacement: path.join(repoRoot, "src", "plugin-sdk", `${subpath}.ts`),
+      })),
+      ...pluginSdkSubpaths.map((subpath) => ({
+        find: `@openclaw/plugin-sdk/${subpath}`,
+        replacement: path.join(repoRoot, "packages", "plugin-sdk", "src", `${subpath}.ts`),
+      })),
+      {
+        find: "openclaw/plugin-sdk",
+        replacement: path.join(repoRoot, "src", "plugin-sdk", "index.ts"),
+      },
+    ],
+  },
+  test: {
+    dir: repoRoot,
+    testTimeout: 120_000,
+    hookTimeout: isWindows ? 180_000 : 120_000,
+    unstubEnvs: true,
+    unstubGlobals: true,
+    isolate: false,
+    pool: defaultPool,
+    runner: nonIsolatedRunnerPath,
+    maxWorkers: workerConfig.maxWorkers,
+    fileParallelism: workerConfig.fileParallelism,
+    deps: {
+      moduleDirectories: dependencyModuleDirectories,
+    },
+    server: {
+      deps: {
+        external: dependencyExternalPatterns,
+      },
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content test/fixtures/cli-catalog-overlay/catalog-prompt-projection.schema.json; Get-Content test/fixtures/cli-catalog-overlay/catalog-summary.schema.json | Select-Object -First 60' in C:\src\openclaw-catalog-restack
+ succeeded in 608ms:
+{
+  "count": 21,
+  "itemFields": [
+    "commandHints",
+    "confirmationRequired",
+    "dispatchMode",
+    "examples",
+    "id",
+    "kind",
+    "risk",
+    "target",
+    "title"
+  ],
+  "ids": [
+    "agents-list",
+    "channels-list",
+    "channels-status",
+    "config-get",
+    "config-unset",
+    "demo-plugin:demo plugin",
+    "gateway",
+    "gateway-status",
+    "health",
+    "models-list",
+    "models-status",
+    "node:demo-filesystem:filesystem.read",
+    "plugins-list",
+    "process",
+    "session_status",
+    "sessions",
+    "sessions_spawn",
+    "skill_workshop",
+    "status",
+    "tasks-audit",
+    "tasks-list"
+  ],
+  "pluginSurfaceIds": [
+    "demo-plugin:demo plugin"
+  ],
+  "nodeCommandSurfaceIds": [
+    "node:demo-filesystem:filesystem.read"
+  ]
+}
+{
+  "schemaVersion": 1,
+  "generatedFrom": "cli-catalog-overlay-operator-summary",
+  "topLevelFields": [
+    "attention",
+    "counts",
+    "generatedFrom",
+    "nextChecks",
+    "schemaVersion"
+  ],
+  "counts": {
+    "commandDescriptors": 61,
+    "commandRoutes": 97,
+    "routedOperations": 14,
+    "agentToolSurfaces": 5,
+    "nodeCommands": 1,
+    "nodeCommandsRequiringApproval": 1,
+    "confirmationRequiredSurfaces": 2,
+    "routePolicyKeys": 8,
+    "coverageGaps": 14
+  },
+  "countFields": [
+    "agentToolSurfaces",
+    "commandDescriptors",
+    "commandRoutes",
+    "confirmationRequiredSurfaces",
+    "coverageGaps",
+    "nodeCommands",
+    "nodeCommandsRequiringApproval",
+    "routePolicyKeys",
+    "routedOperations"
+  ],
+  "attentionFields": [
+    "confirmationRequiredSurfaceIds",
+    "mediumRiskSurfaceIds",
+    "mixedEffectSurfaceIds",
+    "nodeCommandApprovalIds",
+    "policyKeyIds"
+  ],
+  "attention": {
+    "confirmationRequiredSurfaceIds": [
+      "gateway",
+      "skill_workshop"
+    ],
+    "mediumRiskSurfaceIds": [
+      "gateway",
+      "skill_workshop"
+    ],
+    "mixedEffectSurfaceIds": [
+      "gateway",
+      "process",
+      "skill_workshop"
+    ],
+    "nodeCommandApprovalIds": [
+      "node:demo-filesystem:filesystem.read"
+    ],
+    "policyKeyIds": [
+      "bypassConfigGuard",
+      "ensureCliPath",
+      "hideBanner",
+
+codex
+No actionable defects were found in the added schema fixture tests or JSON fixtures. The focused test `node scripts/run-vitest.mjs src/cli-catalog-overlay/schema-fixtures.test.ts` passed.
+No actionable defects were found in the added schema fixture tests or JSON fixtures. The focused test `node scripts/run-vitest.mjs src/cli-catalog-overlay/schema-fixtures.test.ts` passed.
