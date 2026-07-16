@@ -1948,3 +1948,15 @@
   failed the same shard while its core and other browser gates passed. The
   evidence is recorded on PR #3092 in issue comment 4986303339. No Claws code
   changed, all four ClawHub PRs remain draft, and nothing was merged.
+- 2026-07-15 RFC PR #27's two implementer sidecars were tightened through the
+  `.craft/roles` gateway, platform, operator, author, newcomer, security,
+  release, portability, and maintainer lenses at commit `78af1e1`. The
+  normative changes define deterministic YAML and portable path handling,
+  immutable package and development-snapshot identity, exact MCP and cron
+  constraints, security-relevant dry-run disclosure, consent invalidation,
+  applied-versus-ready status, per-owner provenance and compensation, safe
+  recurring-work removal, export identity, and the OpenClaw application-profile
+  boundary. No review notes were added to either specification. Structural
+  checks and local Codex review passed with no actionable findings. RFC #27 is
+  open, ready, and mergeable; its commit-stable sidecar links were refreshed and
+  nothing was merged.
