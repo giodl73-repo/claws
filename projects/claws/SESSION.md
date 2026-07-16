@@ -22,6 +22,35 @@
 
 ## Current Session
 
+### 2026-07-16 RFC 0022 next landing round
+
+- Confirmed RFC 0022 already follows the latest RFC repository sidecar pattern:
+  one readable proposal plus a core specification and a focused runner
+  addendum. RFC 0009 remains the direct structural precedent; no third RFC
+  0022 sidecar was added.
+- Updated RFC fork PR #6 to `1482d0b7` with a smaller upstream plan:
+  1. RFC plus core receipts and `get/list/count`;
+  2. managed invocation and run usage after the receipt boundary settles;
+  3. minimal core and optional Lobster runner adapters with accounting.
+  The existing five implementation PRs are now described as POC evidence, not
+  the proposed landing stack.
+- Added one reference support-email success fixture: record
+  `customer.verified`, resolve it from an authorized later local agent, record
+  `case.resolved`, list/count/show the full evidence, reopen the originating
+  session, and count child-run usage once. Full producer data must exist only
+  in the receipt store, not its trajectory reference.
+- Tightened the core sidecar around a storage-neutral receipt resource:
+  harness-owned idempotency; `get`, bounded/paginated `list`, and payload-free
+  `count`; deterministic ordering; consistent authorization; no silent
+  fallback; bounded Gateway write latency; schema/migration health; private
+  SQLite files; consistent snapshot backup/export; and independent retention.
+- Tightened the runner sidecar so adapters never open SQLite directly and an
+  unresolved required reference fails as `receipt_unavailable`, distinct from
+  `required_receipt_missing` when the outcome was never observed.
+- Kept compliance claims bounded: receipt retention and export are specified,
+  but tamper evidence, signing, and regulatory attestation remain explicitly
+  separate future work.
+
 ### 2026-07-15 RFC 0022 shared receipt store
 
 - Reworked the Auditable Skills storage boundary around one canonical full

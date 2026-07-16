@@ -76,7 +76,26 @@ Following the sidecar pattern established by RFC 0009, the readable proposal is 
 - [Auditable Skills v1 core specification](https://github.com/giodl73-repo/rfcs/blob/agent/rfc-0022-skill-invocation-audit/rfcs/0022/auditable-skills-v1-spec.md) defines portable metadata, receipt production and storage, trajectory references, invocation lineage, run usage and cost, queries, retention boundaries, failure behavior, and conformance.
 - [Orchestration runner v1 addendum](https://github.com/giodl73-repo/rfcs/blob/agent/rfc-0022-skill-invocation-audit/rfcs/0022/orchestration-runner-v1-spec.md) defines the runner boundary, minimal core profile, Lobster adapter, accounting invariants, capability discovery, and phased removal of a hard Lobster dependency.
 
-## Auditable Skills series
+This is the same readable-RFC-plus-sidecars pattern now used by RFC 0009. A third sidecar is not needed: storage and queries belong to the core contract; workflow behavior belongs to the runner addendum.
+
+## What changed for the next review round
+
+- Receipts are now a first-class OpenClaw resource with one storage-neutral `get`, `list`, and `count` boundary shared by CLI, Gateway, plugins, UI, exports, and workflow adapters.
+- The core spec defines stable pagination, exact filter semantics, harness-owned idempotency, consistent authorization for reads and counts, and explicit no-fallback behavior.
+- The SQLite profile now has ordinary production expectations: bounded writes, schema checks and atomic migrations, health diagnostics, private files, consistent snapshot backup/export, and independent retention.
+- Workflow receipt gates distinguish an outcome that was never recorded from a trajectory reference whose retained receipt is unavailable.
+- One repeatable support-email fixture is the reference success proof: record verification, resolve from another authorized local agent, record resolution, list/count/show the evidence, reopen the thread, and report child-run tokens once.
+- The five implementation PRs are explicitly POC evidence, not the proposed landing stack.
+
+## Recommended landing rounds
+
+1. **RFC and core receipts:** land trusted tool receipts, the shared store, trajectory references, and `get/list/count` without skill metadata or a workflow dependency.
+2. **Managed invocation:** add the optional Agent Skills declarations, exact skill identity, isolated invocation, lineage, and run-level usage after the receipt boundary settles.
+3. **Runner adapters and accounting:** expose the normalized managed-step result to a minimal core runner and optional Lobster adapter; keep Lobster pause/resume accounting in Lobster.
+
+Each round is independently useful and reviewable. The Agent Skills standards opportunity stays smaller still: portable declarations and the rule that declarations are not evidence or authority. Storage, sessions, accounting, and workflows remain harness concerns.
+
+## POC evidence series
 
 1. **[RFC 0022 - Auditable Skills](https://github.com/giodl73-repo/rfcs/pull/6)**
 2. [OpenClaw #97 - record and find durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
@@ -87,4 +106,4 @@ Following the sidecar pattern established by RFC 0009, the readable proposal is 
 
 The implementation slices prove the progression independently: shared durable outcomes and retrieval; exact managed invocation lineage; evidence-driven approved composition; accounting continuity across pauses; and observed child usage rolled into workflow spend.
 
-RFC head `9956e659` is based on current upstream RFC `main` and contains the proposal plus two sidecar specifications (3 files, 1,744 additions). Every PR remains draft, fork-only review material. Nothing has been proposed to the upstream OpenClaw, Lobster, or RFC repositories.
+RFC head `1482d0b7` is based on current upstream RFC `main` and contains the proposal plus two sidecar specifications (3 files, 1,899 additions). Every PR remains draft, fork-only review material. Nothing has been proposed to the upstream OpenClaw, Lobster, or RFC repositories.
