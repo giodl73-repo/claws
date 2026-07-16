@@ -2,7 +2,7 @@
 
 - Last updated: 2026-07-16
 - Last agent: Codex
-- Current focus: Auditable Skills between-step budgets, then a minimal core runner
+- Current focus: Auditable Skills agent-driven sequence, then a native managed-dispatch seam
 
 ## Agent Start
 
@@ -25,6 +25,37 @@
   available.
 
 ## Current Session
+
+### 2026-07-16 Auditable Skills orchestration boundary audit
+
+- Audited OpenClaw's native orchestration and managed-skill paths before
+  implementing the next slice. TaskFlow already provides durable owner-scoped,
+  revisioned state, cancellation, waiting, child tasks, and CLI inspection.
+  It is the right owner for future core workflow state.
+- The exact managed-skill admission path currently exists only behind
+  `sessions_spawn`. It resolves the effective per-run skill snapshot and applies
+  agent, policy, isolation, sandbox, model, tool, and child-depth checks before
+  using native subagent dispatch. TaskFlow and plugin controllers do not have a
+  host API that invokes a skill through that same path.
+- Rejected a premature runner PR. A plugin-side runner would either duplicate
+  security and identity logic or advance through in-memory completion callbacks
+  that cannot honestly resume after Gateway restart.
+- Defined the useful profile OpenClaw can support now with existing primitives:
+  a parent agent invokes one managed skill with `sessions_spawn`, reads its
+  native result and receipt types, checks exact accumulated usage across
+  accepted run IDs, and only then chooses the next direct managed spawn. Each
+  step may select an allowed model. This proves sequential composition, receipt
+  gates, and token ceilings without claiming durable workflow identity.
+- Updated RFC 0022 and the orchestration sidecar at fork commit `b7c8c07c03cb`.
+  The live fork-only draft RFC PR is
+  `https://github.com/giodl73-repo/rfcs/pull/6`; its body now mirrors the
+  agent-driven profile and the durable-runner prerequisite. A mistakenly
+  targeted upstream branch was immediately deleted; no upstream PR exists.
+- Next bounded code slice: expose a non-model, host-owned managed-skill dispatch
+  seam that reuses the exact `sessions_spawn` admission path, accepts a
+  host-derived workflow/step/attempt idempotency key, and returns native run,
+  child-session, and managed invocation identity. Build a deterministic
+  TaskFlow controller only after that seam exists.
 
 ### 2026-07-16 Auditable Skills between-step token budget slice
 
