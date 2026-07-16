@@ -60,6 +60,116 @@
   `29521515948`, `29522311511`, and `29523233296` and were in progress at
   handoff. Patrick's stale #106888 change request targets pre-fix commit
   `1e9569d`; a human re-review was requested on the proven current head.
+### 2026-07-16 Auditable Skills Round 1 rebuild
+
+- Rebuilt fork draft OpenClaw #97 directly on current upstream `main` as one
+  upstream-shaped Round 1 commit (`738ca6d79d3`) instead of carrying forward
+  the 40-file prototype stack. The new slice adds producer-facing
+  `AgentToolResult.receipts`, trusted tool-call/session/run correlation, a
+  dedicated configurable `receipts.sqlite`, bounded trajectory references,
+  and a first-class `openclaw receipts` get/list/count surface.
+- Reused the current sanitized private tool-result observer already shared by
+  OpenClaw, Codex, and Copilot. Making `toolCallId` explicit on that observer
+  avoided the old agent-core loop and harness adapter plumbing while preserving
+  cross-harness behavior.
+- Tightened receipt admission during review: malformed optional fields now
+  reject the whole receipt, producer strings and data are bounded, idempotency
+  uses OpenClaw stable JSON rather than property order, empty agent filters
+  match no agents, SQLite lock waits are capped at 50 ms, and persistence vs
+  trajectory-reference failures have distinct diagnostics.
+- The fork PR now targets fork `main`, remains draft, and has a rewritten body
+  centered on durable business outcomes, search/count/revisit behavior, the
+  mini-CRM use case, current OpenClaw primitives, the single-host storage
+  boundary, and the natural path to managed skills, workflows, token spend,
+  and budgets. Final diff: 32 files, 1,489 additions, 27 deletions.
+- Preserved the former #97 head (`1fcf0bf9`) as
+  `prototype/auditable-skills-poc-receipts` and changed #98 to use that archive
+  as its base. This keeps the later POC evidence stack reviewable without
+  forcing its experimental scaffolding into the new Round 1.
+- Validation: 16 focused receipt/composition tests; 349 existing OpenClaw,
+  Codex, and Copilot observer tests; 32 config tests; 21 CLI registry tests;
+  real help and empty-query CLI smoke; production and root-test TypeScript;
+  full lint and format; runtime import-cycle, config-baseline, i18n glossary,
+  and 6,038-link docs checks. Aggregate `pnpm check` stops on stale current-base
+  shrinkwraps for the root package, `extensions/llama-cpp`, and
+  `extensions/twitch`; the branch does not change those files.
+- Fork CI real-behavior proof passes. `auto-response` fails before repository
+  code because the fork lacks its GitHub App private key. The Linux companion
+  compiles and bundles successfully, then signing fails because the fork lacks
+  `TAURI_SIGNING_PRIVATE_KEY`.
+
+### 2026-07-16 RFC 0022 next landing round
+
+- Confirmed RFC 0022 already follows the latest RFC repository sidecar pattern:
+  one readable proposal plus a core specification and a focused runner
+  addendum. RFC 0009 remains the direct structural precedent; no third RFC
+  0022 sidecar was added.
+- Updated RFC fork PR #6 to `1482d0b7` with a smaller upstream plan:
+  1. RFC plus core receipts and `get/list/count`;
+  2. managed invocation and run usage after the receipt boundary settles;
+  3. minimal core and optional Lobster runner adapters with accounting.
+  The existing five implementation PRs are now described as POC evidence, not
+  the proposed landing stack.
+- Added one reference support-email success fixture: record
+  `customer.verified`, resolve it from an authorized later local agent, record
+  `case.resolved`, list/count/show the full evidence, reopen the originating
+  session, and count child-run usage once. Full producer data must exist only
+  in the receipt store, not its trajectory reference.
+- Tightened the core sidecar around a storage-neutral receipt resource:
+  harness-owned idempotency; `get`, bounded/paginated `list`, and payload-free
+  `count`; deterministic ordering; consistent authorization; no silent
+  fallback; bounded Gateway write latency; schema/migration health; private
+  SQLite files; consistent snapshot backup/export; and independent retention.
+- Tightened the runner sidecar so adapters never open SQLite directly and an
+  unresolved required reference fails as `receipt_unavailable`, distinct from
+  `required_receipt_missing` when the outcome was never observed.
+- Kept compliance claims bounded: receipt retention and export are specified,
+  but tamper evidence, signing, and regulatory attestation remain explicitly
+  separate future work.
+- Updated all six live draft PR bodies to label the current stack as **POC
+  evidence** and point reviewers toward the smaller landing rounds rather than
+  implying that the fork stack should land unchanged.
+
+### 2026-07-15 RFC 0022 shared receipt store
+
+- Reworked the Auditable Skills storage boundary around one canonical full
+  receipt record rather than a full `audit.receipt` payload copied into each
+  agent trajectory.
+- OpenClaw #97 now provides a configurable shared local SQLite profile at
+  `audit.receipts.store`, defaulting to
+  `~/.openclaw/state/receipts.sqlite`. It indexes exact type, subject, agent,
+  session, run, invocation, and skill correlation; `sessions tail` can return
+  or count exact receipt types across agents. Normal trajectories contain only
+  bounded `audit.receipt.recorded` references.
+- The database is explicitly single-host/local-storage v1. The receipt-store
+  boundary permits a later remote provider without changing producers,
+  queries, or managed-step results. Receipt retention is independent of
+  transcript and trajectory rotation.
+- Restacked and lease-updated the OpenClaw fork stack:
+  - #97 `1fcf0bf9`: shared receipt store and cross-agent query;
+  - #98 `9c7568ad`: invocation and exact skill digest correlation;
+  - #100 `78185761`: workflow audit reader resolves full evidence from the
+    configured store before Lobster conditions consume it;
+  - #109 `398d65ac`: accounting slice restacked unchanged over #100.
+- Updated RFC #6 at `9956e659`. The core sidecar now specifies the full receipt
+  record, trajectory reference, store/query contract, default SQLite profile,
+  independent retention, and future remote-provider seam. The runner sidecar
+  requires runners to resolve receipts through that store rather than create a
+  workflow receipt ledger.
+- Rewrote and published all six live PR bodies from
+  `projects/claws/auditable-skills-pr-bodies/`. They now tell the same
+  support-thread/mini-CRM story, show exact search and count behavior, state
+  the single-host SQLite boundary, and explain the core-runner/Lobster
+  migration path. All six remain draft fork PRs.
+- Focused validation:
+  - #97: 26 tests passed; config/schema baselines, lint, formatting, LOC
+    ratchet, and diff checks pass; full typecheck has only known baseline errors
+    outside this slice;
+  - #98: 31 focused receipt, invocation, run-projection, and session-query tests
+    passed;
+  - #100: 38 receipt-resolution and embedded Lobster tests passed;
+  - #109 intentionally requires Lobster #1 for cost aggregation; the stock
+    published Lobster package demonstrates the landing-order gate.
 
 ### 2026-07-15 RFC 0022 sidecar specifications
 

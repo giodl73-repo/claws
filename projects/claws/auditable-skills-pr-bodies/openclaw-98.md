@@ -2,7 +2,7 @@
 
 Durable outcomes answer what happened. A complete audit also needs to explain which exact skill ran, who invoked it, which child run performed the work, and what tokens that run consumed.
 
-This slice consumes portable Agent Skills declarations while keeping authority and observed facts with OpenClaw's existing agent, session, subagent, policy, trajectory, and model-usage primitives.
+This slice consumes portable Agent Skills declarations while keeping authority and observed facts with OpenClaw's existing agent, session, subagent, policy, trajectory, usage, and receipt-store primitives.
 
 ```yaml
 ---
@@ -23,32 +23,31 @@ These fields describe capability and composition intent. They are not evidence, 
 - Records exact executed skill identity and invocation lifecycle.
 - Adds an explicit managed child-skill invocation path.
 - Preserves parent/child invocation and run lineage across isolation, cleanup, and model fallback.
-- Summarizes receipts, skill lineage, models, and normalized token usage by run.
-- Filters audit summaries by exact observed outcome type.
+- Correlates receipts in the shared store with invocation ID, skill name, and exact skill digest.
+- Summarizes receipt references, skill lineage, models, and normalized token usage by run.
 - Keeps the caller authoritative for allowed children, models, tools, and budgets.
 
-Isolated execution becomes the honest skill-level accounting boundary. No workflow language is added to `SKILL.md`.
+Isolated execution becomes the honest skill-level accounting boundary. No workflow language is added to `SKILL.md`, and full receipt evidence remains owned by the receipt-store contract now being tightened in #97.
 
-## Auditable Skills series
+## POC evidence series
 
 1. [RFC 0022](https://github.com/giodl73-repo/rfcs/pull/6)
-2. [OpenClaw #97 - durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
+2. [OpenClaw #97 - shared durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
 3. **OpenClaw #98 - managed invocation**
 4. [OpenClaw #100 - workflow composition](https://github.com/giodl73-repo/openclaw/pull/100)
 5. [Lobster #1 - accounting continuity](https://github.com/giodl73-repo/lobster/pull/1)
 6. [OpenClaw #109 - workflow spend](https://github.com/giodl73-repo/openclaw/pull/109)
 
+These fork drafts preserve the evidence trail. RFC 0022 now places managed invocation in a later landing round after the core receipt boundary settles; this PR is not a request to land the current stack unchanged.
+
 ## Validation
 
-- Audit-run projection: 4 passing tests.
-- Session-tail audit summary and outcome filtering: 17 passing tests.
-- Final head: `62bf8ebc` (71 files, 2,589 additions, 451 deletions).
-- `git diff --check` clean and no dependency on a separate session business-association model.
+- Focused invocation, finalization, receipt correlation, audit-run, and session-query suites: 5 files, 31 tests passed.
+- Formatting, lint, and `git diff --check` pass for the updated integration.
+- Head `9c7568ad`; slice over #97 is 73 files, 2,631 additions, 451 deletions.
 
-## Real behavior proof
-
-An explicit isolated child remains on the current agent and ordinary policy path. Its lifecycle settles once, parent/child identity survives fallback and cleanup, and the audit projection joins exact skill identity to observed outcomes and run-level usage.
+**Real behavior:** an explicit isolated child remains on the current agent and ordinary policy path. Its lifecycle settles once, parent/child identity survives fallback and cleanup, and recorded receipts carry the exact invocation and skill digest needed to join outcome evidence to run-level usage.
 
 No live paid-provider child invocation was performed.
 
-Depends on #97. Fork-only Auditable Skills proof; not proposed upstream.
+This POC remains based on the archived original receipt prototype so its historical evidence stays reviewable while #97 is rebuilt as the smaller upstream-shaped Round 1. It is not directly stacked on the rewritten #97 and is not proposed upstream.

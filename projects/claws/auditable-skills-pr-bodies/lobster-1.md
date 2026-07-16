@@ -12,16 +12,20 @@ Lobster already owns workflow token aggregation, estimated cost, and `cost_limit
 - Preserves incurred cost on cancellation when resume state is available.
 - Keeps cancellation idempotent after state expires while surfacing real cleanup failures.
 
-OpenClaw records observed usage for each isolated managed child run. Lobster counts those step results once, carries the aggregate across pauses, and applies the caller-provided `cost_limit`. Skills cannot set or widen that limit, and business outcome evidence remains independent from run-level accounting.
+OpenClaw records observed usage for each isolated managed child run. Lobster counts those step results once, carries the aggregate across pauses, and applies the caller-provided `cost_limit`. Skills cannot set or widen that limit, and business outcome evidence remains independently searchable in OpenClaw's configured receipt store.
 
-## Auditable Skills series
+This is the one cross-repository prerequisite for the final accounting proof. It changes Lobster's native resume envelope; it does not teach Lobster about OpenClaw sessions, receipts, or skill metadata.
+
+## POC evidence series
 
 1. [RFC 0022](https://github.com/giodl73-repo/rfcs/pull/6)
-2. [OpenClaw #97 - durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
+2. [OpenClaw #97 - shared durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
 3. [OpenClaw #98 - managed invocation](https://github.com/giodl73-repo/openclaw/pull/98)
 4. [OpenClaw #100 - workflow composition](https://github.com/giodl73-repo/openclaw/pull/100)
 5. **Lobster #1 - accounting continuity**
 6. [OpenClaw #109 - workflow spend](https://github.com/giodl73-repo/openclaw/pull/109)
+
+These fork drafts preserve the evidence trail. RFC 0022 keeps this change in Lobster's owning repository and makes Lobster optional for OpenClaw's basic receipt and managed-invocation rounds.
 
 ## Validation
 
@@ -29,8 +33,8 @@ OpenClaw records observed usage for each isolated managed child run. Lobster cou
 - Approval and structured-input resume proof covers work before and after the gate.
 - Cancellation covers live, deleted-workflow, and expired resume state.
 - Public CLI envelope cost metadata is covered.
-- 12 focused `CostTracker` tests pass.
-- Formatting, lint, and `git diff --check` pass; lint reports only pre-existing warnings.
+- Focused `CostTracker` and resume tests pass in the supported POSIX lane.
+- Head `0ad538b3`; 6 files, 242 additions, 25 deletions.
 
 The final and cancelled envelopes retain incurred accounting across pauses. No new accounting service, database, pricing model, receipt schema, or per-outcome token attribution is introduced.
 
