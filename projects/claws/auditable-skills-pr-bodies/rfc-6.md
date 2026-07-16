@@ -27,8 +27,8 @@ A package can describe capability, but it cannot prove its own success, grant it
 
 Following the sidecar pattern established by RFC 0009, this PR now separates design rationale from normative contracts:
 
-- [Auditable Skills v1 core specification](https://github.com/giodl73-repo/rfcs/blob/24b3e6151d3107526edb09ba2e9ceb39b319d8de/rfcs/0022/auditable-skills-v1-spec.md) defines portable metadata, receipts, recorded receipt envelopes, invocation lineage, run usage and cost, queries, failure behavior, and conformance.
-- [Orchestration runner v1 addendum](https://github.com/giodl73-repo/rfcs/blob/24b3e6151d3107526edb09ba2e9ceb39b319d8de/rfcs/0022/orchestration-runner-v1-spec.md) defines the runner boundary, minimal core profile, Lobster adapter, accounting invariants, capability discovery, and phased removal of the hard Lobster dependency.
+- [Auditable Skills v1 core specification](https://github.com/giodl73-repo/rfcs/blob/007325fbfbaebd74e54e1d6e7890e0979c731a29/rfcs/0022/auditable-skills-v1-spec.md) defines portable metadata, receipts, recorded receipt envelopes, invocation lineage, run usage and cost, queries, failure behavior, and conformance.
+- [Orchestration runner v1 addendum](https://github.com/giodl73-repo/rfcs/blob/007325fbfbaebd74e54e1d6e7890e0979c731a29/rfcs/0022/orchestration-runner-v1-spec.md) defines the runner boundary, minimal core profile, Lobster adapter, accounting invariants, capability discovery, and phased removal of the hard Lobster dependency.
 
 The RFC remains the readable proposal. The two sidecars are the implementer-facing specifications.
 
@@ -87,6 +87,6 @@ The implementation slices prove the progression independently: durable outcomes 
 
 The stack has been reduced after implementation learning: the separate session business-association concept was removed. The series now relies on native session/thread identity plus receipt type and subject.
 
-RFC head `24b3e615` is rebased on current upstream RFC `main` and contains three RFC 0022 files: the proposal and two sidecar specifications (1,540 additions). The implementation heads remain `dd7495e9` (#97), `62bf8ebc` (#98), `023f4092` (#100), and `2c7f5e26` (#109). Complete 114-job fork CI passed on both the consolidated [#100 workflow head](https://github.com/giodl73-repo/openclaw/actions/runs/29456949470) and [#109 accounting head](https://github.com/giodl73-repo/openclaw/actions/runs/29456951214).
+RFC head `007325fb` is rebased on current upstream RFC `main` and contains three RFC 0022 files: the proposal and two sidecar specifications (1,660 additions). The implementation heads remain `dd7495e9` (#97), `62bf8ebc` (#98), `023f4092` (#100), and `2c7f5e26` (#109). Complete 114-job fork CI passed on both the consolidated [#100 workflow head](https://github.com/giodl73-repo/openclaw/actions/runs/29456949470) and [#109 accounting head](https://github.com/giodl73-repo/openclaw/actions/runs/29456951214).
 
 This RFC and every implementation PR remain draft, fork-only review material. Nothing has been proposed to the upstream OpenClaw, Lobster, or RFC repositories.

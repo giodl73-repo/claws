@@ -39,12 +39,20 @@
   not a permanent dependency. Direct managed invocation remains runner-free;
   simple composition can use the core profile; Lobster remains available for
   conditions, retries, approvals, structured input, and durable resume.
-- Architecture review kept the three-line `SKILL.md` author experience,
-  required bounded/non-blocking plan validation, separated plan identity from
-  execution identity, covered cancel-before-dispatch and active-wait
-  cancellation, and required sanitized stable errors across the runner boundary.
+- Tightened the normative contracts against current OpenClaw trajectory and
+  skill primitives: recorded receipts now use the existing trajectory envelope,
+  invocation and run projections preserve native session/run identity and
+  multi-model execution, and usage uses OpenClaw's normalized token buckets.
+  The runner addendum now distinguishes exclusive from shared accounting,
+  defines deterministic dispatch idempotency and terminal settlement, and keeps
+  cancellation, resume, receipt gates, and limit failures from erasing observed
+  effects or incurred spend.
+- The specifications retain the three-line `SKILL.md` author experience,
+  bounded/non-blocking validation, clear managed-invocation failure for malformed
+  recognized metadata, sanitized stable errors, and existing OpenClaw authority
+  boundaries. They make no tamper-evidence or regulatory-attestation claim.
 - RFC PR #6 is draft, open, cleanly mergeable, and limited to three files at
-  head `24b3e615`: 1,540 additions / 0 deletions. Relative Markdown links and
+  head `007325fb`: 1,660 additions / 0 deletions. Relative Markdown links and
   `git diff --check` pass.
 
 ### 2026-07-15 Auditable Skills simplification: remove `regarding`
