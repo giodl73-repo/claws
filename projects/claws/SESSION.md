@@ -1,5 +1,9 @@
 # Claws Session Context
 
+- Last updated: 2026-07-16
+- Last agent: Codex
+- Current focus: Auditable Skills exact-run usage, then minimal budgets/workflows
+
 ## Agent Start
 
 1. Read this file.
@@ -21,6 +25,40 @@
   available.
 
 ## Current Session
+
+### 2026-07-16 Auditable Skills exact-run accounting slice
+
+- Rebuilt fork draft OpenClaw #109 directly on compact #100 as one commit
+  (`1af563a188ec`). The former workflow-spend head remains preserved on
+  `prototype/auditable-skills-poc-workflow-composition`; #109 is now a compact
+  14-file, 175-addition/1-deletion exact-run token-usage slice.
+- Reused OpenClaw's native accounting path. The embedded runner's cumulative,
+  retry-aware usage travels through terminal lifecycle and `agent.wait`, then
+  is snapshotted on the exact SQLite-backed subagent registry row. No second
+  counter, database, polling loop, trajectory sum, or workflow ledger was
+  added.
+- Managed result reads now expose optional `usage` beside native status and
+  durable receipts. Missing usage remains absent. Steer/restart successors do
+  not inherit predecessor usage, and the in-process lifecycle fallback retains
+  usage when it completes before `agent.wait`.
+- Exact historical currency remains deliberately out of scope until amount and
+  pricing basis can be captured with the run. Mutable session cost estimates
+  are not treated as durable cost receipts.
+- Updated RFC #6 at `7cbda980183e` and its two sidecar specifications with the
+  exact-run accounting boundary, cost caveat, four compact OpenClaw slices,
+  and the next runner/budget round. Updated all five live implementation PR
+  bodies and the RFC body to match; every PR remains draft and fork-only.
+- Validation: managed result 4 tests; gateway cumulative-usage 6 tests;
+  lifecycle retention 1 test; exact-run, lifecycle-fallback, and steer
+  isolation 6 focused tests; formatting, lint, and diff checks passed. Full
+  `tsgo --noEmit` stopped only on known shared-worktree dependency diagnostics
+  outside the diff.
+- Active implementation worktree:
+  `C:\src\openclaw-auditable-skills-usage`, branch
+  `agent/auditable-skills-run-usage`, clean at `1af563a188ec` and pushed.
+- Current focus: design the next minimal budget/runner slice over the normalized
+  managed result. Token limits can use exact-run usage now; USD limits wait for
+  execution-time cost and basis capture.
 
 ### 2026-07-16 Auditable Skills RFC and Round 3 rebuild
 

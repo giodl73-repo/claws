@@ -14,7 +14,7 @@ This changes only Lobster's own resume envelope. It does not teach Lobster about
 
 ## Why this remains archived
 
-The compact Auditable Skills stack no longer requires Lobster for core receipts, managed child identity, or managed result reads. A future Lobster adapter can reuse this accounting behavior after OpenClaw exposes honest cumulative run usage, but this PR is prototype evidence rather than a current landing prerequisite.
+The compact Auditable Skills stack no longer requires Lobster for core receipts, managed child identity, managed result reads, or exact-run token usage. A future Lobster adapter can consume OpenClaw #109's optional cumulative usage and reuse this pause/resume accounting behavior, but this PR is prototype evidence rather than a current landing prerequisite.
 
 Skills still cannot set or widen caller-owned limits. Business outcome receipts remain independently searchable in OpenClaw's configured receipt store.
 
@@ -33,7 +33,7 @@ Skills still cannot set or widen caller-owned limits. Business outcome receipts 
 2. [OpenClaw #97 - shared durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
 3. [OpenClaw #98 - managed child runs](https://github.com/giodl73-repo/openclaw/pull/98)
 4. [OpenClaw #100 - compact managed run results](https://github.com/giodl73-repo/openclaw/pull/100)
-5. **Lobster #1 - accounting continuity prototype**
-6. [OpenClaw #109 - workflow spend prototype](https://github.com/giodl73-repo/openclaw/pull/109)
+5. [OpenClaw #109 - exact-run token usage](https://github.com/giodl73-repo/openclaw/pull/109)
+6. **Lobster #1 - accounting continuity prototype**
 
 Fork-only historical evidence; nothing is proposed against `openclaw/lobster`.

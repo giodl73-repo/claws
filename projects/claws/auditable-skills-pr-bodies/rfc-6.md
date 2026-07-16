@@ -78,6 +78,8 @@ OpenClaw already owns child status, cancellation, cleanup, model selection, sess
 
 The existing subagent view is the first operator surface for skill identity and the run's current usage/cost projection. Workflow accounting later consumes cumulative observed run usage. It must not treat OpenClaw's context-window `totalTokens` snapshot as spend or turn missing usage into zero.
 
+The compact accounting slice now carries OpenClaw's cumulative native-run usage through its existing terminal lifecycle and `agent.wait` result, then snapshots it on the exact subagent record. A later session turn cannot rewrite that historical run, and a steer replacement starts without inherited usage. Exact historical USD remains optional until OpenClaw can capture the amount and pricing basis with the run; a mutable session estimate is not a durable cost receipt.
+
 The retention rule is equally direct: if a product promises skill attribution for as long as receipts are retained, it must retain or export the `runId`-to-skill association for that period. If the association is gone, the answer is unavailable—not inferred from transcript prose.
 
 ## A natural path to workflows
@@ -93,7 +95,7 @@ The RFC deliberately does not add steps, expressions, loops, approvals, model ch
 
 Recorded outcomes can become completion gates. `uses-skills` can inform managed composition. `isolation` creates an honest execution and accounting boundary.
 
-The archived proof uses Lobster, but the contract is runner-neutral. The next useful core seam is a read-only managed-step result assembled by `runId` from native child identity, terminal state, cumulative usage, and receipts. Either a small OpenClaw runner or Lobster can consume that result without owning another execution ledger.
+The archived proof uses Lobster, but the contract is runner-neutral. OpenClaw #100 supplies the read-only managed result, and #109 adds exact-run cumulative usage to it. Either a small OpenClaw runner or Lobster can consume that result without owning another execution or accounting ledger.
 
 ## Implementer specifications
 
@@ -111,14 +113,14 @@ Storage and queries belong to the core contract; workflow behavior belongs to th
 - One repeatable support-email fixture is the reference proof: record verification, resolve from another authorized local agent, record resolution, list/count/show the evidence, reopen the thread, and report child-run tokens once.
 - Managed skill identity now lives on OpenClaw's native child-run record. There is no second invocation lifecycle, usage ledger, receipt store, or executor.
 - `runId` is the canonical join across skill identity, sessions, usage, cost, and receipts; retention and unavailable-data behavior are explicit.
-- OpenClaw #97, #98, and #100 have been rebuilt as compact landing candidates. The Lobster and workflow-spend PRs remain archived POC evidence.
+- OpenClaw #97, #98, #100, and #109 are compact, independently reviewable evidence slices. The earlier Lobster workflow experiments remain archived POC evidence.
 
 ## Recommended landing rounds
 
 1. **Core receipts:** land trusted tool receipts, the shared store, trajectory references, and `get/list/count` without skill metadata or a workflow dependency.
-2. **Managed child runs:** add the optional Agent Skills declarations and exact skill identity to the existing native child record, then project existing usage and cost without another lifecycle store.
-3. **Normalized managed results:** resolve one run by `runId` into identity, terminal state, and receipts. Add cumulative usage only when the native run can prove it. This is the stable input for either a small core runner or Lobster.
-4. **Runner adapters and accounting:** add static dependencies, receipt gates, cancellation, and cumulative limits only after the result and usage boundaries settle; keep advanced pause/resume behavior in Lobster.
+2. **Managed child runs and results:** add the optional Agent Skills declarations and exact skill identity to the existing native child record, then resolve one run by `runId` into identity, terminal state, and receipts.
+3. **Exact-run accounting:** carry cumulative observed usage through native completion, retain it with the exact run, and expose it as an optional result field. Capture cost and basis with the run before claiming historical USD or enforcing USD limits.
+4. **Runner adapters and budgets:** add static dependencies, receipt gates, cancellation, and cumulative limits over the normalized result; keep advanced pause/resume behavior in Lobster.
 
 Each round is independently useful and reviewable. The Agent Skills standards opportunity stays smaller still: portable declarations and the rule that declarations are not evidence or authority. Storage, sessions, accounting, and workflows remain harness concerns.
 
@@ -128,9 +130,9 @@ Each round is independently useful and reviewable. The Agent Skills standards op
 2. [OpenClaw #97 - record and find durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
 3. [OpenClaw #98 - track managed skill runs](https://github.com/giodl73-repo/openclaw/pull/98)
 4. [OpenClaw #100 - read managed run results](https://github.com/giodl73-repo/openclaw/pull/100)
-5. [Lobster #1 - accounting continuity prototype](https://github.com/giodl73-repo/lobster/pull/1)
-6. [OpenClaw #109 - workflow spend prototype](https://github.com/giodl73-repo/openclaw/pull/109)
+5. [OpenClaw #109 - retain exact-run token usage](https://github.com/giodl73-repo/openclaw/pull/109)
+6. [Lobster #1 - accounting continuity prototype](https://github.com/giodl73-repo/lobster/pull/1)
 
-The series proved the progression independently: shared durable outcomes and retrieval; exact managed child-run identity; runner-neutral managed results; accounting continuity across pauses; and observed child usage rolled into workflow spend. The compact proposal keeps the first three OpenClaw slices and uses the later accounting work as evidence, not as a stack maintainers must accept.
+The series proves the progression independently: shared durable outcomes and retrieval; exact managed child-run identity; runner-neutral managed results; cumulative retry-aware token usage retained by exact run; and optional accounting continuity across pauses. Budgets and workflow dispatch remain the next layer over these native facts.
 
 Every PR remains draft, fork-only review material. Nothing has been proposed to the upstream OpenClaw, Lobster, or RFC repositories.

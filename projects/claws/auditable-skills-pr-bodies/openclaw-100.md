@@ -69,7 +69,7 @@ No workflow DSL, step state machine, approval engine, TaskFlow layer, Lobster de
 2. [OpenClaw #97 - shared durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
 3. [OpenClaw #98 - managed child runs](https://github.com/giodl73-repo/openclaw/pull/98)
 4. **OpenClaw #100 - read managed run results**
-5. [Lobster #1 - archived accounting continuity proof](https://github.com/giodl73-repo/lobster/pull/1)
-6. [OpenClaw #109 - archived workflow spend proof](https://github.com/giodl73-repo/openclaw/pull/109)
+5. [OpenClaw #109 - exact-run token usage](https://github.com/giodl73-repo/openclaw/pull/109)
+6. [Lobster #1 - archived accounting continuity proof](https://github.com/giodl73-repo/lobster/pull/1)
 
-The old workflow-composition head remains preserved on a prototype branch as evidence. This compact PR depends only on #98 and remains draft, fork-only review material; it is not proposed upstream.
+The old workflow-composition head remains preserved on a prototype branch as evidence. Compact #109 adds optional cumulative usage to this result without reviving that workflow bridge. This PR depends only on #98 and remains draft, fork-only review material; it is not proposed upstream.

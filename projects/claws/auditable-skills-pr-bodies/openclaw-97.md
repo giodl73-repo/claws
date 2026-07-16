@@ -80,10 +80,10 @@ No live payment, inventory, CRM, or other external business system was mutated.
 
 1. [RFC 0022 - Auditable Skills](https://github.com/giodl73-repo/rfcs/pull/6)
 2. **OpenClaw #97 - core durable outcome receipts**
-3. [OpenClaw #98 - managed invocation POC](https://github.com/giodl73-repo/openclaw/pull/98)
-4. [OpenClaw #100 - workflow composition POC](https://github.com/giodl73-repo/openclaw/pull/100)
-5. [Lobster #1 - accounting continuity POC](https://github.com/giodl73-repo/lobster/pull/1)
-6. [OpenClaw #109 - workflow spend POC](https://github.com/giodl73-repo/openclaw/pull/109)
+3. [OpenClaw #98 - managed skill runs](https://github.com/giodl73-repo/openclaw/pull/98)
+4. [OpenClaw #100 - managed run results](https://github.com/giodl73-repo/openclaw/pull/100)
+5. [OpenClaw #109 - exact-run token usage](https://github.com/giodl73-repo/openclaw/pull/109)
+6. [Lobster #1 - accounting continuity prototype](https://github.com/giodl73-repo/lobster/pull/1)
 
 Depends on RFC 0022. Draft fork proof for maintainer review; nothing is proposed to `openclaw/openclaw` by this PR.
 
