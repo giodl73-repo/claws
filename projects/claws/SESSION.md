@@ -61,6 +61,127 @@
   handoff. Patrick's stale #106888 change request targets pre-fix commit
   `1e9569d`; a human re-review was requested on the proven current head.
 
+### 2026-07-15 RFC 0022 sidecar specifications
+
+- Rebased RFC fork PR #6 on current upstream RFC `main` (`2d213ae`) and
+  fast-forwarded the fork base so RFC 0009's newly landed sidecars do not appear
+  in the RFC 0022 diff.
+- Added `rfcs/0022/auditable-skills-v1-spec.md`, the normative core v1 contract
+  for skill metadata, producer receipts, harness-owned recorded receipt
+  envelopes, managed invocation, exact skill identity, usage/cost, queries,
+  failure behavior, and conformance.
+- Added `rfcs/0022/orchestration-runner-v1-spec.md`, a runner-neutral addendum
+  defining normalized workflow plans and step results, lifecycle, accounting
+  deduplication, cancellation, resume, capability discovery, a deliberately
+  small core runner, a Lobster adapter, and five mechanical migration phases.
+- Updated RFC 0022 and its PR body to make Lobster the current advanced proof,
+  not a permanent dependency. Direct managed invocation remains runner-free;
+  simple composition can use the core profile; Lobster remains available for
+  conditions, retries, approvals, structured input, and durable resume.
+- Tightened the normative contracts against current OpenClaw trajectory and
+  skill primitives: recorded receipts now use the existing trajectory envelope,
+  invocation and run projections preserve native session/run identity and
+  multi-model execution, and usage uses OpenClaw's normalized token buckets.
+  The runner addendum now distinguishes exclusive from shared accounting,
+  defines deterministic dispatch idempotency and terminal settlement, and keeps
+  cancellation, resume, receipt gates, and limit failures from erasing observed
+  effects or incurred spend.
+- The specifications retain the three-line `SKILL.md` author experience,
+  bounded/non-blocking validation, clear managed-invocation failure for malformed
+  recognized metadata, sanitized stable errors, and existing OpenClaw authority
+  boundaries. They make no tamper-evidence or regulatory-attestation claim.
+- RFC PR #6 is draft, open, cleanly mergeable, and limited to three files at
+  head `007325fb`: 1,660 additions / 0 deletions. Relative Markdown links and
+  `git diff --check` pass.
+
+### 2026-07-15 Auditable Skills simplification: remove `regarding`
+
+- Removed the separate session business-association concept from the active RFC
+  and all four stacked OpenClaw implementation branches. Historical notes below
+  remain as the design trail; they are no longer the proposed architecture.
+- The retained model is smaller: native OpenClaw session/channel identity keeps
+  the work thread, a typed receipt records the observed outcome, optional
+  producer-owned `subject` identifies the affected object, and run/invocation
+  envelopes supply lineage, model usage, and cost.
+- Rebuilt and lease-updated the fork-only stack:
+  - #97 `dd7495e9`: 566 additions / 32 deletions / 29 files;
+  - #98 `62bf8ebc`: 2,589 additions / 451 deletions / 71 files;
+  - #100 `023f4092`: 1,782 additions / 152 deletions / 41 files;
+  - #109 `2c7f5e26`: 154 additions / 2 deletions / 4 files.
+- RFC #6 was `04651012` at 675 lines before its two sidecar specifications were
+  added; current RFC state is recorded above. Lobster #1 remains `0ad538b3` at
+  242 additions / 25 deletions. The implementation simplification removed
+  1,248 lines of churn; the later implementer specs add documentation without
+  restoring the removed runtime design.
+- Verified there are no `regarding`, Dataverse, or Dynamics references in the
+  active RFC, cumulative OpenClaw stack diff, or any of the six live PR bodies.
+- Focused proof after rebuilding:
+  - #97: 20 receipt and session-query assertions passed;
+  - #98: 21 audit-run and query assertions passed;
+  - #100: 120 managed-skill, Lobster, and audit-reader assertions passed, plus
+    24/25 spawn assertions; the remaining assertion is the pre-existing Windows
+    `/tmp` versus `C:\tmp` path expectation;
+  - #109 retains the deliberate Lobster #1 source dependency for `_meta.cost`.
+- Complete 114-job fork CI passed on both exact final heads: #100 in run
+  `29456949470` and #109 in run `29456951214`. An earlier #109 proof had one
+  unrelated 40 ms media timeout; both authoritative final-head runs passed.
+- Rewrote and published all six PR bodies from
+  `projects/claws/auditable-skills-pr-bodies/`. Every PR remains draft,
+  fork-only, open, and mergeable.
+
+### 2026-07-15 Auditable Skills presentation
+
+- Reframed RFC 0022 and the full six-draft fork series under the umbrella
+  **Auditable Skills**. Metadata is now presented as the portable declaration
+  mechanism; durable outcome evidence, `regarding`, invocation lineage, search,
+  usage, cost, and workflow accounting are the runtime-owned audit story.
+- Renamed the RFC source to `rfcs/0022-auditable-skills.md`, changed its title
+  to **RFC 0022: Auditable Skills**, and pushed commit `9580ab5` to RFC fork
+  PR [#6](https://github.com/giodl73-repo/rfcs/pull/6).
+- Retitled and rewrote every live draft body with a shared six-slice map,
+  slice-specific opportunity and boundaries, accurate validation, and complete
+  Real behavior proof sections: OpenClaw
+  [#97](https://github.com/giodl73-repo/openclaw/pull/97),
+  [#98](https://github.com/giodl73-repo/openclaw/pull/98),
+  [#100](https://github.com/giodl73-repo/openclaw/pull/100), Lobster
+  [#1](https://github.com/giodl73-repo/lobster/pull/1), and OpenClaw
+  [#109](https://github.com/giodl73-repo/openclaw/pull/109).
+- Live verification confirms all six remain open, draft, and mergeable; every
+  OpenClaw Real behavior proof recheck passed; and the OpenClaw ancestry remains
+  #97 -> #98 -> #100 -> #109. RFC, OpenClaw #109, and Lobster worktrees are
+  clean.
+- Current live GitHub review size is 7,236 additions and 682 deletions across
+  the six incremental drafts (7,918 lines of churn), including RFC text, tests,
+  docs, fixtures, and generated updates.
+
+### 2026-07-15 RFC 0022 cross-repository accounting proof
+
+- Expanded RFC fork PR #6's reviewer-facing body to match the final RFC thesis:
+  portable Agent Skills declarations; observed, searchable business evidence;
+  `regarding` continuity; managed composition; native workflow accounting; and
+  the complete six-draft proof order. It now includes the support-case/query
+  story and completed cross-repository spend proof, and no longer says already
+  closed exploratory drafts "will be" superseded.
+- Closed the final validation gap between OpenClaw fork draft
+  [#109](https://github.com/giodl73-repo/openclaw/pull/109) at `56c9c6db`
+  and Lobster fork draft
+  [#1](https://github.com/giodl73-repo/lobster/pull/1) at `0ad538b3`.
+- Built Lobster #1 and loaded that source runtime directly from an ephemeral
+  OpenClaw Vitest harness. The scenario ran `verify_customer`, paused for
+  approval, resumed, and ran `resolve_case` using synthetic completed child-run
+  audits through the real OpenClaw adapter and Lobster workflow runtime.
+- The resumed native Lobster envelope returned 300 input tokens, 75 output
+  tokens, estimated cost `$0.00009`, and separate step entries of 100/20 and
+  200/55 tokens. This proves pre-approval spend survives the pause and combines
+  with post-approval spend without a second accounting store.
+- Updated #109's body and Real behavior proof with the exact environment,
+  command, output, and remaining live-provider limitation. The published
+  `@clawdbot/lobster@2026.6.11` still drops `_meta.cost`, so Lobster #1 remains
+  the deliberate landing-order dependency.
+- Removed the ephemeral proof file after the run. Both implementation
+  worktrees are clean; no dependency override or proof-only code entered either
+  PR. All six review drafts remain fork-only, draft, open, and mergeable.
+
 ### 2026-07-15 RFC 0016 implementer sidecars
 
 - Rebased RFC PR [#27](https://github.com/openclaw/rfcs/pull/27) onto current
@@ -93,7 +214,6 @@
   of cron `current`, ClawHub BOM parity, and artifact-level origin plus later
   non-Claw adoption. Do not claim the existing stacks fully conform to the new
   sidecars until those gaps are repaired and restacked.
-
 ### 2026-07-15 RFC 0022 reviewer-series reformulation
 
 - Replaced the exploratory Skill Receipts/metadata chronology with six
@@ -109,14 +229,14 @@
   Composition**, commit `92f746e`. Portable `SKILL.md` metadata remains only
   `outcomes`, `uses-skills`, and `isolation`; observed records, regarding,
   lineage, accounting, and limits remain runtime-owned.
-- OpenClaw #100 was rebuilt directly on #98 and squashed at `9cbb3b3f`. It
+- OpenClaw #100 was rebuilt directly on #98 and is now at `4e895252`. It
   consolidates the embedded Lobster bridge and exploratory #102-#108 behavior:
   managed skill calls, regarding inheritance, ordered completion, recorded
   outcome branching, approval, and selected-data handoff. The late
   cross-session query demo was intentionally omitted because #97 already owns
   the foundational business-record query and the demo depended on the deleted
   mixed accounting/history layer.
-- OpenClaw #109 is a new 154-line draft at `75904368`. It projects completed
+- OpenClaw #109 is a 154-line draft at `56c9c6db`. It projects completed
   child audit input/output usage and one unambiguous model into Lobster's native
   result shape, and preserves `_meta.cost` through the OpenClaw runner. It
   deliberately depends on Lobster #1; integrated proof cannot pass against the
@@ -131,9 +251,22 @@
 - Closed superseded fork experiments #66-#70, #76-#93, #95-#96, #99, and
   #102-#108 with replacement links. Their branches and discussion remain; no
   branches were deleted. Unrelated fork PRs were untouched.
-- Full fork CI was manually dispatched for condensed OpenClaw #100 at run
-  `29444392432` and #109 at run `29444491276`. Both were still running at this
-  handoff; draft PR event checks passed the proof/format admission surface.
+- Final OpenClaw heads are #97 `7a71d9a7`, #98 `eec741d7`, #100 `4e895252`,
+  and #109 `56c9c6db`. All four drafts are open and mergeable. RFC #6 remains
+  at `92f746e`; Lobster #1 remains at `0ad538b3` and is open and mergeable.
+- Full fork CI passed all 114 jobs for #100 at run `29449202361` and all 114
+  jobs for #109 at run `29449204163`. The repair loop regenerated the six
+  Linux/Node 24 prompt snapshots, preserved CLI managed-invocation lineage,
+  omitted absent lineage from ordinary CLI runs, synchronized the inherited
+  oxlint override contract, isolated workflow adapters so the LOC ratchet
+  passes, and fixed the #109 `_meta` lint access.
+- Local focused proof after the adapter split passed 195 regarding, gateway,
+  plugin-runtime, and audit assertions. The broader Windows spawn suite still
+  has its known `/tmp` path normalization mismatch, and the CLI prepare test
+  cleanup can hit a Windows SQLite `EBUSY`; Linux CI passed both owning lanes.
+- The temporary Linux prompt-snapshot generator branch, worktree, and local
+  artifact were removed after its deterministic patch was applied. No helper
+  commit is in the PR ancestry.
 - Active implementation worktrees:
   `C:\src\openclaw-skill-workflows-condensed` on
   `agent/skill-workflows-condensed` (same head as #100) and
