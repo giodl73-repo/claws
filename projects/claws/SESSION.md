@@ -22,6 +22,45 @@
 
 ## Current Session
 
+### 2026-07-16 final Claws stack refresh
+
+- Patrick approved beginning the landing sequence but asked to hold
+  `CLAW.md` for now. OpenClaw PRs #101328, #101755, #101973, #102228,
+  #102296, #102306, #102383, #102406, #102427, #102959, and #102982 are
+  marked ready for review. #106888 remains draft. No PR has automerge enabled;
+  nothing was merged from this workspace.
+- RFC [#27](https://github.com/openclaw/rfcs/pull/27) is ready and mergeable at
+  `f08192f`. It now records the final ClawHub ownership split: #3090 owns
+  fail-closed reads and full-manifest stripping, #3091 owns enabled discovery,
+  and #3092 owns the hosted feed and published-package proof. The package
+  sidecar already rejects links and special archive entries. Focused Codex
+  review and `git diff --check` are clean.
+- OpenClaw update apply [#102982](https://github.com/openclaw/openclaw/pull/102982)
+  is refreshed at `fc3be18acd1`; final `CLAW.md` compatibility
+  [#106888](https://github.com/openclaw/openclaw/pull/106888) is refreshed at
+  `1b00790e260`. Their focused lifecycle suites and final Codex reviews pass.
+- ClawHub draft heads are #3089 `821c1f4`, #3090 `fe333b8`, #3091 `241db05`,
+  and #3092 `927bd80`. Each was restacked without force-pushing and remains
+  unmerged. #3089/#3090/#3091 pass focused suites, `ci:types-build`,
+  `ci:static`, and clean Codex reviews.
+- #3092 passes feed/API/schema/redirect/archive-safety tests, `ci:types-build`,
+  `ci:static`, and final Codex review. Its real cross-repo E2E downloads and
+  digest-checks a hosted package, rejects unsafe paths plus link/special
+  entries before extraction, and obtains a non-mutating
+  `openclaw.clawAddPlan.v1` result from OpenClaw `1b00790e260`.
+- Resolution comments and `@clawsweeper re-review` requests were posted on
+  #3091, #3092, and RFC #27. No reusable local Convex deployment was available
+  for #3091's live enabled/disabled transcript; the deployment gate must remain
+  off until the complete experimental stack is present. Remaining work is
+  maintainer review and CI follow-up only. Do not merge any PR from this
+  workspace.
+- The required ClawHub `pr-gates` lanes pass. Vercel still requires OpenClaw
+  Foundation authorization, and unrelated local-auth browser shards were
+  flaky; failed GitHub jobs were rerun for workflow runs `29519926564`,
+  `29521515948`, `29522311511`, and `29523233296` and were in progress at
+  handoff. Patrick's stale #106888 change request targets pre-fix commit
+  `1e9569d`; a human re-review was requested on the proven current head.
+
 ### 2026-07-15 RFC 0016 implementer sidecars
 
 - Rebased RFC PR [#27](https://github.com/openclaw/rfcs/pull/27) onto current
