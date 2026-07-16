@@ -14,7 +14,7 @@ OpenClaw already records actual model usage for each managed child run. Lobster 
 
 Together, OpenClaw reports observed child usage, Lobster aggregates each contributing run once, and the caller applies `cost_limit`. Receipt types can still be searched and counted independently of workflow accounting.
 
-## Auditable Skills series
+## POC evidence series
 
 1. [RFC 0022](https://github.com/giodl73-repo/rfcs/pull/6)
 2. [OpenClaw #97 - shared durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
@@ -22,6 +22,8 @@ Together, OpenClaw reports observed child usage, Lobster aggregates each contrib
 4. [OpenClaw #100 - workflow composition](https://github.com/giodl73-repo/openclaw/pull/100)
 5. [Lobster #1 - accounting continuity](https://github.com/giodl73-repo/lobster/pull/1)
 6. **OpenClaw #109 - workflow spend**
+
+These fork drafts preserve the evidence trail. RFC 0022 now folds this small spend projection into the later runner-adapter round rather than proposing it as a standalone upstream slice.
 
 ## Validation and dependency boundary
 

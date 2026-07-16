@@ -16,7 +16,7 @@ OpenClaw records observed usage for each isolated managed child run. Lobster cou
 
 This is the one cross-repository prerequisite for the final accounting proof. It changes Lobster's native resume envelope; it does not teach Lobster about OpenClaw sessions, receipts, or skill metadata.
 
-## Auditable Skills series
+## POC evidence series
 
 1. [RFC 0022](https://github.com/giodl73-repo/rfcs/pull/6)
 2. [OpenClaw #97 - shared durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
@@ -24,6 +24,8 @@ This is the one cross-repository prerequisite for the final accounting proof. It
 4. [OpenClaw #100 - workflow composition](https://github.com/giodl73-repo/openclaw/pull/100)
 5. **Lobster #1 - accounting continuity**
 6. [OpenClaw #109 - workflow spend](https://github.com/giodl73-repo/openclaw/pull/109)
+
+These fork drafts preserve the evidence trail. RFC 0022 keeps this change in Lobster's owning repository and makes Lobster optional for OpenClaw's basic receipt and managed-invocation rounds.
 
 ## Validation
 

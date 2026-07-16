@@ -34,7 +34,7 @@ Version 1 supports local SQLite only. It is intended for agents served by one Ga
 
 This slice does not add a CRM, payment ledger, workflow engine, model-prose inference, skill metadata, or token attribution to individual outcomes. It establishes the evidence and retrieval seam reused by later managed-skill and workflow slices.
 
-## Auditable Skills series
+## POC evidence series
 
 1. [RFC 0022](https://github.com/giodl73-repo/rfcs/pull/6)
 2. **OpenClaw #97 - shared durable outcomes**
@@ -42,6 +42,8 @@ This slice does not add a CRM, payment ledger, workflow engine, model-prose infe
 4. [OpenClaw #100 - workflow composition](https://github.com/giodl73-repo/openclaw/pull/100)
 5. [Lobster #1 - accounting continuity](https://github.com/giodl73-repo/lobster/pull/1)
 6. [OpenClaw #109 - workflow spend](https://github.com/giodl73-repo/openclaw/pull/109)
+
+These fork drafts preserve the evidence trail. RFC 0022 now recommends a smaller upstream sequence beginning with a rebuilt core-receipts slice; this PR is proof for that slice, not a request to land the current stack unchanged.
 
 ## Validation
 

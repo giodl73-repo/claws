@@ -50,6 +50,9 @@
 - Kept compliance claims bounded: receipt retention and export are specified,
   but tamper evidence, signing, and regulatory attestation remain explicitly
   separate future work.
+- Updated all six live draft PR bodies to label the current stack as **POC
+  evidence** and point reviewers toward the smaller landing rounds rather than
+  implying that the fork stack should land unchanged.
 
 ### 2026-07-15 RFC 0022 shared receipt store
 

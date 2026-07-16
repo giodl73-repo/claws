@@ -29,7 +29,7 @@ These fields describe capability and composition intent. They are not evidence, 
 
 Isolated execution becomes the honest skill-level accounting boundary. No workflow language is added to `SKILL.md`, and full receipt evidence remains owned by the store introduced in #97.
 
-## Auditable Skills series
+## POC evidence series
 
 1. [RFC 0022](https://github.com/giodl73-repo/rfcs/pull/6)
 2. [OpenClaw #97 - shared durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
@@ -37,6 +37,8 @@ Isolated execution becomes the honest skill-level accounting boundary. No workfl
 4. [OpenClaw #100 - workflow composition](https://github.com/giodl73-repo/openclaw/pull/100)
 5. [Lobster #1 - accounting continuity](https://github.com/giodl73-repo/lobster/pull/1)
 6. [OpenClaw #109 - workflow spend](https://github.com/giodl73-repo/openclaw/pull/109)
+
+These fork drafts preserve the evidence trail. RFC 0022 now places managed invocation in a later landing round after the core receipt boundary settles; this PR is not a request to land the current stack unchanged.
 
 ## Validation
 

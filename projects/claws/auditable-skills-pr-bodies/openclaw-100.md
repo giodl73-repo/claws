@@ -45,7 +45,7 @@ The verification skill must complete and record `customer.verified`. The audit-r
 
 No new workflow DSL, business database, receipt ledger, approval engine, or task-state model is added. Lobster is the current advanced adapter, not a permanent core dependency: the RFC sidecar specifies the same managed-step contract for a minimal OpenClaw runner.
 
-## Auditable Skills series
+## POC evidence series
 
 1. [RFC 0022](https://github.com/giodl73-repo/rfcs/pull/6)
 2. [OpenClaw #97 - shared durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
@@ -53,6 +53,8 @@ No new workflow DSL, business database, receipt ledger, approval engine, or task
 4. **OpenClaw #100 - workflow composition**
 5. [Lobster #1 - accounting continuity](https://github.com/giodl73-repo/lobster/pull/1)
 6. [OpenClaw #109 - workflow spend](https://github.com/giodl73-repo/openclaw/pull/109)
+
+These fork drafts preserve the evidence trail. RFC 0022 now combines this learning with managed-step accounting in a later runner-adapter round; this PR is not a request to land the current stack unchanged.
 
 ## Validation
 
