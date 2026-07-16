@@ -37,3 +37,7 @@ Skills still cannot set or widen caller-owned limits. Business outcome receipts 
 6. **Lobster #1 - accounting continuity prototype**
 
 Fork-only historical evidence; nothing is proposed against `openclaw/lobster`.
+
+## Relationship to the core proof
+
+This remains optional advanced-runner evidence. [OpenClaw #113](https://github.com/giodl73-repo/openclaw/pull/113) demonstrates the core alternative: a caller can aggregate explicit completed managed runs and make a between-step token decision without Lobster. Lobster is still useful when accounting must survive its existing approval, input, and resume lifecycle; it is not a hard dependency for Auditable Skills.

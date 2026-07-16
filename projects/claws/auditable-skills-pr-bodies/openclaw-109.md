@@ -67,3 +67,7 @@ No live model, external channel, or cost estimate was exercised.
 5. **OpenClaw #109 - exact-run token usage**
 
 This remains a fork-only draft for design review. It does not propose an upstream merge yet.
+
+## Current continuation
+
+The compact fork series now continues through [#109](https://github.com/giodl73-repo/openclaw/pull/109), which retains cumulative usage on the exact native managed run, and [#113](https://github.com/giodl73-repo/openclaw/pull/113), which deduplicates explicit completed run IDs and applies an optional caller-owned between-step token ceiling. This PR's scope is unchanged; the later slices build on its native boundary without adding a second execution, usage, or budget ledger.

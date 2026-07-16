@@ -2,7 +2,7 @@
 
 - Last updated: 2026-07-16
 - Last agent: Codex
-- Current focus: Auditable Skills exact-run usage, then minimal budgets/workflows
+- Current focus: Auditable Skills between-step budgets, then a minimal core runner
 
 ## Agent Start
 
@@ -25,6 +25,55 @@
   available.
 
 ## Current Session
+
+### 2026-07-16 Auditable Skills between-step token budget slice
+
+- Opened fork-only draft OpenClaw #113 directly on #109:
+  `https://github.com/giodl73-repo/openclaw/pull/113`, head
+  `56a0ea65f901`. The two-file slice adds `subagents usage` over explicit
+  managed `runIds`; it deduplicates IDs, aggregates the exact retained usage
+  once, and optionally compares the result with a caller-owned `maxTokens`.
+- The decision is deliberately ephemeral: `within_limit` or `limit_reached`
+  plus remaining tokens. OpenClaw stores no budget, reserves no future tokens,
+  and does not claim mid-run enforcement. A future runner can use the result
+  before dispatching its next step.
+- Reused native boundaries only. Reads use the existing session-tree visibility
+  check and retained SQLite-backed subagent run records. They do not open the
+  receipt store. Running runs, missing managed identity, and missing exact
+  usage return `accounting_unavailable` rather than zero.
+- The retained provider total is preferred. If absent, retained input plus
+  output supplies the total while cache buckets remain separate, matching RFC
+  0022's normalized accounting contract. Duplicate run IDs count once and the
+  exact equality boundary returns `limit_reached`.
+- FACES review kept the change read-only and runner-neutral. The Gateway lens
+  rejected new stores or blocking I/O; the operator lens favored one usable
+  next-step decision; the ecosystem lens kept budgets out of portable skill
+  metadata. OpenTelemetry's GenAI token-usage convention independently
+  supports provider-reported, operation-owned accounting and explicit
+  unavailability.
+- Updated RFC #6 and both sidecar specs at `0e9f4ec3` with the managed-run usage
+  check, caller ownership, deduplication, visibility, missing-accounting, and
+  no-reservation rules. The implementation plan is now five OpenClaw rounds;
+  runner adapters and workflows follow the completed between-step budget
+  primitive.
+- Updated the live bodies for RFC #6, OpenClaw #97/#98/#100/#109/#113, and
+  Lobster #1. All seven are draft, fork-only, and mergeable. Local body mirrors
+  live under `projects/claws/auditable-skills-pr-bodies/`, including new
+  `openclaw-113.md`.
+- Coordination state is committed on `agent/auditable-state-sync` (four commits
+  ahead of internal `origin/main`). A bounded non-interactive
+  `git push origin HEAD:main` retry again timed out without remote output; no
+  implementation or public-fork push is pending.
+- Validation: focused subagents suite passed 24 tests; scoped `oxfmt`, `oxlint`,
+  and `git diff --check` passed. Whole-repo tsgo exceeded the local 60-second
+  window without diagnostics; the focused TypeScript/Vitest transform passed.
+- Active implementation worktree:
+  `C:\src\openclaw-auditable-skills-budget`, branch
+  `agent/auditable-skills-token-budget`, clean and pushed at `56a0ea65f901`.
+- Next bounded slice: prove one minimal core sequential runner that selects the
+  completed managed run IDs, calls the native usage decision before dispatch,
+  and reuses existing TaskFlow/task lifecycle. Keep fan-out, expressions,
+  approvals, resume, model routing, and USD limits out of that first runner.
 
 ### 2026-07-16 Auditable Skills exact-run accounting slice
 

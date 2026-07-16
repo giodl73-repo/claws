@@ -88,3 +88,7 @@ No live payment, inventory, CRM, or other external business system was mutated.
 Depends on RFC 0022. Draft fork proof for maintainer review; nothing is proposed to `openclaw/openclaw` by this PR.
 
 Head `738ca6d79d3`; 32 files, 1,489 additions, 27 deletions.
+
+## Current continuation
+
+The compact fork series now continues through [#109](https://github.com/giodl73-repo/openclaw/pull/109), which retains cumulative usage on the exact native managed run, and [#113](https://github.com/giodl73-repo/openclaw/pull/113), which deduplicates explicit completed run IDs and applies an optional caller-owned between-step token ceiling. This PR's scope is unchanged; the later slices build on its native boundary without adding a second execution, usage, or budget ledger.

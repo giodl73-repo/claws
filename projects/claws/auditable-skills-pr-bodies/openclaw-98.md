@@ -80,3 +80,7 @@ No paid-provider run was performed.
 6. [Lobster #1 - accounting continuity prototype](https://github.com/giodl73-repo/lobster/pull/1)
 
 The former large #98 remains available as `prototype/auditable-skills-poc-managed-invocation`. Compact #100 and #109 stack directly on this smaller reviewer-facing slice. Everything remains fork-only and draft; nothing is proposed to upstream OpenClaw.
+
+## Current continuation
+
+The compact fork series now continues through [#109](https://github.com/giodl73-repo/openclaw/pull/109), which retains cumulative usage on the exact native managed run, and [#113](https://github.com/giodl73-repo/openclaw/pull/113), which deduplicates explicit completed run IDs and applies an optional caller-owned between-step token ceiling. This PR's scope is unchanged; the later slices build on its native boundary without adding a second execution, usage, or budget ledger.

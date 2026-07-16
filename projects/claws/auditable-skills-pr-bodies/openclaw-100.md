@@ -73,3 +73,7 @@ No workflow DSL, step state machine, approval engine, TaskFlow layer, Lobster de
 6. [Lobster #1 - archived accounting continuity proof](https://github.com/giodl73-repo/lobster/pull/1)
 
 The old workflow-composition head remains preserved on a prototype branch as evidence. Compact #109 adds optional cumulative usage to this result without reviving that workflow bridge. This PR depends only on #98 and remains draft, fork-only review material; it is not proposed upstream.
+
+## Current continuation
+
+The compact fork series now continues through [#109](https://github.com/giodl73-repo/openclaw/pull/109), which retains cumulative usage on the exact native managed run, and [#113](https://github.com/giodl73-repo/openclaw/pull/113), which deduplicates explicit completed run IDs and applies an optional caller-owned between-step token ceiling. This PR's scope is unchanged; the later slices build on its native boundary without adding a second execution, usage, or budget ledger.
