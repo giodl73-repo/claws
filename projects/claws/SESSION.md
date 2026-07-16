@@ -55,6 +55,9 @@
   and 6,038-link docs checks. Aggregate `pnpm check` stops on stale current-base
   shrinkwraps for the root package, `extensions/llama-cpp`, and
   `extensions/twitch`; the branch does not change those files.
+- Fork CI real-behavior proof passes. The `auto-response` workflow fails before
+  repository code because the fork does not have the GitHub App private-key
+  secret required by that upstream workflow.
 
 ### 2026-07-16 RFC 0022 next landing round
 

@@ -70,6 +70,7 @@ This proof does not add a CRM, payment ledger, workflow engine, model-prose infe
 - Full lint, formatting, runtime import-cycle, config-baseline, i18n glossary, and docs-link checks pass; 6,038 internal links were checked.
 - Real CLI smoke: `openclaw receipts --help` and an empty exact-type JSON query succeed against a temporary state directory.
 - The aggregate `pnpm check` reaches a current-base shrinkwrap preflight failure for the root package, `extensions/llama-cpp`, and `extensions/twitch`; this branch does not change those files. The remaining relevant gates above were run directly.
+- Fork CI's `auto-response` job cannot create its GitHub App token because the fork has no private-key secret. This is fork infrastructure rather than a branch failure; the separate real-behavior proof passes.
 
 **Real behavior:** a successful `payment.authorized` result retains invoice `INV-1042` and authorization code `AUTH-9482` in the configured shared store; exact-type list and count can find it; get-by-id returns the full evidence; the trajectory reference contains no receipt `data`; replay with equivalent JSON in a different key order is idempotent; failed or structurally malformed results produce no success receipt.
 
