@@ -20,15 +20,12 @@
 
 ## Current Session
 
-- Last updated: 2026-07-15
+- Last updated: 2026-07-16
 - Last agent: Copilot
-- Current focus: review the corrected five-package fork stack. OpenClaw owns
-  only generic composition, credential, diagnostics, traffic-policy, reverse
-  dispatch, Gateway admission, and native semantic-owner contracts. Lobster
-  owns its external plugin, CAPI binding, credential acquisition, physical
-  dispatcher, Scout configuration, and deployment evidence. PRs #72-#75 and
-  RFC PR #2 are rebuilt and published with that boundary. Package #74 is at
-  `633e087a455`; package #75 is at `bfc0e8fe5e3`.
+- Current focus: finish RFC 0020's implementer-facing v1 sidecars after the
+  corrected five-package fork stack. The RFC now delegates canonical readiness
+  to RFC 0018 PR 33 and optional profile composition to RFC 0023 PR 37 instead
+  of defining another readiness state machine.
 - Consolidated fork review stack: [OpenClaw PR 71](https://github.com/giodl73-repo/openclaw/pull/71)
   guarded dispatch core; [PR 72](https://github.com/giodl73-repo/openclaw/pull/72)
   generic host composition contracts; [PR 73](https://github.com/giodl73-repo/openclaw/pull/73)
@@ -36,11 +33,29 @@
   additional provider owners; and [PR 75](https://github.com/giodl73-repo/openclaw/pull/75)
   Microsoft interactions. All are fork-only drafts. Packages 4 and 5 are
   corrected parallel children of package 3 and are ready for one-by-one review.
-- Active branch / PR: [fork package 2 PR 72](https://github.com/giodl73-repo/openclaw/pull/72), branch `user/giodl/hosted-integration-capi-owner-operations`, head `10b5d0f23c2`; [fork package 3 PR 73](https://github.com/giodl73-repo/openclaw/pull/73), branch `user/giodl/hosted-integration-hosted-capi-execution`, head `1ac7184d60e`; [fork package 4 PR 74](https://github.com/giodl73-repo/openclaw/pull/74), branch `user/giodl/hosted-integration-additional-provider-owners`, head `633e087a455`; [fork package 5 PR 75](https://github.com/giodl73-repo/openclaw/pull/75), branch `user/giodl/hosted-integration-microsoft-interactions`, head `bfc0e8fe5e3`; [fork RFC PR 2](https://github.com/giodl73-repo/rfcs/pull/2), branch `user/giodl/rfc-duplex-transport`, head `9bea1a0d68f`.
+- Active branch / PR: [fork package 2 PR 72](https://github.com/giodl73-repo/openclaw/pull/72), branch `user/giodl/hosted-integration-capi-owner-operations`, head `10b5d0f23c2`; [fork package 3 PR 73](https://github.com/giodl73-repo/openclaw/pull/73), branch `user/giodl/hosted-integration-hosted-capi-execution`, head `1ac7184d60e`; [fork package 4 PR 74](https://github.com/giodl73-repo/openclaw/pull/74), branch `user/giodl/hosted-integration-additional-provider-owners`, head `633e087a455`; [fork package 5 PR 75](https://github.com/giodl73-repo/openclaw/pull/75), branch `user/giodl/hosted-integration-microsoft-interactions`, head `bfc0e8fe5e3`; [fork RFC PR 2](https://github.com/giodl73-repo/rfcs/pull/2), branch `user/giodl/rfc-duplex-transport`, rebased local head `e8a4af4bebf`; published PR head remains `9bea1a0d68f` until force-with-lease push.
 - RFC file: `rfcs/0020-hosted-integration-and-capability-bindings.md`
-- Known dirty state: `claws-hapi` has this session edit plus unrelated feeds
-  and state-continuity changes that must remain untouched. The RFC and generic
-  package #2-#5 worktrees are clean and published. D4a and D3a
+- RFC sidecars drafted under `rfcs/0020/`:
+  `host-integration-bundle-v1-spec.md`, `credential-slot-v1-spec.md`,
+  `provider-request-traffic-policy-v1-spec.md`,
+  `hosted-provider-dispatch-v1-spec.md`, and
+  `host-integration-readiness-v1-spec.md`.
+- RFC sidecar review: Gateway runtime, Lobster operator, CISO/security, and
+  skeptical maintainer role passes tightened async credential resolution,
+  atomic registration, owner/readiness authority, policy-generation fencing,
+  bounded carrier work, network-guard schema, disconnect certainty, audit,
+  proxy narrowing, and conformance fixtures. Final contradiction review is
+  clean after defining RFC 0018 condition ordering for RFC 0020 criteria and
+  mapping RFC 0023 `hostIntegrationGeneration` to `hostBundleGeneration`.
+- Readiness dependencies: [RFC PR 33](https://github.com/openclaw/rfcs/pull/33)
+  adds `rfcs/0018/readiness-v1-spec.md`; [RFC PR 37](https://github.com/openclaw/rfcs/pull/37)
+  adds `rfcs/0023/hosting-profile-v1-spec.md`. RFC 0020 uses their canonical
+  `True`/`False`/`Unknown`, required/advisory, bounded provider, projection,
+  and optional profile contracts without copying them.
+- Known dirty state: `claws-hapi` has this session edit plus unrelated
+  state-continuity changes that must remain untouched. The RFC worktree has the
+  main RFC edit plus five untracked sidecars; these changes are not committed
+  or pushed. Generic package #2-#5 worktrees remain published. D4a and D3a
   source changes are committed and pushed, but
   their hydrated Windows worktrees report generated tracked `node_modules` link
   churn that is intentionally unstaged. D4a PR 59 has the expected fork-only
@@ -127,10 +142,12 @@
   not the current implementation architecture.
 - Review: RFC 0020's native attachment -> owner contract -> optional hosted
   dispatch decision tree.
+- Review: the five `rfcs/0020/` sidecars and their dependencies on RFC PRs 33
+  and 37.
 - Continue: paired owner/adopter deletion slices before designing a reverse
   carrier.
-- Next: monitor PR 75's pending fork checks and keep package 1 as the first
-  upstream filing candidate unless the user authorizes a different order.
+- Next: commit the RFC sidecars, force-with-lease push the rebased RFC branch,
+  update fork RFC PR 2's body, then return to the PR 71-75 Codex findings.
 - Update: this file and the deletion ledger after each evidence slice
 
 ## Guardrails

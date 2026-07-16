@@ -31,7 +31,10 @@ owner reviews converge.
 ## Remaining V1 sequence
 
 1. **Finish E5b Portable authority**
-   - implement the `lobster-host` streaming publication provider;
+   - move the streaming publication provider into an external
+     continuity-owned plugin;
+   - remove the superseded Hosted Integration and bundled `lobster-host`
+     dependency from the fork-only E5b stack;
    - publish conditionally, retrieve through a fresh instance, and verify exact
      archive and manifest identities;
    - durably commit the acceptance receipt;
@@ -39,6 +42,8 @@ owner reviews converge.
    - permit provider retirement only from durable `SafeToDestroy`.
 
 2. **Close the Portable round trip**
+   - bind acceptance to the exact continuity provider ID, contract version,
+     stable generation, and plugin provenance without a host-bundle identity;
    - connect accepted publication to the existing fresh-compute restore
      executor;
    - prove dependency and credential capability closure;

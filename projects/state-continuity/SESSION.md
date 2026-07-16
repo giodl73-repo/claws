@@ -4,14 +4,14 @@
 
 **Last agent:** GitHub Copilot
 
-**Current focus:** Close out Lobster E5b durable publication/finalization
-authority and commit the fork-only slice:
-`Publishing -> Published -> SourceFinalizing -> SafeToDestroy`.
+**Current focus:** Finish the literal process-A publication to process-B
+retrieval proof for replacement E5b, then close review and package the
+implementation and RFC branches.
 
-**Blocking question:** There is no remaining E5b architecture choice or
-recovery blocker. E5a production integration still requires promotion of the
-OpenClaw managed capture and `gateway.suspend.prepare` surfaces into the Lobster
-image baseline.
+**Blocking question:** None for provider selection. Follow manifest-declared web
+provider precedent: continuity config selects a provider ID, the installed
+manifest index resolves its owning external plugin, and the managed operation
+loads only that plugin before Gateway startup.
 
 ## Active Work
 
@@ -24,11 +24,17 @@ image baseline.
 - Draft:
   `rfcs/0021-runtime-state-continuity.md`
 - Known state:
-  RFC 0021 includes the restore hold, forward-only claim/assembly, and typed
-  pre-Gateway executor binding, same-boot execution fencing, and strict
-  allocation attestation. E4c now also requires exact per-file materialization
-  inventory and stable plan identity across journal replay at `9f36a8d`; it is
-  pushed to fork draft PR `giodl73-repo/rfcs#5`.
+  RFC 0021 now describes Portable publication as a continuity-owned external
+  provider selected by manifest-declared ownership and ordinary scoped plugin
+  loading, without a Hosted Integration or bundled product prerequisite. The
+  implementer-facing contract is
+  `rfcs/0021/portable-publication-provider-v1-spec.md`. State-level guarantees
+  and conformance are now normative in
+  `rfcs/0021/state-cape-v1-spec.md`. The branch includes the latest `fork/main`,
+  including RFC 0009's sidecar-spec precedent. The role-tightened optional
+  composition contract is
+  `rfcs/0021/readiness-hosting-composition-v1-addendum-spec.md`. The RFC branch
+  remains uncommitted after the narrative/spec revision.
 - OpenClaw implementation worktree:
   `/root/src/openclaw-state-continuity-pr1`
 - OpenClaw branch:
@@ -59,10 +65,28 @@ image baseline.
   creation, and fsynced publication/cleanup. Fork real-behavior proof and
   workflow sanity pass; fork-only `auto-response` and `label` fail before
   repository code because the fork lacks the GitHub App private-key secret.
+- Replacement OpenClaw E5b worktree:
+  `C:\src\openclaw-state-continuity-e5b-direct-publication`, branch
+  `user/giodl/state-continuity-e5b-direct-publication`, based directly on E5a
+  `203ecf95a70`. The uncommitted slice now defines the continuity-owned
+  publication contract, `continuity.publicationProvider`, manifest contract
+  `continuityPublicationProviders`, Plugin SDK/runtime registration, exact
+  manifest-owner lookup, scoped loading of only that plugin, and receipts
+  binding plugin ID, provider ID, contract version, and stable provider
+  generation. No Hosted Integration, host-bundle, reverse-carrier, or
+  `extensions/lobster-host` reference remains in the replacement provider
+  surface. The slice now also includes
+  `openclaw backup publish --managed --json`: it pins and verifies the source
+  archive, publishes in one scoped provider session, stops it, resolves a fresh
+  scoped registry, retrieves and fully verifies the accepted artifact, and
+  returns typed hold/quarantine failures. Sixty-three focused tests plus core
+  and core-test typechecks pass.
 - Lobster E5b worktree:
   `C:\src\lobster-state-continuity-e5b-publication-authority`, branch
-  `user/giodl/state-continuity-e5b-publication-authority`, dirty pending final
-  review and commit. The slice adds strict publication/finalization DTOs,
+  `user/giodl/state-continuity-e5b-publication-authority`, clean at
+  `c8c52b7987e`, fork draft PR
+  `https://microsoft.ghe.com/giodl/lobster/pull/17`, stacked on Lobster E5a PR
+  16. The slice adds strict publication/finalization DTOs,
   durable Redis/CAS `Publishing -> Published -> SourceFinalizing ->
   SafeToDestroy`, exact-source-worker and source-runtime-generation binding,
   same-route replay across uncertain publication/finalization outcomes, strict
@@ -73,7 +97,9 @@ image baseline.
 - OpenClaw E5b owner-contract worktree:
   `C:\src\openclaw-state-continuity-e5b-publication-owner`, branch
   `user/giodl/state-continuity-e5b-publication-owner`, clean at
-  `44609139c47`. Defines the type-only
+  `44609139c47`, fork draft PR
+  `https://github.com/giodl73-repo/openclaw/pull/110`, stacked on
+  `user/giodl/hosted-integration-hosted-capi-execution`. Defines the type-only
   streaming publication provider contract, registry/captured-runtime wiring,
   exact provenance and generation fencing, immutable acceptance, fresh
   retrieval integrity verification, and structured provider failures. Seventy-five
@@ -82,7 +108,9 @@ image baseline.
   correctness findings.
 - OpenClaw E5b operation worktree:
   `C:\src\openclaw-state-continuity-e5b-operation`, branch
-  `user/giodl/state-continuity-e5b-operation`, clean at `92d23bd8bdc`.
+  `user/giodl/state-continuity-e5b-operation`, clean at `92d23bd8bdc`, fork
+  draft PR `https://github.com/giodl73-repo/openclaw/pull/111`, stacked on PR
+  110.
   Adds the sixth `lobster/continuity` contribution, strict durable filesystem
   provider, `backup publish --managed --json`, complete
   source/fresh-retrieval verification, pinned-source TOCTOU protection,
@@ -116,9 +144,11 @@ image baseline.
   and writer fencing, async Teams completion tracking, Gateway cooperative
   suspension, clean stop, workspace checkpoint, and managed capture are
   implemented. Final Codex review reports no accepted/actionable findings.
-- Architectural prerequisite:
-  RFC 0020 Hosted Integration on `user/giodl/rfc-duplex-transport`,
-  fork PR `giodl73-repo/rfcs#2`.
+- Adjacent architecture:
+  RFC 0020 Hosted Integration on `user/giodl/rfc-duplex-transport`, fork PR
+  `giodl73-repo/rfcs#2`, may provide independently justified Channel, ingress,
+  credential, Status/Doctor, and Hosting Profile seams. It is not a Portable
+  publication prerequisite.
 
 ## Current Model
 
@@ -137,9 +167,9 @@ image baseline.
 - Periodic checkpoints use native online component capture.
 - Final handoff closes admission, drains work and writable owners, completes
   clean shutdown, then captures closed persisted state.
-- Hosted Integration owns bundle registration, owner references, activation,
-  Hosting Profiles readiness, Status/Doctor patterns, generations, and
-  carriers.
+- Portable publication uses ordinary external plugin manifests, scoped loading,
+  one continuity-owned provider interface, and stable cross-process provider
+  generation. Hosted Integration is not in that dependency chain.
 - Continuity owns manifests, immutable publication, restore, final handoff,
   hibernate, wake, retained ingress semantics, and CAPE guarantees.
 - Portable requires dependency and credential capability closure, not secret
@@ -190,17 +220,79 @@ image baseline.
 
 ## Completed This Session
 
+- Reviewed the RFC 0021 sidecars through the `.craft/roles` Gateway,
+  Lobster-container, CISO, and Lorant-maintainer lenses and directly tightened
+  the normative contracts. The specs now require a literal independent
+  retrieval process, receipt-bound provider contract version, exact stream
+  size/digest checks, owner/tenant-cell equality, capture-time integrity
+  authority independent of the provider receipt, bounded deadlines/resources,
+  transient retrieval hold versus corruption quarantine, credential exclusion,
+  crash-relocation loss reporting, restored-sidecar gating, durable audit
+  evidence, authenticated quarantine exit, and non-overridable fail-closed
+  rules.
+- Added
+  `rfcs/0021/readiness-hosting-composition-v1-addendum-spec.md`. The optional
+  addendum composes exact RFC 0018 criterion selectors, an automatic
+  `ContinuityRestoreComplete` gate, RPO posture, RFC 0023 operator profiles,
+  and RFC 0020 semantic-owner evidence without placing Portable publication in
+  a host bundle or letting profiles/hosts author continuity truth.
+- Added `rfcs/0021/state-cape-v1-spec.md` as the normative State CAPE v1
+  standard. It defines monotonic Conventional, Archived, Portable, and Elastic
+  requirements; common invariants; level-specific capture, restore,
+  replacement, hibernation, wake, readiness, Status, Doctor, quarantine,
+  policy, compatibility, and conformance rules. Linked it from RFC 0021 and the
+  Portable Publication Provider sidecar.
+- Merged latest RFC `fork/main` into
+  `user/giodl/rfc-0021-state-continuity`, reviewed RFC 0009's sidecar-spec
+  precedent, and added
+  `rfcs/0021/portable-publication-provider-v1-spec.md`. The sidecar specifies
+  manifest ownership, operator selection, scoped plugin loading, stable
+  provider generation, immutable acceptance, bounded retrieval, managed
+  publication, failure handling, replay, security, and conformance. Revised
+  RFC 0021 to remove Hosted Integration and host-bundle prerequisites from
+  Portable publication while preserving separately owned readiness, Channel,
+  ingress, credential, and lifecycle seams.
+- Started the replacement E5b implementation directly from E5a. Ported and
+  adapted the reviewed publication provider contract to bind external plugin
+  provenance instead of host-bundle identity; added native manifest, config,
+  SDK, captured registration, runtime registry, and exact scoped-loading
+  seams. Manifest owner lookup now returns no singular owner when declarations
+  are ambiguous. Added focused process-fresh registry, changed-owner,
+  generation, integrity, registration, and scoped-load tests.
+- Added the replacement managed publication operation and CLI without
+  Hosted Integration. Its strict request freezes external plugin ID, provider
+  ID, contract version, and stable generation; obsolete host-bundle request
+  fields are rejected. Publication and retrieval use separate registry/service
+  sessions, with complete archive and manifest verification on both sides.
+  Review then tightened two failure boundaries: manifest ambiguity now considers
+  only effectively enabled owners, and managed provider services use strict
+  startup, rollback, and shutdown propagation instead of the Gateway's
+  log-and-continue lifecycle helper.
+  A non-bundled external filesystem-provider fixture now declares
+  `fixture/continuity`, stores immutable archive bytes outside OpenClaw, and
+  passes publication/retrieval through two fresh scoped registry loads. The
+  true child-process boundary proof remains next.
+
+- Published the fork-only E5b stack: OpenClaw owner contract PR 110, OpenClaw
+  managed operation PR 111, and Lobster destruction-authority PR 17. OpenClaw
+  fork CI attached immediately; the fork-only `label` check failed and
+  `auto-response`, real-behavior proof, no-tabs, and actionlint were initially
+  running. Lobster PR 17 had no check-runs attached at creation, so required
+  `GitOps/GitHubPop`, `Lobster-Runtime-PullRequest`, and
+  `Lobster-Runtime-Build-Validation` remain missing and the PR is not ready.
 - Implemented the Lobster E5b fork slice in
-  `C:\src\lobster-state-continuity-e5b-publication-authority`. Review fixes
+  `C:\src\lobster-state-continuity-e5b-publication-authority` and committed it
+  as `c8c52b7987e`. Review fixes
   made advanced `Publishing`/`SourceFinalizing` revisions resumable from the
   original operation revision, made passport checkout CAS loss fail closed,
-  rejected empty logical publication IDs, and corrected publication identity
-  to use the frozen source runtime generation rather than the handoff-store
-  owner generation. Focused schema, Plex orchestration, durable hold, and
-  lifecycle-policy tests pass. The full Rust workspace compiles and passes
-  except for two persistent Windows-only graceful-shutdown socket-reset tests;
-  the OpenClaw adapter package remains blocked on its inherited Windows
-  dead-code warning.
+  rejected empty logical publication IDs, bound process-local bundle
+  generations to the frozen portable `bundleId@bundleVersion`, and corrected
+  publication identity to use the frozen source runtime generation rather than
+  the handoff-store owner generation. Focused schema, Plex orchestration,
+  durable hold, and lifecycle-policy tests pass. The full Rust workspace
+  compiles and passes except for two persistent Windows-only graceful-shutdown
+  socket-reset tests; the OpenClaw adapter package remains blocked on its
+  inherited Windows dead-code warning.
 - Committed the recovered OpenClaw E5b provider and managed publication
   operation as `92d23bd8bdc`. Final closeout distinguished absent host-bundle
   availability from stale identity, preserved structured failures across
@@ -767,7 +859,8 @@ image baseline.
    that stack lands.
 16. Run a final RFC de-duplication and internal-consistency pass without
    removing the decision history.
-17. Complete final Codex closeout and commit Lobster E5b.
+17. Monitor fork-only PRs 110, 111, and 17; do not call Lobster PR 17 ready
+    until all three required enterprise contexts attach and pass.
 18. Promote the OpenClaw E5a/E5b managed operations into the Lobster image
     baseline, then add the runtime-side exact-worker trigger that invokes
     capture followed by publication/finalization.

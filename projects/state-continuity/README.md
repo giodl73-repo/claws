@@ -17,11 +17,11 @@ Define:
   and
 - the operator-facing CAPE levels: Conventional, Archived, Portable, Elastic.
 
-RFC 0020 Hosted Integration is a prerequisite for hosted publication,
-Portable, and Elastic. It owns host bundle registration, typed owner
-references, activation, Hosting Profiles readiness, Status/Doctor conventions,
-generations, and carriers. The continuity owner model and local Archived path
-can begin from OpenClaw `main` while those hosted seams land.
+Runtime State Continuity owns publication, retrieval, lifecycle authority, and
+restored admission directly. It does not depend on Hosted Integration bundles,
+reverse dispatch, or a bundled `lobster-host` extension. It may reuse ordinary
+plugin registration plus existing readiness, Status, and Doctor conventions.
+Elastic may later consume independently justified hosted networking seams.
 
 ## Active Notes
 
@@ -40,6 +40,7 @@ can begin from OpenClaw `main` while those hosted seams land.
 | Exact E4c managed executor paper fixture | `e4c-executor-fixture.md` |
 | Final handoff closed-state capture contract | `final-handoff-capture.md` |
 | Final publication and destruction authority | `final-handoff-publication.md` |
+| Portable source-to-fresh-compute round trip | `portable-roundtrip.md` |
 | V1 closeout and V2 horizon | `v1-closeout-v2-horizon.md` |
 | Fleet cell isolation and destruction scope | `fleet-cell-boundary.md` |
 | Internal and external comparison matrix | `comparison-matrix.md` |
@@ -78,7 +79,8 @@ can begin from OpenClaw `main` while those hosted seams land.
 1. Complete the core state-surface inventory and treatment.
 2. Prove local Archived capture, publication, retrieval, and restore on paper.
 3. Bound online-capture runtime, memory, disk, and I/O impact.
-4. Follow landed Hosted Integration owner/binding/readiness patterns.
+4. Keep continuity providers owner-specific and independent from Hosted
+   Integration bundles and carriers.
 5. Prove Portable clean-shutdown capture, dependency closure, generation
    fencing, and restore-gated readiness.
 6. Prove Elastic Teams/API/cron wake, retained delivery, quarantine, and cold
