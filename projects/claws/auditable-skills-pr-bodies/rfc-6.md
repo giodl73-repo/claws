@@ -91,7 +91,7 @@ The RFC deliberately does not add steps, expressions, loops, approvals, model ch
 - OpenClaw owns sessions, the shared receipt store, managed child execution, policy, native run lineage, and observed child-run usage.
 - A parent OpenClaw agent can already provide the smallest useful sequence: invoke one managed skill, inspect its native result and receipts, check exact accumulated usage, and decide whether to invoke the next skill.
 - The selected durable runner owns ordering, workflow status, aggregation, and limit decisions through one normalized managed-step result.
-- Once a trusted host dispatch seam reuses the existing managed `sessions_spawn` admission path, a minimal TaskFlow-backed core runner can provide static dependencies, failure, cancellation, receipt gates, and totals without Lobster.
+- OpenClaw #114 extracts the trusted host dispatch function and routes `sessions_spawn` through it. Once that boundary also has host-derived step-attempt idempotency, a minimal TaskFlow-backed core runner can provide static dependencies, failure, cancellation, receipt gates, and totals without Lobster.
 - Lobster can remain the advanced runner for conditions, retries, approvals, structured input, and durable resume.
 - TaskFlow owns durable flow identity and linked child lifecycle.
 - A Claw or direct caller owns allowed composition and execution policy.
@@ -100,7 +100,7 @@ Recorded outcomes can become completion gates. `uses-skills` can inform managed 
 
 The agent-driven profile also permits an allowed model choice on each direct managed spawn. It proves useful sequential composition, receipt gates, and token limits now, without claiming a separate workflow ID, automatic replay, or restart-safe next-step dispatch.
 
-The archived proof uses Lobster, but the contract is runner-neutral. OpenClaw #100 supplies the read-only managed result, #109 adds exact-run cumulative usage, and #113 provides a bounded between-step token decision over explicit run IDs. A future core runner must dispatch through a host-owned managed-skill API that applies the exact same visibility, policy, isolation, sandbox, model, tool, and depth checks as `sessions_spawn`; it must not reproduce those checks in a plugin or controller.
+The archived proof uses Lobster, but the contract is runner-neutral. OpenClaw #100 supplies the read-only managed result, #109 adds exact-run cumulative usage, #113 provides a bounded between-step token decision over explicit run IDs, and #114 extracts one host-owned managed-skill dispatch path shared by `sessions_spawn` and future core controllers. A runner must use that path rather than reproduce visibility, policy, isolation, sandbox, model, tool, or depth checks in a plugin or controller. #114 deliberately stops before durable step-attempt idempotency.
 
 ## Implementer specifications
 
@@ -119,7 +119,7 @@ Storage and queries belong to the core contract; workflow behavior belongs to th
 - Managed skill identity now lives on OpenClaw's native child-run record. There is no second invocation lifecycle, usage ledger, receipt store, or executor.
 - `runId` is the canonical join across skill identity, sessions, usage, cost, and receipts; retention and unavailable-data behavior are explicit.
 - The first composition profile needs no new executor: a parent agent can sequence native managed runs using result, receipt, and exact-token decisions. Durable TaskFlow orchestration waits for a trusted non-model managed dispatch seam.
-- OpenClaw #97, #98, #100, #109, and #113 are compact, independently reviewable evidence slices. The earlier Lobster workflow experiments remain archived POC evidence.
+- OpenClaw #97, #98, #100, #109, #113, and #114 are compact, independently reviewable evidence slices. The earlier Lobster workflow experiments remain archived POC evidence.
 
 ## Recommended landing rounds
 
@@ -128,7 +128,8 @@ Storage and queries belong to the core contract; workflow behavior belongs to th
 3. **Exact-run accounting:** carry cumulative observed usage through native completion, retain it with the exact run, and expose it as an optional result field. Capture cost and basis with the run before claiming historical USD or enforcing USD limits.
 4. **Between-step token budgets:** deduplicate explicit completed managed runs and apply an optional caller-owned token ceiling without adding a ledger or claiming reservation.
 5. **Agent-driven sequence proof:** use the parent agent, managed `sessions_spawn`, native result and receipt queries, and exact usage checks to demonstrate one-step-at-a-time composition with optional allowed model selection.
-6. **Managed dispatch seam and runners:** expose a host-owned, idempotent managed-skill dispatch boundary that reuses the exact `sessions_spawn` admission path; then add a deterministic TaskFlow controller. Keep advanced pause/resume behavior in Lobster.
+6. **Managed dispatch seam:** extract one host-owned managed-skill dispatch function and make `sessions_spawn` use it, keeping trusted resolution, managed identity, and native child admission in one path without adding workflow state or plugin authority.
+7. **Idempotent runners:** add host-derived workflow/step/attempt idempotency to that boundary; then add a deterministic TaskFlow controller. Keep advanced pause/resume behavior in Lobster.
 
 Each round is independently useful and reviewable. The Agent Skills standards opportunity stays smaller still: portable declarations and the rule that declarations are not evidence or authority. Storage, sessions, accounting, and workflows remain harness concerns.
 
@@ -140,8 +141,9 @@ Each round is independently useful and reviewable. The Agent Skills standards op
 4. [OpenClaw #100 - read managed run results](https://github.com/giodl73-repo/openclaw/pull/100)
 5. [OpenClaw #109 - retain exact-run token usage](https://github.com/giodl73-repo/openclaw/pull/109)
 6. [OpenClaw #113 - check exact-run token budgets](https://github.com/giodl73-repo/openclaw/pull/113)
-7. [Lobster #1 - accounting continuity prototype](https://github.com/giodl73-repo/lobster/pull/1)
+7. [OpenClaw #114 - centralize managed skill dispatch](https://github.com/giodl73-repo/openclaw/pull/114)
+8. [Lobster #1 - accounting continuity prototype](https://github.com/giodl73-repo/lobster/pull/1)
 
-The series proves the progression independently: shared durable outcomes and retrieval; exact managed child-run identity; runner-neutral managed results; cumulative retry-aware token usage retained by exact run; an optional caller-owned between-step token decision; and accounting continuity across pauses. Agent-driven sequential composition is possible over those facts now. Durable workflow dispatch is the next layer, after OpenClaw exposes the trusted managed dispatch seam a TaskFlow controller needs.
+The series proves the progression independently: shared durable outcomes and retrieval; exact managed child-run identity; runner-neutral managed results; cumulative retry-aware token usage retained by exact run; an optional caller-owned between-step token decision; one canonical host-managed dispatch path; and accounting continuity across pauses. Agent-driven sequential composition is possible over those facts now. Host-derived step-attempt idempotency is the remaining prerequisite before a durable TaskFlow controller.
 
 Every PR remains draft, fork-only review material. Nothing has been proposed to the upstream OpenClaw, Lobster, or RFC repositories.

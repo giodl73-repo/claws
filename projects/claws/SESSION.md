@@ -2,7 +2,7 @@
 
 - Last updated: 2026-07-16
 - Last agent: Codex
-- Current focus: Auditable Skills agent-driven sequence, then a native managed-dispatch seam
+- Current focus: Auditable Skills host-derived step-attempt idempotency
 
 ## Agent Start
 
@@ -25,6 +25,39 @@
   available.
 
 ## Current Session
+
+### 2026-07-16 Auditable Skills managed dispatch seam
+
+- Opened fork-only draft OpenClaw #114 directly on #113:
+  `https://github.com/giodl73-repo/openclaw/pull/114`, head
+  `fc77504d7579`. The four-file slice extracts one host-owned
+  `spawnManagedSkillDirect` function and routes model-facing `sessions_spawn`
+  through it.
+- The canonical function resolves exactly one model-invocable skill from the
+  trusted effective parent snapshot, enforces current-agent and background-run
+  restrictions, constructs the existing managed invocation descriptor, and
+  delegates all remaining admission and lifecycle behavior to native
+  `spawnSubagentDirect`. The old inline path is deleted.
+- This is deliberately an internal core seam, not a plugin API. It adds no
+  workflow record, storage, configuration, permission, or alternate executor.
+  Production code is +77 net lines; tests add 137 lines. PR #114 is draft and
+  mergeable with 4 changed files, +305/-91 overall.
+- Focused proof passed: 4 direct seam tests and 4 managed `sessions_spawn`
+  parity tests. Scoped `oxfmt`, direct scoped `oxlint`, and `git diff --check`
+  passed. The full unfiltered sessions-spawn suite exceeded 180 seconds without
+  a result; the focused changed surface passed. Codex autoreview returned no
+  findings and judged the patch correct at 0.94 confidence.
+- Updated RFC #6 and the orchestration sidecar at fork commit `d6e8f07b58ce`.
+  The RFC now separates canonical managed dispatch extraction from durable
+  step-attempt idempotency and links #114. The live RFC and #113 bodies were
+  updated to match.
+- Active implementation worktree:
+  `C:\src\openclaw-auditable-skills-dispatch`, branch
+  `agent/auditable-skills-managed-dispatch`, clean and pushed at `fc77504d7579`.
+- Next bounded slice: add a host-derived workflow/step/attempt idempotency key
+  to the canonical managed dispatch boundary with safe identical replay and
+  conflicting-reuse rejection. Do not add a TaskFlow runner until that proof
+  is complete.
 
 ### 2026-07-16 Auditable Skills orchestration boundary audit
 

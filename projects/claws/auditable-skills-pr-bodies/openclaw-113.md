@@ -29,6 +29,7 @@ This also follows the direction of [OpenTelemetry's GenAI usage conventions](htt
 ## Stack
 
 - Builds on #109, which retains cumulative usage on the exact native managed run.
+- Followed by #114, which extracts one host-owned managed-skill dispatch path for `sessions_spawn` and future core controllers.
 - Part of the Auditable Skills RFC: https://github.com/giodl73-repo/rfcs/pull/6
 - Fork-only proof of concept; not opened against upstream OpenClaw.
 
