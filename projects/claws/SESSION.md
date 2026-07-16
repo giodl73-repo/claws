@@ -22,6 +22,40 @@
 
 ## Current Session
 
+### 2026-07-16 Auditable Skills Round 1 rebuild
+
+- Rebuilt fork draft OpenClaw #97 directly on current upstream `main` as one
+  upstream-shaped Round 1 commit (`738ca6d79d3`) instead of carrying forward
+  the 40-file prototype stack. The new slice adds producer-facing
+  `AgentToolResult.receipts`, trusted tool-call/session/run correlation, a
+  dedicated configurable `receipts.sqlite`, bounded trajectory references,
+  and a first-class `openclaw receipts` get/list/count surface.
+- Reused the current sanitized private tool-result observer already shared by
+  OpenClaw, Codex, and Copilot. Making `toolCallId` explicit on that observer
+  avoided the old agent-core loop and harness adapter plumbing while preserving
+  cross-harness behavior.
+- Tightened receipt admission during review: malformed optional fields now
+  reject the whole receipt, producer strings and data are bounded, idempotency
+  uses OpenClaw stable JSON rather than property order, empty agent filters
+  match no agents, SQLite lock waits are capped at 50 ms, and persistence vs
+  trajectory-reference failures have distinct diagnostics.
+- The fork PR now targets fork `main`, remains draft, and has a rewritten body
+  centered on durable business outcomes, search/count/revisit behavior, the
+  mini-CRM use case, current OpenClaw primitives, the single-host storage
+  boundary, and the natural path to managed skills, workflows, token spend,
+  and budgets. Final diff: 32 files, 1,489 additions, 27 deletions.
+- Preserved the former #97 head (`1fcf0bf9`) as
+  `prototype/auditable-skills-poc-receipts` and changed #98 to use that archive
+  as its base. This keeps the later POC evidence stack reviewable without
+  forcing its experimental scaffolding into the new Round 1.
+- Validation: 16 focused receipt/composition tests; 349 existing OpenClaw,
+  Codex, and Copilot observer tests; 32 config tests; 21 CLI registry tests;
+  real help and empty-query CLI smoke; production and root-test TypeScript;
+  full lint and format; runtime import-cycle, config-baseline, i18n glossary,
+  and 6,038-link docs checks. Aggregate `pnpm check` stops on stale current-base
+  shrinkwraps for the root package, `extensions/llama-cpp`, and
+  `extensions/twitch`; the branch does not change those files.
+
 ### 2026-07-16 RFC 0022 next landing round
 
 - Confirmed RFC 0022 already follows the latest RFC repository sidecar pattern:

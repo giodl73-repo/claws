@@ -27,7 +27,7 @@ These fields describe capability and composition intent. They are not evidence, 
 - Summarizes receipt references, skill lineage, models, and normalized token usage by run.
 - Keeps the caller authoritative for allowed children, models, tools, and budgets.
 
-Isolated execution becomes the honest skill-level accounting boundary. No workflow language is added to `SKILL.md`, and full receipt evidence remains owned by the store introduced in #97.
+Isolated execution becomes the honest skill-level accounting boundary. No workflow language is added to `SKILL.md`, and full receipt evidence remains owned by the receipt-store contract now being tightened in #97.
 
 ## POC evidence series
 
@@ -50,4 +50,4 @@ These fork drafts preserve the evidence trail. RFC 0022 now places managed invoc
 
 No live paid-provider child invocation was performed.
 
-Depends on #97. Fork-only Auditable Skills proof; not proposed upstream.
+This POC remains based on the archived original receipt prototype so its historical evidence stays reviewable while #97 is rebuilt as the smaller upstream-shaped Round 1. It is not directly stacked on the rewritten #97 and is not proposed upstream.

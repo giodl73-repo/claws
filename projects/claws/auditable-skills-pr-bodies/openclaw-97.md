@@ -1,62 +1,89 @@
 ## Opportunity
 
-After an agent finishes work, an operator or another agent should be able to find the originating thread, see what outcome was actually recorded, count similar outcomes, and inspect concrete evidence such as a payment authorization code.
+Agent Skills can describe reusable work, but businesses also need a simple answer after the work runs: **what actually happened, where did it happen, and what evidence came back?**
 
-This first slice adds that durable fact using OpenClaw's existing trusted tool-result and session/run boundaries, with one purpose-built receipt store shared across local agents.
+This first slice gives OpenClaw a durable outcome primitive. A trusted tool can attach a typed receipt such as `case.resolved`, `inventory.sent`, or `payment.authorized` to a successful result. OpenClaw adds the trusted run and thread correlation, stores the full record once, and makes it easy to find or count later.
+
+```ts
+return {
+  content: [{ type: "text", text: "Payment authorized." }],
+  details: {},
+  receipts: [
+    {
+      type: "payment.authorized",
+      subject: { type: "invoice", id: "INV-1042" },
+      data: { authorizationCode: "AUTH-9482" },
+    },
+  ],
+};
+```
+
+```bash
+openclaw receipts --type payment.authorized --json
+openclaw receipts --type case.resolved --count
+openclaw receipts --id <RECEIPT_ID>
+```
+
+For a support inbox, the existing channel thread remains the case history while `case.resolved` provides a small, searchable index over completed work. The same primitive works for inventory, billing, onboarding, fulfillment, or any other producer-owned outcome type. It does not require OpenClaw to understand those business schemas.
 
 ## What this slice proves
 
-- Successful tools may return sanitized typed evidence such as `case.resolved`, `inventory.sent`, or `payment.authorized`.
-- OpenClaw records the full receipt once in a configurable shared SQLite database.
-- The default is `~/.openclaw/state/receipts.sqlite`; another local path can be configured for a team or deployment.
-- Exact receipt type, subject, agent, session, run, and skill provenance are indexed for later queries.
-- `openclaw sessions tail --receipt-type <type>` retrieves full evidence; `--count` counts exact matches, including across `--all-agents`.
-- The ordinary trajectory stores only an `audit.receipt.recorded` reference, so receipt payloads are not duplicated and have an independent lifecycle.
-- Failed tools and malformed evidence do not become successful outcomes; recording failure is contained and does not rewrite the tool result.
+- `AgentToolResult.receipts` is a small producer-facing contract for typed business evidence.
+- Receipts are admitted only from successful, sanitized tool results. A malformed optional field rejects that receipt as a whole.
+- OpenClaw supplies receipt id, time, agent, session, run, tool, and tool-call correlation; producers cannot assert those trusted fields.
+- One configurable local SQLite store is shared by agents served by the Gateway host. The default is `~/.openclaw/state/receipts.sqlite`.
+- The store supports idempotent record, get by id, exact-filter list, stable pagination, and count without materializing receipt data.
+- Exact type, subject, agent, session, run, invocation, skill, and tool dimensions are indexed or queryable for later managed-skill and workflow slices.
+- The trajectory records only an `audit.receipt.recorded` reference. Full evidence such as `AUTH-9482` remains in the receipt store instead of being copied into every trajectory.
+- Recording failures are contained and do not rewrite a completed tool result. SQLite lock waits on the result path are bounded to 50 ms.
 
-The producer owns the business fields. OpenClaw owns trusted correlation, durable recording, sanitization, retrieval, and the pointer back to the run.
-
-```json
-{
-  "type": "payment.authorized",
-  "subject": { "type": "invoice", "id": "INV-1042" },
-  "data": { "authorizationCode": "AUTH-9482" }
-}
-```
-
-An operator can search `payment.authorized`, count it across agents, inspect `AUTH-9482`, and reopen the session that recorded it. For a support inbox, the channel thread remains the case history while typed outcomes provide a small CRM-like index over completed work.
+The implementation reuses current OpenClaw primitives: the sanitized private tool-result observer already shared by OpenClaw, Codex, and Copilot harnesses; native session/run identity; the trajectory recorder; config schema metadata; Node SQLite through Kysely; WAL, private-file, transaction, and user-version helpers; and lazy CLI registration.
 
 ## Storage boundary
 
-Version 1 supports local SQLite only. It is intended for agents served by one Gateway host, not direct network-filesystem or multi-host SQLite sharing. The implementation sits behind a receipt-store boundary so a future remote provider can preserve the same producer, query, and workflow contracts.
+Version 1 is a single-host local SQLite profile. A deployment may configure another **local** path, but direct network-filesystem and multi-host SQLite sharing are outside this slice. The store boundary leaves room for a later remote provider without changing receipt producers or workflow results.
+
+Receipt data has a different lifecycle from metadata-only activity audit rows and conversation transcripts, which is why this proof uses a dedicated database. Production retention, snapshot backup/export, store health diagnostics, and remote query authorization remain explicit follow-up work rather than hidden behavior in this PR.
+
+## Natural path to workflows
+
+This is the first stepping stone, not a workflow language. Once a durable outcome can be recorded and resolved by id, later slices can add:
+
+1. portable `SKILL.md` declarations for intended outcomes and possible child skills;
+2. managed skill invocation with exact executed-skill identity and parent/child lineage;
+3. workflow steps that consume recorded outcomes rather than model prose;
+4. normalized run token usage, captured cost, and caller-owned budget enforcement.
+
+Simple composition can stay in OpenClaw. Advanced retries, approvals, structured input, and durable resume can continue to use Lobster through the same receipt and accounting contracts.
 
 ## Boundaries
 
-This slice does not add a CRM, payment ledger, workflow engine, model-prose inference, skill metadata, or token attribution to individual outcomes. It establishes the evidence and retrieval seam reused by later managed-skill and workflow slices.
-
-## POC evidence series
-
-1. [RFC 0022](https://github.com/giodl73-repo/rfcs/pull/6)
-2. **OpenClaw #97 - shared durable outcomes**
-3. [OpenClaw #98 - managed invocation](https://github.com/giodl73-repo/openclaw/pull/98)
-4. [OpenClaw #100 - workflow composition](https://github.com/giodl73-repo/openclaw/pull/100)
-5. [Lobster #1 - accounting continuity](https://github.com/giodl73-repo/lobster/pull/1)
-6. [OpenClaw #109 - workflow spend](https://github.com/giodl73-repo/openclaw/pull/109)
-
-These fork drafts preserve the evidence trail. RFC 0022 now recommends a smaller upstream sequence beginning with a rebuilt core-receipts slice; this PR is proof for that slice, not a request to land the current stack unchanged.
+This proof does not add a CRM, payment ledger, workflow engine, model-prose inference, skill invocation, token accounting, cost attribution, budget enforcement, retention policy, remote store, or compliance attestation. It establishes the durable evidence and query seam those features can reuse.
 
 ## Validation
 
-- Receipt store, multi-agent filtering, idempotency, and configured-path tests pass.
-- Session retrieval, safe JSON evidence, and exact count tests pass.
-- Harness recording and trajectory-reference tests pass.
-- Focused result: 4 files, 26 tests passed.
-- Config schema/doc baselines, formatting, lint, LOC ratchet, and `git diff --check` pass.
-- Core typecheck reports only pre-existing branch-baseline errors outside the receipt changes.
-- Head `1fcf0bf9`; full slice is 40 files, 1,390 additions, 60 deletions.
+- 16 focused receipt, store, command, trajectory, and backend-composition tests pass.
+- 349 existing OpenClaw, Codex, and Copilot tool-result observer tests pass.
+- 32 config help and generated-baseline tests pass.
+- 21 CLI registration/help tests pass.
+- Production and root-test TypeScript checks pass.
+- Full lint, formatting, runtime import-cycle, config-baseline, i18n glossary, and docs-link checks pass; 6,038 internal links were checked.
+- Real CLI smoke: `openclaw receipts --help` and an empty exact-type JSON query succeed against a temporary state directory.
+- The aggregate `pnpm check` reaches a current-base shrinkwrap preflight failure for the root package, `extensions/llama-cpp`, and `extensions/twitch`; this branch does not change those files. The remaining relevant gates above were run directly.
 
-**Real behavior:** a valid `payment.authorized` receipt retained its invoice subject and authorization code in the configured shared database; exact-type retrieval returned the full sanitized record; a trajectory reference contained no receipt `data`; failed and malformed results produced no success receipt.
+**Real behavior:** a successful `payment.authorized` result retains invoice `INV-1042` and authorization code `AUTH-9482` in the configured shared store; exact-type list and count can find it; get-by-id returns the full evidence; the trajectory reference contains no receipt `data`; replay with equivalent JSON in a different key order is idempotent; failed or structurally malformed results produce no success receipt.
 
 No live payment, inventory, CRM, or other external business system was mutated.
 
-Depends on RFC 0022. Fork-only Auditable Skills proof; not proposed upstream.
+## Auditable Skills series
+
+1. [RFC 0022 - Auditable Skills](https://github.com/giodl73-repo/rfcs/pull/6)
+2. **OpenClaw #97 - core durable outcome receipts**
+3. [OpenClaw #98 - managed invocation POC](https://github.com/giodl73-repo/openclaw/pull/98)
+4. [OpenClaw #100 - workflow composition POC](https://github.com/giodl73-repo/openclaw/pull/100)
+5. [Lobster #1 - accounting continuity POC](https://github.com/giodl73-repo/lobster/pull/1)
+6. [OpenClaw #109 - workflow spend POC](https://github.com/giodl73-repo/openclaw/pull/109)
+
+Depends on RFC 0022. Draft fork proof for maintainer review; nothing is proposed to `openclaw/openclaw` by this PR.
+
+Head `738ca6d79d3`; 32 files, 1,489 additions, 27 deletions.
