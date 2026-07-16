@@ -6,23 +6,22 @@
 - Marketplace discovery/install is already proven in production: 301/302
   returned the MOS3 marketplace feed, and 302 installed
   `billing-info-lookup`. Lobster PRs #3717 and #3718 are merged.
-- The remaining runtime gate is Lobster PR #4344 at head `d237a6d22e`. It
-  makes personal publish MOS3-owned when no durable Lobster overlay is
-  configured, then reloads the caller's MOS3 acquisitions and checks readback.
-- Live #4344 blockers: branch is 209 commits behind `origin/main`; current ADO
-  fails on main-drift compile errors (`ManagedGatewayStartRequest` /
-  `SandboxConnectionCaller`), Build Validation is missing, GitHubPop is red,
-  and review remains `CHANGES_REQUESTED`. The standing review ask is an
-  endpoint-level 200 success test for MOS3-only personal publish; reviewer
-  hardening also requests bearer-header assertions and corrected chart
-  comments.
+- The remaining runtime gate is Lobster PR #4344 at head `ccb0946d15`. It is
+  current with `main`, makes personal publish MOS3-owned when no complete
+  durable Lobster overlay is configured, and requires acquisitions readback
+  before reporting a synchronous MOS3 publication as complete.
+- #4344 repair is pushed and re-review requested. Proof now covers the
+  MOS3-only endpoint success path, delegated bearer propagation, pending
+  publication behavior, incomplete-overlay fallback, and MOS3 skill-ID
+  normalization. All 66 Scout route tests and runtime all-target clippy pass;
+  final independent review is clean. ADO PR validation is running
+  automatically. GitHubPop is currently red; do not manually queue ADO.
 - MOS3 v-team alignment: MOS3 remains the system of record; Scout should prove
   MOS3 discovery, acquisitions-backed personal projection, and the personal
   storage loop. The latest reported blocker is E2E validation of that personal
   loop. Scout is reported preauthorized; delegated auth/environment routing
   and agent-user token behavior remain integration dependencies.
-- Execution order: refresh #4344 onto current main, add the endpoint success
-  coverage and review hardening, get required checks/re-review, deploy to an
+- Execution order: get #4344 required checks and re-review, deploy to an
   enabled Test or FirstRelease ring, then run
   `projects/feeds/demo/record-mos3-live-proof.ps1 -Environment msit -Publish`
   using browser/WAM auth rather than device code. Capture marketplace,
