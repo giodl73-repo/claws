@@ -334,3 +334,13 @@
 - Interactive in-cell configuration remains on ordinary mutable config.
 - RFC branch and PR #34 advanced to 823cf9f.
 - No OpenClaw implementation change is required by this clarification.
+
+## 2026-07-15 - Managed Configuration V1 sidecar specification
+
+- Rebased RFC 0019 branch onto current openclaw/rfcs main after upstream standardized RFC sidecars under rfcs/<id>/.
+- Added normative sidecar rfcs/0019/managed-configuration-v1-spec.md.
+- The sidecar freezes the V1 invocation grammar, source preparation order, sparse recursive composition, exact authority, bounded tools.allow/tools.deny semantics, findings, validation, path-scoped immutable lifecycle, ordinary-config compatibility, Fleet per-cell contract, security boundary, evolution rules, and minimum conformance suite.
+- RFC 0019 now links the sidecar directly from its summary.
+- The sidecar does not expand implementation scope: no reload, writes, provenance, role semantics, remote sources, or Fleet command changes.
+- RFC branch was rebased and force-with-lease pushed at eaeeb56f8843d7dd826b32843f5a49a8d30ff89f.
+- Existing RFC draft PR #34 was updated in place to call out the implementer-facing spec.
