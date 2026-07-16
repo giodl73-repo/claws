@@ -22,6 +22,47 @@
 
 ## Current Session
 
+### 2026-07-15 RFC 0022 shared receipt store
+
+- Reworked the Auditable Skills storage boundary around one canonical full
+  receipt record rather than a full `audit.receipt` payload copied into each
+  agent trajectory.
+- OpenClaw #97 now provides a configurable shared local SQLite profile at
+  `audit.receipts.store`, defaulting to
+  `~/.openclaw/state/receipts.sqlite`. It indexes exact type, subject, agent,
+  session, run, invocation, and skill correlation; `sessions tail` can return
+  or count exact receipt types across agents. Normal trajectories contain only
+  bounded `audit.receipt.recorded` references.
+- The database is explicitly single-host/local-storage v1. The receipt-store
+  boundary permits a later remote provider without changing producers,
+  queries, or managed-step results. Receipt retention is independent of
+  transcript and trajectory rotation.
+- Restacked and lease-updated the OpenClaw fork stack:
+  - #97 `1fcf0bf9`: shared receipt store and cross-agent query;
+  - #98 `9c7568ad`: invocation and exact skill digest correlation;
+  - #100 `78185761`: workflow audit reader resolves full evidence from the
+    configured store before Lobster conditions consume it;
+  - #109 `398d65ac`: accounting slice restacked unchanged over #100.
+- Updated RFC #6 at `9956e659`. The core sidecar now specifies the full receipt
+  record, trajectory reference, store/query contract, default SQLite profile,
+  independent retention, and future remote-provider seam. The runner sidecar
+  requires runners to resolve receipts through that store rather than create a
+  workflow receipt ledger.
+- Rewrote and published all six live PR bodies from
+  `projects/claws/auditable-skills-pr-bodies/`. They now tell the same
+  support-thread/mini-CRM story, show exact search and count behavior, state
+  the single-host SQLite boundary, and explain the core-runner/Lobster
+  migration path. All six remain draft fork PRs.
+- Focused validation:
+  - #97: 26 tests passed; config/schema baselines, lint, formatting, LOC
+    ratchet, and diff checks pass; full typecheck has only known baseline errors
+    outside this slice;
+  - #98: 31 focused receipt, invocation, run-projection, and session-query tests
+    passed;
+  - #100: 38 receipt-resolution and embedded Lobster tests passed;
+  - #109 intentionally requires Lobster #1 for cost aggregation; the stock
+    published Lobster package demonstrates the landing-order gate.
+
 ### 2026-07-15 RFC 0022 sidecar specifications
 
 - Rebased RFC fork PR #6 on current upstream RFC `main` (`2d213ae`) and
