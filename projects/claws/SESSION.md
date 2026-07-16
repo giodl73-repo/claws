@@ -134,7 +134,38 @@
 - Removed the ephemeral proof file after the run. Both implementation
   worktrees are clean; no dependency override or proof-only code entered either
   PR. All six review drafts remain fork-only, draft, open, and mergeable.
+### 2026-07-15 RFC 0016 implementer sidecars
 
+- Rebased RFC PR [#27](https://github.com/openclaw/rfcs/pull/27) onto current
+  `openclaw/rfcs` `main` and pushed the rewritten fork branch with an explicit
+  force-with-lease. The PR remains open and ready; nothing was merged.
+- Added two RFC 0009-style implementer sidecars at commit `8da262c`:
+  `rfcs/0016/claw-md-v1-spec.md` and
+  `rfcs/0016/claw-package-v1-spec.md`. RFC 0016 links both and the PR body now
+  links their commit-stable GitHub views.
+- `CLAW.md` v1 now specifies the YAML 1.2 Core Schema envelope, BOM and digest
+  behavior, equivalent JSON form, complete strict grouped schema, portable
+  workspace/avatar paths, mutually exclusive MCP variants, cron constraints,
+  compatibility, and producer/consumer conformance.
+- Claw Package v1 now specifies package identity/layout, portable path and
+  publication validation, exact artifact integrity, registry/client ownership,
+  plan/consent boundaries, provenance, add/update/remove, export, and
+  conformance. Package removal uses artifact-level `claw-installed` origin,
+  remains removal-order independent, and preserves later direct/operator
+  adoption.
+- Reconciled stale RFC text: canonical `openclaw.claw` is `CLAW.md` rather than
+  `./CLAW.md`; strict v1 cannot gain fields in place; whole-Claw removal may
+  uninstall only eligible sole unchanged artifacts through canonical owners.
+- Final `/root/.codex/skills/codex-review/scripts/codex-review --mode local`
+  result was clean after resolving YAML scalar portability, schema-version,
+  path collision, avatar lifecycle, package ownership/adoption, MCP union,
+  complete agent-field, and unsupported cron-session findings.
+- Follow-up implementation alignment is still required across the OpenClaw and
+  ClawHub draft stacks: NFC/case-folded workspace destination collisions,
+  declared managed local avatars, a Claw-specific heartbeat allowlist, removal
+  of cron `current`, ClawHub BOM parity, and artifact-level origin plus later
+  non-Claw adoption. Do not claim the existing stacks fully conform to the new
+  sidecars until those gaps are repaired and restacked.
 ### 2026-07-15 RFC 0022 reviewer-series reformulation
 
 - Replaced the exploratory Skill Receipts/metadata chronology with six
