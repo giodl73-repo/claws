@@ -2,7 +2,7 @@
 
 - Last updated: 2026-07-16
 - Last agent: Codex
-- Current focus: Auditable Skills host-derived step-attempt idempotency
+- Current focus: Auditable Skills atomic managed-dispatch reservation design
 
 ## Agent Start
 
@@ -25,6 +25,29 @@
   available.
 
 ## Current Session
+
+### 2026-07-16 Auditable Skills idempotency audit blocker
+
+- Prototyped the next host-derived managed-dispatch idempotency slice in
+  `C:\src\openclaw-auditable-skills-idempotency`, branch
+  `agent/auditable-skills-dispatch-idempotency`, directly on #114. The local
+  worktree is intentionally dirty; nothing was committed, pushed, or opened.
+- The prototype persisted scope, attempt key, and a canonical request digest on
+  the existing native managed-run record; it replayed accepted runs, rejected
+  digest conflicts, and single-flighted concurrent calls in one process.
+  Seven focused seam tests, four `sessions_spawn` parity tests, three SQLite
+  round-trip tests, scoped format/lint, and `git diff --check` passed.
+- Mandatory Codex autoreview rejected the design at 0.84 confidence: the
+  registry lookup and spawn are not one atomic operation, so two Gateway
+  processes or worker isolates can both observe no accepted run and dispatch
+  duplicate effects. The finding is valid.
+- Correct next design requires an atomic persistent reservation in the shared
+  OpenClaw SQLite state, uniquely keyed by `(scope, idempotency_key)` with the
+  request digest checked on conflict. Reservation, accepted native run, failed
+  dispatch, and indeterminate pre-acceptance crash semantics must be specified
+  before implementation. This is a storage-contract expansion, so the
+  prototype was not promoted into the fork PR stack.
+- PR #114 remains the clean stack head. No #115 exists.
 
 ### 2026-07-16 Auditable Skills managed dispatch seam
 
