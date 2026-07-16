@@ -22,6 +22,51 @@
 
 ## Current Session
 
+### 2026-07-16 Auditable Skills Round 2 rebuild
+
+- Rebuilt fork draft OpenClaw #98 directly on the compact #97 as one
+  upstream-shaped commit (`fe043820a78`) instead of retaining the 73-file
+  managed-invocation POC. The new slice is 24 files, 488 additions, and 13
+  deletions.
+- Reused OpenClaw's native seams: portable string-valued Agent Skills metadata
+  is loaded into the existing skill snapshot; `sessions_spawn` resolves one
+  available skill and starts an ordinary one-shot current-agent subagent; the
+  existing SQLite-backed subagent registry owns invocation identity and parent
+  run lineage; and `subagents list` projects the existing model, run usage, and
+  estimated cost beside that identity.
+- The result joins to #97 without another ledger: the managed spawn returns
+  `runId`, `childSessionKey`, and `skillInvocationId`, while
+  `openclaw receipts --run <runId>` finds the durable business evidence.
+  `usage.total` is input plus output; OpenClaw's existing `totalTokens` remains
+  the separate context/prompt-cache snapshot.
+- Kept v1 deliberately bounded: no workflow syntax, nested-call enforcement,
+  approvals, retries, budget decisions, ACP execution, or persistent/threaded
+  managed sessions. `outcomes`, `uses-skills`, and `isolation` remain portable
+  declarations rather than evidence or authority.
+- Preserved former #98 head `9c7568ad7f9` as
+  `prototype/auditable-skills-poc-managed-invocation`, moved #100's base to
+  that archive, and force-updated the existing #98 head branch. #98 remains
+  draft, fork-only, mergeable, and now directly targets
+  `agent/skill-metadata-work-records`.
+- Rewrote #98's title/body as **Auditable Skills: track managed skill runs**.
+  The body includes the portable `SKILL.md` example, native join/query story,
+  explicit boundaries, before/after size, validation, and archive relationship.
+- Validation: 259 focused assertions passed; scoped format/lint/diff checks and
+  production core typecheck passed. Core-test typecheck passed once, while
+  later native TypeScript preview repeats intermittently stalled without a
+  diagnostic. `check:changed` reaches only the inherited current-base
+  `src/plugins/update.ts` max-lines ratchet. WSL Codex autoreview could not
+  authenticate (HTTP 401); manual review corrected usage-total semantics and
+  found no further actionable issue. Fork real-behavior, runner-admission,
+  workflow-sanity, and dispatch checks pass; expected fork-only secret failures
+  remain for GitHub App automation and Linux companion signing.
+- Active implementation worktree:
+  `/root/src/openclaw-auditable-skills-round2`, branch
+  `agent/auditable-skills-round2`, clean at `fe043820a78`.
+- Next recommended slice: update RFC 0022's managed-invocation language to this
+  smaller native-registry/run-id design, then decide whether #100 should be
+  rebuilt as a minimal core composition proof or remain archived POC evidence.
+
 ### 2026-07-16 Auditable Skills Round 1 rebuild
 
 - Rebuilt fork draft OpenClaw #97 directly on current upstream `main` as one
