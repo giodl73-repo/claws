@@ -22,6 +22,37 @@
 
 ## Current Session
 
+### 2026-07-16 Claws stack restack pass - PRs #101755 and #101973
+
+- Maintainer hold remains in force: do not merge #101328 until Gio explicitly
+  says to proceed; Omar is still being given review time.
+- #101755 is restacked on #101328 at
+  `bea0e3f33ac6062561275f258fee49e4f4c9b5a3`. Follow-up cleanup regenerated
+  `openclaw-state-schema.generated.ts` and added narrow `sqlite-allow-raw`
+  comments for Claw provenance writes. Updated proof/comment:
+  https://github.com/openclaw/openclaw/pull/101755#issuecomment-4997398112.
+  Local validation passed: `pnpm check:architecture`, focused Claws Vitest
+  (`provenance`, CLI, lifecycle e2e), direct CLI proof, and `git diff --check`.
+- #101973 is restacked on corrected #101755 at
+  `5d2dea5984a533faa96027e913a120ad0689e6a4`. Follow-up cleanup regenerated
+  the state schema, kept `claw_workspace_files` in the runtime generated
+  schema, removed test-only workspace/provenance read exports, and added narrow
+  `sqlite-allow-raw` comments for workspace-file state writes. Updated
+  proof/comment:
+  https://github.com/openclaw/openclaw/pull/101973#issuecomment-4997398262.
+  Local validation passed: focused Claws Vitest (`workspace`, `provenance`,
+  CLI, lifecycle e2e), `pnpm tsgo:prod`, `pnpm check:architecture`,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:unused-files`,
+  `pnpm deadcode:exports`, direct CLI workspace-file proof, and
+  `git diff --check`.
+- Live CI after the pushes still has expected guard failures on dependency and
+  security-sensitive guard lanes, plus #101755 still shows current-base
+  `check-test-types` failure in `test/scripts/docs-sync-publish.test.ts`
+  (`pruneOrphanLocaleDocs` missing from `scripts/docs-sync-publish.mjs`),
+  which matches the earlier current-main docs-sync drift and is outside the
+  Claws diff. #101973 CI was still running when noted.
+- No PR was merged and no automerge was enabled.
+
 ### 2026-07-16 Auditable Skills receipt-first publication
 
 - Switched GitHub.com auth to `giodl73-repo`, pushed RFC commit `9004fb5`,
