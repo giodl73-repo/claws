@@ -22,6 +22,32 @@
 
 ## Current Session
 
+### 2026-07-16 Auditable Skills receipt-first cutoff
+
+- Confirmed the product cutoff: durable typed receipts and `get/list/count` are
+  the standalone Round 1. Managed skill identity and exact-run usage are later
+  evidence rounds; budgets require operator demand; orchestration requires a
+  concrete consumer and is not part of the receipt pitch.
+- Tightened RFC 0022 accordingly. Round 1 now has receipt-only goals, a
+  receipt-only support scenario, and six receipt-only acceptance criteria. The
+  implementation plan explicitly says that lack of demand for a later round is
+  a valid stopping point.
+- RFC worktree `C:\src\openclaw-rfcs-skill-audit` is clean at local commit
+  `9004fb5` on `agent/rfc-0022-skill-invocation-audit`, one commit ahead of the
+  fork branch. Push is blocked because both configured GitHub.com credentials
+  are invalid and Git selected `giodl_microsoft`, which cannot write
+  `giodl73-repo/rfcs`.
+- Rewrote the prepared fork bodies in
+  `projects/claws/auditable-skills-pr-bodies/rfc-6.md` and
+  `openclaw-97.md`. The RFC body now presents receipts first and labels the
+  rest as POC evidence. The #97 body removes the implied workflow dependency
+  and uses OpenClaw's exact `Real behavior proof` field labels.
+- Live fork PR bodies were not mutated because GitHub authentication is
+  unavailable. After reauthentication as the fork owner: push `9004fb5`, apply
+  the prepared bodies to RFC #6 and OpenClaw #97, and verify both live bodies.
+- Do not resume the dirty idempotency prototype or open #115. Atomic dispatch
+  reservation remains a separate future runner concern, not Round 1 work.
+
 ### 2026-07-16 Claws stack landing hold - PR #101328
 
 - OpenClaw PR [#101328](https://github.com/openclaw/openclaw/pull/101328)
