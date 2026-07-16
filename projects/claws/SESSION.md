@@ -22,6 +22,33 @@
 
 ## Current Session
 
+### 2026-07-16 Claws stack landing hold - PR #101328
+
+- OpenClaw PR [#101328](https://github.com/openclaw/openclaw/pull/101328)
+  is updated to head `a3c017240d70d528e8e2b804339c0eb8d33df4ca` on branch
+  `user/giodl/claws-pr2-schema-plan`. Do not merge this first PR until Gio
+  explicitly says so; Omar is still being given review time.
+- Fixed current-head blockers: removed duplicate install-spec parser modules,
+  removed dead Claws helper files/exports, repaired rebase-time avatar imports,
+  and switched `src/cli/claws-cli.runtime.ts` from deprecated `loadConfig()`
+  to process-boundary `getRuntimeConfig()`.
+- Local validation passed: focused Claws Vitest suite
+  (`src/claws/schema.test.ts`, `src/cli/claws-cli.test.ts`,
+  `src/claws/lifecycle.e2e.test.ts`), `pnpm check:deprecated-api-usage`,
+  the deprecated internal config API contract test,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:unused-files`,
+  `pnpm deadcode:exports`, and `git diff --check`.
+- Current-head direct CLI proof was posted at
+  https://github.com/openclaw/openclaw/pull/101328#issuecomment-4997106915
+  and includes disabled/enabled help, `claws inspect --json`,
+  `claws add --dry-run --json`, and fail-closed non-dry-run output.
+- Live GitHub state after the push: `check-lint` fails only on current-main
+  `scripts/docs-sync-publish.d.mts` overload-adjacency drift outside the PR
+  diff; `openclaw/ci-gate` is red because of that. PR is `BEHIND` and still
+  has stale `CHANGES_REQUESTED`. ClawSweeper acknowledged the current-head
+  re-review request but the durable review comment was still stale at the
+  previous `5a11bf5...` verdict when this note was written.
+
 ### 2026-07-16 final Claws stack refresh
 
 - Patrick approved beginning the landing sequence but asked to hold
