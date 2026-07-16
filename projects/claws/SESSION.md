@@ -22,6 +22,21 @@
 
 ## Current Session
 
+### 2026-07-16 Auditable Skills receipt-first publication
+
+- Switched GitHub.com auth to `giodl73-repo`, pushed RFC commit `9004fb5`,
+  and published the prepared receipt-first bodies to fork RFC #6 and OpenClaw
+  #97.
+- Live verification is exact: RFC #6 is draft, clean, mergeable, and points to
+  `9004fb57fbef`; OpenClaw #97 is draft and mergeable at `738ca6d79d37`; both
+  live bodies byte-match the normalized prepared files.
+- OpenClaw #97 now contains the required `Real behavior proof` heading and full
+  field labels. Its unstable rollup remains limited to fork infrastructure:
+  `auto-response`, `label`, and Linux companion signing.
+- The current product message is final for this round: receipts are the
+  standalone product; managed identity and usage are optional later evidence;
+  budgets require demand; orchestration requires a concrete consumer.
+
 ### 2026-07-16 Auditable Skills receipt-first cutoff
 
 - Confirmed the product cutoff: durable typed receipts and `get/list/count` are
@@ -32,19 +47,15 @@
   receipt-only support scenario, and six receipt-only acceptance criteria. The
   implementation plan explicitly says that lack of demand for a later round is
   a valid stopping point.
-- RFC worktree `C:\src\openclaw-rfcs-skill-audit` is clean at local commit
-  `9004fb5` on `agent/rfc-0022-skill-invocation-audit`, one commit ahead of the
-  fork branch. Push is blocked because both configured GitHub.com credentials
-  are invalid and Git selected `giodl_microsoft`, which cannot write
-  `giodl73-repo/rfcs`.
+- RFC worktree `C:\src\openclaw-rfcs-skill-audit` is clean at commit `9004fb5`
+  on `agent/rfc-0022-skill-invocation-audit`, pushed to the fork branch.
 - Rewrote the prepared fork bodies in
   `projects/claws/auditable-skills-pr-bodies/rfc-6.md` and
   `openclaw-97.md`. The RFC body now presents receipts first and labels the
   rest as POC evidence. The #97 body removes the implied workflow dependency
   and uses OpenClaw's exact `Real behavior proof` field labels.
-- Live fork PR bodies were not mutated because GitHub authentication is
-  unavailable. After reauthentication as the fork owner: push `9004fb5`, apply
-  the prepared bodies to RFC #6 and OpenClaw #97, and verify both live bodies.
+- The prepared bodies are published to RFC #6 and OpenClaw #97 and were
+  verified against their live GitHub contents.
 - Do not resume the dirty idempotency prototype or open #115. Atomic dispatch
   reservation remains a separate future runner concern, not Round 1 work.
 
