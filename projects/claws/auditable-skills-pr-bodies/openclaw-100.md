@@ -1,71 +1,75 @@
-## Opportunity
+## What Problem This Solves
 
-Once outcomes are durable and managed skill calls retain lineage, those facts can drive a real workflow. OpenClaw should reuse its workflow stack rather than invent another step engine or trust assistant prose as completion evidence.
+After OpenClaw records a durable outcome and tracks the exact skill on a native child run, the next useful question is simple: given the `runId`, what happened?
 
-This slice connects existing owners: Lobster supplies deterministic pipeline semantics and approvals, TaskFlow supplies durable flow identity, and OpenClaw supplies policy-filtered managed skill execution, native session context, the shared receipt store, and child-run audit data.
+Operators and future workflow runners need one reliable answer containing:
 
-## Support-case proof
+- the exact retained managed-skill identity;
+- the native child session and terminal state;
+- the durable business receipts recorded for that run.
 
-```yaml
-name: support-case
-steps:
-  - id: verify_customer
-    pipeline: >
-      openclaw.skill --skill verify-customer
-      --receipt-type customer.verified
-      --wait-timeout-ms 60000
+Without this seam, every runner or plugin would have to rediscover how to join subagent state and receipt storage. The previous POC proved that composition works, but it did so through 41 files and an embedded Lobster bridge. This revision keeps the useful contract and removes the workflow engine from the slice.
 
-  - id: approve_resolution
-    approval: Resolve this verified customer issue?
-    stdin: $verify_customer.json.receipt
-    when: $verify_customer.json.receipt.type == "customer.verified"
+## Why This Change Was Made
 
-  - id: resolve_case
-    pipeline: >
-      openclaw.skill --skill resolve-case
-      --input-name authorizationCode
-      --wait-timeout-ms 60000
-    stdin: $verify_customer.json.receipt.data.authorizationCode
-    when: $approve_resolution.approved
+This PR adds a runner-neutral managed-run result built entirely from existing OpenClaw primitives:
+
+```json
+{
+  "runId": "run-123",
+  "childSessionKey": "agent:support:subagent:abc",
+  "managedSkill": {
+    "invocationId": "skill-456",
+    "skillName": "resolve-case",
+    "skillDigest": "sha256:abc123"
+  },
+  "status": "completed",
+  "receipts": [
+    {
+      "type": "case.resolved",
+      "data": { "authorizationCode": "AUTH-9482" }
+    }
+  ]
+}
 ```
 
-The verification skill must complete and record `customer.verified`. The audit-run reader resolves the trajectory reference through the configured receipt store, returning the full receipt—including the authorization code—to the managed-step result. That observed evidence controls the branch. Lobster pauses for approval, and the resolving skill receives only the selected code as `workflow-input.json`, not the complete receipt, audit summary, or transcript.
+The new `subagents` `result` action accepts the native `runId`. It resolves the exact retained run—not merely the latest run for a child session—applies the existing session-tree visibility rule, and joins receipts through the configured receipt-store API.
 
-## What this slice proves
+The result reuses native state rather than inventing another ledger:
 
-- Gives embedded Lobster one context-bound OpenClaw invocation primitive.
-- Adds `openclaw.skill` for policy-filtered managed skill steps.
-- Preserves agent, session, channel, sender, provider/model policy, TaskFlow identity, and invocation lineage.
-- Waits for managed child completion before advancing.
-- Resolves full evidence from OpenClaw's core receipt-store boundary rather than reading business payloads from trajectories.
-- Branches on recorded outcome evidence rather than assistant prose.
-- Reuses Lobster's existing `when:` and `approval:` semantics.
-- Passes one selected structured value into the next child through the existing attachment path.
-- Rejects recursion and missing selected input before dispatch.
+- subagent registry owns skill identity, child session, status, timing, and errors;
+- `receipts.sqlite` owns durable business evidence;
+- `runId` is the canonical join;
+- receipt SQLite is loaded only for an explicit result read, keeping ordinary list/cancel paths lightweight.
 
-No new workflow DSL, business database, receipt ledger, approval engine, or task-state model is added. Lobster is the current advanced adapter, not a permanent core dependency: the RFC sidecar specifies the same managed-step contract for a minimal OpenClaw runner.
+If managed identity has expired, the result reports `managed_identity_unavailable`. If a receipt contradicts the retained run, it reports `receipt_correlation_mismatch`. It never infers identity from task text, transcript prose, or receipt data.
+
+## User Impact
+
+This is the first small composition primitive after receipts and managed runs. A support agent can start a skill, retain the returned `runId`, and later retrieve the concrete `case.resolved`, `payment.refunded`, or other outcome—including producer evidence such as an authorization code—without depending on Lobster.
+
+It is also a natural input to later workflow work: a minimal core runner or Lobster adapter can consume the same result for receipt gates and step completion.
+
+Usage and cost are intentionally absent from this slice. OpenClaw's current subagent view exposes a useful session snapshot, but workflow budgets need cumulative observed run usage. This PR does not mislabel a context-window token snapshot as spend; cumulative accounting remains the next bounded slice.
+
+No workflow DSL, step state machine, approval engine, TaskFlow layer, Lobster dependency, usage ledger, or new database is added.
+
+## Evidence
+
+- Focused managed-result and tool tests: 22 assertions passed.
+- Native control coverage: all 35 assertions passed, including exact historical `runId` lookup and session visibility. The Windows test process then hit its existing SQLite teardown `EBUSY` while deleting a temporary database.
+- Scoped formatting, lint, and `git diff --check` pass.
+- Native preview `tsgo` reproduced the branch's known intermittent no-diagnostic hang. Stable `tsc` reached only unrelated dependency/worktree errors in `net-policy` and `web-push`; it reported no changed-file error.
+- 6 files, 339 additions, 6 deletions, compared with the archived POC's 41 files, 1,843 additions, and 152 deletions.
+- Automated Codex review could not complete: sandbox mode lacked `codex-windows-sandbox-setup.exe`, and the full-access retry timed out without findings. Manual review caught and fixed lazy receipt-store loading and exact historical run lookup.
 
 ## POC evidence series
 
 1. [RFC 0022](https://github.com/giodl73-repo/rfcs/pull/6)
 2. [OpenClaw #97 - shared durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
-3. [OpenClaw #98 - managed invocation](https://github.com/giodl73-repo/openclaw/pull/98)
-4. **OpenClaw #100 - workflow composition**
-5. [Lobster #1 - accounting continuity](https://github.com/giodl73-repo/lobster/pull/1)
-6. [OpenClaw #109 - workflow spend](https://github.com/giodl73-repo/openclaw/pull/109)
+3. [OpenClaw #98 - managed child runs](https://github.com/giodl73-repo/openclaw/pull/98)
+4. **OpenClaw #100 - read managed run results**
+5. [Lobster #1 - archived accounting continuity proof](https://github.com/giodl73-repo/lobster/pull/1)
+6. [OpenClaw #109 - archived workflow spend proof](https://github.com/giodl73-repo/openclaw/pull/109)
 
-These fork drafts preserve the evidence trail. RFC 0022 now combines this learning with managed-step accounting in a later runner-adapter round; this PR is not a request to land the current stack unchanged.
-
-## Validation
-
-- Shared-store audit-run resolution: 1 passing test with full receipt data absent from the trajectory reference.
-- Embedded Lobster workflow registry and runner: 37 passing tests.
-- Focused result: 3 files, 38 tests passed.
-- Formatting, lint, and `git diff --check` pass for the new store-resolution integration.
-- Head `78185761`; slice over #98 is 41 files, 1,843 additions, 152 deletions.
-
-**Real behavior:** the embedded execution order is `spawn verify -> complete verify -> approval -> spawn resolve -> complete resolve`. Failed or non-matching verification stops before resolution; rejection does not invoke resolution; approval passes only the selected authorization code to the final skill.
-
-No live customer system or paid provider was invoked.
-
-Depends on #98. Fork-only Auditable Skills workflow proof; not proposed upstream.
+The old workflow-composition head remains preserved on a prototype branch as evidence. This compact PR depends only on #98 and remains draft, fork-only review material; it is not proposed upstream.

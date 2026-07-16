@@ -22,6 +22,55 @@
 
 ## Current Session
 
+### 2026-07-16 Auditable Skills RFC and Round 3 rebuild
+
+- Updated fork RFC #6 at `d06f0cb7d78` to match the compact implementation.
+  Exact skill identity now belongs to OpenClaw's native child-run record;
+  `runId` is the canonical join to sessions, usage, cost, and receipts; and the
+  proposal explicitly adds no second invocation lifecycle or ledger.
+- Replaced the core spec's parallel `SkillInvocationV1` state machine with an
+  immutable managed-skill descriptor on one native child run. Parent lineage
+  uses `parentRunId`; pre-dispatch rejection creates no record; expired
+  run-to-skill association is reported as unavailable rather than inferred.
+- Tightened accounting language: provider aggregate is preferred when present,
+  otherwise simple run total is input plus output; cache buckets remain
+  separate; OpenClaw's context-window `totalTokens` snapshot is not workflow
+  spend. A future budget slice requires cumulative observed run usage.
+- Confirmed the current Agent Skills specification defines `metadata` as a
+  string-to-string map. The portable `outcomes`, `uses-skills`, and `isolation`
+  declarations remain simple strings and do not become evidence or authority.
+- Rebuilt fork draft OpenClaw #100 directly on compact #98 as one commit
+  (`521ff7f4af48`). The old 41-file Lobster bridge is replaced by a 6-file,
+  339-addition/6-deletion runner-neutral managed-result slice.
+- Added `subagents result --runId` semantics through the existing model tool:
+  resolve the exact retained native run under the current session visibility
+  rule, normalize its native terminal state, and join durable receipts through
+  the configured receipt-store API. Receipt SQLite lazy-loads only for the
+  explicit result read.
+- The result omits usage and cost until a cumulative, retry-aware source is
+  available. It returns `managed_identity_unavailable` for expired identity and
+  `receipt_correlation_mismatch` for contradictory receipt correlation rather
+  than reconstructing either from prose.
+- Preserved old #100 head `781857612e39` as
+  `prototype/auditable-skills-poc-workflow-composition`, moved #109's base to
+  that archive, and retitled #109 and Lobster #1 as prototype evidence. #100 is
+  draft, fork-only, mergeable, and now targets
+  `agent/skill-metadata-managed-invocation`.
+- Validation: focused result/tool proof passes 22 assertions; native control
+  proof passes all 35 assertions before an existing Windows SQLite teardown
+  `EBUSY`; scoped formatting, lint, and diff checks pass. Native `tsgo`
+  reproduced its intermittent no-diagnostic hang; stable `tsc` reported only
+  unrelated worktree dependency diagnostics. Manual review fixed eager SQLite
+  loading and display-deduplicated run lookup. Codex review was unavailable due
+  a missing Windows sandbox helper and a full-access timeout without findings.
+- Active implementation worktree:
+  `C:\src\openclaw-auditable-skills-managed-result`, branch
+  `agent/rebuild-auditable-skills-pr100-round2`, clean at `521ff7f4af48`.
+- Next bounded slice: define and prove cumulative observed usage for one managed
+  native run, then add it as an optional field on this result. Only after that
+  boundary settles should a minimal core runner or Lobster adapter aggregate
+  workflow totals and enforce caller-owned limits.
+
 ### 2026-07-16 Auditable Skills Round 2 rebuild
 
 - Rebuilt fork draft OpenClaw #98 directly on the compact #97 as one
