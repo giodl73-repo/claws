@@ -22,6 +22,35 @@
 
 ## Current Session
 
+### 2026-07-16 Claws stack restack pass - PR #102228
+
+- Maintainer hold remains in force: do not merge #101328 until Gio explicitly
+  says to proceed; Omar is still being given review time.
+- #102228 is restacked on #101973 at
+  `2ae7d51d0919c7ddd8f6e54636aa6fb48f3007e0` on branch
+  `user/giodl/claws-pr5-installers`. The old lower-stack merge history was
+  removed; the clean range is eight commits on top of #101973
+  `5d2dea5984a533faa96027e913a120ad0689e6a4`.
+- Fixed ClawSweeper's concrete blocker: managed plugin uninstall now passes
+  the caller state `env` into `collectClawPluginUninstallWarnings`, and the
+  warning collector reads `claw_package_refs` from that same state DB.
+- Updated proof/comment:
+  https://github.com/openclaw/openclaw/pull/102228#issuecomment-4997577993.
+  Exact-head direct proof covered minimal Claw dry-run plus consented add, and
+  isolated uninstall-warning state-env behavior with an empty control state.
+- Local validation passed on exact head `2ae7d51d0919c`: `git diff --check`,
+  `pnpm db:kysely:check`, `pnpm check:architecture`, `pnpm tsgo:prod`,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:unused-files`,
+  `pnpm deadcode:exports`, and focused Vitest for Claw packages/provenance,
+  CLI, lifecycle e2e, plugin preflight/uninstall, management service, and state
+  DB migrations.
+- Live GitHub state immediately after push: PR is not draft, mergeable, still
+  `CHANGES_REQUESTED`, and still carries stale `status: 📣 needs proof` /
+  unranked labels until ClawSweeper re-reviews. New CI is in progress; early
+  lanes such as runner admission, dispatch, real behavior proof, dependency
+  guard detect, and security-sensitive guard detect passed.
+- No PR was merged and no automerge was enabled.
+
 ### 2026-07-16 Claws stack restack pass - PRs #101755 and #101973
 
 - Maintainer hold remains in force: do not merge #101328 until Gio explicitly
