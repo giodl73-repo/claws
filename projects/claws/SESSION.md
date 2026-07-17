@@ -58,6 +58,15 @@
   local agent id and workspace immutable update identity; a separate install
   id would change provenance/update/remove contracts across the stack and
   needs an explicit RFC decision.
+- Final ClawSweeper refresh also identified the retired
+  `openclaw.clawFeed.v1` fixture as an orphan. Confirmed it was the only
+  remaining feed-schema reference, deleted it, passed the focused 39 tests,
+  and pushed `81f01f15c29`. Fresh CI has no failures while the remaining
+  matrix completes. The exact Node 24.15 four-case CLI transcript is from the
+  immediately preceding code head `eb3680cff8d`; the only final-head delta is
+  deletion of that unused JSON fixture. The local source launcher hung while
+  trying to rebuild after the deletion, so do not describe that transcript as
+  an exact-`81f01f15c29` rerun.
 
 ### 2026-07-17 Claws stack review pass - PR #102306 export cleanup
 
