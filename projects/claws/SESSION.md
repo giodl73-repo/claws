@@ -22,6 +22,37 @@
 
 ## Current Session
 
+### 2026-07-17 Fresh independent review - PR #101973 final head
+
+- Restacked OpenClaw PR [#101973](https://github.com/openclaw/openclaw/pull/101973)
+  directly on the final #101755 head `39bd12cf12b8` and force-pushed the
+  reviewed stack to `user/giodl/claws-pr4-artifact-plan`. Current head is
+  `1f5536a03e47f02f477ac63650b6acd6926ed974`; no unrelated stack commits
+  remain in the PR range.
+- Independent review found and repaired an owner-recovery defect: after one
+  managed file succeeded and a later write failed, retry treated the already
+  created owned file as a permanent collision. Matching ownership and content
+  now resume safely, drift or different ownership fail closed, per-file state
+  transitions use compare-and-set checks, and uncertain writes remain pending
+  in the partial result.
+- Omar's canonical workspace identity and preview/apply source-parity
+  requirements remain preserved through the restack. Added recovery, drift,
+  ownership-idempotency, Windows canonical-path, and implicit-main coverage.
+- Local exact-head validation: 81 tests passed and 3 platform tests skipped;
+  focused formatter/linter checks, generated Kysely schema verification,
+  Kysely and legacy-store guards, lifecycle E2E, and `git diff --check` passed.
+  Full typecheck remains non-baseline in the shared Windows dependency tree
+  and fails only in unrelated files also failing from the base checkout.
+- Exact-head real CLI proof at `1f5536a03e47` shows preview and consented apply,
+  three created workspace files, a complete root install record, and three
+  complete SQLite ownership rows with matching SHA-256 digests. The public
+  proof comment is drafted but not posted pending Gio's explicit approval.
+- GitHub CI is fully green. Two unrelated first-attempt flakes (TUI `/exit`
+  timeout and gateway pairing-QR broadcast count) both passed on failed-only
+  rerun without source changes; `openclaw/ci-gate` passed. ClawSweeper's only
+  code/proof blocker is stale exact-head proof, followed by human RFC/stack
+  sponsorship. No PR was merged and no automerge was enabled.
+
 ### 2026-07-17 Fresh independent review - PR #101328
 
 - Re-read live RFC #27 and all three v1 documents at RFC head `892c60fa70`,
