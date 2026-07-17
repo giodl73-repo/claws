@@ -22,6 +22,43 @@
 
 ## Current Session
 
+### 2026-07-16 Claws stack restack pass - PR #102296
+
+- Maintainer hold remains in force: do not merge #101328 until Gio explicitly
+  says to proceed; Omar is still being given review time.
+- OpenClaw PR [#102296](https://github.com/openclaw/openclaw/pull/102296)
+  is restacked on #102228 at
+  `f07a024b5e22077ac2c555410c72201cc8bf2730` on branch
+  `user/giodl/claws-pr6-lifecycle`. GitHub reports the PR as not draft and
+  mergeable on base `2ae7d51d0919c7ddd8f6e54636aa6fb48f3007e0`.
+- Restack fixes kept the plan-first status/remove slice aligned with the lower
+  Claw state schema: restored read-only workspace-file state lookup, used the
+  runtime config process boundary in status, removed stale exported deadcode,
+  and updated Claws test fixtures for the current add-plan/source identity
+  shape.
+- Posted proof/comment:
+  https://github.com/openclaw/openclaw/pull/102296#issuecomment-4997726721.
+  Follow-up test-type delta/comment:
+  https://github.com/openclaw/openclaw/pull/102296#issuecomment-4997818807.
+- Local validation passed on exact head `f07a024b5e22`: `git diff --check`,
+  `pnpm tsgo:prod`, `pnpm check:architecture`, `pnpm deadcode:dependencies`,
+  `pnpm deadcode:exports`, `pnpm deadcode:unused-files`, `pnpm lint:kysely`,
+  focused Claws lifecycle/package/CLI/plugin/skill/adoption Vitest (63 tests),
+  and `pnpm tsgo:core:test`.
+- Exact-head CLI proof in isolated state added `workspace-agent` with exact
+  add plan digest, verified `claws status` reported one present Claw with zero
+  drift, planned removal with exact remove digest, and completed removal with
+  all three managed workspace files deleted.
+- Full local `pnpm check:test-types` now gets past the Claws test fixture
+  errors and stops at the known current-base root-test drift:
+  `test/scripts/docs-sync-publish.test.ts` imports
+  `pruneOrphanLocaleDocs`, which is not exported from
+  `scripts/docs-sync-publish.mjs`. That file is outside the Claws PR diff.
+- ClawSweeper acknowledged and started re-review on the first proof comment;
+  a second `@clawsweeper re-review` was posted after the amended test-fixture
+  head. CI is rerunning on the amended head. No PR was merged and no automerge
+  was enabled.
+
 ### 2026-07-16 Claws stack restack pass - PR #102228
 
 - Maintainer hold remains in force: do not merge #101328 until Gio explicitly
