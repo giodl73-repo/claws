@@ -2777,3 +2777,20 @@
   requires explicit force-with-lease approval. Patrick's four stale review
   threads remain unresolved, and exact-head terminal recovery proof plus a
   public proof comment remain pending until after push. Do not merge.
+- 2026-07-17 follow-up: OpenClaw PR #101755's stack mirror was force-with-lease
+  updated to PR #101328 final head `81f01f15c29`, and the PR branch was
+  force-with-lease updated then advanced normally to exact head
+  `39bd12cf12b8f3fa1d10e1d99ad83f61ddd470e9`. Current CI is fully clean: 82
+  passed, 42 skipped, 0 pending, 0 failed, with GitHub merge state `CLEAN`.
+  Two deterministic rerun defects were fixed at the final head: AST-local raw
+  SQLite allow comments for the phase update/delete and an inherited unused
+  package-acceptance test local rejected by current test typecheck. Four
+  unrelated first-attempt timeouts (bundled-plugin source checkout, gateway
+  chat parsing race, TUI PTY readiness, and restart handoff) all passed on the
+  failed-job-only rerun. Exact-head source-runtime proof used real
+  `runClawsAddCommand` with no mocks: a non-empty durable `workspace_ready`
+  state retried with identical plan integrity to `complete`, preserved its
+  leftover file, and committed config agents `main,internal-triage`. Patrick's
+  four outdated threads and stale `CHANGES_REQUESTED` decision remain the only
+  PR blocker; public proof/replies require approval before posting. Do not
+  merge.
