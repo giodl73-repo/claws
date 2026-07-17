@@ -22,6 +22,47 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack review pass - PR #102959 update preview cleanup
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#102959](https://github.com/openclaw/openclaw/pull/102959)
+  is clean-restacked on current #102427 head
+  `5043432a68ef10f72cbcc6c8617f4a94cf4101c3` and pushed at
+  `0b998ddf359141ac535f9d8497902b45025835f3` on branch
+  `user/giodl/claws-pr11-update-plan`.
+- The refresh addresses Omar's update-preview finding: the read-only update
+  plan now includes structured `capabilityChanges[]`, summary counts for
+  capability changes and escalations requiring distinct consent, and human
+  preview output for field-level changes. Covered surfaces include agent
+  sandbox/tools, plugin executable-code changes, MCP tool-surface changes, and
+  cron/scheduled automation changes. The update command remains read-only.
+- Restack fallout was fixed: update CLI now uses `getRuntimeConfig()` on this
+  base, package fixtures include required integrity, MCP sibling-ref lookup is
+  exported for the planner, read-only raw SQLite probes carry Kysely guard
+  allowlist comments, and helper modules keep `update-plan.ts` below the
+  max-lines gate.
+- Local validation on exact head `0b998ddf35`: focused update-plan/CLI Vitest
+  passed 36 tests across 2 files, `pnpm check:test-types`, `pnpm lint`,
+  `pnpm check:architecture`, `pnpm deadcode:full`, max-lines ratchet,
+  no-conflict-markers, no-runtime-action-load-config, import-cycles, scoped
+  `oxlint`, scoped `oxfmt --check`, and `git diff --check` passed.
+- Proof/re-review comments are
+  https://github.com/openclaw/openclaw/pull/102959#issuecomment-5008331359,
+  https://github.com/openclaw/openclaw/pull/102959#issuecomment-5008375295,
+  and final head correction
+  https://github.com/openclaw/openclaw/pull/102959#issuecomment-5008441196.
+  ClawSweeper re-review was requested on the final head.
+- Live GitHub CI is running on `0b998ddf35`. Early lanes include Real behavior
+  proof, dispatch, label, runner admission, and selected security/setup gates
+  passing. The previous `check-dependencies`, `check-architecture`, and
+  `check-lint` failures were fixed locally and superseded by the final push.
+  A prior unrelated plugin-sdk timing shard failure was observed on the
+  superseded `f76c6c7604` run. Final CI and stale `CHANGES_REQUESTED` review
+  state still need a refresh before merge readiness. No PR was merged and no
+  automerge was enabled.
+
 ### 2026-07-17 Claws stack review pass - PR #102427 diagnostics cleanup
 
 - Maintainer hold remains in force: do not merge #101328 or downstream Claws
