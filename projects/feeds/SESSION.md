@@ -1,3 +1,193 @@
+# 2026-07-17 scalable publisher-feed distribution track
+
+- Opened draft ClawHub wire-contract PR
+  [#3147](https://github.com/openclaw/clawhub/pull/3147) at `d659a420`.
+  It adds strict official-catalog query/change/reset schemas, exact payload-type
+  binding, deterministic normalized filters, complete query/change chain
+  validation, typed identity uniqueness, bounded metadata, cursor-cycle
+  rejection, and terminal revision coverage. The committed schema package
+  artifacts are included. Focused schema proof passes 14 tests; package
+  typecheck, lint, format, diff checks, and the accepted/rejected autoreview
+  loop are complete. It depends on RFC/spec PR #39.
+- Opened stacked draft ClawHub durable journal PR
+  [#3149](https://github.com/openclaw/clawhub/pull/3149) at `1df84c40`.
+  It journals each current catalog publication as one revision plus normalized
+  upsert/remove/metadata rows, exposes indexed 500-row internal reads that
+  atomically return either the retained window or `resetRequired`, and prunes
+  30-day history in bounded batches with revision markers retired before rows.
+  Each revision now persists its own and cumulative change counts, allowing an
+  exact range `changeCount` without scanning retained history.
+  Focused catalog/cron proof passes 35 tests, root TypeScript and scoped lint /
+  format pass, and final autoreview is clean. `ci:static` is blocked by two
+  unrelated CLAUDE.md format failures; `ci:unit` passed 4,651 tests and hit 18
+  unrelated Windows path/symlink script failures. No Convex runtime was
+  targeted because the worktree has no deployment state.
+- Opened stacked draft ClawHub signed-change transport PR
+  [#3151](https://github.com/openclaw/clawhub/pull/3151) at `ee662222`.
+  It serves `/api/v1/feeds/plugins/changes` as signed DSSE change pages, pins
+  the first request's exact sequence range, and protects continuations with a
+  five-minute signer-bound cursor carrying the range, exact count, Convex
+  cursor, limit, page/offset, and expiry. Retention gaps return a signed 409
+  reset to the signed atomic plugin snapshot. The route enforces 500-record and
+  1 MiB bounds. Focused journal/schema/signer/handler proof passes 39 tests;
+  root TypeScript, lint, targeted format, diff check, and structured autoreview
+  are clean. Automatic CI is running; the fork Vercel authorization context is
+  expected. The draft includes #3147, #3149, and #3005 until dependencies land.
+- Next main-catalog slices: indexed signed query projection; then complete
+  sharded snapshots and removal of the current 1,000-entry skills cap.
+  The clean next worktree is
+  `C:\src\openclaw-clawhub-catalog-feed-indexed-query` on
+  `feat/catalog-feed-indexed-query`, based at #3151. Its design must materialize
+  a revision-pinned indexed query result with an exact `resultCount`; do not
+  regress to filtering the full snapshot or expose an approximate count.
+
+- Updated RFC/spec PR [openclaw/rfcs#39](https://github.com/openclaw/rfcs/pull/39)
+  at `39b0295` with the reusable scalable distribution contract: signed atomic
+  roots/shards, signed query pages, signed changed-since pages, tombstones,
+  revision-bound cursors, reset-required, origin policy, exact normalization,
+  and bounded payloads. Publisher feeds are the first rollout target; the same
+  contract is reusable by the main catalog, named/org/composed feeds, and MOS3.
+  The latest update assigns complete publisher snapshots the distinct
+  `openclaw.clawhub-publisher-feed-snapshot.v1` payload type and canonical
+  `/feed/snapshot` route so retention-gap recovery never downgrades to the
+  unsigned paginated discovery route.
+- Opened draft ClawHub PR [#3116](https://github.com/openclaw/clawhub/pull/3116)
+  at `ead52602`. It adds strict publisher query/change/reset schemas, normalized
+  deterministic query projection, durable revision/change history, contiguous
+  changed-since reads, tombstones, and safe legacy reset behavior. It exposes
+  no unsigned public query/delta route. CI exposed missing publisher-delete
+  lifecycle coverage; the fix now removes publication state synchronously and
+  retained revisions/changes in bounded 100-row rescheduled batches. All 151
+  focused publisher/account tests, TypeScript, lint, and final review pass.
+- Rebased and readied ClawHub signer PR
+  [#3005](https://github.com/openclaw/clawhub/pull/3005). Patrick's findings
+  are fixed: one atomic signing-config secret, representation-only validators,
+  and a reusable DSSE signing helper.
+- Opened draft ClawHub integration PR
+  [#3117](https://github.com/openclaw/clawhub/pull/3117) at `f76aaae3`. It adds
+  signed publisher query and changes routes, signed reset responses,
+  integrity-protected five-minute cursors, revision/range/query binding, and
+  fail-closed signing config. It now also serves a complete signed publisher
+  snapshot, validates that strict representation before signing, and points
+  reset responses only at the signed snapshot route. The latest focused schema,
+  account storage, route, and signing proof passes 41 tests; scoped type-aware
+  lint, format, schema build, diff check, and Codex review are clean. The branch
+  intentionally includes #3116 and #3005 until those dependencies land.
+- Opened draft OpenClaw consumer PR
+  [#109305](https://github.com/openclaw/openclaw/pull/109305) at `44d18dbb90a`.
+  It extracts a reusable payload-type-aware DSSE verifier while preserving the
+  install-catalog verifier, then adds strict publisher query/change/reset
+  decoders. Publisher discovery payloads cannot be accepted as install
+  catalogs. The latest commit also narrows decoded change ranges before their
+  sequence bounds are inspected. Fifteen focused tests, scoped lint, diff
+  check, and Codex review pass. Full TypeScript exhausted an 8 GB heap in the
+  no-install worktree's borrowed dependency tree and remains for
+  CI/fresh-install proof.
+- Opened draft OpenClaw transport PR
+  [#109340](https://github.com/openclaw/openclaw/pull/109340) at `1bbddaf71e6`.
+  It adds bounded same-origin query/change paging over signed projections,
+  strict revision/query/range/cursor/expiry continuity, exact redirect and
+  content-type enforcement, 1 MiB page limits, atomic delta application,
+  validated reset boundaries, and deterministic entry ordering. Review-found
+  regressions for empty cursors, locale-dependent ordering, sparse sequence
+  ranges, and starting-sequence spoofing are covered. All 26 focused tests
+  across two shards, scoped type-aware lint, format, diff check, and final
+  Codex review pass. Repository-wide TypeScript remains for fresh CI because
+  this worktree borrows a stale dependency tree under Node 24.14.0.
+- Opened draft OpenClaw durable refresh PR
+  [#109378](https://github.com/openclaw/openclaw/pull/109378) at `ec1c9278896`.
+  It verifies complete signed publisher snapshots, persists accepted state and
+  actual signing evidence in shared OpenClaw SQLite, applies complete deltas
+  transactionally, recovers retention gaps through sequence-bound signed
+  snapshots, and exposes a bounded serial stoppable scheduler for explicit
+  publisher targets. The store rejects rollback, same-sequence content drift,
+  corrupted rows, unsafe URLs, and identity mismatch. Exact-commit WSL proof
+  under Node 24.15.0 / SQLite 3.51.3 passes all 35 focused tests across two
+  shards, including real SQLite tests; scoped type-aware lint, format, schema
+  generation, diff check, and final Codex review are clean.
+- Opened draft OpenClaw follow-management PR
+  [#109397](https://github.com/openclaw/openclaw/pull/109397) at
+  `ad65875ba887`. It persists followed publisher targets in shared OpenClaw
+  SQLite and adds `openclaw publisher list|follow|unfollow|refresh`. Follow
+  requires an explicitly trusted signed feed profile, verifies a complete
+  snapshot before persistence, rejects trust rollback/equivocation, and keeps
+  unfollow working after profile removal. Exact-commit WSL proof under Node
+  24.15.0 / SQLite 3.51.3 passes 34 focused tests across three shards; final
+  Codex review is clean.
+- Opened draft OpenClaw gateway lifecycle PR
+  [#109407](https://github.com/openclaw/openclaw/pull/109407) at
+  `3fa9b41edf60`. It starts followed-publisher refresh after gateway readiness,
+  reloads persisted follows and marketplace config each cycle, prevents
+  overlap, records bounded status, survives per-follow and cycle failures, and
+  stops during gateway shutdown. A review-found eager startup import was
+  removed to preserve the gateway lazy-service boundary. Exact-commit WSL
+  proof under Node 24.15.0 passes all 66 focused gateway tests; type-aware lint,
+  formatting, changed-file TypeScript, diff check, and final Codex review are
+  clean.
+- Opened draft OpenClaw authenticated RPC PR
+  [#109461](https://github.com/openclaw/openclaw/pull/109461) at
+  `82e34f2fbeda`. It adds typed protocol contracts and lazy gateway handlers for
+  `publisherFeeds.list|follow|unfollow|refresh|status`, with read/write scopes,
+  startup admission for scheduler-dependent calls, scheduler serialization,
+  and unavailable responses outside the full gateway context. Core method
+  descriptors remain append-only. Follow inputs are trimmed, UTF-8 byte
+  bounded, and semantically classified so invalid profiles return
+  `INVALID_REQUEST` while transport/persistence failures remain `UNAVAILABLE`.
+  Exact-commit WSL proof under Node 24.15.0 passes 207 tests across gateway,
+  protocol, and plugin shards. Final Codex review is clean after fixes for
+  startup admission, method-index compatibility, local-context ownership,
+  error classification, and identifier normalization.
+- Opened draft OpenClaw Control UI PR
+  [#109518](https://github.com/openclaw/openclaw/pull/109518) at
+  `3a6494db8b5`, stacked on #109461. It adds a capability-gated Following tab
+  to the Plugins/Skills hub, list/follow/unfollow/refresh controls, scheduler
+  status, accepted sequence and verification timestamps, responsive loading,
+  error, and empty states, deep-link recovery after delayed gateway connection,
+  unsupported-gateway fallback to a populated Skills view, and
+  `operator.write` gating for mutations. The generated Control UI i18n fallback
+  baseline is committed. Focused UI proof passes 44 tests; targeted feed,
+  deep-link, and authorization proof passes 16 tests; i18n verify, changed-slice
+  production/test types, formatting, and diff checks are clean. Final
+  `codex review --uncommitted` reported no discrete correctness regressions
+  after fixing i18n metadata, connection and request-order races, unsupported
+  fallback loading, and read-only mutation controls.
+- Opened draft OpenClaw signed-profile discovery PR
+  [#109584](https://github.com/openclaw/openclaw/pull/109584) at
+  `9ce3c6c7bc5`, stacked on #109518. It adds the operator-read
+  `publisherFeeds.profiles` RPC, returns only names and origins for configured
+  signed HTTPS profiles, and replaces free-text profile entry with a selector
+  when the gateway advertises discovery. The UI prefers `clawhub-public`,
+  blocks follow when no eligible profile exists, keeps older-gateway manual
+  entry compatibility, and never exposes trust keys. Focused proof passes 42
+  tests plus targeted format, lint, i18n verification, and diff checks. Codex
+  review findings for append-only gateway method indices and select/model
+  alignment were fixed with regression coverage; final review retries timed
+  out without additional output.
+- Updated OpenClaw default ClawHub trust PR
+  [#101981](https://github.com/openclaw/openclaw/pull/101981) at
+  `fe939bc302a` for Patrick's requested changes. A customized built-in
+  `clawhub-public` profile now inherits bundled/environment trust unless it
+  explicitly overrides verification. Signed payloads require valid
+  `expiresAt > generatedAt`; expired 304/offline/error snapshots remain
+  visible but have all install authority removed. Legacy signed snapshots
+  without expiry are treated as stale/non-installable while retaining their
+  rollback sequence, avoiding an upgrade deadlock. The complete non-SQLite
+  catalog suite passes 41 tests; the two SQLite cases are locally blocked by
+  Node 24.14.0 versus the repository's WAL-safe 24.15.0 floor. Codex review
+  found and drove fixes for explicit-verification precedence and legacy
+  snapshot migration, then returned clean. Patrick re-review was requested.
+- Re-review was also requested on ClawHub signer PR
+  [#3005](https://github.com/openclaw/clawhub/pull/3005) at `c62a50640a`;
+  Patrick's atomic signer-transition and representation-validator findings are
+  fixed. Substantive static/unit/type/package/E2E checks are green; remaining
+  failures are unrelated Playwright moderation-star and Vercel authorization.
+  Do not manually queue CI.
+- Next stack slice: validate the complete follow, signed snapshot, delta
+  refresh, restart persistence, and unfollow flow against a live ClawHub
+  publisher feed once the signer and bundled trust profile are deployed.
+  Main catalog sharding/query/delta support follows after the publisher track
+  proves the reusable path.
+
 # 2026-07-15 MOS3 personal skill E2E alignment
 
 - Current target flow: discover/install a MOS3 marketplace skill, publish a
@@ -6,16 +196,82 @@
 - Marketplace discovery/install is already proven in production: 301/302
   returned the MOS3 marketplace feed, and 302 installed
   `billing-info-lookup`. Lobster PRs #3717 and #3718 are merged.
-- The remaining runtime gate is Lobster PR #4344 at head `ccb0946d15`. It is
-  current with `main`, makes personal publish MOS3-owned when no complete
-  durable Lobster overlay is configured, and requires acquisitions readback
-  before reporting a synchronous MOS3 publication as complete.
+- The personal-publish runtime slice, Lobster PR #4344, merged as
+  `a9e1524213`. It makes personal publish MOS3-owned when no complete durable
+  Lobster overlay is configured and requires acquisitions readback before
+  reporting a synchronous MOS3 publication as complete.
 - #4344 repair is pushed and re-review requested. Proof now covers the
   MOS3-only endpoint success path, delegated bearer propagation, pending
   publication behavior, incomplete-overlay fallback, and MOS3 skill-ID
   normalization. All 66 Scout route tests and runtime all-target clippy pass;
-  final independent review is clean. ADO PR validation is running
-  automatically. GitHubPop is currently red; do not manually queue ADO.
+  final independent review is clean. Runtime PR validation is green on head
+  `2013cb63fc`; user-authorized Build Validation build `172454400` was queued
+  for that exact head. It failed only on Guardian false positives introduced
+  by current `main`. Narrow fix PR #4840 is open at `b811dff2c0`; once merged,
+  refresh #4344 from main and rerun Build Validation. GitHubPop still requires
+  proof-of-presence.
+- #4344 peer review found that same-title readback could accept a stale
+  version. Fixed and pushed at `e7a9f94879`: synchronous readback now requires
+  the version returned by MOS3 publish, with an adversarial stale-version test.
+  Full Scout route tests and runtime clippy pass; final review is clean and
+  Harry/Edpiva re-review was requested.
+- After #4840 merged, #4344 was refreshed to current main and pushed at
+  `d48a898a8b`. The request version is now authoritative in the generated MOS3
+  manifest, so versionless publish responses can still use strict revision
+  readback without false rejection. Package tests, both version readback
+  regressions, all 66 Scout route tests, clippy, fmt, and final review are clean.
+- #4344's current Runtime validation is blocked by a current-main regression
+  from #4502: `LOBSTER_DEV_PRESERVE_WORKSPACE_AGENT_IDENTITY` is consumed by
+  `gateway_proxy` but is neither projected nor explicitly exempted by
+  `runtime_gateway_proxy_env_config_test.py`. This is unrelated to the feeds
+  diff and should be fixed on main as a documented dev/test-only exemption.
+  Build Validation is not attached yet; GitHubPop still requires interactive
+  proof-of-presence.
+- The env-classification regression was subsequently fixed on main by #4857.
+  Refreshing #4344 then exposed a second current-main blocker:
+  `clippy::large_futures` at the terminal websocket `run_upgrade` boundary.
+  Opened narrow main-fix PR #4889,
+  `https://microsoft.ghe.com/bic/lobster/pull/4889`, at `589e97df71`.
+  It boxes that future without changing polling behavior. Runtime all-target
+  clippy, 22 terminal-proxy tests, fmt, and autoreview are clean. Keep #4344 on
+  its prior head until #4889 lands, then refresh once and push.
+- To avoid waiting on missing #4889 ADO attachment, #4344 was made
+  self-contained: refreshed to current main, applied the reviewed #4889 fix,
+  validated the env-config guard, all 158 Scout tests, 18 personal-publish
+  runtime tests, and runtime all-target clippy, then pushed at `7a5aeff0fe`.
+  Current-head re-review was requested from Harry, Edpiva, and Galin at
+  `https://microsoft.ghe.com/bic/lobster/pull/4344#issuecomment-203918216`.
+- Stacked Lobster PR #4862 was automatically closed when its #4344 base
+  merged, and GitHub would not permit reopening or retargeting it. Its
+  restacked head is now replacement PR #4923,
+  `https://microsoft.ghe.com/bic/lobster/pull/4923`, at `a3043649ee`, directly
+  against `main`. It introduces typed MOS3 publish scopes (`personal`,
+  `shared`, `tenant`), rejects unsupported CLI values before upload, keeps
+  hosted personal callers explicit, and proves `Shared` emits `scope=shared`.
+  The diff remains limited to the intended six files. All 160 Scout tests,
+  Scout clippy, runtime check, and branch autoreview are clean. Galin and
+  Edpiva were requested to re-review; required runtime contexts and GitHubPop
+  are not attached yet.
+- #4923 peer review requested positive public-CLI proof for shared and tenant
+  scopes. Fixed at `4c69b2607e`: shared and tenant success tests assert the
+  outgoing scope query, tenant `403` renders the structured `ScopeDisabled`
+  outcome, and invalid scopes are rejected before auth/package preparation.
+  All 163 Scout tests, Scout all-target clippy, fmt, and final Codex review are
+  clean. #4923 was mistakenly opened from the `giodl/lobster` fork, so ADO
+  contexts could not attach. It is closed and replaced by internal-head PR
+  #4976, `https://microsoft.ghe.com/bic/lobster/pull/4976`, at the identical
+  SHA. `Lobster-Runtime-PullRequest` attached immediately and is running;
+  current-head reviews and GitHubPop remain required.
+- Opened the next stacked Lobster PR #4866,
+  `https://microsoft.ghe.com/bic/lobster/pull/4866`, at `b15f300a0f`.
+  It defines the route-independent shared-skill request, provenance, explicit
+  visibility, and structured outcome contracts. `allUsers` is the only
+  currently validated visibility; selected users/groups return structured
+  `unsupportedVisibility` until MOS3 ACL transport is confirmed. Strict
+  deserialization rejects broad-visibility payloads carrying principal fields.
+  No route, UI action, tenant approval claim, or ACL wire mapping is enabled.
+  All 166 Scout tests, Scout clippy, fmt, and final autoreview are clean. The PR
+  still needs to be restacked from closed #4862 onto #4923.
 - MOS3 v-team alignment: MOS3 remains the system of record; Scout should prove
   MOS3 discovery, acquisitions-backed personal projection, and the personal
   storage loop. The latest reported blocker is E2E validation of that personal
@@ -26,6 +282,11 @@
   `projects/feeds/demo/record-mos3-live-proof.ps1 -Environment msit -Publish`
   using browser/WAM auth rather than device code. Capture marketplace,
   publish, acquisitions reload, and personal-feed readback artifacts.
+- Shared-publish delivery is framed in
+  `projects/feeds/mos3-shared-skill-publish-slice.md`: first lock typed MOS3
+  shared-publish scope/readback/ACL semantics, then add one gated vertical
+  shared-skill publish route with strict revision readback. Do not conflate it
+  with personal save, local install, or tenant approval.
 
 # 2026-07-10 301/302 feeds promise validation
 

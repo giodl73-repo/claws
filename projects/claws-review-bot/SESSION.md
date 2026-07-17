@@ -27,6 +27,14 @@
 - Current focus: Azure `claws-review-bot-job` now re-evaluates unchanged PR
   heads when an authoritative maintainer responds, while preserving the
   maintainer-decision approval gate.
+- 2026-07-16 targeted check on Lobster PR `#4890`:
+  - ClawsBot had already re-evaluated Galin's response on exact head
+    `1f7e89a022` in comment `203893661`: prior findings F1-F4 are resolved and
+    new Major/block finding F-new1 requires an explicit maintainer decision on
+    the durable owner-profile and adapter-contract rollout posture.
+  - Targeted execution `claws-review-bot-job-zl1297b` succeeded and correctly
+    skipped without duplicating the review because no newer author or
+    authoritative maintainer response existed.
 - 2026-07-15 targeted validation on Lobster PR `#4616`:
   - Started execution `claws-review-bot-job-tklv3iv` with
     `tick bic/lobster#4616 --post`, preserving the live job's env and secret

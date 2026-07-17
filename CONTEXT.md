@@ -33,6 +33,7 @@ tools.
 | Mail work | `projects/mail/README.md` |
 | Claws work | `projects/claws/README.md` |
 | Claws Review Bot | `projects/claws-review-bot/README.md` |
+| Localization work | `projects/localization/README.md` |
 | oc-path work | `projects/oc-path/README.md` |
 | ClawPilot issue loop | `projects/clawpilot/README.md` |
 | Bugfix work | `projects/bugs/README.md` |
@@ -177,6 +178,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
 - Claws Review Bot: `@bic/claws-review-bot` package notes, with Lobster PR
   review as the primary lane and a separate ClawPilot issue-classifier
   experiment.
+- Localization: OpenClaw locale architecture, current surface coverage,
+  runtime error/message gaps, and bounded localization slices.
 - oc-path: destination specs, workspace path behavior, and follow-up branches.
 - ClawPilot: feedback-to-issue tracking in `gim-home/m` using the
   `clawpilot-issue-loop` skill.

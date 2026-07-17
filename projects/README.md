@@ -29,6 +29,7 @@ be buried in generated wave directories.
 | `mail/` | OpenClaw mail-channel research, mail plugin options, and Exchange/Microsoft Graph integration framing. |
 | `claws/` | OpenClaw RFC direction for runnable starter setups across skills, plugins, MCP servers, workspace files, persona files, and automations. |
 | `claws-review-bot/` | `@bic/claws-review-bot` package notes; primary Lobster PR reviewer lane plus separate ClawPilot issue-classifier experiment. |
+| `localization/` | OpenClaw localization architecture, current coverage, runtime message gaps, and bounded evidence slices. |
 | `oc-path/` | oc-path, workspace destination specs, and related local worktrees. |
 | `clawpilot/` | ClawPilot issue-loop and feedback-to-issue tracking. |
 | `bugs/` | Cross-cutting bugfix triage, reproduction notes, fix branches, and proof. |
@@ -69,6 +70,7 @@ agent is assigned to an area, then read the area `README.md`.
 | Mail | `mail/SESSION.md` |
 | Claws | `claws/SESSION.md` |
 | Claws Review Bot | `claws-review-bot/SESSION.md` |
+| Localization | `localization/SESSION.md` |
 | oc-path | `oc-path/SESSION.md` |
 | ClawPilot | `clawpilot/SESSION.md` |
 | Bugs | `bugs/SESSION.md` |

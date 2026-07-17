@@ -24,21 +24,23 @@
 
 ### 2026-07-16 final Claws stack refresh
 
-- Patrick approved beginning the landing sequence but asked to hold
-  `CLAW.md` for now. OpenClaw PRs #101328, #101755, #101973, #102228,
-  #102296, #102306, #102383, #102406, #102427, #102959, and #102982 are
-  marked ready for review. #106888 remains draft. No PR has automerge enabled;
-  nothing was merged from this workspace.
-- RFC [#27](https://github.com/openclaw/rfcs/pull/27) is ready and mergeable at
-  `f08192f`. It now records the final ClawHub ownership split: #3090 owns
-  fail-closed reads and full-manifest stripping, #3091 owns enabled discovery,
-  and #3092 owns the hosted feed and published-package proof. The package
-  sidecar already rejects links and special archive entries. Focused Codex
-  review and `git diff --check` are clean.
+- Patrick approved using the existing Claws experimental gate for `CLAW.md`
+  rather than adding a second flag. All twelve OpenClaw PRs are ready for
+  review; #106888 is no longer draft. No PR has automerge enabled and nothing
+  was merged from this workspace.
+- RFC [#27](https://github.com/openclaw/rfcs/pull/27) is ready and approved at
+  `892c60f`. The RFC, package sidecar, manifest sidecar, and PR body now define
+  `CLAW.md` plus grouped JSON under the single Claws gate. The Markdown support
+  is explicitly a removable reader/export adapter with no separate lifecycle,
+  ownership, provenance, flag, or package dependency.
 - OpenClaw update apply [#102982](https://github.com/openclaw/openclaw/pull/102982)
-  is refreshed at `fc3be18acd1`; final `CLAW.md` compatibility
+  is refreshed at `594f6aa3da1` with exact validation of every package-manager
+  MCP selector. Final `CLAW.md` compatibility
   [#106888](https://github.com/openclaw/openclaw/pull/106888) is refreshed at
-  `1b00790e260`. Their focused lifecycle suites and final Codex reviews pass.
+  `757592aada0`; its effective diff is four reader/export files. Focused proof
+  passes 55 tests, lifecycle E2E passes 8 tests, and final Codex reviews are
+  clean. CI is running; Patrick's earlier GitHub changes-requested review is
+  stale and needs refresh against the fixed head.
 - ClawHub draft heads are #3089 `821c1f4`, #3090 `fe333b8`, #3091 `241db05`,
   and #3092 `927bd80`. Each was restacked without force-pushing and remains
   unmerged. #3089/#3090/#3091 pass focused suites, `ci:types-build`,

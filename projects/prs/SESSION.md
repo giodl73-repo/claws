@@ -21,49 +21,164 @@
 
 ## Current Session
 
-- Last updated: 2026-07-15.
+- Last updated: 2026-07-17.
 - Last agent: Copilot.
 - Current focus: Lobster PR cleanup for Gio-authored front queue in
   `microsoft.ghe.com/bic/lobster`; prioritize mergeable reviewed PRs, then
   focused CI repairs, without manually queuing missing ADO validations unless
   explicitly requested.
-- 2026-07-15 live front queue:
-  - `#4644` was closed after verifying its allowlist additions came from live
-    Desktop/local and stacked ClawPilot work rather than commands landed on
-    ClawPilot `main`. Future commands must be added only when the cross-repo
-    contract actually lands.
-  - `#4648` has two approvals and is mergeable, but PullRequest fails in the
-    OpenClaw image/Agent image and adapter quality/unit lanes; Build Validation
-    is missing.
-  - `#4528` has a local current-main rebase and timeout-hook repair not yet
-    pushed. Final autoreview found two obsolete upstream test paths restored in
-    the Docker conflict resolution; remove them, rerun focused proof, and push.
-  - `#4092` has PullRequest green and current-head approvals, but Harry's
-    current-head request-changes asks for a real system/E2E execution path.
-  - `#4616` is conflicting and remains properly held by VClaws F1-F4 plus two
-    formal request-changes reviews.
-- Active branch / PR: Gio open Lobster queue is #4298, #4297, #4272, #4092,
-  and #4064. Session-highlighted #4206 is already merged.
-- Live PR state: #4272 pushed to `1f9d4dd8d1`, fixing fail-closed inventory
-  source handling and configured `load.paths` manifest scanning; proof comment:
-  https://microsoft.ghe.com/bic/lobster/pull/4272#issuecomment-199982276.
-  #4092 pushed to `d5fcc05a1a`, fixing the stale `snapshot` README allowlist
-  reference; proof comment:
-  https://microsoft.ghe.com/bic/lobster/pull/4092#issuecomment-199982776.
-  #4064 pushed to `5825b59b88`, adding duplicate-schedule guard plus startup
-  artifact/telemetry proof; proof comment:
-  https://microsoft.ghe.com/bic/lobster/pull/4064#issuecomment-199983351.
-  #4298 remains non-draft at `755d7f8a7d`, PullRequest green, GitHubPop red,
-  Build Validation missing, and reviewDecision `CHANGES_REQUESTED` despite
-  newer approvals. #4297 remains draft at `8471b690ae`, PullRequest neutral,
-  GitHubPop red, and Build Validation missing.
+- Active approval loop: schedule `#2` runs every 10 minutes across non-feed PRs
+  `#4528`, `#4355`, `#4272`, `#4648`, and `#4297`; it refreshes
+  exact-head reviews, repairs actionable blockers, and stops when every still
+  open in-scope PR is approved or only human action remains.
+- 2026-07-16 live non-feed front queue:
+  - `#4840` merged.
+  - `#4648` head `b4212f2ca1` has PullRequest green and exact-head approvals
+    from `@harryf` and `@Galin-Iliev`, but `@edpiva`'s older request-changes
+    review still controls the review decision; Build Validation is missing and
+    GitHubPop is red. Current-head re-review remains requested from `@edpiva`.
+  - `#4528` is draft and has been rebased onto current `main`; current pushed
+    head `6e5f08100d` retains both the reply-session conflict retry and outbound
+    Teams quoted replies on OpenClaw 2026.6.11. Build
+    `172520289` exposed one
+    branch-owned Rust E2E drift: OpenClaw 2026.6.11 migrated cron state from
+    `~/.openclaw/cron/jobs.json` to SQLite, but the diagnostics safety test
+    still read the removed file. The test now validates the same no-`bash` /
+    no-`write` invariant through the supported `openclaw cron show
+    daily-diagnostics --json` response and fails closed on malformed or missing
+    policy data. The exact pinned OpenClaw source confirms `cron show --json`
+    returns the full stored job.     The rebase retains the reply-session retry as
+    `0014-retry-reply-session-init-conflicts.patch` and ports the previous
+    outbound quote behavior to a separate
+    `0015-msteams-quoted-replies.patch`; all 15 patches apply sequentially to
+    pristine `v2026.6.11`, and the Docker patch-coverage gate explicitly runs
+    every patch-added test. The combined diagnostics/msteams trusted-install
+    seed is startup-critical so Gateway cannot report ready with a nonfunctional
+    Teams plugin. Focused quoted-reply/controller tests pass 78/78, the offline
+    patch inventory/coverage gate passes, and final Codex review is clean.
+    PullRequest build `172574920` exposed two stale source-contract assertions
+    that still searched for the old diagnostics-only seed helper name after the
+    shared helper was renamed; the branch updates those assertions with
+    no runtime change. The focused lifecycle suite passes 75/75 and the follow-up
+    Codex review is clean. A subsequent main advance added the cron
+    gateway-restart interruption patch against OpenClaw 2026.5.28; the latest
+    rebase ports it to 2026.6.11 as patch `0016`, after reply-session retry
+    `0014` and Teams quoted replies `0015`. Cron restart tests pass 15/15,
+    lifecycle tests pass 75/75, the 16-patch offline inventory/coverage gate
+    passes, and final Codex review is clean. Current-head review is requested
+    from `@harryf`, `@dspektor`, and `@Galin-Iliev`. PullRequest build
+    `172586629` then exposed a real reply-session initialization race: snapshot
+    and guarded commit were not serialized on the session-store writer lane,
+    and hydrated runtime-only skill state could create false revision
+    conflicts. Patch `0014` now ports the canonical upstream fix: same-lane
+    serialization, explicit reentrant commit support, persisted-shape revision
+    comparison, plus the existing bounded retry. The full `0001`-`0016` stack
+    applies cleanly; affected session/retry tests pass 123/123; concurrent
+    eight-initializer and hydrated-skill regressions pass; final Codex review is
+    clean. Harry's persistence follow-up exposed that TRIPS only proved a
+    workspace file, not SQLite-backed OpenClaw state across a genuinely new
+    worker. Head `7ffb5d45dc` added SQLite-safe `VACUUM INTO` snapshots before
+    git checkpoints, verified restore before Gateway startup, and extended the
+    TRIPS proof to create a real cron, stop the first worker, hydrate a new
+    worker, and recover the same cron ID. PullRequest build `172633299` then
+    exposed a CI-host compatibility defect: the scripts statically resolved
+    `node:sqlite` even on missing-state no-op paths. Current pushed draft head
+    `f3d88e88ee` defers that import until real SQLite work exists and gates only
+    SQLite-specific host tests on capability; production remains fail-closed.
+    Build `172637702` confirmed the image and adapter unit lanes green, leaving
+    only the final TRIPS Graph git-I/O log assertion. Current draft head
+    `52e4fe3846` explicitly preserves the replacement worker's completed
+    hydration logs alongside the stopped first worker's pre-shutdown logs, so
+    the existing strict git evidence assertion can see the successful hydration
+    that already restored the same cron ID. The SQLite suite passes 4/4, the
+    annotated cross-platform git-store tests pass locally, the E2E target
+    compiles, its immutable-log regression passes, and Codex review is clean.
+    Proof comments `203956366`, `203961126`, and `203998596` plus current-head
+    review requests are posted. Build Validation remains missing, and no ADO
+    run was manually queued.
+  - `#4064` merged as `b07652c262` on 2026-07-16.
+  - `#4355` and `#4272` remain changes-requested because older
+    `@harryf` request-changes reviews still control their review decisions.
+    `#4355` prior head `6abe9b55d6` addressed its review blockers and removed
+    the unregistered `definition-id: TBD` entry that failed the OneLocBuild
+    contract. Current head `0efe63f013` has exact-head `@Galin-Iliev` approval
+    and PullRequest build `172537645` is green; current-head re-review remains
+    requested from `@harryf`. Build Validation is missing and GitHubPop is red.
+  - `#4064` was rebased again onto current `main` at `b3dc4059bd`, resolving
+    snapshot tool rename/legacy-registration conflicts. The rebased stack
+    includes the `f17c8ceaaf` image-build proof: it imports the shipped
+    plugin entry through the real installed SDK, loads the shipped enabled
+    config, performs registration, and verifies the startup snapshot artifact
+    plus successful create telemetry. Focused snapshot tests pass 22/22,
+    Docker/static checks pass, and Codex review found no registration defect;
+    the existing synchronous SQLite tool implementation was intentionally not
+    expanded into a worker-thread redesign. Current head `b3dc4059bd` has
+    exact-head `@Galin-Iliev` approval and PullRequest build `172537513` is
+    green; current-head re-review remains requested from `@harryf`. Build
+    Validation is missing and GitHubPop is red. No ADO run was manually queued.
+  - `#4355` was cleanly rebased onto current `main` at `0efe63f013`, picking up
+    the landed env drift-guard repair; current-head re-review was requested from
+    `@harryf`.
+  - `#4272` current head `c53ff46b0a` is rebased onto current `main` and
+    addresses the latest peer-review trust
+    boundary gaps: duplicate manifest IDs and malformed plugin config overrides
+    fail closed; the image smoke compares deny matching against OpenClaw's real
+    policy engine from the pinned OpenClaw source build stage, rather than a
+    private dist path that disappeared after tsdown bundling. It exercises human CLI and override-error paths, propagates SDK
+    registration rejection, and verifies malformed config through the shipped
+    registered tool. The refresh also fixes catalog enablement parity so
+    `entries.<id>.enabled=true` cannot bypass a restrictive non-empty
+    `plugins.allow`, while absent or empty allow remains unrestricted.
+    A subsequent exact-head Harry review identified real catalog input-boundary
+    gaps. The plugin now requires absolute config/plugin/load paths, tests the
+    exact baked `openclaw.plugins.json` catalog paths, and rejects array/scalar
+    tool parameters instead of silently defaulting to list. Catalog tests pass
+    21/21, container wiring is valid, and final Codex review has no accepted
+    actionable findings. Unrelated web/Python/launcher review findings were
+    verified outside this PR's diff.
+    Current-head re-review is requested from `@harryf`, `@dspektor`, and
+    `@Galin-Iliev`. Focused catalog tests pass 21/21, Rust catalog wiring tests
+    pass 2/2, code-mode container validation passes, and Codex review is clean.
+    Natural PullRequest build `172635198` again failed only the OpenClaw image
+    build with GitHub's generic `Bash exited with code 1` annotation; every
+    completed sibling job was green. The repeated branch-only image boundary
+    was the new `openclaw catalog` build smoke running against the full
+    production plugin config, which can activate unrelated plugins requiring
+    live services during `docker build`. Current head keeps the real OpenClaw
+    command-loader proof but uses a temporary catalog-only runtime config; the
+    plugin still inventories the complete baked production manifests through
+    explicit absolute paths. Catalog tests pass 21/21, build-context and patch
+    guards pass, and Codex review is clean. Proof comment `204026376` and
+    current-head review requests are posted. Local Docker is unavailable, ADO
+    log access is still blocked by the wrong Azure identity, and two direct AWS
+    Crabbox probes (`cbx_5966258c7708`, `cbx_10b7de10fa41`) failed before
+    command execution while building the sync file list from the Windows-created
+    worktree, so they provide no product proof. No ADO run was manually queued.
+  - `#4861` was approved, then closed as superseded. Main commit `c06ae61102`
+    from `#4857` independently landed both drift-guard exemptions with stronger
+    production-boundary descriptions.
+  - `#4297` remains draft at `874c31412e`, now cleanly restacked on `#4272`
+    head `c53ff46b0a`.
+    The node prompt projection is explicit and code-mode gated, filters
+    disconnected/pending-only capabilities, bounds loopback fetches, sanitizes
+    node-advertised command names, and avoids speculative approval claims.
+    Static guidance is inventory-neutral until `Nodes.list()` runs, unavailable
+    and valid-empty inventory are distinct, displayed command families are
+    capped with explicit truncation, and both loopback clients cover the
+    endpoint's 7s enqueue plus 7s response budget. Catalog tests pass 27/27,
+    nodes-code-mode tests pass 10/10, Rust nodes/catalog preservation tests
+    pass, container wiring is valid, and final Codex review has no actionable
+    findings. Proof comments `203959801` and `204026631` and current-head review
+    requests are posted to `@harryf`, `@dspektor`, and `@Galin-Iliev`; the PR
+    remains draft.
+- Active branch / PR: Gio's open Lobster queue is #4648, #4528, #4355,
+  #4344, #4297, and #4272. #4344 is feed-related and excluded from the
+  current non-feed priority lane. #4092 and #4298 are no longer open.
 - Checks: branch rules require `GitOps/GitHubPop`,
   `Lobster-Runtime-PullRequest`, and `Lobster-Runtime-Build-Validation` on
-  every Lobster PR head. After the pushes, #4272/#4092/#4064 natural
-  PullRequest checks are queued, GitHubPop is red or missing-on-new-head, and
-  Build Validation remains missing. Per Lobster policy and current pool
-  exhaustion, do not manually queue or rerun ADO unless the user explicitly
-  names a PR/branch.
+  every Lobster PR head. None of the current non-feed queue has all three green.
+  Per Lobster policy, do not manually queue or rerun ADO unless the user
+  explicitly names a PR/branch.
 - PR body: updated twice on 2026-06-20. It no longer calls
   `0b64c4ebda2c4610994b3eb46e1012c71ad28d22` the current signed head and now
   references current head `0928476673c7323bd7a3fba51b5a565b4fbe5d07` as a clean

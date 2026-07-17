@@ -22,21 +22,22 @@
 
 ## Current Session
 
-- Last updated: 2026-07-15.
+- Last updated: 2026-07-16.
 - Last agent: Copilot.
-- Current focus: Drive the repaired first generated Lobster OpenClaw upgrade
-  PR through fresh CI and image-backed acceptance.
+- Current focus: Drive the repaired PromoteClaw automation and its first
+  generated Lobster OpenClaw upgrade through fresh CI and acceptance.
 - Active branch / PR: Lobster #4355
   `https://microsoft.ghe.com/bic/lobster/pull/4355`, branch
-  `user/giodl/promoteclaw-job`, head `efc51ca468`. Generated candidate:
+  `user/giodl/promoteclaw-job`, head `6abe9b55d6`. Generated candidate:
   Lobster #4528 `https://microsoft.ghe.com/bic/lobster/pull/4528`, branch
-  `promoteclaw/openclaw-2026.6.11`, head `ec876d7bdb`, draft and mergeable.
+  `promoteclaw/openclaw-2026.6.11`, head `d8ada10e6c`, draft and mergeable.
 - Known dirty state: PromoteClaw Lobster worktrees used this session are clean.
   `C:\src\claws-hapi` has this session note update plus unrelated existing
   dirty project notes.
 - Blocking question: #4528 needs fresh CI plus a newly built 2026.6.11 image
   for persisted-home Gateway, brokered Teams/msteams, and version-visibility
-  acceptance; #4355 still needs `GHE_PROMOTECLAW_TOKEN` after merge.
+  acceptance; #4355 needs fresh CI/re-review and still requires
+  `GHE_PROMOTECLAW_TOKEN` after merge.
 
 ## Resume Checklist
 
@@ -70,6 +71,39 @@
 
 ## Open Threads
 
+- #4355 current-head CI repair at 2026-07-16: pushed `6abe9b55d6`.
+  The prior Repo validation failure was branch-owned: an unregistered
+  PromoteClaw definition had been added to the live operations catalog with
+  `definition-id: TBD`, which the OneLocBuild contract forbids. Removed the
+  placeholder from `docs/ops-catalog/pipelines.yml` and the live-definition
+  tables in `docs/pipelines.md`; pending registration remains documented in
+  `docs/feed/README.md`. The exact OneLocBuild and PromoteClaw job tests passed,
+  the PromoteClaw self-test passed, and Codex review was clean. Natural
+  PullRequest build `172523497` is pending; no ADO run was manually queued.
+- #4355 current-head review repair at 2026-07-16: pushed `d54209e158`.
+  Dry-run now intentionally uses the managed Azure Artifacts token without GH
+  credentials or mutation flags; malformed feed version/view shapes fail
+  loudly; existing generated candidates are restored to draft before update;
+  and the unused Python import was removed. PromoteClaw self-tests and 4 job
+  tests passed, YAML/Python syntax checks passed, and Codex review was clean.
+  Superseded PullRequest build `172521891` is cancelling after the newer push;
+  no ADO run was manually queued.
+- #4528 prior head `4f391f7d91` fixed build `172462154`'s shared
+  `dead_code` failure by moving test-only install-seed helpers into the sibling
+  test module. Natural PullRequest build `172520289` is in progress. Both
+  OpenClaw image builds, the runtime image build, adapter quality/unit tests,
+  patched OpenClaw JS tests, Web E2E, and Repo validation are green; runtime E2E
+  and remaining tail jobs are still running. No ADO run was manually queued.
+- #4528 current head `d8ada10e6c` fixes build `172520289`'s branch-owned
+  diagnostics cron E2E failure. OpenClaw 2026.6.11 stores cron state in SQLite,
+  so `/home/node/.openclaw/cron/jobs.json` no longer exists. The test now keeps
+  its read-only safety assertion by inspecting the supported `openclaw cron
+  show daily-diagnostics --json` response and rejects malformed, missing,
+  `bash`, or `write` policy data. The pinned `v2026.6.11` CLI source confirms
+  the JSON response contains the full job payload. `git diff --check`, Rustfmt,
+  and Codex review passed; focused Cargo tests are locally blocked before build
+  by missing private `ecsclient` registry auth. Natural PullRequest build
+  `172535490` queued after push; no ADO run was manually queued.
 - #4528 repair at 2026-07-15 02:40 UTC: rebased
   `promoteclaw/openclaw-2026.6.11` onto current `origin/main`, resolved the
   patch README and package conflicts, restored the missing msteams threading
