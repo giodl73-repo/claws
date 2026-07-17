@@ -22,6 +22,38 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack restack pass - PR #102383
+
+- Maintainer hold remains in force: do not merge #101328 until Gio explicitly
+  says to proceed; Omar is still being given review time.
+- OpenClaw PR [#102383](https://github.com/openclaw/openclaw/pull/102383)
+  is restacked on #102306 at
+  `1188b433a29a01b7fdfdd8d1015522b5d96f9c6c` on branch
+  `user/giodl/claws-pr8-skills`. GitHub reports the PR as not draft with base
+  `f9916ba650bf979ab2db04c999a78b0ff0859b6e`.
+- Restack fixes kept cron lifecycle work aligned with the current package and
+  export stack: Claw cron refs now compose with inspected package status,
+  remove consent remains bound to exact plan integrity, cron cleanup fails
+  closed before agent deletion, completed remote removals can be retried
+  without repeating `cron.remove`, and local agent-delete fallback output stays
+  internal to `claws remove`.
+- Posted proof/comment:
+  https://github.com/openclaw/openclaw/pull/102383#issuecomment-4998167345.
+- Local validation passed on exact head `1188b433a2`: `git diff --check`,
+  `pnpm tsgo:prod`, `pnpm check:architecture`,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:exports`,
+  `pnpm deadcode:unused-files`, `pnpm tsgo:core:test`, and focused cron /
+  lifecycle / CLI / gateway Vitest.
+- Exact-head direct behavior proof in isolated state covered add with
+  `cron.add`, status/export with one resolved cron ref, lost-response
+  reconciliation through `cron.list`, failed remove leaving the agent intact,
+  retry after confirmed remote removal without repeating `cron.remove`, and
+  final cleanup with zero Claws/cron refs.
+- ClawSweeper re-review was requested on the proof comment. CI is rerunning on
+  the restacked head; early real behavior proof and guard lanes passed, while
+  CodeQL/CI preflight were still pending at the first snapshot. No PR was
+  merged and no automerge was enabled.
+
 ### 2026-07-17 Claws stack restack pass - PR #102306
 
 - Maintainer hold remains in force: do not merge #101328 until Gio explicitly
