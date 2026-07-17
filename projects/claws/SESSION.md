@@ -22,6 +22,39 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack review pass - PR #101973
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#101973](https://github.com/openclaw/openclaw/pull/101973)
+  is restacked on #101755 at
+  `3e49e967e4e67ce2dd1e48a140cc2b8692616b25` on branch
+  `user/giodl/claws-pr4-artifact-plan`.
+- Omar's workspace-file findings are addressed at the current head: workspace
+  planning canonicalizes the requested workspace path through existing
+  symlinked parents and uses that canonical identity in agent config, action
+  targets, plan integrity, and existing-workspace comparison; workspace-file
+  apply realpaths package/workspace roots, reopens consented sources through
+  fs-safe with symlink/hardlink rejection, and rejects source aliases whose
+  realpath no longer matches the consented plan source.
+- Rebase integration with #101755 preserves resumability: workspace-file
+  failure now leaves the root install record at `config_committed` so the
+  already-created agent/workspace remains reconcilable rather than becoming an
+  unretriable partial row.
+- Posted proof/comment:
+  https://github.com/openclaw/openclaw/pull/101973#issuecomment-4998585485.
+- Local validation passed on exact head `3e49e967e4`: focused Claws/CLI/
+  lifecycle Vitest (66 tests), `pnpm tsgo:prod`,
+  `pnpm check:architecture`, `pnpm deadcode:dependencies`,
+  `pnpm deadcode:exports`, `pnpm deadcode:unused-files`, and
+  `git diff --check`.
+- ClawSweeper acknowledged the re-review request at
+  https://github.com/openclaw/openclaw/pull/101973#issuecomment-4998585722.
+  Live CI is rerunning on the new head; no failures were present at the first
+  post-push snapshot, with broader CI still pending. No PR was merged and no
+  automerge was enabled.
+
 ### 2026-07-17 Claws stack review pass - PR #101755
 
 - Maintainer hold remains in force: do not merge #101328 or downstream Claws
