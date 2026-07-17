@@ -22,6 +22,33 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack review pass - PR #102406 MCP cleanup
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#102406](https://github.com/openclaw/openclaw/pull/102406)
+  has a local clean-restacked replacement branch in WSL worktree
+  `/root/src/openclaw-workflow/.worktrees/pr-102406` at
+  `d10b34396798e17487a0111362c490d708d5d792` on branch
+  `pr-102406-restacked`, based on current #102383 head
+  `9fe2b5d1c30c4a83e6457fa0cdcbbfa684be4304`.
+- The local refresh replays the original MCP ownership commits and adds one
+  integration fix commit, `d10b343967`, covering the composed add-result MCP
+  refs, ClawSweeper's credential-bearing remote MCP URL preview redaction
+  concern, raw SQLite guard annotations, and deadcode-safe internal MCP refs.
+- Local validation on exact head `d10b343967`: focused MCP/lifecycle/export/
+  CLI/config Vitest passed 59 tests across 5 files, `pnpm tsgo:core:test`,
+  `pnpm tsgo:prod`, scoped Oxlint, `pnpm check:architecture`,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:exports`,
+  `pnpm deadcode:unused-files`, and `git diff --check` passed.
+- Live PR #102406 still points to stale head
+  `b76cb7e09985e20de2b3e49e913f3e53dbc88e3b`, with GitHub reporting
+  `mergeStateStatus: DIRTY`, `reviewDecision: CHANGES_REQUESTED`, and
+  `status: needs proof`. Do not force-push `user/giodl/claws-pr9-mcp` without
+  Gio's explicit OK; intended command is
+  `git push origin HEAD:user/giodl/claws-pr9-mcp --force-with-lease`.
+
 ### 2026-07-17 Claws stack review pass - PR #102383 scheduled work cleanup
 
 - Maintainer hold remains in force: do not merge #101328 or downstream Claws
