@@ -2608,3 +2608,26 @@
   checks and local Codex review passed with no actionable findings. RFC #27 is
   open, ready, and mergeable; its commit-stable sidecar links were refreshed and
   nothing was merged.
+- 2026-07-16 OpenClaw Claws PR #102228 was clean-restacked on #101973 and
+  pushed at `18d178885ecc95a4d0f8af8968bcc444fb5d1792` (`fix(claws): tighten
+  package install policy`). The branch is `user/giodl/claws-pr5-installers`,
+  based on #101973 head `b46453290b2392fd8f655d5098701a9257eeec3b`. The
+  repair narrows this slice to plugin package mutation only; skill package
+  declarations remain schema-valid but fail closed until a later skill package
+  lifecycle adds real read-only preflight plus uninstall/recovery. Package
+  declarations now require `integrity`, package add-plan actions surface that
+  digest, and `claw_package_refs` persists `package_integrity` with migration
+  support. Plugin install/reuse remains consent-bound by exact owner state, and
+  partial config-commit failure now preserves `workspace_ready` when cleanup
+  cannot remove the workspace so retry can resume. Local proof passed focused
+  Claws/package/state tests (140 tests), `src/cli/claws-cli.test.ts` (10 tests),
+  `pnpm tsgo:test`, `pnpm tsgo:prod`, full oxlint shards, architecture,
+  deadcode dependencies/exports/unused-files, and `git diff --check`. GitHub CI
+  is `CLEAN` with the aggregate gate green, including the previously failing
+  `checks-node-compact-small-7` rerun. Proof comments are
+  `https://github.com/openclaw/openclaw/pull/102228#issuecomment-4999034089`
+  and head correction
+  `https://github.com/openclaw/openclaw/pull/102228#issuecomment-4999065917`.
+  ClawSweeper acknowledged and started review for exact head `18d178885e`; final
+  ClawSweeper review and the stale GitHub `CHANGES_REQUESTED` decision were
+  still pending at this note. Do not merge without explicit user instruction.
