@@ -2869,3 +2869,28 @@
   requested-changes review and six unresolved outdated threads remain the only
   recorded review blocker. No review reply, thread resolution, proof comment,
   merge, or automerge occurred. Do not merge.
+- 2026-07-17 final follow-up: OpenClaw PR #102228 is pushed at exact head
+  `ae79fd7ddd7cc7f1d672bf1b91fa927e7b159e89`. Production ClawHub proof found
+  that public package metadata uses standard SHA-256 SRI rather than the
+  internal `sha256:<hex>` form; commit `ae79fd7ddd7c` now normalizes and
+  enforces both representations. Exact-head proof installs the real public
+  `@steipete/weather@1.0.0` skill through the real CLI/ClawHub/archive/workspace/
+  SQLite path, rejects a wrong SRI without writing `SKILL.md`, and exercises a
+  deterministic package-boundary disconnect that retains truthful partial
+  provenance after config/workspace commit. The PR body contains the required
+  real-behavior-proof schema and explicitly discloses that a live shared plugin
+  and Crabbox were not tested.
+- Omar's policy question is resolved for this experimental v1: plugins remain
+  process-wide shared-host resources, and exact `claws add --yes
+  --plan-integrity <preview-digest>` consent authorizes the displayed shared
+  plugin install/reuse action. No per-agent plugin isolation is claimed; that
+  may be revisited separately. This is documented in the PR body and in the
+  public Omar reply at
+  https://github.com/openclaw/openclaw/pull/102228#issuecomment-5008511867.
+  Patrick's six outdated inline threads were answered with current-head
+  evidence and resolved. GitHub reports `MERGEABLE` / `CLEAN`, but the stale
+  human review decision remains `CHANGES_REQUESTED`. ClawSweeper's durable
+  exact-head review was generated before the final proof/body revision and
+  still requested proof; a stabilized-source re-review was queued at
+  https://github.com/openclaw/openclaw/pull/102228#issuecomment-5008570798.
+  No merge or automerge was enabled.
