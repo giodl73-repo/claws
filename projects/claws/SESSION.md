@@ -2753,3 +2753,27 @@
   ClawSweeper acknowledged and started review for exact head `18d178885e`; final
   ClawSweeper review and the stale GitHub `CHANGES_REQUESTED` decision were
   still pending at this note. Do not merge without explicit user instruction.
+- 2026-07-17 OpenClaw Claws PR #101755 was deeply reviewed and repaired locally
+  in `C:\src\openclaw-claws-pr3-review`. The original public head
+  `31caeb09e7d` overstated interrupted-retry behavior: the CLI could not resume
+  an on-disk workspace, phase writes could race, configured workspace aliases
+  were not canonicalized, implicit `main` could be replaced, and caught
+  zero-ownership failures stranded provenance. The local branch was restacked
+  from stale base `c5abb329537` onto PR #101328 final head `81f01f15c29`, and
+  now ends at `f7a98b11d0a`. It makes retry phases durable and compare-and-set,
+  revalidates workspace ancestry and ownership, preserves/checks implicit
+  `main`, resumes an identical config committed before its phase write, and
+  reconciles only caught failures that own no workspace or config. Stale SDK
+  budget and unrelated package-acceptance workarounds were removed. Focused
+  proof passes 71 tests (52 schema/provenance, 14 CLI, 5 lifecycle E2E), scoped
+  oxfmt/oxlint and `git diff --check`; direct plugin-SDK budget proof remains at
+  8010 public exports / 4476 callable exports. Codex review found and drove the
+  implicit-main, resume, zero-ownership, and implicit-workspace-overlap fixes;
+  later convergence retries were inconclusive because the local Windows review
+  sandbox repeatedly timed out, and one apparent clean result was rejected as
+  unrelated. Nothing was pushed: updating OpenClaw base mirror
+  `user/giodl/claws-pr2-schema-plan` from `c5abb329537` to `81f01f15c29` and PR
+  branch `user/giodl/claws-pr3-feed-plan` from `31caeb09e7d` to `f7a98b11d0a`
+  requires explicit force-with-lease approval. Patrick's four stale review
+  threads remain unresolved, and exact-head terminal recovery proof plus a
+  public proof comment remain pending until after push. Do not merge.
