@@ -22,6 +22,43 @@
 
 ## Current Session
 
+### 2026-07-17 Fresh independent review - PR #101328
+
+- Re-read live RFC #27 and all three v1 documents at RFC head `892c60fa70`,
+  then independently reviewed PR #101328, Omar's feedback, Patrick's inline
+  threads, ClawSweeper's exact-head verdict, and live CI before trusting the
+  prior session notes.
+- Found a real remaining preview/inspect gap at PR head `c5abb32953`:
+  `readClawManifestFile()` built the development snapshot with unbounded
+  `readFile()` calls before the planner's source limits ran, and inspection
+  accepted intermediate in-root symlinks that add planning rejected.
+- Pushed the repair on `user/giodl/claws-pr2-schema-plan`. Workspace sources
+  now share the planner's 1 MiB/file and 4 MiB aggregate limits, are opened
+  through fs-safe with symlink-parent/final-symlink/hardlink rejection, are all
+  size-preflighted before content reads, and are read from pinned handles.
+  Added reader regressions for intermediate symlinks and both size limits.
+- Also fixed the existing `params` shadowing lint failure. Current-main CI then
+  exposed one export/one callable Plugin SDK drift plus the corresponding
+  Knip consumer requirement. The branch preserves
+  `CORE_CLI_COMMAND_DESCRIPTORS` and consumes it from argv while retaining the
+  hidden-by-default Claws gate. Exact merge-tree comparison then identified
+  the actual SDK growth as the new `assertNoSymlinkParents` public infra
+  re-export; Claws now imports it from the existing internal fs-safe-advanced
+  facade and the public re-export is removed. Current review head is
+  `eb3680cff8d` and CI is rerunning.
+- The earlier test-type failure was confirmed as old-base drift already fixed
+  on current main. The Plugin SDK count failure was branch-caused and repaired;
+  no budget baseline was weakened. Focused schema/reader and CLI tests pass
+  39/39 locally. Exact-head Node 24.15 CLI proof shows a valid workspace source
+  succeeds, while an intermediate Windows junction, a 1 MiB + 1 byte source,
+  and five 1 MiB sources fail closed with the expected three diagnostics.
+  Real behavior proof passes. No PR was merged and no automerge was enabled.
+- Honest product read: Omar's immutable-install-id suggestion should not be
+  improvised in this base PR. The current RFC explicitly makes the installed
+  local agent id and workspace immutable update identity; a separate install
+  id would change provenance/update/remove contracts across the stack and
+  needs an explicit RFC decision.
+
 ### 2026-07-17 Claws stack review pass - PR #102306 export cleanup
 
 - Maintainer hold remains in force: do not merge #101328 or downstream Claws
