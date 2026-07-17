@@ -22,6 +22,40 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack review pass - PR #102306 export cleanup
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#102306](https://github.com/openclaw/openclaw/pull/102306)
+  is clean-restacked on current #102296 head
+  `0be472639ea586ac049a5b2ab1634c3abbd3d578` at head
+  `41517c89a575a498c7258ab593a8ea152f069a79` on branch
+  `user/giodl/claws-pr7-export`.
+- The restack kept the four export commits only. The concrete lower-stack
+  fallout was the package integrity contract from #102296/#102228: exported
+  package refs now carry recorded `integrity`, and the export test fixture
+  seeds/expects package integrity.
+- Corrected exact-head proof/comment:
+  https://github.com/openclaw/openclaw/pull/102306#issuecomment-5003538044.
+  ClawSweeper acknowledged the exact-head request at
+  https://github.com/openclaw/openclaw/pull/102306#issuecomment-5003538428.
+- Local validation on exact head `41517c89a5`: focused export/CLI/lifecycle
+  Vitest passed 32 tests across 3 shards, `pnpm tsgo:core:test`,
+  `pnpm tsgo:prod`, scoped Oxlint, `pnpm check:architecture`, deadcode
+  dependencies/exports/unused-files, and `git diff --check` passed.
+- Exact-head CLI proof added `workspace-agent`, exported it as a package,
+  inspected the exported package successfully, then added the exported package
+  in a separate clean state with exact dry-run `planIntegrity` consent. The
+  exported package wrote `workspace/HEARTBEAT.md`, `workspace/SOUL.md`,
+  `workspace/reference/policy.md`, `package.json`, and `openclaw.claw.json`.
+- Live GitHub CI is rerunning on `41517c89a5`. Early snapshot: Real behavior
+  proof passed, and the previously failing `check-test-types` and `check-lint`
+  lanes passed. Broader matrix was still pending at this note. GitHub review
+  state remains stale `CHANGES_REQUESTED` from Patrick's old exact-head review
+  until a human/ClawSweeper refresh clears it. No PR was merged and no
+  automerge was enabled.
+
 ### 2026-07-17 Claws stack review pass - PR #102296 lifecycle cleanup
 
 - Maintainer hold remains in force: do not merge #101328 or downstream Claws
