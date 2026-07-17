@@ -54,14 +54,18 @@
   and final head correction
   https://github.com/openclaw/openclaw/pull/102959#issuecomment-5008441196.
   ClawSweeper re-review was requested on the final head.
-- Live GitHub CI is running on `0b998ddf35`. Early lanes include Real behavior
-  proof, dispatch, label, runner admission, and selected security/setup gates
-  passing. The previous `check-dependencies`, `check-architecture`, and
-  `check-lint` failures were fixed locally and superseded by the final push.
-  A prior unrelated plugin-sdk timing shard failure was observed on the
-  superseded `f76c6c7604` run. Final CI and stale `CHANGES_REQUESTED` review
-  state still need a refresh before merge readiness. No PR was merged and no
-  automerge was enabled.
+- Live GitHub CI is green on `0b998ddf35`: `openclaw/ci-gate`, Real behavior
+  proof, lint, test-types, dependency/architecture gates, compact shards,
+  CodeQL/security checks, OpenGrep, and changed-path scan passed. The previous
+  `check-dependencies`, `check-architecture`, `check-lint`, and compact shard
+  failures were fixed or superseded by the final push.
+- GitHub still reports stale review/label state after the final proof request:
+  `reviewDecision: CHANGES_REQUESTED`, `rating: unranked krab`, and
+  `status: needs proof`. ClawSweeper acknowledged the exact-head re-review
+  command at
+  https://github.com/openclaw/openclaw/pull/102959#issuecomment-5008441196,
+  but no final clearing review was present at the last live check. No PR was
+  merged and no automerge was enabled.
 
 ### 2026-07-17 Claws stack review pass - PR #102427 diagnostics cleanup
 
