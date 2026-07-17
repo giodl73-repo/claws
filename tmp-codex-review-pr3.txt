@@ -1,0 +1,3237 @@
+OpenAI Codex v0.143.0
+--------
+workdir: C:\src\openclaw-catalog-restack
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f4909-b574-7d32-8e3f-627c064fa4ac
+--------
+user
+changes against 'user/giodl/cli-catalog-review-dynamic-lenses'
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content -Raw .agents/skills/autoreview/SKILL.md' in C:\src\openclaw-catalog-restack
+ succeeded in 371ms:
+---
+name: autoreview
+description: "Pre-commit/ship code review: Codex default; optional Claude, Pi, Droid, Copilot, Cursor, or OpenCode."
+---
+
+# Auto Review
+
+Run the bundled structured review helper as a closeout check. This is code review, not Guardian `auto_review` approval routing.
+
+Codex review is the default when no engine is set. It uses `gpt-5.5` by default, usually delivers the best review results, and should remain the normal final closeout engine. Claude review is optional and uses `claude-fable-5` by default.
+
+For user-visible behavior, pair autoreview with `behavior-validator`. Autoreview is source-aware and judges the change bundle; behavior validation is source-blind and judges the running product or tool against a behavior contract. A clean autoreview is not proof that a UI, CLI, API, or generated artifact works from the user's perspective.
+
+Use when:
+
+- user asks for Codex review / Claude review / Pi review / Droid review / Cursor review / OpenCode review / autoreview / second-model review
+- after non-trivial code edits, before final/commit/ship
+- reviewing a local branch or PR branch after fixes
+
+## Contract
+
+- Treat review output as advisory. Never blindly apply it.
+- Verify every finding by reading the real code path and adjacent files.
+- Read dependency docs/source/types when the finding depends on external behavior.
+- Reject unrealistic edge cases, speculative risks, broad rewrites, and fixes that over-complicate the codebase.
+- Prefer small fixes at the right ownership boundary; no refactor unless it clearly improves the bug class.
+- When an accepted finding shows a bug class or repeated pattern, inspect the current PR scope for sibling instances before fixing.
+- Fix the scoped bug class at once when practical; stop at touched surfaces, owner boundaries, and clear follow-up territory.
+- Keep going until structured review returns no accepted/actionable findings only while the work remains inside the original task scope.
+- If a review-triggered fix changes code, rerun focused tests and rerun the structured review helper.
+- For security-audit suppression changes, verify accepted findings remain auditable: suppressed findings stay in structured output, active output keeps an unsuppressible suppression notice, and aggregate findings cannot hide unrelated active risk.
+- Never switch or override the requested review engine/model. If the review hits model capacity, retry the same command a few times with the same engine/model.
+- Be patient with large bundles. Structured review can take up to 30 minutes while the model call is active, especially with Codex tools or web search.
+- Treat heartbeat lines like `review still running: ... elapsed=... pid=...` as healthy progress, not a hang. Let the helper continue while heartbeats are advancing. Pass `--stream-engine-output` when live engine text is useful; Codex, Claude, and Cursor filter tool/file chatter, other engines pass raw output through.
+- Do not kill a review just because it has been quiet for 2-5 minutes, or because it is still running under the 30-minute window. Inspect the process only after missing multiple expected heartbeats, after 30 minutes, or after an obviously failed subprocess; prefer letting the same helper command finish.
+- Tools are useful in review mode. The helper allows read-only inspection tools and web search by default so reviewers can check dependency contracts, upstream docs, and current behavior.
+- Security perspective is always included, but it should not cripple legitimate functionality. Report security findings only when the change creates a concrete, actionable risk or removes an important safety check.
+- For regression provenance, keep roles separate: blamed code author, blamed PR author, PR merger/committer, current PR author, and PR/date. If no blamed PR is traceable, use the blamed commit as the provenance: commit SHA, date, and author username. Do not guess a merger or frame missing PR metadata as a separate finding.
+- If the blamed PR was merged by `clawsweeper[bot]` or another automation, identify the human trigger when practical. Check timeline/comments first; if rate-limited, use gitcrawl/cache or public PR HTML. Look for maintainer commands such as `@clawsweeper automerge`, `/landpr`, or labels/status comments that armed automerge. Report `automerge triggered by @login`; if not found, say trigger unknown.
+- Do not invoke built-in `codex review`, nested reviewers, or reviewer panels from inside the review. The helper builds one bundle, calls one selected engine, validates one structured result, and stops.
+- Stop as soon as the helper exits 0 with no accepted/actionable findings. Do not run an extra review just to get a nicer "clean" line, a second opinion, or clearer closeout wording.
+- Treat the helper's successful exit plus absence of actionable findings as the clean review result, even if the underlying Codex CLI output is terse.
+- Multi-reviewer panels are opt-in only. Use them when explicitly requested or when risk justifies the extra spend; the main agent still verifies every accepted finding before fixing.
+- If rejecting a finding as intentional/not worth fixing, add a brief inline code comment only when it explains a real invariant or ownership decision that future reviewers should know.
+- If `gh`/Gitcrawl reports `database disk image is malformed`, run `gitcrawl doctor --json` once to let the portable cache repair before retrying review; do not bypass the shim unless repair fails and freshness requires live GitHub.
+- If Gitcrawl reports a portable manifest mismatch, source/runtime DB health error, or stale portable-store checkout, run `gitcrawl doctor --json` and inspect `source_db_health`, `runtime_db_health`, and `portable_store_status` before falling back to live GitHub.
+- Do not push just to review. Push only when the user requested push/ship/PR update.
+
+## Scope Governor
+
+Autoreview is a closeout gate, not permission to rewrite the task.
+
+Before the first review, freeze a scope baseline: original request or issue, target branch, intended behavior, owner boundary, changed files, and non-test LOC. For inherited or already-bloated branches, use the intended PR diff as the baseline rather than accepting all existing branch drift.
+
+Before patching a finding, classify it:
+
+- **In-scope blocker**: the finding is introduced by the current diff, affects the same owner boundary, and can be fixed without changing the task's contract.
+- **Follow-up**: the finding is real but belongs to an adjacent bug class, sibling surface, cleanup, or broader hardening track.
+- **Stop-and-escalate**: the finding requires a new protocol/config/storage/public API contract, a different owner boundary, a release-process change, or a design choice outside the original request.
+
+Stop patching and report the scope break instead of continuing when:
+
+- a narrow PR turns into an architecture change, protocol change, migration, or release-process change;
+- the diff grows past 2x the original files or non-test LOC without explicit approval to expand scope;
+- two review-triggered patch cycles have not converged; pause and reclassify every remaining finding before another edit;
+- the best fix is "define the canonical contract first" rather than another local inference layer;
+- fixing the accepted finding would make the PR no longer describe the same behavior, issue, or owner boundary.
+
+After the two-cycle pause, continue only when every remaining accepted finding is still an in-scope blocker. Otherwise preserve the useful analysis, identify the smallest safe landed subset if one exists, and open or request a follow-up for the larger fix. Do not keep committing speculative fixes just to satisfy the reviewer.
+
+Do not stack or push review-triggered fix commits while scope classification or focused proof is unresolved. Keep exploratory edits local until the cycle is proven in scope; if scope breaks, remove them from the landing lane instead of preserving them as branch history.
+
+Critical exceptions must be explicit: active data loss, crash, broken install/upgrade, release blocker, or concrete security exposure. If the exception is not one of those, it is not critical enough to blow up scope.
+
+## Release Branches And Release Process
+
+On release, beta, stable, hotfix, signing, notarization, appcast, package-publish, or release-check work, use freeze discipline even when the branch name is not release-like:
+
+- Fix only release blockers, failed release infrastructure, exact backports, install/upgrade breakage, data loss, crashes, or concrete security exposure.
+- Treat non-blocking autoreview findings as follow-ups for `main`, not reasons to broaden the release branch.
+- Do not introduce new product behavior, config surface, protocol shape, migration, plugin ownership, docs narrative, or process policy unless it directly unblocks the release.
+- Keep proof tied to the release target: exact branch/ref, failing check or shipped-risk reason, smallest command/proof, and whether the fix must also forward-port to `main`.
+- If review discovers a real but non-critical design problem during release closeout, stop with a follow-up issue/PR plan; do not use the release branch as the refactor lane.
+
+## Skill Path (set once)
+
+Set the skill script paths once, then use `"$AUTOREVIEW"` and `"$AUTOREVIEW_HARNESS"` in the examples below.
+
+Choose one:
+
+```bash
+# Project-local skill in the current repo:
+export AUTOREVIEW=".agents/skills/autoreview/scripts/autoreview"
+export AUTOREVIEW_HARNESS=".agents/skills/autoreview/scripts/test-review-harness"
+```
+
+```bash
+# Source checkout of openclaw/agent-skills:
+export AUTOREVIEW="skills/autoreview/scripts/autoreview"
+export AUTOREVIEW_HARNESS="skills/autoreview/scripts/test-review-harness"
+```
+
+```bash
+# Global skill:
+export AGENTS_HOME="${AGENTS_HOME:-$HOME/.agents}"
+export AUTOREVIEW="$AGENTS_HOME/skills/autoreview/scripts/autoreview"
+export AUTOREVIEW_HARNESS="$AGENTS_HOME/skills/autoreview/scripts/test-review-harness"
+```
+
+When using Claude Code, set `AGENTS_HOME="$HOME/.claude"` for global skills. Project-local skills live under `.claude/skills/` in the current repo.
+
+## Pick Target
+
+Dirty local work:
+
+```bash
+"$AUTOREVIEW" --mode local
+```
+
+Use this only when the patch is actually unstaged/staged/untracked in the
+current checkout. `--mode uncommitted` is accepted as an alias for `--mode local`.
+For committed, pushed, or PR work, point the helper at the commit
+or branch diff instead; do not force dirty modes just
+because the helper docs mention dirty work first. A clean local review
+only proves there is no local patch.
+
+Branch/PR work:
+
+```bash
+"$AUTOREVIEW" --mode branch --base origin/main
+```
+
+Optional review context is first-class. Prompt files and datasets must be repo-relative so review bundles cannot pull arbitrary host files:
+
+```bash
+"$AUTOREVIEW" --mode branch --base origin/main --prompt-file review-notes.md --dataset evidence.json
+```
+
+If an open PR exists, use its actual base:
+
+```bash
+base=$(gh pr view --json baseRefName --jq .baseRefName)
+"$AUTOREVIEW" --mode branch --base "origin/$base"
+```
+
+Committed single change:
+
+```bash
+"$AUTOREVIEW" --mode commit --commit HEAD
+```
+
+Use commit review for already-landed or already-pushed work on `main`. Reviewing
+clean `main` against `origin/main` is usually an empty diff after push. For a
+small stack, review each commit explicitly or review the branch before merging
+with `--base`.
+
+## Parallel Closeout
+
+Format first if formatting can change line locations. Then it is OK to run tests and review in parallel:
+
+```bash
+"$AUTOREVIEW" --parallel-tests "<focused test command>"
+```
+
+On Windows, the default `--parallel-tests` shell preserves the platform `cmd.exe`
+semantics used by Python `shell=True`. Use `--parallel-tests-shell powershell`
+or `--parallel-tests-shell pwsh` when the focused test command is PowerShell-specific.
+
+Tradeoff: tests may force code changes that stale the review. If tests or review lead to code edits, rerun the affected tests and rerun review until no accepted/actionable findings remain. Once that rerun exits cleanly, stop; do not spend another long review cycle on redundant confirmation.
+
+## Review Panels
+
+Run multiple reviewers against one frozen bundle:
+
+```bash
+"$AUTOREVIEW" --reviewers codex,claude,pi,opencode
+```
+
+`--panel` is shorthand for Codex plus Claude unless `--engine` changes the first reviewer:
+
+```bash
+"$AUTOREVIEW" --panel
+```
+
+Set reviewer models and thinking/effort explicitly:
+
+```bash
+"$AUTOREVIEW" --reviewers codex,claude --model codex=gpt-5.5 --thinking codex=high --model claude=claude-fable-5 --thinking claude=max
+```
+
+Inline syntax is also supported for simple model IDs:
+
+```bash
+"$AUTOREVIEW" --reviewers codex:gpt-5.5:high,claude:claude-fable-5:max
+```
+
+For models with slashes or extra colons, prefer keyed form:
+
+```bash
+"$AUTOREVIEW" --engine pi --model anthropic/claude-sonnet-4 --thinking high
+"$AUTOREVIEW" --engine opencode --model opencode/north-mini-code-free --thinking high
+"$AUTOREVIEW" --engine cursor --model auto --cursor-allow-workspace-instructions
+"$AUTOREVIEW" --reviewers codex,pi --model codex=gpt-5.5 --model pi=anthropic/claude-sonnet-4
+"$AUTOREVIEW" --reviewers codex,opencode --model codex=gpt-5.5 --model opencode=opencode/north-mini-code-free
+"$AUTOREVIEW" --reviewers codex,cursor --model codex=gpt-5.5 --model cursor=auto --cursor-allow-workspace-instructions
+```
+
+`--reviewers all` covers Codex, Claude, Copilot, Pi, and OpenCode. Cursor requires both explicit selection (`--engine cursor` or named in `--reviewers`) and `--cursor-allow-workspace-instructions` because the current Cursor CLI does not document a per-run flag that ignores project-local instructions/config. Droid selection currently fails closed because its CLI cannot disable both project instructions and all tools.
+
+## Models and thinking
+
+The helper accepts `--model` globally or per engine (`engine=model`) and `--thinking` globally or per engine (`engine=level`). Repeat either flag for multiple reviewers.
+
+Recommended model defaults:
+
+| Engine | Default model | Source note |
+|--------|---------------|-------------|
+| **codex** (default) | `gpt-5.5` | OpenAI's current GPT-5.5 alias |
+| **claude** | `claude-fable-5` | Anthropic's most capable widely released Claude model |
+
+CLI flags and environment variables override these defaults. Droid, Copilot, Pi, Cursor, and OpenCode do not get built-in model defaults here because their provider catalogs are external to the Codex/Claude closeout path and may vary by installation.
+
+| Engine | Model flag | Example model IDs | Thinking flag | Accepted levels |
+|--------|------------|-------------------|---------------|-----------------|
+| **codex** (default) | `codex --model X exec ...` | `gpt-5.5`, `gpt-5.5-2026-04-23` | `-c model_reasoning_effort=Y` | `none`, `minimal`, `low`, `medium`, `high`, `xhigh` |
+| **claude** | `claude --model X` | `claude-fable-5`, `claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5` | `--effort Y` | `low`, `medium`, `high`, `xhigh`, `max` |
+| **droid** | currently refused | Factory model IDs | `-r, --reasoning-effort Y` | `off`, `none`, `low`, `medium`, `high`, `xhigh`, `max` |
+| **copilot** | `copilot --model X` | `gpt-5.2`, Copilot model aliases | not supported | n/a |
+| **pi** | `pi --model X` | `anthropic/claude-sonnet-4`, `openai/gpt-4o` | `--thinking Y` | `off`, `minimal`, `low`, `medium`, `high`, `xhigh` |
+| **cursor** | `cursor-agent --model X` | `auto`, Cursor model aliases | not supported | n/a |
+| **opencode** | `opencode run -m X` | `opencode/north-mini-code-free`, OpenCode provider/model IDs | `--variant Y` | `minimal`, `low`, `medium`, `high`, `max` |
+
+Claude also supports `--fallback-model a,b` for availability-based fallback chains ([model-config](https://code.claude.com/docs/en/model-config)). Current Claude docs note that auth, billing, rate-limit, request-size, and transport errors do not trigger fallback, and the changelog documents interactive-session support in `v2.1.166`.
+
+Examples matching current `main` behavior:
+
+```bash
+# Codex with explicit model and reasoning
+"$AUTOREVIEW" --engine codex --model gpt-5.5 --thinking high
+
+# Codex fast mode (priority service tier); needs a model whose catalog lists the tier, silently standard otherwise
+"$AUTOREVIEW" --engine codex --codex-speed fast
+
+# Arbitrary Codex config overrides (isolation flags still win; --codex-speed wins over a service_tier here)
+"$AUTOREVIEW" --engine codex --codex-config 'service_tier="fast"'
+
+# Claude Code aliases or full model names, with optional availability fallback
+"$AUTOREVIEW" --engine claude --model claude-fable-5 --thinking max
+"$AUTOREVIEW" --engine claude --model claude-fable-5 --fallback-model claude-opus-4-8,claude-sonnet-4-6
+
+# GitHub Copilot (model only; no thinking knob)
+"$AUTOREVIEW" --engine copilot --model gpt-5.2
+
+# Pi with explicit model and thinking level
+"$AUTOREVIEW" --engine pi --model anthropic/claude-sonnet-4 --thinking high --pi-bin pi
+
+# Cursor print-mode review (`cursor-agent` remains a compatibility alias)
+"$AUTOREVIEW" --engine cursor --model auto --cursor-bin cursor-agent --cursor-allow-workspace-instructions
+
+# OpenCode with explicit provider/model and variant
+"$AUTOREVIEW" --engine opencode --model opencode/north-mini-code-free --thinking high
+```
+
+`--cursor-agent-bin` and `CURSOR_AGENT_BIN` remain compatibility aliases for
+`--cursor-bin` and `CURSOR_BIN`.
+
+### Environment defaults
+
+CLI flags take precedence over environment variables.
+
+Store persistent personal defaults in your shell startup file or launcher
+environment. For repository-local defaults, use an existing local environment
+loader such as an untracked `.envrc`; the helper does not write a config file.
+
+| Variable | Purpose |
+|----------|---------|
+| `AUTOREVIEW_MODEL` | Override the built-in default `--model` for all engines |
+| `AUTOREVIEW_THINKING` | Default `--thinking` for all engines |
+| `AUTOREVIEW_FALLBACK_MODEL` | Default Claude `--fallback-model` chain |
+| `AUTOREVIEW_<ENGINE>_MODEL` | Per-engine model override, for example `AUTOREVIEW_CODEX_MODEL=gpt-5.5` |
+| `AUTOREVIEW_<ENGINE>_THINKING` | Per-engine thinking override |
+| `AUTOREVIEW_CODEX_CONFIG` | Default Codex `-c key=value` overrides, semicolon-separated, e.g. `service_tier="fast"`; isolation flags still win |
+| `AUTOREVIEW_CODEX_SPEED` | Default Codex service tier: `fast` (priority), `flex`, or `default`; silently standard when the model does not list the tier |
+| `AUTOREVIEW_CLAUDE_FALLBACK_MODEL` | Claude-only fallback chain |
+| `AUTOREVIEW_CURSOR_ALLOW_WORKSPACE_INSTRUCTIONS` | Required `1`/true opt-in for Cursor reviews of trusted repositories |
+
+Codex maps thinking to `model_reasoning_effort`. Claude maps thinking to `--effort`. Droid maps thinking to `-r, --reasoning-effort`. Pi maps thinking to `--thinking`. OpenCode maps thinking to `--variant`. Copilot and Cursor reject `--thinking`. Only Claude accepts `--fallback-model`; global CLI/env fallback requires at least one Claude reviewer, and engine-specific fallback overrides require that reviewer to be selected. Non-Claude fallback overrides, including `AUTOREVIEW_<NONCLAUDE>_FALLBACK_MODEL`, fail closed instead of being silently ignored.
+
+## Review engine isolation
+
+When autoreview runs inside the repository under review, external reviewer CLIs must not load project-local trust or configuration that the branch controls.
+
+| Engine | Isolation flags | Reference |
+|--------|-----------------|-----------|
+| **codex** | Auth-only config overrides, `-c project_doc_max_bytes=0`, repo `trust_level="untrusted"`, `exec --ignore-user-config --ignore-rules`, plus read-only sandbox | Codex CLI `exec --help` |
+| **claude** | `--safe-mode --setting-sources user --strict-mcp-config --disallowedTools mcp__*` plus explicit `--allowedTools` (`--safe-mode` requires Claude Code `v2.1.169+`) | Claude Code [CLI reference](https://code.claude.com/docs/en/cli-reference) |
+| **droid** | Fails closed: current CLI cannot disable both project instructions and all tools | Droid CLI `exec --help` and `--list-tools` |
+| **pi** | `--no-approve --no-session --no-context-files --no-extensions --no-skills --no-prompt-templates --no-themes --no-tools` | Pi CLI `--help`; requires Pi `v0.79.0+` |
+| **opencode** | `opencode run --dir <repo> --pure --format json`, prompt over stdin, neutral subprocess cwd, injected deny-by-default permissions, project config disabled | OpenCode CLI `--help` |
+| **cursor** | `cursor-agent --print --mode ask --sandbox enabled --output-format json|stream-json`, prompt over stdin, temporary read-only permission config, help-probed flags, and mandatory explicit trusted-workspace opt-in | Cursor CLI [headless mode](https://cursor.com/docs/cli/headless), [output format](https://cursor.com/docs/cli/reference/output-format), [permissions](https://cursor.com/docs/cli/reference/permissions), [configuration](https://cursor.com/docs/cli/reference/configuration) |
+
+Codex `--ignore-user-config` skips config loading for the exec run. Autoreview reconstructs only the documented `cli_auth_credentials_store`, `forced_login_method`, and `forced_chatgpt_workspace_id` settings from `CODEX_HOME/config.toml`, keeping authentication and workspace restrictions usable without forwarding unrelated user configuration. The explicit repo trust override and zero project-doc budget keep reviewed-repo `AGENTS.md` and `.codex/` trust surfaces out of the review prompt. `--ignore-rules` skips user/project execpolicy rules. Claude `--safe-mode` disables project hooks, skills, plugins, MCP servers, and CLAUDE.md while preserving normal authentication, model selection, built-in tools, and permissions; managed settings policy can still apply. `--setting-sources user` avoids project/local settings from the reviewed checkout, and current Claude Code docs note the project-skill blocking behavior was fixed in `v2.1.69`. `--strict-mcp-config` and `--disallowedTools mcp__*` keep MCP unavailable to the review run. `--bare` is not used here because Claude's headless docs say it skips OAuth and keychain reads. Droid fails closed because its CLI cannot disable reviewed-repository `AGENTS.md` loading and all tools in the same run. Pi `--no-approve` ignores project-local files for one run; the helper requires Pi `v0.79.0+` plus help output that advertises every required isolation flag because older legacy binaries can ignore unknown flags. The current package is `@earendil-works/pi-coding-agent`; deprecated `@mariozechner/pi-coding-agent` `0.73.x` is intentionally rejected. Pi version/help probes and the review command run from neutral temporary directories, not the reviewed repo. Pi `--no-context-files` removes `AGENTS.md`/`CLAUDE.md`, the resource-disable flags keep `.pi` extensions, skills, prompts, and themes out of the run, `--no-session` avoids writing review sessions, and `--no-tools` prevents built-in read tools from escaping the repository through absolute paths. OpenCode starts from a neutral temporary directory, points at the reviewed repo with `--dir`, disables project config through `OPENCODE_DISABLE_PROJECT_CONFIG=1`, and injects `OPENCODE_CONFIG_CONTENT`; permissions default to deny, allow read/grep/glob, preserve OpenCode's `.env` ask rules, and gate `websearch`/`webfetch` with `--no-web-search`. The injected config also clears command/instruction/plugin arrays and disables write/edit/bash/task/skill/todowrite tools without changing user auth storage. Cursor's documented headless path is print mode with JSON output and workspace-relative project-resource discovery. Because the CLI exposes no per-run flag that disables every current and future project instruction surface, autoreview requires `--cursor-allow-workspace-instructions` (or its environment equivalent) for every Cursor run. Project-local Cursor/Claude hook settings, project MCP config, and global Cursor MCP config remain hard refusals because hooks execute host commands and MCP tools cannot be constrained to read-only review access. Cursor capability probes run from neutral temporary directories with the sanitized engine environment. Review runs set documented `CURSOR_CONFIG_DIR` to an ephemeral configuration that allows workspace reads while denying shell commands and relative or absolute writes. The helper sends review prompts to OpenCode and Cursor over stdin rather than argv and extracts final structured JSON from terminal result/text events. OpenCode and Cursor reject `--no-tools`; Cursor also rejects `--no-web-search` because the CLI does not expose a documented per-run web-search disable flag.
+
+## Context Efficiency
+
+Run the helper directly so target selection, engine choice, structured validation, and exit status all stay in one path. If output is noisy, summarize the completed helper output after it returns; do not ask another agent or reviewer to rerun the review.
+
+## Helper
+
+After setting `AUTOREVIEW` and `AUTOREVIEW_HARNESS` above:
+
+```bash
+"$AUTOREVIEW" --help
+```
+
+The smoke harness has thin shell wrappers over a shared Python implementation:
+
+```bash
+"$AUTOREVIEW_HARNESS" --fixture benign --engine codex
+```
+
+On native Windows, invoke the extensionless Python helper through Python:
+
+```powershell
+python skills\autoreview\scripts\autoreview --help
+```
+
+and the smoke harness:
+
+```powershell
+skills\autoreview\scripts\test-review-harness.ps1 -Fixture benign -Engine codex
+```
+
+The helper:
+
+- chooses dirty local changes first
+- accepts `--mode uncommitted` as an alias for `--mode local`
+- otherwise uses current PR base if `gh pr view` works
+- otherwise uses `origin/main` for non-main branches
+- does not fetch automatically during branch review; the selected base ref must already resolve locally
+- recognizes `--engine droid` only to fail closed with an isolation error; runnable engines are `codex`, `claude`, `copilot`, `pi`, `opencode`, and `cursor`; default is `AUTOREVIEW_ENGINE` or `codex`
+- resolves bare `git`, `gh`, reviewer, and PowerShell shell commands from absolute `PATH` entries only, never from the reviewed checkout; explicit relative `--*-bin` paths are resolved from the reviewed repository root
+- use `--mode commit --commit <ref>` for already-committed work, especially clean `main` after landing
+- should be left in `--mode auto` or forced to `--mode branch` for PR/branch work; do not force `--mode local` after committing
+- writes only to stdout unless `--output`, `--json-output`, or live streamed engine stderr is set
+- supports `--dry-run`, `--parallel-tests`, `--parallel-tests-shell`, `--prompt`, repo-relative `--prompt-file`, repo-relative `--dataset`, `--no-tools`, `--no-web-search`, repeatable Codex-only `--codex-config key=value`, Codex-only `--codex-speed fast|flex|default`, and commit refs
+- supports `--stream-engine-output` or `AUTOREVIEW_STREAM_ENGINE_OUTPUT=1` for live engine text while preserving structured validation; Codex, Claude, and Cursor hide tool/file event details, emit compact activity summaries, and report usage at turn completion
+- supports opt-in review panels with `--panel` / `--reviewers`, plus per-engine `--model`, `--thinking`, and Claude `--fallback-model`
+- uses built-in model defaults `codex=gpt-5.5` and `claude=claude-fable-5`; honors `AUTOREVIEW_MODEL`, `AUTOREVIEW_THINKING`, `AUTOREVIEW_FALLBACK_MODEL`, and per-engine `AUTOREVIEW_<ENGINE>_MODEL` / `AUTOREVIEW_<ENGINE>_THINKING` environment overrides when CLI flags are omitted
+- allows read-only tools and web search by default where the selected CLI supports them; forbids nested review in the prompt; Codex is run through `codex exec` with auth-only user settings, read-only sandbox, reviewed-repo instruction/config/rule isolation flags, and structured output
+- runs Claude with `--safe-mode` (`v2.1.169+`), `--setting-sources user`, MCP disabled, explicit allowed tools, and `--fallback-model` when set, so reviewed-repo hooks/skills/MCP do not affect the review run while normal auth still works; managed settings policy can still apply
+- refuses Droid reviews until the CLI exposes a complete project-instruction and tool-isolation contract
+- runs Pi `v0.79.0+` from neutral temporary directories with `--no-approve`, `--no-session`, disabled Pi context/resource loading, and `--no-tools` because its built-in read tools are not repository-confined
+- runs OpenCode with `opencode run --dir <repo> --pure --format json` from a neutral temporary directory, forwards `--model` and `--variant`, injects deny-by-default permissions, disables project config loading, and passes the review prompt over stdin
+- runs Cursor only with mandatory trusted-workspace opt-in, uses `cursor-agent --print --mode ask --sandbox enabled --output-format json`, forwards `--model`, passes the review prompt over stdin, and always refuses project-local hooks/MCP
+- prints `review still running: <engine> elapsed=<seconds>s pid=<pid>` to stderr at long-running intervals while waiting for the selected review engine, unless streamed output or compact Codex activity has been visible recently
+- prints `autoreview clean: no accepted/actionable findings reported` when the selected review command exits 0
+- exits nonzero when accepted/actionable findings are present
+
+## Final Report
+
+Include:
+
+- review command used
+- tests/proof run
+- findings accepted/rejected, briefly why
+- the clean review result from the final helper/review run, or why a remaining finding was consciously rejected
+
+Do not run another review solely to improve the final report wording. If the final helper run exited 0 and produced no accepted/actionable findings, report that exact run as clean.
+
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'git diff --stat 58f285d635e005aafe47763c50846cc8f72cf482; git diff --name-only 58f285d635e005aafe47763c50846cc8f72cf482' in C:\src\openclaw-catalog-restack
+ succeeded in 664ms:
+ src/agents/catalog-overlay-prompt.test.ts         |  44 ++++++++
+ src/agents/catalog-overlay-prompt.ts              |  72 +++++++++++++
+ src/agents/system-prompt.ts                       |   6 ++
+ src/cli-catalog-overlay/prompt-projection.test.ts | 126 ++++++++++++++++++++++
+ src/cli-catalog-overlay/prompt-projection.ts      | 123 +++++++++++++++++++++
+ src/cli-catalog-overlay/registry-guards.test.ts   |  21 ++++
+ 6 files changed, 392 insertions(+)
+src/agents/catalog-overlay-prompt.test.ts
+src/agents/catalog-overlay-prompt.ts
+src/agents/system-prompt.ts
+src/cli-catalog-overlay/prompt-projection.test.ts
+src/cli-catalog-overlay/prompt-projection.ts
+src/cli-catalog-overlay/registry-guards.test.ts
+warning: unable to access 'C:\Users\giodl/.config/git/ignore': Permission denied
+warning: unable to access 'C:\Users\giodl/.config/git/ignore': Permission denied
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-ChildItem -Path src -Filter AGENTS.md -Recurse | Select-Object -ExpandProperty FullName' in C:\src\openclaw-catalog-restack
+ succeeded in 583ms:
+C:\src\openclaw-catalog-restack\src\agents\AGENTS.md
+C:\src\openclaw-catalog-restack\src\agents\embedded-agent-runner\run\AGENTS.md
+C:\src\openclaw-catalog-restack\src\agents\tools\AGENTS.md
+C:\src\openclaw-catalog-restack\src\channels\AGENTS.md
+C:\src\openclaw-catalog-restack\src\channels\plugins\contracts\test-helpers\AGENTS.md
+C:\src\openclaw-catalog-restack\src\gateway\AGENTS.md
+C:\src\openclaw-catalog-restack\src\gateway\server-methods\AGENTS.md
+C:\src\openclaw-catalog-restack\src\infra\outbound\AGENTS.md
+C:\src\openclaw-catalog-restack\src\plugin-sdk\AGENTS.md
+C:\src\openclaw-catalog-restack\src\plugins\AGENTS.md
+C:\src\openclaw-catalog-restack\src\tui\AGENTS.md
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content -Raw src/agents/AGENTS.md' in C:\src\openclaw-catalog-restack
+ succeeded in 344ms:
+<!-- Agent test performance notes for keeping expensive runtime imports out of focused tests. -->
+
+# Agents Test Performance
+
+Agent tests are often import-bound. Treat slow test files as architecture
+signals, not just runner noise.
+
+## Guardrails
+
+- Benchmark before and after performance edits. Prefer existing grouped
+  artifacts when comparing suites, or use `/usr/bin/time -l pnpm test <file>`
+  for a scoped hotspot.
+- If a test only needs schema, capability, routing, or static discovery data,
+  do not cold-load full bundled plugin/channel/provider runtime. Add or reuse a
+  lightweight typed artifact and keep full runtime as a fallback.
+- Keep expensive bootstrap, embedded runner, provider, plugin, and channel
+  runtime work behind dependency injection or narrow helpers so tests can cover
+  behavior without starting the whole runtime.
+- Treat channel/plugin lookups inside agent hot paths as suspect. If the code
+  only needs target parsing, peer-kind inference, setup hints, or static
+  descriptors, use a local pure helper or lightweight public artifact before
+  reaching for `getChannelPlugin()` / bundled runtime fallback.
+- In spawn/session/requester-origin logic, keep routing and delivery-context
+  normalization deterministic and runtime-free. Add explicit parser coverage for
+  channel-specific prefixes instead of loading a channel plugin just to classify
+  a target.
+- If moving coverage out of a slow integration test, preserve the exact
+  production composition in a named helper and test that helper. Do not remove
+  the behavior proof just because the old proof was slow.
+- Avoid broad `importOriginal()` partial mocks and module resets in hot agent
+  tests. Use explicit mock factories, one-time imports, and reset only the
+  state the test mutates.
+
+## Verification
+
+- For agent performance changes, record seconds and RSS before/after in the
+  handoff or benchmark report.
+- If the change touches lazy-loading, plugin runtime imports, or bundled
+  artifacts, run `pnpm build`.
+
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'git diff --color=never 58f285d635e005aafe47763c50846cc8f72cf482 -- src/agents/catalog-overlay-prompt.ts src/agents/system-prompt.ts src/cli-catalog-overlay/prompt-projection.ts src/cli-catalog-overlay/registry-guards.test.ts src/agents/catalog-overlay-prompt.test.ts src/cli-catalog-overlay/prompt-projection.test.ts' in C:\src\openclaw-catalog-restack
+ succeeded in 959ms:
+diff --git a/src/agents/catalog-overlay-prompt.test.ts b/src/agents/catalog-overlay-prompt.test.ts
+new file mode 100644
+index 0000000000..64b24fed8e
+--- /dev/null
++++ b/src/agents/catalog-overlay-prompt.test.ts
+@@ -0,0 +1,44 @@
++import { describe, expect, it } from "vitest";
++import { buildCliCatalogOverlayPromptSection } from "./catalog-overlay-prompt.js";
++
++describe("buildCliCatalogOverlayPromptSection", () => {
++  it("describes the catalog overlay as a metadata-first layer", () => {
++    const section = buildCliCatalogOverlayPromptSection().join("\n");
++
++    expect(section).toContain("## CLI Catalog Overlay");
++    expect(section).toContain(
++      "Use catalog metadata to route bounded requests to existing OpenClaw commands/tools",
++    );
++    expect(section).toContain("### Catalog");
++    expect(section).toContain("- gateway: Gateway control");
++    expect(section).toContain(
++      "commands=gateway status | gateway restart | gateway config.schema.lookup | gateway config.apply",
++    );
++    expect(section).not.toContain("source=");
++    expect(section).not.toContain("owner=");
++    expect(section).not.toContain("status=");
++    expect(section).not.toContain("confidence=");
++    expect(section).not.toContain("effects=");
++    expect(section).not.toContain("aliases=");
++  });
++
++  it("keeps the rendered overlay within a lean token budget", () => {
++    const section = buildCliCatalogOverlayPromptSection().join("\n");
++    const approxTokens = Math.round(section.length / 4);
++
++    expect(section.length).toBeLessThan(1800);
++    expect(approxTokens).toBeLessThan(450);
++  });
++
++  it("filters unavailable tool-backed surfaces when tools are scoped", () => {
++    const section = buildCliCatalogOverlayPromptSection({
++      availableTools: new Set(["read", "session_status"]),
++    }).join("\n");
++
++    expect(section).toContain("session_status");
++    expect(section).toContain("- gateway:");
++    expect(section).not.toContain("skill_workshop");
++    expect(section).not.toContain("sessions_spawn");
++    expect(section).not.toContain("commands=process");
++  });
++});
+diff --git a/src/agents/catalog-overlay-prompt.ts b/src/agents/catalog-overlay-prompt.ts
+new file mode 100644
+index 0000000000..b129669d0e
+--- /dev/null
++++ b/src/agents/catalog-overlay-prompt.ts
+@@ -0,0 +1,72 @@
++/**
++ * System-prompt contribution for a CLI-catalog-first OpenClaw command overlay.
++ *
++ * The overlay describes existing command surfaces and the commands they map to,
++ * so the model can prefer catalog metadata over freeform invention.
++ */
++import type { CliCatalogPluginCommand } from "../cli-catalog-overlay/plugin-commands.js";
++import { listCliCatalogPromptSurfaces } from "../cli-catalog-overlay/prompt-projection.js";
++
++const TOOL_BACKED_SURFACE_TARGETS = new Set([
++  "process",
++  "session_status",
++  "sessions_spawn",
++  "skill_workshop",
++]);
++
++function formatSurfaceLine(surface: {
++  id: string;
++  title: string;
++  kind: string;
++  dispatchMode: string;
++  target: string;
++  commandHints: readonly string[];
++  risk: string;
++  confirmationRequired: boolean;
++}): string {
++  const confirm = surface.confirmationRequired ? "1" : "0";
++  if (surface.kind === "routed-operation") {
++    return `- ${surface.id}->${surface.target} r=${surface.risk} c=${confirm}`;
++  }
++  const commands = surface.commandHints.join(" | ");
++  return `- ${surface.id}: ${surface.title} target=${surface.target} r=${surface.risk} c=${confirm} commands=${commands}`;
++}
++
++function shouldRenderSurface(
++  surface: {
++    kind: string;
++    target: string;
++  },
++  availableTools?: ReadonlySet<string>,
++): boolean {
++  if (!availableTools || surface.kind === "routed-operation") {
++    return true;
++  }
++  if (!TOOL_BACKED_SURFACE_TARGETS.has(surface.target)) {
++    return true;
++  }
++  return availableTools.has(surface.target);
++}
++
++export function buildCliCatalogOverlayPromptSection(
++  params: {
++    availableTools?: ReadonlySet<string>;
++    pluginCommands?: readonly CliCatalogPluginCommand[];
++    promptPluginIds?: ReadonlySet<string>;
++  } = {},
++): string[] {
++  const surfaces = listCliCatalogPromptSurfaces({
++    pluginCommands: params.pluginCommands,
++    promptPluginIds: params.promptPluginIds,
++  }).filter((surface) => shouldRenderSurface(surface, params.availableTools));
++  return [
++    "## CLI Catalog Overlay",
++    "Use catalog metadata to route bounded requests to existing OpenClaw commands/tools before inventing a flow.",
++    "Full JSON has descriptors, command routes, routed ops, and agent/tool surfaces; this prompt is the lean projection.",
++    "Use the smallest matching surface and keep execution on its current path.",
++    "",
++    "### Catalog",
++    ...surfaces.map(formatSurfaceLine),
++    "",
++  ];
++}
+diff --git a/src/agents/system-prompt.ts b/src/agents/system-prompt.ts
+index 75b93ef689..d01bc038c4 100644
+--- a/src/agents/system-prompt.ts
++++ b/src/agents/system-prompt.ts
+@@ -38,6 +38,7 @@ import {
+   buildFullBootstrapPromptLines,
+   buildLimitedBootstrapPromptLines,
+ } from "./bootstrap-prompt.js";
++import { buildCliCatalogOverlayPromptSection } from "./catalog-overlay-prompt.js";
+ import type { ResolvedTimeFormat } from "./date-time.js";
+ import type { EmbeddedContextFile } from "./embedded-agent-helpers.js";
+ import type {
+@@ -970,6 +971,9 @@ export function buildAgentSystemPrompt(params: {
+   const skillWorkshopSection = availableTools.has(SKILL_WORKSHOP_TOOL_NAME)
+     ? buildSkillWorkshopPromptSection()
+     : [];
++  const cliCatalogOverlaySection = isMinimal
++    ? []
++    : buildCliCatalogOverlayPromptSection({ availableTools });
+   const memorySection = buildMemorySection({
+     isMinimal,
+     includeMemorySection: params.includeMemorySection,
+@@ -1034,6 +1038,7 @@ export function buildAgentSystemPrompt(params: {
+     includeMemorySection: params.includeMemorySection,
+     memoryCitationsMode: params.memoryCitationsMode,
+     memorySection,
++    cliCatalogOverlaySection,
+     acpEnabled,
+     stableContextFiles: contextFiles.stable,
+   });
+@@ -1130,6 +1135,7 @@ export function buildAgentSystemPrompt(params: {
+       "",
+       ...skillsSection,
+       ...skillWorkshopSection,
++      ...cliCatalogOverlaySection,
+       ...memorySection,
+       hasGateway && !isMinimal ? "## OpenClaw Self-Update" : "",
+       hasGateway && !isMinimal
+diff --git a/src/cli-catalog-overlay/prompt-projection.test.ts b/src/cli-catalog-overlay/prompt-projection.test.ts
+new file mode 100644
+index 0000000000..2da27443be
+--- /dev/null
++++ b/src/cli-catalog-overlay/prompt-projection.test.ts
+@@ -0,0 +1,126 @@
++import { describe, expect, it } from "vitest";
++import type { CliCatalogNodeCommand } from "./node-commands.js";
++import { listCliCatalogPromptSurfaces } from "./prompt-projection.js";
++
++const sampleNodeCommands: readonly CliCatalogNodeCommand[] = [
++  {
++    id: "node:demo-filesystem:filesystem.read",
++    command: "filesystem.read",
++    title: "Read file through paired node",
++    nodeId: "demo-filesystem",
++    description: "Read a file through a paired node command declaration.",
++    argumentHints: ["path"],
++    invocationHint: "openclaw nodes invoke --node demo-filesystem --command filesystem.read",
++    availability: "approved",
++    approvalKind: "pairing",
++    risk: "medium",
++    confirmationRequired: true,
++    effectMode: "read",
++    effects: ["filesystem.read"],
++    trustBoundary: "paired-node",
++    sourceKind: "node-pairing",
++    sourceId: "demo-filesystem:filesystem.read",
++    discoveryMode: "paired-node-declaration",
++    visibility: ["prompt", "audit", "operator"],
++  },
++];
++
++describe("CLI catalog overlay prompt projection", () => {
++  it("returns only lean model-facing routing fields", () => {
++    const surfaces = listCliCatalogPromptSurfaces();
++    const gatewayStatus = surfaces.find((surface) => surface.id === "gateway-status");
++    const gateway = surfaces.find((surface) => surface.id === "gateway");
++
++    expect(surfaces).toHaveLength(19);
++    expect(gatewayStatus).toEqual({
++      id: "gateway-status",
++      title: "Gateway status",
++      kind: "routed-operation",
++      dispatchMode: "direct",
++      target: "gateway status",
++      examples: ["gateway status"],
++      commandHints: ["gateway status"],
++      risk: "low",
++      confirmationRequired: false,
++    });
++
++    expect(gateway).toEqual({
++      id: "gateway",
++      title: "Gateway control",
++      kind: "command",
++      dispatchMode: "hybrid",
++      target: "gateway",
++      examples: ["restart the gateway", "inspect gateway config"],
++      commandHints: [
++        "gateway status",
++        "gateway restart",
++        "gateway config.schema.lookup",
++        "gateway config.apply",
++      ],
++      risk: "medium",
++      confirmationRequired: true,
++    });
++    expect(Object.keys(gateway ?? {}).toSorted()).toEqual([
++      "commandHints",
++      "confirmationRequired",
++      "dispatchMode",
++      "examples",
++      "id",
++      "kind",
++      "risk",
++      "target",
++      "title",
++    ]);
++  });
++
++  it("includes plugin descriptor commands only when a plugin is prompt-enabled", () => {
++    const pluginCommands = [
++      {
++        pluginId: "demo-plugin",
++        commandPath: ["demo"],
++        name: "demo",
++        description: "Demo plugin command",
++        hasSubcommands: false,
++        sourceKind: "plugin" as const,
++        sourceId: "demo-plugin:demo",
++        discoveryMode: "plugin-descriptor" as const,
++        visibility: ["docs", "audit", "operator", "policy"] as const,
++      },
++    ];
++
++    expect(
++      listCliCatalogPromptSurfaces({ pluginCommands }).map((surface) => surface.id),
++    ).not.toContain("demo-plugin:demo");
++    expect(
++      listCliCatalogPromptSurfaces({
++        pluginCommands,
++        promptPluginIds: new Set(["demo-plugin"]),
++      }).find((surface) => surface.id === "demo-plugin:demo"),
++    ).toMatchObject({
++      kind: "plugin-command",
++      target: "demo",
++      risk: "medium",
++      confirmationRequired: true,
++    });
++  });
++
++  it("includes node commands only in the node-operator prompt scope", () => {
++    expect(
++      listCliCatalogPromptSurfaces({ nodeCommands: sampleNodeCommands }).map(
++        (surface) => surface.id,
++      ),
++    ).not.toContain("node:demo-filesystem:filesystem.read");
++
++    expect(
++      listCliCatalogPromptSurfaces({
++        scope: "node-operator",
++        nodeCommands: sampleNodeCommands,
++      }).find((surface) => surface.id === "node:demo-filesystem:filesystem.read"),
++    ).toMatchObject({
++      kind: "node-command",
++      target: "filesystem.read",
++      risk: "medium",
++      confirmationRequired: true,
++    });
++  });
++});
+diff --git a/src/cli-catalog-overlay/prompt-projection.ts b/src/cli-catalog-overlay/prompt-projection.ts
+new file mode 100644
+index 0000000000..bb759d57d0
+--- /dev/null
++++ b/src/cli-catalog-overlay/prompt-projection.ts
+@@ -0,0 +1,123 @@
++import { cliCommandCatalog } from "../cli/command-catalog.js";
++import type { CliCatalogNodeCommand } from "./node-commands.js";
++import type { CliCatalogPluginCommand } from "./plugin-commands.js";
++import { listCliCatalogSurfaces } from "./registry.js";
++
++export type CliCatalogPromptSurface = {
++  readonly id: string;
++  readonly title: string;
++  readonly kind: string;
++  readonly dispatchMode: string;
++  readonly target: string;
++  readonly examples: readonly string[];
++  readonly commandHints: readonly string[];
++  readonly risk: string;
++  readonly confirmationRequired: boolean;
++};
++
++const ROUTED_OPERATION_TITLES: Readonly<Record<string, string>> = {
++  "agents-list": "List agents",
++  "channels-list": "List channels",
++  "channels-status": "Channel status",
++  "config-get": "Read config",
++  "config-unset": "Unset config",
++  "gateway-status": "Gateway status",
++  health: "Health check",
++  "models-list": "List models",
++  "models-status": "Model status",
++  "plugins-list": "List plugins",
++  sessions: "List sessions",
++  status: "Status summary",
++  "tasks-audit": "Audit tasks",
++  "tasks-list": "List tasks",
++};
++
++type PromptRoutedOperation = {
++  readonly id: string;
++  readonly commandPaths: readonly (readonly string[])[];
++};
++
++function routedOperationRisk(id: string): "low" | "medium" {
++  return id === "config-unset" ? "medium" : "low";
++}
++
++function listPromptRoutedOperations(): readonly PromptRoutedOperation[] {
++  const byId = new Map<string, string[][]>();
++  for (const entry of cliCommandCatalog) {
++    const id = entry.route?.id;
++    if (!id) {
++      continue;
++    }
++    const commandPaths = byId.get(id) ?? [];
++    commandPaths.push([...entry.commandPath]);
++    byId.set(id, commandPaths);
++  }
++
++  return [...byId.entries()]
++    .toSorted(([left], [right]) => left.localeCompare(right))
++    .map(([id, commandPaths]) => ({ id, commandPaths }));
++}
++
++export function listCliCatalogPromptSurfaces(
++  params: {
++    pluginCommands?: readonly CliCatalogPluginCommand[];
++    promptPluginIds?: ReadonlySet<string>;
++    nodeCommands?: readonly CliCatalogNodeCommand[];
++    scope?: "default" | "node-operator";
++  } = {},
++): readonly CliCatalogPromptSurface[] {
++  const routedOperations = listPromptRoutedOperations().map((operation) => ({
++    id: operation.id,
++    title: ROUTED_OPERATION_TITLES[operation.id] ?? operation.id,
++    kind: "routed-operation",
++    dispatchMode: "direct",
++    target: operation.commandPaths[0]?.join(" ") ?? operation.id,
++    examples: operation.commandPaths.slice(0, 2).map((path) => path.join(" ")),
++    commandHints: operation.commandPaths.map((path) => path.join(" ")),
++    risk: routedOperationRisk(operation.id),
++    confirmationRequired: routedOperationRisk(operation.id) !== "low",
++  }));
++  const agentToolSurfaces = listCliCatalogSurfaces()
++    .filter((surface) => surface.visibility.includes("prompt"))
++    .map((surface) => ({
++      id: surface.id,
++      title: surface.title,
++      kind: surface.kind,
++      dispatchMode: surface.dispatchMode,
++      target: surface.target,
++      examples: surface.examples,
++      commandHints: surface.commandHints,
++      risk: surface.risk,
++      confirmationRequired: surface.confirmationRequired,
++    }));
++  const pluginSurfaces = (params.pluginCommands ?? [])
++    .filter((command) => params.promptPluginIds?.has(command.pluginId))
++    .map((command) => ({
++      id: command.sourceId,
++      title: command.description || command.name,
++      kind: "plugin-command",
++      dispatchMode: "metadata-first",
++      target: command.commandPath.join(" "),
++      examples: [command.commandPath.join(" ")],
++      commandHints: [command.commandPath.join(" ")],
++      risk: "medium",
++      confirmationRequired: true,
++    }));
++  const nodeSurfaces =
++    params.scope === "node-operator"
++      ? (params.nodeCommands ?? [])
++          .filter((command) => command.visibility.includes("prompt"))
++          .map((command) => ({
++            id: command.id,
++            title: command.title,
++            kind: "node-command",
++            dispatchMode: "metadata-first",
++            target: command.command,
++            examples: [command.invocationHint],
++            commandHints: [command.invocationHint, ...command.argumentHints],
++            risk: command.risk,
++            confirmationRequired: command.confirmationRequired,
++          }))
++      : [];
++  return [...routedOperations, ...agentToolSurfaces, ...pluginSurfaces, ...nodeSurfaces];
++}
+diff --git a/src/cli-catalog-overlay/registry-guards.test.ts b/src/cli-catalog-overlay/registry-guards.test.ts
+index 7fd16d2060..51ce78c77a 100644
+--- a/src/cli-catalog-overlay/registry-guards.test.ts
++++ b/src/cli-catalog-overlay/registry-guards.test.ts
+@@ -1,3 +1,5 @@
++import fs from "node:fs";
++import path from "node:path";
+ import { describe, expect, it } from "vitest";
+ import { listCliCatalogSurfaces } from "./registry.js";
+ 
+@@ -42,4 +44,23 @@ describe("CLI catalog overlay registry guards", () => {
+       expect(surface.cliDescriptor?.description.trim().length).toBeGreaterThan(0);
+     }
+   });
++  it("keeps the prompt projection lean", async () => {
++    const { buildCliCatalogOverlayPromptSection } =
++      await import("../agents/catalog-overlay-prompt.js");
++    const section = buildCliCatalogOverlayPromptSection().join("\n");
++
++    expect(section.length).toBeLessThan(3600);
++    expect(Math.round(section.length / 4)).toBeLessThan(900);
++  });
++
++  it("keeps the prompt projection off the full catalog builder", () => {
++    const source = fs.readFileSync(
++      path.join(process.cwd(), "src/cli-catalog-overlay/prompt-projection.ts"),
++      "utf8",
++    );
++
++    expect(source).not.toContain('from "./list.js"');
++    expect(source).not.toContain("buildCatalogList");
++    expect(source).not.toContain("routed-command-definitions");
++  });
+ });
+warning: unable to access 'C:\Users\giodl/.config/git/ignore': Permission denied
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content -Raw src/cli-catalog-overlay/registry.ts; Get-Content -Raw src/cli/command-catalog.ts' in C:\src\openclaw-catalog-restack
+ succeeded in 720ms:
+import type { NamedCommandDescriptor } from "../cli/program/command-group-descriptors.js";
+import { getCoreCliCommandDescriptors } from "../cli/program/core-command-descriptors.js";
+import { getSubCliEntries } from "../cli/program/subcli-descriptors.js";
+
+export type CliCatalogSurfaceId =
+  | "skill_workshop"
+  | "session_status"
+  | "sessions_spawn"
+  | "process"
+  | "gateway";
+
+export type CliCatalogSurfaceKind = "tool" | "command" | "workflow";
+export type CliCatalogDispatchMode = "direct" | "metadata-first" | "hybrid";
+export type CliCatalogRisk = "low" | "medium" | "high";
+export type CliCatalogSurfaceStatus = "draft" | "stable" | "deprecated";
+export type CliCatalogEffectMode = "read" | "mutating" | "mixed";
+export type CliCatalogSourceKind =
+  | "core"
+  | "subcli"
+  | "route-policy"
+  | "explicit-overlay"
+  | "runtime"
+  | "plugin";
+export type CliCatalogDiscoveryMode =
+  | "static-descriptor"
+  | "route-policy"
+  | "explicit-overlay"
+  | "runtime-registered"
+  | "plugin-descriptor";
+export type CliCatalogVisibility = "docs" | "prompt" | "audit" | "operator" | "policy";
+
+export type CliCatalogSurfaceDefinition = {
+  readonly id: CliCatalogSurfaceId;
+  readonly title: string;
+  readonly kind: CliCatalogSurfaceKind;
+  readonly dispatchMode: CliCatalogDispatchMode;
+  readonly target: string;
+  readonly source: string;
+  readonly sourceKind: CliCatalogSourceKind;
+  readonly sourceId: string;
+  readonly discoveryMode: CliCatalogDiscoveryMode;
+  readonly visibility: readonly CliCatalogVisibility[];
+  readonly intent: string;
+  readonly examples: readonly string[];
+  readonly aliases: readonly string[];
+  readonly owner: string;
+  readonly status: CliCatalogSurfaceStatus;
+  readonly confidence: "low" | "medium" | "high";
+  readonly risk: CliCatalogRisk;
+  readonly confirmationRequired: boolean;
+  readonly effectMode: CliCatalogEffectMode;
+  readonly effects: readonly string[];
+  readonly commandHints: readonly string[];
+  readonly cliDescriptor?: NamedCommandDescriptor;
+};
+
+type CliCatalogSurfaceInput = Omit<CliCatalogSurfaceDefinition, "cliDescriptor"> & {
+  readonly cliDescriptorName?: string;
+};
+
+function getCliDescriptors(): readonly NamedCommandDescriptor[] {
+  return [...getCoreCliCommandDescriptors(), ...getSubCliEntries()];
+}
+
+function findCliDescriptor(name: string): NamedCommandDescriptor {
+  const descriptor = getCliDescriptors().find((entry) => entry.name === name);
+  if (!descriptor) {
+    throw new Error(`Missing CLI descriptor for catalog overlay surface: ${name}`);
+  }
+  return descriptor;
+}
+
+function defineCliCatalogSurface(input: CliCatalogSurfaceInput): CliCatalogSurfaceDefinition {
+  const { cliDescriptorName, ...surface } = input;
+  if (!cliDescriptorName) {
+    return surface;
+  }
+  const descriptor = findCliDescriptor(cliDescriptorName);
+  return {
+    ...surface,
+    source: `CLI descriptor: ${descriptor.name}`,
+    sourceKind: "subcli",
+    sourceId: descriptor.name,
+    discoveryMode: "static-descriptor",
+    target: descriptor.name,
+    intent: surface.intent || descriptor.description,
+    cliDescriptor: descriptor,
+  };
+}
+
+const CLI_CATALOG_SURFACES: readonly CliCatalogSurfaceDefinition[] = [
+  {
+    id: "skill_workshop",
+    title: "Skill Workshop proposals",
+    kind: "tool",
+    dispatchMode: "metadata-first",
+    target: "skill_workshop",
+    source: "existing skill_workshop tool and prompt guidance",
+    sourceKind: "explicit-overlay",
+    sourceId: "skill_workshop",
+    discoveryMode: "explicit-overlay",
+    visibility: ["docs", "prompt", "audit", "operator", "policy"],
+    intent: "Create, revise, apply, reject, or quarantine durable skill proposals.",
+    examples: ["create a reusable skill", "reject a pending skill proposal"],
+    aliases: ["skill workshop", "skill proposals"],
+    owner: "agents",
+    status: "stable",
+    confidence: "high",
+    risk: "medium",
+    confirmationRequired: true,
+    effectMode: "mixed",
+    effects: ["proposal.lifecycle"],
+    commandHints: [
+      "skill_workshop action=create|update|revise",
+      "skill_workshop action=apply|reject|quarantine",
+    ],
+  },
+  {
+    id: "session_status",
+    title: "Session status",
+    kind: "tool",
+    dispatchMode: "direct",
+    target: "session_status",
+    source: "existing session_status command",
+    sourceKind: "explicit-overlay",
+    sourceId: "session_status",
+    discoveryMode: "explicit-overlay",
+    visibility: ["docs", "prompt", "audit", "operator", "policy"],
+    intent: "Report the current session state and model-use status.",
+    examples: ["what model am I using", "show session status"],
+    aliases: ["status", "session status"],
+    owner: "agents",
+    status: "stable",
+    confidence: "high",
+    risk: "low",
+    confirmationRequired: false,
+    effectMode: "read",
+    effects: ["session.status"],
+    commandHints: ["session_status"],
+  },
+  {
+    id: "sessions_spawn",
+    title: "Sub-agent spawn",
+    kind: "tool",
+    dispatchMode: "hybrid",
+    target: "sessions_spawn",
+    source: "existing sessions_spawn command and delegation guidance",
+    sourceKind: "explicit-overlay",
+    sourceId: "sessions_spawn",
+    discoveryMode: "explicit-overlay",
+    visibility: ["docs", "prompt", "audit", "operator", "policy"],
+    intent:
+      "Delegate work to a sub-agent or ACP session when the task is broader than a direct reply.",
+    examples: ["delegate file review", "spawn a sub-agent for debugging"],
+    aliases: ["spawn", "delegate"],
+    owner: "agents",
+    status: "stable",
+    confidence: "high",
+    risk: "low",
+    confirmationRequired: false,
+    effectMode: "mutating",
+    effects: ["delegation.spawn"],
+    commandHints: ["sessions_spawn"],
+  },
+  {
+    id: "process",
+    title: "Process control",
+    kind: "command",
+    dispatchMode: "direct",
+    target: "process",
+    source: "existing process command surface",
+    sourceKind: "explicit-overlay",
+    sourceId: "process",
+    discoveryMode: "explicit-overlay",
+    visibility: ["docs", "prompt", "audit", "operator", "policy"],
+    intent: "Inspect and manage active exec/process work.",
+    examples: ["show process logs", "poll a running command"],
+    aliases: ["proc", "running process"],
+    owner: "agents",
+    status: "stable",
+    confidence: "high",
+    risk: "low",
+    confirmationRequired: false,
+    effectMode: "mixed",
+    effects: ["process.lifecycle"],
+    commandHints: ["process list", "process poll", "process log", "process write"],
+  },
+  defineCliCatalogSurface({
+    id: "gateway",
+    title: "Gateway control",
+    kind: "command",
+    dispatchMode: "hybrid",
+    cliDescriptorName: "gateway",
+    target: "gateway",
+    source: "",
+    sourceKind: "subcli",
+    sourceId: "gateway",
+    discoveryMode: "static-descriptor",
+    visibility: ["docs", "prompt", "audit", "operator", "policy"],
+    intent: "Inspect, reconfigure, or restart the OpenClaw gateway.",
+    examples: ["restart the gateway", "inspect gateway config"],
+    aliases: ["gateway", "restart gateway"],
+    owner: "runtime",
+    status: "stable",
+    confidence: "high",
+    risk: "medium",
+    confirmationRequired: true,
+    effectMode: "mixed",
+    effects: ["gateway.restart", "gateway.config"],
+    commandHints: [
+      "gateway status",
+      "gateway restart",
+      "gateway config.schema.lookup",
+      "gateway config.apply",
+    ],
+  }),
+] as const;
+
+export function listCliCatalogSurfaces(): readonly CliCatalogSurfaceDefinition[] {
+  return CLI_CATALOG_SURFACES;
+}
+
+export function getCliCatalogSurface(
+  surfaceId: CliCatalogSurfaceId,
+): CliCatalogSurfaceDefinition | undefined {
+  return CLI_CATALOG_SURFACES.find((surface) => surface.id === surfaceId);
+}
+
+// Declarative CLI command catalog for startup policy and fast-path routing.
+import { hasFlag } from "./argv.js";
+
+export type CliCommandPluginLoadPolicy =
+  | "never"
+  | "always"
+  | "text-only"
+  | ((ctx: { argv: string[]; commandPath: string[]; jsonOutputMode: boolean }) => boolean);
+type CliRouteConfigGuardPolicy = "never" | "always" | "when-suppressed";
+export type CliPluginRegistryScope = "all" | "channels" | "configured-channels";
+export type CliPluginRegistryPolicy = {
+  scope: CliPluginRegistryScope;
+};
+export type CliNetworkProxyPolicy = "default" | "bypass";
+type CliNetworkProxyPolicyResolver =
+  | CliNetworkProxyPolicy
+  | ((ctx: { argv: string[]; commandPath: string[] }) => CliNetworkProxyPolicy);
+type CliRoutedCommandId =
+  | "health"
+  | "status"
+  | "gateway-status"
+  | "sessions"
+  | "agents-list"
+  | "config-get"
+  | "config-unset"
+  | "models-list"
+  | "models-status"
+  | "tasks-list"
+  | "tasks-audit"
+  | "channels-list"
+  | "channels-status"
+  | "plugins-list";
+
+export type CliCommandPathPolicy = {
+  bypassConfigGuard: boolean;
+  routeConfigGuard: CliRouteConfigGuardPolicy;
+  loadPlugins: CliCommandPluginLoadPolicy;
+  pluginRegistry: CliPluginRegistryPolicy;
+  ownsProtocolStdout: boolean;
+  hideBanner: boolean;
+  ensureCliPath: boolean;
+  networkProxy: CliNetworkProxyPolicyResolver;
+};
+
+export type CliCommandCatalogEntry = {
+  commandPath: readonly string[];
+  exact?: boolean;
+  policy?: Partial<CliCommandPathPolicy>;
+  route?: {
+    id: CliRoutedCommandId;
+    preloadPlugins?: boolean;
+  };
+};
+
+/** Command path registry used before Commander registration has loaded all plugins. */
+export const cliCommandCatalog: readonly CliCommandCatalogEntry[] = [
+  {
+    commandPath: ["crestodian"],
+    policy: { bypassConfigGuard: true, loadPlugins: "never", ensureCliPath: false },
+  },
+  {
+    commandPath: ["agent"],
+    policy: {
+      loadPlugins: ({ argv, jsonOutputMode }) => hasFlag(argv, "--local") || !jsonOutputMode,
+      pluginRegistry: { scope: "all" },
+      networkProxy: ({ argv }) => (hasFlag(argv, "--local") ? "default" : "bypass"),
+    },
+  },
+  { commandPath: ["message"], policy: { loadPlugins: "never" } },
+  {
+    commandPath: ["channels"],
+    policy: {
+      loadPlugins: "always",
+      pluginRegistry: { scope: "configured-channels" },
+    },
+  },
+  { commandPath: ["directory"], policy: { loadPlugins: "always" } },
+  { commandPath: ["agents"], policy: { loadPlugins: "always", networkProxy: "bypass" } },
+  {
+    commandPath: ["agents"],
+    exact: true,
+    policy: { loadPlugins: "never", networkProxy: "bypass" },
+    route: { id: "agents-list" },
+  },
+  {
+    commandPath: ["agents", "bind"],
+    exact: true,
+    policy: { loadPlugins: "never" },
+  },
+  {
+    commandPath: ["agents", "bindings"],
+    exact: true,
+    policy: { loadPlugins: "never" },
+  },
+  {
+    commandPath: ["agents", "unbind"],
+    exact: true,
+    policy: { loadPlugins: "never" },
+  },
+  {
+    commandPath: ["agents", "set-identity"],
+    exact: true,
+    policy: { loadPlugins: "never" },
+  },
+  {
+    commandPath: ["agents", "delete"],
+    exact: true,
+    policy: { loadPlugins: "never" },
+  },
+  { commandPath: ["configure"], policy: { bypassConfigGuard: true, loadPlugins: "never" } },
+  {
+    commandPath: ["config"],
+    exact: true,
+    policy: { bypassConfigGuard: true, loadPlugins: "never", networkProxy: "bypass" },
+  },
+  {
+    commandPath: ["config", "models"],
+    exact: true,
+    policy: { bypassConfigGuard: true, loadPlugins: "never", networkProxy: "bypass" },
+  },
+  {
+    commandPath: ["migrate"],
+    policy: { bypassConfigGuard: true, loadPlugins: "never", networkProxy: "bypass" },
+  },
+  {
+    commandPath: ["status"],
+    policy: {
+      loadPlugins: "never",
+      pluginRegistry: { scope: "channels" },
+      ensureCliPath: false,
+      networkProxy: "bypass",
+    },
+    route: { id: "status" },
+  },
+  {
+    commandPath: ["health"],
+    policy: {
+      loadPlugins: "never",
+      pluginRegistry: { scope: "channels" },
+      ensureCliPath: false,
+      networkProxy: "bypass",
+    },
+    route: { id: "health" },
+  },
+  {
+    commandPath: ["gateway"],
+    policy: {
+      networkProxy: ({ commandPath }) =>
+        commandPath.length === 1 || commandPath[1] === "run" ? "default" : "bypass",
+    },
+  },
+  {
+    commandPath: ["gateway", "status"],
+    exact: true,
+    policy: {
+      routeConfigGuard: "always",
+      loadPlugins: "never",
+      networkProxy: "bypass",
+    },
+    route: { id: "gateway-status" },
+  },
+  { commandPath: ["gateway", "call"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["gateway", "diagnostics"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["gateway", "discover"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["gateway", "export"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["gateway", "health"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["gateway", "install"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["gateway", "probe"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["gateway", "restart"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["gateway", "stability"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["gateway", "start"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["gateway", "stop"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["gateway", "uninstall"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["gateway", "usage-cost"], exact: true, policy: { networkProxy: "bypass" } },
+  {
+    commandPath: ["sessions"],
+    exact: true,
+    policy: { ensureCliPath: false, networkProxy: "bypass" },
+    route: { id: "sessions" },
+  },
+  {
+    commandPath: ["commitments"],
+    policy: {
+      ensureCliPath: false,
+      loadPlugins: "never",
+      networkProxy: "bypass",
+    },
+  },
+  {
+    commandPath: ["agents", "list"],
+    // Text and JSON output are derived from config plus read-only channel
+    // metadata, so the route should not preload bundled plugin runtimes.
+    policy: { loadPlugins: "never", networkProxy: "bypass" },
+    route: { id: "agents-list" },
+  },
+  {
+    commandPath: ["config", "get"],
+    exact: true,
+    policy: { ensureCliPath: false, networkProxy: "bypass" },
+    route: { id: "config-get" },
+  },
+  {
+    commandPath: ["config", "unset"],
+    exact: true,
+    policy: { ensureCliPath: false, networkProxy: "bypass" },
+    route: { id: "config-unset" },
+  },
+  {
+    commandPath: ["models", "list"],
+    exact: true,
+    policy: { ensureCliPath: false, routeConfigGuard: "always", networkProxy: "bypass" },
+    route: { id: "models-list" },
+  },
+  {
+    commandPath: ["models", "status"],
+    exact: true,
+    policy: {
+      ensureCliPath: false,
+      routeConfigGuard: "always",
+      networkProxy: ({ argv }) => (hasFlag(argv, "--probe") ? "default" : "bypass"),
+    },
+    route: { id: "models-status" },
+  },
+  {
+    commandPath: ["catalog"],
+    policy: {
+      bypassConfigGuard: true,
+      ensureCliPath: false,
+      loadPlugins: "never",
+      networkProxy: "bypass",
+    },
+  },
+  {
+    commandPath: ["tasks", "list"],
+    exact: true,
+    policy: {
+      ensureCliPath: false,
+      loadPlugins: "never",
+      networkProxy: "bypass",
+    },
+    route: { id: "tasks-list" },
+  },
+  {
+    commandPath: ["tasks", "audit"],
+    exact: true,
+    policy: {
+      ensureCliPath: false,
+      loadPlugins: "never",
+      networkProxy: "bypass",
+    },
+    route: { id: "tasks-audit" },
+  },
+  {
+    commandPath: ["tasks"],
+    policy: {
+      ensureCliPath: false,
+      loadPlugins: "never",
+      networkProxy: "bypass",
+    },
+    route: { id: "tasks-list" },
+  },
+  {
+    commandPath: ["tool"],
+    policy: { loadPlugins: "never", ensureCliPath: false, networkProxy: "bypass" },
+  },
+  {
+    commandPath: ["tools"],
+    policy: { loadPlugins: "never", ensureCliPath: false, networkProxy: "bypass" },
+  },
+  { commandPath: ["acp"], policy: { networkProxy: "bypass" } },
+  {
+    commandPath: ["acp"],
+    exact: true,
+    policy: { ownsProtocolStdout: true },
+  },
+  { commandPath: ["approvals"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["backup"], policy: { bypassConfigGuard: true, networkProxy: "bypass" } },
+  { commandPath: ["chat"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["config"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["cron"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["dashboard"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["daemon"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["devices"], policy: { networkProxy: "bypass" } },
+  {
+    commandPath: ["worktrees"],
+    policy: { loadPlugins: "never", networkProxy: "bypass" },
+  },
+  {
+    commandPath: ["doctor"],
+    policy: {
+      bypassConfigGuard: true,
+      loadPlugins: "never",
+    },
+  },
+  { commandPath: ["exec-approvals"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["exec-policy"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["hooks"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["logs"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["mcp"], policy: { networkProxy: "bypass" } },
+  {
+    commandPath: ["mcp", "serve"],
+    exact: true,
+    policy: { ownsProtocolStdout: true },
+  },
+  {
+    commandPath: ["node"],
+    policy: { networkProxy: "bypass" },
+  },
+  {
+    commandPath: ["node", "run"],
+    exact: true,
+    policy: { networkProxy: "default" },
+  },
+  { commandPath: ["nodes"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["pairing"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["proxy"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["qr"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["reset"], policy: { networkProxy: "bypass" } },
+  {
+    commandPath: ["completion"],
+    policy: {
+      bypassConfigGuard: true,
+      hideBanner: true,
+      networkProxy: "bypass",
+    },
+  },
+  { commandPath: ["secrets"], policy: { bypassConfigGuard: true, networkProxy: "bypass" } },
+  { commandPath: ["security"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["system"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["terminal"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["tui"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["uninstall"], policy: { networkProxy: "bypass" } },
+  { commandPath: ["update"], policy: { hideBanner: true } },
+  {
+    commandPath: ["config", "validate"],
+    exact: true,
+    policy: { bypassConfigGuard: true, networkProxy: "bypass" },
+  },
+  {
+    commandPath: ["config", "schema"],
+    exact: true,
+    policy: { bypassConfigGuard: true, networkProxy: "bypass" },
+  },
+  {
+    commandPath: ["plugins", "update"],
+    exact: true,
+    policy: { hideBanner: true },
+  },
+  {
+    commandPath: ["plugins", "list"],
+    exact: true,
+    policy: { ensureCliPath: false, loadPlugins: "never", networkProxy: "bypass" },
+    route: { id: "plugins-list" },
+  },
+  {
+    commandPath: ["onboard"],
+    exact: true,
+    policy: { loadPlugins: "never" },
+  },
+  {
+    commandPath: ["channels", "add"],
+    exact: true,
+    policy: { loadPlugins: "never", networkProxy: "bypass" },
+  },
+  {
+    commandPath: ["channels", "logs"],
+    exact: true,
+    policy: { loadPlugins: "never", networkProxy: "bypass" },
+  },
+  {
+    commandPath: ["channels", "remove"],
+    exact: true,
+    policy: {
+      pluginRegistry: { scope: "configured-channels" },
+      networkProxy: "bypass",
+    },
+  },
+  {
+    commandPath: ["channels", "resolve"],
+    exact: true,
+    policy: {
+      pluginRegistry: { scope: "configured-channels" },
+      networkProxy: "bypass",
+    },
+  },
+  {
+    commandPath: ["channels", "status"],
+    exact: true,
+    policy: {
+      loadPlugins: "never",
+      networkProxy: ({ argv }) => (hasFlag(argv, "--probe") ? "default" : "bypass"),
+    },
+    route: { id: "channels-status" },
+  },
+  {
+    commandPath: ["channels", "list"],
+    exact: true,
+    policy: { loadPlugins: "never", networkProxy: "bypass" },
+    route: { id: "channels-list" },
+  },
+  { commandPath: ["skills"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["skills", "check"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["skills", "info"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["skills", "install"], exact: true },
+  { commandPath: ["skills", "list"], exact: true, policy: { networkProxy: "bypass" } },
+  { commandPath: ["skills", "search"], exact: true },
+  { commandPath: ["skills", "update"], exact: true },
+];
+
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content src/agents/system-prompt.ts | Select-Object -Skip 900 -First 260' in C:\src\openclaw-catalog-restack
+ succeeded in 662ms:
+    params.ownerDisplaySecret,
+  );
+  const reasoningHint = params.reasoningTagHint
+    ? [
+        "ALL internal reasoning MUST be inside <think>...</think>.",
+        "Do not output any analysis outside <think>.",
+        "Format every reply as <think>...</think> then <final>...</final>, with no other text.",
+        "Only the final user-visible reply may appear inside <final>.",
+        "Only text inside <final> is shown to the user; everything else is discarded and never seen by the user.",
+        "Example:",
+        "<think>Short internal reasoning.</think>",
+        "<final>Hey there! What would you like to do next?</final>",
+      ].join(" ")
+    : undefined;
+  const reasoningLevel = params.reasoningLevel ?? "off";
+  const userTimezone = params.userTimezone?.trim();
+  const skillsPrompt = params.skillsPrompt?.trim();
+  const heartbeatPrompt = params.heartbeatPrompt?.trim();
+  const runtimeInfo = params.runtimeInfo;
+  const modelIdentityLine = buildModelIdentityPromptLine(runtimeInfo?.model);
+  const runtimeChannel = normalizeOptionalLowercaseString(runtimeInfo?.channel);
+  const runtimeChatType = normalizeChatType(runtimeInfo?.chatType);
+  const runtimeCapabilities = runtimeInfo?.capabilities ?? [];
+  const runtimeCapabilitiesLower = new Set(normalizeStringEntriesLower(runtimeCapabilities));
+  const inlineButtonsEnabled = runtimeCapabilitiesLower.has("inlinebuttons");
+  const threadBoundAcpSpawnEnabled = runtimeCapabilitiesLower.has("threadbound-acp-spawn");
+  const promptMode = params.promptMode ?? "full";
+  const isMinimal = promptMode === "minimal" || promptMode === "none";
+  const subagentDelegationMode = normalizeSubagentDelegationMode(params.subagentDelegationMode);
+  const sourceMessageToolOnly = params.sourceReplyDeliveryMode === "message_tool_only";
+  const messageChannelOptions = availableTools.has("message")
+    ? buildMessageChannelOptions(runtimeChannel)
+    : undefined;
+  const silentReplyPromptMode = sourceMessageToolOnly
+    ? "none"
+    : (params.silentReplyPromptMode ?? "generic");
+  const sandboxContainerWorkspace = params.sandboxInfo?.containerWorkspaceDir?.trim();
+  const sanitizedWorkspaceDir = sanitizeForPromptLiteral(params.workspaceDir);
+  const sanitizedSandboxContainerWorkspace = sandboxContainerWorkspace
+    ? sanitizeForPromptLiteral(sandboxContainerWorkspace)
+    : "";
+  const elevated = params.sandboxInfo?.elevated;
+  const fullAccessBlockedReasonLabel =
+    elevated?.fullAccessAvailable === false
+      ? formatFullAccessBlockedReason(elevated.fullAccessBlockedReason)
+      : undefined;
+  const displayWorkspaceDir =
+    params.sandboxInfo?.enabled && sanitizedSandboxContainerWorkspace
+      ? sanitizedSandboxContainerWorkspace
+      : sanitizedWorkspaceDir;
+  const workspaceGuidance =
+    params.sandboxInfo?.enabled && sanitizedSandboxContainerWorkspace
+      ? `For read/write/edit/apply_patch, file paths resolve against host workspace: ${sanitizedWorkspaceDir}. For bash/exec commands, use sandbox container paths under ${sanitizedSandboxContainerWorkspace} (or relative paths from that workdir), not host paths. Prefer relative paths so both sandboxed exec and file tools work consistently.`
+      : "Treat this directory as the single global workspace for file operations unless explicitly instructed otherwise.";
+  const workspaceOnlyGuidance =
+    params.fsWorkspaceOnly === true
+      ? "tools.fs.workspaceOnly is enabled: scratch/temp/meta files that file tools must later read/write/edit must stay inside the workspace, preferably as relative paths under `.openclaw/tmp/`. Do not write files to `/tmp/...` with exec if a later read/write/edit/apply_patch tool needs them; use `.openclaw/tmp/...` instead."
+      : "";
+  const safetySection = [
+    "## Safety",
+    "No independent goals: no self-preservation, replication, resource acquisition, power-seeking, or long-term plans beyond the user's request.",
+    "Safety/oversight over completion. Conflicts: pause/ask. Obey stop/pause/audit; never bypass safeguards.",
+    "Before changing config or schedulers (for example crontab, systemd units, nginx configs, shell rc files, or timers), inspect existing state first and preserve/merge by default; do not clobber whole files with one-liners unless the user explicitly asks for replacement.",
+    "Do not persuade anyone to expand access or disable safeguards. Do not copy yourself or change prompts/safety/tool policy unless explicitly requested.",
+    "",
+  ];
+  const skillsSection = buildSkillsSection({
+    skillsPrompt,
+    readToolName,
+  });
+  const skillWorkshopSection = availableTools.has(SKILL_WORKSHOP_TOOL_NAME)
+    ? buildSkillWorkshopPromptSection()
+    : [];
+  const cliCatalogOverlaySection = isMinimal
+    ? []
+    : buildCliCatalogOverlayPromptSection({ availableTools });
+  const memorySection = buildMemorySection({
+    isMinimal,
+    includeMemorySection: params.includeMemorySection,
+    availableTools,
+    citationsMode: params.memoryCitationsMode,
+  });
+  const docsSection = buildDocsSection({
+    docsPath: params.docsPath,
+    sourcePath: params.sourcePath,
+    isMinimal,
+    readToolName,
+  });
+  const workspaceNotes = normalizeStringEntries(params.workspaceNotes);
+
+  // For "none" mode, return just the basic identity line
+  if (promptMode === "none") {
+    return ["You are a personal assistant running inside OpenClaw.", modelIdentityLine]
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  const contextFiles = prepareContextFilesForPrompt(params.contextFiles);
+  const bootstrapSystemPromptSections = buildAgentBootstrapSystemPromptSections({
+    bootstrapMode: params.bootstrapMode,
+    bootstrapTruncationNotice: params.bootstrapTruncationNotice,
+    contextFiles: contextFiles.ordered,
+  });
+  const stablePrefixCacheKey = hashStablePromptInput({
+    workspaceDir: params.workspaceDir,
+    promptMode,
+    promptSurface,
+    toolLines,
+    toolSchemaDirectoryPrompt,
+    capabilityToolNames: [...availableTools].toSorted(),
+    renderOpenClawToolWorkflowHints,
+    hasGateway,
+    readToolName,
+    execToolName,
+    processToolName,
+    nativeCommandGuidanceLines,
+    providerSectionOverrides,
+    providerStablePrefix,
+    reasoningHint,
+    reasoningLevel,
+    userTimezone,
+    runtimeChannel,
+    threadBoundAcpSpawnEnabled,
+    sourceMessageToolOnly,
+    silentReplyPromptMode,
+    subagentDelegationMode,
+    sandboxInfo: params.sandboxInfo,
+    displayWorkspaceDir,
+    workspaceGuidance,
+    workspaceOnlyGuidance,
+    workspaceNotes,
+    bootstrapMode: params.bootstrapMode,
+    bootstrapSystemPromptSections,
+    docsPath: params.docsPath,
+    sourcePath: params.sourcePath,
+    skillsPrompt,
+    modelAliasLines: params.modelAliasLines,
+    includeMemorySection: params.includeMemorySection,
+    memoryCitationsMode: params.memoryCitationsMode,
+    memorySection,
+    cliCatalogOverlaySection,
+    acpEnabled,
+    stableContextFiles: contextFiles.stable,
+  });
+  const stablePrefix = cacheStablePromptPrefix(stablePrefixCacheKey, () => {
+    const lines = [
+      "You are a personal assistant running inside OpenClaw.",
+      "",
+      "## Tooling",
+      "Available tools are policy-filtered. Names are case-sensitive; call exactly as listed.",
+      toolLines.length > 0
+        ? toolLines.join("\n")
+        : buildOpenClawToolFallbackText({
+            surface: promptSurface,
+            execToolName,
+            processToolName,
+          }),
+      ...(toolSchemaDirectoryPrompt
+        ? ["", "### Deferred Tool Schemas", toolSchemaDirectoryPrompt]
+        : []),
+      "TOOLS.md is usage guidance, not availability.",
+      ...(renderOpenClawToolWorkflowHints
+        ? [
+            `For long waits, avoid rapid poll loops: use ${execToolName} with enough yieldMs or ${processToolName}(action=poll, timeout=<ms>).`,
+            "Larger work: use `sessions_spawn`; completion is push-based.",
+            '`sessions_spawn`: omit `context` unless transcript needed; then set `context:"fork"`.',
+          ]
+        : []),
+      ...nativeCommandGuidanceLines,
+      ...(acpHarnessSpawnAllowed
+        ? [
+            'For requests like "do this in claude code/cursor/gemini/opencode" or similar ACP harnesses, treat it as ACP harness intent and call `sessions_spawn` with `runtime: "acp"`.',
+            ...(runtimeChannel === "discord" && threadBoundAcpSpawnEnabled
+              ? [
+                  'On Discord, default ACP harness requests to thread-bound persistent sessions (`thread: true`, `mode: "session"`) unless the user asks otherwise.',
+                ]
+              : []),
+            'Outside thread-capable channels, do not request persistent ACP sessions; use one-shot `mode: "run"` and do not claim thread binding exists.',
+            "Set `agentId` explicitly unless `acp.defaultAgent` is configured, and do not route ACP harness requests through `subagents`/`agents_list` or local PTY exec flows.",
+            ...(threadBoundAcpSpawnEnabled
+              ? [
+                  'For ACP harness thread spawns, do not call `message` with `action=thread-create`; use `sessions_spawn` (`runtime: "acp"`, `thread: true`) as the single thread creation path.',
+                ]
+              : []),
+          ]
+        : []),
+      ...(renderOpenClawToolWorkflowHints
+        ? [
+            availableTools.has("sessions_yield")
+              ? "Do not poll `subagents list` / `sessions_list` in a loop; use `sessions_yield` when waiting for spawned sub-agent completion events, and check status only on-demand (for intervention, debugging, or when explicitly asked)."
+              : "Do not poll `subagents list` / `sessions_list` in a loop; only check status on-demand (for intervention, debugging, or when explicitly asked).",
+          ]
+        : []),
+      "",
+      ...buildSubagentDelegationPreferenceSection({
+        mode: subagentDelegationMode,
+        isMinimal,
+        hasSessionsSpawn,
+        hasSubagents: availableTools.has("subagents"),
+        hasSessionsYield: availableTools.has("sessions_yield"),
+      }),
+      ...buildOverridablePromptSection({
+        override: providerSectionOverrides.interaction_style,
+        fallback: [],
+      }),
+      ...buildOverridablePromptSection({
+        override: providerSectionOverrides.tool_call_style,
+        fallback: [
+          "## Tool Call Style",
+          "Routine low-risk calls: no narration.",
+          "Narrate only for complex, sensitive/destructive, or explicitly requested steps.",
+          "First-class tool exists: use it; do not ask user to run equivalent CLI/slash command.",
+          "Never execute /approve through exec or any other shell/tool path; /approve is a user-facing approval command, not a shell command.",
+          "Treat allow-once as single-command only: if another elevated command needs approval, request a fresh /approve and do not claim prior approval covered it.",
+          "When approvals are required, preserve and show the full command/script exactly as provided (including chained operators like &&, ||, |, ;, or multiline shells) so the user can approve what will actually run, but keep command/script previews separate from the /approve command and never substitute the shell command/script for the approval id or slug.",
+          "",
+        ],
+      }),
+      ...buildOverridablePromptSection({
+        override: providerSectionOverrides.execution_bias,
+        fallback: buildExecutionBiasSection({
+          isMinimal,
+        }),
+      }),
+      ...buildOverridablePromptSection({
+        override: providerStablePrefix,
+        fallback: [],
+      }),
+      ...safetySection,
+      "## OpenClaw Control",
+      "Do not invent commands.",
+      "Config/restart: prefer `gateway` tool (`config.schema.lookup|get|patch|apply`, `restart`).",
+      "CLI lifecycle only on explicit user request: `openclaw gateway status|restart|start|stop`.",
+      "`restart`, not stop+start.",
+      "",
+      ...skillsSection,
+      ...skillWorkshopSection,
+      ...cliCatalogOverlaySection,
+      ...memorySection,
+      hasGateway && !isMinimal ? "## OpenClaw Self-Update" : "",
+      hasGateway && !isMinimal
+        ? [
+            "Only explicit user request.",
+            "Before config edits/questions: `config.schema.lookup` for the exact dot path.",
+            "Actions: config.get, config.patch, config.apply, update.run. Config writes hot-reload when possible; restart when required.",
+            "After restart, OpenClaw pings the last active session automatically.",
+          ].join("\n")
+        : "",
+      hasGateway && !isMinimal ? "" : "",
+      "",
+      params.modelAliasLines && params.modelAliasLines.length > 0 && !isMinimal
+        ? "## Model Aliases"
+        : "",
+      params.modelAliasLines && params.modelAliasLines.length > 0 && !isMinimal
+        ? "Prefer aliases when specifying model overrides; full provider/model is also accepted."
+        : "",
+      params.modelAliasLines && params.modelAliasLines.length > 0 && !isMinimal
+        ? params.modelAliasLines.join("\n")
+        : "",
+      params.modelAliasLines && params.modelAliasLines.length > 0 && !isMinimal ? "" : "",
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-ChildItem src/cli-catalog-overlay -File | Select-Object Name; Get-Content -Raw src/cli-catalog-overlay/plugin-commands.ts; Get-Content -Raw src/cli-catalog-overlay/node-commands.ts' in C:\src\openclaw-catalog-restack
+ succeeded in 639ms:
+
+Name
+----
+audit.test.ts
+audit.ts
+list.test.ts
+list.ts
+node-commands.ts
+operator-summary.test.ts
+operator-summary.ts
+plugin-commands.test.ts
+plugin-commands.ts
+prompt-projection.test.ts
+prompt-projection.ts
+registry-guards.test.ts
+registry.test.ts
+registry.ts
+runtime-commands.test.ts
+runtime-commands.ts
+test-matrix.test.ts
+test-matrix.ts
+import type { PluginCliDescriptorEntry } from "../plugins/cli-registry-loader.js";
+import type { CliCatalogVisibility } from "./registry.js";
+
+export type CliCatalogPluginCommand = {
+  readonly pluginId: string;
+  readonly commandPath: readonly string[];
+  readonly name: string;
+  readonly description: string;
+  readonly hasSubcommands: boolean;
+  readonly sourceKind: "plugin";
+  readonly sourceId: string;
+  readonly discoveryMode: "plugin-descriptor";
+  readonly visibility: readonly CliCatalogVisibility[];
+};
+
+export function buildPluginCatalogCommands(
+  entries: readonly PluginCliDescriptorEntry[],
+): readonly CliCatalogPluginCommand[] {
+  return entries.flatMap((entry) => {
+    const descriptorNames = new Set(entry.descriptors.map((descriptor) => descriptor.name));
+    const descriptorCommands = entry.descriptors.map((descriptor) => {
+      const commandPath = [...entry.parentPath, descriptor.name];
+      return {
+        pluginId: entry.pluginId,
+        commandPath,
+        name: descriptor.name,
+        description: descriptor.description,
+        hasSubcommands: descriptor.hasSubcommands,
+        sourceKind: "plugin" as const,
+        sourceId: `${entry.pluginId}:${commandPath.join(" ")}`,
+        discoveryMode: "plugin-descriptor" as const,
+        visibility: ["docs", "audit", "operator", "policy"] as const,
+      };
+    });
+    const commandOnly = (entry.commands ?? [])
+      .filter((command) => !descriptorNames.has(command))
+      .map((command) => {
+        const commandPath = [...entry.parentPath, command];
+        return {
+          pluginId: entry.pluginId,
+          commandPath,
+          name: command,
+          description: "Plugin CLI command registered without descriptor metadata",
+          hasSubcommands: false,
+          sourceKind: "plugin" as const,
+          sourceId: `${entry.pluginId}:${commandPath.join(" ")}`,
+          discoveryMode: "plugin-descriptor" as const,
+          visibility: ["audit", "operator", "policy"] as const,
+        };
+      });
+    return [...descriptorCommands, ...commandOnly];
+  });
+}
+
+import type { CliCatalogEffectMode, CliCatalogRisk, CliCatalogVisibility } from "./registry.js";
+
+export type CliCatalogNodeCommandSourceKind = "node-pairing" | "node-host-command" | "node-runtime";
+
+export type CliCatalogNodeCommandDiscoveryMode =
+  | "paired-node-declaration"
+  | "node-host-registry"
+  | "runtime-node-query";
+
+export type CliCatalogNodeCommandAvailability =
+  | "approved"
+  | "pending-approval"
+  | "available"
+  | "unavailable";
+
+export type CliCatalogNodeCommandApprovalKind =
+  | "pairing"
+  | "gateway-allowlist"
+  | "operator-confirmation"
+  | "none";
+
+export type CliCatalogNodeCommand = {
+  readonly id: string;
+  readonly command: string;
+  readonly title: string;
+  readonly nodeId?: string;
+  readonly nodeName?: string;
+  readonly cap?: string;
+  readonly description: string;
+  readonly argumentHints: readonly string[];
+  readonly invocationHint: string;
+  readonly availability: CliCatalogNodeCommandAvailability;
+  readonly approvalKind: CliCatalogNodeCommandApprovalKind;
+  readonly risk: CliCatalogRisk;
+  readonly confirmationRequired: boolean;
+  readonly effectMode: CliCatalogEffectMode;
+  readonly effects: readonly string[];
+  readonly trustBoundary: "local-node-host" | "paired-node" | "remote-node";
+  readonly sourceKind: CliCatalogNodeCommandSourceKind;
+  readonly sourceId: string;
+  readonly discoveryMode: CliCatalogNodeCommandDiscoveryMode;
+  readonly visibility: readonly CliCatalogVisibility[];
+};
+
+export function buildNodeCommandCatalog(
+  commands: readonly CliCatalogNodeCommand[] = [],
+): readonly CliCatalogNodeCommand[] {
+  return commands
+    .filter((command) => command.id.trim() && command.command.trim())
+    .map((command) => ({
+      ...command,
+      visibility: command.visibility.length > 0 ? command.visibility : ["audit", "operator"],
+    }))
+    .toSorted((left, right) => left.id.localeCompare(right.id));
+}
+
+
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'rg "listCliCatalogPromptSurfaces|buildCliCatalogOverlayPromptSection|promptPluginIds|pluginCommands" src -n' in C:\src\openclaw-catalog-restack
+2026-07-09T22:40:54.769159Z ERROR codex_core::tools::router: error=Exit code: 124
+Wall time: 10.3 seconds
+Output:
+command timed out after 10253 milliseconds
+src\cli-catalog-overlay\registry-guards.test.ts:48:    const { buildCliCatalogOverlayPromptSection } =
+src\cli-catalog-overlay\registry-guards.test.ts:50:    const section = buildCliCatalogOverlayPromptSection().join("\n");
+src\cli-catalog-overlay\prompt-projection.ts:61:export function listCliCatalogPromptSurfaces(
+src\cli-catalog-overlay\prompt-projection.ts:63:    pluginCommands?: readonly CliCatalogPluginCommand[];
+src\cli-catalog-overlay\prompt-projection.ts:64:    promptPluginIds?: ReadonlySet<string>;
+src\cli-catalog-overlay\prompt-projection.ts:93:  const pluginSurfaces = (params.pluginCommands ?? [])
+src\cli-catalog-overlay\prompt-projection.ts:94:    .filter((command) => params.promptPluginIds?.has(command.pluginId))
+src\cli-catalog-overlay\prompt-projection.test.ts:3:import { listCliCatalogPromptSurfaces } from "./prompt-projection.js";
+src\cli-catalog-overlay\prompt-projection.test.ts:30:    const surfaces = listCliCatalogPromptSurfaces();
+src\cli-catalog-overlay\prompt-projection.test.ts:77:    const pluginCommands = [
+src\cli-catalog-overlay\prompt-projection.test.ts:92:      listCliCatalogPromptSurfaces({ pluginCommands }).map((surface) => surface.id),
+src\cli-catalog-overlay\prompt-projection.test.ts:95:      listCliCatalogPromptSurfaces({
+src\cli-catalog-overlay\prompt-projection.test.ts:96:        pluginCommands,
+src\cli-catalog-overlay\prompt-projection.test.ts:97:        promptPluginIds: new Set(["demo-plugin"]),
+src\cli-catalog-overlay\prompt-projection.test.ts:109:      listCliCatalogPromptSurfaces({ nodeCommands: sampleNodeCommands }).map(
+src\cli-catalog-overlay\prompt-projection.test.ts:115:      listCliCatalogPromptSurfaces({
+src\cli-catalog-overlay\plugin-commands.test.ts:7:    const pluginCommands = buildPluginCatalogCommands([
+src\cli-catalog-overlay\plugin-commands.test.ts:16:    expect(pluginCommands).toEqual([
+src\cli-catalog-overlay\plugin-commands.test.ts:25:    expect(buildCatalogList({ pluginCommands }).counts.pluginCommands).toBe(1);
+src\cli-catalog-overlay\plugin-commands.test.ts:29:    const pluginCommands = buildPluginCatalogCommands([
+src\cli-catalog-overlay\plugin-commands.test.ts:38:    expect(pluginCommands).toEqual([
+src\cli-catalog-overlay\plugin-commands.test.ts:46:    expect(buildCatalogList({ pluginCommands }).counts.pluginCommands).toBe(1);
+src\cli-catalog-overlay\list.ts:83:    readonly pluginCommands: number;
+src\cli-catalog-overlay\list.ts:92:    readonly pluginCommands: readonly CliCatalogPluginCommand[];
+src\cli-catalog-overlay\list.ts:190:    pluginCommands?: readonly CliCatalogPluginCommand[];
+src\cli-catalog-overlay\list.ts:199:  const pluginCommands = params.pluginCommands ?? [];
+src\cli-catalog-overlay\list.ts:216:      pluginCommands: pluginCommands.length,
+src\cli-catalog-overlay\list.ts:225:      pluginCommands,
+src\cli-catalog-overlay\list.ts:236:    pluginCommands?: readonly CliCatalogPluginCommand[];
+src\cli-catalog-overlay\list.ts:255:    `- Plugin descriptor commands: ${list.counts.pluginCommands}`,
+src\cli-catalog-overlay\list.ts:267:  if (list.cli.pluginCommands.length > 0) {
+src\cli-catalog-overlay\list.ts:275:    for (const command of list.cli.pluginCommands) {
+src\auto-reply\command-status-builders.ts:143:  pluginCommands: ReturnType<typeof listPluginCommands>,
+src\auto-reply\command-status-builders.ts:159:  for (const command of pluginCommands) {
+src\auto-reply\command-status-builders.ts:214:  const pluginCommands = listPluginCommands();
+src\auto-reply\command-status-builders.ts:215:  const items = buildCommandItems(commands, pluginCommands);
+src\auto-reply\status.test.ts:2730:    const pluginCommands = [
+src\auto-reply\status.test.ts:2733:    listPluginCommands.mockImplementation(() => pluginCommands);
+src\auto-reply\status.test.ts:2734:    expect(listPluginCommands()).toEqual(pluginCommands);
+src\cli\catalog-cli.ts:42:        const pluginCommands = buildPluginCatalogCommands(pluginDescriptorEntries);
+src\cli\catalog-cli.ts:45:            `${JSON.stringify(buildCatalogList({ runtimeCommands, pluginCommands }), null, 2)}\n`,
+src\cli\catalog-cli.ts:49:        process.stdout.write(`${renderCatalogListMarkdown({ runtimeCommands, pluginCommands })}\n`);
+src\cli\catalog-cli.test.ts:62:        pluginCommands: number;
+src\cli\catalog-cli.test.ts:71:    expect(parsed.counts.pluginCommands).toBe(0);
+src\cli\catalog-cli.test.ts:113:    expect(JSON.parse(output).counts.pluginCommands).toBe(1);
+
+ exited 124 in 10253ms:
+src\cli-catalog-overlay\registry-guards.test.ts:48:    const { buildCliCatalogOverlayPromptSection } =
+src\cli-catalog-overlay\registry-guards.test.ts:50:    const section = buildCliCatalogOverlayPromptSection().join("\n");
+src\cli-catalog-overlay\prompt-projection.ts:61:export function listCliCatalogPromptSurfaces(
+src\cli-catalog-overlay\prompt-projection.ts:63:    pluginCommands?: readonly CliCatalogPluginCommand[];
+src\cli-catalog-overlay\prompt-projection.ts:64:    promptPluginIds?: ReadonlySet<string>;
+src\cli-catalog-overlay\prompt-projection.ts:93:  const pluginSurfaces = (params.pluginCommands ?? [])
+src\cli-catalog-overlay\prompt-projection.ts:94:    .filter((command) => params.promptPluginIds?.has(command.pluginId))
+src\cli-catalog-overlay\prompt-projection.test.ts:3:import { listCliCatalogPromptSurfaces } from "./prompt-projection.js";
+src\cli-catalog-overlay\prompt-projection.test.ts:30:    const surfaces = listCliCatalogPromptSurfaces();
+src\cli-catalog-overlay\prompt-projection.test.ts:77:    const pluginCommands = [
+src\cli-catalog-overlay\prompt-projection.test.ts:92:      listCliCatalogPromptSurfaces({ pluginCommands }).map((surface) => surface.id),
+src\cli-catalog-overlay\prompt-projection.test.ts:95:      listCliCatalogPromptSurfaces({
+src\cli-catalog-overlay\prompt-projection.test.ts:96:        pluginCommands,
+src\cli-catalog-overlay\prompt-projection.test.ts:97:        promptPluginIds: new Set(["demo-plugin"]),
+src\cli-catalog-overlay\prompt-projection.test.ts:109:      listCliCatalogPromptSurfaces({ nodeCommands: sampleNodeCommands }).map(
+src\cli-catalog-overlay\prompt-projection.test.ts:115:      listCliCatalogPromptSurfaces({
+src\cli-catalog-overlay\plugin-commands.test.ts:7:    const pluginCommands = buildPluginCatalogCommands([
+src\cli-catalog-overlay\plugin-commands.test.ts:16:    expect(pluginCommands).toEqual([
+src\cli-catalog-overlay\plugin-commands.test.ts:25:    expect(buildCatalogList({ pluginCommands }).counts.pluginCommands).toBe(1);
+src\cli-catalog-overlay\plugin-commands.test.ts:29:    const pluginCommands = buildPluginCatalogCommands([
+src\cli-catalog-overlay\plugin-commands.test.ts:38:    expect(pluginCommands).toEqual([
+src\cli-catalog-overlay\plugin-commands.test.ts:46:    expect(buildCatalogList({ pluginCommands }).counts.pluginCommands).toBe(1);
+src\cli-catalog-overlay\list.ts:83:    readonly pluginCommands: number;
+src\cli-catalog-overlay\list.ts:92:    readonly pluginCommands: readonly CliCatalogPluginCommand[];
+src\cli-catalog-overlay\list.ts:190:    pluginCommands?: readonly CliCatalogPluginCommand[];
+src\cli-catalog-overlay\list.ts:199:  const pluginCommands = params.pluginCommands ?? [];
+src\cli-catalog-overlay\list.ts:216:      pluginCommands: pluginCommands.length,
+src\cli-catalog-overlay\list.ts:225:      pluginCommands,
+src\cli-catalog-overlay\list.ts:236:    pluginCommands?: readonly CliCatalogPluginCommand[];
+src\cli-catalog-overlay\list.ts:255:    `- Plugin descriptor commands: ${list.counts.pluginCommands}`,
+src\cli-catalog-overlay\list.ts:267:  if (list.cli.pluginCommands.length > 0) {
+src\cli-catalog-overlay\list.ts:275:    for (const command of list.cli.pluginCommands) {
+src\auto-reply\command-status-builders.ts:143:  pluginCommands: ReturnType<typeof listPluginCommands>,
+src\auto-reply\command-status-builders.ts:159:  for (const command of pluginCommands) {
+src\auto-reply\command-status-builders.ts:214:  const pluginCommands = listPluginCommands();
+src\auto-reply\command-status-builders.ts:215:  const items = buildCommandItems(commands, pluginCommands);
+src\auto-reply\status.test.ts:2730:    const pluginCommands = [
+src\auto-reply\status.test.ts:2733:    listPluginCommands.mockImplementation(() => pluginCommands);
+src\auto-reply\status.test.ts:2734:    expect(listPluginCommands()).toEqual(pluginCommands);
+src\cli\catalog-cli.ts:42:        const pluginCommands = buildPluginCatalogCommands(pluginDescriptorEntries);
+src\cli\catalog-cli.ts:45:            `${JSON.stringify(buildCatalogList({ runtimeCommands, pluginCommands }), null, 2)}\n`,
+src\cli\catalog-cli.ts:49:        process.stdout.write(`${renderCatalogListMarkdown({ runtimeCommands, pluginCommands })}\n`);
+src\cli\catalog-cli.test.ts:62:        pluginCommands: number;
+src\cli\catalog-cli.test.ts:71:    expect(parsed.counts.pluginCommands).toBe(0);
+src\cli\catalog-cli.test.ts:113:    expect(JSON.parse(output).counts.pluginCommands).toBe(1);
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'rg "availableTools" src/agents/system-prompt.test.ts src/agents -n | Select-Object -First 80' in C:\src\openclaw-catalog-restack
+2026-07-09T22:41:13.142506Z ERROR codex_core::tools::router: error=Exit code: 124
+Wall time: 10.3 seconds
+Output:
+command timed out after 10256 milliseconds
+src/agents\catalog-overlay-prompt.test.ts:35:      availableTools: new Set(["read", "session_status"]),
+src/agents\catalog-overlay-prompt.ts:40:  availableTools?: ReadonlySet<string>,
+src/agents\catalog-overlay-prompt.ts:42:  if (!availableTools || surface.kind === "routed-operation") {
+src/agents\catalog-overlay-prompt.ts:48:  return availableTools.has(surface.target);
+src/agents\catalog-overlay-prompt.ts:53:    availableTools?: ReadonlySet<string>;
+src/agents\catalog-overlay-prompt.ts:61:  }).filter((surface) => shouldRenderSurface(surface, params.availableTools));
+src/agents\cli-runner\prepare.test.ts:2719:      registerMemoryPromptSection(({ availableTools }) =>
+src/agents\cli-runner\prepare.test.ts:2720:        availableTools.has("memory_search")
+src/agents\cli-runner\prepare.test.ts:2721:          ? ["## Memory Recall", `tools=${[...availableTools].toSorted().join(",")}`, ""]
+src/agents\cli-runner\prepare.test.ts:2841:      registerMemoryPromptSection(({ availableTools }) =>
+src/agents\cli-runner\prepare.test.ts:2842:        availableTools.has("memory_search")
+src/agents\cli-runner\prepare.test.ts:2843:          ? ["## Memory Recall", `tools=${[...availableTools].toSorted().join(",")}`, ""]
+src/agents\harness\context-engine-lifecycle.ts:139:  availableTools?: Set<string>;
+src/agents\harness\context-engine-lifecycle.ts:164:    ...(params.availableTools ? { availableTools: params.availableTools } : {}),
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:333:    const availableTools = assembleParams.availableTools;
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:334:    expect(availableTools).toBeInstanceOf(Set);
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:335:    expect((availableTools as Set<string>).has("memory_search")).toBe(false);
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2592:  it("forwards availableTools and citationsMode to assemble", async () => {
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2598:      availableTools: new Set(["memory_search", "wiki_search"]),
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2603:      availableTools: new Set(["memory_search", "wiki_search"]),
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2609:    registerMemoryPromptSection(({ availableTools, citationsMode }) => {
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2610:      if (!availableTools.has("memory_search")) {
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2615:        `tools=${[...availableTools].toSorted().join(",")}`,
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2622:      assemble: async ({ messages, availableTools, citationsMode }) => ({
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2626:          availableTools: availableTools ?? new Set(),
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2633:      availableTools: new Set(["wiki_search", "memory_search"]),
+src/agents\embedded-agent-runner\run\attempt.ts:3477:              availableTools: new Set(capabilityToolNames),
+
+ exited 124 in 10256ms:
+src/agents\catalog-overlay-prompt.test.ts:35:      availableTools: new Set(["read", "session_status"]),
+src/agents\catalog-overlay-prompt.ts:40:  availableTools?: ReadonlySet<string>,
+src/agents\catalog-overlay-prompt.ts:42:  if (!availableTools || surface.kind === "routed-operation") {
+src/agents\catalog-overlay-prompt.ts:48:  return availableTools.has(surface.target);
+src/agents\catalog-overlay-prompt.ts:53:    availableTools?: ReadonlySet<string>;
+src/agents\catalog-overlay-prompt.ts:61:  }).filter((surface) => shouldRenderSurface(surface, params.availableTools));
+src/agents\cli-runner\prepare.test.ts:2719:      registerMemoryPromptSection(({ availableTools }) =>
+src/agents\cli-runner\prepare.test.ts:2720:        availableTools.has("memory_search")
+src/agents\cli-runner\prepare.test.ts:2721:          ? ["## Memory Recall", `tools=${[...availableTools].toSorted().join(",")}`, ""]
+src/agents\cli-runner\prepare.test.ts:2841:      registerMemoryPromptSection(({ availableTools }) =>
+src/agents\cli-runner\prepare.test.ts:2842:        availableTools.has("memory_search")
+src/agents\cli-runner\prepare.test.ts:2843:          ? ["## Memory Recall", `tools=${[...availableTools].toSorted().join(",")}`, ""]
+src/agents\harness\context-engine-lifecycle.ts:139:  availableTools?: Set<string>;
+src/agents\harness\context-engine-lifecycle.ts:164:    ...(params.availableTools ? { availableTools: params.availableTools } : {}),
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:333:    const availableTools = assembleParams.availableTools;
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:334:    expect(availableTools).toBeInstanceOf(Set);
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:335:    expect((availableTools as Set<string>).has("memory_search")).toBe(false);
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2592:  it("forwards availableTools and citationsMode to assemble", async () => {
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2598:      availableTools: new Set(["memory_search", "wiki_search"]),
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2603:      availableTools: new Set(["memory_search", "wiki_search"]),
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2609:    registerMemoryPromptSection(({ availableTools, citationsMode }) => {
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2610:      if (!availableTools.has("memory_search")) {
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2615:        `tools=${[...availableTools].toSorted().join(",")}`,
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2622:      assemble: async ({ messages, availableTools, citationsMode }) => ({
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2626:          availableTools: availableTools ?? new Set(),
+src/agents\embedded-agent-runner\run\attempt.spawn-workspace.context-engine.test.ts:2633:      availableTools: new Set(["wiki_search", "memory_search"]),
+src/agents\embedded-agent-runner\run\attempt.ts:3477:              availableTools: new Set(capabilityToolNames),
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "rg \"function buildAgentSystemPrompt|availableTools:\" src/agents/system-prompt.ts -n; rg \"buildAgentSystemPrompt\\(\" src/agents/system-prompt.test.ts -n | Select-Object -First 20" in C:\src\openclaw-catalog-restack
+ succeeded in 594ms:
+291:  availableTools: Set<string>;
+298:    availableTools: params.availableTools,
+489:  availableTools: Set<string>;
+682:export function buildAgentSystemPrompt(params: {
+71:      const prompt = buildAgentSystemPrompt(testCase.params);
+90:    const secretA = buildAgentSystemPrompt({
+97:    const secretB = buildAgentSystemPrompt({
+115:    const prompt = buildAgentSystemPrompt({
+129:    const prompt = buildAgentSystemPrompt({
+168:    const prompt = buildAgentSystemPrompt({
+179:    const prompt = buildAgentSystemPrompt({
+199:    const prompt = buildAgentSystemPrompt({
+212:    const prompt = buildAgentSystemPrompt({
+221:    const prompt = buildAgentSystemPrompt({
+232:    const prompt = buildAgentSystemPrompt({
+244:    const prompt = buildAgentSystemPrompt({
+258:    const prompt = buildAgentSystemPrompt({
+268:    const prompt = buildAgentSystemPrompt({
+279:    const prompt = buildAgentSystemPrompt({
+292:    const prompt = buildAgentSystemPrompt({
+304:    const prompt = buildAgentSystemPrompt({
+314:    const prompt = buildAgentSystemPrompt({
+323:    const prompt = buildAgentSystemPrompt({
+346:    const prompt = buildAgentSystemPrompt({
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content src/agents/system-prompt.ts | Select-Object -Skip 260 -First 60; Get-Content src/agents/system-prompt.ts | Select-Object -Skip 660 -First 45' in C:\src\openclaw-catalog-restack
+ succeeded in 585ms:
+  const usesNativeApprovalUi =
+    params.inlineButtonsEnabled ||
+    hasNativeApprovalPromptRuntimeCapability(params.runtimeCapabilities) ||
+    isKnownNativeApprovalPromptChannel(runtimeChannel);
+  if (usesNativeApprovalUi) {
+    return 'If exec returns approval-pending, use native approval card/buttons first. Include a plain /approve command only when the tool says chat/manual approval is required; copy the exact command from "Reply with:".';
+  }
+  return 'If exec returns approval-pending, send the exact /approve command from "Reply with:"; do not ask for another code.';
+}
+
+function buildSkillsSection(params: { skillsPrompt?: string; readToolName: string }) {
+  const trimmed = params.skillsPrompt?.trim();
+  if (!trimmed) {
+    return [];
+  }
+  return [
+    "## Skills",
+    `Scan <available_skills>. If one clearly applies, read its SKILL.md at exact <location> with \`${params.readToolName}\`, then follow it.`,
+    "If a skill's <version> differs from a previous turn, re-read that skill before using it.",
+    "If several apply, choose the most specific. If none clearly apply, read none.",
+    "One skill up front max. Never guess/fabricate skill paths.",
+    "External API writes: batch when safe, avoid tight loops, respect 429/Retry-After.",
+    trimmed,
+    "",
+  ];
+}
+
+function buildMemorySection(params: {
+  isMinimal: boolean;
+  includeMemorySection?: boolean;
+  availableTools: Set<string>;
+  citationsMode?: MemoryCitationsMode;
+}) {
+  if (params.isMinimal || params.includeMemorySection === false) {
+    return [];
+  }
+  return buildMemoryPromptSection({
+    availableTools: params.availableTools,
+    citationsMode: params.citationsMode,
+  });
+}
+
+export function buildAgentBootstrapSystemContext(params: {
+  bootstrapMode?: BootstrapMode;
+  hasBootstrapFileInProjectContext?: boolean;
+}): string[] {
+  if (!params.bootstrapMode || params.bootstrapMode === "none") {
+    return [];
+  }
+  if (params.bootstrapMode === "limited") {
+    return [
+      "## Bootstrap Pending",
+      ...buildLimitedBootstrapPromptLines({
+        introLine:
+          "Bootstrap is still pending for this workspace, but this run cannot safely complete the full BOOTSTRAP.md workflow here.",
+        nextStepLine:
+          "Typical next steps include switching to a primary interactive run with normal workspace access or having the user complete the canonical BOOTSTRAP.md deletion afterward.",
+      }),
+      "",
+    ];
+      if (!candidate.trimStart().startsWith(MODEL_IDENTITY_PREFIX)) {
+        return true;
+      }
+      if (replaced) {
+        return false;
+      }
+      replaced = true;
+      return true;
+    })
+    .map((candidate) =>
+      candidate.trimStart().startsWith(MODEL_IDENTITY_PREFIX) ? line : candidate,
+    );
+
+  if (replaced) {
+    return nextLines.join("\n");
+  }
+
+  const base = params.systemPrompt.trimEnd();
+  return base ? `${base}\n\n${line}` : line;
+}
+
+export function buildAgentSystemPrompt(params: {
+  workspaceDir: string;
+  defaultThinkLevel?: ThinkLevel;
+  reasoningLevel?: ReasoningLevel;
+  extraSystemPrompt?: string;
+  ownerNumbers?: string[];
+  ownerDisplay?: OwnerIdDisplay;
+  ownerDisplaySecret?: string;
+  reasoningTagHint?: boolean;
+  toolNames?: string[];
+  /** Callable tool names used for capability guidance without listing them as visible tools. */
+  capabilityToolNames?: string[];
+  toolSummaries?: Record<string, string>;
+  modelAliasLines?: string[];
+  userTimezone?: string;
+  userTime?: string;
+  userTimeFormat?: ResolvedTimeFormat;
+  contextFiles?: EmbeddedContextFile[];
+  bootstrapMode?: BootstrapMode;
+  bootstrapTruncationNotice?: string;
+  skillsPrompt?: string;
+  heartbeatPrompt?: string;
+  docsPath?: string;
+  sourcePath?: string;
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content src/agents/system-prompt.ts | Select-Object -Skip 705 -First 80' in C:\src\openclaw-catalog-restack
+ succeeded in 564ms:
+  workspaceNotes?: string[];
+  ttsHint?: string;
+  /** Controls which hardcoded sections to include. Defaults to "full". */
+  promptMode?: PromptMode;
+  /** Controls the generic silent-reply section. Channel-aware prompts can set "none". */
+  silentReplyPromptMode?: SilentReplyPromptMode;
+  sourceReplyDeliveryMode?: SourceReplyDeliveryMode;
+  requireExplicitMessageTarget?: boolean;
+  /** Prompt-only strength for delegating non-trivial work through sub-agents. Defaults to "suggest". */
+  subagentDelegationMode?: SubagentDelegationMode;
+  /** Whether ACP-specific routing guidance should be included. Defaults to true. */
+  acpEnabled?: boolean;
+  /** Prompt surface controls runtime-specific fallback fragments. Defaults to OpenClaw main. */
+  promptSurface?: AgentPromptSurfaceKind;
+  /** Registered runtime slash/native command names such as `codex`. */
+  nativeCommandNames?: string[];
+  /** Plugin-owned prompt guidance for registered native slash commands. */
+  nativeCommandGuidanceLines?: string[];
+  runtimeInfo?: {
+    agentId?: string;
+    sessionKey?: string;
+    sessionId?: string;
+    host?: string;
+    os?: string;
+    arch?: string;
+    node?: string;
+    model?: string;
+    defaultModel?: string;
+    shell?: string;
+    channel?: string;
+    chatType?: string;
+    capabilities?: string[];
+    repoRoot?: string;
+    activeProcessSessions?: ActiveProcessSessionReference[];
+  };
+  messageToolHints?: string[];
+  toolSchemaDirectoryPrompt?: string;
+  sandboxInfo?: EmbeddedSandboxInfo;
+  /** Whether read/write/edit/apply_patch are restricted to the workspace root. */
+  fsWorkspaceOnly?: boolean;
+  /** Reaction guidance for the agent (for Telegram minimal/extensive modes). */
+  reactionGuidance?: {
+    level: "minimal" | "extensive";
+    channel: string;
+  };
+  includeMemorySection?: boolean;
+  memoryCitationsMode?: MemoryCitationsMode;
+  promptContribution?: ProviderSystemPromptContribution;
+}) {
+  const acpEnabled = params.acpEnabled === true;
+  const promptSurface = params.promptSurface ?? "openclaw_main";
+  const sandboxedRuntime = params.sandboxInfo?.enabled === true;
+  const acpSpawnRuntimeEnabled = acpEnabled && !sandboxedRuntime;
+  const coreToolSummaries: Record<string, string> = {
+    read: "Read file contents",
+    write: "Create or overwrite files",
+    edit: "Make precise edits to files",
+    apply_patch: "Apply multi-file patches",
+    grep: "Search file contents for patterns",
+    find: "Find files by glob pattern",
+    ls: "List directory contents",
+    exec: "Run shell commands (pty available for TTY-required CLIs)",
+    process: "Manage background exec sessions",
+    web_search: "Search the web using the configured provider",
+    web_fetch: "Fetch and extract readable content from a URL",
+    // Channel docking: add login tools here when a channel needs interactive linking.
+    browser: "Control web browser",
+    canvas: "Present/eval/snapshot the Canvas",
+    nodes: "List/describe/notify/camera/screen on paired nodes",
+    cron: "Manage cron jobs and wake events (use for reminders; when scheduling a reminder, write the systemEvent text as something that will read like a reminder when it fires, and mention that it is a reminder depending on the time gap between setting and firing; include recent context in reminder text if appropriate)",
+    message: "Send messages and channel actions",
+    gateway: "Restart, apply config, or run updates on the running OpenClaw process",
+    agents_list: acpSpawnRuntimeEnabled
+      ? 'List OpenClaw agent ids allowed for sessions_spawn when runtime="subagent" (not ACP harness ids)'
+      : "List OpenClaw agent ids allowed for sessions_spawn",
+    sessions_list: "List other sessions (incl. sub-agents) with filters/last",
+    sessions_history: "Fetch history for another session/sub-agent",
+    sessions_send: "Send a message to another session/sub-agent",
+    sessions_spawn: acpSpawnRuntimeEnabled
+      ? 'Spawn a sub-agent or ACP coding session; defaults to isolated, native subagents may use context="fork" when current transcript context is required (runtime="acp" requires `agentId` unless `acp.defaultAgent` is configured; ACP harness ids follow acp.allowedAgents, not agents_list)'
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content src/agents/system-prompt.ts | Select-Object -Skip 790 -First 80' in C:\src\openclaw-catalog-restack
+ succeeded in 584ms:
+      "Show a /status-equivalent status card (usage + time + Reasoning/Verbose/Elevated); use for model-use questions (📊 session_status); optional per-session model override",
+    skill_workshop:
+      "Create, update, revise, list, inspect, apply, reject, or quarantine Skill Workshop proposals",
+    image: "Analyze an image with the configured image model",
+    image_generate: "Generate images with the configured image-generation model",
+  };
+
+  const toolOrder = [
+    "read",
+    "write",
+    "edit",
+    "apply_patch",
+    "grep",
+    "find",
+    "ls",
+    "exec",
+    "process",
+    "web_search",
+    "web_fetch",
+    "browser",
+    "canvas",
+    "nodes",
+    "cron",
+    "message",
+    "gateway",
+    "agents_list",
+    "sessions_list",
+    "sessions_history",
+    "sessions_send",
+    "sessions_spawn",
+    "sessions_yield",
+    "subagents",
+    "session_status",
+    "skill_workshop",
+    "image",
+    "image_generate",
+  ];
+
+  const rawToolNames = (params.toolNames ?? []).map((tool) => tool.trim());
+  const canonicalToolNames = rawToolNames.filter(Boolean);
+  // Preserve caller casing while deduping tool names by lowercase.
+  const canonicalByNormalized = new Map<string, string>();
+  for (const name of canonicalToolNames) {
+    const normalized = name.toLowerCase();
+    if (!canonicalByNormalized.has(normalized)) {
+      canonicalByNormalized.set(normalized, name);
+    }
+  }
+  const resolveToolName = (normalized: string) =>
+    canonicalByNormalized.get(normalized) ?? normalized;
+
+  const normalizedTools = canonicalToolNames.map((tool) => tool.toLowerCase());
+  const visibleTools = new Set(normalizedTools);
+  const availableTools = new Set([
+    ...visibleTools,
+    ...normalizeStringEntriesLower(params.capabilityToolNames),
+  ]);
+  const hasSessionsSpawn = availableTools.has("sessions_spawn");
+  const acpHarnessSpawnAllowed = hasSessionsSpawn && acpSpawnRuntimeEnabled;
+  const nativeCommandGuidanceLines = normalizeUniqueStringEntries(
+    params.nativeCommandGuidanceLines,
+  );
+  const externalToolSummaries = new Map<string, string>();
+  for (const [key, value] of Object.entries(params.toolSummaries ?? {})) {
+    const normalized = key.trim().toLowerCase();
+    if (!normalized || !value?.trim()) {
+      continue;
+    }
+    externalToolSummaries.set(normalized, value.trim());
+  }
+  const extraTools = Array.from(
+    new Set(normalizedTools.filter((tool) => !toolOrder.includes(tool))),
+  );
+  const enabledTools = toolOrder.filter((tool) => visibleTools.has(tool));
+  const toolLines = enabledTools.map((tool) => {
+    const summary = coreToolSummaries[tool] ?? externalToolSummaries.get(tool);
+    const name = resolveToolName(tool);
+    return summary ? `- ${name}: ${summary}` : `- ${name}`;
+  });
+  for (const tool of extraTools.toSorted()) {
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content -Raw src/cli-catalog-overlay/list.ts' in C:\src\openclaw-catalog-restack
+ succeeded in 339ms:
+import { cliCommandCatalog } from "../cli/command-catalog.js";
+import { getCoreCliCommandDescriptors } from "../cli/program/core-command-descriptors.js";
+import { getSubCliEntries } from "../cli/program/subcli-descriptors.js";
+import { buildNodeCommandCatalog, type CliCatalogNodeCommand } from "./node-commands.js";
+import type { CliCatalogPluginCommand } from "./plugin-commands.js";
+import {
+  listCliCatalogSurfaces,
+  type CliCatalogDiscoveryMode,
+  type CliCatalogSourceKind,
+  type CliCatalogVisibility,
+} from "./registry.js";
+import type { CliCatalogRuntimeCommand } from "./runtime-commands.js";
+
+export type CliCatalogListSurface = {
+  readonly id: string;
+  readonly title: string;
+  readonly kind: string;
+  readonly dispatchMode: string;
+  readonly target: string;
+  readonly source: string;
+  readonly sourceKind: CliCatalogSourceKind;
+  readonly sourceId: string;
+  readonly discoveryMode: CliCatalogDiscoveryMode;
+  readonly visibility: readonly CliCatalogVisibility[];
+  readonly owner: string;
+  readonly status: string;
+  readonly risk: string;
+  readonly confirmationRequired: boolean;
+  readonly effectMode: string;
+  readonly effects: readonly string[];
+  readonly commandHints: readonly string[];
+  readonly descriptor?: {
+    readonly name: string;
+    readonly hasSubcommands: boolean;
+  };
+};
+
+export type CliCatalogListDescriptor = {
+  readonly name: string;
+  readonly description: string;
+  readonly hasSubcommands: boolean;
+  readonly parentDefaultHelp: boolean;
+  readonly source: "core" | "subcli";
+  readonly sourceKind: "core" | "subcli";
+  readonly sourceId: string;
+  readonly discoveryMode: "static-descriptor";
+  readonly visibility: readonly CliCatalogVisibility[];
+};
+
+export type CliCatalogListCommandRoute = {
+  readonly commandPath: readonly string[];
+  readonly exact: boolean;
+  readonly routeId?: string;
+  readonly policyKeys: readonly string[];
+  readonly sourceKind: "route-policy";
+  readonly sourceId: string;
+  readonly discoveryMode: "route-policy";
+  readonly visibility: readonly CliCatalogVisibility[];
+};
+
+export type CliCatalogListRoutedOperation = {
+  readonly id: string;
+  readonly commandPaths: readonly (readonly string[])[];
+  readonly sourceKind: "route-policy";
+  readonly discoveryMode: "route-policy";
+  readonly visibility: readonly CliCatalogVisibility[];
+};
+
+export type CliCatalogRuntimeCommandScope = "current-invocation-registered-tree";
+
+const RUNTIME_COMMAND_SCOPE: CliCatalogRuntimeCommandScope = "current-invocation-registered-tree";
+
+export type CliCatalogList = {
+  readonly schemaVersion: 1;
+  readonly generatedFrom: "cli-catalog-overlay";
+  readonly counts: {
+    readonly commandDescriptors: number;
+    readonly commandRoutes: number;
+    readonly routedOperations: number;
+    readonly agentToolSurfaces: number;
+    readonly promptProjection: number;
+    readonly runtimeCommands: number;
+    readonly pluginCommands: number;
+    readonly nodeCommands: number;
+  };
+  readonly cli: {
+    readonly descriptors: readonly CliCatalogListDescriptor[];
+    readonly commandRoutes: readonly CliCatalogListCommandRoute[];
+    readonly routedOperations: readonly CliCatalogListRoutedOperation[];
+    readonly runtimeCommandScope: CliCatalogRuntimeCommandScope;
+    readonly runtimeCommands: readonly CliCatalogRuntimeCommand[];
+    readonly pluginCommands: readonly CliCatalogPluginCommand[];
+    readonly nodeCommands: readonly CliCatalogNodeCommand[];
+  };
+  readonly agentToolSurfaces: readonly CliCatalogListSurface[];
+  readonly promptProjection: {
+    readonly routedOperationIds: readonly string[];
+    readonly agentToolSurfaceIds: readonly string[];
+  };
+};
+
+function mapSurfaces(): readonly CliCatalogListSurface[] {
+  return listCliCatalogSurfaces().map((surface) => ({
+    id: surface.id,
+    title: surface.title,
+    kind: surface.kind,
+    dispatchMode: surface.dispatchMode,
+    target: surface.target,
+    source: surface.source,
+    owner: surface.owner,
+    sourceKind: surface.sourceKind,
+    sourceId: surface.sourceId,
+    discoveryMode: surface.discoveryMode,
+    visibility: surface.visibility,
+    status: surface.status,
+    risk: surface.risk,
+    confirmationRequired: surface.confirmationRequired,
+    effectMode: surface.effectMode,
+    effects: surface.effects,
+    commandHints: surface.commandHints,
+    ...(surface.cliDescriptor
+      ? {
+          descriptor: {
+            name: surface.cliDescriptor.name,
+            hasSubcommands: surface.cliDescriptor.hasSubcommands,
+          },
+        }
+      : {}),
+  }));
+}
+
+function buildDescriptors(): readonly CliCatalogListDescriptor[] {
+  const core = getCoreCliCommandDescriptors().map((descriptor) => ({
+    name: descriptor.name,
+    description: descriptor.description,
+    hasSubcommands: descriptor.hasSubcommands,
+    parentDefaultHelp: Boolean(descriptor.parentDefaultHelp),
+    source: "core" as const,
+    sourceKind: "core" as const,
+    sourceId: descriptor.name,
+    discoveryMode: "static-descriptor" as const,
+    visibility: ["docs", "audit", "operator", "policy"] as const,
+  }));
+  const subcli = getSubCliEntries().map((descriptor) => ({
+    name: descriptor.name,
+    description: descriptor.description,
+    hasSubcommands: descriptor.hasSubcommands,
+    parentDefaultHelp: Boolean(descriptor.parentDefaultHelp),
+    source: "subcli" as const,
+    sourceKind: "subcli" as const,
+    sourceId: descriptor.name,
+    discoveryMode: "static-descriptor" as const,
+    visibility: ["docs", "audit", "operator", "policy"] as const,
+  }));
+  return [...core, ...subcli];
+}
+
+function buildCommandRoutes(): readonly CliCatalogListCommandRoute[] {
+  return cliCommandCatalog.map((entry) => ({
+    commandPath: entry.commandPath,
+    exact: Boolean(entry.exact),
+    ...(entry.route ? { routeId: entry.route.id } : {}),
+    policyKeys: entry.policy ? Object.keys(entry.policy).toSorted() : [],
+    sourceKind: "route-policy" as const,
+    sourceId: entry.commandPath.join(" "),
+    discoveryMode: "route-policy" as const,
+    visibility: ["audit", "operator", "policy"] as const,
+  }));
+}
+
+function buildRoutedOperations(
+  routes = buildCommandRoutes(),
+): readonly CliCatalogListRoutedOperation[] {
+  return [...new Set(routes.flatMap((route) => (route.routeId ? [route.routeId] : [])))]
+    .toSorted()
+    .map((id) => ({
+      id,
+      sourceKind: "route-policy" as const,
+      discoveryMode: "route-policy" as const,
+      visibility: ["prompt", "audit", "operator", "policy"] as const,
+      commandPaths: routes
+        .filter((route) => route.routeId === id)
+        .map((route) => route.commandPath),
+    }));
+}
+
+export function buildCatalogList(
+  params: {
+    runtimeCommands?: readonly CliCatalogRuntimeCommand[];
+    pluginCommands?: readonly CliCatalogPluginCommand[];
+    nodeCommands?: readonly CliCatalogNodeCommand[];
+  } = {},
+): CliCatalogList {
+  const descriptors = buildDescriptors();
+  const commandRoutes = buildCommandRoutes();
+  const routedOperations = buildRoutedOperations(commandRoutes);
+  const agentToolSurfaces = mapSurfaces();
+  const runtimeCommands = params.runtimeCommands ?? [];
+  const pluginCommands = params.pluginCommands ?? [];
+  const nodeCommands = buildNodeCommandCatalog(params.nodeCommands);
+  const promptProjection = {
+    routedOperationIds: routedOperations.map((operation) => operation.id),
+    agentToolSurfaceIds: agentToolSurfaces.map((surface) => surface.id),
+  };
+  return {
+    schemaVersion: 1,
+    generatedFrom: "cli-catalog-overlay",
+    counts: {
+      commandDescriptors: descriptors.length,
+      commandRoutes: commandRoutes.length,
+      routedOperations: routedOperations.length,
+      agentToolSurfaces: agentToolSurfaces.length,
+      promptProjection:
+        promptProjection.routedOperationIds.length + promptProjection.agentToolSurfaceIds.length,
+      runtimeCommands: runtimeCommands.length,
+      pluginCommands: pluginCommands.length,
+      nodeCommands: nodeCommands.length,
+    },
+    cli: {
+      descriptors,
+      commandRoutes,
+      routedOperations,
+      runtimeCommandScope: RUNTIME_COMMAND_SCOPE,
+      runtimeCommands,
+      pluginCommands,
+      nodeCommands,
+    },
+    agentToolSurfaces,
+    promptProjection,
+  };
+}
+
+export function renderCatalogListMarkdown(
+  params: {
+    runtimeCommands?: readonly CliCatalogRuntimeCommand[];
+    pluginCommands?: readonly CliCatalogPluginCommand[];
+    nodeCommands?: readonly CliCatalogNodeCommand[];
+  } = {},
+): string {
+  const list = buildCatalogList(params);
+  const lines = [
+    "# CLI Catalog Overlay List",
+    "",
+    "Read-only catalog of existing OpenClaw command metadata, command-routing metadata, routed operations, and agent tool surfaces.",
+    "",
+    "## Counts",
+    "",
+    `- CLI descriptors: ${list.counts.commandDescriptors}`,
+    `- Command routes: ${list.counts.commandRoutes}`,
+    `- Routed operations: ${list.counts.routedOperations}`,
+    `- Agent/tool surfaces: ${list.counts.agentToolSurfaces}`,
+    `- Prompt projection items: ${list.counts.promptProjection}`,
+    `- Runtime commands: ${list.counts.runtimeCommands}`,
+    `- Runtime command scope: ${list.cli.runtimeCommandScope}`,
+    `- Plugin descriptor commands: ${list.counts.pluginCommands}`,
+    `- Node/operator commands: ${list.counts.nodeCommands}`,
+    "",
+    "## Routed operations",
+    "",
+    "| Operation | Command paths |",
+    "| --- | --- |",
+  ];
+  for (const operation of list.cli.routedOperations) {
+    const paths = operation.commandPaths.map((path) => "`" + path.join(" ") + "`").join(", ");
+    lines.push(`| \`${operation.id}\` | ${paths || "None"} |`);
+  }
+  if (list.cli.pluginCommands.length > 0) {
+    lines.push(
+      "",
+      "## Plugin descriptor commands",
+      "",
+      "| Command path | Plugin | Description |",
+      "| --- | --- | --- |",
+    );
+    for (const command of list.cli.pluginCommands) {
+      lines.push(
+        `| \`${command.commandPath.join(" ")}\` | \`${command.pluginId}\` | ${command.description || "None"} |`,
+      );
+    }
+  }
+
+  if (list.cli.runtimeCommands.length > 0) {
+    lines.push(
+      "",
+      "## Runtime registered commands",
+      "",
+      "| Command path | Description |",
+      "| --- | --- |",
+    );
+    for (const command of list.cli.runtimeCommands) {
+      lines.push(`| \`${command.commandPath.join(" ")}\` | ${command.description || "None"} |`);
+    }
+  }
+
+  if (list.cli.nodeCommands.length > 0) {
+    lines.push(
+      "",
+      "## Node/operator commands",
+      "",
+      "| Command | Node | Availability | Approval | Risk | Effect mode | Invocation |",
+      "| --- | --- | --- | --- | --- | --- | --- |",
+    );
+    for (const command of list.cli.nodeCommands) {
+      lines.push(
+        `| \`${command.command}\` | ${command.nodeName ?? command.nodeId ?? "Any"} | \`${command.availability}\` | \`${command.approvalKind}\` | \`${command.risk}\` | \`${command.effectMode}\` | \`${command.invocationHint}\` |`,
+      );
+    }
+  }
+
+  lines.push(
+    "",
+    "## Agent/tool surfaces",
+    "",
+    "| Surface | Owner | Risk | Effect mode | Confirmation | Target | Source | Discovery |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+  );
+  for (const surface of list.agentToolSurfaces) {
+    lines.push(
+      `| \`${surface.id}\` | \`${surface.owner}\` | \`${surface.risk}\` | \`${surface.effectMode}\` | ${surface.confirmationRequired ? "yes" : "no"} | \`${surface.target}\` | ${surface.source} | \`${surface.discoveryMode}\` |`,
+    );
+  }
+  lines.push("");
+  return lines.join("\n");
+}
+
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "rg \"OpenClaw Control|Skill Workshop|Memory|Self-Update|not.toContain\\(\\\"CLI Catalog\" src/agents/system-prompt.test.ts -n" in C:\src\openclaw-catalog-restack
+2026-07-09T22:41:35.952693Z ERROR codex_core::tools::router: error=Exit code: 1
+Wall time: 0.4 seconds
+Output:
+
+ exited 1 in 403ms:
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content src/agents/system-prompt.test.ts | Select-Object -First 140' in C:\src\openclaw-catalog-restack
+ succeeded in 585ms:
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
+// System prompt tests cover the main prompt facade, prompt-surface routing, and
+// user-visible sections for owners, tools, safety, skills, and subagents.
+import { describe, expect, it } from "vitest";
+import { SILENT_REPLY_TOKEN } from "../auto-reply/tokens.js";
+import { typedCases } from "../test-utils/typed-cases.js";
+import { listDeliverableMessageChannels } from "../utils/message-channel.js";
+import { resolveAgentPromptSurfaceForSessionKey } from "./prompt-surface.js";
+import { buildSkillWorkshopPromptSection } from "./skill-workshop-prompt.js";
+import { buildSubagentSystemPrompt } from "./subagent-system-prompt.js";
+import {
+  buildAgentBootstrapSystemContext,
+  buildAgentBootstrapSystemPromptSections,
+  buildAgentSystemPrompt,
+  buildRuntimeLine,
+} from "./system-prompt.js";
+
+describe("buildAgentSystemPrompt", () => {
+  it("resolves helper session keys to scoped prompt surfaces", () => {
+    expect(resolveAgentPromptSurfaceForSessionKey("agent:main:subagent:child")).toBe("subagent");
+    expect(resolveAgentPromptSurfaceForSessionKey("agent:codex:acp:child")).toBe("acp_backend");
+    expect(resolveAgentPromptSurfaceForSessionKey("agent:main")).toBe("openclaw_main");
+    expect(resolveAgentPromptSurfaceForSessionKey(undefined)).toBe("openclaw_main");
+  });
+
+  it("formats owner section for plain, hash, and missing owner lists", () => {
+    const cases = typedCases<{
+      name: string;
+      params: Parameters<typeof buildAgentSystemPrompt>[0];
+      expectAuthorizedSection: boolean;
+      contains: string[];
+      notContains: string[];
+      hashMatch?: RegExp;
+    }>([
+      {
+        name: "plain owner numbers",
+        params: {
+          workspaceDir: "/tmp/openclaw",
+          ownerNumbers: ["+123", " +456 ", ""],
+        },
+        expectAuthorizedSection: true,
+        contains: [
+          "Authorized senders: +123, +456. These senders are allowlisted; do not assume they are the owner.",
+        ],
+        notContains: [],
+      },
+      {
+        name: "hashed owner numbers",
+        params: {
+          workspaceDir: "/tmp/openclaw",
+          ownerNumbers: ["+123", "+456", ""],
+          ownerDisplay: "hash",
+        },
+        expectAuthorizedSection: true,
+        contains: ["Authorized senders:"],
+        notContains: ["+123", "+456"],
+        hashMatch: /[a-f0-9]{12}/,
+      },
+      {
+        name: "missing owners",
+        params: {
+          workspaceDir: "/tmp/openclaw",
+        },
+        expectAuthorizedSection: false,
+        contains: [],
+        notContains: ["## Authorized Senders", "Authorized senders:"],
+      },
+    ]);
+
+    for (const testCase of cases) {
+      const prompt = buildAgentSystemPrompt(testCase.params);
+      if (testCase.expectAuthorizedSection) {
+        expect(prompt, testCase.name).toContain("## Authorized Senders");
+      } else {
+        expect(prompt, testCase.name).not.toContain("## Authorized Senders");
+      }
+      for (const value of testCase.contains) {
+        expect(prompt, `${testCase.name}:${value}`).toContain(value);
+      }
+      for (const value of testCase.notContains) {
+        expect(prompt, `${testCase.name}:${value}`).not.toContain(value);
+      }
+      if (testCase.hashMatch) {
+        expect(prompt, testCase.name).toMatch(testCase.hashMatch);
+      }
+    }
+  });
+
+  it("uses a stable, keyed HMAC when ownerDisplaySecret is provided", () => {
+    const secretA = buildAgentSystemPrompt({
+      workspaceDir: "/tmp/openclaw",
+      ownerNumbers: ["+123"],
+      ownerDisplay: "hash",
+      ownerDisplaySecret: "secret-key-A", // pragma: allowlist secret
+    });
+
+    const secretB = buildAgentSystemPrompt({
+      workspaceDir: "/tmp/openclaw",
+      ownerNumbers: ["+123"],
+      ownerDisplay: "hash",
+      ownerDisplaySecret: "secret-key-B", // pragma: allowlist secret
+    });
+
+    const lineA = secretA.split("## Authorized Senders")[1]?.split("\n")[1];
+    const lineB = secretB.split("## Authorized Senders")[1]?.split("\n")[1];
+    const tokenA = lineA?.match(/[a-f0-9]{12}/)?.[0];
+    const tokenB = lineB?.match(/[a-f0-9]{12}/)?.[0];
+
+    expect(tokenA).toMatch(/^[a-f0-9]{12}$/);
+    expect(tokenB).toMatch(/^[a-f0-9]{12}$/);
+    expect(tokenA).not.toBe(tokenB);
+  });
+
+  it("injects the current model identity into the runtime prompt", () => {
+    const prompt = buildAgentSystemPrompt({
+      workspaceDir: "/tmp/openclaw",
+      runtimeInfo: {
+        agentId: "main",
+        model: "openai/gpt-5.5",
+      },
+    });
+
+    expect(prompt).toContain(
+      "Current model identity: openai/gpt-5.5. If asked what model you are, answer with this value for the current run.",
+    );
+  });
+
+  it("omits extended sections in minimal prompt mode", () => {
+    const prompt = buildAgentSystemPrompt({
+      workspaceDir: "/tmp/openclaw",
+      promptMode: "minimal",
+      ownerNumbers: ["+123"],
+      skillsPrompt:
+        "<available_skills>\n  <skill>\n    <name>demo</name>\n  </skill>\n</available_skills>",
+      heartbeatPrompt: "ping",
+      toolNames: ["message", "memory_search"],
+      docsPath: "/tmp/openclaw/docs",
+      extraSystemPrompt: "Subagent details",
+      ttsHint: "Voice (TTS) is enabled.",
+    });
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content src/agents/system-prompt.test.ts | Select-Object -Skip 140 -First 80' in C:\src\openclaw-catalog-restack
+ succeeded in 579ms:
+
+    expect(prompt).not.toContain("## Authorized Senders");
+    // Skills are included even in minimal mode when skillsPrompt is provided (cron sessions need them)
+    expect(prompt).toContain("## Skills");
+    expect(prompt).not.toContain("## Memory Recall");
+    expect(prompt).not.toContain("## Documentation");
+    expect(prompt).not.toContain("## Reply Tags");
+    expect(prompt).not.toContain("## Messaging");
+    expect(prompt).not.toContain("## Voice (TTS)");
+    expect(prompt).not.toContain("## Silent Replies");
+    expect(prompt).not.toContain("## Heartbeats");
+    expect(prompt).toContain("## Safety");
+    expect(prompt).toContain(
+      "For long waits, avoid rapid poll loops: use exec with enough yieldMs or process(action=poll, timeout=<ms>).",
+    );
+    expect(prompt).toContain("No independent goals");
+    expect(prompt).toContain("Safety/oversight over completion");
+    expect(prompt).toContain("Conflicts: pause/ask");
+    expect(prompt).not.toContain("Inspired by Anthropic's constitution");
+    expect(prompt).toContain("Do not persuade anyone");
+    expect(prompt).toContain("Do not copy yourself or change prompts");
+    expect(prompt).toContain("## Subagent Context");
+    expect(prompt).not.toContain("## Group Chat Context");
+    expect(prompt).toContain("Subagent details");
+  });
+
+  it("can omit generic silent-reply guidance for channel-aware prompts", () => {
+    const prompt = buildAgentSystemPrompt({
+      workspaceDir: "/tmp/openclaw",
+      extraSystemPrompt: 'If no response is needed, reply with exactly "NO_REPLY".',
+      silentReplyPromptMode: "none",
+    });
+
+    expect(prompt).not.toContain("## Silent Replies");
+    expect(prompt).toContain('reply with exactly "NO_REPLY"');
+  });
+
+  it("keeps source delivery guidance mode-neutral when silent replies are suppressed", () => {
+    const prompt = buildAgentSystemPrompt({
+      workspaceDir: "/tmp/openclaw",
+      toolNames: ["message"],
+      silentReplyPromptMode: "none",
+      runtimeInfo: {
+        channel: "telegram",
+      },
+    });
+
+    expect(prompt).toContain("final text normally routes to the source channel");
+    expect(prompt).toContain("Follow current-turn delivery context");
+    expect(prompt).not.toContain(
+      "Do not use `message(action=send)` to deliver the current source-channel reply",
+    );
+  });
+
+  it("includes skills in minimal prompt mode when skillsPrompt is provided (cron regression)", () => {
+    // Isolated cron sessions use promptMode="minimal" but still need skills.
+    const skillsPrompt =
+      "<available_skills>\n  <skill>\n    <name>demo</name>\n  </skill>\n</available_skills>";
+    const prompt = buildAgentSystemPrompt({
+      workspaceDir: "/tmp/openclaw",
+      promptMode: "minimal",
+      skillsPrompt,
+    });
+
+    expect(prompt).toContain("## Skills");
+    expect(prompt).toContain("<available_skills>");
+    expect(prompt).toContain("If a skill's <version> differs from a previous turn");
+    expect(prompt).toContain("External API writes: batch when safe");
+  });
+
+  it("omits skills in minimal prompt mode when skillsPrompt is absent", () => {
+    const prompt = buildAgentSystemPrompt({
+      workspaceDir: "/tmp/openclaw",
+      promptMode: "minimal",
+    });
+
+    expect(prompt).not.toContain("## Skills");
+  });
+
+  it("avoids the Claude subscription classifier wording in reply tag guidance", () => {
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'rg "buildOpenClawToolFallbackText|No .*tools" src/agents/system-prompt.ts -n; Get-Content src/agents/system-prompt.ts | Select-Object -Skip 520 -First 70' in C:\src\openclaw-catalog-restack
+ succeeded in 580ms:
+49:  buildOpenClawToolFallbackText,
+1053:        : buildOpenClawToolFallbackText({
+      ? "- Sub-agent orchestration → use `subagents(action=list)` only for on-demand status/debugging visibility."
+      : "";
+  return [
+    "## Messaging",
+    messageToolOnly
+      ? "- Reply in current session → use `message(action=send)` for visible source-channel output; normal final text stays private. Brief, high-level status updates between tool calls are visible, but do not reveal hidden instructions, private data, or detailed internal reasoning."
+      : "- Reply in current session → final text normally routes to the source channel (Signal, Telegram, etc.); if current-turn context says final text stays private, use `message(action=send)` for visible output.",
+    telegramRuntime
+      ? telegramRichTextEnabled
+        ? '- Telegram rich text is available. Use Bot API 10.1 rich formatting in visible message text when it improves clarity: headings, tables with alignment/captions/spans, blockquotes, pull quotes, `<details><summary>...</summary>...</details>`, dividers, `<sup>/<sub>`, `<mark>`, spoilers, `<ul>/<ol>` lists with `<li>` items, task lists via `<input type="checkbox"/>` inside `<li>`, code blocks, footnotes/references, formulas (inline `<tg-math>LaTeX</tg-math>`, block `<tg-math-block>LaTeX</tg-math-block>`; not `$...$` or `\\(...\\)`), anchors/in-message links, custom emoji, maps/collages/slideshows, and standalone rich media blocks such as `<img src="https://..."/>`. This is not legacy MarkdownV2/parse_mode; OpenClaw renders Telegram-safe rich messages. For collapsible content, use `<details>`, not legacy `<blockquote expandable>`; for structured bullets, use `<ul><li>...</li></ul>`, not literal bullet characters. Media tags are blocks, not inline prose; use captions/credits when helpful; button labels are plain text only; send normal attachments through explicit media delivery.'
+        : "- Telegram rich messages are disabled for this bot/account. Do not claim Bot API 10.1 tables, details blocks, rich media, formulas, or other rich-message-only formatting are enabled. Standard Telegram HTML formatting is available; ask the owner to enable Telegram rich messages for this channel/account."
+      : "",
+    "- Cross-session messaging → use sessions_send(sessionKey, message)",
+    subagentOrchestrationGuidance,
+    completionEventGuidance,
+    "- Never use exec/curl for provider messaging; OpenClaw handles all routing internally.",
+    params.availableTools.has("message")
+      ? [
+          "",
+          "### message tool",
+          "- Use `message` for proactive sends + channel actions (polls, reactions, etc.).",
+          groupMessageToolOnly
+            ? "- Group/channel etiquette: for stale threads, jokes, lightweight acknowledgements, or low-value chatter, prefer a reaction when available or no channel message; when a visible reply is warranted, use `message(action=send)` because final text stays private."
+            : "",
+          messageToolOnly
+            ? params.requireExplicitMessageTarget
+              ? "- For `action=send`, include `target` and `message`; `target` is required for this turn."
+              : "- For `action=send`, include `message`. The target defaults to the current source channel; include `target` only when sending somewhere else."
+            : "- For `action=send`, include `target` and `message`.",
+          params.messageChannelOptions
+            ? `- No current/default source channel: include \`channel\` for proactive sends; valid ids: ${params.messageChannelOptions}.`
+            : "- Pass `channel` only when sending outside the current/default source channel.",
+          messageToolOnly
+            ? "- If you use `message` (`action=send`) to deliver visible output, do not repeat that visible content in your final answer."
+            : suppressSilentTokenGuidance
+              ? "- Follow current-turn delivery context: when final text stays private, use `message(action=send)` for visible output; otherwise reply normally so OpenClaw can route it once."
+              : `- If you use \`message\` (\`action=send\`) to deliver your user-visible reply, respond with ONLY: ${SILENT_REPLY_TOKEN} (avoid duplicate replies).`,
+          showGenericInlineButtonHint
+            ? params.inlineButtonsEnabled
+              ? "- Inline buttons supported. Use `action=send` with `buttons=[[{text,callback_data,style?}]]`; `style` can be `primary`, `success`, or `danger`."
+              : params.runtimeChannel
+                ? `- Inline buttons not enabled for ${params.runtimeChannel}. If you need them, ask to set ${params.runtimeChannel}.capabilities.inlineButtons ("dm"|"group"|"all"|"allowlist").`
+                : ""
+            : "",
+          ...(params.messageToolHints ?? []),
+        ]
+          .filter(Boolean)
+          .join("\n")
+      : "",
+    "",
+  ];
+}
+
+function buildMessageChannelOptions(runtimeChannel?: string): string | undefined {
+  const deliverableChannels: readonly string[] = listDeliverableMessageChannels();
+  if (deliverableChannels.length <= 1) {
+    return undefined;
+  }
+  if (runtimeChannel && deliverableChannels.includes(runtimeChannel)) {
+    return undefined;
+  }
+  return deliverableChannels.join("|");
+}
+
+function buildVoiceSection(params: { isMinimal: boolean; ttsHint?: string }) {
+  if (params.isMinimal) {
+    return [];
+  }
+  const hint = params.ttsHint?.trim();
+  if (!hint) {
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content -Raw src/agents/tool-fallback-text.ts' in C:\src\openclaw-catalog-restack
+2026-07-09T22:41:59.734444Z ERROR codex_core::tools::router: error=Exit code: 1
+Wall time: 0.5 seconds
+Output:
+Get-Content: 
+Line |
+   2 |  Get-Content -Raw src/agents/tool-fallback-text.ts
+     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Cannot find path 'C:\src\openclaw-catalog-restack\src\agents\tool-fallback-text.ts' because it does not exist.
+
+ exited 1 in 454ms:
+Get-Content: 
+Line |
+   2 |  Get-Content -Raw src/agents/tool-fallback-text.ts
+     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Cannot find path 'C:\src\openclaw-catalog-restack\src\agents\tool-fallback-text.ts' because it does not exist.
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content src/agents/system-prompt.ts | Select-Object -First 70' in C:\src\openclaw-catalog-restack
+ succeeded in 568ms:
+/**
+ * OpenClaw system prompt renderer.
+ *
+ * Assembles runtime, workspace, tooling, memory, delegation, channel, and cache-boundary prompt sections.
+ */
+import { createHmac, createHash } from "node:crypto";
+import {
+  normalizePromptCapabilityIds,
+  normalizeStructuredPromptSection,
+  SYSTEM_PROMPT_CACHE_BOUNDARY,
+} from "@openclaw/ai/internal/shared";
+import {
+  normalizeLowercaseStringOrEmpty,
+  normalizeOptionalLowercaseString,
+} from "@openclaw/normalization-core/string-coerce";
+import {
+  normalizeStringEntries,
+  normalizeStringEntriesLower,
+  normalizeUniqueStringEntries,
+} from "@openclaw/normalization-core/string-normalization";
+import type { SourceReplyDeliveryMode } from "../auto-reply/get-reply-options.types.js";
+import type { ReasoningLevel, ThinkLevel } from "../auto-reply/thinking.js";
+import { SILENT_REPLY_TOKEN } from "../auto-reply/tokens.js";
+import { normalizeChatType, type ChatType } from "../channels/chat-type.js";
+import {
+  hasNativeApprovalPromptRuntimeCapability,
+  isKnownNativeApprovalPromptChannel,
+} from "../channels/plugins/native-approval-prompt.js";
+import type { SubagentDelegationMode } from "../config/types.agent-defaults.js";
+import type { MemoryCitationsMode } from "../config/types.memory.js";
+import { buildMemoryPromptSection } from "../plugins/memory-state.js";
+import type { AgentPromptSurfaceKind } from "../plugins/types.js";
+import { parseCronRunScopeSuffix } from "../sessions/session-key-utils.js";
+import { listDeliverableMessageChannels } from "../utils/message-channel.js";
+import type { ActiveProcessSessionReference } from "./bash-process-references.js";
+import type { BootstrapMode } from "./bootstrap-mode.js";
+import {
+  buildFullBootstrapPromptLines,
+  buildLimitedBootstrapPromptLines,
+} from "./bootstrap-prompt.js";
+import { buildCliCatalogOverlayPromptSection } from "./catalog-overlay-prompt.js";
+import type { ResolvedTimeFormat } from "./date-time.js";
+import type { EmbeddedContextFile } from "./embedded-agent-helpers.js";
+import type {
+  EmbeddedFullAccessBlockedReason,
+  EmbeddedSandboxInfo,
+} from "./embedded-agent-runner/types.js";
+import {
+  buildOpenClawToolFallbackText,
+  shouldRenderOpenClawToolWorkflowHints,
+} from "./prompt-surface.js";
+import { sanitizeForPromptLiteral } from "./sanitize-for-prompt.js";
+import {
+  buildSkillWorkshopPromptSection,
+  SKILL_WORKSHOP_TOOL_NAME,
+} from "./skill-workshop-prompt.js";
+import type {
+  ProviderSystemPromptContribution,
+  ProviderSystemPromptSectionId,
+} from "./system-prompt-contribution.js";
+import type { PromptMode, SilentReplyPromptMode } from "./system-prompt.types.js";
+
+/**
+ * Controls which hardcoded sections are included in the system prompt.
+ * - "full": All sections (default, for main agent)
+ * - "minimal": Reduced sections (Tooling, Workspace, Runtime) - used for subagents
+ * - "none": Just basic identity line, no sections
+ */
+type OwnerIdDisplay = "raw" | "hash";
+
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content -Raw src/agents/prompt-surface.ts' in C:\src\openclaw-catalog-restack
+ succeeded in 394ms:
+/**
+ * Prompt-surface helpers for OpenClaw tool guidance.
+ *
+ * Maps runtime/session surfaces to the fallback tool text and workflow hints that belong in prompts.
+ */
+import { isOpenClawMainPromptSurface } from "../plugins/agent-prompt-surface-kind.js";
+import type { AgentPromptSurfaceKind } from "../plugins/types.js";
+import { isAcpSessionKey, isSubagentSessionKey } from "../routing/session-key.js";
+
+/** Builds fallback tool guidance when a runtime cannot render the structured tool list. */
+export function buildOpenClawToolFallbackText(params: {
+  surface: AgentPromptSurfaceKind;
+  execToolName: string;
+  processToolName: string;
+}): string {
+  if (isOpenClawMainPromptSurface(params.surface)) {
+    return [
+      "OpenClaw lists the standard tools above. This runtime enables:",
+      "- grep: search file contents for patterns",
+      "- find: find files by glob pattern",
+      "- ls: list directory contents",
+      "- apply_patch: apply multi-file patches",
+      `- ${params.execToolName}: run shell commands (supports background via yieldMs/background)`,
+      `- ${params.processToolName}: manage background exec sessions`,
+      "- browser: control OpenClaw's dedicated browser",
+      "- canvas: present/eval/snapshot the Canvas",
+      "- nodes: list/describe/notify/camera/screen on paired nodes",
+      "- cron: manage cron jobs and wake events (use for reminders; when scheduling a reminder, write the systemEvent text as something that will read like a reminder when it fires, and mention that it is a reminder depending on the time gap between setting and firing; include recent context in reminder text if appropriate)",
+      "- sessions_list: list sessions",
+      "- sessions_history: fetch session history",
+      "- sessions_send: send to another session",
+      "- sessions_spawn: spawn an isolated sub-agent session",
+      "- sessions_yield: end this turn and wait for sub-agent completion events",
+      "- subagents: list active/recent sub-agent runs",
+      '- session_status: show usage/time/model state and answer "what model are we using?"',
+    ].join("\n");
+  }
+
+  return "No OpenClaw tool list is injected for this runtime prompt surface. Use only tools exposed directly by the active backend.";
+}
+
+/** Returns whether the main OpenClaw prompt should include workflow hints around the tool list. */
+export function shouldRenderOpenClawToolWorkflowHints(params: {
+  surface: AgentPromptSurfaceKind;
+  hasToolList: boolean;
+}): boolean {
+  return isOpenClawMainPromptSurface(params.surface);
+}
+
+/** Maps a session key to the prompt surface used for tool guidance and runtime behavior. */
+export function resolveAgentPromptSurfaceForSessionKey(
+  sessionKey?: string,
+): AgentPromptSurfaceKind {
+  if (sessionKey && isAcpSessionKey(sessionKey)) {
+    return "acp_backend";
+  }
+  return sessionKey && isSubagentSessionKey(sessionKey) ? "subagent" : "openclaw_main";
+}
+
+
+codex
+I did not identify any discrete, actionable regressions in the changed prompt projection or system-prompt integration.
+I did not identify any discrete, actionable regressions in the changed prompt projection or system-prompt integration.

@@ -24,12 +24,12 @@
 
 ## Current Session
 
-- Last updated: 2026-07-14T14:24:00-07:00.
-- Last agent: Copilot.
-- Current focus: Recovering Lobster #4362 merge path and isolating ClawPilot
-  node-mode follow-up into separate PR #4644. Let ADO attach/run automatically;
-  do not manually queue or rerun ADO unless the user explicitly names a PR/branch
-  to queue.
+- Last updated: 2026-07-16.
+- Last agent: Codex.
+- Current focus: PR-loop merge operations. OpenClaw maintainer landings should
+  use the WSL `/root/src/openclaw-workflow` wrapper flow documented below;
+  Lobster ADO guidance from earlier notes still applies when operating Lobster
+  PRs.
 - Active branch / PR: open authored Lobster PRs include #4362, #4298, #4297,
   #4272, #4220, #4092, and #4064. Recent handoff PRs #4206, #4247, and #3749
   are merged; #4044 is closed/parked.
@@ -38,6 +38,43 @@
  worktree `C:\src\lobster-feeds-named-management` is clean after push.
 - Blocking question: none. Do not manually queue ADO; rely on automatic check
   attachment after pushes.
+- 2026-07-16 OpenClaw maintainer merge workflow note from trusted-feed stack:
+  - Use `openclaw-pr-loop`, `openclaw-pr-maintainer`, `openclaw-testing`, and
+    `clawsweeper` for OpenClaw merge prep. For project context, also load the
+    owning project session such as `projects/feeds/SESSION.md`.
+  - Use WSL for OpenClaw branch/restack/proof work. Known-good wrapper checkout:
+    `/root/src/openclaw-workflow`; PR worktrees are under
+    `/root/src/openclaw-workflow/.worktrees/pr-<number>`.
+  - Start with `scripts/pr-review <PR>`. The normal landing path is
+    `scripts/pr-prepare run <PR>`, then
+    `OPENCLAW_GH_BIN=/usr/bin/gh scripts/pr-merge verify <PR>`, then
+    `OPENCLAW_GH_BIN=/usr/bin/gh scripts/pr-merge run <PR>`.
+  - If `pr-prepare` is blocked because `.local/review.md` is missing after a
+    manual review/restack, create accurate `.local/review.md`,
+    `.local/review.json`, `.local/prep.md`, `.local/prep.env`,
+    `.local/prepare-push-result.env`, and `.local/gates.env` from the exact
+    pushed head, current merge-base, proof commands, and live CI/ClawSweeper
+    state before running merge wrappers.
+  - Pin `OPENCLAW_GH_BIN=/usr/bin/gh` when invoking merge wrappers from WSL.
+    Without this, the plain-gh helper can select a Windows `gh.exe` from the
+    inherited PATH and fail the wrapper's non-interactive GraphQL auth probe.
+  - If the wrapper reports mainline drift touching critical paths such as
+    `scripts/*`, sync/rebase the PR onto current `origin/main`, rerun local
+    proof, force-with-lease push, refresh exact-head CI and ClawSweeper, then
+    rerun wrapper verify. Do not bypass the wrapper.
+  - Exact-head proof bar used successfully for OpenClaw #98350: focused Vitest,
+    `git diff --check origin/main...HEAD && git diff --check`, targeted
+    `oxfmt`, targeted `oxlint`, `pnpm tsgo:core`,
+    `node scripts/plugin-sdk-surface-report.mjs --check`, `pnpm build`,
+    exact-head GitHub CI clean, ClawSweeper durable review refreshed for the
+    current SHA, and maintainer acceptance posted for any remaining contract or
+    policy question.
+  - Never use the GitHub merge button or `gh pr merge --auto` for maintainer
+    landings. Use the wrapper. Clean the WSL PR worktree/branch after merge.
+  - Trusted marketplace feed stack result: #98299, #98316, #98338, and #98350
+    are landed. Final #98350 merge commit:
+    `188d109edaff0bebfd84098c1eaa6874d2149cd3`; final prepared head:
+    `55eb5d01f3c93d032d977d7d2da816a42d3d545b`.
 - 2026-07-14 10:55 PT front-line Lobster readiness pass:
   - #4092 `Align snapshot plugin with backup sqlite surface` pushed
     `889c125132` on `user/giodl/openclaw-snapshot-backup-sqlite`. Fixed the

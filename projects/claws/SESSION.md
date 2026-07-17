@@ -22,6 +22,446 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack review pass - PR #102306 export cleanup
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#102306](https://github.com/openclaw/openclaw/pull/102306)
+  is clean-restacked on current #102296 head
+  `0be472639ea586ac049a5b2ab1634c3abbd3d578` at head
+  `41517c89a575a498c7258ab593a8ea152f069a79` on branch
+  `user/giodl/claws-pr7-export`.
+- The restack kept the four export commits only. The concrete lower-stack
+  fallout was the package integrity contract from #102296/#102228: exported
+  package refs now carry recorded `integrity`, and the export test fixture
+  seeds/expects package integrity.
+- Corrected exact-head proof/comment:
+  https://github.com/openclaw/openclaw/pull/102306#issuecomment-5003538044.
+  ClawSweeper acknowledged the exact-head request at
+  https://github.com/openclaw/openclaw/pull/102306#issuecomment-5003538428.
+- Local validation on exact head `41517c89a5`: focused export/CLI/lifecycle
+  Vitest passed 32 tests across 3 shards, `pnpm tsgo:core:test`,
+  `pnpm tsgo:prod`, scoped Oxlint, `pnpm check:architecture`, deadcode
+  dependencies/exports/unused-files, and `git diff --check` passed.
+- Exact-head CLI proof added `workspace-agent`, exported it as a package,
+  inspected the exported package successfully, then added the exported package
+  in a separate clean state with exact dry-run `planIntegrity` consent. The
+  exported package wrote `workspace/HEARTBEAT.md`, `workspace/SOUL.md`,
+  `workspace/reference/policy.md`, `package.json`, and `openclaw.claw.json`.
+- Live GitHub CI is rerunning on `41517c89a5`. Early snapshot: Real behavior
+  proof passed, and the previously failing `check-test-types` and `check-lint`
+  lanes passed. Broader matrix was still pending at this note. GitHub review
+  state remains stale `CHANGES_REQUESTED` from Patrick's old exact-head review
+  until a human/ClawSweeper refresh clears it. No PR was merged and no
+  automerge was enabled.
+
+### 2026-07-17 Claws stack review pass - PR #102296 lifecycle cleanup
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#102296](https://github.com/openclaw/openclaw/pull/102296)
+  is clean-restacked on #102228 at
+  `0be472639ea586ac049a5b2ab1634c3abbd3d578` on branch
+  `user/giodl/claws-pr6-lifecycle`. Its base is #102228 head
+  `18d178885ecc95a4d0f8af8968bcc444fb5d1792`.
+- This supersedes the stale proof at
+  https://github.com/openclaw/openclaw/pull/102296#issuecomment-5001947963
+  for `3085ab9...` and the intermediate restack head `f85340a...`.
+  Corrected proof is
+  https://github.com/openclaw/openclaw/pull/102296#issuecomment-5002363925.
+- Omar's lifecycle findings are addressed at the current head: status now
+  inventories subordinate package/workspace rows even without a root install
+  row; remove dry-run includes canonical agent deletion side effects in the
+  consent digest; remove apply cleans packages, config, managed files, and only
+  then canonical workspace/agent/session directories; package last-reference
+  cleanup claims the Claw ref as `pending`, re-reads ownership, rejects
+  post-claim adoption, and restores the ref when later cleanup cannot finish.
+- Restack resolution kept #102228's fail-closed skill package policy while
+  preserving Claw-installed origin for plugin reuse already owned by another
+  Claw. A follow-up amend fixed the `check-test-types` fixture drift caught by
+  CI after the restack (`AgentBinding.match`, package-ref integrity, and
+  adoption-helper fixture shape).
+- Local validation on exact head `0be472639e`: `pnpm tsgo:core:test` after
+  clearing the stale local core-test cache, focused lifecycle/package/adoption
+  Vitest (24 tests), `pnpm tsgo:core`, and `git diff --check` passed.
+  Immediately preceding head `f85340a...` also had focused Claws/schema/
+  lifecycle/package/CLI/plugin/state Vitest (202 tests), scoped Oxlint,
+  `pnpm check:architecture`, deadcode dependencies/exports/unused-files, and
+  `git diff --check` passing; the final head only changed test fixtures.
+- ClawSweeper acknowledged the corrected exact-head review request at
+  https://github.com/openclaw/openclaw/pull/102296#issuecomment-5002364505.
+  Live GitHub CI is rerunning on `0be472639e`; early proof/dispatch/label/
+  no-tabs/guard detect lanes passed, broader checks were still pending at the
+  first snapshot. No PR was merged and no automerge was enabled.
+
+### 2026-07-17 Claws stack review pass - PRs #101755 and #101973 CI cleanup
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#101755](https://github.com/openclaw/openclaw/pull/101755)
+  is now at `31caeb09e7db44945bfab10dd3f19e00caa7d5bd` on branch
+  `user/giodl/claws-pr3-feed-plan`.
+- The prior #101755 CI failures were fixed and are green on GitHub: Claws
+  oxlint (`src/claws/add.ts` unused assignment and `src/claws/lifecycle.ts`
+  `params` shadowing), test typecheck (`test/scripts/package-acceptance-
+  workflow.test.ts` unused `workflow` local), and the plugin SDK surface
+  budget (current graph is 8011 public exports / 4477 callable exports).
+  Focused proof, full oxlint, test/prod typechecks, architecture, deadcode, and
+  `git diff --check` passed locally.
+- Updated #101755 proof:
+  https://github.com/openclaw/openclaw/pull/101755#issuecomment-4998752291.
+  The first proof comment has stale pasted full SHAs; the correction with the
+  actual current head is
+  https://github.com/openclaw/openclaw/pull/101755#issuecomment-4998785951.
+  ClawSweeper started a fresh review for the actual current head at
+  https://github.com/openclaw/openclaw/pull/101755#issuecomment-4998753673.
+  Live CI is clean, merge state is clean, and review state remains
+  `CHANGES_REQUESTED` until Omar/Patrick/ClawSweeper clears it.
+- OpenClaw PR [#101973](https://github.com/openclaw/openclaw/pull/101973)
+  is restacked on #101755 at
+  `b46453290b2392fd8f655d5098701a9257eeec3b` on branch
+  `user/giodl/claws-pr4-artifact-plan`.
+- #101973 retained Omar's workspace-file fixes after the restack. Focused
+  Claws/CLI/tooling Vitest passed 76 tests, and `pnpm tsgo:prod`,
+  `pnpm check:architecture`, `pnpm deadcode:dependencies`,
+  `pnpm deadcode:exports`, `pnpm deadcode:unused-files`, scoped oxlint, and
+  `git diff --check` passed locally on the exact head.
+- Updated #101973 proof:
+  https://github.com/openclaw/openclaw/pull/101973#issuecomment-4998780412.
+  The first proof comment has stale pasted full SHAs; the correction with the
+  actual current head is
+  https://github.com/openclaw/openclaw/pull/101973#issuecomment-4998786124.
+  ClawSweeper started a fresh review for the actual current head at
+  https://github.com/openclaw/openclaw/pull/101973#issuecomment-4998756755.
+  Live CI is clean after rerunning the OpenGrep changed-path scan; the first
+  attempt failed before scanning because OpenGrep install could not fetch
+  GitHub versions.
+- No PR was merged and no automerge was enabled.
+
+### 2026-07-17 Claws stack review pass - PR #101973
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#101973](https://github.com/openclaw/openclaw/pull/101973)
+  is restacked on #101755 at
+  `3e49e967e4e67ce2dd1e48a140cc2b8692616b25` on branch
+  `user/giodl/claws-pr4-artifact-plan`.
+- Omar's workspace-file findings are addressed at the current head: workspace
+  planning canonicalizes the requested workspace path through existing
+  symlinked parents and uses that canonical identity in agent config, action
+  targets, plan integrity, and existing-workspace comparison; workspace-file
+  apply realpaths package/workspace roots, reopens consented sources through
+  fs-safe with symlink/hardlink rejection, and rejects source aliases whose
+  realpath no longer matches the consented plan source.
+- Rebase integration with #101755 preserves resumability: workspace-file
+  failure now leaves the root install record at `config_committed` so the
+  already-created agent/workspace remains reconcilable rather than becoming an
+  unretriable partial row.
+- Posted proof/comment:
+  https://github.com/openclaw/openclaw/pull/101973#issuecomment-4998585485.
+- Local validation passed on exact head `3e49e967e4`: focused Claws/CLI/
+  lifecycle Vitest (66 tests), `pnpm tsgo:prod`,
+  `pnpm check:architecture`, `pnpm deadcode:dependencies`,
+  `pnpm deadcode:exports`, `pnpm deadcode:unused-files`, and
+  `git diff --check`.
+- ClawSweeper acknowledged the re-review request at
+  https://github.com/openclaw/openclaw/pull/101973#issuecomment-4998585722.
+  Live CI is rerunning on the new head; no failures were present at the first
+  post-push snapshot, with broader CI still pending. No PR was merged and no
+  automerge was enabled.
+
+### 2026-07-17 Claws stack review pass - PR #101755
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#101755](https://github.com/openclaw/openclaw/pull/101755)
+  is restacked on #101328 at
+  `6b9d9fd2b962626a25710e79f13ad7953eb40514` on branch
+  `user/giodl/claws-pr3-feed-plan`.
+- Omar's interrupted-install blocker is addressed at the current head: root
+  add provenance now resumes matching non-complete install rows, records
+  workspace parent creation failures as partial, tracks durable
+  `workspace_ready` and `config_committed` phases, reconciles existing matching
+  workspace/config state on retry, and the CLI rebuilds a consented retry plan
+  without self-blocking on the matching in-flight agent/workspace.
+- Posted proof/comment:
+  https://github.com/openclaw/openclaw/pull/101755#issuecomment-4998486703.
+- Local validation passed on exact head `6b9d9fd2b9`: focused provenance/apply
+  and CLI Vitest (21 tests), lifecycle CLI E2E Vitest (5 tests),
+  `pnpm tsgo:prod`, `pnpm check:architecture`,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:exports`,
+  `pnpm deadcode:unused-files`, and `git diff --check`.
+- ClawSweeper acknowledged the re-review request at
+  https://github.com/openclaw/openclaw/pull/101755#issuecomment-4998486874.
+  Live CI is rerunning on the new head; early proof/dispatch/preflight and
+  guard lanes passed, while the broader matrix was still in progress at the
+  first snapshot. Review state remains `CHANGES_REQUESTED` until Omar/Patrick
+  or ClawSweeper re-review.
+- No PR was merged and no automerge was enabled.
+
+### 2026-07-17 Claws stack review pass - PR #101328
+
+- Maintainer hold remains in force: do not merge #101328 until Gio explicitly
+  says to proceed; Omar/Patrick human review is still pending.
+- OpenClaw PR [#101328](https://github.com/openclaw/openclaw/pull/101328)
+  is restacked on current main and pushed to head
+  `c5abb329537cf811edde9e2e5833de6dd92afdde` on branch
+  `user/giodl/claws-pr2-schema-plan`.
+- Omar's Scout Crews review comment is live at
+  https://github.com/openclaw/openclaw/pull/101328#issuecomment-4998156305.
+  The current head addresses the concrete preview findings: workspace source
+  planning now uses fs-safe-compatible path policy, rejects intermediate
+  symlink parents/final symlinks/hardlinked source files, enforces per-file
+  source byte limits before reading, and enforces an aggregate workspace-source
+  byte limit before hashing any source bytes. Regression tests cover
+  intermediate symlink parents and aggregate overage.
+- The immutable install-id suggestion was explicitly treated as a lifecycle /
+  ownership contract decision for the create/resume slices rather than widening
+  this base add-plan schema without maintainer agreement.
+- Posted proof/comment:
+  https://github.com/openclaw/openclaw/pull/101328#issuecomment-4998336018.
+- Local validation passed on exact head `c5abb32953`:
+  `node scripts/run-vitest.mjs src/claws/schema.test.ts
+  src/cli/claws-cli.test.ts src/claws/lifecycle.e2e.test.ts -- --reporter=dot`,
+  `pnpm tsgo:prod`, `pnpm check:architecture`,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:exports`,
+  `pnpm deadcode:unused-files`, and `git diff --check`.
+- Live CI is rerunning on `c5abb32953`; early Real behavior proof,
+  dependency/security guard detect, runner admission, dispatch, label, and
+  dependency guard lanes passed, while broader preflight/security/actionlint
+  lanes were still in progress at the first post-push snapshot. Review state
+  remains stale `CHANGES_REQUESTED` until Omar/Patrick/ClawSweeper re-review.
+- No PR was merged and no automerge was enabled.
+
+### 2026-07-17 Claws stack restack pass - PR #102383
+
+- Maintainer hold remains in force: do not merge #101328 until Gio explicitly
+  says to proceed; Omar is still being given review time.
+- OpenClaw PR [#102383](https://github.com/openclaw/openclaw/pull/102383)
+  is restacked on #102306 at
+  `1188b433a29a01b7fdfdd8d1015522b5d96f9c6c` on branch
+  `user/giodl/claws-pr8-skills`. GitHub reports the PR as not draft with base
+  `f9916ba650bf979ab2db04c999a78b0ff0859b6e`.
+- Restack fixes kept cron lifecycle work aligned with the current package and
+  export stack: Claw cron refs now compose with inspected package status,
+  remove consent remains bound to exact plan integrity, cron cleanup fails
+  closed before agent deletion, completed remote removals can be retried
+  without repeating `cron.remove`, and local agent-delete fallback output stays
+  internal to `claws remove`.
+- Posted proof/comment:
+  https://github.com/openclaw/openclaw/pull/102383#issuecomment-4998167345.
+- Local validation passed on exact head `1188b433a2`: `git diff --check`,
+  `pnpm tsgo:prod`, `pnpm check:architecture`,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:exports`,
+  `pnpm deadcode:unused-files`, `pnpm tsgo:core:test`, and focused cron /
+  lifecycle / CLI / gateway Vitest.
+- Exact-head direct behavior proof in isolated state covered add with
+  `cron.add`, status/export with one resolved cron ref, lost-response
+  reconciliation through `cron.list`, failed remove leaving the agent intact,
+  retry after confirmed remote removal without repeating `cron.remove`, and
+  final cleanup with zero Claws/cron refs.
+- ClawSweeper re-review was requested on the proof comment. CI is rerunning on
+  the restacked head; early real behavior proof and guard lanes passed, while
+  CodeQL/CI preflight were still pending at the first snapshot. No PR was
+  merged and no automerge was enabled.
+
+### 2026-07-17 Claws stack restack pass - PR #102306
+
+- Maintainer hold remains in force: do not merge #101328 until Gio explicitly
+  says to proceed; Omar is still being given review time.
+- OpenClaw PR [#102306](https://github.com/openclaw/openclaw/pull/102306)
+  is restacked on #102296 at
+  `f9916ba650bf979ab2db04c999a78b0ff0859b6e` on branch
+  `user/giodl/claws-pr7-export`. GitHub reports the PR as not draft and
+  mergeable on base `f07a024b5e22077ac2c555410c72201cc8bf2730`.
+- Restack fixes aligned export with the current lifecycle stack: export now
+  uses manifest-local type aliases after Claw manifest internals became
+  module-private, calls `getRuntimeConfig()` at the CLI process boundary, keeps
+  `ClawExportResult` module-local, and updates export tests for stricter
+  `AgentConfig` fixture typing.
+- Posted proof/comment:
+  https://github.com/openclaw/openclaw/pull/102306#issuecomment-4997971605.
+- Local validation passed on exact head `f9916ba650bf`: `git diff --check`,
+  `pnpm tsgo:prod`, `pnpm check:architecture`, `pnpm deadcode:dependencies`,
+  `pnpm deadcode:exports`, `pnpm deadcode:unused-files`,
+  `pnpm tsgo:core:test`, and focused export/CLI/lifecycle Vitest (31 tests).
+- Exact-head CLI proof in isolated state added `workspace-agent`, exported it
+  as a package, inspected the exported package successfully, then added the
+  exported package into a separate clean state with exact dry-run
+  `planIntegrity` consent. The export wrote `openclaw.claw.json`,
+  `package.json`, `workspace/HEARTBEAT.md`, `workspace/SOUL.md`, and
+  `workspace/reference/policy.md`.
+- ClawSweeper acknowledged the `@clawsweeper re-review` request on the proof
+  comment. CI is rerunning on the restacked head; no failures were present at
+  the first post-push snapshot, but many checks were still pending. No PR was
+  merged and no automerge was enabled.
+
+### 2026-07-16 Claws stack restack pass - PR #102296
+
+- Maintainer hold remains in force: do not merge #101328 until Gio explicitly
+  says to proceed; Omar is still being given review time.
+- OpenClaw PR [#102296](https://github.com/openclaw/openclaw/pull/102296)
+  is restacked on #102228 at
+  `f07a024b5e22077ac2c555410c72201cc8bf2730` on branch
+  `user/giodl/claws-pr6-lifecycle`. GitHub reports the PR as not draft and
+  mergeable on base `2ae7d51d0919c7ddd8f6e54636aa6fb48f3007e0`.
+- Restack fixes kept the plan-first status/remove slice aligned with the lower
+  Claw state schema: restored read-only workspace-file state lookup, used the
+  runtime config process boundary in status, removed stale exported deadcode,
+  and updated Claws test fixtures for the current add-plan/source identity
+  shape.
+- Posted proof/comment:
+  https://github.com/openclaw/openclaw/pull/102296#issuecomment-4997726721.
+  Follow-up test-type delta/comment:
+  https://github.com/openclaw/openclaw/pull/102296#issuecomment-4997818807.
+- Local validation passed on exact head `f07a024b5e22`: `git diff --check`,
+  `pnpm tsgo:prod`, `pnpm check:architecture`, `pnpm deadcode:dependencies`,
+  `pnpm deadcode:exports`, `pnpm deadcode:unused-files`, `pnpm lint:kysely`,
+  focused Claws lifecycle/package/CLI/plugin/skill/adoption Vitest (63 tests),
+  and `pnpm tsgo:core:test`.
+- Exact-head CLI proof in isolated state added `workspace-agent` with exact
+  add plan digest, verified `claws status` reported one present Claw with zero
+  drift, planned removal with exact remove digest, and completed removal with
+  all three managed workspace files deleted.
+- Full local `pnpm check:test-types` now gets past the Claws test fixture
+  errors and stops at the known current-base root-test drift:
+  `test/scripts/docs-sync-publish.test.ts` imports
+  `pruneOrphanLocaleDocs`, which is not exported from
+  `scripts/docs-sync-publish.mjs`. That file is outside the Claws PR diff.
+- ClawSweeper acknowledged and started re-review on the first proof comment;
+  a second `@clawsweeper re-review` was posted after the amended test-fixture
+  head. CI is rerunning on the amended head. No PR was merged and no automerge
+  was enabled.
+
+### 2026-07-16 Claws stack restack pass - PR #102228
+
+- Maintainer hold remains in force: do not merge #101328 until Gio explicitly
+  says to proceed; Omar is still being given review time.
+- #102228 is restacked on #101973 at
+  `2ae7d51d0919c7ddd8f6e54636aa6fb48f3007e0` on branch
+  `user/giodl/claws-pr5-installers`. The old lower-stack merge history was
+  removed; the clean range is eight commits on top of #101973
+  `5d2dea5984a533faa96027e913a120ad0689e6a4`.
+- Fixed ClawSweeper's concrete blocker: managed plugin uninstall now passes
+  the caller state `env` into `collectClawPluginUninstallWarnings`, and the
+  warning collector reads `claw_package_refs` from that same state DB.
+- Updated proof/comment:
+  https://github.com/openclaw/openclaw/pull/102228#issuecomment-4997577993.
+  Exact-head direct proof covered minimal Claw dry-run plus consented add, and
+  isolated uninstall-warning state-env behavior with an empty control state.
+- Local validation passed on exact head `2ae7d51d0919c`: `git diff --check`,
+  `pnpm db:kysely:check`, `pnpm check:architecture`, `pnpm tsgo:prod`,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:unused-files`,
+  `pnpm deadcode:exports`, and focused Vitest for Claw packages/provenance,
+  CLI, lifecycle e2e, plugin preflight/uninstall, management service, and state
+  DB migrations.
+- Live GitHub state immediately after push: PR is not draft, mergeable, still
+  `CHANGES_REQUESTED`, and still carries stale `status: 📣 needs proof` /
+  unranked labels until ClawSweeper re-reviews. New CI is in progress; early
+  lanes such as runner admission, dispatch, real behavior proof, dependency
+  guard detect, and security-sensitive guard detect passed.
+- No PR was merged and no automerge was enabled.
+
+### 2026-07-16 Claws stack restack pass - PRs #101755 and #101973
+
+- Maintainer hold remains in force: do not merge #101328 until Gio explicitly
+  says to proceed; Omar is still being given review time.
+- #101755 is restacked on #101328 at
+  `bea0e3f33ac6062561275f258fee49e4f4c9b5a3`. Follow-up cleanup regenerated
+  `openclaw-state-schema.generated.ts` and added narrow `sqlite-allow-raw`
+  comments for Claw provenance writes. Updated proof/comment:
+  https://github.com/openclaw/openclaw/pull/101755#issuecomment-4997398112.
+  Local validation passed: `pnpm check:architecture`, focused Claws Vitest
+  (`provenance`, CLI, lifecycle e2e), direct CLI proof, and `git diff --check`.
+- #101973 is restacked on corrected #101755 at
+  `5d2dea5984a533faa96027e913a120ad0689e6a4`. Follow-up cleanup regenerated
+  the state schema, kept `claw_workspace_files` in the runtime generated
+  schema, removed test-only workspace/provenance read exports, and added narrow
+  `sqlite-allow-raw` comments for workspace-file state writes. Updated
+  proof/comment:
+  https://github.com/openclaw/openclaw/pull/101973#issuecomment-4997398262.
+  Local validation passed: focused Claws Vitest (`workspace`, `provenance`,
+  CLI, lifecycle e2e), `pnpm tsgo:prod`, `pnpm check:architecture`,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:unused-files`,
+  `pnpm deadcode:exports`, direct CLI workspace-file proof, and
+  `git diff --check`.
+- Live CI after the pushes still has expected guard failures on dependency and
+  security-sensitive guard lanes, plus #101755 still shows current-base
+  `check-test-types` failure in `test/scripts/docs-sync-publish.test.ts`
+  (`pruneOrphanLocaleDocs` missing from `scripts/docs-sync-publish.mjs`),
+  which matches the earlier current-main docs-sync drift and is outside the
+  Claws diff. #101973 CI was still running when noted.
+- No PR was merged and no automerge was enabled.
+
+### 2026-07-16 Auditable Skills receipt-first publication
+
+- Switched GitHub.com auth to `giodl73-repo`, pushed RFC commit `9004fb5`,
+  and published the prepared receipt-first bodies to fork RFC #6 and OpenClaw
+  #97.
+- Live verification is exact: RFC #6 is draft, clean, mergeable, and points to
+  `9004fb57fbef`; OpenClaw #97 is draft and mergeable at `738ca6d79d37`; both
+  live bodies byte-match the normalized prepared files.
+- OpenClaw #97 now contains the required `Real behavior proof` heading and full
+  field labels. Its unstable rollup remains limited to fork infrastructure:
+  `auto-response`, `label`, and Linux companion signing.
+- The current product message is final for this round: receipts are the
+  standalone product; managed identity and usage are optional later evidence;
+  budgets require demand; orchestration requires a concrete consumer.
+
+### 2026-07-16 Auditable Skills receipt-first cutoff
+
+- Confirmed the product cutoff: durable typed receipts and `get/list/count` are
+  the standalone Round 1. Managed skill identity and exact-run usage are later
+  evidence rounds; budgets require operator demand; orchestration requires a
+  concrete consumer and is not part of the receipt pitch.
+- Tightened RFC 0022 accordingly. Round 1 now has receipt-only goals, a
+  receipt-only support scenario, and six receipt-only acceptance criteria. The
+  implementation plan explicitly says that lack of demand for a later round is
+  a valid stopping point.
+- RFC worktree `C:\src\openclaw-rfcs-skill-audit` is clean at commit `9004fb5`
+  on `agent/rfc-0022-skill-invocation-audit`, pushed to the fork branch.
+- Rewrote the prepared fork bodies in
+  `projects/claws/auditable-skills-pr-bodies/rfc-6.md` and
+  `openclaw-97.md`. The RFC body now presents receipts first and labels the
+  rest as POC evidence. The #97 body removes the implied workflow dependency
+  and uses OpenClaw's exact `Real behavior proof` field labels.
+- The prepared bodies are published to RFC #6 and OpenClaw #97 and were
+  verified against their live GitHub contents.
+- Do not resume the dirty idempotency prototype or open #115. Atomic dispatch
+  reservation remains a separate future runner concern, not Round 1 work.
+
+### 2026-07-16 Claws stack landing hold - PR #101328
+
+- OpenClaw PR [#101328](https://github.com/openclaw/openclaw/pull/101328)
+  is updated to head `a3c017240d70d528e8e2b804339c0eb8d33df4ca` on branch
+  `user/giodl/claws-pr2-schema-plan`. Do not merge this first PR until Gio
+  explicitly says so; Omar is still being given review time.
+- Fixed current-head blockers: removed duplicate install-spec parser modules,
+  removed dead Claws helper files/exports, repaired rebase-time avatar imports,
+  and switched `src/cli/claws-cli.runtime.ts` from deprecated `loadConfig()`
+  to process-boundary `getRuntimeConfig()`.
+- Local validation passed: focused Claws Vitest suite
+  (`src/claws/schema.test.ts`, `src/cli/claws-cli.test.ts`,
+  `src/claws/lifecycle.e2e.test.ts`), `pnpm check:deprecated-api-usage`,
+  the deprecated internal config API contract test,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:unused-files`,
+  `pnpm deadcode:exports`, and `git diff --check`.
+- Current-head direct CLI proof was posted at
+  https://github.com/openclaw/openclaw/pull/101328#issuecomment-4997106915
+  and includes disabled/enabled help, `claws inspect --json`,
+  `claws add --dry-run --json`, and fail-closed non-dry-run output.
+- Live GitHub state after the push: `check-lint` fails only on current-main
+  `scripts/docs-sync-publish.d.mts` overload-adjacency drift outside the PR
+  diff; `openclaw/ci-gate` is red because of that. PR is `BEHIND` and still
+  has stale `CHANGES_REQUESTED`. ClawSweeper acknowledged the current-head
+  re-review request but the durable review comment was still stale at the
+  previous `5a11bf5...` verdict when this note was written.
+
 ### 2026-07-16 final Claws stack refresh
 
 - Patrick approved using the existing Claws experimental gate for `CLAW.md`
@@ -2244,3 +2684,26 @@
   checks and local Codex review passed with no actionable findings. RFC #27 is
   open, ready, and mergeable; its commit-stable sidecar links were refreshed and
   nothing was merged.
+- 2026-07-16 OpenClaw Claws PR #102228 was clean-restacked on #101973 and
+  pushed at `18d178885ecc95a4d0f8af8968bcc444fb5d1792` (`fix(claws): tighten
+  package install policy`). The branch is `user/giodl/claws-pr5-installers`,
+  based on #101973 head `b46453290b2392fd8f655d5098701a9257eeec3b`. The
+  repair narrows this slice to plugin package mutation only; skill package
+  declarations remain schema-valid but fail closed until a later skill package
+  lifecycle adds real read-only preflight plus uninstall/recovery. Package
+  declarations now require `integrity`, package add-plan actions surface that
+  digest, and `claw_package_refs` persists `package_integrity` with migration
+  support. Plugin install/reuse remains consent-bound by exact owner state, and
+  partial config-commit failure now preserves `workspace_ready` when cleanup
+  cannot remove the workspace so retry can resume. Local proof passed focused
+  Claws/package/state tests (140 tests), `src/cli/claws-cli.test.ts` (10 tests),
+  `pnpm tsgo:test`, `pnpm tsgo:prod`, full oxlint shards, architecture,
+  deadcode dependencies/exports/unused-files, and `git diff --check`. GitHub CI
+  is `CLEAN` with the aggregate gate green, including the previously failing
+  `checks-node-compact-small-7` rerun. Proof comments are
+  `https://github.com/openclaw/openclaw/pull/102228#issuecomment-4999034089`
+  and head correction
+  `https://github.com/openclaw/openclaw/pull/102228#issuecomment-4999065917`.
+  ClawSweeper acknowledged and started review for exact head `18d178885e`; final
+  ClawSweeper review and the stale GitHub `CHANGES_REQUESTED` decision were
+  still pending at this note. Do not merge without explicit user instruction.

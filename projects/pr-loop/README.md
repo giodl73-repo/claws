@@ -19,6 +19,7 @@ into mergeable, reviewed, useful PRs.
 | Repo | PR / Issue | Branch | Status | Purpose |
 | --- | --- | --- | --- | --- |
 | `bic/lobster` | Scout feeds stack | `user/giodl/scout-feeds-*` | Active | Marketplace/admin feed PR dependency loop. |
+| `openclaw/openclaw` | Maintainer merge wrapper flow | `/root/src/openclaw-workflow` | Active pattern | Use WSL `scripts/pr-review`, `scripts/pr-prepare`, and `scripts/pr-merge`; see `SESSION.md` for auth pin, ClawSweeper, exact-head CI, and drift handling notes. |
 
 ## Related Areas
 
