@@ -22,6 +22,39 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack review pass - PR #102383 scheduled work cleanup
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#102383](https://github.com/openclaw/openclaw/pull/102383)
+  is clean-restacked on current #102306 head
+  `41517c89a575a498c7258ab593a8ea152f069a79` at head
+  `9fe2b5d1c30c4a83e6457fa0cdcbbfa684be4304` on branch
+  `user/giodl/claws-pr8-skills`.
+- This refresh addresses the scheduled-work teardown/retry blockers: Claw
+  remove disables/removes scheduler cron refs before package cleanup and before
+  agent/config deletion; confirmed remote removals are marked `removed` so
+  retry can finish local cleanup without repeating `cron.remove`; Gateway
+  `agents.delete` now removes agent-owned cron jobs before committing agent
+  deletion and has regression coverage for cron cleanup failure leaving config
+  untouched.
+- Corrected exact-head proof/comment:
+  https://github.com/openclaw/openclaw/pull/102383#issuecomment-5003785243.
+  ClawSweeper acknowledged the new exact-head request at
+  https://github.com/openclaw/openclaw/pull/102383#issuecomment-5003785730.
+- Local validation on exact head `9fe2b5d1c3`: focused cron/lifecycle/gateway/
+  export/provenance/schema/CLI Vitest passed 198 tests across 10 files,
+  `pnpm tsgo:core:test`, `pnpm tsgo:prod`, scoped Oxlint,
+  `pnpm check:architecture`, deadcode dependencies/exports/unused-files, and
+  `git diff --check` passed.
+- Live GitHub CI is rerunning on `9fe2b5d1c3`. Early snapshot: Real behavior
+  proof, CodeQL, OpenGrep, changed-path scan, security-fast, dependency guard,
+  dispatch, label, actionlint, and several setup lanes passed; broader matrix
+  checks were still pending. Review state remains stale `CHANGES_REQUESTED`
+  until ClawSweeper or a human refresh clears it. No PR was merged and no
+  automerge was enabled.
+
 ### 2026-07-17 Claws stack review pass - PR #102306 export cleanup
 
 - Maintainer hold remains in force: do not merge #101328 or downstream Claws
