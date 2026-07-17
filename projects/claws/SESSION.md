@@ -22,6 +22,33 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack review pass - PR #102427 diagnostics cleanup
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#102427](https://github.com/openclaw/openclaw/pull/102427)
+  has a local clean-restacked replacement branch in WSL worktree
+  `/root/src/openclaw-workflow/.worktrees/pr-102427` at
+  `6652c82310ba8a387155355558f2dfa4cc335b58` on branch
+  `pr-102427-replay`, based on current #102406 head
+  `d10b34396798e17487a0111362c490d708d5d792`.
+- This refresh replays the five original diagnostics commits without the stale
+  MCP merge commit and adds two cleanup commits. It fixes restack fallout,
+  keeps Claw doctor SQLite reads from creating sidecars for sidecar-free
+  quiescent databases, and addresses Omar's cron diagnostic finding by treating
+  complete cron refs as healthy only when live Gateway inventory corroborates
+  scheduler id, declaration key, owner agent, enabled state, and execution
+  digest. Missing inventory or Gateway failure reports unknown, not healthy.
+- Local validation on exact head `6652c82310`: focused Claws doctor/core
+  doctor/health-contribution/state Vitest passed 213 tests across 4 files,
+  `pnpm tsgo:prod`, scoped Oxlint, `pnpm check:architecture`,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:exports`,
+  `pnpm deadcode:unused-files`, and `git diff --check` passed.
+- Nothing has been pushed. Do not force-push
+  `user/giodl/claws-pr10-doctor` without Gio's explicit OK; intended command
+  is `git push origin HEAD:user/giodl/claws-pr10-doctor --force-with-lease`.
+
 ### 2026-07-17 Claws stack review pass - PR #102406 MCP cleanup
 
 - Maintainer hold remains in force: do not merge #101328 or downstream Claws
