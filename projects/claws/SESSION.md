@@ -22,6 +22,51 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack review pass - PRs #101755 and #101973 CI cleanup
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#101755](https://github.com/openclaw/openclaw/pull/101755)
+  is now at `31caeb09e7db44945bfab10dd3f19e00caa7d5bd` on branch
+  `user/giodl/claws-pr3-feed-plan`.
+- The prior #101755 CI failures were fixed and are green on GitHub: Claws
+  oxlint (`src/claws/add.ts` unused assignment and `src/claws/lifecycle.ts`
+  `params` shadowing), test typecheck (`test/scripts/package-acceptance-
+  workflow.test.ts` unused `workflow` local), and the plugin SDK surface
+  budget (current graph is 8011 public exports / 4477 callable exports).
+  Focused proof, full oxlint, test/prod typechecks, architecture, deadcode, and
+  `git diff --check` passed locally.
+- Updated #101755 proof:
+  https://github.com/openclaw/openclaw/pull/101755#issuecomment-4998752291.
+  The first proof comment has stale pasted full SHAs; the correction with the
+  actual current head is
+  https://github.com/openclaw/openclaw/pull/101755#issuecomment-4998785951.
+  ClawSweeper started a fresh review for the actual current head at
+  https://github.com/openclaw/openclaw/pull/101755#issuecomment-4998753673.
+  Live CI is clean, merge state is clean, and review state remains
+  `CHANGES_REQUESTED` until Omar/Patrick/ClawSweeper clears it.
+- OpenClaw PR [#101973](https://github.com/openclaw/openclaw/pull/101973)
+  is restacked on #101755 at
+  `b46453290b2392fd8f655d5098701a9257eeec3b` on branch
+  `user/giodl/claws-pr4-artifact-plan`.
+- #101973 retained Omar's workspace-file fixes after the restack. Focused
+  Claws/CLI/tooling Vitest passed 76 tests, and `pnpm tsgo:prod`,
+  `pnpm check:architecture`, `pnpm deadcode:dependencies`,
+  `pnpm deadcode:exports`, `pnpm deadcode:unused-files`, scoped oxlint, and
+  `git diff --check` passed locally on the exact head.
+- Updated #101973 proof:
+  https://github.com/openclaw/openclaw/pull/101973#issuecomment-4998780412.
+  The first proof comment has stale pasted full SHAs; the correction with the
+  actual current head is
+  https://github.com/openclaw/openclaw/pull/101973#issuecomment-4998786124.
+  ClawSweeper started a fresh review for the actual current head at
+  https://github.com/openclaw/openclaw/pull/101973#issuecomment-4998756755.
+  Live CI is clean after rerunning the OpenGrep changed-path scan; the first
+  attempt failed before scanning because OpenGrep install could not fetch
+  GitHub versions.
+- No PR was merged and no automerge was enabled.
+
 ### 2026-07-17 Claws stack review pass - PR #101973
 
 - Maintainer hold remains in force: do not merge #101328 or downstream Claws
