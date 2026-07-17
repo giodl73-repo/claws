@@ -2855,3 +2855,17 @@
   grant surface was invented in this repair. Publishing the restack requires
   force-with-lease approval; no push, review reply, thread resolution, proof
   comment, merge, or automerge occurred. Do not merge.
+- 2026-07-17 follow-up: PR #102228 was published with the approved
+  force-with-lease restack, then advanced normally to exact head
+  `8e926cabdf5c98614c25286e054e3e5e7ef232df`. The first exact-head CI run
+  identified one PR-owned Knip failure: the internal
+  `ClawHubSkillInstallPreflightResult` type was unnecessarily exported. Commit
+  `8e926cabdf5` removes only that export modifier. The replacement check set is
+  fully clean: 83 passed, 37 skipped, 0 pending, 0 failed; GitHub reports
+  `MERGEABLE` / `CLEAN`. ClawSweeper dispatch and the real-behavior-proof
+  presence gate passed, but no new cross-repo ClawSweeper commit-review run was
+  visible; the prior ClawSweeper P1 findings are addressed by the exact
+  artifact enforcement and real skill install path above. Patrick's stale
+  requested-changes review and six unresolved outdated threads remain the only
+  recorded review blocker. No review reply, thread resolution, proof comment,
+  merge, or automerge occurred. Do not merge.
