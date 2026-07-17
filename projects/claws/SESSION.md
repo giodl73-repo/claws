@@ -2825,3 +2825,33 @@
   four outdated threads and stale `CHANGES_REQUESTED` decision remain the only
   PR blocker; public proof/replies require approval before posting. Do not
   merge.
+- 2026-07-17 OpenClaw Claws PR #102228 was re-reviewed from the current RFC and
+  both normative v1 specifications, then clean-restacked locally onto PR
+  #101973 final head `1f5536a03e47f02f477ac63650b6acd6926ed974`. The public
+  head remains `18d178885ecc95a4d0f8af8968bcc444fb5d1792`; the repaired
+  local branch in `C:\src\openclaw-claws-pr5-review` ends at
+  `b52fd2a554a1ebd65f39bb1df70c777560c1520b`. The prior implementation's
+  manifest `integrity` field was nonconformant schema drift and did not enforce
+  downloaded bytes, while every skill package was deliberately blocked. The
+  repair restores the v1 manifest shape (`kind/source/ref/version`), resolves
+  exact skill/plugin artifact digest and runtime identity into the consented
+  add plan, checks those pins in both real installers, supports exact skill
+  install/reuse in the planned workspace, and rejects version, digest, runtime
+  identity, or owner-state drift. Package mutation is now the final add phase;
+  newly installed global plugins are compensated in reverse order after a
+  later package failure, except when another Claw concurrently references the
+  plugin. Durable package-ref replay is idempotent, preserves Claw-installed
+  ownership, and distinguishes conclusive `rolled_back` state from uncertain
+  `failed` state. Validation on portable Node 24.15.0 / SQLite 3.51.3 passed 75
+  focused unit tests (1 skip), 6 lifecycle CLI E2Es, 27 plugin tests, 25 CLI
+  tests, 2 exact skill artifact tests, formatting, oxlint, generated Kysely
+  verification, Kysely raw-SQL guardrails, SQLite transaction boundaries, and
+  `git diff --check`. The broader state DB suite passed 76 tests with 2 skips;
+  its one Windows NFS journal-mode assertion remained an unrelated platform
+  failure. Direct core typecheck reported only four existing cross-worktree
+  declaration-path errors and no changed-file error. Omar's shared process-wide
+  plugin grant concern remains a real product/maintainer decision: RFC v1 uses
+  explicit Claw-add consent plus existing plugin safety rules, so no new host
+  grant surface was invented in this repair. Publishing the restack requires
+  force-with-lease approval; no push, review reply, thread resolution, proof
+  comment, merge, or automerge occurred. Do not merge.
