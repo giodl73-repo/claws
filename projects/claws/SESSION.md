@@ -22,6 +22,46 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack review pass - PR #102296 lifecycle cleanup
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#102296](https://github.com/openclaw/openclaw/pull/102296)
+  is clean-restacked on #102228 at
+  `0be472639ea586ac049a5b2ab1634c3abbd3d578` on branch
+  `user/giodl/claws-pr6-lifecycle`. Its base is #102228 head
+  `18d178885ecc95a4d0f8af8968bcc444fb5d1792`.
+- This supersedes the stale proof at
+  https://github.com/openclaw/openclaw/pull/102296#issuecomment-5001947963
+  for `3085ab9...` and the intermediate restack head `f85340a...`.
+  Corrected proof is
+  https://github.com/openclaw/openclaw/pull/102296#issuecomment-5002363925.
+- Omar's lifecycle findings are addressed at the current head: status now
+  inventories subordinate package/workspace rows even without a root install
+  row; remove dry-run includes canonical agent deletion side effects in the
+  consent digest; remove apply cleans packages, config, managed files, and only
+  then canonical workspace/agent/session directories; package last-reference
+  cleanup claims the Claw ref as `pending`, re-reads ownership, rejects
+  post-claim adoption, and restores the ref when later cleanup cannot finish.
+- Restack resolution kept #102228's fail-closed skill package policy while
+  preserving Claw-installed origin for plugin reuse already owned by another
+  Claw. A follow-up amend fixed the `check-test-types` fixture drift caught by
+  CI after the restack (`AgentBinding.match`, package-ref integrity, and
+  adoption-helper fixture shape).
+- Local validation on exact head `0be472639e`: `pnpm tsgo:core:test` after
+  clearing the stale local core-test cache, focused lifecycle/package/adoption
+  Vitest (24 tests), `pnpm tsgo:core`, and `git diff --check` passed.
+  Immediately preceding head `f85340a...` also had focused Claws/schema/
+  lifecycle/package/CLI/plugin/state Vitest (202 tests), scoped Oxlint,
+  `pnpm check:architecture`, deadcode dependencies/exports/unused-files, and
+  `git diff --check` passing; the final head only changed test fixtures.
+- ClawSweeper acknowledged the corrected exact-head review request at
+  https://github.com/openclaw/openclaw/pull/102296#issuecomment-5002364505.
+  Live GitHub CI is rerunning on `0be472639e`; early proof/dispatch/label/
+  no-tabs/guard detect lanes passed, broader checks were still pending at the
+  first snapshot. No PR was merged and no automerge was enabled.
+
 ### 2026-07-17 Claws stack review pass - PRs #101755 and #101973 CI cleanup
 
 - Maintainer hold remains in force: do not merge #101328 or downstream Claws
