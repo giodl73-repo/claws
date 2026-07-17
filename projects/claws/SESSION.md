@@ -22,6 +22,37 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack restack pass - PR #102306
+
+- Maintainer hold remains in force: do not merge #101328 until Gio explicitly
+  says to proceed; Omar is still being given review time.
+- OpenClaw PR [#102306](https://github.com/openclaw/openclaw/pull/102306)
+  is restacked on #102296 at
+  `f9916ba650bf979ab2db04c999a78b0ff0859b6e` on branch
+  `user/giodl/claws-pr7-export`. GitHub reports the PR as not draft and
+  mergeable on base `f07a024b5e22077ac2c555410c72201cc8bf2730`.
+- Restack fixes aligned export with the current lifecycle stack: export now
+  uses manifest-local type aliases after Claw manifest internals became
+  module-private, calls `getRuntimeConfig()` at the CLI process boundary, keeps
+  `ClawExportResult` module-local, and updates export tests for stricter
+  `AgentConfig` fixture typing.
+- Posted proof/comment:
+  https://github.com/openclaw/openclaw/pull/102306#issuecomment-4997971605.
+- Local validation passed on exact head `f9916ba650bf`: `git diff --check`,
+  `pnpm tsgo:prod`, `pnpm check:architecture`, `pnpm deadcode:dependencies`,
+  `pnpm deadcode:exports`, `pnpm deadcode:unused-files`,
+  `pnpm tsgo:core:test`, and focused export/CLI/lifecycle Vitest (31 tests).
+- Exact-head CLI proof in isolated state added `workspace-agent`, exported it
+  as a package, inspected the exported package successfully, then added the
+  exported package into a separate clean state with exact dry-run
+  `planIntegrity` consent. The export wrote `openclaw.claw.json`,
+  `package.json`, `workspace/HEARTBEAT.md`, `workspace/SOUL.md`, and
+  `workspace/reference/policy.md`.
+- ClawSweeper acknowledged the `@clawsweeper re-review` request on the proof
+  comment. CI is rerunning on the restacked head; no failures were present at
+  the first post-push snapshot, but many checks were still pending. No PR was
+  merged and no automerge was enabled.
+
 ### 2026-07-16 Claws stack restack pass - PR #102296
 
 - Maintainer hold remains in force: do not merge #101328 until Gio explicitly
