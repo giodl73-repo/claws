@@ -22,6 +22,36 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack review pass - PR #101755
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#101755](https://github.com/openclaw/openclaw/pull/101755)
+  is restacked on #101328 at
+  `6b9d9fd2b962626a25710e79f13ad7953eb40514` on branch
+  `user/giodl/claws-pr3-feed-plan`.
+- Omar's interrupted-install blocker is addressed at the current head: root
+  add provenance now resumes matching non-complete install rows, records
+  workspace parent creation failures as partial, tracks durable
+  `workspace_ready` and `config_committed` phases, reconciles existing matching
+  workspace/config state on retry, and the CLI rebuilds a consented retry plan
+  without self-blocking on the matching in-flight agent/workspace.
+- Posted proof/comment:
+  https://github.com/openclaw/openclaw/pull/101755#issuecomment-4998486703.
+- Local validation passed on exact head `6b9d9fd2b9`: focused provenance/apply
+  and CLI Vitest (21 tests), lifecycle CLI E2E Vitest (5 tests),
+  `pnpm tsgo:prod`, `pnpm check:architecture`,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:exports`,
+  `pnpm deadcode:unused-files`, and `git diff --check`.
+- ClawSweeper acknowledged the re-review request at
+  https://github.com/openclaw/openclaw/pull/101755#issuecomment-4998486874.
+  Live CI is rerunning on the new head; early proof/dispatch/preflight and
+  guard lanes passed, while the broader matrix was still in progress at the
+  first snapshot. Review state remains `CHANGES_REQUESTED` until Omar/Patrick
+  or ClawSweeper re-review.
+- No PR was merged and no automerge was enabled.
+
 ### 2026-07-17 Claws stack review pass - PR #101328
 
 - Maintainer hold remains in force: do not merge #101328 until Gio explicitly
