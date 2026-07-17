@@ -22,6 +22,40 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack review pass - PR #101328
+
+- Maintainer hold remains in force: do not merge #101328 until Gio explicitly
+  says to proceed; Omar/Patrick human review is still pending.
+- OpenClaw PR [#101328](https://github.com/openclaw/openclaw/pull/101328)
+  is restacked on current main and pushed to head
+  `c5abb329537cf811edde9e2e5833de6dd92afdde` on branch
+  `user/giodl/claws-pr2-schema-plan`.
+- Omar's Scout Crews review comment is live at
+  https://github.com/openclaw/openclaw/pull/101328#issuecomment-4998156305.
+  The current head addresses the concrete preview findings: workspace source
+  planning now uses fs-safe-compatible path policy, rejects intermediate
+  symlink parents/final symlinks/hardlinked source files, enforces per-file
+  source byte limits before reading, and enforces an aggregate workspace-source
+  byte limit before hashing any source bytes. Regression tests cover
+  intermediate symlink parents and aggregate overage.
+- The immutable install-id suggestion was explicitly treated as a lifecycle /
+  ownership contract decision for the create/resume slices rather than widening
+  this base add-plan schema without maintainer agreement.
+- Posted proof/comment:
+  https://github.com/openclaw/openclaw/pull/101328#issuecomment-4998336018.
+- Local validation passed on exact head `c5abb32953`:
+  `node scripts/run-vitest.mjs src/claws/schema.test.ts
+  src/cli/claws-cli.test.ts src/claws/lifecycle.e2e.test.ts -- --reporter=dot`,
+  `pnpm tsgo:prod`, `pnpm check:architecture`,
+  `pnpm deadcode:dependencies`, `pnpm deadcode:exports`,
+  `pnpm deadcode:unused-files`, and `git diff --check`.
+- Live CI is rerunning on `c5abb32953`; early Real behavior proof,
+  dependency/security guard detect, runner admission, dispatch, label, and
+  dependency guard lanes passed, while broader preflight/security/actionlint
+  lanes were still in progress at the first post-push snapshot. Review state
+  remains stale `CHANGES_REQUESTED` until Omar/Patrick/ClawSweeper re-review.
+- No PR was merged and no automerge was enabled.
+
 ### 2026-07-17 Claws stack restack pass - PR #102383
 
 - Maintainer hold remains in force: do not merge #101328 until Gio explicitly
