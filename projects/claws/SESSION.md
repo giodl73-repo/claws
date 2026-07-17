@@ -30,7 +30,7 @@
 - OpenClaw PR [#102427](https://github.com/openclaw/openclaw/pull/102427)
   has a local clean-restacked replacement branch in WSL worktree
   `/root/src/openclaw-workflow/.worktrees/pr-102427` at
-  `6652c82310ba8a387155355558f2dfa4cc335b58` on branch
+  `5043432a68ef10f72cbcc6c8617f4a94cf4101c3` on branch
   `pr-102427-replay`, based on current #102406 head
   `d10b34396798e17487a0111362c490d708d5d792`.
 - This refresh replays the five original diagnostics commits without the stale
@@ -45,9 +45,24 @@
   `pnpm tsgo:prod`, scoped Oxlint, `pnpm check:architecture`,
   `pnpm deadcode:dependencies`, `pnpm deadcode:exports`,
   `pnpm deadcode:unused-files`, and `git diff --check` passed.
-- Nothing has been pushed. Do not force-push
-  `user/giodl/claws-pr10-doctor` without Gio's explicit OK; intended command
-  is `git push origin HEAD:user/giodl/claws-pr10-doctor --force-with-lease`.
+- Follow-up head `5043432a68` fixes CI fallout: the doctor drift fixture keeps
+  the installed agent id for test typecheck, lifecycle remove apply is split
+  out of `lifecycle-state.ts` to remove the max-lines suppression without an
+  import cycle, and two import-order format issues are corrected. Local
+  validation on the final head passed `pnpm lint`, `pnpm check:test-types`,
+  `pnpm check:max-lines-ratchet --base d10b34396798e17487a0111362c490d708d5d792`,
+  `pnpm check:architecture`, focused 213-test Claws/doctor/state Vitest,
+  `pnpm tsgo:prod`, deadcode dependencies/exports/unused-files,
+  `pnpm format:check`, and `git diff --check`.
+- Live GitHub CI is green on `5043432a68`, including Real behavior proof,
+  changed-path scan, `check-lint`, `check-test-types`, max-lines ratchet,
+  compact shards, and `openclaw/ci-gate`. Proof comments are
+  https://github.com/openclaw/openclaw/pull/102427#issuecomment-5007849419 and
+  https://github.com/openclaw/openclaw/pull/102427#issuecomment-5008038157.
+  ClawSweeper re-review was requested at
+  https://github.com/openclaw/openclaw/pull/102427#issuecomment-5008083512.
+  Review labels still need to refresh; no PR was merged and no automerge was
+  enabled.
 
 ### 2026-07-17 Claws stack review pass - PR #102406 MCP cleanup
 
