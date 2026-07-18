@@ -22,6 +22,44 @@
 
 ## Current Session
 
+### 2026-07-17 Claws stack review pass - PR #102982 update apply cleanup
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#102982](https://github.com/openclaw/openclaw/pull/102982)
+  is clean-restacked on current #102959 head
+  `0b998ddf359141ac535f9d8497902b45025835f3` and pushed at
+  `555a2f70775626e5cf576bf48b900f28fdf2d2d4` on branch
+  `user/giodl/claws-pr12-update-apply`.
+- The restack kept the four PR12 update-apply commits and adds
+  `fix(claws): restack update apply on capability plans`. The fix carries
+  PR11 capability-change plan fields through update apply/CLI consent, splits
+  update CLI runtime below the max-lines gate, preserves package integrity in
+  package compare-and-swap replacements, and annotates intentional raw SQLite
+  writes for Claw lifecycle/provenance tables.
+- Local validation on exact head `555a2f7077`: focused update apply/package/
+  cron/MCP/workspace/CLI/provenance Vitest passed 63 tests across 7 files,
+  `pnpm check:test-types`, `pnpm lint`, `pnpm check:architecture`,
+  deadcode dependencies/exports/unused-files, max-lines ratchet,
+  no-conflict-markers, and `git diff --check` passed.
+- Proof/re-review comment:
+  https://github.com/openclaw/openclaw/pull/102982#issuecomment-5009070680.
+  The comment is intentionally scoped: it proves restack/local gates, but does
+  not claim the separate live external-boundary proof Omar/ClawSweeper asked
+  for around exact package replacement, Gateway cron convergence/retry, and
+  retained-artifact recovery.
+- Live GitHub CI is green on `555a2f7077`, including `openclaw/ci-gate`, Real
+  behavior proof, check-lint, check-test-types, architecture/topology,
+  dependencies, compact shards, security high checks, CodeQL, OpenGrep, and
+  changed-path scan. GitHub reports `mergeStateStatus: CLEAN` and no failing
+  checks.
+- Review labels remain stale/pending after the exact-head proof request:
+  `rating: gold shrimp` and `status: needs proof`. ClawSweeper acknowledged
+  the re-review and posted "review started" at the last live check; no final
+  clearing review was present yet. No PR was merged and no automerge was
+  enabled.
+
 ### 2026-07-17 Claws stack review pass - PR #102959 update preview cleanup
 
 - Maintainer hold remains in force: do not merge #101328 or downstream Claws
