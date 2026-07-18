@@ -20,6 +20,7 @@ Claws are not feeds and not raw workspace templates:
 | Role review | `role-review.md` |
 | Auditable Skills receipt-first role review | `auditable-skills-role-review.md` |
 | Auditable Skills support-case proof | `auditable-skills-support-proof.md` |
+| Auditable Skills maintainer brief | `auditable-skills-maintainer-brief.md` |
 
 ## Related Areas
 

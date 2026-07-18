@@ -22,6 +22,20 @@
 
 ## Current Session
 
+### 2026-07-18 Auditable Skills maintainer handoff
+
+- Added `auditable-skills-maintainer-brief.md`, a forwardable review note for
+  Patrick and Hannes. It leads with the business opportunity, explains why
+  OpenClaw can own the execution envelope, summarizes the support proof, and
+  keeps CRM state, workflows, budgets, and multi-host operations outside the
+  first decision.
+- The requested decision is narrow: whether a durable typed outcome from a
+  successful trusted tool should be a core OpenClaw resource that operators
+  and later agents can retrieve and count.
+- Live state remains RFC #6 at `8df2232e6bfa` and OpenClaw #97 at
+  `f04293c9153b`; both are draft, fork-only, mergeable, and the OpenClaw Real
+  behavior proof check passes.
+
 ### 2026-07-18 Auditable Skills support-case proof
 
 - Proved OpenClaw fork PR #97 head `f04293c9153b` with nine durable receipts
