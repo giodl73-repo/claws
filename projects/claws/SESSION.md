@@ -2894,3 +2894,27 @@
   still requested proof; a stabilized-source re-review was queued at
   https://github.com/openclaw/openclaw/pull/102228#issuecomment-5008570798.
   No merge or automerge was enabled.
+- 2026-07-17 OpenClaw Claws PR #102296 was clean-restacked on PR #102228 exact
+  head `ae79fd7ddd7cc7f1d672bf1b91fa927e7b159e89`, deeply repaired, and
+  force-pushed with lease at `da8e4d41d73c77c6294e8813ac2856ad402a646b`
+  (`feat(claws): add lifecycle status and removal`). The final policy keeps
+  plugins global: removal emits an explicit retain reason and releases the
+  Claw reference without uninstalling the plugin. Workspace-scoped skills can
+  still be removed through the canonical lifecycle when their final complete,
+  unchanged Claw-owned reference is released. Cross-process package lifecycle
+  leases now cover direct installs and cleanup; skill leases serialize the
+  whole workspace because its skills share one `.clawhub/lock.json`. Missing
+  workspace provenance fails closed. The repair also covers orphan inventory,
+  already-missing agent cleanup targets, atomic config/removal-surface
+  validation, canonical workspace/session safety, complete skill-tree digests,
+  and lockfile rollback. No permanent removal tombstone was added; partial
+  subordinate provenance remains available for retry/status only when cleanup
+  does not complete. Portable Node 24.15.0 proof passed 49 focused unit tests,
+  the targeted canonical ClawHub plugin-install lease test, the real lifecycle
+  CLI E2E, scoped TypeScript, Oxlint, Oxfmt, and `git diff --check`. Final
+  independent Codex review found no discrete actionable regression. PR body
+  and exact-head evidence, including the Omar policy response, are at
+  https://github.com/openclaw/openclaw/pull/102296#issuecomment-5009979822;
+  ClawSweeper re-review and fresh CI are running. Do not merge or enable
+  automerge without explicit user instruction. Next: restack and review PR
+  #102306 against this rewritten lifecycle head.
