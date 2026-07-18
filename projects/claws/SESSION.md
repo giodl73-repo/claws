@@ -35,6 +35,9 @@
   not own case lifecycle state or an unresolved-work queue.
 - No OpenClaw implementation files changed. The draft remains fork-only and
   the next decision is maintainer comprehension/adoption, not orchestration.
+- RFC fork PR #6 is updated at `8df2232e6bfa` and its live body carries the
+  proof. The RFC and Receipt Core sidecar now say explicitly that absence of a
+  resolution receipt does not create authoritative unresolved-case state.
 
 ### 2026-07-17 Auditable Skills receipt-core hardening
 

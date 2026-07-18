@@ -25,6 +25,8 @@ The trusted tool owns the business fields. OpenClaw adds facts it can observe: r
 
 Stable `type` and optional producer-owned `subject` make completed work easy to find and count. For a support agent, the channel thread remains the work history while typed outcomes provide a useful mini-CRM index over facts such as `customer.verified` and `case.resolved`. This does not replace accounts, queues, ownership, SLAs, or authoritative line-of-business systems.
 
+The fork proof exercised that boundary with nine receipts across three stable email-thread sessions. After the recording process exited, fresh processes counted three opened cases and two resolved outcomes, recovered inventory tracking evidence by session, and retrieved a refund authorization code by receipt ID. Receipt Core did not invent an authoritative unresolved queue from the remaining opened case.
+
 OpenClaw's proof profile uses configurable single-host SQLite, defaulting to `~/.openclaw/state/receipts.sqlite`. The producer and `get/list/count` semantics are portable, but Round 1 deliberately implements them directly in the SQLite module. A provider interface should be extracted only when a second store exists.
 
 ## Later evidence, not Round 1 dependencies
