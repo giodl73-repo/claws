@@ -2918,3 +2918,36 @@
   ClawSweeper re-review and fresh CI are running. Do not merge or enable
   automerge without explicit user instruction. Next: restack and review PR
   #102306 against this rewritten lifecycle head.
+
+### 2026-07-18 Ownership contract and PRs #102383/#102406
+
+- RFC PR #27 is pushed at `51c0ccd`. The RFC and both sidecar specs define one
+  capability-neutral resource model: `relationship` is `managed` or
+  `referenced`; `origin` is `claw-introduced` or `pre-existing`; current
+  non-Claw ownership is separate present-time evidence. There are no refcounts,
+  ownership-history ledgers, or arbitrary capability quotas. Managed resources
+  are cleanup candidates by default; referenced resources retain by default
+  and may be selected for integrity-bound `remove-if-unused` or explicit
+  cleanup with a stronger conflict override. `--yes` never broadens cleanup.
+- PR #102383 is pushed at `344d024f8b5`. It leaves ordinary agent deletion and
+  global cron behavior unchanged, removes a dead Claw-only agent-delete API
+  extension, and composes existing config/session/workspace/trash primitives
+  under Claw provenance checks. Exact-head focused proof passed 59 tests;
+  GitHub is `CLEAN` with 86 successful checks and no failures. Evidence and
+  ClawSweeper re-review request: issue comment `5011958605`.
+- PR #102406 is clean-restacked on #102383 and pushed at `c5d416c95c0`. MCP
+  declarations use the common relationship/origin/independent-owner fields:
+  collision-free Claw-created declarations are managed, exact existing or
+  cross-Claw reuse is referenced, and ordinary MCP writes record independent
+  ownership. Remove uses the same referenced cleanup modes as packages and
+  compare-before-unset. Source-preserving env references, landed/non-landed
+  uncertain-write recovery, and canonical generated state schema are covered.
+- Patrick's three outdated PR #102406 threads received exact-head replies and
+  were resolved. Local proof passed generated Kysely verification/guardrails,
+  max-lines ratchet without suppression, all three Knip export scans with zero
+  entries, and 126 focused tests. Latest evidence and ClawSweeper re-review:
+  issue comment `5012004541`; fresh GitHub CI is running. Do not merge.
+- Only PR #102383 required an earlier-stack semantic cleanup for this model.
+  PRs #1-#7 keep their existing boundaries. Next: wait for #102406 exact-head
+  CI/ClawSweeper, then restack and review PR #102427 (doctor) and downstream
+  PRs #102959, #102982, and #106888 in order.
