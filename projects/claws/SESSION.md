@@ -22,6 +22,59 @@
 
 ## Current Session
 
+### 2026-07-17 Auditable Skills receipt-first role review
+
+- Reviewed RFC 0022, both sidecars, and fork OpenClaw PR #97 at
+  `738ca6d79d37` through founder, Gateway, platform, operator, skill-author,
+  newcomer, CISO/compliance, simplicity, repository-steward, and release
+  lenses. Durable findings are in `auditable-skills-role-review.md`; no review
+  transcript was added to the RFC or specifications.
+- The receipt-first thesis and configurable single-host `receipts.sqlite`
+  remain sound. Round 1 should not include CRM entities, managed skills,
+  budgets, orchestration, or a speculative storage-provider framework.
+- Before presenting the slice, bound and batch receipt writes on the tool-result
+  path; separate receipt versus later managed/accounting conformance in the
+  core spec; re-status the runner spec as an optional future addendum; narrow
+  storage-neutral/atomic-migration claims; and document sensitive local
+  evidence plus production retention, backup/export, health, corruption, and
+  unsupported-schema gates.
+
+### 2026-07-17 Claws stack review pass - PR #106888 CLAW.md cleanup
+
+- Maintainer hold remains in force: do not merge #101328 or downstream Claws
+  PRs until Gio explicitly says to proceed; Omar/Patrick human review is still
+  pending.
+- OpenClaw PR [#106888](https://github.com/openclaw/openclaw/pull/106888)
+  is clean-restacked on current #102982 head
+  `555a2f70775626e5cf576bf48b900f28fdf2d2d4` and pushed at
+  `3df96efbd320994c2cbc34d8f96877431173eb90` on branch
+  `user/giodl/claws-pr13-claw-md` in Gio's fork.
+- The refresh keeps PR13 as one clean commit, `feat(claws): add CLAW.md
+  manifest support`, touching only `src/claws/reader.ts`,
+  `src/claws/export.ts`, `src/claws/schema.test.ts`, and
+  `src/claws/export.test.ts`. It preserves JSON manifest compatibility for
+  non-`CLAW.md` sources, keeps development-snapshot integrity over original
+  bytes while allowing one leading BOM for CLAW.md frontmatter recognition,
+  and preserves package `integrity` in exported CLAW.md package refs.
+- Local validation on exact head `3df96efbd3`: focused CLAW.md/schema/export/
+  CLI/lifecycle Vitest passed 65 tests across 3 files, `pnpm
+  check:test-types`, `pnpm lint`, `pnpm check:architecture`, deadcode
+  dependencies/exports/unused-files, max-lines ratchet against `555a2f7077`,
+  no-conflict-markers, and `git diff --check` passed.
+- Proof/re-review comment:
+  https://github.com/openclaw/openclaw/pull/106888#issuecomment-5009292873.
+  The comment is scoped to readiness proof and explicitly does not override
+  the broader maintainer discussion about when `CLAW.md` should become
+  canonical relative to Crew/role/policy semantics.
+- Live GitHub CI is green on `3df96efbd3`, including `openclaw/ci-gate`,
+  Real behavior proof, check-lint, check-test-types, dependency/architecture
+  gates, compact shards, QA smoke profiles, security high checks, CodeQL,
+  OpenGrep, and changed-path scan. GitHub reports `mergeStateStatus: CLEAN`
+  and no failing or pending checks.
+- Review labels show `proof: sufficient`, `rating: platinum hermit`, and
+  `status: ready for maintainer look`; `reviewDecision` remains stale
+  `CHANGES_REQUESTED`. No PR was merged and no automerge was enabled.
+
 ### 2026-07-17 Claws stack review pass - PR #102982 update apply cleanup
 
 - Maintainer hold remains in force: do not merge #101328 or downstream Claws
