@@ -79,6 +79,8 @@
   `user/giodl/claws-pr12-update-apply`, not directly into `main`, with merge
   commit `baf04f5555e195f737180fe338429d25f3b4b2bc`. The source head was
   `3df96efbd320994c2cbc34d8f96877431173eb90`.
+- Post-merge comment:
+  https://github.com/openclaw/openclaw/pull/106888#issuecomment-5009653532.
 
 ### 2026-07-17 Claws stack review pass - PR #102982 update apply cleanup
 
