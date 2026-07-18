@@ -22,6 +22,27 @@
 
 ## Current Session
 
+### 2026-07-17 Auditable Skills receipt-core hardening
+
+- RFC fork PR [#6](https://github.com/giodl73-repo/rfcs/pull/6) is updated at
+  `1e8aa6ed7dfd`. Receipt Core is now the only Round 1 conformance profile;
+  Skill Declaration, Managed Skill Identity, and Run Accounting are explicit
+  later profiles. The runner sidecar is conditional future research and does
+  not select Lobster, TaskFlow, or a built-in OpenClaw engine.
+- OpenClaw fork PR [#97](https://github.com/giodl73-repo/openclaw/pull/97) is
+  updated at `f04293c9153b`. One tool result admits at most 16 receipt
+  candidates; payload preparation occurs before the write lock; accepted rows
+  commit atomically under one bounded lock wait; schema setup is transactional;
+  and operator docs cover sensitive evidence plus production readiness gaps.
+- Focused Vitest passed 20 tests. Scoped format/lint, max-lines ratchet, Docs
+  MDX, config-doc baseline, runtime import cycles, and diff checks passed. Core
+  typecheck reported only inherited `net-policy` and `web-push` diagnostics.
+  Bundled Codex autoreview was clean with 0.94 confidence after one accepted
+  pre-lock-preparation finding was fixed and retested.
+- Both live fork PR bodies and their project-state body files carry the updated
+  receipt-core message. No upstream PR was opened and no draft was marked
+  ready or merged.
+
 ### 2026-07-17 Auditable Skills receipt-first role review
 
 - Reviewed RFC 0022, both sidecars, and fork OpenClaw PR #97 at

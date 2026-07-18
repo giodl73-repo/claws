@@ -25,7 +25,7 @@ The trusted tool owns the business fields. OpenClaw adds facts it can observe: r
 
 Stable `type` and optional producer-owned `subject` make completed work easy to find and count. For a support agent, the channel thread remains the work history while typed outcomes provide a useful mini-CRM index over facts such as `customer.verified` and `case.resolved`. This does not replace accounts, queues, ownership, SLAs, or authoritative line-of-business systems.
 
-OpenClaw's proof profile uses configurable single-host SQLite, defaulting to `~/.openclaw/state/receipts.sqlite`. The resource boundary is storage-neutral so a future multi-host provider can preserve the producer and query contracts.
+OpenClaw's proof profile uses configurable single-host SQLite, defaulting to `~/.openclaw/state/receipts.sqlite`. The producer and `get/list/count` semantics are portable, but Round 1 deliberately implements them directly in the SQLite module. A provider interface should be extracted only when a second store exists.
 
 ## Later evidence, not Round 1 dependencies
 
@@ -60,8 +60,10 @@ These string values fit the existing Agent Skills metadata contract and may be i
 
 Following the sidecar pattern established by RFC 0009, the readable proposal has two implementer references:
 
-- [Auditable Skills v1 core specification](https://github.com/giodl73-repo/rfcs/blob/agent/rfc-0022-skill-invocation-audit/rfcs/0022/auditable-skills-v1-spec.md) defines receipts, storage and query behavior, optional portable metadata, native managed identity, usage/cost, retention, failure behavior, and conformance.
-- [Orchestration runner v1 addendum](https://github.com/giodl73-repo/rfcs/blob/agent/rfc-0022-skill-invocation-audit/rfcs/0022/orchestration-runner-v1-spec.md) records the runner-neutral findings for a possible future consumer. It is not required for Round 1.
+- [Receipt Core and later extension profiles](https://github.com/giodl73-repo/rfcs/blob/agent/rfc-0022-skill-invocation-audit/rfcs/0022/auditable-skills-v1-spec.md) makes Receipt Core the only Round 1 conformance profile. Skill declarations, managed identity, and run accounting are explicitly later profiles with separate test vectors.
+- [Future orchestration runner addendum](https://github.com/giodl73-repo/rfcs/blob/agent/rfc-0022-skill-invocation-audit/rfcs/0022/orchestration-runner-v1-spec.md) preserves the runner research for a concrete future consumer. It is non-normative for Receipt Core and does not select Lobster, TaskFlow, or a built-in OpenClaw engine.
+
+Receipt admission is bounded per tool result. The SQLite profile must prepare payloads before acquiring its write lock, commit one bounded batch, initialize or migrate schema transactionally, and keep sensitive evidence under an explicit access, backup, export, and retention boundary.
 
 ## Recommended landing rule
 

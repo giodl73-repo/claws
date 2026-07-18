@@ -34,7 +34,8 @@ For a support inbox, the existing channel thread remains the work history while 
 - Stores the full record once in a configurable local SQLite database shared by agents on the Gateway host. The default is `~/.openclaw/state/receipts.sqlite`.
 - Supports idempotent record, get by ID, exact-filter list, stable pagination, and payload-free count.
 - Records only a bounded `audit.receipt.recorded` trajectory reference. Evidence such as `AUTH-9482` is not copied into every trajectory.
-- Contains recording failures so a receipt-store problem cannot rewrite a completed tool result. SQLite lock waits on that result path are capped at 50 ms.
+- Admits at most 16 receipt candidates from one tool result, reports overflow, prepares payloads before taking the SQLite write lock, and commits the accepted batch atomically under one bounded lock wait.
+- Initializes the SQLite schema transactionally and contains recording failures so a receipt-store problem cannot rewrite a completed tool result.
 
 The implementation reuses OpenClaw's sanitized private tool-result observer shared by the OpenClaw, Codex, and Copilot harnesses; native session and run identity; trajectory recording; config metadata; Kysely/SQLite helpers; WAL and private-file conventions; and lazy CLI registration.
 
@@ -42,7 +43,7 @@ The implementation reuses OpenClaw's sanitized private tool-result observer shar
 
 This is not workflow scaffolding. It answers a complete product question on its own: **what happened, to what, where, and what evidence came back?** Managed skill identity and run-level token usage may enrich that answer later, but neither is required to record or retrieve receipts.
 
-The dedicated database reflects the different volume and retention needs of full business evidence. Version 1 is explicitly single-host local SQLite. A deployment may configure another local path; network-filesystem and multi-host SQLite sharing are outside this slice. Production retention, snapshot/export, health diagnostics, and a future remote provider remain explicit follow-up work.
+The dedicated database reflects the different volume, sensitivity, and retention needs of full business evidence. Version 1 is explicitly single-host local SQLite. A deployment may configure another local path; network-filesystem and multi-host SQLite sharing are outside this slice. The producer and query semantics are portable, but this PR does not add a speculative provider interface. Production retention, snapshot/export, and health diagnostics remain explicit follow-up work.
 
 ## Boundaries
 
@@ -50,11 +51,11 @@ This PR does not add a CRM, payment ledger, workflow engine, skill invocation, t
 
 ## Validation
 
-- 16 focused receipt, store, command, trajectory, and backend-composition tests pass.
+- 20 focused receipt-normalization, SQLite-store, and backend-composition tests pass on the hardening commit, including overflow, pre-lock size rejection, and atomic rollback.
 - 349 existing OpenClaw, Codex, and Copilot tool-result observer tests pass.
 - 32 config help and generated-baseline tests pass.
 - 21 CLI registration/help tests pass.
-- Production and root-test TypeScript checks pass.
+- The focused core TypeScript check reports only inherited current-base diagnostics in `packages/net-policy` and missing `web-push` declarations; it reports no receipt-change diagnostics.
 - Full lint, formatting, runtime import-cycle, config-baseline, i18n glossary, and docs-link checks pass; 6,038 internal links were checked.
 - The aggregate `pnpm check` reaches a current-base shrinkwrap preflight failure for the root package, `extensions/llama-cpp`, and `extensions/twitch`; this branch does not change those files.
 - Fork-only `auto-response`, label, and companion-signing failures are caused by unavailable upstream secrets. The separate Real behavior proof gate passes.
@@ -75,7 +76,7 @@ Exact steps or command run after this patch:
 5. Run `openclaw receipts --help` and an empty exact-type JSON query against a temporary state directory.
 
 Evidence after fix:
-The source-harness transcript returned one stored `payment.authorized` receipt containing `AUTH-9482`; exact-type list and count found it; get-by-ID returned the full evidence; the trajectory contained only the bounded receipt reference; equivalent replay returned the same record; failed and malformed results created no success receipt. The fork Real behavior proof check passed.
+The source-harness transcript on the receipt feature head returned one stored `payment.authorized` receipt containing `AUTH-9482`; exact-type list and count found it; get-by-ID returned the full evidence; the trajectory contained only the bounded receipt reference; equivalent replay returned the same record; failed and malformed results created no success receipt. The hardening commit then passed the real SQLite store and shared observer tests for the same path plus bounded batch behavior. The fork Real behavior proof check passed.
 
 Observed result after fix:
 OpenClaw retained one canonical outcome record, made it searchable and countable, preserved its originating session/run correlation, and kept the full producer payload out of the trajectory.
@@ -95,4 +96,4 @@ The later PRs are evidence that receipts can support richer execution accounting
 
 Draft fork proof for maintainer review; nothing is proposed to `openclaw/openclaw` by this PR.
 
-Head `738ca6d79d3`; 32 files, 1,489 additions, 27 deletions.
+Head `f04293c9153b`; 32 files, 1,673 additions, 27 deletions.
