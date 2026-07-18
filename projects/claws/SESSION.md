@@ -22,6 +22,20 @@
 
 ## Current Session
 
+### 2026-07-18 Auditable Skills support-case proof
+
+- Proved OpenClaw fork PR #97 head `f04293c9153b` with nine durable receipts
+  across three stable email-thread sessions and two agents. The seed process
+  exited before all query operations.
+- Fresh processes counted three `case.opened` and two `case.resolved` outcomes,
+  recovered Carol's `inventory.sent` tracking evidence by session, and
+  retrieved Bob's `refund.approved` authorization code by receipt ID.
+- Durable evidence is in `auditable-skills-support-proof.md`. The proof makes
+  the product boundary explicit: Receipt Core records completed facts but does
+  not own case lifecycle state or an unresolved-work queue.
+- No OpenClaw implementation files changed. The draft remains fork-only and
+  the next decision is maintainer comprehension/adoption, not orchestration.
+
 ### 2026-07-17 Auditable Skills receipt-core hardening
 
 - RFC fork PR [#6](https://github.com/giodl73-repo/rfcs/pull/6) is updated at

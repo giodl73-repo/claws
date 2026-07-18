@@ -78,11 +78,15 @@ Exact steps or command run after this patch:
 Evidence after fix:
 The source-harness transcript on the receipt feature head returned one stored `payment.authorized` receipt containing `AUTH-9482`; exact-type list and count found it; get-by-ID returned the full evidence; the trajectory contained only the bounded receipt reference; equivalent replay returned the same record; failed and malformed results created no success receipt. The hardening commit then passed the real SQLite store and shared observer tests for the same path plus bounded batch behavior. The fork Real behavior proof check passed.
 
+A second support-case proof on the hardening head recorded nine receipts across three stable email-thread sessions and two agents, then exited the seed process. Fresh processes counted `case.opened=3` and `case.resolved=2`, listed both resolved cases with exact agent/session/run/tool correlation, recovered Carol's `inventory.sent` tracking number from her thread, and retrieved Bob's full `refund.approved` receipt by ID with authorization code `RFND-AUTH-7721`. The retained `receipts.sqlite` was 45,056 bytes.
+
 Observed result after fix:
 OpenClaw retained one canonical outcome record, made it searchable and countable, preserved its originating session/run correlation, and kept the full producer payload out of the trajectory.
 
+In the support fixture, Receipt Core made completed work and concrete evidence revisitable after process exit without creating CRM entities. Three opened cases versus two resolved outcomes also exposed the intended boundary: receipts preserve facts, but an authoritative unresolved-work queue still belongs to the source channel or a CRM/workflow consumer.
+
 What was not tested:
-No live line-of-business system was mutated. Multi-host storage, remote providers, production retention/export, and regulatory attestation are outside this PR.
+No live email provider or line-of-business system was called or mutated. The support fixture used deterministic local business identifiers. Multi-host storage, remote providers, production retention/export, authoritative case lifecycle state, and regulatory attestation are outside this PR.
 
 ## Related evidence
 
