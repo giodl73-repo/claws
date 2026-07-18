@@ -81,6 +81,10 @@
   `3df96efbd320994c2cbc34d8f96877431173eb90`.
 - Post-merge comment:
   https://github.com/openclaw/openclaw/pull/106888#issuecomment-5009653532.
+- Recovery: this was not the intended operation. The bad stacked-branch merge
+  was reverted on `user/giodl/claws-pr12-update-apply` at
+  `b8cb480fdeaa17600532345e9d025b7c18664ec6`, restoring PR #102982's branch
+  to the pre-CLAW.md content. OpenClaw `main` was not touched by #106888.
 
 ### 2026-07-17 Claws stack review pass - PR #102982 update apply cleanup
 

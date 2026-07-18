@@ -18,6 +18,7 @@ Claws are not feeds and not raw workspace templates:
 | --- | --- |
 | Initial RFC sketch | `rfc-sketch.md` |
 | Role review | `role-review.md` |
+| Auditable Skills receipt-first role review | `auditable-skills-role-review.md` |
 
 ## Related Areas
 
