@@ -40,6 +40,15 @@
   Receipt Core sidecar makes tool-versus-harness ownership explicit and adds
   the fresh-process support conformance vector; the runner sidecar states that
   it is strictly a later consumer and cannot alter or gate Receipt Core.
+- A focused founder, Gateway, operator, skill-author, CISO, and repository
+  boundary pass found no further change needed: the proposal remains optional
+  for authors, bounded for the runtime, useful without CRM state, and explicit
+  that receipts are not compliance evidence. No review prose was added to the
+  RFC or specifications.
+- `codex --dangerously-bypass-approvals-and-sandbox review --commit HEAD`
+  reviewed exact commit `7349888` and reported no introduced contradiction or
+  actionable issue. The normal sandboxed attempt could not inspect files
+  because the Windows sandbox helper is absent; it was not counted as review.
 
 ### 2026-07-18 Auditable Skills support-case proof
 
