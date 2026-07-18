@@ -35,6 +35,11 @@
 - Live state remains RFC #6 at `8df2232e6bfa` and OpenClaw #97 at
   `f04293c9153b`; both are draft, fork-only, mergeable, and the OpenClaw Real
   behavior proof check passes.
+- RFC #6 is now updated at `7349888b8570`. The readable RFC asks the core
+  product decision up front and includes the trusted-tool result example; the
+  Receipt Core sidecar makes tool-versus-harness ownership explicit and adds
+  the fresh-process support conformance vector; the runner sidecar states that
+  it is strictly a later consumer and cannot alter or gate Receipt Core.
 
 ### 2026-07-18 Auditable Skills support-case proof
 
