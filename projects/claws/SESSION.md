@@ -73,7 +73,12 @@
   and no failing or pending checks.
 - Review labels show `proof: sufficient`, `rating: platinum hermit`, and
   `status: ready for maintainer look`; `reviewDecision` remains stale
-  `CHANGES_REQUESTED`. No PR was merged and no automerge was enabled.
+  `CHANGES_REQUESTED` before landing. No automerge was enabled.
+- Gio explicitly approved landing after this readiness pass. PR #106888 was
+  squash-merged on 2026-07-18 at 03:02:51Z into its stacked base branch
+  `user/giodl/claws-pr12-update-apply`, not directly into `main`, with merge
+  commit `baf04f5555e195f737180fe338429d25f3b4b2bc`. The source head was
+  `3df96efbd320994c2cbc34d8f96877431173eb90`.
 
 ### 2026-07-17 Claws stack review pass - PR #102982 update apply cleanup
 
