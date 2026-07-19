@@ -67,6 +67,40 @@
 - Deliberate follow-ups remain unchanged: ordinary `agents delete` does not gain
   Claw cron cleanup in this series, and v1 does not add a tombstone/history
   ledger. Both remain explicit RFC questions rather than hidden behavior.
+- Final CI-owned type remediation was applied at the originating stack stages
+  and pushed with explicit leases. PR #102228 now models the complete
+  `ClawAddPlan` capability fields and complete ClawHub plugin success record in
+  its tests. PR #102296's adoption fixture carries the same plan contract. PR
+  #102982 derives the internal package-installer dependency type from the
+  public installer signature, preserves string-keyed package lookup typing,
+  and gives update capability fixtures exact effects. No runtime policy or
+  RFC/spec change was required for these fixture/type corrections.
+- Current post-remediation heads are #102228 `99948eec5554`, #102296
+  `3979cd9ae4ef`, #102306 `4576fbf3ecb2`, #102383 `d8fe5a537b68`, #102406
+  `a1375875bdff`, #102427 `94c8957c9557`, #102959 `f2c57d468ee6`, #102982
+  `0aa5de04281a`, and #111391 `62f60207a736`. PRs #101328-#101973 and RFC #27
+  remain at the heads recorded above. Nothing was merged.
+- Direct native TypeScript validation on the cumulative PR13 tree reports no
+  Claws-owned production or test type errors. The residual local production
+  declarations are pre-existing cross-worktree `AbortSignal`/`Response`
+  portability errors; the residual test-project errors are only the missing
+  generated `@openclaw/libterminal/browser` package. Focused tests passed 29/34;
+  all five failures were the intentional Node 24.14.0 / SQLite 3.51.2 WAL
+  safety refusal. Scoped Oxfmt, zero-warning Oxlint, `git diff --check`, stack
+  ancestry, and signatures are clean. Fresh exact-head GitHub CI is running
+  and remains authoritative for generated packages and database-backed tests.
+- The next CI pass made PR8/PR9 stack-boundary defects visible. PR #102383
+  internalizes `clawCronGatewayInput` because no production consumer exists at
+  that stage; PR #102982 exports it when `cron-update` becomes the second
+  production consumer. PR #102406 restores the specified non-complete root
+  status rule after its status-module extraction had narrowed it to literal
+  `partial`, supplies the required `cron.get` live recheck in removal coverage,
+  and moves removal result types into the existing contract module to satisfy
+  max-lines without suppression. Current heads are #102383 `e1c32196fbaa`,
+  #102406 `f84e6975f29a`, #102427 `8a1fda55310b`, #102959 `6d84086e3557`,
+  #102982 `416f1722d6bd`, and #111391 `eb7ad0462168`. Earlier heads in this
+  subsection remain unchanged. Cumulative Claws test typing and scoped lint are
+  clean; fresh exact-head CI is running. Nothing was merged.
 
 ### 2026-07-19 three-model independent review
 
