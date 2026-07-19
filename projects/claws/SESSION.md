@@ -3287,3 +3287,41 @@
   stack pointer with #111391; its PR body links were refreshed too. Final PR13
   evidence is comment `5015933588`. ClawSweeper exact-head review is still
   running. Do not merge.
+
+### 2026-07-19 PR11-PR13 CI remediation and final restack
+
+- PR #102959 is pushed at `9b852c57ce1c457ca69e0b29ab079910b1bb547a`.
+  Its capability-effect records now expose only secret-safe MCP and cron
+  execution shape. Serialized plans no longer include MCP URLs, commands,
+  arguments, auth details, env names or values, tool-filter contents, or cron
+  payloads; exact desired-state digests and `planIntegrity` still bind the
+  complete target. The update-plan output helper moved to
+  `src/cli/claws-cli-update-output.ts`, returning `claws-cli.runtime.ts` to 682
+  lines and satisfying the max-lines ratchet.
+- PR #102982 was clean-restacked on that planner and pushed at
+  `9caf48127adf20d5ad9bc067a6991ab1808b0154`. Its mutating CLI reuses the
+  shared secret-safe output helper. The old downstream
+  `fix(claws): preserve update capability effects` commit became redundant and
+  collapsed during rebase. The plan-summary calculation moved to a focused
+  internal module after this stage's imports pushed `update-plan.ts` three
+  lines over the lint budget; no suppression or executor policy change was
+  introduced.
+- PR #111391 was clean-restacked on PR #102982 and pushed at
+  `dcd1d263c68a1073fa6f4ef6faaf310582ba9b6f`; CLAW.md behavior is unchanged.
+  All restacked commits have valid Gio signatures.
+- Local proof passed 10/10 focused capability tests, 53/55 cumulative
+  capability/schema tests (two expected skips), five focused update-preview
+  CLI tests, full-tree Oxfmt, max-lines, and `git diff --check`. Local
+  SQLite-backed tests remain
+  intentionally blocked because Node 24.14.0 embeds unsafe SQLite 3.51.2. The
+  cumulative test typecheck reports only unrelated missing
+  `@openclaw/libterminal/browser` declarations.
+- PR bodies and exact-head comments were refreshed for all three PRs. RFC #27
+  and its sidecar specs need no additional edit: this remediation implements
+  their existing secret-safe preview and integrity-binding contract rather
+  than changing policy. Exact-head CI is green for PR #102959 (run
+  `29706989262`, including the successful rerun of one unrelated timing flake)
+  and PR #102982 (run `29707267090`). PR #111391 run `29707267429` has no
+  failures; its final two large test shards remain queued for runners. A
+  superseded PR #111391 run and ClawSweeper dispatches were canceled, not test
+  failures. Do not merge or enable automerge.
