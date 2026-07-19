@@ -22,6 +22,239 @@
 
 ## Current Session
 
+### 2026-07-19 independent-review remediation and final restack
+
+- Adjudicated the three-model review against the implementation and updated RFC
+  #27 plus both normative sidecars. Accepted fixes cover distinct capability
+  disclosures, strict `CLAW.md` YAML, exact dependency identity and trust
+  warnings, release-only package removal during update, structured partial
+  outcomes, pending/failed provenance, live cron drift checks, bounded reads,
+  strict strings, MCP tool-filter grammar, and documentation examples.
+- Restacked and pushed the complete OpenClaw series in dependency order. Current
+  heads are #101328 `38c3942ae813`, #101755 `d10d03d8410c`, #101973
+  `67c48fc7907c`, #102228 `51d8369278cc`, #102296 `e64b7c4bec13`, #102306
+  `68205169d401`, #102383 `8156de4ba310`, #102406 `9bce7482475d`, #102427
+  `36ae52d1bb47`, #102959 `029ae216a3ed`, #102982 `e9e9b4c2c77c`, and
+  #111391 `22639cf758e8`. RFC #27 is `9924dec5a67e`. PR #101328's fork head
+  and upstream shadow were updated together. Nothing was merged.
+- Rebase review caught and repaired three cumulative losses before push:
+  package capability effects still said unresolved after package preflight;
+  PR12's runtime extraction had dropped add/update capability-effect output;
+  and PR12 had dropped `cron.get` before removal. PR13 now reads original
+  `CLAW.md` bytes through the 1 MiB fs-safe, symlink-rejecting reader.
+- Focused proof passes: PR5 schema 34/35 (one skip), PR12 add/update capability
+  CLI assertions, PR13 schema-conformance 16/16, and the final seven selected
+  consent/trust/parser/partial assertions. The broader final run passed 105
+  tests with two skips; its 26 database-backed failures were solely the
+  intentional Node 24.14.0 / SQLite 3.51.2 WAL-safety refusal. Fresh GitHub CI
+  is the authoritative database/full-suite proof. `git diff --check`, conflict
+  marker checks, stack ancestry, and signatures are clean.
+- Cumulative `codex review --base 1f5c8239d71c` reported no discrete actionable
+  correctness issue. All stack commits after that base are signed by
+  `Gio Della-Libera <giodl73@gmail.com>` and map to `giodl73-repo`.
+- First fresh CI identified two owning-stage defects before closeout. PR #101328
+  had an unnecessary regex escape rejected by Oxlint. PR #102228 had an
+  unreachable type branch, a lease assertion before that stage introduces
+  leases, and a test-only exported dependency type. All were fixed at their
+  owning stages, the stack was restacked and pushed again, and focused schema
+  and scoped Oxlint checks pass. Local `tsgo:core` could not complete because
+  pnpm attempted an unauthenticated Microsoft feed download and received 403;
+  fresh CI is the authoritative typecheck.
+- Updated every implementation PR body and RFC #27's body, refreshed immutable
+  sidecar links, and posted one exact-head remediation comment per PR. Existing
+  predecessor-head runtime evidence is explicitly retained as historical;
+  fresh exact-head CI is not claimed until it completes.
+- Deliberate follow-ups remain unchanged: ordinary `agents delete` does not gain
+  Claw cron cleanup in this series, and v1 does not add a tombstone/history
+  ledger. Both remain explicit RFC questions rather than hidden behavior.
+
+### 2026-07-19 three-model independent review
+
+- Commissioned independent read-only reviews from `gpt-5.6-sol` (94%
+  confidence), `gpt-5.5` (84%), and `gpt-5.6-terra` (93%). The initial Spark
+  reviewer exhausted its context and was replaced rather than counted. All
+  three final judgments were `changes required`; no agent edited files or
+  posted to GitHub.
+- Strongest reproduced findings are missing distinct add capability disclosure
+  (Sol and GPT-5.5) and failure to reject prohibited valid YAML anchors,
+  aliases, merge keys, and tags in `CLAW.md` (all three). Sol and Terra also
+  independently identified update partial/recovery contract problems, though
+  with different concrete manifestations.
+- Additional findings needing local adjudication include ClawHub risk-warning
+  acknowledgement, cron live-drift checks, cross-owner add compensation,
+  bounded reads, update dependency-integrity binding, update capability detail,
+  update package-release semantics, raw-byte CLAW.md integrity, strict-field
+  trimming, MCP tool-filter grammar, an unpinned normative MCP example, and the
+  docs `target`/`path` mismatch.
+- All three agree durable tombstones/history ledgers can remain follow-up work.
+  Sol considers ordinary `agents delete` with attached Claw cron a blocker;
+  GPT-5.5 and Terra consider generic deletion cleanup a follow-up because
+  dedicated Claw removal already owns cron-first teardown. Reproduce the
+  claimed deleted-agent cron fallback before retaining the prior policy.
+- No fixes were made from this panel. Next step is local evidence-based
+  adjudication, starting with the consensus parser/consent findings and then
+  the high-impact update and cron claims, before requesting final approval.
+
+### 2026-07-19 signed history cleanup
+
+- Rebuilt RFC #27 and the twelve-PR OpenClaw Claws stack after the signing
+  audit found fourteen unsigned early PR #101328 commits and RFC commits using
+  an email GitHub could not attribute. Every rewritten commit is authored as
+  `Gio Della-Libera <giodl73@gmail.com>`, maps to `giodl73-repo`, and has a
+  GitHub-verified SSH signature.
+- Compacted iterative review and bug-fix commits without flattening useful
+  history. RFC #27 now has three commits for the RFC, package specification,
+  and CLAW.md specification. Each implementation PR has three commits for
+  production behavior, tests/fixtures, and the progressive documentation
+  introduced at that stage.
+- Preserved every RFC and implementation tip tree exactly and verified the
+  rewritten parent chain before pushing. New heads are RFC #27 `89312305c60c`,
+  #101328 `e0aed39c1413`, #101755 `ed152be79577`, #101973 `bfe0787f5e34`,
+  #102228 `732b833828f9`, #102296 `ebd50cb54e16`, #102306 `830f057a4f46`,
+  #102383 `739c0325ace6`, #102406 `a397313392c1`, #102427 `117cdb35dee0`,
+  #102959 `bb7b2743e4ae`, #102982 `14598acdba1e`, and #111391
+  `61f7f39a8437`.
+- Force-pushed with explicit leases in dependency order, including PR #101328's
+  upstream shadow branch. GitHub reports 39/39 rewritten commits verified with
+  the expected author account. RFC CI is clean; implementation CI restarted
+  after the history rewrite and had no failures at the initial check. Nothing
+  was merged.
+- Updated all twelve implementation PR bodies with an explicit history-only
+  proof carry-forward attestation and posted one comment per PR recording the
+  prior head, current signed head, and identical Git tree. These notes preserve
+  the existing runtime evidence without claiming a new execution. All Real
+  behavior proof and auto-response gates pass. Unrelated failed CI shards were
+  rerun and passed; only two queued Opengrep checks remained at the last poll.
+- Updated RFC #27's immutable sidecar links to the rewritten signed head and
+  posted the equivalent RFC tree-attestation comment. The maintainer Discord
+  blurb on the clipboard now summarizes Patrick and Omar's policy alignment,
+  progressive docs, and the deferred tombstone/history and ordinary
+  `agents delete` cron-cleanup follow-ups.
+
+### 2026-07-19 final capability-consent policy alignment
+
+- RFC #27 is pushed at `d17fab4034b` and remains approved/CLEAN. RFC 0016 and
+  the package sidecar now define one exact OpenClaw CLI confirmation: capability
+  escalations remain separate machine-readable records and human plan lines,
+  while `planIntegrity` binds both that disclosed capability set and ordinary
+  content. Hosts may present a separate dialog or aggregate those records.
+- PR #102959 is pushed at `be0725e3dcf`. Human update preview now labels
+  capability escalations for explicit review, prints the exact plan integrity,
+  and explains that the token binds every `!` capability line. The focused CLI
+  regression passes; exact-head CI is green. Codex review found the initially
+  missing human token, the fix was applied, and the final commit review is
+  clean.
+- PR #102982 is restacked and pushed at `11a506c9926`. Apply compares
+  `capabilityChanges` independently as well as checking the rebuilt digest, so
+  a changed capability disclosure fails with `update_changed` before mutation.
+  All 8 focused apply tests and the human-preview CLI test pass; exact-head CI
+  is green. A final broad Codex branch review timed out without a verdict, but
+  the earlier policy-specific review finding was fixed and the focused review
+  of that fix is clean.
+- PR #111391 is restacked and pushed at `378c997616e`. Its first CI attempt hit
+  an unrelated flaky media redirect-timeout test; the failed-job rerun and full
+  `openclaw/ci-gate` pass. No PR was merged.
+- Replied to Patrick on all four stale #102306 export threads and all four
+  #102383 cron/removal threads. Seven threads were resolved with exact-head
+  evidence. The agent-teardown thread remains intentionally open: Claws reuse
+  the canonical config mutation and cleanup primitives, but this experimental
+  stack does not change ordinary `agents delete` cron behavior; Patrick can
+  decide whether that separate core follow-up should block Claws.
+
+### 2026-07-19 RFC/spec alignment after staged documentation
+
+- Re-audited RFC #27 and both normative sidecars against the live twelve-PR
+  OpenClaw stack after public Claws documentation was distributed from the
+  first command-owning PR onward. The sidecars already matched the final
+  managed/referenced, origin, independent-owner, update, removal, partial-result,
+  grouped JSON, and `CLAW.md` contracts; only the package sidecar's status label
+  needed normalization to `experimental draft`.
+- RFC #27 is pushed at `59e031d`.
+  It now documents public-but-non-executable hosted guidance under the local
+  feature gate, exact `--plan-integrity` consent, provenance-default update
+  sources with optional `--from`, explicit referenced cleanup selection,
+  current ownership provenance, and progressive documentation ownership across
+  #101328 through #111391. Codex review found that the prior term `artifact
+  origin` did not cover mutable MCP declarations; the RFC and package sidecar
+  now define capability-neutral `resource origin`, and MCP provenance requires
+  origin plus current non-Claw ownership. The clean rerun found no remaining
+  contradiction. The PR body and immutable sidecar links were refreshed;
+  GitHub reports `CLEAN` and the existing human approval remains current.
+- PR #111391 is pushed at `19116c73f6808b61f8bfa6b8f773e0707a13a4b7`.
+  Its final guide no longer says later stages will add MCP/cron provenance after
+  those stages are already inherited. The PR body now records the new exact
+  head and targeted validation. Targeted MDX and `git diff --check` pass; the
+  worktree's local pre-commit formatter link was missing, so the wording-only
+  commit used `--no-verify` after direct validation. Fresh GitHub CI is running.
+- A stale fork copy of the PR13 branch exists at `fork/user/giodl/claws-pr13-claw-md`;
+  it is not the source of PR #111391. The canonical PR branch is
+  `origin/user/giodl/claws-pr13-claw-md`. No branch was overwritten and nothing
+  was merged.
+
+### 2026-07-19 staged experimental documentation across the Claws stack
+
+- Moved the public experimental guide and navigation from final PR #111391 to
+  first-command PR #101328. Each later PR now extends `docs/cli/claws.md` only
+  with behavior introduced in that stage: consented add, workspace files,
+  packages, status/remove, grouped JSON export, cron, MCP, Doctor, update
+  preview, update apply/recovery, then `CLAW.md` authoring and canonical export.
+- Current ordered heads are #101328 `a590c21831c`, #101755 `540a7f43914`,
+  #101973 `a03d921805e`, #102228 `329e9289ae8`, #102296 `fafa6984225`,
+  #102306 `01179a6693e`, #102383 `102464b8810`, #102406 `c8f2ca2eabd`,
+  #102427 `4bcf5527148`, #102959 `335444fe425`, #102982 `403ab66b1fa`,
+  and #111391 `2fd141b3ae1`. All branches were pushed in order; no PR was
+  merged.
+- Synchronized the upstream shadow branch for fork-owned #101328 and refreshed
+  #101755's base metadata so GitHub computes the intended stacked diff.
+- CI exposed one real existing #102228 test/contract gap: newly introduced
+  skill/plugin refs relied on the persistence default for
+  `independentOwner: false`. The production call sites now pass it explicitly;
+  the exact PR head passes all 7 focused package tests, and the fix was
+  propagated through every downstream branch. The unrelated #101973 SQLite
+  benchmark timeout was rerun.
+- Final exact-head validation at `2fd141b3ae1`: 60 schema/package/export tests,
+  733-file MDX validation, 6,051 internal links with zero broken, generated
+  docs map, Oxfmt, and `git diff --check` pass. The i18n check has no Claws
+  findings and retains six unrelated stacked-base labels.
+- Updated every PR body with its documentation stage, corrected stale head
+  language, replaced #102306's obsolete #106888 pointer with #111391, and
+  narrowed #111391's body to its actual six-file CLAW.md delta. All current
+  heads report zero pending and zero failed checks; GitHub reports `CLEAN` for
+  #101755 through #111391. #101328 has a passing required CI gate but remains
+  `UNSTABLE` because its existing human review decision is `CHANGES_REQUESTED`;
+  do not dismiss that review or merge.
+
+### 2026-07-18 Fresh independent review - PR #102959 final head
+
+- Restacked and fully repaired OpenClaw PR [#102959](https://github.com/openclaw/openclaw/pull/102959)
+  on final PR #102427 head `ec41651ee29a`. The authoritative update-plan
+  branch is `user/giodl/claws-pr11-update-plan` at `82bcde001d69`; no PR was
+  merged and Patrick's stale human changes-requested review was not dismissed.
+- Update planning now uses persisted provenance when `--from` is omitted,
+  preserves agent list position, resolves effective sandbox/heartbeat defaults,
+  classifies heartbeat direction and missing-agent restoration correctly, and
+  emits only redacted summaries plus digests of those summaries. Raw MCP/cron
+  details do not enter output or secret-derived fingerprints.
+- Package removals fail closed for unresolved artifacts and release referenced
+  or independently owned artifacts. Managed, unchanged, otherwise-unused
+  artifacts remain removal candidates. Workspace, MCP, cron, package, and
+  capability actions use the common managed/referenced/origin/independent-owner
+  policy.
+- Exact-head local proof passed 55 focused tests, Oxfmt, Oxlint, max-lines, and
+  Knip all-exports. Bundle-based GPT-5.5 autoreview reported no actionable
+  findings (`patch is correct`, confidence 0.84). GitHub CI is fully green,
+  including production/test types, dependency scans, all shards, security, and
+  `openclaw/ci-gate`; merge state is `CLEAN`.
+- The PR body distinguishes the runtime transcript captured at prior reviewed
+  head `ee3b8d180375` from exact-head automated proof. An exact-head local CLI
+  rerun could not be rebuilt in the linked WSL dependency tree because pnpm
+  refused its mismatched modules directory; do not claim a new runtime
+  transcript without rebuilding in a clean environment.
+- ClawSweeper exact-head re-review started in run `29672473131` from comment
+  `5014133132`. Next: inspect its final verdict, then restack and independently
+  review PR #102982 on `82bcde001d69`, preserving its external-mutation recovery
+  policy question for Gio/Omar rather than silently choosing it.
+
 ### 2026-07-17 Fresh independent review - PR #101973 final head
 
 - Restacked OpenClaw PR [#101973](https://github.com/openclaw/openclaw/pull/101973)
@@ -2951,3 +3184,72 @@
   PRs #1-#7 keep their existing boundaries. Next: wait for #102406 exact-head
   CI/ClawSweeper, then restack and review PR #102427 (doctor) and downstream
   PRs #102959, #102982, and #106888 in order.
+
+### 2026-07-18 PR #102982 update executor closeout
+
+- OpenClaw PR #102982 was clean-restacked on the final read-only planner head
+  `82bcde001d69249e9b880301ae6974d6e5296196`, repaired, and force-pushed with
+  lease at exact head `3667eb6d4e07d922742aca9d4a601d6c62c52e0f`.
+  Consent requires both `--yes` and the exact dry-run `--plan-integrity`.
+  Execution rebuilds the plan, uses per-owner compare-and-swap checks, advances
+  root provenance only after success, and reports `update_partial` when an
+  external installer, source-config writer, or Gateway scheduler mutation
+  cannot be proven compensated.
+- Package update provenance now uses the common managed/referenced,
+  origin, and independent-owner model. Referenced removal releases only this
+  Claw's row; managed removal uses the existing removal planner and uninstaller
+  before deleting provenance. Package release is reference-only and CAS
+  checked. MCP, workspace, cron, agent, and root-provenance races fail closed.
+- Independent exact-branch Codex review reported no actionable code finding.
+  Focused validation passed 82 tests across update execution, packages, MCP,
+  workspace, cron, provenance, and CLI consent. The final test-only amendment
+  moved two temporary roots to the standard auto-cleanup tracker; its focused
+  tests passed 7/7 along with Oxfmt, zero-warning Oxlint, and the temp-path
+  guard.
+- Exact-SHA GitHub CI run `29676105624` passed with no failed jobs, including
+  production/test types, lint, dependency guards, Node core tests, and macOS
+  Swift. The PR body and final status comment link that evidence:
+  https://github.com/openclaw/openclaw/pull/102982#issuecomment-5014718192.
+- ClawSweeper's exact-head review reports no discrete security defect. Its
+  remaining blocker is deliberately not a mechanical code fix: maintainers
+  must accept report-only `update_partial` plus operator inspection/replanning
+  as the initial experimental recovery contract, or require a richer
+  doctor/retry/reconcile operation identity, and still request exact-head live
+  package replacement and Gateway cron recovery proof. Do not merge. Next:
+  continue the ordered review with replacement PR #111391 on this final base.
+
+### 2026-07-19 PR #111391 CLAW.md and documentation closeout
+
+- The original CLAW.md PR #106888 had been merged only into an obsolete PR12
+  stack head. Current PR12 no longer contained that merge, and a merged PR
+  cannot be reopened. Replacement PR #111391 now supersedes #106888 and is
+  stacked directly on PR12 head `3667eb6d4e07d922742aca9d4a601d6c62c52e0f`.
+- PR #111391 is pushed at exact head
+  `60f28841279a740a2f35ec35947a4db194289099`. Its implementation commit adds
+  YAML-frontmatter `CLAW.md` input and canonical `CLAW.md` export while keeping
+  grouped JSON input and the existing schema, lifecycle, provenance, consent,
+  and single `OPENCLAW_EXPERIMENTAL_CLAWS=1` gate. The restack preserves
+  PR12's filesystem limits, source-byte integrity, ownership-aware export,
+  64-character derivative identity, and agent-drift rejection.
+- Documentation placement was audited across the effective 13-stage stack:
+  RFC #27 owns the normative RFC and sidecar specifications; intermediate
+  implementation PRs keep stage-specific contracts and proof in their PR
+  bodies; final PR13 owns the complete public guide because only that stage has
+  the entire documented lifecycle plus canonical CLAW.md syntax. The guide is
+  `docs/cli/claws.md`, linked beside the agent CLI docs, with generated docs map
+  and zh-CN glossary updates. It explicitly excludes future whole-Claw
+  ClawHub publish/search/install behavior.
+- Exact local proof passed 82 focused schema/export/CLI lifecycle tests,
+  Oxfmt, zero-warning Oxlint, test types, architecture and database guards,
+  all three Knip scans, max-lines, conflict-marker, and temp-path guards. Docs
+  MDX, 6,052 internal links, and docs-map verification pass. The glossary
+  check has no Claws findings but still reports six unrelated stacked-base
+  labels; full local anchor audit is blocked by a pre-existing syntax error in
+  `docs/concepts/qa-e2e-automation.md`.
+- Two independent exact-branch Codex reviews reported no accepted/actionable
+  findings. GitHub CI run `29688975469`, dedicated docs checks, security
+  checks, and `openclaw/ci-gate` all pass with no annotations; GitHub reports
+  `CLEAN`. RFC PR #27 was updated at `840ccc3` to replace its obsolete #106888
+  stack pointer with #111391; its PR body links were refreshed too. Final PR13
+  evidence is comment `5015933588`. ClawSweeper exact-head review is still
+  running. Do not merge.
