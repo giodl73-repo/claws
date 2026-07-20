@@ -22,6 +22,41 @@
 
 ## Current Session
 
+### 2026-07-19 ClawHub independent-panel closeout
+
+- Completed independent security, lifecycle/API, and staged-stack reviews of
+  draft ClawHub PRs #3089-#3092. Accepted findings were implemented at their
+  owning stage and propagated through the cumulative stack; no PR was merged or
+  marked ready.
+- Current signed heads are #3089 `34f3cbea35dc` (schema/storage), #3090
+  `1dd30e764762` (publication), #3091 `c2393ea11b56` (discovery), and #3092
+  `8f25cdd19337` (experimental feed/bridge proof). Every commit has author and
+  committer `Gio Della-Libera <giodl73@gmail.com>` and a good signature.
+- PR1 now handles `npm exec`/`npm x` and `bun x` without package-manager pin
+  bypasses, fails closed on unsupported known modes, and bounds public summary
+  text. A final CI-only Oxlint shadowing finding was fixed before restacking.
+- PR2 accepts Claw npm packs without a plugin manifest; validates canonical
+  archive/source identity with strict UTF-8/YAML and bounded streaming tar
+  parsing; and preserves exact immutable TGZ or legacy ZIP bytes. PR3 returns
+  release-specific bounded summaries. PR4 keeps stable RFC 0009 feed v1
+  plugin/skill-only and defines a separate gated experimental Claw feed with
+  bounded downloads/extraction and accurate bridge-proof scope.
+- RFC #27 is current at `e9c2bb478179`; the RFC and sidecars document the stable
+  feed boundary, artifact authority, bounded summary projection, version
+  semantics, no ungated redirect, and bridge rather than native feed proof.
+- Exact-head local proof passed: PR1 23 schema tests; PR2 346 cumulative
+  schema/publication tests plus three CLI tests; PR3 25 focused discovery/API
+  tests; PR4 34 focused feed/API/archive tests with two expected Windows skips,
+  plus four Linux bridge cases previously passed in WSL. Final schema build,
+  root typecheck, type-aware lint, format, and diff checks pass.
+- Fresh CI reaches Oxlint with 0 warnings/errors and 4,871 passing unit tests,
+  then fails only in unrelated `ui-design-contract.test.ts` because the CI
+  install lacks `@openclaw/design-system/styles/tokens.css`; downstream jobs
+  mirror that aggregate failure. The exact failure is recorded on all four PRs.
+- All four PR bodies now reference the current RFC/spec revision and exact
+  heads. Resolution comments and `@clawsweeper re-review` requests were posted
+  in stack order; ClawSweeper acknowledged and queued each request at handoff.
+
 ### 2026-07-19 ClawHub four-PR refresh
 
 - Rebuilt the four draft ClawHub PRs on current `openclaw/clawhub` main
