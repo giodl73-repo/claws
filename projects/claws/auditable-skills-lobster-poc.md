@@ -46,6 +46,31 @@ toolchain. The full plugin runner is locally blocked by missing `tsx`; the full
 OpenClaw Rust test recipe is locally blocked by missing Lobster Cargo registry
 credentials.
 
+### OpenClaw host proof
+
+The committed Lobster plugin was also copied byte-for-byte into a temporary
+WSL directory and loaded through OpenClaw's real plugin loader and agent tool
+resolver from `/root/src/openclaw-audit-receipts` at `ff4b4a86057`.
+The loader was bounded to `onlyPluginIds: ["auditable-skills"]`; OpenClaw
+loaded one plugin with three registered tool entries, and its optional-tool
+policy exposed only the tool explicitly selected for each run.
+
+Two separate Node processes shared one temporary `receipts.sqlite`:
+
+1. Agent context `returns-agent` / `email:return-1001` resolved and executed
+   `authorize_return`, recording `return.authorized` for `RET-1001` with
+   authorization code `RMA-2C7A27324C`.
+2. After that process exited, agent context `audit-agent` /
+   `ops:audit-review` independently resolved `receipts_search` and recovered
+   the same receipt, source session metadata, and authorization code using
+   exact receipt-type and subject filters.
+
+The temporary store directory was mode `0700` and the SQLite database was mode
+`0600`. This proves discovery, optional-tool selection, trusted agent/session
+context capture, durable recording, and fresh-process recovery at the actual
+OpenClaw plugin boundary. It does not claim LLM tool-choice behavior or an
+external returns-system authorization.
+
 ## Boundaries and migration
 
 - This is a local proof authorization, not an external returns integration.

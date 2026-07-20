@@ -73,6 +73,12 @@
 - The POC is committed locally at `26398a247` and remains unpushed. Durable
   scope, proof, and migration notes are in
   `auditable-skills-lobster-poc.md`.
+- Live OpenClaw host proof now passes against the receipt-query worktree at
+  `ff4b4a86057`: the real plugin loader registered all three contracts, the
+  agent tool resolver exposed only the explicitly selected optional tool, and
+  two separate processes authorized then recovered `RET-1001` from one
+  dedicated SQLite store. The recovered authorization code was
+  `RMA-2C7A27324C`; the store directory/database modes were `0700`/`0600`.
 
 ### 2026-07-18 Auditable Skills maintainer handoff
 
