@@ -22,6 +22,42 @@
 
 ## Current Session
 
+### 2026-07-19 ClawHub four-PR refresh
+
+- Rebuilt the four draft ClawHub PRs on current `openclaw/clawhub` main
+  `aaa73625ed41`, preserving a strict cumulative stack. Current signed heads are
+  #3089 `a23ebf6113d5` (schema/storage), #3090 `0e868cca40ad`
+  (publication), #3091 `3424d29a73cb` (discovery APIs), and #3092
+  `66fed8fdd109` (hosted feed plus OpenClaw lifecycle proof). Nothing was
+  merged and all four remain drafts.
+- Final registry ownership rule: the exact uploaded artifact is authoritative;
+  Convex stores artifact metadata and a bounded safe summary rather than a
+  second full parsed-manifest copy. Public discovery and feed projections never
+  expose an unbounded manifest. This avoids exceeding Convex's 1 MiB document
+  limit when a valid Claw contains the specified bounded inline avatar.
+- Publication rejects YAML aliases, anchors, merge keys, and explicit tags;
+  validates strict package identity; and remains disabled unless
+  `CLAWHUB_EXPERIMENTAL_CLAWS=1`. Discovery and feed reads fail closed under
+  the same gate. The feed E2E selects extraction by artifact kind and safely
+  supports both npm tarballs and legacy ZIP releases.
+- RFC #27 and both normative sidecars are pushed at `bb6b3e506056`. The specs
+  now state the artifact/summary boundary and require format-aware extraction.
+  Every ClawHub PR body points at that immutable sidecar revision and records
+  the exact validation and stack dependency.
+- Focused cumulative validation passed through each stage. Final PR #3092 proof
+  includes 38 Windows feed/API/unit tests with two expected Linux-only skips,
+  schema build, typecheck, lint, format, diff-check, and a WSL Ubuntu 24.04 live
+  cross-repo run: 4/4 tests passed against OpenClaw #106888 head
+  `3df96efbd320`, including a real `claws add --dry-run --json` invocation.
+- The first cumulative Codex review found two valid issues: full-manifest
+  persistence could exceed Convex's document limit, and lifecycle proof assumed
+  npm tarballs despite legacy ZIP publication. Both were fixed at their owning
+  stages and propagated through the stack. The final cumulative
+  `codex review --base origin/main` completed cleanly with no discrete
+  actionable regression. Fresh exact-head CI remained queued at handoff; fast
+  ClawSweeper helper jobs intermittently returned GitHub-side failures and their
+  Actions API logs returned HTTP 503.
+
 ### 2026-07-18 Auditable Skills maintainer handoff
 
 - Added `auditable-skills-maintainer-brief.md`, a forwardable review note for
