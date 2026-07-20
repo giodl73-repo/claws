@@ -49,10 +49,11 @@
   tests; PR4 34 focused feed/API/archive tests with two expected Windows skips,
   plus four Linux bridge cases previously passed in WSL. Final schema build,
   root typecheck, type-aware lint, format, and diff checks pass.
-- Fresh CI reaches Oxlint with 0 warnings/errors and 4,871 passing unit tests,
-  then fails only in unrelated `ui-design-contract.test.ts` because the CI
-  install lacks `@openclaw/design-system/styles/tokens.css`; downstream jobs
-  mirror that aggregate failure. The exact failure is recorded on all four PRs.
+- The first fresh CI attempt reached Oxlint with 0 warnings/errors and 4,871
+  passing unit tests, then hit a transient missing
+  `@openclaw/design-system/styles/tokens.css` dependency. Final exact-head CI
+  subsequently passed on all four PRs, including each aggregate `pr-gates`
+  job, schema guard, secret scan, Playwright smoke, and local-auth shards.
 - All four PR bodies now reference the current RFC/spec revision and exact
   heads. Resolution comments and `@clawsweeper re-review` requests were posted
   in stack order. A final cleanliness pass caught and committed regenerated
