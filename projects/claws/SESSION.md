@@ -28,9 +28,9 @@
   draft ClawHub PRs #3089-#3092. Accepted findings were implemented at their
   owning stage and propagated through the cumulative stack; no PR was merged or
   marked ready.
-- Current signed heads are #3089 `34f3cbea35dc` (schema/storage), #3090
-  `1dd30e764762` (publication), #3091 `c2393ea11b56` (discovery), and #3092
-  `8f25cdd19337` (experimental feed/bridge proof). Every commit has author and
+- Current signed heads are #3089 `dd5fef7f8dc5` (schema/storage), #3090
+  `0e618871acdb` (publication), #3091 `a5e840893dbc` (discovery), and #3092
+  `7490a7f6bdee` (experimental feed/bridge proof). Every commit has author and
   committer `Gio Della-Libera <giodl73@gmail.com>` and a good signature.
 - PR1 now handles `npm exec`/`npm x` and `bun x` without package-manager pin
   bypasses, fails closed on unsupported known modes, and bounds public summary
@@ -55,7 +55,10 @@
   mirror that aggregate failure. The exact failure is recorded on all four PRs.
 - All four PR bodies now reference the current RFC/spec revision and exact
   heads. Resolution comments and `@clawsweeper re-review` requests were posted
-  in stack order; ClawSweeper acknowledged and queued each request at handoff.
+  in stack order. A final cleanliness pass caught and committed regenerated
+  schema distribution output after a lint-only rename; all downstream commits
+  were re-signed/restacked, bodies were refreshed, and exact-head ClawSweeper
+  reviews were requested again.
 
 ### 2026-07-19 ClawHub four-PR refresh
 
