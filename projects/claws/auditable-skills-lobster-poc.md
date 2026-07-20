@@ -16,8 +16,9 @@ session without rereading conversation prose.
 
 - Repo/worktree: `C:\src\lobster-auditable-skills-poc`
 - Branch: `user/giodl/auditable-skills-lobster-poc`
-- Commit: `26398a247` (`feat(openclaw): add auditable skills plugin proof`)
-- Base: `user/giodl/scout-catalog-node-prompt` at `8471b690a`
+- Draft PR: [bic/lobster#5211](https://microsoft.ghe.com/bic/lobster/pull/5211)
+- Commit: `9df86837c` (`feat(openclaw): add auditable skills plugin proof`)
+- Base: `user/giodl/scout-catalog-node-prompt` at `e39a2998e`
 - Plugin: `src/openclaw_container/plugins/auditable-skills`
 - Baked state: bundled and allowlisted, but `entries.auditable-skills.enabled`
   remains `false`.
@@ -87,3 +88,14 @@ external returns-system authorization.
 The runtime/operator/simplicity/security review kept the slice in-process,
 disabled by default, bounded to exact queries, idempotent under replay, and
 explicit about sensitive shared-store access. It adds no sidecar or service.
+
+## Publication
+
+Draft Lobster PR #5211 is stacked on Scout PR #4297. After the Scout branch was
+force-updated, the single POC commit was rebased onto its current head and the
+two overlapping wiring guards were resolved by retaining both Scout and
+Auditable Skills coverage. The focused six-case test, strict container wiring
+guard, stable Rust formatting check, and diff check all passed again at
+`9df86837c`. GitHub reports the draft mergeable and clean. The required Lobster
+runtime checks are not yet all attached and green; no ADO pipeline was manually
+queued.

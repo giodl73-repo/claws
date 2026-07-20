@@ -70,9 +70,13 @@
   Rust formatting passes. Broader plugin tests are blocked locally by missing
   `tsx`; OpenClaw Rust tests are blocked by missing Lobster Cargo registry
   credentials.
-- The POC is committed locally at `26398a247` and remains unpushed. Durable
-  scope, proof, and migration notes are in
-  `auditable-skills-lobster-poc.md`.
+- The POC is published as draft Lobster PR
+  [#5211](https://microsoft.ghe.com/bic/lobster/pull/5211), stacked on Scout PR
+  #4297. It was rebased onto the rewritten Scout head `e39a2998e`, retested,
+  and force-pushed with lease at `9df86837c`; GitHub reports it mergeable and
+  clean. Required Lobster runtime checks are not yet all attached and green,
+  and no ADO pipeline was manually queued. Durable scope, proof, and migration
+  notes are in `auditable-skills-lobster-poc.md`.
 - Live OpenClaw host proof now passes against the receipt-query worktree at
   `ff4b4a86057`: the real plugin loader registered all three contracts, the
   agent tool resolver exposed only the explicitly selected optional tool, and
