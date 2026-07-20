@@ -57,6 +57,22 @@
   actionable regression. Fresh exact-head CI remained queued at handoff; fast
   ClawSweeper helper jobs intermittently returned GitHub-side failures and their
   Actions API logs returned HTTP 503.
+### 2026-07-19 Auditable Skills Lobster plugin POC
+
+- Created isolated Lobster worktree `C:\src\lobster-auditable-skills-poc` on
+  `user/giodl/auditable-skills-lobster-poc`, based on
+  `user/giodl/scout-catalog-node-prompt` at `8471b690a`.
+- Added a bundled, disabled-by-default `auditable-skills` OpenClaw plugin with
+  `authorize_return`, `receipts_search`, and `receipts_count`, a configurable
+  dedicated `receipts.sqlite`, and companion `SKILL.md` declaring
+  `metadata.outcomes: "return.authorized"`.
+- Focused proof passes six cases plus the strict container wiring guard. Stable
+  Rust formatting passes. Broader plugin tests are blocked locally by missing
+  `tsx`; OpenClaw Rust tests are blocked by missing Lobster Cargo registry
+  credentials.
+- The POC is committed locally at `26398a247` and remains unpushed. Durable
+  scope, proof, and migration notes are in
+  `auditable-skills-lobster-poc.md`.
 
 ### 2026-07-18 Auditable Skills maintainer handoff
 
