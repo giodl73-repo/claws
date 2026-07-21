@@ -22,6 +22,17 @@
 
 ## Current Session
 
+### 2026-07-21 coordination history alignment
+
+- Reconciled `giodl_microsoft/claws` remote `main` with the 16 commits that had
+  remained only on the dirty primary checkout. Signed merge `77dd61d789e`
+  preserves both the 25 remote-only commits and the complete local project
+  history; the sole content conflict was two independent July 19 Claws session
+  blocks, both of which were retained.
+- The clean sync worktree is the authoritative aligned checkout. The primary
+  `C:\src\claws-hapi` worktree still contains unrelated uncommitted work and was
+  intentionally not reset, stashed, or otherwise modified during alignment.
+
 ### 2026-07-19 ClawHub independent-panel closeout
 
 - Completed independent security, lifecycle/API, and staged-stack reviews of
