@@ -1,38 +1,73 @@
-## Opportunity
+## What Problem This Solves
 
-Auditable Skills should answer both sides of completed work: what outcome was recorded, and what the execution consumed. Once managed skills become workflow steps, operators need one trustworthy view of total tokens and cost across the workflow.
+As skills take on customer support, finance, operations, and other durable work, people need to answer two simple questions later: what happened, and what did the run consume?
 
-OpenClaw already records actual model usage for each managed child run. Lobster already owns workflow aggregation and `cost_limit`. This final slice connects those native owners instead of introducing another accounting or budget system.
+The earlier Auditable Skills slices make outcomes searchable and give managed skill runs stable native identity. PR #100 joins that identity, terminal state, and durable receipts into one result. The remaining accounting gap is that session token fields are mutable snapshots: after a retry, steer, or later turn, they cannot reliably describe one historical run.
 
-## What this slice proves
+That makes honest skill budgets and workflow rollups impossible. A missing measurement must not silently become zero, and a later session total must not be attributed to an earlier run.
 
-- Projects a completed managed skill run's recorded input and output tokens into Lobster's native `usage` result shape.
-- Includes the model only when the child audit identifies exactly one model.
-- Preserves Lobster's `_meta.cost` envelope through the OpenClaw runner.
-- Covers multiple managed children and an approval pause/resume boundary.
-- Keeps outcomes separate from accounting: full receipts remain in the shared store, while tokens and cost belong to runs and workflows.
+## Why This Change Was Made
 
-Together, OpenClaw reports observed child usage, Lobster aggregates each contributing run once, and the caller applies `cost_limit`. Receipt types can still be searched and counted independently of workflow accounting.
+This PR carries OpenClaw's existing cumulative native-run usage through the existing lifecycle and `agent.wait` paths, then snapshots it on the exact subagent run record before terminal persistence.
 
-## POC evidence series
+The source usage is already accumulated by the embedded runner across model calls and retry attempts. This change does not add another counter, database, polling loop, or workflow engine. It reuses OpenClaw's native run lifecycle and SQLite-backed subagent registry.
+
+The snapshot is optional. When a runner cannot report cumulative usage, the result omits `usage` instead of guessing or reporting zero. Steer/restart successors begin without their predecessor's usage.
+
+## User Impact
+
+Managed skill results can now include billing-oriented token fields for the exact historical run:
+
+```json
+{
+  "runId": "run-123",
+  "status": "completed",
+  "usage": {
+    "input": 120,
+    "output": 30,
+    "cacheRead": 80,
+    "total": 230
+  },
+  "receipts": [
+    { "type": "case.resolved" }
+  ]
+}
+```
+
+This is the natural next stepping stone from auditable skill effects to budgets and workflows. A core runner or a workflow plugin can later sum exact child-run usage, enforce a declared budget, and choose different models without inventing its own accounting source.
+
+This slice deliberately stops at measured token usage. Currency estimates, reservations, policy enforcement, and multi-step workflow orchestration remain follow-ups.
+
+## Evidence
+
+- `agent.wait` returns normalized cumulative usage from both terminal lifecycle events and completed native-run results.
+- terminal usage is persisted on the exact subagent registry row;
+- the lifecycle fallback retains usage when it completes before `agent.wait`;
+- steer/restart replacement clears prior-run usage;
+- managed result reads expose the persisted optional usage next to receipts.
+
+Focused validation:
+
+- managed result: 4 tests passed;
+- gateway dedupe usage: 6 tests passed across the gateway projects;
+- lifecycle usage retention: 1 focused test passed;
+- native-run and lifecycle-fallback snapshots plus steer isolation: 6 focused tests passed across the agent projects;
+- changed-file formatting, lint, and `git diff --check`: passed.
+
+Repository-wide type checking reached the changed files without errors, then reported existing/shared-worktree dependency failures in Feishu, net-policy, web-push, terminal, and UI packages. No files in those surfaces are changed here.
+
+No live model, external channel, or cost estimate was exercised.
+
+## Auditable Skills POC series
 
 1. [RFC 0022](https://github.com/giodl73-repo/rfcs/pull/6)
-2. [OpenClaw #97 - shared durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
-3. [OpenClaw #98 - managed invocation](https://github.com/giodl73-repo/openclaw/pull/98)
-4. [OpenClaw #100 - workflow composition](https://github.com/giodl73-repo/openclaw/pull/100)
-5. [Lobster #1 - accounting continuity](https://github.com/giodl73-repo/lobster/pull/1)
-6. **OpenClaw #109 - workflow spend**
+2. [OpenClaw #97 - searchable durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
+3. [OpenClaw #98 - managed skill runs](https://github.com/giodl73-repo/openclaw/pull/98)
+4. [OpenClaw #100 - managed run results](https://github.com/giodl73-repo/openclaw/pull/100)
+5. **OpenClaw #109 - exact-run token usage**
 
-These fork drafts preserve the evidence trail. RFC 0022 now folds this small spend projection into the later runner-adapter round rather than proposing it as a standalone upstream slice.
+This remains a fork-only draft for design review. It does not propose an upstream merge yet.
 
-## Validation and dependency boundary
+## Current continuation
 
-- Projection fixtures cover input/output usage, single-model reporting, multi-model omission, and missing usage.
-- The cross-repository proof covers two managed skill steps, approval pause/resume, total token aggregation, per-step attribution, and `_meta.cost`.
-- That proof returns 300 input tokens, 75 output tokens, and `$0.00009`, split 100/20 and 200/55 across the two steps.
-- The stock Lobster package does not yet preserve workflow cost metadata; Lobster #1 is therefore an explicit dependency and landing-order gate, not a local override hidden in this PR.
-- Head `398d65ac`; slice over #100 is 4 files, 154 additions, 2 deletions.
-
-No live model or external channel was used. Pricing and child audit inputs are deterministic fixtures; the OpenClaw adapter, Lobster workflow runtime, persisted approval-resume state, and returned envelope are the real source implementations.
-
-Depends on #100 and Lobster #1. Fork-only Auditable Skills accounting proof; not proposed upstream.
+The compact fork series now continues through [#109](https://github.com/giodl73-repo/openclaw/pull/109), which retains cumulative usage on the exact native managed run, and [#113](https://github.com/giodl73-repo/openclaw/pull/113), which deduplicates explicit completed run IDs and applies an optional caller-owned between-step token ceiling. This PR's scope is unchanged; the later slices build on its native boundary without adding a second execution, usage, or budget ledger.

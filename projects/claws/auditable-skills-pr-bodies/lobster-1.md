@@ -1,41 +1,43 @@
-## Opportunity
+## What this prototype explored
 
-An audit is incomplete if workflow spend disappears when execution pauses for a human decision. Auditable Skills needs one trustworthy accounting history across managed steps, approvals, structured input, resume, and cancellation.
+Workflow accounting should not disappear when execution pauses for a human decision. Lobster already owns token aggregation, estimated cost, and `cost_limit` through `CostTracker`, so this fork prototype tested preserving that native accounting across suspension instead of adding another ledger.
 
-Lobster already owns workflow token aggregation, estimated cost, and `cost_limit` through `CostTracker`. This slice preserves that native accounting across suspension instead of introducing another ledger.
+It proved that Lobster can:
 
-## What this slice proves
+- snapshot the current `CostTracker` summary in existing resume state;
+- restore the summary when a workflow resumes;
+- return `_meta.cost` through embedded and CLI envelopes;
+- retain incurred cost on cancellation when resume state is available;
+- keep cancellation idempotent after state expires while surfacing real cleanup failures.
 
-- Snapshots the current `CostTracker` summary in Lobster's existing resume state.
-- Restores the summary when the workflow resumes.
-- Returns `_meta.cost` through embedded and CLI workflow envelopes.
-- Preserves incurred cost on cancellation when resume state is available.
-- Keeps cancellation idempotent after state expires while surfacing real cleanup failures.
+This changes only Lobster's own resume envelope. It does not teach Lobster about OpenClaw sessions, receipts, skills, or models.
 
-OpenClaw records observed usage for each isolated managed child run. Lobster counts those step results once, carries the aggregate across pauses, and applies the caller-provided `cost_limit`. Skills cannot set or widen that limit, and business outcome evidence remains independently searchable in OpenClaw's configured receipt store.
+## Why this remains archived
 
-This is the one cross-repository prerequisite for the final accounting proof. It changes Lobster's native resume envelope; it does not teach Lobster about OpenClaw sessions, receipts, or skill metadata.
+The compact Auditable Skills stack no longer requires Lobster for core receipts, managed child identity, managed result reads, or exact-run token usage. A future Lobster adapter can consume OpenClaw #109's optional cumulative usage and reuse this pause/resume accounting behavior, but this PR is prototype evidence rather than a current landing prerequisite.
+
+Skills still cannot set or widen caller-owned limits. Business outcome receipts remain independently searchable in OpenClaw's configured receipt store.
+
+## Evidence and preservation
+
+- 6 files, 242 additions, 25 deletions.
+- Approval and structured-input proof covers work before and after the gate.
+- Cancellation covers live, deleted-workflow, and expired resume state.
+- Public CLI envelope cost metadata is covered.
+- Focused `CostTracker` and resume tests passed in the supported POSIX lane.
+- No accounting service, database, pricing model, receipt schema, or per-outcome token attribution was added.
 
 ## POC evidence series
 
 1. [RFC 0022](https://github.com/giodl73-repo/rfcs/pull/6)
 2. [OpenClaw #97 - shared durable outcomes](https://github.com/giodl73-repo/openclaw/pull/97)
-3. [OpenClaw #98 - managed invocation](https://github.com/giodl73-repo/openclaw/pull/98)
-4. [OpenClaw #100 - workflow composition](https://github.com/giodl73-repo/openclaw/pull/100)
-5. **Lobster #1 - accounting continuity**
-6. [OpenClaw #109 - workflow spend](https://github.com/giodl73-repo/openclaw/pull/109)
+3. [OpenClaw #98 - managed child runs](https://github.com/giodl73-repo/openclaw/pull/98)
+4. [OpenClaw #100 - compact managed run results](https://github.com/giodl73-repo/openclaw/pull/100)
+5. [OpenClaw #109 - exact-run token usage](https://github.com/giodl73-repo/openclaw/pull/109)
+6. **Lobster #1 - accounting continuity prototype**
 
-These fork drafts preserve the evidence trail. RFC 0022 keeps this change in Lobster's owning repository and makes Lobster optional for OpenClaw's basic receipt and managed-invocation rounds.
+Fork-only historical evidence; nothing is proposed against `openclaw/lobster`.
 
-## Validation
+## Relationship to the core proof
 
-- TypeScript compilation passes.
-- Approval and structured-input resume proof covers work before and after the gate.
-- Cancellation covers live, deleted-workflow, and expired resume state.
-- Public CLI envelope cost metadata is covered.
-- Focused `CostTracker` and resume tests pass in the supported POSIX lane.
-- Head `0ad538b3`; 6 files, 242 additions, 25 deletions.
-
-The final and cancelled envelopes retain incurred accounting across pauses. No new accounting service, database, pricing model, receipt schema, or per-outcome token attribution is introduced.
-
-Fork-only Auditable Skills prerequisite; nothing is proposed against `openclaw/lobster`.
+This remains optional advanced-runner evidence. [OpenClaw #113](https://github.com/giodl73-repo/openclaw/pull/113) demonstrates the core alternative: a caller can aggregate explicit completed managed runs and make a between-step token decision without Lobster. Lobster is still useful when accounting must survive its existing approval, input, and resume lifecycle; it is not a hard dependency for Auditable Skills.

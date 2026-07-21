@@ -22,6 +22,20 @@
 
 ## Current Session
 
+### 2026-07-21 project-state reconciliation
+
+- Fast-forwarded the coordination checkout to current `origin/main` and merged
+  the seven outstanding `agent/auditable-state-sync` commits.
+- Preserved the newer receipt-first RFC and PR-body wording already on `main`.
+  The merged branch adds the compact managed-result, exact-run accounting,
+  between-step token decision, canonical managed-dispatch, and idempotency-audit
+  records plus their local PR-body mirrors.
+- The idempotency prototype remains intentionally unpromoted: its valid review
+  blocker requires an atomic persistent `(scope, idempotency_key)` reservation
+  before a durable runner can safely replay dispatch across processes.
+- No OpenClaw, RFC, ClawHub, or Lobster draft PR was merged as part of this
+  repository cleanup.
+
 ### 2026-07-21 coordination history alignment
 
 - Reconciled `giodl_microsoft/claws` remote `main` with the 16 commits that had
