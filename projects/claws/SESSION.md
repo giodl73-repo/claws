@@ -3813,3 +3813,34 @@
   failures; its final two large test shards remain queued for runners. A
   superseded PR #111391 run and ClawSweeper dispatches were canceled, not test
   failures. Do not merge or enable automerge.
+
+### 2026-07-21 PR12 regression repair and PR13 propagation
+
+- Final cumulative review found two PR12 correctness regressions. Owned plugin
+  version changes discarded shared-preflight `integrity`, `installId`, and risk
+  warning metadata before desired-digest verification. Claw-internal MCP update
+  and rollback writes also omitted `recordIndependentOwner: false`, allowing an
+  interrupted lifecycle write to look independently owned.
+- PR #102982 fixes both at signed exact head
+  `30c9e925353d89e9548197a90760406804e2b092`. The four-file patch preserves
+  resolved plugin metadata through the expected version-change path and marks
+  every internal MCP forward/rollback write as lifecycle-owned. Focused
+  regression tests pass, as do changed-file Oxfmt, zero-warning Oxc lint,
+  type-aware Oxc lint, `git diff --check`, and an independent Codex review with
+  no correctness findings. Evidence comment: issue comment `5037155009`.
+- PR #111391 was clean-restacked on the corrected PR12 head and force-pushed
+  with an explicit lease at signed exact head
+  `006c30e71cc51fe5fd8dbf15f182ec05a2eb9613`. Its five CLAW.md commits and
+  PR13-owned tree are unchanged; only the inherited four-file PR12 repair
+  differs. Schema tests pass 43 with two skips, both inherited regressions pass
+  at the new head, and every replayed commit retains a valid Gio signature.
+  Evidence comment: issue comment `5037155179`.
+- Both PR bodies now reference their current heads and exact evidence. RFC #27
+  and its sidecar specs need no policy edit because these fixes enforce the
+  existing package-integrity and managed/referenced ownership contracts.
+- Exact-head CI runs `29853170107` (PR12) and `29853483956` (PR13) are runner
+  queued. Their completed `security-fast` jobs fail only on the repository-wide
+  Axios GHSA (`>=1.15.2 <1.18.0`), outside the Claws patch; do not broaden this
+  stack to repair ambient dependency state. ClawSweeper exact-head reviews have
+  started. Wait for queued preflight and review results before treating PR12 or
+  PR13 as merge-ready. Do not merge or enable automerge.
