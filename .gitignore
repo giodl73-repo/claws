@@ -7,6 +7,7 @@ coverage/
 *.zip
 
 # Local scratch files from PR/review sessions.
+.tmp/
 .tmp-*
 tmp/
 inspect-*.sh
