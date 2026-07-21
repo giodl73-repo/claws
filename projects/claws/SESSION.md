@@ -35,6 +35,13 @@
   before a durable runner can safely replay dispatch across processes.
 - No OpenClaw, RFC, ClawHub, or Lobster draft PR was merged as part of this
   repository cleanup.
+- Also landed the previously isolated WSL OpenClaw PR status helper, preserving
+  the current `Ubuntu` default while adding `CLAWS_WSL_*` overrides. Its WSL
+  repository scan and empty-queue GitHub smoke paths pass.
+- Removed the merged project-state worktree/branch and local review scratch.
+  Both remaining coordination worktrees are clean. The disconnected
+  `parked-main-worktree-20260605` history remains an explicit archive and was
+  not merged into the current coordination repository.
 
 ### 2026-07-21 coordination history alignment
 
