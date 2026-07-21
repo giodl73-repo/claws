@@ -40,6 +40,7 @@ Elastic may later consume independently justified hosted networking seams.
 | Exact E4c managed executor paper fixture | `e4c-executor-fixture.md` |
 | Final handoff closed-state capture contract | `final-handoff-capture.md` |
 | Final publication and destruction authority | `final-handoff-publication.md` |
+| Elastic host lifecycle and activation contract | RFC sidecar `rfcs/0021/elastic-host-lifecycle-v1-spec.md` in the RFC worktree |
 | Portable source-to-fresh-compute round trip | `portable-roundtrip.md` |
 | V1 closeout and V2 horizon | `v1-closeout-v2-horizon.md` |
 | Fleet cell isolation and destruction scope | `fleet-cell-boundary.md` |
@@ -68,8 +69,12 @@ Elastic may later consume independently justified hosted networking seams.
 | `giodl73-repo/openclaw` | [Fork PR 58](https://github.com/giodl73-repo/openclaw/pull/58) | `user/giodl/state-continuity-archived-preview` | Draft, fork-only; stacked on PR 57 | Read-only exact-target restore preview with explicit execution blockers. |
 | `giodl73-repo/openclaw` | [Fork PR 64](https://github.com/giodl73-repo/openclaw/pull/64) | `user/giodl/state-continuity-e4c-executor` | Draft, fork-only; stacked on PR 58 | Launcher-fenced managed restore execution, forward-only evidence, exact assembly, and same-incarnation replay. |
 | `giodl73-repo/openclaw` | [Fork PR 101](https://github.com/giodl73-repo/openclaw/pull/101) | `user/giodl/state-continuity-e5a-final-capture` | Draft, fork-only; stacked on PR 64 | Strict managed final capture, atomic durable replay journal, credential-safe immutable archive, and exact local receipt. |
+| `giodl73-repo/openclaw` | [Fork PR 112](https://github.com/giodl73-repo/openclaw/pull/112) | `user/giodl/state-continuity-e5b-direct-publication` | Draft, fork-only; stacked on PR 101 | Direct external-plugin Portable publication and independent-process retrieval. |
+| `giodl73-repo/openclaw` | [Fork PR 115](https://github.com/giodl73-repo/openclaw/pull/115) | `user/giodl/state-continuity-e6-elastic-lifecycle` | Draft, fork-only; stacked on PR 112 | Closed scheduler generation and reconciled semantic wake descriptor bound to final capture. |
 | `giodl/lobster` | [Fork PR 15](https://microsoft.ghe.com/giodl/lobster/pull/15) | `user/giodl/state-continuity-e4d-operation` | Draft, fork-only; stacked on PR 8 | Strict allocation attestation, adapter execution, E4 replay/commit/quarantine, and exact-route restored startup. |
 | `giodl/lobster` | [Fork PR 16](https://microsoft.ghe.com/giodl/lobster/pull/16) | `user/giodl/state-continuity-e5a-final-capture` | Draft, fork-only; stacked on PR 15 | Durable final-handoff authority, exact-route capture, asynchronous turn drain, authoritative Gateway suspension, and closed-state local receipt. |
+| `giodl/lobster` | [Fork PR 17](https://microsoft.ghe.com/giodl/lobster/pull/17) | `user/giodl/state-continuity-e5b-publication-authority` | Draft, fork-only; stacked on PR 16 | Accepted Portable publication, strict source finalization, and generation-bound destruction authority. |
+| `giodl/lobster` | [Fork PR 18](https://microsoft.ghe.com/giodl/lobster/pull/18) | `user/giodl/state-continuity-e6-elastic-activation` | Draft, fork-only; stacked on PR 17 | Wake registration plus revocable sleep authorization; fail closed until host scheduler consumption. |
 | `giodl73-repo/rfcs` | [Fork PR 2](https://github.com/giodl73-repo/rfcs/pull/2) | `user/giodl/rfc-duplex-transport` | Prerequisite | Hosted Integration architecture and implementation patterns. |
 | `openclaw/rfcs` | [Snapshot RFC 20](https://github.com/openclaw/rfcs/pull/20) | Existing | Related | SQLite-safe component capture primitive. |
 | `bic/lobster` | TBD | `user/giodl/layering-contract-audit` | Evidence | Current workspace persistence, Teams inbox, cron wake, credentials, and lifecycle behavior. |

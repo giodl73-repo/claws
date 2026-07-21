@@ -33,6 +33,7 @@ For agent and harness entry points, start with `CONTEXT.md`.
 | Mail | `projects/mail/` | Mail-channel research, mail plugin options, and Exchange/Microsoft Graph integration framing. |
 | Claws | `projects/claws/` | OpenClaw RFC direction for runnable starter setups across skills, plugins, MCP servers, workspace files, persona files, and automations. |
 | Claws Review Bot | `projects/claws-review-bot/` | `@bic/claws-review-bot` package notes; primary Lobster PR reviewer lane plus separate ClawPilot issue-classifier experiment. |
+| Localization | `projects/localization/` | OpenClaw localization architecture, surface coverage, runtime errors, channel messages, and bounded evidence slices. |
 | oc-path | `projects/oc-path/` | oc-path worktrees, specs, and follow-up PRs. |
 | ClawPilot | `projects/clawpilot/` | ClawPilot feedback-to-issue tracking and issue-loop notes. |
 | Bugs | `projects/bugs/` | Cross-cutting bugfix triage, reproduction notes, and fix proof. |

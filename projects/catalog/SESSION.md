@@ -19,13 +19,13 @@
 
 ## Current Session
 
-- Last updated: 2026-07-10
+- Last updated: 2026-07-16
 - Last agent: Codex
-- Current focus: command inventory PR1+PR2 promoted to the upstream draft, with
+- Current focus: command inventory PR1+PR2 promoted to the upstream PR, with
   a fork-only scoped prompt projection prepared as optional PR3.
 - Active branch / PR:
   - RFC PR: `https://github.com/openclaw/rfcs/pull/32`.
-  - Upstream rollup draft PR:
+  - Upstream rollup PR:
     `https://github.com/openclaw/openclaw/pull/100960`.
   - Fork-local step PRs:
     `https://github.com/giodl73-repo/openclaw/pull/11` through
@@ -51,9 +51,10 @@
 - Preserved reviewed full stack:
   `user/giodl/cli-catalog-review-full-stack` at `a86631846a`.
 - The catalog PR2 remains preserved at `e67c446807`. The remote
-  `user/giodl/cli-catalog-review-hardening` branch is the head of upstream draft
-  `openclaw/openclaw#100960` and now points to the promoted commands stack at
-  `90a7b1ca2b`.
+  `user/giodl/cli-catalog-review-hardening` branch is the head of upstream PR
+  `openclaw/openclaw#100960` and now points to `70b91ef6206`. Runtime proof
+  remains anchored at `90a7b1ca2b`; the final commit adds the discoverable
+  `docs/cli/commands.md` reference, CLI index link, and docs navigation.
 
 ## 2026-07-10 Reduced Upstream Draft
 

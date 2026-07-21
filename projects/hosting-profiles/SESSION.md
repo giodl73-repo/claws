@@ -29,7 +29,7 @@
 
 ## Current Session
 
-- Last updated: 2026-07-15
+- Last updated: 2026-07-16
 - Last agent: Codex
 - Current focus: Readiness and Standard Hosting Profiles are split into two
   independently reviewable RFCs and implementation stacks.
@@ -42,13 +42,15 @@
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
   at `17b34f792d87`. The dependent upstream profile implementation is
   [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765)
-  at `f54affa3983b`; [fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
-  provides the clean profile-only comparison. Exact review slices are recorded
-  in `openclaw-pr-plan.md`.
+  at `672bc488cfd`; runtime proof remains anchored at `f54affa3983b`, and the
+  final commit adds the discoverable `docs/gateway/hosting-profiles.md` guide,
+  config reference, CLI cross-link, and docs navigation. [Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
+  provides the clean profile-only comparison. Exact review slices are
+  recorded in `openclaw-pr-plan.md`.
 - Known dirty state: `claws-hapi` contains unrelated feeds and state-continuity
   project edits. The RFC 0018 and RFC 0023 WSL worktrees are clean at pushed
   heads `bacc7079b1a1` and `6d7d4f4ceaca`.
-- Blocking question: exact-head ClawSweeper/CI review is pending on both draft
+- Blocking question: exact-head ClawSweeper/CI review is pending on the ready
   implementation PRs.
 
 ## Resume Checklist

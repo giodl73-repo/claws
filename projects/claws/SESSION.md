@@ -437,6 +437,7 @@
   checks were still pending. Review state remains stale `CHANGES_REQUESTED`
   until ClawSweeper or a human refresh clears it. No PR was merged and no
   automerge was enabled.
+
 ### 2026-07-19 independent-review remediation and final restack
 
 - Adjudicated the three-model review against the implementation and updated RFC

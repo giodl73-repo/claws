@@ -1,17 +1,19 @@
 # State Continuity Session
 
-**Last updated:** 2026-07-15
+**Last updated:** 2026-07-17
 
 **Last agent:** GitHub Copilot
 
-**Current focus:** Finish the literal process-A publication to process-B
-retrieval proof for replacement E5b, then close review and package the
-implementation and RFC branches.
+**Current focus:** Monitor the paired E6 wake-evidence and sleep-authority
+fork PRs, then design the next host-owned scheduler-consumption and
+`EnsureRuntimeReady` slice without weakening the fail-closed boundary.
 
-**Blocking question:** None for provider selection. Follow manifest-declared web
-provider precedent: continuity config selects a provider ID, the installed
-manifest index resolves its owning external plugin, and the managed operation
-loads only that plugin before Gateway startup.
+**Blocking question:** Owner confirmation is required for
+`continuity.publicationProvider`, manifest contract
+`continuityPublicationProviders`, the Plugin SDK provider v1 contract, and the
+managed backup publication CLI. Provider selection and packaged Linux behavior
+are proven. Lobster must not consume E6 sleep authorization until durable wake
+scheduling and the paired OpenClaw image are available.
 
 ## Active Work
 
@@ -34,7 +36,13 @@ loads only that plugin before Gateway startup.
   including RFC 0009's sidecar-spec precedent. The role-tightened optional
   composition contract is
   `rfcs/0021/readiness-hosting-composition-v1-addendum-spec.md`. The RFC branch
-  remains uncommitted after the narrative/spec revision.
+  now also defines the minimal Elastic host API in
+  `rfcs/0021/elastic-host-lifecycle-v1-spec.md`: `PrepareHibernate`,
+  `EnsureRuntimeReady`, and `InspectElasticLifecycle`, with atomic final wake
+  registration, revocable sleep authorization, Teams/API/deadline wake
+  coalescing, scheduler reconciliation, and readiness-gated delivery. The RFC
+  branch is committed and pushed through `0c37e1d`; fork PR 5's body now
+  describes the direct provider and minimal Elastic host contracts.
 - OpenClaw implementation worktree:
   `/root/src/openclaw-state-continuity-pr1`
 - OpenClaw branch:
@@ -78,13 +86,35 @@ loads only that plugin before Gateway startup.
   surface. The slice now also includes
   `openclaw backup publish --managed --json`: it pins and verifies the source
   archive, publishes in one scoped provider session, stops it, resolves a fresh
-  scoped registry, retrieves and fully verifies the accepted artifact, and
-  returns typed hold/quarantine failures. Sixty-three focused tests plus core
-  and core-test typechecks pass.
+  independent CLI process, retrieves and fully verifies the accepted artifact,
+  and returns typed hold/quarantine failures. Receipts bind the provider
+  contract version and trusted owner; outbound and retrieved byte streams are
+  size/digest checked; operation, startup, shutdown, and child-process
+  deadlines are bounded; late-starting services are stopped; temporary-disk
+  exhaustion remains a hold rather than corruption quarantine; and cleanup
+  errors cannot replace the primary disposition. Duplicate provider
+  registrations remain observable so runtime resolution fails closed, and the
+  provider v1 contract is exported through the public Plugin SDK and its
+  external-plugin compatibility runtime.
+  Forty-five focused tests pass, including literal process-A exit followed by
+  process-B retrieval. Targeted Oxfmt/Oxlint, the core TypeScript check, Plugin
+  SDK export sync/API baseline checks, and final autoreview pass. The branch is
+  committed through `0751a77ef7e`. Brokered AWS packaged Linux proof succeeds:
+  run `run_1b8766142769`, provider `aws`, lease `cbx_c16ab8fba0e0`
+  (`harbor-crayfish`, `c7a.48xlarge`). The run built and verified
+  `openclaw-current.tgz`, installed it outside the repository, loaded a real
+  external plugin through `openclaw/plugin-sdk`, created a verified backup,
+  published it, and retrieved it in an independent process. Success marker:
+  `E5B_PACKAGE_PROOF_OK package=openclaw-current.tgz publisherPid=9683
+  retrieverPid=9695 publicationId=publication/handoff-7`. Exit code was zero
+  and the one-shot lease stopped automatically.
+  Fork-only draft PR:
+  `https://github.com/giodl73-repo/openclaw/pull/112`, stacked directly on E5a
+  PR 101's branch.
 - Lobster E5b worktree:
   `C:\src\lobster-state-continuity-e5b-publication-authority`, branch
   `user/giodl/state-continuity-e5b-publication-authority`, clean at
-  `c8c52b7987e`, fork draft PR
+  `e2f49f9632`, fork draft PR
   `https://microsoft.ghe.com/giodl/lobster/pull/17`, stacked on Lobster E5a PR
   16. The slice adds strict publication/finalization DTOs,
   durable Redis/CAS `Publishing -> Published -> SourceFinalizing ->
@@ -93,7 +123,35 @@ loads only that plugin before Gateway startup.
   passport release, and lifecycle-policy destruction gating. Production
   invocation remains intentionally blocked with E5a until the managed capture
   and `gateway.suspend.prepare` surfaces are promoted into the Lobster image
-  baseline.
+  baseline. Commit `e2f49f9632` aligns the full durable path to the finalized
+  direct provider provenance: plugin ID, provider ID, provider contract
+  version, and provider generation. The obsolete host-bundle identity and
+  generation fields are removed, the durable record version is bumped to v2
+  so stale records fail closed, and all 41 Lobster continuity tests pass.
+- OpenClaw E6 worktree:
+  `C:\src\openclaw-state-continuity-e6-elastic-lifecycle`, branch
+  `user/giodl/state-continuity-e6-elastic-lifecycle`, clean at
+  `af2c41707e0`, fork PR
+  `https://github.com/giodl73-repo/openclaw/pull/115`, stacked on PR 112.
+  Final capture now publishes `continuity-wake-descriptor/v1` from the same
+  closed config and scheduler state as the recovery point. It freezes the
+  descriptor in durable intent/replay evidence, reconciles persisted cron
+  deadlines against the scheduler's natural next run, respects config/env
+  disablement, and fails closed on invalid scheduler state. Eight descriptor
+  tests and eighteen managed-capture tests pass; final Codex review is clean.
+- Lobster E6a worktree:
+  `C:\src\lobster-state-continuity-e6-elastic-activation`, branch
+  `user/giodl/state-continuity-e6-elastic-activation`, clean at
+  `97ff21918d`, fork PR
+  `https://microsoft.ghe.com/giodl/lobster/pull/18`, stacked on PR 17.
+  The slice strictly validates and binds the OpenClaw wake descriptor, creates
+  durable wake registration plus revocable sleep authorization, and proves
+  consume-before-wake and wake-before-consume races. It deliberately returns
+  `safe_to_destroy=false` until a host scheduler durably registers the wake and
+  consumes the exact authorization. Finalized v2 records remain readable as
+  consumed authority, while every v2 transition fails closed. Schema, Plex
+  authority, adapter, and strict-wire tests pass; final review has no accepted
+  findings within the E6a boundary.
 - OpenClaw E5b owner-contract worktree:
   `C:\src\openclaw-state-continuity-e5b-publication-owner`, branch
   `user/giodl/state-continuity-e5b-publication-owner`, clean at
@@ -220,6 +278,42 @@ loads only that plugin before Gateway startup.
 
 ## Completed This Session
 
+- Completed replacement E5b closeout. The managed operation now launches the
+  hidden `backup publish-retrieve --managed --json` command in an independent
+  process after publication services stop, verifies capture identity
+  independently from provider acceptance, and proves publisher/retriever PIDs
+  differ.
+- Closed all accepted autoreview findings: corrected accidentally nested
+  functions and CLI registration, bounded source copying before temporary-disk
+  use, classified retrieval ENOSPC as hold, preserved primary failures across
+  shutdown/cleanup errors, included stream verification inside the retrieval
+  deadline, handled late service startup after timeout, made duplicate
+  registrations fail closed, and exposed the provider v1 contract through the
+  Plugin SDK with a regenerated API baseline.
+- Recovered the Windows worktree after pnpm junction traversal removed the
+  `.git` pointer and tracked base files. Restored the existing worktree
+  metadata and all unintended deletions without reverting implementation
+  changes. Final status has no tracked deletions or `node_modules` drift.
+- Final local proof: 45 focused tests pass across provider contract/runtime,
+  fresh scoped loading, literal cross-process retrieval, managed publication,
+  and CLI registration. Final autoreview reports no accepted/actionable
+  findings.
+- Committed the replacement E5b implementation as `8bfbacf52aa` and the RFC
+  0021 narrative plus three normative sidecars as `501b2c6`.
+- Closed packaged-runtime gaps found by brokered AWS proof: isolated the public
+  provider contract, consciously raised the Plugin SDK declaration budget for
+  the v1 surface, regenerated the API baseline, preserved runtime version
+  constants, and exported those constants through the compatibility runtime
+  used by external root SDK imports. Commits: `117fbf53f5d`,
+  `9620defbbce`, `e82b503eed8`, and `0751a77ef7e`.
+- Completed brokered AWS package proof on `cbx_c16ab8fba0e0`
+  (`run_1b8766142769`): package build/integrity, external install, plugin
+  discovery, managed publication, immutable receipt binding, and distinct
+  publisher/retriever processes all passed. The lease stopped automatically.
+- Pushed both fork branches and opened replacement E5b as fork-only draft PR
+  112, explicitly requesting owner confirmation for the new config, manifest,
+  Plugin SDK, and managed CLI surfaces.
+
 - Reviewed the RFC 0021 sidecars through the `.craft/roles` Gateway,
   Lobster-container, CISO, and Lorant-maintainer lenses and directly tightened
   the normative contracts. The specs now require a literal independent
@@ -280,6 +374,13 @@ loads only that plugin before Gateway startup.
   running. Lobster PR 17 had no check-runs attached at creation, so required
   `GitOps/GitHubPop`, `Lobster-Runtime-PullRequest`, and
   `Lobster-Runtime-Build-Validation` remain missing and the PR is not ready.
+- Aligned Lobster PR 17 to replacement OpenClaw PR 112 in commit
+  `e2f49f9632`. Managed publication requests now freeze the manifest plugin ID,
+  provider ID, `continuity-publication-provider/v1`, and provider generation;
+  acceptance and every durable phase through `SafeToDestroy` bind and replay
+  those exact values. Removed the discarded Hosted Integration bundle
+  identity/generation checks and bumped the durable record contract to v2.
+  Focused schema, adapter, and all 41 Lobster continuity tests pass.
 - Implemented the Lobster E5b fork slice in
   `C:\src\lobster-state-continuity-e5b-publication-authority` and committed it
   as `c8c52b7987e`. Review fixes
@@ -859,8 +960,8 @@ loads only that plugin before Gateway startup.
    that stack lands.
 16. Run a final RFC de-duplication and internal-consistency pass without
    removing the decision history.
-17. Monitor fork-only PRs 110, 111, and 17; do not call Lobster PR 17 ready
-    until all three required enterprise contexts attach and pass.
+17. Monitor replacement OpenClaw PR 112 and Lobster PR 17; do not call Lobster
+    PR 17 ready until all three required enterprise contexts attach and pass.
 18. Promote the OpenClaw E5a/E5b managed operations into the Lobster image
     baseline, then add the runtime-side exact-worker trigger that invokes
     capture followed by publication/finalization.
