@@ -38,6 +38,13 @@
  worktree `C:\src\lobster-feeds-named-management` is clean after push.
 - Blocking question: none. Do not manually queue ADO; rely on automatic check
   attachment after pushes.
+- 2026-07-21 Lobster merge push:
+  - #4297 rebuilt on current main at `3350fcdc68`; PullRequest CI is green.
+    Proof comment `206557181`; remaining gates are GitHubPop, Build Validation,
+    and refreshed review.
+  - #4528 rebased on current main at `0bb18c90fa`; two E2E assumptions are fixed
+    and all 18 OpenClaw `v2026.6.11` patches apply cleanly. Proof comments
+    `206579531`, `206590326`; natural CI only.
 - 2026-07-16 OpenClaw maintainer merge workflow note from trusted-feed stack:
   - Use `openclaw-pr-loop`, `openclaw-pr-maintainer`, `openclaw-testing`, and
     `clawsweeper` for OpenClaw merge prep. For project context, also load the

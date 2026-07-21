@@ -71,6 +71,11 @@
 
 ## Open Threads
 
+- 2026-07-21: #4528 was rebased onto current main and pushed at `0bb18c90fa`.
+  Build `173074090`'s reused-worker git proof and WorkIQ `not present` matcher
+  failures are fixed. Current-main patch 0018 was re-derived for OpenClaw
+  `v2026.6.11`; all 18 patches apply cleanly in Docker order. Proof comments:
+  `206579531`, `206590326`. Natural CI only; no manual ADO queue.
 - #4355 current-head CI repair at 2026-07-16: pushed `6abe9b55d6`.
   The prior Repo validation failure was branch-owned: an unregistered
   PromoteClaw definition had been added to the live operations catalog with

@@ -31,6 +31,10 @@
   `#4528`, `#4355`, `#4272`, `#4648`, and `#4297`; it refreshes
   exact-head reviews, repairs actionable blockers, and stops when every still
   open in-scope PR is approved or only human action remains.
+- 2026-07-21: #4297 head `3350fcdc68` is mergeable with PullRequest CI green;
+  #4528 head `0bb18c90fa` is mergeable after latest-main rebase, E2E fixes, and
+  re-derivation of patch 0018 for OpenClaw `v2026.6.11`. No ADO runs were
+  manually queued.
 - 2026-07-16 live non-feed front queue:
   - `#4840` merged.
   - `#4648` head `b4212f2ca1` has PullRequest green and exact-head approvals

@@ -35,6 +35,11 @@ below:
   `server__tool` selector binding must land before either connector is
   acquirable by `scout-standard`; runtime MCP identity/approval rails are
   reused.
+- The canonical implementation stack now lives in the Lobster architecture:
+  OpenClaw exec-mode policy, Lobster OpenClaw pin/patch rebase, inventory
+  generation, atomic profile activation, native attachment package/integration,
+  typed product-bug plugin, then evals. Phase 2 starts with a fixture-proven
+  exact connector-selector gate before either tracker connector.
 
 The remainder records the original source audit and proposal evolution. Where
 it differs from this revision, the filed Lobster architecture is authoritative.
