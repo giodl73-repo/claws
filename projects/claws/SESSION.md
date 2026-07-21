@@ -22,6 +22,46 @@
 
 ## Current Session
 
+### 2026-07-21 final OpenClaw stack readiness audit
+
+- Live state at audit time: RFC #27 and all twelve current OpenClaw Claws PRs
+  were open and non-draft; none had merged. RFC #27 was approved and clean at
+  `e9c2bb478179`. The implementation order remains #101328, #101755, #101973,
+  #102228, #102296, #102306, #102383, #102406, #102427, #102959, #102982,
+  then replacement CLAW.md PR #111391. Git ancestry proved every current PR
+  head is a descendant of its predecessor through #111391.
+- Patrick directly authored and pushed the latest implementation hardening.
+  Current heads at audit time were #101328 `087500a80942`, #101755
+  `6a0c7d581ad9`, #101973 `6dff773d010c`, #102228 `f57f58c042b9`, #102296
+  `23d8a8cc5c23`, #102306 `cc8d2df28faf`, #102383 `9f7b652eee1d`, #102406
+  `c77140ceda33`, #102427 `10b972b6a6c6`, #102959 `af0dd0ca6cb4`, #102982
+  `9830e091ee5f`, and #111391 `5080b2af53b7`.
+- Exact-head GitHub CI had zero pending checks and every required
+  `openclaw/ci-gate` passed. Four PRs displayed two historical cancelled runs,
+  but each had later passing Real behavior proof and auto-response checks; the
+  cancellations were not current failures. Patrick's six visible
+  `CHANGES_REQUESTED` reviews target obsolete July 14 commits. All inline
+  threads are resolved except the intentionally open, outdated #102383 thread
+  asking whether ordinary `agents delete` cron cleanup must block Claws.
+- Cumulative `codex review --base origin/main` on exact PR13 head
+  `5080b2af53b7` found two accepted P2 blockers owned by PR12 #102982. First,
+  accepting an owned-plugin version conflict drops resolved integrity,
+  install-id, and risk-warning metadata, so the subsequent desired-digest check
+  rejects a normal upgrade as `update_changed`. Second, Claw lifecycle MCP
+  writes use the config helper's default independent-owner recording; an exit
+  after config mutation but before the final provenance upsert can therefore
+  preserve a false external-ownership claim. Fix both in PR12, add focused
+  regressions, propagate the commit into #111391, rerun focused tests and CI,
+  and do not merge #102982 or #111391 until the new exact heads are confirmed.
+- Patrick's amendments implement existing RFC invariants rather than changing
+  the model. No RFC or sidecar update is currently required. The two PR12 fixes
+  likewise enforce existing digest/provenance contracts.
+- The current Patrick-authored branch-tip commits are unsigned. This is not a
+  final-main signature blocker when the normal maintainer squash path is used:
+  `scripts/pr-merge run` defaults to `gh pr merge --squash`, and GitHub creates
+  the resulting `web-flow` commit with a valid, Verified GitHub signature.
+  Do not use rebase merge if a single signed final commit is required.
+
 ### 2026-07-21 project-state reconciliation
 
 - Fast-forwarded the coordination checkout to current `origin/main` and merged
