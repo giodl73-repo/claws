@@ -1,21 +1,37 @@
 # State Continuity Session
 
-**Last updated:** 2026-07-17
+**Last updated:** 2026-07-21
 
 **Last agent:** GitHub Copilot
 
-**Current focus:** Monitor the paired E6 wake-evidence and sleep-authority
-fork PRs, then design the next host-owned scheduler-consumption and
-`EnsureRuntimeReady` slice without weakening the fail-closed boundary.
+**Current focus:** Review RFC 0013 sidecar PR 46 and the first fork-only
+OpenClaw implementation draft, then keep both draft until maintainers accept
+the owner/snapshot boundary.
 
-**Blocking question:** Owner confirmation is required for
-`continuity.publicationProvider`, manifest contract
-`continuityPublicationProviders`, the Plugin SDK provider v1 contract, and the
-managed backup publication CLI. Provider selection and packaged Linux behavior
-are proven. Lobster must not consume E6 sleep authorization until durable wake
-scheduling and the paired OpenClaw image are available.
+**Parent project:** [`projects/snapshot`](../snapshot/README.md). RFC 0013,
+OpenClaw PR 105718, and `openclaw backup sqlite` remain authoritative for
+SQLite capture, verification, and fresh-target restore.
 
-## Active Work
+**Active RFC work:** [openclaw/rfcs#46](https://github.com/openclaw/rfcs/pull/46),
+branch `user/giodl/rfc-0013-continuity-sidecars`, commit `17fcd5d894d`, stacked
+on RFC PR 20.
+
+**Draft implementation work:** OpenClaw
+[PR 112385](https://github.com/openclaw/openclaw/pull/112385), branch
+`user/giodl/rfc-0013-recovery-points`, commit `8f2084eed5d`, contains the first
+private aggregate-recovery-point slice. It composes verified global and agent
+RFC 0013 snapshots, binds exact owner-manifest and artifact identities, records
+value-free obligations, and derives a canonical recovery-point identity. It
+adds no CLI, plugin, storage, lifecycle, or restored-start surface.
+
+**Blocking question:** Maintainers must accept the sidecar ownership boundaries
+before PR 112385 becomes merge-ready or later implementation surfaces begin.
+
+## Deprecated RFC 0021 evidence
+
+The work below is preserved as historical evidence and code donors. Do not
+promote or extend its twelve-PR architecture while the RFC 0013 replacement
+series is active.
 
 - RFC worktree:
   `C:\src\openclaw-rfcs-state-continuity`

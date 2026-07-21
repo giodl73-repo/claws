@@ -133,8 +133,18 @@ and that the sidecars preserve its host/owner boundary.
 
 **Depends on:** #105718 and the recovery-point sidecar
 
-**Purpose:** compose existing verified SQLite snapshots with one bounded
-non-SQLite owner component and explicit reconstruction/external obligations.
+**Draft PR:** [openclaw/openclaw#112385](https://github.com/openclaw/openclaw/pull/112385)
+
+**Branch:** `user/giodl/rfc-0013-recovery-points`
+
+**Current commit:** `8f2084eed5d565a6f4832f4fc81820f62c75a819`
+
+**Purpose:** compose existing verified global and per-agent SQLite snapshots
+with explicit reconstruction/external obligations.
+
+Config, workspace, and plugin-source kinds remain reserved until their semantic
+owners expose bounded capture and restore verification. The initial draft must
+not invent path-copy behavior to satisfy the older evidence-slice wording.
 
 **Reuse:**
 
@@ -152,9 +162,10 @@ non-SQLite owner component and explicit reconstruction/external obligations.
 - generic capture-provider registry;
 - ordinary-backup reinterpretation.
 
-**Evidence slice:** global SQLite, one agent SQLite, one config/workspace
-component, one SecretRef obligation, one omitted plugin dependency obligation,
-one exact aggregate manifest, and corruption/unknown-component rejection.
+**Evidence slice:** global SQLite, one agent SQLite, one SecretRef obligation,
+one omitted plugin dependency obligation, one exact aggregate manifest, and
+corruption/unknown-component rejection. Add the first non-SQLite component only
+after its named owner contract exists.
 
 ### PR 3: Lobster portable handoff and acceptance
 
