@@ -22,6 +22,26 @@
 
 ## Current Session
 
+### 2026-07-23 merged-main lifecycle validation and cron removal repair
+
+- Validated merged Claws main at `f3b4f9cfa208` in isolated WSL profiles:
+  feature gate, inspect, add, status, doctor, update, export/reapply,
+  stale-consent rejection, drift-preserving removal, clean removal, MCP apply,
+  and real Gateway cron apply all passed.
+- Real cron removal exposed one new correctness bug: the scheduler's canonical
+  default `payload.toolsAllow: ["*"]` did not compare equal to a Claw manifest
+  that omitted the field. OpenClaw
+  [#113045](https://github.com/openclaw/openclaw/pull/113045) fixes symmetric
+  default normalization, adds a regression test, and documents explicit
+  workspace selection for disposable profiles. Two signed commits are pushed;
+  focused proof passes 32/32 and Codex review is clean.
+- The real failed removal retained truthful partial provenance. Retrying with
+  the fix removed the Gateway cron, agent, workspace, and remaining state,
+  leaving zero Claws and zero cron/MCP references.
+- Main's false update escalations for omitted inherited policy remain owned by
+  [#112773](https://github.com/openclaw/openclaw/pull/112773), not duplicated.
+  Full evidence is in `main-lifecycle-validation-2026-07-23.md`.
+
 ### 2026-07-22 portable agent settings three-model repair closeout
 
 - OpenClaw [#112773](https://github.com/openclaw/openclaw/pull/112773)
