@@ -32,7 +32,7 @@ to-file public and private umbrella issue text is in
 
 **Implementation work ready for review:** OpenClaw
 [PR 112385](https://github.com/openclaw/openclaw/pull/112385), branch
-`user/giodl/rfc-0013-recovery-points`, commit `f9f39f6c201`, contains the first
+`user/giodl/rfc-0013-recovery-points`, commit `08cec229db9`, contains the first
 private aggregate-recovery-point slice. It composes verified global and agent
 RFC 0013 snapshots against the state owner's exact expected-agent inventory,
 binds exact owner-manifest and artifact identities and sizes, validates a
@@ -43,7 +43,7 @@ surface.
 
 OpenClaw
 [PR 112865](https://github.com/openclaw/openclaw/pull/112865), branch
-`user/giodl/rfc-0013-final-capture`, commit `7f45255eb37`, is stacked on PR 112385. Its hidden offline operation durably binds host-supplied closure
+`user/giodl/rfc-0013-final-capture`, commit `f45804a1b64`, is stacked on PR 112385. Its hidden offline operation durably binds host-supplied closure
 evidence to real global and selected-agent snapshots, the canonical aggregate,
 and a full acceptance inventory. Exact response-loss replay returns the same
 committed result; changed requests, partial intent, invalid inventories, and
@@ -53,7 +53,7 @@ destruction.
 
 OpenClaw
 [PR 112896](https://github.com/openclaw/openclaw/pull/112896), branch
-`user/giodl/rfc-0013-restored-admission`, commit `0afba9c8ab7`, is stacked on
+`user/giodl/rfc-0013-restored-admission`, commit `61a4e44061a`, is stacked on
 PR 112865. Its hidden strict-stdin operation verifies the accepted recovery
 point before mutation, restores only into fresh canonical SQLite targets,
 durably journals exact replay, and emits a private startup descriptor. Gateway

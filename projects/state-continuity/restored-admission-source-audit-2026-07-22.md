@@ -58,7 +58,7 @@ ordinary-startup import isolation, and strict CLI registration.
 ## Evidence
 
 - Ready for review: [openclaw/openclaw#112896](https://github.com/openclaw/openclaw/pull/112896)
-- Branch/head: `user/giodl/rfc-0013-restored-admission` at `0afba9c8ab7`
+- Branch/head: `user/giodl/rfc-0013-restored-admission` at `61a4e44061a`
 - Incremental size: 1,411 additions, 4 deletions, 11 files
 - Safe Linux proof: Ubuntu 24.04 WSL, Node 24.15.0, built-in SQLite 3.51.3.
   The exact current-main combined head passed both Knip audits and 102 focused
