@@ -4,25 +4,26 @@
 
 **Last agent:** Codex
 
-**Current focus:** Review replacement PRs 3A-3D, final-capture PR 112865, and the
-Lobster final-capture adopter in fork PR 28. The owner operation and live
-Gateway-side adopter now exist; obtain a generation-scoped provider remover
-before authoring PR 3E-B or wiring PR 3D to production. RFC PR 46, OpenClaw PR
-112385, OpenClaw PR 112865, Lobster PR 5481, and fork PR 28 remain draft. Keep every
+**Current focus:** Review the complete three-PR OpenClaw Portable evidence stack:
+recovery points in PR 112385, final capture in PR 112865, and restored admission
+in PR 112896. No additional OpenClaw implementation PR is needed for the current
+Portable merge sequence. Full scale-to-zero still needs a later bounded host
+wake/scheduler adapter after the Lobster owner/caller work is ready. Keep every
 implementation PR draft until Vincent and the relevant state owners accept the
-inventory, protection, acceptance-byte-set, and destruction-authority
-contracts.
+inventory, protection, acceptance-byte-set, restored-admission, and destruction-
+authority contracts.
 
 **Parent project:** [`projects/snapshot`](../snapshot/README.md). RFC 0013,
 OpenClaw PR 105718, and `openclaw backup sqlite` remain authoritative for
 SQLite capture, verification, and fresh-target restore.
 
 **Active RFC work:** [openclaw/rfcs#46](https://github.com/openclaw/rfcs/pull/46),
-branch `user/giodl/rfc-0013-continuity-sidecars`, commit `e75fa002b69`, stacked
+branch `user/giodl/rfc-0013-continuity-sidecars`, commit `87777dd0910`, stacked
 on RFC PR 20. It binds a closed owner-selected component inventory, keeps
 ordinary snapshots host-protected, defines a deterministic logical acceptance
-byte set, and links OpenClaw PR 112385 plus PR 112865 as non-normative
-implementation evidence for owner review. The RFC and live PR body now lead
+byte set, and links OpenClaw PRs 112385, 112865, and 112896 as non-normative
+implementation evidence for owner review. The
+RFC and live PR body now lead
 with the safe scale-to-zero motivation, managed-host failure classes, industry
 compute-lifecycle baseline, observable outcomes, and explicit separation
 between the OpenClaw application-consistency layer and host-owned wake. Ready-
@@ -49,6 +50,19 @@ committed result; changed requests, partial intent, invalid inventories, and
 tampered bytes quarantine or fail closed. It does not suspend or stop Gateway,
 fence ingress, publish, accept, claim credential-free portability, or authorize
 destruction.
+
+OpenClaw draft
+[PR 112896](https://github.com/openclaw/openclaw/pull/112896), branch
+`user/giodl/rfc-0013-restored-admission`, commit `c96cbda2364`, is stacked on
+PR 112865. Its hidden strict-stdin operation verifies the accepted recovery
+point before mutation, restores only into fresh canonical SQLite targets,
+durably journals exact replay, and emits a private startup descriptor. Gateway
+startup closes work admission before database preflight, reconciles the
+canonical scheduler and required owners, verifies readiness for the same
+accepted identity, and opens admission exactly once. It adds no public config,
+generic lifecycle hook, host wake scheduler, ingress mechanism, or destruction
+authority. The incremental slice is 1,407 additions and 4 deletions across 11
+files; GitHub displays the full three-PR stack while the base PR remains open.
 
 Lobster [PR 5481](https://microsoft.ghe.com/bic/lobster/pull/5481), branch
 `user/giodl/rfc-0013-host-acceptance-contract`, commit `c313f37c49e`, is the
