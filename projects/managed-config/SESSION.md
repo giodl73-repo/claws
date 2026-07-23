@@ -22,7 +22,7 @@
 
 ## Current Session
 
-- Last updated: 2026-07-13
+- Last updated: 2026-07-23
 - Last agent: Codex
 - Current focus: Fork-only OpenClaw stack is reviewed, type-clean, and pushed
   through the pre-migration Gateway bootstrap. Next is Lobster
@@ -365,3 +365,13 @@
 - Lobster fork PR 12 head is `be8e2acdd911b04dd577c8bac839808e5a1efd45`. Adoption now requires `LOBSTER_OPENCLAW_MANAGED_CONFIG_ENABLED=true` plus CLI capability. It captures operator state before seeding, completes plugin/remote projections before materialization, derives the operator delta from the pre-seed capture, sanitizes immutable inputs in memory, publishes a private per-generation file set, caches CLI capability, and keeps a healthy warm Gateway running when re-projection fails.
 - PR bodies for all three PRs were updated with the current heads, corrected lifecycle semantics, explicit pending-validation language, and the Lobster global/tenant/operator example.
 - No local tests, formatting, Clippy, image startup, or refreshed lifecycle proof were run during this repair pass. Required next evidence is current-head OpenClaw CI/core-conformance mapping and canonical Unix Lobster validation plus exact-head image/process proof.
+
+## 2026-07-23 Exact-head CI and Lobster validation
+
+- OpenClaw PR 107026 is published at `409fab999c4095c5b24a8d7ac23d495659738666`.
+- Repaired the CI-only snapshot-type import, removed internal/test-only exports, regenerated the docs map, and replaced the final filter-plus-first-result lint violation with `find`.
+- Local exact-head proof passes `pnpm tsgo`, both dead-export scans, 101 focused tests, and targeted Oxlint with zero warnings or errors. The preceding GitHub head passed production/test types, docs, build artifacts, config and Gateway boundaries, security shards, QA smoke, and real behavior proof; CI for the final lint-only head is running.
+- RFC PR 34 remains a clean, mergeable draft at `8046ab416426e9ab5e4a6140a12fe9ede60c75bf`. ClawSweeper reports no contributor-facing repair and leaves the core ownership/security contract as the maintainer decision.
+- Lobster fork PR 12 is published at `0d37e2a34b45e660ecbc12fbfea41a32b3ca8125`. `just openclaw-container-fmt-check` passes and the focused WSL Cargo lane passes all four managed-config tests with zero failures.
+- Canonical exact-head ClawSweeper re-reviews were requested for both public OpenClaw PRs. Lobster remains fork-only; no upstream Lobster PR was created.
+- The obsolete damaged Windows OpenClaw worktree remains untouched. Use the clean WSL worktree at `/root/src/openclaw-managed-config-slice1`.
