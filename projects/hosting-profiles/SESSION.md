@@ -115,6 +115,21 @@
 
 ## Implementation Notes
 
+- 2026-07-23: Completed independent three-model review of RFC 0018, RFC 0023,
+  both normative sidecar specs, and both exact implementation diffs.
+  - GPT-5.6-Sol reviewed architecture and contract coherence; GPT-5.5 reviewed
+    adversarial runtime resilience; GPT-5.4 reviewed upstream maintainability
+    and compatibility.
+  - All three requested changes. Consensus findings cover provider-result
+    enforcement and unprofiled activation compatibility. Two-review consensus
+    also covers trusted-proxy false readiness, overlapping hung callbacks,
+    missing host-visible profile projection, and workspace reason drift.
+  - Source validation confirmed the consensus findings and an additional
+    node-mode ownership issue. See
+    `reviews/2026-07-23-three-model/README.md` and the retained model outputs.
+  - Do not describe the current branches as conformant or ready to land until
+    the accepted blockers are repaired and the reviews are rerun.
+
 - 2026-07-15: Added implementer-facing sidecar specifications to both RFCs,
   following RFC 0009's narrative-RFC plus normative-sidecar pattern.
   - RFC 0018 now links `rfcs/0018/readiness-v1-spec.md`, which defines the v1
