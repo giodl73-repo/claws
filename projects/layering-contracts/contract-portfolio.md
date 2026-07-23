@@ -23,15 +23,15 @@ Every audited item must be classified as one of:
 
 ## Area Map
 
-| Existing contract concern | Owning area |
-| --- | --- |
-| Config composition and effective-config identity | Runtime activation |
-| Plugin activation and dependencies | Runtime activation |
-| Tool, node, and restriction materialization | Runtime activation |
-| Trusted hosted identity and allowed origins | Runtime boundary |
-| Brokered provider access and proxy-pipe | Runtime boundary |
-| Start, readiness, drain, stop, reload, and retry | Runtime boundary |
-| Durable paths, snapshots, checkpoint, restore, and leases | State and continuity |
+| Existing contract concern                                          | Owning area                |
+| ------------------------------------------------------------------ | -------------------------- |
+| Config composition and effective-config identity                   | Runtime activation         |
+| Plugin activation and dependencies                                 | Runtime activation         |
+| Tool, node, and restriction materialization                        | Runtime activation         |
+| Trusted hosted identity and allowed origins                        | Runtime boundary           |
+| Brokered provider access and proxy-pipe                            | Runtime boundary           |
+| Start, readiness, drain, stop, reload, and retry                   | Runtime boundary           |
+| Durable paths, snapshots, checkpoint, restore, and leases          | State and continuity       |
 | Diagnostics, failure taxonomy, version identity, and release gates | Evidence and compatibility |
 
 Readiness and Hosting Profiles is the first child initiative under Runtime

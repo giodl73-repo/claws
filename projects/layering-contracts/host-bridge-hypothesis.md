@@ -82,16 +82,16 @@ The hosting platform should own its implementation and enterprise decisions:
 
 ## Mapping Existing ProxyPipe Traffic
 
-| ProxyPipe family | Canonical semantic owner | Host Bridge role |
-| --- | --- | --- |
-| Exec approval | Gateway `exec.approval.*` | Relay canonical events and RPC; Lobster presents the decision surface |
-| Node/device pairing | Gateway `node.pair.*` and `device.pair.*` | Relay scoped pairing events and decisions |
-| Plugin approval | Gateway/plugin approval lifecycle | Relay canonical plugin intent and decision without a second approval schema |
-| Teams activity | Channel ingress | Transport accepted channel input and acknowledgement |
-| Remote harness | AgentHarness RFC 31 | Carry the canonical data-plane stream |
-| Lifecycle/status | OpenClaw runtime lifecycle | Carry portable supervision commands and observations |
-| Brokered provider HTTP | Host egress/provider service | Advertise and invoke an optional host service |
-| Judge dedup, feedback, WorkIQ markers | Plugin or Lobster product service | Keep namespaced outside the core bridge semantics |
+| ProxyPipe family                      | Canonical semantic owner                  | Host Bridge role                                                            |
+| ------------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------- |
+| Exec approval                         | Gateway `exec.approval.*`                 | Relay canonical events and RPC; Lobster presents the decision surface       |
+| Node/device pairing                   | Gateway `node.pair.*` and `device.pair.*` | Relay scoped pairing events and decisions                                   |
+| Plugin approval                       | Gateway/plugin approval lifecycle         | Relay canonical plugin intent and decision without a second approval schema |
+| Teams activity                        | Channel ingress                           | Transport accepted channel input and acknowledgement                        |
+| Remote harness                        | AgentHarness RFC 31                       | Carry the canonical data-plane stream                                       |
+| Lifecycle/status                      | OpenClaw runtime lifecycle                | Carry portable supervision commands and observations                        |
+| Brokered provider HTTP                | Host egress/provider service              | Advertise and invoke an optional host service                               |
+| Judge dedup, feedback, WorkIQ markers | Plugin or Lobster product service         | Keep namespaced outside the core bridge semantics                           |
 
 For approvals, the existing ACP implementation establishes the relevant
 pattern: it observes Gateway approval events, presents an external permission

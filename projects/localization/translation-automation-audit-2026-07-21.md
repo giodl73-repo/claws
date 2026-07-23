@@ -10,6 +10,20 @@ strings for Control UI, native apps, and docs. RFC 0024 should extend this
 operating model to CLI, TUI, runtime, Gateway, channel, and metadata catalogs
 rather than introduce a parallel publisher.
 
+An organization-wide search covered all 97 visible `openclaw/*` repositories,
+including 12 private and 4 archived repositories. The translation system is
+split across two repositories:
+
+- `openclaw/openclaw` owns Control UI and native-app source detection,
+  per-locale generation, validation, and generated PR publication.
+- `openclaw/docs` is the dedicated documentation translation repository. It
+  owns incremental/full translation workflows, source hashes, translation
+  memory, generated locale trees, MDX repair, and publication.
+
+No third dedicated localization service or repository was found. `openclaw/ask-molty`
+is the documentation agent and retrieval builder; it consumes the docs mirror
+but does not own translation generation.
+
 ```text
 reviewed English/source inventory lands on main
   -> owner refresh workflow detects changed or stale targets
@@ -77,6 +91,37 @@ reviewed English/source inventory lands on main
 8. Source-only advisory drift where a post-merge bot owns repair; strict checks
    for generated artifact changes.
 9. No provider credentials in pull-request CI.
+
+## Deeper Alignment Opportunity
+
+The implementations already share more than their repository layout suggests:
+
+- `openclaw/docs` checks out an exact `openclaw/openclaw` source revision and
+  runs `source/scripts/docs-i18n`; the documentation translator implementation
+  therefore remains source-owned even though docs orchestration and publication
+  live in the docs repository.
+- Native translation imports the Control UI translation client rather than
+  maintaining another provider implementation.
+- Docs, Control UI, and native workflows use the same provider-secret naming
+  and source-pinned execution posture.
+
+The next alignment step should formalize one translation-run contract rather
+than create another service or repository. Each owner workflow should emit the
+same provenance manifest:
+
+```text
+source repository + exact source SHA
++ locale + source/glossary hashes
++ provider/model identity
++ generated artifact hash
++ validation result
+-> reviewable candidate translation evidence
+```
+
+Share locale identity, protected-literal rules, provider policy, retry/timeout
+semantics, and provenance fields. Keep extraction, structural validation,
+publication, and auto-merge policy owner-specific for docs, Control UI, native,
+CLI/TUI, and safety catalogs.
 
 ## RFC 0024 Integration
 

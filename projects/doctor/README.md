@@ -5,59 +5,59 @@ repair and health-finding stack.
 
 ## Active PRs
 
-| Repo | PR | Branch | Status | Purpose |
-| --- | --- | --- | --- | --- |
-| openclaw/openclaw | [#97514](https://github.com/openclaw/openclaw/pull/97514) | `doctor-systemd-linger-lint-findings` | Merged 2026-07-05 from `65ec5a0acfe` as `7bb686c14012`; completion comment posted | Expose default-off systemd-linger findings without enabling linger from lint. |
-| openclaw/openclaw | [#98869](https://github.com/openclaw/openclaw/pull/98869) | `doctor-channel-plugin-blocker-dry-run-effects` | Parked at `9c44766ab5`; branch diff empty after accepting Omar reachability finding | Dry-run backfill paused until core structured repair has a supported entry point. |
-| openclaw/openclaw | [#99255](https://github.com/openclaw/openclaw/pull/99255) | `doctor-config-write-dry-run` | Draft open at `3adfe2f2a1`; focused proof passed, ClawSweeper review requested | Preview Doctor config writes during dry-run without adding CLI, SDK, plugin, or config contract surface. |
-| openclaw/openclaw | [#84472](https://github.com/openclaw/openclaw/pull/84472) | `doctor-dry-run-contribution-guard` | Draft open, paused | Expose dry-run preview reports after more rule slices are structured. |
+| Repo              | PR                                                        | Branch                                          | Status                                                                              | Purpose                                                                                                  |
+| ----------------- | --------------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| openclaw/openclaw | [#97514](https://github.com/openclaw/openclaw/pull/97514) | `doctor-systemd-linger-lint-findings`           | Merged 2026-07-05 from `65ec5a0acfe` as `7bb686c14012`; completion comment posted   | Expose default-off systemd-linger findings without enabling linger from lint.                            |
+| openclaw/openclaw | [#98869](https://github.com/openclaw/openclaw/pull/98869) | `doctor-channel-plugin-blocker-dry-run-effects` | Parked at `9c44766ab5`; branch diff empty after accepting Omar reachability finding | Dry-run backfill paused until core structured repair has a supported entry point.                        |
+| openclaw/openclaw | [#99255](https://github.com/openclaw/openclaw/pull/99255) | `doctor-config-write-dry-run`                   | Draft open at `3adfe2f2a1`; focused proof passed, ClawSweeper review requested      | Preview Doctor config writes during dry-run without adding CLI, SDK, plugin, or config contract surface. |
+| openclaw/openclaw | [#84472](https://github.com/openclaw/openclaw/pull/84472) | `doctor-dry-run-contribution-guard`             | Draft open, paused                                                                  | Expose dry-run preview reports after more rule slices are structured.                                    |
 
 ## Landed PRs
 
-| Repo | PR | Purpose |
-| --- | --- | --- |
+| Repo              | PR                                                          | Purpose                                                                                                                                                                                                                                          |
+| ----------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | openclaw/openclaw | [#100361](https://github.com/openclaw/openclaw/pull/100361) | Audit Doctor lint defaults after 44/44 tracked rule families gained lint findings; keep legacy state, skills readiness, session transcripts, and session snapshots explicit-only via `--all`/`--only` with no plugin/SDK public contract change. |
-| openclaw/openclaw | [#100093](https://github.com/openclaw/openclaw/pull/100093) | Expose default-off write-config blocker findings for Nix/config write directory blockers; completes 44/44 tracked Doctor rule families with structured lint findings. |
-| openclaw/openclaw | [#99238](https://github.com/openclaw/openclaw/pull/99238) | Expose default-off generic channel preview warning findings under `core/doctor/channel-preview-warnings`. |
-| openclaw/openclaw | [#99250](https://github.com/openclaw/openclaw/pull/99250) | Keep legacy WhatsApp crontab shell-backed findings out of default lint while preserving `--all`/`--only`. |
-| openclaw/openclaw | [#99249](https://github.com/openclaw/openclaw/pull/99249) | Keep advisory workspace suggestion info findings out of default lint while preserving `--all`/`--only`. |
-| openclaw/openclaw | [#98729](https://github.com/openclaw/openclaw/pull/98729) | Expose default-off stale plugin-runtime symlink findings; real cleanup remains in legacy `doctor --fix`. |
-| openclaw/openclaw | [#99211](https://github.com/openclaw/openclaw/pull/99211) | Expose default-off legacy cron store/run-log/payload findings; real repair remains in legacy `doctor --fix`. |
-| openclaw/openclaw | [#98406](https://github.com/openclaw/openclaw/pull/98406) | Expose default-off WhatsApp responsiveness findings without selected lint resolving exec SecretRefs or creating Gateway device identity. |
-| openclaw/openclaw | [#98725](https://github.com/openclaw/openclaw/pull/98725) | Expose default-off legacy plugin dependency state findings; real cleanup remains in legacy `doctor --fix`. |
-| openclaw/openclaw | [#98400](https://github.com/openclaw/openclaw/pull/98400) | Expose default-off heartbeat template findings; real rewrite remains in legacy `doctor --fix`. |
-| openclaw/openclaw | [#98695](https://github.com/openclaw/openclaw/pull/98695) | Expose default-off legacy plugin manifest findings; real rewrites remain in legacy `doctor --fix`. |
-| openclaw/openclaw | [#97496](https://github.com/openclaw/openclaw/pull/97496) | Expose default-off channel plugin blocker findings. |
-| openclaw/openclaw | [#97500](https://github.com/openclaw/openclaw/pull/97500) | Expose default-off tool-result-cap findings for explicit and inherited cap settings. |
-| openclaw/openclaw | [#98391](https://github.com/openclaw/openclaw/pull/98391) | Expose default-off disk-space findings using existing Doctor thresholds. |
-| openclaw/openclaw | [#97366](https://github.com/openclaw/openclaw/pull/97366) | Expose default-off device-pairing findings without Gateway probes in lint. |
-| openclaw/openclaw | [#97358](https://github.com/openclaw/openclaw/pull/97358) | Expose default-off workspace-status findings for plugin diagnostics and TaskFlow recovery hints. |
-| openclaw/openclaw | [#97137](https://github.com/openclaw/openclaw/pull/97137) | Expose default-off memory-search lint findings without runtime probes or auth-profile mutation. |
-| openclaw/openclaw | [#97125](https://github.com/openclaw/openclaw/pull/97125) | Expose opt-in auth profile findings. |
-| openclaw/openclaw | [#97075](https://github.com/openclaw/openclaw/pull/97075) | Expose opt-in gateway health and daemon findings. |
-| openclaw/openclaw | [#96171](https://github.com/openclaw/openclaw/pull/96171) | Expose configured plugin install findings. |
-| openclaw/openclaw | [#96169](https://github.com/openclaw/openclaw/pull/96169) | Expose plugin registry findings. |
-| openclaw/openclaw | [#95979](https://github.com/openclaw/openclaw/pull/95979) | Expose state integrity findings. |
-| openclaw/openclaw | [#96471](https://github.com/openclaw/openclaw/pull/96471) | Add lint-only `doctor --lint --all` so operators can include opt-in checks. |
-| openclaw/openclaw | [#95976](https://github.com/openclaw/openclaw/pull/95976) | Expose session transcript and snapshot findings. |
-| openclaw/openclaw | [#84450](https://github.com/openclaw/openclaw/pull/84450) | Expose config audit scrub findings. |
-| openclaw/openclaw | [#84366](https://github.com/openclaw/openclaw/pull/84366) | Expose session lock findings. |
-| openclaw/openclaw | [#84340](https://github.com/openclaw/openclaw/pull/84340) | Expose extra gateway service findings. |
-| openclaw/openclaw | [#84326](https://github.com/openclaw/openclaw/pull/84326) | Expose sandbox registry findings. |
-| openclaw/openclaw | [#86627](https://github.com/openclaw/openclaw/pull/86627) | Keep core doctor health in contribution order. |
-| openclaw/openclaw | [#88100](https://github.com/openclaw/openclaw/pull/88100) | Quiet tool policy removal audits. |
-| openclaw/openclaw | [#87361](https://github.com/openclaw/openclaw/pull/87361) | Make restart follow-up actionable. |
-| openclaw/openclaw | [#86101](https://github.com/openclaw/openclaw/pull/86101) | Keep hooks model checks read-only. |
-| openclaw/openclaw | [#86081](https://github.com/openclaw/openclaw/pull/86081) | Migrate Feishu account bot names. |
-| openclaw/openclaw | [#85924](https://github.com/openclaw/openclaw/pull/85924) | Label auth health by agent. |
-| openclaw/openclaw | [#85735](https://github.com/openclaw/openclaw/pull/85735) | Canonicalize git checkout detection. |
-| openclaw/openclaw | [#85566](https://github.com/openclaw/openclaw/pull/85566) | Expose shell completion health findings. |
-| openclaw/openclaw | [#85038](https://github.com/openclaw/openclaw/pull/85038) | Prune stale bundled plugin load paths. |
-| openclaw/openclaw | [#84626](https://github.com/openclaw/openclaw/pull/84626) | Migrate invalid thinking formats. |
-| openclaw/openclaw | [#84290](https://github.com/openclaw/openclaw/pull/84290) | Expose UI freshness health findings. |
-| openclaw/openclaw | [#84221](https://github.com/openclaw/openclaw/pull/84221) | Clear stale runtime override pins. |
-| openclaw/openclaw | [#83753](https://github.com/openclaw/openclaw/pull/83753) | Normalize repair checks inside runner. |
-| openclaw/rfcs | [#1](https://github.com/openclaw/rfcs/pull/1) | Doctor health upgrades RFC. |
+| openclaw/openclaw | [#100093](https://github.com/openclaw/openclaw/pull/100093) | Expose default-off write-config blocker findings for Nix/config write directory blockers; completes 44/44 tracked Doctor rule families with structured lint findings.                                                                            |
+| openclaw/openclaw | [#99238](https://github.com/openclaw/openclaw/pull/99238)   | Expose default-off generic channel preview warning findings under `core/doctor/channel-preview-warnings`.                                                                                                                                        |
+| openclaw/openclaw | [#99250](https://github.com/openclaw/openclaw/pull/99250)   | Keep legacy WhatsApp crontab shell-backed findings out of default lint while preserving `--all`/`--only`.                                                                                                                                        |
+| openclaw/openclaw | [#99249](https://github.com/openclaw/openclaw/pull/99249)   | Keep advisory workspace suggestion info findings out of default lint while preserving `--all`/`--only`.                                                                                                                                          |
+| openclaw/openclaw | [#98729](https://github.com/openclaw/openclaw/pull/98729)   | Expose default-off stale plugin-runtime symlink findings; real cleanup remains in legacy `doctor --fix`.                                                                                                                                         |
+| openclaw/openclaw | [#99211](https://github.com/openclaw/openclaw/pull/99211)   | Expose default-off legacy cron store/run-log/payload findings; real repair remains in legacy `doctor --fix`.                                                                                                                                     |
+| openclaw/openclaw | [#98406](https://github.com/openclaw/openclaw/pull/98406)   | Expose default-off WhatsApp responsiveness findings without selected lint resolving exec SecretRefs or creating Gateway device identity.                                                                                                         |
+| openclaw/openclaw | [#98725](https://github.com/openclaw/openclaw/pull/98725)   | Expose default-off legacy plugin dependency state findings; real cleanup remains in legacy `doctor --fix`.                                                                                                                                       |
+| openclaw/openclaw | [#98400](https://github.com/openclaw/openclaw/pull/98400)   | Expose default-off heartbeat template findings; real rewrite remains in legacy `doctor --fix`.                                                                                                                                                   |
+| openclaw/openclaw | [#98695](https://github.com/openclaw/openclaw/pull/98695)   | Expose default-off legacy plugin manifest findings; real rewrites remain in legacy `doctor --fix`.                                                                                                                                               |
+| openclaw/openclaw | [#97496](https://github.com/openclaw/openclaw/pull/97496)   | Expose default-off channel plugin blocker findings.                                                                                                                                                                                              |
+| openclaw/openclaw | [#97500](https://github.com/openclaw/openclaw/pull/97500)   | Expose default-off tool-result-cap findings for explicit and inherited cap settings.                                                                                                                                                             |
+| openclaw/openclaw | [#98391](https://github.com/openclaw/openclaw/pull/98391)   | Expose default-off disk-space findings using existing Doctor thresholds.                                                                                                                                                                         |
+| openclaw/openclaw | [#97366](https://github.com/openclaw/openclaw/pull/97366)   | Expose default-off device-pairing findings without Gateway probes in lint.                                                                                                                                                                       |
+| openclaw/openclaw | [#97358](https://github.com/openclaw/openclaw/pull/97358)   | Expose default-off workspace-status findings for plugin diagnostics and TaskFlow recovery hints.                                                                                                                                                 |
+| openclaw/openclaw | [#97137](https://github.com/openclaw/openclaw/pull/97137)   | Expose default-off memory-search lint findings without runtime probes or auth-profile mutation.                                                                                                                                                  |
+| openclaw/openclaw | [#97125](https://github.com/openclaw/openclaw/pull/97125)   | Expose opt-in auth profile findings.                                                                                                                                                                                                             |
+| openclaw/openclaw | [#97075](https://github.com/openclaw/openclaw/pull/97075)   | Expose opt-in gateway health and daemon findings.                                                                                                                                                                                                |
+| openclaw/openclaw | [#96171](https://github.com/openclaw/openclaw/pull/96171)   | Expose configured plugin install findings.                                                                                                                                                                                                       |
+| openclaw/openclaw | [#96169](https://github.com/openclaw/openclaw/pull/96169)   | Expose plugin registry findings.                                                                                                                                                                                                                 |
+| openclaw/openclaw | [#95979](https://github.com/openclaw/openclaw/pull/95979)   | Expose state integrity findings.                                                                                                                                                                                                                 |
+| openclaw/openclaw | [#96471](https://github.com/openclaw/openclaw/pull/96471)   | Add lint-only `doctor --lint --all` so operators can include opt-in checks.                                                                                                                                                                      |
+| openclaw/openclaw | [#95976](https://github.com/openclaw/openclaw/pull/95976)   | Expose session transcript and snapshot findings.                                                                                                                                                                                                 |
+| openclaw/openclaw | [#84450](https://github.com/openclaw/openclaw/pull/84450)   | Expose config audit scrub findings.                                                                                                                                                                                                              |
+| openclaw/openclaw | [#84366](https://github.com/openclaw/openclaw/pull/84366)   | Expose session lock findings.                                                                                                                                                                                                                    |
+| openclaw/openclaw | [#84340](https://github.com/openclaw/openclaw/pull/84340)   | Expose extra gateway service findings.                                                                                                                                                                                                           |
+| openclaw/openclaw | [#84326](https://github.com/openclaw/openclaw/pull/84326)   | Expose sandbox registry findings.                                                                                                                                                                                                                |
+| openclaw/openclaw | [#86627](https://github.com/openclaw/openclaw/pull/86627)   | Keep core doctor health in contribution order.                                                                                                                                                                                                   |
+| openclaw/openclaw | [#88100](https://github.com/openclaw/openclaw/pull/88100)   | Quiet tool policy removal audits.                                                                                                                                                                                                                |
+| openclaw/openclaw | [#87361](https://github.com/openclaw/openclaw/pull/87361)   | Make restart follow-up actionable.                                                                                                                                                                                                               |
+| openclaw/openclaw | [#86101](https://github.com/openclaw/openclaw/pull/86101)   | Keep hooks model checks read-only.                                                                                                                                                                                                               |
+| openclaw/openclaw | [#86081](https://github.com/openclaw/openclaw/pull/86081)   | Migrate Feishu account bot names.                                                                                                                                                                                                                |
+| openclaw/openclaw | [#85924](https://github.com/openclaw/openclaw/pull/85924)   | Label auth health by agent.                                                                                                                                                                                                                      |
+| openclaw/openclaw | [#85735](https://github.com/openclaw/openclaw/pull/85735)   | Canonicalize git checkout detection.                                                                                                                                                                                                             |
+| openclaw/openclaw | [#85566](https://github.com/openclaw/openclaw/pull/85566)   | Expose shell completion health findings.                                                                                                                                                                                                         |
+| openclaw/openclaw | [#85038](https://github.com/openclaw/openclaw/pull/85038)   | Prune stale bundled plugin load paths.                                                                                                                                                                                                           |
+| openclaw/openclaw | [#84626](https://github.com/openclaw/openclaw/pull/84626)   | Migrate invalid thinking formats.                                                                                                                                                                                                                |
+| openclaw/openclaw | [#84290](https://github.com/openclaw/openclaw/pull/84290)   | Expose UI freshness health findings.                                                                                                                                                                                                             |
+| openclaw/openclaw | [#84221](https://github.com/openclaw/openclaw/pull/84221)   | Clear stale runtime override pins.                                                                                                                                                                                                               |
+| openclaw/openclaw | [#83753](https://github.com/openclaw/openclaw/pull/83753)   | Normalize repair checks inside runner.                                                                                                                                                                                                           |
+| openclaw/rfcs     | [#1](https://github.com/openclaw/rfcs/pull/1)               | Doctor health upgrades RFC.                                                                                                                                                                                                                      |
 
 ## Severity Bar
 
@@ -134,13 +134,16 @@ Target order before refreshing #84472:
    - Uses the existing legacy Doctor thresholds and note text as
      default-disabled structured lint findings.
 10. Heartbeat template repair/readiness.
-   - Draft open as #98400.
-   - Uses the existing legacy heartbeat template analyzer as default-disabled
-     structured lint findings; real rewrite remains in `doctor --fix`.
+
+- Draft open as #98400.
+- Uses the existing legacy heartbeat template analyzer as default-disabled
+  structured lint findings; real rewrite remains in `doctor --fix`.
+
 11. Config/write path.
-   - Candidate families: write config and final config validation follow-ups.
-     Treat as late-stage work because this is the highest-blast-radius repair
-     surface.
+
+- Candidate families: write config and final config validation follow-ups.
+  Treat as late-stage work because this is the highest-blast-radius repair
+  surface.
 
 ## Dry-Run Backfill Queue
 

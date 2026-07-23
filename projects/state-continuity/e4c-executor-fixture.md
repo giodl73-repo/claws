@@ -296,16 +296,16 @@ file returns quarantine instead of repair.
 
 E4c needs only these public failure classes:
 
-| Code | Phase | Disposition |
-| --- | --- | --- |
-| `continuity.restore.request_invalid` | request | quarantine |
-| `continuity.restore.execution_incarnation_mismatch` | request | quarantine |
-| `continuity.restore.materialization_content_identity_required` | preflight | quarantine |
-| `continuity.restore.plan_mismatch` | preflight | quarantine |
-| `continuity.restore.target_unattributed` | preflight/claim | quarantine |
-| `continuity.restore.target_identity_mismatch` | assembly/verify | quarantine |
-| `continuity.restore.journal_conflict` | journal | quarantine |
-| `continuity.restore.interrupted_consistent` | assembly | retry-same-restore |
+| Code                                                           | Phase           | Disposition        |
+| -------------------------------------------------------------- | --------------- | ------------------ |
+| `continuity.restore.request_invalid`                           | request         | quarantine         |
+| `continuity.restore.execution_incarnation_mismatch`            | request         | quarantine         |
+| `continuity.restore.materialization_content_identity_required` | preflight       | quarantine         |
+| `continuity.restore.plan_mismatch`                             | preflight       | quarantine         |
+| `continuity.restore.target_unattributed`                       | preflight/claim | quarantine         |
+| `continuity.restore.target_identity_mismatch`                  | assembly/verify | quarantine         |
+| `continuity.restore.journal_conflict`                          | journal         | quarantine         |
+| `continuity.restore.interrupted_consistent`                    | assembly        | retry-same-restore |
 
 Local diagnostic text may distinguish malformed fields and filesystem errors,
 but the adapter receives only the bounded typed result.

@@ -72,7 +72,7 @@
   the missing `@openai/codex-linux-x64` optional package, so the branch received
   a manual Codex-style review. After removing the old typed-operation surface,
   targeted Vitest passed 2 shards / 4 files / 96 tests; `node_modules/.bin/oxfmt
-  --check <prototype files>` passed; `git diff --check` passed; source/test/script
+--check <prototype files>` passed; `git diff --check` passed; source/test/script
   search has no remaining old typed-operation surface naming or old overlay
   naming.
 - Next step: decide whether more root/sub-CLI surfaces should become
@@ -100,10 +100,10 @@
   `test/scripts/generate-cli-catalog-overlay-doc.test.ts`, and
   `test/scripts/cli-catalog-overlay-list.test.ts` passed 4 shards / 12
   files / 130 tests; `node --import tsx
-  scripts/generate-cli-catalog-overlay-doc.ts --check`, catalog list JSON/Markdown
+scripts/generate-cli-catalog-overlay-doc.ts --check`, catalog list JSON/Markdown
   script smoke, source CLI smoke for `openclaw catalog list --json` and
   `--markdown`, `pnpm docs:list`, `oxfmt --check <stack files>`, and `git diff
-  --check` all passed. Diff vs `origin/main` is 22 files, +944/-7.
+--check` all passed. Diff vs `origin/main` is 22 files, +944/-7.
 - Reorder note: created backup branch
   `backup/cli-catalog-overlay-before-reorder-20260704133600` before rewriting
   the local-only stack. Final order now puts the prompt projection API inside
@@ -115,7 +115,7 @@
   prototype. The old typed-operation/old overlay naming remains intentionally
   absent.
 - Latest naming update: the read-only operator surface is now `openclaw catalog
-  list`, backed by `buildCatalogList()`. The WSL prototype renamed the old
+list`, backed by `buildCatalogList()`. The WSL prototype renamed the old
   inventory module/script/test paths to list-based names and added a source CLI
   smoke for `catalog list --json` / `--markdown`.
 - The generated catalog page now documents the CLI access block:
@@ -185,13 +185,13 @@
 - PR title: `Doctor: add lint --all`.
 - ClawSweeper latest durable review is ready for maintainer review with no
   concrete code blocker. Maintainer judgment accepted for prepare: `openclaw
-  doctor --lint --all` is the intended public all-checks lint selector,
+doctor --lint --all` is the intended public all-checks lint selector,
   including current and future default-disabled Doctor diagnostics.
 - Initial merge verification required a sync because latest `main` touched
   merge-critical CI/workflow/SDK metadata scripts. Synced with:
   `OPENCLAW_GH_BIN="C:/Program Files/GitHub CLI/gh.exe" OPENCLAW_TESTBOX=1
-  OPENCLAW_PR_PUSH_MODE=git OPENCLAW_ALLOW_UNSIGNED_GIT_PUSH=1 GIT_EDITOR=true
-  scripts/pr prepare-sync-head 96471`.
+OPENCLAW_PR_PUSH_MODE=git OPENCLAW_ALLOW_UNSIGNED_GIT_PUSH=1 GIT_EDITOR=true
+scripts/pr prepare-sync-head 96471`.
 - Final head is `560d59f2f5e18a32d97bca672aa8536f8cc6c045`; exact-head hosted
   CI/Testbox gates are green and PR state is `mergeStateStatus=CLEAN`,
   `mergeable=MERGEABLE`, no pending or failed checks.
@@ -199,12 +199,12 @@
   `.worktrees/pr-96471/.local/review.md` and `.local/review.json`;
   recommendation `READY FOR /prepare-pr`, no findings.
 - `OPENCLAW_GH_BIN="C:/Program Files/GitHub CLI/gh.exe" OPENCLAW_TESTBOX=1
-  scripts/pr-prepare run 96471` passed and wrote `.local/prep.md` and
+scripts/pr-prepare run 96471` passed and wrote `.local/prep.md` and
   `.local/prep.env`.
 - Final `OPENCLAW_GH_BIN="C:/Program Files/GitHub CLI/gh.exe"
-  scripts/pr-merge verify 96471` passed after the PR body update.
+scripts/pr-merge verify 96471` passed after the PR body update.
 - `OPENCLAW_GH_BIN="C:/Program Files/GitHub CLI/gh.exe"
-  scripts/pr-merge run 96471` completed successfully:
+scripts/pr-merge run 96471` completed successfully:
   merge commit `4fc504d321b6b1264ff7495dabfe2170a462e6e7`, merged by
   `giodl73-repo`, completion comment
   https://github.com/openclaw/openclaw/pull/96471#issuecomment-4806624647.
@@ -214,19 +214,19 @@
 - PR body updated to final head `560d59f2f5` and final validation/proof counts.
 - Local validation on final head passed:
   - `OPENCLAW_VITEST_MAX_WORKERS=1 node scripts/run-vitest.mjs run
-    src/flows/doctor-lint-flow.test.ts src/commands/doctor-lint.test.ts
-    src/cli/program/register.maintenance.test.ts --reporter=dot`
+src/flows/doctor-lint-flow.test.ts src/commands/doctor-lint.test.ts
+src/cli/program/register.maintenance.test.ts --reporter=dot`
   - `pnpm docs:list`
   - `node_modules/.bin/oxfmt --check <PR-touched source/test/doc files>`
   - `node_modules/.bin/oxlint <PR-touched source/test files>`
   - `node node_modules/@typescript/native-preview/bin/tsgo.js -p
-    tsconfig.core.json --incremental --tsBuildInfoFile
-    .artifacts/tsgo-cache/core.tsbuildinfo --declaration false
-    --singleThreaded --checkers 1`
+tsconfig.core.json --incremental --tsBuildInfoFile
+.artifacts/tsgo-cache/core.tsbuildinfo --declaration false
+--singleThreaded --checkers 1`
   - `node node_modules/@typescript/native-preview/bin/tsgo.js -p
-    test/tsconfig/tsconfig.test.src.json --incremental --tsBuildInfoFile
-    .artifacts/tsgo-cache/test-src.tsbuildinfo --declaration false
-    --singleThreaded --checkers 1`
+test/tsconfig/tsconfig.test.src.json --incremental --tsBuildInfoFile
+.artifacts/tsgo-cache/test-src.tsbuildinfo --declaration false
+--singleThreaded --checkers 1`
   - `node scripts/plugin-sdk-surface-report.mjs --check`
   - `git diff --check origin/main...HEAD && git diff --check`
 - Source CLI proof with isolated temp state/config passed: default lint exited
@@ -238,9 +238,9 @@
 
 - PR title: `Doctor: expose session artifact findings`.
 - Rebased with `OPENCLAW_GH_BIN="C:/Program Files/GitHub CLI/gh.exe"
-  OPENCLAW_TESTBOX=1 OPENCLAW_PR_PUSH_MODE=git
-  OPENCLAW_ALLOW_UNSIGNED_GIT_PUSH=1 GIT_EDITOR=true scripts/pr
-  prepare-sync-head 95976` after merge verification required a sync for
+OPENCLAW_TESTBOX=1 OPENCLAW_PR_PUSH_MODE=git
+OPENCLAW_ALLOW_UNSIGNED_GIT_PUSH=1 GIT_EDITOR=true scripts/pr
+prepare-sync-head 95976` after merge verification required a sync for
   merge-critical mainline drift.
 - Final head `482ff8a57074d5a710cd6c6acb94a0d92e08c037` has exact-head hosted
   CI/Testbox green; a later `main` move touched only outbound delivery files and
@@ -249,13 +249,13 @@
   `.worktrees/pr-95976/.local/review.md` and `.local/review.json`;
   recommendation `READY FOR /prepare-pr`, no findings.
 - `OPENCLAW_GH_BIN="C:/Program Files/GitHub CLI/gh.exe" OPENCLAW_TESTBOX=1
-  scripts/pr-prepare run 95976` passed and wrote `.local/prep.md` and
+scripts/pr-prepare run 95976` passed and wrote `.local/prep.md` and
   `.local/prep.env`.
 - Final `OPENCLAW_GH_BIN="C:/Program Files/GitHub CLI/gh.exe"
-  scripts/pr-merge verify 95976` passed. It noted behind-main drift only under
+scripts/pr-merge verify 95976` passed. It noted behind-main drift only under
   unrelated gateway/outbound delivery files and continued without another sync.
 - `OPENCLAW_GH_BIN="C:/Program Files/GitHub CLI/gh.exe"
-  scripts/pr-merge run 95976` completed successfully:
+scripts/pr-merge run 95976` completed successfully:
   merge commit `82a6a57330cde5d4894fb2cb109618ca66f5091e`, merged by
   `giodl73-repo`, completion comment
   https://github.com/openclaw/openclaw/pull/95976#issuecomment-4801071347.
@@ -265,19 +265,19 @@
 - PR body updated to final head `482ff8a570` and final validation state.
 - Local validation on final head passed:
   - `OPENCLAW_VITEST_MAX_WORKERS=1 node scripts/run-vitest.mjs run
-    src/commands/doctor-session-transcripts.test.ts
-    src/commands/doctor-session-snapshots.test.ts
-    src/flows/doctor-health-contributions.test.ts --reporter=dot`
+src/commands/doctor-session-transcripts.test.ts
+src/commands/doctor-session-snapshots.test.ts
+src/flows/doctor-health-contributions.test.ts --reporter=dot`
   - `node_modules/.bin/oxfmt --check <PR-touched TS files>`
   - `node_modules/.bin/oxlint <PR-touched TS files>`
   - `node node_modules/@typescript/native-preview/bin/tsgo.js -p
-    tsconfig.core.json --incremental --tsBuildInfoFile
-    .artifacts/tsgo-cache/core.tsbuildinfo --declaration false
-    --singleThreaded --checkers 1`
+tsconfig.core.json --incremental --tsBuildInfoFile
+.artifacts/tsgo-cache/core.tsbuildinfo --declaration false
+--singleThreaded --checkers 1`
   - `node node_modules/@typescript/native-preview/bin/tsgo.js -p
-    test/tsconfig/tsconfig.test.src.json --incremental --tsBuildInfoFile
-    .artifacts/tsgo-cache/test-src.tsbuildinfo --declaration false
-    --singleThreaded --checkers 1`
+test/tsconfig/tsconfig.test.src.json --incremental --tsBuildInfoFile
+.artifacts/tsgo-cache/test-src.tsbuildinfo --declaration false
+--singleThreaded --checkers 1`
   - `node scripts/plugin-sdk-surface-report.mjs --check`
   - `git diff --check origin/main...HEAD && git diff --check`
 - Maintainer judgment accepted for merge: the two new info-level Doctor check
@@ -410,7 +410,7 @@
   legacy sandbox registry residue is stale noncanonical state with an existing
   `openclaw doctor --fix` correction path, so warning severity is acceptable.
 - Initial local `scripts/pr-prepare run 84326` passed `pnpm install
-  --frozen-lockfile` and `pnpm build`, then failed `pnpm check` only on
+--frozen-lockfile` and `pnpm build`, then failed `pnpm check` only on
   `npm-shrinkwrap.json is stale`.
 - The same `pnpm check` shrinkwrap failure reproduced on detached current
   `origin/main`; all other `pnpm check` guards passed. Treated as local
@@ -551,8 +551,8 @@
 - PR2 validation passed:
   `node --import tsx scripts/generate-cli-catalog-overlay-doc.ts --check`,
   `node scripts/run-vitest.mjs run
-  test/scripts/generate-cli-catalog-overlay-doc.test.ts
-  src/cli-catalog-overlay/list.test.ts --reporter=dot` (2 shards / 4 tests),
+test/scripts/generate-cli-catalog-overlay-doc.test.ts
+src/cli-catalog-overlay/list.test.ts --reporter=dot` (2 shards / 4 tests),
   `oxfmt` on touched files, and `git diff --check`.
 - PR3 audit/policy inventory consumer opened as a stacked fork PR:
   https://github.com/giodl73-repo/openclaw/pull/8.
@@ -565,10 +565,10 @@
   command behavior.
 - PR3 validation passed:
   `node scripts/run-vitest.mjs run src/cli-catalog-overlay/audit.test.ts
-  src/cli/catalog-cli.test.ts src/cli-catalog-overlay/list.test.ts
-  --reporter=dot` (2 shards / 8 tests), audit count smoke
+src/cli/catalog-cli.test.ts src/cli-catalog-overlay/list.test.ts
+--reporter=dot` (2 shards / 8 tests), audit count smoke
   `{agentToolSurfaces:5, confirmationRequiredSurfaces:2, commandRoutes:93,
-  commandRoutesWithPolicyKeys:90, routePolicyKeys:7}`, source CLI smokes for
+commandRoutesWithPolicyKeys:90, routePolicyKeys:7}`, source CLI smokes for
   `catalog audit --json` and `--markdown`, `oxfmt` on touched files, and
   `git diff --check`.
 - PR4 test-matrix consumer opened as a stacked fork PR:
@@ -583,10 +583,10 @@
   rather than inferred from filenames.
 - PR4 validation passed:
   `node scripts/run-vitest.mjs run src/cli-catalog-overlay/test-matrix.test.ts
-  src/cli/catalog-cli.test.ts src/cli-catalog-overlay/list.test.ts
-  --reporter=dot` (2 shards / 10 tests), matrix count smoke
+src/cli/catalog-cli.test.ts src/cli-catalog-overlay/list.test.ts
+--reporter=dot` (2 shards / 10 tests), matrix count smoke
   `{routedOperations:14, smokeCandidates:14, coveredRoutedOperations:0,
-  coverageGaps:14}`, source CLI smokes for `catalog test-matrix --json` and
+coverageGaps:14}`, source CLI smokes for `catalog test-matrix --json` and
   `--markdown`, `oxfmt` on touched files, and `git diff --check`.
 - PR5 operator/admin inventory consumer opened as a stacked fork PR:
   https://github.com/giodl73-repo/openclaw/pull/10.
@@ -600,9 +600,9 @@
   hints.
 - PR5 validation passed:
   `node scripts/run-vitest.mjs run
-  src/cli-catalog-overlay/operator-summary.test.ts src/cli/catalog-cli.test.ts
-  src/cli-catalog-overlay/audit.test.ts
-  src/cli-catalog-overlay/test-matrix.test.ts --reporter=dot` (2 shards / 14
+src/cli-catalog-overlay/operator-summary.test.ts src/cli/catalog-cli.test.ts
+src/cli-catalog-overlay/audit.test.ts
+src/cli-catalog-overlay/test-matrix.test.ts --reporter=dot` (2 shards / 14
   tests), source CLI smokes for `catalog summary --json` and `--markdown`,
   `oxfmt` on touched files, and `git diff --check`.
 - Latest pushed RFC head is now `99daa53`, amended with the full integration
@@ -628,11 +628,11 @@
   branch TS/TSX changes; and whitespace checks.
 - Latest WSL validation after review fixes:
   `node scripts/run-vitest.mjs run src/agents/catalog-overlay-prompt.test.ts
-  src/agents/system-prompt.test.ts
-  src/cli-catalog-overlay/prompt-projection.test.ts
-  src/cli-catalog-overlay/list.test.ts
-  src/cli-catalog-overlay/registry-guards.test.ts
-  src/agents/skill-workshop-prompt.test.ts --reporter=dot` passed 2 shards /
+src/agents/system-prompt.test.ts
+src/cli-catalog-overlay/prompt-projection.test.ts
+src/cli-catalog-overlay/list.test.ts
+src/cli-catalog-overlay/registry-guards.test.ts
+src/agents/skill-workshop-prompt.test.ts --reporter=dot` passed 2 shards /
   103 tests; generated docs check, count smoke
   `{56,93,14,5,19}`, `oxfmt`, and `git diff --check` passed.
 - Final WSL status is dirty with the intended uncommitted review fixes on
@@ -661,8 +661,8 @@
 - WSL validation after the fix passed:
   `node --import tsx scripts/generate-cli-catalog-overlay-doc.ts --check` and
   `node scripts/run-vitest.mjs test/scripts/generate-cli-catalog-overlay-doc.test.ts
-  test/scripts/cli-catalog-overlay-list.test.ts
-  src/cli-catalog-overlay/list.test.ts src/cli/catalog-cli.test.ts` (3 shards,
+test/scripts/cli-catalog-overlay-list.test.ts
+src/cli-catalog-overlay/list.test.ts src/cli/catalog-cli.test.ts` (3 shards,
   14 tests).
 - Final Codex review results: all five PRs clean. Windows review checkout still
   lacks `node_modules`, so Codex could not run Vitest there; focused tests ran
@@ -692,14 +692,14 @@
   test matrix, operator summary, and prompt projection contracts.
 - PR6 validation passed in WSL:
   `UPDATE_CATALOG_SCHEMA_FIXTURES=1 node scripts/run-vitest.mjs
-  src/cli-catalog-overlay/schema-fixtures.test.ts --reporter=dot`; normal
+src/cli-catalog-overlay/schema-fixtures.test.ts --reporter=dot`; normal
   read-only fixture test; broader catalog run with schema fixtures, list, audit,
   prompt projection, and CLI catalog tests (2 shards / 15 tests);
   `npm exec -- oxfmt --check src/cli-catalog-overlay/schema-fixtures.test.ts`;
   and `git diff --check`.
 - Continued with PR7 on branch `user/giodl/cli-catalog-lenses-docs`, pushed to
   `giodl73-repo/openclaw` at `c1e06bdc94a` (`Generate CLI catalog reference
-  docs`). No upstream PR was opened.
+docs`). No upstream PR was opened.
 - PR7 adds a generated CLI catalog reference page at `docs/cli/catalog.md`, a
   `scripts/generate-cli-catalog-doc.ts --write|--check` generator, a freshness
   test, and a link from the CLI index. The page covers list, audit,
@@ -713,7 +713,7 @@
 - Continued with PR8 on branch
   `user/giodl/cli-catalog-lenses-runtime-plugin-detail`, pushed to
   `giodl73-repo/openclaw` at `fccc6cc1baf` (`Enrich catalog runtime and plugin
-  metadata`). No upstream PR was opened.
+metadata`). No upstream PR was opened.
 - PR8 enriches runtime catalog entries with `parentPath`, `depth`,
   `visibleSubcommandCount`, and explicit `hidden: false`; plugin descriptor
   entries now expose `parentPath`, `depth`, `descriptorName`, and explicit
@@ -726,7 +726,7 @@
   `git diff --check`.
 - Continued with PR9 on branch `user/giodl/cli-catalog-lenses-advisory-report`,
   pushed to `giodl73-repo/openclaw` at `2dcc378c272` (`Add advisory CLI
-  catalog reports`). No upstream PR was opened.
+catalog reports`). No upstream PR was opened.
 - PR9 adds `scripts/cli-catalog-overlay-report.ts`, which writes advisory
   review artifacts under `.artifacts/cli-catalog-overlay` by default:
   `catalog-summary.json`, `catalog-test-matrix.json`, and
@@ -739,7 +739,7 @@
 - Continued with PR10 on branch
   `user/giodl/cli-catalog-lenses-consumer-contract`, pushed to
   `giodl73-repo/openclaw` at `291c02e20a3` (`Document CLI catalog consumer
-  contract`). No upstream PR was opened.
+contract`). No upstream PR was opened.
 - PR10 adds `src/cli-catalog-overlay/consumer-contract.ts` as a read-only
   contract for policy/admin/diagnostics/prompt/CI-report consumers. It documents
   stable import paths, JSON output fields, snapshot fields, and non-goals
@@ -811,7 +811,7 @@
   coherence in `C:\src\openclaw-catalog-codex-review`.
 - Updated PR9 branch `user/giodl/cli-catalog-lenses-advisory-report` on
   `giodl73-repo/openclaw` to `9fe711f165` (`Enrich CLI catalog advisory
-  report`).
+report`).
 - PR9 now writes `catalog-audit.json` in addition to summary, test-matrix, and
   Markdown report artifacts. The report also surfaces concrete advisory audit
   signals: confirmation-required surfaces, medium-risk surfaces, mixed-effect
@@ -860,7 +860,7 @@
 - Current focus: RFC branch `codex/cli-catalog-overlay-rfc` in
   `C:\src\openclaw-rfcs-snapshot`.
 - Pushed RFC update to `giodl73-repo/rfcs` at `272512d` (`Refocus CLI catalog
-  RFC`).
+RFC`).
 - RFC now centers the proposal on one read-only catalog view over existing
   OpenClaw command/tool registries, not an AI-first surface. It adds a concrete
   table explaining why existing registries are not a single joined inventory,
@@ -892,9 +892,9 @@
   `codex/cli-catalog-overlay-rfc`.
 - Pushed implementation update on
   `user/giodl/cli-catalog-review-hardening` at `b05490d750` (`Move catalog
-  metadata onto owning descriptors`).
+metadata onto owning descriptors`).
 - Pushed RFC update to `giodl73-repo/rfcs` at `3eede22` (`Clarify CLI catalog
-  metadata ownership`).
+metadata ownership`).
 - Design decision: `agentToolSurfaces` is no longer framed as an independent
   durable registry. Catalog metadata now belongs on existing owning descriptors
   where possible: CLI descriptors for command-level surfaces, command-route
@@ -929,15 +929,15 @@
   `src/plugins/loader.cli-metadata.test.ts`.
 - Final PR6 proof passed:
   `node scripts/run-vitest.mjs src/plugins/captured-registration.test.ts
-  src/plugins/loader.cli-metadata.test.ts
-  src/cli-catalog-overlay/plugin-commands.test.ts`, `git diff --check`, and
+src/plugins/loader.cli-metadata.test.ts
+src/cli-catalog-overlay/plugin-commands.test.ts`, `git diff --check`, and
   `codex review --uncommitted`.
 - Pushed implementation branch
   `user/giodl/cli-catalog-review-hardening` to `giodl73-repo/openclaw` at
   `fac56e6942` (`Preserve plugin catalog metadata`).
 - Opened upstream draft review PR for maintainer comments:
   https://github.com/openclaw/openclaw/pull/100960 (`Draft: add CLI catalog
-  views`), from `giodl73-repo:user/giodl/cli-catalog-review-hardening` into
+views`), from `giodl73-repo:user/giodl/cli-catalog-review-hardening` into
   `openclaw:main`.
 - Pushed RFC simplification to `giodl73-repo/rfcs` at `37b2ef4`
   (`Simplify CLI catalog RFC framing`): the RFC now leads with the simpler
@@ -945,7 +945,7 @@
   today, but no user-facing `openclaw catalog` command or joined read-only
   inventory; the proposal adds that view without replacing existing owners.
 - Pushed RFC PR7 update to `giodl73-repo/rfcs` at `0f788bc` (`Add
-  node-operator catalog PR7 plan`). PR7 is now the Scout/OpenClaw node-operator
+node-operator catalog PR7 plan`). PR7 is now the Scout/OpenClaw node-operator
   prompt lens over MCP, filesystem, browser/file-open, and future system/M365
   node command families, motivated by `gim-home/m#4045`, `#4086`, and `#4088`.
 - Created fork branch for PR7:
@@ -1000,14 +1000,14 @@
     contract.
 - Validation passed in `C:\src\openclaw-catalog-restack`:
   - `node scripts/run-vitest.mjs src/cli-catalog-overlay/list.test.ts
-    src/cli-catalog-overlay/prompt-projection.test.ts
-    src/cli-catalog-overlay/audit.test.ts
-    src/cli-catalog-overlay/test-matrix.test.ts
-    src/cli-catalog-overlay/operator-summary.test.ts
-    src/cli-catalog-overlay/schema-fixtures.test.ts
-    src/cli-catalog-overlay/consumer-contract.test.ts
-    test/scripts/generate-cli-catalog-doc.test.ts
-    test/scripts/cli-catalog-overlay-report.test.ts --reporter=dot`
+src/cli-catalog-overlay/prompt-projection.test.ts
+src/cli-catalog-overlay/audit.test.ts
+src/cli-catalog-overlay/test-matrix.test.ts
+src/cli-catalog-overlay/operator-summary.test.ts
+src/cli-catalog-overlay/schema-fixtures.test.ts
+src/cli-catalog-overlay/consumer-contract.test.ts
+test/scripts/generate-cli-catalog-doc.test.ts
+test/scripts/cli-catalog-overlay-report.test.ts --reporter=dot`
     passed 2 shards / 9 files / 30 tests.
   - `node --import tsx scripts/generate-cli-catalog-doc.ts --check` passed.
   - `npm exec -- oxfmt --check <catalog/doc/report touched files>` passed.
@@ -1033,11 +1033,11 @@
   `scope: "node-operator"`.
 - Validation passed in `C:\src\openclaw-catalog-restack`:
   - `node scripts/run-vitest.mjs src/cli-catalog-overlay/prompt-projection.test.ts
-    src/agents/catalog-overlay-prompt.test.ts src/agents/system-prompt.test.ts
-    --reporter=dot` passed 2 shards / 3 files / 99 tests.
+src/agents/catalog-overlay-prompt.test.ts src/agents/system-prompt.test.ts
+--reporter=dot` passed 2 shards / 3 files / 99 tests.
   - `npm exec -- oxfmt --check src/agents/catalog-overlay-prompt.ts
-    src/agents/catalog-overlay-prompt.test.ts src/agents/system-prompt.ts
-    src/agents/system-prompt.test.ts` passed.
+src/agents/catalog-overlay-prompt.test.ts src/agents/system-prompt.ts
+src/agents/system-prompt.test.ts` passed.
   - `git diff --check` passed.
 - Remaining honest boundary for Vince/Peter: this proves the prompt-builder
   seam end to end for callers that supply node declarations. It does not yet
@@ -1045,21 +1045,21 @@
   node/gateway; that can be a follow-up integration once the declaration source
   is finalized.
 - Follow-up pushed at `1776dd3887` (`Thread catalog overlay through embedded
-  runs`): `RunEmbeddedAgentParams`, `runEmbeddedAttempt`, and
+runs`): `RunEmbeddedAgentParams`, `runEmbeddedAttempt`, and
   `buildEmbeddedSystemPrompt` now all accept/pass `cliCatalogOverlay`, so an
   actual embedded-run caller such as Lobster/Scout or a future node-mode
   launcher can call the prompt with `scope: "node-operator"` and supplied node
   declarations.
 - Additional validation passed:
   `node scripts/run-vitest.mjs src/agents/embedded-agent-runner/system-prompt.test.ts
-  src/agents/system-prompt.test.ts src/agents/catalog-overlay-prompt.test.ts
-  src/cli-catalog-overlay/prompt-projection.test.ts --reporter=dot`,
+src/agents/system-prompt.test.ts src/agents/catalog-overlay-prompt.test.ts
+src/cli-catalog-overlay/prompt-projection.test.ts --reporter=dot`,
   `npm exec -- oxfmt --check <six prompt/threading files>`, and
   `git diff --check`.
 - Codex review pass on 2026-07-09 found stale catalog CLI count
   expectations after the branch grew to 60 command descriptors and 97 command
   routes. Fixed and pushed `da8aca8f5a` (`Update catalog CLI count
-  expectations`) to the draft PR head and compatibility branch.
+expectations`) to the draft PR head and compatibility branch.
 - Latest review/proof: full-branch `codex review --base origin/main` timed out
   twice without returning findings; focused `codex review --commit HEAD`
   reported no introduced correctness issue for `da8aca8f5a`. Manual targeted
@@ -1101,12 +1101,12 @@
   implementation worktree.
 - Final focused validation passed in `C:\src\openclaw-catalog-restack`:
   `node scripts/run-vitest.mjs test/scripts/cli-catalog-overlay-list.test.ts
-  test/scripts/generate-cli-catalog-doc.test.ts
-  src/cli-catalog-overlay/schema-fixtures.test.ts
-  src/cli-catalog-overlay/prompt-projection.test.ts
-  src/cli-catalog-overlay/list.test.ts
-  src/cli-catalog-overlay/operator-summary.test.ts src/cli/catalog-cli.test.ts
-  --reporter=dot`, `npm exec -- oxfmt --check <review-touched files>`, and
+test/scripts/generate-cli-catalog-doc.test.ts
+src/cli-catalog-overlay/schema-fixtures.test.ts
+src/cli-catalog-overlay/prompt-projection.test.ts
+src/cli-catalog-overlay/list.test.ts
+src/cli-catalog-overlay/operator-summary.test.ts src/cli/catalog-cli.test.ts
+--reporter=dot`, `npm exec -- oxfmt --check <review-touched files>`, and
   `git diff --check origin/main...HEAD`.
 - Not yet pushed after this review restack. Push/force-with-lease is the next
   step if the user wants to update the fork branches/PR #100960.

@@ -26,15 +26,15 @@ features and should be promoted directly.
 `GatewayStartBody.extra_env` is a carrier, not a semantic contract. Each key
 must move to one of these destinations:
 
-| Current meaning | Destination |
-| --- | --- |
-| Ordinary OpenClaw setting or host/operator-owned value | Managed Configuration |
-| Plugin enablement or plugin-owned feature gate | Plugin manifest/config and Lobster rollout selection |
-| Host implementation, credential, endpoint, or traffic-policy selection | Hosted Integration owner binding |
-| Runtime identity and selected hosting posture | Hosting Profile activation identity |
-| Restore, checkpoint, persistence, or safe-shutdown fact | Runtime State Continuity |
-| Container-only implementation detail | Remain in Lobster image/orchestration |
-| Removed consumer or historical patch toggle | Delete |
+| Current meaning                                                        | Destination                                          |
+| ---------------------------------------------------------------------- | ---------------------------------------------------- |
+| Ordinary OpenClaw setting or host/operator-owned value                 | Managed Configuration                                |
+| Plugin enablement or plugin-owned feature gate                         | Plugin manifest/config and Lobster rollout selection |
+| Host implementation, credential, endpoint, or traffic-policy selection | Hosted Integration owner binding                     |
+| Runtime identity and selected hosting posture                          | Hosting Profile activation identity                  |
+| Restore, checkpoint, persistence, or safe-shutdown fact                | Runtime State Continuity                             |
+| Container-only implementation detail                                   | Remain in Lobster image/orchestration                |
+| Removed consumer or historical patch toggle                            | Delete                                               |
 
 The target is not zero environment variables. It is a small documented
 bootstrap carrier with no environment key that silently rewrites ordinary
@@ -75,10 +75,10 @@ identity fields, but Lobster still needs to populate them.
 
 Recommended mapping:
 
-| OpenClaw field | Lobster source | Lifecycle |
-| --- | --- | --- |
-| `runtimeId` | Stable logical route/binding identity for the tenant/user OpenClaw runtime | Survives process/container replacement |
-| `incarnationId` | Physical Plex/container/process allocation identity | Changes whenever execution is replaced |
+| OpenClaw field  | Lobster source                                                             | Lifecycle                              |
+| --------------- | -------------------------------------------------------------------------- | -------------------------------------- |
+| `runtimeId`     | Stable logical route/binding identity for the tenant/user OpenClaw runtime | Survives process/container replacement |
+| `incarnationId` | Physical Plex/container/process allocation identity                        | Changes whenever execution is replaced |
 
 Lobster should pass both when launching the Gateway, then record the returned
 activation identity beside route identity, worker/container identity, selected
@@ -94,13 +94,13 @@ or rollout ownership into OpenClaw. Those remain Lobster/OCC concerns.
 but it should shrink toward orchestration rather than remain the semantic home
 for OpenClaw behavior.
 
-| Start-body family | Long-term owner |
-| --- | --- |
-| Profile and runtime/incarnation identity | Hosting Profiles activation |
-| Config fragments, model catalogs, policy values | Managed Configuration |
-| ProxyPipe, credentials, provider adapters, Channel endpoints | Hosted Integration |
-| Git mode, restore/checkpoint intent, shutdown safety | Runtime State Continuity |
-| User/tenant routing, rollout flags, diagnostics selection | Lobster |
+| Start-body family                                            | Long-term owner             |
+| ------------------------------------------------------------ | --------------------------- |
+| Profile and runtime/incarnation identity                     | Hosting Profiles activation |
+| Config fragments, model catalogs, policy values              | Managed Configuration       |
+| ProxyPipe, credentials, provider adapters, Channel endpoints | Hosted Integration          |
+| Git mode, restore/checkpoint intent, shutdown safety         | Runtime State Continuity    |
+| User/tenant routing, rollout flags, diagnostics selection    | Lobster                     |
 
 Unknown-field tolerance is useful for rolling versions, but requested behavior
 needs owner-produced readiness evidence. Ignoring an unknown start field cannot
@@ -111,15 +111,15 @@ count as successful activation.
 The current image applies eleven source patches plus two post-install rewrite
 scripts. They do not all belong to the four RFCs.
 
-| Patch family | Disposition |
-| --- | --- |
-| msteams brokered auth and benchmark-range networking (`0001-0002`) | Hosted Integration supplies the binding/traffic contract; concrete Teams behavior remains in the msteams plugin |
-| Native msteams packaging (`0003`) | Plugin packaging/lifecycle contribution, then delete Lobster patch |
-| Keyless WebIQ secrets fast path (`0004`) | Hosted Integration credential/provider binding plus readiness |
-| Teams streaming, dedupe, quoted/forward normalization, threading (`0005-0007`, `0009`) | Ordinary msteams plugin fixes/features; upstream directly |
-| Deferred Gateway activation (`0008`) | Hosting Profile activation/readiness and lifecycle adoption |
-| Cron delivery target and tool-less run semantics (`0010-0011`) | Ordinary OpenClaw cron/tool-policy fixes; upstream directly |
-| Request-timeout and cron-plan rewrite scripts | Audit individually as upstream bug/config/approval work; do not normalize post-install mutation as a hosting contract |
+| Patch family                                                                           | Disposition                                                                                                           |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| msteams brokered auth and benchmark-range networking (`0001-0002`)                     | Hosted Integration supplies the binding/traffic contract; concrete Teams behavior remains in the msteams plugin       |
+| Native msteams packaging (`0003`)                                                      | Plugin packaging/lifecycle contribution, then delete Lobster patch                                                    |
+| Keyless WebIQ secrets fast path (`0004`)                                               | Hosted Integration credential/provider binding plus readiness                                                         |
+| Teams streaming, dedupe, quoted/forward normalization, threading (`0005-0007`, `0009`) | Ordinary msteams plugin fixes/features; upstream directly                                                             |
+| Deferred Gateway activation (`0008`)                                                   | Hosting Profile activation/readiness and lifecycle adoption                                                           |
+| Cron delivery target and tool-less run semantics (`0010-0011`)                         | Ordinary OpenClaw cron/tool-policy fixes; upstream directly                                                           |
+| Request-timeout and cron-plan rewrite scripts                                          | Audit individually as upstream bug/config/approval work; do not normalize post-install mutation as a hosting contract |
 
 Every patch needs an upstream issue/PR, the first OpenClaw release containing
 the replacement, a Lobster dual-run or conformance gate where necessary, and a

@@ -674,7 +674,7 @@
     internal-evaluation response, and single nested `readiness` projections in
     Gateway health and `status --json`.
   - The audit found PR 18 still reading the removed `(await
-    getReadiness()).hosting` field. PR 18 head `c423b77720` now statically
+getReadiness()).hosting` field. PR 18 head `c423b77720` now statically
     returns the legacy/canonical intersection and explicitly projects the five
     canonical fields into health without restoring a duplicate payload.
   - Added a real Gateway-health response assertion and fixed the health-state
@@ -824,7 +824,7 @@
     blocked because Docker Desktop's Linux engine is not running. Direct AWS
     Crabbox proof did not allocate a lease because WSL lacks broker login; the
     wrapper requires `crabbox login --url https://crabbox.openclaw.ai
-    --provider aws`. No remote runtime pass is claimed yet.
+--provider aws`. No remote runtime pass is claimed yet.
 - 2026-07-10: Completed package-installed Docker proof for upstream draft
   #104018 from this machine.
   - The first Docker-capable exact-head run exposed a real harness gap: device

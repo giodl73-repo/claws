@@ -113,21 +113,21 @@ Policy-owned startup requirements:
     "requireProfile": "hosted-openclaw/v0",
     "gateway": {
       "requireTrustedProxy": true,
-      "forbidDirectUnauthenticatedAccess": true
+      "forbidDirectUnauthenticatedAccess": true,
     },
     "egress": {
       "requireBrokered": true,
       "requireFailClosed": true,
-      "forbidRuntimeProviderSecrets": true
+      "forbidRuntimeProviderSecrets": true,
     },
     "state": {
       "requireWorkspaceRestoredBeforeReady": true,
-      "requireSingleWriter": true
+      "requireSingleWriter": true,
     },
     "plugins": {
-      "requireAllSelectedPluginsResolved": true
-    }
-  }
+      "requireAllSelectedPluginsResolved": true,
+    },
+  },
 }
 ```
 
@@ -138,25 +138,25 @@ Runtime-owned startup evidence:
   "profile": "hosted-openclaw/v0",
   "config": {
     "sourceFingerprint": "...",
-    "runtimeFingerprint": "..."
+    "runtimeFingerprint": "...",
   },
   "gateway": {
     "authMode": "trusted-proxy",
     "trustedProxyConfigured": true,
-    "directUnauthenticatedAccess": false
+    "directUnauthenticatedAccess": false,
   },
   "egress": {
     "managedProxyActive": true,
     "childProcessProxyInherited": true,
-    "runtimeProviderSecretsPresent": false
+    "runtimeProviderSecretsPresent": false,
   },
   "state": {
     "workspaceRestored": true,
-    "singleWriter": true
+    "singleWriter": true,
   },
   "plugins": {
-    "requiredResolved": true
-  }
+    "requiredResolved": true,
+  },
 }
 ```
 
@@ -172,15 +172,15 @@ Ready check result:
       "checkId": "hosted/gateway/trusted-proxy",
       "ok": true,
       "requirement": "oc://policy/startup/gateway/requireTrustedProxy",
-      "evidence": "oc://runtime/startup/gateway/authMode"
+      "evidence": "oc://runtime/startup/gateway/authMode",
     },
     {
       "checkId": "hosted/egress/brokered",
       "ok": true,
       "requirement": "oc://policy/startup/egress/requireBrokered",
-      "evidence": "oc://runtime/startup/egress/managedProxyActive"
-    }
-  ]
+      "evidence": "oc://runtime/startup/egress/managedProxyActive",
+    },
+  ],
 }
 ```
 
@@ -191,15 +191,15 @@ copying it into parallel fields.
 
 Examples:
 
-| Concern | Existing config home | Hosted profile role |
-| --- | --- | --- |
-| Gateway trusted proxy auth | `gateway.auth.mode`, `gateway.auth.trustedProxy` | Require/validate hosted Gateway profile. |
-| Gateway bind/exposure | `gateway.bind`, `gateway.controlUi.*`, `gateway.remote`, `gateway.tailscale` | Policy checks and hosted readiness use effective posture. |
-| Gateway node commands | `gateway.nodes.allowCommands`, `gateway.nodes.denyCommands` | Policy owns allow/deny posture and doctor findings. |
-| Gateway HTTP endpoints | `gateway.http.endpoints.*` | Policy owns endpoint posture checks and repairs. |
-| Tools | `tools.*` | Policy owns tool posture checks and repairs. |
-| Plugins | `plugins.*`, plugin manifests | Hosted profile may require resolution; plugin config stays plugin-owned. |
-| Network proxy | `proxy.*` | Existing proxy config remains normal proxy config; hosted egress adds readiness/no-secrets invariants. |
+| Concern                    | Existing config home                                                         | Hosted profile role                                                                                    |
+| -------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Gateway trusted proxy auth | `gateway.auth.mode`, `gateway.auth.trustedProxy`                             | Require/validate hosted Gateway profile.                                                               |
+| Gateway bind/exposure      | `gateway.bind`, `gateway.controlUi.*`, `gateway.remote`, `gateway.tailscale` | Policy checks and hosted readiness use effective posture.                                              |
+| Gateway node commands      | `gateway.nodes.allowCommands`, `gateway.nodes.denyCommands`                  | Policy owns allow/deny posture and doctor findings.                                                    |
+| Gateway HTTP endpoints     | `gateway.http.endpoints.*`                                                   | Policy owns endpoint posture checks and repairs.                                                       |
+| Tools                      | `tools.*`                                                                    | Policy owns tool posture checks and repairs.                                                           |
+| Plugins                    | `plugins.*`, plugin manifests                                                | Hosted profile may require resolution; plugin config stays plugin-owned.                               |
+| Network proxy              | `proxy.*`                                                                    | Existing proxy config remains normal proxy config; hosted egress adds readiness/no-secrets invariants. |
 
 Do not add `hosted.gateway.nodes`, `hosted.tools`, or `hosted.plugins` when
 existing OpenClaw config already owns those settings.
@@ -257,16 +257,16 @@ new parallel subsystem.
 
 Recommended first landing areas:
 
-| Area | Existing OpenClaw location | Hosted profile work |
-| --- | --- | --- |
-| Envelope schema and validation | `src/config/` | Add hosted envelope/config schema, validation, compatibility versioning, and config overlay checks alongside existing config schema/runtime code. |
-| Gateway hosted behavior | `src/gateway/` | Add hosted/trusted-proxy auth profile, allowed-origin/direct-caller semantics, node command/approval behavior, and Gateway conformance tests. |
-| Runtime host contracts | `src/plugin-sdk/` existing runtime/config contract surfaces | Add host-facing contract types only where plugins or adapters need to consume hosted context. |
-| Plugin participation | `src/plugin-sdk/`, `src/plugins/`, `extensions/*` | Let plugin manifests declare hosted config, tools, skills, state paths, policy asks, and telemetry hooks. |
-| State and persistence semantics | `src/state/`, `src/sessions/`, `src/memory/`, `src/plugin-state/` | Define durable/ephemeral path semantics, restore/checkpoint expectations, and stable failure codes. |
-| Provider and brokered egress | `src/provider-runtime/`, `src/proxy-capture/`, `src/runtime-env.ts`, provider config modules | Define no-secrets/brokered-provider behavior and readiness/failure diagnostics if accepted as a generic host contract. |
-| Doctor/conformance | `src/runtime-doctor.ts`, `src/test-helpers/`, `test/`, relevant `src/*/*.test.ts` | Add hosted envelope validation and golden hosted profile conformance tests. |
-| Host-specific Lobster integration | `extensions/lobster/` | Keep Lobster-specific implementation here; do not make it the generic contract. |
+| Area                              | Existing OpenClaw location                                                                   | Hosted profile work                                                                                                                               |
+| --------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Envelope schema and validation    | `src/config/`                                                                                | Add hosted envelope/config schema, validation, compatibility versioning, and config overlay checks alongside existing config schema/runtime code. |
+| Gateway hosted behavior           | `src/gateway/`                                                                               | Add hosted/trusted-proxy auth profile, allowed-origin/direct-caller semantics, node command/approval behavior, and Gateway conformance tests.     |
+| Runtime host contracts            | `src/plugin-sdk/` existing runtime/config contract surfaces                                  | Add host-facing contract types only where plugins or adapters need to consume hosted context.                                                     |
+| Plugin participation              | `src/plugin-sdk/`, `src/plugins/`, `extensions/*`                                            | Let plugin manifests declare hosted config, tools, skills, state paths, policy asks, and telemetry hooks.                                         |
+| State and persistence semantics   | `src/state/`, `src/sessions/`, `src/memory/`, `src/plugin-state/`                            | Define durable/ephemeral path semantics, restore/checkpoint expectations, and stable failure codes.                                               |
+| Provider and brokered egress      | `src/provider-runtime/`, `src/proxy-capture/`, `src/runtime-env.ts`, provider config modules | Define no-secrets/brokered-provider behavior and readiness/failure diagnostics if accepted as a generic host contract.                            |
+| Doctor/conformance                | `src/runtime-doctor.ts`, `src/test-helpers/`, `test/`, relevant `src/*/*.test.ts`            | Add hosted envelope validation and golden hosted profile conformance tests.                                                                       |
+| Host-specific Lobster integration | `extensions/lobster/`                                                                        | Keep Lobster-specific implementation here; do not make it the generic contract.                                                                   |
 
 The initial implementation should not be a generic new `packages/hosted-runtime`
 module unless maintainers prefer a package boundary. The current repo already
@@ -392,14 +392,14 @@ releases instead of carrying private patches.
 
 OCC can compile declarative resources into this hosted envelope:
 
-| OCC resource | Hosted envelope section |
-| --- | --- |
-| Agent | identity, plugins, policy, model/profile selection |
-| Channel | Gateway/channel ingress profile |
-| Cell | lifecycle, readiness, persistence |
-| SandboxPolicy | tools, network, exec, approval restrictions |
-| Budget | quotas, model/provider limits |
-| Plugin | plugin selection, config, policy asks |
+| OCC resource  | Hosted envelope section                            |
+| ------------- | -------------------------------------------------- |
+| Agent         | identity, plugins, policy, model/profile selection |
+| Channel       | Gateway/channel ingress profile                    |
+| Cell          | lifecycle, readiness, persistence                  |
+| SandboxPolicy | tools, network, exec, approval restrictions        |
+| Budget        | quotas, model/provider limits                      |
+| Plugin        | plugin selection, config, policy asks              |
 
 OCC should remain the control plane. It should not carry hot-path assistant
 deltas, tool frames, terminal output, patches, compaction events, or harness

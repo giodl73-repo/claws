@@ -29,21 +29,21 @@ OpenClaw contracts.
 
 ## Frame Inventory
 
-| Tags | Frames | Family | Target ownership |
-| --- | --- | --- | --- |
-| 1-5 | `BeginRequest`, `RequestChunk`, `BeginResponse`, `ResponseChunk`, `RequestCancelled` | Brokered HTTP egress | Lobster host transport implementing portable brokered-provider behavior |
-| 6 | `CronSchedule` | Legacy cron hint | Compatibility-only; retained for rolling decode, then delete when safe |
-| 7-10 | Judge dedup check/write request/response | Product runtime service | Code-mode/plugin-owned capability using Lobster Redis service |
-| 11 | `UserTurnPush` | Product runtime hint | Code-mode/plugin-owned; verify whether existing OpenClaw session events can replace it |
-| 12-13 | `DeliverActivity`, `DeliverActivityAck` | Native Teams channel ingress | Runtime data-plane/channel contract; Lobster owns Teams delivery and routing |
-| 14 | `ContainerHello` | Runtime/build evidence | Generic identity concept; current frame is Lobster transport projection |
-| 15-16 | Feedback request/response | Diagnostics/product feedback | Plugin/host service; not brokered provider egress |
-| 17 | `LifecycleSignal` | Runtime lifecycle observation | Portable lifecycle semantics projected over Lobster transport |
-| 20-23 | Remote harness open, agent frame, brain frame, close | AgentHarness execution | Must converge on remote AgentHarness RFC; do not independently define a second canonical protocol |
-| 24-26 | Lifecycle command capability, command, result | Runtime lifecycle control | Portable supervision semantics projected over Lobster transport |
-| 27-28 | Node-pair approval request/response | Interactive approval | OpenClaw node approval protocol plus Lobster user surface |
-| 29-30 | Exec approval request/response | Interactive approval | OpenClaw command approval protocol plus Lobster user surface |
-| 31-32 | Cron creation approval request/response | Product/plugin approval | WorkIQ plugin approval plus Lobster user surface |
+| Tags  | Frames                                                                               | Family                        | Target ownership                                                                                  |
+| ----- | ------------------------------------------------------------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------- |
+| 1-5   | `BeginRequest`, `RequestChunk`, `BeginResponse`, `ResponseChunk`, `RequestCancelled` | Brokered HTTP egress          | Lobster host transport implementing portable brokered-provider behavior                           |
+| 6     | `CronSchedule`                                                                       | Legacy cron hint              | Compatibility-only; retained for rolling decode, then delete when safe                            |
+| 7-10  | Judge dedup check/write request/response                                             | Product runtime service       | Code-mode/plugin-owned capability using Lobster Redis service                                     |
+| 11    | `UserTurnPush`                                                                       | Product runtime hint          | Code-mode/plugin-owned; verify whether existing OpenClaw session events can replace it            |
+| 12-13 | `DeliverActivity`, `DeliverActivityAck`                                              | Native Teams channel ingress  | Runtime data-plane/channel contract; Lobster owns Teams delivery and routing                      |
+| 14    | `ContainerHello`                                                                     | Runtime/build evidence        | Generic identity concept; current frame is Lobster transport projection                           |
+| 15-16 | Feedback request/response                                                            | Diagnostics/product feedback  | Plugin/host service; not brokered provider egress                                                 |
+| 17    | `LifecycleSignal`                                                                    | Runtime lifecycle observation | Portable lifecycle semantics projected over Lobster transport                                     |
+| 20-23 | Remote harness open, agent frame, brain frame, close                                 | AgentHarness execution        | Must converge on remote AgentHarness RFC; do not independently define a second canonical protocol |
+| 24-26 | Lifecycle command capability, command, result                                        | Runtime lifecycle control     | Portable supervision semantics projected over Lobster transport                                   |
+| 27-28 | Node-pair approval request/response                                                  | Interactive approval          | OpenClaw node approval protocol plus Lobster user surface                                         |
+| 29-30 | Exec approval request/response                                                       | Interactive approval          | OpenClaw command approval protocol plus Lobster user surface                                      |
+| 31-32 | Cron creation approval request/response                                              | Product/plugin approval       | WorkIQ plugin approval plus Lobster user surface                                                  |
 
 Tags 18 and 19 are reserved. The remote-harness family uses 20-23, lifecycle
 capability/control uses 24-26, and approval families continue through 32.
@@ -192,4 +192,3 @@ host service and to evolve under explicit capability/version rules.
 5. Map node/exec approval frames to existing OpenClaw approval APIs.
 6. Identify product frames that can move behind plugin-owned host-service
    declarations instead of central proto growth.
-

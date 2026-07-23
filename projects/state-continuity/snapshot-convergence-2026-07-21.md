@@ -83,20 +83,20 @@ restore execution, and lifecycle protocol. Only part of that remains necessary.
 
 ### Compare
 
-| Concern | Direction |
-| --- | --- |
-| SQLite-consistent capture | **Reuse #105718 unchanged.** |
-| SQLite role/schema/owner verification | **Reuse #105718 unchanged.** |
-| Local immutable artifact publication | **Reuse #105718 unchanged.** |
-| Fresh-target SQLite restore | **Reuse #105718 unchanged.** |
-| Credential-free portable projection | **Adapt with the state owner.** Do not silently redefine ordinary backup snapshots; define a distinct owner-authored portable projection only if required. |
-| Config, workspace, plugin source, and other non-SQLite state | **Keep owner-specific.** Compose explicit component artifacts; do not force them into the SQLite contract. |
-| Aggregate recovery-point manifest | **Keep in continuity.** It binds all required components and obligations. |
-| Upload, storage receipt, retention, and retrieval | **Keep host-owned.** Start with completed directories and exact digests before adding a generic plugin provider. |
-| Planned final handoff and `safeToDestroy` | **Keep in continuity/host lifecycle.** A snapshot alone cannot authorize destruction. |
-| Restore hold, generation fencing, replay, and quarantine | **Keep in continuity/host lifecycle.** |
-| Scheduler reconciliation and restored admission | **Keep in OpenClaw lifecycle.** Restore success is not readiness. |
-| CAPE operator projection | **Keep as policy/status only.** Do not use it as implementation decomposition. |
+| Concern                                                      | Direction                                                                                                                                                  |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SQLite-consistent capture                                    | **Reuse #105718 unchanged.**                                                                                                                               |
+| SQLite role/schema/owner verification                        | **Reuse #105718 unchanged.**                                                                                                                               |
+| Local immutable artifact publication                         | **Reuse #105718 unchanged.**                                                                                                                               |
+| Fresh-target SQLite restore                                  | **Reuse #105718 unchanged.**                                                                                                                               |
+| Credential-free portable projection                          | **Adapt with the state owner.** Do not silently redefine ordinary backup snapshots; define a distinct owner-authored portable projection only if required. |
+| Config, workspace, plugin source, and other non-SQLite state | **Keep owner-specific.** Compose explicit component artifacts; do not force them into the SQLite contract.                                                 |
+| Aggregate recovery-point manifest                            | **Keep in continuity.** It binds all required components and obligations.                                                                                  |
+| Upload, storage receipt, retention, and retrieval            | **Keep host-owned.** Start with completed directories and exact digests before adding a generic plugin provider.                                           |
+| Planned final handoff and `safeToDestroy`                    | **Keep in continuity/host lifecycle.** A snapshot alone cannot authorize destruction.                                                                      |
+| Restore hold, generation fencing, replay, and quarantine     | **Keep in continuity/host lifecycle.**                                                                                                                     |
+| Scheduler reconciliation and restored admission              | **Keep in OpenClaw lifecycle.** Restore success is not readiness.                                                                                          |
+| CAPE operator projection                                     | **Keep as policy/status only.** Do not use it as implementation decomposition.                                                                             |
 
 ### Evaluate
 

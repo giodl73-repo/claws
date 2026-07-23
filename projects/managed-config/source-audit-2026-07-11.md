@@ -50,14 +50,14 @@ role-specific branches. Runtime consumers continue to receive one
 
 ## Existing Primitives To Reuse
 
-| Need | Existing primitive | Proposed adaptation |
-| --- | --- | --- |
-| Source confinement | Include root, symlink, depth, size, and raw hashing guards | Give the managed source its own immutable resolution boundary. |
-| Source/runtime separation | Resolved source and runtime config materialization | Compose resolved sources before producing the runtime config. |
-| Write race protection | Snapshot-backed write options and mutation conflict errors | Add managed-boundary identity to operator write preflight only if current path ownership checks are insufficient. |
-| Atomic runtime observation | Runtime snapshot preflight, finalize, and notification | Publish only an admitted effective candidate. |
-| Reload behavior | Changed-path reload plan with restart fallback | Diff prior and next effective snapshots; reuse current plan unchanged. |
-| Diagnostics | Config audit, health state, snapshots, and validation issues | Add structured authority findings and redacted provenance. |
+| Need                       | Existing primitive                                           | Proposed adaptation                                                                                               |
+| -------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Source confinement         | Include root, symlink, depth, size, and raw hashing guards   | Give the managed source its own immutable resolution boundary.                                                    |
+| Source/runtime separation  | Resolved source and runtime config materialization           | Compose resolved sources before producing the runtime config.                                                     |
+| Write race protection      | Snapshot-backed write options and mutation conflict errors   | Add managed-boundary identity to operator write preflight only if current path ownership checks are insufficient. |
+| Atomic runtime observation | Runtime snapshot preflight, finalize, and notification       | Publish only an admitted effective candidate.                                                                     |
+| Reload behavior            | Changed-path reload plan with restart fallback               | Diff prior and next effective snapshots; reuse current plan unchanged.                                            |
+| Diagnostics                | Config audit, health state, snapshots, and validation issues | Add structured authority findings and redacted provenance.                                                        |
 
 ## Runtime Override Finding
 
@@ -75,17 +75,17 @@ V1 should not promise support for an unclassified override surface.
 
 ## Representative Lobster Leaves
 
-| Leaf or family | Initial class | V1 proof value |
-| --- | --- | --- |
-| `gateway.auth.mode` and trusted-proxy posture | Exact host authority | Scalar conflict with security significance. |
-| Gateway bind and exposed endpoint posture | Exact host authority | Exact activation input and restart classification. |
-| `gateway.controlUi.allowedOrigins` | Exact host authority | Replaces a concrete environment-driven post-seed writer. |
-| Adapter-local MCP endpoint | Exact host authority | Exact nested object child without claiming unrelated siblings. |
-| `tools.alsoAllow` | Bounded candidate, not first slice | Needs allow-set semantics and interaction with deny precedence. |
-| Exec approval requirement | Bounded/policy candidate | Must not be conflated with exact config authority or make Policy a dependency. |
-| Plugin availability and required bundle | Mixed host/plugin ownership | Defer until availability, installation, and enablement are separated. |
-| Agent model selection | Operator authority within host-provided catalog | Useful omission/non-ownership proof after provider catalog classification. |
-| Legacy node/exec cleanup | Obsolete after migration | Deletion target, not a permanent managed field. |
+| Leaf or family                                | Initial class                                   | V1 proof value                                                                 |
+| --------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------ |
+| `gateway.auth.mode` and trusted-proxy posture | Exact host authority                            | Scalar conflict with security significance.                                    |
+| Gateway bind and exposed endpoint posture     | Exact host authority                            | Exact activation input and restart classification.                             |
+| `gateway.controlUi.allowedOrigins`            | Exact host authority                            | Replaces a concrete environment-driven post-seed writer.                       |
+| Adapter-local MCP endpoint                    | Exact host authority                            | Exact nested object child without claiming unrelated siblings.                 |
+| `tools.alsoAllow`                             | Bounded candidate, not first slice              | Needs allow-set semantics and interaction with deny precedence.                |
+| Exec approval requirement                     | Bounded/policy candidate                        | Must not be conflated with exact config authority or make Policy a dependency. |
+| Plugin availability and required bundle       | Mixed host/plugin ownership                     | Defer until availability, installation, and enablement are separated.          |
+| Agent model selection                         | Operator authority within host-provided catalog | Useful omission/non-ownership proof after provider catalog classification.     |
+| Legacy node/exec cleanup                      | Obsolete after migration                        | Deletion target, not a permanent managed field.                                |
 
 ## Audit Conclusions
 

@@ -21,20 +21,20 @@ authoritative state, reconstructable state, and external dependencies.
 
 ## Source-Backed Treatment
 
-| Surface | Continuity treatment | Required behavior |
-| --- | --- | --- |
-| Global `auth_profile_stores` | External | Delete from the copied SQLite snapshot. Never mutate the live database. |
-| Per-agent `auth_profile_store` | External | Delete from the copied SQLite snapshot. Re-resolve credentials through the configured owner on restore. |
-| Global/per-agent `auth_profile_state` | Reconstructed | Delete from copied snapshots and rebuild profile order, last-good, cooldown, and failure metadata from available destination profiles. |
-| OAuth credentials directory | External | Omit the directory from continuity capture even when it is beneath the state root. |
-| Root config and included fragments | Captured with external references | Preserve valid SecretRefs and environment placeholders exactly; reject literal sensitive values. Enumerate and classify the complete `$include` closure. |
-| SQLite session/transcript rows | Captured | Use the native per-agent SQLite snapshot. |
-| Legacy `.jsonl`/`.log` transcripts | Blocking | Fail continuity capture when authoritative legacy transcript files remain. Do not run Doctor migration as a checkpoint side effect. |
-| Current outbound/session delivery queues | Captured | Capture authoritative queue rows through the shared SQLite snapshot. |
-| Legacy delivery-queue JSON and delivered markers | Blocking | Fail continuity capture until the existing migration moves authoritative entries into shared SQLite. Do not silently apply the volatile backup exclusion. |
-| Installed plugin source and manifest | Captured | Preserve plugin-owned source and manifest files plus the shared SQLite install index. |
-| Installed plugin dependency trees | Reconstructed | Keep excluding `extensions/**/node_modules`; record a plugin-owner reinstall/readiness obligation rather than claiming the plugin is runnable. |
-| Logs, sockets, PIDs, and temp files | Ephemeral | Keep existing backup exclusions and recreate only through normal owner startup. |
+| Surface                                          | Continuity treatment              | Required behavior                                                                                                                                         |
+| ------------------------------------------------ | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Global `auth_profile_stores`                     | External                          | Delete from the copied SQLite snapshot. Never mutate the live database.                                                                                   |
+| Per-agent `auth_profile_store`                   | External                          | Delete from the copied SQLite snapshot. Re-resolve credentials through the configured owner on restore.                                                   |
+| Global/per-agent `auth_profile_state`            | Reconstructed                     | Delete from copied snapshots and rebuild profile order, last-good, cooldown, and failure metadata from available destination profiles.                    |
+| OAuth credentials directory                      | External                          | Omit the directory from continuity capture even when it is beneath the state root.                                                                        |
+| Root config and included fragments               | Captured with external references | Preserve valid SecretRefs and environment placeholders exactly; reject literal sensitive values. Enumerate and classify the complete `$include` closure.  |
+| SQLite session/transcript rows                   | Captured                          | Use the native per-agent SQLite snapshot.                                                                                                                 |
+| Legacy `.jsonl`/`.log` transcripts               | Blocking                          | Fail continuity capture when authoritative legacy transcript files remain. Do not run Doctor migration as a checkpoint side effect.                       |
+| Current outbound/session delivery queues         | Captured                          | Capture authoritative queue rows through the shared SQLite snapshot.                                                                                      |
+| Legacy delivery-queue JSON and delivered markers | Blocking                          | Fail continuity capture until the existing migration moves authoritative entries into shared SQLite. Do not silently apply the volatile backup exclusion. |
+| Installed plugin source and manifest             | Captured                          | Preserve plugin-owned source and manifest files plus the shared SQLite install index.                                                                     |
+| Installed plugin dependency trees                | Reconstructed                     | Keep excluding `extensions/**/node_modules`; record a plugin-owner reinstall/readiness obligation rather than claiming the plugin is runnable.            |
+| Logs, sockets, PIDs, and temp files              | Ephemeral                         | Keep existing backup exclusions and recreate only through normal owner startup.                                                                           |
 
 ## Why Redacted Config Is Not A Restore Artifact
 

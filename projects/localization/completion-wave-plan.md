@@ -1,5 +1,11 @@
 # RFC 0024 Localization Completion Wave
 
+> Superseded on 2026-07-22 by the 44-entry projected owner slice registry in
+> `rfcs/0024/projected-owner-slice-registry.md` on RFC PR #42. The proposal
+> below is retained as design history only. Do not execute it as five broad
+> completion PRs. Current delivery uses bounded owner registries, separate
+> generated-artifact follow-ups, and evidence-only release promotion.
+
 ## Executive Ask
 
 Approve one final five-PR implementation wave plus a parallel named-language
@@ -74,6 +80,21 @@ aggregate validation, stale-input deferral, App-token, automation-branch, and
 changed-scope seams for CLI/TUI and routine operator catalogs. It must not add a
 second generated-PR publisher.
 
+The workflows also share one minimum translation-run evidence record:
+
+```text
+source repository + exact source SHA
++ locale + source/glossary hashes
++ generator/workflow + provider/model identity
++ artifact hash + validation result
+```
+
+This formalizes sharing that already exists: `openclaw/docs` executes the
+source-owned `scripts/docs-i18n` translator from an exact
+`openclaw/openclaw` revision, and native translation imports the Control UI
+translation client. Owner workflows still control extraction, catalog format,
+publication, and review policy.
+
 ## Final Five PRs
 
 ### Completion PR A: Operator Surfaces
@@ -94,6 +115,8 @@ Work:
   trusted detect/refresh/enforce drift gate for registered catalogs, reusing
   the shared publisher, exact-source resolution, per-locale artifacts,
   stale-input deferral, and source/generated CI ownership;
+- define and emit the shared translation-run evidence record from the first
+  CLI/TUI operator-catalog lane;
 - finish the remaining product-owned string inventories;
 - add all 21 target catalogs, including Swedish where currently unsupported;
 - remove raw-copy and catalog fallback gaps;
@@ -189,6 +212,8 @@ Work:
 - reconcile translation contradictions through named platform/language review;
 - verify generated native artifacts and catalog revisions;
 - complete and verify docs artifacts for every supported target locale;
+- verify `openclaw/docs` evidence against the exact
+  `openclaw/openclaw` source revision and source-owned translator revision;
 - add Swedish docs coverage; and
 - obtain an explicit disposition for Persian and Thai docs publishing.
 
@@ -210,6 +235,7 @@ Surfaces:
 Work:
 
 - ingest named linguistic-review evidence for all 21 target locales;
+- ingest the common translation-run evidence for every generated catalog;
 - bind review evidence to exact catalog revisions;
 - fail on stale review, fallback, missing artifacts, quality advisories, or
   unmigrated surfaces;
@@ -257,12 +283,12 @@ attestation.
 The first five PRs create the common contract. These five consume it across all
 15 surfaces:
 
-| Completion PR | Surfaces | Matrix cells |
-| --- | ---: | ---: |
-| A: operator surfaces | 5 | 105 |
-| B: runtime and Gateway | 2 | 42 |
-| C: channels and metadata | 5 | 105 |
-| D: native apps and docs | 3 | 63 |
+| Completion PR             |     Surfaces |                Matrix cells |
+| ------------------------- | -----------: | --------------------------: |
+| A: operator surfaces      |            5 |                         105 |
+| B: runtime and Gateway    |            2 |                          42 |
+| C: channels and metadata  |            5 |                         105 |
+| D: native apps and docs   |            3 |                          63 |
 | E: evidence and promotion | product-wide | promotes all eligible cells |
 
 There is no unassigned product surface after PR D and no unverified completion

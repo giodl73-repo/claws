@@ -41,14 +41,39 @@ work outside shared discovery, publish, and governance.
 
 ## Delivery Dates
 
-| Date | Slice | Output |
-| --- | --- | --- |
-| 2026-07-10 | Contract lock | MOS3 shared-registry contract for skills, MCP/connectors, agents, auth scopes, item taxonomy, and publish/search/install semantics. |
-| 2026-07-15 | Skills search/install | PR for skills shared-registry search and local install path, with marketplace/feed semantics kept separate from personal library publishing. |
-| 2026-07-20 | Skills publish | PR for publishing skills into MOS3 shared registry, preserving source provenance, package/artifact selectors, and personal vs shared authority boundaries. |
-| 2026-07-24 | MCP/connectors search | PR for MCP/connectors shared-registry search, normalized result shape, source labels, and non-installable/activation-required states. |
-| 2026-07-29 | MCP/connectors publish foundation | PR for connector/MCP publish metadata and MOS3 write path foundation, stopping before full runtime auth/activation. |
-| 2026-07-31 | Agents contract | PR/RFC for agents shared-registry contract, feed entry shape, governance states, and follow-up implementation plan. |
+| Date       | Slice                             | Output                                                                                                                                                     |
+| ---------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-10 | Contract lock                     | MOS3 shared-registry contract for skills, MCP/connectors, agents, auth scopes, item taxonomy, and publish/search/install semantics.                        |
+| 2026-07-15 | Skills search/install             | PR for skills shared-registry search and local install path, with marketplace/feed semantics kept separate from personal library publishing.               |
+| 2026-07-20 | Skills publish                    | PR for publishing skills into MOS3 shared registry, preserving source provenance, package/artifact selectors, and personal vs shared authority boundaries. |
+| 2026-07-24 | MCP/connectors search             | PR for MCP/connectors shared-registry search, normalized result shape, source labels, and non-installable/activation-required states.                      |
+| 2026-07-29 | MCP/connectors publish foundation | PR for connector/MCP publish metadata and MOS3 write path foundation, stopping before full runtime auth/activation.                                        |
+| 2026-07-31 | Agents contract                   | PR/RFC for agents shared-registry contract, feed entry shape, governance states, and follow-up implementation plan.                                        |
+
+## July 21 Recovery Status
+
+The dates above are the original internal targets. They were not confirmed as
+accepted v-team commitments. Use this table for the current execution plan:
+
+| Original target | Slice                             | July 21 status                                                                                               | Recovery target                                                                                                     |
+| --------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| July 10         | Contract lock                     | Partially covered by the shared-registry position/contract notes and active Lobster #4982; not fully closed. | July 22: publish the current contract/status packet and map every remaining API/RBAC question.                      |
+| July 15         | Skills search/install             | Delivered by the landed Scout personal/tenant feed, hosted artifact, and install foundations.                | Complete; retain regression proof only.                                                                             |
+| July 20         | Skills publish                    | Active in Lobster #4982, followed by #5045 capability diagnostics.                                           | July 24: drive the contract/diagnostics stack and record any MOS3 API gap explicitly.                               |
+| July 24         | MCP/connectors search             | No dedicated implementation PR is currently filed.                                                           | July 22: cut the PR; July 26: target review-ready search/result-model slice.                                        |
+| July 29         | MCP/connectors publish foundation | Planned, not yet filed.                                                                                      | Retain July 29 only if the search slice is filed July 22; otherwise report the slip rather than compressing review. |
+| July 31         | Agents contract                   | Planned, not yet filed.                                                                                      | Retain July 31 for a contract/RFC PR only; runtime orchestration remains August work.                               |
+
+## July 21 Action List
+
+1. Drive Lobster #4982 to merge as the shared skill publish contract.
+2. Land stacked #5045 for capability diagnostics.
+3. Close #5057's remaining artifact URL test gap so the acquisition follow-up
+   is reviewable.
+4. Author the MCP/connectors search/result-model PR by July 22.
+5. Start the agents shared-registry contract PR early enough for July 31 review.
+6. Send the recovery table to the shared-registry v-team as working targets;
+   do not describe them as accepted commitments until acknowledged.
 
 ## PR Stack
 
@@ -188,16 +213,16 @@ Exit criteria:
 The same verbs should apply across all item types, even when the runtime action
 differs:
 
-| Verb | Meaning |
-| --- | --- |
-| Search | Find authorized entries and feeds the caller can see. |
-| Install | Materialize an entry into a local workspace or runtime where that type supports install. |
-| Save to library | Copy or reference a selected entry into the user's personal library. |
-| Publish | Create or update a user-owned or source-owned registry record. |
-| Share | Change visibility or ACL on a named/shared registry record. |
-| Follow | Include a feed or source in the caller's effective discovery scope. |
-| Approve | Tenant-admin promotion of a selected entry, feed, or revision. |
-| Revoke/block | Prevent new discovery/install/activation according to policy. |
+| Verb            | Meaning                                                                                  |
+| --------------- | ---------------------------------------------------------------------------------------- |
+| Search          | Find authorized entries and feeds the caller can see.                                    |
+| Install         | Materialize an entry into a local workspace or runtime where that type supports install. |
+| Save to library | Copy or reference a selected entry into the user's personal library.                     |
+| Publish         | Create or update a user-owned or source-owned registry record.                           |
+| Share           | Change visibility or ACL on a named/shared registry record.                              |
+| Follow          | Include a feed or source in the caller's effective discovery scope.                      |
+| Approve         | Tenant-admin promotion of a selected entry, feed, or revision.                           |
+| Revoke/block    | Prevent new discovery/install/activation according to policy.                            |
 
 Search should not imply install. Publish should not imply tenant approval.
 Tenant-visible should not imply tenant-approved. Connector or agent visibility

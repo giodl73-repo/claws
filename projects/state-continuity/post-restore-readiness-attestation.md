@@ -63,22 +63,22 @@ prepare, restore, reconcile, or readiness calls.
 
 ### Internal analogues
 
-| Analogue | Decision | Lesson |
-| --- | --- | --- |
-| E4d restore journal | Reuse | Publish one write-once-or-exact durable record and replay exact bytes after unknown outcomes. |
-| E6 wake descriptor | Reuse | Use OpenClaw's canonical scheduler generation after reconciliation; do not add a second scheduler hash. |
-| Gateway readiness | Adapt | Require its current ready result, but do not treat the generic boolean as continuity evidence. |
-| Doctor health contributions | Reuse for projection | Project failure detail through Status/Doctor; do not use diagnostics as activation authority. |
-| One aggregate continuity readiness gate | Adapt | Evaluate required reconstruction obligations behind one restored-start gate, not one host policy knob per artifact. |
-| Container health probe | Avoid as authority | Process reachability cannot prove restore identity, scheduler reconciliation, or destination generation. |
+| Analogue                                | Decision             | Lesson                                                                                                              |
+| --------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| E4d restore journal                     | Reuse                | Publish one write-once-or-exact durable record and replay exact bytes after unknown outcomes.                       |
+| E6 wake descriptor                      | Reuse                | Use OpenClaw's canonical scheduler generation after reconciliation; do not add a second scheduler hash.             |
+| Gateway readiness                       | Adapt                | Require its current ready result, but do not treat the generic boolean as continuity evidence.                      |
+| Doctor health contributions             | Reuse for projection | Project failure detail through Status/Doctor; do not use diagnostics as activation authority.                       |
+| One aggregate continuity readiness gate | Adapt                | Evaluate required reconstruction obligations behind one restored-start gate, not one host policy knob per artifact. |
+| Container health probe                  | Avoid as authority   | Process reachability cannot prove restore identity, scheduler reconciliation, or destination generation.            |
 
 ### External comparators
 
-| System | Useful precedent | Decision |
-| --- | --- | --- |
-| Kubernetes readiness gates | A missing owner condition is treated as false; traffic requires both application readiness and every explicit gate. | Reuse the fail-closed conjunction semantics. |
-| systemd `READY=1` | The service, not the manager, declares completion of its own startup; reload completion is a separate service-authored edge. | Adapt to an OpenClaw-authored, generation-bound durable edge. |
-| Azure Container Apps readiness probes | Traffic waits for application-defined readiness and dependency checks. | Use only as an outer transport gate; it lacks continuity identity and replay evidence. |
+| System                                | Useful precedent                                                                                                             | Decision                                                                               |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Kubernetes readiness gates            | A missing owner condition is treated as false; traffic requires both application readiness and every explicit gate.          | Reuse the fail-closed conjunction semantics.                                           |
+| systemd `READY=1`                     | The service, not the manager, declares completion of its own startup; reload completion is a separate service-authored edge. | Adapt to an OpenClaw-authored, generation-bound durable edge.                          |
+| Azure Container Apps readiness probes | Traffic waits for application-defined readiness and dependency checks.                                                       | Use only as an outer transport gate; it lacks continuity identity and replay evidence. |
 
 ## Contract
 

@@ -4,7 +4,7 @@
 
 - Evidence: openclaw/openclaw#102961
 - Fork PR: https://github.com/giodl73-repo/openclaw/pull/146
-- Commit: `728998a348d`
+- Commit: `0ac31a744a5`
 - Base: fork PR #145
 - Status: implemented conformance candidate; owner adoption pending
 
@@ -25,6 +25,8 @@
 - MCP remains native-relay-owned, avoiding duplicate observations.
 - Existing result middleware ordering and in-place mutation remain compatible.
 - Aborted runs suppress deferred observations rather than emitting stale hooks.
+- Failed structured items consume already-available relay context but do not
+  wait for a success-only `PostToolUse` callback.
 
 ## Deletion Target
 
@@ -36,7 +38,9 @@ Plugin-side success/failure reconstruction from flattened stdout/stderr text.
 - 24 Codex projector/relay tests.
 - 25 tool-result middleware tests.
 - 6 Plugin SDK API baseline tests.
-- Final Codex review: no actionable defects.
+- 7 focused projector tests on the corrected review head.
+- Regenerated Plugin SDK API manifest check.
+- Final stack-fix Codex review: no actionable defects.
 
 ## Adoption Questions
 

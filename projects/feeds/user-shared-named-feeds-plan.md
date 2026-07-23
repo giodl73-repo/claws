@@ -47,14 +47,14 @@ feed becomes official.
 
 ## Feed Classes
 
-| Class | Owner | Visibility | Trust meaning |
-| --- | --- | --- | --- |
-| Personal feed | User | Owner only | Private working/install state. |
-| Named feed | User, group, team, Microsoft, or tenant admin | Configured per feed | A reusable collection with stable identity and versions. |
-| Shared feed | Named feed owner | Specific people or groups | Recipient can view and install; not tenant endorsed. |
-| Tenant-visible feed | Named feed owner | Everyone in the tenant | Discoverable by the tenant; not tenant endorsed. |
-| Tenant-approved feed | Tenant admin or MOS3 composition authority | Scoped tenant/group/client visibility | Official governed feed after review, approval, pinning, policy, and audit. |
-| Source feed | Marketplace, ClawHub, MOS3, team catalog, partner catalog | Source-defined | Raw supply input, not automatically approved. |
+| Class                | Owner                                                     | Visibility                            | Trust meaning                                                              |
+| -------------------- | --------------------------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------- |
+| Personal feed        | User                                                      | Owner only                            | Private working/install state.                                             |
+| Named feed           | User, group, team, Microsoft, or tenant admin             | Configured per feed                   | A reusable collection with stable identity and versions.                   |
+| Shared feed          | Named feed owner                                          | Specific people or groups             | Recipient can view and install; not tenant endorsed.                       |
+| Tenant-visible feed  | Named feed owner                                          | Everyone in the tenant                | Discoverable by the tenant; not tenant endorsed.                           |
+| Tenant-approved feed | Tenant admin or MOS3 composition authority                | Scoped tenant/group/client visibility | Official governed feed after review, approval, pinning, policy, and audit. |
+| Source feed          | Marketplace, ClawHub, MOS3, team catalog, partner catalog | Source-defined                        | Raw supply input, not automatically approved.                              |
 
 Personal feeds remain the user's install and authoring workspace. A named feed
 is the shareable unit. Tenant approval changes governance status, not merely
@@ -75,12 +75,12 @@ for named feeds and source feeds, even if sharing/ACL UI lands later.
 
 Following a feed is different from copying a single entry:
 
-| Action | Result |
-| --- | --- |
-| Install entry | Copies one selected entry into the user's personal feed. |
-| Follow named feed | Adds the named feed as a source for the user's personal effective feed. |
-| Follow source feed | Adds a visible source feed such as ClawHub as a source for search and the personal effective feed. |
-| Unfollow feed | Removes that source from the user's personal effective feed without deleting entries installed independently. |
+| Action             | Result                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------- |
+| Install entry      | Copies one selected entry into the user's personal feed.                                                      |
+| Follow named feed  | Adds the named feed as a source for the user's personal effective feed.                                       |
+| Follow source feed | Adds a visible source feed such as ClawHub as a source for search and the personal effective feed.            |
+| Unfollow feed      | Removes that source from the user's personal effective feed without deleting entries installed independently. |
 
 The personal feed is therefore an effective view over:
 
@@ -170,14 +170,14 @@ revisions unless the admin explicitly chooses a tracked-latest policy.
 
 Trust state should be visible at both feed and entry level:
 
-| Label | Meaning |
-| --- | --- |
-| Personal | Direct user-owned or user-installed entry. |
-| Shared | Comes from a named feed shared with the user. |
-| Tenant visible | Discoverable across the tenant, not admin-endorsed. |
-| Tenant approved | Admin-reviewed and included in the tenant-approved effective feed. |
+| Label              | Meaning                                                            |
+| ------------------ | ------------------------------------------------------------------ |
+| Personal           | Direct user-owned or user-installed entry.                         |
+| Shared             | Comes from a named feed shared with the user.                      |
+| Tenant visible     | Discoverable across the tenant, not admin-endorsed.                |
+| Tenant approved    | Admin-reviewed and included in the tenant-approved effective feed. |
 | Microsoft reviewed | Microsoft curation or package-defense signal, not tenant approval. |
-| Blocked | Tenant, Microsoft, or security policy blocks discovery/install. |
+| Blocked            | Tenant, Microsoft, or security policy blocks discovery/install.    |
 
 An entry can carry more than one signal. For example, an entry may be Microsoft
 reviewed and shared, or tenant visible and not approved. The UI should avoid a
@@ -187,11 +187,11 @@ single generic "safe" badge.
 
 User-created named feeds need three first-class visibility states:
 
-| Visibility | Behavior |
-| --- | --- |
-| Private | Only the owner can view, edit, and install from the named feed. |
-| Shared with people/groups | The owner grants view/install access to named users or M365 groups. |
-| Visible to tenant | Any user in the tenant can discover, view, and install from the feed. |
+| Visibility                | Behavior                                                              |
+| ------------------------- | --------------------------------------------------------------------- |
+| Private                   | Only the owner can view, edit, and install from the named feed.       |
+| Shared with people/groups | The owner grants view/install access to named users or M365 groups.   |
+| Visible to tenant         | Any user in the tenant can discover, view, and install from the feed. |
 
 Tenant-visible does not mean tenant-approved. The UI and API should preserve
 that distinction everywhere.
@@ -284,12 +284,12 @@ present:
 
 Search should support mixed result types:
 
-| Result type | Example | Primary action |
-| --- | --- | --- |
-| Entry | `Excel review skill` | Install or save. |
-| Named feed | `Finance analyst pack` | Follow or open feed. |
+| Result type          | Example                               | Primary action                            |
+| -------------------- | ------------------------------------- | ----------------------------------------- |
+| Entry                | `Excel review skill`                  | Install or save.                          |
+| Named feed           | `Finance analyst pack`                | Follow or open feed.                      |
 | Tenant-approved feed | `Approved incident response baseline` | Follow/open, or install selected entries. |
-| Marketplace source | `MOS3 marketplace` | Browse/search source where enabled. |
+| Marketplace source   | `MOS3 marketplace`                    | Browse/search source where enabled.       |
 
 Feed results should appear when:
 
@@ -578,11 +578,11 @@ building blocks for named feeds, sharing, tenant visibility, and search.
 Evidence from Aether's MOS3 plugin-sharing path suggests MOS3 title ACLs can
 represent the personal/shared/tenant visibility shape we want:
 
-| Feed visibility | Candidate MOS3 ACL shape |
-| --- | --- |
-| Private | `ForAllUsers=false` and no ACL entities. |
+| Feed visibility           | Candidate MOS3 ACL shape                                              |
+| ------------------------- | --------------------------------------------------------------------- |
+| Private                   | `ForAllUsers=false` and no ACL entities.                              |
 | Shared with people/groups | `ForAllUsers=false` and `Entities` contains user or group principals. |
-| Visible to tenant | `ForAllUsers=true`. |
+| Visible to tenant         | `ForAllUsers=true`.                                                   |
 
 Aether reads title ACLs through
 `GET /builder/v1/users/titles/{titleId}/allowed?idType=TitleId` and writes them
@@ -671,11 +671,11 @@ Concrete storage target:
 
 Concrete ACL target:
 
-| Visibility | MOS3 ACL shape |
-| --- | --- |
-| Private | `ForAllUsers=false` and no `Entities`. |
+| Visibility                | MOS3 ACL shape                                                        |
+| ------------------------- | --------------------------------------------------------------------- |
+| Private                   | `ForAllUsers=false` and no `Entities`.                                |
 | Shared with people/groups | `ForAllUsers=false` and `Entities` contains user or group principals. |
-| Tenant visible | `ForAllUsers=true`. |
+| Tenant visible            | `ForAllUsers=true`.                                                   |
 
 Tenant-visible does not mean tenant-approved. Tenant approval is a separate
 governance state that should point at a specific named-feed revision or selected

@@ -148,13 +148,13 @@ across deployments.
 
 Built-in profiles are also the support matrix:
 
-| Profile | Support promise |
-| --- | --- |
-| `local` | OpenClaw starts and reports useful local readiness for development and single-user operation. |
-| `container` | OpenClaw behaves as a well-formed container workload with ready/live/status and signal handling. |
-| `node-mode` | OpenClaw behaves as a platform-controlled execution node with pairing, target inventory, approvals, and state readiness. |
-| `reverse-proxy` | OpenClaw behaves correctly behind a trusted identity or TLS proxy. |
-| `managed` | OpenClaw behaves as a managed platform workload with stronger egress, durability, events, and drain expectations. |
+| Profile         | Support promise                                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `local`         | OpenClaw starts and reports useful local readiness for development and single-user operation.                            |
+| `container`     | OpenClaw behaves as a well-formed container workload with ready/live/status and signal handling.                         |
+| `node-mode`     | OpenClaw behaves as a platform-controlled execution node with pairing, target inventory, approvals, and state readiness. |
+| `reverse-proxy` | OpenClaw behaves correctly behind a trusted identity or TLS proxy.                                                       |
+| `managed`       | OpenClaw behaves as a managed platform workload with stronger egress, durability, events, and drain expectations.        |
 
 Maturity scorecards remain useful. Profiles make them sharper: a scorecard can
 say which profile is implemented, which conditions are stable, which checks are
@@ -162,13 +162,13 @@ warning-only, and which conditions are release-blocking.
 
 Initial profiles:
 
-| Profile | Purpose | Required signal |
-| --- | --- | --- |
-| `local` | Developer/local foreground process | config, Gateway, workspace, plugins |
-| `container` | One service in Docker or Compose | `local` plus ready/live/status and signal handling |
-| `node-mode` | OpenClaw running as a platform-controlled execution node or cell | `container` plus node pairing, controlled-target inventory, command approval posture, control-channel readiness, and workspace/state readiness |
-| `reverse-proxy` | Gateway behind TLS or identity proxy | `container` plus trusted proxy posture |
-| `managed` | Platform-hosted OpenClaw | `node-mode` and/or `reverse-proxy` plus brokered egress, durable state, stable events, and drain |
+| Profile         | Purpose                                                          | Required signal                                                                                                                                |
+| --------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `local`         | Developer/local foreground process                               | config, Gateway, workspace, plugins                                                                                                            |
+| `container`     | One service in Docker or Compose                                 | `local` plus ready/live/status and signal handling                                                                                             |
+| `node-mode`     | OpenClaw running as a platform-controlled execution node or cell | `container` plus node pairing, controlled-target inventory, command approval posture, control-channel readiness, and workspace/state readiness |
+| `reverse-proxy` | Gateway behind TLS or identity proxy                             | `container` plus trusted proxy posture                                                                                                         |
+| `managed`       | Platform-hosted OpenClaw                                         | `node-mode` and/or `reverse-proxy` plus brokered egress, durable state, stable events, and drain                                               |
 
 The same condition schema should work for every profile. Profiles only change
 which conditions are required for `ready=true`.
@@ -215,7 +215,8 @@ startup argument because the host manifest then shows the workload contract at a
 glance:
 
 ```yaml
-command: ["gateway", "run", "--hosting-profile", "container", "--config", "/etc/openclaw/openclaw.json"]
+command:
+  ["gateway", "run", "--hosting-profile", "container", "--config", "/etc/openclaw/openclaw.json"]
 ```
 
 Config should support the same selection for deployments that want one mounted
@@ -224,8 +225,8 @@ file to describe the runtime:
 ```jsonc
 {
   "hosting": {
-    "profile": "container"
-  }
+    "profile": "container",
+  },
 }
 ```
 
@@ -256,20 +257,20 @@ OpenClaw should model readiness with Kubernetes-style conditions:
     {
       "type": "ConfigLoaded",
       "status": "True",
-      "reason": "EffectiveConfigReady"
+      "reason": "EffectiveConfigReady",
     },
     {
       "type": "GatewayReady",
       "status": "True",
-      "reason": "TrustedProxyActive"
+      "reason": "TrustedProxyActive",
     },
     {
       "type": "EgressReady",
       "status": "False",
       "reason": "BrokeredEgressUnavailable",
-      "message": "Brokered egress is required but no active managed proxy was registered."
-    }
-  ]
+      "message": "Brokered egress is required but no active managed proxy was registered.",
+    },
+  ],
 }
 ```
 
@@ -322,23 +323,23 @@ Core startup requirements could look like:
         "GatewayReady",
         "EgressReady",
         "StateReady",
-        "PluginsReady"
+        "PluginsReady",
       ],
-      "failClosed": true
+      "failClosed": true,
     },
     "gateway": {
       "requireTrustedProxy": true,
-      "forbidDirectUnauthenticatedAccess": true
+      "forbidDirectUnauthenticatedAccess": true,
     },
     "egress": {
       "requireBrokered": true,
-      "forbidRuntimeProviderSecrets": true
+      "forbidRuntimeProviderSecrets": true,
     },
     "state": {
       "requireRestoreBeforeReady": true,
-      "requireSingleWriter": true
-    }
-  }
+      "requireSingleWriter": true,
+    },
+  },
 }
 ```
 
@@ -350,15 +351,15 @@ diagnostics later, but the first contract must stand on its own.
 
 Runtime subsystems should contribute startup evidence to the ready check:
 
-| Evidence area | Existing OpenClaw seams |
-| --- | --- |
-| Config | `src/gateway/server-startup-config.ts`, `src/config/runtime-snapshot.ts`, `src/config/runtime-overrides.ts` |
-| Gateway | `src/config/types.gateway.ts`, `src/gateway/auth*.ts`, Gateway server startup |
-| Egress/proxy | `src/config/zod-schema.proxy.ts`, `src/infra/net/proxy/*`, `src/proxy-capture/*` |
-| Secrets | `src/secrets/runtime-state.ts`, secrets runtime snapshot activation |
-| Plugins | plugin registry, plugin metadata snapshot, plugin health |
-| State/session | `src/state/*`, `src/sessions/*`, session store paths |
-| Health/status | `src/commands/health.ts`, `src/commands/status.*`, Gateway `health` and `status` methods |
+| Evidence area | Existing OpenClaw seams                                                                                     |
+| ------------- | ----------------------------------------------------------------------------------------------------------- |
+| Config        | `src/gateway/server-startup-config.ts`, `src/config/runtime-snapshot.ts`, `src/config/runtime-overrides.ts` |
+| Gateway       | `src/config/types.gateway.ts`, `src/gateway/auth*.ts`, Gateway server startup                               |
+| Egress/proxy  | `src/config/zod-schema.proxy.ts`, `src/infra/net/proxy/*`, `src/proxy-capture/*`                            |
+| Secrets       | `src/secrets/runtime-state.ts`, secrets runtime snapshot activation                                         |
+| Plugins       | plugin registry, plugin metadata snapshot, plugin health                                                    |
+| State/session | `src/state/*`, `src/sessions/*`, session store paths                                                        |
+| Health/status | `src/commands/health.ts`, `src/commands/status.*`, Gateway `health` and `status` methods                    |
 
 The ready check should consume evidence; it should not duplicate the underlying
 configuration model.

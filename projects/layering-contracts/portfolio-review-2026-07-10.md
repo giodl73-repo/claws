@@ -5,12 +5,12 @@
 The portfolio has four foundational host/runtime contracts, not four isolated
 frameworks:
 
-| Contract | Host decision | OpenClaw authority | Lobster authority |
-| --- | --- | --- | --- |
-| Readiness and Hosting Profiles | May this instance receive work? | Conditions, aggregation, profiles, packaged profile evidence | Selected/expected profile and artifact, rollout, fleet response |
-| Managed Configuration | What configuration governs this runtime? | Schema, authority, composition, validation, effective generation | Managed values, tenant/operator inputs, rollout |
-| Duplex Transport and Host Providers | How may the runtime call its host? | Peer role, typed providers, permissions, bounds, failures | Provider implementations, tenant routing, service backends |
-| Runtime State Continuity | Can this state continue safely elsewhere? | State ownership, consistency, manifests, fencing, restore | Storage, encryption, retention, placement, retry policy |
+| Contract                            | Host decision                             | OpenClaw authority                                               | Lobster authority                                               |
+| ----------------------------------- | ----------------------------------------- | ---------------------------------------------------------------- | --------------------------------------------------------------- |
+| Readiness and Hosting Profiles      | May this instance receive work?           | Conditions, aggregation, profiles, packaged profile evidence     | Selected/expected profile and artifact, rollout, fleet response |
+| Managed Configuration               | What configuration governs this runtime?  | Schema, authority, composition, validation, effective generation | Managed values, tenant/operator inputs, rollout                 |
+| Duplex Transport and Host Providers | How may the runtime call its host?        | Peer role, typed providers, permissions, bounds, failures        | Provider implementations, tenant routing, service backends      |
+| Runtime State Continuity            | Can this state continue safely elsewhere? | State ownership, consistency, manifests, fencing, restore        | Storage, encryption, retention, placement, retry policy         |
 
 OCC may produce desired state for these contracts. AgentHarness remains the
 execution-event protocol. Neither belongs in the runtime hot path created by

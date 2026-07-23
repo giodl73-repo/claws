@@ -36,55 +36,55 @@ rollback authority, and a named downstream deletion target.
 
 ## Active Notes
 
-| Area | File |
-| --- | --- |
-| Current session and resume state | `SESSION.md` |
-| Reviewer-facing decision and sales package | `decision-package.md` |
-| Five-PR fork review stack | `fork-review-stack.md` |
-| Corrected source audit and ownership model | `source-audit-2026-07-11.md` |
-| Internal and external comparison matrix | `comparison-matrix.md` |
-| Runtime/operator/security/simplicity review | `role-review-2026-07-11.md` |
-| Typed host composition and activation model | `host-wiring-model.md` |
-| Central host integration bundle and distributed typed references | `host-integration-bundle.md` |
-| Managed Configuration alignment and CAPI proof requirements | `managed-configuration-alignment.md` |
-| Area 1: host integration and traffic governance | `area-1-host-integration-plane.md` |
-| Area 1 exec approval host contract | `area-1-exec-approval-host-contract.md` |
-| Area 1 Channel attachment contract | `area-1-channel-attachment-contract.md` |
-| Area 1 provider traffic governance | `area-1-provider-traffic-governance.md` |
-| Area 1 operations and attachment catalog | `area-1-operations-and-catalog.md` |
-| Area 1 focused role review | `area-1-role-review-2026-07-11.md` |
-| Area 2: explicit host capability providers | `area-2-host-capability-providers.md` |
-| Area 2 provider-request dispatcher contract and evidence fixture | `area-2-provider-dispatch-contract.md` |
-| Area 2 provider-dispatch role review | `area-2-role-review-2026-07-11.md` |
-| Area 2 provider-dispatch paper evidence slice | `area-2-provider-dispatch-evidence-slice.md` |
-| Final `.craft/roles` provider assembly review | `provider-assembly-role-review-2026-07-11.md` |
-| Cross-repository implementation PR series | `implementation-pr-series.md` |
-| Implementation PR series `.craft/roles` review | `implementation-pr-series-role-review-2026-07-11.md` |
-| One-file execution plan for every PR | `pr-plans/README.md` |
-| Final `.craft/roles` review of PR-exact plans | `pr-plans-role-review-2026-07-11.md` |
-| Restore-hold owner/adopter role review | `restore-hold-role-review-2026-07-12.md` |
-| `.craft/roles` review of the RFC PR pitch | `pr-body-role-review-2026-07-11.md` |
-| Area 3: host wiring and composition | `area-3-host-wiring-composition.md` |
-| Area 4: carrier options | `area-4-carrier-options.md` |
-| Area 4 provider-dispatch reverse carrier | `area-4-provider-dispatch-reverse-carrier.md` |
-| Cross-area ownership, lifecycle, and migration synthesis | `four-area-architecture.md` |
-| Overarching `.craft/roles` validation | `overarching-role-review-2026-07-11.md` |
-| Bundle-centered final role review | `bundle-centered-role-review-2026-07-11.md` |
-| ProxyPipe semantic and transport decomposition | `proxypipe-decomposition.md` |
-| Candidate design and completed gates | `../layering-contracts/hosted-integration.md` |
-| OpenClawTransport fit audit | `../layering-contracts/inventory/proxypipe-openclaw-transport-fit-2026-07-10.md` |
-| `node.invoke` reuse decision | `../layering-contracts/inventory/node-invoke-duplex-fit-2026-07-10.md` |
-| Hosted peer identity decision | `../layering-contracts/inventory/hosted-peer-identity-2026-07-10.md` |
-| ProxyPipe frame inventory | `../layering-contracts/inventory/proxy-pipe-frames-2026-07-10.md` |
-| Portfolio deletion ledger | `../layering-contracts/lobster-deletion-ledger.md` |
+| Area                                                             | File                                                                             |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Current session and resume state                                 | `SESSION.md`                                                                     |
+| Reviewer-facing decision and sales package                       | `decision-package.md`                                                            |
+| Five-PR fork review stack                                        | `fork-review-stack.md`                                                           |
+| Corrected source audit and ownership model                       | `source-audit-2026-07-11.md`                                                     |
+| Internal and external comparison matrix                          | `comparison-matrix.md`                                                           |
+| Runtime/operator/security/simplicity review                      | `role-review-2026-07-11.md`                                                      |
+| Typed host composition and activation model                      | `host-wiring-model.md`                                                           |
+| Central host integration bundle and distributed typed references | `host-integration-bundle.md`                                                     |
+| Managed Configuration alignment and CAPI proof requirements      | `managed-configuration-alignment.md`                                             |
+| Area 1: host integration and traffic governance                  | `area-1-host-integration-plane.md`                                               |
+| Area 1 exec approval host contract                               | `area-1-exec-approval-host-contract.md`                                          |
+| Area 1 Channel attachment contract                               | `area-1-channel-attachment-contract.md`                                          |
+| Area 1 provider traffic governance                               | `area-1-provider-traffic-governance.md`                                          |
+| Area 1 operations and attachment catalog                         | `area-1-operations-and-catalog.md`                                               |
+| Area 1 focused role review                                       | `area-1-role-review-2026-07-11.md`                                               |
+| Area 2: explicit host capability providers                       | `area-2-host-capability-providers.md`                                            |
+| Area 2 provider-request dispatcher contract and evidence fixture | `area-2-provider-dispatch-contract.md`                                           |
+| Area 2 provider-dispatch role review                             | `area-2-role-review-2026-07-11.md`                                               |
+| Area 2 provider-dispatch paper evidence slice                    | `area-2-provider-dispatch-evidence-slice.md`                                     |
+| Final `.craft/roles` provider assembly review                    | `provider-assembly-role-review-2026-07-11.md`                                    |
+| Cross-repository implementation PR series                        | `implementation-pr-series.md`                                                    |
+| Implementation PR series `.craft/roles` review                   | `implementation-pr-series-role-review-2026-07-11.md`                             |
+| One-file execution plan for every PR                             | `pr-plans/README.md`                                                             |
+| Final `.craft/roles` review of PR-exact plans                    | `pr-plans-role-review-2026-07-11.md`                                             |
+| Restore-hold owner/adopter role review                           | `restore-hold-role-review-2026-07-12.md`                                         |
+| `.craft/roles` review of the RFC PR pitch                        | `pr-body-role-review-2026-07-11.md`                                              |
+| Area 3: host wiring and composition                              | `area-3-host-wiring-composition.md`                                              |
+| Area 4: carrier options                                          | `area-4-carrier-options.md`                                                      |
+| Area 4 provider-dispatch reverse carrier                         | `area-4-provider-dispatch-reverse-carrier.md`                                    |
+| Cross-area ownership, lifecycle, and migration synthesis         | `four-area-architecture.md`                                                      |
+| Overarching `.craft/roles` validation                            | `overarching-role-review-2026-07-11.md`                                          |
+| Bundle-centered final role review                                | `bundle-centered-role-review-2026-07-11.md`                                      |
+| ProxyPipe semantic and transport decomposition                   | `proxypipe-decomposition.md`                                                     |
+| Candidate design and completed gates                             | `../layering-contracts/hosted-integration.md`                                    |
+| OpenClawTransport fit audit                                      | `../layering-contracts/inventory/proxypipe-openclaw-transport-fit-2026-07-10.md` |
+| `node.invoke` reuse decision                                     | `../layering-contracts/inventory/node-invoke-duplex-fit-2026-07-10.md`           |
+| Hosted peer identity decision                                    | `../layering-contracts/inventory/hosted-peer-identity-2026-07-10.md`             |
+| ProxyPipe frame inventory                                        | `../layering-contracts/inventory/proxy-pipe-frames-2026-07-10.md`                |
+| Portfolio deletion ledger                                        | `../layering-contracts/lobster-deletion-ledger.md`                               |
 
 ## Active Work
 
-| Repo | PR | Branch | Status | Purpose |
-| --- | --- | --- | --- | --- |
-| `giodl73-repo/rfcs` | [Fork PR 2](https://github.com/giodl73-repo/rfcs/pull/2) | `user/giodl/rfc-duplex-transport` | Draft, fork-only | RFC 0020 now leads with native attachments, owner contracts, and optional hosted physical dispatch. |
-| `bic/lobster` | TBD | `user/giodl/layering-contract-audit` | Evidence | Map existing host behavior onto reusable upstream factorings. |
-| `openclaw/openclaw` | TBD | New isolated worktree | Discovery | Audit provider/secret seams and shared peer-invocation extraction. |
+| Repo                | PR                                                       | Branch                               | Status           | Purpose                                                                                             |
+| ------------------- | -------------------------------------------------------- | ------------------------------------ | ---------------- | --------------------------------------------------------------------------------------------------- |
+| `giodl73-repo/rfcs` | [Fork PR 2](https://github.com/giodl73-repo/rfcs/pull/2) | `user/giodl/rfc-duplex-transport`    | Draft, fork-only | RFC 0020 now leads with native attachments, owner contracts, and optional hosted physical dispatch. |
+| `bic/lobster`       | TBD                                                      | `user/giodl/layering-contract-audit` | Evidence         | Map existing host behavior onto reusable upstream factorings.                                       |
+| `openclaw/openclaw` | TBD                                                      | New isolated worktree                | Discovery        | Audit provider/secret seams and shared peer-invocation extraction.                                  |
 
 ## Delivery Gates
 

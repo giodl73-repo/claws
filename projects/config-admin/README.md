@@ -10,8 +10,8 @@ worktrees; use this folder for operating notes and PR stack shape.
 
 ## Active Notes
 
-| Area | File |
-| --- | --- |
+| Area            | File         |
+| --------------- | ------------ |
 | Session handoff | `SESSION.md` |
 
 ## Initial Direction
@@ -29,9 +29,9 @@ The first implementation slice should be small and reusable:
 
 ## Active Work
 
-| Repo | PR / Issue | Branch | Status | Purpose |
-| --- | --- | --- | --- | --- |
-| bic/lobster | TBD | TBD | Planning | Shared settings descriptor registry and preview/save shell for Policy and Scout admin UX. |
+| Repo        | PR / Issue | Branch | Status   | Purpose                                                                                   |
+| ----------- | ---------- | ------ | -------- | ----------------------------------------------------------------------------------------- |
+| bic/lobster | TBD        | TBD    | Planning | Shared settings descriptor registry and preview/save shell for Policy and Scout admin UX. |
 
 ## Related Areas
 

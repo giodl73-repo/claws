@@ -1,6 +1,6 @@
 # PromoteClaw feed discovery
 
-Date: 2026-07-10
+Date: 2026-07-21
 
 ## Confirmed feed/process references
 
@@ -10,20 +10,21 @@ We found concrete references for Galin's OpenClaw quarantine/LTS feed process.
 
 From `bic/lobster` `docs/feed/README.md`:
 
-| Feed | URL | Purpose |
-| --- | --- | --- |
-| `M365-Lobster-Upstream` | `https://pkgs.dev.azure.com/msazure/One/_packaging/M365-Lobster-Upstream/npm/registry/` | Quarantine/ingest feed for upstream OpenClaw packages. |
-| `M365-Lobster` | `https://pkgs.dev.azure.com/msazure/One/_packaging/M365-Lobster/npm/registry/` | Team consumption feed for CI/Docker builds and Lobster extensions. |
-| `Lobster` | `https://pkgs.dev.azure.com/msazure/One/_packaging/Lobster/npm/registry/` | Local dev feed; upstream source is `M365-Lobster-Upstream @Release`. |
+| Feed                    | URL                                                                                     | Purpose                                                              |
+| ----------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `M365-Lobster-Upstream` | `https://pkgs.dev.azure.com/msazure/One/_packaging/M365-Lobster-Upstream/npm/registry/` | Quarantine/ingest feed for upstream OpenClaw packages.               |
+| `M365-Lobster`          | `https://pkgs.dev.azure.com/msazure/One/_packaging/M365-Lobster/npm/registry/`          | Team consumption feed for CI/Docker builds and Lobster extensions.   |
+| `Lobster`               | `https://pkgs.dev.azure.com/msazure/One/_packaging/Lobster/npm/registry/`               | Local dev feed; upstream source is `M365-Lobster-Upstream @Release`. |
 
 ## Pipelines
 
 From GHE code search in `bic/lobster`:
 
-| Pipeline | File | Schedule | Purpose |
-| --- | --- | --- | --- |
-| Ingest upstream | `.pipelines/lobster-feed/ingest-upstream.yml` | Hourly | Downloads latest LTS from public npm and publishes to `M365-Lobster-Upstream` with `@quarantine` tag. |
-| Promote to release | `.pipelines/lobster-feed/promote-lts.yml` | Daily 06:00 UTC + manual | Promotes packages that are 7+ days old and CG-clean from `@quarantine` to `@Release`, then republishes tarballs to the `Lobster` feed. |
+| Pipeline                   | File                                              | Schedule                 | Purpose                                                                                                                                                                                                          |
+| -------------------------- | ------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ingest upstream            | `.pipelines/lobster-feed/ingest-upstream.yml`     | Hourly                   | Downloads latest LTS from public npm and publishes to `M365-Lobster-Upstream` with `@quarantine` tag.                                                                                                            |
+| Promote to release         | `.pipelines/lobster-feed/promote-lts.yml`         | Daily 06:00 UTC + manual | Promotes packages that are 7+ days old and CG-clean from `@quarantine` to `@Release`, then republishes tarballs to the `Lobster` feed.                                                                           |
+| Open PromoteClaw candidate | `.pipelines/lobster-feed/promoteclaw-open-pr.yml` | Daily 07:00 UTC          | Detects the newest `openclaw` version in `@Release` and opens or updates a draft Lobster promotion PR. Registered as ADO definition `469977`; first dry runs remain blocked on protected-resource authorization. |
 
 `promote-lts.yml` parameters include:
 
@@ -103,6 +104,18 @@ All versions returned by the internal feed query:
 2026.6.1, 2026.6.5, 2026.6.6, 2026.6.8, 2026.6.9,
 2026.6.10, 2026.6.11
 ```
+
+## 2026-07-21 refresh
+
+- `openclaw@2026.7.1` is visible in `Local,Release,quarantine`.
+- Publish date: `2026-07-13T18:13:06.8396262Z`.
+- PromoteClaw selected `2026.7.1` over Lobster main's `2026.5.28` pin.
+- `@openclaw/diagnostics-otel@2026.7.1` was not found in `@Release`, so the
+  generated candidate retained the existing `2026.5.28` companion pin.
+- Generated candidate: Lobster #5402,
+  `https://microsoft.ghe.com/bic/lobster/pull/5402`.
+- Superseded candidate #4528 (`2026.6.11`) remains useful only as a donor for
+  patch re-derivation and CI repairs.
 
 ## GHE references found
 

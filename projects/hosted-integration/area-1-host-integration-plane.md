@@ -143,13 +143,13 @@ approval surface.
 
 ## Compare
 
-| Comparator | Reuse | Avoid |
-| --- | --- | --- |
-| Kubernetes Gateway API policy attachment | Typed target references, explicit route ownership, status conditions, scoped precedence | Policy inheritance that becomes hard to explain |
-| Envoy extension points | Named listener/route/filter insertion points, effective config inspection, per-filter telemetry | Treating every application concern as L7 traffic |
-| ASP.NET Core middleware | Simple ordered composition and short-circuit model | Global visibility, order-dependent hidden mutation, weak ownership |
-| OpenClaw Gateway descriptors | Canonical method inventory and scopes | Assuming method discovery covers non-Gateway adapters |
-| OpenClaw Channel adapters | Owner-specific typed surfaces | Flattening all adapters into one host hook |
+| Comparator                               | Reuse                                                                                           | Avoid                                                              |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Kubernetes Gateway API policy attachment | Typed target references, explicit route ownership, status conditions, scoped precedence         | Policy inheritance that becomes hard to explain                    |
+| Envoy extension points                   | Named listener/route/filter insertion points, effective config inspection, per-filter telemetry | Treating every application concern as L7 traffic                   |
+| ASP.NET Core middleware                  | Simple ordered composition and short-circuit model                                              | Global visibility, order-dependent hidden mutation, weak ownership |
+| OpenClaw Gateway descriptors             | Canonical method inventory and scopes                                                           | Assuming method discovery covers non-Gateway adapters              |
+| OpenClaw Channel adapters                | Owner-specific typed surfaces                                                                   | Flattening all adapters into one host hook                         |
 
 ## Evaluate
 

@@ -65,20 +65,20 @@ collapsed into one API.
 
 OpenClaw publishes stable metadata for the approval attachment point:
 
-| Field | Exec approval value |
-| --- | --- |
-| Stable ID | `exec-approval.consumer` |
-| Semantic owner | Gateway exec approval manager |
-| Protocol | Canonical Gateway methods and events |
-| Required scope | `operator.approvals` |
-| Events | requested, resolved |
-| Methods | list, resolve |
-| Replay rule | Live subscription plus pending-list replay and ID dedupe |
-| Permitted host action | Present, authorize actor, resolve allowed decision |
-| Forbidden mutation | Command, plan, target, expiry, and allowed decisions |
-| Side-effect authority | At most one authoritative resolver path |
-| Failure posture | Expire or deny according to canonical OpenClaw policy |
-| Redaction owner | Exec approval owner |
+| Field                 | Exec approval value                                      |
+| --------------------- | -------------------------------------------------------- |
+| Stable ID             | `exec-approval.consumer`                                 |
+| Semantic owner        | Gateway exec approval manager                            |
+| Protocol              | Canonical Gateway methods and events                     |
+| Required scope        | `operator.approvals`                                     |
+| Events                | requested, resolved                                      |
+| Methods               | list, resolve                                            |
+| Replay rule           | Live subscription plus pending-list replay and ID dedupe |
+| Permitted host action | Present, authorize actor, resolve allowed decision       |
+| Forbidden mutation    | Command, plan, target, expiry, and allowed decisions     |
+| Side-effect authority | At most one authoritative resolver path                  |
+| Failure posture       | Expire or deny according to canonical OpenClaw policy    |
+| Redaction owner       | Exec approval owner                                      |
 
 The descriptor is discoverable metadata and conformance documentation. It is
 not a hot-path interceptor or a registry of arbitrary host methods.
@@ -186,15 +186,15 @@ They must not affect the command binding or widen the allowed decisions.
 
 OpenClaw and the host answer different questions:
 
-| Question | Owner |
-| --- | --- |
-| Does this operation require approval? | OpenClaw |
-| What exact operation is pending? | OpenClaw |
-| Which decisions are allowed? | OpenClaw |
-| Where should the prompt be presented? | Host adapter |
-| Is this actor allowed to decide? | Host identity/policy |
-| Which allowed decision did the actor choose? | Host adapter |
-| Did that decision win exactly once? | OpenClaw |
+| Question                                     | Owner                |
+| -------------------------------------------- | -------------------- |
+| Does this operation require approval?        | OpenClaw             |
+| What exact operation is pending?             | OpenClaw             |
+| Which decisions are allowed?                 | OpenClaw             |
+| Where should the prompt be presented?        | Host adapter         |
+| Is this actor allowed to decide?             | Host identity/policy |
+| Which allowed decision did the actor choose? | Host adapter         |
+| Did that decision win exactly once?          | OpenClaw             |
 
 The host may deny or decline to present. It may not invent `allow-always`,
 change the command, extend expiry, or substitute another approval ID.
@@ -287,18 +287,18 @@ The status record should expose:
 
 ## Structured Failures
 
-| Failure | Required outcome |
-| --- | --- |
-| Missing `operator.approvals` scope | Binding fails activation |
-| Unexpected client/device identity | Binding fails closed |
-| Stale Gateway owner generation | Consumer cannot become authoritative |
-| Replay incomplete | Binding remains non-ready |
-| Host adapter unavailable | Required route degrades readiness |
-| Unknown or expired approval | Host finalizes stale presentation |
-| Conflicting repeated resolution | Gateway rejects it |
-| Duplicate identical resolution | Gateway treats it as retry success |
-| Host actor unauthorized | No Gateway resolution call |
-| Carrier disconnect | Pending approval remains Gateway-owned |
+| Failure                            | Required outcome                       |
+| ---------------------------------- | -------------------------------------- |
+| Missing `operator.approvals` scope | Binding fails activation               |
+| Unexpected client/device identity  | Binding fails closed                   |
+| Stale Gateway owner generation     | Consumer cannot become authoritative   |
+| Replay incomplete                  | Binding remains non-ready              |
+| Host adapter unavailable           | Required route degrades readiness      |
+| Unknown or expired approval        | Host finalizes stale presentation      |
+| Conflicting repeated resolution    | Gateway rejects it                     |
+| Duplicate identical resolution     | Gateway treats it as retry success     |
+| Host actor unauthorized            | No Gateway resolution call             |
+| Carrier disconnect                 | Pending approval remains Gateway-owned |
 
 ## What OpenClaw Adds
 

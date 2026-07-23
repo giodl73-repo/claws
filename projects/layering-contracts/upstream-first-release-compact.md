@@ -53,20 +53,20 @@ Lobster finds a gap
 No new OpenClaw source patch, post-install rewrite, private config overlay, or
 ProxyPipe behavior enters Lobster without a machine-readable record containing:
 
-| Field | Requirement |
-| --- | --- |
-| `id` | Stable Lobster workaround id |
-| `owner` | Named engineering owner |
-| `introducedAt` | Date and Lobster commit/PR |
-| `reason` | User or operational failure being mitigated |
-| `classification` | One of the four contracts, ordinary upstream bug/plugin feature, or legitimate Lobster ownership |
-| `upstream` | OpenClaw issue/RFC/PR, or incident exception with due date |
-| `affectedArtifacts` | OpenClaw packages/files/protocol/config surfaces changed |
-| `conformance` | Test proving replacement behavior |
-| `minimumRelease` | First OpenClaw release expected to remove the workaround |
-| `expiry` | Date or release after which fallback is forbidden |
-| `removal` | Planned Lobster deletion PR/files/tests |
-| `telemetry` | Evidence that old-path use reached zero |
+| Field               | Requirement                                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------------------ |
+| `id`                | Stable Lobster workaround id                                                                     |
+| `owner`             | Named engineering owner                                                                          |
+| `introducedAt`      | Date and Lobster commit/PR                                                                       |
+| `reason`            | User or operational failure being mitigated                                                      |
+| `classification`    | One of the four contracts, ordinary upstream bug/plugin feature, or legitimate Lobster ownership |
+| `upstream`          | OpenClaw issue/RFC/PR, or incident exception with due date                                       |
+| `affectedArtifacts` | OpenClaw packages/files/protocol/config surfaces changed                                         |
+| `conformance`       | Test proving replacement behavior                                                                |
+| `minimumRelease`    | First OpenClaw release expected to remove the workaround                                         |
+| `expiry`            | Date or release after which fallback is forbidden                                                |
+| `removal`           | Planned Lobster deletion PR/files/tests                                                          |
+| `telemetry`         | Evidence that old-path use reached zero                                                          |
 
 Incident exceptions must create the missing upstream record within two working
 days. An exception without an owner and expiry is not admissible.
@@ -109,18 +109,18 @@ Dual-run is a bounded comparison technique, not a permanent operating mode.
 
 Report these measures by release and monthly trend:
 
-| Measure | Desired direction |
-| --- | --- |
-| Total Lobster-carried OpenClaw source patches | Down |
-| Post-install rewrite scripts | Down to zero |
-| Private ProxyPipe semantic families | Down |
-| Baked config writers and cleanup rules | Down |
-| Persistence wrappers and private state inference | Down |
-| Median workaround age | Down |
-| Workarounds without upstream link, owner, or expiry | Zero |
-| Candidate releases promoted after quarantine | Regular and predictable |
-| Patches deleted during promotion | Visible positive release outcome |
-| Hosting conformance failures caught before rollout | Visible and acted upon |
+| Measure                                             | Desired direction                |
+| --------------------------------------------------- | -------------------------------- |
+| Total Lobster-carried OpenClaw source patches       | Down                             |
+| Post-install rewrite scripts                        | Down to zero                     |
+| Private ProxyPipe semantic families                 | Down                             |
+| Baked config writers and cleanup rules              | Down                             |
+| Persistence wrappers and private state inference    | Down                             |
+| Median workaround age                               | Down                             |
+| Workarounds without upstream link, owner, or expiry | Zero                             |
+| Candidate releases promoted after quarantine        | Regular and predictable          |
+| Patches deleted during promotion                    | Visible positive release outcome |
+| Hosting conformance failures caught before rollout  | Visible and acted upon           |
 
 The primary architecture metric is deletion, not RFC or PR count.
 

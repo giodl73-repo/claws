@@ -34,12 +34,12 @@ RFC 0018 and its PR body identify this upstream draft as the primary
 implementation to review. The fork PRs below are commit-level review aids, not
 alternative landing PRs.
 
-| Slice | Draft PR | Base | Head |
-| --- | --- | --- | --- |
-| Canonical Gateway conditions | [PR 17](https://github.com/giodl73-repo/openclaw/pull/17) | `hosting-profiles-base` | `66710bed548` |
-| Bounded workspace criterion | [PR 22](https://github.com/giodl73-repo/openclaw/pull/22) | PR 17 | `a46ab9a67b0` |
-| Selectable readiness providers | [PR 23](https://github.com/giodl73-repo/openclaw/pull/23) | PR 22 | `6d8eda8a7c4` |
-| Canonical `openclaw ready` CLI | [PR 27](https://github.com/giodl73-repo/openclaw/pull/27) | PR 23 | `c1da7217893` |
+| Slice                          | Draft PR                                                  | Base                    | Head          |
+| ------------------------------ | --------------------------------------------------------- | ----------------------- | ------------- |
+| Canonical Gateway conditions   | [PR 17](https://github.com/giodl73-repo/openclaw/pull/17) | `hosting-profiles-base` | `66710bed548` |
+| Bounded workspace criterion    | [PR 22](https://github.com/giodl73-repo/openclaw/pull/22) | PR 17                   | `a46ab9a67b0` |
+| Selectable readiness providers | [PR 23](https://github.com/giodl73-repo/openclaw/pull/23) | PR 22                   | `6d8eda8a7c4` |
+| Canonical `openclaw ready` CLI | [PR 27](https://github.com/giodl73-repo/openclaw/pull/27) | PR 23                   | `c1da7217893` |
 
 This stack adds no profile selection. Operators can use the facility directly:
 
@@ -58,18 +58,17 @@ RFC: [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37), file
 `rfcs/0023-standard-hosting-profiles.md`, head `a61b57d8e67a`.
 
 Primary implementation: [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765),
-head `f54affa3983`, stacked directly on readiness head `17b34f792d8` from PR
-104018.
+head `f54affa3983`, stacked directly on readiness head `17b34f792d8` from PR 104018.
 [Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94) provides a
 clean profile-only comparison while the upstream aggregate diff contains both
 layers.
 
-| Commit | Review slice | Scope |
-| --- | --- | --- |
+| Commit        | Review slice                                              | Scope                                         |
+| ------------- | --------------------------------------------------------- | --------------------------------------------- |
 | `63596d964b7` | [PR 18](https://github.com/giodl73-repo/openclaw/pull/18) | Local, container, and reverse-proxy profiles. |
-| `a68829096d1` | [PR 19](https://github.com/giodl73-repo/openclaw/pull/19) | Node-mode standard profile. |
-| `11322a977f6` | [PR 42](https://github.com/giodl73-repo/openclaw/pull/42) | Runtime activation identity. |
-| `2f8defb707c` | [PR 21](https://github.com/giodl73-repo/openclaw/pull/21) | Packaged release conformance. |
+| `a68829096d1` | [PR 19](https://github.com/giodl73-repo/openclaw/pull/19) | Node-mode standard profile.                   |
+| `11322a977f6` | [PR 42](https://github.com/giodl73-repo/openclaw/pull/42) | Runtime activation identity.                  |
+| `2f8defb707c` | [PR 21](https://github.com/giodl73-repo/openclaw/pull/21) | Packaged release conformance.                 |
 
 The real upstream stack contains eight profile-only commits. After restacking,
 their heads are `642bed18093`, `b9121934a7f`, `2b10b218279`, `81f787820da`,

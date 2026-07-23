@@ -26,32 +26,32 @@ This assessment tests that model against Lobster revision `0a9514c1ce`.
 
 ## Baked Fragment Fit
 
-| Current fragment | Host/operator mapping | Replacement fit |
-| --- | --- | --- |
-| `openclaw.gateway.json` | Host owns bind, trusted-proxy auth, local-hop posture, exposed endpoints, and maximum node command surface | Strong; direct sparse host config replaces baked Gateway fragment |
-| `openclaw.models.json` | Host owns provider catalogs/endpoints and brokered credential posture; operator may select an available default | Strong for exact values; model-choice constraints remain separate |
-| `openclaw.mcp.json` | Host owns adapter-local MCP endpoint availability | Strong |
-| `openclaw.diagnostics.json` | Host owns diagnostics enablement and sink/runtime defaults | Strong |
-| `openclaw.hooks.json` | Host can own deployment hook posture; plugin-owned hooks should declare themselves | Strong mechanically; ownership cleanup still desirable |
-| `openclaw.session.json` | Operator controls session behavior unless Lobster intentionally claims a field | Strong |
-| `openclaw.agents.json` | Split: host may claim runtime-required state/default posture; operator controls agent/model behavior where unclaimed | Partial until current mixed fragment is separated by authority |
-| `openclaw.tools.json` | Host claims hard posture/exact fields; operator controls remaining choices | Partial because ceilings/allowed subsets are restrictions, not exact ownership |
-| `openclaw.plugins.json` | Host owns installed/available/required bundle and may claim exact config; operator controls optional activation only where unclaimed | Partial because availability versus enablement is not represented by simple override alone |
-| `openclaw.skills.json` | Host can claim deployment paths, but plugin-declared skills should reduce global host config | Strong mechanically; plugin ownership improvement remains |
-| Root `openclaw.json` includes | Replaced by OpenClaw reading host and operator documents directly | Strong; custom include index no longer needed for host composition |
+| Current fragment              | Host/operator mapping                                                                                                                | Replacement fit                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `openclaw.gateway.json`       | Host owns bind, trusted-proxy auth, local-hop posture, exposed endpoints, and maximum node command surface                           | Strong; direct sparse host config replaces baked Gateway fragment                          |
+| `openclaw.models.json`        | Host owns provider catalogs/endpoints and brokered credential posture; operator may select an available default                      | Strong for exact values; model-choice constraints remain separate                          |
+| `openclaw.mcp.json`           | Host owns adapter-local MCP endpoint availability                                                                                    | Strong                                                                                     |
+| `openclaw.diagnostics.json`   | Host owns diagnostics enablement and sink/runtime defaults                                                                           | Strong                                                                                     |
+| `openclaw.hooks.json`         | Host can own deployment hook posture; plugin-owned hooks should declare themselves                                                   | Strong mechanically; ownership cleanup still desirable                                     |
+| `openclaw.session.json`       | Operator controls session behavior unless Lobster intentionally claims a field                                                       | Strong                                                                                     |
+| `openclaw.agents.json`        | Split: host may claim runtime-required state/default posture; operator controls agent/model behavior where unclaimed                 | Partial until current mixed fragment is separated by authority                             |
+| `openclaw.tools.json`         | Host claims hard posture/exact fields; operator controls remaining choices                                                           | Partial because ceilings/allowed subsets are restrictions, not exact ownership             |
+| `openclaw.plugins.json`       | Host owns installed/available/required bundle and may claim exact config; operator controls optional activation only where unclaimed | Partial because availability versus enablement is not represented by simple override alone |
+| `openclaw.skills.json`        | Host can claim deployment paths, but plugin-declared skills should reduce global host config                                         | Strong mechanically; plugin ownership improvement remains                                  |
+| Root `openclaw.json` includes | Replaced by OpenClaw reading host and operator documents directly                                                                    | Strong; custom include index no longer needed for host composition                         |
 
 ## Overlay Fit
 
-| Current writer | Host/operator replacement | Residual work |
-| --- | --- | --- |
-| Allowed-origins overlay | Host declares `gateway.controlUi.allowedOrigins` | None beyond normal startup config validation |
-| Dynamic model config/default model seeding | Host supplies provider catalog; host or operator owns default-model leaf according to product decision | Need explicit authority decision for default selection |
-| Plugin filtering and product gates | Host config declares exact host-owned plugin fields; operator config owns unclaimed optional choices | Availability/required/allowed-subset semantics may need plugin admission support |
-| Skills overlay | Host or plugin declares skill paths; no post-seed file rewrite | Plugin manifest migration remains |
-| Remote-harness model-runtime overlay | Per-start host config declares required model runtime and transport config | Execution protocol and secretless transport remain outside config |
-| Policy baseline materialization | Not replaced by ownership alone | Managed restrictions/policy stay separate from exact config authority |
-| Legacy node/exec cleanup | Becomes a one-time migration only | Old generated config still needs cleanup during transition |
-| Diagnostics installed-index seed | Not replaced | Package trust/install registration is packaging lifecycle, not ordinary config |
+| Current writer                             | Host/operator replacement                                                                              | Residual work                                                                    |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| Allowed-origins overlay                    | Host declares `gateway.controlUi.allowedOrigins`                                                       | None beyond normal startup config validation                                     |
+| Dynamic model config/default model seeding | Host supplies provider catalog; host or operator owns default-model leaf according to product decision | Need explicit authority decision for default selection                           |
+| Plugin filtering and product gates         | Host config declares exact host-owned plugin fields; operator config owns unclaimed optional choices   | Availability/required/allowed-subset semantics may need plugin admission support |
+| Skills overlay                             | Host or plugin declares skill paths; no post-seed file rewrite                                         | Plugin manifest migration remains                                                |
+| Remote-harness model-runtime overlay       | Per-start host config declares required model runtime and transport config                             | Execution protocol and secretless transport remain outside config                |
+| Policy baseline materialization            | Not replaced by ownership alone                                                                        | Managed restrictions/policy stay separate from exact config authority            |
+| Legacy node/exec cleanup                   | Becomes a one-time migration only                                                                      | Old generated config still needs cleanup during transition                       |
+| Diagnostics installed-index seed           | Not replaced                                                                                           | Package trust/install registration is packaging lifecycle, not ordinary config   |
 
 ## What This Replaces
 
@@ -160,4 +160,3 @@ complete replacement today:
    of adapter-generated config.
 5. Compare normal, parked, and deferred startup using the same two documents.
 6. Quantify the adapter code and environment keys removable after migration.
-

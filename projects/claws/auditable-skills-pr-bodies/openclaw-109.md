@@ -28,9 +28,7 @@ Managed skill results can now include billing-oriented token fields for the exac
     "cacheRead": 80,
     "total": 230
   },
-  "receipts": [
-    { "type": "case.resolved" }
-  ]
+  "receipts": [{ "type": "case.resolved" }]
 }
 ```
 

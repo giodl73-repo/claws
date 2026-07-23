@@ -7,18 +7,18 @@ shared runtime or test helper.
 
 ## Comparison
 
-| Boundary | Telegram draft delivery | Codex native tool results | Shared conclusion |
-| --- | --- | --- | --- |
-| Semantic owner | Telegram draft delivery | Codex-native tool runtime | Keep owner-local. |
-| Authoritative boundary | Active draft stream stops after missing message id | App-server command/file completion | Test the exact owner transition. |
-| Machine identity | Existing diagnostic type plus bounded error category | Existing structured result status and exit code | Preserve native owner fields; do not normalize into a shared envelope. |
-| Projection | Trusted diagnostic event | Existing `after_tool_call` hook | Use the existing consumer matching the fact. |
-| Correlation | Session and trusted trace context | Tool-call ID, run/session, cwd, channel | Preserve existing IDs; do not fabricate a common correlation object. |
-| Privacy | Omit chat, content, token, raw response, exception | Keep result private to the hook; bound output; do not promote to diagnostics | Review public/private boundaries per projection. |
-| Compatibility | Existing event family and open bounded category | Existing tool name, args, context, middleware behavior | Prove old consumer behavior locally. |
-| Exactly once | Active generation only; fallback is a separate attempt | Join completion and PostToolUse; MCP remains relay-owned | Prove retries, supersession, and competing producers explicitly. |
-| Disabled/cancelled behavior | Diagnostics-disabled owner behavior is unchanged | Aborted run suppresses deferred observation | Consumer lifecycle must not rewrite owner state. |
-| Deletion | Verbose-only semantic collapse | Plugin text reconstruction | Name the workaround removed. |
+| Boundary                    | Telegram draft delivery                                | Codex native tool results                                                    | Shared conclusion                                                      |
+| --------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Semantic owner              | Telegram draft delivery                                | Codex-native tool runtime                                                    | Keep owner-local.                                                      |
+| Authoritative boundary      | Active draft stream stops after missing message id     | App-server command/file completion                                           | Test the exact owner transition.                                       |
+| Machine identity            | Existing diagnostic type plus bounded error category   | Existing structured result status and exit code                              | Preserve native owner fields; do not normalize into a shared envelope. |
+| Projection                  | Trusted diagnostic event                               | Existing `after_tool_call` hook                                              | Use the existing consumer matching the fact.                           |
+| Correlation                 | Session and trusted trace context                      | Tool-call ID, run/session, cwd, channel                                      | Preserve existing IDs; do not fabricate a common correlation object.   |
+| Privacy                     | Omit chat, content, token, raw response, exception     | Keep result private to the hook; bound output; do not promote to diagnostics | Review public/private boundaries per projection.                       |
+| Compatibility               | Existing event family and open bounded category        | Existing tool name, args, context, middleware behavior                       | Prove old consumer behavior locally.                                   |
+| Exactly once                | Active generation only; fallback is a separate attempt | Join completion and PostToolUse; MCP remains relay-owned                     | Prove retries, supersession, and competing producers explicitly.       |
+| Disabled/cancelled behavior | Diagnostics-disabled owner behavior is unchanged       | Aborted run suppresses deferred observation                                  | Consumer lifecycle must not rewrite owner state.                       |
+| Deletion                    | Verbose-only semantic collapse                         | Plugin text reconstruction                                                   | Name the workaround removed.                                           |
 
 ## Reuse, adapt, avoid
 

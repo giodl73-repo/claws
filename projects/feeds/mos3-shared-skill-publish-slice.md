@@ -50,13 +50,13 @@ Unknowns requiring MOS3 confirmation:
 
 ## Compare
 
-| Analogue | Decision | Reason |
-| --- | --- | --- |
-| Personal MOS3 publish | Reuse | Packaging, OBO token, outcome handling, normalized identity, and strict readback are proven. |
-| Marketplace save/install | Adapt | Keeps discovery/install separate from library mutation. |
-| Tenant marketplace approval | Adapt | Preserves promotion as a distinct admin operation. |
-| Arbitrary CLI `--scope` | Avoid | Allows unsupported scope strings without a product-level contract. |
-| Lobster durable file overlay | Avoid | MOS3 must remain the source of truth for shared publication. |
+| Analogue                     | Decision | Reason                                                                                       |
+| ---------------------------- | -------- | -------------------------------------------------------------------------------------------- |
+| Personal MOS3 publish        | Reuse    | Packaging, OBO token, outcome handling, normalized identity, and strict readback are proven. |
+| Marketplace save/install     | Adapt    | Keeps discovery/install separate from library mutation.                                      |
+| Tenant marketplace approval  | Adapt    | Preserves promotion as a distinct admin operation.                                           |
+| Arbitrary CLI `--scope`      | Avoid    | Allows unsupported scope strings without a product-level contract.                           |
+| Lobster durable file overlay | Avoid    | MOS3 must remain the source of truth for shared publication.                                 |
 
 ## Evaluate
 

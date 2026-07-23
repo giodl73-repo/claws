@@ -283,16 +283,16 @@ source feed must not automatically make the full source installable.
 
 Admin actions should map to predictable client outcomes.
 
-| Admin action | Feed effect | Expected client outcome |
-| --- | --- | --- |
-| Register source feed | Source can be imported. | No entry becomes installable by registration alone. |
-| Include in baseline | Source or entry becomes eligible. | Entry still requires tenant approval unless policy says otherwise. |
-| Allow entry | Tenant state becomes allowed. | Entry can become searchable or installable if scope and compatibility match. |
-| Deny entry | Tenant state becomes denied. | Entry is hidden or blocked for new discovery and install. |
-| Pin version | Selected version is fixed. | Client presents pinned version and does not auto-upgrade beyond it. |
-| Scope entry | Surfaces, groups, devices, or environments are restricted. | Client hides or blocks outside the configured scope. |
-| Revoke entry | Distribution state becomes revoked. | Client blocks new discovery and new install after refresh. |
-| Deprecate entry | Distribution state becomes deprecated. | Client may warn, lower ranking, or guide to replacement. |
+| Admin action         | Feed effect                                                | Expected client outcome                                                      |
+| -------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Register source feed | Source can be imported.                                    | No entry becomes installable by registration alone.                          |
+| Include in baseline  | Source or entry becomes eligible.                          | Entry still requires tenant approval unless policy says otherwise.           |
+| Allow entry          | Tenant state becomes allowed.                              | Entry can become searchable or installable if scope and compatibility match. |
+| Deny entry           | Tenant state becomes denied.                               | Entry is hidden or blocked for new discovery and install.                    |
+| Pin version          | Selected version is fixed.                                 | Client presents pinned version and does not auto-upgrade beyond it.          |
+| Scope entry          | Surfaces, groups, devices, or environments are restricted. | Client hides or blocks outside the configured scope.                         |
+| Revoke entry         | Distribution state becomes revoked.                        | Client blocks new discovery and new install after refresh.                   |
+| Deprecate entry      | Distribution state becomes deprecated.                     | Client may warn, lower ranking, or guide to replacement.                     |
 
 ## Admin Guardrails
 

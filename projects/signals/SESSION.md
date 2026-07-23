@@ -23,17 +23,20 @@
 
 - Last updated: 2026-07-21.
 - Last agent: Copilot.
-- Current focus: Adoption PR 4 preserves an existing authoritative agent
-  `runId` through routed outbound message hooks without adding tracing fields
-  or a new correlation carrier.
+- Current focus: reviewed fork drafts #145-#150 remain frozen evidence
+  snapshots. Runtime LLM usage owner selection now routes through existing
+  upstream PR #107937 rather than a duplicate promotion.
 - Active branch / PR: fork draft
-  [giodl73-repo/openclaw#148](https://github.com/giodl73-repo/openclaw/pull/148),
-  head `user/giodl/signals-outbound-run-correlation` at `2347e079e43`, stacked
-  on fork draft
+  [giodl73-repo/openclaw#150](https://github.com/giodl73-repo/openclaw/pull/150),
+  head `user/giodl/signals-runtime-llm-usage` at `06ed6cb65ba`, stacked on fork
+  draft [#149](https://github.com/giodl73-repo/openclaw/pull/149) at
+  `a614815a4ce`, which is stacked on fork draft
+  [#148](https://github.com/giodl73-repo/openclaw/pull/148) at
+  `d6978e25f6c`, which is stacked on fork draft
   [#147](https://github.com/giodl73-repo/openclaw/pull/147) at
-  `cc0697c609a`, which is stacked on fork draft
+  `aa2b1420ba8`, which is stacked on fork draft
   [#146](https://github.com/giodl73-repo/openclaw/pull/146) at
-  `728998a348d`, which is stacked on fork draft
+  `0ac31a744a5`, which is stacked on fork draft
   [#145](https://github.com/giodl73-repo/openclaw/pull/145) at
   `381c85fea31cb3d79ea08bce99e948939b49de53`. Local RFC branch
   `user/giodl/rfc-0025-signals` remains unpushed.
@@ -41,8 +44,8 @@
   [openclaw/openclaw#111065](https://github.com/openclaw/openclaw/pull/111065)
   is logging-only again at `917815b6049364b51497dbb7a4c519eccef42c71`.
 - Implementation worktree: `C:\src\openclaw-signals-telegram-v1`; branch
-  `user/giodl/signals-outbound-run-correlation`, stacked on fork PR #147. The
-  contributor-review and temporary WSL proof worktrees were removed.
+  `user/giodl/signals-runtime-llm-usage`, stacked on fork PR #149.
+  The contributor-review and temporary WSL proof worktrees were removed.
 - Known dirty state: `C:\src\claws-hapi` contains unrelated active project
   changes; do not overwrite or reorganize them.
 - RFC decision: implemented the active plain-text Telegram preview send that
@@ -72,6 +75,83 @@
   success, nonzero exit, output, original arguments, channel context,
   exactly-once dispatch, MCP/file-change ownership, completion-before-hook
   ordering, in-place middleware mutation, and cancellation.
+- PR 2 review correction: seven focused projector tests pass after failed
+  structured items were changed to skip the success-only `PostToolUse` wait.
+- PR 5 owner boundary: the registry already persists exactly-once
+  `subagent_ended` emission and owns terminal outcome, reason, run, target, and
+  timestamp. Diagnostics-otel now consumes that hook only while its service is
+  active and projects bounded outcome, reason, and target kind.
+- PR 5 privacy boundary: terminal spans remain roots because the hook carries
+  no authoritative trace context. Run IDs, session keys, account IDs, task
+  text, and raw errors remain outside span attributes and metric labels.
+- PR 5 focused proof: 113 diagnostics-otel tests, 13 plugin boundary tests, 16
+  registry completion test executions, unchanged Plugin SDK API baseline, and
+  a clean final Codex review. The dedicated runtime-API guard could not collect
+  locally after the dependency feed rejected unauthenticated
+  `@earendil-works/pi-tui`, leaving `@openclaw/fs-safe/config` unlinked.
+- PR 6 decision: active upstream PR
+  [openclaw/openclaw#91603](https://github.com/openclaw/openclaw/pull/91603)
+  already owns the proposed ACP mapping. The remaining resolved-versus-rejected
+  compatibility behavior, error code, and unrelated reconnect change require
+  ACP owner/product direction, so no competing fork PR was created.
+- PR 7 owner boundary: `api.runtime.llm.complete` owns the successful trusted
+  plugin/context-engine completion plus normalized usage and explicit or
+  estimated cost. These calls bypass the normal reply, cron, ingress, and
+  worker usage projections.
+- PR 7 projection: one existing `model.usage` event is emitted after successful
+  nonempty accounting with authoritative agent, provider, model, optional
+  session key, token buckets, cost, and duration. Disabled diagnostics, empty
+  usage, and failed completions emit nothing; caller, purpose, channel, run,
+  prompt, and response data remain excluded.
+- PR 7 focused proof: 25 runtime LLM tests, changed-file format/lint checks, and
+  a clean `codex review --uncommitted`; usage now includes the standard derived
+  prompt-token bucket.
+- PR 7 owner handoff: the exact gap is open issue #98968; broad issue #13219
+  asks for a separate usage-log product surface. Open PR #107937 already owns
+  the upstream implementation path. Fork #150 is not promotion-ready unchanged
+  because its plugin-completion `durationMs` is consumed as
+  `openclaw.run.duration_ms`. Owner choice is now minimal accounting without
+  duration/plugin schema changes versus attributed accounting through a
+  corrected #107937 with live exporter proof.
+- PR 8 decision: issue
+  [openclaw/openclaw#90674](https://github.com/openclaw/openclaw/issues/90674)
+  remains a real per-turn provenance gap, but merged PR #85882 already prevents
+  aggregate confident-zero reporting and closed PR #90825 already attempted a
+  runtime warning. All-zero pricing cannot distinguish unavailable from
+  intentionally free/local models. Extending `Usage.cost.totalOrigin` would
+  change persisted session, replay, worker-protocol, and downstream contracts,
+  so no competing fork PR was created without model-pricing owner direction.
+- PR 9 decision: maintainer-authored issue
+  [openclaw/openclaw#93070](https://github.com/openclaw/openclaw/issues/93070)
+  is assigned to `@bek91` and explicitly blocked on maintainer/product review.
+  Existing `telemetry.exporter` events are ephemeral; a complete operator
+  surface requires exporter-owned retained state plus a new carrier into
+  Gateway Health/Status. A static Doctor-only warning would be partial and
+  duplicative, so no fork PR was created.
+- PR 10 decision: issue
+  [openclaw/openclaw#102018](https://github.com/openclaw/openclaw/issues/102018)
+  reports trajectory `session.ended`, not the existing diagnostic
+  `run.completed` projection. `run.completed` already sets OTel error status
+  correctly; trajectory session termination has no diagnostics event or OTel
+  handler. A new session-terminal contract would overlap end-reason issue
+  #102019 and risk duplicate lifecycle artifacts, so no fork PR was created.
+- Stack consolidation: all six fork PRs remain exact one-commit slices and no
+  later slice edits an earlier slice's files. #146-#150 patches applied
+  independently to main at `8f31892b550`, but that is point-in-time structural
+  proof, not standalone CI proof; #145 must be recreated on its accepted
+  Telegram owner base. The corrected #146 and #148 commits now own generated
+  Plugin SDK hashes at their stacked boundaries. Fresh promotion branches must
+  still regenerate those records from their selected owner base.
+- Stack review fixes: #146 skips the unavailable native `PostToolUse` wait for
+  failed structured items, #148 strips transient `runId` before durable queue
+  persistence, and #150 includes derived prompt-token usage. The generated SDK
+  manifest was regenerated at the owning commits, including correction of the
+  stale cumulative `infra-runtime` hash. Final Codex review is clean.
+- Live fork closeout: all six PRs are open drafts with the exact rewritten
+  one-commit parent chain, seven successful checks per head, no review feedback,
+  and only fork-inapplicable `auto-response`/`label` failures. Updated #146,
+  #148, and #150 bodies were published from Markdown files and match live. The
+  verified rewrite recovery stash and temporary state artifact were removed.
 - Prior exact-head CI for the preserved Signals commit completed with 71
   passing checks and none pending.
   `security-fast` failed on the unrelated repository-wide `axios` production
@@ -82,7 +162,7 @@
   resolved operationally by moving that diagnostic into fork-only draft #145
   and restoring contributor PR #111065 to logging-only.
 - Codex review: `codex review --base
-  fork/user/giodl/base-telegram-draft-visible-failures` completed cleanly on
+fork/user/giodl/base-telegram-draft-visible-failures` completed cleanly on
   fork draft #145 with no accepted or rejected findings.
 - PR 2 Codex review: four `codex review --uncommitted` passes drove fixes for
   tool-name/argument/context compatibility, real Codex completion-before-hook
@@ -97,8 +177,10 @@
 
 ## Resume Checklist
 
-- Run: work through fork drafts #145 and #146 and the local RFC package before any
-  upstream publication; do not repair the unrelated Axios advisory here.
+- Run: use `projects/signals/owner-handoff-runtime-llm-usage-2026-07-21.md` for
+  the active owner decision; do not open a duplicate upstream PR.
+- Promote: recreate only the selected slice from then-current main or its owner
+  branch, regenerate artifacts, and rerun focused proof before publication.
 - Verify: preserve the exact owner/projection fixtures if maintainer feedback
   changes the diagnostic contract.
 - Review: seek Telegram and diagnostics owner adoption of the bounded event
@@ -126,8 +208,40 @@
 
 ## Open Threads
 
+- Fork stack consolidation and promotion map:
+  `projects/signals/stack-consolidation-2026-07-21.md`.
+- Keep #145-#150 as fork evidence snapshots. Do not combine them into one
+  upstream PR or infer implementation dependencies from their chronological
+  bases.
 - Adoption PR 4 evidence:
   `projects/signals/slice-4-outbound-run-correlation.md`.
+- Adoption PR 5 evidence:
+  `projects/signals/slice-5-subagent-terminal-telemetry.md`.
+- Adoption PR 6 is owner/product-decision blocked by active upstream PR #91603;
+  do not create a duplicate fork implementation.
+- Adoption PR 7 evidence:
+  `projects/signals/slice-7-runtime-llm-usage.md`.
+- Adoption PR 8 owner-decision audit:
+  `projects/signals/slice-8-unknown-pricing-deferred.md`.
+- Do not implement PR 8 until model-pricing and persisted-usage owners define
+  provenance for provider-billed, catalog-estimated, explicitly free, and
+  unavailable cost plus compatibility/replay behavior.
+- Adoption PR 9 owner-decision audit:
+  `projects/signals/slice-9-exporter-health-deferred.md`.
+- Do not implement PR 9 until diagnostics and Gateway Health owners define the
+  retained per-signal lifecycle state, expiry/recovery semantics, and
+  plugin-to-health snapshot carrier.
+- Adoption PR 10 owner-decision audit:
+  `projects/signals/slice-10-session-export-conformance-deferred.md`.
+- Do not implement PR 10 until session lifecycle, trajectory, and diagnostics
+  owners define whether `session.ended` is a public diagnostic contract, how it
+  relates to `run.completed`, and one end-reason taxonomy with issue #102019.
+- Keep #150 limited to owner-local `model.usage` projection after successful
+  runtime LLM completion. Do not add a ledger, fields, hook, pricing state, or
+  resource-governance policy.
+- Keep #149 limited to diagnostics-otel projection of the existing owner hook.
+  Do not add another diagnostic event, duplicate `run.completed`, export
+  owner identifiers, or infer parent trace context.
 - Keep #148 limited to outbound correlation. Inbound message identity, span
   aliases, and subagent requester-run hierarchy remain separate owner decisions.
 - Foundation comparison:

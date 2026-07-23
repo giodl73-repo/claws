@@ -105,16 +105,16 @@ Mode semantics:
 
 ## ACS To OpenClaw Lifecycle Mapping
 
-| ACS intervention point | OpenClaw host point | Initial support |
-| --- | --- | --- |
-| `agent_startup` | agent/session startup after config resolution | Advisory first |
-| `input` | inbound user/channel message before agent context assembly | Phase 2 |
-| `pre_model_call` | provider request before dispatch | Phase 2 |
-| `post_model_call` | provider response before tool/action handling | Phase 3 |
-| `pre_tool_call` | tool invocation before execution | Phase 1 |
-| `post_tool_call` | tool result before context reinjection | Phase 2 |
-| `output` | final user/channel response before send | Phase 3 |
-| `agent_shutdown` | session/run completion summary | Advisory first |
+| ACS intervention point | OpenClaw host point                                        | Initial support |
+| ---------------------- | ---------------------------------------------------------- | --------------- |
+| `agent_startup`        | agent/session startup after config resolution              | Advisory first  |
+| `input`                | inbound user/channel message before agent context assembly | Phase 2         |
+| `pre_model_call`       | provider request before dispatch                           | Phase 2         |
+| `post_model_call`      | provider response before tool/action handling              | Phase 3         |
+| `pre_tool_call`        | tool invocation before execution                           | Phase 1         |
+| `post_tool_call`       | tool result before context reinjection                     | Phase 2         |
+| `output`               | final user/channel response before send                    | Phase 3         |
+| `agent_shutdown`       | session/run completion summary                             | Advisory first  |
 
 Start with `pre_tool_call` because it has the clearest enforcement behavior and
 the highest risk payoff: allow, deny, warn, or escalate before an action touches

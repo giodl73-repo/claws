@@ -73,14 +73,14 @@ completion would be circular if continuity itself is represented as
 
 ### Internal analogues
 
-| Analogue | Decision | Reason |
-| --- | --- | --- |
-| Existing `[gateway] ready` child protocol | Adapt | It is already the adapter's authoritative service-authored startup edge. |
-| Gateway startup-pending/readiness state | Reuse | It already prevents readiness while initialization is incomplete; continuity must avoid self-dependency. |
-| Health/readiness provider registries | Reuse | Owner readiness should be resolved through native owner registrations, not a continuity-specific provider bus. |
-| Typed `GatewayStartBody` | Adapt | Add one restored-only typed descriptor; do not route evidence through generic `extra_env`. |
-| E4d adapter execution-incarnation binding | Reuse | The startup descriptor and result must remain bound to the same adapter boot and exact route. |
-| New post-start CLI or HTTP endpoint | Avoid | It creates a second race window after the process is already reachable. |
+| Analogue                                  | Decision | Reason                                                                                                         |
+| ----------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| Existing `[gateway] ready` child protocol | Adapt    | It is already the adapter's authoritative service-authored startup edge.                                       |
+| Gateway startup-pending/readiness state   | Reuse    | It already prevents readiness while initialization is incomplete; continuity must avoid self-dependency.       |
+| Health/readiness provider registries      | Reuse    | Owner readiness should be resolved through native owner registrations, not a continuity-specific provider bus. |
+| Typed `GatewayStartBody`                  | Adapt    | Add one restored-only typed descriptor; do not route evidence through generic `extra_env`.                     |
+| E4d adapter execution-incarnation binding | Reuse    | The startup descriptor and result must remain bound to the same adapter boot and exact route.                  |
+| New post-start CLI or HTTP endpoint       | Avoid    | It creates a second race window after the process is already reachable.                                        |
 
 ### External comparators
 

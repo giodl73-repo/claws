@@ -4,7 +4,7 @@
 
 - Evidence: [openclaw/openclaw#50291](https://github.com/openclaw/openclaw/issues/50291)
 - Fork PR: [giodl73-repo/openclaw#148](https://github.com/giodl73-repo/openclaw/pull/148)
-- Revision: `2347e079e43`
+- Revision: `d6978e25f6c`
 - Owner: routed outbound delivery and Plugin SDK message hooks
 - Supporting owner: agent run lifecycle
 
@@ -14,8 +14,9 @@
 authoritative only for delivery produced by that routed turn.
 
 The slice carries that ID through `OutboundSessionContext` into
-`message_sending` and `message_sent`. Standalone sends, recovered delivery, and
-paths without proven run ownership leave it absent.
+`message_sending` and `message_sent`. Standalone sends, recovered delivery, and paths without proven run ownership
+leave it absent. The durable queue strips live `runId` before persistence so a
+replay cannot inherit an ended run's identity.
 
 ## Conformance evidence
 
@@ -29,6 +30,8 @@ paths without proven run ownership leave it absent.
 - Privacy: no message, sender, content, span, or metric-label identity is added.
 - Exactly once: existing per-payload hook dispatch is unchanged; the slice adds
   context only.
+- Durability: the live hook receives `runId`, while the recovery record omits
+  it.
 - Projection: Plugin SDK message hooks only.
 
 ## Deliberate exclusions
@@ -49,6 +52,9 @@ turn.
 
 - 230 focused tests across outbound delivery, session context, routed replies,
   and message-hook mapping.
+- The new durable-recovery fixture passes; the broader file run completed 159
+  tests and hit two unrelated media-staging failures in the partially hydrated
+  Windows dependency environment.
 - Plugin SDK API baseline check.
 - Repository formatting and diff checks.
 - Formal Codex review: no actionable regression.

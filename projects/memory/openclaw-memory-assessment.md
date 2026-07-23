@@ -4,16 +4,16 @@ Source pass: 2026-06-22 against `C:\src\openclaw-stack`.
 
 ## Evidence Files Checked
 
-| Area | Path |
-| --- | --- |
-| Vision and plugin strategy | `VISION.md` |
-| Memory overview | `docs/concepts/memory.md` |
-| Builtin backend | `docs/concepts/memory-builtin.md` |
-| QMD backend | `docs/concepts/memory-qmd.md` |
-| Active Memory | `docs/concepts/active-memory.md` |
-| Memory config | `docs/reference/memory-config.md` |
-| Security boundary | `SECURITY.md` |
-| Config/source surface | `src/config/types.memory.ts`, `src/plugins/memory-state.ts`, `packages/memory-host-sdk/src/`, `extensions/memory-core/src/memory/` |
+| Area                       | Path                                                                                                                               |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Vision and plugin strategy | `VISION.md`                                                                                                                        |
+| Memory overview            | `docs/concepts/memory.md`                                                                                                          |
+| Builtin backend            | `docs/concepts/memory-builtin.md`                                                                                                  |
+| QMD backend                | `docs/concepts/memory-qmd.md`                                                                                                      |
+| Active Memory              | `docs/concepts/active-memory.md`                                                                                                   |
+| Memory config              | `docs/reference/memory-config.md`                                                                                                  |
+| Security boundary          | `SECURITY.md`                                                                                                                      |
+| Config/source surface      | `src/config/types.memory.ts`, `src/plugins/memory-state.ts`, `packages/memory-host-sdk/src/`, `extensions/memory-core/src/memory/` |
 
 ## Current Architecture
 

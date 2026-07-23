@@ -127,25 +127,25 @@ start until both are closed.
 
 ### Internal analogues
 
-| Analogue | Disposition | Activation lesson |
-| --- | --- | --- |
-| Immutable continuity publication | Reuse | Bind every retry and receipt to the same archive and manifest identity. |
-| Config atomic writes | Adapt | Stage beside the target and publish without exposing partial file bytes. |
-| Shared/agent SQLite migrations | Reuse | Let schema owners migrate supported older databases during normal startup. |
-| Memory reindex publication | Reuse | Build derived state outside the authoritative database and publish briefly; failed rebuild must preserve usable state. |
-| Gateway readiness checker | Adapt narrowly | Add one continuity-owned startup fact; do not create another probe or registry. |
-| Hosting Profiles | Reuse when landed | Require the continuity fact for profiles that promise restored startup. |
-| Gateway suspend/drain readiness | Reuse semantics | Recovery-incomplete is non-ready while liveness/diagnostics remain available. |
-| Gateway startup-pending gate | Reuse | Hold work admission before Channels, cron, and recovery replay; do not rely on a probe published after services start. |
-| Doctor state migrations | Avoid as restore side effect | A recovery operation must not silently run unrelated legacy migrations to make an incomplete artifact look complete. |
+| Analogue                         | Disposition                  | Activation lesson                                                                                                      |
+| -------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Immutable continuity publication | Reuse                        | Bind every retry and receipt to the same archive and manifest identity.                                                |
+| Config atomic writes             | Adapt                        | Stage beside the target and publish without exposing partial file bytes.                                               |
+| Shared/agent SQLite migrations   | Reuse                        | Let schema owners migrate supported older databases during normal startup.                                             |
+| Memory reindex publication       | Reuse                        | Build derived state outside the authoritative database and publish briefly; failed rebuild must preserve usable state. |
+| Gateway readiness checker        | Adapt narrowly               | Add one continuity-owned startup fact; do not create another probe or registry.                                        |
+| Hosting Profiles                 | Reuse when landed            | Require the continuity fact for profiles that promise restored startup.                                                |
+| Gateway suspend/drain readiness  | Reuse semantics              | Recovery-incomplete is non-ready while liveness/diagnostics remain available.                                          |
+| Gateway startup-pending gate     | Reuse                        | Hold work admission before Channels, cron, and recovery replay; do not rely on a probe published after services start. |
+| Doctor state migrations          | Avoid as restore side effect | A recovery operation must not silently run unrelated legacy migrations to make an incomplete artifact look complete.   |
 
 ### External comparators
 
-| Comparator | Useful precedent | Avoid |
-| --- | --- | --- |
-| restic restore | Restore targets are explicit and existing files are preserved unless overwrite is requested. Local Archived is stricter: overwrite is never accepted. | A restore that reports copy success without OpenClaw compatibility/readiness proof. |
-| Velero restore | Existing-resource conflict policy is explicit; restore phases are separate from workload operation. | Generic restore hooks that let arbitrary scripts define core recovery correctness. |
-| Kubernetes init containers | Ordered initialization completes before the application starts; readiness belongs to the running application. | Treating the restore process itself as the long-lived readiness authority. |
+| Comparator                 | Useful precedent                                                                                                                                      | Avoid                                                                               |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| restic restore             | Restore targets are explicit and existing files are preserved unless overwrite is requested. Local Archived is stricter: overwrite is never accepted. | A restore that reports copy success without OpenClaw compatibility/readiness proof. |
+| Velero restore             | Existing-resource conflict policy is explicit; restore phases are separate from workload operation.                                                   | Generic restore hooks that let arbitrary scripts define core recovery correctness.  |
+| Kubernetes init containers | Ordered initialization completes before the application starts; readiness belongs to the running application.                                         | Treating the restore process itself as the long-lived readiness authority.          |
 
 Primary references:
 

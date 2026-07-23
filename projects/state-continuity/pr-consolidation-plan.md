@@ -12,11 +12,11 @@ focused proof.
 ## Current Count
 
 | Repository | Before cleanup | Canonical after cleanup | Target bundles |
-| --- | ---: | ---: | ---: |
-| OpenClaw | 15 | 13 | 7 |
-| Lobster | 7 | 7 | 4 |
-| RFCs | 2 | 1 | 1 |
-| **Total** | **24** | **21** | **12** |
+| ---------- | -------------: | ----------------------: | -------------: |
+| OpenClaw   |             15 |                      13 |              7 |
+| Lobster    |              7 |                       7 |              4 |
+| RFCs       |              2 |                       1 |              1 |
+| **Total**  |         **24** |                  **21** |         **12** |
 
 Closed as superseded:
 
@@ -27,43 +27,43 @@ Closed as superseded:
 
 ### OpenClaw
 
-| Bundle | Source PRs | Boundary |
-| --- | --- | --- |
-| OC-A | 41, 55-58 | CAPE owner model plus complete Archived capture, verification, materialization, and preview. |
-| OC-B | 64 | Launcher-fenced managed restore executor. |
-| OC-C | 101 | Strict final closed-state capture. |
-| OC-D | 112 | Direct external-plugin publication and independent retrieval. |
-| OC-E | 115, 121 | Elastic wake descriptor plus exact destination preparation. |
-| OC-F | 124, 127 | Durable restored readiness plus private restored-startup transaction. |
-| OC-G | 129 plus current follow-on | Live restored startup and paired v2 descriptor/result/completion contracts. One product follow-on commit; no proof-harness code. |
+| Bundle | Source PRs                 | Boundary                                                                                                                         |
+| ------ | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| OC-A   | 41, 55-58                  | CAPE owner model plus complete Archived capture, verification, materialization, and preview.                                     |
+| OC-B   | 64                         | Launcher-fenced managed restore executor.                                                                                        |
+| OC-C   | 101                        | Strict final closed-state capture.                                                                                               |
+| OC-D   | 112                        | Direct external-plugin publication and independent retrieval.                                                                    |
+| OC-E   | 115, 121                   | Elastic wake descriptor plus exact destination preparation.                                                                      |
+| OC-F   | 124, 127                   | Durable restored readiness plus private restored-startup transaction.                                                            |
+| OC-G   | 129 plus current follow-on | Live restored startup and paired v2 descriptor/result/completion contracts. One product follow-on commit; no proof-harness code. |
 
 ### Lobster
 
-| Bundle | Source PRs | Boundary |
-| --- | --- | --- |
-| LB-A | 15 | Exact-route fenced restore execution. |
-| LB-B | 16, 17 | Final capture, publication acceptance, source finalization, and destruction authority. |
-| LB-C | 18, 19 | Sleep authorization and durable wake scheduling. |
-| LB-D | 20, 21 plus current follow-on | Ensure-ready coordination, destination restore binding, concrete crash-safe provisioner, and one separate test-only paired-image proof commit. |
+| Bundle | Source PRs                    | Boundary                                                                                                                                       |
+| ------ | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| LB-A   | 15                            | Exact-route fenced restore execution.                                                                                                          |
+| LB-B   | 16, 17                        | Final capture, publication acceptance, source finalization, and destruction authority.                                                         |
+| LB-C   | 18, 19                        | Sleep authorization and durable wake scheduling.                                                                                               |
+| LB-D   | 20, 21 plus current follow-on | Ensure-ready coordination, destination restore binding, concrete crash-safe provisioner, and one separate test-only paired-image proof commit. |
 
 ### RFC
 
-| Bundle | Source PR | Boundary |
-| --- | --- | --- |
-| RFC-A | 5 | RFC 0021 and normative CAPE, publication, readiness, and Elastic host sidecars. |
+| Bundle | Source PR | Boundary                                                                        |
+| ------ | --------- | ------------------------------------------------------------------------------- |
+| RFC-A  | 5         | RFC 0021 and normative CAPE, publication, readiness, and Elastic host sidecars. |
 
 ## Rollups Created
 
-| Bundle | Rollup PR | State | Source PRs |
-| --- | --- | --- | --- |
-| OC-A | [OpenClaw PR 139](https://github.com/giodl73-repo/openclaw/pull/139) | Verified exact terminal source head. Substantive checks pass; fork-only label/auto-response jobs fail on missing app secrets as expected. | 41, 55-58 remain open by user choice. |
-| OC-B | [OpenClaw PR 141](https://github.com/giodl73-repo/openclaw/pull/141) | Verified exact terminal source head. Substantive checks pass; only expected fork-secret jobs fail. | 64 remains open by user choice. |
-| OC-C | [OpenClaw PR 142](https://github.com/giodl73-repo/openclaw/pull/142) | Verified exact terminal source head. Substantive checks pass; only expected fork-secret jobs fail. | 101 remains open by user choice. |
-| OC-D | [OpenClaw PR 143](https://github.com/giodl73-repo/openclaw/pull/143) | Verified exact terminal source head. Substantive checks pass; only expected fork-secret jobs fail. | 112 remains open by user choice. |
-| OC-E | [OpenClaw PR 144](https://github.com/giodl73-repo/openclaw/pull/144) | Verified exact terminal source head. Substantive checks pass; only expected fork-secret jobs fail. | 115 and 121 remain open by user choice. |
-| OC-F | [OpenClaw PR 140](https://github.com/giodl73-repo/openclaw/pull/140) | Verified exact terminal source head. Substantive checks pass; only expected fork-secret jobs fail. | 124 and 127 remain open by user choice. |
-| LB-B | [Lobster PR 22](https://microsoft.ghe.com/giodl/lobster/pull/22) | Draft and mergeable, but no GitOps/ADO contexts are attached. Not ready. | 16-17 remain open. |
-| LB-C | [Lobster PR 23](https://microsoft.ghe.com/giodl/lobster/pull/23) | Draft and mergeable, but no GitOps/ADO contexts are attached. Not ready. | 18-19 remain open. |
+| Bundle | Rollup PR                                                            | State                                                                                                                                     | Source PRs                              |
+| ------ | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| OC-A   | [OpenClaw PR 139](https://github.com/giodl73-repo/openclaw/pull/139) | Verified exact terminal source head. Substantive checks pass; fork-only label/auto-response jobs fail on missing app secrets as expected. | 41, 55-58 remain open by user choice.   |
+| OC-B   | [OpenClaw PR 141](https://github.com/giodl73-repo/openclaw/pull/141) | Verified exact terminal source head. Substantive checks pass; only expected fork-secret jobs fail.                                        | 64 remains open by user choice.         |
+| OC-C   | [OpenClaw PR 142](https://github.com/giodl73-repo/openclaw/pull/142) | Verified exact terminal source head. Substantive checks pass; only expected fork-secret jobs fail.                                        | 101 remains open by user choice.        |
+| OC-D   | [OpenClaw PR 143](https://github.com/giodl73-repo/openclaw/pull/143) | Verified exact terminal source head. Substantive checks pass; only expected fork-secret jobs fail.                                        | 112 remains open by user choice.        |
+| OC-E   | [OpenClaw PR 144](https://github.com/giodl73-repo/openclaw/pull/144) | Verified exact terminal source head. Substantive checks pass; only expected fork-secret jobs fail.                                        | 115 and 121 remain open by user choice. |
+| OC-F   | [OpenClaw PR 140](https://github.com/giodl73-repo/openclaw/pull/140) | Verified exact terminal source head. Substantive checks pass; only expected fork-secret jobs fail.                                        | 124 and 127 remain open by user choice. |
+| LB-B   | [Lobster PR 22](https://microsoft.ghe.com/giodl/lobster/pull/22)     | Draft and mergeable, but no GitOps/ADO contexts are attached. Not ready.                                                                  | 16-17 remain open.                      |
+| LB-C   | [Lobster PR 23](https://microsoft.ghe.com/giodl/lobster/pull/23)     | Draft and mergeable, but no GitOps/ADO contexts are attached. Not ready.                                                                  | 18-19 remain open.                      |
 
 Ten of the twelve target bundle positions now exist when counting RFC PR 5 and
 the single-source Lobster restore foundation PR 15. OC-G and LB-D remain

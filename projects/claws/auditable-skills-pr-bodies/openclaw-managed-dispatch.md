@@ -45,6 +45,7 @@ Real environment tested:
 Windows 11, Node-based OpenClaw source harness, fork branch `agent/auditable-skills-managed-dispatch` at `fc77504d`, using the prepared dependencies from the exact parent stack checkout. No live Gateway or provider credentials were used.
 
 Exact steps or command run after this patch:
+
 1. `node scripts/run-vitest.mjs src/agents/managed-skill-spawn.test.ts`
 2. `node scripts/run-vitest.mjs src/agents/tools/sessions-spawn-tool.test.ts -t "managed"`
 3. Run scoped `oxfmt --check`, direct scoped `oxlint`, and `git diff --check` over the four changed files.

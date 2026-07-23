@@ -3,56 +3,69 @@
 Policy work belongs in OpenClaw and RFC branches. This folder tracks the stack,
 proof, and next PRs without using `claws-hapi` as a prototype repo.
 
+## M5 Rendezvous Support
+
+For Lobster #867, Policy supplies the existing evidence and narrowing
+contracts. The missing delivery is not a new approval-policy system; it is the
+admin-owned MAC control to enable or disable Scout. Per-action approval remains
+owned by the user/runtime/Desktop path. See `projects/rendezvous/pr-plan.md`.
+
+For Lobster #3897, [#5336](https://microsoft.ghe.com/bic/lobster/pull/5336)
+is the convergence brief and implementation contract: `scout-standard`, exact
+typed capability inventory, existing approval/MCP rails, explicit ownership,
+and deletion of exec workarounds. Its implementation series is tracked in the
+same Rendezvous PR plan.
+
 ## Active PRs
 
-| Repo | PR | Branch | Status | Purpose |
-| --- | --- | --- | --- | --- |
-| giodl73-repo/openclaw | [#3](https://github.com/giodl73-repo/openclaw/pull/3) | `policy-sandbox-allow-modes` | Draft open | Stack `sandbox.allowModes` on exec approvals as the P1 remainder. |
-| openclaw/openclaw | [#99686](https://github.com/openclaw/openclaw/pull/99686) | `policy-doctor-fix-rules` | Draft open; stacked on #99121 | Add policy doctor fix-class metadata and structured recommendation output. |
-| openclaw/openclaw | [#99690](https://github.com/openclaw/openclaw/pull/99690) | `policy-doctor-automatic-narrowers` | Draft open; stacked on #99686; Codex clean at `30c3cace63` | Add first safe automatic policy repair narrowers. |
-| openclaw/openclaw | [#99700](https://github.com/openclaw/openclaw/pull/99700) | `policy-doctor-required-deny-repairs` | Draft open; stacked on #99690; Codex clean at `40d680cc50` | Add automatic repairs for required tool deny findings. |
-| openclaw/openclaw | [#99720](https://github.com/openclaw/openclaw/pull/99720) | `policy-doctor-channel-ingress-repairs` | Draft open; stacked on #99700; Codex clean at `0df67e7360` | Add automatic repairs for channel ingress narrowing findings. |
-| openclaw/openclaw | [#99731](https://github.com/openclaw/openclaw/pull/99731) | `policy-doctor-gateway-http-repairs` | Draft open; stacked on #99720; Codex clean at `ebd841a8ca` | Add automatic repairs for denied Gateway HTTP endpoints. |
-| openclaw/openclaw | [#99776](https://github.com/openclaw/openclaw/pull/99776) | `policy-doctor-review-required-previews` | Draft open; stacked on #99731; Codex clean at `80ecc9cbcc` | Add review-required repair previews for Gateway bind and node-command policy findings. |
-| giodl73-repo/openclaw | Unfiled | `policy-config-coverage-p2` | Pushed branch | Stack P2 config coverage bundle on `sandbox.allowModes`. |
-| openclaw/openclaw | [#87826](https://github.com/openclaw/openclaw/pull/87826) | `feeds-policy-conformance-4pr` | Draft open; clean at `bb7ed067` | Feed catalog policy conformance. |
+| Repo                  | PR                                                        | Branch                                   | Status                                                     | Purpose                                                                                |
+| --------------------- | --------------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| giodl73-repo/openclaw | [#3](https://github.com/giodl73-repo/openclaw/pull/3)     | `policy-sandbox-allow-modes`             | Draft open                                                 | Stack `sandbox.allowModes` on exec approvals as the P1 remainder.                      |
+| openclaw/openclaw     | [#99686](https://github.com/openclaw/openclaw/pull/99686) | `policy-doctor-fix-rules`                | Draft open; stacked on #99121                              | Add policy doctor fix-class metadata and structured recommendation output.             |
+| openclaw/openclaw     | [#99690](https://github.com/openclaw/openclaw/pull/99690) | `policy-doctor-automatic-narrowers`      | Draft open; stacked on #99686; Codex clean at `30c3cace63` | Add first safe automatic policy repair narrowers.                                      |
+| openclaw/openclaw     | [#99700](https://github.com/openclaw/openclaw/pull/99700) | `policy-doctor-required-deny-repairs`    | Draft open; stacked on #99690; Codex clean at `40d680cc50` | Add automatic repairs for required tool deny findings.                                 |
+| openclaw/openclaw     | [#99720](https://github.com/openclaw/openclaw/pull/99720) | `policy-doctor-channel-ingress-repairs`  | Draft open; stacked on #99700; Codex clean at `0df67e7360` | Add automatic repairs for channel ingress narrowing findings.                          |
+| openclaw/openclaw     | [#99731](https://github.com/openclaw/openclaw/pull/99731) | `policy-doctor-gateway-http-repairs`     | Draft open; stacked on #99720; Codex clean at `ebd841a8ca` | Add automatic repairs for denied Gateway HTTP endpoints.                               |
+| openclaw/openclaw     | [#99776](https://github.com/openclaw/openclaw/pull/99776) | `policy-doctor-review-required-previews` | Draft open; stacked on #99731; Codex clean at `80ecc9cbcc` | Add review-required repair previews for Gateway bind and node-command policy findings. |
+| giodl73-repo/openclaw | Unfiled                                                   | `policy-config-coverage-p2`              | Pushed branch                                              | Stack P2 config coverage bundle on `sandbox.allowModes`.                               |
+| openclaw/openclaw     | [#87826](https://github.com/openclaw/openclaw/pull/87826) | `feeds-policy-conformance-4pr`           | Draft open; clean at `bb7ed067`                            | Feed catalog policy conformance.                                                       |
 
 ## Landed PRs
 
-| Repo | PR | Purpose |
-| --- | --- | --- |
-| openclaw/openclaw | [#87074](https://github.com/openclaw/openclaw/pull/87074) | Reject unsupported policy keys. |
-| openclaw/openclaw | [#90003](https://github.com/openclaw/openclaw/pull/90003) | Cover `exec-approvals.json` policy evidence and rules. Merged 2026-06-16 at `55263b3dfa416425f4fc4fdc60cd08d6e8bbb345`. |
-| openclaw/openclaw | [#87081](https://github.com/openclaw/openclaw/pull/87081) | Add policy config coverage report. Merged at head `68973454`. |
-| openclaw/openclaw | [#89596](https://github.com/openclaw/openclaw/pull/89596) | Recognize declared plugin/MCP tool allowlists. Merged 2026-06-18 at `fadbcf8a4e43d7f4384c49972fdaff17bb34e6d7`. |
-| openclaw/openclaw | [#99121](https://github.com/openclaw/openclaw/pull/99121) | Cover Gateway node command deny policy. Merged 2026-07-04 at `832cb3c48880b672a72bfcbdb570e7d123412d8e`. |
-| openclaw/openclaw | [#99686](https://github.com/openclaw/openclaw/pull/99686) | Add policy-owned doctor fix recommendation metadata and public `policy.fixRecommendation` JSON output. Merged 2026-07-05 at `55683d23e35af8a343889fec691000dbd29430cd`. |
-| openclaw/openclaw | [#99690](https://github.com/openclaw/openclaw/pull/99690) | Add guarded automatic `doctor --fix` repairs for policy narrowing findings. Merged 2026-07-05 at `14b2ca11ffa97c8e98ee186a0300f563f88fdce6`. |
-| openclaw/openclaw | [#99700](https://github.com/openclaw/openclaw/pull/99700) | Add guarded required-deny automatic repairs for Policy doctor findings. Merged 2026-07-06 at `5b06eba9fe9e6caf224d6d573b2116149b7755b7`. |
-| openclaw/openclaw | [#99720](https://github.com/openclaw/openclaw/pull/99720) | Add guarded channel ingress automatic repairs for Policy doctor findings. Merged 2026-07-07 at `97777a70268a39ab29b1dcdac94a01565efb8077`. |
-| openclaw/openclaw | [#99731](https://github.com/openclaw/openclaw/pull/99731) | Add guarded Gateway HTTP endpoint automatic repairs for Policy doctor findings. Merged 2026-07-07 at `41425bf094ec7f65f673a0d99f8a185354a3b8bf`. |
+| Repo              | PR                                                        | Purpose                                                                                                                                                                          |
+| ----------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| openclaw/openclaw | [#87074](https://github.com/openclaw/openclaw/pull/87074) | Reject unsupported policy keys.                                                                                                                                                  |
+| openclaw/openclaw | [#90003](https://github.com/openclaw/openclaw/pull/90003) | Cover `exec-approvals.json` policy evidence and rules. Merged 2026-06-16 at `55263b3dfa416425f4fc4fdc60cd08d6e8bbb345`.                                                          |
+| openclaw/openclaw | [#87081](https://github.com/openclaw/openclaw/pull/87081) | Add policy config coverage report. Merged at head `68973454`.                                                                                                                    |
+| openclaw/openclaw | [#89596](https://github.com/openclaw/openclaw/pull/89596) | Recognize declared plugin/MCP tool allowlists. Merged 2026-06-18 at `fadbcf8a4e43d7f4384c49972fdaff17bb34e6d7`.                                                                  |
+| openclaw/openclaw | [#99121](https://github.com/openclaw/openclaw/pull/99121) | Cover Gateway node command deny policy. Merged 2026-07-04 at `832cb3c48880b672a72bfcbdb570e7d123412d8e`.                                                                         |
+| openclaw/openclaw | [#99686](https://github.com/openclaw/openclaw/pull/99686) | Add policy-owned doctor fix recommendation metadata and public `policy.fixRecommendation` JSON output. Merged 2026-07-05 at `55683d23e35af8a343889fec691000dbd29430cd`.          |
+| openclaw/openclaw | [#99690](https://github.com/openclaw/openclaw/pull/99690) | Add guarded automatic `doctor --fix` repairs for policy narrowing findings. Merged 2026-07-05 at `14b2ca11ffa97c8e98ee186a0300f563f88fdce6`.                                     |
+| openclaw/openclaw | [#99700](https://github.com/openclaw/openclaw/pull/99700) | Add guarded required-deny automatic repairs for Policy doctor findings. Merged 2026-07-06 at `5b06eba9fe9e6caf224d6d573b2116149b7755b7`.                                         |
+| openclaw/openclaw | [#99720](https://github.com/openclaw/openclaw/pull/99720) | Add guarded channel ingress automatic repairs for Policy doctor findings. Merged 2026-07-07 at `97777a70268a39ab29b1dcdac94a01565efb8077`.                                       |
+| openclaw/openclaw | [#99731](https://github.com/openclaw/openclaw/pull/99731) | Add guarded Gateway HTTP endpoint automatic repairs for Policy doctor findings. Merged 2026-07-07 at `41425bf094ec7f65f673a0d99f8a185354a3b8bf`.                                 |
 | openclaw/openclaw | [#99776](https://github.com/openclaw/openclaw/pull/99776) | Add review-required Gateway repair previews for non-loopback bind and node command deny Policy doctor findings. Merged 2026-07-08 at `aa27ae9d9f37ee1127f89952e1dfeb9fb8577b99`. |
-| openclaw/openclaw | [#87056](https://github.com/openclaw/openclaw/pull/87056) | Data handling conformance checks. |
-| openclaw/openclaw | [#86768](https://github.com/openclaw/openclaw/pull/86768) | Policy file comparison command. |
-| openclaw/openclaw | [#85817](https://github.com/openclaw/openclaw/pull/85817) | Agent-scoped policy overlays. |
-| openclaw/openclaw | [#85795](https://github.com/openclaw/openclaw/pull/85795) | Policy rule reference tables. |
-| openclaw/openclaw | [#85744](https://github.com/openclaw/openclaw/pull/85744) | Ingress channel conformance checks. |
-| openclaw/openclaw | [#85572](https://github.com/openclaw/openclaw/pull/85572) | Sandbox posture conformance checks. |
-| openclaw/openclaw | [#85482](https://github.com/openclaw/openclaw/pull/85482) | Tool posture conformance checks. |
-| openclaw/openclaw | [#85096](https://github.com/openclaw/openclaw/pull/85096) | Agent workspace conformance checks. |
-| openclaw/rfcs | [#2](https://github.com/openclaw/rfcs/pull/2) | Policy Conformance 1.0 RFC. |
-| openclaw/rfcs | [#6](https://github.com/openclaw/rfcs/pull/6) | RFC addendum for exec approvals evidence. |
-| openclaw/openclaw | [#94314](https://github.com/openclaw/openclaw/pull/94314) | Split policy doctor modules. Merged 2026-06-19 at head `0d876ce3`. |
-| bic/lobster | [#3555](https://microsoft.ghe.com/bic/lobster/pull/3555) | MAC / Partner Center registration guidance refresh. Merged 2026-06-24 at head `44cc96c6`. |
-| bic/lobster | [#3391](https://microsoft.ghe.com/bic/lobster/pull/3391) | Gated Policy UX preview. Merged 2026-06-20 at head `a07e8915`. |
-| bic/lobster | [#3388](https://microsoft.ghe.com/bic/lobster/pull/3388) | Personal policy baseline state with MOS3-backed equal-or-stricter acceptance. Merged 2026-06-20. |
-| bic/lobster | [#3383](https://microsoft.ghe.com/bic/lobster/pull/3383) | Scout policy preview polish. Merged 2026-06-20. |
-| bic/lobster | [#3355](https://microsoft.ghe.com/bic/lobster/pull/3355) | Scout tenant feed policy preview for package-defense and MOS3 block-status metadata. Merged 2026-06-19. |
-| bic/lobster | [#2270](https://microsoft.ghe.com/bic/lobster/pull/2270) | Bootstrap managed OpenClaw policy baselines. Merged 2026-06-19. |
-| bic/lobster | [#2275](https://microsoft.ghe.com/bic/lobster/pull/2275) | Policy baseline state primitives with optional MOS3 artifact metadata. Merged 2026-06-19. |
-| bic/lobster | [#1051](https://microsoft.ghe.com/bic/lobster/pull/1051) | Policy 1.0, Workspace 1.0, and ClawPilot 1.0 specs. |
-| bic/lobster | [#878](https://microsoft.ghe.com/bic/lobster/pull/878) | Policy proposal coverage in oc-harness. |
-| bic/lobster | [#877](https://microsoft.ghe.com/bic/lobster/pull/877) | OpenClaw policy proposal drafts. |
+| openclaw/openclaw | [#87056](https://github.com/openclaw/openclaw/pull/87056) | Data handling conformance checks.                                                                                                                                                |
+| openclaw/openclaw | [#86768](https://github.com/openclaw/openclaw/pull/86768) | Policy file comparison command.                                                                                                                                                  |
+| openclaw/openclaw | [#85817](https://github.com/openclaw/openclaw/pull/85817) | Agent-scoped policy overlays.                                                                                                                                                    |
+| openclaw/openclaw | [#85795](https://github.com/openclaw/openclaw/pull/85795) | Policy rule reference tables.                                                                                                                                                    |
+| openclaw/openclaw | [#85744](https://github.com/openclaw/openclaw/pull/85744) | Ingress channel conformance checks.                                                                                                                                              |
+| openclaw/openclaw | [#85572](https://github.com/openclaw/openclaw/pull/85572) | Sandbox posture conformance checks.                                                                                                                                              |
+| openclaw/openclaw | [#85482](https://github.com/openclaw/openclaw/pull/85482) | Tool posture conformance checks.                                                                                                                                                 |
+| openclaw/openclaw | [#85096](https://github.com/openclaw/openclaw/pull/85096) | Agent workspace conformance checks.                                                                                                                                              |
+| openclaw/rfcs     | [#2](https://github.com/openclaw/rfcs/pull/2)             | Policy Conformance 1.0 RFC.                                                                                                                                                      |
+| openclaw/rfcs     | [#6](https://github.com/openclaw/rfcs/pull/6)             | RFC addendum for exec approvals evidence.                                                                                                                                        |
+| openclaw/openclaw | [#94314](https://github.com/openclaw/openclaw/pull/94314) | Split policy doctor modules. Merged 2026-06-19 at head `0d876ce3`.                                                                                                               |
+| bic/lobster       | [#3555](https://microsoft.ghe.com/bic/lobster/pull/3555)  | MAC / Partner Center registration guidance refresh. Merged 2026-06-24 at head `44cc96c6`.                                                                                        |
+| bic/lobster       | [#3391](https://microsoft.ghe.com/bic/lobster/pull/3391)  | Gated Policy UX preview. Merged 2026-06-20 at head `a07e8915`.                                                                                                                   |
+| bic/lobster       | [#3388](https://microsoft.ghe.com/bic/lobster/pull/3388)  | Personal policy baseline state with MOS3-backed equal-or-stricter acceptance. Merged 2026-06-20.                                                                                 |
+| bic/lobster       | [#3383](https://microsoft.ghe.com/bic/lobster/pull/3383)  | Scout policy preview polish. Merged 2026-06-20.                                                                                                                                  |
+| bic/lobster       | [#3355](https://microsoft.ghe.com/bic/lobster/pull/3355)  | Scout tenant feed policy preview for package-defense and MOS3 block-status metadata. Merged 2026-06-19.                                                                          |
+| bic/lobster       | [#2270](https://microsoft.ghe.com/bic/lobster/pull/2270)  | Bootstrap managed OpenClaw policy baselines. Merged 2026-06-19.                                                                                                                  |
+| bic/lobster       | [#2275](https://microsoft.ghe.com/bic/lobster/pull/2275)  | Policy baseline state primitives with optional MOS3 artifact metadata. Merged 2026-06-19.                                                                                        |
+| bic/lobster       | [#1051](https://microsoft.ghe.com/bic/lobster/pull/1051)  | Policy 1.0, Workspace 1.0, and ClawPilot 1.0 specs.                                                                                                                              |
+| bic/lobster       | [#878](https://microsoft.ghe.com/bic/lobster/pull/878)    | Policy proposal coverage in oc-harness.                                                                                                                                          |
+| bic/lobster       | [#877](https://microsoft.ghe.com/bic/lobster/pull/877)    | OpenClaw policy proposal drafts.                                                                                                                                                 |
 
 ## 2026-07-13 Issue Watch
 

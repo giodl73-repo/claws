@@ -26,12 +26,12 @@ OpenClaw guarded-fetch test owner
 
 Fixture origins:
 
-| Origin | Behavior |
-| --- | --- |
-| `https://api.dispatch.test` | Records request head/chunks and streams a bounded response |
-| `https://redirect.dispatch.test` | Returns configurable `302`, `307`, and `308` responses |
-| `https://private.dispatch.test` | Resolves to a fixture-private address |
-| `https://rebind.dispatch.test` | Resolves to an allowed address, then a loopback/private address |
+| Origin                           | Behavior                                                        |
+| -------------------------------- | --------------------------------------------------------------- |
+| `https://api.dispatch.test`      | Records request head/chunks and streams a bounded response      |
+| `https://redirect.dispatch.test` | Returns configurable `302`, `307`, and `308` responses          |
+| `https://private.dispatch.test`  | Resolves to a fixture-private address                           |
+| `https://rebind.dispatch.test`   | Resolves to an allowed address, then a loopback/private address |
 
 No production provider credentials or endpoints participate.
 
@@ -69,24 +69,24 @@ to authorize different networks.
 
 ## Contract Cases
 
-| Case | Expected dispatcher observation | Expected OpenClaw result |
-| --- | --- | --- |
-| Public streamed request | One invocation; two request chunks; one half-close | Same response status, headers, and two response chunks |
-| First-hop policy denial | Zero invocations | `denied`, `not-started` |
-| Hosted `302` | One invocation; no second host request | OpenClaw receives `302` and evaluates `Location` |
-| Redirect to denied private origin | First hop only | Second hop rejected before dispatcher |
-| Rebinding hostname | Connection not opened to private/loopback address | `denied`, `not-started` |
-| Managed private origin | One invocation only under managed-private profile | Normal response |
-| Cross-origin redirect | Second hop lacks stripped protected headers/slots | Normal response or policy denial |
-| Declared credential slot | Exact configured header at allowed origin | Normal response; secret absent from evidence output |
-| Undeclared credential slot | Zero provider sends | `protocol-violation` or configuration failure, `not-started` |
-| Saturated dispatcher | Zero provider sends | `overloaded`, `not-started`; readiness remains true |
-| Disconnect after send | One send may have reached fixture | `connection-lost`, `started-unconfirmed` |
-| Advisory cancellation after send | Cancellation observed; no replay | `cancelled` with current certainty |
-| Stale owner generation | Zero provider sends | `stale-generation`, `not-started` |
-| Stale host bundle generation | Zero provider sends | `stale-generation`, `not-started` |
-| One-shot body plus `307`/`308` | No replay dispatch | non-replayable redirect failure |
-| Response limit exceeded | Response stream terminated | `response-limit-exceeded`; no truncated success |
+| Case                              | Expected dispatcher observation                    | Expected OpenClaw result                                     |
+| --------------------------------- | -------------------------------------------------- | ------------------------------------------------------------ |
+| Public streamed request           | One invocation; two request chunks; one half-close | Same response status, headers, and two response chunks       |
+| First-hop policy denial           | Zero invocations                                   | `denied`, `not-started`                                      |
+| Hosted `302`                      | One invocation; no second host request             | OpenClaw receives `302` and evaluates `Location`             |
+| Redirect to denied private origin | First hop only                                     | Second hop rejected before dispatcher                        |
+| Rebinding hostname                | Connection not opened to private/loopback address  | `denied`, `not-started`                                      |
+| Managed private origin            | One invocation only under managed-private profile  | Normal response                                              |
+| Cross-origin redirect             | Second hop lacks stripped protected headers/slots  | Normal response or policy denial                             |
+| Declared credential slot          | Exact configured header at allowed origin          | Normal response; secret absent from evidence output          |
+| Undeclared credential slot        | Zero provider sends                                | `protocol-violation` or configuration failure, `not-started` |
+| Saturated dispatcher              | Zero provider sends                                | `overloaded`, `not-started`; readiness remains true          |
+| Disconnect after send             | One send may have reached fixture                  | `connection-lost`, `started-unconfirmed`                     |
+| Advisory cancellation after send  | Cancellation observed; no replay                   | `cancelled` with current certainty                           |
+| Stale owner generation            | Zero provider sends                                | `stale-generation`, `not-started`                            |
+| Stale host bundle generation      | Zero provider sends                                | `stale-generation`, `not-started`                            |
+| One-shot body plus `307`/`308`    | No replay dispatch                                 | non-replayable redirect failure                              |
+| Response limit exceeded           | Response stream terminated                         | `response-limit-exceeded`; no truncated success              |
 
 ## Observable Proof
 
@@ -138,16 +138,16 @@ They need not share:
 The current forwarding core contains preparation semantics that must not be
 hidden inside the generic dispatcher:
 
-| Current path | Credential shape | Other preparation | V1 implication |
-| --- | --- | --- | --- |
-| Anthropic direct | `x-api-key` | Buffers and rewrites attachment markers in the JSON body | Register an Anthropic provider adapter plus key slot resolver |
-| WebIQ | `x-apikey` | Target policy and product routing | Register the owner adapter/policy plus key slot resolver |
-| Entra/dev token targets | `Authorization` bearer | Scope selection and user assertion exchange | Register an origin/scope-bound bearer slot resolver |
-| Teams/Bot Framework ACF | `Authorization` bearer | Per-user agent identity and Channel semantics | Channel owner prepares the request and selects an ACF bearer slot |
-| Graph agentic-user | `Authorization` bearer | Per-user Graph identity and feature gates | Graph/Channel owner prepares the request and selects an agentic-user bearer slot |
-| CAPI | Bearer plus several metadata headers | URL/query rewrite, model/stream inspection, buffered body, response SSE transformation | Register `lobster/capi` adapter for semantics and `lobster/capi-token` for the bearer slot |
-| Substrate LLM API | Bearer plus many routing/taxonomy headers | Endpoint rewrite, model inspection/mapping, buffered body | Register `lobster/substrate-llmapi` adapter and `lobster/substrate-token` bearer slot |
-| IDP registry handlers | Potentially provider-defined credential mutation | Provider-specific identity policy | Register typed owner adapters and slot resolvers; arbitrary mutation does not enter the dispatcher |
+| Current path            | Credential shape                                 | Other preparation                                                                      | V1 implication                                                                                     |
+| ----------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Anthropic direct        | `x-api-key`                                      | Buffers and rewrites attachment markers in the JSON body                               | Register an Anthropic provider adapter plus key slot resolver                                      |
+| WebIQ                   | `x-apikey`                                       | Target policy and product routing                                                      | Register the owner adapter/policy plus key slot resolver                                           |
+| Entra/dev token targets | `Authorization` bearer                           | Scope selection and user assertion exchange                                            | Register an origin/scope-bound bearer slot resolver                                                |
+| Teams/Bot Framework ACF | `Authorization` bearer                           | Per-user agent identity and Channel semantics                                          | Channel owner prepares the request and selects an ACF bearer slot                                  |
+| Graph agentic-user      | `Authorization` bearer                           | Per-user Graph identity and feature gates                                              | Graph/Channel owner prepares the request and selects an agentic-user bearer slot                   |
+| CAPI                    | Bearer plus several metadata headers             | URL/query rewrite, model/stream inspection, buffered body, response SSE transformation | Register `lobster/capi` adapter for semantics and `lobster/capi-token` for the bearer slot         |
+| Substrate LLM API       | Bearer plus many routing/taxonomy headers        | Endpoint rewrite, model inspection/mapping, buffered body                              | Register `lobster/substrate-llmapi` adapter and `lobster/substrate-token` bearer slot              |
+| IDP registry handlers   | Potentially provider-defined credential mutation | Provider-specific identity policy                                                      | Register typed owner adapters and slot resolvers; arbitrary mutation does not enter the dispatcher |
 
 The first conformance slice therefore proves the dispatcher mechanism. Full
 ProxyPipe tag deletion waits for every active brokered path either to:
@@ -160,16 +160,16 @@ ProxyPipe tag deletion waits for every active brokered path either to:
 
 ## Exact ProxyPipe Mapping
 
-| Current source | Replacement evidence | Deletion condition |
-| --- | --- | --- |
-| `proto/proxy_pipe.proto` tags 1-5 | Dispatcher and reverse-carrier schemas | All brokered request families migrated |
+| Current source                                                                                                 | Replacement evidence                           | Deletion condition                        |
+| -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------------- |
+| `proto/proxy_pipe.proto` tags 1-5                                                                              | Dispatcher and reverse-carrier schemas         | All brokered request families migrated    |
 | `openclaw_container/src/proxy_pipe_bridge.rs` body buffering, request IDs, inflight waiters, response channels | OpenClaw dispatcher client and carrier streams | No forward/refresh caller uses the bridge |
-| `openclaw_container/src/adapter_state.rs` `proxy_pipe_inflight` and request ID allocator | Dispatcher-owned operation registry | Bridge removed |
-| `lobster_runtime/src/proxy_pipe/request_registry.rs` HTTP active bodies, cancellation, and chunk routing | Reverse-carrier stream state machine | No tag 1-5 decoding |
-| `lobster_runtime/src/proxy_pipe/response_sender.rs` HTTP response frame helpers | Reverse-carrier response stream | No tag 3-5 encoding |
-| `lobster_runtime/src/proxy_pipe/handler.rs` HTTP dispatch permits and frame branches | Dispatcher admission and per-operation credit | No tag 1-5 handling |
-| 100 MiB gRPC message allowances | Bounded carrier chunks | Single-message request packaging removed |
-| Pipe refresh compatibility | Binding-owned credential/session renewal | No refresh call over tags 1-5 |
+| `openclaw_container/src/adapter_state.rs` `proxy_pipe_inflight` and request ID allocator                       | Dispatcher-owned operation registry            | Bridge removed                            |
+| `lobster_runtime/src/proxy_pipe/request_registry.rs` HTTP active bodies, cancellation, and chunk routing       | Reverse-carrier stream state machine           | No tag 1-5 decoding                       |
+| `lobster_runtime/src/proxy_pipe/response_sender.rs` HTTP response frame helpers                                | Reverse-carrier response stream                | No tag 3-5 encoding                       |
+| `lobster_runtime/src/proxy_pipe/handler.rs` HTTP dispatch permits and frame branches                           | Dispatcher admission and per-operation credit  | No tag 1-5 handling                       |
+| 100 MiB gRPC message allowances                                                                                | Bounded carrier chunks                         | Single-message request packaging removed  |
+| Pipe refresh compatibility                                                                                     | Binding-owned credential/session renewal       | No refresh call over tags 1-5             |
 
 The 10 MiB buffering in `container_proxy/forward.rs` is reviewed separately.
 Buffering used only to package ProxyPipe requests is deleted. Buffering required

@@ -67,11 +67,11 @@ and they do not run under a launcher hold.
 
 Node 24 probes established:
 
-| Platform | File `sync()` | Claimed-directory `sync()` | Parent-directory `sync()` |
-| --- | --- | --- | --- |
-| Linux, Node 24.15 | Pass | Pass | Pass |
-| Windows, Node 24.14 | Pass | `EPERM` | `EPERM` |
-| macOS | Blocked | Blocked | Blocked |
+| Platform            | File `sync()` | Claimed-directory `sync()` | Parent-directory `sync()` |
+| ------------------- | ------------- | -------------------------- | ------------------------- |
+| Linux, Node 24.15   | Pass          | Pass                       | Pass                      |
+| Windows, Node 24.14 | Pass          | `EPERM`                    | `EPERM`                   |
+| macOS               | Blocked       | Blocked                    | Blocked                   |
 
 Linux documents that syncing a file does not persist its directory entry; the
 containing directory must also be synced. Windows exposes directory handles
@@ -93,14 +93,14 @@ allocated, and documentation is not counted as platform proof.
 
 ### Internal analogues
 
-| Analogue | Decision | Reason |
-| --- | --- | --- |
-| Retrieve/materialize exclusive copy loop | Reuse | It already rejects links, aliases, replacement, and unsynced file content. |
-| Incomplete destination marker | Adapt | Bind it to journal, artifact, plan, policy, hold, and target identities; never treat it as the primary fence. |
-| Materialization receipt file inventory | Reuse | Retry can reverify or recreate every expected file without recording one journal event per file. |
-| Cleanup incomplete destinations | Avoid | Once the first final root is claimed, recovery is forward-only; automatic deletion could destroy evidence or foreign bytes. |
-| Gateway process lock | Avoid | It cannot fence adapter, supervisor, autoscaling, diagnostic, or replacement starts. |
-| Atomic rename publication | Avoid | Node rename may replace, and the restore hold makes partial visibility safe. |
+| Analogue                                 | Decision | Reason                                                                                                                      |
+| ---------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Retrieve/materialize exclusive copy loop | Reuse    | It already rejects links, aliases, replacement, and unsynced file content.                                                  |
+| Incomplete destination marker            | Adapt    | Bind it to journal, artifact, plan, policy, hold, and target identities; never treat it as the primary fence.               |
+| Materialization receipt file inventory   | Reuse    | Retry can reverify or recreate every expected file without recording one journal event per file.                            |
+| Cleanup incomplete destinations          | Avoid    | Once the first final root is claimed, recovery is forward-only; automatic deletion could destroy evidence or foreign bytes. |
+| Gateway process lock                     | Avoid    | It cannot fence adapter, supervisor, autoscaling, diagnostic, or replacement starts.                                        |
+| Atomic rename publication                | Avoid    | Node rename may replace, and the restore hold makes partial visibility safe.                                                |
 
 ### External comparators
 

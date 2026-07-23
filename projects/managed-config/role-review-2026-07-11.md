@@ -36,14 +36,14 @@ engineer, CISO, and new-hire lenses from `.craft/roles/claws/`.
 
 ## Role-specific Consequences
 
-| Lens | Required consequence |
-| --- | --- |
-| Founder | Default personal installs remain one ordinary config file; managed mode is explicit and removable. |
-| Gateway engineer | No per-request merge or policy hook; runtime receives one existing config shape and existing reload rules. |
-| Platform engineer | Expose managed-boundary identity, effective-content identity, conflicts, and readiness status for fleet drift. |
+| Lens                       | Required consequence                                                                                                                      |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Founder                    | Default personal installs remain one ordinary config file; managed mode is explicit and removable.                                        |
+| Gateway engineer           | No per-request merge or policy hook; runtime receives one existing config shape and existing reload rules.                                |
+| Platform engineer          | Expose managed-boundary identity, effective-content identity, conflicts, and readiness status for fleet drift.                            |
 | Lobster container engineer | Invalid composition blocks readiness deterministically; prior snapshot preservation applies only to reload, never unsafe initial startup. |
-| CISO | Operator APIs cannot write or force managed fields; conflicts cannot silently fall back to unmanaged config. |
-| New hire | Findings say which path is managed, what was requested, and whether to remove or match the operator value. |
+| CISO                       | Operator APIs cannot write or force managed fields; conflicts cannot silently fall back to unmanaged config.                              |
+| New hire                   | Findings say which path is managed, what was requested, and whether to remove or match the operator value.                                |
 
 ## Evaluation Verdict
 

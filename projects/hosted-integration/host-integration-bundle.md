@@ -37,8 +37,8 @@ Illustrative manifest:
   "contracts": {
     "trafficPolicies": ["example/managed-egress"],
     "providerRequestDispatchers": ["example/managed-dispatch"],
-    "credentialSlotResolvers": ["example/provider-token"]
-  }
+    "credentialSlotResolvers": ["example/provider-token"],
+  },
 }
 ```
 
@@ -62,11 +62,11 @@ the normal plugin configuration surface:
         "enabled": true,
         "config": {
           "bundle": "lobster/managed",
-          "version": "1.0.0"
-        }
-      }
-    }
-  }
+          "version": "1.0.0",
+        },
+      },
+    },
+  },
 }
 ```
 
@@ -93,29 +93,29 @@ Detailed settings remain in their semantic owners:
 {
   "channels": {
     "msteams": {
-      "endpoint": "lobster/teams"
-    }
+      "endpoint": "lobster/teams",
+    },
   },
   "providerRequests": {
     "trafficPolicy": "lobster/enterprise-egress",
-    "dispatcher": "lobster/egress"
+    "dispatcher": "lobster/egress",
   },
   "models": {
     "providers": {
       "capi": {
         "requestAdapter": "lobster/capi",
         "credentials": {
-          "primary": "lobster/capi-token"
-        }
-      }
-    }
+          "primary": "lobster/capi-token",
+        },
+      },
+    },
   },
   "secrets": {
-    "provider": "lobster/vault"
+    "provider": "lobster/vault",
   },
   "hosting": {
-    "profile": "lobster/managed"
-  }
+    "profile": "lobster/managed",
+  },
 }
 ```
 
@@ -181,14 +181,12 @@ The namespaced profile declares the deployment contract:
         "requiredCriteria": [
           "channel.msteams.endpoint",
           "provider.request.policy",
-          "provider.request.dispatcher"
+          "provider.request.dispatcher",
         ],
-        "advisoryCriteria": [
-          "telemetry.lobster"
-        ]
-      }
-    }
-  }
+        "advisoryCriteria": ["telemetry.lobster"],
+      },
+    },
+  },
 }
 ```
 

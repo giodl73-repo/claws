@@ -14,15 +14,15 @@ is strongest to weakest.
 
 ## Required Algebra
 
-| Case | Rule |
-| --- | --- |
-| Missing path | Identity: the layer contributes no value or claim. |
-| First declaration | Establish the value, control mode, and controlling-layer provenance. |
-| Later exact declaration | Accept only the same canonical value; otherwise emit a conflict naming both layers. |
-| Later bounded declaration | Accept only an equal or stricter value and carry the tightened boundary forward. |
-| Invalid layer | Fail the candidate composition; do not skip the layer or partially publish. |
-| Defaults | Apply only after every declared layer is composed. Defaults never claim authority. |
-| Runtime-derived values | Apply after composition only when they cannot weaken authority; otherwise classify them as an explicit layer or reject them. |
+| Case                      | Rule                                                                                                                         |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Missing path              | Identity: the layer contributes no value or claim.                                                                           |
+| First declaration         | Establish the value, control mode, and controlling-layer provenance.                                                         |
+| Later exact declaration   | Accept only the same canonical value; otherwise emit a conflict naming both layers.                                          |
+| Later bounded declaration | Accept only an equal or stricter value and carry the tightened boundary forward.                                             |
+| Invalid layer             | Fail the candidate composition; do not skip the layer or partially publish.                                                  |
+| Defaults                  | Apply only after every declared layer is composed. Defaults never claim authority.                                           |
+| Runtime-derived values    | Apply after composition only when they cannot weaken authority; otherwise classify them as an explicit layer or reject them. |
 
 Exact composition is a partial associative operation over `missing` and equal
 canonical values. A bounded comparator must be deterministic, idempotent, and
@@ -95,14 +95,14 @@ redacted runtime configuration.
 
 ## Role Evaluation
 
-| Lens | Result |
-| --- | --- |
-| Founder | One ordinary writable layer remains the default profile; generic layering adds no tax unless configured. |
-| Gateway engineer | The fold runs only during activation. Runtime consumers and reload planning remain unchanged. |
-| Platform engineer | Arbitrary named layers support platform/tenant/team shapes without core role semantics; chain identity supports drift detection. |
-| Lobster container engineer | Full recomputation and atomic snapshot publication make layer rotation deterministic. |
-| CISO | Earlier authority cannot be bypassed by writable later layers; runtime overrides must be classified. |
-| New hire | Diagnostics show declared order and name the conflicting earlier layer without requiring host/operator terminology. |
+| Lens                       | Result                                                                                                                           |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Founder                    | One ordinary writable layer remains the default profile; generic layering adds no tax unless configured.                         |
+| Gateway engineer           | The fold runs only during activation. Runtime consumers and reload planning remain unchanged.                                    |
+| Platform engineer          | Arbitrary named layers support platform/tenant/team shapes without core role semantics; chain identity supports drift detection. |
+| Lobster container engineer | Full recomputation and atomic snapshot publication make layer rotation deterministic.                                            |
+| CISO                       | Earlier authority cannot be bypassed by writable later layers; runtime overrides must be classified.                             |
+| New hire                   | Diagnostics show declared order and name the conflicting earlier layer without requiring host/operator terminology.              |
 
 ## Decision
 

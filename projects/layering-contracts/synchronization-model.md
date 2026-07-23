@@ -214,4 +214,3 @@ Do not promote this model until the audit can prove:
 3. The boundary between local materialization and host durability.
 4. A restore demonstration through the reported durable generation.
 5. A race-free drain, synchronize, and shutdown sequence.
-

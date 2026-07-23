@@ -42,13 +42,13 @@ used by CLI, channel, and Gateway error renderers.
 
 ### Localization exists today
 
-| Surface | Current support | Evidence |
-| --- | --- | --- |
-| Control UI | English plus 20 lazy-loaded locale bundles, browser locale resolution, persisted user selection, English fallback, interpolation | `ui/src/i18n/lib/registry.ts`, `ui/src/i18n/lib/translate.ts`, `src/i18n/registry.test.ts` |
-| CLI onboarding wizard | `en`, `zh-CN`, and `zh-TW`; resolves `OPENCLAW_LOCALE`, `LC_ALL`, `LC_MESSAGES`, then `LANG`; English fallback | `src/wizard/i18n/index.ts`, `src/wizard/i18n/locales/`, `docs/cli/onboard.md` |
-| Bundled plugin setup | Shared setup translator is used by channel setup surfaces | `src/wizard/i18n/index.ts`, `extensions/*/src/setup*.ts` |
-| Native apps | Shared generated locale inventory and Android/iOS localization workflows | `apps/.i18n/`, `scripts/native-app-i18n.ts`, `.github/workflows/native-app-locale-refresh.yml` |
-| Documentation | Dedicated translation workflow, glossaries, navigation catalogs, and translation tooling | `docs/.i18n/`, `scripts/docs-i18n/` |
+| Surface               | Current support                                                                                                                  | Evidence                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Control UI            | English plus 20 lazy-loaded locale bundles, browser locale resolution, persisted user selection, English fallback, interpolation | `ui/src/i18n/lib/registry.ts`, `ui/src/i18n/lib/translate.ts`, `src/i18n/registry.test.ts`     |
+| CLI onboarding wizard | `en`, `zh-CN`, and `zh-TW`; resolves `OPENCLAW_LOCALE`, `LC_ALL`, `LC_MESSAGES`, then `LANG`; English fallback                   | `src/wizard/i18n/index.ts`, `src/wizard/i18n/locales/`, `docs/cli/onboard.md`                  |
+| Bundled plugin setup  | Shared setup translator is used by channel setup surfaces                                                                        | `src/wizard/i18n/index.ts`, `extensions/*/src/setup*.ts`                                       |
+| Native apps           | Shared generated locale inventory and Android/iOS localization workflows                                                         | `apps/.i18n/`, `scripts/native-app-i18n.ts`, `.github/workflows/native-app-locale-refresh.yml` |
+| Documentation         | Dedicated translation workflow, glossaries, navigation catalogs, and translation tooling                                         | `docs/.i18n/`, `scripts/docs-i18n/`                                                            |
 
 The CLI wizard catalog was introduced in May 2026
 (`d8ae3ec4c85 feat(wizard): add cli i18n catalog`). The broader UI localization

@@ -110,16 +110,16 @@ an availability reduction, not permission to reopen startup.
 
 ### Internal analogues
 
-| Analogue | Decision | Reason |
-| --- | --- | --- |
-| `resolve -> allocate` | Reuse | Produces the exact worker and initializes context without Gateway startup. |
-| Allocation response | Adapt | Return an adapter boot attestation before publication starts. |
-| Shared `lobster_sandbox_schema` DTO | Reuse | One strict request/result contract avoids mirrored Rust types. |
-| Typed Gateway start route | Adapt | Same routing and identity model, but a distinct operation and timeout. |
-| Direct `openclaw` child invocation | Reuse | No shell, bounded process lifetime, captured structured output. |
-| Generic diagnostics command | Avoid | Text command surface, wrong authorization model, and unsafe replay defaults. |
-| Gateway start body extension | Avoid | Restore must complete and E4 must commit before restored-start admission. |
-| Separate Kubernetes Job | Avoid | Would add scheduling, volume, identity, and result-recovery surfaces already solved by the allocated worker. |
+| Analogue                            | Decision | Reason                                                                                                       |
+| ----------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
+| `resolve -> allocate`               | Reuse    | Produces the exact worker and initializes context without Gateway startup.                                   |
+| Allocation response                 | Adapt    | Return an adapter boot attestation before publication starts.                                                |
+| Shared `lobster_sandbox_schema` DTO | Reuse    | One strict request/result contract avoids mirrored Rust types.                                               |
+| Typed Gateway start route           | Adapt    | Same routing and identity model, but a distinct operation and timeout.                                       |
+| Direct `openclaw` child invocation  | Reuse    | No shell, bounded process lifetime, captured structured output.                                              |
+| Generic diagnostics command         | Avoid    | Text command surface, wrong authorization model, and unsafe replay defaults.                                 |
+| Gateway start body extension        | Avoid    | Restore must complete and E4 must commit before restored-start admission.                                    |
+| Separate Kubernetes Job             | Avoid    | Would add scheduling, volume, identity, and result-recovery surfaces already solved by the allocated worker. |
 
 ### External comparators
 

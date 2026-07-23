@@ -1,338 +1,531 @@
 <!doctype html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      width: 1600px;
-      height: 900px;
-      overflow: hidden;
-      background: #030712;
-      color: #f8fafc;
-      font-family: "Segoe UI", Arial, sans-serif;
-    }
-    .board {
-      position: relative;
-      width: 1600px;
-      height: 900px;
-      padding: 24px 48px;
-      background:
-        radial-gradient(circle at 18% 18%, rgba(37, 99, 235, .20), transparent 30%),
-        radial-gradient(circle at 78% 18%, rgba(168, 85, 247, .18), transparent 32%),
-        linear-gradient(180deg, #020617 0%, #07111f 58%, #030712 100%);
-    }
-    h1 {
-      margin: 0;
-      text-align: center;
-      font-size: 50px;
-      line-height: 1.05;
-      letter-spacing: 0;
-      text-shadow: 0 2px 12px rgba(0,0,0,.8);
-    }
-    .subtitle {
-      margin-top: 8px;
-      text-align: center;
-      color: #cbd5e1;
-      font-size: 25px;
-      font-weight: 650;
-    }
-    .panel {
-      position: absolute;
-      border: 2px solid rgba(148, 163, 184, .58);
-      border-radius: 16px;
-      background: linear-gradient(180deg, rgba(15, 23, 42, .92), rgba(2, 6, 23, .86));
-      box-shadow: 0 0 0 1px rgba(255,255,255,.04), 0 24px 60px rgba(0,0,0,.45);
-      overflow: hidden;
-    }
-    .panel.blue { border-color: rgba(96, 165, 250, .86); }
-    .panel.purple { border-color: rgba(167, 139, 250, .86); }
-    .panel.green { border-color: rgba(74, 222, 128, .80); }
-    .panel.amber { border-color: rgba(251, 191, 36, .82); }
-    .panel.red { border-color: rgba(248, 113, 113, .82); }
-    .panel h2 {
-      margin: 0;
-      padding: 17px 22px 13px;
-      font-size: 26px;
-      line-height: 1;
-      border-bottom: 1px solid rgba(148, 163, 184, .35);
-    }
-    .small-title {
-      color: #93c5fd;
-      font-size: 17px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .03em;
-    }
-    .row {
-      display: flex;
-      align-items: center;
-      min-height: 54px;
-      margin: 10px 16px;
-      padding: 10px 14px;
-      border: 1px solid rgba(148, 163, 184, .32);
-      border-radius: 10px;
-      background: linear-gradient(180deg, rgba(30, 41, 59, .88), rgba(15, 23, 42, .90));
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
-    }
-    .icon {
-      width: 36px;
-      height: 36px;
-      margin-right: 12px;
-      border-radius: 9px;
-      display: grid;
-      place-items: center;
-      color: white;
-      font-weight: 900;
-      font-size: 21px;
-      box-shadow: 0 0 18px rgba(0,0,0,.42);
-    }
-    .i-blue { background: linear-gradient(135deg,#60a5fa,#2563eb); }
-    .i-green { background: linear-gradient(135deg,#86efac,#16a34a); }
-    .i-purple { background: linear-gradient(135deg,#c4b5fd,#7c3aed); }
-    .i-red { background: linear-gradient(135deg,#f87171,#dc2626); }
-    .i-amber { background: linear-gradient(135deg,#fbbf24,#d97706); }
-    .label { flex: 1; font-size: 24px; font-weight: 800; }
-    .minor { color: #94a3b8; font-size: 17px; font-weight: 600; }
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 64px;
-      padding: 5px 10px;
-      border-radius: 9px;
-      background: rgba(255,255,255,.08);
-      color: #cbd5e1;
-      font-size: 16px;
-      font-weight: 800;
-      border: 1px solid rgba(255,255,255,.08);
-    }
-    .ok { color: #86efac; border-color: rgba(34,197,94,.7); background: rgba(22,163,74,.12); }
-    .no { color: #fca5a5; border-color: rgba(239,68,68,.7); background: rgba(220,38,38,.12); }
-    .pin { color: #fde68a; border-color: rgba(245,158,11,.7); background: rgba(245,158,11,.14); }
-    .warn { color: #fcd34d; border-color: rgba(245,158,11,.7); background: rgba(245,158,11,.14); }
-    .rule {
-      display: grid;
-      grid-template-columns: 32px 1fr;
-      gap: 10px;
-      align-items: center;
-      margin: 9px 16px;
-      color: #e2e8f0;
-      font-size: 18px;
-      font-weight: 650;
-    }
-    .rule .dot {
-      width: 24px;
-      height: 24px;
-      display: grid;
-      place-items: center;
-      border-radius: 50%;
-      font-weight: 900;
-      font-size: 16px;
-    }
-    .arrow {
-      position: absolute;
-      height: 0;
-      border-top: 5px solid #60a5fa;
-      filter: drop-shadow(0 0 8px rgba(96,165,250,.65));
-    }
-    .arrow:after {
-      content: "";
-      position: absolute;
-      right: -2px;
-      top: -11px;
-      border-left: 17px solid #60a5fa;
-      border-top: 8px solid transparent;
-      border-bottom: 8px solid transparent;
-    }
-    .arrow.left:after {
-      left: -2px;
-      right: auto;
-      border-left: 0;
-      border-right: 17px solid #60a5fa;
-    }
-    .caption {
-      position: absolute;
-      color: #bfdbfe;
-      font-size: 17px;
-      font-weight: 750;
-      text-align: center;
-    }
-    .lane {
-      position: absolute;
-      border: 2px solid rgba(96,165,250,.78);
-      border-radius: 16px;
-      background: rgba(2, 6, 23, .62);
-      box-shadow: inset 0 0 40px rgba(59,130,246,.08);
-    }
-    .mini {
-      font-size: 15px;
-      color: #cbd5e1;
-      font-weight: 650;
-    }
-    .matrix {
-      display: grid;
-      gap: 10px;
-      padding: 14px 16px;
-    }
-    .cell {
-      border: 1px solid rgba(148,163,184,.32);
-      border-radius: 10px;
-      padding: 10px 12px;
-      background: rgba(15,23,42,.86);
-    }
-    .cell strong { display:block; font-size: 18px; margin-bottom: 3px; }
-    .cell span { color:#cbd5e1; font-size: 14px; font-weight:650; }
-    .footer-note {
-      position: absolute;
-      left: 56px;
-      right: 56px;
-      bottom: 22px;
-      color: #cbd5e1;
-      font-size: 18px;
-      font-weight: 650;
-      text-align: center;
-    }
-    .source-badge {
-      display:inline-flex;
-      align-items:center;
-      gap: 7px;
-      padding: 8px 11px;
-      margin: 8px 5px 0 0;
-      border: 1px solid rgba(148,163,184,.35);
-      border-radius: 10px;
-      color:#dbeafe;
-      background:rgba(15,23,42,.75);
-      font-weight:750;
-    }
-  </style>
-</head>
-<body>
-<div id="root"></div>
-<script>
-const diagram = new URLSearchParams(location.search).get("diagram") || "position";
-const root = document.getElementById("root");
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        width: 1600px;
+        height: 900px;
+        overflow: hidden;
+        background: #030712;
+        color: #f8fafc;
+        font-family: "Segoe UI", Arial, sans-serif;
+      }
+      .board {
+        position: relative;
+        width: 1600px;
+        height: 900px;
+        padding: 24px 48px;
+        background:
+          radial-gradient(circle at 18% 18%, rgba(37, 99, 235, 0.2), transparent 30%),
+          radial-gradient(circle at 78% 18%, rgba(168, 85, 247, 0.18), transparent 32%),
+          linear-gradient(180deg, #020617 0%, #07111f 58%, #030712 100%);
+      }
+      h1 {
+        margin: 0;
+        text-align: center;
+        font-size: 50px;
+        line-height: 1.05;
+        letter-spacing: 0;
+        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+      }
+      .subtitle {
+        margin-top: 8px;
+        text-align: center;
+        color: #cbd5e1;
+        font-size: 25px;
+        font-weight: 650;
+      }
+      .panel {
+        position: absolute;
+        border: 2px solid rgba(148, 163, 184, 0.58);
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.86));
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.04),
+          0 24px 60px rgba(0, 0, 0, 0.45);
+        overflow: hidden;
+      }
+      .panel.blue {
+        border-color: rgba(96, 165, 250, 0.86);
+      }
+      .panel.purple {
+        border-color: rgba(167, 139, 250, 0.86);
+      }
+      .panel.green {
+        border-color: rgba(74, 222, 128, 0.8);
+      }
+      .panel.amber {
+        border-color: rgba(251, 191, 36, 0.82);
+      }
+      .panel.red {
+        border-color: rgba(248, 113, 113, 0.82);
+      }
+      .panel h2 {
+        margin: 0;
+        padding: 17px 22px 13px;
+        font-size: 26px;
+        line-height: 1;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+      }
+      .small-title {
+        color: #93c5fd;
+        font-size: 17px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        min-height: 54px;
+        margin: 10px 16px;
+        padding: 10px 14px;
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        border-radius: 10px;
+        background: linear-gradient(180deg, rgba(30, 41, 59, 0.88), rgba(15, 23, 42, 0.9));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      }
+      .icon {
+        width: 36px;
+        height: 36px;
+        margin-right: 12px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        color: white;
+        font-weight: 900;
+        font-size: 21px;
+        box-shadow: 0 0 18px rgba(0, 0, 0, 0.42);
+      }
+      .i-blue {
+        background: linear-gradient(135deg, #60a5fa, #2563eb);
+      }
+      .i-green {
+        background: linear-gradient(135deg, #86efac, #16a34a);
+      }
+      .i-purple {
+        background: linear-gradient(135deg, #c4b5fd, #7c3aed);
+      }
+      .i-red {
+        background: linear-gradient(135deg, #f87171, #dc2626);
+      }
+      .i-amber {
+        background: linear-gradient(135deg, #fbbf24, #d97706);
+      }
+      .label {
+        flex: 1;
+        font-size: 24px;
+        font-weight: 800;
+      }
+      .minor {
+        color: #94a3b8;
+        font-size: 17px;
+        font-weight: 600;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 64px;
+        padding: 5px 10px;
+        border-radius: 9px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #cbd5e1;
+        font-size: 16px;
+        font-weight: 800;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .ok {
+        color: #86efac;
+        border-color: rgba(34, 197, 94, 0.7);
+        background: rgba(22, 163, 74, 0.12);
+      }
+      .no {
+        color: #fca5a5;
+        border-color: rgba(239, 68, 68, 0.7);
+        background: rgba(220, 38, 38, 0.12);
+      }
+      .pin {
+        color: #fde68a;
+        border-color: rgba(245, 158, 11, 0.7);
+        background: rgba(245, 158, 11, 0.14);
+      }
+      .warn {
+        color: #fcd34d;
+        border-color: rgba(245, 158, 11, 0.7);
+        background: rgba(245, 158, 11, 0.14);
+      }
+      .rule {
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 10px;
+        align-items: center;
+        margin: 9px 16px;
+        color: #e2e8f0;
+        font-size: 18px;
+        font-weight: 650;
+      }
+      .rule .dot {
+        width: 24px;
+        height: 24px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        font-weight: 900;
+        font-size: 16px;
+      }
+      .arrow {
+        position: absolute;
+        height: 0;
+        border-top: 5px solid #60a5fa;
+        filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.65));
+      }
+      .arrow:after {
+        content: "";
+        position: absolute;
+        right: -2px;
+        top: -11px;
+        border-left: 17px solid #60a5fa;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+      }
+      .arrow.left:after {
+        left: -2px;
+        right: auto;
+        border-left: 0;
+        border-right: 17px solid #60a5fa;
+      }
+      .caption {
+        position: absolute;
+        color: #bfdbfe;
+        font-size: 17px;
+        font-weight: 750;
+        text-align: center;
+      }
+      .lane {
+        position: absolute;
+        border: 2px solid rgba(96, 165, 250, 0.78);
+        border-radius: 16px;
+        background: rgba(2, 6, 23, 0.62);
+        box-shadow: inset 0 0 40px rgba(59, 130, 246, 0.08);
+      }
+      .mini {
+        font-size: 15px;
+        color: #cbd5e1;
+        font-weight: 650;
+      }
+      .matrix {
+        display: grid;
+        gap: 10px;
+        padding: 14px 16px;
+      }
+      .cell {
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: rgba(15, 23, 42, 0.86);
+      }
+      .cell strong {
+        display: block;
+        font-size: 18px;
+        margin-bottom: 3px;
+      }
+      .cell span {
+        color: #cbd5e1;
+        font-size: 14px;
+        font-weight: 650;
+      }
+      .footer-note {
+        position: absolute;
+        left: 56px;
+        right: 56px;
+        bottom: 22px;
+        color: #cbd5e1;
+        font-size: 18px;
+        font-weight: 650;
+        text-align: center;
+      }
+      .source-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 11px;
+        margin: 8px 5px 0 0;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 10px;
+        color: #dbeafe;
+        background: rgba(15, 23, 42, 0.75);
+        font-weight: 750;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      const diagram = new URLSearchParams(location.search).get("diagram") || "position";
+      const root = document.getElementById("root");
 
-function row(icon, cls, label, version, status) {
-  return `<div class="row"><div class="icon ${cls}">${icon}</div><div class="label">${label}</div>${version ? `<div class="chip">${version}</div>` : ""}${status ? `<div class="chip ${status[1]}">${status[0]}</div>` : ""}</div>`;
-}
-function panel(cls, x, y, w, h, title, body) {
-  return `<section class="panel ${cls}" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"><h2>${title}</h2>${body}</section>`;
-}
-function arrow(x, y, w, left=false) {
-  return `<div class="arrow ${left ? "left" : ""}" style="left:${x}px;top:${y}px;width:${w}px"></div>`;
-}
-function board(title, subtitle, content) {
-  root.innerHTML = `<main class="board"><h1>${title}</h1><div class="subtitle">${subtitle}</div>${content}</main>`;
-}
+      function row(icon, cls, label, version, status) {
+        return `<div class="row"><div class="icon ${cls}">${icon}</div><div class="label">${label}</div>${version ? `<div class="chip">${version}</div>` : ""}${status ? `<div class="chip ${status[1]}">${status[0]}</div>` : ""}</div>`;
+      }
+      function panel(cls, x, y, w, h, title, body) {
+        return `<section class="panel ${cls}" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"><h2>${title}</h2>${body}</section>`;
+      }
+      function arrow(x, y, w, left = false) {
+        return `<div class="arrow ${left ? "left" : ""}" style="left:${x}px;top:${y}px;width:${w}px"></div>`;
+      }
+      function board(title, subtitle, content) {
+        root.innerHTML = `<main class="board"><h1>${title}</h1><div class="subtitle">${subtitle}</div>${content}</main>`;
+      }
 
-function additive() {
-  board("What MOS3 Adds With Feeds",
-    "MOS3 keeps the registry and settings. Feeds package the effective decision for clients.",
-    panel("blue", 58, 142, 426, 590, "MOS3 already owns",
-      row("T","i-blue","titles and packages", "", ["records","ok"]) +
-      row("A","i-green","acquisitions and entitlements", "", ["state","ok"]) +
-      row("P","i-purple","publisher and source metadata", "", ["metadata","ok"]) +
-      row("S","i-amber","tenant and admin settings", "", ["policy","ok"]) +
-      row("R","i-red","review and revocation state", "", ["risk","warn"]) +
-      `<div style="padding:8px 20px;color:#cbd5e1;font-size:17px;font-weight:650;line-height:1.25">These remain authoritative. Feeds do not replace this system of record.</div>`) +
-    arrow(486, 390, 120) +
-    panel("purple", 606, 142, 390, 590, "Feeds add the projection",
-      `<div class="matrix" style="grid-template-columns:1fr 1fr">
+      function additive() {
+        board(
+          "What MOS3 Adds With Feeds",
+          "MOS3 keeps the registry and settings. Feeds package the effective decision for clients.",
+          panel(
+            "blue",
+            58,
+            142,
+            426,
+            590,
+            "MOS3 already owns",
+            row("T", "i-blue", "titles and packages", "", ["records", "ok"]) +
+              row("A", "i-green", "acquisitions and entitlements", "", ["state", "ok"]) +
+              row("P", "i-purple", "publisher and source metadata", "", ["metadata", "ok"]) +
+              row("S", "i-amber", "tenant and admin settings", "", ["policy", "ok"]) +
+              row("R", "i-red", "review and revocation state", "", ["risk", "warn"]) +
+              `<div style="padding:8px 20px;color:#cbd5e1;font-size:17px;font-weight:650;line-height:1.25">These remain authoritative. Feeds do not replace this system of record.</div>`,
+          ) +
+            arrow(486, 390, 120) +
+            panel(
+              "purple",
+              606,
+              142,
+              390,
+              590,
+              "Feeds add the projection",
+              `<div class="matrix" style="grid-template-columns:1fr 1fr">
         <div class="cell"><strong>Compose</strong><span>N sources plus MOS3 records</span></div>
         <div class="cell"><strong>Scope</strong><span>tenant, group, user, surface, region</span></div>
         <div class="cell"><strong>Decide</strong><span>allow, deny, pin, revoke, review</span></div>
         <div class="cell"><strong>Materialize</strong><span>signed effective feed revision</span></div>
       </div>
-      ${row("F","i-blue","effective feed", "", ["signed","ok"])}
-      ${row("D","i-green","client diagnostics", "", ["fresh","ok"])}`) +
-    arrow(998, 390, 120) +
-    panel("green", 1118, 142, 424, 590, "Clients consume",
-      row("S","i-blue","Scout", "", ["search","ok"]) +
-      row("C","i-green","Chat and Cowork", "", ["install","ok"]) +
-      row("V","i-purple","VS Code and GitHub Copilot", "", ["browse","ok"]) +
-      row("O","i-amber","OpenClaw", "", ["policy","ok"]) +
-      row("A","i-red","future clients", "", ["same view","ok"]) +
-      `<div style="padding:12px 20px;color:#cbd5e1;font-size:18px;font-weight:650">Clients no longer reimplement source-specific filtering and tenant policy.</div>`) +
-    `<section class="lane" style="left:82px;top:760px;width:1436px;height:88px">
+      ${row("F", "i-blue", "effective feed", "", ["signed", "ok"])}
+      ${row("D", "i-green", "client diagnostics", "", ["fresh", "ok"])}`,
+            ) +
+            arrow(998, 390, 120) +
+            panel(
+              "green",
+              1118,
+              142,
+              424,
+              590,
+              "Clients consume",
+              row("S", "i-blue", "Scout", "", ["search", "ok"]) +
+                row("C", "i-green", "Chat and Cowork", "", ["install", "ok"]) +
+                row("V", "i-purple", "VS Code and GitHub Copilot", "", ["browse", "ok"]) +
+                row("O", "i-amber", "OpenClaw", "", ["policy", "ok"]) +
+                row("A", "i-red", "future clients", "", ["same view", "ok"]) +
+                `<div style="padding:12px 20px;color:#cbd5e1;font-size:18px;font-weight:650">Clients no longer reimplement source-specific filtering and tenant policy.</div>`,
+            ) +
+            `<section class="lane" style="left:82px;top:760px;width:1436px;height:88px">
       <div class="small-title" style="position:absolute;left:24px;top:17px;color:#93c5fd">Working-group framing</div>
       <div style="position:absolute;left:330px;right:24px;top:20px;font-size:23px;line-height:1.2;font-weight:850;color:#f8fafc">MOS3 stores the records and decisions. Feeds package the effective decision for clients.</div>
-    </section>`);
-}
+    </section>`,
+        );
+      }
 
-function position() {
-  board("MOS3 Managed Feeds",
-    "Many sources become one tenant-approved view for skills, plugins, MCP servers, connectors, and agents",
-    panel("blue", 48, 128, 405, 512, "Source ecosystems",
-      row("S","i-blue","ClawHub skill", "v1.2", ["source",""]) +
-      row("P","i-green","GitHub plugin", "v1.4", ["source",""]) +
-      row("M","i-purple","Partner MCP server", "v2.0", ["source",""]) +
-      row("C","i-red","Connector", "v1.0", ["source",""]) +
-      `<div style="margin:18px 18px 0;border-top:1px solid rgba(148,163,184,.35);padding-top:16px">
+      function position() {
+        board(
+          "MOS3 Managed Feeds",
+          "Many sources become one tenant-approved view for skills, plugins, MCP servers, connectors, and agents",
+          panel(
+            "blue",
+            48,
+            128,
+            405,
+            512,
+            "Source ecosystems",
+            row("S", "i-blue", "ClawHub skill", "v1.2", ["source", ""]) +
+              row("P", "i-green", "GitHub plugin", "v1.4", ["source", ""]) +
+              row("M", "i-purple", "Partner MCP server", "v2.0", ["source", ""]) +
+              row("C", "i-red", "Connector", "v1.0", ["source", ""]) +
+              `<div style="margin:18px 18px 0;border-top:1px solid rgba(148,163,184,.35);padding-top:16px">
         <div class="source-badge">official</div><div class="source-badge">reviewed</div><div class="source-badge">community</div>
-      </div>`) +
-    arrow(455, 294, 155) + arrow(455, 366, 155) + arrow(455, 438, 155) +
-    panel("purple", 610, 128, 396, 512, "MOS3 feed composition",
-      `<div class="matrix" style="grid-template-columns: 1fr 1fr">
+      </div>`,
+          ) +
+            arrow(455, 294, 155) +
+            arrow(455, 366, 155) +
+            arrow(455, 438, 155) +
+            panel(
+              "purple",
+              610,
+              128,
+              396,
+              512,
+              "MOS3 feed composition",
+              `<div class="matrix" style="grid-template-columns: 1fr 1fr">
         <div class="cell"><strong>Normalize</strong><span>stable IDs, versions, provenance</span></div>
         <div class="cell"><strong>Review</strong><span>Microsoft evidence and compatibility</span></div>
         <div class="cell"><strong>Approve</strong><span>tenant allow, deny, pin, scope</span></div>
         <div class="cell"><strong>Materialize</strong><span>tenant effective feed revision</span></div>
       </div>
-      ${row("S","i-blue","skill approved", "v1.2", ["✓","ok"])}
-      ${row("P","i-green","plugin pinned", "v1.4", ["pin","pin"])}`) +
-    arrow(1008, 344, 170, true) +
-    `<div class="caption" style="left:1028px;top:280px;width:130px">search and browse</div>` +
-    arrow(1008, 424, 170, true) +
-    `<div class="caption" style="left:1030px;top:438px;width:130px">install from feed</div>` +
-    panel("green", 1178, 128, 374, 512, "Client surfaces",
-      `<div class="small-title" style="padding:14px 18px 0;color:#c4b5fd">Scout tenant workspace</div>` +
-      row("S","i-blue","skill A", "v1.2", ["✓","ok"]) +
-      row("P","i-green","plugin B", "v1.4", ["pin","pin"]) +
-      row("M","i-purple","MCP D", "v2.0", ["✓","ok"]) +
-      `<div class="small-title" style="padding:10px 18px 0;color:#c4b5fd">VS Code and OpenClaw</div>` +
-      row("S","i-blue","skill A", "v1.2", ["✓","ok"]) +
-      row("C","i-red","connector C", "v1.0", ["block","no"])) +
-    `<section class="lane" style="left:48px;top:674px;width:1504px;height:170px">
+      ${row("S", "i-blue", "skill approved", "v1.2", ["✓", "ok"])}
+      ${row("P", "i-green", "plugin pinned", "v1.4", ["pin", "pin"])}`,
+            ) +
+            arrow(1008, 344, 170, true) +
+            `<div class="caption" style="left:1028px;top:280px;width:130px">search and browse</div>` +
+            arrow(1008, 424, 170, true) +
+            `<div class="caption" style="left:1030px;top:438px;width:130px">install from feed</div>` +
+            panel(
+              "green",
+              1178,
+              128,
+              374,
+              512,
+              "Client surfaces",
+              `<div class="small-title" style="padding:14px 18px 0;color:#c4b5fd">Scout tenant workspace</div>` +
+                row("S", "i-blue", "skill A", "v1.2", ["✓", "ok"]) +
+                row("P", "i-green", "plugin B", "v1.4", ["pin", "pin"]) +
+                row("M", "i-purple", "MCP D", "v2.0", ["✓", "ok"]) +
+                `<div class="small-title" style="padding:10px 18px 0;color:#c4b5fd">VS Code and OpenClaw</div>` +
+                row("S", "i-blue", "skill A", "v1.2", ["✓", "ok"]) +
+                row("C", "i-red", "connector C", "v1.0", ["block", "no"]),
+            ) +
+            `<section class="lane" style="left:48px;top:674px;width:1504px;height:170px">
       <div class="small-title" style="position:absolute;left:30px;top:24px;color:#93c5fd">Update and revocation propagation</div>
-      <div style="position:absolute;left:30px;top:62px;width:330px">${row("P","i-green","plugin B", "v1.4 to v1.5", ["source",""])}</div>
-      <div style="position:absolute;left:430px;top:62px;width:330px">${row("P","i-green","evaluated", "v1.5", ["approved","ok"])}</div>
-      <div style="position:absolute;left:830px;top:62px;width:330px">${row("P","i-green","delivered", "v1.5", ["update","warn"])}</div>
-      <div style="position:absolute;left:1170px;top:62px;width:300px">${row("C","i-red","revoked", "v1.0", ["blocked","no"])}</div>
-      ${arrow(366,118,58)}${arrow(766,118,58)}${arrow(1135,118,40)}
+      <div style="position:absolute;left:30px;top:62px;width:330px">${row("P", "i-green", "plugin B", "v1.4 to v1.5", ["source", ""])}</div>
+      <div style="position:absolute;left:430px;top:62px;width:330px">${row("P", "i-green", "evaluated", "v1.5", ["approved", "ok"])}</div>
+      <div style="position:absolute;left:830px;top:62px;width:330px">${row("P", "i-green", "delivered", "v1.5", ["update", "warn"])}</div>
+      <div style="position:absolute;left:1170px;top:62px;width:300px">${row("C", "i-red", "revoked", "v1.0", ["blocked", "no"])}</div>
+      ${arrow(366, 118, 58)}${arrow(766, 118, 58)}${arrow(1135, 118, 40)}
     </section>` +
-    `<div class="footer-note">Source marketplaces keep publishing. MOS3 creates the governed enterprise view that clients consume.</div>`);
-}
+            `<div class="footer-note">Source marketplaces keep publishing. MOS3 creates the governed enterprise view that clients consume.</div>`,
+        );
+      }
 
-function architecture() {
-  board("MOS3 Feed Composition Architecture", "Source feeds are normalized, curated, narrowed, and delivered as tenant effective feeds",
-    panel("blue", 54, 145, 286, 548, "1 Source feeds", row("C","i-blue","ClawHub", "", ["raw",""]) + row("G","i-green","GitHub", "", ["raw",""]) + row("P","i-purple","Partners", "", ["raw",""]) + row("T","i-amber","Teams", "", ["raw",""])) +
-    arrow(342, 408, 86) +
-    panel("purple", 428, 145, 286, 548, "2 MOS3 records", row("ID","i-blue","identity", "", ["stable","ok"]) + row("V","i-green","version", "", ["mapped","ok"]) + row("P","i-purple","provenance", "", ["kept","ok"]) + row("K","i-amber","kind", "", ["typed","ok"])) +
-    arrow(716, 408, 86) +
-    panel("amber", 802, 145, 286, 548, "3 Curated views", row("R","i-blue","review", "", ["MS","ok"]) + row("B","i-green","baseline", "", ["eligible","ok"]) + row("E","i-purple","evidence", "", ["linked","ok"]) + row("D","i-red","deny list", "", ["block","no"])) +
-    arrow(1090, 408, 86) +
-    panel("green", 1176, 145, 370, 548, "4 Tenant effective feed", row("A","i-blue","allowed", "", ["search","ok"]) + row("P","i-green","pinned", "", ["install","pin"]) + row("S","i-purple","scoped", "", ["surface","ok"]) + row("R","i-red","revoked", "", ["blocked","no"])) +
-    `<section class="lane" style="left:80px;top:734px;width:1440px;height:108px">
+      function architecture() {
+        board(
+          "MOS3 Feed Composition Architecture",
+          "Source feeds are normalized, curated, narrowed, and delivered as tenant effective feeds",
+          panel(
+            "blue",
+            54,
+            145,
+            286,
+            548,
+            "1 Source feeds",
+            row("C", "i-blue", "ClawHub", "", ["raw", ""]) +
+              row("G", "i-green", "GitHub", "", ["raw", ""]) +
+              row("P", "i-purple", "Partners", "", ["raw", ""]) +
+              row("T", "i-amber", "Teams", "", ["raw", ""]),
+          ) +
+            arrow(342, 408, 86) +
+            panel(
+              "purple",
+              428,
+              145,
+              286,
+              548,
+              "2 MOS3 records",
+              row("ID", "i-blue", "identity", "", ["stable", "ok"]) +
+                row("V", "i-green", "version", "", ["mapped", "ok"]) +
+                row("P", "i-purple", "provenance", "", ["kept", "ok"]) +
+                row("K", "i-amber", "kind", "", ["typed", "ok"]),
+            ) +
+            arrow(716, 408, 86) +
+            panel(
+              "amber",
+              802,
+              145,
+              286,
+              548,
+              "3 Curated views",
+              row("R", "i-blue", "review", "", ["MS", "ok"]) +
+                row("B", "i-green", "baseline", "", ["eligible", "ok"]) +
+                row("E", "i-purple", "evidence", "", ["linked", "ok"]) +
+                row("D", "i-red", "deny list", "", ["block", "no"]),
+            ) +
+            arrow(1090, 408, 86) +
+            panel(
+              "green",
+              1176,
+              145,
+              370,
+              548,
+              "4 Tenant effective feed",
+              row("A", "i-blue", "allowed", "", ["search", "ok"]) +
+                row("P", "i-green", "pinned", "", ["install", "pin"]) +
+                row("S", "i-purple", "scoped", "", ["surface", "ok"]) +
+                row("R", "i-red", "revoked", "", ["blocked", "no"]),
+            ) +
+            `<section class="lane" style="left:80px;top:734px;width:1440px;height:108px">
       <div class="small-title" style="position:absolute;left:24px;top:18px;color:#fcd34d">Composition precedence</div>
       <div style="position:absolute;left:270px;top:30px;font-size:25px;font-weight:850;color:#fff7ed">revoked > tenant deny > tenant pin > tenant allow > deployment baseline > Microsoft curated > source feed</div>
-    </section>`);
-}
+    </section>`,
+        );
+      }
 
-function contract() {
-  board("MOS3 Feed Contract Standard", "A common envelope that preserves provenance and yields client-visible outcomes",
-    panel("blue", 70, 150, 410, 594, "Feed document", row("1","i-blue","schemaVersion", "", ["must","ok"]) + row("2","i-blue","feedId and feedType", "", ["must","ok"]) + row("3","i-blue","revision", "", ["must","ok"]) + row("4","i-blue","sourceRevisions", "", ["must","ok"]) + row("5","i-blue","attestation", "", ["should","warn"])) +
-    arrow(482, 438, 112) +
-    panel("purple", 594, 150, 410, 594, "Entry envelope", row("ID","i-purple","id, kind, name", "", ["must","ok"]) + row("V","i-purple","version", "", ["must","ok"]) + row("S","i-purple","source", "", ["must","ok"]) + row("G","i-purple","governance", "", ["must","ok"]) + row("C","i-purple","compatibility", "", ["must","ok"])) +
-    arrow(1006, 438, 112) +
-    panel("green", 1118, 150, 410, 594, "Effective outcomes", row("✓","i-green","searchable", "", ["show","ok"]) + row("↓","i-blue","installable", "", ["allow","ok"]) + row("!","i-amber","deprecated", "", ["warn","warn"]) + row("×","i-red","blocked", "", ["hide","no"]) + row("S","i-purple","outOfScope", "", ["filter","pin"]) + row("T","i-amber","stale", "", ["diag","warn"])) +
-    `<div class="footer-note">The compact outcome is derived from separate review, tenant, distribution, scope, compatibility, and integrity state.</div>`);
-}
+      function contract() {
+        board(
+          "MOS3 Feed Contract Standard",
+          "A common envelope that preserves provenance and yields client-visible outcomes",
+          panel(
+            "blue",
+            70,
+            150,
+            410,
+            594,
+            "Feed document",
+            row("1", "i-blue", "schemaVersion", "", ["must", "ok"]) +
+              row("2", "i-blue", "feedId and feedType", "", ["must", "ok"]) +
+              row("3", "i-blue", "revision", "", ["must", "ok"]) +
+              row("4", "i-blue", "sourceRevisions", "", ["must", "ok"]) +
+              row("5", "i-blue", "attestation", "", ["should", "warn"]),
+          ) +
+            arrow(482, 438, 112) +
+            panel(
+              "purple",
+              594,
+              150,
+              410,
+              594,
+              "Entry envelope",
+              row("ID", "i-purple", "id, kind, name", "", ["must", "ok"]) +
+                row("V", "i-purple", "version", "", ["must", "ok"]) +
+                row("S", "i-purple", "source", "", ["must", "ok"]) +
+                row("G", "i-purple", "governance", "", ["must", "ok"]) +
+                row("C", "i-purple", "compatibility", "", ["must", "ok"]),
+            ) +
+            arrow(1006, 438, 112) +
+            panel(
+              "green",
+              1118,
+              150,
+              410,
+              594,
+              "Effective outcomes",
+              row("✓", "i-green", "searchable", "", ["show", "ok"]) +
+                row("↓", "i-blue", "installable", "", ["allow", "ok"]) +
+                row("!", "i-amber", "deprecated", "", ["warn", "warn"]) +
+                row("×", "i-red", "blocked", "", ["hide", "no"]) +
+                row("S", "i-purple", "outOfScope", "", ["filter", "pin"]) +
+                row("T", "i-amber", "stale", "", ["diag", "warn"]),
+            ) +
+            `<div class="footer-note">The compact outcome is derived from separate review, tenant, distribution, scope, compatibility, and integrity state.</div>`,
+        );
+      }
 
-function admin() {
-  board("MOS3 Feed Admin Experience", "Preview, publish, explain, and audit tenant feed decisions before clients refresh",
-    `<div class="panel amber" style="left:56px;top:140px;width:1488px;height:210px">
+      function admin() {
+        board(
+          "MOS3 Feed Admin Experience",
+          "Preview, publish, explain, and audit tenant feed decisions before clients refresh",
+          `<div class="panel amber" style="left:56px;top:140px;width:1488px;height:210px">
       <h2>Admin workflow</h2>
       <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;padding:18px">
         <div class="cell"><strong>Register</strong><span>source, owner, refresh, auth</span></div>
@@ -343,101 +536,244 @@ function admin() {
         <div class="cell"><strong>Publish</strong><span>new feed revision</span></div>
       </div>
     </div>` +
-    panel("blue", 74, 396, 430, 330, "Policy preview", row("+","i-green","entries added", "", ["impact","ok"]) + row("-","i-red","entries blocked", "", ["impact","no"]) + row("S","i-purple","scope changes", "", ["groups","pin"]) + row("T","i-amber","stale sources", "", ["warn","warn"])) +
-    panel("purple", 585, 396, 430, 330, "Explain view", row("S","i-blue","source revision", "", ["sha",""]) + row("R","i-green","Microsoft review", "", ["reviewed","ok"]) + row("P","i-purple","tenant policy", "", ["pinned","pin"]) + row("C","i-amber","client expectation", "", ["install","ok"])) +
-    panel("green", 1096, 396, 430, 330, "Operations", row("D","i-amber","drift", "", ["detect","warn"]) + row("A","i-blue","audit trail", "", ["who/when","ok"]) + row("B","i-red","rollback", "", ["previous","pin"]) + row("R","i-red","revocation", "", ["block","no"])) +
-    `<div class="footer-note">Adding a source feed does not make every entry installable. Admins publish materialized tenant effective feed revisions.</div>`);
-}
+            panel(
+              "blue",
+              74,
+              396,
+              430,
+              330,
+              "Policy preview",
+              row("+", "i-green", "entries added", "", ["impact", "ok"]) +
+                row("-", "i-red", "entries blocked", "", ["impact", "no"]) +
+                row("S", "i-purple", "scope changes", "", ["groups", "pin"]) +
+                row("T", "i-amber", "stale sources", "", ["warn", "warn"]),
+            ) +
+            panel(
+              "purple",
+              585,
+              396,
+              430,
+              330,
+              "Explain view",
+              row("S", "i-blue", "source revision", "", ["sha", ""]) +
+                row("R", "i-green", "Microsoft review", "", ["reviewed", "ok"]) +
+                row("P", "i-purple", "tenant policy", "", ["pinned", "pin"]) +
+                row("C", "i-amber", "client expectation", "", ["install", "ok"]),
+            ) +
+            panel(
+              "green",
+              1096,
+              396,
+              430,
+              330,
+              "Operations",
+              row("D", "i-amber", "drift", "", ["detect", "warn"]) +
+                row("A", "i-blue", "audit trail", "", ["who/when", "ok"]) +
+                row("B", "i-red", "rollback", "", ["previous", "pin"]) +
+                row("R", "i-red", "revocation", "", ["block", "no"]),
+            ) +
+            `<div class="footer-note">Adding a source feed does not make every entry installable. Admins publish materialized tenant effective feed revisions.</div>`,
+        );
+      }
 
-function client() {
-  board("MOS3 Feed Client Conformance", "Clients share governed feed behavior while keeping runtime-specific activation",
-    panel("blue", 60, 145, 335, 555, "Refresh", row("F","i-blue","fetch effective feed", "", ["L1","ok"]) + row("V","i-green","validate integrity", "", ["L1","ok"]) + row("C","i-purple","cache atomically", "", ["L1","ok"]) + row("S","i-amber","stale diagnostics", "", ["L3","warn"])) +
-    arrow(397, 410, 100) +
-    panel("purple", 497, 145, 335, 555, "Discovery and install", row("S","i-blue","respect scope", "", ["L1","ok"]) + row("D","i-red","deny and revoke", "", ["L1","no"]) + row("P","i-amber","pin versions", "", ["L2","pin"]) + row("I","i-green","install approved", "", ["L2","ok"])) +
-    arrow(834, 410, 100) +
-    panel("green", 934, 145, 335, 555, "Runtime boundary", row("A","i-blue","auth and consent", "", ["runtime",""]) + row("M","i-purple","MCP/session scope", "", ["runtime",""]) + row("L","i-green","local activation", "", ["runtime",""]) + row("X","i-red","active termination", "", ["optional","pin"])) +
-    arrow(1271, 410, 100) +
-    panel("amber", 1371, 145, 180, 555, "Levels", `<div style="padding:20px">${row("1","i-blue","Search", "", ["L1","ok"])}${row("2","i-green","Install", "", ["L2","ok"])}${row("3","i-amber","Drift", "", ["L3","warn"])}</div>`) +
-    `<div class="footer-note">Feed approval is not runtime auth. Runtime auth success is not feed approval.</div>`);
-}
+      function client() {
+        board(
+          "MOS3 Feed Client Conformance",
+          "Clients share governed feed behavior while keeping runtime-specific activation",
+          panel(
+            "blue",
+            60,
+            145,
+            335,
+            555,
+            "Refresh",
+            row("F", "i-blue", "fetch effective feed", "", ["L1", "ok"]) +
+              row("V", "i-green", "validate integrity", "", ["L1", "ok"]) +
+              row("C", "i-purple", "cache atomically", "", ["L1", "ok"]) +
+              row("S", "i-amber", "stale diagnostics", "", ["L3", "warn"]),
+          ) +
+            arrow(397, 410, 100) +
+            panel(
+              "purple",
+              497,
+              145,
+              335,
+              555,
+              "Discovery and install",
+              row("S", "i-blue", "respect scope", "", ["L1", "ok"]) +
+                row("D", "i-red", "deny and revoke", "", ["L1", "no"]) +
+                row("P", "i-amber", "pin versions", "", ["L2", "pin"]) +
+                row("I", "i-green", "install approved", "", ["L2", "ok"]),
+            ) +
+            arrow(834, 410, 100) +
+            panel(
+              "green",
+              934,
+              145,
+              335,
+              555,
+              "Runtime boundary",
+              row("A", "i-blue", "auth and consent", "", ["runtime", ""]) +
+                row("M", "i-purple", "MCP/session scope", "", ["runtime", ""]) +
+                row("L", "i-green", "local activation", "", ["runtime", ""]) +
+                row("X", "i-red", "active termination", "", ["optional", "pin"]),
+            ) +
+            arrow(1271, 410, 100) +
+            panel(
+              "amber",
+              1371,
+              145,
+              180,
+              555,
+              "Levels",
+              `<div style="padding:20px">${row("1", "i-blue", "Search", "", ["L1", "ok"])}${row("2", "i-green", "Install", "", ["L2", "ok"])}${row("3", "i-amber", "Drift", "", ["L3", "warn"])}</div>`,
+            ) +
+            `<div class="footer-note">Feed approval is not runtime auth. Runtime auth success is not feed approval.</div>`,
+        );
+      }
 
-function npm() {
-  board("Skills And Plugins As NPM Packages", "Reuse package infrastructure, keep enterprise governance in MOS3",
-    panel("blue", 48, 138, 390, 560, "NPM registries",
-      row("S","i-blue","@clawhub/skill-review", "1.2.0", null) +
-      row("P","i-green","@github/plugin-query", "1.4.0", null) +
-      row("M","i-purple","@partner/mcp-jira", "2.0.0", ["sig","ok"]) +
-      row("C","i-amber","@contoso/connector", "0.9.0", null) +
-      `<div style="padding:10px 18px;color:#cbd5e1;font-size:17px;font-weight:650">Default package unit for shared skills and plugins.</div>`) +
-    arrow(440, 404, 80) +
-    panel("purple", 520, 138, 370, 560, "MOS3 ingestion",
-      `<div class="matrix" style="grid-template-columns:1fr 1fr">
+      function npm() {
+        board(
+          "Skills And Plugins As NPM Packages",
+          "Reuse package infrastructure, keep enterprise governance in MOS3",
+          panel(
+            "blue",
+            48,
+            138,
+            390,
+            560,
+            "NPM registries",
+            row("S", "i-blue", "@clawhub/skill-review", "1.2.0", null) +
+              row("P", "i-green", "@github/plugin-query", "1.4.0", null) +
+              row("M", "i-purple", "@partner/mcp-jira", "2.0.0", ["sig", "ok"]) +
+              row("C", "i-amber", "@contoso/connector", "0.9.0", null) +
+              `<div style="padding:10px 18px;color:#cbd5e1;font-size:17px;font-weight:650">Default package unit for shared skills and plugins.</div>`,
+          ) +
+            arrow(440, 404, 80) +
+            panel(
+              "purple",
+              520,
+              138,
+              370,
+              560,
+              "MOS3 ingestion",
+              `<div class="matrix" style="grid-template-columns:1fr 1fr">
         <div class="cell"><strong>Read package</strong><span>package.json and sidecar manifest</span></div>
         <div class="cell"><strong>Keep proof</strong><span>integrity, signature, provenance</span></div>
         <div class="cell"><strong>Defend</strong><span>vulnerabilities, malware, dependency risk</span></div>
         <div class="cell"><strong>Review</strong><span>Microsoft evidence and compatibility</span></div>
       </div>
-      ${row("ID","i-blue","stable feed entry", "", ["source",""])}
-      ${row("D","i-amber","package defense", "", ["passed","ok"])}`) +
-    arrow(892, 404, 78) +
-    panel("amber", 970, 138, 300, 560, "Tenant policy",
-      row("A","i-green","allow", "", ["tenant","ok"]) +
-      row("D","i-red","deny", "", ["tenant","no"]) +
-      row("P","i-amber","pin exact version", "", ["1.2.0","pin"]) +
-      row("S","i-purple","scope surface", "", ["Scout","ok"]) +
-      `<div style="padding:10px 18px;color:#cbd5e1;font-size:17px;font-weight:650">npm tags inform. MOS3 policy decides.</div>`) +
-    arrow(1272, 404, 76) +
-    panel("green", 1348, 138, 204, 560, "Clients",
-      `<div style="padding:20px">
-        ${row("F","i-blue","feed", "", null)}
-        ${row("I","i-green","install", "", null)}
-        ${row("R","i-red","block", "", null)}
-      </div>`) +
-    `<section class="lane" style="left:58px;top:732px;width:1490px;height:112px">
+      ${row("ID", "i-blue", "stable feed entry", "", ["source", ""])}
+      ${row("D", "i-amber", "package defense", "", ["passed", "ok"])}`,
+            ) +
+            arrow(892, 404, 78) +
+            panel(
+              "amber",
+              970,
+              138,
+              300,
+              560,
+              "Tenant policy",
+              row("A", "i-green", "allow", "", ["tenant", "ok"]) +
+                row("D", "i-red", "deny", "", ["tenant", "no"]) +
+                row("P", "i-amber", "pin exact version", "", ["1.2.0", "pin"]) +
+                row("S", "i-purple", "scope surface", "", ["Scout", "ok"]) +
+                `<div style="padding:10px 18px;color:#cbd5e1;font-size:17px;font-weight:650">npm tags inform. MOS3 policy decides.</div>`,
+            ) +
+            arrow(1272, 404, 76) +
+            panel(
+              "green",
+              1348,
+              138,
+              204,
+              560,
+              "Clients",
+              `<div style="padding:20px">
+        ${row("F", "i-blue", "feed", "", null)}
+        ${row("I", "i-green", "install", "", null)}
+        ${row("R", "i-red", "block", "", null)}
+      </div>`,
+            ) +
+            `<section class="lane" style="left:58px;top:732px;width:1490px;height:112px">
       <div class="small-title" style="position:absolute;left:24px;top:18px;color:#93c5fd">Enterprise lockfile pattern</div>
       <div style="position:absolute;left:300px;top:30px;font-size:24px;font-weight:850;color:#f8fafc">tenant effective feed = exact package + exact version + exact integrity + exact policy outcome + exact revision</div>
     </section>` +
-    `<div class="footer-note">npm handles package mechanics. MOS3 handles package defense, composition, approval, revocation, audit, and client-visible outcomes.</div>`);
-}
+            `<div class="footer-note">npm handles package mechanics. MOS3 handles package defense, composition, approval, revocation, audit, and client-visible outcomes.</div>`,
+        );
+      }
 
-function authoring() {
-  board("NPM Package Authoring For MOS3 Feeds", "A normal npm package plus a capability manifest becomes a governed feed entry",
-    panel("blue", 54, 140, 330, 550, "Author package",
-      row("P","i-blue","package.json", "", ["npm","ok"]) +
-      row("M","i-purple","capability manifest", "", null) +
-      row("C","i-green","code and assets", "", ["files","ok"]) +
-      row("R","i-amber","README and license", "", ["review",""]) +
-      `<div style="padding:10px 18px;color:#cbd5e1;font-size:17px;font-weight:650">Publisher workflow stays familiar. Agentic meaning lives in the sidecar manifest.</div>`) +
-    arrow(386, 405, 92) +
-    panel("purple", 478, 140, 330, 550, "Publish package",
-      row("@","i-blue","scoped package", "", ["identity","ok"]) +
-      row("V","i-green","exact version", "1.2.0", null) +
-      row("T","i-purple","tarball", "", ["integrity","ok"]) +
-      row("D","i-amber","dependencies", "", null) +
-      `<div style="padding:10px 18px;color:#cbd5e1;font-size:17px;font-weight:650">Tags are source signals. MOS3 materializes exact versions.</div>`) +
-    arrow(810, 405, 92) +
-    panel("amber", 902, 140, 330, 550, "MOS3 evaluates",
-      row("I","i-blue","ingest manifest", "", ["schema","ok"]) +
-      row("D","i-amber","package defense", "", ["scan","ok"]) +
-      row("R","i-green","Microsoft review", "", ["evidence","ok"]) +
-      row("S","i-purple","compatibility", "", null) +
-      `<div style="padding:10px 18px;color:#cbd5e1;font-size:17px;font-weight:650">Defense and review are evidence. Tenant policy is still separate.</div>`) +
-    arrow(1234, 405, 92) +
-    panel("green", 1326, 140, 220, 550, "Effective feed",
-      `<div style="padding:20px">
-        ${row("E","i-blue","entry", "", null)}
-        ${row("A","i-green","allow", "", null)}
-        ${row("P","i-amber","pin", "", null)}
-        ${row("B","i-red","block", "", null)}
-      </div>`) +
-    `<section class="lane" style="left:64px;top:728px;width:1480px;height:116px">
+      function authoring() {
+        board(
+          "NPM Package Authoring For MOS3 Feeds",
+          "A normal npm package plus a capability manifest becomes a governed feed entry",
+          panel(
+            "blue",
+            54,
+            140,
+            330,
+            550,
+            "Author package",
+            row("P", "i-blue", "package.json", "", ["npm", "ok"]) +
+              row("M", "i-purple", "capability manifest", "", null) +
+              row("C", "i-green", "code and assets", "", ["files", "ok"]) +
+              row("R", "i-amber", "README and license", "", ["review", ""]) +
+              `<div style="padding:10px 18px;color:#cbd5e1;font-size:17px;font-weight:650">Publisher workflow stays familiar. Agentic meaning lives in the sidecar manifest.</div>`,
+          ) +
+            arrow(386, 405, 92) +
+            panel(
+              "purple",
+              478,
+              140,
+              330,
+              550,
+              "Publish package",
+              row("@", "i-blue", "scoped package", "", ["identity", "ok"]) +
+                row("V", "i-green", "exact version", "1.2.0", null) +
+                row("T", "i-purple", "tarball", "", ["integrity", "ok"]) +
+                row("D", "i-amber", "dependencies", "", null) +
+                `<div style="padding:10px 18px;color:#cbd5e1;font-size:17px;font-weight:650">Tags are source signals. MOS3 materializes exact versions.</div>`,
+            ) +
+            arrow(810, 405, 92) +
+            panel(
+              "amber",
+              902,
+              140,
+              330,
+              550,
+              "MOS3 evaluates",
+              row("I", "i-blue", "ingest manifest", "", ["schema", "ok"]) +
+                row("D", "i-amber", "package defense", "", ["scan", "ok"]) +
+                row("R", "i-green", "Microsoft review", "", ["evidence", "ok"]) +
+                row("S", "i-purple", "compatibility", "", null) +
+                `<div style="padding:10px 18px;color:#cbd5e1;font-size:17px;font-weight:650">Defense and review are evidence. Tenant policy is still separate.</div>`,
+            ) +
+            arrow(1234, 405, 92) +
+            panel(
+              "green",
+              1326,
+              140,
+              220,
+              550,
+              "Effective feed",
+              `<div style="padding:20px">
+        ${row("E", "i-blue", "entry", "", null)}
+        ${row("A", "i-green", "allow", "", null)}
+        ${row("P", "i-amber", "pin", "", null)}
+        ${row("B", "i-red", "block", "", null)}
+      </div>`,
+            ) +
+            `<section class="lane" style="left:64px;top:728px;width:1480px;height:116px">
       <div class="small-title" style="position:absolute;left:24px;top:18px;color:#93c5fd">Authoring boundary</div>
       <div style="position:absolute;left:300px;top:30px;font-size:24px;font-weight:850;color:#f8fafc">package declares capability intent; MOS3 decides eligibility; tenant effective feed decides availability</div>
     </section>` +
-    `<div class="footer-note">Do not encode tenant approval in the package. Packages declare. Feeds govern.</div>`);
-}
+            `<div class="footer-note">Do not encode tenant approval in the package. Packages declare. Feeds govern.</div>`,
+        );
+      }
 
-({additive, position, architecture, contract, admin, client, npm, authoring}[diagram] || position)();
-</script>
-</body>
+      (
+        ({ additive, position, architecture, contract, admin, client, npm, authoring })[diagram] ||
+        position
+      )();
+    </script>
+  </body>
 </html>

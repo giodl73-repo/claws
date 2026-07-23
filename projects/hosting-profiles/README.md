@@ -36,34 +36,34 @@ keep container-only implementation details in the host.
 
 ## Active Notes
 
-| Area | File |
-| --- | --- |
-| Current project guidance and RFC promotion workflow | `guidance.md` |
-| Initial Lobster repo inventory and proposal outline | `analysis.md` |
-| Stair-step architecture from today's host pressure to OCC/AgentHarness | `stair-step-architecture.md` |
-| Lobster repo audit of current host pressure and patch inventory | `lobster-layer-inventory.md` |
-| First pass contract classification from Lobster audit | `contract-audit.md` |
-| `.craft/roles` review of missing evidence and proposal gaps | `role-review.md` |
-| Milestone path from as-is Lobster layer to upstream conformance | `milestones.md` |
-| Real OpenClaw hosting seams and missing startup-admission contract | `hosting-seams.md` |
-| Standard container/workload hosting model and one-line-to-platform progression | `standard-hosting-model.md` |
-| Original combined RFC draft; retained as historical context | `0010-standard-hosting-ready-check.md` |
-| Older draft notes before the profiles framing stabilized | `rfc-draft.md` |
-| Compact upstream PR series for the RFC and first implementation slices | `openclaw-pr-plan.md` |
-| Live GitHub evidence for readiness demand and extensibility boundaries | `github-readiness-demand-2026-07-10.md` |
+| Area                                                                           | File                                    |
+| ------------------------------------------------------------------------------ | --------------------------------------- |
+| Current project guidance and RFC promotion workflow                            | `guidance.md`                           |
+| Initial Lobster repo inventory and proposal outline                            | `analysis.md`                           |
+| Stair-step architecture from today's host pressure to OCC/AgentHarness         | `stair-step-architecture.md`            |
+| Lobster repo audit of current host pressure and patch inventory                | `lobster-layer-inventory.md`            |
+| First pass contract classification from Lobster audit                          | `contract-audit.md`                     |
+| `.craft/roles` review of missing evidence and proposal gaps                    | `role-review.md`                        |
+| Milestone path from as-is Lobster layer to upstream conformance                | `milestones.md`                         |
+| Real OpenClaw hosting seams and missing startup-admission contract             | `hosting-seams.md`                      |
+| Standard container/workload hosting model and one-line-to-platform progression | `standard-hosting-model.md`             |
+| Original combined RFC draft; retained as historical context                    | `0010-standard-hosting-ready-check.md`  |
+| Older draft notes before the profiles framing stabilized                       | `rfc-draft.md`                          |
+| Compact upstream PR series for the RFC and first implementation slices         | `openclaw-pr-plan.md`                   |
+| Live GitHub evidence for readiness demand and extensibility boundaries         | `github-readiness-demand-2026-07-10.md` |
 
 ## Active Work
 
-| Repo | PR / Issue | Branch | Status | Purpose |
-| --- | --- | --- | --- | --- |
-| bic/lobster | TBD | TBD | Analysis | Inventory host pressure and patches OpenClaw should absorb as generic contracts. |
-| openclaw/rfcs | [RFC 0018 / PR 33](https://github.com/openclaw/rfcs/pull/33) | `user/giodl/standard-hosting-profiles-ready-check` | Review | Define readiness conditions/providers, direct operator selection, canonical projections, and CLI. |
-| openclaw/rfcs | [RFC 0023 / PR 37](https://github.com/openclaw/rfcs/pull/37) | `user/giodl/rfc-0023-standard-hosting-profiles` | Draft | Define standard, release-tested hosting profile presets over RFC 0018. |
-| openclaw/openclaw | [Readiness PR 104018](https://github.com/openclaw/openclaw/pull/104018) | `user/giodl/readiness-profiles-upstream` | Draft | Real readiness-only landing candidate for RFC 0018; four commits, no profile implementation. |
-| openclaw/openclaw | [Hosting Profiles PR 107765](https://github.com/openclaw/openclaw/pull/107765) | `user/giodl/standard-hosting-profiles-upstream` | Draft | Real stacked implementation request for RFC 0023; depends on readiness PR 104018. |
-| giodl73-repo/openclaw | [Readiness PRs 17, 22, 23, 27](https://github.com/giodl73-repo/openclaw/pulls) | readiness-only stack | Draft | Modernize Gateway readiness without requiring profiles. |
-| giodl73-repo/openclaw | [Profile comparison PR 94](https://github.com/giodl73-repo/openclaw/pull/94) | `user/giodl/standard-hosting-profiles-upstream` | Draft | Clean profile-only comparison against readiness PR 104018. |
-| giodl73-repo/openclaw | [Profile review slices 18, 19, 42, 21](https://github.com/giodl73-repo/openclaw/pulls) | four-commit profile stack | Draft | Optional commit-level review aids for upstream PR 107765. |
+| Repo                  | PR / Issue                                                                             | Branch                                             | Status   | Purpose                                                                                           |
+| --------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------- |
+| bic/lobster           | TBD                                                                                    | TBD                                                | Analysis | Inventory host pressure and patches OpenClaw should absorb as generic contracts.                  |
+| openclaw/rfcs         | [RFC 0018 / PR 33](https://github.com/openclaw/rfcs/pull/33)                           | `user/giodl/standard-hosting-profiles-ready-check` | Review   | Define readiness conditions/providers, direct operator selection, canonical projections, and CLI. |
+| openclaw/rfcs         | [RFC 0023 / PR 37](https://github.com/openclaw/rfcs/pull/37)                           | `user/giodl/rfc-0023-standard-hosting-profiles`    | Draft    | Define standard, release-tested hosting profile presets over RFC 0018.                            |
+| openclaw/openclaw     | [Readiness PR 104018](https://github.com/openclaw/openclaw/pull/104018)                | `user/giodl/readiness-profiles-upstream`           | Draft    | Real readiness-only landing candidate for RFC 0018; four commits, no profile implementation.      |
+| openclaw/openclaw     | [Hosting Profiles PR 107765](https://github.com/openclaw/openclaw/pull/107765)         | `user/giodl/standard-hosting-profiles-upstream`    | Draft    | Real stacked implementation request for RFC 0023; depends on readiness PR 104018.                 |
+| giodl73-repo/openclaw | [Readiness PRs 17, 22, 23, 27](https://github.com/giodl73-repo/openclaw/pulls)         | readiness-only stack                               | Draft    | Modernize Gateway readiness without requiring profiles.                                           |
+| giodl73-repo/openclaw | [Profile comparison PR 94](https://github.com/giodl73-repo/openclaw/pull/94)           | `user/giodl/standard-hosting-profiles-upstream`    | Draft    | Clean profile-only comparison against readiness PR 104018.                                        |
+| giodl73-repo/openclaw | [Profile review slices 18, 19, 42, 21](https://github.com/giodl73-repo/openclaw/pulls) | four-commit profile stack                          | Draft    | Optional commit-level review aids for upstream PR 107765.                                         |
 
 ## Scope
 

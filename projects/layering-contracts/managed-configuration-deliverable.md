@@ -54,15 +54,15 @@ managed boundary.
 
 Initial candidate comparators:
 
-| Field shape | Composition/admission rule |
-| --- | --- |
-| Allowed capability set | Operator value must be a subset |
-| Denied capability set | Operator value must be a superset |
-| Minimum approval requirement | Operator value must be equal or stricter |
-| Maximum numeric limit | Operator value must be equal or lower |
-| Risky feature enablement | Operator cannot re-enable after managed disable |
-| Required protection | Operator cannot disable |
-| Other fields | Exact authority |
+| Field shape                  | Composition/admission rule                      |
+| ---------------------------- | ----------------------------------------------- |
+| Allowed capability set       | Operator value must be a subset                 |
+| Denied capability set        | Operator value must be a superset               |
+| Minimum approval requirement | Operator value must be equal or stricter        |
+| Maximum numeric limit        | Operator value must be equal or lower           |
+| Risky feature enablement     | Operator cannot re-enable after managed disable |
+| Required protection          | Operator cannot disable                         |
+| Other fields                 | Exact authority                                 |
 
 Strictness is schema-defined per supported field. Hosts cannot invent custom
 comparators or redefine what “stricter” means.
@@ -215,4 +215,3 @@ slices:
    provenance, and structured conflicts.
 2. A small closed set of bounded built-in strictness comparators shared with the
    Policy plugin.
-

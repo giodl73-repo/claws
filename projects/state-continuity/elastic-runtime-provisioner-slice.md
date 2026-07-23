@@ -78,13 +78,13 @@ owns references to:
 It re-reads the durable handoff, checks the request identities, derives private
 paths, inspects the exact restore hold, and chooses:
 
-| Durable destination state | Result |
-| --- | --- |
-| Exact ready evidence | Idempotent start fan-in, same-child check, pipe re-establishment, then identical `Ready`. |
-| Same exact restore preparing/restoring/starting | Return `Pending`. |
-| No exact attempt | Execute the existing paired transaction once. |
-| Different or conflicting attempt | Fail closed. |
-| Quarantined | Fail closed with stable quarantine detail. |
+| Durable destination state                       | Result                                                                                    |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Exact ready evidence                            | Idempotent start fan-in, same-child check, pipe re-establishment, then identical `Ready`. |
+| Same exact restore preparing/restoring/starting | Return `Pending`.                                                                         |
+| No exact attempt                                | Execute the existing paired transaction once.                                             |
+| Different or conflicting attempt                | Fail closed.                                                                              |
+| Quarantined                                     | Fail closed with stable quarantine detail.                                                |
 
 ## Fixtures
 
@@ -232,8 +232,8 @@ process.
   managed preparation and restore:
   - `continuity_preparation: invoking fixed managed preparation child`
   - `continuity_restore: request accepted — invoking fixed executor child`
-  Counting those markers before and after restart proves calls, not merely
-  journal idempotence.
+    Counting those markers before and after restart proves calls, not merely
+    journal idempotence.
 - The compose stack already accepts `OPENCLAW_IMAGE`; the proof should use a
   derived local image that replaces the pinned OpenClaw npm package with a
   packed artifact from the OpenClaw fork while retaining the Lobster-fork
@@ -244,13 +244,13 @@ process.
 
 ### Compare
 
-| Existing pattern | Decision | Use |
-| --- | --- | --- |
-| `cron_cold_wake_e2e` | Reuse | Ignored Docker E2E ownership, unique identity, worker discovery, Redis and log helpers. |
-| Readiness provider fixtures | Adapt | One owner-created provider object, one accepted result, one explicit failure; no registry or framework. |
-| Plex mock admin mutation endpoints | Avoid extending | Crash belongs at the coordinator boundary, not inside the worker allocator. |
-| Production diagnostics endpoint | Avoid | Would create a sticky semi-public fault-injection surface only for proof. |
-| In-memory provisioner fixture | Retain as lower layer | Fast exact contract proof, but not restart or image evidence. |
+| Existing pattern                   | Decision              | Use                                                                                                     |
+| ---------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------- |
+| `cron_cold_wake_e2e`               | Reuse                 | Ignored Docker E2E ownership, unique identity, worker discovery, Redis and log helpers.                 |
+| Readiness provider fixtures        | Adapt                 | One owner-created provider object, one accepted result, one explicit failure; no registry or framework. |
+| Plex mock admin mutation endpoints | Avoid extending       | Crash belongs at the coordinator boundary, not inside the worker allocator.                             |
+| Production diagnostics endpoint    | Avoid                 | Would create a sticky semi-public fault-injection surface only for proof.                               |
+| In-memory provisioner fixture      | Retain as lower layer | Fast exact contract proof, but not restart or image evidence.                                           |
 
 ### Harness shape
 
@@ -382,15 +382,15 @@ This is a design brief, not authorization to implement.
 
 ### Files and ownership
 
-| Surface | Planned change | Boundary |
-| --- | --- | --- |
-| `src/lobster_runtime/src/continuity_elastic.rs` | Add ignored library-test executor phases and `CrashAfterReadyProvisioner`. | Test-only; no exported production API. |
-| `src/lobster_runtime/tests/continuity_elastic_crash_e2e.rs` | Add ignored black-box parent orchestrator using existing E2E helpers. | E2E-only. |
-| `src/lobster_runtime/Dockerfile` | Add unused named stages that compile/copy the library test executable into a proof runtime image. | Built only with explicit `--target`; production `runtime` target unchanged. |
-| `docker-compose.lobster-e2e.yml` | Parameterize both runtime service images as `${LOBSTER_RUNTIME_IMAGE:-lobster-runtime:e2e}`. | E2E-only default preservation. |
-| `scripts/continuity-proof-build-runtime.sh` | Build the named proof runtime target with BuildKit secrets and a unique tag. | Proof-only helper. |
-| `scripts/continuity-proof-build-openclaw.sh` | Pack the OpenClaw fork, create a real fixture publication, and derive the paired worker image. | Proof-only helper; records package/image identities. |
-| `justfile` | Add one explicit `continuity-proof` lane: build, up, exact ignored test, down. | No dependency from ordinary `e2e` or production recipes. |
+| Surface                                                     | Planned change                                                                                    | Boundary                                                                    |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `src/lobster_runtime/src/continuity_elastic.rs`             | Add ignored library-test executor phases and `CrashAfterReadyProvisioner`.                        | Test-only; no exported production API.                                      |
+| `src/lobster_runtime/tests/continuity_elastic_crash_e2e.rs` | Add ignored black-box parent orchestrator using existing E2E helpers.                             | E2E-only.                                                                   |
+| `src/lobster_runtime/Dockerfile`                            | Add unused named stages that compile/copy the library test executable into a proof runtime image. | Built only with explicit `--target`; production `runtime` target unchanged. |
+| `docker-compose.lobster-e2e.yml`                            | Parameterize both runtime service images as `${LOBSTER_RUNTIME_IMAGE:-lobster-runtime:e2e}`.      | E2E-only default preservation.                                              |
+| `scripts/continuity-proof-build-runtime.sh`                 | Build the named proof runtime target with BuildKit secrets and a unique tag.                      | Proof-only helper.                                                          |
+| `scripts/continuity-proof-build-openclaw.sh`                | Pack the OpenClaw fork, create a real fixture publication, and derive the paired worker image.    | Proof-only helper; records package/image identities.                        |
+| `justfile`                                                  | Add one explicit `continuity-proof` lane: build, up, exact ignored test, down.                    | No dependency from ordinary `e2e` or production recipes.                    |
 
 ### Runtime test executable
 

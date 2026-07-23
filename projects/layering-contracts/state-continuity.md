@@ -25,7 +25,7 @@ encryption, leases, checkpoint scheduling, retries, and user-visible handling.
 Build a source-backed table with these columns:
 
 | State class | Path/owner | Writer | Durable expectation | Consistency point | Restore order | Compatibility | Lobster handling | Evidence |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ----------- | ---------- | ------ | ------------------- | ----------------- | ------------- | ------------- | ---------------- | -------- |
 
 Use `synchronization-model.md` as a hypothesis to test against this inventory.
 Do not assume `/synced`, a global generation, or a synchronization-provider

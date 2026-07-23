@@ -195,23 +195,23 @@ consumed by OpenClaw, not host integration attachments.
 
 Every attachment descriptor supplies:
 
-| Field | Purpose |
-| --- | --- |
-| `id` | Stable owner-defined attachment ID |
-| `owner` | Semantic owner and package/plugin provenance |
-| `kind` | One of the three V1 attachment kinds |
-| `version` | Descriptor and referenced contract version |
-| `target` | Gateway, Channel/account, provider scope, or owner target |
-| `requirements` | Methods, events, scopes, capabilities, routes, or references |
-| `authority` | Observe, present, resolve, administer, route, or enforce |
-| `cardinality` | Single writer, many observers, per-account, or per-route rules |
-| `policy` | Permitted outcomes and transformations |
-| `identity` | Required authenticated principals and provenance |
-| `lifecycle` | Prepare, start, stop, reload, and recovery behavior |
-| `readiness` | Required/optional contribution and ready predicate |
-| `status` | Owner status source and redaction |
-| `migration` | Shadow and authoritative behavior |
-| `schemas` | References to owner-owned payload or protocol schemas |
+| Field          | Purpose                                                        |
+| -------------- | -------------------------------------------------------------- |
+| `id`           | Stable owner-defined attachment ID                             |
+| `owner`        | Semantic owner and package/plugin provenance                   |
+| `kind`         | One of the three V1 attachment kinds                           |
+| `version`      | Descriptor and referenced contract version                     |
+| `target`       | Gateway, Channel/account, provider scope, or owner target      |
+| `requirements` | Methods, events, scopes, capabilities, routes, or references   |
+| `authority`    | Observe, present, resolve, administer, route, or enforce       |
+| `cardinality`  | Single writer, many observers, per-account, or per-route rules |
+| `policy`       | Permitted outcomes and transformations                         |
+| `identity`     | Required authenticated principals and provenance               |
+| `lifecycle`    | Prepare, start, stop, reload, and recovery behavior            |
+| `readiness`    | Required/optional contribution and ready predicate             |
+| `status`       | Owner status source and redaction                              |
+| `migration`    | Shadow and authoritative behavior                              |
+| `schemas`      | References to owner-owned payload or protocol schemas          |
 
 The descriptor does not embed arbitrary callbacks, executable code, or a
 carrier envelope.
@@ -324,13 +324,13 @@ owner-produced readiness.
 
 Area 1 uses separate concepts:
 
-| Concept | Meaning |
-| --- | --- |
-| Liveness | Process or binding loop is alive |
-| Startup | Initialization has completed |
-| Readiness | Required work can be accepted now |
-| Health | Diagnostic quality, possibly degraded |
-| Programmed | Host route or policy has been applied |
+| Concept             | Meaning                                                |
+| ------------------- | ------------------------------------------------------ |
+| Liveness            | Process or binding loop is alive                       |
+| Startup             | Initialization has completed                           |
+| Readiness           | Required work can be accepted now                      |
+| Health              | Diagnostic quality, possibly degraded                  |
+| Programmed          | Host route or policy has been applied                  |
 | Observed generation | Status reflects the owner's current desired generation |
 
 Liveness must not depend on optional external services and should not cause
@@ -389,14 +389,14 @@ than receiving generic admin power.
 
 Examples:
 
-| Binding | Required authority |
-| --- | --- |
-| Status observer | `operator.read` methods/events |
-| Approval presenter | `operator.approvals` |
-| Pairing administrator | `operator.pairing` |
-| Channel lifecycle controller | selected `operator.admin` Channel methods |
-| Config controller | config schema/get plus selected apply/patch authority |
-| Suspend controller | suspend prepare/status/resume |
+| Binding                      | Required authority                                    |
+| ---------------------------- | ----------------------------------------------------- |
+| Status observer              | `operator.read` methods/events                        |
+| Approval presenter           | `operator.approvals`                                  |
+| Pairing administrator        | `operator.pairing`                                    |
+| Channel lifecycle controller | selected `operator.admin` Channel methods             |
+| Config controller            | config schema/get plus selected apply/patch authority |
+| Suspend controller           | suspend prepare/status/resume                         |
 
 The binding verifies its required methods and events against Gateway hello.
 Unexpected additional server methods do not expand the binding's authority.
@@ -454,23 +454,23 @@ Only one path may perform the owner-defined side effect.
 
 ### Internal analogues
 
-| Analogue | Classification | Lesson |
-| --- | --- | --- |
-| Gateway method descriptors and hello | Reuse | Discovery and scope already exist |
-| Channel snapshots | Reuse | Owners compute detailed lifecycle status |
-| Gateway health cache plus live merge | Reuse | Avoid stale success-shaped status |
-| Config reload plan/status | Adapt | Owner declares reload effect and degradation |
-| Plugin runtime registry | Avoid as catalog core | Do not create another executable plugin framework |
+| Analogue                             | Classification        | Lesson                                            |
+| ------------------------------------ | --------------------- | ------------------------------------------------- |
+| Gateway method descriptors and hello | Reuse                 | Discovery and scope already exist                 |
+| Channel snapshots                    | Reuse                 | Owners compute detailed lifecycle status          |
+| Gateway health cache plus live merge | Reuse                 | Avoid stale success-shaped status                 |
+| Config reload plan/status            | Adapt                 | Owner declares reload effect and degradation      |
+| Plugin runtime registry              | Avoid as catalog core | Do not create another executable plugin framework |
 
 ### External comparators
 
-| Comparator | Reuse | Avoid |
-| --- | --- | --- |
-| Kubernetes conditions and observed generation | Structured conditions and stale-status fencing | A universal resource model for every OpenClaw concern |
-| Kubernetes readiness/liveness/startup | Separate traffic readiness from restart decisions | External dependency failures causing liveness restart loops |
-| systemd `READY`, `STATUS`, `WATCHDOG`, `STOPPING` | Small lifecycle vocabulary | Free-form status as the only diagnostic surface |
-| .NET Generic Host | Ordered activation and reverse shutdown | One global service list owning domain semantics |
-| Gateway API policy attachment | Accepted/programmed/resolved distinctions | Policy objects silently changing owner behavior |
+| Comparator                                        | Reuse                                             | Avoid                                                       |
+| ------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------- |
+| Kubernetes conditions and observed generation     | Structured conditions and stale-status fencing    | A universal resource model for every OpenClaw concern       |
+| Kubernetes readiness/liveness/startup             | Separate traffic readiness from restart decisions | External dependency failures causing liveness restart loops |
+| systemd `READY`, `STATUS`, `WATCHDOG`, `STOPPING` | Small lifecycle vocabulary                        | Free-form status as the only diagnostic surface             |
+| .NET Generic Host                                 | Ordered activation and reverse shutdown           | One global service list owning domain semantics             |
+| Gateway API policy attachment                     | Accepted/programmed/resolved distinctions         | Policy objects silently changing owner behavior             |
 
 ## Role Evaluation
 

@@ -27,10 +27,10 @@ That is normal owner startup, not an artifact-declared reconstruction step.
 
 ### Reconstructed state
 
-| Obligation | Current evidence | Safe treatment | Readiness |
-| --- | --- | --- | --- |
-| Auth-profile runtime order, last-good, cooldown, failure, and usage state | Exact removed `auth_profile_state` row count from sanitation | Start from the empty safe default; owners repopulate only from resolved destination profiles and new runtime observations | Non-blocking; external profile availability is evaluated separately |
-| Installed plugin dependency trees | `extensions/**/node_modules` is deliberately omitted while plugin source, manifest, and SQLite index are captured | Existing plugin owner reinstalls or repairs dependencies | Owner-required when a configured plugin cannot load without the omitted tree |
+| Obligation                                                                | Current evidence                                                                                                  | Safe treatment                                                                                                            | Readiness                                                                    |
+| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Auth-profile runtime order, last-good, cooldown, failure, and usage state | Exact removed `auth_profile_state` row count from sanitation                                                      | Start from the empty safe default; owners repopulate only from resolved destination profiles and new runtime observations | Non-blocking; external profile availability is evaluated separately          |
+| Installed plugin dependency trees                                         | `extensions/**/node_modules` is deliberately omitted while plugin source, manifest, and SQLite index are captured | Existing plugin owner reinstalls or repairs dependencies                                                                  | Owner-required when a configured plugin cannot load without the omitted tree |
 
 Supported schema owners may also drop and rebuild a legacy memory index shape
 during normal migration. That decision is derived from the opened database
@@ -38,19 +38,19 @@ structure and remains owner migration, not an artifact obligation.
 
 ### Ephemeral state
 
-| Surface | Current evidence | Safe treatment | Readiness |
-| --- | --- | --- | --- |
-| Process-local caches | No durable authority; recreated by module/runtime use | Empty on process start | Never continuity-blocking |
-| Runtime transients | Sockets, PIDs, locks, temporary reindex databases | Recreate through normal startup; stale transient artifacts remain excluded | Owner startup failures use existing readiness |
+| Surface              | Current evidence                                      | Safe treatment                                                             | Readiness                                     |
+| -------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------- |
+| Process-local caches | No durable authority; recreated by module/runtime use | Empty on process start                                                     | Never continuity-blocking                     |
+| Runtime transients   | Sockets, PIDs, locks, temporary reindex databases     | Recreate through normal startup; stale transient artifacts remain excluded | Owner startup failures use existing readiness |
 
 ### External dependencies
 
-| Obligation | Current evidence | Resolution owner |
-| --- | --- | --- |
-| Config SecretRefs | Exact path-free counts by `env`, `file`, and `exec` source | Existing secrets runtime |
-| Environment placeholders | Preserved authored config bytes | Launcher/config owner |
+| Obligation                              | Current evidence                                                            | Resolution owner                            |
+| --------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------- |
+| Config SecretRefs                       | Exact path-free counts by `env`, `file`, and `exec` source                  | Existing secrets runtime                    |
+| Environment placeholders                | Preserved authored config bytes                                             | Launcher/config owner                       |
 | OAuth and auth-profile credential bytes | OAuth exclusion plus zero credential rows in every packaged SQLite database | Existing auth/profile/host credential owner |
-| Host placement/publication dependencies | Not part of local Archived artifacts | Hosted Integration at Portable/Elastic |
+| Host placement/publication dependencies | Not part of local Archived artifacts                                        | Hosted Integration at Portable/Elastic      |
 
 An external dependency is not automatically required merely because its class
 exists. The owner evaluates the restored effective config and selected runtime

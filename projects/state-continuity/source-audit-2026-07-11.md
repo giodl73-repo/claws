@@ -11,16 +11,16 @@
 
 ## OpenClaw State Findings
 
-| Surface | Current behavior | Continuity consequence |
-| --- | --- | --- |
-| Global SQLite | Multiple subsystem writers; local transactions and revisions; no runtime-wide mutation generation. | Capture through the database's native online semantics. Do not invent aggregate consistency. |
-| Per-agent SQLite | Independent database per agent; indexes have separate revisions. | Inventory and capture each required database independently. |
-| Sessions/transcripts | File-backed and not uniformly covered by existing volatile backup behavior. | Classify and test them explicitly; do not infer consistency from SQLite capture. |
-| Configuration | Atomic writes, version stamps, and last-known-good recovery exist. | Reuse native artifacts and provenance where available. |
-| Workspace | Agent/tool writes; hosting durability may be provided outside core. | Declare captured, reconstructed, or externally bound treatment. |
-| Plugin state | Some state shares core SQLite; plugins may also own external state. | V1 inventories core surfaces; third-party capture registration is deferred. |
-| Credentials/identity | Mix of runtime-owned files and host-injected capabilities. | Never capture host-managed credentials; classify runtime-owned identity separately. |
-| Caches/indexes | Often reconstructable. | Exclude only with an explicit reconstruction rule. |
+| Surface              | Current behavior                                                                                   | Continuity consequence                                                                       |
+| -------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Global SQLite        | Multiple subsystem writers; local transactions and revisions; no runtime-wide mutation generation. | Capture through the database's native online semantics. Do not invent aggregate consistency. |
+| Per-agent SQLite     | Independent database per agent; indexes have separate revisions.                                   | Inventory and capture each required database independently.                                  |
+| Sessions/transcripts | File-backed and not uniformly covered by existing volatile backup behavior.                        | Classify and test them explicitly; do not infer consistency from SQLite capture.             |
+| Configuration        | Atomic writes, version stamps, and last-known-good recovery exist.                                 | Reuse native artifacts and provenance where available.                                       |
+| Workspace            | Agent/tool writes; hosting durability may be provided outside core.                                | Declare captured, reconstructed, or externally bound treatment.                              |
+| Plugin state         | Some state shares core SQLite; plugins may also own external state.                                | V1 inventories core surfaces; third-party capture registration is deferred.                  |
+| Credentials/identity | Mix of runtime-owned files and host-injected capabilities.                                         | Never capture host-managed credentials; classify runtime-owned identity separately.          |
+| Caches/indexes       | Often reconstructable.                                                                             | Exclude only with an explicit reconstruction rule.                                           |
 
 Evidence includes `src/state/openclaw-state-db.paths.ts`,
 `src/state/openclaw-agent-db.paths.ts`, global and agent SQL schemas,
@@ -120,6 +120,7 @@ existing state owners and storage semantics
 The first evidence slice is a local Archived round trip with a complete core
 state inventory. Portable and Elastic add lifecycle authority only after that
 substrate and Hosted Integration patterns are proven.
+
 ## PR 2 Current-Main Backup Audit
 
 The first implementation branch exposed a useful distinction: current

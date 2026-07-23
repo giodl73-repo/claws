@@ -280,7 +280,8 @@ export async function buildClawUpdatePlan(params: {
         action: "remove",
         target: `${current.source}:${current.ref}@${current.version}`,
         blocked: false,
-        reason: "Target manifest removes this Claw package reference without implying shared uninstall.",
+        reason:
+          "Target manifest removes this Claw package reference without implying shared uninstall.",
         currentDigest: digest(current),
       });
     }

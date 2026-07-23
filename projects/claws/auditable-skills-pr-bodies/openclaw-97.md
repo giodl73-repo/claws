@@ -69,6 +69,7 @@ Real environment tested:
 Windows checkout on the PR head using the real OpenClaw tool-result observer, receipt store, trajectory recorder, and CLI against a temporary OpenClaw state directory. The business tool and payment identifiers were deterministic fixtures; no external payment, inventory, or CRM system was called.
 
 Exact steps or command run after this patch:
+
 1. Emit a successful `payment.authorized` tool result for invoice `INV-1042` with authorization code `AUTH-9482`.
 2. List and count receipts by exact type, then retrieve the recorded receipt by ID.
 3. Inspect the matching trajectory reference.

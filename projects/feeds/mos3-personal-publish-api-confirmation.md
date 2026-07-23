@@ -51,10 +51,10 @@ Content-Type: application/json
 
 Known base URLs/scopes in Lobster:
 
-| Environment | Base URL | Scope |
-| --- | --- | --- |
-| MSIT | `https://titles.msit.mos.microsoft.com` | `https://titles.msit.mos.microsoft.com/.default` |
-| Prod | `https://titles.prod.mos.microsoft.com` | `https://titles.prod.mos.microsoft.com/.default` |
+| Environment  | Base URL                                   | Scope                                               |
+| ------------ | ------------------------------------------ | --------------------------------------------------- |
+| MSIT         | `https://titles.msit.mos.microsoft.com`    | `https://titles.msit.mos.microsoft.com/.default`    |
+| Prod         | `https://titles.prod.mos.microsoft.com`    | `https://titles.prod.mos.microsoft.com/.default`    |
 | MSIT private | `https://titles.msitprv.mos.microsoft.com` | `https://titles.msitprv.mos.microsoft.com/.default` |
 
 Lobster can optionally call:
@@ -214,7 +214,7 @@ Live 301/302 Scout validation showed:
 - Integrated Scout browser auth works.
 - Marketplace feed is MOS3-configured.
 - `GET /v1/scout/feeds/marketplace.json` returns HTTP 200 with `feedId:
-  mos3-root`.
+mos3-root`.
 - Marketplace search works in both 301 and 302.
 - 302 marketplace install succeeded for `billing-info-lookup`.
 - Personal feed/publish were not configured in 301/302 at that time.

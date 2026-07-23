@@ -10,12 +10,12 @@ start fields, config overlays, proxy-pipe events, state artifacts, lifecycle
 signals, and telemetry dependencies are concrete integration items. Each must
 map to one semantic area and a target disposition under `charter.md`.
 
-| Area | Canonical concept | Surface disposition |
-| --- | --- | --- |
-| Runtime Activation | Host intent becomes effective runtime configuration | Startup-critical observations fold into readiness; drift belongs in status/reconciliation |
-| Runtime Boundary | Runtime may safely receive work | `/ready` and Readiness Conditions/Hosting Profiles |
-| State and Continuity | Required runtime state catches up to durable state | `/synced` remains an audit hypothesis over synchronization conditions |
-| Evidence and Compatibility | Host can admit a supported artifact and prove runtime behavior | Capabilities, conformance, runtime identity, stable events; no new probe |
+| Area                       | Canonical concept                                              | Surface disposition                                                                       |
+| -------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Runtime Activation         | Host intent becomes effective runtime configuration            | Startup-critical observations fold into readiness; drift belongs in status/reconciliation |
+| Runtime Boundary           | Runtime may safely receive work                                | `/ready` and Readiness Conditions/Hosting Profiles                                        |
+| State and Continuity       | Required runtime state catches up to durable state             | `/synced` remains an audit hypothesis over synchronization conditions                     |
+| Evidence and Compatibility | Host can admit a supported artifact and prove runtime behavior | Capabilities, conformance, runtime identity, stable events; no new probe                  |
 
 ## Lifecycle
 

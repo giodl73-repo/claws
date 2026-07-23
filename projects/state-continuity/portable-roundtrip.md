@@ -127,17 +127,17 @@ generation fails closed.
 
 ### Internal analogues
 
-| Analogue | Disposition | Reason |
-| --- | --- | --- |
-| E5b managed publication | Adapt | Preserve bounded streaming, strict JSON, and no-Gateway execution; replace host-bundle lookup with direct continuity-provider selection. |
-| Manifest-declared web providers | Reuse | Owner config selects a provider ID; manifest metadata finds the owning plugin before scoped runtime loading. |
-| Hosted Integration bundle/carrier | Avoid | Latest architecture excludes publication/lifecycle and removes bundled Lobster product code. |
-| Archived verification/materialization | Reuse | It already owns archive integrity, compatibility, offline output, and exact materialization receipts. |
-| E4d restore executor | Reuse unchanged | It should continue consuming local verified paths and owning final claim/assembly. |
-| E4 restore hold | Reuse | Publication-start fencing, same-boot replay, commit, and quarantine already express the mutating phase. |
-| Hosting Profiles readiness | Adapt narrowly | Fixed owner conditions close restored admission without another readiness registry. |
-| E5b source passport finalization | Avoid on destination | Destination preparation does not own source release or destruction authority. |
-| Generic provider callback/carrier | Avoid | Retrieval is a fixed managed operation, not arbitrary host dispatch. |
+| Analogue                              | Disposition          | Reason                                                                                                                                   |
+| ------------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| E5b managed publication               | Adapt                | Preserve bounded streaming, strict JSON, and no-Gateway execution; replace host-bundle lookup with direct continuity-provider selection. |
+| Manifest-declared web providers       | Reuse                | Owner config selects a provider ID; manifest metadata finds the owning plugin before scoped runtime loading.                             |
+| Hosted Integration bundle/carrier     | Avoid                | Latest architecture excludes publication/lifecycle and removes bundled Lobster product code.                                             |
+| Archived verification/materialization | Reuse                | It already owns archive integrity, compatibility, offline output, and exact materialization receipts.                                    |
+| E4d restore executor                  | Reuse unchanged      | It should continue consuming local verified paths and owning final claim/assembly.                                                       |
+| E4 restore hold                       | Reuse                | Publication-start fencing, same-boot replay, commit, and quarantine already express the mutating phase.                                  |
+| Hosting Profiles readiness            | Adapt narrowly       | Fixed owner conditions close restored admission without another readiness registry.                                                      |
+| E5b source passport finalization      | Avoid on destination | Destination preparation does not own source release or destruction authority.                                                            |
+| Generic provider callback/carrier     | Avoid                | Retrieval is a fixed managed operation, not arbitrary host dispatch.                                                                     |
 
 ### External precedent
 
@@ -250,18 +250,18 @@ into `ContinuityRestoreExecutionSource`.
 
 ### Failure and replay
 
-| Failure | Result |
-| --- | --- |
-| Provider plugin provenance differs | Quarantine |
-| Stable provider generation differs | Quarantine |
-| Retrieval unavailable before local publication | Retry preparation |
-| Retrieval identity/digest/size differs | Quarantine |
-| Preparation response lost on same destination boot | Replay exact request |
-| Destination adapter restarts before preparation commit | Re-run preparation from acceptance |
-| Materialization conflict or foreign target | Quarantine |
-| E4 mutation begins | Existing E4 same-boot/no-replacement rules |
-| Required credential unavailable at startup | Remain unready; source stays retired |
-| Owner reconstruction fails | Remain unready with owner finding; never ordinary-start |
+| Failure                                                | Result                                                  |
+| ------------------------------------------------------ | ------------------------------------------------------- |
+| Provider plugin provenance differs                     | Quarantine                                              |
+| Stable provider generation differs                     | Quarantine                                              |
+| Retrieval unavailable before local publication         | Retry preparation                                       |
+| Retrieval identity/digest/size differs                 | Quarantine                                              |
+| Preparation response lost on same destination boot     | Replay exact request                                    |
+| Destination adapter restarts before preparation commit | Re-run preparation from acceptance                      |
+| Materialization conflict or foreign target             | Quarantine                                              |
+| E4 mutation begins                                     | Existing E4 same-boot/no-replacement rules              |
+| Required credential unavailable at startup             | Remain unready; source stays retired                    |
+| Owner reconstruction fails                             | Remain unready with owner finding; never ordinary-start |
 
 ### Reconstruction and readiness
 

@@ -13,12 +13,12 @@ replacement, or scale-to-zero implementation. This is a design-only fixture.
     "level": "archived",
     "checkpoint": {
       "rpo": "5m",
-      "publication": "local-volume"
+      "publication": "local-volume",
     },
     "retention": {
-      "minimumPoints": 2
-    }
-  }
+      "minimumPoints": 2,
+    },
+  },
 }
 ```
 

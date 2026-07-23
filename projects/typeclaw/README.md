@@ -10,17 +10,17 @@ worth filing. It should not blindly upgrade OpenClaw's toolchain without data.
 
 ## Active Notes
 
-| Area | File |
-| --- | --- |
-| Session handoff | `SESSION.md` |
-| TS7/native findings report | `ts7-native-api-report.md` |
+| Area                       | File                          |
+| -------------------------- | ----------------------------- |
+| Session handoff            | `SESSION.md`                  |
+| TS7/native findings report | `ts7-native-api-report.md`    |
 | Minimal compiler API repro | `ts7-native-minimal-repro.md` |
 
 ## Active Work
 
-| Repo | PR / Issue | Branch | Status | Purpose |
-| --- | --- | --- | --- | --- |
-| `openclaw/openclaw` | TBD | `user/giodl/typeclaw-ts-native-eval` | Active fork branch | Evaluate TypeScript native / TS7 impact on OpenClaw typecheck/build workflows. |
+| Repo                | PR / Issue | Branch                               | Status             | Purpose                                                                        |
+| ------------------- | ---------- | ------------------------------------ | ------------------ | ------------------------------------------------------------------------------ |
+| `openclaw/openclaw` | TBD        | `user/giodl/typeclaw-ts-native-eval` | Active fork branch | Evaluate TypeScript native / TS7 impact on OpenClaw typecheck/build workflows. |
 
 ## Evaluation Plan
 

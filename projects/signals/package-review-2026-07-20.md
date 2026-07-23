@@ -104,16 +104,16 @@ No source evidence justifies:
 
 ### Internal analogues
 
-| Analogue | Disposition | Package implication |
-| --- | --- | --- |
-| `DiagnosticEventPayload` | Reuse | Projection spec must use current dispatcher, trace, trust, private-data, queue, and exporter behavior. |
-| `HealthFinding` | Reuse | Owner spec must allow findings to remain findings rather than force events. |
-| Security/install-policy findings | Reuse | Preserve `checkId` and `ruleId` ownership instead of normalizing IDs. |
-| `ReadinessResult` | Reuse | Current readiness vocabulary remains authoritative; richer conditions remain separate work. |
-| `PluginHookAfterToolCallEvent` | Adapt | Preserve the owner result and current hook compatibility rather than introduce a new hook family. |
-| `DiagnosticUsageEvent` | Adapt through owner | Usage and unknown-cost changes remain resource-owner decisions. |
-| Localization descriptors | Project into | Stable owner fields and typed parameters feed rendering; Localization owns catalogs and fallback. |
-| Universal Signals envelope | Avoid | Duplicates existing event, result, finding, readiness, and usage contracts. |
+| Analogue                         | Disposition         | Package implication                                                                                    |
+| -------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
+| `DiagnosticEventPayload`         | Reuse               | Projection spec must use current dispatcher, trace, trust, private-data, queue, and exporter behavior. |
+| `HealthFinding`                  | Reuse               | Owner spec must allow findings to remain findings rather than force events.                            |
+| Security/install-policy findings | Reuse               | Preserve `checkId` and `ruleId` ownership instead of normalizing IDs.                                  |
+| `ReadinessResult`                | Reuse               | Current readiness vocabulary remains authoritative; richer conditions remain separate work.            |
+| `PluginHookAfterToolCallEvent`   | Adapt               | Preserve the owner result and current hook compatibility rather than introduce a new hook family.      |
+| `DiagnosticUsageEvent`           | Adapt through owner | Usage and unknown-cost changes remain resource-owner decisions.                                        |
+| Localization descriptors         | Project into        | Stable owner fields and typed parameters feed rendering; Localization owns catalogs and fallback.      |
+| Universal Signals envelope       | Avoid               | Duplicates existing event, result, finding, readiness, and usage contracts.                            |
 
 ### RFC 0024 package
 
@@ -131,12 +131,12 @@ migration universe comparable to 315 locale/surface cells.
 
 ### External comparators
 
-| Comparator | Reuse | Avoid |
-| --- | --- | --- |
-| RFC 9457 | Stable machine problem identity alongside human detail. | One HTTP problem shape for every runtime fact. |
-| Kubernetes Conditions | Machine reason separate from human message and stale-generation awareness. | Condition arrays for ephemeral events. |
-| W3C Trace Context | Standard trace ancestry and parentage. | Proprietary replacement correlation IDs. |
-| OpenTelemetry | Interoperable exporter projection. | Exporter conventions as canonical OpenClaw semantics. |
+| Comparator            | Reuse                                                                      | Avoid                                                 |
+| --------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------- |
+| RFC 9457              | Stable machine problem identity alongside human detail.                    | One HTTP problem shape for every runtime fact.        |
+| Kubernetes Conditions | Machine reason separate from human message and stale-generation awareness. | Condition arrays for ephemeral events.                |
+| W3C Trace Context     | Standard trace ancestry and parentage.                                     | Proprietary replacement correlation IDs.              |
+| OpenTelemetry         | Interoperable exporter projection.                                         | Exporter conventions as canonical OpenClaw semantics. |
 
 ## Evaluate
 

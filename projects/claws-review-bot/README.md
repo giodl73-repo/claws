@@ -10,25 +10,25 @@ confused with the main Lobster reviewer behavior.
 
 ## Anchors
 
-| Name | Value |
-| --- | --- |
-| Package | `@bic/claws-review-bot` |
+| Name       | Value                       |
+| ---------- | --------------------------- |
+| Package    | `@bic/claws-review-bot`     |
 | Local path | `packages/claws-review-bot` |
-| Azure job | `claws-review-bot-job` |
+| Azure job  | `claws-review-bot-job`      |
 
 ## Active Notes
 
-| Area | File |
-| --- | --- |
-| Session handoff | `SESSION.md` |
-| Initial operating rules | `rules.md` |
+| Area                    | File         |
+| ----------------------- | ------------ |
+| Session handoff         | `SESSION.md` |
+| Initial operating rules | `rules.md`   |
 
 ## Active Work
 
-| Repo | Scope | Status | Purpose |
-| --- | --- | --- | --- |
-| `bic/lobster` | Lobster PRs | primary | Main reviewer lane for PR assessment. |
-| `gim-home/m` | ClawPilot issues | exploratory | Define a narrow issue-classifier lane for issue quality and regression triage. |
+| Repo          | Scope            | Status      | Purpose                                                                        |
+| ------------- | ---------------- | ----------- | ------------------------------------------------------------------------------ |
+| `bic/lobster` | Lobster PRs      | primary     | Main reviewer lane for PR assessment.                                          |
+| `gim-home/m`  | ClawPilot issues | exploratory | Define a narrow issue-classifier lane for issue quality and regression triage. |
 
 ## Related Areas
 

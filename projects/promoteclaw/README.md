@@ -10,17 +10,26 @@ Lobster patches still needed on that release.
 
 ## Active Notes
 
-| Area | File |
-| --- | --- |
-| Session handoff | `SESSION.md` |
-| Feed discovery | `feed-discovery.md` |
+| Area                                                    | File                                                      |
+| ------------------------------------------------------- | --------------------------------------------------------- |
+| Session handoff                                         | `SESSION.md`                                              |
+| Feed discovery                                          | `feed-discovery.md`                                       |
 | Upstream patch admission, promotion, and deletion rules | `../layering-contracts/upstream-first-release-compact.md` |
+
+## M5 Rendezvous Role
+
+Lobster #551 lands upstream first through the OpenClaw Claws stack. PromoteClaw
+then picks up the first release containing Claws after the required seven-day
+quarantine. The expected end-to-end pickup is roughly two weeks after upstream
+landing. Existing #4528 promotes `2026.6.11` and is not the Claws carrier.
+
+See `projects/rendezvous/pr-plan.md`.
 
 ## Active Work
 
-| Repo | PR / Issue | Branch | Status | Purpose |
-| --- | --- | --- | --- | --- |
-| `bic/lobster` | TBD | TBD | Planning | Regularly update `src/openclaw_container` to the latest quarantine-cleared OpenClaw release. |
+| Repo          | PR / Issue | Branch | Status   | Purpose                                                                                      |
+| ------------- | ---------- | ------ | -------- | -------------------------------------------------------------------------------------------- |
+| `bic/lobster` | TBD        | TBD    | Planning | Regularly update `src/openclaw_container` to the latest quarantine-cleared OpenClaw release. |
 
 ## Promotion Process
 

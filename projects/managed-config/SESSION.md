@@ -209,7 +209,6 @@
 - Next stack step: restack Lobster against the exact simple CLI contract and
   remove prototype-only generation/controller assumptions.
 
-
 ## 2026-07-13 - Simplified Lobster adapter complete
 
 - Worktree: `C:\src\lobster-layering-audit`
@@ -273,7 +272,6 @@
   - let OpenClaw and RFC CI/review complete
   - record foreground three-layer startup, conflict rejection, and runtime mutation rejection proof for implementation PR #107026
   - keep both upstream PRs draft until those gates are satisfied
-
 
 ## 2026-07-13 - Foreground lifecycle proof
 

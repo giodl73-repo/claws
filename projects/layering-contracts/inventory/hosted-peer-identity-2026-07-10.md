@@ -86,16 +86,16 @@ Duplex can evolve this declaration additively. It should not overload node
 
 ## Existing Authentication Options
 
-| Mechanism | Fit | Reason |
-| --- | --- | --- |
-| Shared Gateway token/password | Poor | Authenticates possession of a deployment-wide secret; cannot safely self-declare provider methods or tenant/generation identity |
-| Trusted proxy | Poor for provider identity | Authenticates a user/header identity at a network boundary; intended for operator HTTP/UI access, not workload proof-of-possession |
-| Paired device token | Poor | Persistent device role/scope grant and device-pairing lifecycle are the wrong domain |
-| Node bootstrap/pairing | Poor | Couples host infrastructure to user/device command approval, wake, and node policy |
-| Operator device token | Poor | Grants host-to-Gateway operator authority, not Gateway-to-host provider authority |
-| Process-local approval runtime token | Useful precedent only | Safely grants one narrow backend responsibility but is intentionally loopback/process-local and not remotely portable |
-| Agent runtime identity token | Useful precedent only | Demonstrates signed, scoped runtime identity but binds agent/session execution, not host provider methods |
-| New host-provider admission token | Best fit | Can bind provider identity, capabilities, deployment, generation, expiry, and proof of possession |
+| Mechanism                            | Fit                        | Reason                                                                                                                             |
+| ------------------------------------ | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Shared Gateway token/password        | Poor                       | Authenticates possession of a deployment-wide secret; cannot safely self-declare provider methods or tenant/generation identity    |
+| Trusted proxy                        | Poor for provider identity | Authenticates a user/header identity at a network boundary; intended for operator HTTP/UI access, not workload proof-of-possession |
+| Paired device token                  | Poor                       | Persistent device role/scope grant and device-pairing lifecycle are the wrong domain                                               |
+| Node bootstrap/pairing               | Poor                       | Couples host infrastructure to user/device command approval, wake, and node policy                                                 |
+| Operator device token                | Poor                       | Grants host-to-Gateway operator authority, not Gateway-to-host provider authority                                                  |
+| Process-local approval runtime token | Useful precedent only      | Safely grants one narrow backend responsibility but is intentionally loopback/process-local and not remotely portable              |
+| Agent runtime identity token         | Useful precedent only      | Demonstrates signed, scoped runtime identity but binds agent/session execution, not host provider methods                          |
+| New host-provider admission token    | Best fit                   | Can bind provider identity, capabilities, deployment, generation, expiry, and proof of possession                                  |
 
 ## Why `operator` Is Insufficient
 
@@ -348,13 +348,13 @@ Select the first portable unary provider proof. Evaluate candidates against:
 
 Candidates:
 
-| Provider | Advantages | Risks |
-| --- | --- | --- |
-| Secret resolution | Portable, bounded unary, strong least-privilege case | Existing OpenClaw secret APIs may already provide the correct extension |
-| Bounded egress metadata/token operation | Central to ProxyPipe origin | Full HTTP bodies require streaming; avoid a misleading partial contract |
-| Durable publication acknowledgement | Architecturally valuable | Depends on unfinished state/continuity semantics |
-| Feedback submission | Small and already implemented | Product/plugin-owned and weak evidence for core |
-| Judge dedup | Simple unary | Lobster/code-mode specific; should remain plugin-owned |
+| Provider                                | Advantages                                           | Risks                                                                   |
+| --------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------- |
+| Secret resolution                       | Portable, bounded unary, strong least-privilege case | Existing OpenClaw secret APIs may already provide the correct extension |
+| Bounded egress metadata/token operation | Central to ProxyPipe origin                          | Full HTTP bodies require streaming; avoid a misleading partial contract |
+| Durable publication acknowledgement     | Architecturally valuable                             | Depends on unfinished state/continuity semantics                        |
+| Feedback submission                     | Small and already implemented                        | Product/plugin-owned and weak evidence for core                         |
+| Judge dedup                             | Simple unary                                         | Lobster/code-mode specific; should remain plugin-owned                  |
 
 Audit existing secret provider/broker extension points before selecting the
 foundation proof.

@@ -17,6 +17,20 @@ tenant-subset model, but feed implementation and Scout catalog work belong in
 | Policy admin PR stack after feeds | `policy-admin-pr-stack.md` |
 | Policy UX shape proposal | `policy-ux-proposal.md` |
 
+## M5 Rendezvous Commitment
+
+Lobster #867 now explicitly includes a tenant admin control to enable or
+disable Scout through the Microsoft 365 admin center path. Merged #3555
+documents registration and deployment boundaries but does not implement this
+control. #5422 implements the runtime half: MAC/MOS3 owns native availability
+for the existing Scout Teams app, while Lobster reads, caches, and enforces it
+after operator enrollment. No profile, custom policy, or declarative agent is
+added. Registration only needs to publish the existing package and supply its
+per-environment MOS3 title ids; its stable AppId already exists. Keep deployment
+availability separate from per-action user/Desktop approval.
+
+See `projects/rendezvous/pr-plan.md`.
+
 ## Current Stack
 
 | PR | Branch | Purpose | Status |
@@ -30,6 +44,8 @@ tenant-subset model, but feed implementation and Scout catalog work belong in
 | #3388 | `user/giodl/lobster-personal-policy-mos3` | Personal policy baseline state, accepted only when MOS3-backed and equal-or-stricter than the tenant-effective baseline. | Merged 2026-06-20 at merge commit `f9278926`; final head `0b9f4af53` |
 | #3391 | `user/giodl/lobster-policy-ux-gate` | URL-gated Policy UX preview with scope/section controls, strictness preview, and generated policy JSON; save path remains disabled. | Merged 2026-06-20 at head `a07e8915e` |
 | #3555 | `user/giodl/lobster-mac-registration-refresh` | Refresh Partner Center / MAC registration guidance to align with Aether/Cowork MOS3 registration and runtime boundaries. | Merged 2026-06-24 at head `44cc96c6` |
+| #5422 | `user/giodl/scout-tenant-availability` | Enforce native MAC/MOS3 availability for the existing Scout Teams app after operator enrollment. | Non-draft/mergeable at `8feadccf92`; fail-closed cold resolution, last-known fallback, resolver/cache tests, and aligned ECS text are pushed. PullRequest rerun `173385787` is queued; Build Validation is blocked by the current-main web-bundle regression isolated in #5495. GitHubPop and refreshed review remain. |
+| #5495 | `user/giodl/buildvalidation-web-dist` | Restore Build Validation's published web-bundle handoff before the runtime Docker build. | Open/mergeable at `7d76d8ff68`; focused contracts plus SDL validator suites pass. PullRequest `173387944` and Build Validation `173387953` are queued on merge `f044795806`; review and GitHubPop remain. |
 | #3585 | `user/giodl/lobster-personal-policy-upload` | First live authenticated personal-policy accept route, requiring durable policy state plus MOS3 artifact metadata and OpenClaw comparison attestation. | Draft; ADO queued 2026-06-24 |
 | #3586 | `user/giodl/lobster-policy-ux-save` | Stacked on #3585; wires gated Policy UX save to selected MOS3 artifact metadata and the personal-policy accept API. | Draft; ADO queued 2026-06-24 |
 | #3588 | `user/giodl/lobster-policy-mos3-upload` | Stacked on #3586; adds policy-specific MOS3 publish backend and updates Policy UX save to publish before accepting returned artifacts. | Draft; ADO queued 2026-06-24 |
@@ -63,6 +79,13 @@ tenant-subset model, but feed implementation and Scout catalog work belong in
   MOS3 is the catalog/governance authority behind package acquisition, policy
   artifacts, package-defense state, and effective availability; Lobster is the
   runtime materialization layer.
+- Cowork's `x-policies` pattern applies because Cowork already ships as a
+  declarative agent. Scout currently ships as a Teams tabs app, and MAC already
+  exposes native app availability/block controls for that title. #5422 now
+  consumes the targeted MOS3 marketplace preview state (`acquisitionState` and
+  tenant `scope`/`blockStatus`) instead of creating a synthetic declarative
+  agent or Lobster-owned setting. Registration only needs the existing app's
+  environment title ids; Lobster consumes/caches and enforces the native value.
 - #3391 landed the gated Policy UX preview. #3585 adds the first live
   personal-policy acceptance route and matching web API client. #3586 stacks on
   it and wires the Policy UX save action to selected MOS3 artifact metadata.

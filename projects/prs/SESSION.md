@@ -49,9 +49,9 @@
     `~/.openclaw/cron/jobs.json` to SQLite, but the diagnostics safety test
     still read the removed file. The test now validates the same no-`bash` /
     no-`write` invariant through the supported `openclaw cron show
-    daily-diagnostics --json` response and fails closed on malformed or missing
+daily-diagnostics --json` response and fails closed on malformed or missing
     policy data. The exact pinned OpenClaw source confirms `cron show --json`
-    returns the full stored job.     The rebase retains the reply-session retry as
+    returns the full stored job. The rebase retains the reply-session retry as
     `0014-retry-reply-session-init-conflicts.patch` and ports the previous
     outbound quote behavior to a separate
     `0015-msteams-quoted-replies.patch`; all 15 patches apply sequentially to
@@ -213,7 +213,7 @@
   commit that GitHub still saw as conflicting, so the final clean state was made
   by direct rebase onto latest `origin/main` and
   `git push prhead HEAD:doctor-core-contribution-health
-  --force-with-lease=<current-remote-head>`. No final merge was run.
+--force-with-lease=<current-remote-head>`. No final merge was run.
 - Gitcrawl: unavailable on Windows in this session (`gitcrawl` command not
   recognized); live GitHub was used as fallback.
 - Next action: wait for the queued hosted checks on
@@ -275,7 +275,7 @@
   and labels on the exact current head. Do not treat the command ack as the
   review result.
 - Treat ClawSweeper `status: ready for maintainer look` plus `proof:
-  sufficient` as author-action clear, not automatic merge approval. If
+sufficient` as author-action clear, not automatic merge approval. If
   ClawSweeper calls out `needs-human`, security, compatibility, schema, trust,
   or storage-boundary concerns, record the maintainer decision before marking
   ready or merging.
@@ -382,7 +382,7 @@
   source Gateway harness started QA mock OpenAI, real `startGatewayServer`, and
   the real CLI child process
   `node scripts/run-node.mjs agent --session-key agent:main:probe-mqlb00jt
-  --message ... --json --timeout 120`; the CLI exited 0, Gateway dispatched one
+--message ... --json --timeout 120`; the CLI exited 0, Gateway dispatched one
   provider request with model `gpt-5.5`, and the fresh session key was persisted
   under `state/agents/main/sessions/...` with `agent:main` evidence in both the
   trajectory log and `sessions.json`. Focused regression Vitest, targeted
@@ -396,7 +396,7 @@
   https://github.com/openclaw/openclaw/pull/90062#issuecomment-4754160646.
   Follow-up live snapshot showed ClawSweeper refreshed #90062 to
   `proof: sufficient`, `rating: platinum`, and `status: ready for maintainer
-  look`; merge state was `UNKNOWN` after the body/comment update but the PR
+look`; merge state was `UNKNOWN` after the body/comment update but the PR
   remained draft.
 - #87081 was rebased on 2026-06-19 to head `373f83cd0e`, resolving the dirty
   merge state. Local proof passed for policy config coverage, script lint,
@@ -412,7 +412,7 @@
   feeds/bundled-health Vitest, targeted oxlint, scoped format/diff check,
   plugin inventory check, and `pnpm tsgo:extensions`. The PR body now includes
   real source CLI proof for `openclaw feeds sources --json`, `openclaw feeds
-  list --json`, and `openclaw feeds search proof --type plugin --json` against
+list --json`, and `openclaw feeds search proof --type plugin --json` against
   an isolated local `file://` feed config; GitHub `Real behavior proof` passes.
   A follow-up ClawSweeper P2 availability finding for unbounded remote feed
   bodies was fixed and pushed at head `57d27be40d` by capping HTTPS feed reads
@@ -511,9 +511,9 @@
 - #84326 proof was completed on 2026-06-19 at head `5acbf868ed1`. A fresh
   worktree `/root/src/openclaw-84326-proof` ran source CLI proof with isolated
   temp state: `doctor --lint --json --only
-  core/doctor/sandbox/registry-files` reported the legacy
+core/doctor/sandbox/registry-files` reported the legacy
   `sandbox/containers.json` finding, then `doctor --fix --yes
-  --non-interactive` exited 0, removed the legacy JSON, and migrated
+--non-interactive` exited 0, removed the legacy JSON, and migrated
   `openclaw-sbx-proof` into SQLite `sandbox_registry_entries`. Focused
   sandbox/contribution Vitest passed (60 tests), targeted `oxlint` passed, and
   `git diff --check` was clean. PR body was updated with `Real behavior proof`
@@ -529,11 +529,11 @@
 - #84340 was updated again on 2026-06-19 to signed head `bfe89099c77` after
   ClawSweeper found that intentional non-legacy extra gateways would fail
   default `doctor --lint`. Non-legacy extra gateways now emit `severity:
-  "info"`, default lint exit 0, and no repair effects; legacy gateway services
+"info"`, default lint exit 0, and no repair effects; legacy gateway services
   remain `warning`, default lint exit 1, and expose
   `would-remove-legacy-gateway-service`. Focused gateway/contribution Vitest
   passed (82 tests), targeted `oxlint`, targeted `oxfmt --check`, `git diff
-  --check`, and `pnpm tsgo:core` passed. PR body now has current-head proof,
+--check`, and `pnpm tsgo:core` passed. PR body now has current-head proof,
   and fresh re-review was requested:
   https://github.com/openclaw/openclaw/pull/84340#issuecomment-4755395041.
   Live immediately after: non-draft, merge state `UNSTABLE`, no failing checks,
@@ -582,7 +582,7 @@
   `oxlint`/`oxfmt --check` passed, `pnpm tsgo:core` passed, and
   `git diff --check` passed. Real CLI proof ran
   `node --import tsx src/entry.ts doctor --lint --json --only
-  core/doctor/session-locks` against isolated Windows state with a hidden live
+core/doctor/session-locks` against isolated Windows state with a hidden live
   owner argv containing `openclaw.mjs`; output showed the new fix hint,
   expected exit code 1, and `LOCK_EXISTS=true`. The broader Windows
   `src/agents/session-write-lock.test.ts` shard still fails three
@@ -607,7 +607,7 @@
   `doctor-config-flow.test.ts` still has an unrelated Windows path assertion
   failure for `hooks.transformsDir`. Real built-launcher proof passed with
   isolated env: `node openclaw.mjs doctor --dry-run --diff --json
-  --non-interactive` exited 0 and emitted clean preview JSON. PR body was
+--non-interactive` exited 0 and emitted clean preview JSON. PR body was
   updated, `@clawsweeper review` was posted at
   https://github.com/openclaw/openclaw/pull/84472#issuecomment-4770775197,
   Real behavior proof check passes, merge state `CLEAN`, maintainer edits
@@ -619,10 +619,10 @@
   requested changes. Local WSL proof: `git diff --check origin/main...HEAD`
   passed; `pnpm test extensions/mxc/test/config.test.ts -- --reporter=verbose`
   passed; `pnpm test extensions/mxc/test/mxc-spawn-launcher.test.ts --
-  --reporter=verbose` passed; `pnpm test
-  extensions/mxc/test/sandbox-policy-loader.test.ts -- --reporter=verbose`
+--reporter=verbose` passed; `pnpm test
+extensions/mxc/test/sandbox-policy-loader.test.ts -- --reporter=verbose`
   passed; `pnpm test extensions/mxc/test/mxc-backend.test.ts --
-  --reporter=verbose` passed as an explicit non-Windows skip. Live state:
+--reporter=verbose` passed as an explicit non-Windows skip. Live state:
   non-draft, assigned to `steipete` since 2026-06-29, stale
   `CHANGES_REQUESTED` reviews from earlier heads, one failing
   `dependency-guard` check pending exact-head maintainer/secops dependency

@@ -1,5 +1,31 @@
 # PromoteClaw Session Context
 
+## 2026-07-22 #5402 OpenClaw 2026.7.1 re-derivation
+
+- Merged current `origin/main`, re-derived
+  `0019-cron-preapproval-creation.patch` against pristine OpenClaw v2026.7.1,
+  and pushed draft head `502cb78e29`. All 18 Lobster patches apply cleanly.
+- Green proof: `just openclaw-patches-check`; cron preapproval Stage 0, 1, and
+  2 contract checks; upstream TypeScript check; focused gateway/agent 20/20,
+  job-patch 11/11, and definition-revision 3/3 tests. Local image/JS recipe is
+  blocked because Docker Desktop is not running.
+- Independently verified annotated tag `v2026.7.1` object
+  `842a951d5d0843aa6eb77575dc9867bf0603835c` peels to the pinned commit
+  `2d2ddc43d0dcf71f31283d780f9fe9ff4cc04fe4`.
+- Natural runtime build `173390675` is queued. GitHubPop requires current-head
+  Microsoft/PME Proof of Presence. Keep the three mixed
+  `openclaw@2026.7.1` / `diagnostics-otel@2026.5.28` Gateway-startup threads
+  open until that pipeline/image smoke receipt exists; do not mark ready or
+  manually queue ADO before then.
+
+## 2026-07-21 PR #5402 current-head repair
+
+- Pushed draft Lobster #5402 at `a145aac5f361404c63bf3168ac8f1d280c210431` after merging current `main` (`7111f04caf`). The PR is now mergeable; its displayed `CHANGES_REQUESTED` verdict is from the superseded `46570527b8` head, and a fresh review is requested from Galin.
+- Re-derived the OpenClaw patch stack against pristine `v2026.7.1` / `2d2ddc43d0dcf71f31283d780f9fe9ff4cc04fe4`: 17 patches remain, upstreamed 0012 was dropped, and 0018 preserves main's #5386 canonical preapproval-manifest behavior.
+- Green local proof: `just openclaw-patches-check`, `just cron-tool-preapproval-stage0-contract-check`, and `just cron-tool-preapproval-stage1-contract-check`. The full-verification Docker list now runs relocated `monitor-handler/inbound-media.test.ts`; final focused Codex review found no actionable issue.
+- `just openclaw-js-unit-tests` could not start locally because Docker Desktop is unavailable. Keep the PR draft until the automatic full image/startup lane and owner acceptance prove the intentional OpenClaw `2026.7.1` + diagnostics companion `2026.5.28` mixed pair. Natural PullRequest build `173252279` is queued/running; do not manually queue ADO.
+- Resolved stale review threads covered by the new receipts and left diagnostics compatibility/smoke threads open. Repair comment: https://microsoft.ghe.com/bic/lobster/pull/5402#issuecomment-206924731
+
 ## Agent Start
 
 1. Read this file.
@@ -22,22 +48,28 @@
 
 ## Current Session
 
-- Last updated: 2026-07-16.
-- Last agent: Copilot.
-- Current focus: Drive the repaired PromoteClaw automation and its first
-  generated Lobster OpenClaw upgrade through fresh CI and acceptance.
-- Active branch / PR: Lobster #4355
-  `https://microsoft.ghe.com/bic/lobster/pull/4355`, branch
-  `user/giodl/promoteclaw-job`, head `6abe9b55d6`. Generated candidate:
-  Lobster #4528 `https://microsoft.ghe.com/bic/lobster/pull/4528`, branch
-  `promoteclaw/openclaw-2026.6.11`, head `d8ada10e6c`, draft and mergeable.
+- Last updated: 2026-07-21.
+- Last agent: Copilot CLI.
+- Current focus: Drive the quarantine-cleared OpenClaw `2026.7.1` candidate
+  through patch carry-forward, CI, and acceptance while finishing the daily
+  PromoteClaw pipeline authorization.
+- Active branch / PR: Lobster #5402
+  `https://microsoft.ghe.com/bic/lobster/pull/5402`, branch
+  `promoteclaw/openclaw-2026.7.1`, head `f64899b8f4`, draft and mergeable.
+  Lobster #4528 remains open at `2026.6.11`, but is superseded as the promotion
+  target and should be used only as a donor for still-relevant patch and CI
+  repairs.
+- M5 #551 follow-through: after the Claws stack lands upstream, wait for the
+  first containing OpenClaw release and its seven-day quarantine, then target
+  Lobster pickup in roughly two weeks.
 - Known dirty state: PromoteClaw Lobster worktrees used this session are clean.
   `C:\src\claws-hapi` has this session note update plus unrelated existing
   dirty project notes.
-- Blocking question: #4528 needs fresh CI plus a newly built 2026.6.11 image
-  for persisted-home Gateway, brokered Teams/msteams, and version-visibility
-  acceptance; #4355 needs fresh CI/re-review and still requires
-  `GHE_PROMOTECLAW_TOKEN` after merge.
+- Blocking question: #5402 leaves `@openclaw/diagnostics-otel` at `2026.5.28`
+  because `2026.7.1` is not present in the internal Release view. The retained
+  Lobster patches must be audited/re-derived against `v2026.7.1` before image,
+  persisted-home Gateway, brokered Teams/msteams, and version-visibility
+  acceptance.
 
 ## Resume Checklist
 
@@ -71,6 +103,36 @@
 
 ## Open Threads
 
+- 2026-07-22 #5402 exact-head repair: natural ADO `173306193` exposed a stale
+  cron fake-time fixture and the OpenClaw 2026.7.1 cron handler/declarative-add
+  shape. Pushed `c26f6b3b55` after adapting async validation/read APIs and
+  caller scope, failing closed on approval-gated declaration-key convergence,
+  merging `main` `4199135d8f`, and passing cron patcher 7/7, pipeline SDL
+  281/281, syntax/fmt/diff, and final Codex review. Receipt:
+  https://microsoft.ghe.com/bic/lobster/pull/5402#issuecomment-207309736.
+  PR remains draft; natural ADO `173312698` is queued and GitHubPop requires
+  current-head Proof of Presence. Galin and Daron were re-requested.
+- 2026-07-21: pushed `f64899b8f4` to #5402. It preserves the unpublished
+  `@openclaw/diagnostics-otel@2026.5.28` pin in validators/install fixtures,
+  updates the `v2026.7.1` re-derive SHA to `2d2ddc43d0`, and changes the Rust
+  invariant to validate the companion's own pin rather than forcing equality
+  with `openclaw@2026.7.1`. Pipeline SDL, targeted Python assertion, rustfmt,
+  and diff checks pass; focused Rust execution remains blocked by the existing
+  Windows `find_git_binary` compile defect. Patch audit and draft acceptance
+  still remain.
+
+- 2026-07-21: registered the daily PromoteClaw ADO definition
+  `Lobster-PromoteClaw-Open-PR` as definition `469977`. Dry runs `173180963`
+  and `173185456` passed SDL source analysis but remained at
+  `Checkpoint.Authorization` before the PromoteClaw stage. The GHE repository
+  resource is authorized; the remaining protected resource still needs an
+  owner authorization.
+- 2026-07-21: internal feed detection selected `openclaw@2026.7.1`, published
+  `2026-07-13T18:13:06.8396262Z` and visible in `@Release`. Generated and
+  pushed branch `promoteclaw/openclaw-2026.7.1` at `0ea38b2aba`, then opened
+  draft Lobster #5402 with a verified Markdown body. Main remains pinned to
+  `2026.5.28`; `@openclaw/diagnostics-otel@2026.7.1` was absent from Release,
+  so the generator left that companion pin unchanged.
 - 2026-07-21: #4528 was rebased onto current main and pushed at `0bb18c90fa`.
   Build `173074090`'s reused-worker git proof and WorkIQ `not present` matcher
   failures are fixed. Current-main patch 0018 was re-derived for OpenClaw
@@ -103,7 +165,7 @@
   diagnostics cron E2E failure. OpenClaw 2026.6.11 stores cron state in SQLite,
   so `/home/node/.openclaw/cron/jobs.json` no longer exists. The test now keeps
   its read-only safety assertion by inspecting the supported `openclaw cron
-  show daily-diagnostics --json` response and rejects malformed, missing,
+show daily-diagnostics --json` response and rejects malformed, missing,
   `bash`, or `write` policy data. The pinned `v2026.6.11` CLI source confirms
   the JSON response contains the full job payload. `git diff --check`, Rustfmt,
   and Codex review passed; focused Cargo tests are locally blocked before build
@@ -159,7 +221,7 @@
   persisted/non-empty OpenClaw home as part of the remaining smoke proof.
 - Added #4528 commit `c4975c8ba6` with opt-in
   `scripts/openclaw-gateway-container-smoke.sh` plus `just
-  openclaw-gateway-container-smoke`. The smoke boots a built Gateway image with
+openclaw-gateway-container-smoke`. The smoke boots a built Gateway image with
   a non-empty persisted OpenClaw home, POSTs
   `/extension/v1/openclaw-gateway/start`, checks the baked OpenClaw version, and
   verifies the SQLite `installed_plugin_index` diagnostics-otel seed. Local
@@ -182,8 +244,8 @@
   The pushed fix removes that stale hunk from the real branch merge source.
   Local proof: `cargo fmt --check`, `git diff --check`, and pre-merge focused
   `cargo test -p openclaw-adapter
-  shipped_policy_baseline_keeps_workspace_guardrails_without_baked_sandbox_defaults
-  -- --exact` compiled successfully. Post-merge local cargo test is blocked by
+shipped_policy_baseline_keeps_workspace_guardrails_without_baked_sandbox_defaults
+-- --exact` compiled successfully. Post-merge local cargo test is blocked by
   missing private Lobster Cargo registry auth/token, not by the test source.
   Immediately after push, GitHub showed new head `f20b9bc7ed` with no checks
   attached yet; do not manually queue ADO unless explicitly asked.
@@ -224,7 +286,7 @@
   scheduler sets `owner_upn_fallback: None`; the sandbox test matrix now uses
   `ManagedGatewayStartIntent::{SpaGatewayWs, TeamsBridge, NativeTeamsDelivery}`
   and `manager.start_gateway(...)`. Local proof: `cargo fmt --manifest-path
-  src/lobster_runtime/Cargo.toml -- --check`, `git diff --check`, and stale API
+src/lobster_runtime/Cargo.toml -- --check`, `git diff --check`, and stale API
   grep clean. Local targeted cargo test remains blocked by missing private
   Lobster Cargo registry token. Proof comment:
   https://microsoft.ghe.com/bic/lobster/pull/4362#issuecomment-200920341.
@@ -241,7 +303,7 @@
   keeping the already-intended rebased behavior, validated with
   `python -m unittest scripts.check_token_collisions_test -v`,
   `python scripts\check-token-collisions.py`, `cargo fmt --manifest-path
-  src\lobster_runtime\Cargo.toml -- --check`, and `git diff --check`, then
+src\lobster_runtime\Cargo.toml -- --check`, and `git diff --check`, then
   force-pushed the PR branch on `bic/lobster` to head `5c0ad59904`.
   Immediately after push, #4362 was mergeable/BLOCKED with no checks attached
   yet and review reset to `REVIEW_REQUIRED`.
@@ -252,7 +314,7 @@
   (`src/lobster_runtime/src/sandbox_connection_tests.rs:116`). Pushed
   `4bb8b6584c` to use `panic!("not in test matrix")` for the impossible
   scheduler arm instead. Local proof: `cargo fmt --manifest-path
-  src\lobster_runtime\Cargo.toml -- --check` and `git diff --check`. Local
+src\lobster_runtime\Cargo.toml -- --check` and `git diff --check`. Local
   full clippy remains blocked by missing `CARGO_REGISTRIES_LOBSTER_TOKEN`.
   Immediately after push, #4362 head was `4bb8b6584c`, mergeable/BLOCKED, with
   `GitOps/FileAffordance` green, `GitOps/GitHubPop` red, runtime checks not yet
@@ -266,7 +328,7 @@
   non-matrix arm. The prior `4bb8b6584c` clippy-fix commit dropped during
   rebase because the resolved sandbox commit already contains the same patch.
   Local proof: `git diff --check`, `cargo fmt --manifest-path
-  src\lobster_runtime\Cargo.toml -- --check`,
+src\lobster_runtime\Cargo.toml -- --check`,
   `python -m unittest scripts.check_token_collisions_test -v`, and
   `python scripts\check-token-collisions.py`. Force-pushed the PR branch to
   head `c1c745f12d`; immediately after push GitHub showed MERGEABLE/BLOCKED,

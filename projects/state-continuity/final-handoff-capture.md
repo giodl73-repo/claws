@@ -159,29 +159,29 @@ resident. Carrier publication is the next physical-boundary slice.
 
 ### Failure posture
 
-| Failure | Result |
-| --- | --- |
-| New admission or active work remains | Hold; do not stop Gateway |
-| Gateway clean shutdown times out or requires force kill | Block final capture |
-| Adapter writer/checkpoint flush times out | Block final capture |
-| Continuity plan or sanitation blocker | Return typed capture failure |
-| Archive packaging or verification fails | Return typed capture failure |
-| Response is lost after local artifact creation | Replay only on the same adapter boot and handoff identity |
-| Adapter restarts | Quarantine the local capture attempt; do not infer an artifact |
-| Capture succeeds | Keep lease and compute; return exact local artifact evidence |
+| Failure                                                 | Result                                                         |
+| ------------------------------------------------------- | -------------------------------------------------------------- |
+| New admission or active work remains                    | Hold; do not stop Gateway                                      |
+| Gateway clean shutdown times out or requires force kill | Block final capture                                            |
+| Adapter writer/checkpoint flush times out               | Block final capture                                            |
+| Continuity plan or sanitation blocker                   | Return typed capture failure                                   |
+| Archive packaging or verification fails                 | Return typed capture failure                                   |
+| Response is lost after local artifact creation          | Replay only on the same adapter boot and handoff identity      |
+| Adapter restarts                                        | Quarantine the local capture attempt; do not infer an artifact |
+| Capture succeeds                                        | Keep lease and compute; return exact local artifact evidence   |
 
 ## Compare
 
 ### Internal analogues
 
-| Analogue | Disposition | Reason |
-| --- | --- | --- |
-| E4d strict adapter operation | Reuse | Fixed command, strict DTO, boot identity, bounded child I/O, exact-route replay, and no generic command bus fit final capture. |
-| Adapter drain/retire state machine | Adapt | Reuse admission closure and active-turn accounting, but do not reuse `ReportComplete -> SIGTERM` as the final-capture sequence. |
-| Existing continuity archive path | Reuse | It already owns artifact, sanitation, exclusion, verification, and cleanup semantics. |
-| `shutdown_ready` lifecycle signal | Avoid as authority | It precedes warning-tolerant flush/release and carries no artifact identity. |
-| Readiness providers | Adapt only for evidence shape | Stable typed evidence is useful; cached observation semantics are wrong for a mutating operation. |
-| Kubernetes-style termination hook | Avoid | A platform grace period is not a durable handoff transaction and may end in forced kill. |
+| Analogue                           | Disposition                   | Reason                                                                                                                          |
+| ---------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| E4d strict adapter operation       | Reuse                         | Fixed command, strict DTO, boot identity, bounded child I/O, exact-route replay, and no generic command bus fit final capture.  |
+| Adapter drain/retire state machine | Adapt                         | Reuse admission closure and active-turn accounting, but do not reuse `ReportComplete -> SIGTERM` as the final-capture sequence. |
+| Existing continuity archive path   | Reuse                         | It already owns artifact, sanitation, exclusion, verification, and cleanup semantics.                                           |
+| `shutdown_ready` lifecycle signal  | Avoid as authority            | It precedes warning-tolerant flush/release and carries no artifact identity.                                                    |
+| Readiness providers                | Adapt only for evidence shape | Stable typed evidence is useful; cached observation semantics are wrong for a mutating operation.                               |
+| Kubernetes-style termination hook  | Avoid                         | A platform grace period is not a durable handoff transaction and may end in forced kill.                                        |
 
 ### External comparators
 

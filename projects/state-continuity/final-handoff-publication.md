@@ -417,31 +417,31 @@ adapter boot after `Publishing`.
 
 ### Unknown outcomes
 
-| Outcome | Required action |
-| --- | --- |
-| Failure before any block/part is durable | Retry same request on same boot |
-| Uncommitted blocks/parts may exist | Retry same request; they grant no acceptance |
-| Final commit response lost | Resolve exact logical object and identities; return original receipt or conflict |
-| Fresh retrieval or digest verification fails | Hold or quarantine; never accept |
-| Binding/bundle generation changes | Quarantine the attempt |
-| Adapter restarts before source finalization | Quarantine source-local replay |
-| Passport release response lost on same boot | Replay exact strict finalization |
-| Provider pause/delete response lost after `SafeToDestroy` | Reconcile provider state; never reopen source |
+| Outcome                                                   | Required action                                                                  |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Failure before any block/part is durable                  | Retry same request on same boot                                                  |
+| Uncommitted blocks/parts may exist                        | Retry same request; they grant no acceptance                                     |
+| Final commit response lost                                | Resolve exact logical object and identities; return original receipt or conflict |
+| Fresh retrieval or digest verification fails              | Hold or quarantine; never accept                                                 |
+| Binding/bundle generation changes                         | Quarantine the attempt                                                           |
+| Adapter restarts before source finalization               | Quarantine source-local replay                                                   |
+| Passport release response lost on same boot               | Replay exact strict finalization                                                 |
+| Provider pause/delete response lost after `SafeToDestroy` | Reconcile provider state; never reopen source                                    |
 
 ## Compare
 
 ### Internal analogues
 
-| Analogue | Disposition | Reason |
-| --- | --- | --- |
-| Stage 3 continuity publication design | Adapt | It defines the right owner semantics, but the provider contract and registry must be implemented before E5b can reuse them. |
-| E4 durable restore hold | Adapt | CAS phases, identity immutability, same-incarnation replay, and quarantine fit handoff. |
-| E4d strict adapter execution | Reuse | Fixed invocation, boot attestation, bounded I/O, and exact result binding. |
-| Host bundle registration/status | Reuse | Keeps owner, bundle, binding, carrier generations and provenance distinct. |
-| Cron Blob client | Adapt control-plane patterns | Conditional writes and workload identity are useful; buffered JSON upload is not. |
-| Provider-dispatch reverse carrier | Avoid | Wrong payload, flow-control, and blast-radius owner. |
-| `shutdown_ready` / readiness cache | Avoid as authority | Observation cannot represent a committed lineage transition. |
-| Ordinary passport release hook | Avoid for finalization | Warning-only failure posture is unsafe for destruction authority. |
+| Analogue                              | Disposition                  | Reason                                                                                                                      |
+| ------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Stage 3 continuity publication design | Adapt                        | It defines the right owner semantics, but the provider contract and registry must be implemented before E5b can reuse them. |
+| E4 durable restore hold               | Adapt                        | CAS phases, identity immutability, same-incarnation replay, and quarantine fit handoff.                                     |
+| E4d strict adapter execution          | Reuse                        | Fixed invocation, boot attestation, bounded I/O, and exact result binding.                                                  |
+| Host bundle registration/status       | Reuse                        | Keeps owner, bundle, binding, carrier generations and provenance distinct.                                                  |
+| Cron Blob client                      | Adapt control-plane patterns | Conditional writes and workload identity are useful; buffered JSON upload is not.                                           |
+| Provider-dispatch reverse carrier     | Avoid                        | Wrong payload, flow-control, and blast-radius owner.                                                                        |
+| `shutdown_ready` / readiness cache    | Avoid as authority           | Observation cannot represent a committed lineage transition.                                                                |
+| Ordinary passport release hook        | Avoid for finalization       | Warning-only failure posture is unsafe for destruction authority.                                                           |
 
 ### External comparators
 

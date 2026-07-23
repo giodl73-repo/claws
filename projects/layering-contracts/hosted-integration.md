@@ -104,16 +104,16 @@ Each capability declares:
 
 ## ProxyPipe Migration
 
-| ProxyPipe family | Duplex disposition |
-| --- | --- |
+| ProxyPipe family                         | Duplex disposition                                                                        |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------- |
 | Exec, plugin, node, and device approvals | Existing Gateway request/event contract; should not require new duplex provider semantics |
-| Container identity and capabilities | Transport session handshake and generation binding |
-| Brokered provider HTTP | Candidate `host.egress.v1` provider |
-| Durable workspace publication | Candidate `host.publication.v1`, after state/continuity proof |
-| Feedback and judge dedup | Plugin-owned namespaced providers, if they remain remote services |
-| Teams ingress | Existing Channel contract; audit before adding any duplex surface |
-| AgentHarness | RFC 31 protocol carried on a typed duplex stream, not redefined here |
-| Lifecycle | Existing Gateway suspend/restart plus proven checkpoint/publication gaps |
+| Container identity and capabilities      | Transport session handshake and generation binding                                        |
+| Brokered provider HTTP                   | Candidate `host.egress.v1` provider                                                       |
+| Durable workspace publication            | Candidate `host.publication.v1`, after state/continuity proof                             |
+| Feedback and judge dedup                 | Plugin-owned namespaced providers, if they remain remote services                         |
+| Teams ingress                            | Existing Channel contract; audit before adding any duplex surface                         |
+| AgentHarness                             | RFC 31 protocol carried on a typed duplex stream, not redefined here                      |
+| Lifecycle                                | Existing Gateway suspend/restart plus proven checkpoint/publication gaps                  |
 
 ProxyPipe can remain a physical implementation during migration. The project
 does not upstream its proto, tags, Plex routing, or Lobster product semantics.

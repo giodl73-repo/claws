@@ -1,19 +1,19 @@
-import { chromium } from 'file:///C:/src/lobster-feeds-validation/src/lobster_web/node_modules/@playwright/test/index.mjs';
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import { chromium } from "file:///C:/src/lobster-feeds-validation/src/lobster_web/node_modules/@playwright/test/index.mjs";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 const environments = {
-  'prod-301eus': {
-    url: 'https://lobster.eus-ia301.gateway.prod.island.powerapps.com/?gateway=prod-301eus#/skills',
-    profileDir: 'C:/tmp/lobster-feeds-301-edge-profile',
+  "prod-301eus": {
+    url: "https://lobster.eus-ia301.gateway.prod.island.powerapps.com/?gateway=prod-301eus#/skills",
+    profileDir: "C:/tmp/lobster-feeds-301-edge-profile",
   },
-  'prod-302us': {
-    url: 'https://lobster.us-ia302.gateway.prod.island.powerapps.com/#/skills',
-    profileDir: 'C:/tmp/lobster-feeds-302-edge-profile',
+  "prod-302us": {
+    url: "https://lobster.us-ia302.gateway.prod.island.powerapps.com/#/skills",
+    profileDir: "C:/tmp/lobster-feeds-302-edge-profile",
   },
 };
 
-const envName = process.env.LOBSTER_PROBE_ENV ?? 'prod-301eus';
+const envName = process.env.LOBSTER_PROBE_ENV ?? "prod-301eus";
 const env = environments[envName];
 if (env === undefined) {
   throw new Error(`Unknown LOBSTER_PROBE_ENV=${envName}`);
@@ -23,11 +23,11 @@ const outDir =
   process.env.LOBSTER_PROBE_OUT_DIR ??
   path.resolve(`C:/tmp/lobster-route-admin-${envName}-${timestamp()}`);
 const waitMs = Number(process.env.LOBSTER_PROBE_WAIT_MS ?? 5 * 60 * 1000);
-const browserChannel = process.env.LOBSTER_PROBE_BROWSER_CHANNEL ?? 'msedge';
+const browserChannel = process.env.LOBSTER_PROBE_BROWSER_CHANNEL ?? "msedge";
 const userDataDir = process.env.LOBSTER_PROBE_EDGE_PROFILE ?? env.profileDir;
 
 function timestamp() {
-  return new Date().toISOString().replaceAll(':', '').replaceAll('.', '-');
+  return new Date().toISOString().replaceAll(":", "").replaceAll(".", "-");
 }
 
 function parseJson(text) {
@@ -40,11 +40,11 @@ function parseJson(text) {
 }
 
 function decodeJwtPayload(token) {
-  const parts = token.split('.');
+  const parts = token.split(".");
   if (parts.length < 2) return null;
-  const base64 = parts[1].replaceAll('-', '+').replaceAll('_', '/');
-  const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
-  return JSON.parse(Buffer.from(padded, 'base64').toString('utf8'));
+  const base64 = parts[1].replaceAll("-", "+").replaceAll("_", "/");
+  const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+  return JSON.parse(Buffer.from(padded, "base64").toString("utf8"));
 }
 
 async function waitForToken(page, deadline) {
@@ -53,8 +53,8 @@ async function waitForToken(page, deadline) {
     const result = await page
       .evaluate(async () => {
         const cfg = window.__LOBSTER_RUNTIME_CONFIG__ ?? {};
-        if (typeof cfg.tokenProvider !== 'function') {
-          return { ok: false, reason: 'tokenProvider is not available' };
+        if (typeof cfg.tokenProvider !== "function") {
+          return { ok: false, reason: "tokenProvider is not available" };
         }
         try {
           const token = await cfg.tokenProvider();
@@ -63,7 +63,7 @@ async function waitForToken(page, deadline) {
           return {
             ok: false,
             reason: error instanceof Error ? error.message : String(error),
-            hasSignIn: typeof cfg.signIn === 'function',
+            hasSignIn: typeof cfg.signIn === "function",
           };
         }
       })
@@ -78,7 +78,7 @@ async function waitForToken(page, deadline) {
     if (!signInStarted && result.hasSignIn) {
       signInStarted = true;
       console.log(`Token unavailable (${result.reason}); starting sign-in in the visible browser.`);
-      const button = page.getByRole('button', { name: /^Sign in$/i }).first();
+      const button = page.getByRole("button", { name: /^Sign in$/i }).first();
       if (await button.isVisible().catch(() => false)) {
         await button.click().catch(() => {});
       } else {
@@ -87,22 +87,22 @@ async function waitForToken(page, deadline) {
     }
 
     if (/login\.microsoftonline\.com|signin/i.test(page.url())) {
-      console.log('Waiting for interactive sign-in to return to Lobster...');
+      console.log("Waiting for interactive sign-in to return to Lobster...");
     }
     await page.waitForTimeout(1500);
   }
-  throw new Error('Timed out waiting for a Lobster bearer token.');
+  throw new Error("Timed out waiting for a Lobster bearer token.");
 }
 
 async function fetchJson(page, token, route) {
   return page.evaluate(
     async ({ route, token }) => {
       const response = await fetch(route, {
-        method: 'GET',
-        credentials: 'same-origin',
-        redirect: 'error',
+        method: "GET",
+        credentials: "same-origin",
+        redirect: "error",
         headers: {
-          Accept: 'application/json',
+          Accept: "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
@@ -121,7 +121,7 @@ await fs.mkdir(outDir, { recursive: true });
 const context = await chromium.launchPersistentContext(userDataDir, {
   channel: browserChannel,
   headless: false,
-  args: ['--start-maximized'],
+  args: ["--start-maximized"],
   viewport: null,
 });
 
@@ -130,16 +130,16 @@ console.log(`Environment: ${envName}`);
 console.log(`URL: ${env.url}`);
 console.log(`Profile: ${userDataDir}`);
 console.log(`Artifacts: ${outDir}`);
-console.log('Sign in in the visible browser window if prompted.');
+console.log("Sign in in the visible browser window if prompted.");
 
-await page.goto(env.url, { waitUntil: 'domcontentloaded' });
+await page.goto(env.url, { waitUntil: "domcontentloaded" });
 const token = await waitForToken(page, Date.now() + waitMs);
 const payload = decodeJwtPayload(token);
 
 const routes = {
-  route: await fetchJson(page, token, '/v1/route'),
-  featureFlags: await fetchJson(page, token, '/v1/me/web-feature-flags'),
-  feedDiagnostics: await fetchJson(page, token, '/v1/scout/feeds/source-diagnostics'),
+  route: await fetchJson(page, token, "/v1/route"),
+  featureFlags: await fetchJson(page, token, "/v1/me/web-feature-flags"),
+  feedDiagnostics: await fetchJson(page, token, "/v1/scout/feeds/source-diagnostics"),
 };
 
 const summary = {
@@ -152,10 +152,9 @@ const summary = {
     upn: payload?.upn ?? payload?.preferred_username ?? null,
     wids: payload?.wids ?? [],
     hasM365TenantAdminWid: (payload?.wids ?? []).some((wid) =>
-      [
-        '62e90394-69f5-4237-9190-012177145e10',
-        '158c047a-c907-4556-b7ef-446551a6b5f7',
-      ].some((allowed) => String(wid).trim().toLowerCase() === allowed),
+      ["62e90394-69f5-4237-9190-012177145e10", "158c047a-c907-4556-b7ef-446551a6b5f7"].some(
+        (allowed) => String(wid).trim().toLowerCase() === allowed,
+      ),
     ),
   },
   route: {
@@ -175,8 +174,8 @@ const summary = {
   },
 };
 
-await fs.writeFile(path.join(outDir, 'summary.json'), JSON.stringify(summary, null, 2), 'utf8');
-await page.screenshot({ path: path.join(outDir, 'page.png'), fullPage: true }).catch(() => {});
+await fs.writeFile(path.join(outDir, "summary.json"), JSON.stringify(summary, null, 2), "utf8");
+await page.screenshot({ path: path.join(outDir, "page.png"), fullPage: true }).catch(() => {});
 await context.close();
 
 console.log(JSON.stringify(summary, null, 2));

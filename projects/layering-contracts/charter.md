@@ -27,15 +27,15 @@ OpenClaw's value remains the portable agent runtime:
 
 ## Practical Ownership Split
 
-| OpenClaw contract | Lobster responsibility |
-| --- | --- |
-| Gateway authentication modes and trusted-proxy behavior | Select the authentication posture for each tenant/ring |
-| Plugin lifecycle and manifest semantics | Select which plugins are bundled and enabled |
-| Snapshot and backup primitives | Select trial policy, schedule, storage destination, and telemetry rollout |
-| Node pairing and command approval protocol | Apply user/tenant gating and provide approval UX |
-| Tool policy resolution and effective-decision semantics | Select and roll out managed baselines |
-| Session/state schema, durability, and restore semantics | Route workers, enforce tenant stickiness, and implement storage |
-| Diagnostics hooks and stable event names | Operate Kusto dashboards and fleet alerts |
+| OpenClaw contract                                       | Lobster responsibility                                                    |
+| ------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Gateway authentication modes and trusted-proxy behavior | Select the authentication posture for each tenant/ring                    |
+| Plugin lifecycle and manifest semantics                 | Select which plugins are bundled and enabled                              |
+| Snapshot and backup primitives                          | Select trial policy, schedule, storage destination, and telemetry rollout |
+| Node pairing and command approval protocol              | Apply user/tenant gating and provide approval UX                          |
+| Tool policy resolution and effective-decision semantics | Select and roll out managed baselines                                     |
+| Session/state schema, durability, and restore semantics | Route workers, enforce tenant stickiness, and implement storage           |
+| Diagnostics hooks and stable event names                | Operate Kusto dashboards and fleet alerts                                 |
 
 ## Working Rules
 

@@ -111,16 +111,16 @@ The effective status surface reports:
 
 ## ProxyPipe Decomposition
 
-| ProxyPipe concern | Area |
-| --- | --- |
-| Gateway approvals, pairing, canonical events | Host integration plane |
-| Teams ingress | Host integration plane through a Channel endpoint attachment |
-| Channel outbound implementation | Existing Channel owner, or a host capability only when a concrete external execution seam is required |
-| Egress dispatch, secrets, publication, telemetry | Host capability providers |
-| Capability flags and readiness aggregation | Host wiring and composition |
-| Activation, generation, and migration authority | The semantic owner |
-| Reverse dial, framing, correlation, flow control | Carrier |
-| AgentHarness and lifecycle semantics | Their existing owners, not any of the four generic layers |
+| ProxyPipe concern                                | Area                                                                                                  |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| Gateway approvals, pairing, canonical events     | Host integration plane                                                                                |
+| Teams ingress                                    | Host integration plane through a Channel endpoint attachment                                          |
+| Channel outbound implementation                  | Existing Channel owner, or a host capability only when a concrete external execution seam is required |
+| Egress dispatch, secrets, publication, telemetry | Host capability providers                                                                             |
+| Capability flags and readiness aggregation       | Host wiring and composition                                                                           |
+| Activation, generation, and migration authority  | The semantic owner                                                                                    |
+| Reverse dial, framing, correlation, flow control | Carrier                                                                                               |
+| AgentHarness and lifecycle semantics             | Their existing owners, not any of the four generic layers                                             |
 
 All four areas are needed to eliminate ProxyPipe cleanly. None requires keeping
 ProxyPipe's central envelope or a replacement bus.

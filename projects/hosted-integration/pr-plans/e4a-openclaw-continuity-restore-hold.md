@@ -13,7 +13,7 @@ existing owner generation and operational surfaces.
 ## Change
 
 - Define `runnable -> restore-held -> restore-committed -> one admitted
-  restored start` for the lifecycle owner.
+restored start` for the lifecycle owner.
 - Bind hold acquisition to the stable runtime owner, current owner generation,
   and exact restore identity.
 - Bind commit to the exact restore receipt rather than deleting the hold.

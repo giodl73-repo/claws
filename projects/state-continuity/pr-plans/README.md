@@ -9,14 +9,14 @@ Evidence collection starts before implementation. See
 runtime-budget, failure, Lobster wake, and deletion lanes that run from current
 `main`.
 
-| Stage | Actual PRs | Plan | Primary outcome |
-| --- | --- | --- | --- |
-| 1 | 1 | `01-continuity-owner-model.md` | Stable continuity vocabulary, config, inventory, status, and fixtures |
-| 2 | 2 | `02-checkpoint-and-restore.md` | Local Archived round trip |
-| 3 | 3A OpenClaw, then 3B Lobster | `03-hosted-publication.md` | Hosted Integration publication binding |
-| 4 | 4A OpenClaw, then 4B Lobster | `04-replacement-and-handoff.md` | Portable fresh-compute replacement |
-| 5 | 5A OpenClaw, then 5B Lobster | `05-hibernate-and-wake.md` | Elastic scale-from-zero |
-| 6 | 6A optional observation support, then 6B Lobster | `06-migration-and-deletion.md` | Lobster authority cutover and private-path deletion |
+| Stage | Actual PRs                                       | Plan                            | Primary outcome                                                       |
+| ----- | ------------------------------------------------ | ------------------------------- | --------------------------------------------------------------------- |
+| 1     | 1                                                | `01-continuity-owner-model.md`  | Stable continuity vocabulary, config, inventory, status, and fixtures |
+| 2     | 2                                                | `02-checkpoint-and-restore.md`  | Local Archived round trip                                             |
+| 3     | 3A OpenClaw, then 3B Lobster                     | `03-hosted-publication.md`      | Hosted Integration publication binding                                |
+| 4     | 4A OpenClaw, then 4B Lobster                     | `04-replacement-and-handoff.md` | Portable fresh-compute replacement                                    |
+| 5     | 5A OpenClaw, then 5B Lobster                     | `05-hibernate-and-wake.md`      | Elastic scale-from-zero                                               |
+| 6     | 6A optional observation support, then 6B Lobster | `06-migration-and-deletion.md`  | Lobster authority cutover and private-path deletion                   |
 
 The RFC has six implementation stages, not necessarily six GitHub PRs. A
 cross-repository stage is explicitly split into independently reviewable A/B

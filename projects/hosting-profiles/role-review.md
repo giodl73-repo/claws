@@ -149,17 +149,17 @@ needed:
 
 ### Role Conclusions
 
-| Role | Assessment |
-| --- | --- |
-| Founder | Natural upstream feature if the first profile catalog stays minimal; remove aliases that look enterprise-shaped without distinct semantics. |
-| Gateway engineer | Probe-path integration is correct; uncached synchronous pairing reads need a bound. |
-| Platform engineer | Stable reasons and profile identity are valuable; every shipped support profile needs packaged conformance proof. |
-| Lobster container engineer | The profiles provide a useful hostee boundary; document direct-container versus proxied-container selection explicitly. |
-| CISO / compliance | Correctly scoped as operational readiness, not governance or audit proof. Redaction behavior is preserved. |
-| Release engineer | Three proven postures are credible; unproven profile names should not enter the support matrix. |
-| Repo steward / Lorant reviewer | Existing surfaces and ownership fit; remove the duplicate nested payload and keep one canonical result. |
-| Policy steward | Clean separation: profile selects runtime requirements, core facts provide evidence, optional policy can consume later. |
-| New hire / power user | Default local behavior remains low ceremony; profile names need topology guidance to avoid selecting `container` merely because Docker is involved. |
+| Role                           | Assessment                                                                                                                                          |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Founder                        | Natural upstream feature if the first profile catalog stays minimal; remove aliases that look enterprise-shaped without distinct semantics.         |
+| Gateway engineer               | Probe-path integration is correct; uncached synchronous pairing reads need a bound.                                                                 |
+| Platform engineer              | Stable reasons and profile identity are valuable; every shipped support profile needs packaged conformance proof.                                   |
+| Lobster container engineer     | The profiles provide a useful hostee boundary; document direct-container versus proxied-container selection explicitly.                             |
+| CISO / compliance              | Correctly scoped as operational readiness, not governance or audit proof. Redaction behavior is preserved.                                          |
+| Release engineer               | Three proven postures are credible; unproven profile names should not enter the support matrix.                                                     |
+| Repo steward / Lorant reviewer | Existing surfaces and ownership fit; remove the duplicate nested payload and keep one canonical result.                                             |
+| Policy steward                 | Clean separation: profile selects runtime requirements, core facts provide evidence, optional policy can consume later.                             |
+| New hire / power user          | Default local behavior remains low ceremony; profile names need topology guidance to avoid selecting `container` merely because Docker is involved. |
 
 ### Recommendation
 
@@ -348,17 +348,17 @@ the exact readiness/status command output used as proof.
          "acme.managed": {
            "extends": "managed",
            "readiness": {
-             "requiredCriteria": ["acme.backup-ready"]
-           }
-         }
+             "requiredCriteria": ["acme.backup-ready"],
+           },
+         },
        },
        "criteria": {
          "acme.backup-ready": {
            "label": "Backup ready",
-           "description": "Backup volume must be mounted before serving traffic."
-         }
-       }
-     }
+           "description": "Backup volume must be mounted before serving traffic.",
+         },
+       },
+     },
    }
    ```
 
@@ -408,12 +408,12 @@ Reviewed the current hosted-layer audit through these `.craft/roles` lenses:
 We have the rough layer. We still need a complete inventory table with one row
 per boundary item:
 
-| Item | Today | Owner | Desired owner | Stability | Evidence |
-| --- | --- | --- | --- | --- | --- |
-| Env var | runtime/adapter/config path | Lobster/OpenClaw/plugin | upstream/host/plugin | image-time/process/per-start/deprecated | test/doc/code link |
-| Header | caller and receiver | Lobster/OpenClaw | upstream/host | stable/experimental | proof |
-| Config field | fragment and merge path | Lobster/OpenClaw/plugin | upstream/host/plugin | stable/overlay-only | test/doc |
-| Event | emitter and consumer | Lobster/OpenClaw | upstream/host | stable/internal | Kusto/dashboard |
+| Item         | Today                       | Owner                   | Desired owner        | Stability                               | Evidence           |
+| ------------ | --------------------------- | ----------------------- | -------------------- | --------------------------------------- | ------------------ |
+| Env var      | runtime/adapter/config path | Lobster/OpenClaw/plugin | upstream/host/plugin | image-time/process/per-start/deprecated | test/doc/code link |
+| Header       | caller and receiver         | Lobster/OpenClaw        | upstream/host        | stable/experimental                     | proof              |
+| Config field | fragment and merge path     | Lobster/OpenClaw/plugin | upstream/host/plugin | stable/overlay-only                     | test/doc           |
+| Event        | emitter and consumer        | Lobster/OpenClaw        | upstream/host        | stable/internal                         | Kusto/dashboard    |
 
 Why this matters by role:
 
@@ -474,13 +474,13 @@ paths are explicit.
 
 Needed table:
 
-| Path/state | Durable? | Restored from | Checkpoint trigger | Single-writer? | Failure class |
-| --- | --- | --- | --- | --- | --- |
-| `/workspace` | yes/no | Graph/SPO git | turn/end/idle/snapshot | passport/none | stable code |
-| OpenClaw home config | yes/no | image/overlay/user | seed/reset | n/a | stable code |
-| memory sqlite | yes/no | workspace/Copilot memory/tmp | TBD | TBD | stable code |
-| plugin state | yes/no | plugin-owned path | TBD | TBD | stable code |
-| sessions/transcripts | yes/no | OpenClaw state | TBD | TBD | stable code |
+| Path/state           | Durable? | Restored from                | Checkpoint trigger     | Single-writer? | Failure class |
+| -------------------- | -------- | ---------------------------- | ---------------------- | -------------- | ------------- |
+| `/workspace`         | yes/no   | Graph/SPO git                | turn/end/idle/snapshot | passport/none  | stable code   |
+| OpenClaw home config | yes/no   | image/overlay/user           | seed/reset             | n/a            | stable code   |
+| memory sqlite        | yes/no   | workspace/Copilot memory/tmp | TBD                    | TBD            | stable code   |
+| plugin state         | yes/no   | plugin-owned path            | TBD                    | TBD            | stable code   |
+| sessions/transcripts | yes/no   | OpenClaw state               | TBD                    | TBD            | stable code   |
 
 Role pressure:
 
@@ -575,14 +575,14 @@ each time.
 
 Needed per step:
 
-| Step | Lobster surface removed/simplified | Upstream contract added | Risk reduced | Compatibility proof |
-| --- | --- | --- | --- | --- |
-| Freeze as-is | none | named `hosted-openclaw v0` | hidden drift becomes visible | inventory/test |
-| Gateway profile | baked auth/local UI config | trusted-proxy profile | auth drift | Gateway conformance |
-| Pluginize features | baked plugin/tool/skill edits | plugin manifests | broad config drift | plugin lifecycle tests |
-| Policy categories | ad hoc flags | policy/restriction semantics | one-off gates | evidence/attestation |
-| State contract | storage-specific behavior | snapshot/restore/path semantics | persistence ambiguity | restore tests |
-| AgentHarness/OCC later | Gateway shrinkage | data-plane/control-plane contracts | future migration churn | conformance tests |
+| Step                   | Lobster surface removed/simplified | Upstream contract added            | Risk reduced                 | Compatibility proof    |
+| ---------------------- | ---------------------------------- | ---------------------------------- | ---------------------------- | ---------------------- |
+| Freeze as-is           | none                               | named `hosted-openclaw v0`         | hidden drift becomes visible | inventory/test         |
+| Gateway profile        | baked auth/local UI config         | trusted-proxy profile              | auth drift                   | Gateway conformance    |
+| Pluginize features     | baked plugin/tool/skill edits      | plugin manifests                   | broad config drift           | plugin lifecycle tests |
+| Policy categories      | ad hoc flags                       | policy/restriction semantics       | one-off gates                | evidence/attestation   |
+| State contract         | storage-specific behavior          | snapshot/restore/path semantics    | persistence ambiguity        | restore tests          |
+| AgentHarness/OCC later | Gateway shrinkage                  | data-plane/control-plane contracts | future migration churn       | conformance tests      |
 
 Role pressure:
 

@@ -5,9 +5,9 @@ notes. Admin-plane work belongs in `projects/admin/`.
 
 ## Active Notes
 
-| Area | File |
-| --- | --- |
-| Scout feeds and catalog work | `feeds-scout.md` |
+| Area                                        | File               |
+| ------------------------------------------- | ------------------ |
+| Scout feeds and catalog work                | `feeds-scout.md`   |
 | ADO pipeline queueing and Azure login state | `ado-pipelines.md` |
 
 Admin spaces, policy baseline admin state, and Partner Center notes moved to
@@ -15,12 +15,12 @@ Admin spaces, policy baseline admin state, and Partner Center notes moved to
 
 ## Active References
 
-| Item | Location |
-| --- | --- |
-| Main Lobster checkout | `C:\src\lobster` |
-| LobsterTank worktree | `C:\src\lobster-lobstertank` |
-| LobsterTank code | `C:\src\lobster-lobstertank\tools\lobstertank` |
-| LobsterTank URL when running | `http://127.0.0.1:8787/` |
+| Item                         | Location                                       |
+| ---------------------------- | ---------------------------------------------- |
+| Main Lobster checkout        | `C:\src\lobster`                               |
+| LobsterTank worktree         | `C:\src\lobster-lobstertank`                   |
+| LobsterTank code             | `C:\src\lobster-lobstertank\tools\lobstertank` |
+| LobsterTank URL when running | `http://127.0.0.1:8787/`                       |
 
 ## LobsterTank
 

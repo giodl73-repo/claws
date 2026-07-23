@@ -149,7 +149,7 @@ an exact generated inventory:
   "tools": {
     "profile": "minimal",
     "fs": {
-      "workspaceOnly": true
+      "workspaceOnly": true,
     },
     "deny": [
       "process",
@@ -162,12 +162,12 @@ an exact generated inventory:
       "image_generate",
       "music_generate",
       "video_generate",
-      "tts"
+      "tts",
     ],
     "exec": {
       "security": "allowlist",
       "ask": "on-miss",
-      "host": "auto"
+      "host": "auto",
     },
     "alsoAllow": [
       "read",
@@ -182,8 +182,8 @@ an exact generated inventory:
       "sessions_history",
       "cron",
       // Lobster-owned plugin/MCP tool ids generated from the approved profile.
-    ]
-  }
+    ],
+  },
 }
 ```
 
@@ -197,18 +197,18 @@ requirements.
 
 ### 2. Approved capability classes
 
-| Capability | V1 posture |
-| --- | --- |
-| Workspace read/write/edit/patch | Allowed only inside the active workspace |
-| WorkIQ code mode | Allowed as the current compound capability; destructive/outbound methods retain the existing user-confirmation contract |
-| Email attachment save | Allowed through the bounded WorkIQ operation below |
-| Product self-diagnosis feedback | Allowed through the existing Lobster path |
-| GitHub/ADO issue creation | Explicit namespaced connector tools; connector-owned approval and delegated identity |
-| Exec | Visible, allowlisted, `ask=on-miss`, no elevated execution |
-| Process management / arbitrary code execution | Denied |
-| Gateway administration | Denied |
-| Cross-agent/session mutation | Denied |
-| Browser and media generation | Denied; image understanding remains allowed |
+| Capability                                    | V1 posture                                                                                                              |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Workspace read/write/edit/patch               | Allowed only inside the active workspace                                                                                |
+| WorkIQ code mode                              | Allowed as the current compound capability; destructive/outbound methods retain the existing user-confirmation contract |
+| Email attachment save                         | Allowed through the bounded WorkIQ operation below                                                                      |
+| Product self-diagnosis feedback               | Allowed through the existing Lobster path                                                                               |
+| GitHub/ADO issue creation                     | Explicit namespaced connector tools; connector-owned approval and delegated identity                                    |
+| Exec                                          | Visible, allowlisted, `ask=on-miss`, no elevated execution                                                              |
+| Process management / arbitrary code execution | Denied                                                                                                                  |
+| Gateway administration                        | Denied                                                                                                                  |
+| Cross-agent/session mutation                  | Denied                                                                                                                  |
+| Browser and media generation                  | Denied; image understanding remains allowed                                                                             |
 
 Omitting a tool from the profile means unavailable. It must not silently fall
 back to exec.
@@ -293,15 +293,15 @@ may choose the execution location; it does not remove approval requirements.
 
 ## Configuration Ownership
 
-| Surface | Owner |
-| --- | --- |
-| Core profile and filesystem enforcement semantics | OpenClaw |
-| `scout-standard` composition and approved plugin list | Lobster |
-| Tenant equal-or-stricter baseline | Lobster policy administration |
-| WorkIQ attachment retrieval and delegated identity | WorkIQ/Lobster plugin |
-| Workspace path enforcement and write result contract | OpenClaw-native filesystem seam reused by the plugin |
-| Issue tracker authorization | Connector owner |
-| Exec approval artifact | Operator/admin |
+| Surface                                               | Owner                                                |
+| ----------------------------------------------------- | ---------------------------------------------------- |
+| Core profile and filesystem enforcement semantics     | OpenClaw                                             |
+| `scout-standard` composition and approved plugin list | Lobster                                              |
+| Tenant equal-or-stricter baseline                     | Lobster policy administration                        |
+| WorkIQ attachment retrieval and delegated identity    | WorkIQ/Lobster plugin                                |
+| Workspace path enforcement and write result contract  | OpenClaw-native filesystem seam reused by the plugin |
+| Issue tracker authorization                           | Connector owner                                      |
+| Exec approval artifact                                | Operator/admin                                       |
 
 Agents may inspect their effective capabilities and request a change, but they
 must not mutate their own profile or approval artifact.
@@ -383,16 +383,16 @@ The migration must preserve stricter operator or tenant overlays.
 
 ## Internal Analogues
 
-| Analogue | Decision | Reason |
-| --- | --- | --- |
-| OpenClaw `minimal` profile | Reuse | Fail-closed base that does not inherit future coding tools |
-| `tools.fs.workspaceOnly` | Reuse | Existing tested path boundary for filesystem tools |
-| Exec approvals evidence | Reuse | Existing attributable ask/allowlist mechanism |
-| File-transfer plugin | Adapt | Good bounded binary/path precedent, but wrong source and destination model |
-| Chat attachment staging | Adapt | Good byte limits and media-store precedent, but input is chat request data |
-| Gateway artifacts API | Adapt later | Useful artifact representation, but not a model-facing workspace write |
-| Lobster `alsoAllow` overlays | Avoid as authority | Useful compatibility mechanism, poor long-term profile source |
-| Blanket auto/yolo | Avoid | Removes friction by widening trust instead of completing capabilities |
+| Analogue                     | Decision           | Reason                                                                     |
+| ---------------------------- | ------------------ | -------------------------------------------------------------------------- |
+| OpenClaw `minimal` profile   | Reuse              | Fail-closed base that does not inherit future coding tools                 |
+| `tools.fs.workspaceOnly`     | Reuse              | Existing tested path boundary for filesystem tools                         |
+| Exec approvals evidence      | Reuse              | Existing attributable ask/allowlist mechanism                              |
+| File-transfer plugin         | Adapt              | Good bounded binary/path precedent, but wrong source and destination model |
+| Chat attachment staging      | Adapt              | Good byte limits and media-store precedent, but input is chat request data |
+| Gateway artifacts API        | Adapt later        | Useful artifact representation, but not a model-facing workspace write     |
+| Lobster `alsoAllow` overlays | Avoid as authority | Useful compatibility mechanism, poor long-term profile source              |
+| Blanket auto/yolo            | Avoid              | Removes friction by widening trust instead of completing capabilities      |
 
 ## External Comparator
 

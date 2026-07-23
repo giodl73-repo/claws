@@ -103,14 +103,14 @@ reconstruct `readinessGeneration`.
 
 ### Internal analogues
 
-| Analogue | Decision | Reason |
-| --- | --- | --- |
-| Handoff wake operation | Reuse | It already coalesces callers onto one destination generation and records final readiness only after provisioning returns. |
-| Restore hold exact replay | Adapt | Retain the exact OpenClaw ready evidence beside the restored admission so a lost provisioner response can replay without mutation. |
-| E4d preparation/restore replay | Reuse | Unknown outcomes retry only on the same route and same request before completion is known. |
-| `ContainerSession` start overlay | Reuse | It is the existing owner of user/agent identity, proxy minting, and pipe lifecycle. |
-| `SandboxProvider` abstraction | Avoid for V1 | Restore is currently Plex-specific and adding a provider-neutral restore contract would generalize ahead of a second implementation. |
-| New readiness fetch endpoint | Avoid | It would create a second authority path and make host polling part of correctness. |
+| Analogue                         | Decision     | Reason                                                                                                                               |
+| -------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Handoff wake operation           | Reuse        | It already coalesces callers onto one destination generation and records final readiness only after provisioning returns.            |
+| Restore hold exact replay        | Adapt        | Retain the exact OpenClaw ready evidence beside the restored admission so a lost provisioner response can replay without mutation.   |
+| E4d preparation/restore replay   | Reuse        | Unknown outcomes retry only on the same route and same request before completion is known.                                           |
+| `ContainerSession` start overlay | Reuse        | It is the existing owner of user/agent identity, proxy minting, and pipe lifecycle.                                                  |
+| `SandboxProvider` abstraction    | Avoid for V1 | Restore is currently Plex-specific and adding a provider-neutral restore contract would generalize ahead of a second implementation. |
+| New readiness fetch endpoint     | Avoid        | It would create a second authority path and make host polling part of correctness.                                                   |
 
 ### External comparators
 
@@ -326,7 +326,7 @@ continuity readiness.
 9. Prove a mismatched recovery point, destination generation, retained ready
    result, or Gateway incarnation fails closed.
 10. Keep `LOBSTER_CONTINUITY_ENSURE_RUNTIME_READY_ENABLED` false in production
-   until the paired fork image and this replay proof are promoted.
+    until the paired fork image and this replay proof are promoted.
 
 The deletion gate is satisfied when `ensure_runtime_ready` uses this concrete
 provisioner in a fork environment and the fake provisioner is no longer the only

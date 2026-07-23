@@ -13,12 +13,12 @@ Microsoft agent experiences.
 
 ## Work-Back
 
-| Date | Output |
-| --- | --- |
-| 2026-06-23 | Reviewable outline |
-| 2026-06-26 | First draft paper |
-| 2026-06-29 to 2026-07-03 | Iteration window |
-| 2026-07-06 | Presentation to Apps and Agent LT |
+| Date                     | Output                            |
+| ------------------------ | --------------------------------- |
+| 2026-06-23               | Reviewable outline                |
+| 2026-06-26               | First draft paper                 |
+| 2026-06-29 to 2026-07-03 | Iteration window                  |
+| 2026-07-06               | Presentation to Apps and Agent LT |
 
 ## Proposed Paper Shape
 
@@ -95,14 +95,14 @@ Microsoft agent experiences.
 
 ## First-Draft Inputs Needed
 
-| Input | Owner / source | Status |
-| --- | --- | --- |
-| Cowork memory strategy summary | Gio / Eduardo / Omar thread | Needed |
-| MCS memory/state architecture | MCS owner | Needed |
-| Scout memory/state architecture | Scout owner | Needed |
-| Hermes memory architecture | Hermes owner | Needed |
-| Microsoft Apps & Agents memory inventory | Selcuk / topic team | Needed |
-| OpenClaw source-grounded assessment | `openclaw-memory-assessment.md` | Seeded |
+| Input                                    | Owner / source                  | Status |
+| ---------------------------------------- | ------------------------------- | ------ |
+| Cowork memory strategy summary           | Gio / Eduardo / Omar thread     | Needed |
+| MCS memory/state architecture            | MCS owner                       | Needed |
+| Scout memory/state architecture          | Scout owner                     | Needed |
+| Hermes memory architecture               | Hermes owner                    | Needed |
+| Microsoft Apps & Agents memory inventory | Selcuk / topic team             | Needed |
+| OpenClaw source-grounded assessment      | `openclaw-memory-assessment.md` | Seeded |
 
 ## Selcuk MCS Two-Layer Proposal
 

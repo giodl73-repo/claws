@@ -63,6 +63,71 @@
   PRs and records the final artifact, integrity, scope, and cleanup policy at
   signed head `bea0bcca99a`.
 
+### 2026-07-22 ClawHub stack refresh after OpenClaw landing
+
+- RFC addendum #48 now includes a non-blocking two-PR Control UI follow-up at
+  signed head `08db874`: first read-only inventory/status/doctor/provenance,
+  then plan-integrity-bound add/update/remove plus ClawHub discovery. The UI
+  must reuse canonical lifecycle operations and remains outside v1 schema
+  conformance and the initial CLI acceptance gate. Gateway method advertisement
+  through `hello-ok.features.methods` is the UI-visible OpenClaw gate; ClawHub
+  remains server-authoritative through omitted/rejected APIs and a no-store 404
+  feed response while disabled. Neither browser receives raw environment state.
+- Marked ClawHub PRs #3089-#3092 ready, then rebased PR1 onto current ClawHub
+  `main` and restacked the cumulative four-PR series. Current signed heads are
+  #3089 `58b53c7b8b1c`, #3090 `fe7ee71b7e99`, #3091 `039ba1200d80`, and
+  #3092 `9e3e5be12614`; GitHub reports all four mergeable.
+- PR1 now accepts the portable agent-policy shape from RFC addendum #48:
+  profile selection, `alsoAllow`, `fs.workspaceOnly`, and bounded memory-search
+  fields. ClawHub validates portable structure without freezing OpenClaw's
+  evolving built-in profile registry; applying OpenClaw resolves and rejects
+  unknown profiles before planning mutation.
+- RFC addendum #48 is pushed signed at `88ff067`. The RFC and both sidecars now
+  distinguish registry structural validation from applying-harness profile
+  resolution while retaining one portable package contract.
+- PR2 was adapted to current main's `publicationStatus` result contract. Final
+  cumulative review also found and fixed two PR2-owned regressions: the CLI now
+  uses the complete canonical Claw validator, and the legacy `/download` route
+  projects npm packs to compatibility ZIPs instead of serving TGZ bytes as
+  `application/zip`. PR4's obsolete OpenClaw #106888 proof was replaced by a
+  fresh WSL bridge against OpenClaw #112773 head `b5c2836155b8`, which includes
+  current #111391 CLAW.md support and portable agent settings.
+- Exact local proof passes: PR1 25 schema tests; PR2 349 schema/publication tests
+  plus 15 focused CLI tests; PR3 25 discovery/API tests; PR4 36 feed/API/archive
+  tests including 7/7 bridge cases and a real `claws add --dry-run --json`.
+  Schema builds, root typechecks, type-aware lint, format, and diff checks pass.
+- PR3's final restacked discovery proof passes 25/25 tests; PR4's final
+  feed/API/archive proof passes 36/36, including all seven bridge cases and a
+  real OpenClaw dry-run. Schema builds, typecheck, type-aware lint, format, and
+  diff checks pass. Final cumulative `codex review --base origin/main` reports
+  no actionable regression. PR bodies and exact-head proof comments are
+  current and ClawSweeper re-reviews are queued. All GitHub Actions checks pass
+  on the four exact heads. The Vercel status remains an external
+  fork-authorization failure on each PR.
+
+### 2026-07-21 M5 Rendezvous execution
+
+- Lobster #551 is now tracked as an upstream-then-promotion delivery.
+- Drive all twelve OpenClaw Claws PRs bottom-up today using the maintainer
+  review, prepare, and merge workflow.
+- After landing, target the first quarantine-cleared Claws-bearing OpenClaw
+  release for Lobster pickup in roughly two weeks through PromoteClaw.
+- Lobster #4982 and #5045 are the active shared-publish contract stack; #5211
+  is a draft auditable-skills POC to restack or explicitly disposition.
+- Canonical order: `projects/rendezvous/pr-plan.md`.
+
+### 2026-07-22 Lobster #551 scope disposition
+
+- Lobster #4982 and #5045 are merged.
+- Closed draft #5211 as out of scope for #551. The POC proves optional typed
+  outcome receipts, but #551 exits on personal-skill creation and MCP server
+  registration, health validation, tool discovery, allowlist enforcement, and
+  unauthorized-server errors. Preserve the branch and RFC for a separate
+  receipt initiative rather than carrying it on the critical delivery path.
+- The remaining #551 path is the upstream Claws landing, the first containing
+  release's seven-day quarantine, PromoteClaw pickup, and Lobster acceptance
+  validation.
+
 ### 2026-07-21 final OpenClaw stack readiness audit
 
 - Live state at audit time: RFC #27 and all twelve current OpenClaw Claws PRs
@@ -209,6 +274,7 @@
   actionable regression. Fresh exact-head CI remained queued at handoff; fast
   ClawSweeper helper jobs intermittently returned GitHub-side failures and their
   Actions API logs returned HTTP 503.
+
 ### 2026-07-19 Auditable Skills Lobster plugin POC
 
 - Created isolated Lobster worktree `C:\src\lobster-auditable-skills-poc` on
@@ -330,7 +396,7 @@
   `3df96efbd320994c2cbc34d8f96877431173eb90` on branch
   `user/giodl/claws-pr13-claw-md` in Gio's fork.
 - The refresh keeps PR13 as one clean commit, `feat(claws): add CLAW.md
-  manifest support`, touching only `src/claws/reader.ts`,
+manifest support`, touching only `src/claws/reader.ts`,
   `src/claws/export.ts`, `src/claws/schema.test.ts`, and
   `src/claws/export.test.ts`. It preserves JSON manifest compatibility for
   non-`CLAW.md` sources, keeps development-snapshot integrity over original
@@ -338,7 +404,7 @@
   and preserves package `integrity` in exported CLAW.md package refs.
 - Local validation on exact head `3df96efbd3`: focused CLAW.md/schema/export/
   CLI/lifecycle Vitest passed 65 tests across 3 files, `pnpm
-  check:test-types`, `pnpm lint`, `pnpm check:architecture`, deadcode
+check:test-types`, `pnpm lint`, `pnpm check:architecture`, deadcode
   dependencies/exports/unused-files, max-lines ratchet against `555a2f7077`,
   no-conflict-markers, and `git diff --check` passed.
 - Proof/re-review comment:
@@ -738,7 +804,7 @@
   sources with optional `--from`, explicit referenced cleanup selection,
   current ownership provenance, and progressive documentation ownership across
   #101328 through #111391. Codex review found that the prior term `artifact
-  origin` did not cover mutable MCP declarations; the RFC and package sidecar
+origin` did not cover mutable MCP declarations; the RFC and package sidecar
   now define capability-neutral `resource origin`, and MCP provenance requires
   origin plus current non-Claw ownership. The clean rerun found no remaining
   contradiction. The PR body and immutable sidecar links were refreshed;
@@ -980,7 +1046,7 @@
 - The prior #101755 CI failures were fixed and are green on GitHub: Claws
   oxlint (`src/claws/add.ts` unused assignment and `src/claws/lifecycle.ts`
   `params` shadowing), test typecheck (`test/scripts/package-acceptance-
-  workflow.test.ts` unused `workflow` local), and the plugin SDK surface
+workflow.test.ts` unused `workflow` local), and the plugin SDK surface
   budget (current graph is 8011 public exports / 4477 callable exports).
   Focused proof, full oxlint, test/prod typechecks, architecture, deadcode, and
   `git diff --check` passed locally.
@@ -1100,7 +1166,7 @@
   https://github.com/openclaw/openclaw/pull/101328#issuecomment-4998336018.
 - Local validation passed on exact head `c5abb32953`:
   `node scripts/run-vitest.mjs src/claws/schema.test.ts
-  src/cli/claws-cli.test.ts src/claws/lifecycle.e2e.test.ts -- --reporter=dot`,
+src/cli/claws-cli.test.ts src/claws/lifecycle.e2e.test.ts -- --reporter=dot`,
   `pnpm tsgo:prod`, `pnpm check:architecture`,
   `pnpm deadcode:dependencies`, `pnpm deadcode:exports`,
   `pnpm deadcode:unused-files`, and `git diff --check`.
@@ -1375,6 +1441,7 @@
   `29521515948`, `29522311511`, and `29523233296` and were in progress at
   handoff. Patrick's stale #106888 change request targets pre-fix commit
   `1e9569d`; a human re-review was requested on the proven current head.
+
 ### 2026-07-16 Auditable Skills Round 1 rebuild
 
 - Rebuilt fork draft OpenClaw #97 directly on current upstream `main` as one
@@ -1423,8 +1490,8 @@
   1. RFC plus core receipts and `get/list/count`;
   2. managed invocation and run usage after the receipt boundary settles;
   3. minimal core and optional Lobster runner adapters with accounting.
-  The existing five implementation PRs are now described as POC evidence, not
-  the proposed landing stack.
+     The existing five implementation PRs are now described as POC evidence, not
+     the proposed landing stack.
 - Added one reference support-email success fixture: record
   `customer.verified`, resolve it from an authorized later local agent, record
   `case.resolved`, list/count/show the full evidence, reopen the originating
@@ -1639,6 +1706,7 @@
   of cron `current`, ClawHub BOM parity, and artifact-level origin plus later
   non-Claw adoption. Do not claim the existing stacks fully conform to the new
   sidecars until those gaps are repaired and restacked.
+
 ### 2026-07-15 RFC 0022 reviewer-series reformulation
 
 - Replaced the exploratory Skill Receipts/metadata chronology with six
@@ -1798,6 +1866,7 @@
 - Blocking question: none. The agreed design is to contribute/refactor shared
   skill/plugin artifact lifecycle APIs and keep Claws as the provenance and
   final-reference policy caller.
+
 ### 2026-07-15 recorded-outcome workflow branch
 
 - Opened fork-only stacked OpenClaw draft PR
@@ -2465,7 +2534,7 @@
 ### 2026-07-10 Control UI plugin-management impact
 
 - Reviewed merged OpenClaw PR `#103176` (`feat: add Control UI plugin
-  management`) and Patrick's `patrick.webp` analysis. The hosted RFC 0009 feed
+management`) and Patrick's `patrick.webp` analysis. The hosted RFC 0009 feed
   powers plugin/skill catalog discovery; installed MCP servers still come from
   local `mcp.servers`, and the Control UI MCP connector shelf remains a
   separately curated presentation surface.
@@ -2514,7 +2583,7 @@
   `63334bfe073`, `#102406` `76caf2cfbf8`, and `#102427` `d47b47c5adc`.
 - PR `#102982` was rewritten and force-pushed at
   `af69df0dfacf9b2544af82bc937724a3d0a37931` (`Apply consented
-  agent-only Claw updates`). It adds `claws update ... --yes` and
+agent-only Claw updates`). It adds `claws update ... --yes` and
   `openclaw.clawUpdateResult.v1`, rebuilds the plan before mutation,
   compare-and-swaps the owned agent entry and root package/version/integrity
   record, preserves the original install timestamp, and rolls the config back
@@ -2538,12 +2607,12 @@
   `add`. Patrick's feedback was answered at
   `https://github.com/openclaw/rfcs/pull/27#issuecomment-4931913856`.
 - RFC head: `5829ce30c1520e46d21f291d39866d2cb25d1d14` (`Revise Claws
-  around agent ownership`). The RFC also defines the process-only experimental
+around agent ownership`). The RFC also defines the process-only experimental
   gate `OPENCLAW_EXPERIMENTAL_CLAWS=1`; disabled mode omits Claws from command
   registration, help, and completion without writing persistent config.
 - Bottom OpenClaw PR `#101328` now includes the experimental CLI gate at
   `9a2b55625b73894d4d2761d93940731a93a03b14` (`feat(claws): gate
-  experimental CLI`). Focused validation passed 190 tests across argv, schema,
+experimental CLI`). Focused validation passed 190 tests across argv, schema,
   feed, CLI registry, root help, and lifecycle E2E. Direct root-help proof found
   zero `claws` entries with the env unset and one with it set.
 - The previously reviewed 11-PR implementation stack remains prototype
@@ -2552,7 +2621,7 @@
   through the descendants once that contract is stable.
 - Bottom PR `#101328` was fully rewritten and pushed at
   `7f3bab34903639a51545291b6c2286c678695364` (`feat(claws): adopt
-  grouped agent manifest`). It now validates schema version `1`, takes Claw
+grouped agent manifest`). It now validates schema version `1`, takes Claw
   identity from package metadata or explicit development identity, exposes
   `inspect` and `add --dry-run`, plans a new agent/workspace plus all grouped
   resources, and rejects the old flat/apply/feed CLI contract. PR title/body
@@ -2573,7 +2642,7 @@
   managed hashes and partial-failure visibility.
 - PR `#101973` was rebased, rewritten, squashed to one commit, and force-pushed
   with lease at `47facef73082edd1961f685f5fc3be93a967c630` (`feat(claws):
-  create managed workspace files`). It now writes only declared bootstrap and
+create managed workspace files`). It now writes only declared bootstrap and
   supporting files into the newly created agent workspace, uses fs-safe rooted
   IO, revalidates source digests, never overwrites an existing destination, and
   persists each successful file immediately in `claw_workspace_files`. Later
@@ -2585,7 +2654,7 @@
   refreshed to `Create Claw-managed workspace files`.
 - PR `#102228` was rebased, rewritten, squashed to one commit, and force-pushed
   with lease at `e550a6d10ed56eea7c70f54bccb156a8e69cbb0f` (`Install ClawHub packages
-  for new agents`). It installs exact-version ClawHub skills into the created
+for new agents`). It installs exact-version ClawHub skills into the created
   agent workspace and plugins through the existing shared plugin lifecycle,
   records each successful package reference immediately in root SQLite, and
   returns partial state without rolling back prior resources if a later package
@@ -2594,19 +2663,19 @@
   remain fail-closed for later slices. Validation passed `pnpm tsgo:core`,
   `pnpm tsgo:core:test`, focused Oxlint, 22 package/provenance/uninstall tests,
   and all 6 Claw lifecycle E2E tests. PR title/body were refreshed to `Install
-  ClawHub packages for new Claw agents`; current checks have no pending or
+ClawHub packages for new Claw agents`; current checks have no pending or
   failing jobs.
 - PR `#102296` was rebased onto rewritten `#102228`, rewritten, squashed to one
   commit, and force-pushed with lease at
   `d11434ddfe47010980aa09fe03f342c6ed5b5914` (`Add plan-first Claw status and
-  remove`). It adds experimental agent-centric status plus read-only remove
+remove`). It adds experimental agent-centric status plus read-only remove
   planning and separately consented apply. Remove blocks agent-config drift and
   unsafe files, deletes only unchanged managed files, preserves local edits,
   releases package references without uninstalling artifacts, and keeps the
   install ledger/package refs visible when cleanup becomes unsafe after config
   commit. Package identity resolves only unambiguous installs; final agent ids
   disambiguate repeated adds. Validation passed `pnpm tsgo:core`, `pnpm
-  tsgo:core:test`, focused Oxlint, 18 status/remove CLI tests, and 7 lifecycle
+tsgo:core:test`, focused Oxlint, 18 status/remove CLI tests, and 7 lifecycle
   E2E tests including a real add/status/preview/remove round trip. PR title/body
   were refreshed to `Add plan-first Claw status and remove`; current checks
   have no pending or failing jobs.
@@ -2616,16 +2685,16 @@
 - PR `#102306` was rebased onto rewritten `#102296`, rewritten, squashed to one
   commit, and force-pushed with lease at
   `06b1e172426d02fa1370a3f4f3c7087254905064` (`Export installed agents as
-  grouped Claw packages`). It adds agent-id-only export, explicitly projects
+grouped Claw packages`). It adds agent-id-only export, explicitly projects
   portable agent fields, copies only ledger-managed workspace files through
   rooted IO, emits exact recorded package refs, and writes package identity plus
   the grouped manifest and safe sidecars into a new directory. Published
   identity is retained; development identity becomes
   `openclaw-claw-<agent-id>`. Validation passed `pnpm tsgo:core`, `pnpm
-  tsgo:core:test`, focused Oxlint, 17 export/CLI tests, and 8 lifecycle E2E
+tsgo:core:test`, focused Oxlint, 17 export/CLI tests, and 8 lifecycle E2E
   tests including add -> export -> inspect -> add in a fresh state directory.
   PR title/body were refreshed to `Export installed agents as grouped Claw
-  packages`; current checks have no pending or failing jobs.
+packages`; current checks have no pending or failing jobs.
 - Next: repurpose redundant skill PR `#102383` / `user/giodl/claws-pr8-skills`
   as the missing agent-pinned cron-job slice, then keep `#102406` for MCP and
   `#102427` for doctor diagnostics.
@@ -2638,7 +2707,7 @@
   scheduler ids immediately for partial cleanup/status/export.
 - PR `#102383` was repurposed, rewritten, and force-pushed with lease at
   `1549403834f8008f56670c92f2d07183d0b6ef7b` (`Manage Claw cron jobs through
-  the gateway`). Grouped cron declarations now use gateway-owned `cron.add`
+the gateway`). Grouped cron declarations now use gateway-owned `cron.add`
   with agent-scoped declaration keys, persist pending/complete/failed ownership
   before and after scheduler mutation, appear in status, round-trip through
   export, and are removed through `cron.remove` before agent config. Ambiguous
@@ -2648,7 +2717,7 @@
   Fresh-model `codex review --commit HEAD` could not start because the local
   CLI selected unsupported ChatGPT model `gpt-5.3-codex`; no model override was
   used. PR title/body were refreshed to `Manage Claw cron jobs through the
-  gateway`.
+gateway`.
 - Next: rebase `#102406` / `user/giodl/claws-pr9-mcp` onto rewritten `#102383`
   and replace its obsolete flat artifact logic with grouped `mcpServers`
   ownership, conflict handling, status/remove/export, and secret-safe
@@ -2665,7 +2734,7 @@
   cleanup. Validation passed `pnpm tsgo:core`, focused Oxlint with zero
   findings, 46 focused tests, and all 8 lifecycle E2E tests including a real
   add -> status -> export -> remove MCP config round trip. Fresh-model `codex
-  review --commit HEAD` again could not start because local Codex selected the
+review --commit HEAD` again could not start because local Codex selected the
   unsupported ChatGPT model `gpt-5.3-codex`; no model override was used. PR
   title/body were refreshed and latest GitHub Real behavior proof plus
   admission/sanity checks pass.
@@ -2676,7 +2745,7 @@
   remain correct.
 - PR `#102427` was rewritten into one commit and force-pushed with lease at
   `74a53bb9ac3d1ab15b8a0ba004d65d76daf0ceb1` (`Add experimental Claw lifecycle
-  diagnostics`). Doctor now projects the canonical `claws status` model rather
+diagnostics`). Doctor now projects the canonical `claws status` model rather
   than duplicating file/MCP inspection, reports partial installs, agent and
   workspace drift, MCP ownership states, unresolved cron refs, and orphaned
   subordinate rows across the workspace/package/MCP/cron ledgers. It remains
@@ -2744,7 +2813,7 @@
   The RFC now uses `apply` for the Claw lifecycle verb and `remove` as the
   Claw-level inverse; artifact-level `uninstall` remains only for underlying
   package-like entries. The RFC PR body was refreshed and `@clawsweeper
-  re-review` was requested at
+re-review` was requested at
   https://github.com/openclaw/rfcs/pull/27#issuecomment-4916290685. GitHub PR
   metadata now reports head `74d469117d31f648cf273ab3a7561dcda8e07d9a`.
 - OpenClaw PR #101328 body/title were refreshed for the one-PR validation
@@ -2761,21 +2830,21 @@
   to consolidated validation commit `4b331214496f4ec831fe3f4f91a271163da2ac11`;
   the raw compare API reports #101755 as one commit ahead. PR body includes RFC
   PR #27 and #101328 references plus real SQLite proof. `@clawsweeper
-  re-review` was requested at
+re-review` was requested at
   `https://github.com/openclaw/openclaw/pull/101755#issuecomment-4910769650`.
   Latest local validation for PR1 passed:
   `node scripts/run-vitest.mjs src/claws/schema.test.ts
-  src/claws/provenance.test.ts src/cli/claws-cli.test.ts
-  src/claws/lifecycle.e2e.test.ts
-  src/cli/program/command-registry.test.ts
-  src/cli/program/root-command-descriptions.test.ts`; `git diff --check`;
+src/claws/provenance.test.ts src/cli/claws-cli.test.ts
+src/claws/lifecycle.e2e.test.ts
+src/cli/program/command-registry.test.ts
+src/cli/program/root-command-descriptions.test.ts`; `git diff --check`;
   `node scripts/check-no-conflict-markers.mjs`; and real CLI proof with
   `OPENCLAW_DISABLE_BUNDLED_PLUGINS=1
-  OPENCLAW_STATE_DIR=/tmp/openclaw-claws-mutating-pr1-proof-state node --import
-  tsx src/entry.ts claws apply src/claws/fixtures/incident-response.claw.json
-  --yes --json`, which recorded three rows in `claw_artifact_refs`. Codex
+OPENCLAW_STATE_DIR=/tmp/openclaw-claws-mutating-pr1-proof-state node --import
+tsx src/entry.ts claws apply src/claws/fixtures/incident-response.claw.json
+--yes --json`, which recorded three rows in `claw_artifact_refs`. Codex
   review with `codex review -c model=gpt-5.5 --base
-  origin/user/giodl/claws-pr2-schema-plan` found and fixed stale-ref
+origin/user/giodl/claws-pr2-schema-plan` found and fixed stale-ref
   reconciliation, duplicate entry IDs, local path artifact identity collisions,
   package selector canonicalization, two strict typecheck issues, and
   duplicate-ID validation across optional unknown entries. Final Codex review at
@@ -2797,15 +2866,15 @@
   counts only created/updated files in `appliedWorkspaceFiles`. Validation
   passed: `pnpm db:kysely:check`;
   `node scripts/run-vitest.mjs src/claws/schema.test.ts
-  src/claws/provenance.test.ts src/claws/workspace.test.ts
-  src/state/openclaw-state-db.test.ts src/cli/claws-cli.test.ts
-  src/claws/lifecycle.e2e.test.ts src/cli/program/command-registry.test.ts
-  src/cli/program/root-command-descriptions.test.ts`; focused
+src/claws/provenance.test.ts src/claws/workspace.test.ts
+src/state/openclaw-state-db.test.ts src/cli/claws-cli.test.ts
+src/claws/lifecycle.e2e.test.ts src/cli/program/command-registry.test.ts
+src/cli/program/root-command-descriptions.test.ts`; focused
   `node scripts/run-vitest.mjs src/state/openclaw-state-db.test.ts
-  src/claws/workspace.test.ts src/cli/claws-cli.test.ts`; `git diff --check`;
+src/claws/workspace.test.ts src/cli/claws-cli.test.ts`; `git diff --check`;
   `node scripts/check-no-conflict-markers.mjs`; real CLI proof for
   `claws apply --yes --workspace`; and final `codex review -c model=gpt-5.5
-  --base origin/user/giodl/claws-pr3-feed-plan`, which reported no blocking
+--base origin/user/giodl/claws-pr3-feed-plan`, which reported no blocking
   correctness issues. PR body was refreshed and `@clawsweeper re-review` was
   requested at
   `https://github.com/openclaw/openclaw/pull/101973#issuecomment-4916085109`.
@@ -2830,17 +2899,17 @@
   npm, npm-pack, ClawHub, path/file URL, and local git artifact identity.
   Validation passed:
   `node scripts/run-vitest.mjs src/claws/schema.test.ts
-  src/claws/provenance.test.ts src/claws/artifact-installers.test.ts
-  src/claws/workspace.test.ts src/state/openclaw-state-db.test.ts
-  src/cli/claws-cli.test.ts src/cli/plugins-cli.uninstall.test.ts
-  src/claws/lifecycle.e2e.test.ts
-  src/cli/program/command-registry.test.ts
-  src/cli/program/root-command-descriptions.test.ts`; `git diff --check`;
+src/claws/provenance.test.ts src/claws/artifact-installers.test.ts
+src/claws/workspace.test.ts src/state/openclaw-state-db.test.ts
+src/cli/claws-cli.test.ts src/cli/plugins-cli.uninstall.test.ts
+src/claws/lifecycle.e2e.test.ts
+src/cli/program/command-registry.test.ts
+src/cli/program/root-command-descriptions.test.ts`; `git diff --check`;
   and `node scripts/check-no-conflict-markers.mjs`. Full
   `pnpm exec tsgo --noEmit --pretty false` remains blocked only by unrelated
   `src/secrets/config-io.ts` TS4058. Final
   `codex review -c model=gpt-5.5 --base
-  origin/user/giodl/claws-pr4-artifact-plan` reported no high-confidence
+origin/user/giodl/claws-pr4-artifact-plan` reported no high-confidence
   actionable correctness issues after fixes for ClawSweeper's earlier
   ownership/partial-apply findings and Codex findings around hook fallback,
   floating npm selectors, plugin policy matching, and dry-run uninstall
@@ -2860,17 +2929,17 @@
   now runs apply -> status -> dry-run remove -> remove -> status through the
   real CLI. Validation passed:
   `node scripts/run-vitest.mjs src/claws/schema.test.ts
-  src/claws/provenance.test.ts src/claws/artifact-installers.test.ts
-  src/claws/workspace.test.ts src/claws/lifecycle-state.test.ts
-  src/state/openclaw-state-db.test.ts src/cli/claws-cli.test.ts
-  src/cli/plugins-cli.uninstall.test.ts src/claws/lifecycle.e2e.test.ts
-  src/cli/program/command-registry.test.ts
-  src/cli/program/root-command-descriptions.test.ts`; `git diff --check`;
+src/claws/provenance.test.ts src/claws/artifact-installers.test.ts
+src/claws/workspace.test.ts src/claws/lifecycle-state.test.ts
+src/state/openclaw-state-db.test.ts src/cli/claws-cli.test.ts
+src/cli/plugins-cli.uninstall.test.ts src/claws/lifecycle.e2e.test.ts
+src/cli/program/command-registry.test.ts
+src/cli/program/root-command-descriptions.test.ts`; `git diff --check`;
   and `node scripts/check-no-conflict-markers.mjs`. Full
   `pnpm exec tsgo --noEmit --pretty false` remains blocked only by unrelated
   `src/secrets/config-io.ts` TS4058. Final
   `codex review -c model=gpt-5.5 --base
-  origin/user/giodl/claws-pr5-installers` reported no actionable correctness
+origin/user/giodl/claws-pr5-installers` reported no actionable correctness
   issues after fixes for stale workspace roots, partial delete preflight, hash
   revalidation, delete errors, and oversized modified files. PR body was
   created and `@clawsweeper re-review` was posted at
@@ -2888,12 +2957,12 @@
   oversized/non-regular files, duplicate file targets, and produces unique
   entry ids for normalized path collisions. Validation passed:
   `node scripts/run-vitest.mjs src/claws/schema.test.ts
-  src/claws/provenance.test.ts src/claws/artifact-installers.test.ts
-  src/claws/workspace.test.ts src/claws/lifecycle-state.test.ts
-  src/state/openclaw-state-db.test.ts src/cli/claws-cli.test.ts
-  src/cli/plugins-cli.uninstall.test.ts src/claws/lifecycle.e2e.test.ts
-  src/cli/program/command-registry.test.ts
-  src/cli/program/root-command-descriptions.test.ts`; real CLI proof for
+src/claws/provenance.test.ts src/claws/artifact-installers.test.ts
+src/claws/workspace.test.ts src/claws/lifecycle-state.test.ts
+src/state/openclaw-state-db.test.ts src/cli/claws-cli.test.ts
+src/cli/plugins-cli.uninstall.test.ts src/claws/lifecycle.e2e.test.ts
+src/cli/program/command-registry.test.ts
+src/cli/program/root-command-descriptions.test.ts`; real CLI proof for
   `claws export --out` followed by `claws apply --yes`; `git diff --check`;
   `node scripts/check-no-conflict-markers.mjs`; and final
   `codex review -c model=gpt-5.5 --uncommitted`, which reported no actionable
@@ -2961,9 +3030,9 @@
   against `refs/remotes/origin/main` reported no actionable correctness
   regressions.
 - PR2 proof: `node scripts/run-vitest.mjs src/claws/schema.test.ts
-  src/cli/claws-cli.test.ts` passed; `node scripts/run-vitest.mjs
-  src/cli/program/command-registry.test.ts
-  src/cli/program/root-command-descriptions.test.ts` passed;
+src/cli/claws-cli.test.ts` passed; `node scripts/run-vitest.mjs
+src/cli/program/command-registry.test.ts
+src/cli/program/root-command-descriptions.test.ts` passed;
   `node scripts/check-no-conflict-markers.mjs` passed; `git diff --check`
   passed. Real CLI proof was added to the PR body using
   `OPENCLAW_DISABLE_BUNDLED_PLUGINS=1 OPENCLAW_STATE_DIR=/tmp/openclaw-claws-pr2-proof-state node --import tsx src/entry.ts claws inspect/plan ...`.
@@ -2975,10 +3044,10 @@
   because `node_modules/.bin/tsgo` is absent; dependency reconciliation was not
   run from this Codex worktree.
 - PR3 proof: `node scripts/run-vitest.mjs src/claws/schema.test.ts
-  src/claws/feed.test.ts src/cli/claws-cli.test.ts
-  src/cli/program/command-registry.test.ts
-  src/cli/program/root-command-descriptions.test.ts` passed; `git diff
-  --check` passed; `node scripts/check-no-conflict-markers.mjs` passed. Real
+src/claws/feed.test.ts src/cli/claws-cli.test.ts
+src/cli/program/command-registry.test.ts
+src/cli/program/root-command-descriptions.test.ts` passed; `git diff
+--check` passed; `node scripts/check-no-conflict-markers.mjs` passed. Real
   CLI proof passed for `claws feed inspect` and `claws feed plan` against
   `src/claws/fixtures/local-claws.feed.json`. Full-project `tsgo` is blocked
   because `node_modules/.bin/tsgo` is absent; full-project direct `tsc` OOMed
@@ -3005,14 +3074,14 @@
   unsupported-required counts, and updates text CLI output to show unsupported
   required entries. Validation passed:
   `node scripts/run-vitest.mjs src/claws/schema.test.ts src/claws/feed.test.ts
-  src/cli/claws-cli.test.ts src/cli/program/command-registry.test.ts
-  src/cli/program/root-command-descriptions.test.ts`; `git diff --check`;
+src/cli/claws-cli.test.ts src/cli/program/command-registry.test.ts
+src/cli/program/root-command-descriptions.test.ts`; `git diff --check`;
   `node scripts/check-no-conflict-markers.mjs`; changed-file direct `tsc`; and
   real CLI proof via `OPENCLAW_DISABLE_BUNDLED_PLUGINS=1
-  OPENCLAW_STATE_DIR=/tmp/openclaw-claws-pr4-proof-state node --import tsx
-  src/entry.ts claws feed plan src/claws/fixtures/local-claws.feed.json
-  incident-response --json`. `codex review -c model=gpt-5.5 --base
-  origin/user/giodl/claws-pr3-feed-plan` initially found selector and text
+OPENCLAW_STATE_DIR=/tmp/openclaw-claws-pr4-proof-state node --import tsx
+src/entry.ts claws feed plan src/claws/fixtures/local-claws.feed.json
+incident-response --json`. `codex review -c model=gpt-5.5 --base
+origin/user/giodl/claws-pr3-feed-plan` initially found selector and text
   output issues; fixed trailing `@`, npm build metadata, `npm-pack:`, dist-tag
   pinning, text-mode required unsupported output, empty `git:`/`git+`/`file:`
   rejection, and absolute local path preview support. Final review at commit
@@ -3029,7 +3098,7 @@
   `node scripts/check-no-conflict-markers.mjs`, and real CLI proof. Direct
   changed-file `tsc --ignoreConfig` is still limited by repo path aliases for
   `@openclaw/*` packages. Final `codex review -c model=gpt-5.5 --base
-  origin/user/giodl/claws-pr3-feed-plan` reported no actionable regressions.
+origin/user/giodl/claws-pr3-feed-plan` reported no actionable regressions.
   PR body was refreshed and `@clawsweeper re-review` was posted at
   `2026-07-07T19:31:00Z` for head `8eeef1c91a73`; the initial sweep run
   `openclaw/clawsweeper#28893108397` was cancelled by queue/concurrency and
@@ -3047,13 +3116,13 @@
   were treated as blockers; fixed so optional unsupported entries are skipped
   without inflating `blockedEntries` or `installActions`. Validation passed:
   `node scripts/run-vitest.mjs src/claws/schema.test.ts src/claws/feed.test.ts
-  src/cli/claws-cli.test.ts src/cli/program/command-registry.test.ts
-  src/cli/program/root-command-descriptions.test.ts`; targeted
+src/cli/claws-cli.test.ts src/cli/program/command-registry.test.ts
+src/cli/program/root-command-descriptions.test.ts`; targeted
   `node scripts/run-vitest.mjs src/claws/schema.test.ts
-  src/cli/claws-cli.test.ts`; `git diff --check`;
+src/cli/claws-cli.test.ts`; `git diff --check`;
   `node scripts/check-no-conflict-markers.mjs`; and real CLI proof for local
   and feed dry-run apply. Final `codex review -c model=gpt-5.5 --base
-  origin/user/giodl/claws-pr4-artifact-plan` reported no actionable
+origin/user/giodl/claws-pr4-artifact-plan` reported no actionable
   regressions. Live PR labels show `proof: sufficient`,
   `rating: platinum hermit`, and `status: ready for maintainer look`; live
   checks have no failures or pending checks. A fresh `@clawsweeper re-review`
@@ -3069,11 +3138,11 @@
   `OPENCLAW_HOME`, and `OPENCLAW_STATE_DIR` to a temp sandbox and setting
   `OPENCLAW_TEST_FAST=1`. Validation passed:
   `node scripts/run-vitest.mjs src/claws/schema.test.ts
-  src/cli/claws-cli.test.ts src/claws/lifecycle.e2e.test.ts`;
+src/cli/claws-cli.test.ts src/claws/lifecycle.e2e.test.ts`;
   `node scripts/run-vitest.mjs src/claws/lifecycle.e2e.test.ts`;
   `git diff --check`; `node scripts/check-no-conflict-markers.mjs`; and final
   `codex review -c model=gpt-5.5 --base
-  origin/user/giodl/claws-pr5-lifecycle-plan`, which reported no actionable
+origin/user/giodl/claws-pr5-lifecycle-plan`, which reported no actionable
   regressions. `@clawsweeper re-review` was posted at
   `https://github.com/openclaw/openclaw/pull/101879#issuecomment-4908854170`.
   Live labels now show `proof: sufficient`, `rating: 🐚 platinum hermit`, and
@@ -3108,8 +3177,8 @@
   overwritten; and persisted artifact identity uses digest-only labels so inline
   MCP secrets are not stored in artifact keys/selectors. Validation passed:
   `node scripts/run-vitest.mjs src/claws/schema.test.ts
-  src/claws/provenance.test.ts src/claws/artifact-installers.test.ts
-  src/cli/claws-cli.test.ts src/claws/lifecycle.e2e.test.ts`; real CLI proof
+src/claws/provenance.test.ts src/claws/artifact-installers.test.ts
+src/cli/claws-cli.test.ts src/claws/lifecycle.e2e.test.ts`; real CLI proof
   for `claws apply --yes --json` writing `mcp.servers.docs` and recording one
   digest-only MCP artifact ref; `git diff --check`; and
   `node scripts/check-no-conflict-markers.mjs`. Final
@@ -3132,13 +3201,13 @@
   stable connector setup path. Regular `openclaw doctor` and structured
   `doctor --lint` both see the check. Validation passed:
   `node scripts/run-vitest.mjs src/claws/doctor.test.ts
-  src/flows/doctor-core-checks.test.ts
-  src/flows/doctor-health-contributions.test.ts`; the broader Claws/doctor
+src/flows/doctor-core-checks.test.ts
+src/flows/doctor-health-contributions.test.ts`; the broader Claws/doctor
   suite including `src/claws/lifecycle.e2e.test.ts`; `git diff --check`;
   `node scripts/check-no-conflict-markers.mjs`; real CLI proof for
   `doctor --lint --only core/doctor/claws-state --json` reporting a modified
   Claw-managed `SOUL.md`; and final `codex review -c model=gpt-5.5
-  --uncommitted`, which reported no discrete regression after fixes for the
+--uncommitted`, which reported no discrete regression after fixes for the
   interactive doctor no-op, read-error handling, and MCP config drift. Full
   `node scripts/run-tsgo.mjs --noEmit --pretty false` is blocked in this linked
   worktree because `node_modules/.bin/tsgo` is absent. PR body was created and
@@ -3158,7 +3227,7 @@
   body was refreshed and `@clawsweeper re-review` was posted at
   `https://github.com/openclaw/rfcs/pull/27#issuecomment-4926164140`.
 - OpenClaw PR #102959 is the next Claws PR, title `Add Claw update dry-run
-  planning`, head `openclaw/openclaw:user/giodl/claws-pr11-update-plan`, base
+planning`, head `openclaw/openclaw:user/giodl/claws-pr11-update-plan`, base
   `user/giodl/claws-pr10-doctor`, commit `9904dd9e6b7`. It is draft and adds
   `openclaw.clawUpdatePlan.v1` plus
   `openclaw claws update <claw> --from <manifest> --dry-run --json`. The
@@ -3174,12 +3243,12 @@
   `codex review -c model=gpt-5.5 --uncommitted`, which reported no discrete
   correctness issues after fixes for workspace drift, phase changes, target
   diagnostics, and multi-workspace planning. Full `node scripts/run-tsgo.mjs
-  --noEmit --pretty false` timed out after 180s without diagnostics in this
+--noEmit --pretty false` timed out after 180s without diagnostics in this
   linked WSL worktree. `@clawsweeper re-review` was posted at
   `https://github.com/openclaw/openclaw/pull/102959#issuecomment-4926723757`.
 
 - OpenClaw PR #102982 is the next Claws PR, title `Apply Claw update
-  reconciliations`, head
+reconciliations`, head
   `openclaw/openclaw:user/giodl/claws-pr12-update-apply`, base
   `user/giodl/claws-pr11-update-plan`, commit
   `86d6f0aa891b0540e9e6e843b24eb6705ab77079`. It is draft and implements the
@@ -3192,17 +3261,17 @@
   artifact provenance rewrites until workspace reconciliation succeeds, and
   emits `openclaw.clawUpdateResult.v1`. Validation passed:
   `node scripts/run-vitest.mjs src/cli/claws-cli.test.ts
-  src/claws/update-plan.test.ts src/claws/provenance.test.ts`; the broader
+src/claws/update-plan.test.ts src/claws/provenance.test.ts`; the broader
   Claws/doctor/CLI suite including `src/claws/lifecycle.e2e.test.ts`;
   `git diff --check`; `node scripts/check-no-conflict-markers.mjs`;
   `pnpm exec oxfmt --check --threads=1 src/cli/claws-cli.runtime.ts
-  src/cli/claws-cli.test.ts src/claws/lifecycle-state.ts
-  src/claws/provenance.ts src/claws/update-plan.ts`; and real CLI proof for
+src/cli/claws-cli.test.ts src/claws/lifecycle-state.ts
+src/claws/provenance.ts src/claws/update-plan.ts`; and real CLI proof for
   apply followed by `claws update --yes --workspace --json` updating `SOUL.md`
   and deleting a stale managed file. `node_modules/.bin/tsgo --noEmit
-  --pretty false` now gets past this patch and stops at inherited
+--pretty false` now gets past this patch and stops at inherited
   `src/secrets/config-io.ts(12,17)` TS4058. Final `codex review -c
-  model=gpt-5.5 --uncommitted` reported no actionable correctness issues after
+model=gpt-5.5 --uncommitted` reported no actionable correctness issues after
   fixes for same-id workspace moves, premature provenance rewrites, and the
   update-result logger type. PR body was created and `@clawsweeper re-review`
   was posted at
@@ -3281,6 +3350,7 @@
   Next active repair is `#102296`: use canonical agent-delete behavior, make
   managed-file removal identity safe, and implement ownership-aware package
   removal as requested by Patrick/ClawSweeper.
+
 ### 2026-07-13 auditable skill invocation RFC fork review
 
 - Drafted RFC 0022, `Auditable Skill Invocation and Managed Skill Runs`, as an
@@ -3559,7 +3629,7 @@
   nothing was merged.
 - 2026-07-16 OpenClaw Claws PR #102228 was clean-restacked on #101973 and
   pushed at `18d178885ecc95a4d0f8af8968bcc444fb5d1792` (`fix(claws): tighten
-  package install policy`). The branch is `user/giodl/claws-pr5-installers`,
+package install policy`). The branch is `user/giodl/claws-pr5-installers`,
   based on #101973 head `b46453290b2392fd8f655d5098701a9257eeec3b`. The
   repair narrows this slice to plugin package mutation only; skill package
   declarations remain schema-valid but fail closed until a later skill package
@@ -3678,7 +3748,7 @@
   and Crabbox were not tested.
 - Omar's policy question is resolved for this experimental v1: plugins remain
   process-wide shared-host resources, and exact `claws add --yes
-  --plan-integrity <preview-digest>` consent authorizes the displayed shared
+--plan-integrity <preview-digest>` consent authorizes the displayed shared
   plugin install/reuse action. No per-agent plugin isolation is claimed; that
   may be revisited separately. This is documented in the PR body and in the
   public Omar reply at

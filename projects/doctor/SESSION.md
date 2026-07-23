@@ -220,7 +220,7 @@
   execute/search permission on the existing parent. Validation passed on the
   final head: focused Doctor contribution Vitest (81 tests), changed-file
   `oxfmt --check`, changed-file `oxlint`, `pnpm tsgo:core`, and `git diff
-  --check`. Hosted checks settled pass/skipped, merge state is `CLEAN`, and
+--check`. Hosted checks settled pass/skipped, merge state is `CLEAN`, and
   ClawSweeper updated to `rating: platinum hermit`, `proof: sufficient`,
   `status: ready for maintainer look`, with no remaining P2 findings. The PR
   was marked non-draft on 2026-07-05 and the maintainer acceptance comment for
@@ -244,7 +244,7 @@
   `b1f3986b84f7ffd793bd24b019ebb7e9dfd9195d`. Focused local proof on the
   rebased branch passed: Doctor contribution Vitest (81 tests), changed-file
   `oxfmt --check`, changed-file `oxlint`, `pnpm tsgo:core`, and `git diff
-  --check`. The local full `pnpm check` prep path reproduced a shrinkwrap
+--check`. The local full `pnpm check` prep path reproduced a shrinkwrap
   generator disagreement in unrelated `qrcode`/`yargs` hoisting, while hosted
   exact-head `check-shrinkwrap` and the full GitHub matrix were green, so the
   maintainer prep used `OPENCLAW_TESTBOX=1` hosted exact-head gates. The merge
@@ -351,7 +351,7 @@
   `config/tsconfig/oxlint.core.json`, SDK surface report, `git diff --check`,
   and exact-head hosted checks. The maintainer wrapper review artifacts
   validated with zero findings. Wrapper prepare passed `pnpm install
-  --frozen-lockfile` and `pnpm build`, then failed `pnpm check` only on the
+--frozen-lockfile` and `pnpm build`, then failed `pnpm check` only on the
   local npm shrinkwrap guard; the same `npm-shrinkwrap.json is stale` failure
   reproduced on current `origin/main`, so it was treated as baseline local gate
   noise. `scripts/pr-decide` could not record the merge after the live plan
@@ -811,7 +811,7 @@
   `core/doctor/auth-profiles` check is default-disabled, read-only, suppresses
   keychain prompts, uses auth-profile source probes before loading stores,
   preserves malformed API-key findings with `reasonCode:
-  "malformed_api_key"`, reports the canonical SQLite auth store display path,
+"malformed_api_key"`, reports the canonical SQLite auth store display path,
   and leaves real refresh/mutation in the legacy Doctor run path.
 - Fresh proof on 2026-06-30 passed: focused auth-profile/hints/contribution
   Vitest, changed-file `oxfmt --check`, changed-file `oxlint`, core `tsgo`,
@@ -841,9 +841,9 @@
   was rerun after repair and now points the wrapper worktree at
   `c6a4fb1ea32ae70dc65c880a61b436cde2a06a2a`; exact-head hosted gates are
   passed with `OPENCLAW_TESTBOX=1 PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
-  scripts/pr-prepare gates 97125`. Live GitHub now reports merge state `CLEAN`,
+scripts/pr-prepare gates 97125`. Live GitHub now reports merge state `CLEAN`,
   `proof: sufficient`, `rating: platinum hermit`, and `status: ready for
-  maintainer look`; Galin's older `CHANGES_REQUESTED` review remains the active
+maintainer look`; Galin's older `CHANGES_REQUESTED` review remains the active
   review decision.
 - After Galin's review was dismissed, #97125 was synced once more because
   `scripts/pr-merge verify 97125` required mainline drift handling. The wrapper
@@ -856,7 +856,7 @@
   core `tsgo`, `git diff --check`, live GitHub checks, and exact-head hosted
   CI/Testbox gates. Because the prepare-push wrapper was unsafe on this branch,
   #97125 was landed via head-pinned squash merge instead of `scripts/pr-merge
-  run`. Merge commit:
+run`. Merge commit:
   `9f07b21e6231ddb5db3fa845e4fc2763fcdecf86`; completion comment:
   https://github.com/openclaw/openclaw/pull/97125#issuecomment-4847653527.
   Do not reuse `.worktrees/pr-97125` wrapper artifacts for future merge testing;
@@ -898,7 +898,7 @@
   `status: needs proof`, and Galin's older `CHANGES_REQUESTED` review decision.
 - Follow-up refresh on `21971737b72a36390bf619a676f130ff8dc8968e`: WSL root
   Codex auth was repaired with device auth, then `codex review --base
-  origin/main` was run to clean. Accepted fixes: reuse persisted/legacy
+origin/main` was run to clean. Accepted fixes: reuse persisted/legacy
   auth-store coercion in read-only source probes, require eligible credentials,
   ignore malformed/empty/expired/unrelated auth-profile sources, respect
   configured `auth.order` in selected lint, preserve Bedrock `aws-sdk` auth
@@ -954,7 +954,7 @@
   `oxfmt --check`, changed-file `oxlint`, core `tsgo`, plugin SDK surface
   report, plugin SDK export check, and `git diff --check origin/main...HEAD`.
   The first combined type/export command timed out while `pnpm
-  plugin-sdk:check-exports` was still running, so the stale child in this PR
+plugin-sdk:check-exports` was still running, so the stale child in this PR
   worktree was killed and the export check was rerun with
   `PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false`.
 - PR body was updated and ClawSweeper re-review was requested:
@@ -994,7 +994,7 @@
   https://github.com/openclaw/openclaw/pull/97366#issuecomment-4849811519.
   ClawSweeper re-review was requested and updated the durable verdict to
   `proof: sufficient`, `rating: platinum hermit`, and `status: ready for
-  maintainer look`.
+maintainer look`.
 - Validation on the refreshed head passed: focused device-pairing/contribution
   Vitest (63 tests across 2 shards), changed-file `oxfmt --check`,
   changed-file `oxlint`, `pnpm tsgo:core`, plugin SDK surface/export checks,
@@ -1068,7 +1068,7 @@
     resolving or refreshing auth profiles. Validation passed: focused
     memory-search/contribution Vitest, changed-file `oxfmt --check`,
     changed-file `oxlint`, core `tsgo`, and `git diff --check
-    origin/main...HEAD`. Re-review/proof comment:
+origin/main...HEAD`. Re-review/proof comment:
     https://github.com/openclaw/openclaw/pull/97137#issuecomment-4829295185.
     Current-head follow-up to Galin:
     https://github.com/openclaw/openclaw/pull/97137#issuecomment-4847304986.
@@ -1090,7 +1090,7 @@
   added, and re-review requested:
   https://github.com/openclaw/openclaw/pull/97137#issuecomment-4826704795.
   Live labels now show `proof: sufficient` and `status: ready for maintainer
-  look`.
+look`.
 - #97358 workspace-status refreshed to
   `073689112ba50fd0d73b341d8b5ce31ff040a897`; the structured lint path now
   shares the gated daemon-context plugin-drift source with legacy Doctor.
@@ -1122,7 +1122,7 @@
   https://github.com/openclaw/openclaw/pull/89226#issuecomment-4827011581.
   Hosted CI later settled with no pending or failed checks and GitHub reported
   merge state `CLEAN`; the PR retains `proof: sufficient`, `rating: diamond
-  lobster`, and `status: ready for maintainer look`. Maintainer wrapper
+lobster`, and `status: ready for maintainer look`. Maintainer wrapper
   `pr-review` completed and local review artifacts were written. `pr-prepare`
   passed install/build but stopped on the npm shrinkwrap guard; the same
   `node scripts/generate-npm-shrinkwrap.mjs --all --check` failure reproduced
@@ -1423,7 +1423,7 @@
   Validation passed: focused session-lock/lint/core/lint-flow/main-session
   Vitest (73 tests), changed-file `oxlint`, changed-file `oxfmt --check`,
   core `tsgo`, test-source `tsgo`, `node scripts/plugin-sdk-surface-report.mjs
-  --check`, and `git diff --check`. PR body was refreshed to remove the stale
+--check`, and `git diff --check`. PR body was refreshed to remove the stale
   `tsgo:core` blocker, and exact current-head ClawSweeper review was requested:
   https://github.com/openclaw/openclaw/pull/84366#issuecomment-4774424165.
   Later on 2026-06-23, after #84340 merged, rebased onto current `main` and
@@ -1459,7 +1459,7 @@
   SDK surface. Validation passed: focused config-audit/contribution/lint-flow
   Vitest (56 tests), changed-file `oxlint`, changed-file `oxfmt --check`, core
   `tsgo`, test-source `tsgo`, `node scripts/plugin-sdk-surface-report.mjs
-  --check`, and `git diff --check`. PR body and exact ClawSweeper review
+--check`, and `git diff --check`. PR body and exact ClawSweeper review
   request updated:
   https://github.com/openclaw/openclaw/pull/84450#issuecomment-4775537124.
   On 2026-06-24, after #84366 merged, rebased onto current `main` and
@@ -1846,8 +1846,8 @@ preview enough meaningful content.
   lint selection still exercises the real crontab detector through the existing
   core check registration. Validation passed before merge: focused
   `pnpm exec vitest run
-  src/flows/doctor-health-contributions.test.ts --maxWorkers 1
-  --no-fileParallelism` (70 tests), changed-file `oxfmt --check`, changed-file
+src/flows/doctor-health-contributions.test.ts --maxWorkers 1
+--no-fileParallelism` (70 tests), changed-file `oxfmt --check`, changed-file
   `oxlint`, `git diff --check`, `pnpm build`, and hosted exact-head
   CI/Testbox gates after a QA Smoke rerun. Full `tsgo` previously failed
   outside this PR in `src/config/io.ts` / `src/secrets/config-io.ts` around
@@ -1909,7 +1909,7 @@ preview enough meaningful content.
   `cf4399955e2ddc8a38f5bb0f34bed4c6afc54749`. It is the plugin-registry half
   of the plugin slice. The check remains opt-in via `defaultEnabled: false`, so
   default `doctor --lint` is unchanged while `--only
-  core/doctor/plugin-registry` and `--all` can surface the warning. The final
+core/doctor/plugin-registry` and `--all` can surface the warning. The final
   prep fixed CI `check-lint` by adding exhaustive fallbacks to the finding and
   repair-effect mappers. Validation passed: exact-head hosted CI, focused
   plugin-registry/contribution Vitest (64 tests), changed-file

@@ -57,27 +57,27 @@ frame family.
 
 ## Wave Map
 
-| Wave | Outcome |
-| --- | --- |
-| 0 | Contract and Hosting Profiles prerequisites |
-| 1 | Parallel OpenClaw foundations: local dispatcher, approvals, Teams endpoint, traffic policy |
-| 2 | Network guard, credential slots, and generic bundle registration |
-| 3 | Bundle inventory, Status/Doctor, and reverse-session endpoint |
-| 4 | External-plugin vertical proof without host product code in OpenClaw |
-| 5 | Substrate, simple-key providers, Channel, and Graph adoption |
-| 6 | Fleet rollout and downstream compatibility cleanup |
+| Wave | Outcome                                                                                    |
+| ---- | ------------------------------------------------------------------------------------------ |
+| 0    | Contract and Hosting Profiles prerequisites                                                |
+| 1    | Parallel OpenClaw foundations: local dispatcher, approvals, Teams endpoint, traffic policy |
+| 2    | Network guard, credential slots, and generic bundle registration                           |
+| 3    | Bundle inventory, Status/Doctor, and reverse-session endpoint                              |
+| 4    | External-plugin vertical proof without host product code in OpenClaw                       |
+| 5    | Substrate, simple-key providers, Channel, and Graph adoption                               |
+| 6    | Fleet rollout and downstream compatibility cleanup                                         |
 
 The first proof milestone spans Waves 1-4. It is not complete at the end of
 Wave 1.
 
 ## Four-Area Alignment
 
-| Area | Capability ownership | Registration and selection | Runtime path | Readiness and operations |
-| --- | --- | --- | --- | --- |
-| 1. Host integration plane | Gateway, Channel, provider-traffic, and lifecycle owners | B5, D1, E1a-E4b | Native Gateway/Channel/lifecycle paths; traffic policy intersects Area 2 dispatch | A2/A3, B6a/B6b, F1 |
-| 2. Host capability providers | Model/provider, credential, secret, publication, and telemetry owners | B3-B5, D1-D5d | Local or hosted owner-selected providers | Owner criteria through A3/B6a/B6b/F1 |
-| 3. Host wiring and composition | Each semantic owner; Hosting Profiles only aggregates | A2/A3, B5/B6a/B6b, F1/F2 | Owner-local activation and generation fencing | `/ready`, Status, Doctor, provenance, authority |
-| 4. Carrier options | Binding owner selects a conformant carrier | C1-C3 and D1 | Provider-dispatch-only reverse session for hosted egress; native transports elsewhere | Carrier incarnation and failure projected through B6a/B6b |
+| Area                           | Capability ownership                                                  | Registration and selection | Runtime path                                                                          | Readiness and operations                                  |
+| ------------------------------ | --------------------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 1. Host integration plane      | Gateway, Channel, provider-traffic, and lifecycle owners              | B5, D1, E1a-E4b            | Native Gateway/Channel/lifecycle paths; traffic policy intersects Area 2 dispatch     | A2/A3, B6a/B6b, F1                                        |
+| 2. Host capability providers   | Model/provider, credential, secret, publication, and telemetry owners | B3-B5, D1-D5d              | Local or hosted owner-selected providers                                              | Owner criteria through A3/B6a/B6b/F1                      |
+| 3. Host wiring and composition | Each semantic owner; Hosting Profiles only aggregates                 | A2/A3, B5/B6a/B6b, F1/F2   | Owner-local activation and generation fencing                                         | `/ready`, Status, Doctor, provenance, authority           |
+| 4. Carrier options             | Binding owner selects a conformant carrier                            | C1-C3 and D1               | Provider-dispatch-only reverse session for hosted egress; native transports elsewhere | Carrier incarnation and failure projected through B6a/B6b |
 
 Every host offering follows the same integration gate:
 
@@ -97,11 +97,11 @@ hosted provider dispatch uses the narrow reverse carrier in the first proof.
 
 ## Track A: Contracts And Readiness
 
-| PR | Repository | Scope | Depends on |
-| --- | --- | --- | --- |
-| A1 | `openclaw/rfcs` | Finalize RFC 0020 with bundle registration, owner references, Hosting Profiles, provider assembly, and narrow reverse carrier | Architecture approval |
-| A2 | `openclaw/openclaw` | Land or rebase Hosting Profiles: required/advisory criteria, fail-closed `Unknown`, `/ready`, status projection | Existing Hosting Profiles stack |
-| A3 | `openclaw/openclaw` | Generalize trusted readiness criterion registration to required core and Channel owners | A2 |
+| PR  | Repository          | Scope                                                                                                                         | Depends on                      |
+| --- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| A1  | `openclaw/rfcs`     | Finalize RFC 0020 with bundle registration, owner references, Hosting Profiles, provider assembly, and narrow reverse carrier | Architecture approval           |
+| A2  | `openclaw/openclaw` | Land or rebase Hosting Profiles: required/advisory criteria, fail-closed `Unknown`, `/ready`, status projection               | Existing Hosting Profiles stack |
+| A3  | `openclaw/openclaw` | Generalize trusted readiness criterion registration to required core and Channel owners                                       | A2                              |
 
 A1 documents the contract; it does not need to block additive implementation
 experiments in forks. Upstream implementation should not merge ahead of an

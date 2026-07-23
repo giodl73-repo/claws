@@ -106,7 +106,7 @@
   bundle ownership, HTTPS-preserving CAPI redirects, and inactive-by-default
   composition. All 412 tests across the 22 changed test files pass in seven
   Vitest shards. The final `codex review --base
-  fork/user/giodl/hosted-integration-capi-owner-operations` exited clean with no
+fork/user/giodl/hosted-integration-capi-owner-operations` exited clean with no
   accepted/actionable findings.
   Package 4 is rebuilt from corrected package 3, clean, synchronized, and
   published at `633e087a455`. PR 74 contains provider-owned Substrate, WebIQ,
@@ -170,8 +170,7 @@
   D2a PR 52. It preserves bounded attachment transformation, exact API-key
   slot selection, fallback request fields, raw Anthropic SSE responses, and
   local/hosted parity without activating runtime authority. D4d is committed
-  as `96d9b358da` and open as fork-only draft PR 10 stacked on Lobster D2b PR
-  6. It preserves exact key/origin binding, owner-prepared final bytes,
+  as `96d9b358da` and open as fork-only draft PR 10 stacked on Lobster D2b PR 6. It preserves exact key/origin binding, owner-prepared final bytes,
   independent readiness, stateless authority, explicit rollback, redacted
   evidence, and release-gated old-path retirement without adding provider
   semantics to Rust. D5a is committed as `0b8f8684457` and open as fork draft

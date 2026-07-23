@@ -127,7 +127,15 @@ Equivalent Compose shape:
 services:
   openclaw:
     image: openclaw/openclaw
-    command: ["gateway", "run", "--hosting-profile", "container", "--config", "/etc/openclaw/openclaw.json"]
+    command:
+      [
+        "gateway",
+        "run",
+        "--hosting-profile",
+        "container",
+        "--config",
+        "/etc/openclaw/openclaw.json",
+      ]
     ports:
       - "18789:18789"
     volumes:
@@ -233,13 +241,13 @@ profile is, which checks are warning-only, and which checks are release-blocking
 
 Suggested first profiles:
 
-| Profile | Purpose | Required signal |
-| --- | --- | --- |
-| `local` | Developer/local foreground process | config, Gateway, workspace, plugins |
-| `container` | One service in Docker or Compose | `local` plus ready/live/status and signal handling |
-| `node-mode` | OpenClaw running as a platform-controlled execution node or cell | `container` plus node pairing, controlled-target inventory, command approval posture, control-channel readiness, and workspace/state readiness |
-| `reverse-proxy` | Gateway behind TLS or identity proxy | `container` plus trusted proxy posture |
-| `managed` | Platform-hosted OpenClaw | `node-mode` and/or `reverse-proxy` plus brokered egress, durable state, stable events, and drain |
+| Profile         | Purpose                                                          | Required signal                                                                                                                                |
+| --------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `local`         | Developer/local foreground process                               | config, Gateway, workspace, plugins                                                                                                            |
+| `container`     | One service in Docker or Compose                                 | `local` plus ready/live/status and signal handling                                                                                             |
+| `node-mode`     | OpenClaw running as a platform-controlled execution node or cell | `container` plus node pairing, controlled-target inventory, command approval posture, control-channel readiness, and workspace/state readiness |
+| `reverse-proxy` | Gateway behind TLS or identity proxy                             | `container` plus trusted proxy posture                                                                                                         |
+| `managed`       | Platform-hosted OpenClaw                                         | `node-mode` and/or `reverse-proxy` plus brokered egress, durable state, stable events, and drain                                               |
 
 The same condition schema should work for every profile. Profiles only change
 which conditions are required for `ready=true`.
@@ -286,8 +294,8 @@ one mounted file to describe the runtime:
 ```jsonc
 {
   "hosting": {
-    "profile": "container"
-  }
+    "profile": "container",
+  },
 }
 ```
 
@@ -338,29 +346,29 @@ Suggested shape:
     {
       "type": "ConfigLoaded",
       "status": "True",
-      "reason": "EffectiveConfigReady"
+      "reason": "EffectiveConfigReady",
     },
     {
       "type": "GatewayReady",
       "status": "True",
-      "reason": "TrustedProxyActive"
+      "reason": "TrustedProxyActive",
     },
     {
       "type": "EgressReady",
       "status": "True",
-      "reason": "ManagedProxyActive"
+      "reason": "ManagedProxyActive",
     },
     {
       "type": "StateReady",
       "status": "True",
-      "reason": "WorkspaceRestored"
+      "reason": "WorkspaceRestored",
     },
     {
       "type": "PluginsReady",
       "status": "True",
-      "reason": "RequiredPluginsLoaded"
-    }
-  ]
+      "reason": "RequiredPluginsLoaded",
+    },
+  ],
 }
 ```
 

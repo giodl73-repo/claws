@@ -30,10 +30,7 @@ Primary implementation and proof surfaces:
     "config": {
       "gateway": {
         "controlUi": {
-          "allowedOrigins": [
-            "http://127.0.0.1:18001",
-            "http://localhost:18001"
-          ]
+          "allowedOrigins": ["http://127.0.0.1:18001", "http://localhost:18001"]
         }
       }
     }

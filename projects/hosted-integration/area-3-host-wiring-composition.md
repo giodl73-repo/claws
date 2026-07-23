@@ -157,13 +157,13 @@ host-facing answer to:
 
 ## Compare
 
-| Comparator | Reuse | Avoid |
-| --- | --- | --- |
-| .NET Generic Host and DI | Typed registration, dependency construction, build-or-fail startup, health checks | Weak provenance and limited runtime graph replacement |
-| Kubernetes reconciliation | Declarative desired state, status conditions, generation, readiness roll-up, explicit replacement | Eventual consistency where one local activation transaction is sufficient |
-| Backstage-style catalogs | Discoverable registrations, source metadata, operator inventory | Catalog metadata becoming detached from runtime truth |
-| OpenClaw configured binding compiler | Owner-resolved effective registry | Silent skipping without structured findings |
-| OpenClaw reload planner | Explicit hot/restart/no-op ownership | One broad fallback obscuring capability-specific lifecycle |
+| Comparator                           | Reuse                                                                                             | Avoid                                                                     |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| .NET Generic Host and DI             | Typed registration, dependency construction, build-or-fail startup, health checks                 | Weak provenance and limited runtime graph replacement                     |
+| Kubernetes reconciliation            | Declarative desired state, status conditions, generation, readiness roll-up, explicit replacement | Eventual consistency where one local activation transaction is sufficient |
+| Backstage-style catalogs             | Discoverable registrations, source metadata, operator inventory                                   | Catalog metadata becoming detached from runtime truth                     |
+| OpenClaw configured binding compiler | Owner-resolved effective registry                                                                 | Silent skipping without structured findings                               |
+| OpenClaw reload planner              | Explicit hot/restart/no-op ownership                                                              | One broad fallback obscuring capability-specific lifecycle                |
 
 The more exact comparison is:
 
@@ -226,12 +226,12 @@ Example:
   "channels": {
     "msteams": {
       "endpoint": {
-        "mode": "trusted-forwarder"
-      }
-    }
+        "mode": "trusted-forwarder",
+      },
+    },
   },
   "providerRequests": {
-    "dispatcher": "lobster-egress"
+    "dispatcher": "lobster-egress",
   },
   "hosting": {
     "profile": "lobster/managed",
@@ -241,11 +241,11 @@ Example:
         "requiredCriteria": [
           "channel.msteams.endpoint",
           "provider.request.policy",
-          "provider.request.dispatcher"
-        ]
-      }
-    }
-  }
+          "provider.request.dispatcher",
+        ],
+      },
+    },
+  },
 }
 ```
 

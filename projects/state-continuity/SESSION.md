@@ -1,31 +1,76 @@
 # State Continuity Session
 
-**Last updated:** 2026-07-21
+**Last updated:** 2026-07-22
 
-**Last agent:** GitHub Copilot
+**Last agent:** Codex
 
-**Current focus:** Review RFC 0013 sidecar PR 46 and the first fork-only
-OpenClaw implementation draft, then keep both draft until maintainers accept
-the owner/snapshot boundary.
+**Current focus:** Review replacement PRs 3A-3D, final-capture PR 152, and the
+Lobster final-capture adopter in fork PR 28. The owner operation and live
+Gateway-side adopter now exist; obtain a generation-scoped provider remover
+before authoring PR 3E-B or wiring PR 3D to production. RFC PR 46, OpenClaw PR
+112385, fork PR 152, Lobster PR 5481, and fork PR 28 remain draft. Keep every
+implementation PR draft until Vincent and the relevant state owners accept the
+inventory, protection, acceptance-byte-set, and destruction-authority
+contracts.
 
 **Parent project:** [`projects/snapshot`](../snapshot/README.md). RFC 0013,
 OpenClaw PR 105718, and `openclaw backup sqlite` remain authoritative for
 SQLite capture, verification, and fresh-target restore.
 
 **Active RFC work:** [openclaw/rfcs#46](https://github.com/openclaw/rfcs/pull/46),
-branch `user/giodl/rfc-0013-continuity-sidecars`, commit `17fcd5d894d`, stacked
-on RFC PR 20.
+branch `user/giodl/rfc-0013-continuity-sidecars`, commit `0e64ad58c67`, stacked
+on RFC PR 20. It binds a closed owner-selected component inventory, keeps
+ordinary snapshots host-protected, and defines a deterministic logical
+acceptance byte set.
 
 **Draft implementation work:** OpenClaw
 [PR 112385](https://github.com/openclaw/openclaw/pull/112385), branch
-`user/giodl/rfc-0013-recovery-points`, commit `8f2084eed5d`, contains the first
+`user/giodl/rfc-0013-recovery-points`, commit `b483d808916`, contains the first
 private aggregate-recovery-point slice. It composes verified global and agent
-RFC 0013 snapshots, binds exact owner-manifest and artifact identities, records
-value-free obligations, and derives a canonical recovery-point identity. It
-adds no CLI, plugin, storage, lifecycle, or restored-start surface.
+RFC 0013 snapshots against the state owner's exact expected-agent inventory,
+binds exact owner-manifest and artifact identities and sizes, validates a
+closed value-free obligation vocabulary, marks ordinary composition
+`host-protected`, and derives canonical recovery-point and acceptance-set
+identities. It adds no CLI, plugin, storage, lifecycle, or restored-start
+surface.
 
-**Blocking question:** Maintainers must accept the sidecar ownership boundaries
-before PR 112385 becomes merge-ready or later implementation surfaces begin.
+OpenClaw fork draft
+[PR 152](https://github.com/giodl73-repo/openclaw/pull/152), branch
+`user/giodl/rfc-0013-final-capture`, commit `1ee5956dc02`, is stacked on PR 112385. Its hidden offline operation durably binds host-supplied closure
+evidence to real global and selected-agent snapshots, the canonical aggregate,
+and a full acceptance inventory. Exact response-loss replay returns the same
+committed result; changed requests, partial intent, invalid inventories, and
+tampered bytes quarantine or fail closed. It does not suspend or stop Gateway,
+fence ingress, publish, accept, claim credential-free portability, or authorize
+destruction.
+
+Lobster [PR 5481](https://microsoft.ghe.com/bic/lobster/pull/5481), branch
+`user/giodl/rfc-0013-host-acceptance-contract`, commit `c313f37c49e`, is the
+fork-only PR 3A evidence slice. It defines the strict host-acceptance envelope,
+cross-language acceptance-set identity, permanent atomic-store contract,
+idempotent replay, conflict quarantine, and fail-closed validation. It has no
+production store, Redis authority, Gateway caller, or destruction API.
+
+**Blocking question:** Maintainers must accept the sidecar ownership boundaries,
+especially the authoritative selected-agent inventory and owner-authored
+portability receipt, before PR 112385 or later implementation surfaces become
+merge-ready or frozen for promotion.
+
+**Latest drafts:** Lobster fork PR 25 uses existing `BlobClient` ETag CAS to make
+PR 3A's acceptance/replay/quarantine decisions permanent across process, pod,
+and Redis loss. Fork PR 26 adds atomic accepted/revoked/
+destruction-finalized authority. Fork PR 27 consumes that exact authorization,
+persists conclusive completion, and replays provider-unknown outcomes without a
+production provider binding. Final owner capture is now provided by fork PR
+152; live Gateway quiescence, ingress fencing, the Lobster caller, and provider
+deletion were split rather than overstated. Fork PR 28 now adds the fixed live
+final-capture adopter, irreversible admission fence, Gateway suspension and
+clean-stop reconciliation, strict PR 152 invocation/response binding, and
+same-request replay. Provider deletion remains deferred to PR 3E-B because
+current Lobster source has no live generation-scoped remover. PRs 3B-3E-A do
+not use Redis as irreversible
+authority, claim credential-free Portable, or authorize persistent-data
+deletion.
 
 ## Deprecated RFC 0021 evidence
 
@@ -122,7 +167,7 @@ series is active.
   external plugin through `openclaw/plugin-sdk`, created a verified backup,
   published it, and retrieved it in an independent process. Success marker:
   `E5B_PACKAGE_PROOF_OK package=openclaw-current.tgz publisherPid=9683
-  retrieverPid=9695 publicationId=publication/handoff-7`. Exit code was zero
+retrieverPid=9695 publicationId=publication/handoff-7`. Exit code was zero
   and the one-shot lease stopped automatically.
   Fork-only draft PR:
   `https://github.com/giodl73-repo/openclaw/pull/112`, stacked directly on E5a
@@ -131,10 +176,9 @@ series is active.
   `C:\src\lobster-state-continuity-e5b-publication-authority`, branch
   `user/giodl/state-continuity-e5b-publication-authority`, clean at
   `e2f49f9632`, fork draft PR
-  `https://microsoft.ghe.com/giodl/lobster/pull/17`, stacked on Lobster E5a PR
-  16. The slice adds strict publication/finalization DTOs,
+  `https://microsoft.ghe.com/giodl/lobster/pull/17`, stacked on Lobster E5a PR 16. The slice adds strict publication/finalization DTOs,
   durable Redis/CAS `Publishing -> Published -> SourceFinalizing ->
-  SafeToDestroy`, exact-source-worker and source-runtime-generation binding,
+SafeToDestroy`, exact-source-worker and source-runtime-generation binding,
   same-route replay across uncertain publication/finalization outcomes, strict
   passport release, and lifecycle-policy destruction gating. Production
   invocation remains intentionally blocked with E5a until the managed capture
@@ -183,8 +227,7 @@ series is active.
 - OpenClaw E5b operation worktree:
   `C:\src\openclaw-state-continuity-e5b-operation`, branch
   `user/giodl/state-continuity-e5b-operation`, clean at `92d23bd8bdc`, fork
-  draft PR `https://github.com/giodl73-repo/openclaw/pull/111`, stacked on PR
-  110.
+  draft PR `https://github.com/giodl73-repo/openclaw/pull/111`, stacked on PR 110.
   Adds the sixth `lobster/continuity` contribution, strict durable filesystem
   provider, `backup publish --managed --json`, complete
   source/fresh-retrieval verification, pinned-source TOCTOU protection,
@@ -293,6 +336,77 @@ series is active.
   copies overlapping component roots.
 
 ## Completed This Session
+
+- Opened fork-only draft Lobster PR 26 for PR 3C at commit `9a1a72ab76`,
+  stacked on PR 25. It races revocation against generation-scoped destruction
+  finalization in the same permanent Blob record and returns one deterministic
+  authorization for source compute only. Exact acceptance and terminal replay,
+  two-journal race convergence, and corrupt timestamp rejection are covered.
+  Autoreview found and drove fixes for terminal acceptance replay and durable
+  timestamp ordering; the final commit review is clean. Rustfmt/diff checks
+  pass, focused Windows compilation is blocked only by the five inherited
+  `windows_sys` errors, and the fork PR reports no attached checks.
+- Opened fork-only draft Lobster PR 25 for PR 3B at commit `c12685b5eb`,
+  stacked on PR 3A so its review diff is limited to two files and 326 additions.
+  It persists acceptance/replay/quarantine through Azure Blob ETag CAS, bounds
+  conflicts to eight retries, survives journal recreation, and treats malformed
+  permanent bytes as corrupt state. It exposes no caller, lifecycle transition,
+  provider call, or destruction authority. Rustfmt and diff checks pass;
+  targeted Windows compilation is blocked only by the five inherited
+  `windows_sys` errors, and final Codex commit review found no actionable
+  defects. The fork PR reports no attached checks.
+- Opened draft Lobster PR 5481 for the new PR 3A host-acceptance contract at
+  commit `c313f37c49e`. The slice binds logical runtime and continuity lineage,
+  exact OpenClaw acceptance bytes, equivalent host-protection evidence, and
+  opaque non-secret storage identity; replay is idempotent, conflicts
+  quarantine, misrouted store responses fail closed, and no production backend
+  or destruction surface is exposed.
+- Split the former Lobster PR 3 into PR 3A (acceptance contract), PR 3B
+  (permanent Blob acceptance/replay/quarantine), PR 3C (atomic lifecycle and
+  destruction finalization), and PR 3D (Gateway/provider saga).
+  Autoreview findings drove the split: Redis was not permanent authority and a
+  read-only `safeToDestroy` could race cross-pod quarantine. Other accepted
+  fixes bind continuity lineage/current candidates, reject secret-bearing or
+  URL-shaped storage references, and preserve exact integer/state identity.
+- Audited PR 3B seams in worktree
+  `C:\src\lobster-rfc0013-permanent-finalization`, branch
+  `user/giodl/rfc-0013-permanent-acceptance`, stacked on PR 3A. Lobster has a
+  usable permanent Azure Blob ETag CAS primitive (`BlobClient::get_blob` plus
+  conditional `put_blob`) but no durable lifecycle ownership lock spanning
+  Gateway quiescence and provider deletion. PR 3B therefore stays at permanent
+  acceptance/replay/quarantine; PR 3C adds permanent lifecycle authority, and
+  PR 3D owns the later Gateway/provider saga and crash replay.
+- Proof for PR 5481: `just rust-fmt-check` and `git diff --check` passed. The
+  focused Rust test command reached the runtime crate but current-main Windows
+  MIP code imports `windows_sys` without declaring the dependency, so CI/Linux
+  must run the tests. Final low-effort commit review reported no actionable
+  correctness regressions. `GitOps/FileAffordance` passed;
+  `GitOps/GitHubPop` is the expected proof-of-presence user-action failure, and
+  the two required runtime checks have not attached. They were not manually
+  queued.
+
+- Reviewed RFC PR 46 and OpenClaw PR 112385 against the revised snapshot and
+  Gateway-pause direction. Found three material gaps: no closed owner inventory,
+  an unenforceable credential-free portability claim, and no defined exact byte
+  set for host acceptance.
+- Closed those RFC gaps in `0e64ad58c67`: the runtime state owner supplies the
+  exact selected global/agent inventory; ordinary snapshots remain
+  `host-protected` until exact owner portability receipts exist; and handoff,
+  restore hold, restored start, and admission bind one deterministic logical
+  acceptance set over canonical aggregate-manifest, owner-manifest, and
+  artifact bytes.
+- Updated the private OpenClaw evidence slice in `b483d808916` with the same
+  boundaries. Composition and verification require the owner-selected agent
+  inventory, obligations use a closed treatment/kind/owner vocabulary, owner
+  manifest sizes are bound, and verification returns a deterministic
+  acceptance inventory. No public or runtime wiring was added.
+- Proof: the focused recovery-point suite passed 7/7; targeted Oxfmt and Oxlint
+  passed with zero findings; core production typing passed; final
+  `codex review --uncommitted` reported no actionable correctness finding. The
+  delegated changed-file gate stopped before patch lanes on an unrelated
+  current-main max-lines baseline in Blacksmith Testbox
+  `tbx_01ky50qwp8m408m77hc2g5w061`. Both fork branches were pushed and both PRs
+  remain draft with updated evidence and owner gates.
 
 - Completed replacement E5b closeout. The managed operation now launches the
   hidden `backup publish-retrieve --managed --json` command in an independent
@@ -841,7 +955,7 @@ series is active.
   platform durability semantics remain explicit proof gates.
 - Added the restore hold to RFC 0021 using Hosted Integration's existing
   lifecycle-owner generation: `runnable -> restore-held -> restore-committed
-  -> one admitted restored start`.
+-> one admitted restored start`.
 - Made the hold non-expiring and fail-closed, distinguished it from the
   TTL-renewed active generation and Lobster's advisory proxy-pipe lease, bound
   commit to the exact restore receipt, and limited cancellation to before the
@@ -968,19 +1082,25 @@ series is active.
 10. Complete the local Archived round-trip paper proof.
 11. Measure Lobster cold restore and startup phase budgets.
 12. Add the Lobster runtime-side E5a authority/caller on the exact existing
-   worker route; do not add publication, passport release, provider
-   pause/destroy, or `safeToDestroy` in this slice.
+    worker route; do not add publication, passport release, provider
+    pause/destroy, or `safeToDestroy` in this slice.
 13. Threat-model any runtime-owned non-reconstructable identity artifact.
 14. Define mixed-version shadow migration and private-path deletion proof.
 15. Reconcile the local PR plans with the exact Hosted Integration seams after
-   that stack lands.
+    that stack lands.
 16. Run a final RFC de-duplication and internal-consistency pass without
-   removing the decision history.
+    removing the decision history.
 17. Monitor replacement OpenClaw PR 112 and Lobster PR 17; do not call Lobster
     PR 17 ready until all three required enterprise contexts attach and pass.
 18. Promote the OpenClaw E5a/E5b managed operations into the Lobster image
     baseline, then add the runtime-side exact-worker trigger that invokes
     capture followed by publication/finalization.
+19. Obtain Vincent/state-owner review of RFC PR 46's exact selected-agent
+    inventory, host-protected classification, portability receipt ownership,
+    and logical acceptance-set identity before making OpenClaw PR 112385 ready.
+20. Author the live Lobster final-capture caller/adopter and a generation-scoped
+    provider remover before PR 3E; do not move Gateway, ingress-fence, provider,
+    acceptance, or destruction ownership into OpenClaw fork PR 152.
 
 ## Resume Order
 
@@ -1004,3 +1124,97 @@ series is active.
   support.
 - Keep CAPE operator-facing; structure implementation by capabilities.
 - Keep changes and PRs fork-only unless explicitly authorized.
+
+## 2026-07-22 — RFC 0013 PR 3D destruction consumption
+
+- Re-read the replacement RFC 0013 portable-handoff spec, RFC 0020 Hosted
+  Integration, deprecated RFC 0021 for archaeology, Lobster repository
+  contracts, and Gateway/container/security/maintainer role lenses before
+  changing irreversible lifecycle code.
+- Audited current Lobster source and recorded the result in
+  `pr3d-source-audit-2026-07-22.md`: Plex is the only live provider and has no
+  synchronous kill lever, ACA remains disabled, the replacement branch has no
+  production `gateway.suspend.*` caller, and replacement OpenClaw recovery
+  points do not yet expose final closed-state capture.
+- Split the original PR 3D plan rather than claiming absent production wiring.
+  PR 3D now owns permanent destruction consumption; PR 3E is reserved for real
+  Gateway/ingress/final-capture/provider wiring after those owner seams exist.
+- Published fork-only draft
+  [giodl/lobster#27](https://microsoft.ghe.com/giodl/lobster/pull/27), branch
+  `user/giodl/rfc-0013-destruction-consumption`, commit `65b4561dbd`, stacked on
+  fork PR 26.
+- PR 27 adds permanent `destruction_completed` state, a narrow
+  `SourceComputeRemover` that receives only PR 3C's immutable authorization,
+  same-authorization replay after unknown provider outcome, and a coordinator
+  that skips provider work after durable completion or when revocation/
+  quarantine won.
+- Evidence covers response-lost-after-removal followed by `already-absent`,
+  journal/process recreation, completion replay without another provider call,
+  retained-work revocation, invalid-time rejection before provider work, and a
+  removal wire shape with no arbitrary resource, storage, or credential field.
+- Validation: `just rust-fmt-check`, `just cargo check -p lobster-runtime`,
+  `just cargo clippy -p lobster-runtime --lib -- -D warnings`, and
+  `git diff --check` pass. `codex review --uncommitted` completed twice; the
+  final run reported no actionable findings. Focused native-Windows tests are
+  still blocked by the same five inherited unresolved `windows_sys` imports in
+  `mip/engine/staging.rs` observed on PR 3C.
+- Live status on review: upstream draft PR 5481 remains open with
+  `GitOps/FileAffordance` passing and `GitOps/GitHubPop` failing; fork PRs 25
+  and 26 remain open/mergeable with no attached checks. No Azure pipeline was
+  manually queued.
+
+## 2026-07-22 — RFC 0013 final closed-state capture
+
+- Audited the RFC 0013 recovery-point and portable-handoff contracts, OpenClaw
+  PR 112385, current Gateway/host closure ownership, and deprecated E5a only as
+  a donor for durable-intent and exact-replay invariants. The result is recorded
+  in `final-capture-source-audit-2026-07-22.md`.
+- Published fork-only draft
+  [giodl73-repo/openclaw#152](https://github.com/giodl73-repo/openclaw/pull/152),
+  branch `user/giodl/rfc-0013-final-capture`, commit
+  `1ee5956dc0271d50abe216eded76510d283e0c9f`, stacked on PR 112385.
+- Added hidden `openclaw backup capture-final`. Its strict stdin request binds
+  runtime lineage, source generation, handoff identity, canonical capture time,
+  exact selected-agent inventory, host closure evidence, and repository path.
+- The operation writes durable intent before using the existing RFC 0013 SQLite
+  provider and PR 112385 aggregate composer. It persists a canonical result
+  with the complete digest-and-size acceptance inventory and re-verifies the
+  exact committed bytes on replay.
+- Changed requests, interrupted intent, invalid component sets, and tampered
+  committed bytes quarantine or fail closed. Oversized stdin returns a
+  structured `final-capture.request-invalid` failure. Ordinary output remains
+  `host-protected`.
+- The slice deliberately adds no Gateway suspension or stop, external ingress
+  fence, publication, host acceptance, credential-free portability, or
+  destruction authority. Lobster still needs the live caller/adopter and a
+  generation-scoped provider remover before PR 3E.
+- Proof on Node 24.15.0 and pnpm 11.2.2: 22 focused tests passed across three
+  shards; core production tsgo, targeted Oxlint/Oxfmt, and `git diff --check`
+  passed; final Codex review reported no actionable correctness findings.
+  Core-test tsgo remained an explicit proof gap after bounded six- and
+  ten-minute attempts with active CPU and no diagnostics.
+
+## 2026-07-22 — RFC 0013 Lobster final-capture adopter
+
+- Audited current live Lobster seams in
+  `pr3e-live-seams-audit-2026-07-22.md` and split PR 3E into an honest adopter
+  slice and a still-blocked provider-removal slice.
+- Published fork-only draft
+  [giodl/lobster#28](https://microsoft.ghe.com/giodl/lobster/pull/28), branch
+  `user/giodl/rfc-0013-final-capture-adopter`, commit
+  `58d8a63ec999dba2399dbf2d91659e0ce0f96548`, stacked on fork PR 27.
+- Added the fixed final-capture route, exact owner/boot/request/response
+  binding, capability preflight, irreversible lifecycle fence, serialized
+  replay, complete tracked-work admission coverage, native Gateway suspension,
+  cancellation-safe clean-stop reconciliation, and proven-unclean closure
+  poisoning.
+- Current pinned OpenClaw safely returns `503 capture_unavailable` before the
+  lifecycle fence. PR 152 or an equivalent promoted pin supplies the required
+  child operation and Gateway suspension method.
+- `just openclaw-container-fmt-check`, the `just`-wrapped production adapter
+  library check, and diff checks pass. WSL tests are blocked before compilation
+  by the missing private Cargo registry token; Windows test compilation is
+  blocked by the inherited `find_git_binary` error. The draft records both
+  gates and has no attached fork checks or review comments yet.
+- Do not wire PR 3D to `ContainerHost` until a live provider exposes a reviewed,
+  idempotent remover for one exact source generation.

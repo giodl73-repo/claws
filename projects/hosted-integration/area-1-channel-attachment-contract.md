@@ -166,19 +166,19 @@ ingress endpoint.
 
 The descriptor publishes:
 
-| Field | Meaning |
-| --- | --- |
-| Stable attachment ID | Channel and account-specific route identity |
-| Owner | Channel plugin |
-| Endpoint kind | HTTP, WebSocket, queue, polling, or other owner-defined kind |
-| Route/path | Effective route, including configured overrides |
-| Authentication mode | Provider-direct, trusted-forwarder, or local-only |
-| Body and framing limits | Maximum accepted request shape |
-| Idempotency source | Provider event ID or Channel-defined delivery key |
-| Acknowledgement taxonomy | Accepted, retryable, terminal, or unconfirmed |
-| Readiness predicate | Listener and Channel handler availability |
-| Reload disposition | Hot route update or account restart |
-| Redaction policy | Fields safe for status and logs |
+| Field                    | Meaning                                                      |
+| ------------------------ | ------------------------------------------------------------ |
+| Stable attachment ID     | Channel and account-specific route identity                  |
+| Owner                    | Channel plugin                                               |
+| Endpoint kind            | HTTP, WebSocket, queue, polling, or other owner-defined kind |
+| Route/path               | Effective route, including configured overrides              |
+| Authentication mode      | Provider-direct, trusted-forwarder, or local-only            |
+| Body and framing limits  | Maximum accepted request shape                               |
+| Idempotency source       | Provider event ID or Channel-defined delivery key            |
+| Acknowledgement taxonomy | Accepted, retryable, terminal, or unconfirmed                |
+| Readiness predicate      | Listener and Channel handler availability                    |
+| Reload disposition       | Hot route update or account restart                          |
+| Redaction policy         | Fields safe for status and logs                              |
 
 The host binds public routing and policy to this endpoint. The body remains
 opaque to the composition layer.
@@ -257,11 +257,11 @@ host route accepted
 
 The portable acknowledgement classes are:
 
-| Class | Meaning |
-| --- | --- |
-| `accepted` | Channel owns the event and the sender may stop retrying |
-| `retryable` | Event was not accepted; retry is safe |
-| `terminal` | Event is malformed or permanently rejected |
+| Class         | Meaning                                                 |
+| ------------- | ------------------------------------------------------- |
+| `accepted`    | Channel owns the event and the sender may stop retrying |
+| `retryable`   | Event was not accepted; retry is safe                   |
+| `terminal`    | Event is malformed or permanently rejected              |
 | `unconfirmed` | Delivery may have succeeded; retry requires idempotency |
 
 HTTP status codes and provider-specific responses map to these classes under
@@ -385,22 +385,22 @@ validation endpoint, but must not copy live traffic into the Channel handler.
 
 ### Internal analogues
 
-| Analogue | Classification | Lesson |
-| --- | --- | --- |
-| Channel plugin adapters | Reuse | Owners define parsing, delivery, lifecycle, and status |
-| Channel account manager | Reuse | Account lifecycle and restart remain Channel-owned |
-| Approval native runtime | Adapt | Share composition lifecycle, not callback schema |
-| Provider request policy | Adapt | Host network policy may only narrow owner policy |
-| Global middleware interception | Avoid | Hidden ordering and mutation erase ownership |
+| Analogue                       | Classification | Lesson                                                 |
+| ------------------------------ | -------------- | ------------------------------------------------------ |
+| Channel plugin adapters        | Reuse          | Owners define parsing, delivery, lifecycle, and status |
+| Channel account manager        | Reuse          | Account lifecycle and restart remain Channel-owned     |
+| Approval native runtime        | Adapt          | Share composition lifecycle, not callback schema       |
+| Provider request policy        | Adapt          | Host network policy may only narrow owner policy       |
+| Global middleware interception | Avoid          | Hidden ordering and mutation erase ownership           |
 
 ### External comparators
 
-| Comparator | Reuse | Avoid |
-| --- | --- | --- |
-| Kubernetes Gateway API | Targeted attachment, explicit status conditions, programmed versus accepted state | Treating host policy as semantic ownership |
-| CloudEvents/webhooks | At-least-once assumption, stable event IDs, receiver dedupe | Claiming HTTP success provides exactly-once processing |
-| Microsoft Bot/Agents webhook | Provider JWT validation and prompt acknowledgement | Moving protocol authentication into generic hosting code |
-| Dapr input bindings | Route wiring and explicit retry policy | One generic payload/ack rule for every source |
+| Comparator                   | Reuse                                                                             | Avoid                                                    |
+| ---------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Kubernetes Gateway API       | Targeted attachment, explicit status conditions, programmed versus accepted state | Treating host policy as semantic ownership               |
+| CloudEvents/webhooks         | At-least-once assumption, stable event IDs, receiver dedupe                       | Claiming HTTP success provides exactly-once processing   |
+| Microsoft Bot/Agents webhook | Provider JWT validation and prompt acknowledgement                                | Moving protocol authentication into generic hosting code |
+| Dapr input bindings          | Route wiring and explicit retry policy                                            | One generic payload/ack rule for every source            |
 
 ## Evaluate
 

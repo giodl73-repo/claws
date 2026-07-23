@@ -21,29 +21,29 @@ runtime projection
 
 The code currently represents these stages in separate places:
 
-| Stage | Current source |
-| --- | --- |
-| Runtime projection | `lobster_runtime::gateway_proxy::start_options` and later per-claims injectors |
-| Adapter baseline reset | `openclaw_container::plex_api::MANAGED_EXTRA_ENV_KEYS` |
-| Gateway child forwarding | `openclaw_container::gateway_process::ALLOWED_ENV` |
-| Adapter-local/config consumers | Seeding, workspace, plugin/config overlay, proxy/lifecycle modules |
-| Gateway/plugin consumers | Bundled Lobster plugins and patched/package OpenClaw code |
+| Stage                          | Current source                                                                 |
+| ------------------------------ | ------------------------------------------------------------------------------ |
+| Runtime projection             | `lobster_runtime::gateway_proxy::start_options` and later per-claims injectors |
+| Adapter baseline reset         | `openclaw_container::plex_api::MANAGED_EXTRA_ENV_KEYS`                         |
+| Gateway child forwarding       | `openclaw_container::gateway_process::ALLOWED_ENV`                             |
+| Adapter-local/config consumers | Seeding, workspace, plugin/config overlay, proxy/lifecycle modules             |
+| Gateway/plugin consumers       | Bundled Lobster plugins and patched/package OpenClaw code                      |
 
 There is no single descriptor tying key identity, lifecycle, reset behavior,
 secret handling, forwarding, and consumer together.
 
 ## Candidate Resolution
 
-| Key | Projection | Reset | Forwarding | Consumer | Finding |
-| --- | --- | --- | --- | --- | --- |
-| `OPENCLAW_GIT_PASSPORT_STRICT_LEASE_ENABLED` | Explicit on current starts | Missing from generic reset | Not forwarded | Adapter workspace passport checks | Current caller overwrites it, but omission by an older/alternate caller can preserve prior process state |
-| `OPENCLAW_WEBIQ_ENABLED` | Explicit on current starts | Missing from generic reset | Not forwarded | Adapter plugin overlay before Gateway spawn | Current caller overwrites it; rolling/alternate omission can preserve a prior overlay input |
-| `OPENCLAW_WORKIQ_TEAMS_DELEGATED_RENAME_ENABLED` | Explicit on current starts | Missing from generic reset | Explicitly forwarded | WorkIQ plugin in Gateway | Current caller overwrites it; rolling/alternate omission can leak prior child behavior |
-| `OPENCLAW_CODE_MODE_STREAMING_ENABLED` | Explicit on current starts | Missing from generic reset | Not forwarded | No non-test consumer found in repository | Appears to be dead compatibility surface at this revision |
-| `CRON_WORKIQ_PLAN_CAPTURE_ENABLED` | Explicit on current starts | Missing from generic reset | Not forwarded | No non-test consumer found in repository | Appears to be dead compatibility surface at this revision |
-| `OPENCLAW_DEFAULT_MODEL` | Explicit on current starts | Missing from generic reset | Not forwarded | Adapter config seeding reads once before spawn | Current caller overwrites it; rolling/alternate omission can seed from stale process state |
-| `OPENCLAW_GIT_REPO_FILENAME` | Conditional on `LOBSTER_OPENCLAW_GIT_REPO_FILENAME` | Missing from generic reset | Not forwarded | Adapter workspace git store reads process env | Later omission preserves a previously applied filename until adapter restart |
-| `OPENCLAW_TEAMS_DELIVERY_AUTH_TOKEN` | Conditional on secret resolution | Intentionally excluded from generic process reset | Intentionally not forwarded | Routed into `AdapterState.teams_delivery_auth_token` | Correct special handling: each real start initializes to `None`, then applies a nonblank token if present |
+| Key                                              | Projection                                          | Reset                                             | Forwarding                  | Consumer                                             | Finding                                                                                                   |
+| ------------------------------------------------ | --------------------------------------------------- | ------------------------------------------------- | --------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `OPENCLAW_GIT_PASSPORT_STRICT_LEASE_ENABLED`     | Explicit on current starts                          | Missing from generic reset                        | Not forwarded               | Adapter workspace passport checks                    | Current caller overwrites it, but omission by an older/alternate caller can preserve prior process state  |
+| `OPENCLAW_WEBIQ_ENABLED`                         | Explicit on current starts                          | Missing from generic reset                        | Not forwarded               | Adapter plugin overlay before Gateway spawn          | Current caller overwrites it; rolling/alternate omission can preserve a prior overlay input               |
+| `OPENCLAW_WORKIQ_TEAMS_DELEGATED_RENAME_ENABLED` | Explicit on current starts                          | Missing from generic reset                        | Explicitly forwarded        | WorkIQ plugin in Gateway                             | Current caller overwrites it; rolling/alternate omission can leak prior child behavior                    |
+| `OPENCLAW_CODE_MODE_STREAMING_ENABLED`           | Explicit on current starts                          | Missing from generic reset                        | Not forwarded               | No non-test consumer found in repository             | Appears to be dead compatibility surface at this revision                                                 |
+| `CRON_WORKIQ_PLAN_CAPTURE_ENABLED`               | Explicit on current starts                          | Missing from generic reset                        | Not forwarded               | No non-test consumer found in repository             | Appears to be dead compatibility surface at this revision                                                 |
+| `OPENCLAW_DEFAULT_MODEL`                         | Explicit on current starts                          | Missing from generic reset                        | Not forwarded               | Adapter config seeding reads once before spawn       | Current caller overwrites it; rolling/alternate omission can seed from stale process state                |
+| `OPENCLAW_GIT_REPO_FILENAME`                     | Conditional on `LOBSTER_OPENCLAW_GIT_REPO_FILENAME` | Missing from generic reset                        | Not forwarded               | Adapter workspace git store reads process env        | Later omission preserves a previously applied filename until adapter restart                              |
+| `OPENCLAW_TEAMS_DELIVERY_AUTH_TOKEN`             | Conditional on secret resolution                    | Intentionally excluded from generic process reset | Intentionally not forwarded | Routed into `AdapterState.teams_delivery_auth_token` | Correct special handling: each real start initializes to `None`, then applies a nonblank token if present |
 
 ## Key Findings
 
@@ -141,4 +141,3 @@ RFC. Individual consumers may still expose missing portable OpenClaw contracts.
    injectors, policy, context-budget, remote-harness, and identity fields.
 5. Trace config overlay writers next; they are the durable side effects of many
    adapter-local env consumers.
-

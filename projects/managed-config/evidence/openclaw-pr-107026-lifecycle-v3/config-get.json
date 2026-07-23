@@ -6,17 +6,12 @@
     "gateway": {
       "controlUi": {
         "enabled": false,
-        "allowedOrigins": [
-          "http://127.0.0.1:35771"
-        ]
+        "allowedOrigins": ["http://127.0.0.1:35771"]
       },
       "mode": "local"
     },
     "tools": {
-      "deny": [
-        "exec",
-        "web"
-      ]
+      "deny": ["exec", "web"]
     },
     "logging": {
       "level": "info"
@@ -26,17 +21,12 @@
     "gateway": {
       "controlUi": {
         "enabled": false,
-        "allowedOrigins": [
-          "http://127.0.0.1:35771"
-        ]
+        "allowedOrigins": ["http://127.0.0.1:35771"]
       },
       "mode": "local"
     },
     "tools": {
-      "deny": [
-        "exec",
-        "web"
-      ]
+      "deny": ["exec", "web"]
     },
     "logging": {
       "level": "info"
@@ -46,17 +36,12 @@
     "gateway": {
       "controlUi": {
         "enabled": false,
-        "allowedOrigins": [
-          "http://127.0.0.1:35771"
-        ]
+        "allowedOrigins": ["http://127.0.0.1:35771"]
       },
       "mode": "local"
     },
     "tools": {
-      "deny": [
-        "exec",
-        "web"
-      ]
+      "deny": ["exec", "web"]
     },
     "logging": {
       "level": "info"
@@ -69,10 +54,7 @@
       "redactSensitive": "tools"
     },
     "tools": {
-      "deny": [
-        "exec",
-        "web"
-      ]
+      "deny": ["exec", "web"]
     },
     "commands": {
       "native": "auto",
@@ -84,9 +66,7 @@
       "mode": "local",
       "controlUi": {
         "enabled": false,
-        "allowedOrigins": [
-          "http://127.0.0.1:35771"
-        ]
+        "allowedOrigins": ["http://127.0.0.1:35771"]
       }
     },
     "messages": {
@@ -111,10 +91,7 @@
       "redactSensitive": "tools"
     },
     "tools": {
-      "deny": [
-        "exec",
-        "web"
-      ]
+      "deny": ["exec", "web"]
     },
     "commands": {
       "native": "auto",
@@ -126,9 +103,7 @@
       "mode": "local",
       "controlUi": {
         "enabled": false,
-        "allowedOrigins": [
-          "http://127.0.0.1:35771"
-        ]
+        "allowedOrigins": ["http://127.0.0.1:35771"]
       }
     },
     "messages": {

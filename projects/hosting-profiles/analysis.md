@@ -12,15 +12,15 @@ feature, or Lobster enterprise host policy.
 
 ## Proposed Boundary
 
-| OpenClaw contract | Lobster responsibility |
-| --- | --- |
-| Gateway auth modes and trusted-proxy contract | Which auth mode to enable per tenant/ring |
-| Plugin lifecycle and manifest semantics | Which plugins are bundled, enabled, or disabled |
-| Snapshot/backup primitives | Trial policy, telemetry, and storage destination |
-| Node pairing and command approval protocol | User/tenant gating and approval UI |
-| Tool policy resolution semantics | Managed baseline selection and rollout |
-| Session/state schema and restore semantics | Routing, worker pools, and tenant stickiness |
-| Diagnostics hooks and stable event names | Kusto dashboards, fleet alerts, and incident playbooks |
+| OpenClaw contract                             | Lobster responsibility                                 |
+| --------------------------------------------- | ------------------------------------------------------ |
+| Gateway auth modes and trusted-proxy contract | Which auth mode to enable per tenant/ring              |
+| Plugin lifecycle and manifest semantics       | Which plugins are bundled, enabled, or disabled        |
+| Snapshot/backup primitives                    | Trial policy, telemetry, and storage destination       |
+| Node pairing and command approval protocol    | User/tenant gating and approval UI                     |
+| Tool policy resolution semantics              | Managed baseline selection and rollout                 |
+| Session/state schema and restore semantics    | Routing, worker pools, and tenant stickiness           |
+| Diagnostics hooks and stable event names      | Kusto dashboards, fleet alerts, and incident playbooks |
 
 ## Compatibility Layer Candidate
 
@@ -117,10 +117,10 @@ Source anchors:
 
 The future-compatible model:
 
-| Plane | Owns | Must not own |
-| --- | --- | --- |
-| OCC control plane | Declarative desired state, tenant identity, admission, restrictions, quotas, policy compilation, provisioning, lifecycle intent, audit indexing | Hot-path channel messages, assistant deltas, tool events, approvals, patches, compaction events, harness frames |
-| Runtime/data plane | Channel ingress, session routing, cell supervision, Gateway or gateway-shim execution, remote AgentHarness event protocol, cancellation, terminal run state | Global source of truth for tenant policy, admission, quota, or allowed configuration |
+| Plane              | Owns                                                                                                                                                        | Must not own                                                                                                    |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| OCC control plane  | Declarative desired state, tenant identity, admission, restrictions, quotas, policy compilation, provisioning, lifecycle intent, audit indexing             | Hot-path channel messages, assistant deltas, tool events, approvals, patches, compaction events, harness frames |
+| Runtime/data plane | Channel ingress, session routing, cell supervision, Gateway or gateway-shim execution, remote AgentHarness event protocol, cancellation, terminal run state | Global source of truth for tenant policy, admission, quota, or allowed configuration                            |
 
 The phrase to handle carefully is "subsume the Gateway into OCC."
 

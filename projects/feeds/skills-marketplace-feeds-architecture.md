@@ -122,13 +122,13 @@ Feeds add:
 For a first marketplace rollout, start with a small number of well-understood
 feeds:
 
-| Feed | Purpose |
-| --- | --- |
-| All | Everything the source catalog exposes. Useful for broad discovery and testing. |
-| Official | Entries published by the core product/team. |
-| Community | Entries from non-core publishers. |
-| Reviewed | Entries that passed a defined review or validation process. |
-| Enterprise/Tenant | Entries approved for a specific organization or tenant. |
+| Feed              | Purpose                                                                        |
+| ----------------- | ------------------------------------------------------------------------------ |
+| All               | Everything the source catalog exposes. Useful for broad discovery and testing. |
+| Official          | Entries published by the core product/team.                                    |
+| Community         | Entries from non-core publishers.                                              |
+| Reviewed          | Entries that passed a defined review or validation process.                    |
+| Enterprise/Tenant | Entries approved for a specific organization or tenant.                        |
 
 The most important enterprise feed is the final tenant-approved feed. Public
 feeds help populate and refresh it.

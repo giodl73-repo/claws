@@ -251,17 +251,17 @@ governed tenant discovery.
 
 Each client should be able to pass a small shared test matrix.
 
-| Scenario | Expected result |
-| --- | --- |
-| Tenant effective feed includes allowed entry in scope. | Entry appears in governed discovery. |
-| Entry is denied by tenant. | Entry is hidden or blocked for discovery and install. |
-| Entry is revoked after prior install. | New discovery and new install are blocked after refresh. |
-| Entry is pinned to an older version. | Client shows and installs only the pinned version. |
-| Entry is scoped to another surface. | Client hides or blocks the entry. |
-| Feed refresh fails. | Client keeps previous good feed, marks stale, and does not widen access. |
-| Feed integrity check fails. | Client rejects the new feed revision and reports the error. |
-| Public source feed search is enabled. | Results are visibly separate from tenant-approved discovery. |
-| Runtime activation requires auth. | Client does not treat feed approval as auth or consent. |
+| Scenario                                               | Expected result                                                          |
+| ------------------------------------------------------ | ------------------------------------------------------------------------ |
+| Tenant effective feed includes allowed entry in scope. | Entry appears in governed discovery.                                     |
+| Entry is denied by tenant.                             | Entry is hidden or blocked for discovery and install.                    |
+| Entry is revoked after prior install.                  | New discovery and new install are blocked after refresh.                 |
+| Entry is pinned to an older version.                   | Client shows and installs only the pinned version.                       |
+| Entry is scoped to another surface.                    | Client hides or blocks the entry.                                        |
+| Feed refresh fails.                                    | Client keeps previous good feed, marks stale, and does not widen access. |
+| Feed integrity check fails.                            | Client rejects the new feed revision and reports the error.              |
+| Public source feed search is enabled.                  | Results are visibly separate from tenant-approved discovery.             |
+| Runtime activation requires auth.                      | Client does not treat feed approval as auth or consent.                  |
 
 ## Non-Conformance Examples
 

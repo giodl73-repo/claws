@@ -153,17 +153,17 @@ The owner-defined attachment is a **provider egress policy**.
 
 ### Descriptor
 
-| Field | Meaning |
-| --- | --- |
-| Stable ID | `provider-egress.policy` |
-| Semantic owner | Provider request policy/transport |
-| Match dimensions | Provider, capability, transport, endpoint class, configured origin |
-| Inputs | Redacted request metadata and effective policy facts |
-| Outcomes | Deny or select a route profile within the allowed destination |
-| Mutation authority | Explicit owner-declared route/header fields only |
-| Evaluation mode | Compiled local policy in V1 |
-| Failure posture | Fail closed when a required policy cannot evaluate |
-| Status owner | Hosted composition plus provider policy owner |
+| Field              | Meaning                                                            |
+| ------------------ | ------------------------------------------------------------------ |
+| Stable ID          | `provider-egress.policy`                                           |
+| Semantic owner     | Provider request policy/transport                                  |
+| Match dimensions   | Provider, capability, transport, endpoint class, configured origin |
+| Inputs             | Redacted request metadata and effective policy facts               |
+| Outcomes           | Deny or select a route profile within the allowed destination      |
+| Mutation authority | Explicit owner-declared route/header fields only                   |
+| Evaluation mode    | Compiled local policy in V1                                        |
+| Failure posture    | Fail closed when a required policy cannot evaluate                 |
+| Status owner       | Hosted composition plus provider policy owner                      |
 
 The attachment does not receive the request body, provider credential value,
 or response body.
@@ -351,18 +351,18 @@ They must not contain provider secrets or unrestricted payload bodies.
 
 ## Failure Semantics
 
-| Failure | Outcome |
-| --- | --- |
-| Invalid or conflicting policy | Activation fails |
-| Missing required route reference | Non-ready |
-| Required policy unavailable | Deny |
-| Destination outside owner policy | Deny before dispatch |
-| Private-network widening attempt | Reject configuration |
-| Insecure TLS request | Reject configuration |
-| Proxy unavailable | Typed dispatch failure |
-| Stale policy generation | Reject or retry under current generation |
-| Hosted dispatcher disconnected | Required route non-ready; no silent direct fallback |
-| Optional route unavailable | Degraded if another explicitly permitted route exists |
+| Failure                          | Outcome                                               |
+| -------------------------------- | ----------------------------------------------------- |
+| Invalid or conflicting policy    | Activation fails                                      |
+| Missing required route reference | Non-ready                                             |
+| Required policy unavailable      | Deny                                                  |
+| Destination outside owner policy | Deny before dispatch                                  |
+| Private-network widening attempt | Reject configuration                                  |
+| Insecure TLS request             | Reject configuration                                  |
+| Proxy unavailable                | Typed dispatch failure                                |
+| Stale policy generation          | Reject or retry under current generation              |
+| Hosted dispatcher disconnected   | Required route non-ready; no silent direct fallback   |
+| Optional route unavailable       | Degraded if another explicitly permitted route exists |
 
 Fallback from governed to direct egress is never implicit. It must be an
 explicit route in the effective policy.
@@ -371,22 +371,22 @@ explicit route in the effective policy.
 
 ### Internal analogues
 
-| Analogue | Classification | Lesson |
-| --- | --- | --- |
-| Provider request config and guarded fetch | Reuse | Existing owner and insertion point |
-| SecretRef resolution | Reuse | Resolve secret references without exposing values |
-| Config reload planning | Adapt | Owner declares activation and restart effect |
-| Channel route attachment | Adapt | Share status/provenance, not payload API |
-| Global request middleware | Avoid | Hidden order and mutation obscure authority |
+| Analogue                                  | Classification | Lesson                                            |
+| ----------------------------------------- | -------------- | ------------------------------------------------- |
+| Provider request config and guarded fetch | Reuse          | Existing owner and insertion point                |
+| SecretRef resolution                      | Reuse          | Resolve secret references without exposing values |
+| Config reload planning                    | Adapt          | Owner declares activation and restart effect      |
+| Channel route attachment                  | Adapt          | Share status/provenance, not payload API          |
+| Global request middleware                 | Avoid          | Hidden order and mutation obscure authority       |
 
 ### External comparators
 
-| Comparator | Reuse | Avoid |
-| --- | --- | --- |
-| Istio egress gateway | Explicit external destinations, route profiles, TLS origination, audit | Requiring a sidecar or gateway for local OpenClaw |
-| Envoy external authorization | Explicit fail-open/closed and per-route policy | Synchronous remote checks as the default |
-| OPA bundles and decision logs | Versioned policy, local evaluation, decision provenance | Sending unrestricted provider bodies to policy |
-| Kubernetes NetworkPolicy | Default-deny posture | Additive union semantics that allow one policy to widen another |
+| Comparator                    | Reuse                                                                  | Avoid                                                           |
+| ----------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Istio egress gateway          | Explicit external destinations, route profiles, TLS origination, audit | Requiring a sidecar or gateway for local OpenClaw               |
+| Envoy external authorization  | Explicit fail-open/closed and per-route policy                         | Synchronous remote checks as the default                        |
+| OPA bundles and decision logs | Versioned policy, local evaluation, decision provenance                | Sending unrestricted provider bodies to policy                  |
+| Kubernetes NetworkPolicy      | Default-deny posture                                                   | Additive union semantics that allow one policy to widen another |
 
 ## Role Evaluation
 

@@ -21,18 +21,47 @@
 
 ## Current Session
 
-- Last updated: 2026-07-10.
-- Last agent: Copilot CLI.
-- Current focus: Reuse readout for OpenClaw config/admin UX in Lobster/Scout:
+- Last updated: 2026-07-22.
+- Last agent: Codex.
+- Current focus: non-draft Lobster PR #5422 implements M5 #867 using native
+  MAC/MOS3 availability for the existing Scout Teams app. Lobster reads the
+  targeted title preview, caches the caller-scoped decision, and composes it
+  with the existing operator/ECS enrollment gate. There is no Lobster-owned
+  setting, custom policy, declarative-agent surface, or runtime profile. The
+  broader reuse readout remains:
   OpenClaw has interactive config/onboarding, schema-driven Control UI, strict
   config CLI/dry-run/validate, doctor repair, and policy conformance surfaces
   that map into Lobster policy/feed/admin previews.
-- Active branch / PR: draft Lobster stack #3585 -> #3586 -> #3588 -> #3590
+- Active branch / PR: highest-priority #5422 on
+  `user/giodl/scout-tenant-availability` in
+  `C:\src\lobster-scout-tenant-availability`, commit `8feadccf92`, pushed to
+  the `giodl/lobster` fork and marked ready. The first ADO runs exposed a
+  missing ECS inventory entry and CI-toolchain lints; all were repaired in the
+  current head. The blocking review is now addressed: an armed ECS availability
+  gate fails closed on cold resolution failure or missing resolver, while a
+  previously resolved caller retains the last-known decision after refresh
+  failure. Direct resolver discovery/remap/reacquisition/title/cache tests were
+  added. The branch merged current `main`; Rustfmt and diff checks pass, while
+  local runtime compilation and Codex review timed out without findings. A
+  current-head review's one contract-text finding was fixed by aligning the ECS
+  schema comment. PullRequest `173354991` failed only in auto-injected Component
+  Detection amid agent/service warnings; replacement `173385787` is queued on
+  exact merge `b63b4647ac`. Build Validation `173355013` exposed the same
+  missing-web-bundle failure as scheduled current-main run `173356043`, so the
+  blocker is a shared pipeline regression rather than #5422 source. Focused fix
+  #5495 restores the published `BuildWeb` artifact handoff at `7d76d8ff68`;
+  PullRequest `173387944` and Build Validation `173387953` are queued on its
+  exact merge `f044795806`. #5422 remains mergeable but has refreshed review
+  pending; GitOps FileAffordance is green and GitHubPop requires user proof.
+  The older draft Lobster stack is
+  #3585 -> #3586 -> #3588 -> #3590
   -> #3603 -> #3607 -> #3623 -> #3693. #3693 branch
   `user/giodl/lobster-policy-admin-read-ux` lives in
   `C:\src\lobster-policy-default-config`. #2275, #2270, #3355, #3383, #3388,
   #3391, Partner Center prep doc #2422, and MAC registration refresh #3555 are
   merged.
+- Rendezvous issue implementation: Lobster #5422 is open as the focused PR for
+  #867. No separate Rendezvous repo PR is required for this runtime slice.
 - Known dirty state: `claws-hapi` had unrelated local edits before this
   update. #2422 merged on 2026-06-05 at merge commit
   `fe4837d5b8b193e0e9e68afde451845910aa6d92`.
@@ -49,6 +78,19 @@
   connectors dynamically for TGS auth. Aether's proposed admin/publisher flows
   proxy MOS3 builder/admin endpoints using user OBO; tenant-admin gating is a
   local `wids`-claim precheck before forwarding to MOS3.
+- WorkIQ/Aether MAC audit on 2026-07-21 established the #5422 storage
+  direction. Cowork's `x-policies` overlay applies to its existing declarative
+  agent, but Scout ships as a Teams tabs app and must use MAC's native title
+  availability/block controls. MOS3 is authoritative; Lobster reads targeted
+  marketplace title preview state with a user OBO token, caches it, and
+  enforces explicit denial after operator enrollment. #5422 removes the
+  file-backed authoritative state and custom PUT without inventing a profile,
+  `gpt.json`, `x-policies`, or a declarative agent. Registration only needs to
+  publish the existing Teams package and supply environment-specific MOS3 title
+  ids; the stable AppId already exists in the manifest. Failure semantics:
+  retain a last-known value after successful resolution; before the first
+  successful resolution, an armed ECS gate fails retryably rather than granting
+  access. ECS enforcement defaults off.
 - The quarantine/admin policy slice should treat quarantined or failed package
   defense state as blocked for new discovery and install unless an explicit
   tenant or Microsoft exception outcome exists.
@@ -609,6 +651,24 @@
   type-check, focused PolicyPage/policyApi Vitest, touched-file Biome, and
   `git diff --check`. Required ADO queued: PullRequest `170033542`, Build
   Validation `170033541`. Later restack likely needed once #3623/#3693 settle.
+- #5422 was revised on 2026-07-21 after auditing the current Scout package,
+  Cowork's declarative-agent policy pattern, Aether's MOS3 clients, and the
+  native Microsoft 365 admin-center app controls. Scout's existing package is
+  a Teams tabs app, so the PR no longer invents a `gpt.json`, `x-policies`
+  setting, profile, or declarative-agent surface. Head `dc60582777` now reads
+  the existing Teams title directly from
+  `GET /marketplace/v1/users/titles/{titleId}/preview?idType=TitleId`, validates
+  the environment title id plus stable manifest AppId, and denies explicit
+  native block state after operator enrollment. Cache scope is tenant+user,
+  expired callers are pruned, and rollout is default-off through
+  `lobster.scout_native_availability_enabled`. Registration now only needs to
+  publish the existing Teams package and return per-environment MOS3 title ids.
+  Wrapper-backed fmt, affected-crate check, targeted MOS3 tests (6), clippy
+  with warnings denied, and final `codex review --uncommitted` are clean. The
+  focused runtime test target remains blocked by the pre-existing missing
+  `windows_sys` test dependency in MIP staging.
+- Fresh required ADO for #5422 was running on 2026-07-21 against merge SHA
+  `8aea349c25`: PullRequest `173251337` and Build Validation `173251336`.
 
 ## Guardrails
 

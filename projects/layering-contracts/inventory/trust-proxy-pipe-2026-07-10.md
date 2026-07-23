@@ -31,14 +31,14 @@ the authenticated Lobster runtime.
 
 ## Trusted Identity Path
 
-| Hop | Behavior | Source |
-| --- | --- | --- |
-| SPA/runtime relay | Overwrites any route/client `x-forwarded-user`; stamps validated user id and `x-forwarded-proto=https` | `lobster_runtime/src/gateway_proxy/handler.rs::build_upstream_request` |
-| Teams runtime client | Applies the same overwrite after route headers | `lobster_runtime/src/teams_bridge/container_client.rs::build_ws_request` |
-| Plex mock/worker proxy | Explicitly forwards trusted user/proto plus origin and network headers; does not forward infrastructure Authorization | `lobster_plex_mock/src/ws_proxy.rs` |
-| Adapter Gateway WS proxy | Knows the same forwarded-header names and relays to Gateway | `openclaw_container/src/gateway_ws_proxy.rs` |
-| Adapter internal Gateway client | Stamps synthetic `x-forwarded-user=lobster-openclaw-adapter` plus HTTPS proto | `openclaw_container/src/openclaw_client/client.rs` |
-| OpenClaw Gateway | Baked config trusts loopback proxies and reads `x-forwarded-user` | `openclaw_container/config/openclaw.gateway.json` |
+| Hop                             | Behavior                                                                                                              | Source                                                                   |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| SPA/runtime relay               | Overwrites any route/client `x-forwarded-user`; stamps validated user id and `x-forwarded-proto=https`                | `lobster_runtime/src/gateway_proxy/handler.rs::build_upstream_request`   |
+| Teams runtime client            | Applies the same overwrite after route headers                                                                        | `lobster_runtime/src/teams_bridge/container_client.rs::build_ws_request` |
+| Plex mock/worker proxy          | Explicitly forwards trusted user/proto plus origin and network headers; does not forward infrastructure Authorization | `lobster_plex_mock/src/ws_proxy.rs`                                      |
+| Adapter Gateway WS proxy        | Knows the same forwarded-header names and relays to Gateway                                                           | `openclaw_container/src/gateway_ws_proxy.rs`                             |
+| Adapter internal Gateway client | Stamps synthetic `x-forwarded-user=lobster-openclaw-adapter` plus HTTPS proto                                         | `openclaw_container/src/openclaw_client/client.rs`                       |
+| OpenClaw Gateway                | Baked config trusts loopback proxies and reads `x-forwarded-user`                                                     | `openclaw_container/config/openclaw.gateway.json`                        |
 
 Invalid user ids that cannot be encoded as a header cause the runtime client to
 dial without the identity header. The intended safety property is fail-closed at
@@ -231,4 +231,3 @@ failures.
    33 provider semantics without adding Lobster concepts to OpenClaw core.
 6. Record removal conditions for local password, device-auth, synthetic
    principal, and relay-header workarounds.
-

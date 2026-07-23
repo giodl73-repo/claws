@@ -197,16 +197,16 @@ execution; it is not the execution stream.
 
 Use the real OpenClaw repo layout:
 
-| Contract area | OpenClaw home |
-| --- | --- |
-| hosting profile schema and validation | `src/config/` |
-| reverse-proxy/trusted-proxy Gateway behavior | `src/gateway/` |
-| plugin participation contracts | `src/plugin-sdk/` |
-| plugin-owned declarations | `src/plugins/`, `extensions/*` |
-| state durability and restore semantics | `src/state/`, `src/sessions/`, `src/memory/`, `src/plugin-state/` |
-| brokered egress/no-secrets behavior | `src/provider-runtime/`, `src/proxy-capture/`, `src/runtime-env.ts` |
-| ready checks, doctor, and conformance | `src/runtime-doctor.ts`, `test/`, existing `src/*/*.test.ts` |
-| Lobster-specific host implementation | `extensions/lobster/` |
+| Contract area                                | OpenClaw home                                                       |
+| -------------------------------------------- | ------------------------------------------------------------------- |
+| hosting profile schema and validation        | `src/config/`                                                       |
+| reverse-proxy/trusted-proxy Gateway behavior | `src/gateway/`                                                      |
+| plugin participation contracts               | `src/plugin-sdk/`                                                   |
+| plugin-owned declarations                    | `src/plugins/`, `extensions/*`                                      |
+| state durability and restore semantics       | `src/state/`, `src/sessions/`, `src/memory/`, `src/plugin-state/`   |
+| brokered egress/no-secrets behavior          | `src/provider-runtime/`, `src/proxy-capture/`, `src/runtime-env.ts` |
+| ready checks, doctor, and conformance        | `src/runtime-doctor.ts`, `test/`, existing `src/*/*.test.ts`        |
+| Lobster-specific host implementation         | `extensions/lobster/`                                               |
 
 Do not make `extensions/lobster` own the generic contract. It should implement
 or exercise the profile, not define it.

@@ -1,9 +1,7 @@
 ﻿{
-    "acquisitions":  [
-
-                     ],
-    "settings":  {
-                     "PromptUserToAcquireCopilot":  "false"
-                 },
-    "nextInterval":  15
+  "acquisitions": [],
+  "settings": {
+    "PromptUserToAcquireCopilot": "false"
+  },
+  "nextInterval": 15
 }

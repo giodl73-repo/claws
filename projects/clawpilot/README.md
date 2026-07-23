@@ -21,6 +21,15 @@ batches, checking linked PRs, and keeping issue text problem-led.
 | Current local branch when last checked | `fix-cli-clawpatch-findings` |
 | Local state when last checked | ahead of `origin/main` by 1 commit |
 
+## M5 Rendezvous Commitments
+
+- Lobster #3897: use #5336 as the convergence brief and `scout-standard`
+  contract. Drive its typed-capability implementation series and align #4297
+  and #4648 as complementary node-mode slices.
+- Lobster #862: use #4297 as the node-state foundation, then add a focused
+  offline-node remediation PR that tells the user how to reconnect Scout.
+- Canonical order: `projects/rendezvous/pr-plan.md`.
+
 ## Filed Issue Batches
 
 Detailed 24-item issue-loop tracking lives in:

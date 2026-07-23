@@ -30,15 +30,15 @@ into ProxyPipe.
 
 The repository history supports an accretion explanation:
 
-| Date | Change |
-| --- | --- |
-| 2026-04-29 | OpenClaw SDK package introduced |
-| 2026-05-18 | Lobster ProxyPipe introduced as runtime-dialed gRPC |
-| 2026-05-21 | HTTP forward/refresh traffic moved onto ProxyPipe |
-| 2026-06-08 | In-container native Teams channel integrated |
+| Date              | Change                                                                                 |
+| ----------------- | -------------------------------------------------------------------------------------- |
+| 2026-04-29        | OpenClaw SDK package introduced                                                        |
+| 2026-05-18        | Lobster ProxyPipe introduced as runtime-dialed gRPC                                    |
+| 2026-05-21        | HTTP forward/refresh traffic moved onto ProxyPipe                                      |
+| 2026-06-08        | In-container native Teams channel integrated                                           |
 | 2026-06-13 onward | Build identity, feedback, lifecycle, AgentHarness, approvals, and other services added |
-| 2026-06-30 | Hosted `system.run` approval added through ProxyPipe |
-| 2026-07-06 | Native Teams WorkIQ approval gap patched through ProxyPipe |
+| 2026-06-30        | Hosted `system.run` approval added through ProxyPipe                                   |
+| 2026-07-06        | Native Teams WorkIQ approval gap patched through ProxyPipe                             |
 
 `OpenClawTransport` is a TypeScript SDK interface, while the Lobster runtime and
 container adapter are Rust. Lobster could not import the TypeScript type
@@ -137,11 +137,11 @@ building a second WebSocket-like multiplexer inside ProxyPipe.
 With a host-operator Gateway connection, these custom semantic pairs are
 immediate migration candidates:
 
-| ProxyPipe tags | Current DTO | Canonical replacement |
-| --- | --- | --- |
-| 27-28 | `NodePairApprovalRequest/Response` | `node.pair.requested` plus `node.pair.approve/reject` |
-| 29-30 | `ExecApprovalRequest/Response` | `exec.approval.requested` plus `exec.approval.resolve` |
-| 31-32 | `CronCreationApprovalRequest/Response` | `plugin.approval.requested` plus `plugin.approval.resolve`; Lobster marker remains plugin-owned result data |
+| ProxyPipe tags | Current DTO                            | Canonical replacement                                                                                       |
+| -------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| 27-28          | `NodePairApprovalRequest/Response`     | `node.pair.requested` plus `node.pair.approve/reject`                                                       |
+| 29-30          | `ExecApprovalRequest/Response`         | `exec.approval.requested` plus `exec.approval.resolve`                                                      |
+| 31-32          | `CronCreationApprovalRequest/Response` | `plugin.approval.requested` plus `plugin.approval.resolve`; Lobster marker remains plugin-owned result data |
 
 The eager container adapter may still need a local Gateway connection for
 container-local duties such as pairing repair or cron inventory. It would no

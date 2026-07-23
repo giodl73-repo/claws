@@ -111,6 +111,7 @@ maintainers prefer smaller review units, split along the six bullets above.
   surfaces, not a parallel registry.
 - Downstream consumers should rely on `openclaw catalog ... --json` until
   package exports are intentionally added.
+
 5. Catalog operator view: diagnostics/admin/debug output that reuses catalog
    data instead of hardcoded command inventories or help-text scraping.
 6. Catalog automation adapter, if justified: select an existing command/tool

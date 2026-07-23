@@ -272,18 +272,13 @@
         "billingTierInfo": "consumption"
       },
       "eTag": "\"190086b7-0000-0100-0000-69f9a4890000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "Tools for interacting with Microsoft Fabric IQ Ontology. Enables natural language queries against Fabric ontology data estates and schema exploration. Learn more: https://aka.ms/AboutWorkIQ\n",
       "keywords": [],
       "accentColor": "#E0F6FC",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentConnectors"],
       "compatibleHubs": [],
       "tags": [],
       "isAppIOSAcquirable": true,
@@ -299,9 +294,7 @@
       "developerName": "Microsoft Corporation",
       "shortDescription": "MCP server for Microsoft Fabric IQ operations.",
       "scope": "public",
-      "categories": [
-        "Productivity"
-      ],
+      "categories": ["Productivity"],
       "ingestionId": "WA200010559",
       "manifestVersion": "devPreview",
       "cultureName": "EN-US",
@@ -583,18 +576,13 @@
         "billingTierInfo": "consumption"
       },
       "eTag": "\"7e023e51-0000-0100-0000-6a058f1e0000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "firstParty",
       "longDescription": "Work IQ MCP server for Microsoft Outlook Mail operations. This feature is in preview and is part of the Work IQ tools, providing shared work intelligence and actions for agents. Availability and capabilities are subject to change. Learn more: https://aka.ms/AboutWorkIQ",
       "keywords": [],
       "accentColor": "#E0F6FC",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentConnectors"],
       "compatibleHubs": [],
       "tags": [],
       "isAppIOSAcquirable": true,
@@ -610,9 +598,7 @@
       "developerName": "Microsoft Corporation",
       "shortDescription": "Work IQ MCP server for Microsoft Outlook Mail operations.",
       "scope": "public",
-      "categories": [
-        "Productivity"
-      ],
+      "categories": ["Productivity"],
       "ingestionId": "WA200009543",
       "manifestVersion": "devPreview",
       "cultureName": "EN-US",
@@ -893,18 +879,13 @@
         "billingTierInfo": "consumption"
       },
       "eTag": "\"7e020e6c-0000-0100-0000-6a058f950000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "Work IQ MCP server for Microsoft SharePoint operations. This feature is in preview and is part of the Work IQ tools, providing shared work intelligence and actions for agents. Availability and capabilities are subject to change. Learn more: https://aka.ms/AboutWorkIQ",
       "keywords": [],
       "accentColor": "#E0F6FC",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentConnectors"],
       "compatibleHubs": [],
       "tags": [],
       "isAppIOSAcquirable": true,
@@ -920,9 +901,7 @@
       "developerName": "Microsoft Corporation",
       "shortDescription": "Work IQ MCP server for Microsoft SharePoint operations.",
       "scope": "public",
-      "categories": [
-        "Productivity"
-      ],
+      "categories": ["Productivity"],
       "ingestionId": "WA200010257",
       "manifestVersion": "devPreview",
       "cultureName": "EN-US",
@@ -1216,23 +1195,13 @@
         "TL"
       ],
       "eTag": "\"3604b7cf-0000-0100-0000-6a0bca000000\"",
-      "policyRestrictions": [
-        "blocked",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blocked", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "Connect Miro to Microsoft Cowork so you can create, understand, and act on boards directly from your Cowork chat. Go beyond summarizing existing boards: create new boards, build structured layouts with frames, sticky notes, shapes, text, cards, docs, and tables, add images from URLs, generate diagrams, read and resolve comments, and turn team discussion into clear next steps on the canvas. Use it to run retros, compare user journeys, map workflows, capture action items, review product specs, create implementation context, and close the loop on board feedback without leaving Cowork. Miro Cowork uses Miro OAuth and respects the signed-in user's existing Miro permissions, so Cowork can only access boards the user is authorized to view. Requirements: a Miro account with access to the boards you want to use.",
-      "keywords": [
-        "AGILE",
-        "WORKSHOP",
-        "WHITEBOARD"
-      ],
+      "keywords": ["AGILE", "WORKSHOP", "WHITEBOARD"],
       "accentColor": "#4A90D9",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentSkills",
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentSkills", "AgentConnectors"],
       "compatibleHubs": [],
       "isAppIOSAcquirable": true,
       "titleId": "P_1df45080-6422-1b5a-97b3-fed1925e1f9c",
@@ -1247,11 +1216,7 @@
       "developerName": "Miro",
       "shortDescription": "Miro is visual workspace used for real-time collaboration, brainstorming, and project management.",
       "scope": "public",
-      "categories": [
-        "Collaboration",
-        "Productivity",
-        "WorkflowProcessManagement"
-      ],
+      "categories": ["Collaboration", "Productivity", "WorkflowProcessManagement"],
       "ingestionId": "WA200010785",
       "manifestVersion": "devPreview",
       "cultureName": "EN-US",
@@ -1533,18 +1498,13 @@
         "billingTierInfo": "consumption"
       },
       "eTag": "\"7e02bf55-0000-0100-0000-6a058f340000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "firstParty",
       "longDescription": "Work IQ MCP server for Microsoft Teams operations. This feature is in preview and is part of the Work IQ tools, providing shared work intelligence and actions for agents. Availability and capabilities are subject to change. Learn more: https://aka.ms/AboutWorkIQ",
       "keywords": [],
       "accentColor": "#E0F6FC",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentConnectors"],
       "compatibleHubs": [],
       "tags": [],
       "isAppIOSAcquirable": true,
@@ -1560,9 +1520,7 @@
       "developerName": "Microsoft Corporation",
       "shortDescription": "Work IQ MCP server for Microsoft Teams operations.",
       "scope": "public",
-      "categories": [
-        "Productivity"
-      ],
+      "categories": ["Productivity"],
       "ingestionId": "WA200009538",
       "manifestVersion": "devPreview",
       "cultureName": "EN-US",
@@ -1597,10 +1555,7 @@
       "developerUrl": "https://www.spglobal.com",
       "termsOfUseUrl": "https://www.spglobal.com/content/dam/spglobal/commodity-insights/en/products-solutions/delivery/trials-subscription-online-terms.pdf",
       "privacyUrl": "https://www.spglobal.com/en/privacy/privacy-policy-english",
-      "permissions": [
-        "identity",
-        "messageTeamMembers"
-      ],
+      "permissions": ["identity", "messageTeamMembers"],
       "manifestId": "c63c4cbb-4068-4b13-84d8-4ba836917c7a",
       "pricingInfo": {
         "pricingType": "ExternalPurchase"
@@ -1855,22 +1810,14 @@
         "billingTierInfo": "free"
       },
       "eTag": "\"5a00c1c9-0000-0100-0000-6a3102920000\"",
-      "policyRestrictions": [
-        "blocked",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blocked", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "S&P Global Energy's Cowork plugin brings trusted energy insights and data directly into Microsoft 365 Copilot, enabling energy professionals to analyze data, generate insights, and make informed decisions without leaving their workflow. Our platform delivers AI ready, curated, and governed datasets across energy, LNG, and chemicals markets.\n \n\nKEY FEATURES\n\u2022 AI Ready Datasets - Access high-quality structured and unstructured energy data optimized for AI and machine learning\n\u2022 LNG Market Insights - Analyze LNG trade flows, JKM pricing trends, and global shipping data through natural language queries\n\u2022 Chemicals Market Insights - Access comprehensive chemicals market datasets for downstream market analysis\n \nBENEFITS\n\u2022 Faster insights through conversational queries\n\u2022 Unified workflow within Microsoft 365 Copilot\n\u2022 Enterprise-grade data governance with full lineage tracking\n \nGETTING STARTED\n\u2022 New users can sign up at https://developer.spglobal.com/commodityinsights/mcp/getting-started to request MCP access\n\u2022 For step-by-step setup instructions, visit our documentation at https://www.marketplace.spglobal.com/en/solutions/microsoft-copilot-(6a8b56b9-4c0c-4ddc-85ed-21a4648ee569)\n\u2022 Need help? Contact our support team at https://www.spglobal.com/en/contact-us\n \nREQUIREMENTS\n\u2022 Active S&P Global subscription with API credentials required\n\u2022 Contact your S&P Global account representative to enable access",
       "keywords": [],
       "accentColor": "#4A90D9",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentSkills",
-        "AgentConnectors"
-      ],
-      "compatibleHubs": [
-        "Copilot"
-      ],
+      "elementTypes": ["AgentSkills", "AgentConnectors"],
+      "compatibleHubs": ["Copilot"],
       "isAppIOSAcquirable": false,
       "titleId": "P_31fdbc25-b134-5a57-8c3f-4bde95c7a228",
       "name": "S&P Global Energy",
@@ -1884,9 +1831,7 @@
       "developerName": "SPGlobal",
       "shortDescription": "S&P Global Energy - AI Ready & Structured Data",
       "scope": "public",
-      "categories": [
-        "DataAnalytics"
-      ],
+      "categories": ["DataAnalytics"],
       "ingestionId": "WA200010802",
       "manifestVersion": "1.28",
       "cultureName": "EN-US",
@@ -2191,28 +2136,14 @@
         "billingTierInfo": "licensed"
       },
       "eTag": "\"0200fdcb-0000-0100-0000-6a3262410000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "<p><strong>Miro is the visual workspace where teams brainstorm, plan, and build together.</strong></p>\n<p><strong>Work with your Miro boards from Microsoft 365 Copilot</strong></p>\n<p>Miro brings an agent into Copilot that creates, understands, and acts on your boards in real time. Tell it what you need and it builds it on a board:</p>\n<ul>\n  <li><strong>Run workshops, retros, and planning sessions</strong> &mdash; spin up a new board and fill it with frames, sticky notes, and starter content in seconds. &ldquo;Set up a sprint retro board&rdquo; gives you a ready-to-run space.</li>\n  <li><strong>Generate diagrams</strong> &mdash; flowcharts, sequence diagrams, architecture diagrams, ERDs, and user-journey maps from a prompt, PR, or spec. &ldquo;Diagram this service&rsquo;s architecture&rdquo; produces a complete visual.</li>\n  <li><strong>Create documents, tables, and code widgets</strong> &mdash; capture specs, comparisons, trackers, and review-ready code snippets directly on the canvas.</li>\n  <li><strong>Search your existing boards</strong> &mdash; surface themes, decisions, and open questions from prior work without leaving chat.</li>\n  <li><strong>Turn discussions into action items</strong> &mdash; read, reply to, and resolve board comments to close the loop on feedback.</li>\n</ul>\n<p>Content is placed with precise layout, and multiple content types can be combined on a single board in one conversation turn. The agent shares a board link so you can open and keep working in Miro.</p>\n<p><strong>Work in Microsoft 365 Copilot Cowork</strong></p>\n<p>The same Miro skills plug into Copilot Cowork for agentic, multi-step work alongside your other tools:</p>\n<ul>\n  <li><strong>Browse and ground in boards</strong> &mdash; explore existing boards to pull themes, decisions, and open questions into the task at hand.</li>\n  <li><strong>Build layouts and content</strong> &mdash; create boards with frames, sticky notes, shapes, text, cards, docs, and tables, and add images.</li>\n  <li><strong>Generate diagrams</strong> &mdash; flowcharts, sequence diagrams, architecture diagrams, ERDs, and journey maps from a prompt.</li>\n  <li><strong>Review code on the canvas</strong> &mdash; turn a pull request or branch into a visual code review with diagrams and summaries.</li>\n  <li><strong>Capture specs and context</strong> &mdash; extract product and implementation context to a board to plan and hand off work.</li>\n  <li><strong>Close the loop on feedback</strong> &mdash; read, reply to, and resolve board comments, and turn discussion into next steps.</li>\n</ul>\n<p><strong>Collaborate in Microsoft Teams</strong></p>\n<ul>\n  <li><strong>Meetings</strong> &mdash; open boards in the side panel or shared stage for real-time brainstorming</li>\n  <li><strong>Tabs</strong> &mdash; pin boards to channels and group chats</li>\n  <li><strong>Chat</strong> &mdash; search and share boards as adaptive cards</li>\n  <li><strong>Calendar</strong> &mdash; attach boards to meeting invites</li>\n  <li><strong>Notifications</strong> &mdash; get Miro updates in Teams</li>\n</ul>\n<p><strong>Security:</strong> The Miro agent uses Miro OAuth and respects your existing Miro permissions, so it can only access boards you are authorized to view.</p>\n<p><strong>Availability:</strong> Available on all Miro plans. An active Miro account is required.</p>\n<p><strong>Get started:</strong> <a href=\"https://miro.com/signup/\">Sign up for Miro</a> | <a href=\"https://help.miro.com/hc/en-us/articles/360017730533-Getting-Started-with-Miro\">Getting started guide</a></p>\n<p><strong>Help &amp; support:</strong> <a href=\"https://help.miro.com/\">Miro Help Center</a> | <a href=\"https://help.miro.com/hc/en-us/requests/new\">Contact us</a></p>",
-      "keywords": [
-        "WHITEBOARD",
-        "COLLABORATION",
-        "BRAINSTORMING"
-      ],
+      "keywords": ["WHITEBOARD", "COLLABORATION", "BRAINSTORMING"],
       "accentColor": "#FEED55",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentSkills",
-        "AgentConnectors"
-      ],
-      "compatibleHubs": [
-        "Outlook",
-        "Teams",
-        "Copilot"
-      ],
+      "elementTypes": ["AgentSkills", "AgentConnectors"],
+      "compatibleHubs": ["Outlook", "Teams", "Copilot"],
       "isAppIOSAcquirable": true,
       "titleId": "P_3b7af06c-492d-bc33-166d-852e51b91961",
       "name": "Miro",
@@ -2226,11 +2157,7 @@
       "developerName": "Miro",
       "shortDescription": "Manage Miro boards with an agent to run workshops, plan, diagram, and act.",
       "scope": "public",
-      "categories": [
-        "Collaboration",
-        "Productivity",
-        "UtilitiesTools"
-      ],
+      "categories": ["Collaboration", "Productivity", "UtilitiesTools"],
       "ingestionId": "WA104381906",
       "manifestVersion": "1.28",
       "cultureName": "EN-US",
@@ -2269,10 +2196,7 @@
       "developerUrl": "https://www.moodys.com",
       "termsOfUseUrl": "https://go.microsoft.com/fwlink/?linkid=2041178",
       "privacyUrl": "https://www.moodys.com/web/en/us/legal/privacy-policy.html",
-      "permissions": [
-        "identity",
-        "messageTeamMembers"
-      ],
+      "permissions": ["identity", "messageTeamMembers"],
       "manifestId": "4d2d4b9a-a948-479b-91f7-f568c0217a11",
       "pricingInfo": {
         "pricingType": "AppFree"
@@ -2527,26 +2451,14 @@
         "billingTierInfo": "free"
       },
       "eTag": "\"2800b913-0000-0100-0000-6a32380d0000\"",
-      "policyRestrictions": [
-        "blocked",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blocked", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "Moody\u2019s Credit MCP powers AI applications and analytics workflows with GenAI-ready data and analytics that underpin comprehensive credit analysis. Moody\u2019s Credit MCP provides a unified layer across core credit data categories commonly used in risk assessment, offering financial analysis, default risk metrics, and qualitative insights. It combines comprehensive entity information, such as financials, ownership, and management, Moody\u2019s proprietary ratings and research, and probability of default metrics as well as company filings, earnings transcripts, news, and macroeconomic trends. By bringing structured and unstructured credit inputs together in a single interface, Moody\u2019s Credit MCP enables faster data-to-insight workflows, supporting rigorous, consistent credit assessment and continuous monitoring of entities, markets, and portfolios. In order to use this app, you must have an active Moody's account and the required entitlements. Sign up or contact us or for product help: https://www.moodys.com/contact-us. Limitations and conditions: responses are based on available Moody's content and user permissions, may not cover every entity or market, and should be reviewed by qualified professionals; any workflow steps outside Microsoft 365 Copilot are limited and clearly separate from the in Microsoft 365 Copilot experience. Supported language: English.",
-      "keywords": [
-        "MOODYS",
-        "CREDIT",
-        "MCP"
-      ],
+      "keywords": ["MOODYS", "CREDIT", "MCP"],
       "accentColor": "#002855",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentSkills",
-        "AgentConnectors"
-      ],
-      "compatibleHubs": [
-        "Copilot"
-      ],
+      "elementTypes": ["AgentSkills", "AgentConnectors"],
+      "compatibleHubs": ["Copilot"],
       "isAppIOSAcquirable": false,
       "titleId": "P_3cb7b6f2-0b06-8686-9626-21eb51d2dbcb",
       "name": "Moody's Credit MCP",
@@ -2560,11 +2472,7 @@
       "developerName": "Moody's MCP",
       "shortDescription": "Moody's Credit MCP for GenAI-ready credit data",
       "scope": "public",
-      "categories": [
-        "AccountingAndFinance",
-        "DataAnalytics",
-        "NewsWeather"
-      ],
+      "categories": ["AccountingAndFinance", "DataAnalytics", "NewsWeather"],
       "ingestionId": "WA200011085",
       "manifestVersion": "1.28",
       "cultureName": "EN-US",
@@ -2597,10 +2505,7 @@
       "developerUrl": "https://www.morningstar.com/business/products/direct-ai-solutions",
       "termsOfUseUrl": "https://go.microsoft.com/fwlink/?linkid=2041178",
       "privacyUrl": "https://www.morningstar.com/company/privacy-policy",
-      "permissions": [
-        "identity",
-        "messageTeamMembers"
-      ],
+      "permissions": ["identity", "messageTeamMembers"],
       "manifestId": "76a3dd3b-ea76-4a2c-84ab-e407a6686bc4",
       "pricingInfo": {
         "pricingType": "AppFree"
@@ -2856,26 +2761,14 @@
         "billingTierInfo": "free"
       },
       "eTag": "\"cc084946-0000-0100-0000-6a1ea9b60000\"",
-      "policyRestrictions": [
-        "blocked",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blocked", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "Morningstar's Microsoft 365 Copilot agent brings the depth of Morningstar's financial data and research directly into your AI workflow. You can look up any stock, ETF, or mutual fund by name, ticker, or ISIN and instantly access hundreds of structured datapoints, from valuations and performance metrics to risk statistics and ratings, across both current snapshots and historical ranges. For deeper qualitative insight, the agent surfaces Morningstar's analyst research reports covering business strategy, economic moat analysis, fair value estimates, and Bulls Say/Bears Say perspectives. You can screen entire universes of stocks, ETFs, or funds against custom criteria, and drill into fund holdings to understand portfolio composition. The agent can also search Morningstar's editorial article library for market commentary and investing insights. Access to this agent requires an active Morningstar license. For more information on obtaining access, please visit https://www.morningstar.com/business/products/direct-ai-solutions.",
-      "keywords": [
-        "MORNINGSTAR",
-        "FINANCE",
-        "DATA"
-      ],
+      "keywords": ["MORNINGSTAR", "FINANCE", "DATA"],
       "accentColor": "#FFFFFF",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentSkills",
-        "AgentConnectors"
-      ],
-      "compatibleHubs": [
-        "Copilot"
-      ],
+      "elementTypes": ["AgentSkills", "AgentConnectors"],
+      "compatibleHubs": ["Copilot"],
       "isAppIOSAcquirable": false,
       "titleId": "P_552435af-b62d-233e-02cd-a7c5330ba26c",
       "name": "Morningstar",
@@ -2889,10 +2782,7 @@
       "developerName": "Morningstar, Inc.",
       "shortDescription": "Morningstar agent provides access to Morningstar's financial data and research.",
       "scope": "public",
-      "categories": [
-        "AccountingAndFinance",
-        "DataAnalytics"
-      ],
+      "categories": ["AccountingAndFinance", "DataAnalytics"],
       "ingestionId": "WA200010657",
       "manifestVersion": "1.28",
       "cultureName": "EN-US",
@@ -2939,10 +2829,7 @@
         "team": "tab",
         "groupchat": "tab"
       },
-      "permissions": [
-        "identity",
-        "messageTeamMembers"
-      ],
+      "permissions": ["identity", "messageTeamMembers"],
       "manifestId": "eab2d3ce-6d6a-4415-abc4-5f40a8317b1f",
       "pricingInfo": {
         "pricingType": "ExternalPurchase"
@@ -3198,29 +3085,14 @@
         "billingTierInfo": "free"
       },
       "eTag": "\"1b006bb3-0000-0100-0000-6a2b4c0f0000\"",
-      "policyRestrictions": [
-        "blocked",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blocked", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "monday.com is the all-in-one platform that transforms how teams manage projects, sales, development, and service operations \u2014 all powered by AI. Trusted by over 245,000 companies worldwide, monday.com enables organizations to execute work efficiently and effectively across every team.\n\nNow, we\u2019re bringing that same power directly into Microsoft 365 Copilot. With monday.com\u2019s Copilot agent, it\u2019s easier than ever to run all your work in one place \u2014 without switching tabs or losing context.\n\nWhether you\u2019re already using monday.com, Microsoft 365, or both, your work, data, and decisions now move seamlessly between platforms. Collaborate directly on monday.com boards in Teams and Copilot, while working across the full suite: Work Management, Sales CRM, Dev Management, and Enterprise Service Management.\n\n<b>Key capabilities</b>:\nTransform your AI assistants into intelligent collaborators with monday.com\u2019s Copilot agent and in Teams, turning natural language prompts into actionable work across your boards.\n<ul>\n<li>Summarize work in context, update items, assign owners, and trigger automations through natural language.</li>\n<li>Create structured boards from documents or spreadsheets, and run multi-board queries across teams, projects, or workspaces.</li>\n<li>Spot blockers, trends, and insights without digging manually.</li>\n<li>Access real-time insights in Copilot to plan, track, and report work faster.</li>\n</ul>\n\n<b>Try these prompts</b>:\n<ul>\n<li>\u201cOrganize all the tasks into a board with clear priorities, owners, and due dates.\u201d In seconds, Copilot delivers a fully structured board.</li>\n<li>\u201cShow overdue items from the Ops Requests group and who owns them.\u201d Instantly, you see risks and bottlenecks.</li>\n<li>\u201cGive me a campaign recap I can paste into the leadership channel.\u201d A ready-to-share summary appears.</li>\n</ul>\n\nThe result? Immediate impact\nNatural language prompts turn into instant execution \u2014 update boards, assign tasks, trigger automations, and generate insights, all while preserving enterprise-grade permissions and governance.\n\nTo see a video of the monday.com agent in Copilot, please visit: https://www.youtube.com/watch?v=itgiSW7VnWE",
-      "keywords": [
-        "WORKFLOW,TEAMWORK,MANAGEMENT",
-        "PRODUCTIVITY",
-        "COLLABORATION"
-      ],
+      "keywords": ["WORKFLOW,TEAMWORK,MANAGEMENT", "PRODUCTIVITY", "COLLABORATION"],
       "accentColor": "#595AD4",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentSkills",
-        "AgentConnectors"
-      ],
-      "compatibleHubs": [
-        "Outlook",
-        "Teams",
-        "Office",
-        "Copilot"
-      ],
+      "elementTypes": ["AgentSkills", "AgentConnectors"],
+      "compatibleHubs": ["Outlook", "Teams", "Office", "Copilot"],
       "isAppIOSAcquirable": false,
       "titleId": "P_5abac949-11a6-cca6-9f70-8f47520ed97f",
       "name": "monday.com",
@@ -3234,11 +3106,7 @@
       "developerName": "monday.com ltd",
       "shortDescription": "Get more work done with your team using monday.com\u2019s AI-powered platform in Microsoft 365 Copilot",
       "scope": "public",
-      "categories": [
-        "Collaboration",
-        "ProjectManagement",
-        "WorkflowProcessManagement"
-      ],
+      "categories": ["Collaboration", "ProjectManagement", "WorkflowProcessManagement"],
       "ingestionId": "WA200001798",
       "manifestVersion": "1.28",
       "cultureName": "EN-US",
@@ -3280,9 +3148,7 @@
       "termsOfUseUrl": "https://www.harvey.ai/legal/service-terms",
       "privacyUrl": "https://www.harvey.ai/legal/privacy-policy",
       "defaultInstallScope": "copilot",
-      "permissions": [
-        "identity"
-      ],
+      "permissions": ["identity"],
       "manifestId": "18d72ef3-e3d8-4cab-abe8-3e24197beacd",
       "pricingInfo": {
         "pricingType": "ExternalPurchase"
@@ -3290,37 +3156,21 @@
       "securityComplianceInfo": {
         "status": "None"
       },
-      "availableMarkets": [
-        "US"
-      ],
+      "availableMarkets": ["US"],
       "billingInfo": {
         "billingTierInfo": "free"
       },
       "eTag": "\"590087c5-0000-0100-0000-6a30e66c0000\"",
-      "policyRestrictions": [
-        "blocked",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blocked", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "Access specialized legal intelligence directly in Microsoft 365 Copilot\nHarvey for Copilot brings expert-level legal AI to Microsoft 365, enabling legal professionals to ask questions, research issues, analyze documents, and review content from their Harvey Vault without switching platforms. Harvey delivers precedent-aware answers that help lawyers work faster and with greater confidence.\nGet instant legal answers with the Harvey Agent in Microsoft 365 Copilot\nSimply @Harvey in Copilot or select the Harvey agent from the sidebar to ask general legal questions and research issues. You can analyze documents or pull in content from your Harvey vaults without leaving Microsoft 365. When a question turns into a larger task, click the source link to view the answer in Harvey for additional analysis, advanced reasoning, and deeper work product refinement. The Harvey agent also works within Copilot Cowork, making legal intelligence available inside longer, multi-step tasks. From quick research to full document analysis and back to business communication, Harvey and Copilot work together at every stage within a single workflow.\nWork seamlessly across Microsoft 365\nHarvey for Copilot is designed to fit naturally into the tools you already use. In Word, you can research legal positions while drafting contracts and legal documents. In Outlook, verify legal guidance while responding to clients and stakeholders. In PowerPoint and Excel, extract legal analysis and insert it directly into presentations. Through Copilot Cowork, Harvey's legal answers surface as Cowork plans and executes multi-step work across Microsoft 365. All responses appear inline \u2014 no links to click, no browser to open, no workflow interruption.\nRequirements\nTo use Harvey for Copilot, you'll need an active Microsoft 365 Copilot license and a Harvey subscription. Harvey for Copilot works across all Microsoft 365 Copilot-enabled applications. Contact Harvey Sales at harvey.ai/contact-sales to get started, or learn more at harvey.ai/blog/agent-platform-and-microsoft-365-copilot. For help and support, visit the Harvey Help Center or reach the team at support@harvey.ai.",
-      "keywords": [
-        "LEGAL",
-        "AI",
-        "PRODUCTIVITY"
-      ],
+      "keywords": ["LEGAL", "AI", "PRODUCTIVITY"],
       "accentColor": "#FFFFFF",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentConnectors",
-        "AgentSkills"
-      ],
-      "compatibleHubs": [
-        "Copilot"
-      ],
+      "elementTypes": ["AgentConnectors", "AgentSkills"],
+      "compatibleHubs": ["Copilot"],
       "isAppIOSAcquirable": false,
-      "capabilities": [
-        "CodeInterpreter"
-      ],
+      "capabilities": ["CodeInterpreter"],
       "titleId": "P_5e538e98-37ef-2ccf-3727-db78c0ab74de",
       "name": "Harvey",
       "acquisitionState": "blocked",
@@ -3333,11 +3183,7 @@
       "developerName": "Counsel AI Corporation",
       "shortDescription": "AI-powered legal assistant in Microsoft 365 Copilot",
       "scope": "public",
-      "categories": [
-        "AccountingAndFinance",
-        "LegalHR",
-        "Productivity"
-      ],
+      "categories": ["AccountingAndFinance", "LegalHR", "Productivity"],
       "ingestionId": "WA200007562",
       "manifestVersion": "1.28",
       "cultureName": "EN-US",
@@ -3618,18 +3464,13 @@
         "billingTierInfo": "consumption"
       },
       "eTag": "\"5b006ebe-0000-0100-0000-6a311ea40000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "The Work IQ MCP Server exposes a set of tools for AI agents, IDEs, and CLIs \u2014 read, create, update, and delete M365 entities (mail, calendar, files, chats, and more), search and retrieve OpenAPI entity schemas, list available agents, ask M365 Copilot natural language questions, or route requests to specific declarative agents. This is part of the Work IQ tools, providing shared work intelligence and actions for agents.",
       "keywords": [],
       "accentColor": "#E0F6FC",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentConnectors"],
       "compatibleHubs": [],
       "tags": [],
       "isAppIOSAcquirable": true,
@@ -3645,9 +3486,7 @@
       "developerName": "Microsoft Corporation",
       "shortDescription": "The Work IQ MCP Server exposes a set of tools for AI agents, IDEs, and CLIs.",
       "scope": "public",
-      "categories": [
-        "Productivity"
-      ],
+      "categories": ["Productivity"],
       "ingestionId": "WA200011031",
       "manifestVersion": "devPreview",
       "cultureName": "EN-US",
@@ -3929,18 +3768,13 @@
         "billingTierInfo": "consumption"
       },
       "eTag": "\"7e02fa71-0000-0100-0000-6a058fac0000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "firstParty",
       "longDescription": "Work IQ MCP server for Microsoft 365 User operations. This feature is in preview and is part of the Work IQ tools, providing shared work intelligence and actions for agents. Availability and capabilities are subject to change. Learn more: https://aka.ms/AboutWorkIQ",
       "keywords": [],
       "accentColor": "#E0F6FC",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentConnectors"],
       "compatibleHubs": [],
       "tags": [],
       "isAppIOSAcquirable": true,
@@ -3956,9 +3790,7 @@
       "developerName": "Microsoft Corporation",
       "shortDescription": "Work IQ MCP server for Microsoft 365 User operations.",
       "scope": "public",
-      "categories": [
-        "Productivity"
-      ],
+      "categories": ["Productivity"],
       "ingestionId": "WA200009536",
       "manifestVersion": "devPreview",
       "cultureName": "EN-US",
@@ -4241,18 +4073,13 @@
         "billingTierInfo": "consumption"
       },
       "eTag": "\"3205f399-0000-0100-0000-69f4f8d10000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "Windows 365 for Agents gives AI agents a fully managed Windows desktop to work in, enabling them to automate enterprise workflows inside any application regardless of whether an API exists. Agents see the screen, control input, execute commands, and manage sessions, all within a Windows 365 Cloud PC secured to enterprise standards with authentication enforced at runtime.",
       "keywords": [],
       "accentColor": "#E0F6FC",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentConnectors"],
       "compatibleHubs": [],
       "tags": [],
       "isAppIOSAcquirable": true,
@@ -4268,9 +4095,7 @@
       "developerName": "Microsoft Corporation",
       "shortDescription": "Windows 365 for Agents gives AI agents a fully managed Windows desktop for Cloud PC operations.",
       "scope": "public",
-      "categories": [
-        "Productivity"
-      ],
+      "categories": ["Productivity"],
       "ingestionId": "WA200010552",
       "manifestVersion": "devPreview",
       "cultureName": "EN-US",
@@ -4552,18 +4377,13 @@
         "billingTierInfo": "consumption"
       },
       "eTag": "\"7b02110e-0000-0100-0000-6a05816c0000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "firstParty",
       "longDescription": "Work IQ MCP server for Microsoft Copilot Search operations. This feature is in preview and is part of the Work IQ tools, providing shared work intelligence and actions for agents. Availability and capabilities are subject to change. Learn more: https://aka.ms/AboutWorkIQ\n",
       "keywords": [],
       "accentColor": "#E0F6FC",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentConnectors"],
       "compatibleHubs": [],
       "tags": [],
       "isAppIOSAcquirable": true,
@@ -4579,9 +4399,7 @@
       "developerName": "Microsoft Corporation",
       "shortDescription": "Work IQ MCP server for Microsoft Copilot Search operations.",
       "scope": "public",
-      "categories": [
-        "Productivity"
-      ],
+      "categories": ["Productivity"],
       "ingestionId": "WA200009541",
       "manifestVersion": "devPreview",
       "cultureName": "EN-US",
@@ -4873,23 +4691,13 @@
         "TL"
       ],
       "eTag": "\"28005835-0000-0100-0000-6a2c2d320000\"",
-      "policyRestrictions": [
-        "blocked",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blocked", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "<p>Flow Studio MCP Copilot Cowork connects Microsoft 365 Copilot Cowork to the Flow Studio MCP server, giving authorized users a governed way to work with Power Automate cloud flows from natural language.</p>\n\n<p>You can discover flows, inspect definitions, review run history, diagnose failed runs with action-level details, and build or update flows using your configured Flow Studio and Microsoft Power Platform connections.</p>\n\n<h3>Getting started</h3>\n<ol>\n  <li><a href=\"https://mcp.flowstudio.app/?utm_source=microsoft-marketplace&utm_medium=referral&utm_campaign=appsource-cowork&utm_content=website\">Sign up at mcp.flowstudio.app</a> \u2014 claim a free Starter plan or a paid plan</li>\n  <li>Install this plugin in Cowork and sign in with your Microsoft 365 account</li>\n</ol>\n\n<h3>Resources</h3>\n<ul>\n  <li><a href=\"https://learn.flowstudio.app/mcp-cowork-setup\">Flow Studio MCP Copilot Cowork plugin setup guide</a></li>\n  <li><a href=\"https://learn.flowstudio.app/mcp-which-agent-power-automate\">When to use which agent</a></li>\n  <li><a href=\"https://learn.flowstudio.app/mcp-tools\">MCP tools reference</a></li>\n  <li><a href=\"https://learn.flowstudio.app/faq\">FAQ</a></li>\n  <li><a href=\"mailto:support@flowstudio.app\">Contact support</a></li>\n</ul>\n\n<p><strong>Requirements:</strong> A Flow Studio MCP plan (Starter is free). Multi-tenant - works in any Microsoft 365 organization.</p>\n\n<p>Flow Studio MCP also works with Copilot Studio agents, Claude, Codex, GitHub Copilot, and other MCP-compatible clients via direct configuration. This plugin specifically enables the Microsoft 365 Copilot Cowork integration.</p>\n",
-      "keywords": [
-        "POWER AUTOMATE",
-        "RUN HISTORY",
-        "BUILD FLOWS"
-      ],
+      "keywords": ["POWER AUTOMATE", "RUN HISTORY", "BUILD FLOWS"],
       "accentColor": "#4A90D9",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentSkills",
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentSkills", "AgentConnectors"],
       "compatibleHubs": [],
       "isAppIOSAcquirable": false,
       "titleId": "P_a9e55563-2eae-d714-33bf-af21c15083b2",
@@ -4904,11 +4712,7 @@
       "developerName": "Flow Studio Solutions",
       "shortDescription": "Connect Cowork to Power Automate via Flow Studio MCP to build and debug Power Automate flows. ",
       "scope": "public",
-      "categories": [
-        "ITAdmin",
-        "UtilitiesTools",
-        "WorkflowProcessManagement"
-      ],
+      "categories": ["ITAdmin", "UtilitiesTools", "WorkflowProcessManagement"],
       "ingestionId": "WA200011013",
       "manifestVersion": "1.28",
       "cultureName": "EN-US",
@@ -5189,18 +4993,13 @@
         "billingTierInfo": "consumption"
       },
       "eTag": "\"7e02b25a-0000-0100-0000-6a058f4b0000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "Work IQ MCP server for Microsoft OneDrive operations. This feature is in preview and is part of the Work IQ tools, providing shared work intelligence and actions for agents. Availability and capabilities are subject to change. Learn more: https://aka.ms/AboutWorkIQ",
       "keywords": [],
       "accentColor": "#E0F6FC",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentConnectors"],
       "compatibleHubs": [],
       "tags": [],
       "isAppIOSAcquirable": true,
@@ -5216,9 +5015,7 @@
       "developerName": "Microsoft Corporation",
       "shortDescription": "Work IQ MCP server for Microsoft OneDrive operations.",
       "scope": "public",
-      "categories": [
-        "Productivity"
-      ],
+      "categories": ["Productivity"],
       "ingestionId": "WA200010256",
       "manifestVersion": "devPreview",
       "cultureName": "EN-US",
@@ -5279,27 +5076,15 @@
       "securityComplianceInfo": {
         "status": "None"
       },
-      "availableMarkets": [
-        "US"
-      ],
+      "availableMarkets": ["US"],
       "eTag": "\"4e0050d1-0000-0100-0000-6a2ff7630000\"",
-      "policyRestrictions": [
-        "blocked",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blocked", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "<p>\n  enosix arnold\u2122 for Copilot Cowork brings SAP ERP data directly into Microsoft 365 Copilot.\n  Sales teams, customer service representatives, and operations staff can query live SAP data,\n  track orders and deliveries, and initiate document workflows \u2014 all without leaving Copilot Chat.\n</p>\n\n<p><strong>What this app does</strong></p>\n<ul>\n  <li><strong>Order Search</strong> \u2014 Find open or historical sales orders by customer name, material, or date range.</li>\n  <li><strong>Order Status &amp; Availability</strong> \u2014 Check delivery status for an order and confirm material stock levels in real time.</li>\n  <li><strong>Billing &amp; Invoice Lookup</strong> \u2014 Retrieve SAP billing documents and invoice totals for a customer over a date range.</li>\n  <li><strong>Delivery Document Lookup</strong> \u2014 View outbound delivery documents, shipping status, and delivery dates.</li>\n  <li><strong>PDF Document Download</strong> \u2014 Generate and download SAP sales order, delivery, invoice, and quote PDFs.</li>\n  <li><strong>Order Cancellation Check</strong> \u2014 Determine whether a sales order is still eligible for cancellation based on its fulfillment status.</li>\n  <li><strong>Order Update Feasibility</strong> \u2014 Verify whether a sales order can be modified before requesting a change.</li>\n  <li><strong>Order Quantity Update</strong> \u2014 Change or cancel a sales order line item quantity directly from Copilot Chat.</li>\n  <li><strong>Quote Creation via Cloud UI</strong> \u2014 Initiate a new SAP quote for a customer through the enosix Arnold Cloud UI application.</li>\n</ul>\n\n<p><strong>How it works</strong></p>\n<p>\n  The app connects to an enosix Arnold MCP server using OAuth 2.0 authentication.\n  Copilot Cowork authenticates once using your Microsoft 365 identity; subsequent\n  sessions refresh automatically. Your SAP data is never replicated \u2014 it stays in\n  place in your SAP system and is accessed in real time through the arnold\u2122 platform,\n  with no data replication.\n</p>\n<p>\n  All results are returned directly in Copilot Chat. For richer workflows, arnold\u2122\n  also supports real-time document reprinting \u2014 generating live PDFs of sales orders,\n  invoices, deliveries, and quotes on demand \u2014 and integrated Cloud UI components\n  that launch in-context for transactional work like quote and order creation.\n</p>\n\n<p><strong>Built for enterprise security</strong></p>\n<p>\n  enosix Arnold is hosted on Microsoft Azure using managed services and secured through\n  Microsoft Entra ID. Single Sign-On (SSO) and SAP Principal Propagation ensure that\n  every transaction carries the user's SAP identity \u2014 preserving document audit trails\n  and enforcing SAP role-based access controls exactly as configured.\n</p>\n\n<p><strong>Who it's for</strong></p>\n<p>\n  Designed for enterprise sales, customer service, and operations teams at organizations\n  running SAP ECC or SAP S/4HANA. Industries that benefit include manufacturing, distribution,\n  life sciences, energy, and any SAP-driven enterprise looking to surface ERP data where work happens.\n  This app is intended for use by employees with an active Microsoft 365 Copilot seat and\n  access to a connected enosix Arnold subscription.\n</p>\n\n<p><strong>Requirements and account setup</strong></p>\n<ul>\n  <li>Microsoft 365 Copilot license</li>\n  <li>enosix Arnold subscription with a connected SAP ECC or SAP S/4HANA system</li>\n</ul>\n\n<p><strong>Get started</strong></p>\n<ul>\n  <li><strong>Sign up / Request a demo:</strong> <a href=\"https://go.enosix.com/arnold-signup\">https://go.enosix.com/arnold-signup</a></li>\n  <li><strong>Documentation &amp; Get Started guide:</strong> <a href=\"https://go.enosix.com/docs\">https://go.enosix.com/docs</a></li>\n  <li><strong>Contact support:</strong> <a href=\"https://go.enosix.com/support\">https://go.enosix.com/support</a></li>\n  <li><strong>Privacy policy:</strong> <a href=\"https://go.enosix.com/app-privacy-policy\">https://go.enosix.com/app-privacy-policy</a></li>\n</ul>\n\n<p><strong>External workflows</strong></p>\n<p>\n  Most functionality is delivered directly in Microsoft 365 Copilot Chat. Two workflows\n  involve content outside of Chat:\n</p>\n<ul>\n  <li><strong>PDF document download</strong> \u2014 When a PDF is generated for a sales order, invoice, delivery, or quote, Copilot returns a download link. Clicking the link opens the PDF in your web browser, outside of Teams.</li>\n  <li><strong>Quote creation via Cloud UI</strong> \u2014 Advanced quote configuration (adding line items, entering PO references) is completed in the enosix Arnold Cloud UI, which opens in a separate browser tab outside of Teams.</li>\n</ul>",
-      "keywords": [
-        "SAP",
-        "ERP",
-        "SALES ORDERS"
-      ],
+      "keywords": ["SAP", "ERP", "SALES ORDERS"],
       "accentColor": "#E93512",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentSkills",
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentSkills", "AgentConnectors"],
       "compatibleHubs": [],
       "isAppIOSAcquirable": false,
       "titleId": "P_c982a14a-aadb-773e-bff1-d65d0769311a",
@@ -5314,11 +5099,7 @@
       "developerName": "enosix",
       "shortDescription": "SAP ERP order intelligence in Microsoft 365 Copilot \u2014 orders, invoices, deliveries, and quotes.",
       "scope": "public",
-      "categories": [
-        "CRM",
-        "Productivity",
-        "WorkflowProcessManagement"
-      ],
+      "categories": ["CRM", "Productivity", "WorkflowProcessManagement"],
       "ingestionId": "WA200011090",
       "manifestVersion": "1.28",
       "cultureName": "EN-US",
@@ -5600,18 +5381,13 @@
         "billingTierInfo": "consumption"
       },
       "eTag": "\"7e027c67-0000-0100-0000-6a058f840000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "firstParty",
       "longDescription": "Work IQ MCP server for Microsoft Word operations. This feature is in preview and is part of the Work IQ tools, providing shared work intelligence and actions for agents. Availability and capabilities are subject to change. Learn more: https://aka.ms/AboutWorkIQ",
       "keywords": [],
       "accentColor": "#E0F6FC",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentConnectors"],
       "compatibleHubs": [],
       "tags": [],
       "isAppIOSAcquirable": true,
@@ -5627,9 +5403,7 @@
       "developerName": "Microsoft Corporation",
       "shortDescription": "Work IQ MCP server for Microsoft Word operations.",
       "scope": "public",
-      "categories": [
-        "Productivity"
-      ],
+      "categories": ["Productivity"],
       "ingestionId": "WA200009547",
       "manifestVersion": "devPreview",
       "cultureName": "EN-US",
@@ -5926,19 +5700,13 @@
         "TL"
       ],
       "eTag": "\"36040dbf-0000-0100-0000-6a0bc9bf0000\"",
-      "policyRestrictions": [
-        "blocked",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blocked", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "The LSEG Plugin integrates LSEG's MCP server \u2014 covering comprehensive financial market data ecosystem \u2014 directly into Cowork via the plugin system. Rather than calling individual data tools one-by-one, each of its slash commands, orchestrates multiple LSEG tools into a cohesive, domain-aware analysis workflow in a single invocation.\n",
       "keywords": [],
       "accentColor": "#4A90D9",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentSkills",
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentSkills", "AgentConnectors"],
       "compatibleHubs": [],
       "isAppIOSAcquirable": false,
       "titleId": "P_f60b3c23-dd0c-a0d5-7caa-c7aeb60d8167",
@@ -5953,11 +5721,7 @@
       "developerName": "LSEG Financial Analytics",
       "shortDescription": "LSEG Cowork plugin for financial analysis workflows.",
       "scope": "public",
-      "categories": [
-        "AccountingAndFinance",
-        "DataAnalytics",
-        "Productivity"
-      ],
+      "categories": ["AccountingAndFinance", "DataAnalytics", "Productivity"],
       "ingestionId": "WA200010808",
       "manifestVersion": "devPreview",
       "cultureName": "EN-US",
@@ -6239,18 +6003,13 @@
         "billingTierInfo": "consumption"
       },
       "eTag": "\"7e024f62-0000-0100-0000-6a058f6e0000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "firstParty",
       "longDescription": "Work IQ MCP server for Microsoft Outlook Calendar operations. This feature is in preview and is part of the Work IQ tools, providing shared work intelligence and actions for agents. Availability and capabilities are subject to change. Learn more: https://aka.ms/AboutWorkIQ",
       "keywords": [],
       "accentColor": "#E0F6FC",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentConnectors"
-      ],
+      "elementTypes": ["AgentConnectors"],
       "compatibleHubs": [],
       "tags": [],
       "isAppIOSAcquirable": true,
@@ -6266,9 +6025,7 @@
       "developerName": "Microsoft Corporation",
       "shortDescription": "Work IQ MCP server for Microsoft Outlook Calendar operations.",
       "scope": "public",
-      "categories": [
-        "Productivity"
-      ],
+      "categories": ["Productivity"],
       "ingestionId": "WA200009542",
       "manifestVersion": "devPreview",
       "cultureName": "EN-US",
@@ -6296,16 +6053,8 @@
       "developerUrl": "https://maestrolabs.com",
       "termsOfUseUrl": "https://go.microsoft.com/fwlink/?linkid=2041178",
       "privacyUrl": "https://www.maestrolabs.com/privacy",
-      "supportedCultures": [
-        "es",
-        "pt",
-        "de",
-        "fr"
-      ],
-      "permissions": [
-        "identity",
-        "messageTeamMembers"
-      ],
+      "supportedCultures": ["es", "pt", "de", "fr"],
+      "permissions": ["identity", "messageTeamMembers"],
       "manifestId": "69219e39-2023-4fa6-a058-dae106f958f6",
       "pricingInfo": {
         "pricingType": "AppFree"
@@ -6561,28 +6310,14 @@
         "billingTierInfo": "free"
       },
       "eTag": "\"4b005498-0000-0100-0000-6a2fa3000000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "<b>No more scrambling to take notes. No more chasing follow-ups.</b> TeamsMaestro joins every Microsoft Teams, other Meet call, captures every word, and delivers a full summary with action items \u2014 automatically. Works in 40+ languages.<br><br>Powered by <b>ChatGPT (OpenAI)</b> and <b>Claude (Anthropic)</b> for accurate, structured, immediately actionable summaries. Just show up \u2014 TeamsMaestro handles the rest.<br><br><b>Why use TeamsMaestro instead of ChatGPT, Claude, etc.?</b><br>People forget to start transcription on time, resulting in incomplete notes. Pasting transcripts into a chatbot means extra steps and manual sharing. TeamsMaestro auto-joins your calls and sends structured summaries to all participants \u2014 none of your data is ever used to train AI models.<br><br>\u2728 <b>Key benefits</b><br><br><b>Instant AI meeting notes:</b> Accurate transcripts, structured notes, and summaries after every call \u2014 powered by ChatGPT and Claude.<br><br><b>Action items, captured automatically:</b> To-dos, tasks, and next steps extracted from every meeting. Every decision documented, every owner assigned.<br><br><b>Ask TeamsMaestro via Microsoft 365 Copilot:</b> Query your meeting history in natural language via Microsoft 365 Copilot \u2014 answered instantly.<br><br><b>Available everywhere:</b> Notes across Teams, Outlook, and Microsoft 365 on desktop, mobile, or web.<br><br><b>Automatic sharing:</b> Summaries emailed to all participants. Control privacy settings to decide who gets what.<br><br><b>Pause & resume transcription:</b> Need privacy mid-call? Pause and resume in real time.<br><br><b>Enterprise-grade security:</b> SOC 2 Type 2, GDPR, end-to-end encryption, attested by Microsoft and Google. Data never used to train AI models. Visit our <a href=\"https://security.maestrolabs.com/?utm_source=microsoft_marketplace&utm_medium=listing&utm_campaign=teamsmaestro&utm_content=en\" target=\"_blank\" rel=\"noopener noreferrer\">Trust Center</a>.<br><br>\ud83d\udee0 <b>How it works</b><br><ul><li>Install TeamsMaestro on Microsoft Teams</li><li>Connect your calendar for auto-join</li><li>Or invite teams@maestrolabs.com to calendar invites</li><li>TeamsMaestro joins early, takes notes, sends summaries</li><li>Join active calls on demand from the Teams apps menu</li></ul>Having trouble? Contact <a href=\"mailto:feedback@maestrolabs.com\">feedback@maestrolabs.com</a><br><br>\ud83d\udd0d <b>FAQs</b><br><br><b>What AI powers TeamsMaestro?</b><br>Transcription engines (Gladia, Assembly, Google, AWS, Microsoft) + ChatGPT (OpenAI) and Claude (Anthropic).<br><br><b>TeamsMaestro vs Microsoft Copilot?</b><br>Copilot only takes notes when your company organizes the meeting, and only on Teams. TeamsMaestro works across Teams and other Meets platforms, supports 40+ languages, and costs a fraction of Copilot \u2014 while remaining compatible.<br><br><b>TeamsMaestro vs Otter.ai?</b><br>Purpose-built for Microsoft Teams with deeper integration, automatic calendar sync, and notes flowing directly into your Microsoft 365 environment.<br><br><b>TeamsMaestro vs Fireflies.ai?</b><br>Fireflies.ai is built primarily around other Meet platforms. TeamsMaestro is purpose-built for Microsoft Teams with deeper native integration and notes flowing directly into Microsoft 365.<br><br><b>Is TeamsMaestro secure?</b><br>SOC 2 Type 2, GDPR compliant, end-to-end encrypted. Data never used to train AI models. Visit our <a href=\"https://security.maestrolabs.com/?utm_source=microsoft_marketplace&utm_medium=listing&utm_campaign=teamsmaestro&utm_content=en\" target=\"_blank\" rel=\"noopener noreferrer\">Trust Center</a>.<br><br><a href=\"https://www.maestrolabs.com?utm_source=microsoft_marketplace&utm_medium=listing&utm_campaign=teamsmaestro&utm_content=en\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more about TeamsMaestro</a><br><br>#AI #MeetingNotes #AIMeetingAssistant #MicrosoftTeams #ChatGPT #Claude #GenAI #OpenAI #CopilotAlternative #MeetingTranscription #Fireflies #Otter #CopilotForM365 #AIAgent",
-      "keywords": [
-        "CHATGPT",
-        "AI NOTE TAKER",
-        "AI FOR TEAMS"
-      ],
+      "keywords": ["CHATGPT", "AI NOTE TAKER", "AI FOR TEAMS"],
       "accentColor": "#FFFFFF",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentConnectors"
-      ],
-      "compatibleHubs": [
-        "Office",
-        "Outlook",
-        "Teams",
-        "Copilot"
-      ],
+      "elementTypes": ["AgentConnectors"],
+      "compatibleHubs": ["Office", "Outlook", "Teams", "Copilot"],
       "isAppIOSAcquirable": true,
       "capabilities": [],
       "titleId": "P_3761ac1d-61b6-2c85-bb52-0ffe56b2097e",
@@ -6597,11 +6332,7 @@
       "developerName": "MailMaestro",
       "shortDescription": "\u2728Free AI note taker for Microsoft Teams, powered by ChatGPT & Claude.",
       "scope": "public",
-      "categories": [
-        "Productivity",
-        "ProjectManagement",
-        "SalesMarketing"
-      ],
+      "categories": ["Productivity", "ProjectManagement", "SalesMarketing"],
       "ingestionId": "WA200008024",
       "manifestVersion": "1.28",
       "cultureName": "EN",
@@ -6649,20 +6380,12 @@
       "developerUrl": "https://www.canva.com",
       "termsOfUseUrl": "https://go.microsoft.com/fwlink/?linkid=2041178",
       "privacyUrl": "https://www.canva.com/policies/privacy-policy",
-      "supportedCultures": [
-        "en-au",
-        "en-gb",
-        "en-in",
-        "en-ph"
-      ],
+      "supportedCultures": ["en-au", "en-gb", "en-in", "en-ph"],
       "webApplicationInfo": {
         "id": "2c0bebe0-bdb3-4909-8955-7ef311f0db22",
         "resource": "api://www.canva.com/botid-2c0bebe0-bdb3-4909-8955-7ef311f0db22"
       },
-      "permissions": [
-        "identity",
-        "messageTeamMembers"
-      ],
+      "permissions": ["identity", "messageTeamMembers"],
       "manifestId": "2c0bebe0-bdb3-4909-8955-7ef311f0db22",
       "pricingInfo": {
         "pricingType": "AppFree"
@@ -6906,28 +6629,14 @@
         "billingTierInfo": "free"
       },
       "eTag": "\"06004e3f-0000-0100-0000-6a327e420000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "Teams can use Canva create presentations, videos, graphics, posters and more \u2013 then share them with the world!\r\n\r\nThe Canva app for Microsoft Teams keeps everyone in the loop, with all your key design updates in one place. Without ever having to leave Teams, you can:\r\n- Keep up to date on all your Canva notifications\r\n- Invite your team to preview or collaborate on your designs\r\n- View multi-page Canva designs\r\n\r\nReady to supercharge your team with seamless collaboration? Add the Canva app for Microsoft Teams to get started!\r\n\r\nNew to Canva? Sign up or learn more at www.canva.com\r\nFor support, visit www.canva.com/help",
-      "keywords": [
-        "CANVA",
-        "DESIGN",
-        "COLLABORATION"
-      ],
+      "keywords": ["CANVA", "DESIGN", "COLLABORATION"],
       "accentColor": "#00C4CC",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentSkills",
-        "AgentConnectors"
-      ],
-      "compatibleHubs": [
-        "Teams",
-        "Outlook",
-        "Copilot"
-      ],
+      "elementTypes": ["AgentSkills", "AgentConnectors"],
+      "compatibleHubs": ["Teams", "Outlook", "Copilot"],
       "isAppIOSAcquirable": false,
       "titleId": "P_dc7ff5c3-a585-8075-d148-1199548a7529",
       "name": "Canva",
@@ -6941,10 +6650,7 @@
       "developerName": "Canva Pty Ltd",
       "shortDescription": "Canva is the easy to use, collaborative design platform where teams create together!",
       "scope": "public",
-      "categories": [
-        "Collaboration",
-        "Productivity"
-      ],
+      "categories": ["Collaboration", "Productivity"],
       "ingestionId": "WA200004820",
       "manifestVersion": "1.28",
       "cultureName": "EN",
@@ -7009,10 +6715,7 @@
       "defaultGroupCapability": {
         "team": "bot"
       },
-      "permissions": [
-        "identity",
-        "messageTeamMembers"
-      ],
+      "permissions": ["identity", "messageTeamMembers"],
       "manifestId": "8d04bcf6-86d8-4ab1-9602-bc3b56e06c37",
       "pricingInfo": {
         "pricingType": "ExternalPurchase"
@@ -7268,29 +6971,14 @@
         "billingTierInfo": "free"
       },
       "eTag": "\"6200e816-0000-0100-0000-6a319d3f0000\"",
-      "policyRestrictions": [
-        "blockedByAllowPolicy",
-        "disallowed"
-      ],
+      "policyRestrictions": ["blockedByAllowPolicy", "disallowed"],
       "appType": "thirdParty",
       "longDescription": "With integrations across Microsoft 365, Box makes it easy for users to securely access, share, and collaborate on content directly within their favorite productivity tools. By connecting Box's Intelligent Content Management platform with Microsoft\u2019s communication and AI tools, your organization can break down information silos and work smarter.\n\n<h2>Capabilities</h2>\n\n<h4>Box for Teams:</h4>\nKeep conversations and files connected in one central place:\n<ul><li> <b>Share from Box:</b> Seamlessly share Box files to Teams channels and chats, or upload local files directly to a channel's associated Box folder.</li>\n\n<li> <b>Box Files Tab:</b> View, preview, and edit all Box content related to a Teams channel in a dedicated tab without leaving the Teams app. </li>\n\n<li> <b>Personal Scope:</b> Instantly access and manage your personal Box files, even if they haven't been shared in a specific channel or chat yet. </li>\n\n<li> <b>Mobile Compatibility:</b> Upload, preview, and edit your Box files on the go within the Microsoft Teams mobile app for iOS and Android. </li></ul>\n\nAdmin Features:\n\n<ul><li> <b>Automatic Folder Creation:</b> Automatically creates a dedicated Box folder for both new and existing Teams channels. </li>\n\n<li> <b>Automatic Permissions Mapping:</b> Instantly syncs user membership and permissions between Teams channels and their associated Box folders. </li>\n\n<li> <b>Content Card Controls:</b> Customize and choose whether shared content cards display file thumbnail previews and additional metadata. </li></ul>\n\n<h4>Box AI Agent in Copilot:</h4>\n\nEmpower your workspace with secure, conversational intelligence over your entire Box content directly inside Microsoft 365 Copilot:\n\n<ul><li> <b>Enterprise Search:</b> Search across all your Box files using natural language within Copilot. </li>\n\n<li> <b>Smart Summaries:</b> Instantly summarize complex Box documents and extract key takeaways. </li>\n\n<li> <b>Contextual Q&A:</b> Get precise, real-time answers to questions based directly on your Box files. </li>\n\n<li> <b>Content Generation:</b> Generate drafts, proposals, recommendations, and action items from existing Box documents. </li></ul>\n\n<h4>Box Plugin for Copilot Cowork:</h4>\n\nThe Box Plugin integrates with Copilot Cowork to allow agents to seamlessly connect to, reference, and reason over Box content. Whether in a meeting, in Outlook, or in a document, Copilot can safely retrieve Box files to execute complex tasks on the fly:\n\n<ul><li> <b>In Outlook:</b> Pull specific pricing tables from a Box proposal while drafting a client follow-up email. </li>\n\n<li> <b>In Teams:</b> Instantly verify if a vendor\u2019s liability insurance stored in Box meets project compliance during a live chat sync. </li></ul>\n\n<h2>Availability</h2>\n\n<ul><li>An active Box account is required. <a href=\"https://www.box.com/pricing\">Sign up for Box here.</a></li>\n\n<li>IT Administrator deployment is required for Microsoft Teams installation.</li>\n\n<li>Fully compatible with Microsoft 365, Microsoft Teams, and Microsoft 365 Copilot.</li>\n\n<li>For support and inquiries, visit our <a href=\"https://support.box.com/hc/en-us/p/Integration_Page_2023?section-id=21356587547411\">Box for Microsoft Teams</a> and our <a href=\"https://support.box.com/hc/en-us/sections/42780110822035-Box-for-Microsoft-365-Copilot\">Box for Microsoft 365 Copilot</a> support pages.</li></ul>",
-      "keywords": [
-        "CONTENT MANAGEMENT",
-        "COLLABORATION",
-        "AI"
-      ],
+      "keywords": ["CONTENT MANAGEMENT", "COLLABORATION", "AI"],
       "accentColor": "#ffffff",
       "ingestionSource": "Omex",
-      "elementTypes": [
-        "AgentSkills",
-        "AgentConnectors"
-      ],
-      "compatibleHubs": [
-        "Office",
-        "Outlook",
-        "Teams",
-        "Copilot"
-      ],
+      "elementTypes": ["AgentSkills", "AgentConnectors"],
+      "compatibleHubs": ["Office", "Outlook", "Teams", "Copilot"],
       "isAppIOSAcquirable": true,
       "capabilities": [],
       "titleId": "P_fbba5986-55ec-2828-4124-e068a42cbf57",
@@ -7305,11 +6993,7 @@
       "developerName": "Box.",
       "shortDescription": "Streamline how users share, find, and leverage Box content to boost productivity and collaboration",
       "scope": "public",
-      "categories": [
-        "Collaboration",
-        "ContentManagement",
-        "Productivity"
-      ],
+      "categories": ["Collaboration", "ContentManagement", "Productivity"],
       "ingestionId": "WA200001458",
       "manifestVersion": "1.28",
       "cultureName": "EN",

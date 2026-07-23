@@ -5,13 +5,13 @@ WSL is where several OpenClaw PR stacks live. Use the wrappers in
 
 ## Active WSL Paths
 
-| Work | Path |
-| --- | --- |
-| Context budget stack | `/root/src/openclaw-context-budget` |
-| Policy exec approvals PR | `/root/src/openclaw-policy-file-stores` |
-| Policy RFC 0003 | `/root/src/openclaw-rfcs-policy-conformance-0003` |
-| Maintainer scripts | `/root/src/openclaw-maintainers-repo` |
-| WSL operating index | `/root/src/_hapi` |
+| Work                     | Path                                              |
+| ------------------------ | ------------------------------------------------- |
+| Context budget stack     | `/root/src/openclaw-context-budget`               |
+| Policy exec approvals PR | `/root/src/openclaw-policy-file-stores`           |
+| Policy RFC 0003          | `/root/src/openclaw-rfcs-policy-conformance-0003` |
+| Maintainer scripts       | `/root/src/openclaw-maintainers-repo`             |
+| WSL operating index      | `/root/src/_hapi`                                 |
 
 ## Common Commands
 

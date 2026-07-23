@@ -66,12 +66,12 @@ separately justified implementation choice.
 
 ## Current And Proposed Models
 
-| Today | Proposed |
-| --- | --- |
-| ProxyPipe multiplexes unrelated semantic operations over one private connection. | Existing native surfaces remain authoritative for Gateway, Channel, lifecycle, and transparent network concerns. |
+| Today                                                                                                                         | Proposed                                                                                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| ProxyPipe multiplexes unrelated semantic operations over one private connection.                                              | Existing native surfaces remain authoritative for Gateway, Channel, lifecycle, and transparent network concerns.               |
 | Lobster owns request preparation, credentials, policy, transport, retries, and compatibility for several OpenClaw operations. | Each OpenClaw owner prepares the operation and retains identity, response, retry, replay, activation, and readiness semantics. |
-| The private pipe is both integration mechanism and semantic catalog. | A host bundle packages typed contributions but does not become a semantic owner or activation transaction. |
-| Removing one path risks a broad transport migration. | Each capability has an owner/adopter pair, canary, rollback, observation window, expiry, and named deletion target. |
+| The private pipe is both integration mechanism and semantic catalog.                                                          | A host bundle packages typed contributions but does not become a semantic owner or activation transaction.                     |
+| Removing one path risks a broad transport migration.                                                                          | Each capability has an owner/adopter pair, canary, rollback, observation window, expiry, and named deletion target.            |
 
 ## Architecture In One Diagram
 
@@ -95,16 +95,16 @@ policy, response meaning, or replay behavior.
 
 The fork-only implementation series is not a paper architecture. It includes:
 
-| Evidence | What it proves |
-| --- | --- |
-| Local provider-dispatch seam and network guard fixtures | Current local behavior can remain the default while physical execution becomes replaceable. |
-| Exact credential-slot resolver | Hosted execution does not require arbitrary header mutation or exposing credential values to OpenClaw. |
-| Bundle, readiness, Status, and Doctor slices | Registration, selection, compatibility, provenance, and health remain explicit and owner-local. |
-| External CAPI and Substrate adopter slices | Complex provider request and streamed-response semantics stay in external owner plugins rather than OpenClaw core. |
-| WebIQ and Anthropic slices | The model extends to bounded web/API-key providers without creating a universal adapter. |
-| ACF and Graph mail slices | Channel and mailbox identity remain owner-specific; routing input cannot choose trusted identity. |
-| Restore-hold slice | Lifecycle authority composes through owner generations rather than a generic host callback. |
-| CAPI mixed-version observer | Rollout can compare redacted fingerprints, authority, versions, old-path use, rollback, and expiry without duplicating live side effects. |
+| Evidence                                                | What it proves                                                                                                                            |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Local provider-dispatch seam and network guard fixtures | Current local behavior can remain the default while physical execution becomes replaceable.                                               |
+| Exact credential-slot resolver                          | Hosted execution does not require arbitrary header mutation or exposing credential values to OpenClaw.                                    |
+| Bundle, readiness, Status, and Doctor slices            | Registration, selection, compatibility, provenance, and health remain explicit and owner-local.                                           |
+| External CAPI and Substrate adopter slices              | Complex provider request and streamed-response semantics stay in external owner plugins rather than OpenClaw core.                        |
+| WebIQ and Anthropic slices                              | The model extends to bounded web/API-key providers without creating a universal adapter.                                                  |
+| ACF and Graph mail slices                               | Channel and mailbox identity remain owner-specific; routing input cannot choose trusted identity.                                         |
+| Restore-hold slice                                      | Lifecycle authority composes through owner generations rather than a generic host callback.                                               |
+| CAPI mixed-version observer                             | Rollout can compare redacted fingerprints, authority, versions, old-path use, rollback, and expiry without duplicating live side effects. |
 
 The code is intentionally fork-only. It demonstrates feasibility and exposes
 the contracts for review; it is not a request to merge the full stack.
@@ -246,13 +246,13 @@ those only to answer implementation and feasibility questions.
 
 ## Reviewer Entry Points
 
-| Need | Start here |
-| --- | --- |
-| Executive and architecture decision | This document, then RFC 0020 |
-| Exact proposal | Fork RFC PR 2 and `rfcs/0020-hosted-integration-and-capability-bindings.md` |
-| Implementation sequence | `implementation-pr-series.md` |
-| Source and competitor evidence | `source-audit-2026-07-11.md` and `comparison-matrix.md` |
-| Security/runtime/operator review | `role-review-2026-07-11.md` |
-| Exact PR scopes | `pr-plans/README.md` |
-| Deletion proof | `../layering-contracts/lobster-deletion-ledger.md` |
-| Mixed-version rollout | `f2-capi-observation-slice.md` |
+| Need                                | Start here                                                                  |
+| ----------------------------------- | --------------------------------------------------------------------------- |
+| Executive and architecture decision | This document, then RFC 0020                                                |
+| Exact proposal                      | Fork RFC PR 2 and `rfcs/0020-hosted-integration-and-capability-bindings.md` |
+| Implementation sequence             | `implementation-pr-series.md`                                               |
+| Source and competitor evidence      | `source-audit-2026-07-11.md` and `comparison-matrix.md`                     |
+| Security/runtime/operator review    | `role-review-2026-07-11.md`                                                 |
+| Exact PR scopes                     | `pr-plans/README.md`                                                        |
+| Deletion proof                      | `../layering-contracts/lobster-deletion-ledger.md`                          |
+| Mixed-version rollout               | `f2-capi-observation-slice.md`                                              |

@@ -71,15 +71,15 @@ reportable:
 
 ## Current API Coverage Map
 
-| Classic API | TS7/native coverage | Notes |
-| --- | --- | --- |
-| `SyntaxKind` | Available via `typescript/unstable/ast` | AST enum/helper coverage appears present. |
-| `createProgram` | Partial via `typescript/unstable/sync` | `Program`, `Project`, `Snapshot`, and `Checker` primitives exist, but OpenClaw needs an adapter. |
-| `createPrinter` | Partial via `typescript/unstable/sync` | `Emitter.printNode` may cover this, but plugin SDK baseline output needs parity validation. |
-| `readConfigFile` | Partial via `typescript/unstable/fs` | File helpers may cover reads, but classic parse/error shaping is not direct. |
-| `sys` | Partial via `typescript/unstable/fs` | OpenClaw would need to stop depending on the classic `sys` object shape. |
-| `transpileModule` | Missing direct parity | Code Mode still needs a runtime-safe single-file TypeScript transform. |
-| `parseJsonConfigFileContent` | Missing direct parity | No direct tsconfig parse helper parity has been confirmed. |
+| Classic API                  | TS7/native coverage                     | Notes                                                                                            |
+| ---------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `SyntaxKind`                 | Available via `typescript/unstable/ast` | AST enum/helper coverage appears present.                                                        |
+| `createProgram`              | Partial via `typescript/unstable/sync`  | `Program`, `Project`, `Snapshot`, and `Checker` primitives exist, but OpenClaw needs an adapter. |
+| `createPrinter`              | Partial via `typescript/unstable/sync`  | `Emitter.printNode` may cover this, but plugin SDK baseline output needs parity validation.      |
+| `readConfigFile`             | Partial via `typescript/unstable/fs`    | File helpers may cover reads, but classic parse/error shaping is not direct.                     |
+| `sys`                        | Partial via `typescript/unstable/fs`    | OpenClaw would need to stop depending on the classic `sys` object shape.                         |
+| `transpileModule`            | Missing direct parity                   | Code Mode still needs a runtime-safe single-file TypeScript transform.                           |
+| `parseJsonConfigFileContent` | Missing direct parity                   | No direct tsconfig parse helper parity has been confirmed.                                       |
 
 ## Questions for TypeScript / Native Owners
 

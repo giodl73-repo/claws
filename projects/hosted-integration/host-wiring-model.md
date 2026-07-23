@@ -24,8 +24,8 @@ from one universal wire envelope or activation runtime.
     "gatewayClients": ["lobster/approvals"],
     "channelEndpoints": ["lobster/teams"],
     "trafficPolicies": ["lobster/enterprise-egress"],
-    "providerRequestDispatchers": ["lobster/egress"]
-  }
+    "providerRequestDispatchers": ["lobster/egress"],
+  },
 }
 ```
 

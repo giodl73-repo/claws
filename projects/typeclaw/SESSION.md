@@ -83,9 +83,9 @@
   `src/plugin-sdk/api-baseline.ts`; both route through
   `src/typescript/compiler-api.ts`. Current-toolchain validation passed:
   `node scripts/run-tsgo.mjs -p tsconfig.core.json --incremental
-  --tsBuildInfoFile .artifacts/typeclaw/seam-core.tsbuildinfo`,
+--tsBuildInfoFile .artifacts/typeclaw/seam-core.tsbuildinfo`,
   `node scripts/run-vitest.mjs src/agents/code-mode.test.ts
-  src/plugin-sdk/api-baseline.test.ts`, and `git diff --check`.
+src/plugin-sdk/api-baseline.test.ts`, and `git diff --check`.
 - Pushed follow-up diagnostic commit `47bcbcb19d`: the compiler API seam now
   reports the installed TypeScript package shape and names the classic APIs
   OpenClaw still requires when a rootless TS7/native package is installed. It
@@ -100,9 +100,9 @@
   `typescript@7.0.1-rc` metadata with `./unstable/sync` and `./unstable/ast`
   exports. Validation passed
   `node scripts/run-tsgo.mjs -p tsconfig.core.json --incremental
-  --tsBuildInfoFile .artifacts/typeclaw/compiler-api-core.tsbuildinfo`,
+--tsBuildInfoFile .artifacts/typeclaw/compiler-api-core.tsbuildinfo`,
   `node scripts/run-vitest.mjs src/typescript/compiler-api.test.ts
-  src/agents/code-mode.test.ts src/plugin-sdk/api-baseline.test.ts`, and
+src/agents/code-mode.test.ts src/plugin-sdk/api-baseline.test.ts`, and
   `git diff --check`.
 - Pushed coverage-map commit `f93f344c18`: added
   `src/typescript/native-api-coverage.ts` to classify the classic compiler APIs
@@ -113,9 +113,9 @@
   The diagnostic now includes this map so TS7/native failures distinguish
   available, partial, and missing API coverage. Validation passed
   `node scripts/run-tsgo.mjs -p tsconfig.core.json --incremental
-  --tsBuildInfoFile .artifacts/typeclaw/native-api-coverage-core.tsbuildinfo`,
+--tsBuildInfoFile .artifacts/typeclaw/native-api-coverage-core.tsbuildinfo`,
   `node scripts/run-vitest.mjs src/typescript/compiler-api.test.ts
-  src/agents/code-mode.test.ts src/plugin-sdk/api-baseline.test.ts`, and
+src/agents/code-mode.test.ts src/plugin-sdk/api-baseline.test.ts`, and
   `git diff --check`.
 - Remaining classic TypeScript compiler/API imports in `src/` are currently
   test-only files. Next step is to reapply the TS7 candidate and see whether

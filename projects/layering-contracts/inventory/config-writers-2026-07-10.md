@@ -34,17 +34,17 @@ and deferred Gateway paths.
 
 ## Writer Inventory
 
-| Writer | Input | Mutation | Failure posture | Ownership observation |
-| --- | --- | --- | --- | --- |
-| Config seeder | Baked root/includes, existing user config, optional model override/default | Merges baked include anchors, cleans template-equal flattening, writes root atomically | Logs warning/panic result; startup continues toward later validation | Core composition primitive implemented in Lobster adapter |
-| Allowed-origins overlay | `OPENCLAW_GATEWAY_ALLOWED_ORIGINS` | Adds/removes inline `gateway.controlUi.allowedOrigins` while preserving Gateway include | Best effort | Host topology over OpenClaw Gateway config |
-| Legacy node cleanup | Existing inline Gateway config | Removes old adapter-generated command allowlist | Best effort | Lobster migration workaround |
-| Legacy exec cleanup | Existing inline tools config | Removes old adapter-generated exec overlay while preserving operator siblings | Best effort | Lobster migration workaround |
-| Plugins overlay | Plugin gates, WebIQ, WorkIQ toggles, Teams/mail identity and flags | Replaces `plugins.$include` with an inlined filtered/modified manifest | Best effort | Host selection plus plugin-owned semantics, currently adapter-composed |
-| Diagnostics install seed | Baked install metadata | Seeds OpenClaw installed-plugin index through helper config | Best effort; disables Gateway OTEL env for this spawn on failure | Packaging compatibility workaround around plugin trust/install state |
-| Remote-harness overlay | Dispatch enablement | Mutates model/runtime config for remote harness | Fail closed when requested; best effort when disabled | AgentHarness bridge-specific compatibility logic |
-| Skills overlay | Effective code-mode/plugin decision | Replaces `skills.$include` with inlined skill directories | Best effort | Plugin capability visibility currently globally composed |
-| Policy bootstrap | Runtime-selected baseline/env | Writes `policy.jsonc` and related policy config | Separate policy-specific posture | Optional plugin/host rollout, not core readiness dependency |
+| Writer                   | Input                                                                      | Mutation                                                                                | Failure posture                                                      | Ownership observation                                                  |
+| ------------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Config seeder            | Baked root/includes, existing user config, optional model override/default | Merges baked include anchors, cleans template-equal flattening, writes root atomically  | Logs warning/panic result; startup continues toward later validation | Core composition primitive implemented in Lobster adapter              |
+| Allowed-origins overlay  | `OPENCLAW_GATEWAY_ALLOWED_ORIGINS`                                         | Adds/removes inline `gateway.controlUi.allowedOrigins` while preserving Gateway include | Best effort                                                          | Host topology over OpenClaw Gateway config                             |
+| Legacy node cleanup      | Existing inline Gateway config                                             | Removes old adapter-generated command allowlist                                         | Best effort                                                          | Lobster migration workaround                                           |
+| Legacy exec cleanup      | Existing inline tools config                                               | Removes old adapter-generated exec overlay while preserving operator siblings           | Best effort                                                          | Lobster migration workaround                                           |
+| Plugins overlay          | Plugin gates, WebIQ, WorkIQ toggles, Teams/mail identity and flags         | Replaces `plugins.$include` with an inlined filtered/modified manifest                  | Best effort                                                          | Host selection plus plugin-owned semantics, currently adapter-composed |
+| Diagnostics install seed | Baked install metadata                                                     | Seeds OpenClaw installed-plugin index through helper config                             | Best effort; disables Gateway OTEL env for this spawn on failure     | Packaging compatibility workaround around plugin trust/install state   |
+| Remote-harness overlay   | Dispatch enablement                                                        | Mutates model/runtime config for remote harness                                         | Fail closed when requested; best effort when disabled                | AgentHarness bridge-specific compatibility logic                       |
+| Skills overlay           | Effective code-mode/plugin decision                                        | Replaces `skills.$include` with inlined skill directories                               | Best effort                                                          | Plugin capability visibility currently globally composed               |
+| Policy bootstrap         | Runtime-selected baseline/env                                              | Writes `policy.jsonc` and related policy config                                         | Separate policy-specific posture                                     | Optional plugin/host rollout, not core readiness dependency            |
 
 ## Composition Findings
 
@@ -130,4 +130,3 @@ runtime mode applied. Dynamic control-plane reconciliation remains separate.
   provenance that Lobster can consume.
 - Continue into trusted identity and proxy-pipe, which are the next boundary
   inputs applied around this config pipeline.
-

@@ -38,24 +38,24 @@ the same Rust type, but the body has no explicit contract version. Unknown
 fields are ignored for rolling compatibility, and most omitted fields preserve
 prior/default container state.
 
-| Field | Current role | Area | First disposition |
-| --- | --- | --- | --- |
-| `proxy_config` | Short-lived reverse-proxy bearer and TTL | Runtime Boundary | Lobster transport implementation over portable brokered-access needs |
-| `proxy_pipe` | Advertises runtime-dialed gRPC proxy-pipe path | Runtime Boundary | Explicit compatibility boundary; map protocol and failures |
-| `user` | User identity/profile for templates and hooks | Activation / Boundary | Lobster identity projection; minimize OpenClaw-visible identity contract |
-| `agent` | Agent Teams identity for templates/runtime | Activation | Lobster/product metadata unless portable agent identity is proven |
-| `client` | Initiating channel/runtime/session metadata | Evidence / Activation | Correlation and host context; audit consumers |
-| `git_mode` | Selects disabled, SPO, or MS Graph workspace persistence | State/Continuity | Mixes portable durability intent with Lobster storage implementation |
-| `usespoforgit` | Legacy persistence selector | State/Continuity | Compatibility workaround with deletion target |
-| `lobster_team` | Product feature flag | Plugin/product | Keep Lobster/plugin-owned |
-| `daily_diagnostics` | Arms daily diagnostics | Evidence | Lobster rollout over portable diagnostics hooks |
-| `behavioral_diagnostics` | Arms behavioral self-evaluation | Plugin/product | Lobster/plugin-owned unless a generic scheduler primitive is needed |
-| `debug_commands_enabled` | Enables adapter diagnostic commands | Boundary | Lobster operator surface |
-| `self_diagnosis_auto_invoke` | Controls managed prompt directive | Plugin/product | Plugin/host-owned; not a core hosting contract |
-| `idle_user_input_reset_disabled` | Process kill switch for idle handling | Runtime Boundary | Portable lifecycle semantics may be missing; implementation is Lobster |
-| `model_config` | Replaces baked OpenClaw model catalog before spawn | Activation | Host-selected config using OpenClaw model schema |
-| `extra_env` | Arbitrary managed runtime projection | All | Largest implicit boundary; replace scattering with classified entries |
-| `lifecycle` | Lenient drain-protocol capability advertisement | Runtime Boundary | Portable lifecycle capability candidate; currently untyped on wire |
+| Field                            | Current role                                             | Area                  | First disposition                                                        |
+| -------------------------------- | -------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------ |
+| `proxy_config`                   | Short-lived reverse-proxy bearer and TTL                 | Runtime Boundary      | Lobster transport implementation over portable brokered-access needs     |
+| `proxy_pipe`                     | Advertises runtime-dialed gRPC proxy-pipe path           | Runtime Boundary      | Explicit compatibility boundary; map protocol and failures               |
+| `user`                           | User identity/profile for templates and hooks            | Activation / Boundary | Lobster identity projection; minimize OpenClaw-visible identity contract |
+| `agent`                          | Agent Teams identity for templates/runtime               | Activation            | Lobster/product metadata unless portable agent identity is proven        |
+| `client`                         | Initiating channel/runtime/session metadata              | Evidence / Activation | Correlation and host context; audit consumers                            |
+| `git_mode`                       | Selects disabled, SPO, or MS Graph workspace persistence | State/Continuity      | Mixes portable durability intent with Lobster storage implementation     |
+| `usespoforgit`                   | Legacy persistence selector                              | State/Continuity      | Compatibility workaround with deletion target                            |
+| `lobster_team`                   | Product feature flag                                     | Plugin/product        | Keep Lobster/plugin-owned                                                |
+| `daily_diagnostics`              | Arms daily diagnostics                                   | Evidence              | Lobster rollout over portable diagnostics hooks                          |
+| `behavioral_diagnostics`         | Arms behavioral self-evaluation                          | Plugin/product        | Lobster/plugin-owned unless a generic scheduler primitive is needed      |
+| `debug_commands_enabled`         | Enables adapter diagnostic commands                      | Boundary              | Lobster operator surface                                                 |
+| `self_diagnosis_auto_invoke`     | Controls managed prompt directive                        | Plugin/product        | Plugin/host-owned; not a core hosting contract                           |
+| `idle_user_input_reset_disabled` | Process kill switch for idle handling                    | Runtime Boundary      | Portable lifecycle semantics may be missing; implementation is Lobster   |
+| `model_config`                   | Replaces baked OpenClaw model catalog before spawn       | Activation            | Host-selected config using OpenClaw model schema                         |
+| `extra_env`                      | Arbitrary managed runtime projection                     | All                   | Largest implicit boundary; replace scattering with classified entries    |
+| `lifecycle`                      | Lenient drain-protocol capability advertisement          | Runtime Boundary      | Portable lifecycle capability candidate; currently untyped on wire       |
 
 ### Start DTO Findings
 
@@ -121,16 +121,16 @@ The following runtime-projected keys are not visibly listed in the generic
 keys overwrite prior values, and some keys have special adapter handling. Each
 must be traced through its actual consumer and omission behavior.
 
-| Key | Projection behavior | Initial risk question |
-| --- | --- | --- |
-| `OPENCLAW_GIT_PASSPORT_STRICT_LEASE_ENABLED` | Always explicit | Is process reset unnecessary because every real start overwrites it? |
-| `OPENCLAW_WEBIQ_ENABLED` | Always explicit | Does every spawn consume only the current explicit value? |
-| `OPENCLAW_WORKIQ_TEAMS_DELEGATED_RENAME_ENABLED` | Always explicit | Is it omitted on any resolve-only or alternate start path? |
-| `OPENCLAW_CODE_MODE_STREAMING_ENABLED` | Always explicit | Is Gateway/plugin state regenerated on every start? |
-| `CRON_WORKIQ_PLAN_CAPTURE_ENABLED` | Always explicit | Is patched runtime behavior process-sticky across starts? |
-| `OPENCLAW_DEFAULT_MODEL` | Always explicit | Is effective model overlay always rebuilt before spawn? |
-| `OPENCLAW_GIT_REPO_FILENAME` | Conditional on host configuration | Can a prior custom filename survive a later omitted value? |
-| `OPENCLAW_TEAMS_DELIVERY_AUTH_TOKEN` | Conditional on secret availability | Does special in-memory token handling clear prior state when omitted? |
+| Key                                              | Projection behavior                | Initial risk question                                                 |
+| ------------------------------------------------ | ---------------------------------- | --------------------------------------------------------------------- |
+| `OPENCLAW_GIT_PASSPORT_STRICT_LEASE_ENABLED`     | Always explicit                    | Is process reset unnecessary because every real start overwrites it?  |
+| `OPENCLAW_WEBIQ_ENABLED`                         | Always explicit                    | Does every spawn consume only the current explicit value?             |
+| `OPENCLAW_WORKIQ_TEAMS_DELEGATED_RENAME_ENABLED` | Always explicit                    | Is it omitted on any resolve-only or alternate start path?            |
+| `OPENCLAW_CODE_MODE_STREAMING_ENABLED`           | Always explicit                    | Is Gateway/plugin state regenerated on every start?                   |
+| `CRON_WORKIQ_PLAN_CAPTURE_ENABLED`               | Always explicit                    | Is patched runtime behavior process-sticky across starts?             |
+| `OPENCLAW_DEFAULT_MODEL`                         | Always explicit                    | Is effective model overlay always rebuilt before spawn?               |
+| `OPENCLAW_GIT_REPO_FILENAME`                     | Conditional on host configuration  | Can a prior custom filename survive a later omitted value?            |
+| `OPENCLAW_TEAMS_DELIVERY_AUTH_TOKEN`             | Conditional on secret availability | Does special in-memory token handling clear prior state when omitted? |
 
 The prior audit also named `OPENCLAW_GIT_SHALLOW_CLONE_ENABLED`; it is not
 projected by the current `gateway_start_extra_env()` at this revision and must
@@ -140,18 +140,18 @@ be located before retaining it in the current boundary inventory.
 
 The baked root `openclaw.json` uses ten `$include` fragments:
 
-| Fragment | Main content | Classification |
-| --- | --- | --- |
-| `openclaw.session.json` | Per-channel-peer DM scope | OpenClaw config selected by host |
-| `openclaw.gateway.json` | Local/loopback Gateway, trusted proxy, password fallback, Control UI bypasses, disabled HTTP endpoints, node commands | Mixed portable Gateway contract, host posture, and compatibility workarounds |
-| `openclaw.models.json` | Provider catalogs, placeholder API keys, proxy-routed models | Host model selection plus missing brokered-provider/no-secrets contract |
-| `openclaw.mcp.json` | Loopback `aether-tools` MCP endpoint | Host adapter/plugin integration |
-| `openclaw.skills.json` | Product/plugin skill paths | Plugin-owned declarations should replace global baked paths where possible |
-| `openclaw.agents.json` | Default models, disabled memory search, `/tmp` SQLite path, compaction floor, bootstrap skip | Mixed host policy, state semantics, and startup workaround |
-| `openclaw.tools.json` | Minimal profile, denies, explicit tool allowlist, exec approvals, WebIQ | Managed baseline selection plus OpenClaw policy-resolution semantics |
-| `openclaw.plugins.json` | Lobster plugin bundle, install metadata, plugin-specific configs | Lobster selects bundle; each plugin owns its declarations/config |
-| `openclaw.diagnostics.json` | OTel enablement, signals, flush, sampling | OpenClaw diagnostics contract plus Lobster deployment defaults |
-| `openclaw.hooks.json` | Two Lobster hooks and five disabled upstream hooks | Plugin/hook ownership plus suspect boot-time compatibility tuning |
+| Fragment                    | Main content                                                                                                          | Classification                                                               |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `openclaw.session.json`     | Per-channel-peer DM scope                                                                                             | OpenClaw config selected by host                                             |
+| `openclaw.gateway.json`     | Local/loopback Gateway, trusted proxy, password fallback, Control UI bypasses, disabled HTTP endpoints, node commands | Mixed portable Gateway contract, host posture, and compatibility workarounds |
+| `openclaw.models.json`      | Provider catalogs, placeholder API keys, proxy-routed models                                                          | Host model selection plus missing brokered-provider/no-secrets contract      |
+| `openclaw.mcp.json`         | Loopback `aether-tools` MCP endpoint                                                                                  | Host adapter/plugin integration                                              |
+| `openclaw.skills.json`      | Product/plugin skill paths                                                                                            | Plugin-owned declarations should replace global baked paths where possible   |
+| `openclaw.agents.json`      | Default models, disabled memory search, `/tmp` SQLite path, compaction floor, bootstrap skip                          | Mixed host policy, state semantics, and startup workaround                   |
+| `openclaw.tools.json`       | Minimal profile, denies, explicit tool allowlist, exec approvals, WebIQ                                               | Managed baseline selection plus OpenClaw policy-resolution semantics         |
+| `openclaw.plugins.json`     | Lobster plugin bundle, install metadata, plugin-specific configs                                                      | Lobster selects bundle; each plugin owns its declarations/config             |
+| `openclaw.diagnostics.json` | OTel enablement, signals, flush, sampling                                                                             | OpenClaw diagnostics contract plus Lobster deployment defaults               |
+| `openclaw.hooks.json`       | Two Lobster hooks and five disabled upstream hooks                                                                    | Plugin/hook ownership plus suspect boot-time compatibility tuning            |
 
 ### Config Findings
 
@@ -178,16 +178,16 @@ The baked root `openclaw.json` uses ten `$include` fragments:
 
 ## First Disposition
 
-| Boundary concern | Current conclusion | Next proof |
-| --- | --- | --- |
-| Start DTO | Legitimate Lobster adapter API, but too implicit as the compatibility ledger | Trace every consumer and omission/reset rule |
-| `extra_env` | Highest warm-reuse and drift pressure | Build exact projected/accepted/reset/child-forwarded matrix |
-| Config includes | Useful primitive with Lobster-dependent merge semantics | Trace seeding and all runtime overlay writers |
-| Gateway trusted proxy | Portable OpenClaw behavior plus Lobster local-client workarounds | Trace headers and direct-call fallback tests |
-| Model proxy posture | Host need lacks clean credential-free expression | Trace proxy capture and provider child env |
-| Plugin bundle | Correctly Lobster-selected but declarations are partly global | Map fields to plugin manifests and overlays |
-| State paths | Semantics are not aligned with persistence boundary | Continue State/Continuity inventory |
-| Lifecycle capability | Candidate portable contract currently encoded leniently | Trace drain/start/retry state machine |
+| Boundary concern      | Current conclusion                                                           | Next proof                                                  |
+| --------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Start DTO             | Legitimate Lobster adapter API, but too implicit as the compatibility ledger | Trace every consumer and omission/reset rule                |
+| `extra_env`           | Highest warm-reuse and drift pressure                                        | Build exact projected/accepted/reset/child-forwarded matrix |
+| Config includes       | Useful primitive with Lobster-dependent merge semantics                      | Trace seeding and all runtime overlay writers               |
+| Gateway trusted proxy | Portable OpenClaw behavior plus Lobster local-client workarounds             | Trace headers and direct-call fallback tests                |
+| Model proxy posture   | Host need lacks clean credential-free expression                             | Trace proxy capture and provider child env                  |
+| Plugin bundle         | Correctly Lobster-selected but declarations are partly global                | Map fields to plugin manifests and overlays                 |
+| State paths           | Semantics are not aligned with persistence boundary                          | Continue State/Continuity inventory                         |
+| Lifecycle capability  | Candidate portable contract currently encoded leniently                      | Trace drain/start/retry state machine                       |
 
 ## Next Pass
 
@@ -199,4 +199,3 @@ The baked root `openclaw.json` uses ten `$include` fragments:
 4. Trace trusted identity headers through runtime, Plex, adapter, and Gateway.
 5. Start the state-path durability table using the concrete snapshot paths
    discovered here.
-

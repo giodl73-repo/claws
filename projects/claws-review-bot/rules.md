@@ -97,6 +97,7 @@ Use one concise comment per issue:
 
 ```markdown
 <!-- claws-review:issue-assessment -->
+
 **Claws Review Bot issue assessment**
 
 - Classification:

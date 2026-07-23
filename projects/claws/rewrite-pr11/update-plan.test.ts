@@ -69,9 +69,7 @@ async function fixture() {
     installPackages: async (plan, options) =>
       plan.actions
         .filter((action) => action.kind === "package")
-        .map((action) =>
-          persistClawPackageRef(plan, action.details as ClawPackage, options),
-        ),
+        .map((action) => persistClawPackageRef(plan, action.details as ClawPackage, options)),
     installMcpServers: async (plan, options) =>
       await installClawMcpServers(plan, {
         ...options,
@@ -192,8 +190,8 @@ describe("buildClawUpdatePlan", () => {
     const current = await fixture();
     await writeFile(join(current.root, "workspace-worker", "SOUL.md"), "operator edit\n", "utf8");
     current.config.mcp!.servers!.docs = { command: "node", args: ["operator.mjs"] };
-    openOpenClawStateDatabase({ env: current.env }).db
-      .prepare("UPDATE claw_cron_refs SET status = 'pending' WHERE agent_id = 'worker'")
+    openOpenClawStateDatabase({ env: current.env })
+      .db.prepare("UPDATE claw_cron_refs SET status = 'pending' WHERE agent_id = 'worker'")
       .run();
 
     const plan = await buildClawUpdatePlan({

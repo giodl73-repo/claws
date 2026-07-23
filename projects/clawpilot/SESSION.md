@@ -18,8 +18,12 @@
 
 ## Current Session
 
-- Last updated: 2026-07-14T15:16:00-07:00.
-- Last agent: Copilot.
+- Last updated: 2026-07-22.
+- Last agent: Codex.
+- M5 Rendezvous focus: #3897 and #862. Drive Lobster #5336 as the
+  `scout-standard` convergence contract, align #4297/#4648 as its node-mode
+  slices, and author the offline-node remediation PR from
+  `projects/rendezvous/pr-plan.md`.
 - 2026-07-14 separate node-mode fix filed: opened Lobster #4648
   (`https://microsoft.ghe.com/bic/lobster/pull/4648`) from
   `C:\src\lobster-code-mode-node-invoke`, branch
@@ -36,6 +40,13 @@
   audit authority. The PR is non-draft, review required, merge blocked; only
   `GitOps/FileAffordance` was attached and green at creation, while required
   GitHubPop and Lobster runtime ADO contexts were not yet visible.
+- 2026-07-22 node-mode follow-up: #4297 is merged. Opened #5460 and pushed its
+  deployable-bundle review fix at `865df0ade7`; catalog tests pass 32/32,
+  namespace tests 19/19, and bundle generation parity passes. Repaired #4648's failed runtime eval:
+  the generated Nodes plugin bundle was syntactically invalid, causing
+  `unknown_namespace` and native-tool fallback. Commit `fab956125d` restores a
+  valid bundle and adds a Docker `node --check`; current `main` is merged and
+  exact head `b3b1399375` is pushed for refreshed CI/review.
 - 2026-07-14 #4362 backup: opened Lobster #4653
   (`https://microsoft.ghe.com/bic/lobster/pull/4653`) from
   `C:\src\lobster-restore-tool-posture-backup`, branch

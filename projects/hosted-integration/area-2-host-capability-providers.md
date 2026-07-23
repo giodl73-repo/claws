@@ -137,13 +137,13 @@ contract.
 
 ## Compare
 
-| Comparator | Reuse | Avoid |
-| --- | --- | --- |
-| WASI component host imports | Explicit requested capabilities, host-granted implementation, versioned typed interface | Binding everything statically when optional runtime changes are needed |
-| Kubernetes CSI/CNI/CRI | Independent capability specifications, plugin conformance, orchestrator-selected provider | Highly privileged plugins with weak tenant isolation |
-| Dapr building blocks | Simple per-capability APIs and configurable backends | One sidecar becoming the mandatory lowest-common-denominator runtime |
-| OpenClaw SecretRef | Multiple provider bindings behind one consumer model | Treating all capabilities as secret-shaped key/value lookup |
-| OpenClaw AgentHarness | Core policy plus implementation-specific execution | Letting implementations silently change provider or delivery semantics |
+| Comparator                  | Reuse                                                                                     | Avoid                                                                  |
+| --------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| WASI component host imports | Explicit requested capabilities, host-granted implementation, versioned typed interface   | Binding everything statically when optional runtime changes are needed |
+| Kubernetes CSI/CNI/CRI      | Independent capability specifications, plugin conformance, orchestrator-selected provider | Highly privileged plugins with weak tenant isolation                   |
+| Dapr building blocks        | Simple per-capability APIs and configurable backends                                      | One sidecar becoming the mandatory lowest-common-denominator runtime   |
+| OpenClaw SecretRef          | Multiple provider bindings behind one consumer model                                      | Treating all capabilities as secret-shaped key/value lookup            |
+| OpenClaw AgentHarness       | Core policy plus implementation-specific execution                                        | Letting implementations silently change provider or delivery semantics |
 
 ## Evaluate
 

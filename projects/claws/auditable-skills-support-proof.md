@@ -77,4 +77,3 @@ opened cases and two resolved outcomes and correlate the remaining case, but a
 real unresolved queue still belongs to the source channel or a CRM/workflow
 consumer. This is a useful scope boundary, not a reason to add case state to
 Receipt Core.
-

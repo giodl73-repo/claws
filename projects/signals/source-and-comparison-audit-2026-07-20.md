@@ -109,24 +109,24 @@ to verbose prose before existing consumers can observe it.
 
 ## Internal Analogue Matrix
 
-| Analogue | Disposition | Why |
-| --- | --- | --- |
-| `DiagnosticEventPayload` | **Reuse** | Existing typed dispatch, trace, trust, privacy, queueing, and exporter substrate. |
-| `HealthFinding.checkId` plus `message` | **Adapt** | Strong stable-id/human-text split; localization needs typed parameters rather than parsing English. |
-| Readiness `failing` identifiers | **Adapt through Hosting Profiles** | Demonstrates bounded machine identifiers, but readiness semantics remain owner-specific. |
-| Policy Doctor findings | **Reuse** | Existing concrete codes, severity, evidence, and repair projections. |
-| Localization runtime descriptors | **Adapt** | Renderer consumes stable identity and parameters; it must not become the owner of runtime failure semantics. |
-| Free-form log messages | **Avoid as authority** | Useful projection, unsafe as a machine contract or localization source. |
-| A universal `SignalEnvelope` | **Avoid** | Would duplicate existing event, finding, readiness, and owner result contracts. |
+| Analogue                               | Disposition                        | Why                                                                                                          |
+| -------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `DiagnosticEventPayload`               | **Reuse**                          | Existing typed dispatch, trace, trust, privacy, queueing, and exporter substrate.                            |
+| `HealthFinding.checkId` plus `message` | **Adapt**                          | Strong stable-id/human-text split; localization needs typed parameters rather than parsing English.          |
+| Readiness `failing` identifiers        | **Adapt through Hosting Profiles** | Demonstrates bounded machine identifiers, but readiness semantics remain owner-specific.                     |
+| Policy Doctor findings                 | **Reuse**                          | Existing concrete codes, severity, evidence, and repair projections.                                         |
+| Localization runtime descriptors       | **Adapt**                          | Renderer consumes stable identity and parameters; it must not become the owner of runtime failure semantics. |
+| Free-form log messages                 | **Avoid as authority**             | Useful projection, unsafe as a machine contract or localization source.                                      |
+| A universal `SignalEnvelope`           | **Avoid**                          | Would duplicate existing event, finding, readiness, and owner result contracts.                              |
 
 ## External Comparator Matrix
 
-| Comparator | Useful precedent | Avoid |
-| --- | --- | --- |
-| [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457.html) | Stable problem `type` and occurrence identity remain language-neutral while `title` and `detail` are human and negotiable by language. | Treating one HTTP problem shape as the universal runtime event model. |
-| [Kubernetes Conditions](https://kubernetes.io/docs/reference/kubernetes-api/definitions/condition-v1-meta/) | `type`/`status`/`reason` are machine-facing; `message` is human-facing; generation and transition time prevent stale interpretation. | Copying condition arrays into ephemeral event paths or inventing conditions for every warning. |
-| [OpenTelemetry GenAI conventions](https://github.com/open-telemetry/semantic-conventions-genai) | Standard operation, model/provider, usage, error, resource, and trace attributes improve backend interoperability. | Making exporter semantic conventions the canonical OpenClaw product contract. Experimental conventions may change. |
-| [W3C Trace Context](https://www.w3.org/TR/trace-context/) | Standard trace ancestry crosses process/service boundaries; product fields should supplement it with bounded semantic context. | Replacing `traceparent` with OpenClaw-specific correlation headers or placing sensitive identity in trace IDs. |
+| Comparator                                                                                                  | Useful precedent                                                                                                                       | Avoid                                                                                                              |
+| ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457.html)                                     | Stable problem `type` and occurrence identity remain language-neutral while `title` and `detail` are human and negotiable by language. | Treating one HTTP problem shape as the universal runtime event model.                                              |
+| [Kubernetes Conditions](https://kubernetes.io/docs/reference/kubernetes-api/definitions/condition-v1-meta/) | `type`/`status`/`reason` are machine-facing; `message` is human-facing; generation and transition time prevent stale interpretation.   | Copying condition arrays into ephemeral event paths or inventing conditions for every warning.                     |
+| [OpenTelemetry GenAI conventions](https://github.com/open-telemetry/semantic-conventions-genai)             | Standard operation, model/provider, usage, error, resource, and trace attributes improve backend interoperability.                     | Making exporter semantic conventions the canonical OpenClaw product contract. Experimental conventions may change. |
+| [W3C Trace Context](https://www.w3.org/TR/trace-context/)                                                   | Standard trace ancestry crosses process/service boundaries; product fields should supplement it with bounded semantic context.         | Replacing `traceparent` with OpenClaw-specific correlation headers or placing sensitive identity in trace IDs.     |
 
 ## Revised Architecture Conclusion
 

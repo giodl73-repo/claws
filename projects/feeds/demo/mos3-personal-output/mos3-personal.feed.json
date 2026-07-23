@@ -1,23 +1,21 @@
 ﻿{
-    "schemaVersion":  1,
-    "feedId":  "mos3-personal:sha256:2ae8f8066baab9e36c122f5eb5425f33ab2f5ffbea767ea5a7d9f82de680faec:sha256:035622c921a5c9f61f1a6ffc8cc8723f600869a74c1a5ddd35f0d2c7384c8fa6",
-    "generatedAt":  "2026-06-23T22:18:11.1193984Z",
-    "scope":  {
-                  "kind":  "personal",
-                  "tenantIdHash":  "sha256:2ae8f8066baab9e36c122f5eb5425f33ab2f5ffbea767ea5a7d9f82de680faec",
-                  "userIdHash":  "sha256:035622c921a5c9f61f1a6ffc8cc8723f600869a74c1a5ddd35f0d2c7384c8fa6"
-              },
-    "source":  {
-                   "registry":  "mos3",
-                   "endpoint":  "/catalog/v1/users/acquisitions/get",
-                   "environment":  "msit"
-               },
-    "entries":  [
-
-                ],
-    "attestation":  {
-                        "type":  "sha256",
-                        "hash":  "sha256:44c898a0f394de5757f75193e3fbedc0ae298ea83db1b1591e4308a8ae4e0819",
-                        "generatedBy":  "mos3-personal-feed-demo"
-                    }
+  "schemaVersion": 1,
+  "feedId": "mos3-personal:sha256:2ae8f8066baab9e36c122f5eb5425f33ab2f5ffbea767ea5a7d9f82de680faec:sha256:035622c921a5c9f61f1a6ffc8cc8723f600869a74c1a5ddd35f0d2c7384c8fa6",
+  "generatedAt": "2026-06-23T22:18:11.1193984Z",
+  "scope": {
+    "kind": "personal",
+    "tenantIdHash": "sha256:2ae8f8066baab9e36c122f5eb5425f33ab2f5ffbea767ea5a7d9f82de680faec",
+    "userIdHash": "sha256:035622c921a5c9f61f1a6ffc8cc8723f600869a74c1a5ddd35f0d2c7384c8fa6"
+  },
+  "source": {
+    "registry": "mos3",
+    "endpoint": "/catalog/v1/users/acquisitions/get",
+    "environment": "msit"
+  },
+  "entries": [],
+  "attestation": {
+    "type": "sha256",
+    "hash": "sha256:44c898a0f394de5757f75193e3fbedc0ae298ea83db1b1591e4308a8ae4e0819",
+    "generatedBy": "mos3-personal-feed-demo"
+  }
 }

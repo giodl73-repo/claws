@@ -54,14 +54,14 @@ Hypothesis:
 
 ## Compare
 
-| Comparator | Classification | Lesson |
-| --- | --- | --- |
-| Host composition status and Doctor findings | Reuse | Keep deterministic structured status and stable blocker reasons. |
-| CAPI canary authority and rollback | Reuse | Observation reports authority but never owns it. |
-| Carrier owner/bundle generation fencing | Adapt | Include both generations in each fingerprint and reject malformed values. |
-| Kubernetes rollout revisions/status/rollback | Adapt | Expose versioned progress and explicit rollback/expiry gates rather than silently aging out compatibility. |
-| Istio request mirroring | Avoid for writes | Mirroring is fire-and-forget and duplicates side effects; use recorded or synthetic probes only. |
-| Generic fleet rollout framework | Avoid in V1 | One CAPI slice is enough to test the deletion gate. |
+| Comparator                                   | Classification   | Lesson                                                                                                     |
+| -------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| Host composition status and Doctor findings  | Reuse            | Keep deterministic structured status and stable blocker reasons.                                           |
+| CAPI canary authority and rollback           | Reuse            | Observation reports authority but never owns it.                                                           |
+| Carrier owner/bundle generation fencing      | Adapt            | Include both generations in each fingerprint and reject malformed values.                                  |
+| Kubernetes rollout revisions/status/rollback | Adapt            | Expose versioned progress and explicit rollback/expiry gates rather than silently aging out compatibility. |
+| Istio request mirroring                      | Avoid for writes | Mirroring is fire-and-forget and duplicates side effects; use recorded or synthetic probes only.           |
+| Generic fleet rollout framework              | Avoid in V1      | One CAPI slice is enough to test the deletion gate.                                                        |
 
 Primary references:
 

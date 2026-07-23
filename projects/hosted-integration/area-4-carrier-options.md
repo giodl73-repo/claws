@@ -103,14 +103,14 @@ It also demonstrates the risks:
 
 ## Compare
 
-| Carrier | Advantages | Risks |
-| --- | --- | --- |
-| Direct endpoint | Simple ownership, independent failure, native tooling | Requires routable inbound path and more credentials/endpoints |
-| Loopback/mounted socket | Strong local isolation, low overhead | Only works when provider is colocated |
-| Sidecar | Clear process boundary, per-workload lifecycle | Startup, memory, health, and another failure domain |
-| Dedicated reverse connection | Outward-dial topology with failure isolation | More sockets, auth handshakes, keepalives, and rollout surfaces |
-| Gateway peer carrier | Reuses auth, correlation, connection lifecycle | Couples provider traffic to Gateway roles and control-plane capacity |
-| Multiplexed session | One dial, identity, keepalive, and generation | Shared TCP failure, noisy-neighbor flow control, version coupling, bus accretion |
+| Carrier                      | Advantages                                            | Risks                                                                            |
+| ---------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Direct endpoint              | Simple ownership, independent failure, native tooling | Requires routable inbound path and more credentials/endpoints                    |
+| Loopback/mounted socket      | Strong local isolation, low overhead                  | Only works when provider is colocated                                            |
+| Sidecar                      | Clear process boundary, per-workload lifecycle        | Startup, memory, health, and another failure domain                              |
+| Dedicated reverse connection | Outward-dial topology with failure isolation          | More sockets, auth handshakes, keepalives, and rollout surfaces                  |
+| Gateway peer carrier         | Reuses auth, correlation, connection lifecycle        | Couples provider traffic to Gateway roles and control-plane capacity             |
+| Multiplexed session          | One dial, identity, keepalive, and generation         | Shared TCP failure, noisy-neighbor flow control, version coupling, bus accretion |
 
 External precedents:
 

@@ -25,12 +25,12 @@ The through-line:
 
 Every stage keeps the same split:
 
-| Layer | Responsibility |
-| --- | --- |
-| Control plane | Desired state, admission, tenant identity, restrictions, quotas, policy compilation, lifecycle intent, audit index |
-| Host/runtime plane | Tenant routing, channel ingress, worker/cell placement, session routing, proxying, fleet telemetry sinks |
-| OpenClaw runtime plane | Gateway/session semantics, tools, plugin lifecycle, harness invocation, state semantics, diagnostics events |
-| Harness/cell plane | Actual execution environment: process, Docker, pod, VM, sandbox, tool driver |
+| Layer                  | Responsibility                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Control plane          | Desired state, admission, tenant identity, restrictions, quotas, policy compilation, lifecycle intent, audit index |
+| Host/runtime plane     | Tenant routing, channel ingress, worker/cell placement, session routing, proxying, fleet telemetry sinks           |
+| OpenClaw runtime plane | Gateway/session semantics, tools, plugin lifecycle, harness invocation, state semantics, diagnostics events        |
+| Harness/cell plane     | Actual execution environment: process, Docker, pod, VM, sandbox, tool driver                                       |
 
 If a change moves assistant deltas, channel messages, tool events, approvals,
 patches, compaction events, or harness frames into the control plane, it breaks

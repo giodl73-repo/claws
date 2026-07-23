@@ -124,24 +124,24 @@ This is a mature extension pattern, not a fixed list of hard-coded commands.
 
 ## Fit Matrix
 
-| Duplex requirement | `node.invoke` coverage | Needed change |
-| --- | --- | --- |
-| Server-to-peer unary request/result | Strong | Generalize shared machinery |
-| Correlation | Strong | Preserve request IDs and connection binding |
-| Capability/method advertisement | Strong | Add provider schemas/version metadata |
-| Deadline | Strong | Standardize deadline versus duration semantics |
-| Disconnect handling | Strong | Preserve fail-pending behavior |
-| Idempotency | Partial | Key is transported but peer/provider semantics are command-defined |
-| Generation fencing | Partial | Connection ID protects dispatch; hosted runtime generation needs explicit identity |
-| Permission model | Strong but node-specific | Add host-provider permissions separate from operator and pairing scopes |
-| Dynamic narrowing | Strong | Reuse declared/effective ceiling pattern |
-| Plugin extensibility | Strong | Add explicit host-provider registration rather than arbitrary methods |
-| Cancellation | Gap | No `node.invoke.cancel`; timeout removes Gateway waiter but does not cancel peer work |
-| Streaming | Gap | Unary payload/result only; no chunk, credit, half-close, or stream lifecycle |
-| Reconnect/resume | Gap by design | Disconnect fails pending calls; no invocation replay or resumption |
-| Payload bounds/schema | Partial | Gateway frame bounds exist; provider-specific schemas and limits are absent |
-| Host identity | Gap | Node/device pairing identity is the wrong domain |
-| Multi-tenant provenance | Gap | Must bind hosted tenant/user/runtime identity outside event display data |
+| Duplex requirement                  | `node.invoke` coverage   | Needed change                                                                         |
+| ----------------------------------- | ------------------------ | ------------------------------------------------------------------------------------- |
+| Server-to-peer unary request/result | Strong                   | Generalize shared machinery                                                           |
+| Correlation                         | Strong                   | Preserve request IDs and connection binding                                           |
+| Capability/method advertisement     | Strong                   | Add provider schemas/version metadata                                                 |
+| Deadline                            | Strong                   | Standardize deadline versus duration semantics                                        |
+| Disconnect handling                 | Strong                   | Preserve fail-pending behavior                                                        |
+| Idempotency                         | Partial                  | Key is transported but peer/provider semantics are command-defined                    |
+| Generation fencing                  | Partial                  | Connection ID protects dispatch; hosted runtime generation needs explicit identity    |
+| Permission model                    | Strong but node-specific | Add host-provider permissions separate from operator and pairing scopes               |
+| Dynamic narrowing                   | Strong                   | Reuse declared/effective ceiling pattern                                              |
+| Plugin extensibility                | Strong                   | Add explicit host-provider registration rather than arbitrary methods                 |
+| Cancellation                        | Gap                      | No `node.invoke.cancel`; timeout removes Gateway waiter but does not cancel peer work |
+| Streaming                           | Gap                      | Unary payload/result only; no chunk, credit, half-close, or stream lifecycle          |
+| Reconnect/resume                    | Gap by design            | Disconnect fails pending calls; no invocation replay or resumption                    |
+| Payload bounds/schema               | Partial                  | Gateway frame bounds exist; provider-specific schemas and limits are absent           |
+| Host identity                       | Gap                      | Node/device pairing identity is the wrong domain                                      |
+| Multi-tenant provenance             | Gap                      | Must bind hosted tenant/user/runtime identity outside event display data              |
 
 ## Why A Host Is Not A Node
 

@@ -203,21 +203,21 @@ Policy-owned startup requirements:
     "requireProfile": "hosted-openclaw/v0",
     "gateway": {
       "requireTrustedProxy": true,
-      "forbidDirectUnauthenticatedAccess": true
+      "forbidDirectUnauthenticatedAccess": true,
     },
     "egress": {
       "requireBrokered": true,
       "requireFailClosed": true,
-      "forbidRuntimeProviderSecrets": true
+      "forbidRuntimeProviderSecrets": true,
     },
     "state": {
       "requireWorkspaceRestoredBeforeReady": true,
-      "requireSingleWriter": true
+      "requireSingleWriter": true,
     },
     "plugins": {
-      "requireAllSelectedPluginsResolved": true
-    }
-  }
+      "requireAllSelectedPluginsResolved": true,
+    },
+  },
 }
 ```
 
@@ -228,25 +228,25 @@ Runtime-owned startup evidence:
   "profile": "hosted-openclaw/v0",
   "config": {
     "sourceFingerprint": "...",
-    "runtimeFingerprint": "..."
+    "runtimeFingerprint": "...",
   },
   "gateway": {
     "authMode": "trusted-proxy",
     "trustedProxyConfigured": true,
-    "directUnauthenticatedAccess": false
+    "directUnauthenticatedAccess": false,
   },
   "egress": {
     "managedProxyActive": true,
     "childProcessProxyInherited": true,
-    "runtimeProviderSecretsPresent": false
+    "runtimeProviderSecretsPresent": false,
   },
   "state": {
     "workspaceRestored": true,
-    "singleWriter": true
+    "singleWriter": true,
   },
   "plugins": {
-    "requiredResolved": true
-  }
+    "requiredResolved": true,
+  },
 }
 ```
 
@@ -262,9 +262,9 @@ Startup gate result:
       "severity": "error",
       "requirement": "oc://policy/startup/egress/requireBrokered",
       "evidence": "oc://runtime/startup/egress/managedProxyActive",
-      "message": "Brokered egress is required but no active managed proxy was registered."
-    }
-  ]
+      "message": "Brokered egress is required but no active managed proxy was registered.",
+    },
+  ],
 }
 ```
 

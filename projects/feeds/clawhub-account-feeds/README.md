@@ -6,18 +6,18 @@ formal design docs or implementation PRs.
 
 ## Proposed PR Stack
 
-| Order | Design | Implementation intent |
-| --- | --- | --- |
-| 1 | [Account feed model and API](account-feed-model-api.md) | Stable account and publisher identity, account feed URLs, feed shape, and envelope expectations. |
-| 2 | [Claim and official state](claim-official-state.md) | Account claiming, verification state, official state, revocation, and display boundaries. |
-| 3 | [Follow graph and notifications](follow-graph-notifications.md) | Follow/unfollow behavior, notification events, privacy, rate limits, and feed update triggers. |
-| 4 | [Profile and discovery surfaces](profile-discovery-surfaces.md) | Public profile pages, account feed pages, search filters, and "people I follow" discovery. |
-| 5 | [Registry and scan bridge](registry-scan-bridge.md) | Export into OpenClaw review lanes while preserving scans, approval, provenance, and trust separation. |
-| 6 | [Follow controls and followed discovery](follow-controls-discovery.md) | User-facing follow/unfollow controls, followed-publisher lists, and explainable discovery filters. |
-| 7 | [Follow notification delivery](follow-notification-delivery.md) | Notification fanout, preferences, mute/unsubscribe controls, replay, backfill, and audit behavior. |
-| 8 | [Public feed and profile pages](public-feed-profile-pages.md) | Human-readable account/publisher feed pages backed by account-feed facts and explicit state labels. |
-| 9 | [Registry submission workflow](registry-submission-workflow.md) | Idempotent queue, retry, withdrawal, and resubmission flow for downstream registry review and scans. |
-| 10 | [Reflected registry and scan state](reflected-registry-scan-state.md) | Persist and display downstream review, scan, inclusion, local approval, and status history facts. |
+| Order | Design                                                                 | Implementation intent                                                                                 |
+| ----- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| 1     | [Account feed model and API](account-feed-model-api.md)                | Stable account and publisher identity, account feed URLs, feed shape, and envelope expectations.      |
+| 2     | [Claim and official state](claim-official-state.md)                    | Account claiming, verification state, official state, revocation, and display boundaries.             |
+| 3     | [Follow graph and notifications](follow-graph-notifications.md)        | Follow/unfollow behavior, notification events, privacy, rate limits, and feed update triggers.        |
+| 4     | [Profile and discovery surfaces](profile-discovery-surfaces.md)        | Public profile pages, account feed pages, search filters, and "people I follow" discovery.            |
+| 5     | [Registry and scan bridge](registry-scan-bridge.md)                    | Export into OpenClaw review lanes while preserving scans, approval, provenance, and trust separation. |
+| 6     | [Follow controls and followed discovery](follow-controls-discovery.md) | User-facing follow/unfollow controls, followed-publisher lists, and explainable discovery filters.    |
+| 7     | [Follow notification delivery](follow-notification-delivery.md)        | Notification fanout, preferences, mute/unsubscribe controls, replay, backfill, and audit behavior.    |
+| 8     | [Public feed and profile pages](public-feed-profile-pages.md)          | Human-readable account/publisher feed pages backed by account-feed facts and explicit state labels.   |
+| 9     | [Registry submission workflow](registry-submission-workflow.md)        | Idempotent queue, retry, withdrawal, and resubmission flow for downstream registry review and scans.  |
+| 10    | [Reflected registry and scan state](reflected-registry-scan-state.md)  | Persist and display downstream review, scan, inclusion, local approval, and status history facts.     |
 
 ## Cross-Cutting Boundaries
 
