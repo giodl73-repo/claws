@@ -280,10 +280,10 @@
   PR mapping, and accurate prototype labeling.
 - The old local `cli-catalog-overlay-pre-rfc.md` is now a supersession pointer,
   not a competing specification.
-- Rewritten local heads after the repair pass: foundation `406474df299`, live
-  node `3e6db1db2094`, prompt `cef9a482640d`, generated docs `51ee35df8acb`,
-  policy evidence `004b16d0532e`, runtime drift `781b54e74ba0`, and bounded
-  search `b08bbd346a73`.
+- Rewritten local heads after the repair pass and Oxc lint follow-up: foundation
+  `37ca7c7668c`, live node `4a2d0ad06fee`, prompt `651cef48e4d3`, generated
+  docs `12320349d800`, policy evidence `5a0fdaaf8294`, runtime drift
+  `5bf1c719d093`, and bounded search `32bfd32fa4a5`.
 - Focused validation passed 32 foundation tests plus the previously rerun node,
   prompt, docs, policy, drift, and search suites. A final all-slice invocation
   in the secondary worktree stalled before emitting results and exited without
