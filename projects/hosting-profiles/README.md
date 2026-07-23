@@ -91,8 +91,8 @@ RFC 0018 is the readiness acceptance decision. RFC 0023 depends on it but is a
 separate product/support decision. The old combined project draft is not the
 normative source for either RFC.
 
-The 2026-07-23 three-model review is complete at exact heads `8fbc1210762`
-(readiness) and `864c8d25459` (profiles). Architecture and maintainer reviews
+The 2026-07-23 three-model review is complete at exact heads `c1919669c3f`
+(readiness) and `40b5b2e59d9` (profiles). Architecture and maintainer reviews
 approve; resilience reports ship. See `reviews/2026-07-23-three-model/` for the
 original findings, dispositions, and final verdicts.
 

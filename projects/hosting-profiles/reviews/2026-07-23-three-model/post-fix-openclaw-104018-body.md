@@ -37,13 +37,14 @@ Existing `/ready` and `/readyz` HTTP semantics remain `200` when all required co
 
 ## Review Stack
 
-This upstream PR contains thirteen ordered commits at exact head `8fbc1210762`, rebased onto OpenClaw `main` at `b8a47b23384`. Fork slices preserve smaller review boundaries: [canonical conditions](https://github.com/giodl73-repo/openclaw/pull/17), [workspace readiness](https://github.com/giodl73-repo/openclaw/pull/22), [provider selection](https://github.com/giodl73-repo/openclaw/pull/23), and [`openclaw ready`](https://github.com/giodl73-repo/openclaw/pull/27).
+This upstream PR contains fourteen ordered commits at exact head `c1919669c3f`, rebased onto OpenClaw `main` at `b8a47b23384`. Fork slices preserve smaller review boundaries: [canonical conditions](https://github.com/giodl73-repo/openclaw/pull/17), [workspace readiness](https://github.com/giodl73-repo/openclaw/pull/22), [provider selection](https://github.com/giodl73-repo/openclaw/pull/23), and [`openclaw ready`](https://github.com/giodl73-repo/openclaw/pull/27).
 
-Current diff: 65 files, 3,040 insertions, 67 deletions, including tests and documentation.
+Current diff: 66 files, 3,079 insertions, 106 deletions, including tests, documentation, and the generated native i18n inventory required by current `main`.
 
 ## Validation
 
 - Focused readiness, Gateway HTTP/RPC, health, status, config, plugin registration, SDK, CLI, timeout, cancellation, no-overlap, ordering, and redaction assertions pass.
 - Production TypeScript checking, type-aware lint, unused-export checks, protocol generation/guard, documentation indexing, and `git diff --check` pass on the exact head.
+- Native i18n baseline and verification pass on the exact head.
 - Prior package-installed Docker proof demonstrated `/ready` and `/readyz` transition `200 -> 503 -> 200` as a required workspace disappeared and recovered, while `/healthz` stayed `200` and `openclaw ready --json` reported the matching condition and exit status.
 - Exact-head remote container and upgrade proof remain landing gates; the available remote allocators are currently blocked by local authentication.

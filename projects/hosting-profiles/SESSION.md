@@ -36,17 +36,17 @@
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `934d89036110e52d40faf2766f148cd4f08afc0d` and includes
+  `9e87932863c6a561853430e0a419d7484914d145` and includes
   `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
-  `b84e1fca8c352470ff6159a3291118a0a4684605` and includes
+  `98b0713d271031d9ad78e9bb1845ff36c972d002` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `8fbc1210762d41f53242528c16e99fe2cfe4bac5` in thirteen commits, rebased on
+  at `c1919669c3f4d76842ce289ae26df3447320b8ac` in fourteen commits, rebased on
   OpenClaw `main` `b8a47b2338442d1d8a32e4a28057f7688919e600`. The dependent
   upstream profile implementation is
   [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765)
-  at `864c8d2545986cbd27145531e7654a16afbf909d` in nineteen profile-only
+  at `40b5b2e59d936236a15ebaecca2bfc8c87e715c1` in nineteen profile-only
   commits stacked on the exact readiness head. The stack includes the
   discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
   cross-link, and docs navigation. [Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
@@ -62,12 +62,9 @@
   Three independent final reviews report Approve / Ship / Approve; evidence is
   under `reviews/2026-07-23-three-model/`. Earlier Docker/package proof remains
   valid; exact-current-head remote proof is blocked on Crabbox authentication.
-- Blocking question: GitHub CI is still settling. Native i18n currently fails
-  because current OpenClaw `main` changed iOS `RootSidebar.swift` and
-  `RootTabs.swift` line inventories without refreshing
-  `apps/.i18n/native-source.json`; neither implementation stack changes those
-  files. Rebase after the upstream baseline refresh rather than carrying that
-  unrelated generated diff in these PRs.
+- Blocking question: GitHub CI is settling on the refreshed heads. The native
+  i18n inventory required by current OpenClaw `main` is regenerated in the
+  readiness stack, and local baseline plus verification now pass.
 
 ## Resume Checklist
 
@@ -1029,5 +1026,6 @@ getReadiness()).hosting` field. PR 18 head `c423b77720` now statically
   - Final independent verdicts are Architecture Approve, Resilience Ship, and
     Maintainer Approve. Durable prompts, original findings, PR bodies, and
     final results are under `reviews/2026-07-23-three-model/`.
-  - Published heads: RFC 0018 `934d8903611`, readiness `8fbc1210762`, RFC 0023
-    `b84e1fca8c3`, and profiles `864c8d25459`.
+  - Published heads after CI baseline repair: RFC 0018 `9e87932863c`,
+    readiness `c1919669c3f`, RFC 0023 `98b0713d271`, and profiles
+    `40b5b2e59d9`.

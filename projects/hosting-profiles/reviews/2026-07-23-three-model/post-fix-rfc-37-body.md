@@ -25,8 +25,8 @@ The standard catalog creates a bounded support promise: OpenClaw names the postu
 
 ## Implementation Evidence
 
-- Readiness dependency: [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018), exact head `8fbc1210762`
-- Profile implementation: [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765), exact head `864c8d25459`
+- Readiness dependency: [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018), exact head `c1919669c3f`
+- Profile implementation: [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765), exact head `40b5b2e59d9`
 - Profile-only comparison: [giodl73-repo/openclaw#94](https://github.com/giodl73-repo/openclaw/pull/94)
 - Profile-only size: 39 files, 2,027 insertions, 16 deletions, including docs and tests
 

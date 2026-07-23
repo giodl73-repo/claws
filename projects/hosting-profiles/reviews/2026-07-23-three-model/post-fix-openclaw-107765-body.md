@@ -2,7 +2,7 @@ Related RFC: https://github.com/openclaw/rfcs/pull/37
 
 Depends on: https://github.com/openclaw/openclaw/pull/104018
 
-> **Stacked implementation:** this branch contains readiness head `8fbc1210762` followed by nineteen profile-only commits. Until PR 104018 lands, GitHub shows both layers; afterward this PR reduces to the Hosting Profiles work below.
+> **Stacked implementation:** this branch contains readiness head `c1919669c3f` followed by nineteen profile-only commits. Until PR 104018 lands, GitHub shows both layers; afterward this PR reduces to the Hosting Profiles work below.
 
 ## Problem
 
@@ -31,12 +31,13 @@ The reverse-proxy profile validates sources with the same address matcher as aut
 
 ## Implementation
 
-Exact profile head: `864c8d25459`, based on readiness head `8fbc1210762`. Profile-only diff: 39 files, 2,027 insertions, 16 deletions, including tests and documentation. The profile-only comparison remains available in [fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94).
+Exact profile head: `40b5b2e59d9`, based on readiness head `c1919669c3f`. Profile-only diff: 39 files, 2,027 insertions, 16 deletions, including tests and documentation. The profile-only comparison remains available in [fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94).
 
 ## Validation
 
 - Focused profile, activation, startup precedence, node-mode, reverse-proxy, unprofiled compatibility, Gateway, config, CLI, Docker-plan, and release-wiring assertions pass.
 - Production TypeScript checking, type-aware lint, unused-export checks, protocol generation/guard, documentation indexing, and `git diff --check` pass on the exact head.
+- Native i18n verification passes on the exact stacked head.
 - The package workflow passed 90 of 91 tests; the sole failure is an unrelated archive test because this WSL image has no `zip` executable. The hosting-profile package assertion passes.
 - Prior package-installed Docker proof covered all four profiles, expected listener/auth/node/workspace failures, recovery, and unprofiled compatibility. Exact-head remote proof remains a landing gate and is currently blocked by remote allocator authentication.
 

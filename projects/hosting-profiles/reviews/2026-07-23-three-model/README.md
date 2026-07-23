@@ -37,10 +37,10 @@ agreement with the command authorization path.
 
 All confirmed findings were fixed and re-reviewed. The final exact heads are:
 
-- RFC 0018: `934d8903611`
-- readiness implementation: `8fbc1210762`
-- RFC 0023: `b84e1fca8c3`
-- Hosting Profiles implementation: `864c8d25459`
+- RFC 0018: `9e87932863c`
+- readiness implementation: `c1919669c3f`
+- RFC 0023: `98b0713d271`
+- Hosting Profiles implementation: `40b5b2e59d9`
 
 The corrections cover provider bounds/redaction, duplicate registration,
 atomic config/registry publication, deterministic projections, bounded
