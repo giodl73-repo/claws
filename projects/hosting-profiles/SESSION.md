@@ -29,38 +29,45 @@
 
 ## Current Session
 
-- Last updated: 2026-07-22
+- Last updated: 2026-07-23
 - Last agent: Codex
 - Current focus: Readiness and Standard Hosting Profiles are split into two
   independently reviewable RFCs and implementation stacks.
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `d5ebf61` and includes `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
-  `13e3ef6` and includes `rfcs/0023/hosting-profile-v1-spec.md`. The real
+  `934d89036110e52d40faf2766f148cd4f08afc0d` and includes
+  `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
+  `b84e1fca8c352470ff6159a3291118a0a4684605` and includes
+  `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `5e7a713545a6588ce1d14ead756aa594123cc84e` in seven commits, rebased on
-  OpenClaw `main` `f7d61b4352952aae852454f7571cf59d42b695ff`. The dependent
+  at `8fbc1210762d41f53242528c16e99fe2cfe4bac5` in thirteen commits, rebased on
+  OpenClaw `main` `b8a47b2338442d1d8a32e4a28057f7688919e600`. The dependent
   upstream profile implementation is
   [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765)
-  at `2336ee23999eac6bfbed176c3d669e5f42a39f03` in thirteen profile-only
+  at `864c8d2545986cbd27145531e7654a16afbf909d` in nineteen profile-only
   commits stacked on the exact readiness head. The stack includes the
   discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
   cross-link, and docs navigation. [Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
   provides the clean profile-only comparison. Exact review slices are
   recorded in `openclaw-pr-plan.md`.
-- Known dirty state: `claws-hapi` contains unrelated state-continuity project
-  edits. Both implementation worktrees and both RFC worktrees are clean at the
-  pushed heads above.
-- Validation: the focused readiness/profile suites pass 206 assertions, along
-  with production/test type checks, targeted lint, architecture, protocol,
-  config-tier, dead-export, docs, and plugin SDK surface checks. Codex review is
-  clean after fixing plugin timeout recovery and canonical node command-policy
-  evaluation. Earlier Docker/package proof remains valid; exact-current-head
-  remote proof is blocked on Blacksmith/AWS Crabbox authentication.
-- Blocking question: maintainer review and exact-head GitHub CI completion are
-  pending on the implementation PRs.
+- Known dirty state: unrelated project edits remain in `claws-hapi`; only the
+  hosting-profiles project files from this session should be committed. Both
+  implementation worktrees and both RFC worktrees are clean at their pushed
+  heads.
+- Validation: focused post-fix suites pass 78 readiness assertions and 139
+  profile/tooling assertions, plus targeted recovery tests. Type-aware lint,
+  production TypeScript, unused-export scans, formatting, and diff checks pass.
+  Three independent final reviews report Approve / Ship / Approve; evidence is
+  under `reviews/2026-07-23-three-model/`. Earlier Docker/package proof remains
+  valid; exact-current-head remote proof is blocked on Crabbox authentication.
+- Blocking question: GitHub CI is still settling. Native i18n currently fails
+  because current OpenClaw `main` changed iOS `RootSidebar.swift` and
+  `RootTabs.swift` line inventories without refreshing
+  `apps/.i18n/native-source.json`; neither implementation stack changes those
+  files. Rebase after the upstream baseline refresh rather than carrying that
+  unrelated generated diff in these PRs.
 
 ## Resume Checklist
 
@@ -1012,3 +1019,15 @@ getReadiness()).hosting` field. PR 18 head `c423b77720` now statically
   - RFC 0023 and its PR body now make activation opt-in, link directly to the
     proof comment, and use RFC head `a61b57d8e67a`. Fresh ClawSweeper reviews
     are queued for PR 107765 and RFC PR 37.
+- 2026-07-23: Closed the three-model readiness/profile review and republished
+  all four exact heads.
+  - Fixed provider validation/redaction, duplicate registration, config and
+    registry generation publication, canonical ordering, stale workspace
+    recovery, bounded retained workspace work, trusted-proxy ownership,
+    pairing-generation recovery, node command-policy ownership, activation
+    defaults, and profile attribution on failed evaluation.
+  - Final independent verdicts are Architecture Approve, Resilience Ship, and
+    Maintainer Approve. Durable prompts, original findings, PR bodies, and
+    final results are under `reviews/2026-07-23-three-model/`.
+  - Published heads: RFC 0018 `934d8903611`, readiness `8fbc1210762`, RFC 0023
+    `b84e1fca8c3`, and profiles `864c8d25459`.

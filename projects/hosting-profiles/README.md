@@ -59,7 +59,7 @@ keep container-only implementation details in the host.
 | bic/lobster           | TBD                                                                                    | TBD                                                | Analysis | Inventory host pressure and patches OpenClaw should absorb as generic contracts.                  |
 | openclaw/rfcs         | [RFC 0018 / PR 33](https://github.com/openclaw/rfcs/pull/33)                           | `user/giodl/standard-hosting-profiles-ready-check` | Review   | Define readiness conditions/providers, direct operator selection, canonical projections, and CLI. |
 | openclaw/rfcs         | [RFC 0023 / PR 37](https://github.com/openclaw/rfcs/pull/37)                           | `user/giodl/rfc-0023-standard-hosting-profiles`    | Draft    | Define standard, release-tested hosting profile presets over RFC 0018.                            |
-| openclaw/openclaw     | [Readiness PR 104018](https://github.com/openclaw/openclaw/pull/104018)                | `user/giodl/readiness-profiles-upstream`           | Review   | Seven-commit readiness-only landing candidate for RFC 0018, rebased on current `main`.             |
+| openclaw/openclaw     | [Readiness PR 104018](https://github.com/openclaw/openclaw/pull/104018)                | `user/giodl/readiness-profiles-upstream`           | Review   | Thirteen-commit readiness-only landing candidate for RFC 0018, rebased on current `main`.          |
 | openclaw/openclaw     | [Hosting Profiles PR 107765](https://github.com/openclaw/openclaw/pull/107765)         | `user/giodl/standard-hosting-profiles-upstream`    | Review   | Real stacked implementation request for RFC 0023; depends on readiness PR 104018.                 |
 | giodl73-repo/openclaw | [Readiness PRs 17, 22, 23, 27](https://github.com/giodl73-repo/openclaw/pulls)         | readiness-only stack                               | Draft    | Modernize Gateway readiness without requiring profiles.                                           |
 | giodl73-repo/openclaw | [Profile comparison PR 94](https://github.com/giodl73-repo/openclaw/pull/94)           | `user/giodl/standard-hosting-profiles-upstream`    | Draft    | Clean profile-only comparison against readiness PR 104018.                                        |
@@ -90,6 +90,11 @@ the generic contract.
 RFC 0018 is the readiness acceptance decision. RFC 0023 depends on it but is a
 separate product/support decision. The old combined project draft is not the
 normative source for either RFC.
+
+The 2026-07-23 three-model review is complete at exact heads `8fbc1210762`
+(readiness) and `864c8d25459` (profiles). Architecture and maintainer reviews
+approve; resilience reports ship. See `reviews/2026-07-23-three-model/` for the
+original findings, dispositions, and final verdicts.
 
 ## Related Areas
 
