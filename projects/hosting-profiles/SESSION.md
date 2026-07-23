@@ -29,29 +29,38 @@
 
 ## Current Session
 
-- Last updated: 2026-07-16
+- Last updated: 2026-07-22
 - Last agent: Codex
 - Current focus: Readiness and Standard Hosting Profiles are split into two
   independently reviewable RFCs and implementation stacks.
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `bacc7079b1a1` and includes `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
-  `6d7d4f4ceaca` and includes `rfcs/0023/hosting-profile-v1-spec.md`. The real
+  `d5ebf61` and includes `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
+  `13e3ef6` and includes `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `17b34f792d87`. The dependent upstream profile implementation is
+  at `5e7a713545a6588ce1d14ead756aa594123cc84e` in seven commits, rebased on
+  OpenClaw `main` `f7d61b4352952aae852454f7571cf59d42b695ff`. The dependent
+  upstream profile implementation is
   [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765)
-  at `672bc488cfd`; runtime proof remains anchored at `f54affa3983b`, and the
-  final commit adds the discoverable `docs/gateway/hosting-profiles.md` guide,
-  config reference, CLI cross-link, and docs navigation. [Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
+  at `2336ee23999eac6bfbed176c3d669e5f42a39f03` in thirteen profile-only
+  commits stacked on the exact readiness head. The stack includes the
+  discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
+  cross-link, and docs navigation. [Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
   provides the clean profile-only comparison. Exact review slices are
   recorded in `openclaw-pr-plan.md`.
-- Known dirty state: `claws-hapi` contains unrelated feeds and state-continuity
-  project edits. The RFC 0018 and RFC 0023 WSL worktrees are clean at pushed
-  heads `bacc7079b1a1` and `6d7d4f4ceaca`.
-- Blocking question: exact-head ClawSweeper/CI review is pending on the ready
-  implementation PRs.
+- Known dirty state: `claws-hapi` contains unrelated state-continuity project
+  edits. Both implementation worktrees and both RFC worktrees are clean at the
+  pushed heads above.
+- Validation: the focused readiness/profile suites pass 206 assertions, along
+  with production/test type checks, targeted lint, architecture, protocol,
+  config-tier, dead-export, docs, and plugin SDK surface checks. Codex review is
+  clean after fixing plugin timeout recovery and canonical node command-policy
+  evaluation. Earlier Docker/package proof remains valid; exact-current-head
+  remote proof is blocked on Blacksmith/AWS Crabbox authentication.
+- Blocking question: maintainer review and exact-head GitHub CI completion are
+  pending on the implementation PRs.
 
 ## Resume Checklist
 
