@@ -1,8 +1,9 @@
 # Catalog Project
 
-Use this area for OpenClaw catalog work: CLI catalog metadata, command and tool
-surface inventory, prompt lenses, audit/operator lenses, generated catalog docs,
-and RFC/PR-stack coordination.
+Use this area for OpenClaw command catalog work: read-only CLI inventory,
+command-owned metadata, live node observations, explicitly scoped prompt
+projection, generated command docs, optional evidence consumers, and RFC/PR
+coordination.
 
 ## Active Notes
 
@@ -16,9 +17,10 @@ and RFC/PR-stack coordination.
 | Repo | PR / Issue | Branch | Status | Purpose |
 | --- | --- | --- | --- | --- |
 | OpenClaw RFCs | `openclaw/rfcs#32` | `codex/cli-catalog-overlay-rfc` | Open | RFC for the catalog view, review stack, and implementation boundaries. |
-| OpenClaw | `openclaw/openclaw#100960` | `user/giodl/cli-catalog-review-hardening` | Draft | Initial `commands list` and `commands inspect` implementation. |
-| OpenClaw fork | `giodl73-repo/openclaw#24`-`#26` | `user/giodl/commands-inventory-*` | Draft review PRs | Command inventory list, exact inspection, and optional scoped prompt projection. |
-| OpenClaw fork | `giodl73-repo/openclaw#11`-`#16` | `user/giodl/cli-catalog-review-*` | Draft review PRs | Fork-local step PRs for one-layer-at-a-time review. |
+| OpenClaw | `openclaw/openclaw#100960` | `user/giodl/cli-catalog-review-hardening` | Open | Initial `commands list` and `commands inspect` implementation. |
+| OpenClaw | `openclaw/openclaw#104158`-`#104160` | `user/giodl/commands-upstream-*` | Draft | Live node inventory, explicit prompt projection, and generated docs. |
+| OpenClaw fork | `giodl73-repo/openclaw#30`-`#32` | `user/giodl/commands-*` | Draft prototypes | Internal policy evidence, drift, and bounded-search projections; not callable product surfaces. |
+| OpenClaw fork | `giodl73-repo/openclaw#11`-`#29` | historical branches | Preserved | Earlier catalog and command-inventory comparisons; non-normative. |
 
 ## Related Areas
 

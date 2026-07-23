@@ -255,6 +255,44 @@
 - Update: this file plus `projects/openclaw/SESSION.md` when branch hashes,
   review findings, or PR status change.
 
+## 2026-07-23 Three-Agent Repair Pass
+
+- Three independent architecture, correctness/security, and delivery/spec
+  reviews found no P0 issue but identified correctness gaps across all seven
+  branches.
+- Foundation now preserves unknown effects, omits hidden descriptors from
+  public inventory, and reports per-source collection status.
+- Live node collection now uses pairing-aware diagnostics authentication,
+  accepts only bounded command identifiers, and emits identifier-only records
+  without invented effects, approval, availability, descriptions, schemas, or
+  invocation payloads.
+- Prompt projection is explicit caller opt-in, consumes normalized catalog
+  records, rejects unsafe node identifiers, applies conservative unknown
+  guidance, and does not invent empty node parameters.
+- Generated docs restore `check:env-var-count`, omit hidden commands, and watch
+  every canonical generator input.
+- Policy evidence now includes runtime commands, unique route identities,
+  collection scope, and node observations; drift ignores observation timestamps
+  while comparing scope; bounded search includes nested runtime commands and
+  aliases.
+- RFC 0017 was rewritten around the final `openclaw commands` proposal with a
+  concise alternative, stable JSON rules, acceptance criteria, current upstream
+  PR mapping, and accurate prototype labeling.
+- The old local `cli-catalog-overlay-pre-rfc.md` is now a supersession pointer,
+  not a competing specification.
+- Rewritten local heads after the repair pass and Oxc lint follow-up: foundation
+  `37ca7c7668c`, live node `4a2d0ad06fee`, prompt `651cef48e4d3`, generated
+  docs `12320349d800`, policy evidence `5a0fdaaf8294`, runtime drift
+  `5bf1c719d093`, and bounded search `32bfd32fa4a5`.
+- Focused validation passed 32 foundation tests plus the previously rerun node,
+  prompt, docs, policy, drift, and search suites. A final all-slice invocation
+  in the secondary worktree stalled before emitting results and exited without
+  leaving a Vitest process; it is not counted as proof.
+- Hosted foundation CI then found two Oxc `no-map-spread` errors in conditional
+  metadata construction. The implementation now uses the repository's existing
+  `Object.assign` pattern; changed-file Oxc/Oxfmt and all 32 focused foundation
+  tests pass. Fresh CI and ClawSweeper reviews are running on the heads above.
+
 ## 2026-07-10 Upstream Commands Follow-Ups
 
 - Opened three upstream draft follow-ups to `openclaw/openclaw#100960` using
@@ -307,6 +345,88 @@
   both 4 GB and 8 GB heaps after focused tests passed; no type errors were
   emitted before OOM.
 - Active implementation worktree: `C:\src\openclaw-commands-leverage-stack`.
+
+## 2026-07-22 RFC Main Refresh
+
+- Rebased `openclaw/rfcs#32` (`RFC 0017: Command Catalog`) onto upstream main
+  `13819ef` without conflicts and force-pushed the fork branch with lease.
+- Current RFC head: `362e497`; the PR diff remains one 414-line RFC file.
+- The RFC remains `status: draft`. ClawSweeper's only outstanding lifecycle
+  item is the required `maintainer-discussion` thread and resulting canonical
+  relationship decision for Gateway `commands.list`.
+
+## 2026-07-22 Implementation Main Refresh
+
+- Rebased the seven command-catalog implementation branches onto OpenClaw main
+  `8108b9637b0` and force-pushed each fork head with an explicit lease. The
+  initial refresh crossed 70 upstream commits without implementation conflicts;
+  a second 14-commit refresh on July 23 was also conflict-free.
+- Current heads: foundation `8d99208c34e`, live node `9cfc1aafa48`, prompt
+  `1e71176a579`, generated docs `f249db6e2b1`, policy evidence
+  `c61bd552d69`, runtime drift `408dec15063`, and bounded search
+  `6ddc79d3bff`.
+- Ported plugin catalog metadata to the refactored registration leaves
+  (`plugin-registration.types.ts` and `registry-registrars-operations.ts`) and
+  prompt inventory forwarding to
+  `attempt-system-prompt-prepare.ts`.
+- Fixed the strict-indexing type error in the node-command Markdown fixture and
+  regenerated `docs/docs_map.md`; the CI-reported stale map is resolved. Knip's
+  four unused-type groups were also fixed by keeping internal component aliases
+  module-private while preserving the aggregate programmatic API contracts.
+- Validation on the exact stack passed whole-repo `oxfmt`, command-reference
+  freshness, docs-map freshness, and `git diff --check`. The earlier focused
+  run passed 18 files / 190 tests. A fresh WSL type/test rerun is inconclusive:
+  WSL repeatedly terminated `tsgo` and Vitest with filesystem/swap `SIGBUS`
+  errors after the host disk filled during a disposable worktree checkout.
+  Treat GitHub CI on these refreshed heads as the fresh type/test authority.
+- Upstream PRs remain #100960 (ready), #104158-#104160 (draft). Fork consumer
+  PRs #30-#32 remain draft; no readiness or merge action was taken.
+- Fresh #100960 CI on `2928ead46bc` passed `check-dependencies`,
+  `check-test-types`, `check-docs`, and `check-lint`. `build-artifacts` and all
+  QA smoke profiles fail only on the Control UI startup-size ratchet; the same
+  QA failure reproduces on exact current-main run `29979854683`. ClawSweeper
+  has started a fresh review and has not posted findings yet.
+- Command-reference and docs-map freshness passed after the 70-commit refresh.
+  Watch the fresh GitHub CI run for the authoritative type, dependency, lint,
+  and compact-test results.
+
+## 2026-07-23 Foundation CI Follow-Up
+
+- Fresh #100960 run `30007978296` passed every substantive gate except
+  `checks-node-compact-large-5`. Attempts 1 and 2 each timed out only
+  `src/system-agent/tui-backend.test.ts` at its 120-second per-test limit;
+  the other 1,169 tests in that isolated shard passed.
+- Exact-base main run `30007280700` passed the same job, but the affected test
+  already took 73 seconds and the full file took 140 seconds. The PR attempts
+  were broadly 1.6-2x slower across unrelated shards and TUI tests, so this is
+  a threshold-sensitive runner slowdown rather than a catalog assertion or
+  changed TUI code path.
+- Attempt 3 of run `30007978296` failed identically: the same test took 126.9
+  seconds while the other 1,169 tests passed. Do not change unrelated TUI code
+  or raise its timeout solely to make this catalog PR pass.
+- Equivalent local proof is unavailable: the WSL dependency tree has prior
+  filesystem/swap damage, and native Vitest did not reach startup output before
+  its bounded six-minute shell timeout. No matching test process remained.
+- Crabbox remote proof did not start. The non-root WSL profile lacked broker
+  auth, Blacksmith lacked its separate login, and the root broker token was
+  stale (`401`). No AWS or Testbox lease was allocated.
+- The stack was then refreshed onto current main `8108b9637b0`; no intervening
+  commit touched the TUI test or its Vitest configuration. All seven refreshed
+  diffs pass `git diff --check`, and docs-map freshness passes. The
+  TypeScript-backed command-reference checker could not start in the damaged
+  local dependency environment; it passed before the base-only refresh.
+- Fresh foundation CI run `30012862160` on head `8d99208c34e` passed docs,
+  lint, test-types, dependencies, build/QA, security, and every compact shard
+  except `checks-node-compact-large-5`. That shard again failed only the same
+  unrelated TUI test at 127.7 seconds; its other 1,169 tests passed. The
+  aggregate gate is red only because of that shard.
+- `security-fast` initially hit an external production-advisory HTTP 503; its
+  job-only rerun passed. Do not rerun superseded run `30007978296` or the
+  expensive compact shard again without a new reason.
+- ClawSweeper started a refreshed-head review for #100960 but had only posted
+  its start placeholder at handoff. Main advanced again after the push, so
+  GitHub reports #100960 as `BEHIND`; do not chase a moving tip absent a
+  substantive compatibility change or maintainer request.
 
 ## Guardrails
 
